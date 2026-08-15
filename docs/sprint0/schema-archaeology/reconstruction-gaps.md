@@ -1,6 +1,6 @@
 # Reconstruction and ambiguity report
 
-Status: `SELF-REVIEWED + MACHINE-CHECKED; INDEPENDENT THIRD-ENGINEER SIGN-OFF OPEN`
+Status: `INDEPENDENT REVIEW COMPLETED; GAPS FOUND; SIGN-OFF WITHHELD`
 
 The reconstruction below used only the four TSV traces and their referenced `reproduction-evidence.md`. The same repository principal performed the original work and this review, so it is not represented as independent evidence. `tools/check_schema_archaeology.py` independently checks structure, ordering, required fields and trace completeness but cannot judge semantic sufficiency.
 
@@ -26,7 +26,12 @@ The reconstruction below used only the four TSV traces and their referenced `rep
 | `GAP-007` | one principal occupied recorder, reviewer and approver roles | `principal`, `roleAtAction`, and approval identity must remain separate concepts |
 | `GAP-008` | local success and governance approval were easy to conflate | explicit evidence status versus approval/activation status |
 | `GAP-009` | uncertainty concerned evidence completeness, not only effect occurrence | typed uncertainty scope/reason on reconstruction records |
+| `GAP-010` | referenced evidence and receipts were outside the trace-only review corpus | self-contained, content-addressed evidence bundle with resolvable references |
+| `GAP-011` | digest labels did not identify byte scope, ordering or the bytes being verified | digest subject, canonicalisation rule and artifact binding |
+| `GAP-012` | effects summarized patches/deletions without enumerating changed resources | complete affected-resource list plus patch or pre/post content references |
+| `GAP-013` | verification results named counts or success without captured command output and check definitions | executable acceptance definition plus content-addressed stdout/stderr receipt |
+| `GAP-014` | the governance trace ended with approvals pending and no final independent judgement | explicit reviewer judgement, authority role and approval state transition |
 
-## Independent reviewer instructions
+## Independent review result
 
-The reviewer must receive only the trace directory, reproduction evidence and acceptance-condition identifiers. They should write either `independent-signoff: accepted` with identity/date, or new gap rows. Until then, this report supplies schema evidence but does not satisfy the human-independence claim in T0.3.
+An isolated third-engineer agent reviewed only the four trace TSVs on 2026-08-15. It reconstructed all four claimed narratives and added `GAP-010` through `GAP-014`; sign-off was withheld. See `independent-review-2026-08-15.md`. A re-review must receive a self-contained, content-addressed evidence bundle rather than the blank `manual-trace-template.tsv`.

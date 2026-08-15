@@ -38,10 +38,10 @@ These tasks establish the source of truth, merge gates, and developer packet.
 | **DONE** | **B-03** | **System Architecture & ICD** | Package isolation, sink classification and port signatures | **4** | 🔴 GATE | Tech Lead + Sr Dev | Approved |
 | **DONE** | **B-04** | **Active MVP Contract Matrix** | 22 assigned rows; Gate A/B scripts | **5** | 🔴 GATE | Tech Lead + Req Owners | 100% assignment; 100% merged scope |
 | **DONE** | **B-05** | **Verification, Threat & Eval Plan** | Threat model, must-fail catalogue and evaluation protocol | **3** | 🔴 GATE | Sr Dev | Approved for S0 scope |
-| **TODO** | **B-06** | **Automate CI & Traceability Gates** | Boundaries and Gate A/B work; automated PR-body `req_id` validation remains | **2** | 🟢 FAST | Sr Dev + Dev | Complete PR metadata enforcement |
+| **TODO** | **B-06** | **Automate CI & Traceability Gates** | Boundaries and PR-body `req_id` enforcement done; remaining margin reporting open | **2** | 🟢 FAST | Sr Dev + Dev | Complete margin reporting |
 | **TODO** | **B-07** | **Convert GTS-13C into Backlog** | Markdown backlog exists; issue-tracker import remains | **1** | 🟢 FAST | PM + Scrum | Create real tracker tickets |
 | **DONE** | **B-08** | **Assemble Clean Developer Packet** | Sprint 1 index, backlog and Dev 1–4 packets | **0** | 🟢 FAST | PM | Ready, conditional distribution |
-| **TODO** | **B-09** | **Phase 0 Baseline Review & Tag** | Conditional decision exists; independent review, branch protection and Git tag remain | **5** | 🔴 GATE | Project Lead + Tech Lead | Full go/no-go still open |
+| **TODO** | **B-09** | **Phase 0 Baseline Review & Tag** | Annotated `v0.0.0-sprint0` tag exists; independent gaps and hosted branch protection remain | **5** | 🔴 GATE | Project Lead + Tech Lead | Full go/no-go still open |
 
 ---
 
@@ -51,7 +51,7 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **T0.1–T0.4** | Four traces and inventory exist; independent blind reconstruction remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Independent reviewer must sign or add gaps |
+| **TODO** | **T0.1–T0.4** | Independent blind reconstruction completed and added GAP-010..014; remediation/re-signoff remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Make evidence bundle self-contained, then re-review |
 | **TODO** | **T0.5–T0.6** | Non-coding trace exists; prospective human timing remains | **2** | 🟢 FAST | Dev + PM | Capture two timed manual reproductions |
 | **DONE** | **T10.1–T10.3** | Package scaffold, forbidden imports and eight broken counterparts | **2** | 🟢 FAST | Sr Dev + Dev | CI passes |
 | **TODO** | **T10.4–T10.9** | Rule map exists; margin alarms and remaining continuous controls remain | **2** | 🟢 FAST | Dev | Implement automated reporting |
@@ -96,9 +96,9 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 ## 5. Immediate Next Steps for Leadership
 
-1. **TODO — Independent reviewer:** Blindly reconstruct the four T0 traces and sign or add gaps.
+1. **TODO — Tech Lead:** Close independent-review `GAP-010..014`, then request re-signoff.
 2. **TODO — Dev 1 + Dev 2:** Capture prospective hands-on and elapsed timing for two manual reproductions.
 3. **TODO — PM / Scrum:** Import the prepared backlog into the real issue tracker.
-4. **TODO — Sr Dev:** Add automated PR-body `req_id` validation and remaining margin reporting.
-5. **TODO — Project Lead:** Verify branch protection, create the annotated baseline tag and issue the full Sprint 1 go.
+4. **TODO — Sr Dev:** Complete remaining margin reporting; PR-body `req_id` validation is done.
+5. **TODO — Project Lead:** Verify hosted branch protection and issue the full Sprint 1 go; annotated baseline tag exists.
 6. **DONE — Tech Lead / Sr Dev:** Decision Record, ICD, Active Contract, Verification Plan, package gates and developer packets are prepared.

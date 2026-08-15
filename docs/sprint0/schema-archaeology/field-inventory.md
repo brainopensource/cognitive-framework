@@ -1,6 +1,6 @@
 # Field inventory — T0 evidence synthesis
 
-Status: `EVIDENCE COMPLETE; INDEPENDENT HUMAN SIGN-OFF AND HUMAN TIMING OPEN`  
+Status: `INDEPENDENT REVIEW COMPLETE WITH GAPS; SIGN-OFF AND HUMAN TIMING OPEN`  
 Owner: repository principal `rocha`, acting Tech Lead  
 Evidence: `BUG-01`, `BUG-02`, `BUG-03`, `NONCODE-01`
 
@@ -65,6 +65,7 @@ Evidence: `BUG-01`, `BUG-02`, `BUG-03`, `NONCODE-01`
 3. Keep `handsOnMillis` in the archaeology dataset, not the universal event envelope.
 4. Preserve conditional VG-04 fields when their security purpose exceeds what four benign traces exercise; mark them unevidenced rather than deleting them.
 5. No durable trajectory may be recorded until the schema review resolves these four candidate additions and conformance vectors exist.
+6. Treat evidence references as independently usable only when their bytes, digest scope and acceptance definitions travel in a self-contained review bundle (`GAP-010..014`).
 
 ## Exit checklist
 
@@ -73,5 +74,6 @@ Evidence: `BUG-01`, `BUG-02`, `BUG-03`, `NONCODE-01`
 - [x] Structural reconstruction and ambiguity inventory completed.
 - [x] VG-04 fields classified without inventing values.
 - [x] Missing candidate fields have stable gap IDs.
-- [ ] Independent third-engineer reconstruction signed.
+- [x] Independent third-engineer reconstruction attempted; gaps recorded in `independent-review-2026-08-15.md`.
+- [ ] Independent third-engineer reconstruction signed after gap closure.
 - [ ] Prospective human hands-on baseline captured; retrospective values remain honestly unmeasured.

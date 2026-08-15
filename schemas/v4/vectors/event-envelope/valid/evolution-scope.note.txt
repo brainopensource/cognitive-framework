@@ -1,0 +1,1 @@
+Evolution event carries no runId or episodeId. Must be ACCEPTED (04 §12.1 scope discriminator).

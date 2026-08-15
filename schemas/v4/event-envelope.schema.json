@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/event-envelope.schema.json",
+  "$comment": "Owning section: 04 \u00a712.1. Tenancy and data-policy fields are required from the first version; retrofitting identity after a corpus exists is the corpus-format problem in its most expensive form (CT-16).",
+  "title": "EventEnvelope",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "scope",
+    "seq",
+    "occurredAt",
+    "recordedAt",
+    "principal",
+    "tenantId",
+    "ownerId",
+    "confidentiality",
+    "retentionClass",
+    "trainability",
+    "redactionStatus",
+    "payload"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "$ref": "primitives.schema.json#/$defs/SchemaVersion"
+    },
+    "eventId": {
+      "$ref": "primitives.schema.json#/$defs/Uuidv7"
+    },
+    "runId": {
+      "$ref": "primitives.schema.json#/$defs/RunId"
+    },
+    "episodeId": {
+      "$ref": "primitives.schema.json#/$defs/EpisodeId"
+    },
+    "branchId": {
+      "$ref": "primitives.schema.json#/$defs/BranchId"
+    },
+    "parentEventId": {
+      "$ref": "primitives.schema.json#/$defs/Uuidv7"
+    },
+    "traceId": {
+      "type": "string"
+    },
+    "spanId": {
+      "type": "string"
+    },
+    "seq": {
+      "$ref": "primitives.schema.json#/$defs/IntString",
+      "$comment": "Canonical order within a run, writer-allocated. UUIDv7 aids indexing but does not carry causal order."
+    },
+    "occurredAt": {
+      "$ref": "primitives.schema.json#/$defs/Timestamp"
+    },
+    "recordedAt": {
+      "$ref": "primitives.schema.json#/$defs/Timestamp"
+    },
+    "principal": {
+      "$ref": "primitives.schema.json#/$defs/PrincipalId"
+    },
+    "tenantId": {
+      "$ref": "primitives.schema.json#/$defs/TenantId"
+    },
+    "ownerId": {
+      "$ref": "primitives.schema.json#/$defs/OwnerId"
+    },
+    "confidentiality": {
+      "$ref": "primitives.schema.json#/$defs/ConfidentialityLabel"
+    },
+    "retentionClass": {
+      "$ref": "primitives.schema.json#/$defs/RetentionClass"
+    },
+    "trainability": {
+      "$ref": "primitives.schema.json#/$defs/TrainabilityLabel"
+    },
+    "redactionStatus": {
+      "$ref": "primitives.schema.json#/$defs/RedactionStatus"
+    },
+    "encryptionKeyRef": {
+      "type": "string"
+    },
+    "environmentSnapshot": {
+      "$ref": "primitives.schema.json#/$defs/Digest"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        }
+      },
+      "$comment": "CT-44: readers preserve an unknown kind and continue. additionalProperties stays open for that reason."
+    },
+    "scope": {
+      "enum": [
+        "episode",
+        "governance",
+        "evolution",
+        "recovery"
+      ],
+      "$comment": "04 \u00a712.1: evolution and governance events belong to no episode. Forcing a synthetic runId would put fiction in the ledger."
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "scope": {
+            "enum": [
+              "episode",
+              "recovery"
+            ]
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "then": {
+        "required": [
+          "runId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "scope": {
+            "const": "episode"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "then": {
+        "required": [
+          "episodeId"
+        ]
+      }
+    }
+  ]
+}

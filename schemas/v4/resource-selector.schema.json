@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/resource-selector.schema.json",
+  "$comment": "Owning section: 04 §5.2. The type that makes 'read only this repository' expressible. A verb-only permission set cannot express any of these.",
+  "title": "ResourceSelector",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["kind", "root", "paths"],
+      "properties": {
+        "kind": { "const": "fs" },
+        "root": { "$ref": "primitives.schema.json#/$defs/ResourceUri" },
+        "paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "hosts", "ports"],
+      "properties": {
+        "kind": { "const": "network" },
+        "hosts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "ports": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 65535 } }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "refs", "discloseToModel"],
+      "properties": {
+        "kind": { "const": "secret" },
+        "refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "discloseToModel": {
+          "const": false,
+          "$comment": "04 §5.2: a literal, not a boolean. There is no code path that flips this flag."
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "repo", "refs"],
+      "properties": {
+        "kind": { "const": "git" },
+        "repo": { "$ref": "primitives.schema.json#/$defs/ResourceUri" },
+        "refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "table"],
+      "properties": {
+        "kind": { "const": "table" },
+        "table": { "$ref": "primitives.schema.json#/$defs/ResourceUri" },
+        "ranges": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "origin"],
+      "properties": {
+        "kind": { "const": "browser" },
+        "origin": { "type": "string" },
+        "accountRef": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "uriPattern"],
+      "properties": {
+        "kind": { "const": "generic" },
+        "uriPattern": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

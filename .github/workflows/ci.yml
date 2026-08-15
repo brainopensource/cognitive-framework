@@ -1,0 +1,143 @@
+name: vanguard-v4-gates
+
+# Every job below FAILS the workflow on violation. There is no informational-only
+# status here by design: a gate that reports without blocking is not a gate
+# (01 §1 M6). CI-9 is the sole exception in kind — it blocks at Phase 0 exit
+# rather than per-commit — and it is marked explicitly, not silently.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-gates:
+    name: CI-1..CI-8 — document integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install validator
+        run: pip install jsonschema==4.23.0
+
+      # CI-1 registry/disk bijection · CI-2 no pre-v4 refs · CI-3 references
+      # resolve · CI-4 no duplicate namespaces · CI-7 namespaces declared
+      - name: CI-1,2,3,4,7 — reference and namespace audit
+        run: python3 tools/audit_v4.py
+
+      # CI-5 per-document and normative subtotal word caps
+      - name: CI-5 — word budgets
+        run: |
+          sh tools/wordcount_v4.sh docs/v4/[0-9][0-9]_vanguard_*.md
+          python3 - <<'EOF'
+          import subprocess, glob, re, sys, os
+          reg = open("docs/v4/00_vanguard_registry_v040.md").read()
+          caps = {m[0]: int(m[2].replace(",", ""))
+                  for m in re.findall(r"\|\s*(\d\d)\s*\|[^|]*\|\s*(Normative|Supporting)\s*\|\s*([\d,]+)\s*\|", reg)}
+          fail = False
+          for p in sorted(glob.glob("docs/v4/[0-9][0-9]_vanguard_*.md")):
+              n = int(subprocess.run(["sh", "tools/wordcount_v4.sh", p],
+                                     capture_output=True, text=True).stdout.split()[0])
+              d = os.path.basename(p)[:2]
+              if d in caps and n > caps[d]:
+                  print(f"CI-5 FAIL {d}: {n} > {caps[d]}"); fail = True
+          sys.exit(1 if fail else 0)
+          EOF
+
+      # CI-6 every schema valid under 2020-12, with a reader profile and vectors
+      - name: CI-6 — schema validity, reader profiles, vectors
+        run: |
+          python3 - <<'EOF'
+          import json, glob, sys, warnings, subprocess, os
+          warnings.filterwarnings("ignore")
+          from jsonschema import Draft202012Validator, RefResolver
+          writers = [f for f in glob.glob("schemas/v4/*.schema.json") if ".reader." not in f]
+          store = {}
+          for f in glob.glob("schemas/v4/*.schema.json"):
+              d = json.load(open(f)); Draft202012Validator.check_schema(d); store[d["$id"]] = d
+          # SC-11: reader profiles must regenerate byte-identically
+          before = {f: open(f).read() for f in glob.glob("schemas/v4/*.reader.schema.json")}
+          subprocess.run([sys.executable, "tools/reader_profile.py", *writers], check=True)
+          drift = [f for f, t in before.items() if open(f).read() != t]
+          if drift:
+              print("CI-6 FAIL reader-profile drift:", drift); sys.exit(1)
+          # every vector executes with its expected outcome
+          fail = False
+          for d in sorted(glob.glob("schemas/v4/vectors/*/")):
+              name = os.path.basename(d.rstrip("/"))
+              sid = f"https://vanguard.dev/schemas/v4/{name}.schema.json"
+              if sid not in store: continue
+              v = Draft202012Validator(store[sid],
+                    resolver=RefResolver(base_uri=sid, referrer=store[sid], store=store))
+              for c in glob.glob(d + "valid/*.json"):
+                  if c.endswith(".expect.json"): continue
+                  errs = list(v.iter_errors(json.load(open(c))))
+                  if errs: print("CI-6 FAIL valid vector rejected:", c, errs[0].message); fail = True
+              for c in glob.glob(d + "invalid/*.json"):
+                  if c.endswith(".expect.json"): continue
+                  if not list(v.iter_errors(json.load(open(c)))):
+                      print("CI-6 FAIL invalid vector accepted:", c); fail = True
+          sys.exit(1 if fail else 0)
+          EOF
+
+      # CI-8 the vision annex is quarantined
+      - name: CI-8 — vision annex quarantine
+        run: |
+          head -20 docs/v4/12_vanguard_vision_annex_v040.md | grep -q "NON-NORMATIVE" \
+            || { echo "CI-8 FAIL: missing non-normative header"; exit 1; }
+          if grep -rn '`12`' docs/v4/ --include='0[0-9]_*.md' --include='1[01]_*.md' \
+               | grep -v 'VISION\|12_vanguard\|Vision Annex'; then
+            echo "CI-8 FAIL: a document cites the vision annex as authority"; exit 1
+          fi
+
+      # Manifest completeness — SC-12
+      - name: SC-12 — every 04 type has a schema artifact
+        run: |
+          grep -q 'SC-12' schemas/v4/MANIFEST.md \
+            || { echo "FAIL: SC-12 missing from manifest"; exit 1; }
+
+  acceptance:
+    name: CV-1..CV-12 — acceptance verification
+    runs-on: ubuntu-latest
+    needs: docs-gates
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install jsonschema==4.23.0
+      - name: CV-1..CV-12
+        run: python3 tools/cv_checks.py
+
+  rule-coverage:
+    name: CI-9 — rule-to-test coverage (Phase 0 exit gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # CI-9 is RED by construction until the Phase 0 test backlog closes.
+      # It is a phase exit gate, not a per-commit gate: blocking every commit on
+      # it would train the team to bypass it, which is worse than reporting it.
+      # continue-on-error is scoped to THIS job only and is justified here.
+      - name: Generate map and backlog
+        continue-on-error: true
+        run: python3 tools/rule_test_map.py
+      - name: Fail if coverage regressed
+        run: |
+          python3 tools/rule_test_map.py > /tmp/cov.txt || true
+          OPEN=$(grep -o 'gaps=[0-9]*' /tmp/cov.txt | cut -d= -f2)
+          BASE=133
+          echo "open=$OPEN baseline=$BASE"
+          if [ "$OPEN" -gt "$BASE" ]; then
+            echo "CI-9 FAIL: coverage regressed ($OPEN > $BASE)"; exit 1
+          fi

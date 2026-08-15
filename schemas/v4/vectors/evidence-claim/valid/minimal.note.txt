@@ -1,0 +1,1 @@
+INV-1 satisfied: one automatic invalidation condition carrying a checkRef.

@@ -1,0 +1,24 @@
+{
+  "parent": {
+    "kind": "network",
+    "hosts": [
+      "a.example.com"
+    ],
+    "ports": [
+      443
+    ]
+  },
+  "child": {
+    "kind": "network",
+    "hosts": [
+      "a.example.com"
+    ],
+    "ports": [
+      443
+    ]
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

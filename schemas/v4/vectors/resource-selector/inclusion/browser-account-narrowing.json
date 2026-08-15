@@ -1,0 +1,15 @@
+{
+  "parent": {
+    "kind": "browser",
+    "origin": "https://a.example.com"
+  },
+  "child": {
+    "kind": "browser",
+    "origin": "https://a.example.com",
+    "accountRef": "acct-7"
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

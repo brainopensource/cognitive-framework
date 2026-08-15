@@ -1,0 +1,8 @@
+{
+  "kind": "fs",
+  "root": "/workspace",
+  "paths": [
+    "/workspace/src",
+    "/workspace/docs"
+  ]
+}

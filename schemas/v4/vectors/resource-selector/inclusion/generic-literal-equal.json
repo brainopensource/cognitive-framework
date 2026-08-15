@@ -1,0 +1,14 @@
+{
+  "parent": {
+    "kind": "generic",
+    "uriPattern": "vg://tool/echo"
+  },
+  "child": {
+    "kind": "generic",
+    "uriPattern": "vg://tool/echo"
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

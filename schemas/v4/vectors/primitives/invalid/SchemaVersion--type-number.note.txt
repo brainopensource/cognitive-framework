@@ -1,0 +1,1 @@
+Enums are string literals, never integers (CT-10).

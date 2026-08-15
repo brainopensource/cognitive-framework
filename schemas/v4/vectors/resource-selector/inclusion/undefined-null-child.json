@@ -1,0 +1,14 @@
+{
+  "parent": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w"
+    ]
+  },
+  "child": null,
+  "expected": {
+    "included": false,
+    "reason": "unparsable"
+  }
+}

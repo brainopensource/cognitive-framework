@@ -1,6 +1,6 @@
 # Verification, Threat & Evaluation Plan — Sprint 0 baseline
 
-Status: `DRAFT — Tech Lead approval required`  
+Status: `APPROVED — Sprint 0 scope; APPROVAL-0002`  
 Author: Senior Developer  
 Approver: Tech Lead  
 Baseline date: 2026-08-14
@@ -31,6 +31,11 @@ Each test runs once against a correct/reference implementation and once against 
 | `MF-S0-001` | `ports` imports `agency` | dependency build failure | Senior Developer | broken-harness receipt |
 | `MF-S0-002` | core imports `spike/` or `slice/` | disposable-import build failure | Senior Developer | broken-harness receipt |
 | `MF-S0-003` | two source files form an import cycle | cycle build failure | Senior Developer | broken-harness receipt |
+| `MF-S0-004` | governance imports a model-facing port | governance/model isolation failure | Senior Developer | broken-harness receipt |
+| `MF-S0-005` | agency imports an evaluator-facing port | cognition/evidence isolation failure | Senior Developer | broken-harness receipt |
+| `MF-S0-006` | one adapter family imports another | adapter coupling failure | Senior Developer | broken-harness receipt |
+| `MF-S0-007` | `lab/` imports even an external library | laboratory isolation failure | Senior Developer | broken-harness receipt |
+| `MF-S0-008` | Python `ports` imports `agency` | language-independent boundary failure | Senior Developer | broken-harness receipt |
 | `MF-KRN-001` | widening classifier is constant | second scenario contradicts expected classification | Kernel test owner | property counterexample |
 | `MF-KRN-002` | justifying spans reset between turns | untrusted-result branch becomes unreachable | Kernel test owner | adversarial trace |
 | `MF-KRN-003` | grant omits/bypasses descriptor binding | parse or point-of-effect mismatch rejection | Kernel test owner | rejection event |
@@ -52,7 +57,7 @@ Each test runs once against a correct/reference implementation and once against 
 | `MF-REL-002` | rollback was not tested before promotion | promotion gate accepts candidate | Release test owner | gate rejection |
 | `MF-S4-001` | `spike/` or `slice/` remains at S4 exit | deletion gate passes | Senior Developer | absence-check receipt |
 
-Sprint 0 implements `MF-S0-001..003`; later rows are planned acceptance standards, not claims of passing controls.
+Sprint 0 implements `MF-S0-001..008`; later rows are planned acceptance standards, not claims of passing controls.
 
 ## 4. Adversarial suite
 

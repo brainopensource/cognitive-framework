@@ -38,6 +38,21 @@ CHECKS = {
         "GTS-13C has not been used as a substitute",
         "Controlled bootstrap",
     ],
+    Path("docs/sprint0/schema-archaeology/field-inventory.md"): [
+        "Three real repository bugs traced",
+        "Independent third-engineer reconstruction signed",
+        "roleAtAction",
+    ],
+    Path("docs/sprint1/README.md"): [
+        "CONDITIONAL GO",
+        "REQ-SCHEMA-001..012",
+        "No schema may be marked locked",
+    ],
+    Path("docs/sprint1/backlog.md"): [
+        "S1-D1-001",
+        "S1-D4-004",
+        "S1-PL-001",
+    ],
 }
 
 
@@ -61,4 +76,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

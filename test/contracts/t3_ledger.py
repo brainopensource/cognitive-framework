@@ -83,6 +83,7 @@ def _make_envelope(
         "occurredAt": occurred_at,
         "recordedAt": occurred_at,
         "principal": "agent-alpha",
+        "principalRole": "episode",
         "tenantId": "tenant-corp",
         "ownerId": "owner-alice",
         "confidentiality": confidentiality,

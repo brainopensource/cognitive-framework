@@ -38,6 +38,7 @@ __all__ = [
     "VALID_RETENTIONS",
     "VALID_TRAINABILITIES",
     "VALID_REDACTION_STATUSES",
+    "VALID_PRINCIPAL_ROLES",
     "parse_event_envelope",
 ]
 
@@ -46,6 +47,7 @@ VALID_CONFIDENTIALITIES = frozenset({"public", "internal", "confidential", "rest
 VALID_RETENTIONS = frozenset({"ephemeral", "standard", "extended", "legal_hold"})
 VALID_TRAINABILITIES = frozenset({"prohibited", "opt_in_required", "opt_in_granted"})
 VALID_REDACTION_STATUSES = frozenset({"none", "partial", "complete", "pending"})
+VALID_PRINCIPAL_ROLES = frozenset({"user", "operator", "episode", "process", "evaluator", "release"})
 
 # VG-04 §12.2 Minimum Event Set
 EVENT_KINDS = frozenset({
@@ -110,6 +112,7 @@ class EventEnvelope:
     occurred_at: str
     recorded_at: str
     principal: str
+    principal_role: str
     tenant_id: str
     owner_id: str
     confidentiality: str
@@ -137,6 +140,7 @@ class EventEnvelope:
             "occurredAt": self.occurred_at,
             "recordedAt": self.recorded_at,
             "principal": self.principal,
+            "principalRole": self.principal_role,
             "tenantId": self.tenant_id,
             "ownerId": self.owner_id,
             "confidentiality": self.confidentiality,
@@ -223,6 +227,10 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         raise ParseError("EventEnvelope", "principal", "missing or empty principal")
     parse_principal_id(principal)
 
+    principal_role = raw.get("principalRole")
+    if principal_role not in VALID_PRINCIPAL_ROLES:
+        raise ParseError("EventEnvelope", "principalRole", f"invalid principalRole {principal_role!r}")
+
     tenant_id = raw.get("tenantId")
     if not isinstance(tenant_id, str) or not tenant_id:
         raise ParseError("EventEnvelope", "tenantId", "missing or empty tenantId")
@@ -267,6 +275,10 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         if not isinstance(episode_id, str) or not episode_id:
             raise ParseError("EventEnvelope", "episodeId", "scope 'episode' requires non-empty episodeId")
         parse_episode_id(episode_id)
+    elif episode_id is not None:
+        raise ParseError("EventEnvelope", "episodeId", f"scope {scope!r} cannot carry episodeId")
+    if scope in ("governance", "evolution") and run_id is not None:
+        raise ParseError("EventEnvelope", "runId", f"scope {scope!r} cannot carry runId")
 
     # optionals
     branch_id = raw.get("branchId")
@@ -279,12 +291,12 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
             raise ParseError("EventEnvelope", "parentEventId", "parentEventId must be UUIDv7")
 
     trace_id = raw.get("traceId")
-    if trace_id is not None and not isinstance(trace_id, str):
-        raise ParseError("EventEnvelope", "traceId", "traceId must be string")
+    if not isinstance(trace_id, str) or not trace_id:
+        raise ParseError("EventEnvelope", "traceId", "traceId must be a non-empty string")
 
     span_id = raw.get("spanId")
-    if span_id is not None and not isinstance(span_id, str):
-        raise ParseError("EventEnvelope", "spanId", "spanId must be string")
+    if not isinstance(span_id, str) or not span_id:
+        raise ParseError("EventEnvelope", "spanId", "spanId must be a non-empty string")
 
     encryption_key_ref = raw.get("encryptionKeyRef")
     if encryption_key_ref is not None and not isinstance(encryption_key_ref, str):
@@ -299,7 +311,7 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
     known_keys = {
         "schemaVersion", "eventId", "scope", "runId", "episodeId", "branchId",
         "parentEventId", "traceId", "spanId", "seq", "occurredAt", "recordedAt",
-        "principal", "tenantId", "ownerId", "confidentiality", "retentionClass",
+        "principal", "principalRole", "tenantId", "ownerId", "confidentiality", "retentionClass",
         "trainability", "redactionStatus", "encryptionKeyRef", "environmentSnapshot",
         "payload",
     }
@@ -319,6 +331,7 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         occurred_at=occurred_at,
         recorded_at=recorded_at,
         principal=principal,
+        principal_role=principal_role,
         tenant_id=tenant_id,
         owner_id=owner_id,
         confidentiality=confidentiality,

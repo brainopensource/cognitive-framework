@@ -6,7 +6,7 @@ the schema itself to be executable in the test process, and the repository has
 no third-party dependency budget, so this covers exactly the keywords the v4
 schemas use — `type`, `const`, `enum`, `pattern`, `minLength`, `maxLength`,
 `minimum`, `maximum`, `required`, `properties`, `additionalProperties`,
-`items`, `minItems`, `oneOf`, `$ref`, `$defs`.
+`items`, `minItems`, `uniqueItems`, composition and conditionals, `$ref`, `$defs`.
 
 It is deliberately small and deliberately not in `vanguard/packages/`: it is
 test scaffolding for reading the normative artifact, not a product validator.
@@ -24,7 +24,7 @@ SUPPORTED = {
     "$schema", "$id", "$comment", "$defs", "$ref", "title", "type", "const",
     "enum", "pattern", "minLength", "maxLength", "minimum", "maximum",
     "required", "properties", "additionalProperties", "items", "minItems",
-    "oneOf",
+    "oneOf", "allOf", "if", "then", "else", "not", "uniqueItems",
 }
 
 _TYPES = {
@@ -33,6 +33,7 @@ _TYPES = {
     "array": list,
     "boolean": bool,
     "null": type(None),
+    "number": (int, float),
 }
 
 
@@ -111,6 +112,10 @@ class SchemaSet:
             if "items" in schema:
                 for index, item in enumerate(instance):
                     self.validate(item, document, schema["items"], f"{path}/{index}")
+            if "uniqueItems" in schema and schema["uniqueItems"]:
+                encoded = [json.dumps(item, sort_keys=True, separators=(",", ":")) for item in instance]
+                if len(encoded) != len(set(encoded)):
+                    raise SchemaViolation("uniqueItems", path, "items are not unique")
 
         if isinstance(instance, dict):
             for field in schema.get("required", []):
@@ -122,6 +127,8 @@ class SchemaSet:
                     self.validate(value, document, properties[field], f"{path}/{field}")
                 elif schema.get("additionalProperties") is False:
                     raise SchemaViolation("additionalProperties", path, f"unknown field {field!r}")
+                elif isinstance(schema.get("additionalProperties"), dict):
+                    self.validate(value, document, schema["additionalProperties"], f"{path}/{field}")
 
         if "oneOf" in schema:
             matched = []
@@ -133,3 +140,24 @@ class SchemaSet:
                 matched.append(index)
             if len(matched) != 1:
                 raise SchemaViolation("oneOf", path, f"{len(matched)} branches matched")
+
+        for option in schema.get("allOf", []):
+            self.validate(instance, document, option, path)
+
+        if "if" in schema:
+            condition_matches = True
+            try:
+                self.validate(instance, document, schema["if"], path)
+            except SchemaViolation:
+                condition_matches = False
+            branch = schema.get("then" if condition_matches else "else")
+            if branch is not None:
+                self.validate(instance, document, branch, path)
+
+        if "not" in schema:
+            try:
+                self.validate(instance, document, schema["not"], path)
+            except SchemaViolation:
+                pass
+            else:
+                raise SchemaViolation("not", path, "prohibited schema matched")

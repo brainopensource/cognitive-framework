@@ -12,6 +12,9 @@
     "occurredAt",
     "recordedAt",
     "principal",
+    "principalRole",
+    "traceId",
+    "spanId",
     "tenantId",
     "ownerId",
     "confidentiality",
@@ -40,10 +43,12 @@
       "$ref": "primitives.schema.json#/$defs/Uuidv7"
     },
     "traceId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "spanId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "seq": {
       "$ref": "primitives.schema.json#/$defs/IntString",
@@ -57,6 +62,9 @@
     },
     "principal": {
       "$ref": "primitives.schema.json#/$defs/PrincipalId"
+    },
+    "principalRole": {
+      "enum": ["user", "operator", "episode", "process", "evaluator", "release"]
     },
     "tenantId": {
       "$ref": "primitives.schema.json#/$defs/TenantId"
@@ -142,6 +150,20 @@
           "episodeId"
         ]
       }
+    },
+    {
+      "if": {
+        "properties": { "scope": { "enum": ["governance", "evolution"] } },
+        "required": ["scope"]
+      },
+      "then": { "not": { "required": ["runId"] } }
+    },
+    {
+      "if": {
+        "properties": { "scope": { "enum": ["governance", "evolution", "recovery"] } },
+        "required": ["scope"]
+      },
+      "then": { "not": { "required": ["episodeId"] } }
     }
   ]
 }

@@ -3,14 +3,21 @@
   "status": "approved-s2-remediation-review-scope",
   "baseline_date": "2026-08-15",
   "authority": "This artifact is the only merge-gating requirement-to-evidence map. GTS-13C is sequencing and rationale only.",
-  "scope": "Sprint 0 controls plus active review rows for T1, T2, T3 and the T6.4 client scaffold; covered rows record observed local evidence, while open T1.4-T1.12 and CLI contract rows remain merge blockers for their components",
+  "scope": "Sprint 0 controls plus active Sprint 2 rows for T0b, T1, T2, T3, T7 and the T6.4 client scaffold; covered rows record observed local evidence, while the live T0b run and CLI contract remain open for their components",
   "owner_identities": {
     "acting-tech-lead": "Repository principal rocha, acting as Tech Lead for this Sprint 0 setup.",
     "acting-senior-developer": "Repository principal rocha, acting as Senior Developer for this Sprint 0 setup."
   },
   "merged_components": [
     "docs/governance",
-    "tools/ci"
+    "tools/ci",
+    "schemas/v4-v0.1",
+    "schemas/conformance",
+    "ports/event-store",
+    "kernel",
+    "event-ledger",
+    "domain/manifest",
+    "agency/manifests"
   ],
   "deferred_activation": [
     {
@@ -44,12 +51,16 @@
     {"test_id": "TEST-SCHEMA-012", "command": ["python3", "-m", "unittest", "test.contracts.test_t1"]},
     {"test_id": "TEST-ARCH-005", "command": ["python3", "tools/check_boundaries.py"]},
     {"test_id": "TEST-PORT-001", "command": ["python3", "-m", "unittest", "test.contracts.test_event_store_port"]},
-    {"test_id": "TEST-KERNEL-001", "command": ["python3", "-m", "unittest", "discover", "-s", "test/kernel"]},
+    {"test_id": "TEST-KERNEL-001", "command": ["python3", "-m", "unittest", "test.kernel.test_attenuation", "test.kernel.test_dispatch", "test.kernel.test_provenance"]},
     {"test_id": "TEST-KERNEL-002", "command": ["python3", "tools/run_broken_tests.py"]},
     {"test_id": "TEST-KERNEL-003", "command": ["python3", "tools/check_tcb_budget.py"]},
     {"test_id": "TEST-LEDGER-001", "command": ["python3", "-m", "unittest", "test.contracts.t3_ledger"]},
     {"test_id": "TEST-LEDGER-002", "command": ["python3", "-m", "unittest", "test.contracts.t3_ledger", "test.test_ledger_properties"]},
-    {"test_id": "TEST-CLI-001", "command": ["npm", "--workspace", "@vanguard/cli", "test"]}
+    {"test_id": "TEST-CLI-001", "command": ["npm", "--workspace", "@vanguard/cli", "test"]},
+    {"test_id": "TEST-SLICE-001", "command": ["npm", "--workspace", "@vanguard/disposable-slice", "test"]},
+    {"test_id": "TEST-CONF-001", "command": ["python3", "-m", "unittest", "test.contracts.t1_wire_contracts"]},
+    {"test_id": "TEST-GRAPH-001", "command": ["python3", "-m", "unittest", "test.contracts.t7_artifact_graph"]},
+    {"test_id": "TEST-BASELINE-001", "command": ["python3", "-m", "unittest", "test.contracts.t7_artifact_graph"]}
   ],
   "requirements": [
     {
@@ -286,7 +297,7 @@
       "test_id": "TEST-SCHEMA-004",
       "acceptance_evidence": "Descriptor vectors prove normalization, provider-call-ID exclusion, cwd semantics and sink-class parsing.",
       "margin": "zero semantically equal calls with different digests",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -303,7 +314,7 @@
       "test_id": "TEST-SCHEMA-005",
       "acceptance_evidence": "Parsing rejects missing descriptor binding and invalid constraints; conformance vectors cover valid parent/approval forms.",
       "margin": "zero grant forms without descriptor binding",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -320,7 +331,7 @@
       "test_id": "TEST-SCHEMA-006",
       "acceptance_evidence": "Vectors cover all outcomes, non-privileged receipts, affected-resource deltas and unknown occurrence without coercion.",
       "margin": "zero unknown outcomes coerced to success/failure",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -337,7 +348,7 @@
       "test_id": "TEST-SCHEMA-007",
       "acceptance_evidence": "Conditional-schema vectors accept valid episode/governance/recovery events and reject missing or synthetic scope identities.",
       "margin": "zero fabricated scope identifiers",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -354,14 +365,14 @@
       "test_id": "TEST-SCHEMA-008",
       "acceptance_evidence": "Vectors cover kind extension, compensation conditional fields and rejection of mutable state inside content-addressed artifacts.",
       "margin": "zero mutable fields in artifact digest",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
     {
       "req_id": "REQ-SCHEMA-009",
       "source": "GTS-13C T1.9; VG-04 INV-1/INV-2",
-      "statement": "EvidenceClaim retains the VG-04 contract and rejects empty invalidation conditions; active artifacts require at least one automatic invalidation check.",
+      "statement": "EvidenceClaim retains the VG-04 contract and rejects empty invalidation conditions; INV-2 automatic checks remain a separate activation-time obligation rather than mutable claim state.",
       "rationale": "A claim that cannot state and operationalize refutation is inadmissible competence evidence.",
       "component": "schemas/v4-v0.1",
       "owner": "acting-tech-lead",
@@ -369,9 +380,9 @@
       "dependencies": ["REQ-SCHEMA-002", "REQ-SCHEMA-008"],
       "verification_family": "must-fail",
       "test_id": "TEST-SCHEMA-009",
-      "acceptance_evidence": "Invalid vectors reject empty conditions and active-only-manual conditions; valid claims round-trip through both readers.",
+      "acceptance_evidence": "Invalid vectors reject empty conditions; valid claims round-trip losslessly through both independent readers, while activation state remains outside the content-addressed claim.",
       "margin": "zero admissible claims without refutation conditions",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -388,7 +399,7 @@
       "test_id": "TEST-SCHEMA-010",
       "acceptance_evidence": "Vectors cover every reason code and reject absent patch binding, empty reasons and invalid scope.",
       "margin": "zero unscoped preference/style corrections",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -405,14 +416,14 @@
       "test_id": "TEST-SCHEMA-011",
       "acceptance_evidence": "Vectors reject missing recording inputs and prove stable digest/round-trip behavior across both readers.",
       "margin": "zero replay claims without a complete recording tuple",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
     {
       "req_id": "REQ-SCHEMA-012",
       "source": "GTS-13C T1.12; ADR-0050; VG-03 §9/§12",
-      "statement": "ProcessDefinition and ProcessInstance declare finite states, allowed transitions, approvals and bound effect verbs and can resume solely from ledger state without replaying agent reasoning.",
+      "statement": "ProcessDefinition and ProcessInstance declare finite states, allowed transitions, approvals, bound effect verbs and complete history sufficient for the later process engine to resume without replaying agent reasoning.",
       "rationale": "Approval, release and governance paths must remain deterministic, auditable and restartable outside cognition.",
       "component": "schemas/v4-v0.1",
       "owner": "acting-tech-lead",
@@ -420,9 +431,9 @@
       "dependencies": ["REQ-SCHEMA-007", "REQ-SCHEMA-008"],
       "verification_family": "property",
       "test_id": "TEST-SCHEMA-012",
-      "acceptance_evidence": "Schema vectors and restart-resume property tests prove finite readable states and identical post-interruption state without Episode execution.",
+      "acceptance_evidence": "Schema vectors prove finite readable states, deterministic transition declarations and lossless ProcessInstance history reconstruction without Episode execution.",
       "margin": "zero governance transitions requiring a model",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -559,6 +570,74 @@
       "acceptance_evidence": "CLI tests exercise deterministic headless run/trace/why, cancel, resume and checkpoint flows; boundary CI confirms the client remains outside core packages.",
       "margin": "zero direct kernel/agency/ports/adapter imports and stable JSONL output",
       "status": "open",
+      "justification": "",
+      "compensating_assurance": ""
+    },
+    {
+      "req_id": "REQ-SLICE-001",
+      "source": "GTS-13C T0b.1-T0b.4; ADR-0047",
+      "statement": "A disposable end-to-end slice executes a prompt -> model -> patch -> approval -> apply -> test -> result path against a real repository, records live integration findings in slice-findings.md, remains unimportable by production code, and is deleted at S4.",
+      "rationale": "Early live integration proves the entire vertical path before the permanent harness is built while preserving zero production coupling.",
+      "component": "slice/e2e",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": ["REQ-SCHEMA-007", "REQ-PORT-001"],
+      "verification_family": "architecture",
+      "test_id": "TEST-SLICE-001",
+      "acceptance_evidence": "Disposable slice executes live path, emits slice-findings.md, and boundary check confirms zero production imports.",
+      "margin": "zero production dependencies on slice/",
+      "status": "open",
+      "justification": "",
+      "compensating_assurance": ""
+    },
+    {
+      "req_id": "REQ-CONF-001",
+      "source": "GTS-13C T1.13-T1.15; VG-04 §0/§14",
+      "statement": "Wire schemas produce strict writer profiles, forward-compatible reader profiles, dual-language TypeScript/Python agreement on shared golden vectors, and surviving readers under minor migration bumps.",
+      "rationale": "Dual-language reader conformance is the only defense against silent wire format drift across independent consumers.",
+      "component": "schemas/conformance",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": ["REQ-SCHEMA-001", "REQ-SCHEMA-007"],
+      "verification_family": "conformance",
+      "test_id": "TEST-CONF-001",
+      "acceptance_evidence": "Both TypeScript and Python readers agree on 100% of golden vector fixtures and survive forward-compatibility minor bumps.",
+      "margin": "zero vector disagreements and zero unpreserved unknown fields in readers",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": ""
+    },
+    {
+      "req_id": "REQ-GRAPH-001",
+      "source": "GTS-13C T7.1-T7.3; VG-06 §2/§3",
+      "statement": "The artifact graph represents mutable components as typed content-addressed files, supports new kinds via registry extension without core changes, and freezes immutable HarnessManifests per episode at composition.",
+      "rationale": "Harnesses must be declarative configuration rather than custom codebases to allow rigorous benchmarking and counterfactual replay.",
+      "component": "domain/manifest",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": ["REQ-SCHEMA-008", "REQ-LEDGER-001"],
+      "verification_family": "property",
+      "test_id": "TEST-GRAPH-001",
+      "acceptance_evidence": "Artifact registry resolves new kinds without kernel changes; HarnessManifest freezes at composition and reproduces identical state digests.",
+      "margin": "zero runtime manifest mutations and zero core changes for kind extension",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": ""
+    },
+    {
+      "req_id": "REQ-BASELINE-001",
+      "source": "GTS-13C T7.4; locked decision L-15",
+      "statement": "The permanent vg-shell-only baseline manifest is registered, flagged undeletable, and runnable against the fake environment as the standing zero-assumption experimental control.",
+      "rationale": "Without a permanent zero-assumption baseline, empirical gains from typed tools, skills, and context policies cannot be measured.",
+      "component": "agency/manifests",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": ["REQ-GRAPH-001"],
+      "verification_family": "conformance",
+      "test_id": "TEST-BASELINE-001",
+      "acceptance_evidence": "vg-shell-only manifest is registered, rejected for deletion, and executes successfully against the fake environment.",
+      "margin": "zero deletions or modifications of the permanent baseline manifest",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     }

@@ -41,6 +41,12 @@ from .selectors.resource_selector import (
     includes,
     parse_selector,
 )
+from .wire import WIRE_KINDS, WireError, parse_wire
+from .artifacts import (
+    BUILTIN_KINDS, ArtifactFile, ArtifactGraph, ArtifactKind, CapabilityRequirement,
+    FrozenHarness, GraphError, HarnessManifest, KindRegistry, LogicalEdit,
+    ManifestError, ManifestRegistry, RegisteredManifest, Workspace, compose, parse_manifest,
+)
 
 __all__ = [
     "CanonicalisationError", "canonicalise", "canonicalise_text", "canonical_bytes",
@@ -54,4 +60,10 @@ __all__ = [
     "EffectRecord", "ArtifactRecord", "EvidenceRecord", "ApprovalRecord",
     "ReducerError", "initial_state", "reduce_event", "reduce_batch",
     "reconstruct_state", "compute_state_digest",
+    "WIRE_KINDS", "WireError", "parse_wire",
+    "BUILTIN_KINDS", "ArtifactFile", "ArtifactGraph", "ArtifactKind",
+    "CapabilityRequirement", "FrozenHarness", "GraphError", "HarnessManifest",
+    "KindRegistry", "LogicalEdit", "ManifestError", "ManifestRegistry",
+    "RegisteredManifest", "Workspace", "compose",
+    "parse_manifest",
 ]

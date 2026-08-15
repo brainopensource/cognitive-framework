@@ -281,7 +281,6 @@ class CompetencePrior(unittest.TestCase):
 
     def test_the_payload_carries_no_prompt_text(self) -> None:
         """`REQ-TRUST-001`: digests on the wire, never the brief itself."""
-        rendered = json.dumps(dict(self.sink.events[0].payload) if self.sink.events else {})
         self.record()
         rendered = json.dumps(dict(self.sink.events[0].payload))
 

@@ -1,0 +1,12 @@
+{
+  "name": "@vanguard/workspace",
+  "private": true,
+  "workspaces": [
+    "vanguard/packages/*"
+  ],
+  "scripts": {
+    "vg": "npm --workspace @vanguard/cli run vg --",
+    "typecheck": "npm --workspace @vanguard/cli run typecheck",
+    "test": "npm --workspace @vanguard/cli test"
+  }
+}

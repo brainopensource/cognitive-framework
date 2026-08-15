@@ -1,0 +1,130 @@
+# Vanguard General Task Solver (GTS)
+
+> **A verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
+
+---
+
+## 1. Architectural Blueprint & Six-Plane Separation
+
+Vanguard is structured around six distinct planes with strict OS and process-level isolation:
+
+```text
+Interaction  ── CLI · TUI · Inspector · Web Surface
+     │  authenticated requests, event subscriptions
+Cognition    ── Episodes · Operators · Context Compaction
+     │  proposals
+Control      ── Broker · Policy Kernel · Attenuation · Leases
+     │  scoped capability grants
+Workload     ── Sandboxed Environment Adapters (Git, FS, Shell, LSP)
+     │  receipts
+Evidence     ── Exterior Evaluators · Claims · Invalidation Probes
+     │  unreachable verdicts
+Evolution    ── Distillation · Attestation · Promotion Pointers
+     └──────── signed activation pointer ──▶ Cognition
+```
+
+Every capability in the system reduces to one universal invariant protocol:
+```text
+observe → propose → authorise → effect → receipt → evaluate
+```
+
+---
+
+## 2. Physical Repository Tree
+
+```text
+Aether-D-System/
+├── .github/
+│   └── workflows/ci.yml             # CI testing, boundary checks & PR requirement gates
+├── cv13/                            # Onboarding packet & verification keys
+├── docs/
+│   ├── development/                 # Sprint briefings & leadership guidelines
+│   │   ├── guidelines_phase_0.md
+│   │   └── guidelines_phase_0_briefing.md
+│   ├── review/                      # Historical design reviews & AI guidelines
+│   ├── sprint0/                     # Sprint 0 governance, ICD, & schema archaeology
+│   │   ├── active-mvp-contract.json
+│   │   ├── system-architecture-icd.md
+│   │   ├── verification-threat-evaluation-plan.md
+│   │   └── schema-archaeology/      # Trace logs, field inventory, & blind reviews
+│   ├── sprint1/                     # Sprint 1 backlog & developer packets
+│   └── v4/                          # Normative Vanguard v4 Specification Corpus
+│       ├── 00..12 Normative Specs   # Core contracts, kernel security, & memory
+│       └── 13_C_gts_mvp_plan.md     # Master MVP engineering & task backlog
+├── schemas/
+│   └── v4/                          # Canonical JSON Schema reader/writer profiles
+├── spike/                           # Disposable provider API probes (deleted at S4)
+├── test/
+│   └── broken/                      # Defective mock counterparts for must-fail tests
+├── tools/                           # Automated CI linters, boundary, & contract checkers
+└── vanguard/
+    └── packages/                    # Physical package boundaries (enforced by CI)
+        ├── domain/                  # Pure values, wire contracts, and state reducers
+        ├── ports/                   # Abstract interfaces (ModelPort, LedgerPort, etc.)
+        │   └── fakes/               # In-memory deterministic test doubles
+        ├── kernel/                  # Capability attenuation, budget leases, & dispatch
+        ├── agency/                  # Episode recursion, context compiler, & operators
+        ├── runtime/                 # Composition root & daemon lifecycle
+        │   └── governance/          # Durable state machines, approvals, & releases
+        └── adapters/                # Concrete environment implementations (Git, Model, CLI)
+```
+
+---
+
+## 3. Package Dependency Lattice & CI Rules
+
+Dependency direction is strictly enforced in CI (`tools/check_boundaries.py`):
+
+$$\text{domain} \longleftarrow \text{ports} \longleftarrow \text{kernel} \longleftarrow \text{agency} \longleftarrow \text{runtime} \longrightarrow \text{adapters}$$
+
+* **`domain`**: Imports nothing. Pure business logic, canonical serialization, and state reducers.
+* **`ports`**: Imports `domain` only. Pure abstract interfaces.
+* **`kernel`**: Imports `domain` and `ports`. Capability verification and budget leases.
+* **`agency`**: Imports `domain`, `ports`, and `kernel`. Cognitive episode coordination.
+* **`adapters`**: Imports `domain` and `ports`. Zero knowledge of kernel or cognition.
+* **`runtime`**: Injects concrete adapters into ports at composition root.
+
+---
+
+## 4. MVP Roadmap: Waves to Lightweight Coding Agent
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ WAVE 1: FOUNDATION & CONTRACTS (Sprint 0 – Sprint 1)                   │
+│ • Sprint 0: Governance, ICD, CI boundaries, schema archaeology         │
+│ • Sprint 1: Wire contracts (T1), provider probe in spike/ (T0a)        │
+├────────────────────────────────────────────────────────────────────────┤
+│ WAVE 2: KERNEL, LEDGER & ENGINE (Sprint 2 – Sprint 5)                  │
+│ • Sprint 2: Disposable E2E slice (T0b), ledger store (T3), kernel (T2) │
+│ • Sprint 3: Dispatch mediation, crash recovery, cassette replay (T3.8) │
+│ • Sprint 4: Episode recursion (T4), process engine, S4 deletion gate   │
+│ • Sprint 5: Exterior evaluator isolation & double probe (T5)           │
+├────────────────────────────────────────────────────────────────────────┤
+│ WAVE 3: TYPED CODING AGENT & BENCHMARKS (Sprint 6 – Sprint 9)          │
+│ • Sprint 6: Git adapter, typed tools (read/search/patch/test), CLI TUI │
+│             👉 DELIVERS: Production-grade lightweight Coding Agent     │
+│ • Sprint 7: Competitor harness manifests (Claude-Code, OpenCode)       │
+│ • Sprint 8: Paired McNemar runner, A/A floor, generality test (T9)     │
+│ • Sprint 9: Final MVP Gate Review & Release                            │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. Verification & Quality Gates
+
+Run these commands locally to verify full compliance:
+
+```bash
+# 1. Check architectural boundary imports & cycles
+python3 tools/check_boundaries.py
+
+# 2. Check 12/12 mechanical acceptance rules
+python3 tools/cv_checks.py
+
+# 3. Check Active MVP Contract coverage
+python3 tools/check_active_mvp_contract.py
+
+# 4. Verify that must-fail tests catch broken implementations
+python3 tools/run_broken_tests.py
+```

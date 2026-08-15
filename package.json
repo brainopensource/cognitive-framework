@@ -3,8 +3,7 @@
   "private": true,
   "workspaces": [
     "vanguard/packages/*",
-    "vanguard/clients/*",
-    "slice"
+    "vanguard/clients/*"
   ],
   "scripts": {
     "vg": "npm --workspace @vanguard/cli run vg --",

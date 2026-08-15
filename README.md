@@ -53,7 +53,6 @@ Aether-D-System/
 │       └── 13_C_gts_mvp_plan.md     # Master MVP engineering & task backlog
 ├── schemas/
 │   └── v4/                          # Canonical JSON Schema reader/writer profiles
-├── spike/                           # Disposable provider API probes (deleted at S4)
 ├── test/
 │   └── broken/                      # Defective mock counterparts for must-fail tests
 ├── tools/                           # Automated CI linters, boundary, & contract checkers

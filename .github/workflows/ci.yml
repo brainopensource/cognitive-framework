@@ -168,3 +168,29 @@ jobs:
           if [ "$OPEN" -gt "$BASE" ]; then
             echo "CI-9 FAIL: coverage regressed ($OPEN > $BASE)"; exit 1
           fi
+
+  trust-spine:
+    name: S4 — no-model trust spine (REQ-TRUST-001)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # ADR-0048: model behaviour must not become a prerequisite of kernel
+      # verification. The key is unset explicitly rather than merely absent,
+      # so the guarantee survives someone adding a provider secret to this
+      # repository later — which is exactly when it stops being obvious.
+      - name: TEST-TRUST-001 — scripted trajectory with the provider key unset
+        env:
+          OPENROUTER_API_KEY: ''
+        run: |
+          unset OPENROUTER_API_KEY
+          python3 -m unittest test.trust.test_spine
+
+      - name: MF-S4-001 — spike/ and slice/ absent on this tree
+        run: python3 tools/check_boundaries.py --s4-exit
+
+      - name: TEST-EXEC-001 — episode loop and agency identifier lint
+        run: python3 -m unittest discover -s test/agency

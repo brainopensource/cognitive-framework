@@ -1,8 +1,12 @@
 # Provider API Notes — Task T0a Synthesis
 
+Moved here from `spike/provider_notes.md` ahead of the `S4-GATE-001` deletion
+of `spike/` and `slice/`. The notes are the part of a disposable worth keeping
+(`ADR-0047`). Rebuild adapters from this file; do not resurrect `spike/`.
+
 Status: `PROBE COMPLETE — SIMULATION & WIRE TAXONOMY CAPTURED`  
 Owner: Dev 3 (Provider Integration Track)  
-Authority: Non-normative technical discovery for Task `T0a` / Sprint 1; deleted at Sprint 4.
+Authority: Non-normative technical discovery for Task `T0a` / Sprint 1.
 
 ---
 

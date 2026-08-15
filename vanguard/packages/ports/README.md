@@ -10,4 +10,4 @@ Only ports whose full activation bundle is present belong here: interface, share
 
 `SandboxRunner` is activated with a visibly non-contained fake and `test/contracts/test_sandbox_port.py`. Unverified containment reports block publication. The real perimeter adapter is Sprint 4 (`REQ-SEC-001`).
 
-The disposable T0b provider vocabulary remains local to `slice/`. Planned environment, blob, observation, policy, governor, clock, and random ports must not be added here until their activation bundle lands. See `schemas/v4/port-interfaces.md`.
+T0a/T0b disposable trees are gone (`S4-GATE-001`). Provider wire notes live in `docs/sprint1/provider-notes.md`; slice findings live in `docs/sprint2/slice-findings.md`. Planned blob, observation, policy, governor, clock, and random ports must not be added here until their activation bundle lands. See `schemas/v4/port-interfaces.md`.

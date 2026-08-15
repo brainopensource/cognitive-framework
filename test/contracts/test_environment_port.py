@@ -1,7 +1,7 @@
 """Shared substitution contract for every active EnvironmentAdapter implementation.
 
 Owning contract: REQ-PORT-003 / TEST-PORT-003, ICD §4 EnvironmentAdapter, VG-03 §7.1.
-Absorbs: slice/slice-findings.md.
+Absorbs: docs/sprint2/slice-findings.md.
 """
 
 from __future__ import annotations

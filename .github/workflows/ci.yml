@@ -189,5 +189,8 @@ jobs:
           unset OPENROUTER_API_KEY
           python3 -m unittest test.trust.test_spine
 
+      - name: MF-S4-001 — spike/ and slice/ absent on this tree
+        run: python3 tools/check_boundaries.py --s4-exit
+
       - name: TEST-EXEC-001 — episode loop and agency identifier lint
         run: python3 -m unittest discover -s test/agency

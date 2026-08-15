@@ -1,9 +1,0 @@
-{
-  "name": "@vanguard/disposable-slice",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "run": "node --experimental-strip-types run.ts",
-    "test": "node --experimental-strip-types --test provider.test.ts workflow.test.ts"
-  }
-}

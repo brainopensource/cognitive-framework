@@ -12,6 +12,12 @@ from .kernel import (
     EventSink,
     Ledger,
 )
+from .evaluator import (
+    EvaluationProtocol,
+    EvaluatorPort,
+    RunRef,
+    Verdict,
+)
 from .model import (
     ContextBundle,
     ModelPort,
@@ -34,4 +40,8 @@ __all__ = [
     "Proposal",
     "Sampling",
     "ToolSchemas",
+    "EvaluationProtocol",
+    "EvaluatorPort",
+    "RunRef",
+    "Verdict",
 ]

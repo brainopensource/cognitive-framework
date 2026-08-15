@@ -1,5 +1,9 @@
 # T0b disposable-slice findings
 
+Moved here from `slice/slice-findings.md` ahead of the `S4-GATE-001` deletion
+of `spike/` and `slice/`. The findings are the part of a disposable worth
+keeping: the directory is deleted, what it taught is not (`REQ-SLICE-001`).
+
 Status: deterministic path proven (5/5 workspace tests, 2026-08-15). Live-provider run **blocked**: no `VG_SLICE_*` / `OPENROUTER_*` / `OPENAI_*` credential in the environment. `REQ-SLICE-001` stays `open`. Do not invent latency numbers.
 
 ## Proven without a live model

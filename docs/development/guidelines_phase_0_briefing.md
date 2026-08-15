@@ -60,10 +60,11 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 4 | Dispatched locally; no merge |
-| **TODO** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 + leads | Dispatched locally; no schema lock/merge |
-| **TODO** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 + leads | Dispatched locally; no schema lock/merge |
-| **TODO** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 3/4 + Sr Dev | Dispatched locally; no schema lock/merge |
+| **DONE** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 3 | Merged to main via sprint1/integration |
+| **DONE** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 | Merged to main — 60 tests passing, dual TS+Python readers |
+| **DONE** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 | Merged to main — contracts.ts + JSON schemas |
+| **DONE** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 2 | Merged to main — EventEnvelope, Artifact, EvidenceClaim |
+| **DONE** | **T6.4** | CLI/TUI foundation — `vg run`, `vg trace`, `vg why` | **2** | 🟢 FAST | Dev 4 | Merged to main via sprint1/dev4-tui (mock runtime) |
 
 ### Sprint 2 · Real-Provider Disposable Slice, Kernel & Ledger (Weeks 5–6)
 

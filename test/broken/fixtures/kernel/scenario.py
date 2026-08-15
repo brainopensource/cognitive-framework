@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Must-fail counterparts for the kernel controls (`MF-KRN-001..003`).
+"""Must-fail counterparts for the kernel controls (`MF-KRN-001..011`).
 
 The harness contract (`verification-threat-evaluation-plan.md` §3): each test
 runs once against the reference implementation and once against the named
@@ -15,12 +15,20 @@ control is inert, which is the failure these tests exist to detect.
     python3 test/broken/fixtures/kernel/scenario.py --variant constant-classifier
     python3 test/broken/fixtures/kernel/scenario.py --variant span-reset
     python3 test/broken/fixtures/kernel/scenario.py --variant unbound-grant
+    python3 test/broken/fixtures/kernel/scenario.py --variant widening-attenuation
+    python3 test/broken/fixtures/kernel/scenario.py --variant permissive-grant
+    python3 test/broken/fixtures/kernel/scenario.py --variant leaked-lease
+    python3 test/broken/fixtures/kernel/scenario.py --variant clamped-overrun
+    python3 test/broken/fixtures/kernel/scenario.py --variant permissive-sink
+    python3 test/broken/fixtures/kernel/scenario.py --variant unrecorded-effect
+    python3 test/broken/fixtures/kernel/scenario.py --variant late-intent
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -30,13 +38,22 @@ if str(ROOT) not in sys.path:
 from test.kernel import fakes  # noqa: E402
 from vanguard.packages.kernel import (  # noqa: E402
     Accumulation,
+    AttenuationResult,
     FailurePath,
     Grant,
     GrantIssuer,
+    GrantVerification,
     HeldAuthority,
+    HmacAuthenticator,
+    Governor,
+    LeaseState,
+    SinkClass,
+    SinkMismatch,
+    SinkRegistry,
     Span,
     StandardClassifier,
     Trust,
+    attenuate,
     descriptor_of,
 )
 
@@ -86,6 +103,74 @@ class ResettingAccumulation:
     @property
     def spans(self):
         return tuple(self._spans)
+
+
+class PermissiveSinkRegistry(SinkRegistry):
+    """`MF-KRN-008`: trusts the caller's weaker declaration."""
+
+    def register(self, action, sink_class):
+        self._sinks[action] = sink_class
+
+
+class NullIntentLedger:
+    """`MF-KRN-009`: acknowledges intent without preserving it."""
+
+    entries = ()
+
+    def append_intent(self, _event):
+        return None
+
+
+class TracingAdapter(fakes.FakeAdapter):
+    def __init__(self, trace):
+        super().__init__("fs.write")
+        self._trace = trace
+
+    def execute(self, request):
+        self._trace.append("effect")
+        return super().execute(request)
+
+
+class TracingIntentLedger(fakes.RecordingLedger):
+    def __init__(self, trace, *, durable=True):
+        super().__init__()
+        self._trace = trace
+        self._durable = durable
+
+    def append_intent(self, event):
+        if self._durable:
+            self._trace.append("intent")
+            super().append_intent(event)
+        # Broken variant acknowledges the call before making anything durable.
+
+
+class PermissiveGrantIssuer(GrantIssuer):
+    """`MF-KRN-005`: accepts forged, expired, replayed, or substituted grants."""
+
+    def verify(self, *_args, **_kwargs):
+        return GrantVerification(True)
+
+
+class LeakingGovernor(fakes.TracingGovernor):
+    """`MF-KRN-006`: returns from release while the lease remains open."""
+
+    def release(self, _lease):
+        return None
+
+
+class ClampingGovernor(Governor):
+    """`MF-KRN-007`: charges at most the reservation and hides overruns."""
+
+    def commit(self, lease, actual):
+        charged = {
+            dimension: min(amount, lease.reserved.get(dimension, 0))
+            for dimension, amount in actual.items()
+        }
+        super().commit(lease, charged)
+        return {
+            dimension: max(lease.reserved.get(dimension, 0) - amount, 0)
+            for dimension, amount in actual.items()
+        }
 
 
 class UnboundGrantIssuer(GrantIssuer):
@@ -197,11 +282,120 @@ def scenario_grant_binding(variant: str) -> None:
               "no descriptorDigest")
 
 
+def scenario_sink_classification(variant: str) -> None:
+    registry = PermissiveSinkRegistry() if variant == "permissive-sink" else SinkRegistry()
+    try:
+        registry.register("fs.write", SinkClass.PURE)
+    except SinkMismatch:
+        return
+    raise Failed("privileged sink accepted as pure")
+
+
+def scenario_attenuation(variant: str) -> None:
+    parent = fakes.parent_scope()
+    requested = fakes.child_scope(resources=(fakes.WORKSPACE, fakes.ETC))
+    result = AttenuationResult(requested) if variant == "widening-attenuation" else attenuate(parent, requested)
+    check(not result.ok and result.granted is None, "attenuation permits or silently intersects widening")
+
+
+def scenario_grant_integrity(variant: str) -> None:
+    issuer = (PermissiveGrantIssuer(HmacAuthenticator(b"must-fail-key")) if variant == "permissive-grant"
+              else GrantIssuer(HmacAuthenticator(b"must-fail-key")))
+    descriptor = descriptor_of("fs.write", {"path": "/workspace/src/a.ts"})
+    grant = issuer.issue(
+        grant_id="grant-integrity",
+        principal="agent-1",
+        descriptor_digest=descriptor,
+        scope=fakes.child_scope(),
+        expires_at="2026-08-15T10:00:00.000Z",
+        purpose_digest="sha256:" + "a" * 64,
+        cross_process=True,
+    )
+    forged = replace(grant, authenticator="0" * 64)
+    verification = issuer.verify(
+        forged,
+        descriptor_digest=descriptor,
+        now="2026-08-15T09:00:00.000Z",
+        cross_process=True,
+    )
+    check(not verification.ok and verification.failure is FailurePath.GRANT_FORGED,
+          "forged grant accepted")
+
+
+def scenario_release_before_emit(variant: str) -> None:
+    governor = (LeakingGovernor({"usd_micros": 10_000, "millis": 60_000}, trace=[])
+                if variant == "leaked-lease" else None)
+    harness = fakes.build(governor=governor)
+    result = harness.kernel.dispatch(
+        fakes.request(),
+        requested_scope=fakes.child_scope(),
+        reservation=fakes.reservation(),
+    )
+    release_positions = [index for index, item in enumerate(harness.trace) if item == "release"]
+    emit_positions = [index for index, item in enumerate(harness.trace) if item.startswith("emit:")]
+    check(result.ok and release_positions and emit_positions
+          and release_positions[-1] < emit_positions[0],
+          "event emitted before lease release")
+
+
+def scenario_overrun_debit(variant: str) -> None:
+    governor = ClampingGovernor({"usd_micros": 10_000}) if variant == "clamped-overrun" else Governor({"usd_micros": 10_000})
+    lease = governor.reserve("run-overrun", fakes.reservation(usd_micros=500, millis=0))
+    settlement = governor.commit(lease, {"usd_micros": 800})
+    governor.release(lease)
+    check(settlement["usd_micros"] == -300
+          and governor.spent("usd_micros") == 800
+          and lease.state is LeaseState.RELEASED,
+          "budget overrun was clamped instead of debited")
+
+
+def scenario_all_effects_recorded(variant: str) -> None:
+    ledger = NullIntentLedger() if variant == "unrecorded-effect" else fakes.RecordingLedger()
+    harness = fakes.build(adapter=fakes.FakeAdapter("fs.read"), ledger=ledger)
+    result = harness.kernel.dispatch(
+        fakes.request(action="fs.read", declared_sink_class=SinkClass.OBSERVATION),
+        requested_scope=fakes.child_scope(actions=frozenset({"fs.read"})),
+        reservation=fakes.reservation(),
+    )
+    check(result.ok and bool(ledger.entries), "effect completed without durable intent")
+
+
+def scenario_intent_precedes_dispatch(variant: str) -> None:
+    trace = []
+    ledger = TracingIntentLedger(trace, durable=variant != "late-intent")
+    harness = fakes.build(adapter=TracingAdapter(trace), ledger=ledger)
+    result = harness.kernel.dispatch(
+        fakes.request(),
+        requested_scope=fakes.child_scope(),
+        reservation=fakes.reservation(),
+    )
+    check(result.ok and trace[:2] == ["intent", "effect"],
+          "effect dispatched before durable intent")
+
+
 SCENARIOS = {
-    "reference": (scenario_classifier, scenario_spans, scenario_grant_binding),
+    "reference": (
+        scenario_classifier,
+        scenario_spans,
+        scenario_grant_binding,
+        scenario_attenuation,
+        scenario_grant_integrity,
+        scenario_release_before_emit,
+        scenario_overrun_debit,
+        scenario_sink_classification,
+        scenario_all_effects_recorded,
+        scenario_intent_precedes_dispatch,
+    ),
     "constant-classifier": (scenario_classifier,),
     "span-reset": (scenario_spans,),
     "unbound-grant": (scenario_grant_binding,),
+    "widening-attenuation": (scenario_attenuation,),
+    "permissive-grant": (scenario_grant_integrity,),
+    "leaked-lease": (scenario_release_before_emit,),
+    "clamped-overrun": (scenario_overrun_debit,),
+    "permissive-sink": (scenario_sink_classification,),
+    "unrecorded-effect": (scenario_all_effects_recorded,),
+    "late-intent": (scenario_intent_precedes_dispatch,),
 }
 
 

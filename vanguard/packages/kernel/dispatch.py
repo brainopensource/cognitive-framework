@@ -57,7 +57,7 @@ from .model import (
     SinkClass,
 )
 from .policy import Decision, Outcome
-from .ports import Clock, EffectAdapter, EventSink, Ledger
+from ..ports.kernel import Clock, EffectAdapter, EventSink, Ledger
 
 __all__ = ["DispatchResult", "Kernel", "SuspensionToken"]
 

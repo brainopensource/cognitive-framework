@@ -22,6 +22,7 @@ ALLOWED = {
     "adapters": {"domain", "ports"},
     "runtime": {"domain", "ports", "kernel", "agency", "adapters"},
     "governance": {"domain", "ports", "kernel"},
+    "client": {"domain", "runtime"},
 }
 
 JS_IMPORT = re.compile(
@@ -31,7 +32,13 @@ JS_IMPORT = re.compile(
 
 
 def source_files(root: Path) -> list[Path]:
-    starts = [root / "vanguard" / "packages", root / "spike", root / "slice", root / "lab"]
+    starts = [
+        root / "vanguard" / "packages",
+        root / "vanguard" / "clients",
+        root / "spike",
+        root / "slice",
+        root / "lab",
+    ]
     files: list[Path] = []
     for start in starts:
         if not start.exists():
@@ -56,6 +63,8 @@ def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
             return "adapters", family
         if package in PACKAGE_NAMES:
             return package, None
+    if len(parts) >= 3 and parts[:2] == ("vanguard", "clients"):
+        return "client", parts[2]
     return None, None
 
 
@@ -150,6 +159,14 @@ def find_cycles(graph: dict[Path, set[Path]]) -> list[list[Path]]:
 
 def check(root: Path, s4_exit: bool) -> list[str]:
     errors: list[str] = []
+    packages_root = root / "vanguard" / "packages"
+    if packages_root.is_dir():
+        for child in sorted(packages_root.iterdir()):
+            if child.is_dir() and child.name not in PACKAGE_NAMES and child.name not in IGNORED_PARTS:
+                errors.append(
+                    f"unknown core package {child.name!r}; ICD permits exactly: "
+                    + ", ".join(sorted(PACKAGE_NAMES))
+                )
     files = source_files(root)
     graph: dict[Path, set[Path]] = defaultdict(set)
     for source in files:

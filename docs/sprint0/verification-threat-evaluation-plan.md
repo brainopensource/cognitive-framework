@@ -36,6 +36,15 @@ Each test runs once against a correct/reference implementation and once against 
 | `MF-S0-006` | one adapter family imports another | adapter coupling failure | Senior Developer | broken-harness receipt |
 | `MF-S0-007` | `lab/` imports even an external library | laboratory isolation failure | Senior Developer | broken-harness receipt |
 | `MF-S0-008` | Python `ports` imports `agency` | language-independent boundary failure | Senior Developer | broken-harness receipt |
+| `MF-S0-009` | unrecognised directory is added under `vanguard/packages/` | exact-six-package boundary failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-004` | attenuation permits widening or silently intersects an over-broad request | attenuation monotonicity failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-005` | forged or otherwise invalid grant verifies | grant integrity failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-006` | outcome emits while its lease remains open | release-before-emit ordering failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-007` | an overrun refund is clamped at zero | budget conservation failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-008` | privileged sink is registered as `pure` | sink-class mediation failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-009` | a pure/observation effect completes without durable intent | complete-recording failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-010` | an effect executes before intent is durable | pre-dispatch intent ordering failure | Senior Developer | broken-harness receipt |
+| `MF-KRN-011` | kernel source grows beyond its reviewed margin without a new baseline | TCB growth alarm | Senior Developer | metric receipt + broken-harness receipt |
 | `MF-KRN-001` | widening classifier is constant | second scenario contradicts expected classification | Kernel test owner | property counterexample |
 | `MF-KRN-002` | justifying spans reset between turns | untrusted-result branch becomes unreachable | Kernel test owner | adversarial trace |
 | `MF-KRN-003` | grant omits/bypasses descriptor binding | parse or point-of-effect mismatch rejection | Kernel test owner | rejection event |
@@ -57,7 +66,7 @@ Each test runs once against a correct/reference implementation and once against 
 | `MF-REL-002` | rollback was not tested before promotion | promotion gate accepts candidate | Release test owner | gate rejection |
 | `MF-S4-001` | `spike/` or `slice/` remains at S4 exit | deletion gate passes | Senior Developer | absence-check receipt |
 
-Sprint 0 implements `MF-S0-001..008`; later rows are planned acceptance standards, not claims of passing controls.
+Sprint 0 implements `MF-S0-001..009`; later rows are planned acceptance standards, not claims of passing controls.
 
 ## 4. Adversarial suite
 

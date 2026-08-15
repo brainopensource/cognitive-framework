@@ -15,8 +15,8 @@ import datetime
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from ..domain.ledger.events import EventEnvelope, parse_event_envelope
-from ..ports.event_store import EventRange, EventStorePort
+from ...domain.ledger.events import EventEnvelope, parse_event_envelope
+from ...ports.event_store import EventRange, EventStorePort
 
 __all__ = [
     "RecoveryScanner",

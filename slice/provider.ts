@@ -2,14 +2,14 @@
  * Disposable provider adapter for T0b only. It is intentionally not reusable
  * production code and must be deleted at the S4 exit gate.
  */
-import type { ContextBundle, ModelProposal, ModelProvider, PortFailure, Result, Sampling, ToolSchema } from "../vanguard/packages/ports/contracts.ts";
+import type { ContextBundle, ModelProposal, PortFailure, Result, Sampling, SliceModelProvider, ToolSchema } from "./contracts.ts";
 
 type FetchResponse = { readonly ok: boolean; readonly status: number; json(): Promise<unknown> };
 type Fetch = (input: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<FetchResponse>;
 
 const problem = (kind: PortFailure["kind"], message: string, retryable = false): Result<never> => ({ ok: false, error: { kind, message, retryable } });
 
-export class OpenAiCompatibleSliceProvider implements ModelProvider {
+export class OpenAiCompatibleSliceProvider implements SliceModelProvider {
   private readonly config: { endpoint: string; apiKey: string; model: string };
   private readonly request: Fetch;
   constructor(config: { endpoint: string; apiKey: string; model: string }, request: Fetch) {

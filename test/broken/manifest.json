@@ -130,6 +130,22 @@
       "expected_failure": "forbidden ports -> agency import"
     },
     {
+      "test_id": "MF-S0-009",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/unknown_package"
+      ],
+      "expected_failure": "unknown core package 'ledger'"
+    },
+    {
       "test_id": "MF-KRN-001",
       "control": [
         "python3",
@@ -176,6 +192,61 @@
         "unbound-grant"
       ],
       "expected_failure": "grant omits or bypasses descriptor binding"
+    },
+    {
+      "test_id": "MF-KRN-004",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "widening-attenuation"],
+      "expected_failure": "attenuation permits or silently intersects widening"
+    },
+    {
+      "test_id": "MF-KRN-005",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "permissive-grant"],
+      "expected_failure": "forged grant accepted"
+    },
+    {
+      "test_id": "MF-KRN-006",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "leaked-lease"],
+      "expected_failure": "event emitted before lease release"
+    },
+    {
+      "test_id": "MF-KRN-007",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "clamped-overrun"],
+      "expected_failure": "budget overrun was clamped instead of debited"
+    },
+    {
+      "test_id": "MF-KRN-008",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "permissive-sink"],
+      "expected_failure": "privileged sink accepted as pure"
+    },
+    {
+      "test_id": "MF-KRN-009",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "unrecorded-effect"],
+      "expected_failure": "effect completed without durable intent"
+    },
+    {
+      "test_id": "MF-KRN-010",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "late-intent"],
+      "expected_failure": "effect dispatched before durable intent"
+    },
+    {
+      "test_id": "MF-KRN-011",
+      "control": ["python3", "tools/check_tcb_budget.py"],
+      "broken": [
+        "python3",
+        "tools/check_tcb_budget.py",
+        "--root",
+        "test/broken/fixtures/tcb_growth",
+        "--budget",
+        "budget.json"
+      ],
+      "expected_failure": "TCB ALARM"
     }
   ]
 }

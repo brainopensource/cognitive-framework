@@ -15,9 +15,9 @@ import json
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Sequence, TextIO, Union
 
-from ..domain.canonicalisation.digest import digest_of
-from ..domain.canonicalisation.jcs import canonicalise
-from ..ports.event_store import PortFailure, Result
+from ...domain.canonicalisation.digest import digest_of
+from ...domain.canonicalisation.jcs import canonicalise
+from ...ports.event_store import PortFailure, Result
 
 __all__ = [
     "CassetteRecord",

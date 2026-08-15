@@ -9,7 +9,7 @@ Authority: implementation-level client interface under the approved ICD; this do
 
 T6.4 frontend work may proceed before the engine is complete. It must remain a client of the runtime and may not become a seventh core package, a second event model, a policy authority, or a substitute process engine.
 
-The permanent location is `vanguard/clients/cli/`, outside `vanguard/packages/`. The six directories under `vanguard/packages/` remain the complete core package set. The existing `vanguard/packages/cli/` scaffold is a prototype location and must be relocated before its next implementation merge. Relocation changes no core boundary and requires no new ADR because it restores conformance with the approved ICD.
+The permanent location is `vanguard/clients/cli/`, outside `vanguard/packages/`. The six directories under `vanguard/packages/` remain the complete core package set. The scaffold has been relocated to that client boundary. This changes no core boundary and requires no new ADR because it restores conformance with the approved ICD.
 
 The frontend architecture is hexagonal:
 
@@ -160,7 +160,7 @@ Do not create a generic component framework. Extract a reusable component after 
 
 Follow this order:
 
-1. **Boundary correction:** move the prototype to `vanguard/clients/cli`, update workspace paths and extend boundary CI so clients may import only domain/public runtime-client surfaces.
+1. **Boundary correction (complete):** the prototype is under `vanguard/clients/cli`; workspace paths and boundary CI restrict clients to domain/public runtime-client surfaces.
 2. **Contract package:** implement v0.1 client types, parsing boundary, typed failures and adapter contract suite. Replace the prototype's custom `RuntimeEvent` with canonical-envelope fixtures plus local view categories.
 3. **Reducer and selectors:** implement deterministic run, trace and explanation view models; test replay, duplicates, unknown events and large streams.
 4. **Headless first:** implement stable JSONL, exit codes, signal handling, no-color behavior and golden CLI tests. This is the S3-S5 integration probe.

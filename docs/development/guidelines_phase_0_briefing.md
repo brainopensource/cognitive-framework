@@ -33,15 +33,15 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 | Status | Task ID | Task Description | Output / Artifact | Complexity (0–5) | Track | Primary Owner | Review / Sign-off Gate |
 | :---: | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **B-01** | **Register GTS-13C & Archive Superseded** | Update registry; archive `GTS-13` / `13B` | **0** | 🟢 FAST | PM / Scrum | Git history/archive cannot yet be verified |
+| **DONE** | **B-01** | **Register GTS-13C & Archive Superseded** | GTS-13C is the active plan (ADR-0046) | **0** | 🟢 FAST | PM / Scrum | 13/13B remain lead-only |
 | **DONE** | **B-02** | **Create Decision Record** | ADR-0045..0053 plus approval events and reversal conditions | **5** | 🔴 GATE | Tech Lead + Project Lead | Joint approval recorded |
 | **DONE** | **B-03** | **System Architecture & ICD** | Package isolation, sink classification and port signatures | **4** | 🔴 GATE | Tech Lead + Sr Dev | Approved |
 | **DONE** | **B-04** | **Active MVP Contract Matrix** | 22 assigned rows; Gate A/B scripts | **5** | 🔴 GATE | Tech Lead + Req Owners | 100% assignment; 100% merged scope |
 | **DONE** | **B-05** | **Verification, Threat & Eval Plan** | Threat model, must-fail catalogue and evaluation protocol | **3** | 🔴 GATE | Sr Dev | Approved for S0 scope |
 | **TODO** | **B-06** | **Automate CI & Traceability Gates** | Boundaries and PR-body `req_id` enforcement done; remaining margin reporting open | **2** | 🟢 FAST | Sr Dev + Dev | Complete margin reporting |
 | **TODO** | **B-07** | **Convert GTS-13C into Backlog** | Markdown backlog exists; issue-tracker import remains | **1** | 🟢 FAST | PM + Scrum | Create real tracker tickets |
-| **DONE** | **B-08** | **Assemble Clean Developer Packet** | Sprint 1 index, backlog and Dev 1–4 packets | **0** | 🟢 FAST | PM | Ready, conditional distribution |
-| **TODO** | **B-09** | **Phase 0 Baseline Review & Tag** | Annotated `v0.0.0-sprint0` tag exists; independent gaps and hosted branch protection remain | **5** | 🔴 GATE | Project Lead + Tech Lead | Full go/no-go still open |
+| **DONE** | **B-08** | **Assemble Clean Developer Packet** | Sprint 1–4 packets plus `docs/sprint3-4/lane-*.md` | **0** | 🟢 FAST | PM | S3–S4 lanes ready |
+| **TODO** | **B-09** | **Hosted branch protection** | Tag `v0.0.0-sprint0` is **DONE**; `main` protection unverified | **5** | 🔴 GATE | Project Lead + Tech Lead | Enable GitHub protection |
 
 ---
 

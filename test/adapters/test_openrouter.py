@@ -8,6 +8,7 @@ adapter (`REQ-TRUST-001`).
 from __future__ import annotations
 
 import ast
+import json
 import os
 import socket
 import unittest
@@ -15,7 +16,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 from vanguard.packages.adapters.models.cassette import Cassette
-from vanguard.packages.adapters.models.openrouter import OpenRouterModel
+from vanguard.packages.adapters.models.openrouter import (
+    OpenRouterModel,
+    OpenRouterModelAdapter,
+    calculate_cost,
+    estimate_context_tokens,
+    estimate_proposal_tokens,
+    estimate_tokens,
+)
 from vanguard.packages.ports.event_store import Result
 
 
@@ -77,6 +85,9 @@ class OpenRouterModelContract(unittest.TestCase):
             api_key_ref="OPENROUTER_API_KEY",
             transport=_status_transport(429, b'{"error":{"message":"rate limit"}}'),
             environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=1,
+            initial_delay=0.0,
+            jitter=False,
         )
         result = port.propose(CONTEXT, TOOLS, SAMPLING)
         self.assertFalse(result.ok)
@@ -102,6 +113,286 @@ class OpenRouterModelContract(unittest.TestCase):
     def test_trust_spine_sources_do_not_import_openrouter(self) -> None:
         self.assertEqual(_trust_openrouter_imports(), [])
 
+    def test_openrouter_model_adapter_alias(self) -> None:
+        self.assertIs(OpenRouterModelAdapter, OpenRouterModel)
+
+    def test_429_rate_limit_triggers_exponential_backoff_and_recovers(self) -> None:
+        calls = []
+        sleep_durations = []
+
+        def flaky_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            if len(calls) < 3:
+                return 429, b'{"error":{"message":"rate limited"}}'
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "recovered!"}}],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=flaky_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=3,
+            initial_delay=0.1,
+            jitter=False,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "recovered!")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(sleep_durations), 2)
+        self.assertAlmostEqual(sleep_durations[0], 0.1)
+        self.assertAlmostEqual(sleep_durations[1], 0.2)
+
+    def test_503_service_unavailable_triggers_backoff_and_recovers(self) -> None:
+        calls = []
+        sleep_durations = []
+
+        def overloaded_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(1)
+            if len(calls) == 1:
+                return 503, b'{"error":{"message":"Service Unavailable"}}'
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "service restored"}}],
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=overloaded_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=2,
+            initial_delay=0.05,
+            jitter=False,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "service restored")
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(sleep_durations), 1)
+        self.assertAlmostEqual(sleep_durations[0], 0.05)
+
+    def test_429_retry_after_header_is_respected(self) -> None:
+        sleep_durations = []
+        calls = 0
+
+        def retry_after_transport(url: str, headers: dict[str, str], body: bytes):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return 429, {"Retry-After": "1.5"}, b'{"error":{"message":"slow down"}}'
+            return 200, {}, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "ok"}}],
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=retry_after_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=2,
+            initial_delay=0.01,
+            jitter=False,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(len(sleep_durations), 1)
+        self.assertAlmostEqual(sleep_durations[0], 1.5)
+
+    def test_max_retries_exhaustion_returns_instrument_error(self) -> None:
+        calls = 0
+        sleep_durations = []
+
+        def failing_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            nonlocal calls
+            calls += 1
+            return 429, b'{"error":{"message":"still rate limited"}}'
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=failing_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=2,
+            initial_delay=0.01,
+            jitter=False,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertTrue(result.error.retryable)
+        self.assertEqual(calls, 3)  # 1 initial + 2 retries
+        self.assertEqual(len(sleep_durations), 2)
+        self.assertNotIn(SECRET, result.error.message)
+
+    def test_auth_failure_401_fails_fast_without_retries(self) -> None:
+        calls = 0
+        sleep_durations = []
+
+        def unauth_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            nonlocal calls
+            calls += 1
+            return 401, b'{"error":{"message":"invalid api key"}}'
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=unauth_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=3,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertFalse(result.error.retryable)
+        self.assertEqual(calls, 1)
+        self.assertEqual(len(sleep_durations), 0)
+
+    def test_transient_network_exception_retries_and_recovers(self) -> None:
+        calls = 0
+        sleep_durations = []
+
+        def flaky_net_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise urllib.error.URLError("Connection reset by peer")
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "connection succeeded"}}],
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=flaky_net_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            max_retries=2,
+            initial_delay=0.01,
+            jitter=False,
+            sleeper=sleep_durations.append,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "connection succeeded")
+        self.assertEqual(calls, 2)
+        self.assertEqual(len(sleep_durations), 1)
+
+    def test_cassette_recording_preserves_usage_and_cost(self) -> None:
+        cassette = Cassette()
+        payload = json.dumps({
+            "choices": [{"message": {"role": "assistant", "content": "Recorded response"}}],
+            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+        }).encode("utf-8")
+
+        port = OpenRouterModel(
+            cassette=cassette,
+            mode="record",
+            transport=_status_transport(200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(len(cassette.records), 1)
+        record = cassette.records[0]
+        self.assertEqual(record.proposal["text"], "Recorded response")
+        self.assertIn("usage", record.proposal)
+        self.assertEqual(record.proposal["usage"]["prompt_tokens"], 100)
+        self.assertEqual(record.proposal["usage"]["completion_tokens"], 50)
+        self.assertIn("cost_usd", record.proposal)
+
+    def test_priced_accounting_with_provider_usage_and_caching(self) -> None:
+        payload = json.dumps({
+            "choices": [{"message": {"role": "assistant", "content": "I calculated the gradient."}}],
+            "usage": {
+                "prompt_tokens": 1000,
+                "completion_tokens": 200,
+                "total_tokens": 1200,
+                "prompt_tokens_details": {"cached_tokens": 400},
+            },
+        }).encode("utf-8")
+
+        port = OpenRouterModel(
+            model="openai/gpt-4o-mini",
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertIn("usage", result.value)
+        usage = result.value["usage"]
+        self.assertEqual(usage["prompt_tokens"], 1000)
+        self.assertEqual(usage["completion_tokens"], 200)
+        self.assertEqual(usage["cached_tokens"], 400)
+        self.assertEqual(usage["total_tokens"], 1200)
+
+        # Cost check:
+        # gpt-4o-mini pricing: prompt $0.15/1M, completion $0.60/1M, cached $0.075/1M
+        # uncached prompt = 600 * 0.15 / 1M = $0.000090
+        # cached prompt = 400 * 0.075 / 1M = $0.000030
+        # completion = 200 * 0.60 / 1M = $0.000120
+        # total = $0.000240
+        expected_cost = 0.00024
+        self.assertAlmostEqual(usage["cost_usd"], expected_cost, places=6)
+        self.assertAlmostEqual(result.value["cost_usd"], expected_cost, places=6)
+
+    def test_fallback_token_estimation_when_provider_omits_usage(self) -> None:
+        payload = json.dumps({
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "Hello, here is a detailed response without usage.",
+                    "tool_calls": [{
+                        "id": "call_1",
+                        "type": "function",
+                        "function": {"name": "read", "arguments": "{\"path\":\"foo.py\"}"},
+                    }],
+                }
+            }],
+        }).encode("utf-8")
+
+        port = OpenRouterModel(
+            model="openai/gpt-4o-mini",
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertIn("usage", result.value)
+        usage = result.value["usage"]
+        self.assertGreater(usage["prompt_tokens"], 0)
+        self.assertGreater(usage["completion_tokens"], 0)
+        self.assertEqual(usage["cached_tokens"], 0)
+        self.assertEqual(usage["total_tokens"], usage["prompt_tokens"] + usage["completion_tokens"])
+        self.assertGreater(usage["cost_usd"], 0.0)
+
+    def test_custom_pricing_table(self) -> None:
+        custom_pricing = {
+            "custom/fast-model": (1.0, 2.0, 0.5),  # $1/1M prompt, $2/1M completion, $0.5/1M cached
+        }
+        cost = calculate_cost(
+            "custom/fast-model",
+            prompt_tokens=1000,
+            completion_tokens=500,
+            cached_tokens=200,
+            pricing_table=custom_pricing,
+        )
+        # uncached prompt = 800 * 1.0 / 1M = 0.0008
+        # cached prompt = 200 * 0.5 / 1M = 0.0001
+        # completion = 500 * 2.0 / 1M = 0.0010
+        # total = 0.0019
+        self.assertAlmostEqual(cost, 0.0019, places=6)
+
+    def test_token_estimation_helpers(self) -> None:
+        self.assertEqual(estimate_tokens(""), 0)
+        self.assertGreater(estimate_tokens("hello world"), 0)
+        ctx_tokens = estimate_context_tokens(CONTEXT, TOOLS)
+        self.assertGreater(ctx_tokens, 0)
+        prop_tokens = estimate_proposal_tokens({"text": "done", "toolCalls": []})
+        self.assertGreater(prop_tokens, 0)
+
     @unittest.skipUnless(
         os.environ.get("OPENROUTER_API_KEY"),
         "live OpenRouter skipped: key unset",
@@ -112,6 +403,9 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertTrue(
             result.ok or (result.error is not None and result.error.kind == "instrument_error")
         )
+        if result.ok:
+            self.assertIn("usage", result.value)
+            self.assertIn("cost_usd", result.value)
         if result.error is not None:
             self.assertNotIn(os.environ["OPENROUTER_API_KEY"], result.error.message)
 

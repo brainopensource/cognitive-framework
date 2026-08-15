@@ -1,0 +1,1 @@
+Act on the repository task using typed tools (read, search, patch, test). Preview effects before apply and verify tests pass.

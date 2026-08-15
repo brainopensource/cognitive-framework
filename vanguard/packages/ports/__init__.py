@@ -26,6 +26,15 @@ from .model import (
     ToolSchemas,
 )
 
+from .sandbox import (
+    ContainmentReport,
+    ProbeResult,
+    SandboxReceipt,
+    SandboxResult,
+    SandboxRunner,
+    publication_decision,
+)
+
 __all__ = [
     "EventRange",
     "EventStorePort",
@@ -44,4 +53,10 @@ __all__ = [
     "EvaluatorPort",
     "RunRef",
     "Verdict",
+    "ContainmentReport",
+    "ProbeResult",
+    "SandboxReceipt",
+    "SandboxResult",
+    "SandboxRunner",
+    "publication_decision",
 ]

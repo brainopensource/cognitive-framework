@@ -1,6 +1,6 @@
 # System Architecture & Interface Control Document — Sprint 0 baseline
 
-Status: `DRAFT — Tech Lead approval required`  
+Status: `APPROVED — Sprint 0 baseline; APPROVAL-0002`  
 Owners: Tech Lead (primary); Senior Developer (ports, testability and conformance)  
 Authority: below Vanguard v4 contracts and the Decision Record; above GTS-13C and the issue tracker  
 Baseline date: 2026-08-14

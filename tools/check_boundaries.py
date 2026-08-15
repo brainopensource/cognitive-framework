@@ -169,6 +169,13 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 target_area, target_family = area_for(resolved, root)
             else:
                 target_area, target_family = area_from_spec(spec)
+            lowered_spec = spec.lower().replace("_", "-")
+            if source_area == "governance" and "model" in lowered_spec:
+                errors.append(f"{source.relative_to(root)}:{line}: governance may not depend on model APIs ({spec!r})")
+                continue
+            if source_area in {"agency", "governance"} and "evaluator" in lowered_spec:
+                errors.append(f"{source.relative_to(root)}:{line}: {source_area} may not depend on evaluator APIs ({spec!r})")
+                continue
             if not target_area or target_area == source_area:
                 if source_area == "adapters" and target_area == "adapters" and source_family and target_family and source_family != target_family:
                     errors.append(f"{source.relative_to(root)}:{line}: adapter family {source_family!r} imports sibling {target_family!r}")

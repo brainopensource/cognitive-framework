@@ -26,14 +26,14 @@ jobs:
       - name: T11 — governance artifacts and safeguards
         run: python3 tools/check_sprint0_governance.py
 
-      - name: T11.3 — Active MVP Contract assignment and evidence gates
-        run: python3 tools/check_active_mvp_contract.py
+      - name: T0 — trace structure and field-inventory evidence
+        run: python3 tools/check_schema_archaeology.py
 
-      - name: T10.1 — dependency and disposable boundaries
-        run: python3 tools/check_boundaries.py
+      - name: S0 baseline — local integrity manifest
+        run: python3 tools/check_baseline_manifest.py
 
-      - name: T10.3 — every broken counterpart must be observed failing
-        run: python3 tools/run_broken_tests.py
+      - name: T10/T11 — execute every Active MVP Contract test
+        run: python3 tools/run_active_contract_tests.py
 
   docs-gates:
     name: CI-1..CI-8 — document integrity

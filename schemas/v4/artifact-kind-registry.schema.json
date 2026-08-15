@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/artifact-kind-registry.schema.json",
+  "$comment": "GTS-13C T7.1. Kinds extend by adding schema-addressed rows, never by changing a core enum.",
+  "title": "ArtifactKindRegistry",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["kind", "schema"],
+    "properties": {
+      "kind": { "type": "string", "minLength": 1 },
+      "schema": { "type": "string", "minLength": 1 }
+    },
+    "additionalProperties": false
+  },
+  "minItems": 1
+}

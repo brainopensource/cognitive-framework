@@ -47,6 +47,9 @@
     "EpisodeId": {
       "$ref": "#/$defs/Identifier"
     },
+    "ProcessId": {
+      "$ref": "#/$defs/Identifier"
+    },
     "BranchId": {
       "type": "integer",
       "minimum": 0

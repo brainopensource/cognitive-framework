@@ -36,6 +36,7 @@ export type BranchId = Branded<"BranchId", number>;
 export type Uuidv7 = Branded<"Uuidv7", string>;
 export type PrincipalId = Branded<"PrincipalId", string>;
 export type EpisodeId = Branded<"EpisodeId", string>;
+export type ProcessId = Branded<"ProcessId", string>;
 export type RunId = Branded<"RunId", string>;
 export type GrantId = Branded<"GrantId", string>;
 
@@ -139,7 +140,7 @@ function integerChecker(minimum: number): Checker {
 const IDENTIFIER = stringChecker({ minLength: 1, maxLength: 128 });
 
 const ID_KINDS = [
-  "RunId", "EpisodeId", "TaskId", "ArtifactId", "ClaimId", "GrantId",
+  "RunId", "EpisodeId", "ProcessId", "TaskId", "ArtifactId", "ClaimId", "GrantId",
   "LeaseId", "ApprovalId", "CandidateId", "PrincipalId", "TenantId",
   "OwnerId", "EvaluatorId", "ToolCallId", "Identifier",
 ] as const;

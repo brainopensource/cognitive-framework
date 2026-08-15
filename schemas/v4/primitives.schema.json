@@ -30,6 +30,7 @@
     "Identifier": { "type": "string", "minLength": 1, "maxLength": 128 },
     "RunId": { "$ref": "#/$defs/Identifier" },
     "EpisodeId": { "$ref": "#/$defs/Identifier" },
+    "ProcessId": { "$ref": "#/$defs/Identifier" },
     "BranchId": { "type": "integer", "minimum": 0 },
     "TaskId": { "$ref": "#/$defs/Identifier" },
     "ArtifactId": { "$ref": "#/$defs/Identifier" },

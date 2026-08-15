@@ -8,6 +8,29 @@ from .canonicalisation.jcs import (
     canonicalise_text,
     parse_json_text,
 )
+from .ledger import (
+    EVENT_KINDS,
+    VALID_CONFIDENTIALITIES,
+    VALID_REDACTION_STATUSES,
+    VALID_RETENTIONS,
+    VALID_SCOPES,
+    VALID_TRAINABILITIES,
+    ApprovalRecord,
+    ArtifactRecord,
+    BudgetLeaseState,
+    EffectRecord,
+    EpisodeState,
+    EventEnvelope,
+    EvidenceRecord,
+    LedgerState,
+    ReducerError,
+    compute_state_digest,
+    initial_state,
+    parse_event_envelope,
+    reconstruct_state,
+    reduce_batch,
+    reduce_event,
+)
 from .primitives.primitives import PRIMITIVE_KINDS, ParseError, Primitive, parse, unparse
 from .selectors.resource_selector import (
     SELECTOR_KINDS,
@@ -18,6 +41,12 @@ from .selectors.resource_selector import (
     includes,
     parse_selector,
 )
+from .wire import WIRE_KINDS, WireError, parse_wire
+from .artifacts import (
+    BUILTIN_KINDS, ArtifactFile, ArtifactGraph, ArtifactKind, CapabilityRequirement,
+    FrozenHarness, GraphError, HarnessManifest, KindRegistry, LogicalEdit,
+    ManifestError, ManifestRegistry, RegisteredManifest, Workspace, compose, parse_manifest,
+)
 
 __all__ = [
     "CanonicalisationError", "canonicalise", "canonicalise_text", "canonical_bytes",
@@ -25,4 +54,16 @@ __all__ = [
     "PRIMITIVE_KINDS", "ParseError", "Primitive", "parse", "unparse",
     "SELECTOR_KINDS", "Decision", "SelectorError", "canonicalise_selector",
     "decide", "includes", "parse_selector",
+    "EventEnvelope", "EVENT_KINDS", "VALID_SCOPES", "VALID_CONFIDENTIALITIES",
+    "VALID_RETENTIONS", "VALID_TRAINABILITIES", "VALID_REDACTION_STATUSES",
+    "parse_event_envelope", "LedgerState", "EpisodeState", "BudgetLeaseState",
+    "EffectRecord", "ArtifactRecord", "EvidenceRecord", "ApprovalRecord",
+    "ReducerError", "initial_state", "reduce_event", "reduce_batch",
+    "reconstruct_state", "compute_state_digest",
+    "WIRE_KINDS", "WireError", "parse_wire",
+    "BUILTIN_KINDS", "ArtifactFile", "ArtifactGraph", "ArtifactKind",
+    "CapabilityRequirement", "FrozenHarness", "GraphError", "HarnessManifest",
+    "KindRegistry", "LogicalEdit", "ManifestError", "ManifestRegistry",
+    "RegisteredManifest", "Workspace", "compose",
+    "parse_manifest",
 ]

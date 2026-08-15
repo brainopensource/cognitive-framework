@@ -2,7 +2,9 @@
   "name": "@vanguard/workspace",
   "private": true,
   "workspaces": [
-    "vanguard/packages/*"
+    "vanguard/packages/*",
+    "vanguard/clients/*",
+    "slice"
   ],
   "scripts": {
     "vg": "npm --workspace @vanguard/cli run vg --",

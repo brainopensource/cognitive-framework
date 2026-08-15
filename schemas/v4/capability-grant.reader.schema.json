@@ -5,54 +5,44 @@
   "title": "CapabilityGrant",
   "type": "object",
   "required": [
-    "id",
+    "grantId",
     "principal",
     "descriptorDigest",
     "actions",
-    "resources",
+    "selector",
     "constraints",
+    "expiry",
+    "maxUses",
     "purposeDigest"
   ],
   "properties": {
-    "id": {
+    "grantId": {
       "$ref": "primitives.reader.schema.json#/$defs/GrantId"
     },
     "principal": {
       "$ref": "primitives.reader.schema.json#/$defs/PrincipalId"
     },
     "descriptorDigest": {
-      "$ref": "primitives.reader.schema.json#/$defs/Digest",
-      "$comment": "CT-51: the exact normalised call this grant authorises. NOT purposeDigest. Verified at 05 \u00a72.1 S8."
+      "$ref": "primitives.reader.schema.json#/$defs/Digest"
     },
     "actions": {
       "type": "array",
       "items": {
-        "type": "string"
-      },
-      "minItems": 1
-    },
-    "resources": {
-      "type": "array",
-      "items": {
-        "$ref": "resource-selector.reader.schema.json"
+        "type": "string",
+        "minLength": 1
       },
       "minItems": 1,
-      "$comment": "CT-24: a grant without a resource scope is a verb lattice, which is the defect this type exists to remove."
+      "uniqueItems": true
+    },
+    "selector": {
+      "$ref": "resource-selector.reader.schema.json"
     },
     "constraints": {
       "type": "object",
       "required": [
-        "expiresAt",
-        "maxUses",
         "budgetLeaseId"
       ],
       "properties": {
-        "expiresAt": {
-          "$ref": "primitives.reader.schema.json#/$defs/Timestamp"
-        },
-        "maxUses": {
-          "$ref": "primitives.reader.schema.json#/$defs/IntString"
-        },
         "maxBytes": {
           "$ref": "primitives.reader.schema.json#/$defs/IntString"
         },
@@ -80,9 +70,14 @@
       },
       "additionalProperties": true
     },
+    "expiry": {
+      "$ref": "primitives.reader.schema.json#/$defs/Timestamp"
+    },
+    "maxUses": {
+      "$ref": "primitives.reader.schema.json#/$defs/IntString"
+    },
     "purposeDigest": {
-      "$ref": "primitives.reader.schema.json#/$defs/Digest",
-      "$comment": "04 \u00a73.3: intent binding. The effect binds to brief, purpose and approval rather than to inferred causality."
+      "$ref": "primitives.reader.schema.json#/$defs/Digest"
     },
     "parentGrantId": {
       "$ref": "primitives.reader.schema.json#/$defs/GrantId"
@@ -92,7 +87,7 @@
     },
     "authenticator": {
       "type": "string",
-      "$comment": "CT-26: required when the grant crosses a process boundary."
+      "minLength": 1
     }
   },
   "additionalProperties": true

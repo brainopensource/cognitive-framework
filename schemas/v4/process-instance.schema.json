@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/process-instance.schema.json",
+  "$comment": "Owning section: GTS-13C T1.12; ADR-0050. Runtime state is reconstructable from ledger history.",
+  "title": "ProcessInstance",
+  "type": "object",
+  "required": ["processId", "definitionDigest", "currentState", "allowedTransitions", "pendingApprovals", "boundEffectVerbs", "history"],
+  "properties": {
+    "processId": { "$ref": "primitives.schema.json#/$defs/ProcessId" },
+    "definitionDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "currentState": { "type": "string", "minLength": 1 },
+    "allowedTransitions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "pendingApprovals": { "type": "array", "uniqueItems": true, "items": { "$ref": "primitives.schema.json#/$defs/ApprovalId" } },
+    "boundEffectVerbs": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "eventKind", "to", "eventId"],
+        "properties": {
+          "from": { "type": "string", "minLength": 1 },
+          "eventKind": { "type": "string", "minLength": 1 },
+          "to": { "type": "string", "minLength": 1 },
+          "eventId": { "$ref": "primitives.schema.json#/$defs/Uuidv7" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

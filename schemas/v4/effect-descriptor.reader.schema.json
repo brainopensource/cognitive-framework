@@ -5,22 +5,39 @@
   "title": "EffectDescriptor",
   "type": "object",
   "required": [
-    "name",
+    "verb",
+    "sinkClass",
+    "selector",
     "args",
-    "digest"
+    "argsDigest",
+    "idempotencyKey",
+    "riskTier",
+    "provenance"
   ],
   "properties": {
-    "name": {
+    "verb": {
       "type": "string",
       "minLength": 1
     },
-    "args": {
-      "type": "object",
-      "$comment": "D-1 sorted keys, D-2 normalised paths, D-3 provider call id EXCLUDED, D-4 strings untouched, D-5 absent optionals omitted, D-6 shortest round-trip numbers. None of these is expressible in JSON Schema; conformance is by golden vector."
+    "sinkClass": {
+      "enum": [
+        "pure",
+        "observation",
+        "privileged"
+      ]
     },
-    "digest": {
-      "$ref": "primitives.reader.schema.json#/$defs/Digest",
-      "$comment": "sha256 over the RFC 8785 canonical form of {name, args}."
+    "selector": {
+      "$ref": "resource-selector.reader.schema.json"
+    },
+    "args": {
+      "type": "object"
+    },
+    "argsDigest": {
+      "$ref": "primitives.reader.schema.json#/$defs/Digest"
+    },
+    "workingDirectory": {
+      "type": "string",
+      "minLength": 1
     },
     "readSet": {
       "type": "array",
@@ -33,6 +50,16 @@
       "items": {
         "$ref": "resource-selector.reader.schema.json"
       }
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "riskTier": {
+      "$ref": "primitives.reader.schema.json#/$defs/RiskTier"
+    },
+    "provenance": {
+      "$ref": "primitives.reader.schema.json#/$defs/ProvenanceAxes"
     }
   },
   "additionalProperties": true

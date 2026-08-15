@@ -1,0 +1,1 @@
+{"artifactId":"artifact-1","class":"enforcement","hypothesis":"reduces regressions","evidenceRefs":[],"invalidationConditions":[{"condition":"suite fails","checkKind":"automatic","checkRef":"eval-suite"}],"riskDelta":-1,"contentDigest":"sha256:1111111111111111111111111111111111111111111111111111111111111111"}

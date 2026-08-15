@@ -27,6 +27,8 @@ const {
   parseSelector,
   decide,
   SELECTOR_KINDS,
+  parseWire,
+  WIRE_KINDS,
 } = await import(domain);
 
 const request = JSON.parse(readFileSync(0, "utf8"));
@@ -69,6 +71,13 @@ if (request.selectorParse) {
 
 if (request.selectorDecide) {
   response.selectorDecide = request.selectorDecide.map(([parent, child]) => decide(parent, child));
+}
+
+if (request.wire) {
+  response.wire = request.wire.map(({ kind, value }) =>
+    attempt(() => ({ value: parseWire(kind, value) })),
+  );
+  response.wireKinds = WIRE_KINDS;
 }
 
 process.stdout.write(JSON.stringify(response));

@@ -3,52 +3,250 @@
   "cases": [
     {
       "test_id": "MF-S0-001",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/forbidden_direction"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/forbidden_direction"
+      ],
       "expected_failure": "forbidden ports -> agency import"
     },
     {
       "test_id": "MF-S0-002",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/disposable_import"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/disposable_import"
+      ],
       "expected_failure": "imports disposable spike/"
     },
     {
       "test_id": "MF-S0-003",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/cycle"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/cycle"
+      ],
       "expected_failure": "source import cycle"
     },
     {
       "test_id": "MF-S0-004",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/governance_model"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/governance_model"
+      ],
       "expected_failure": "governance may not depend on model APIs"
     },
     {
       "test_id": "MF-S0-005",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/agency_evaluator"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/agency_evaluator"
+      ],
       "expected_failure": "agency may not depend on evaluator APIs"
     },
     {
       "test_id": "MF-S0-006",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/adapter_sibling"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/adapter_sibling"
+      ],
       "expected_failure": "imports sibling"
     },
     {
       "test_id": "MF-S0-007",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/lab_import"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/lab_import"
+      ],
       "expected_failure": "lab/ must import nothing"
     },
     {
       "test_id": "MF-S0-008",
-      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
-      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/python_direction"],
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/python_direction"
+      ],
       "expected_failure": "forbidden ports -> agency import"
+    },
+    {
+      "test_id": "MF-S0-009",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/unknown_package"
+      ],
+      "expected_failure": "unknown core package 'ledger'"
+    },
+    {
+      "test_id": "MF-KRN-001",
+      "control": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "constant-classifier"
+      ],
+      "expected_failure": "widening classifier is constant"
+    },
+    {
+      "test_id": "MF-KRN-002",
+      "control": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "span-reset"
+      ],
+      "expected_failure": "justifying spans reset between turns"
+    },
+    {
+      "test_id": "MF-KRN-003",
+      "control": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/kernel/scenario.py",
+        "--variant",
+        "unbound-grant"
+      ],
+      "expected_failure": "grant omits or bypasses descriptor binding"
+    },
+    {
+      "test_id": "MF-KRN-004",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "widening-attenuation"],
+      "expected_failure": "attenuation permits or silently intersects widening"
+    },
+    {
+      "test_id": "MF-KRN-005",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "permissive-grant"],
+      "expected_failure": "forged grant accepted"
+    },
+    {
+      "test_id": "MF-KRN-006",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "leaked-lease"],
+      "expected_failure": "event emitted before lease release"
+    },
+    {
+      "test_id": "MF-KRN-007",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "clamped-overrun"],
+      "expected_failure": "budget overrun was clamped instead of debited"
+    },
+    {
+      "test_id": "MF-KRN-008",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "permissive-sink"],
+      "expected_failure": "privileged sink accepted as pure"
+    },
+    {
+      "test_id": "MF-KRN-009",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "unrecorded-effect"],
+      "expected_failure": "effect completed without durable intent"
+    },
+    {
+      "test_id": "MF-KRN-010",
+      "control": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "reference"],
+      "broken": ["python3", "test/broken/fixtures/kernel/scenario.py", "--variant", "late-intent"],
+      "expected_failure": "effect dispatched before durable intent"
+    },
+    {
+      "test_id": "MF-KRN-011",
+      "control": ["python3", "tools/check_tcb_budget.py"],
+      "broken": [
+        "python3",
+        "tools/check_tcb_budget.py",
+        "--root",
+        "test/broken/fixtures/tcb_growth",
+        "--budget",
+        "budget.json"
+      ],
+      "expected_failure": "TCB ALARM"
     }
   ]
 }
-

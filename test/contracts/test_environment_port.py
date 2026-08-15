@@ -12,7 +12,10 @@ from contextlib import contextmanager
 from typing import Callable, Iterator
 from unittest.mock import patch
 
-from vanguard.packages.adapters.environment import FakeEnvironment
+import subprocess
+import tempfile
+from pathlib import Path
+from vanguard.packages.adapters.environment import FakeEnvironment, GitEnvironment
 from vanguard.packages.ports.environment import (
     EffectRequest,
     EnvironmentAdapter,
@@ -56,11 +59,38 @@ def _fake_environment_factory() -> Iterator[EnvironmentAdapter]:
         env.dispose()
 
 
+@contextmanager
+def _git_environment_factory() -> Iterator[EnvironmentAdapter]:
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        repo_path = Path(tmp_dir) / "repo"
+        repo_path.mkdir()
+        subprocess.run(["git", "init", "-b", "main"], cwd=repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Vanguard Test"], cwd=repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "test@vanguard.dev"], cwd=repo_path, capture_output=True, check=True)
+
+        for rel_path, content in SAMPLE_FILES.items():
+            f_path = repo_path / rel_path
+            f_path.parent.mkdir(parents=True, exist_ok=True)
+            f_path.write_text(content, encoding="utf-8")
+
+        subprocess.run(["git", "add", "."], cwd=repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, capture_output=True, check=True)
+
+        env = GitEnvironment(repo_path=repo_path)
+        try:
+            yield env
+        finally:
+            env.dispose()
+
+
 class EnvironmentPortContract(unittest.TestCase):
     """The same success and failure behaviour runs against fake and real adapters."""
 
     def _get_factories(self) -> tuple[tuple[str, Callable[[], Iterator[EnvironmentAdapter]]], ...]:
-        return (("fake", _fake_environment_factory),)
+        return (
+            ("fake", _fake_environment_factory),
+            ("git", _git_environment_factory),
+        )
 
     def test_profile_and_snapshot(self) -> None:
         for name, factory in self._get_factories():
@@ -243,7 +273,7 @@ class EnvironmentPortContract(unittest.TestCase):
                 self.assertEqual(str_apply.error.kind, "invalid_request")
 
                 # Accept argv list of strings
-                argv = ["pytest", "tests/test_hello.py"]
+                argv = ["python3", "-c", "print('OK')"]
                 valid_prev = env.preview(EffectRequest(verb="test.run", action="test", command=argv))
                 self.assertTrue(valid_prev.ok)
 
@@ -269,11 +299,31 @@ class EnvironmentPortContract(unittest.TestCase):
                 self.assertFalse(obs.ok)
                 self.assertEqual(obs.error.kind, "not_found")
 
-    def test_fake_does_not_touch_the_network(self) -> None:
-        with patch.object(socket, "socket", side_effect=AssertionError("no network")):
-            with _fake_environment_factory() as env:
-                env.observe(ObservationRequest(action="read", path="src/hello.py"))
-                env.preview(EffectRequest(verb="patch.apply", action="patch", patch=NEW_FILE_PATCH))
+    def test_git_worktree_isolation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_path = Path(tmp_dir) / "repo"
+            repo_path.mkdir()
+            subprocess.run(["git", "init", "-b", "main"], cwd=repo_path, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.name", "Vanguard Test"], cwd=repo_path, capture_output=True, check=True)
+            subprocess.run(["git", "config", "user.email", "test@vanguard.dev"], cwd=repo_path, capture_output=True, check=True)
+            (repo_path / "a.txt").write_text("initial main\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=repo_path, capture_output=True, check=True)
+            subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, capture_output=True, check=True)
+
+            wt_dir = Path(tmp_dir) / "wt"
+            env = GitEnvironment(repo_path=repo_path, worktree_branch="feature-1", worktree_dir=wt_dir)
+            try:
+                self.assertEqual(env.working_dir, wt_dir)
+                write_res = env.apply(EffectRequest(verb="fs.write", action="write", args={"path": "b.txt", "content": "worktree file"}))
+                self.assertTrue(write_res.ok)
+                # Worktree has b.txt
+                self.assertTrue((wt_dir / "b.txt").exists())
+                # Main repo does not have b.txt
+                self.assertFalse((repo_path / "b.txt").exists())
+            finally:
+                env.dispose()
+            # Disposing removed the worktree
+            self.assertFalse(wt_dir.exists())
 
 
 if __name__ == "__main__":

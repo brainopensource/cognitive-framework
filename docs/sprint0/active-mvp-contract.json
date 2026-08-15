@@ -14,6 +14,7 @@
     "schemas/v4-v0.1",
     "schemas/conformance",
     "ports/event-store",
+    "ports/environment",
     "kernel",
     "event-ledger",
     "domain/manifest",
@@ -717,7 +718,7 @@
       "test_id": "TEST-PORT-003",
       "acceptance_evidence": "Fake adapter suite covers preview-of-new-file and argv test; no shell string accepted.",
       "margin": "zero path-escape applies",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },

@@ -18,6 +18,36 @@
       "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
       "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/cycle"],
       "expected_failure": "source import cycle"
+    },
+    {
+      "test_id": "MF-S0-004",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/governance_model"],
+      "expected_failure": "governance may not depend on model APIs"
+    },
+    {
+      "test_id": "MF-S0-005",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/agency_evaluator"],
+      "expected_failure": "agency may not depend on evaluator APIs"
+    },
+    {
+      "test_id": "MF-S0-006",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/adapter_sibling"],
+      "expected_failure": "imports sibling"
+    },
+    {
+      "test_id": "MF-S0-007",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/lab_import"],
+      "expected_failure": "lab/ must import nothing"
+    },
+    {
+      "test_id": "MF-S0-008",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/python_direction"],
+      "expected_failure": "forbidden ports -> agency import"
     }
   ]
 }

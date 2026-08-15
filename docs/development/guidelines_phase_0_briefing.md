@@ -31,17 +31,17 @@ To balance velocity with safety, all tasks are classified into two execution tra
 
 These tasks establish the source of truth, merge gates, and developer packet.
 
-| Task ID | Task Description | Output / Artifact | Complexity (0–5) | Track | Primary Owner | Review / Sign-off Gate |
-| :--- | :--- | :--- | :---: | :---: | :--- | :--- |
-| **B-01** | **Register GTS-13C & Archive Superseded** | Update registry; archive `GTS-13` / `13B` | **0** | 🟢 FAST | PM / Scrum | Tech Lead verification |
-| **B-02** | **Create Decision Record** | Author 18 locked architectural decisions (`DR-01`..`DR-18`) with reversal conditions; seal Rev1/Rev2 to lead-only | **5** | 🔴 GATE | Tech Lead + Project Lead | **MANDATORY JOINT SIGN-OFF** |
-| **B-03** | **System Architecture & ICD** | Package isolation (`domain ← ports ← kernel ← agency ← runtime → adapters`), sink classification (`pure/observation/privileged`), port signatures | **4** | 🔴 GATE | Tech Lead + Sr Dev | Tech Lead approval |
-| **B-04** | **Active MVP Contract Matrix** | Machine-readable matrix (`req_id` $\to$ `component` $\to$ `test_id` $\to$ `evidence`). Enforces Gate A & Gate B | **5** | 🔴 GATE | Tech Lead + Req Owners | **MANDATORY TL SIGN-OFF** |
-| **B-05** | **Verification, Threat & Eval Plan** | Threat models, must-fail test catalogue, A/A noise floor protocol, verifier-deployment gap monitor | **3** | 🔴 GATE | Sr Dev | Tech Lead approval |
-| **B-06** | **Automate CI & Traceability Gates** | Package boundary linters, PR template checks, Gate A/B calculation scripts | **2** | 🟢 FAST | Sr Dev + Dev | Tech Lead acceptance |
-| **B-07** | **Convert GTS-13C into Backlog** | Issue tracker tickets with dependencies, test IDs, and definition of done | **1** | 🟢 FAST | PM + Scrum | Tech Lead dependency check |
-| **B-08** | **Assemble Clean Developer Packet** | Distribute Decision Record, GTS-13C, Architecture/ICD, Active Contract, Verification Plan, Backlog | **0** | 🟢 FAST | PM | Tech Lead review |
-| **B-09** | **Phase 0 Baseline Review & Tag** | Cross-document consistency review, baseline tagging, formal go/no-go decision | **5** | 🔴 GATE | Project Lead + Tech Lead | **FORMAL GO/NO-GO GATE** |
+| Status | Task ID | Task Description | Output / Artifact | Complexity (0–5) | Track | Primary Owner | Review / Sign-off Gate |
+| :---: | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
+| **TODO** | **B-01** | **Register GTS-13C & Archive Superseded** | Update registry; archive `GTS-13` / `13B` | **0** | 🟢 FAST | PM / Scrum | Git history/archive cannot yet be verified |
+| **DONE** | **B-02** | **Create Decision Record** | ADR-0045..0053 plus approval events and reversal conditions | **5** | 🔴 GATE | Tech Lead + Project Lead | Joint approval recorded |
+| **DONE** | **B-03** | **System Architecture & ICD** | Package isolation, sink classification and port signatures | **4** | 🔴 GATE | Tech Lead + Sr Dev | Approved |
+| **DONE** | **B-04** | **Active MVP Contract Matrix** | 22 assigned rows; Gate A/B scripts | **5** | 🔴 GATE | Tech Lead + Req Owners | 100% assignment; 100% merged scope |
+| **DONE** | **B-05** | **Verification, Threat & Eval Plan** | Threat model, must-fail catalogue and evaluation protocol | **3** | 🔴 GATE | Sr Dev | Approved for S0 scope |
+| **TODO** | **B-06** | **Automate CI & Traceability Gates** | Boundaries and PR-body `req_id` enforcement done; remaining margin reporting open | **2** | 🟢 FAST | Sr Dev + Dev | Complete margin reporting |
+| **TODO** | **B-07** | **Convert GTS-13C into Backlog** | Markdown backlog exists; issue-tracker import remains | **1** | 🟢 FAST | PM + Scrum | Create real tracker tickets |
+| **DONE** | **B-08** | **Assemble Clean Developer Packet** | Sprint 1 index, backlog and Dev 1–4 packets | **0** | 🟢 FAST | PM | Ready, conditional distribution |
+| **TODO** | **B-09** | **Phase 0 Baseline Review & Tag** | Annotated `v0.0.0-sprint0` tag exists; independent gaps and hosted branch protection remain | **5** | 🔴 GATE | Project Lead + Tech Lead | Full go/no-go still open |
 
 ---
 
@@ -49,30 +49,30 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 ### Sprint 0 · Infrastructure, Baseline & Schema Archaeology (Weeks 1–2)
 
-| Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
-| :--- | :--- | :---: | :---: | :--- | :--- |
-| **T0.1–T0.4** | Fix 3 bugs by hand; record observation $\to$ proposal $\to$ effect $\to$ receipt in flat file; produce `field-inventory.md` | **3** | 🔴 GATE | Tech Lead + Sr Dev | **Review at exit:** Unused fields marked `speculative` |
-| **T0.5–T0.6** | Non-coding task baseline (spreadsheet/log) + timing human baseline | **2** | 🟢 FAST | Dev + PM | Verify generality candidate fields |
-| **T10.1–T10.3** | Package layout scaffold; broken imports fail build; `test/broken/` scaffold | **2** | 🟢 FAST | Sr Dev + Dev | CI boundary test must pass |
-| **T10.4–T10.9** | Rule-to-test CI mapping; margin alarms setup (TCB LOC, p95 latency) | **2** | 🟢 FAST | Dev | Validate automated reporting |
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **TODO** | **T0.1–T0.4** | Independent blind reconstruction completed and added GAP-010..014; remediation/re-signoff remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Make evidence bundle self-contained, then re-review |
+| **TODO** | **T0.5–T0.6** | Non-coding trace exists; prospective human timing remains | **2** | 🟢 FAST | Dev + PM | Capture two timed manual reproductions |
+| **DONE** | **T10.1–T10.3** | Package scaffold, forbidden imports and eight broken counterparts | **2** | 🟢 FAST | Sr Dev + Dev | CI passes |
+| **TODO** | **T10.4–T10.9** | Rule map exists; margin alarms and remaining continuous controls remain | **2** | 🟢 FAST | Dev | Implement automated reporting |
 
 ### Sprint 1 · Contracts, Wire Schema & Disposable API Spike (Weeks 3–4)
 
-| Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
-| :--- | :--- | :---: | :---: | :--- | :--- |
-| **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` (raw API calls, rate limits, token accounting $\to$ `provider-notes.md`) | **1** | 🟢 FAST | Dev | **Check:** Must live in unimportable `spike/` |
-| **T1.1–T1.3** | Canonicalisation spec (40 golden triples), opaque primitives, `ResourceSelector` with total inclusion relation | **4** | 🔴 GATE | Tech Lead + Sr Dev | **Review:** Property test on selector inclusion |
-| **T1.4–T1.6** | `EffectDescriptor` (with `sinkClass`), `CapabilityGrant`, `Receipt` (with first-class `undeterminable`) | **4** | 🔴 GATE | Tech Lead + Sr Dev | **Review:** Grant without descriptor digest fails parse |
-| **T1.7–T1.11** | `EventEnvelope`, `Artifact`, `Claim` (mandatory invalidation conditions), `CorrectionRecord`, `Recording` | **3** | 🔴 GATE | Sr Dev + Dev | **Review:** Empty invalidation array rejected at parse |
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **TODO** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 4 | Dispatched locally; no merge |
+| **TODO** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 + leads | Dispatched locally; no schema lock/merge |
+| **TODO** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 + leads | Dispatched locally; no schema lock/merge |
+| **TODO** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 3/4 + Sr Dev | Dispatched locally; no schema lock/merge |
 
 ### Sprint 2 · Real-Provider Disposable Slice, Kernel & Ledger (Weeks 5–6)
 
-| Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
-| :--- | :--- | :---: | :---: | :--- | :--- |
-| **T0b.1–T0b.4** | Disposable E2E Slice (`prompt → model → patch → approval → test`) tagged `delete-or-replace-by-S4` | **2** | 🟢 FAST | Sr Dev + Dev | **Check:** Generates `slice-findings.md`; unimportable by core |
-| **T2.1–T2.5** | Kernel capability issuance, attenuation monotonicity, lease-tree budget conservation | **4** | 🔴 GATE | Sr Dev + Tech Lead | **Review:** Must-fail escalation attempts emit alerts |
-| **T3.1–T3.5** | Append-only event store, pure state reducer `(State, Event) → State`, projection rebuild from zero | **3** | 🔴 GATE | Dev + Sr Dev | **Review:** State reconstruction identical on replay |
-| **T1.12–T1.14** | Reader profiles (forward compatibility) + second-language reader-only conformance | **2** | 🟢 FAST | Dev + Sr Dev | Cross-reader agreement on all golden vectors |
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **TODO** | **T0b.1–T0b.4** | Disposable E2E Slice | **2** | 🟢 FAST | Sr Dev + Dev | Sprint 2 |
+| **TODO** | **T2.1–T2.5** | Kernel capabilities, attenuation and budgets | **4** | 🔴 GATE | Sr Dev + Tech Lead | Sprint 2 |
+| **TODO** | **T3.1–T3.5** | Event store, reducer and replay | **3** | 🔴 GATE | Dev + Sr Dev | Sprint 2 |
+| **TODO** | **T1.12–T1.14** | Reader profiles and second-language conformance | **2** | 🟢 FAST | Dev + Sr Dev | Sprint 2 |
 
 ---
 
@@ -96,7 +96,9 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 ## 5. Immediate Next Steps for Leadership
 
-1. [ ] **PM / Scrum**: Set up the sprint board mapping `B-01` through `B-09` and Sprint 0 tasks (`T0.1`–`T0.6`, `T10.1`–`T10.9`).
-2. [ ] **Tech Lead**: Author `01_decision_record.md`, `02_system_architecture_and_icd.md`, and `03_active_mvp_contract.md`.
-3. [ ] **Senior Dev**: Author `04_verification_threat_evaluation_plan.md` and scaffold `tools/ci/` boundary tests.
-4. [ ] **Project Lead**: Execute final Phase 0 baseline review (`B-09`) to authorize Sprint 0 development.
+1. **TODO — Tech Lead:** Close independent-review `GAP-010..014`, then request re-signoff.
+2. **TODO — Dev 1 + Dev 2:** Capture prospective hands-on and elapsed timing for two manual reproductions.
+3. **TODO — PM / Scrum:** Import the prepared backlog into the real issue tracker.
+4. **TODO — Sr Dev:** Complete remaining margin reporting; PR-body `req_id` validation is done.
+5. **TODO — Project Lead:** Verify hosted branch protection and issue the full Sprint 1 go; annotated baseline tag exists.
+6. **DONE — Tech Lead / Sr Dev:** Decision Record, ICD, Active Contract, Verification Plan, package gates and developer packets are prepared.

@@ -1,116 +1,162 @@
-# Phase 1 — Build-to-Trust-Spine Engineering Briefing
-## Task Complexity, Review Governance & Sprint Execution Guide (S1–S4)
+# Sprint 3–4 Engineering Briefing
+## Four-lane parallel execution toward the beta coding harness
 
-**Audience:** Project Manager (PM), Scrum Master, Tech Lead, and Lead Developers  
-**Reference Documents:** `docs/v4/13_C_gts_mvp_program_and_engineering_plan.md`, `docs/development/guidelines_phase_0_briefing.md`, `docs/sprint0/system-architecture-icd.md`, `docs/sprint0/active-mvp-contract.json`  
-**Purpose:** Provide the governance overlay for Sprints 1 through 4 (the build phase that culminates in the S4 trust-spine demo). Maps task complexity (Levels 0–5), execution tracks (Fast vs. Gate), contract row activations, ownership, and merge gating to guarantee an uncompromised engineering baseline.
+**Audience:** Project Lead, Tech Lead, PM, Scrum, Senior Developers  
+**Leadership prompt (do not give to developers):** `docs/development/guidelines_sprint_3_4.md`  
+**References:** GTS-13C, VG-02/03/05/08/10, ICD, Active MVP Contract, Verification Plan, `docs/sprint1/`
 
----
-
-## 1. Pacing & Governance Framework
-
-All tasks are classified into two execution tracks:
-
-* 🟢 **FAST TRACK (Levels 0–2):** Autonomous, high-speed execution. Standard CI checks and peer review apply.
-* 🔴 **GATE & REVIEW TRACK (Levels 3–5):** High design risk, kernel/TCB invariants, capability boundaries, or merge-gating rules. **Requires explicit Tech Lead / Project Lead sign-off before merging.**
-
-### Complexity Scale (0 to 5)
-
-| Level | Profile | Scope & Typical Activities | Governance / Pacing |
-| :---: | :--- | :--- | :--- |
-| **0** | Junior Dev / PM Assistant | Mechanical docs, checklist tracking, file archival | 🟢 Fast Track (Async review) |
-| **1** | Developer | Basic CLI scripts, throwaway provider spikes, JSON schemas | 🟢 Fast Track (Peer review) |
-| **2** | Mid Developer | Port fakes, disposable E2E slices, reader profiles | 🟢 Fast Track (CI automated gate) |
-| **3** | Senior Developer | Event store reducers, ledger crash recovery, must-fail test fixtures | 🔴 Gate Track (Sr Dev + TL sign-off) |
-| **4** | Lead Architect / Sr Dev | Kernel capabilities, attenuation algebra, sink mediation, artifact graph | 🔴 Gate Track (Tech Lead approval) |
-| **5** | Tech Lead / Principal | Episode recursion engine, trust-spine demo, boundary laws, S4 exit review | 🔴 Gate Track (Joint TL + PL sign-off) |
+**Purpose:** operational map of what is already built, how four people (2 senior, 2 mid) run Sprint 3 and Sprint 4 in parallel at mixed complexity, and how that feeds a beta MVP that is one framework plus one coding harness on a real OpenRouter model.
 
 ---
 
-## 2. Two-Clock Discipline for PM & Scrum
+## 1. Beta in one paragraph
 
-Every engineering artifact belongs to exactly one clock:
+The **framework** is: frozen `HarnessManifest` + episode loop + kernel + ledger.  
+The **beta product** is one harness, `vg-code-default`: typed `read` / `search` / `patch` / `test`, Git worktree, human approval of privileged writes, OpenRouter behind `ModelPort`.
 
-| Clock | Scope & Invariants | Lifecycle Rule | Phase 1 Examples |
-| :--- | :--- | :--- | :--- |
-| **Fast Clock (Enforcement / Permanent)** | Capability checks, sandbox isolation, event recording, kernel dispatch, attenuation algebra, ledger integrity | **Never expires.** Changes require an explicit ADR | `kernel/` (T2), `domain/` reducers (T3), `ports/` contracts, architecture boundary gates |
-| **Slow Clock (Compensation / Temporary)** | Scaffolding compensating for model flaws; disposable experimental code built to discover live wire shapes | **Carries expiration trigger.** Must declare `compensatesFor` | `spike/` (T0a), `slice/` (T0b) — **both deleted outright at S4 exit** |
+Sprint 4 does **not** ship that product. Sprint 4 ships Increment A: a scripted trajectory with **no model**, then deletes `spike/` and `slice/`. OpenRouter and Git adapters are built in parallel in Sprint 4 so Sprint 5–6 can wire them instead of inventing them.
 
-**Governance Invariant:** No slow-clock artifact may ever be promoted to a permanent fast-clock dependency. The argument to keep `spike/` or `slice/` is the signal to delete it faster.
+Full MVP (Sprint 9, GTS-13C Ch.10 Q3–Q4: A/A, generality, TableWorld) is out of this briefing.
 
 ---
 
-## 3. Sprint 1 · Contracts, Wire Schema & Provider Spike (Weeks 3–4) — [MERGED]
+## 2. Pacing (unchanged from Phase 0)
 
-| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | Contract Row | Acceptance Evidence |
-| :---: | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
-| **DONE** | **T0a.1–T0a.3** | Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 3 | Backlog | `provider-notes.md` merged; `spike/` unimportable |
-| **DONE** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 | `REQ-SCHEMA-001..003` | 60 tests passing; dual TS+Python readers |
-| **DONE** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 | `REQ-SCHEMA-004..006` | Contracts and wire schemas validated |
-| **DONE** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 2 | `REQ-SCHEMA-007..011` | EventEnvelope, Artifact, Claim schemas |
-| **DONE** | **T6.4** | CLI/TUI foundation — `vg run`, `vg trace`, `vg why` | **2** | 🟢 FAST | Dev 4 | `REQ-CLI-001` | Mock-backed interactive React/Ink & JSONL streaming |
+| Track | Levels | Who merges |
+|---|---|---|
+| FAST | 0–2 | Developer + peer/CI |
+| GATE | 3–5 | Sr Dev and/or Tech Lead (+ Project Lead at 5) |
 
----
-
-## 4. Sprint 2 · Kernel, Ledger, Artifact Graph & Disposable Slice (Weeks 5–6)
-
-### Parallel Execution Structure (Wave 1 vs Wave 2)
-
-* **Wave 1 — Dev 1 (Technical & Wire Deliverables):** Wire schema correction (T1.4–T1.15), Gamma's live disposable slice & `slice-findings.md` (T0b), and artifact graph with `vg-shell-only` baseline (T7.1–T7.4).
-* **Wave 2 — Dev 2 (Governance, Contracts & Verification):** Active contract row activation (`REQ-SLICE-001`, `REQ-CONF-001`, `REQ-GRAPH-001`, `REQ-BASELINE-001`), briefing synchronization, and running full CI boundary/broken gates.
-
-### Sprint 2 Task Breakdown
-
-| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | Contract Row | Review Action & Gate |
-| :---: | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
-| **IN PROGRESS** | **T0b.1–T0b.4** | Disposable E2E Slice (`prompt → model → patch → approval → apply → test → result`) | **2** | 🟢 FAST | Dev Gamma | `REQ-SLICE-001` | Output `slice-findings.md`; verify `slice/` unimportable; marked for deletion at S4 |
-| **IN PROGRESS** | **T7.1–T7.3** | Artifact Graph + `HarnessManifest`: typed files, immutable freeze at composition | **4** ⚠ | 🔴 GATE | Tech Lead + Sr Dev | `REQ-GRAPH-001` | Extensible kind registry without core changes; freeze-at-composition test |
-| **IN PROGRESS** | **T1.13–T1.15** | Writer/Reader profiles, dual-language conformance & migration rehearsal | **2** | 🟢 FAST | Dev 1 | `REQ-CONF-001` | 100% agreement on golden vectors; old readers survive minor bump |
-| **IN PROGRESS** | **T7.4** | `vg-shell-only` permanent baseline manifest registered and flagged undeletable | **1** | 🟢 FAST | Dev Gamma | `REQ-BASELINE-001` | Runs against fake environment; standing zero-assumption control |
-| **DONE** | **T2.1–T2.5** | Kernel capabilities, attenuation algebra, and budget lease trees | **4** ⚠ | 🔴 GATE | Dev Beta | `REQ-KRN-001` | Attenuation monotonicity; budget conservation; alertable denials |
-| **DONE** | **T3.1–T3.5** | Event store, pure reducer `(State, Event) → State`, replay digest identity | **3** | 🔴 GATE | Dev Alpha | `REQ-LEDGER-001` | Reduction associativity; state reconstruction; projection rebuild |
+| Level | Profile |
+| :---: | :--- |
+| 1 | JSON manifests, CLI wiring, boilerplate adapters, unit tests |
+| 2 | Port fakes, contract suites, Git adapter, cassette tests |
+| 3 | Live provider adapter, must-fail counterparts, containment probes |
+| 4 | Episode/process engines, attenuation-adjacent integration, OS perimeter |
+| 5 | Trust-spine gate, contract amendment, joint go/no-go |
 
 ---
 
-## 5. Sprint 3 · Full Dispatch, Mediation & Ledger Recovery (Weeks 7–8)
+## 3. Current inventory (filesystem, not stale briefing checkboxes)
 
-| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | Contract Row | Exit Invariant |
-| :---: | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
-| **PLANNED** | **T2.6–T2.10** | Kernel dispatch + sink-class mediation: no privileged effect without grant; all effects recorded | **4** ⚠ | 🔴 GATE | Dev Beta + TL | `REQ-KRN-002..003` | Fault injection on all dispatch paths; must-fail MF-KRN-008..010 green; TCB LOC alarm active |
-| **PLANNED** | **T3.6–T3.8** | Ledger recovery + cassettes: external recovery scanner, immutable uncertainty, cassette replay | **3** | 🔴 GATE | Dev Alpha + Sr Dev | `REQ-LEDGER-002` | `kill -9` recovery test; external terminal record writer; byte-identical cassette playback |
+Phase 0 briefing still marks T2/T3 as TODO. The contract and tree disagree. Prefer this table.
 
----
+| Area | Status | Implication |
+|---|---|---|
+| T1 schemas + dual readers | Implemented; several `REQ-SCHEMA-*` still `open` / not `LOCKED` | Tech Lead lock-or-justify before S3 product merges |
+| T2 kernel dispatch + TCB alarm | Implemented, `REQ-KRN-001..003` covered, ADR-0054 | **Do not put in Sprint 3** |
+| T3 ledger + recovery + cassettes | Implemented, `REQ-LEDGER-001..002` covered | **Do not put in Sprint 3** |
+| T0a `spike/` | Present | Delete at S4 exit |
+| T0b `slice/` + `slice-findings.md` | Present; live credential run still pending | Rebuild Git/provider; never import; delete at S4 |
+| CLI mock `vg run/trace/why` | Present; `REQ-CLI-001` open | Keep as client; replace `MockRuntime` after S4 |
+| `agency/` episode engine | Missing (manifest JSON only) | Senior A, Sprint 3 |
+| `runtime/governance/` process engine | Missing | Senior B, Sprint 3 |
+| Model / Env / Evaluator / Sandbox ports | Not activated (`ports` README forbids landing interface-only) | Developer C, Sprint 3 fakes |
+| OpenRouter production adapter | Missing (slice has disposable OpenAI-compatible HTTP) | Developer C, Sprint 4 |
+| Git production adapter | Missing (slice has disposable git path) | Developer D, Sprint 4 |
+| Worker perimeter / evaluator OS identity | Missing | Perimeter = Senior B Sprint 4; evaluator identity = Sprint 5 |
 
-## 6. Sprint 4 · Episode Engine, Trust-Spine Demo & Exit Gate (Weeks 9–10)
-
-> ⚠ **Hardest milestone in the programme.** T4.1–T4.7 is rated `XL ⚠` and runs with **zero LLM in the loop**.
-
-| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | Exit Invariant |
-| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **PLANNED** | **T4.1–T4.7** | Episode engine + recursion — **trust-spine demo: scripted trajectory with no model** | **5** ⚠ XL | 🔴 GATE | Tech Lead + Sr Dev + 2 Dev | Denial, attenuation, budget exhaustion, atomicity, recovery, secret non-disclosure all pass |
-| **PLANNED** | **T4.8** | Process engine: durable state machine resuming from ledger without replaying episode | **4** ⚠ | 🔴 GATE | Sr Dev + Dev | Restart-resume property test; states readable by non-engineers |
-| **PLANNED** | **T5.1–T5.2** | Worker perimeter: rootless OS identity, mount namespace, containment report | **4** ⚠ | 🔴 GATE | Sr Dev + Dev | Mount, egress, syscall probes; unverified containment blocks publication |
-| **PLANNED** | **DELETE `spike/` + `slice/`** | Outright deletion of throwaway directories | **1** | 🟢 FAST | Sr Dev | Checked gate item; absence verified by CI boundary checker |
-
----
-
-## 7. S4 Exit Gate Checklist (Joint TL + PL Sign-Off)
-
-| Gate ID | Verification Item | Acceptance Standard | Approver |
-| :---: | :--- | :--- | :--- |
-| **G4-01** | Trust-spine demo passes with no model | Scripted trajectory completes with 100% invariant enforcement | Tech Lead |
-| **G4-02** | Process engine restart-resume | Interrupted governance resumes without replaying agent reasoning | Sr Dev + Tech Lead |
-| **G4-03** | OS-level worker perimeter | Containment report passes mount, egress, syscall probes | Sr Dev + Tech Lead |
-| **G4-04** | Disposable code deletion | `spike/` and `slice/` deleted; CI absence check green | Sr Dev |
-| **G4-05** | Sink-class mediation | Privileged effects require grant; all effects recorded in ledger | Tech Lead |
-| **G4-06** | Active MVP Contract coverage | `merged_scope_evidence_coverage = 100%` across all merged components | Scrum + Tech Lead |
-| **G4-07** | Two-clock separation | Zero `compensatesFor` temporary code promoted to permanent fast clock | Tech Lead |
-| **G4-08** | Formal Go for Sprint 5 | Written decision authorizing real model integration | **Project Lead** |
+Carry-overs that are **not** Sprint 3 engines: B-06 margin reporting, B-07 tracker import, B-09 hosted protection + tag, T0 reconstruction gaps, T0.6 human timing.
 
 ---
 
-## 8. Continuous CI Controls & Active MVP Contract Matrix
+## 4. Milestone map (S3 → beta)
 
-* **Coverage Metric 1:** `baseline_assignment_coverage = 100%` (34/34 rows assigned to component, owner, test ID).
-* **Coverage Metric 2:** `merged_scope_evidence_coverage = 100%` (Every merged component has passing tests or approved justification).
-* **PR Gating Rule:** Zero PRs merge if they leave a merged-scope component with an `open` requirement.
+| When | Name | User-visible truth |
+|---|---|---|
+| End S3 | Seams | Fake-model episode and model-free approval process both record through the kernel |
+| End S4 | Trust spine | No-model scripted trajectory green; disposables gone; OpenRouter + Git adapters exist but are off the gate path |
+| End S5 | Judge is outside | Evaluator separate identity; context compiler prefix-stable |
+| End S6 | **Beta** | `vg run` on `vg-code-default` + OpenRouter fixes a real bug; human approves the exact descriptor |
+
+S7–S9 (reconstructions, A/A, TableWorld, Ch.10 Q3–Q4) stay off the beta backlog.
+
+---
+
+## 5. Four lanes — Sprint 3
+
+All four start day one against merged kernel/ledger. They do not wait for each other. Integration is Senior A in the last 2–3 days.
+
+| Lane | Person | Cx | Track | Packet theme | Own these paths | Must not touch |
+|---|---|---|---|---|---|---|
+| SA | Senior A | 4 | GATE | Episode loop, fake/cassette model, terminals, no self-evaluation | `vanguard/packages/agency/` (engine) | adapters, OpenRouter, governance approvals |
+| SB | Senior B | 4 | GATE | Process engine, restart-resume, readable states | `vanguard/packages/runtime/governance/` | `agency/`, model ports |
+| DC | Developer C | 2 | FAST | Port activation bundles: interface + fake + suite | `ports/`, `adapters/` fakes, `test/contracts/` | episode recursion, kernel algebra |
+| DD | Developer D | 2 | FAST | `vg-code-default` + undeletable `vg-shell-only`; typed tool schemas as artifacts; CLI still on fake runtime | manifests, kind registry, `clients/cli` (no core imports) | live provider, sandbox OS |
+
+**Sprint 3 exit tests (integration):** one cassette-driven episode turn and one interrupted process resume share a ledger digest recipe; architecture tests still fail `agency`→adapters and `governance`→model.
+
+---
+
+## 6. Four lanes — Sprint 4
+
+Same people. Complexity stays mixed. Real LLM is parallel, not the gate.
+
+| Lane | Person | Cx | Track | Packet theme | Own these paths | Gate interaction |
+|---|---|---|---|---|---|---|
+| SA | Senior A | 5 | GATE | No-model trust-spine trajectory (`REQ-TRUST-001`) | composition root, `TEST-TRUST-001`, agency integration | **Is** the S4 gate |
+| SB | Senior B | 4 | GATE | Rootless worker, containment report, unverified ⇒ no publish | sandbox adapter, probes | Required for Increment A perimeter clause; scoped red team only |
+| DC | Developer C | 3 | GATE | OpenRouter `ModelPort` real adapter + cassette record; secret references only | `adapters/` model | Must run with key unset on trust-spine CI |
+| DD | Developer D | 2 | FAST | Permanent Git `EnvironmentAdapter`; typed tools as effects; preview includes new files | `adapters/` environment | Used by S4 only through **fakes** in the gate command |
+
+**Sprint 4 exit (joint, Project Lead + Tech Lead):** ADR-0048 trajectory green; `spike/` and `slice/` absent (`MF-S4-001`); OpenRouter adapter present and unused by that command.
+
+---
+
+## 7. Why this parallelises
+
+| Temptation | Defect | Rule |
+|---|---|---|
+| Everyone waits for the episode engine | Three people idle; S4 stays XL | Engines consume **ports**, not each other’s PRs |
+| Put OpenRouter on the S4 demo | Model masks missing enforcement (ADR-0048) | Fake/cassette only on the gate command |
+| Lift `slice/` into adapters | Disposable becomes architecture (ADR-0047) | Rebuild; then delete |
+| Give both seniors the same T4.1–T4.7 XL blob | Unsplittable sprint | SA = open-ended loop; SB = finite process then OS perimeter |
+| Give mid-devs kernel work | GATE queue explodes; FAST track unused | C = ports/provider; D = manifests/git |
+
+“Any order” means **start** order, not “no integration”. Merge order is still: fakes before composition-root wiring; composition-root wiring before the trust-spine command.
+
+---
+
+## 8. Explicitly out of S3–S4
+
+* TableWorld / non-coding environment (GTS-13C T9, VG-08 Increment C)  
+* A/A floor, paired stats, verifier–deployment gap (T8)  
+* Competitor harness reconstructions (T7.5–T7.7)  
+* Context compiler as a scored artifact (T4.9–T4.11 → S5)  
+* Evaluator double-probe / separate image (T5.3–T5.6 → S5)  
+* Default `vg run` live OpenRouter dogfood (S6)  
+* Competence promotion, semantic memory, canvas, MCP, routing search  
+* Re-implementing T2 dispatch or T3 recovery  
+
+VG-10 `DEF-12` (defer approvals) is **not** followed for beta. Privileged apply needs a human-readable process. Evolution-plane promotion stays human and out of band.
+
+---
+
+## 9. Slice findings the packets must absorb
+
+From `slice/slice-findings.md` (keep the notes; delete the code at S4):
+
+* Model text is not a patch; extract, contain, `git apply --check` are separate stages.  
+* Approval must show the exact patch and file stat, not the model’s story.  
+* Test commands are argv, not a shell string.  
+* Repo root and cwd are contract fields.  
+* Provider / invalid patch / human reject / apply fail / test fail are different outcomes.  
+* No p95 number until a live receipt exists.
+
+---
+
+## 10. Immediate leadership checklist
+
+Use the full prompt (`guidelines_sprint_3_4.md`) to produce artifacts. This is the burndown:
+
+1. ADR: name S4 trust-spine gate and S6 beta gate; rebase GTS-13C S3 away from covered T2/T3.  
+2. Create `REQ-TRUST-001` (cited by ADR-0048, missing today).  
+3. Activate EXEC / PORT / SEC rows; ICD update for ModelPort, Git adapter, worker identity.  
+4. Write `docs/sprint3/` and `docs/sprint4/` packets (clone `docs/sprint1/`).  
+5. Assign SA/SB/DC/DD; confirm no packet waits on another packet’s engine.  
+6. Project Lead: go / conditional-go / no-go.  
+7. Only then: four local branches, tests first, merges cite `req_id`.
+
+---
+
+*This briefing is operational. The leadership prompt is the procedure. Neither is a contract.*

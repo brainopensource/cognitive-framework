@@ -6,7 +6,7 @@ Authored alongside `04_vanguard_core_contracts_and_wire_schema_v040.md`.
 
 **Each writer schema has a generated reader profile** (`*.reader.schema.json`, `SC-10`). Reader profiles are build artifacts, are not listed below, and are never edited by hand.
 
-**`SC-7` for every `DRAFT` row.** The active T1.1–T1.12 contracts have TypeScript and Python readers plus shared vectors (`REQ-SCHEMA-001..012`, `REQ-CONF-001`). Other draft rows remain outside that lock evidence. No row moves to `LOCKED`: `SC-12`, the independent review, and the T0 human timing gates remain open.
+**`SC-7` for every `DRAFT` row.** The active T1.1–T1.12 contracts have TypeScript and Python readers plus shared vectors (`REQ-SCHEMA-001..012`, `REQ-CONF-001` covered). Other draft rows remain outside that lock evidence. No row moves to `LOCKED`: `SC-12`, the independent review, and the T0 human timing gates remain open (`DECISION-0002`).
 
 **`SC-12` — no schema locks while any type in `04` lacks an artifact.** The premature freeze of `04` happened while `effect-descriptor` was still `PLANNED`, and that absence is exactly what concealed the missing grant binding (`ADR-0039`). Cross-language agreement on the schemas that happen to exist is not coverage. Until they close, no row may move to `LOCKED`, and no production trajectory may be recorded against these schemas.
 

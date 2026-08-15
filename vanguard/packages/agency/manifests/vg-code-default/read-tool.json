@@ -1,0 +1,1 @@
+{"name":"read","verb":"fs.read","description":"Read file content from the workspace with selector verification."}

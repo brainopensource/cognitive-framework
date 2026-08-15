@@ -1,5 +1,17 @@
 """Ports package: runtime seams and interfaces (ICD §2)."""
 
+from .environment import (
+    AffectedResource,
+    EffectPreview,
+    EffectReceipt,
+    EffectRequest,
+    EnvironmentAdapter,
+    EnvironmentProfile,
+    EnvironmentSnapshot,
+    Observation,
+    ObservationRequest,
+    Reconciliation,
+)
 from .event_store import (
     EventRange,
     EventStorePort,
@@ -12,8 +24,40 @@ from .kernel import (
     EventSink,
     Ledger,
 )
+from .evaluator import (
+    EvaluationProtocol,
+    EvaluatorPort,
+    RunRef,
+    Verdict,
+)
+from .model import (
+    ContextBundle,
+    ModelPort,
+    Proposal,
+    Sampling,
+    ToolSchemas,
+)
+
+from .sandbox import (
+    ContainmentReport,
+    ProbeResult,
+    SandboxReceipt,
+    SandboxResult,
+    SandboxRunner,
+    publication_decision,
+)
 
 __all__ = [
+    "AffectedResource",
+    "EffectPreview",
+    "EffectReceipt",
+    "EffectRequest",
+    "EnvironmentAdapter",
+    "EnvironmentProfile",
+    "EnvironmentSnapshot",
+    "Observation",
+    "ObservationRequest",
+    "Reconciliation",
     "EventRange",
     "EventStorePort",
     "PortFailure",
@@ -22,4 +66,19 @@ __all__ = [
     "EffectAdapter",
     "EventSink",
     "Ledger",
+    "ContextBundle",
+    "ModelPort",
+    "Proposal",
+    "Sampling",
+    "ToolSchemas",
+    "EvaluationProtocol",
+    "EvaluatorPort",
+    "RunRef",
+    "Verdict",
+    "ContainmentReport",
+    "ProbeResult",
+    "SandboxReceipt",
+    "SandboxResult",
+    "SandboxRunner",
+    "publication_decision",
 ]

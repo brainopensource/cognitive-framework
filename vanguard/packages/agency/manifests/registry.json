@@ -1,5 +1,6 @@
 {
   "manifests": [
-    {"name":"vg-shell-only","path":"vg-shell-only/manifest.json","undeletable":true,"role":"experimental-control"}
+    {"name":"vg-shell-only","path":"vg-shell-only/manifest.json","undeletable":true,"role":"experimental-control"},
+    {"name":"vg-code-default","path":"vg-code-default/manifest.json","undeletable":false,"role":"product-default"}
   ]
 }

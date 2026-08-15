@@ -1,8 +1,0 @@
-{
-  "name": "@vanguard/adapters",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --experimental-strip-types --test fakes/*.test.ts"
-  }
-}

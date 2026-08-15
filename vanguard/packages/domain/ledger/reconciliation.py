@@ -13,8 +13,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
-from ..domain.canonicalisation.digest import digest_of
-from ..domain.ledger.events import EventEnvelope
+from ..canonicalisation.digest import digest_of
+from .events import EventEnvelope
 
 __all__ = [
     "ReconciliationVerdict",

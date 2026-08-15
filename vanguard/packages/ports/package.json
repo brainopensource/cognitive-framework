@@ -1,8 +1,0 @@
-{
-  "name": "@vanguard/ports",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --experimental-strip-types --test test/*.test.ts"
-  }
-}

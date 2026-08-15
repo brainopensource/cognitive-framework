@@ -29,10 +29,10 @@ from vanguard.packages.domain.ledger import (
     reduce_batch,
     reduce_event,
 )
-from vanguard.packages.ledger import (
+from vanguard.packages.adapters.stores import InMemoryEventStore
+from vanguard.packages.runtime.ledger import (
     AuditProjection,
     BudgetProjection,
-    InMemoryEventStore,
     RunSummaryProjection,
     rebuild_projection,
 )

@@ -34,4 +34,4 @@ Authored alongside `04_vanguard_core_contracts_and_wire_schema_v040.md`.
 | `substrate-profile.schema.json` | `06 §5` | PLANNED | Union with the measurement instrument tuple |
 | `instrument-tuple.schema.json` | `07 §5` | PLANNED | Experiment family, arms, splits, contamination ledger references |
 | `config.schema.json` | `04 §14` | PLANNED | Configuration file schemas |
-| `port-interfaces.md` | `04 §13` | PLANNED | Prose + typed excerpts; ports are not wire types |
+| `port-interfaces.md` | `04 §13` | DRAFT | Activation inventory and language boundary; interfaces land only with fake, real adapter and shared suite |

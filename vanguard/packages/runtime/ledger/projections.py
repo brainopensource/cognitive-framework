@@ -13,9 +13,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Sequence, TypeVar
 
-from ..domain.canonicalisation.digest import digest_of
-from ..domain.ledger.events import EventEnvelope
-from ..ports.event_store import EventRange, EventStorePort
+from ...domain.canonicalisation.digest import digest_of
+from ...domain.ledger.events import EventEnvelope
+from ...ports.event_store import EventRange, EventStorePort
 
 __all__ = [
     "Projection",

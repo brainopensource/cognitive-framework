@@ -21,9 +21,9 @@ This is the Trusted Computing Base. Every effect passes through
 ## Verification
 
 ```bash
-python3 -m unittest discover -s test   # 137 tests
+python3 -m unittest discover -s test
 python3 tools/check_boundaries.py
-python3 tools/run_broken_tests.py      # includes MF-KRN-001..003
+python3 tools/run_broken_tests.py      # includes MF-KRN-001..011
 ```
 
 The must-fail counterparts live in `test/broken/fixtures/kernel/scenario.py`.
@@ -36,19 +36,14 @@ Each plants one defect at one seam and leaves the rest of the kernel real:
   request completes, and the effect executes.
 * `MF-KRN-003` — a grant that binds no descriptor, and a verifier that
   compares none. Against the defect a substituted call rides an approved grant.
+* `MF-KRN-004..007` — widening attenuation, permissive grant verification,
+  emission before release, and a clamped budget overrun.
+* `MF-KRN-008..010` — a privileged sink weakened to `pure`, an effect with no
+  durable intent, and dispatch occurring before intent durability.
+* `MF-KRN-011` — unreviewed policy-kernel growth beyond the measured alarm.
 
-## Open items for the Tech Lead
+## Integration boundary
 
-* **The Active MVP Contract has no `T2.*` rows.** `docs/sprint0/active-mvp-contract.json`
-  carries `REQ-SCHEMA-001..012` and the Sprint 0 governance rows only; kernel
-  requirements sit under `deferred_activation` until the T0 exit gate and a
-  contract amendment. This code is therefore ahead of its requirement rows,
-  and `MF-KRN-001..003` are registered in the broken-test manifest but map to
-  no `req_id` yet.
-* **`ports.py` placement.** `ICD §1` gives `ports` its own package. The
-  protocols are declared here because the kernel is their only consumer and
-  this packet's scope was `vanguard/packages/kernel/`. Moving them is
-  mechanical and changes no behaviour.
-* **Suspension re-entry** (`K-14`, S1) and **recorded replay** (`K-12`) are
-  represented by the token and the failure path, but the resume driver belongs
-  to `runtime` and is not implemented here.
+Kernel role protocols are owned by `vanguard/packages/ports/kernel.py`.
+Approval suspension is represented by its token and failure path; the resume
+driver belongs to `runtime` and lands with the S4 process engine.

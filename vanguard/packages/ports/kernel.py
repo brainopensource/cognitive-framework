@@ -5,12 +5,9 @@ adapters, and only the composition root knows a concrete implementation.
 Every protocol here is small and role-specific (`01 §2`, interface
 segregation) — there is no runtime god-object.
 
-**Placement note.** `system-architecture-icd.md` §1 gives `ports` its own
-package. These protocols are declared here because the kernel is their only
-consumer today and this packet's scope is `vanguard/packages/kernel/`; moving
-them to `vanguard/packages/ports/` is a mechanical follow-up that changes no
-behaviour. The dependency direction is already correct either way — the kernel
-holds the interface, adapters implement it.
+These protocols live in the approved `ports` package.  They deliberately use
+structural values at this layer: exchange models are supplied by callers, so
+`ports` never imports the higher-level `kernel` package merely for annotations.
 
 **Liskov (`01 §2`).** The failure mode is the half of the contract that breaks
 substitution, so each protocol states it:
@@ -27,18 +24,13 @@ substitution, so each protocol states it:
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Protocol, runtime_checkable
-
-from .model import AdapterOutcome, EffectRequest, Event
+from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
     "Clock",
     "EffectAdapter",
     "EventSink",
     "Ledger",
-    "PolicyPort",
-    "WideningClassifier",
-    "GrantAuthenticator",
 ]
 
 
@@ -59,7 +51,7 @@ class EffectAdapter(Protocol):
     def healthy(self) -> bool:
         """False routes to `F-03` before any lease is opened."""
 
-    def execute(self, request: EffectRequest) -> AdapterOutcome:
+    def execute(self, request: Any) -> Any:
         """Perform the effect and report what happened.
 
         Returns a typed outcome for success, error, timeout, cancellation and
@@ -69,39 +61,15 @@ class EffectAdapter(Protocol):
 
 
 @runtime_checkable
-class PolicyPort(Protocol):
-    """Authorisation. The governor holds no opinion here and vice versa."""
-
-    def authorize(self, request: EffectRequest, *, widens_capability: bool) -> Any:
-        """Return a `Decision` (see `policy.py`). Never raises for a denial."""
-
-
-@runtime_checkable
-class WideningClassifier(Protocol):
-    """`K-32`. A call, never a constant — see `classifier.py`."""
-
-    def widens_capability(self, request: EffectRequest) -> bool: ...
-
-
-@runtime_checkable
 class EventSink(Protocol):
     """Where kernel events go. Emission failure never fails an effect (`F-25`)."""
 
-    def emit(self, event: Event) -> None: ...
+    def emit(self, event: Any) -> None: ...
 
 
 @runtime_checkable
 class Ledger(Protocol):
     """Durable intent, written before the effect begins (`K-47`)."""
 
-    def append_intent(self, event: Event) -> None:
+    def append_intent(self, event: Any) -> None:
         """Persist and flush. Raising routes to `F-21a`; the effect never starts."""
-
-
-@runtime_checkable
-class GrantAuthenticator(Protocol):
-    """`K-20`. Authentication for grants crossing a process boundary."""
-
-    def sign(self, payload: Mapping[str, Any]) -> str: ...
-
-    def verify(self, payload: Mapping[str, Any], authenticator: str) -> bool: ...

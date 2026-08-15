@@ -16,8 +16,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Optional, Sequence, TextIO
 
-from ..domain.canonicalisation.digest import digest_of
-from ..domain.ledger.events import EventEnvelope, parse_event_envelope
+from ...domain.canonicalisation.digest import digest_of
+from ...domain.ledger.events import EventEnvelope, parse_event_envelope
 
 __all__ = [
     "RedactionPolicy",

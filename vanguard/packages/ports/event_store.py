@@ -1,4 +1,4 @@
-"""EventStore and storage port interfaces.
+"""EventStore port interface.
 
 Owning contract: VG-04 §13, ICD §4.
 Invariants:
@@ -19,8 +19,6 @@ __all__ = [
     "PortFailure",
     "EventRange",
     "EventStorePort",
-    "Blob",
-    "BlobStorePort",
 ]
 
 T = TypeVar("T")
@@ -80,24 +78,4 @@ class EventStorePort(Protocol):
 
     def count(self, run_id: Optional[str] = None) -> int:
         """Return the number of stored events."""
-        ...
-
-
-@dataclass(frozen=True, slots=True)
-class Blob:
-    """Content-addressed binary blob with classification (VG-04 §2)."""
-
-    bytes_data: bytes
-    classification: str = "internal"  # "public" | "internal" | "confidential" | "restricted"
-
-
-class BlobStorePort(Protocol):
-    """Content-addressed BlobStore port interface (VG-04 §2, ICD §4)."""
-
-    def put(self, blob: Blob) -> Result[str]:
-        """Store immutable bytes, returning sha256 digest."""
-        ...
-
-    def get(self, digest: str) -> Result[Blob]:
-        """Retrieve bytes by sha256 digest."""
         ...

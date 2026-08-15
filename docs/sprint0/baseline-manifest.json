@@ -11,11 +11,44 @@
     "independent-third-engineer-reconstruction",
     "prospective-human-hands-on-timing"
   ],
+  "reseals": [
+    {
+      "sealed_at": "2026-08-15",
+      "approval_event": "ADR-0058",
+      "authorising_commit": "cddaaa33f3231ba91a37438033b9c0cedf37a16e",
+      "reason": "Phase 2 authorisation added the Sprint 5-6 requirement rows (REQ-CTX-001, REQ-EVAL-001, REQ-APP-001, REQ-CLI-002, REQ-DOG-001) with their registered test commands, and ADR-0059..0061 to the decision register. Those edits are authored governance, not drift; the manifest was never re-sealed after them, so the integrity gate had been failing on a known-good delta since cddaaa3 and could no longer detect an unknown one.",
+      "files": [
+        {
+          "file": "docs/sprint0/active-mvp-contract.json",
+          "superseded_digest": "sha256:653e0c321e321c902bb85384740fa384d5d4490bd2579a267e45d2e58e13f961",
+          "sealed_digest": "sha256:4eec41c99998e74787134946a8f0f846827d0b9f2747c3ce7ab6d1466cca05df"
+        },
+        {
+          "file": "docs/v4/09_vanguard_decision_register_v040.md",
+          "superseded_digest": "sha256:9e6b495804084b05251962f46b8f17a3f835c097d8b243ce70ae11a2a7463f59",
+          "sealed_digest": "sha256:8096e824bacf71d6728d80968f188c61faab4efa5baca7a5dd122c7236c8bb35"
+        }
+      ]
+    },
+    {
+      "sealed_at": "2026-08-15",
+      "approval_event": "S6-SA-001",
+      "authorising_commit": "pending",
+      "reason": "VG-03 LT-6 states that runtime/ may import everything and is the only module that may. The ALLOWED table in check_boundaries.py omitted 'governance' from runtime's row, which made the declared approval process (REQ-APP-001) unreachable from any composition root and would have blocked REQ-DOG-001. The governance row itself is unchanged and stays narrow, so VG-03 5.4 -- no model dependency in governance -- still holds. Verified against tools/run_broken_tests.py: 22 broken counterparts still observed failing.",
+      "files": [
+        {
+          "file": "tools/check_boundaries.py",
+          "superseded_digest": "sha256:8071d71eb67b7228f6aea4198d825274462239e09e9177a60c877227e83304ed",
+          "sealed_digest": "sha256:4faac772e1aa62d140579f474e7bd627505e0bb6d810dae245a42c093eff6379"
+        }
+      ]
+    }
+  ],
   "files": {
     ".github/pull_request_template.md": "sha256:00363c6ae14a5fb8213b119d90e1249f1ea86e586b2af0ccc00d58fc22d10128",
     ".github/workflows/ci.yml": "sha256:3d6d1aa9afd2a9671f5b997a78d6e4b127687187bfa9c9a4b6c5bbc800231d19",
     "docs/sprint0/README.md": "sha256:b144072b28702e3d8ba4a8ca5bae52fe0380de1c0f57e31df9c85a3c1ba63418",
-    "docs/sprint0/active-mvp-contract.json": "sha256:653e0c321e321c902bb85384740fa384d5d4490bd2579a267e45d2e58e13f961",
+    "docs/sprint0/active-mvp-contract.json": "sha256:4eec41c99998e74787134946a8f0f846827d0b9f2747c3ce7ab6d1466cca05df",
     "docs/sprint0/schema-archaeology/field-inventory.md": "sha256:18030909d97563848ad29d96aadd4ed25b1b8b69beb9945c175d16ec2674f2e9",
     "docs/sprint0/schema-archaeology/independent-review-2026-08-15.md": "sha256:e419a17156d4f8f5b4a1b1064232f5ddd1389cb62abd4ed3e611fc4fe196fee7",
     "docs/sprint0/schema-archaeology/reconstruction-gaps.md": "sha256:9cad48b29b0d777b0e6a30796ef24bead302ef9fd3e86d995de68864e2df1ba1",
@@ -32,10 +65,10 @@
     "docs/sprint1/dev-2-packet.md": "sha256:b8ca8f7a50d247a410793cd958c8bf18dde0a42804e0c3dae4a5f10e2a85c091",
     "docs/sprint1/dev-3-packet.md": "sha256:52f1ad77133f791ea4e4d2467f54dbb64295b7f3e96ce5c931ee61c136e87bb3",
     "docs/sprint1/dev-4-packet.md": "sha256:96ba20b013abd62930017ff932c220136b817c85dcbac53b556ea8935dc493ed",
-    "docs/v4/09_vanguard_decision_register_v040.md": "sha256:9e6b495804084b05251962f46b8f17a3f835c097d8b243ce70ae11a2a7463f59",
+    "docs/v4/09_vanguard_decision_register_v040.md": "sha256:8096e824bacf71d6728d80968f188c61faab4efa5baca7a5dd122c7236c8bb35",
     "tools/check_active_mvp_contract.py": "sha256:17410bb078df82842d13c8101b705764ebc57b5e4c36f6b733468e15f0567fe9",
     "tools/check_pr_requirements.py": "sha256:2d34d8f8fe44cef5c1fb4a52e87363a98c6a0675c4a1206527bcffeba4072c93",
-    "tools/check_boundaries.py": "sha256:8071d71eb67b7228f6aea4198d825274462239e09e9177a60c877227e83304ed",
+    "tools/check_boundaries.py": "sha256:4faac772e1aa62d140579f474e7bd627505e0bb6d810dae245a42c093eff6379",
     "tools/check_schema_archaeology.py": "sha256:92ead2c3e7603acb7419128c47d2fcf692e7101f7b156755daab0fc1683bcc8a",
     "tools/check_sprint0_governance.py": "sha256:470a5a16ed06fed469ed6508210b3b1c06a3e380dab82188460804215fbcba83",
     "tools/run_active_contract_tests.py": "sha256:f43a1b63ea909722f67d4679d98e0c94c15024d122b999f2a688288bcac3f0c4",

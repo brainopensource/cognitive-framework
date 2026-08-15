@@ -20,7 +20,13 @@ ALLOWED = {
     "kernel": {"domain", "ports"},
     "agency": {"domain", "ports", "kernel"},
     "adapters": {"domain", "ports"},
-    "runtime": {"domain", "ports", "kernel", "agency", "adapters"},
+    # VG-03 LT-6: runtime/ may import everything, and it is the only module
+    # that may -- it is the composition root. Omitting "governance" made the
+    # declared approval process unreachable from any composition, which is a
+    # gap in this table rather than a property of the architecture.
+    "runtime": {"domain", "ports", "kernel", "agency", "adapters", "governance"},
+    # VG-03 5.4: no model dependency in governance. A compliance path that
+    # calls an LLM is not a compliance path, so this row stays narrow.
     "governance": {"domain", "ports", "kernel"},
     "client": {"domain", "runtime"},
 }

@@ -445,12 +445,14 @@ Authorisation: `AuthorizationRequested`, `CapabilityGranted`, **`AuthorizationDe
 Budget: `BudgetReserved`, `BudgetCommitted`, `BudgetReleased`.
 Effects: `EffectPreviewed`, **`EffectStarted`**, `EffectCompleted`, `EffectReconciled`, `ConflictDetected`.
 Evidence: `EvaluationRequested`, `EvidenceClaimProduced`.
-Competence: `ArtifactCreated`, `ActivationChanged`.
+Competence: `ArtifactCreated`, `ActivationChanged`, `CompetencePriorRecorded`.
 Human: `ApprovalRequested`, `ApprovalResolved`.
 Liveness and recovery: `Heartbeat`, `RunRecovered`, `RunAborted`.
 Evolution: `CandidateBuilt`, `CandidateAttested`, `CanaryPromoted`, `RollbackTriggered`.
 
 `AuthorizationDenied` carries the reason, what was requested and what was grantable. Scope escalation is a first-class, alertable signal — not a log line.
+
+`CompetencePriorRecorded` carries a **pre-action** prior $P(\text{success} \mid \text{task})$ and the digest of the exact context vector it was a prior for. Without the digest the prior is unscoreable: offline Brier calibration would be comparing outcomes against a prompt nobody can reconstruct. It is emitted before the first turn reaches the provider, so it cannot be conditioned on evidence the episode has not yet seen.
 
 `ConflictDetected` discharges `03 [CC-6]`: concurrent branches racing on one resource produce a record, never last-write-wins. `CapabilityRevoked` discharges the Control plane's revocation and kill-switch authority (`03 §3`); a revocation that leaves no event is indistinguishable from a grant that was never issued.
 

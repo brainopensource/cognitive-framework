@@ -82,6 +82,7 @@ EVENT_KINDS = frozenset({
     # Competence
     "ArtifactCreated",
     "ActivationChanged",
+    "CompetencePriorRecorded",
     # Human
     "ApprovalRequested",
     "ApprovalResolved",

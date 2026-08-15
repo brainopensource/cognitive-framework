@@ -200,9 +200,19 @@ class CompiledContext:
 
         A mapping rather than this type, so no adapter has to import `agency`
         to call `propose` — the seam stays structural.
+
+        `messages` carries `role` and `content` and nothing else, because a
+        provider adapter forwards it to a wire API that rejects — or worse,
+        silently retains — fields it does not know. The layer tags, breakpoints
+        and provenance a caller needs for cache accounting are the *same*
+        messages under `layers`, in the same order, so nothing is lost by
+        sending the narrow form.
         """
+        rendered = self.messages()
         return {
-            "messages": self.messages(),
+            "messages": tuple({"role": message["role"], "content": message["content"]}
+                              for message in rendered),
+            "layers": rendered,
             "promptDigest": self.digest,
             "prefixDigest": self.prefix_digest,
             "tokens": self.total_tokens,

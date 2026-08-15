@@ -341,9 +341,20 @@ class Reach(unittest.TestCase):
         compiled: CompiledContext = build().compile(brief="fix the parser")
         bundle = compiled.bundle()
 
-        self.assertEqual([message["layer"] for message in bundle["messages"]],
+        self.assertEqual([message["layer"] for message in bundle["layers"]],
                          ["L1", "L2", "L3", "L4"])
         self.assertEqual(bundle["promptDigest"], compiled.digest)
+
+    def test_the_wire_messages_carry_only_role_and_content(self) -> None:
+        """A provider adapter forwards `messages` to a wire API. Layer tags and
+        provenance are ours, not the provider's, and a field it does not know
+        is one it may reject or silently retain."""
+        bundle = build().compile(brief="fix the parser", dialogue=dialogue(1)).bundle()
+
+        for message in bundle["messages"]:
+            self.assertEqual(set(message), {"role", "content"})
+        self.assertEqual([message["content"] for message in bundle["messages"]],
+                         [message["content"] for message in bundle["layers"]])
 
 
 if __name__ == "__main__":

@@ -345,6 +345,24 @@ class GitEnvironment:
                     hunk_match = _HUNK_HEADER.match(lines[i])
                     if not hunk_match:
                         return Result.fail("invalid_request", f"malformed hunk header: {lines[i]}")
+                    # Honour the hunk's old-file start line. Without this the
+                    # first hunk is applied from line 1 whatever its header
+                    # says, so every diff that does not begin at the top of the
+                    # file reports a context mismatch against itself. Lines
+                    # before the hunk are unchanged and copy across verbatim.
+                    hunk_start = int(hunk_match.group(1))
+                    target_idx = max(hunk_start - 1, 0) if hunk_start else 0
+                    if target_idx < orig_idx:
+                        return Result.fail(
+                            "invalid_request",
+                            f"hunks out of order in {norm_rel} at line {hunk_start}")
+                    if target_idx > len(orig_lines):
+                        return Result.fail(
+                            "conflict",
+                            f"hunk starts past end of {norm_rel} at line {hunk_start}")
+                    while orig_idx < target_idx:
+                        new_file_lines.append(orig_lines[orig_idx])
+                        orig_idx += 1
                     i += 1
 
                     while i < len(lines) and not lines[i].startswith("@@") and not lines[i].startswith("--- ") and not lines[i].startswith("diff --git"):

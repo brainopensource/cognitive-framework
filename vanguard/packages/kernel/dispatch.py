@@ -43,7 +43,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 from ..domain.canonicalisation.jcs import CanonicalisationError
-from .attenuation import Constraints, Scope
+from .attenuation import Scope
 from .budget import BudgetDenied, Governor, Lease, Reservation
 from .classifier import SinkRegistry
 from .grants import Grant, GrantIssuer, MissingDescriptorBinding, descriptor_of
@@ -252,10 +252,19 @@ class Kernel:
         *,
         cross_process: bool,
     ) -> DispatchResult:
+        """S8..S10 inside the guard, S11 in `finally`, S12 only afterwards.
+
+        Nothing in this block emits. `K-06` puts release strictly before emit,
+        and a `return` inside `try` evaluates its expression *before* the
+        `finally` runs — so emitting from here would silently reverse the two
+        and reintroduce exactly the defect the rule exists to prevent. The
+        block therefore records an outcome and lets `_finish` emit it.
+        """
         failure = FailurePath.OK
         outcome: AdapterOutcome | None = None
         detail = ""
         settlement: Mapping[str, int] = {}
+        intent: Event | None = None
         try:
             # -- S8 VERIFY, at the point of effect (`K-05`) -------------
             if grant is not None:
@@ -265,63 +274,64 @@ class Kernel:
                 if not verification.ok:
                     failure = verification.failure or FailurePath.GRANT_MISMATCH
                     detail = verification.detail
-                    return self._finish(request, lease, emitted, failure, descriptor,
-                                        None, detail, settlement)
-                self._issuer.consume(grant)
+                else:
+                    self._issuer.consume(grant)
 
             # -- S8a INTENT, durable before the effect begins (`K-47`) --
-            intent = Event(
-                kind="EffectStarted", reason="intent", at=self._clock.now(),
-                run_id=request.run_id, principal=request.principal,
-                payload={"descriptorDigest": descriptor,
-                         "grantId": grant.grant_id if grant else None,
-                         "idempotencyKey": request.idempotency_key,
-                         "sinkClass": self._sinks.sink_class(request.action).value})
-            try:
-                self._ledger.append_intent(intent)
-            except Exception as exc:
-                # `F-21a`: the effect never starts. Alertable.
-                self._emit(emitted, request, "KernelAlarm", "intent_append_failed",
-                           {"descriptorDigest": descriptor, "error": str(exc)},
-                           alertable=True)
-                return self._finish(request, lease, emitted,
-                                    FailurePath.INTENT_APPEND_FAILED, descriptor,
-                                    None, str(exc), settlement)
-            emitted.append(intent)
+            if failure is FailurePath.OK:
+                intent = Event(
+                    kind="EffectStarted", reason="intent", at=self._clock.now(),
+                    run_id=request.run_id, principal=request.principal,
+                    payload={"descriptorDigest": descriptor,
+                             "grantId": grant.grant_id if grant else None,
+                             "idempotencyKey": request.idempotency_key,
+                             "sinkClass": self._sinks.sink_class(request.action).value})
+                try:
+                    self._ledger.append_intent(intent)
+                except Exception as exc:
+                    # `F-21a`: the effect never starts.
+                    failure = FailurePath.INTENT_APPEND_FAILED
+                    detail = str(exc)
+                    intent = None
 
             # -- S9 DISPATCH -------------------------------------------
-            try:
-                outcome = adapter.execute(request)
-            except Exception as exc:
-                failure = FailurePath.ADAPTER_ERROR
-                detail = str(exc)
-                outcome = AdapterOutcome("error", Occurrence.UNDETERMINABLE, detail=detail)
-            else:
-                failure = _failure_for(outcome)
-                detail = outcome.detail or ""
+            if failure is FailurePath.OK:
+                try:
+                    outcome = adapter.execute(request)
+                except Exception as exc:
+                    # An adapter that raises leaves occurrence unknown: it may
+                    # have reached the external system before failing (`F-22`).
+                    detail = str(exc)
+                    outcome = AdapterOutcome("error", Occurrence.UNDETERMINABLE, detail=detail)
+                    failure = FailurePath.UNDETERMINABLE
+                else:
+                    failure = _failure_for(outcome)
+                    detail = outcome.detail or ""
 
-            # -- S10 COMMIT — debits reality, overruns included (`K-07`) -
-            try:
-                settlement = self._governor.commit(lease, dict(outcome.actual_cost))
-            except Exception as exc:
-                failure = FailurePath.COMMIT_FAILED
-                detail = str(exc)
+                # -- S10 COMMIT — debits reality, overruns included ----
+                try:
+                    settlement = self._governor.commit(lease, dict(outcome.actual_cost))
+                except Exception as exc:
+                    failure = FailurePath.COMMIT_FAILED
+                    detail = str(exc)
         finally:
             # -- S11 RELEASE — every path, always, before S12 (`K-06`) --
             try:
                 self._governor.release(lease)
-            except Exception as exc:  # `F-24`: leaked. This must page.
+            except Exception as exc:  # `F-24`: leaked. This must page, not log.
                 self._emit(emitted, request, "KernelAlarm", "lease_leak",
                            {"leaseId": lease.lease_id, "error": str(exc)}, alertable=True)
                 raise KernelAlarm(f"lease {lease.lease_id} leaked: {exc}") from exc
 
-        return self._finish(request, lease, emitted, failure, descriptor,
-                            outcome, detail, settlement)
+        # -- S12 EMIT ---------------------------------------------------
+        if intent is not None:
+            emitted.append(intent)
+            self._publish(intent)
+        return self._finish(request, emitted, failure, descriptor, outcome, detail, settlement)
 
     def _finish(
         self,
         request: EffectRequest,
-        lease: Lease,
         emitted: list[Event],
         failure: FailurePath,
         descriptor: str,
@@ -329,9 +339,11 @@ class Kernel:
         detail: str,
         settlement: Mapping[str, int],
     ) -> DispatchResult:
-        """S11 then S12. Release has already happened on every path here."""
-        self._governor.release(lease)
-        if failure in _GRANT_FAILURES:
+        """S12 EMIT. The lease is already released on every path reaching here."""
+        if failure is FailurePath.INTENT_APPEND_FAILED:
+            self._emit(emitted, request, "KernelAlarm", "intent_append_failed",
+                       {"descriptorDigest": descriptor, "detail": detail}, alertable=True)
+        elif failure in _GRANT_FAILURES:
             self._emit(emitted, request, "EffectRejected", failure.name.lower(),
                        {"descriptorDigest": descriptor, "detail": detail},
                        alertable=failure in ALERTABLE)
@@ -339,9 +351,9 @@ class Kernel:
             # `F-22`: uncertainty is preserved, never resolved to success or
             # failure. Resolving it would be manufacturing evidence.
             self._emit(emitted, request, "EffectReconciled", "unknown",
-                       {"descriptorDigest": descriptor,
+                       {"descriptorDigest": descriptor, "detail": detail,
                         "occurrence": Occurrence.UNDETERMINABLE.value})
-        elif failure is not FailurePath.INTENT_APPEND_FAILED:
+        else:
             self._emit(emitted, request, "EffectCompleted",
                        "ok" if failure is FailurePath.OK else failure.name.lower(),
                        {"descriptorDigest": descriptor,
@@ -365,6 +377,9 @@ class Kernel:
                       run_id=request.run_id, principal=request.principal,
                       payload=dict(payload), alertable=alertable)
         emitted.append(event)
+        self._publish(event)
+
+    def _publish(self, event: Event) -> None:
         try:
             self._events.emit(event)
         except Exception:
@@ -378,7 +393,6 @@ _GRANT_FAILURES = frozenset({
     FailurePath.GRANT_EXPIRED,
     FailurePath.GRANT_REPLAY,
     FailurePath.GRANT_FORGED,
-    FailurePath.INTENT_APPEND_FAILED,
 })
 
 

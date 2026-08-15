@@ -26,6 +26,8 @@ This mapping resolves vocabulary without changing the v4 topology. A new seventh
 
 An arrow points from a consumer to what it may import:
 
+The compact mandated notation is `domain <- ports <- kernel <- agency <- runtime -> adapters`; the expanded graph below removes the notation's ambiguity by listing every allowed edge.
+
 ```text
 runtime ────────→ agency ────────→ kernel ────────→ ports ────────→ domain
    │                 │                │                 │

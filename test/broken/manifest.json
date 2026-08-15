@@ -1,0 +1,24 @@
+{
+  "schema_version": "gts.broken-test-manifest.v1",
+  "cases": [
+    {
+      "test_id": "MF-S0-001",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/forbidden_direction"],
+      "expected_failure": "forbidden ports -> agency import"
+    },
+    {
+      "test_id": "MF-S0-002",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/disposable_import"],
+      "expected_failure": "imports disposable spike/"
+    },
+    {
+      "test_id": "MF-S0-003",
+      "control": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/valid"],
+      "broken": ["python3", "tools/check_boundaries.py", "--root", "test/broken/fixtures/cycle"],
+      "expected_failure": "source import cycle"
+    }
+  ]
+}
+

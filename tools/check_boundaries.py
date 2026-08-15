@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+"""Fail on forbidden Vanguard imports, disposable imports, or source cycles."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import re
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+
+SOURCE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}
+IGNORED_PARTS = {".git", ".venv", "node_modules", "__pycache__", "dist", "build"}
+PACKAGE_NAMES = {"domain", "ports", "kernel", "agency", "runtime", "adapters"}
+ALLOWED = {
+    "domain": set(),
+    "ports": {"domain"},
+    "kernel": {"domain", "ports"},
+    "agency": {"domain", "ports", "kernel"},
+    "adapters": {"domain", "ports"},
+    "runtime": {"domain", "ports", "kernel", "agency", "adapters"},
+    "governance": {"domain", "ports", "kernel"},
+}
+
+JS_IMPORT = re.compile(
+    r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
+    r"[\"']([^\"']+)[\"']"
+)
+
+
+def source_files(root: Path) -> list[Path]:
+    starts = [root / "vanguard" / "packages", root / "spike", root / "slice", root / "lab"]
+    files: list[Path] = []
+    for start in starts:
+        if not start.exists():
+            continue
+        for path in start.rglob("*"):
+            if path.is_file() and path.suffix in SOURCE_SUFFIXES and not (set(path.parts) & IGNORED_PARTS):
+                files.append(path.resolve())
+    return sorted(set(files))
+
+
+def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
+    rel = path.resolve().relative_to(root.resolve())
+    parts = rel.parts
+    if parts and parts[0] in {"spike", "slice", "lab"}:
+        return parts[0], None
+    if len(parts) >= 3 and parts[:2] == ("vanguard", "packages"):
+        package = parts[2]
+        if package == "runtime" and len(parts) >= 4 and parts[3] == "governance":
+            return "governance", None
+        if package == "adapters":
+            family = parts[3] if len(parts) >= 4 else None
+            return "adapters", family
+        if package in PACKAGE_NAMES:
+            return package, None
+    return None, None
+
+
+def python_imports(path: Path) -> list[tuple[int, str]]:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (SyntaxError, UnicodeDecodeError) as exc:
+        raise ValueError(f"cannot parse {path}: {exc}") from exc
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            found.extend((node.lineno, alias.name) for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            prefix = "." * node.level
+            found.append((node.lineno, prefix + (node.module or "")))
+    return found
+
+
+def imports_in(path: Path) -> list[tuple[int, str]]:
+    if path.suffix == ".py":
+        return python_imports(path)
+    text = path.read_text(encoding="utf-8")
+    return [(text.count("\n", 0, match.start()) + 1, match.group(1)) for match in JS_IMPORT.finditer(text)]
+
+
+def resolve_relative(source: Path, spec: str) -> Path | None:
+    if not spec.startswith("."):
+        return None
+    if source.suffix == ".py":
+        levels = len(spec) - len(spec.lstrip("."))
+        base = source.parent
+        for _ in range(max(levels - 1, 0)):
+            base = base.parent
+        tail = spec[levels:].replace(".", "/")
+        candidate = base / tail if tail else base / "__init__"
+    else:
+        candidate = source.parent / spec
+    options = [candidate]
+    options.extend(candidate.with_suffix(suffix) for suffix in SOURCE_SUFFIXES)
+    options.extend(candidate / ("index" + suffix) for suffix in SOURCE_SUFFIXES)
+    options.append(candidate / "__init__.py")
+    for option in options:
+        if option.is_file():
+            return option.resolve()
+    return None
+
+
+def area_from_spec(spec: str) -> tuple[str | None, str | None]:
+    normal = spec.replace("@vanguard/", "vanguard/packages/").replace(".", "/")
+    parts = tuple(part for part in normal.split("/") if part)
+    for disposable in ("spike", "slice", "lab"):
+        if disposable in parts:
+            return disposable, None
+    if "packages" in parts:
+        index = parts.index("packages") + 1
+        if index < len(parts) and parts[index] in PACKAGE_NAMES:
+            package = parts[index]
+            if package == "runtime" and index + 1 < len(parts) and parts[index + 1] == "governance":
+                return "governance", None
+            family = parts[index + 1] if package == "adapters" and index + 1 < len(parts) else None
+            return package, family
+    if parts and parts[0] in PACKAGE_NAMES:
+        family = parts[1] if parts[0] == "adapters" and len(parts) > 1 else None
+        return parts[0], family
+    return None, None
+
+
+def find_cycles(graph: dict[Path, set[Path]]) -> list[list[Path]]:
+    state: dict[Path, int] = {}
+    stack: list[Path] = []
+    cycles: list[list[Path]] = []
+
+    def visit(node: Path) -> None:
+        state[node] = 1
+        stack.append(node)
+        for target in sorted(graph.get(node, set())):
+            if state.get(target, 0) == 0:
+                visit(target)
+            elif state.get(target) == 1:
+                start = stack.index(target)
+                cycle = stack[start:] + [target]
+                if cycle not in cycles:
+                    cycles.append(cycle)
+        stack.pop()
+        state[node] = 2
+
+    for node in sorted(graph):
+        if state.get(node, 0) == 0:
+            visit(node)
+    return cycles
+
+
+def check(root: Path, s4_exit: bool) -> list[str]:
+    errors: list[str] = []
+    files = source_files(root)
+    graph: dict[Path, set[Path]] = defaultdict(set)
+    for source in files:
+        source_area, source_family = area_for(source, root)
+        try:
+            imports = imports_in(source)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+        for line, spec in imports:
+            if source_area == "lab":
+                errors.append(f"{source.relative_to(root)}:{line}: lab/ must import nothing ({spec!r})")
+                continue
+            resolved = resolve_relative(source, spec)
+            if resolved and resolved in files:
+                graph[source].add(resolved)
+                target_area, target_family = area_for(resolved, root)
+            else:
+                target_area, target_family = area_from_spec(spec)
+            if not target_area or target_area == source_area:
+                if source_area == "adapters" and target_area == "adapters" and source_family and target_family and source_family != target_family:
+                    errors.append(f"{source.relative_to(root)}:{line}: adapter family {source_family!r} imports sibling {target_family!r}")
+                continue
+            if target_area in {"spike", "slice"}:
+                errors.append(f"{source.relative_to(root)}:{line}: imports disposable {target_area}/ via {spec!r}")
+                continue
+            if target_area == "lab":
+                errors.append(f"{source.relative_to(root)}:{line}: lab/ must import nothing and be imported by nothing ({spec!r})")
+                continue
+            if source_area in {"spike", "slice"}:
+                continue
+            if source_area in ALLOWED and target_area not in ALLOWED[source_area]:
+                errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
+
+    for cycle in find_cycles(graph):
+        rendered = " -> ".join(str(path.relative_to(root)) for path in cycle)
+        errors.append(f"source import cycle: {rendered}")
+
+    if s4_exit:
+        for name in ("spike", "slice"):
+            if (root / name).exists():
+                errors.append(f"S4 exit requires {name}/ to be absent")
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--s4-exit", action="store_true")
+    args = parser.parse_args()
+    root = args.root.resolve()
+    errors = check(root, args.s4_exit)
+    if errors:
+        for error in errors:
+            print(f"BOUNDARY FAIL: {error}")
+        return 1
+    print(f"BOUNDARY PASS: {len(source_files(root))} source files checked")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

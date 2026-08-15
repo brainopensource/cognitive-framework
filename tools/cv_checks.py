@@ -9,6 +9,12 @@ Exit 1 on any FAIL.
 """
 import re, sys, glob, os, subprocess
 from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+os.chdir(ROOT / "docs" / "v4")
+AUDIT_TOOL = ROOT / "tools" / "audit_v4.py"
+WORDCOUNT_TOOL = ROOT / "tools" / "wordcount_v4.sh"
 
 RULE_IN_TABLE = re.compile(r"\|\s*\*{0,2}`?([A-Z]{1,4})-(\d{1,4})`?\*{0,2}\s*\|")
 RULE_IN_QUOTE = re.compile(r"^>\s*\*\*`([A-Z]{1,4})-(\d{1,4})`")
@@ -146,7 +152,7 @@ def main():
            manual="Chapter 8 migration ledger fully DONE — reviewer confirms")
 
     # CV-11 — CI-1..CI-9 pass
-    ci = subprocess.run([sys.executable, "tools/audit_v4.py"], capture_output=True, text=True)
+    ci = subprocess.run([sys.executable, str(AUDIT_TOOL)], capture_output=True, text=True)
     record("CV-11", ci.returncode == 0, "audit_v4.py " + ("clean" if ci.returncode == 0 else "FAILED"))
 
     # CV-12 — word budgets
@@ -155,7 +161,7 @@ def main():
         caps[m.group(1)] = (m.group(2), int(m.group(3).replace(",", "")))
     over, normative = [], 0
     for p in sorted(glob.glob("[0-9][0-9]_vanguard_*.md")):
-        n = int(subprocess.run(["sh", "tools/wordcount_v4.sh", p],
+        n = int(subprocess.run(["sh", str(WORDCOUNT_TOOL), p],
                                capture_output=True, text=True).stdout.split()[0])
         doc = os.path.basename(p)[:2]
         if doc in caps:

@@ -3,7 +3,7 @@
 Project decision: `NOT STARTED — after Sprint 3 integration`  
 Decisions: `ADR-0047`, `ADR-0048`, `ADR-0055`, `ADR-0056`
 
-Split a/b. Same four people. OpenRouter is parallel and **off** the trust-spine command.
+Split a/b. Same four people. OpenRouter is parallel and **off** the trust-spine command. Wave prompts: `docs/sprint3-4/lane-a.md` … `lane-d.md`.
 
 | Half | Lane | Packet | Cx | Contract |
 |---|---|---|---|---|

@@ -7,7 +7,7 @@
 | `guidelines_sprint_3_4.md` | Project Lead + Tech Lead | **Run this** to produce Sprint 3–4 packets, contract rows and the four-lane structure |
 | `guidelines_sprint_3_4_briefing.md` | PM / Scrum / leads | Inventory, beta definition, SA/SB/DC/DD lanes |
 
-Developers do not receive the `guidelines_*.md` leadership prompts. They receive `docs/sprintN/` packets only.
+Developers do not receive the `guidelines_*.md` leadership prompts. For this wave they receive `docs/sprint3-4/lane-a.md` … `lane-d.md` plus the matching `docs/sprint3/` and `docs/sprint4/` packets.
 
-Sprint 3–4 packets: `docs/sprint3/`, `docs/sprint4/`. Implementation of those sprints is **not** started; `DECISION-0003` is a conditional go only.
+Sprints 0–2 engineering is **DONE**. Sprint 3–4 implementation starts on `sprints3-4/integration`.
 

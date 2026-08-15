@@ -1,6 +1,6 @@
 # Sprint 2 closure
 
-Status: `ENGINEERING CLOSED — APPROVAL-0003`  
+Status: `DONE — ENGINEERING CLOSED — APPROVAL-0003`  
 Merged: PR #4 `sprint2/alpha-beta-gamma`  
 Decision: `DECISION-0002`
 

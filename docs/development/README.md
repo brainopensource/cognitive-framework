@@ -9,4 +9,5 @@
 
 Developers do not receive the `guidelines_*.md` leadership prompts. They receive `docs/sprintN/` packets only.
 
-Sprint 3–4 packets do not exist until the Tech Lead and Project Lead execute `guidelines_sprint_3_4.md` and record a go.
+Sprint 3–4 packets: `docs/sprint3/`, `docs/sprint4/`. Implementation of those sprints is **not** started; `DECISION-0003` is a conditional go only.
+

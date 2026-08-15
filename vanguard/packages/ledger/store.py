@@ -19,7 +19,6 @@ from typing import Any, Optional, Sequence, Union
 
 from ..domain.canonicalisation.digest import digest_of
 from ..domain.ledger.events import EventEnvelope, parse_event_envelope
-from ..domain.primitives.primitives import int_string_to_int
 from ..ports.event_store import EventRange, EventStorePort, PortFailure, Result
 
 __all__ = [
@@ -43,16 +42,16 @@ class InMemoryEventStore(EventStorePort):
 
         with self._lock:
             # Validate monotonicity and integrity across all incoming events before committing any
-            last_global_seq = int_string_to_int(self._events[-1].seq) if self._events else -1
+            last_global_seq = int(self._events[-1].seq) if self._events else -1
             run_last_seqs: dict[str, int] = {}
             for r_id, r_events in self._by_run.items():
                 if r_events:
-                    run_last_seqs[r_id] = int_string_to_int(r_events[-1].seq)
+                    run_last_seqs[r_id] = int(r_events[-1].seq)
 
             # Check incoming batch for internal and external monotonicity
             current_batch_run_seqs = dict(run_last_seqs)
             for idx, event in enumerate(events):
-                seq_int = int_string_to_int(event.seq)
+                seq_int = int(event.seq)
                 r_id = event.run_id or "__global__"
                 prior_seq = current_batch_run_seqs.get(r_id, -1)
                 if seq_int <= prior_seq:
@@ -86,7 +85,7 @@ class InMemoryEventStore(EventStorePort):
                 source = self._by_run.get(range_query.run_id, [])
 
             filtered: list[EventEnvelope] = []
-            after_seq_int = int_string_to_int(range_query.after_seq) if range_query.after_seq is not None else -1
+            after_seq_int = int(range_query.after_seq) if range_query.after_seq is not None else -1
 
             for event in source:
                 if range_query.run_id is not None and event.run_id != range_query.run_id:
@@ -95,7 +94,7 @@ class InMemoryEventStore(EventStorePort):
                     continue
                 if range_query.scope is not None and event.scope != range_query.scope:
                     continue
-                if int_string_to_int(event.seq) <= after_seq_int:
+                if int(event.seq) <= after_seq_int:
                     continue
 
                 filtered.append(event)
@@ -177,7 +176,7 @@ class SqliteEventStore(EventStorePort):
                 cur.execute("BEGIN IMMEDIATE;")
 
                 for event in events:
-                    seq_int = int_string_to_int(event.seq)
+                    seq_int = int(event.seq)
                     r_id = event.run_id or "__global__"
 
                     # Verify sequence monotonicity within the run in the database
@@ -259,7 +258,7 @@ class SqliteEventStore(EventStorePort):
                     params.append(range_query.scope)
                 if range_query.after_seq is not None:
                     query += " AND seq > ?"
-                    params.append(int_string_to_int(range_query.after_seq))
+                    params.append(int(range_query.after_seq))
 
             query += " ORDER BY global_id ASC"
 

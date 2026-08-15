@@ -16,7 +16,6 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
 from ..canonicalisation.digest import digest_of
-from ..primitives.primitives import int_string_to_int
 from .events import EventEnvelope
 from .state import (
     ApprovalRecord,
@@ -59,9 +58,9 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
     - Strictly monotonic sequence enforcement within the run.
     - Pure functional updates returning a new immutable LedgerState.
     """
-    seq_int = int_string_to_int(envelope.seq)
+    seq_int = int(envelope.seq)
     if state.last_seq is not None:
-        last_seq_int = int_string_to_int(state.last_seq)
+        last_seq_int = int(state.last_seq)
         if seq_int <= last_seq_int:
             raise ReducerError(
                 f"Non-monotonic sequence: incoming seq {envelope.seq} ({seq_int}) "
@@ -290,14 +289,15 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         if desc_digest:
             prev = effects.get(desc_digest)
             reconcile_status = payload.get("status", "undeterminable")
+            outcome = reconcile_status if reconcile_status == "undeterminable" else (prev.outcome if prev and prev.outcome else "ok")
             effects[desc_digest] = EffectRecord(
                 descriptor_digest=desc_digest,
                 sink_class=prev.sink_class if prev else None,
                 grant_id=prev.grant_id if prev else None,
                 preview_summary=prev.preview_summary if prev else None,
                 status="reconciled",
-                receipt_digest=prev.receipt_digest if prev else None,
-                outcome=prev.outcome if prev else (reconcile_status if reconcile_status == "undeterminable" else "ok"),
+                receipt_digest=prev.receipt_digest if prev else payload.get("receiptDigest"),
+                outcome=outcome,
                 result_digest=prev.result_digest if prev else None,
                 idempotency_key=payload.get("idempotencyKey"),
                 reconciliation_status=reconcile_status,
@@ -305,13 +305,15 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             )
 
     elif kind == "ArtifactCreated":
-        artifact_id = payload.get("artifactId") or payload.get("id")
+        artifact_data = payload.get("artifact", payload)
+        artifact_id = artifact_data.get("artifactId") or artifact_data.get("id")
         if artifact_id:
+            art_kind = artifact_data.get("artifactKind") or (artifact_data.get("kind") if artifact_data.get("kind") != "ArtifactCreated" else "M")
             artifacts[artifact_id] = ArtifactRecord(
                 artifact_id=artifact_id,
-                kind=payload.get("kind", "M"),
-                version=payload.get("version") or payload.get("artifactVersion", "1.0.0"),
-                content_digest=payload.get("contentDigest", ""),
+                kind=art_kind or "M",
+                version=artifact_data.get("version") or artifact_data.get("artifactVersion", "1.0.0"),
+                content_digest=artifact_data.get("contentDigest", ""),
                 status="active",
             )
 

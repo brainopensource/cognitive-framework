@@ -15,7 +15,6 @@ from typing import Any, Optional, Sequence, TypeVar
 
 from ..domain.canonicalisation.digest import digest_of
 from ..domain.ledger.events import EventEnvelope
-from ..domain.primitives.primitives import int_string_to_int
 from ..ports.event_store import EventRange, EventStorePort
 
 __all__ = [

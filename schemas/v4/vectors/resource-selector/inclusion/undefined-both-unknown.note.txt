@@ -1,0 +1,1 @@
+Two undefined selectors are still undefined, even when identical.

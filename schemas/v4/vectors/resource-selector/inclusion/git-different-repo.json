@@ -1,0 +1,20 @@
+{
+  "parent": {
+    "kind": "git",
+    "repo": "git://h/r.git",
+    "refs": [
+      "refs/heads/main"
+    ]
+  },
+  "child": {
+    "kind": "git",
+    "repo": "git://h/other.git",
+    "refs": [
+      "refs/heads/main"
+    ]
+  },
+  "expected": {
+    "included": false,
+    "reason": "not_included"
+  }
+}

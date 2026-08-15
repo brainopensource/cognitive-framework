@@ -1,0 +1,21 @@
+{
+  "parent": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w/a"
+    ]
+  },
+  "child": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w/a",
+      "/w/b"
+    ]
+  },
+  "expected": {
+    "included": false,
+    "reason": "not_included"
+  }
+}

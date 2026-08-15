@@ -1,0 +1,1 @@
+There is no wildcard origin; origin is the browser's own trust unit.

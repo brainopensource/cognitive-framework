@@ -1,0 +1,1 @@
+Act only on the supplied repository task. Use the scoped shell capability and report observed test results.

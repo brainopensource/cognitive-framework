@@ -1,0 +1,1 @@
+{"name":"shell","verb":"proc.exec","description":"Execute one allowlisted repository command through the environment boundary."}

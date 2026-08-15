@@ -1,0 +1,5 @@
+{
+  "manifests": [
+    {"name":"vg-shell-only","path":"vg-shell-only/manifest.json","undeletable":true,"role":"experimental-control"}
+  ]
+}

@@ -1,16 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vanguard.dev/schemas/v4/receipt.schema.json",
-  "$comment": "Candidate owned by Sprint 1 S1-D2-003 / REQ-SCHEMA-006.",
+  "$comment": "Owning section: 04 §5; GTS-13C T1.6. Undeterminable occurrence remains first-class.",
   "title": "Receipt",
   "type": "object",
   "required": ["descriptorDigest", "outcome", "observedAt", "resultDigest", "affectedResources"],
   "properties": {
-    "descriptorDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
-    "grantId": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/GrantId" },
+    "descriptorDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "grantId": { "$ref": "primitives.schema.json#/$defs/GrantId" },
     "outcome": { "enum": ["ok", "failed", "undeterminable"] },
-    "observedAt": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Timestamp" },
-    "resultDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
+    "observedAt": { "$ref": "primitives.schema.json#/$defs/Timestamp" },
+    "resultDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
     "affectedResources": {
       "type": "array",
       "items": {
@@ -19,15 +19,11 @@
         "properties": {
           "resource": { "type": "string", "minLength": 1 },
           "change": { "enum": ["created", "modified", "deleted", "observed"] },
-          "preDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
-          "postDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
-          "patchRef": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" }
+          "preDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+          "postDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+          "patchRef": { "$ref": "primitives.schema.json#/$defs/Digest" }
         },
-        "additionalProperties": false,
-        "allOf": [
-          { "if": { "properties": { "change": { "enum": ["modified", "deleted", "observed"] } }, "required": ["change"] }, "then": { "required": ["preDigest"] } },
-          { "if": { "properties": { "change": { "enum": ["created", "modified", "observed"] } }, "required": ["change"] }, "then": { "required": ["postDigest"] } }
-        ]
+        "additionalProperties": false
       }
     },
     "workingDirectory": { "type": "string", "minLength": 1 },

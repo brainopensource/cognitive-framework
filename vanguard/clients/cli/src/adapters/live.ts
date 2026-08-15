@@ -1,6 +1,7 @@
 import { fail, parseJsonlLine } from "../contract/parse.js";
 import type {
   EventCursor,
+  CorrectionRecord,
   Result,
   ResumeRunRequest,
   ResolveApprovalRequest,
@@ -57,5 +58,9 @@ export class LiveRuntimeClient implements RuntimeClient {
 
   async resolveApproval(request: ResolveApprovalRequest): Promise<Result<never>> {
     return unavailable(`resolveApproval(${request.approvalId})`);
+  }
+
+  async recordCorrection(_record: CorrectionRecord): Promise<Result<never>> {
+    return unavailable("recordCorrection");
   }
 }

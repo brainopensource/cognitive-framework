@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterCursor, fail, parseJsonlLine } from "../contract/parse.js";
 import type {
   ArtifactExplanation,
+  CorrectionRecord,
   EventCursor,
   EventEnvelope,
   Result,
@@ -46,6 +47,8 @@ function projectExplanation(envelopes: readonly EventEnvelope[], artifactId: str
 }
 
 export class ReplayRuntimeClient implements RuntimeClient {
+  private readonly corrections: CorrectionRecord[] = [];
+
   private constructor(private readonly envelopes: readonly EventEnvelope[]) {}
 
   static fromJsonl(text: string): ReplayRuntimeClient {
@@ -102,5 +105,10 @@ export class ReplayRuntimeClient implements RuntimeClient {
 
   async resolveApproval(request: ResolveApprovalRequest): Promise<Result<never>> {
     return unavailable(`resolveApproval(${request.approvalId})`);
+  }
+
+  async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
+    this.corrections.push(record);
+    return { ok: true, value: { runId: record.episodeId, command: "record_correction", status: "requested" } };
   }
 }

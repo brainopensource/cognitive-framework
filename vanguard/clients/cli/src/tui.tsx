@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
-import type { RuntimeClient, StreamItem } from "./contract/types.js";
+import { captureCorrection } from "./application/corrections.js";
+import { dispatchApproval } from "./application/approvals.js";
+import { emptyRunView, reduceRunView, type RunViewModel } from "./application/run-view.js";
+import type { RuntimeClient } from "./contract/types.js";
+import { ApprovalModal } from "./ui/approval-modal.js";
+import { CorrectionPrompt } from "./ui/correction-prompt.js";
+import { approvalActionForKey } from "./ui/keys.js";
+import { LiveScreen } from "./ui/live-screen.js";
 
 export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeClient; repo: string; runId?: string; resumeFrom?: string }) {
   const { exit } = useApp();
-  const [events, setEvents] = useState<StreamItem[]>([]);
+  const [view, setView] = useState<RunViewModel>(emptyRunView);
   const [status, setStatus] = useState("starting");
-  const activeRunId = events[0]?.envelope.runId ?? runId;
+  const [mode, setMode] = useState<"run" | "correct">("run");
+  const [activeRunId, setActiveRunId] = useState(runId ?? "");
 
   useEffect(() => {
     let alive = true;
@@ -14,15 +22,15 @@ export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeC
       try {
         const started = await runtime.startRun({ repo, runId, resumeFrom });
         const streamId = started.ok ? started.value.runId : runId ?? "";
-        if (started.ok) setStatus("requested");
-        else setStatus(started.error.code);
+        setActiveRunId(streamId);
+        setStatus(started.ok ? "requested" : started.error.code);
         for await (const result of runtime.streamEvents({ runId: streamId })) {
           if (!alive) return;
           if (!result.ok) {
             setStatus(result.error.code);
             continue;
           }
-          setEvents((current) => [...current.slice(-11), result.value]);
+          setView((current) => reduceRunView(current, result.value.envelope));
           setStatus(result.value.envelope.payload.kind);
         }
       } catch (error) {
@@ -35,16 +43,50 @@ export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeC
   }, [repo, resumeFrom, runId, runtime]);
 
   useInput((input, key) => {
+    if (key.escape || input === "q") {
+      exit();
+      return;
+    }
+    if (mode === "correct") {
+      const approval = view.pendingApproval;
+      if (!approval) {
+        setMode("run");
+        return;
+      }
+      void captureCorrection(runtime, {
+        episodeId: approval.episodeId,
+        proposedPatchDigest: approval.proposedPatchDigest,
+        acceptedPatchDigest: approval.proposedPatchDigest,
+        key: input,
+      }).then((result) => {
+        if (result.ok) setMode("run");
+      });
+      return;
+    }
+    if (view.pendingApproval) {
+      const action = approvalActionForKey(input);
+      if (action === "approve" || action === "reject") void dispatchApproval(runtime, view.pendingApproval.approvalId, input);
+      if (action === "correct") setMode("correct");
+      return;
+    }
     if (input === "c" && activeRunId) void runtime.requestCancel(activeRunId);
-    if (input === "q" || key.escape) exit();
   });
 
-  return <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-    <Text color="cyan" bold>VG / RUN</Text>
-    <Text>repo: {repo}  status: <Text color="yellow">{status}</Text></Text>
-    <Text dimColor>controls: c cancel · q quit</Text>
-    <Box flexDirection="column" marginTop={1}>
-      {events.map((item) => <Text key={`${item.envelope.eventId}-${item.envelope.seq}`}>[{item.envelope.seq.padStart(2, "0")}] {item.envelope.payload.kind.padEnd(20)} {item.source}</Text>)}
+  return (
+    <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
+      <Text color="cyan" bold>VG / RUN</Text>
+      <Text>status: <Text color="yellow">{status}</Text></Text>
+      <LiveScreen view={view} repo={repo} />
+      {view.pendingApproval && mode === "run" ? (
+        <ApprovalModal
+          approval={view.pendingApproval}
+          onApprove={() => void runtime.resolveApproval({ approvalId: view.pendingApproval!.approvalId, decision: "approve" })}
+          onReject={() => void runtime.resolveApproval({ approvalId: view.pendingApproval!.approvalId, decision: "reject" })}
+          onCorrect={() => setMode("correct")}
+        />
+      ) : undefined}
+      {mode === "correct" ? <CorrectionPrompt /> : undefined}
+      <Text dimColor>{view.pendingApproval ? (mode === "correct" ? "taxonomy keys" : "y/n/c") : "c cancel · q quit"}</Text>
     </Box>
-  </Box>;
+  );
 }

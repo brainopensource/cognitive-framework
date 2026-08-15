@@ -64,11 +64,21 @@ export type RunRef = { runId: string; episodeId?: string };
 export type RunSnapshot = { runId: string; status: string; seq: string };
 export type CommandReceipt = {
   runId: string;
-  command: "cancel" | "checkpoint" | "resume" | "resolve_approval";
+  command: "cancel" | "checkpoint" | "resume" | "resolve_approval" | "record_correction";
   status: "requested";
 };
 export type ResumeRunRequest = { runId: string; checkpointId?: string };
 export type ResolveApprovalRequest = { approvalId: string; decision: "approve" | "reject" };
+
+export type CorrectionRecord = {
+  episodeId: string;
+  proposedPatchDigest: string;
+  acceptedPatchDigest: string;
+  reasonCodes: ReadonlyArray<string>;
+  magnitude: "minor" | "moderate" | "major";
+  scope: "user" | "team" | "repo" | "domain" | "general";
+  correctingPrincipalRole: NonNullable<EventEnvelope["principalRole"]>;
+};
 
 export type ArtifactExplanation = {
   artifactId: string;
@@ -88,4 +98,5 @@ export interface RuntimeClient {
   requestResume(request: ResumeRunRequest, signal?: AbortSignal): Promise<Result<RunRef>>;
   explainArtifact(artifactId: string, signal?: AbortSignal): Promise<Result<ArtifactExplanation>>;
   resolveApproval(request: ResolveApprovalRequest, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
+  recordCorrection(record: CorrectionRecord, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
 }

@@ -1,6 +1,7 @@
 import { fail } from "../contract/parse.js";
 import type {
   ArtifactExplanation,
+  CorrectionRecord,
   EventCursor,
   EventEnvelope,
   Result,
@@ -42,6 +43,7 @@ function envelope(runId: string, seq: string, kind: string, extra: Record<string
 
 export class ScenarioRuntimeClient implements RuntimeClient {
   private readonly runs = new Map<string, EventEnvelope[]>();
+  readonly corrections: CorrectionRecord[] = [];
 
   async startRun(request: StartRunRequest): Promise<Result<RunRef>> {
     const runId = request.runId ?? "scenario-run";
@@ -103,7 +105,12 @@ export class ScenarioRuntimeClient implements RuntimeClient {
     };
   }
 
-  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<never>> {
-    return fail("not_available", `resolveApproval(${request.approvalId}) is unavailable until T4.8/T6.6`);
+  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<{ runId: string; command: "resolve_approval"; status: "requested" }>> {
+    return { ok: true, value: { runId: request.approvalId, command: "resolve_approval", status: "requested" } };
+  }
+
+  async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
+    this.corrections.push(record);
+    return { ok: true, value: { runId: record.episodeId, command: "record_correction", status: "requested" } };
   }
 }

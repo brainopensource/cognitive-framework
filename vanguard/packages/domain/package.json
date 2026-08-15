@@ -1,0 +1,8 @@
+{
+  "name": "@vanguard/domain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.ts && python3 test/schema_conformance.py"
+  }
+}

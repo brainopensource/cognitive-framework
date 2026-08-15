@@ -51,29 +51,30 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **T0.1–T0.4** | Independent blind reconstruction completed and added GAP-010..014; remediation/re-signoff remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Make evidence bundle self-contained, then re-review |
-| **TODO** | **T0.5–T0.6** | Non-coding trace exists; prospective human timing remains | **2** | 🟢 FAST | Dev + PM | Capture two timed manual reproductions |
+| **TODO** | **T0.1–T0.4** | Independent blind reconstruction completed and added GAP-010..014; remediation/re-signoff remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Residual; does not re-open T2/T3 |
+| **TODO** | **T0.5–T0.6** | Non-coding trace exists; prospective human timing remains | **2** | 🟢 FAST | Dev + PM | Residual |
 | **DONE** | **T10.1–T10.3** | Package scaffold, forbidden imports and eight broken counterparts | **2** | 🟢 FAST | Sr Dev + Dev | CI passes |
-| **TODO** | **T10.4–T10.9** | Rule map exists; margin alarms and remaining continuous controls remain | **2** | 🟢 FAST | Dev | Implement automated reporting |
+| **TODO** | **T10.4–T10.9** | Rule map exists; margin alarms and remaining continuous controls remain | **2** | 🟢 FAST | Dev | Continuous through S8 |
 
 ### Sprint 1 · Contracts, Wire Schema & Disposable API Spike (Weeks 3–4)
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **DONE** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 3 | Merged to main via sprint1/integration |
-| **DONE** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 | Merged to main — 60 tests passing, dual TS+Python readers |
-| **DONE** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 | Merged to main — contracts.ts + JSON schemas |
-| **DONE** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 2 | Merged to main — EventEnvelope, Artifact, EvidenceClaim |
-| **DONE** | **T6.4** | CLI/TUI foundation — `vg run`, `vg trace`, `vg why` | **2** | 🟢 FAST | Dev 4 | Merged to main via sprint1/dev4-tui (mock runtime) |
+| **DONE** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 3 | Merged; delete S4 |
+| **DONE** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 | Covered DRAFT |
+| **DONE** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 | Covered DRAFT |
+| **DONE** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 2 | Covered DRAFT |
+| **DONE** | **T6.4** | CLI/TUI foundation — `vg run`, `vg trace`, `vg why` | **2** | 🟢 FAST | Dev 4 | `REQ-CLI-001` covered (mock) |
 
 ### Sprint 2 · Real-Provider Disposable Slice, Kernel & Ledger (Weeks 5–6)
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **T0b.1–T0b.4** | Disposable E2E Slice | **2** | 🟢 FAST | Sr Dev + Dev | Sprint 2 |
-| **TODO** | **T2.1–T2.5** | Kernel capabilities, attenuation and budgets | **4** | 🔴 GATE | Sr Dev + Tech Lead | Sprint 2 |
-| **TODO** | **T3.1–T3.5** | Event store, reducer and replay | **3** | 🔴 GATE | Dev + Sr Dev | Sprint 2 |
-| **TODO** | **T1.12–T1.14** | Reader profiles and second-language conformance | **2** | 🟢 FAST | Dev + Sr Dev | Sprint 2 |
+| **DONE** | **T0b.1–T0b.3** | Disposable E2E Slice (deterministic) | **2** | 🟢 FAST | Sr Dev + Dev | Live credential residual `REQ-SLICE-001` |
+| **DONE** | **T2.1–T2.10** | Kernel capabilities through dispatch | **4** | 🔴 GATE | Sr Dev + Tech Lead | `REQ-KRN-001..003` |
+| **DONE** | **T3.1–T3.8** | Event store, reducer, recovery, cassettes | **3** | 🔴 GATE | Dev + Sr Dev | `REQ-LEDGER-001..002` |
+| **DONE** | **T1.12–T1.15** | Process contracts, reader profiles, dual-language | **2** | 🟢 FAST | Dev + Sr Dev | `REQ-CONF-001` |
+| **DONE** | **T7.1–T7.4** | Artifact graph + `vg-shell-only` | **2** | 🟢 FAST | Tech Lead | `REQ-GRAPH-001`, `REQ-BASELINE-001` |
 
 ---
 
@@ -97,9 +98,8 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 ## 5. Immediate Next Steps for Leadership
 
-1. **TODO — Tech Lead:** Close independent-review `GAP-010..014`, then request re-signoff.
-2. **TODO — Dev 1 + Dev 2:** Capture prospective hands-on and elapsed timing for two manual reproductions.
-3. **TODO — PM / Scrum:** Import the prepared backlog into the real issue tracker.
-4. **TODO — Sr Dev:** Complete remaining margin reporting; PR-body `req_id` validation is done.
-5. **TODO — Project Lead:** Verify hosted branch protection and issue the full Sprint 1 go; annotated baseline tag exists.
-6. **DONE — Tech Lead / Sr Dev:** Decision Record, ICD, Active Contract, Verification Plan, package gates and developer packets are prepared.
+1. **Residual — Tech Lead:** GAP-010..014 self-contained evidence bundle (schema LOCKED blocker).
+2. **Residual — live T0b:** supply disposable OpenRouter-compatible key; then close `REQ-SLICE-001`.
+3. **Residual — Project Lead:** enable GitHub branch protection on `main`.
+4. **S3 — developers:** execute `docs/sprint3/` packets; do not start S4 implementation until S3-INT is green.
+5. **DONE — S0–S2 engineering:** kernel, ledger, T1 DRAFT, T7 baseline, mock CLI, deterministic slice.

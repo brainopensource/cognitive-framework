@@ -65,8 +65,10 @@ Each test runs once against a correct/reference implementation and once against 
 | `MF-REL-001` | candidate overwrites live component or promotes itself | autonomous path exists | Release test owner | architecture path failure |
 | `MF-REL-002` | rollback was not tested before promotion | promotion gate accepts candidate | Release test owner | gate rejection |
 | `MF-S4-001` | `spike/` or `slice/` remains at S4 exit | deletion gate passes | Senior Developer | absence-check receipt |
+| `MF-TRUST-001` | trust-spine command imports or requires a live model | `TEST-TRUST-001` still passes | Senior Developer | planned S4; not a passing claim |
+| `MF-SEC-004` | unverified containment report still publishes | publication blocked | Senior Developer | planned S4 |
 
-Sprint 0 implements `MF-S0-001..009`; later rows are planned acceptance standards, not claims of passing controls.
+Sprint 0 implements `MF-S0-001..009`. Sprint 2 implements kernel/ledger/slice-deterministic rows. `TEST-TRUST-001` / `MF-TRUST-001` are Sprint 4 acceptance standards, not claims of passing controls.
 
 ## 4. Adversarial suite
 

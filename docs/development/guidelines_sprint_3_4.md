@@ -1,3 +1,5 @@
+**Status:** EXECUTED 2026-08-15 as Tech Lead + Project Lead. Artifacts: Decision Record §10, `docs/sprint3/`, `docs/sprint4/`, contract rows `REQ-EXEC-*` / `REQ-PORT-002..006` / `REQ-TRUST-001` / `REQ-SEC-001` / `REQ-HARN-001`. Do not re-run this prompt to invent a second structure.
+
 # SPRINT 3–4 STRUCTURE PROMPT
 ## Tech Lead + Project Lead — executable backlog, packets and merge gates
 

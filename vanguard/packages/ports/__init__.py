@@ -12,6 +12,13 @@ from .kernel import (
     EventSink,
     Ledger,
 )
+from .model import (
+    ContextBundle,
+    ModelPort,
+    Proposal,
+    Sampling,
+    ToolSchemas,
+)
 
 __all__ = [
     "EventRange",
@@ -22,4 +29,9 @@ __all__ = [
     "EffectAdapter",
     "EventSink",
     "Ledger",
+    "ContextBundle",
+    "ModelPort",
+    "Proposal",
+    "Sampling",
+    "ToolSchemas",
 ]

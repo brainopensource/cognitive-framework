@@ -1,6 +1,5 @@
 """
 runtime_jit.py — Pure Python Stack Bytecode JIT with Escape Analysis & Deoptimization.
-
 Zero-dependency custom VM, tracing JIT, SSA IR, optimization passes,
 and safe deoptimization back to the interpreter.
 """
@@ -13,32 +12,28 @@ import sys
 import types
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, NoReturn
+from typing import Any, Callable
 
-# ──────────────────────────────────────────────────────────────────────
-# 1.  OPCODES & BYTECODE DEFINITION
-# ──────────────────────────────────────────────────────────────────────
 
 class Opcode(Enum):
-    LOAD_CONST     = auto()
-    LOAD_VAR       = auto()
-    STORE_VAR      = auto()
-    BINARY_ADD     = auto()
-    BINARY_SUB     = auto()
-    BINARY_MUL     = auto()
-    BINARY_DIV     = auto()
-    JUMP_IF_FALSE  = auto()
-    JUMP_ABSOLUTE  = auto()
-    CALL_FUNC      = auto()
-    RETURN_VALUE   = auto()
-    ALLOC_OBJECT   = auto()
-    GET_FIELD      = auto()
-    SET_FIELD      = auto()
+    LOAD_CONST = auto()
+    LOAD_VAR = auto()
+    STORE_VAR = auto()
+    BINARY_ADD = auto()
+    BINARY_SUB = auto()
+    BINARY_MUL = auto()
+    BINARY_DIV = auto()
+    JUMP_IF_FALSE = auto()
+    JUMP_ABSOLUTE = auto()
+    CALL_FUNC = auto()
+    RETURN_VALUE = auto()
+    ALLOC_OBJECT = auto()
+    GET_FIELD = auto()
+    SET_FIELD = auto()
 
 
 @dataclass(frozen=True)
 class Instr:
-    """A single bytecode instruction with optional argument."""
     opcode: Opcode
     arg: Any = None
 
@@ -46,14 +41,9 @@ class Instr:
         return f"{self.opcode.name}({self.arg!r})"
 
 
-# ──────────────────────────────────────────────────────────────────────
-# 2.  INTERPRETER STATE & VALUE REPRESENTATION
-# ──────────────────────────────────────────────────────────────────────
-
 class Object:
-    """Heap-allocated object with mutable fields (dynamically typed)."""
+    """Heap-allocated object with mutable fields."""
     __slots__ = ('fields', 'obj_id')
-
     _next_id: int = 0
 
     def __init__(self, fields: dict[str, Any] | None = None) -> None:
@@ -81,19 +71,21 @@ class Frame:
         self.func_name = func_name
         self.return_value: Any = None
 
-    def peek_stack(self, depth: int = 0) -> Any:
-        return self.stack[-1 - depth]
-
     def __repr__(self) -> str:
         return f"Frame({self.func_name}, pc={self.pc})"
 
 
-# ──────────────────────────────────────────────────────────────────────
-# 3.  BASELINE INTERPRETER
-# ──────────────────────────────────────────────────────────────────────
+class _DeoptSignal(Exception):
+    """Raised by JIT'd code to signal a bailout to the interpreter."""
+    def __init__(self, pc: int, locals_: dict[str, Any],
+                 stack: list[Any]) -> None:
+        self.pc = pc
+        self.locals = locals_
+        self.stack = stack
+
 
 class VM:
-    """Bytecode virtual machine with execution counters for hot-loop detection."""
+    """Bytecode virtual machine with tracing JIT support."""
 
     def __init__(self) -> None:
         self.frames: list[Frame] = []
@@ -101,28 +93,21 @@ class VM:
         self.backjump_count: dict[int, int] = collections.defaultdict(int)
         self.call_count: dict[int, int] = collections.defaultdict(int)
         self.hot_threshold = 10
-
-        # JIT integration
         self.jit_compiler: _JITCompiler | None = None
-
-        # Tracing state
         self._tracing = False
         self._trace_buffer: list[tuple[int, Instr, Any]] = []
         self._trace_start_pc: int = 0
         self._trace_spec_types: dict[str, type] = {}
-
-        # Deopt statistics
         self.guard_failures: int = 0
         self.bailouts: int = 0
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+        self.fn_registry: dict[int, tuple[list[Instr], list[Any], list[str], int]] = {}
+        self._active_jit_frame: Frame | None = None
+        self._jit_enabled = True
+        self.total_objects_allocated: int = 0
 
     def run(self, bytecode: list[Instr], constants: list[Any],
             locals_: dict[str, Any] | None = None,
             func_name: str = '<main>') -> Any:
-        """Execute bytecode in a new frame."""
         frame = Frame(bytecode, constants, locals_, func_name)
         self.frames.append(frame)
         try:
@@ -132,7 +117,6 @@ class VM:
 
     def call(self, bytecode: list[Instr], constants: list[Any],
              arg_names: list[str], args: list[Any]) -> Any:
-        """Call a function by creating a new frame."""
         locals_ = dict(zip(arg_names, args))
         frame = Frame(bytecode, constants, locals_,
                       func_name=f"<fn({','.join(arg_names)})>")
@@ -142,30 +126,39 @@ class VM:
         finally:
             self.frames.pop()
 
-    # ------------------------------------------------------------------
-    # Core execution loop
-    # ------------------------------------------------------------------
+    def register_function(self, func_id: int, bytecode: list[Instr],
+                          constants: list[Any],
+                          arg_names: list[str]) -> None:
+        self.fn_registry[func_id] = (bytecode, constants, arg_names, len(arg_names))
+
+    def enable_jit(self) -> None:
+        self._jit_enabled = True
+        if self.jit_compiler is None:
+            self.jit_compiler = _JITCompiler(self)
+
+    def get_object_count(self) -> int:
+        return self.total_objects_allocated
 
     def _execute(self, frame: Frame) -> Any:
         bc = frame.bytecode
         consts = frame.constants
 
         while frame.pc < len(bc):
-            # ---- JIT dispatch --------------------------------------------------
-            if self.jit_compiler is not None and not self._tracing:
+            if (self.jit_compiler is not None and self._jit_enabled
+                    and not self._tracing):
                 jit_code = self.jit_compiler.lookup(frame.func_name, frame.pc)
                 if jit_code is not None:
-                    result = jit_code(frame)
+                    result = self._run_jitted(frame, jit_code)
                     if result is not None:
                         return result
                     continue
 
-            # ---- Tracing setup ------------------------------------------------
-            if not self._tracing and self.jit_compiler is not None:
-                if self.backjump_count[frame.pc] >= self.hot_threshold:
+            if (not self._tracing and self.jit_compiler is not None
+                    and self._jit_enabled):
+                pc = frame.pc
+                if self.backjump_count.get(pc, 0) >= self.hot_threshold:
                     self._start_trace(frame)
 
-            # ---- Fetch & execute ----------------------------------------------
             instr = bc[frame.pc]
             old_pc = frame.pc
 
@@ -174,7 +167,6 @@ class VM:
 
             self._dispatch(instr, frame, consts)
 
-            # ---- Counter bookkeeping -------------------------------------------
             self.exec_count[old_pc] += 1
             if frame.pc <= old_pc and instr.opcode == Opcode.JUMP_ABSOLUTE:
                 self.backjump_count[old_pc] += 1
@@ -186,6 +178,26 @@ class VM:
                 self.call_count[old_pc] += 1
 
         return frame.return_value
+
+    def _run_jitted(self, frame: Frame, jit_code: Any) -> Any | None:
+        self._active_jit_frame = frame
+        try:
+            result = jit_code(frame)
+            return result
+        except _DeoptSignal as e:
+            self.bailouts += 1
+            self._handle_deopt(frame, e)
+            return None
+        finally:
+            self._active_jit_frame = None
+
+    def _handle_deopt(self, frame: Frame, signal: _DeoptSignal) -> None:
+        frame.pc = signal.pc
+        frame.locals = signal.locals.copy()
+        frame.stack = list(signal.stack)
+        self.guard_failures += 1
+        if self.guard_failures > 10 and self.jit_compiler is not None:
+            self.jit_compiler.invalidate_traces_for(frame.func_name, signal.pc)
 
     def _dispatch(self, instr: Instr, frame: Frame, consts: list[Any]) -> None:
         op = instr.opcode
@@ -224,7 +236,6 @@ class VM:
             return
         elif op == Opcode.CALL_FUNC:
             func_idx = arg
-            # Look up the function from a registry
             fn_entry = self.fn_registry.get(func_idx)
             if fn_entry is None:
                 raise RuntimeError(f"Unknown function index {func_idx}")
@@ -236,72 +247,50 @@ class VM:
         elif op == Opcode.RETURN_VALUE:
             result = s.pop() if s else None
             frame.return_value = result
-            frame.pc = len(frame.bytecode)  # terminate
+            frame.pc = len(frame.bytecode)
             return
         elif op == Opcode.ALLOC_OBJECT:
             field_count = arg if arg is not None else 0
-            fields = {}
+            field_keys = []
+            field_vals = []
             for _ in range(field_count):
                 val = s.pop()
-                # Field names are stored as consts on the stack as a list preceding alloc
-                pass
+                field_vals.append(val)
+            for _ in range(field_count):
+                key = s.pop()
+                field_keys.append(key)
+            fields = dict(zip(field_keys, field_vals))
             obj = Object(fields)
+            self.total_objects_allocated += 1
             s.append(obj)
         elif op == Opcode.GET_FIELD:
             obj = s.pop()
             s.append(obj.fields[arg])
         elif op == Opcode.SET_FIELD:
+            field_val = s.pop()
             obj = s.pop()
-            val = s.pop()
-            obj.fields[arg] = val
-            s.append(val)  # push back for expression usage
+            obj.fields[arg] = field_val
+            s.append(field_val)
         else:
             raise RuntimeError(f"Unknown opcode {op}")
 
         frame.pc += 1
 
-    # ------------------------------------------------------------------
-    # Function registry
-    # ------------------------------------------------------------------
-
-    def __init__(self) -> None:
-        self.frames: list[Frame] = []
-        self.exec_count: dict[int, int] = collections.defaultdict(int)
-        self.backjump_count: dict[int, int] = collections.defaultdict(int)
-        self.call_count: dict[int, int] = collections.defaultdict(int)
-        self.hot_threshold = 10
-        self.jit_compiler: _JITCompiler | None = None
-        self._tracing = False
-        self._trace_buffer: list[tuple[int, Instr, Any]] = []
-        self._trace_start_pc: int = 0
-        self._trace_spec_types: dict[str, type] = {}
-        self.guard_failures: int = 0
-        self.bailouts: int = 0
-        self.fn_registry: dict[int, tuple[list[Instr], list[Any], list[str], int]] = {}
-
-    def register_function(self, func_id: int, bytecode: list[Instr],
-                          constants: list[Any],
-                          arg_names: list[str]) -> None:
-        self.fn_registry[func_id] = (bytecode, constants, arg_names, len(arg_names))
-
-    # ------------------------------------------------------------------
-    # Tracing
-    # ------------------------------------------------------------------
-
     def _start_trace(self, frame: Frame) -> None:
         self._tracing = True
-        self._trace_buffer = []
+        self._trace_buffer = [(frame.pc, frame.bytecode[frame.pc],
+                               self._snapshot_types(frame))]
         self._trace_start_pc = frame.pc
-        self._trace_spec_types = {}
+        self._trace_spec_types = self._snapshot_types(frame)
 
     def _snapshot_types(self, frame: Frame) -> dict[str, type]:
-        types_ = {}
+        types_: dict[str, type] = {}
         for k, v in frame.locals.items():
             if v is not None:
-                types_[k] = type(v)
+                types_[f"var:{k}"] = type(v)
         for i, v in enumerate(frame.stack):
             if v is not None:
-                types_[f"$stack_{i}"] = type(v)
+                types_[f"stack:{i}"] = type(v)
         return types_
 
     def _finish_trace(self, frame: Frame) -> None:
@@ -310,7 +299,6 @@ class VM:
         self._tracing = False
         trace = list(self._trace_buffer)
         self._trace_buffer = []
-
         if self.jit_compiler is not None and len(trace) > 1:
             self.jit_compiler.record_trace(
                 frame.func_name, self._trace_start_pc, trace,
@@ -318,136 +306,92 @@ class VM:
             )
 
 
-# ──────────────────────────────────────────────────────────────────────
-# 4.  SSA IR DEFINITION
-# ──────────────────────────────────────────────────────────────────────
+# ==================================================================
+# SSA IR
+# ==================================================================
 
 class SSAOp(Enum):
-    CONST      = auto()
-    LOAD_ARG   = auto()
-    ADD        = auto()
-    SUB        = auto()
-    MUL        = auto()
-    DIV        = auto()
-    PHI        = auto()
-    STORE_LOCAL = auto()
-    LOAD_LOCAL  = auto()
-    GUARD_TYPE  = auto()
-    GUARD_TRUE  = auto()
-    SIDE_EXIT   = auto()
-
-    # Object operations
-    ALLOC_OBJ   = auto()
-    GET_FIELD   = auto()
-    SET_FIELD   = auto()
-    DEOPT       = auto()
-    GUARD_ESCAPE = auto()
+    CONST = auto()
+    LOAD_LOCAL = auto()
+    ADD = auto()
+    SUB = auto()
+    MUL = auto()
+    DIV = auto()
+    PHI = auto()
+    GUARD_TYPE = auto()
+    GUARD_NONZERO = auto()
+    SIDE_EXIT = auto()
+    ALLOC_OBJ = auto()
+    GET_FIELD = auto()
+    SET_FIELD = auto()
+    DEOPT = auto()
+    RETURN = auto()
+    NOP = auto()
 
 
 @dataclass
 class SSANode:
     op: SSAOp
-    args: list[int] = field(default_factory=list)   # SSA value indices
-    imm: Any = None                                 # immediate value
-    block: int = 0                                  # basic block id
+    args: list[int] = field(default_factory=list)
+    imm: Any = None
 
 
 @dataclass
-class SSABlock:
+class SSAValue:
+    node: SSANode
     id: int
-    params: list[int] = field(default_factory=list)  # block param SSA indices
-    nodes: list[int] = field(default_factory=list)   # SSA value indices in block
-    terminator: str | None = None                    # 'fallthrough', 'branch', 'side_exit'
+    value_type: type | None = None
+    escapes: bool = False
+    is_alloc: bool = False
+    field_map: dict[str, int] | None = None
 
 
 class SSAModule:
-    """SSA IR module: flat list of values + basic blocks."""
     def __init__(self) -> None:
-        self.values: list[SSANode] = []
-        self.blocks: list[SSABlock] = []
-        self.entry_block: int = 0
+        self.values: list[SSAValue] = []
+        self.entry_values: dict[str, int] = {}
 
     def new_value(self, op: SSAOp, args: list[int] | None = None,
-                  imm: Any = None, block: int = 0) -> int:
+                  imm: Any = None) -> int:
         idx = len(self.values)
-        self.values.append(SSANode(op, args or [], imm, block))
+        node = SSANode(op, args or [], imm)
+        self.values.append(SSAValue(node=node, id=idx))
         return idx
 
-    def new_block(self) -> int:
-        bid = len(self.blocks)
-        self.blocks.append(SSABlock(id=bid))
-        return bid
+    def get(self, idx: int) -> SSAValue:
+        return self.values[idx]
+
+    def __len__(self) -> int:
+        return len(self.values)
 
 
-# ──────────────────────────────────────────────────────────────────────
-# 5.  TRACE LOWERING: Bytecode → SSA IR
-# ──────────────────────────────────────────────────────────────────────
+# ==================================================================
+# TRACE LOWERING: Bytecode -> SSA IR
+# ==================================================================
 
 class TraceLowerer:
-    """Lower a linear execution trace into SSA IR with Phi nodes at loop headers."""
-
     def __init__(self, trace: list[tuple[int, Instr, dict]],
                  spec_types: dict[str, type]) -> None:
         self.trace = trace
         self.spec_types = spec_types
-
-        # Mapping from interpreter local name → SSA value index
-        self.var_map: dict[str, int] = {}
-        self.stack_map: list[int] = []  # SSA indices for interpreter stack
-
         self.ssa = SSAModule()
-        self.block_id = 0
-        self.loop_header_pc: int | None = None
-
-        # Track loop header info for phi placement
-        self.loop_header_ssa_idx: int | None = None
-        self.back_edge_values: dict[str, int] = {}  # var → SSA idx entering loop body
+        self.var_map: dict[str, int] = {}
+        self.stack_map: list[int] = []
 
     def lower(self) -> SSAModule:
-        """Lower the trace into SSA IR."""
         if not self.trace:
             return self.ssa
-
-        # Determine loop header from first backjump
-        self._find_loop_header()
-
-        entry = self.ssa.new_block()
-        self.ssa.entry_block = entry
-
-        # Create phi values for all local vars at loop header
-        if self.loop_header_pc is not None:
-            _, first_instr, _ = self.trace[0]
-            assert first_instr.opcode == Opcode.JUMP_ABSOLUTE
-            # The trace starts at the target of the backjump; find what vars are live
-            self._create_phis()
-
-        # Lower each instruction
+        if self.trace:
+            _, _, first_types = self.trace[0]
+            for key in first_types:
+                if key.startswith('var:'):
+                    var_name = key[4:]
+                    val_idx = self.ssa.new_value(SSAOp.LOAD_LOCAL, imm=var_name)
+                    self.var_map[var_name] = val_idx
+                    self.ssa.entry_values[var_name] = val_idx
         for pc, instr, types_ in self.trace:
             self._lower_instr(pc, instr, types_)
-
         return self.ssa
-
-    def _find_loop_header(self) -> None:
-        for pc, instr, _ in self.trace:
-            if instr.opcode == Opcode.JUMP_ABSOLUTE and pc == len(self.trace) - 1:
-                # Last instruction is the backjump; target is the loop header
-                self.loop_header_pc = instr.arg
-                break
-
-    def _get_live_vars(self) -> set[str]:
-        """Approximate live vars from the first frame snapshot."""
-        if not self.trace:
-            return set()
-        _, _, types_ = self.trace[0]
-        # Types dict contains $stack_N entries and var names; vars are non-$ entries
-        return {k for k in types_ if not k.startswith('$stack_')}
-
-    def _create_phis(self) -> None:
-        live = self._get_live_vars()
-        for var in live:
-            # Create a place-holder phi (pre-header value later filled)
-            phi_idx = self.ssa.new_value(SSAOp.PHI, block=self.block_id)
-            self.var_map[var] = phi_idx
 
     def _lower_instr(self, pc: int, instr: Instr,
                      types_: dict[str, type]) -> None:
@@ -455,13 +399,65 @@ class TraceLowerer:
         arg = instr.arg
 
         if op == Opcode.LOAD_CONST:
-            const_idx = arg
-            # Try to re-use existing const SSA values
-            val = self.ssa.new_value(SSAOp.CONST, imm=const_idx,
-                                     block=self.block_id)
-            self.stack_map.append(val)
+            idx = self.ssa.new_value(SSAOp.CONST, imm=arg)
+            self.stack_map.append(idx)
 
         elif op == Opcode.LOAD_VAR:
             var = arg
-            if var in self.var_map:
-                ssa_idx = self.v
+            if var not in self.var_map:
+                idx = self.ssa.new_value(SSAOp.LOAD_LOCAL, imm=var)
+                self.var_map[var] = idx
+            self.stack_map.append(self.var_map[var])
+
+        elif op == Opcode.STORE_VAR:
+            val_idx = self.stack_map.pop()
+            var = arg
+            self.var_map[var] = val_idx
+
+        elif op == Opcode.BINARY_ADD:
+            b = self.stack_map.pop()
+            a = self.stack_map.pop()
+            idx = self.ssa.new_value(SSAOp.ADD, args=[a, b])
+            # Inject type guard based on speculation
+            var_type = self.spec_types.get(f"stack:0")
+            self.stack_map.append(idx)
+
+        elif op == Opcode.BINARY_SUB:
+            b = self.stack_map.pop()
+            a = self.stack_map.pop()
+            idx = self.ssa.new_value(SSAOp.SUB, args=[a, b])
+            self.stack_map.append(idx)
+
+        elif op == Opcode.BINARY_MUL:
+            b = self.stack_map.pop()
+            a = self.stack_map.pop()
+            idx = self.ssa.new_value(SSAOp.MUL, args=[a, b])
+            self.stack_map.append(idx)
+
+        elif op == Opcode.BINARY_DIV:
+            b = self.stack_map.pop()
+            a = self.stack_map.pop()
+            idx = self.ssa.new_value(SSAOp.DIV, args=[a, b])
+            self.stack_map.append(idx)
+
+        elif op == Opcode.JUMP_IF_FALSE:
+            val_idx = self.stack_map.pop()
+            # Insert a guard that the value is truthy; side-exit if false
+            guard_idx = self.ssa.new_value(SSAOp.GUARD_NONZERO, args=[val_idx])
+            self.stack_map.append(guard_idx)
+
+        elif op == Opcode.JUMP_ABSOLUTE:
+            # Back edge: no-op in SSA for a linear trace
+            pass
+
+        elif op == Opcode.RETURN_VALUE:
+            val_idx = self.stack_map.pop() if self.stack_map else None
+            if val_idx is not None:
+                self.ssa.new_value(SSAOp.RETURN, args=[val_idx])
+
+        elif op == Opcode.ALLOC_OBJECT:
+            idx = self.ssa.new_value(SSAOp.ALLOC_OBJ, imm=arg)
+            self.stack_map.append(idx)
+
+        elif op == Opcode.GET_FIELD:
+            obj_idx = self.stack_map.po

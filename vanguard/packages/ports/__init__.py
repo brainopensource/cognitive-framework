@@ -1,5 +1,17 @@
 """Ports package: runtime seams and interfaces (ICD §2)."""
 
+from .environment import (
+    AffectedResource,
+    EffectPreview,
+    EffectReceipt,
+    EffectRequest,
+    EnvironmentAdapter,
+    EnvironmentProfile,
+    EnvironmentSnapshot,
+    Observation,
+    ObservationRequest,
+    Reconciliation,
+)
 from .event_store import (
     EventRange,
     EventStorePort,
@@ -36,6 +48,16 @@ from .sandbox import (
 )
 
 __all__ = [
+    "AffectedResource",
+    "EffectPreview",
+    "EffectReceipt",
+    "EffectRequest",
+    "EnvironmentAdapter",
+    "EnvironmentProfile",
+    "EnvironmentSnapshot",
+    "Observation",
+    "ObservationRequest",
+    "Reconciliation",
     "EventRange",
     "EventStorePort",
     "PortFailure",

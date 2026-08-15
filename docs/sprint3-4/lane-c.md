@@ -13,7 +13,7 @@ Packages: `vanguard/packages/ports/`, fakes under `vanguard/packages/adapters/`,
 3. `docs/sprint4/backlog.md`, `docs/sprint4/dc-packet.md`
 4. ICD §4 port table; `vanguard/packages/ports/README.md` (activation bundle rule)
 5. `schemas/v4/port-interfaces.md`
-6. `spike/provider_notes.md` and `slice/slice-findings.md` — notes only; **do not import those trees**
+6. `docs/sprint1/provider-notes.md` and `docs/sprint2/slice-findings.md` — notes only; **do not resurrect `spike/` or `slice/`**
 7. Your contract rows in `docs/sprint0/active-mvp-contract.json`
 8. Existing `EventStorePort` fake+real as the pattern to copy
 9. `.github/pull_request_template.md`

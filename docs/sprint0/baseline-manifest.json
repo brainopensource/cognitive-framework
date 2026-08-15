@@ -13,7 +13,7 @@
   ],
   "files": {
     ".github/pull_request_template.md": "sha256:00363c6ae14a5fb8213b119d90e1249f1ea86e586b2af0ccc00d58fc22d10128",
-    ".github/workflows/ci.yml": "sha256:b61a2c1d12252948961ae2e85e542d1f781dd8520e2e23c6fb9b1c84af478135",
+    ".github/workflows/ci.yml": "sha256:3d6d1aa9afd2a9671f5b997a78d6e4b127687187bfa9c9a4b6c5bbc800231d19",
     "docs/sprint0/README.md": "sha256:b144072b28702e3d8ba4a8ca5bae52fe0380de1c0f57e31df9c85a3c1ba63418",
     "docs/sprint0/active-mvp-contract.json": "sha256:653e0c321e321c902bb85384740fa384d5d4490bd2579a267e45d2e58e13f961",
     "docs/sprint0/schema-archaeology/field-inventory.md": "sha256:18030909d97563848ad29d96aadd4ed25b1b8b69beb9945c175d16ec2674f2e9",

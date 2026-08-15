@@ -1,6 +1,6 @@
 # Sprint 4 developer packet index
 
-Project decision: `NOT STARTED — after Sprint 3 integration`  
+Project decision: `S4-GATE-001 disposables deleted; S4-DD Git adapter still open`  
 Decisions: `ADR-0047`, `ADR-0048`, `ADR-0055`, `ADR-0056`
 
 Split a/b. Same four people. OpenRouter is parallel and **off** the trust-spine command. Wave prompts: `docs/sprint3-4/lane-a.md` … `lane-d.md`.

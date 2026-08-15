@@ -12,7 +12,7 @@ Packages: environment fake then real under `vanguard/packages/adapters/`; manife
 2. `docs/sprint3/backlog.md`, `docs/sprint3/dd-packet.md`
 3. `docs/sprint4/backlog.md`, `docs/sprint4/dd-packet.md`
 4. ICD `EnvironmentAdapter`; Decision Record `ADR-0049`
-5. `slice/slice-findings.md` — absorb the rules; **do not copy `slice/` source**
+5. `docs/sprint2/slice-findings.md` — absorb the rules; **do not copy deleted `slice/` source**
 6. Existing `vg-shell-only` under `vanguard/packages/agency/manifests/`
 7. Your contract rows in `docs/sprint0/active-mvp-contract.json`
 8. `.github/pull_request_template.md`

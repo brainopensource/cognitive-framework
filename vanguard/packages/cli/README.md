@@ -1,5 +1,7 @@
 # `vg` CLI / TUI (T6.4 scaffold)
 
+> **Prototype location:** the approved permanent client boundary is `vanguard/clients/cli/`. Before the next implementation merge, relocate this package and replace its prototype event vocabulary as specified in [`docs/development/cli_tui_architecture.md`](../../../docs/development/cli_tui_architecture.md).
+
 This package provides the operator surface before the real runtime is available. It uses a deterministic `MockRuntime` behind the same `RuntimePort` that the runtime composition root will implement later.
 
 ```bash

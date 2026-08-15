@@ -1,0 +1,1 @@
+CT-08: exactly three fractional digits.

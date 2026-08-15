@@ -1,0 +1,14 @@
+{
+  "parent": {
+    "kind": "browser",
+    "origin": "https://a.example.com"
+  },
+  "child": {
+    "kind": "browser",
+    "origin": "https://a.example.com:8443"
+  },
+  "expected": {
+    "included": false,
+    "reason": "not_included"
+  }
+}

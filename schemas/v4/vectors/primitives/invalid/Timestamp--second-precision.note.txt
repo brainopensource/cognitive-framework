@@ -1,0 +1,1 @@
+CT-08: millisecond precision is mandatory, not optional.

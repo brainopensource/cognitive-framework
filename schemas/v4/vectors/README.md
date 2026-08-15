@@ -18,7 +18,7 @@ vectors/{schema-name}/
 | # | Rule |
 |---|---|
 | GV-1 | Every schema has at least one valid case, one invalid-by-omission case and one invalid-by-type case |
-| GV-2 | Every type carrying a digest has a canonicalisation triple (input, canonical form, digest). **Outstanding: no triples exist yet; blocking for `SC-7`** |
+| GV-2 | Every type carrying a digest has a canonicalisation triple (input, canonical form, digest). The shared triple set lives in `canonicalisation/` (`REQ-SCHEMA-001`) and is replayed through both readers by `test/contracts/t1_dev1_canonicalisation.py` |
 | GV-3 | Vectors are written **before** the second implementation exists — that is the point of writing them as data |
 | GV-4 | Two implementations at the first lock: TypeScript and Python. A third is added when a third consumer exists, not before |
 | GV-5 | A vector is never edited to make an implementation pass. It is edited only when the schema's semantics change, under an ADR |

@@ -1,0 +1,12 @@
+{
+  "parent": {
+    "kind": "process"
+  },
+  "child": {
+    "kind": "process"
+  },
+  "expected": {
+    "included": false,
+    "reason": "unparsable"
+  }
+}

@@ -1,0 +1,1 @@
+D-2: two spellings of one path are the same path.

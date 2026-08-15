@@ -1,0 +1,24 @@
+{
+  "parent": {
+    "kind": "network",
+    "hosts": [
+      "münchen.example"
+    ],
+    "ports": [
+      443
+    ]
+  },
+  "child": {
+    "kind": "network",
+    "hosts": [
+      "xn--mnchen-3ya.example"
+    ],
+    "ports": [
+      443
+    ]
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

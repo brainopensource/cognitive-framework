@@ -1,0 +1,20 @@
+{
+  "parent": {
+    "kind": "fs",
+    "root": "/w/",
+    "paths": [
+      "/w/./src/"
+    ]
+  },
+  "child": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w/src"
+    ]
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

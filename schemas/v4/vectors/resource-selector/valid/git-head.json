@@ -1,0 +1,7 @@
+{
+  "kind": "git",
+  "repo": "git+ssh://git@host/vanguard.git",
+  "refs": [
+    "HEAD"
+  ]
+}

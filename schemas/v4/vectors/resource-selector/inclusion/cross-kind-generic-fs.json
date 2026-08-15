@@ -1,0 +1,17 @@
+{
+  "parent": {
+    "kind": "generic",
+    "uriPattern": "file:///w"
+  },
+  "child": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w"
+    ]
+  },
+  "expected": {
+    "included": false,
+    "reason": "cross_kind"
+  }
+}

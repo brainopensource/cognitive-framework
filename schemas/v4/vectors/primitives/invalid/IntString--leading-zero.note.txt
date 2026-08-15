@@ -1,0 +1,1 @@
+Two spellings of one integer would give one value two digests.

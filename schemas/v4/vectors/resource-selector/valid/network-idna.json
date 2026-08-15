@@ -1,0 +1,9 @@
+{
+  "kind": "network",
+  "hosts": [
+    "münchen.example"
+  ],
+  "ports": [
+    443
+  ]
+}

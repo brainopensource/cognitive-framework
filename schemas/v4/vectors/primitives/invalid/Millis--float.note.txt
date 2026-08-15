@@ -1,0 +1,1 @@
+CT-07: no floating point for durations.

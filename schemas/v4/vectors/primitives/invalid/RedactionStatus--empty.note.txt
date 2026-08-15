@@ -1,0 +1,1 @@
+Absent status is omission, not an empty string.

@@ -67,6 +67,14 @@ Premature formalisation is indistinguishable from rigor at the moment of the dec
 
 **The standing exception:** the kernel, verifier and capability boundary stay at full rigor. They are the only thing between *self-improving* and *self-deceiving*, and deferring them costs more than building them.
 
+### M10 — Polyglot plugins outside the TCB (The Narrow Waist Wire Law)
+
+The microkernel and state ledger are minimal, deterministic, and language-neutral in their wire representation. Domain computation (Tree-sitter indexing, browser automation, microVM sandboxes, vector engines) or plugins in Rust, Go, TypeScript/Node, or Python must execute strictly outside the TCB, communicating across port boundaries via standard wire contracts (stdio, JSON-RPC, IPC, Unix domain sockets). The TCB never imports an external plugin runtime.
+
+### M11 — The Generality Falsification Invariant
+
+The core loop and microkernel must remain 100% agnostic to task domains. Coding is merely a configuration manifest (`vg-code-default`). Adding a research, legal, medical, or robotics task must require zero lines of code modified in `vanguard/packages/kernel/` or `vanguard/packages/agency/episode/`.
+
 ---
 
 ## 2. SOLID, concretely, here

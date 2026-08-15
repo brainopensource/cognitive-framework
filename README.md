@@ -127,3 +127,32 @@ python3 tools/check_active_mvp_contract.py
 # 4. Verify that must-fail tests catch broken implementations
 python3 tools/run_broken_tests.py
 ```
+
+
+## Openrouter Guidelines
+
+- **OpenRouter**:
+  - `base_url`: `https://openrouter.ai/api/v1`
+  - `api_key_env`: `"OPENROUTER_API_KEY"` on `ModelRoute` (the engine reads the env var)
+  - **Verified Free Models**:
+    1. `openrouter/free`
+    2. `inclusionai/ling-3.0-tiny:free`
+    3. `poolside/laguna-s-2.1:free`
+    4. `cohere/north-mini-code:free`
+    5. `google/gemma-4-26b-a4b-it:free`
+    6. `nvidia/nemotron-3-super-120b-a12b:free`
+    7. `openai/gpt-oss-20b:free`
+  - **Verified Low-Cost Paid Models**:
+    8. `deepseek/deepseek-v4-flash`
+    9. `xiaomi/mimo-v2.5`
+  - **Frontier Cloud Models**: `z-ai/glm-5.2`, `openai/gpt-5.6-luna`, `deepseek/deepseek-v4-pro`, `minimax/minimax-m3`
+- **DeepSeek API**:
+  - `base_url`: `https://api.deepseek.com/v1`
+  - `model`: `deepseek-reasoner` or `deepseek-coder` on `ModelRoute`
+  - `api_key_env`: `"DEEPSEEK_API_KEY"`
+- **OpenAI**:
+  - `base_url`: `https://api.openai.com/v1`
+  - `model`: `gpt-4o` on `ModelRoute`
+  - `api_key_env`: `"OPENAI_API_KEY"`
+
+---

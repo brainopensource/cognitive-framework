@@ -1,45 +1,40 @@
-# Lane C — Developer — ports and OpenRouter
+# Developer Prompt — Lane DC: Senior Developer C
 
-You own port activation bundles, then the real model adapter. You do not own the episode loop, Git, or governance.
+**Role:** Senior Systems Developer C (Model Port & Telemetry)  
+**Branch:** `sprint5-6/integration`  
+**Base:** `main` (Sprint 0–4 merged at `v0.4.0-sprint4`)  
+**Assigned Packet:** [`docs/sprint5/dc-packet.md`](../../sprint5/dc-packet.md)  
+**Contract Rows:** [`REQ-PORT-006`](../../sprint0/active-mvp-contract.json), [`REQ-SLICE-001`](../../sprint0/active-mvp-contract.json)  
+**Your Target Code:** `vanguard/packages/adapters/models/`
 
-Tickets: `S3-DC-001`, `S3-DC-002`, `S3-DC-003`, `S4-DC-001`  
-Contract: `REQ-PORT-002`, `REQ-PORT-004`, `REQ-PORT-005`, then `REQ-PORT-006`  
-Packages: `vanguard/packages/ports/`, fakes under `vanguard/packages/adapters/`, suites under `test/contracts/`.
+---
 
-## Read (in order), then implement from the tree
+## 1. Goal
+Harden the `OpenRouterModelAdapter` with **exponential retry backoff on 429/503**, fallback token estimation, cost calculation, and live disposable key execution receipt.
 
-1. This file and `docs/sprint3-4/README.md`
-2. `docs/sprint3/backlog.md`, `docs/sprint3/dc-packet.md`
-3. `docs/sprint4/backlog.md`, `docs/sprint4/dc-packet.md`
-4. ICD §4 port table; `vanguard/packages/ports/README.md` (activation bundle rule)
-5. `schemas/v4/port-interfaces.md`
-6. `docs/sprint1/provider-notes.md` and `docs/sprint2/slice-findings.md` — notes only; **do not resurrect `spike/` or `slice/`**
-7. Your contract rows in `docs/sprint0/active-mvp-contract.json`
-8. Existing `EventStorePort` fake+real as the pattern to copy
-9. `.github/pull_request_template.md`
+---
 
-A port with no fake and no shared suite must not land.
+## 2. Mandatory Reading Before Writing Code
+Read these exact files in order:
+1. [`docs/sprint1/provider-notes.md`](../../sprint1/provider-notes.md) — OpenRouter wire formats and streaming quirks.
+2. [`docs/sprint5/dc-packet.md`](../../sprint5/dc-packet.md) — Rate limit backoff and priced accounting requirements.
+3. [`docs/sprint0/active-mvp-contract.json`](../../sprint0/active-mvp-contract.json) — `REQ-PORT-006`, `REQ-SLICE-001`.
+4. [`vanguard/packages/ports/model.py`](../../../vanguard/packages/ports/model.py) — `ModelPort` contract.
+5. [`vanguard/packages/adapters/models/openrouter.py`](../../../vanguard/packages/adapters/models/openrouter.py) — Existing adapter.
 
-## S3 (no network)
+---
 
-- `ModelPort`: interface + cassette/fake + suite. Provider failures are instrument errors, not task failures.
-- `EvaluatorPort`: interface + fake. `agency` must not import it.
-- `SandboxRunner`: interface + visibly non-contained fake; unverified containment blocks publication.
+## 3. Strict Invariants (DO NOT DRIFT)
+* **Never Import in Trust Spine:** `openrouter.py` must NEVER be imported on the `test/trust/test_spine.py` gate path.
+* **Secret Cleanliness:** Never write raw `OPENROUTER_API_KEY` values into logs, events, or serialized artifacts.
+* **Priced Accounting:** Emit accurate token counts (`prompt_tokens`, `completion_tokens`, `cached_tokens`) and USD costs.
+* **First Failing Test:** Write unit tests for exponential backoff on 429 rate limits in `test/adapters/test_openrouter.py`.
 
-## S4
+---
 
-- OpenRouter (OpenAI-compatible) adapter behind `ModelPort`. Secret references only.
-- Cassette record/replay for CI. Skip live calls when the key is unset.
-- Trust-spine tests (`TEST-TRUST-001`) must not instantiate this adapter.
-
-## Out
-
-Episode engine, process engine, Git worktree adapter, deleting disposables, CLI dogfood.
-
-## Git
-
-Branch `sprints3-4/integration` only. After each ticket: `git status`, `git diff`, commit with ticket + `req_id` + done-state, then `git push -u origin HEAD`. Example:
-
+## 4. Verification Gate
+```bash
+python3 -m unittest test.adapters.test_openrouter
+python3 tools/check_boundaries.py
 ```
-S3-DC-001: ModelPort fake and cassette suite with typed instrument errors (REQ-PORT-002).
-```
+Push only to `sprint5-6/integration` with commit message format: `[dev-dc] S5-DC-001: <reason naming REQ-PORT-006>`.

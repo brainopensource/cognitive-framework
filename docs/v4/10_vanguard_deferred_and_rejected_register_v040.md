@@ -27,7 +27,7 @@ A **deferral** is a capability worth building later. A **rejection** is an idea 
 | # | Deferred | Why now | Reversal condition |
 |---|---|---|---|
 | `DEF-01` | Graphical authoring canvas | A graph is an excellent authoring and visualisation surface and a poor runtime substrate. The surface is worth building; it is not worth building first | A recorded trajectory renderer exists and users ask to *edit* rather than only inspect |
-| `DEF-02` | Semantic memory in Phase 0 | The claim pipeline (`06 §3`) needs an evaluator and a corpus, neither of which exists yet | Phase 2, with the memory ticket and `MF-31` |
+| `DEF-02` | Semantic memory in Phase 0 | The claim pipeline (`06 §3`) needs an evaluator and a corpus, neither of which exists yet | Phase 2, with the memory ticket and dedicated memory-write gating tests in a clean `MF-` namespace allocation |
 | `DEF-03` | General subagents | Operator invocation covers the Phase 0 cases; general composition adds budget-tree and cancellation surface before the loop is proven | Phase 2, when a real task needs depth beyond operator invocation |
 | `DEF-04` | Protocol integrations, browser, web search, retrieval index | Each is a registry entry plus configuration by construction (`02 [C-02]`). Building them early proves nothing and costs perimeter surface | Phase 2+, or earlier if a dogfood opt-out reason names one |
 | `DEF-05` | Systems-language index | The orchestration path is under five milliseconds against seconds of inference. Optimising it is optimising the row that does not matter | A measured number on a real repository crosses a stated threshold — and the experiment that would produce it is already named in `07 §5.8` |
@@ -37,7 +37,7 @@ A **deferral** is a capability worth building later. A **rejection** is an idea 
 | `DEF-09` | Training on the corpus | Requires corpus opt-in, contamination tracking per instance, and licensing (`04 [CT-16]`, `07 [M-20]`) | Phase 3, and never before the adversarial verifier audit |
 | `DEF-10` | A dedicated discovery or competence-expansion document | Premature: the machinery it would specify does not exist, and specifying it now would formalise guesses | When `06 §5` promotion has run on real artifacts and produced a pattern worth naming |
 | `DEF-11` | Compaction beyond a recency window in Phase 0 | Strategy comparison is a `07 §5.8` experiment, and there is no instrument yet | Phase 2, once consolidation loss is measurable |
-| `DEF-12` | Approvals, suspension and session resume | Phase 0 runs in benchmark-free interactive mode with a human present throughout | Phase 1 |
+| `DEF-12` | Approvals, suspension and session resume | Phase 0 runs in benchmark-free interactive mode with a human present throughout | **Superseded by ADR-0057 for privileged effects in beta.** Descriptor-bound human approval for `fs.patch` (Sink Class: `privileged`) lands in Phase 2 (Sprint 6). General multi-turn session suspension outside privileged effects remains deferred |
 
 ---
 

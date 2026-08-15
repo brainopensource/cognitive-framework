@@ -154,9 +154,16 @@ Each rule below corresponds to a defect that actually occurred, not a hypothetic
 
 ### 5.6 The instrument tuple
 
-Every result carries the complete configuration that produced it: model fingerprint and sampling parameters; harness and agent-definition hashes; artifact versions and prompt template hashes; manifest hash and split identifier; evaluator image digest; **the containment report** (`05 §6.2`); the substrate profile (`06 §7`); cache and seed policy; runner version; schema version; and timestamp.
+Every result carries an instrument tuple partitioned into four explicit algebraic subsets:
 
-> **`M-18` — the comparability rule.** Two results are comparable **if and only if** their tuples differ in exactly the dimensions under test. The comparison harness **refuses** to compute a lift between tuples differing in an undeclared dimension.
+$$\text{Tuple} = \langle \mathcal{K}_{\text{compat}}, \mathcal{D}_{\text{treatment}}, \mathcal{S}_{\text{strat}}, \mathcal{M}_{\text{meta}} \rangle$$
+
+- $\mathcal{K}_{\text{compat}}$ (**Compatibility Key**): benchmark ID, split hash, model fingerprint and sampling parameters, harness commit, agent definition hash, evaluator image digest, containment report digest (`05 §6.2`), substrate profile (`06 §7`), runner version, and schema version. Must be strictly equal ($\mathcal{K}_A = \mathcal{K}_B$) across compared arms.
+- $\mathcal{D}_{\text{treatment}}$ (**Treatment Dimensions**): the declared experimental axis under test (e.g. `vg-code-default` vs `vg-shell-only`, or L1–L5 prefix-cache enabled vs disabled).
+- $\mathcal{S}_{\text{strat}}$ (**Stratification Fields**): controlled categorical dimensions (e.g. task difficulty tier, repository programming language).
+- $\mathcal{M}_{\text{meta}}$ (**Observation Metadata**): physical timestamp, run ID, node ID, operator identity. **Explicitly excluded from the strict equality comparison operator.**
+
+> **`M-18` — the comparability rule.** Two results are comparable **if and only if** their compatibility keys match ($\mathcal{K}_A = \mathcal{K}_B$) and their tuples differ in exactly the declared treatment dimensions ($\mathcal{D}_{\text{treatment}}$). The comparison harness **refuses** to compute a lift between runs differing in an undeclared dimension. Observation metadata ($\mathcal{M}_{\text{meta}}$) is excluded from the equality check.
 
 This is the single highest-leverage piece of the apparatus, because it converts the most common analytical error in the field from a discipline problem into a runtime failure. A cross-schema-version comparison is a tuple delta and is refused unless declared.
 

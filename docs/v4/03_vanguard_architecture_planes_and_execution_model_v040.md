@@ -72,9 +72,9 @@ None of these are incidents. They are what happens when a dynamic process is exp
 
 ### 2.2 The expressiveness claim
 
-> **An agent that can invoke another agent as a tool is strictly more expressive than a graph of steps, at a small fraction of the machinery.**
+> **The episode loop is at least as expressive as the static topology language rejected above, at a small fraction of the machinery.**
 
-The expressiveness half is proved below. The machinery half is an **estimate**, anchored on one measurement — the prototype's graph validator alone was 501 lines, and the loop that replaces it is smaller than that. Treat it as an order-of-magnitude expectation, not a specification.
+The expressiveness half is proved below against static DAG topologies. The machinery half is an **estimate**, anchored on one measurement — the prototype's graph validator alone was 501 lines, and the loop that replaces it is smaller than that. Strict superiority holds under the static constraints enumerated in §2.1; dynamic graphs with runtime-generated nodes and recursive tasks may express equivalent behavior, but require significantly greater machinery. Treat it as an order-of-magnitude expectation, not an absolute proof over all possible workflow languages.
 
 **Proof by construction.** Take any such topology:
 
@@ -87,7 +87,7 @@ The expressiveness half is proved below. The machinery half is an **estimate**, 
 | `repair` | Does not exist. The agent observes failing output as a result and continues — *that is the loop* |
 | fan-out + join | N branches in isolated snapshots under one task group, ranked by verdict |
 
-Every graph is expressible. The converse fails: a graph cannot express the agent deciding at runtime that it needs three more files before planning, that this task needs no architect, or that two branches should be spawned and compared. **Static topology is a strict subset.**
+Every static graph is expressible. The converse fails for static topologies: a static graph cannot express the agent deciding at runtime that it needs three more files before planning, that this task needs no architect, or that two branches should be spawned and compared. **Static topology is a strict subset.**
 
 ### 2.3 What the graph was for, and how each goal survives
 
@@ -457,7 +457,7 @@ Pluggable and comparable — which is the point, since "which compaction strateg
 | `result_eviction` | Keep that a file was read; drop the body once superseded | Low. Usually the correct first move |
 | `model_summarize` | A child summarises the middle | Prose loses structure |
 | `structured_consolidate` | A child emits a structured record (§10.4) | Lowest measured; the recommended default |
-| `operator_isolation` | Never admit exploration to the parent context | **None** — the exploration was never there |
+| `operator_isolation` | Never admit exploration to the parent context | **Bounded** at the return contract — raw exploration is retained in child trajectory, summary loss measurable |
 
 **The cheapest way to keep a context window clean is never to put the exploration in it.** Isolation is the primary mechanism; compaction handles the remainder.
 

@@ -1,45 +1,43 @@
-# Lane B — Senior — process engine and perimeter
+# Developer Prompt — Lane SB: Senior Developer B
 
-You own finite, model-free governance, then the worker perimeter. You do not own the episode loop or providers.
+**Role:** Senior Systems Developer B (Security & Evaluator Isolation)  
+**Branch:** `sprint5-6/integration`  
+**Base:** `main` (Sprint 0–4 merged at `v0.4.0-sprint4`)  
+**Assigned Packet:** [`docs/sprint5/sb-packet.md`](../../sprint5/sb-packet.md)  
+**Contract Row:** [`REQ-EVAL-001`](../../sprint0/active-mvp-contract.json)  
+**Your Target Code:** `vanguard/packages/adapters/evaluators/`
 
-Tickets: `S3-SB-001`, `S4-SB-001`  
-Contract: `REQ-EXEC-002`, then `REQ-SEC-001`  
-Packages: `vanguard/packages/runtime/governance/`, then sandbox adapter.
+---
 
-## Read (in order), then implement from the tree
+## 1. Goal
+Implement the **OS-Isolated Exterior Evaluator Daemon** (`vanguard/packages/adapters/evaluators/isolated.py`) with the **Double Probe Protocol** (immutability + non-pollution).
 
-1. This file and `docs/sprint3-4/README.md`
-2. `docs/sprint3/backlog.md`, `docs/sprint3/sb-packet.md`
-3. `docs/sprint4/backlog.md`, `docs/sprint4/sb-packet.md`
-4. Decision Record — `ADR-0050`, `ADR-0055`
-5. ICD isolation topology and `SandboxRunner`
-6. VG-05 perimeter / containment (as cited by the ICD)
-7. Your contract rows in `docs/sprint0/active-mvp-contract.json`
-8. Process wire types already in `schemas/v4/` and `vanguard/packages/domain/`
-9. `.github/pull_request_template.md`
+---
 
-If two docs disagree, stop and ask the Tech Lead.
+## 2. Mandatory Reading Before Writing Code
+Read these exact files in order:
+1. [`docs/v4/05_vanguard_kernel_capabilities_and_security_v040.md`](../../v4/05_vanguard_kernel_capabilities_and_security_v040.md) — §2.1 Dual Ingress (`Principal::EvidencePlane`), §6 Sandbox & Perimeter.
+2. [`docs/v4/01_vanguard_engineering_handbook_v040.md`](../../v4/01_vanguard_engineering_handbook_v040.md) — Mental Model M5 (The verifier is outside everything).
+3. [`docs/sprint5/sb-packet.md`](../../sprint5/sb-packet.md) — Double probe protocol and `inconclusive` failure states.
+4. [`docs/sprint0/system-architecture-icd.md`](../../sprint0/system-architecture-icd.md) — `EvaluatorPort` interface definition.
+5. [`vanguard/packages/ports/evaluator.py`](../../../vanguard/packages/ports/evaluator.py) — Port contract.
 
-## S3
+---
 
-- Process engine: declared states, approvals, restart-resume from the ledger with **no** `ModelPort`.
-- Readable without opening the implementation.
-- Lane A will join your resume test in `S3-INT-001`. Keep the engine importable without `agency/`.
+## 3. Strict Invariants (DO NOT DRIFT)
+* **Exteriority:** The episode engine holds ZERO evaluation authority. The evaluator daemon is triggered strictly by observing terminal ledger events across an OS boundary.
+* **Double Probes:**
+  - Probe 1: Pre-registered sha256 digest check over test oracle files. Any modification $\to$ `EvaluationTampered` fail closed.
+  - Probe 2: Scan for untracked monkey-patches in the workspace. Any pollution $\to$ fail closed.
+* **Fail-Closed Uncertainty:** Instrument crashes or socket timeouts MUST return `inconclusive`, NEVER a fabricated pass.
+* **First Failing Test:** Write `test/adapters/test_isolated_evaluator.py` and prove failure before implementing the adapter.
 
-## S4
+---
 
-- Real (or probed) `SandboxRunner` using Lane C’s Sprint 3 port.
-- Containment report from probes. Unverified report blocks publication.
-- Scoped fixture: worker cannot read the evaluator bundle. Not a full-programme red team.
-
-## Out
-
-Episode loop, OpenRouter, Git adapter, deleting `spike/`/`slice/` (Lane A gate), S5 evaluator OS identity.
-
-## Git
-
-Branch `sprints3-4/integration` only. After each ticket: `git status`, `git diff`, commit with ticket + `req_id` + done-state, then `git push -u origin HEAD`. Example:
-
+## 4. Verification Gate
+```bash
+python3 -m unittest test.adapters.test_isolated_evaluator
+python3 tools/check_boundaries.py
+python3 tools/run_broken_tests.py
 ```
-S3-SB-001: interrupted process resumes from the ledger without an episode (REQ-EXEC-002).
-```
+Push only to `sprint5-6/integration` with commit message format: `[dev-sb] S5-SB-001: <reason naming REQ-EVAL-001>`.

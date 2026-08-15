@@ -85,7 +85,12 @@ Sections 2 through 9 exist to make S1 checkable. §9 enumerates the attacks agai
 
 ### 2.1 The only path
 
-Every effect — model call, read, write, subprocess, tool, operator invocation, memory access, verification — passes through exactly this sequence. There is no second path, and `AT-01` proves it.
+The dispatch sequence is the single execution path for all effects. However, two distinct principals invoke it across well-defined boundaries:
+
+1. **`Principal::Episode`** (ingress from the agent loop): submits action proposals (`observe`, `fs.patch`, `proc.test`). Subject to grant verification, selector attenuation, and budget reservation.
+2. **`Principal::EvidencePlane`** (ingress from the evaluator daemon, a separate OS process identity): submits evaluation executions triggered solely upon observing a terminal ledger event. The episode holds zero capability to invoke or request this path (`03 §3/§6.1`).
+
+The dispatcher pipeline S0–S12 is identical and strictly mediated; the distinction resides in caller authority and provenance. There is no second path, and `AT-01` proves it.
 
 ```
  S0  ENTER      EffectRequest { action, resource, args, principal, depth,
@@ -153,13 +158,15 @@ Every exit is enumerated. **An exit not in this table is a defect**, and `AT-09`
 | `F-22` | S9 | External effect occurrence undeterminable | released | `EffectReconciled{unknown}` | **uncertainty preserved** |
 | `F-23` | S10 | Commit fails | released | `BudgetReleased` | kernel error |
 | `F-24` | S11 | Release itself fails | **leaked — alarm** | `KernelAlarm{lease_leak}` | kernel error |
-| `F-25` | S12 | Emit fails | already released (`K-06`) | — | log; do not fail the effect |
+| `F-25` | S12 | Emit fails | already released (`K-06`) | `EffectReconciled{unknown}` | **transactional outbox: intent record exists from S8a; recovery scanner reconciles to `undeterminable`** |
 
 **On `F-05`.** A classifier that raises is treated as widening. Failing open here would mean that an exception in the classifier disables the authority predicate — the single most attractive target in the entire kernel.
 
 **On `F-22`.** This path did not exist in either predecessor. Without it, an implementation must resolve an undeterminable external effect to success or failure, which is manufacturing evidence. It is the enforcement point for `02 [C-11]`.
 
 **On `F-24`.** A release failure is unrecoverable by definition and is the only condition raising a kernel alarm. **It must page, not log.**
+
+**On `F-25`.** An emission failure at S12 does not re-execute the effect. Because the intent record was durably written at S8a before execution, the transaction is enqueued to the outbox, and the recovery scanner reconciles the outcome to `undeterminable` rather than silently dropping the event.
 
 ### 2.4 Idempotence and replay
 

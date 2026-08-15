@@ -1,42 +1,39 @@
-# Lane D — Developer — harness manifest and Git environment
+# Developer Prompt — Lane DD: Mid Developer D
 
-You own the coding environment adapter and the beta harness as **data**. You do not own the episode loop, OpenRouter, or governance.
+**Role:** Mid Developer D (Client & Hexagonal CLI Interface)  
+**Branch:** `sprint5-6/integration`  
+**Base:** `main` (Sprint 0–4 merged at `v0.4.0-sprint4`)  
+**Assigned Packet:** [`docs/sprint5/dd-packet.md`](../../sprint5/dd-packet.md)  
+**Contract Row:** [`REQ-CLI-001`](../../sprint0/active-mvp-contract.json)  
+**Your Target Code:** `vanguard/clients/cli/`
 
-Tickets: `S3-DD-001`, `S3-DD-002`, `S4-DD-001`  
-Contract: `REQ-PORT-003`, `REQ-HARN-001`  
-Packages: environment fake then real under `vanguard/packages/adapters/`; manifests under `vanguard/packages/agency/manifests/`.
+---
 
-## Read (in order), then implement from the tree
+## 1. Goal
+Realign the `@vanguard/cli` TypeScript client to consume live `RuntimeClient` async event streams and provide clean JSONL replay rendering for `vg run`, `vg trace`, and `vg why`.
 
-1. This file and `docs/sprint3-4/README.md`
-2. `docs/sprint3/backlog.md`, `docs/sprint3/dd-packet.md`
-3. `docs/sprint4/backlog.md`, `docs/sprint4/dd-packet.md`
-4. ICD `EnvironmentAdapter`; Decision Record `ADR-0049`
-5. `docs/sprint2/slice-findings.md` — absorb the rules; **do not copy deleted `slice/` source**
-6. Existing `vg-shell-only` under `vanguard/packages/agency/manifests/`
-7. Your contract rows in `docs/sprint0/active-mvp-contract.json`
-8. `.github/pull_request_template.md`
+---
 
-## S3
+## 2. Mandatory Reading Before Writing Code
+Read these exact files in order:
+1. [`docs/development/cli_tui_architecture.md`](../cli_tui_architecture.md) — Normative Hexagonal CLI & `RuntimeClient` specification.
+2. [`docs/sprint5/dd-packet.md`](../../sprint5/dd-packet.md) — CLI packet deliverables and headless requirements.
+3. [`docs/v4/04_vanguard_core_contracts_and_wire_schema_v040.md`](../../v4/04_vanguard_core_contracts_and_wire_schema_v040.md) — EventEnvelope wire schemas.
+4. [`docs/sprint0/active-mvp-contract.json`](../../sprint0/active-mvp-contract.json) — `REQ-CLI-001`.
+5. [`vanguard/clients/cli/src/`](../../../vanguard/clients/cli/src/) — Existing client codebase.
 
-- `EnvironmentAdapter` fake: snapshot, observe, preview **including new files**, apply, reconcile, dispose.
-- Tests are argv arrays, never a shell string.
-- Register `vg-code-default` (typed `read` / `search` / `patch` / `test`). `vg-shell-only` stays undeletable.
-- Leave the CLI on `MockRuntime`.
+---
 
-## S4
+## 3. Strict Invariants (DO NOT DRIFT)
+* **Hexagonal Boundary:** The CLI package is outside `vanguard/packages/`. It must NEVER import internal Python files or backend symbols directly.
+* **Deterministic Replay:** `vg trace` and `vg why` must parse and render timelines directly from stored JSONL event lines without invoking any LLM.
+* **Headless Mode:** In `vg run --headless`, stdout is strictly clean JSON lines; interactive terminal escape sequences are suppressed.
+* **First Failing Test:** Write/update `@vanguard/cli` TypeScript unit tests in `vanguard/clients/cli/test/`.
 
-- Permanent Git adapter (worktree, preview, apply). Shell is a selector-scoped privileged fallback, not the default.
-- The S4 trust-spine command uses the **fake**, not this adapter. Live `vg run` wiring is Sprint 6.
+---
 
-## Out
-
-ModelPort, OpenRouter, episode engine, process engine, deleting `spike/`/`slice/`.
-
-## Git
-
-Branch `sprints3-4/integration` only. After each ticket: `git status`, `git diff`, commit with ticket + `req_id` + done-state, then `git push -u origin HEAD`. Example:
-
+## 4. Verification Gate
+```bash
+npm --workspace @vanguard/cli test
 ```
-S3-DD-002: vg-code-default registered; vg-shell-only remains undeletable (REQ-HARN-001).
-```
+Push only to `sprint5-6/integration` with commit message format: `[dev-dd] S5-DD-001: <reason naming REQ-CLI-001>`.

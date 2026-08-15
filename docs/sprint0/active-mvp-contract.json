@@ -18,6 +18,7 @@
     "event-ledger",
     "domain/manifest",
     "agency/manifests",
+    "agency/harness-default",
     "client/cli"
   ],
   "deferred_activation": [
@@ -818,7 +819,7 @@
       "test_id": "TEST-HARN-001",
       "acceptance_evidence": "Both manifests freeze at composition; deletion of vg-shell-only is rejected.",
       "margin": "zero second product harness in S3-S6",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     }

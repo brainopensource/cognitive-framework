@@ -141,11 +141,76 @@ class ShellBaselineContract(unittest.TestCase):
         self.assertEqual(result, "3 passed")
         self.assertEqual(calls, [("proc.exec", capability.selector)])
 
-    def test_registry_refuses_baseline_deletion(self) -> None:
+def _code_default_workspace() -> Workspace:
+    kinds = {
+        "system-prompt.txt": "system_prompt",
+        "read-tool.json": "tool_schema",
+        "search-tool.json": "tool_schema",
+        "patch-tool.json": "tool_schema",
+        "test-tool.json": "tool_schema",
+        "context-policy.json": "context_policy",
+        "routing-policy.json": "routing_policy",
+        "budget-policy.json": "budget_policy",
+    }
+    artifacts = tuple(
+        ArtifactFile(f"vg-code-default/{name}", kind,
+                     (MANIFESTS / "vg-code-default" / name).read_text())
+        for name, kind in kinds.items()
+    )
+    return Workspace.empty().apply(LogicalEdit("register vg-code-default", artifacts))
+
+
+class CodeDefaultHarnessContract(unittest.TestCase):
+    """REQ-HARN-001: vg-code-default product manifest with typed read/search/patch/test."""
+
+    def setUp(self) -> None:
+        self.raw = json.loads((MANIFESTS / "vg-code-default" / "manifest.json").read_text())
+        self.manifest = parse_manifest(self.raw)
+        self.workspace = _code_default_workspace()
+
+    def test_code_default_files_validate_against_schema(self) -> None:
+        schema_set = SchemaSet(SCHEMAS)
+        schema_set.validate(self.raw, "harness-manifest.schema.json")
+        for tool_file in ("read-tool.json", "search-tool.json", "patch-tool.json", "test-tool.json"):
+            tool_data = json.loads((MANIFESTS / "vg-code-default" / tool_file).read_text())
+            self.assertIn("name", tool_data)
+            self.assertIn("verb", tool_data)
+
+    def test_code_default_contains_typed_tools_and_capabilities(self) -> None:
+        components = dict(self.manifest.components)
+        self.assertEqual(len(components["tools"]), 4)
+        verbs = {cap.verb for cap in self.manifest.capabilities}
+        self.assertEqual(verbs, {"fs.read", "fs.search", "patch.apply", "proc.exec"})
+        sinks = {cap.verb: cap.sink for cap in self.manifest.capabilities}
+        self.assertEqual(sinks["fs.read"], "observation")
+        self.assertEqual(sinks["fs.search"], "observation")
+        self.assertEqual(sinks["patch.apply"], "privileged")
+        self.assertEqual(sinks["proc.exec"], "privileged")
+
+    def test_composition_freezes_digests_per_episode(self) -> None:
+        frozen = compose(self.manifest, self.workspace.graph, "episode-1")
+        again = compose(self.manifest, self.workspace.graph, "episode-1")
+        other = compose(self.manifest, self.workspace.graph, "episode-2")
+        self.assertEqual(frozen.composition_digest, again.composition_digest)
+        self.assertNotEqual(frozen.composition_digest, other.composition_digest)
+
+    def test_registry_contains_both_manifests_and_protects_undeletable_control(self) -> None:
         registry = ManifestRegistry.parse(json.loads((MANIFESTS / "registry.json").read_text()))
+        self.assertEqual(len(registry.entries), 2)
+        by_name = {entry.name: entry for entry in registry.entries}
+        self.assertTrue(by_name["vg-shell-only"].undeletable)
+        self.assertFalse(by_name["vg-code-default"].undeletable)
+
+        # Baseline control cannot be deleted
         with self.assertRaisesRegex(ManifestError, "undeletable"):
             registry.remove("vg-shell-only")
+
+        # Product default can be replaced or removed without error
+        updated = registry.remove("vg-code-default")
+        self.assertEqual(len(updated.entries), 1)
+        self.assertEqual(updated.entries[0].name, "vg-shell-only")
 
 
 if __name__ == "__main__":
     unittest.main()
+

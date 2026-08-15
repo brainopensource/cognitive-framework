@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import unittest
 
@@ -289,26 +290,33 @@ class NoModelOnTheGatePath(unittest.TestCase):
     def test_no_provider_adapter_is_loaded_by_the_spine(self) -> None:
         """Asserted over the loaded module graph rather than promised in a
         docstring. A gate whose only evidence is a comment is a comment."""
-        spine.build([spine.finish()]).run()
-        loaded = [name for name in sys.modules
-                  if "openrouter" in name.lower() or "adapters.models" in name]
-        self.assertEqual(loaded, [])
+        cmd = [
+            sys.executable,
+            "-c",
+            "import sys; from test.trust import spine; spine.build([spine.finish()]).run(); "
+            "loaded = [name for name in sys.modules if 'openrouter' in name.lower() or 'adapters.models' in name]; "
+            "assert loaded == [], f'Provider adapters loaded: {loaded}'"
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Spine loaded provider adapter: {res.stderr}")
 
     def test_the_episode_holds_no_evaluator_authority(self) -> None:
         """`ICD §3` / `ICD §6`: evaluation is exterior and runs under a
         separate identity. OS isolation is Sprint 5; what is provable now is
         that the episode principal and the evaluator principal are distinct
         and that the episode reaches no evaluator symbol."""
-        wired = spine.build([spine.effect(), spine.finish()])
-        wired.run()
-
-        self.assertNotEqual(spine.PRINCIPAL, spine.EVALUATOR_PRINCIPAL)
-        principals = {event.principal for event in wired.ledger.events()}
-        self.assertNotIn(spine.EVALUATOR_PRINCIPAL, principals)
-        self.assertEqual(
-            [name for name in sys.modules
-             if name.startswith("vanguard.packages.agency") and "evaluator" in name],
-            [])
+        cmd = [
+            sys.executable,
+            "-c",
+            "import sys; from test.trust import spine; wired = spine.build([spine.effect(), spine.finish()]); wired.run(); "
+            "assert spine.PRINCIPAL != spine.EVALUATOR_PRINCIPAL; "
+            "principals = {event.principal for event in wired.ledger.events()}; "
+            "assert spine.EVALUATOR_PRINCIPAL not in principals; "
+            "eval_mods = [name for name in sys.modules if name.startswith('vanguard.packages.agency') and 'evaluator' in name]; "
+            "assert eval_mods == [], f'Evaluator modules in agency: {eval_mods}'"
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Evaluator authority breached: {res.stderr}")
 
 
 if __name__ == "__main__":

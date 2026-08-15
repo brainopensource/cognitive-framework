@@ -169,3 +169,14 @@ Approval events supplement; they do not edit the proposed rows above.
 | `APPROVAL-0003` | Close Sprints 0–2 product work. `REQ-CLI-001` covered. T1 remains DRAFT (not LOCKED). Live T0b (`REQ-SLICE-001`) stays open: no disposable credential. Human T0 re-signoff and hosted branch protection remain residuals, not schema-lock waivers | Tag `v0.0.0-sprint0`; PR #4; CLI 3/3; slice tests 5/5; contract Gate A/B 100% on merged scope; `gh` reports main unprotected | Tech Lead + Project Lead | 2026-08-15 |
 | `DECISION-0002` | Sprint 0–2 engineering closed. Carry: live T0b, GAP-010..014 bundle, prospective timing, branch protection, tracker import, T10.4–T10.9 continuous | APPROVAL-0003 | Project Lead | 2026-08-15 |
 | `DECISION-0003` | Conditional go for Sprint 3 implementation after packets on this branch: local tests allowed; no S3 merge to main until `REQ-SLICE-001` live run or a justified compensating live-cassette, and hosted protection is verified | Packets exist; live key absent | Project Lead | 2026-08-15 |
+
+## 11. Sprint 3–4 closure and Phase 2 authorization
+
+| ADR | Decision | Context | Alternative | Evidence | Owner · status | Reversal |
+|---|---|---|---|---|---|---|
+| `0058` | Authorize Phase 2 (Sprints 5–6) as the Lightweight Beta MVP delivery wave. S5 lands T5.3–T5.6 exterior evaluator OS isolation and T4.9–T4.11 prefix-stable context compiler. S6 lands T6.1–T6.8 runtime composition root, descriptor-bound approvals and live OpenRouter coding harness | Phase 1 (Trust Spine) successfully verified; Beta MVP requires product wiring and judge isolation | Delay evaluator isolation to Phase 3; or wire OpenRouter directly without composition root | `docs/review/todo/phases_review.md`; `active-mvp-contract.json` | Tech Lead + Project Lead · accepted · 2026-08-15 | Live dogfood demonstrates that single-file repair requires multi-agent coordination depth |
+
+| Event | Decision | Evidence | Authority | Date |
+|---|---|---|---|---|
+| `APPROVAL-0004` | Close Sprints 3–4. Merge PR #5 to `main`, tag `v0.4.0-sprint4`. S4 gate executed: `spike/` and `slice/` deleted and proven absent by `MF-S4-001`. Landed requirements (`REQ-EXEC-001..002`, `REQ-PORT-002..006`, `REQ-TRUST-001`, `REQ-SEC-001`, `REQ-HARN-001`) covered. GAP-01 (subprocess module isolation in `test_spine.py`) and GAP-02 (`active-mvp-contract.json` sync) resolved and 100% green | Tag `v0.4.0-sprint4`; PR #5; 252 unittests pass; 42/42 merged-scope contract evidence 100%; 21 broken counterparts pass; TCB 1307 LOC pass | Tech Lead + Project Lead | 2026-08-15 |
+| `DECISION-0004` | Go for Phase 2 (Sprint 5) implementation on `sprint5-6/integration`. Documentation consolidated and obsolete review scratch files purged | APPROVAL-0004; `docs/review/todo/phases_review.md` | Project Lead | 2026-08-15 |

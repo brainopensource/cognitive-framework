@@ -7,7 +7,7 @@ from typing import Sequence
 
 from ...domain.ledger.events import EventEnvelope
 from ...ports.event_store import EventRange, EventStorePort
-from .model import ProcessDefinition, ProcessHistory, ProcessInstance
+from .definitions import ProcessDefinition, ProcessHistory, ProcessInstance
 
 
 class ProcessError(RuntimeError):

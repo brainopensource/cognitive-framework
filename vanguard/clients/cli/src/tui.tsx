@@ -1,30 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
-import type { RuntimeEvent, RuntimePort } from "./runtime.js";
+import type { RuntimeClient, StreamItem } from "./contract/types.js";
 
-export function RunTui({ runtime, repo, runId, resumeFrom, checkpointEvery }: { runtime: RuntimePort; repo: string; runId?: string; resumeFrom?: string; checkpointEvery?: number }) {
+export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeClient; repo: string; runId?: string; resumeFrom?: string }) {
   const { exit } = useApp();
-  const [events, setEvents] = useState<RuntimeEvent[]>([]);
+  const [events, setEvents] = useState<StreamItem[]>([]);
   const [status, setStatus] = useState("starting");
-  const activeRunId = events[0]?.runId ?? runId;
+  const activeRunId = events[0]?.envelope.runId ?? runId;
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const source = resumeFrom ? runtime.resume(resumeFrom) : runtime.run({ repo, runId, checkpointEvery });
-        for await (const event of source) {
+        const started = await runtime.startRun({ repo, runId, resumeFrom });
+        const streamId = started.ok ? started.value.runId : runId ?? "";
+        if (started.ok) setStatus("requested");
+        else setStatus(started.error.code);
+        for await (const result of runtime.streamEvents({ runId: streamId })) {
           if (!alive) return;
-          setEvents((current) => [...current.slice(-11), event]);
-          setStatus(event.type.replace(".", " "));
+          if (!result.ok) {
+            setStatus(result.error.code);
+            continue;
+          }
+          setEvents((current) => [...current.slice(-11), result.value]);
+          setStatus(result.value.envelope.payload.kind);
         }
-      } catch (error) { setStatus(error instanceof Error ? error.message : String(error)); }
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : String(error));
+      }
     })();
-    return () => { alive = false; };
-  }, [repo, resumeFrom, runId, checkpointEvery, runtime]);
+    return () => {
+      alive = false;
+    };
+  }, [repo, resumeFrom, runId, runtime]);
 
   useInput((input, key) => {
-    if (input === "c" && activeRunId) void runtime.cancel(activeRunId);
+    if (input === "c" && activeRunId) void runtime.requestCancel(activeRunId);
     if (input === "q" || key.escape) exit();
   });
 
@@ -33,7 +44,7 @@ export function RunTui({ runtime, repo, runId, resumeFrom, checkpointEvery }: { 
     <Text>repo: {repo}  status: <Text color="yellow">{status}</Text></Text>
     <Text dimColor>controls: c cancel · q quit</Text>
     <Box flexDirection="column" marginTop={1}>
-      {events.map((event) => <Text key={`${event.runId}-${event.seq}`} color={event.type === "run.completed" ? "green" : event.type === "run.cancelled" ? "red" : undefined}>[{String(event.seq).padStart(2, "0")}] {event.type.padEnd(20)} {event.message}</Text>)}
+      {events.map((item) => <Text key={`${item.envelope.eventId}-${item.envelope.seq}`}>[{item.envelope.seq.padStart(2, "0")}] {item.envelope.payload.kind.padEnd(20)} {item.source}</Text>)}
     </Box>
   </Box>;
 }

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanguard GTS — Workflow, DAG & Iterative Spiral Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0d14;
+      --bg-panel: #111622;
+      --bg-panel-subtle: #171f2f;
+      --bg-card: #1c2538;
+      --bg-card-hover: #243048;
+      --border-subtle: #27344e;
+      --border-strong: #384a6e;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #8b5cf6;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top App Bar */
+    header {
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #0284c7, #0f766e);
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #f8fafc;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* View Switcher Tabs */
+    .view-tabs {
+      display: flex;
+      background-color: var(--bg-base);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background-color: var(--bg-panel-subtle);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background-color: var(--bg-card);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      font-weight: 600;
+    }
+
+    /* Playback & Telemetry HUD */
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-btn {
+      background-color: var(--bg-panel-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease;
+    }
+
+    .control-btn:hover {
+      background-color: var(--bg-card);
+    }
+
+    .control-btn.primary {
+      background-color: #0284c7;
+      border-color: #0369a1;
+      color: #fff;
+      font-weight: 600;
+    }
+    .control-btn.primary:hover {
+      background-color: #0369a1;
+    }
+
+    .speed-select {
+      background-color: var(--bg-panel-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      outline: none;
+      font-family: var(--font-mono);
+    }
+
+    /* Telemetry Header Bar */
+    .telemetry-strip {
+      background-color: var(--bg-panel-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 6px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    .metric-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-item span.label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .metric-item span.value {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Canvas / Graph Container */
+    .graph-viewport {
+      position: relative;
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 24px 24px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #workflow-svg {
+      width: 100%;
+      height: 100%;
+      user-select: none;
+    }
+
+    /* Right Inspector Sidebar */
+    .inspector-panel {
+      background-color: var(--bg-panel);
+      border-left: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .badge.active { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge.invalidation { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+    .badge.verified { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge.pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .key-value-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .key-value-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .key-value-row .key {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .key-value-row .val {
+      color: var(--text-primary);
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .code-block {
+      background-color: #0c1017;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #cbd5e1;
+      overflow-x: auto;
+      max-height: 220px;
+      white-space: pre-wrap;
+    }
+
+    /* SVG Graphical Styling */
+    .node-group {
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .node-group:hover rect.node-box {
+      stroke: var(--accent-cyan);
+      filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
+    }
+
+    .node-group.selected rect.node-box {
+      stroke: #38bdf8;
+      stroke-width: 2.5px;
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6));
+    }
+
+    .wire-path {
+      fill: none;
+      stroke: #334155;
+      stroke-width: 2px;
+      stroke-linecap: round;
+      transition: stroke 0.3s ease;
+    }
+
+    .wire-path.active {
+      stroke: #0ea5e9;
+      stroke-width: 2.5px;
+    }
+
+    .wire-path.backtrack {
+      stroke: #f43f5e;
+      stroke-dasharray: 6, 6;
+      stroke-width: 2.5px;
+      animation: dash-animation 20s linear infinite;
+    }
+
+    @keyframes dash-animation {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+
+    .wire-pulse {
+      fill: #38bdf8;
+      filter: drop-shadow(0 0 6px #38bdf8);
+    }
+
+    .wire-pulse.backtrack {
+      fill: #f43f5e;
+      filter: drop-shadow(0 0 8px #f43f5e);
+    }
+
+    /* Mode 3: Multi-Harness Comparison Table Container */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 92%;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .harness-card {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .harness-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+    }
+
+    .harness-card.highlight {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+    }
+
+    .harness-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .harness-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .stage-box {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 11px;
+    }
+
+    .stage-title {
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand-section">
+      <div class="brand-badge">Vanguard v4</div>
+      <div>
+        <div class="brand-title">Workflow, DAG & Iterative Spiral Visualizer</div>
+        <div class="brand-subtitle">General Task Solver (GTS) Meta-Harness & Replay Substrate</div>
+      </div>
+    </div>
+
+    <!-- Mode Switcher Tabs -->
+    <div class="view-tabs">
+      <button class="tab-btn active" onclick="switchMode('spiral')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        1. Design Spiral & Backtracking
+      </button>
+      <button class="tab-btn" onclick="switchMode('node-net')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M10 6.5h4M6.5 10v4M17.5 10v4M10 17.5h4"/></svg>
+        2. ComfyUI / n8n Node Net
+      </button>
+      <button class="tab-btn" onclick="switchMode('matrix')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        3. Multi-Harness Matrix
+      </button>
+      <button class="tab-btn" onclick="switchMode('scales')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        4. Scales (Atom → Cell)
+      </button>
+    </div>
+
+    <!-- Global Telemetry & Playback Controls -->
+    <div class="hud-controls">
+      <button class="control-btn primary" id="play-pause-btn" onclick="togglePlayback()">
+        <span id="play-icon">▶</span> <span id="play-label">Play</span>
+      </button>
+      <button class="control-btn" onclick="stepForward()">Step ❯</button>
+      <button class="control-btn" onclick="resetPlayback()">Reset ↺</button>
+      <select class="speed-select" id="speed-select" onchange="changeSpeed(this.value)">
+        <option value="1">1.0x Speed</option>
+        <option value="2">2.0x Speed</option>
+        <option value="0.5">0.5x Speed</option>
+        <option value="4">4.0x Speed</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Live Telemetry Strip -->
+  <div class="telemetry-strip">
+    <div class="metric-group">
+      <div class="metric-item">
+        <span class="label">Run ID:</span>
+        <span class="value" id="hud-run-id">run-vg-s2-spiral-042</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Current Seq:</span>
+        <span class="value" id="hud-seq">0</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Causal Depth:</span>
+        <span class="value" id="hud-depth">1</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Status:</span>
+        <span class="badge active" id="hud-status">ACTIVE</span>
+      </div>
+    </div>
+    <div class="metric-group">
+      <div class="metric-item">
+        <span class="label">Active Invalidation:</span>
+        <span class="value" style="color: #f59e0b;" id="hud-invalidation">None (H0 Active)</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Token Usage:</span>
+        <span class="value" id="hud-tokens">0 tok</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Budget Debited:</span>
+        <span class="value" id="hud-usd">0 µ$</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">State Digest:</span>
+        <span class="value" id="hud-digest">sha256:e3b0c442...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Viewport and Inspector Area -->
+  <div class="workspace">
+    
+    <!-- Left Dynamic Graph Viewport -->
+    <div class="graph-viewport" id="graph-container">
+      <svg id="workflow-svg" viewBox="0 0 1000 650"></svg>
+    </div>
+
+    <!-- Right Inspector & State Drawer -->
+    <div class="inspector-panel">
+      <div class="panel-header">
+        <div class="panel-title">Inspection & Ledger Telemetry</div>
+        <span class="badge active" id="inspector-badge">NODE DETAILS</span>
+      </div>
+      
+      <div class="panel-content">
+        
+        <!-- Active Node Summary Card -->
+        <div class="card">
+          <div class="card-title">
+            <span id="ins-node-title">Initial Hull Hypothesis (H0)</span>
+            <span class="badge active" id="ins-node-type">Hypothesis</span>
+          </div>
+          <div class="key-value-list">
+            <div class="key-value-row">
+              <span class="key">Causal Layer:</span>
+              <span class="val" id="ins-layer">L6 Agency / Formulation</span>
+            </div>
+            <div class="key-value-row">
+              <span class="key">Epistemic State:</span>
+              <span class="val" id="ins-epistemic" style="color: #38bdf8;">corroborated</span>
+            </div>
+            <div class="key-value-row">
+              <span class="key">Execution Mode:</span>
+              <span class="val" id="ins-mode">Deterministic Pre-Flight</span>
+            </div>
+            <div class="key-value-row">
+              <span class="key">Constraint Delta:</span>
+              <span class="val" id="ins-constraint">None (Base Allocation)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invalidation Condition Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>Machine Invalidation Gate (INV-1 / INV-2)</span>
+            <span class="badge verified" id="ins-inv-status">PASS</span>
+          </div>
+          <div class="code-block" id="ins-inv-code">INV-1 := CavitationNumber(V, P) &lt; 0.45 
+         OR MaxThermalFlux &gt; 1250 kW/m²
+Status := Validated on iteration k=1</div>
+        </div>
+
+        <!-- Raw Wire EventEnvelope View -->
+        <div class="card">
+          <div class="card-title">
+            <span>Raw EventEnvelope (Wire Contract)</span>
+            <button class="control-btn" style="padding: 2px 6px; font-size: 10px;" onclick="copyEventJson()">Copy JSON</button>
+          </div>
+          <div class="code-block" id="ins-json">{
+  "schemaVersion": "vg.4",
+  "eventId": "018f7777-1111-7000-8000-000000000001",
+  "seq": "0",
+  "scope": "episode",
+  "occurredAt": "2026-08-15T00:00:00.000Z",
+  "payload": {
+    "kind": "EpisodeStarted",
+    "hypothesis": "H0_Baseline_Design"
+  }
+}</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Visualizer State Management
+    let currentMode = 'spiral';
+    let isPlaying = false;
+    let playTimer = null;
+    let playbackSpeed = 1;
+    let currentStep = 0;
+    let selectedNodeId = null;
+
+    // Simulation Sequence Data for Mode 1 (Design Spiral & Backtracking)
+    const spiralSteps = [
+      {
+        step: 0,
+        seq: "0",
+        activeNode: "node-h0",
+        activeWires: ["wire-h0-sim"],
+        status: "ACTIVE",
+        invalidation: "None (H0 Formulated)",
+        tokens: 450,
+        usd: 1200,
+        digest: "sha256:01af82c918a3...",
+        nodeDetails: {
+          title: "1. Baseline Hypothesis Formulation (H0)",
+          type: "Hypothesis Root",
+          badge: "active",
+          layer: "L6 Metacognition & Agency",
+          epistemic: "hypothesised",
+          mode: "Snapshot Seeded",
+          constraint: "Initial parameters: Mass Ratio 0.88, Beam/Length 0.14",
+          invRule: "INV-1 := MaxThermalFlux <= 1250 kW/m²\nINV-2 := CavitationIndex >= 0.45",
+          invStatus: "PENDING",
+          invBadge: "pending",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0001-7000-8000-0000-000000000001",
+            seq: "0",
+            scope: "episode",
+            runId: "run-vg-s2-spiral-042",
+            payload: {
+              kind: "EpisodeStarted",
+              hypothesisId: "H0",
+              parameters: { massRatio: 0.88, beamRatio: 0.14 }
+            }
+          }
+        }
+      },
+      {
+        step: 1,
+        seq: "1",
+        activeNode: "node-sim",
+        activeWires: ["wire-sim-prop"],
+        status: "ACTIVE",
+        invalidation: "Simulation Convergence OK",
+        tokens: 1280,
+        usd: 3400,
+        digest: "sha256:94df22ba01fe...",
+        nodeDetails: {
+          title: "2. Hydrodynamic / Structural Simulation",
+          type: "Sandbox Effect",
+          badge: "active",
+          layer: "L0 Substrate / Execution Sandbox",
+          epistemic: "observed",
+          mode: "Sandboxed Execution (Pure)",
+          constraint: "Hydro loads calculated at 35 kts cruise",
+          invRule: "INV-1: Max stress load < Yield Strength (320 MPa) -> PASS (280 MPa)",
+          invStatus: "PASS",
+          invBadge: "verified",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0002-7000-8000-0000-000000000002",
+            seq: "1",
+            scope: "episode",
+            payload: {
+              kind: "EffectCompleted",
+              descriptorDigest: "sha256:77ff12... (OpenFOAM Runner)",
+              outcome: "ok",
+              receiptDigest: "sha256:88ee33..."
+            }
+          }
+        }
+      },
+      {
+        step: 2,
+        seq: "2",
+        activeNode: "node-prop",
+        activeWires: ["wire-prop-ver"],
+        status: "ACTIVE",
+        invalidation: "Propulsion Staging Coupled",
+        tokens: 2100,
+        usd: 5800,
+        digest: "sha256:bc3371908aa1...",
+        nodeDetails: {
+          title: "3. Propulsion & Thermal Staging",
+          type: "Coupled Analysis",
+          badge: "active",
+          layer: "L2 Artifact Graph",
+          epistemic: "derived",
+          mode: "Multi-Model Inference",
+          constraint: "Shaft RPM: 1450, Blade Loading: 110 kPa",
+          invRule: "Coupling Check: Thermal gradient vs Hull boundary",
+          invStatus: "PASS",
+          invBadge: "verified",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0003-7000-8000-0000-000000000003",
+            seq: "2",
+            scope: "episode",
+            payload: {
+              kind: "ProposalProduced",
+              operatorId: "thermal-staging-v2",
+              toolCalls: [{ name: "calc_thermal_gradient" }]
+            }
+          }
+        }
+      },
+      {
+        step: 3,
+        seq: "3",
+        activeNode: "node-ver",
+        activeWires: ["wire-backtrack-h1"],
+        status: "INVALIDATED",
+        invalidation: "INV-1 VIOLATED: Cavitation Inception at 28 kts!",
+        tokens: 3400,
+        usd: 9100,
+        digest: "sha256:fa2018bbca32...",
+        nodeDetails: {
+          title: "4. Downstream Verifier (Cavitation Violation)",
+          type: "Sealed Evaluator",
+          badge: "invalidation",
+          layer: "L3 Exterior Judge",
+          epistemic: "contradicted",
+          mode: "Sealed Exterior Assertion",
+          constraint: "Cavitation index 0.38 < 0.45 minimum threshold! Structural erosion risk.",
+          invRule: "INV-1 FALSIFIED! Parameter set H0 cannot meet acoustic & endurance envelope.",
+          invStatus: "FAILED -> ROLLBACK TO H0",
+          invBadge: "invalidation",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0004-7000-8000-0000-000000000004",
+            seq: "3",
+            scope: "episode",
+            payload: {
+              kind: "EvaluationRequested",
+              evaluatorId: "cavitation-judge-l3",
+              verdict: "FAILED",
+              invalidationTriggered: "INV-1",
+              rollbackTarget: "Snapshot_0 (H0)"
+            }
+          }
+        }
+      },
+      {
+        step: 4,
+        seq: "4",
+        activeNode: "node-h1",
+        activeWires: ["wire-h1-opt"],
+        status: "RE-PARAMETERIZED",
+        invalidation: "H1 Formulated: Delta-Beam +12%, Modified Foil",
+        tokens: 4900,
+        usd: 12500,
+        digest: "sha256:66ab730018f2...",
+        nodeDetails: {
+          title: "5. Backtracked Re-Parameterization (H1)",
+          type: "Causal Spiral",
+          badge: "active",
+          layer: "L6 Metacognition & Search Spiral",
+          epistemic: "hypothesised",
+          mode: "Counterfactual Restoration",
+          constraint: "H0 refuted with empirical negative trace. Beam adjusted to 0.158, Foil NACA-66.",
+          invRule: "INV-1 and INV-2 re-checked with augmented constraint set",
+          invStatus: "PASSING",
+          invBadge: "verified",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0005-7000-8000-0000-000000000005",
+            seq: "4",
+            scope: "episode",
+            payload: {
+              kind: "EpisodeStateChanged",
+              fromState: "backtracking",
+              toState: "active_spiral_2",
+              reason: "H0 refuted by cavitation judge. Evolving Pareto frontier to H1."
+            }
+          }
+        }
+      },
+      {
+        step: 5,
+        seq: "5",
+        activeNode: "node-opt",
+        activeWires: [],
+        status: "CONVERGED",
+        invalidation: "None (All Constraints Satisfied)",
+        tokens: 6100,
+        usd: 15400,
+        digest: "sha256:09fe8830ac51...",
+        nodeDetails: {
+          title: "6. Optimal Verified Convergence",
+          type: "Sealed Release",
+          badge: "verified",
+          layer: "L1 State Ledger & Attestation",
+          epistemic: "corroborated",
+          mode: "Signed Artifact Publication",
+          constraint: "All multi-disciplinary hydrodynamic, thermal & structural bounds verified.",
+          invRule: "ALL 12/12 CHECKS PASS. Zero invalidation alarms.",
+          invStatus: "VERIFIED",
+          invBadge: "verified",
+          json: {
+            schemaVersion: "vg.4",
+            eventId: "018f0006-7000-8000-0000-000000000006",
+            seq: "5",
+            scope: "episode",
+            payload: {
+              kind: "EpisodeCompleted",
+              outcome: "resolved",
+              paretoOptimal: true,
+              totalIterations: 2,
+              finalArtifactDigest: "sha256:9900aabbcc..."
+            }
+          }
+        }
+      }
+    ];
+
+    // Rendering Modes
+    function renderCurrentMode() {
+      const svg = document.getElementById('workflow-svg');
+      const container = document.getElementById('graph-container');
+      
+      if (currentMode === 'spiral') {
+        renderDesignSpiral(svg);
+      } else if (currentMode === 'node-net') {
+        renderNodeNet(svg);
+      } else if (currentMode === 'matrix') {
+        renderHarnessMatrix(container);
+      } else if (currentMode === 'scales') {
+        renderScalesHierarchy(svg);
+      }
+    }
+
+    // MODE 1: Non-Linear Iterative Design Spiral & Backtracking
+    function renderDesignSpiral(svg) {
+      document.getElementById('graph-container').innerHTML = '<svg id="workflow-svg" viewBox="0 0 1000 620"></svg>';
+      const targetSvg = document.getElementById('workflow-svg');
+      
+      const stepData = spiralSteps[currentStep];
+
+      targetSvg.innerHTML = `
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0ea5e9" />
+          </marker>
+          <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#f43f5e" />
+          </marker>
+          <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#06b6d4" flood-opacity="0.6"/>
+          </filter>
+          <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#f43f5e" flood-opacity="0.8"/>
+          </filter>
+        </defs>
+
+        <!-- Forward Causal Paths -->
+        <path id="wire-h0-sim" class="wire-path ${currentStep >= 1 ? 'active' : ''}" d="M 230 180 L 370 180" marker-end="url(#arrow)" />
+        <path id="wire-sim-prop" class="wire-path ${currentStep >= 2 ? 'active' : ''}" d="M 550 180 L 670 180" marker-end="url(#arrow)" />
+        <path id="wire-prop-ver" class="wire-path ${currentStep >= 3 ? 'active' : ''}" d="M 760 220 L 760 360" marker-end="url(#arrow)" />
+        
+        <!-- NON-LINEAR BACKTRACKING FEEDBACK LOOP (The Marine/Rocket Spiral) -->
+        <path id="wire-backtrack-h1" class="wire-path backtrack" d="M 670 410 C 450 560, 200 480, 140 240" marker-end="url(#arrow-red)" />
+        <path id="wire-h1-opt" class="wire-path ${currentStep >= 5 ? 'active' : ''}" d="M 230 200 C 350 350, 480 350, 480 440" marker-end="url(#arrow)" />
+
+        <!-- Pulse Particles along active wires -->
+        ${currentStep === 0 ? '<circle class="wire-pulse" cx="290" cy="180" r="4"><animate attributeName="cx" from="230" to="370" dur="1.2s" repeatCount="indefinite"/></circle>' : ''}
+        ${currentStep === 1 ? '<circle class="wire-pulse" cx="600" cy="180" r="4"><animate attributeName="cx" from="550" to="670" dur="1.2s" repeatCount="indefinite"/></circle>' : ''}
+        ${currentStep === 2 ? '<circle class="wire-pulse" cx="760" cy="280" r="4"><animate attributeName="cy" from="220" to="360" dur="1.2s" repeatCount="indefinite"/></circle>' : ''}
+        ${currentStep === 3 ? '<circle class="wire-pulse backtrack" cx="450" cy="480" r="5"/>' : ''}
+        ${currentStep === 4 ? '<circle class="wire-pulse" cx="300" cy="270" r="4"/>' : ''}
+
+        <!-- Backtracking Annotation Banner -->
+        <g transform="translate(340, 520)">
+          <rect x="0" y="0" width="340" height="42" rx="8" fill="#1e1b2e" stroke="#f43f5e" stroke-dasharray="4,4" />
+          <text x="170" y="25" fill="#f43f5e" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">
+            ↩ Causal Backtracking (INV-1 Falsified → Refit H0)
+          </text>
+        </g>
+
+        <!-- Node 1: Initial Hypothesis H0 -->
+        <g id="node-h0" class="node-group ${stepData.activeNode === 'node-h0' ? 'selected' : ''}" onclick="selectNodeStep(0)" transform="translate(60, 130)">
+          <rect class="node-box" width="170" height="95" rx="10" fill="#171f2f" stroke="${stepData.activeNode === 'node-h0' ? '#38bdf8' : '#334155'}" stroke-width="1.5" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#0ea5e9" />
+          <text x="26" y="22" fill="#94a3b8" font-size="10" font-weight="600" text-transform="uppercase" font-family="sans-serif">Hypothesis H₀</text>
+          <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="600" font-family="sans-serif">Baseline Hull/Staging</text>
+          <text x="14" y="65" fill="#64748b" font-size="10" font-family="sans-serif">Mass: 0.88 · Beam: 0.14</text>
+          <text x="14" y="80" fill="#38bdf8" font-size="9" font-family="monospace">Snapshot_0 Digest</text>
+        </g>
+
+        <!-- Node 2: Structural & Hydro Simulation -->
+        <g id="node-sim" class="node-group ${stepData.activeNode === 'node-sim' ? 'selected' : ''}" onclick="selectNodeStep(1)" transform="translate(370, 130)">
+          <rect class="node-box" width="180" height="95" rx="10" fill="#171f2f" stroke="${stepData.activeNode === 'node-sim' ? '#38bdf8' : '#334155'}" stroke-width="1.5" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#10b981" />
+          <text x="26" y="22" fill="#94a3b8" font-size="10" font-weight="600" text-transform="uppercase" font-family="sans-serif">L0 Sandbox Effect</text>
+          <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="600" font-family="sans-serif">Hydro / CFD Solver</text>
+          <text x="14" y="65" fill="#64748b" font-size="10" font-family="sans-serif">35 kts Cruise Condition</text>
+          <text x="14" y="80" fill="#10b981" font-size="9" font-family="monospace">Yield Check: 280 MPa (OK)</text>
+        </g>
+
+        <!-- Node 3: Propulsion Staging -->
+        <g id="node-prop" class="node-group ${stepData.activeNode === 'node-prop' ? 'selected' : ''}" onclick="selectNodeStep(2)" transform="translate(670, 130)">
+          <rect class="node-box" width="180" height="95" rx="10" fill="#171f2f" stroke="${stepData.activeNode === 'node-prop' ? '#38bdf8' : '#334155'}" stroke-width="1.5" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#f59e0b" />
+          <text x="26" y="22" fill="#94a3b8" font-size="10" font-weight="600" text-transform="uppercase" font-family="sans-serif">L2 Coupled Artifact</text>
+          <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="600" font-family="sans-serif">Propulsion & Thermal</text>
+          <text x="14" y="65" fill="#64748b" font-size="10" font-family="sans-serif">Shaft: 1450 RPM / 110 kPa</text>
+          <text x="14" y="80" fill="#f59e0b" font-size="9" font-family="monospace">Coupling Gradient OK</text>
+        </g>
+
+        <!-- Node 4: Downstream Cavitation Verifier (The Invalidation Trigger) -->
+        <g id="node-ver" class="node-group ${stepData.activeNode === 'node-ver' ? 'selected' : ''}" onclick="selectNodeStep(3)" transform="translate(670, 360)">
+          <rect class="node-box" width="190" height="105" rx="10" fill="#20131e" stroke="${stepData.activeNode === 'node-ver' ? '#f43f5e' : '#e11d48'}" stroke-width="2" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#f43f5e" />
+          <text x="26" y="22" fill="#fb7185" font-size="10" font-weight="700" text-transform="uppercase" font-family="sans-serif">L3 Exterior Verifier</text>
+          <text x="14" y="45" fill="#fff" font-size="13" font-weight="700" font-family="sans-serif">Cavitation Limit Gate</text>
+          <text x="14" y="65" fill="#fda4af" font-size="10" font-family="sans-serif">Cavitation: 0.38 &lt; 0.45 MIN</text>
+          <text x="14" y="85" fill="#f43f5e" font-size="10" font-weight="700" font-family="monospace">INV-1 VIOLATION (Rollback)</text>
+        </g>
+
+        <!-- Node 5: Evolved Hypothesis H1 -->
+        <g id="node-h1" class="node-group ${stepData.activeNode === 'node-h1' ? 'selected' : ''}" onclick="selectNodeStep(4)" transform="translate(60, 360)">
+          <rect class="node-box" width="180" height="95" rx="10" fill="#132338" stroke="${stepData.activeNode === 'node-h1' ? '#38bdf8' : '#0284c7'}" stroke-width="1.5" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#38bdf8" />
+          <text x="26" y="22" fill="#7dd3fc" font-size="10" font-weight="600" text-transform="uppercase" font-family="sans-serif">Spiral Loop Iteration k=2</text>
+          <text x="14" y="45" fill="#f8fafc" font-size="13" font-weight="600" font-family="sans-serif">Re-Fit Hypothesis H₁</text>
+          <text x="14" y="65" fill="#94a3b8" font-size="10" font-family="sans-serif">Beam: 0.158 (+12%) · NACA-66</text>
+          <text x="14" y="80" fill="#38bdf8" font-size="9" font-family="monospace">Negative Trajectory Pruned</text>
+        </g>
+
+        <!-- Node 6: Global Optimum Solution -->
+        <g id="node-opt" class="node-group ${stepData.activeNode === 'node-opt' ? 'selected' : ''}" onclick="selectNodeStep(5)" transform="translate(380, 440)">
+          <rect class="node-box" width="200" height="95" rx="10" fill="#0f2922" stroke="${stepData.activeNode === 'node-opt' ? '#10b981' : '#059669'}" stroke-width="2" />
+          <rect x="12" y="14" width="8" height="8" rx="2" fill="#10b981" />
+          <text x="26" y="22" fill="#6ee7b7" font-size="10" font-weight="700" text-transform="uppercase" font-family="sans-serif">L1 Admitted Pareto Release</text>
+          <text x="14" y="45" fill="#fff" font-size="14" font-weight="700" font-family="sans-serif">Verified Global Optimum</text>
+          <text x="14" y="65" fill="#a7f3d0" font-size="10" font-family="sans-serif">Zero Invalidation · Signed State</text>
+          <text x="14" y="80" fill="#10b981" font-size="9" font-family="monospace">Digest: sha256:9900aabb...</text>
+        </g>
+      `;
+
+      updateInspector(stepData);
+    }
+
+    // MODE 2: ComfyUI / n8n Node Net
+    function renderNodeNet(svg) {
+      document.getElementById('graph-container').innerHTML = '<svg id="workflow-svg" viewBox="0 0 1000 620"></svg>';
+      const targetSvg = document.getElementById('workflow-svg');
+      
+      targetSvg.innerHTML = `
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0ea5e9" />
+          </marker>
+        </defs>
+
+        <!-- Connected Pipeline Wires -->
+        <path class="wire-path active" d="M 190 120 L 290 120" marker-end="url(#arrow)" />
+        <path class="wire-path active" d="M 450 120 L 530 120" marker-end="url(#arrow)" />
+        <path class="wire-path active" d="M 610 160 L 610 240" marker-end="url(#arrow)" />
+        <path class="wire-path active" d="M 610 320 L 610 400" marker-end="url(#arrow)" />
+        <path class="wire-path active" d="M 530 440 L 410 440" marker-end="url(#arrow)" />
+
+        <!-- Node 1: Input Snapshot -->
+        <g class="node-group" transform="translate(40, 70)">
+          <rect class="node-box" width="150" height="90" rx="8" fill="#171f2f" stroke="#0284c7" stroke-width="1.5" />
+          <text x="12" y="24" fill="#38bdf8" font-size="11" font-weight="700">Input Node</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">TaskSpec & Git Head</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">Digest: sha256:1a8f...</text>
+        </g>
+
+        <!-- Node 2: Planner Operator (Claude / Grok) -->
+        <g class="node-group" transform="translate(290, 70)">
+          <rect class="node-box" width="160" height="90" rx="8" fill="#171f2f" stroke="#8b5cf6" stroke-width="1.5" />
+          <text x="12" y="24" fill="#c084fc" font-size="11" font-weight="700">Operator Node</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">Planner (Opus 3.7)</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">Temp: 0.2 · Context L1..L5</text>
+        </g>
+
+        <!-- Node 3: Capability Broker & Gate -->
+        <g class="node-group" transform="translate(530, 70)">
+          <rect class="node-box" width="170" height="90" rx="8" fill="#171f2f" stroke="#f59e0b" stroke-width="1.5" />
+          <text x="12" y="24" fill="#fcd34d" font-size="11" font-weight="700">Capability Gate</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">Broker Attenuation</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">Grant: fs.write (src/*)</text>
+        </g>
+
+        <!-- Node 4: Sandboxed Code Editor -->
+        <g class="node-group" transform="translate(530, 240)">
+          <rect class="node-box" width="170" height="90" rx="8" fill="#171f2f" stroke="#0ea5e9" stroke-width="1.5" />
+          <text x="12" y="24" fill="#38bdf8" font-size="11" font-weight="700">Tool Adapter Node</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">File Edit / Diff Patch</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">Rootless Jail (No Net)</text>
+        </g>
+
+        <!-- Node 5: Exterior Test Judge -->
+        <g class="node-group" transform="translate(530, 400)">
+          <rect class="node-box" width="170" height="90" rx="8" fill="#171f2f" stroke="#10b981" stroke-width="1.5" />
+          <text x="12" y="24" fill="#6ee7b7" font-size="11" font-weight="700">Judge / Verifier Node</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">Pytest / Mutation Check</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">Sealed Test Suite</text>
+        </g>
+
+        <!-- Node 6: State Ledger Appender -->
+        <g class="node-group" transform="translate(240, 400)">
+          <rect class="node-box" width="170" height="90" rx="8" fill="#171f2f" stroke="#10b981" stroke-width="1.5" />
+          <text x="12" y="24" fill="#6ee7b7" font-size="11" font-weight="700">Ledger Sink Node</text>
+          <text x="12" y="44" fill="#f8fafc" font-size="12" font-weight="600">Append-Only EventLog</text>
+          <text x="12" y="65" fill="#64748b" font-size="10">SHA-256 Digest Commits</text>
+        </g>
+      `;
+    }
+
+    // MODE 3: Multi-Harness Matrix (Side-by-Side Comparison)
+    function renderHarnessMatrix(container) {
+      container.innerHTML = `
+        <div class="matrix-grid">
+          
+          <!-- Claude Code Style -->
+          <div class="harness-card highlight">
+            <div class="harness-header">
+              <div class="harness-name">Claude Code Style</div>
+              <span class="badge active">Reactive Loop</span>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Input</div>
+              <div>Prompt + Local Repo Shell</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Middle Ground (Trajectory)</div>
+              <div>Single-agent turn-by-turn bash & replace tool calls. Fast clock ~850ms/turn.</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Output & Efficiency</div>
+              <div style="color: #38bdf8; font-weight: 600;">8 turns · 12,400 tok · $0.082</div>
+            </div>
+          </div>
+
+          <!-- Grok Build Style -->
+          <div class="harness-card">
+            <div class="harness-header">
+              <div class="harness-name">Grok Build Style</div>
+              <span class="badge pending">Plan → Exec</span>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Input</div>
+              <div>Structured Spec + File Tree</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Middle Ground (Trajectory)</div>
+              <div>Multi-phase: planning decomposition, patch staging, test-driven validation.</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Output & Efficiency</div>
+              <div style="color: #f59e0b; font-weight: 600;">5 turns · 18,200 tok · $0.114</div>
+            </div>
+          </div>
+
+          <!-- Codex / Shell Baseline -->
+          <div class="harness-card">
+            <div class="harness-header">
+              <div class="harness-name">Codex / Shell-Only</div>
+              <span class="badge">Diff Stream</span>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Input</div>
+              <div>Context Snippets + Test</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Middle Ground (Trajectory)</div>
+              <div>Direct patch proposal against pinned index. Minimal conversational overhead.</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Output & Efficiency</div>
+              <div style="color: #94a3b8; font-weight: 600;">3 turns · 6,800 tok · $0.041</div>
+            </div>
+          </div>
+
+          <!-- Custom Vanguard Enterprise DAG -->
+          <div class="harness-card">
+            <div class="harness-header">
+              <div class="harness-name">Vanguard Verified DAG</div>
+              <span class="badge verified">Gated Substrate</span>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Input</div>
+              <div>Attested TaskSpec + Budgets</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Middle Ground (Trajectory)</div>
+              <div>Attenuated capability grants, sealed judge assertions, immutable event ledger.</div>
+            </div>
+            <div class="stage-box">
+              <div class="stage-title">Output & Efficiency</div>
+              <div style="color: #10b981; font-weight: 600;">6 turns · 11,100 tok · 100% Provenance</div>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    // MODE 4: Emergent Scales (Atom -> Cell)
+    function renderScalesHierarchy(svg) {
+      document.getElementById('graph-container').innerHTML = '<svg id="workflow-svg" viewBox="0 0 1000 620"></svg>';
+      const targetSvg = document.getElementById('workflow-svg');
+      
+      targetSvg.innerHTML = `
+        <g transform="translate(100, 80)">
+          <!-- Outer Cell Ring -->
+          <rect x="0" y="0" width="800" height="460" rx="20" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="8,6" />
+          <text x="20" y="30" fill="#38bdf8" font-size="14" font-weight="700">CELL SCALE · Autonomous Episode (Budget, Owner, Sandbox Perimeter)</text>
+
+          <!-- Polymer Layer -->
+          <rect x="40" y="60" width="720" height="360" rx="14" fill="rgba(30, 41, 59, 0.4)" stroke="#8b5cf6" stroke-width="1.5" />
+          <text x="60" y="90" fill="#c084fc" font-size="13" font-weight="600">POLYMER / PROTEIN SCALE · Coordinated Playbook (Multi-turn Test & Repair Loop)</text>
+
+          <!-- Molecule Layer -->
+          <rect x="80" y="120" width="640" height="260" rx="10" fill="rgba(15, 23, 42, 0.7)" stroke="#f59e0b" stroke-width="1.5" />
+          <text x="100" y="150" fill="#fcd34d" font-size="12" font-weight="600">MOLECULE SCALE · Operator Turn (Observation → Proposal → Capability Grant)</text>
+
+          <!-- Atom Layer -->
+          <g transform="translate(120, 180)">
+            <rect x="0" y="0" width="160" height="70" rx="8" fill="#1e293b" stroke="#10b981" />
+            <text x="12" y="24" fill="#6ee7b7" font-size="11" font-weight="700">ATOM: fs.read</text>
+            <text x="12" y="44" fill="#94a3b8" font-size="10">Deterministic Hash</text>
+          </g>
+
+          <g transform="translate(320, 180)">
+            <rect x="0" y="0" width="160" height="70" rx="8" fill="#1e293b" stroke="#10b981" />
+            <text x="12" y="24" fill="#6ee7b7" font-size="11" font-weight="700">ATOM: bash.exec</text>
+            <text x="12" y="44" fill="#94a3b8" font-size="10">Rootless Subprocess</text>
+          </g>
+
+          <g transform="translate(520, 180)">
+            <rect x="0" y="0" width="160" height="70" rx="8" fill="#1e293b" stroke="#10b981" />
+            <text x="12" y="24" fill="#6ee7b7" font-size="11" font-weight="700">ATOM: Receipt</text>
+            <text x="12" y="44" fill="#94a3b8" font-size="10">Signed Outcome</text>
+          </g>
+        </g>
+      `;
+    }
+
+    // Playback and UI Handlers
+    function switchMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderCurrentMode();
+    }
+
+    function togglePlayback() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('play-pause-btn');
+      const icon = document.getElementById('play-icon');
+      const label = document.getElementById('play-label');
+
+      if (isPlaying) {
+        icon.textContent = '⏸';
+        label.textContent = 'Pause';
+        playTimer = setInterval(stepForward, 1800 / playbackSpeed);
+      } else {
+        icon.textContent = '▶';
+        label.textContent = 'Play';
+        clearInterval(playTimer);
+      }
+    }
+
+    function stepForward() {
+      currentStep = (currentStep + 1) % spiralSteps.length;
+      if (currentMode === 'spiral') {
+        renderDesignSpiral(document.getElementById('workflow-svg'));
+      }
+    }
+
+    function resetPlayback() {
+      currentStep = 0;
+      if (isPlaying) togglePlayback();
+      renderCurrentMode();
+    }
+
+    function changeSpeed(val) {
+      playbackSpeed = parseFloat(val);
+      if (isPlaying) {
+        clearInterval(playTimer);
+        playTimer = setInterval(stepForward, 1800 / playbackSpeed);
+      }
+    }
+
+    function selectNodeStep(idx) {
+      currentStep = idx;
+      renderDesignSpiral(document.getElementById('workflow-svg'));
+    }
+
+    function updateInspector(data) {
+      document.getElementById('hud-seq').textContent = data.seq;
+      document.getElementById('hud-depth').textContent = data.step + 1;
+      document.getElementById('hud-tokens').textContent = data.tokens + ' tok';
+      document.getElementById('hud-usd').textContent = data.usd + ' µ$';
+      document.getElementById('hud-digest').textContent = data.digest;
+      document.getElementById('hud-invalidation').textContent = data.invalidation;
+
+      const badge = document.getElementById('hud-status');
+      badge.textContent = data.status;
+      badge.className = 'badge ' + data.nodeDetails.badge;
+
+      const details = data.nodeDetails;
+      document.getElementById('ins-node-title').textContent = details.title;
+      document.getElementById('ins-node-type').textContent = details.type;
+      document.getElementById('ins-node-type').className = 'badge ' + details.badge;
+      document.getElementById('ins-layer').textContent = details.layer;
+      document.getElementById('ins-epistemic').textContent = details.epistemic;
+      document.getElementById('ins-mode').textContent = details.mode;
+      document.getElementById('ins-constraint').textContent = details.constraint;
+
+      document.getElementById('ins-inv-code').textContent = details.invRule;
+      const invBadge = document.getElementById('ins-inv-status');
+      invBadge.textContent = details.invStatus;
+      invBadge.className = 'badge ' + details.invBadge;
+
+      document.getElementById('ins-json').textContent = JSON.stringify(details.json, null, 2);
+    }
+
+    function copyEventJson() {
+      const text = document.getElementById('ins-json').textContent;
+      navigator.clipboard.writeText(text);
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCurrentMode();
+    });
+  </script>
+</body>
+</html>

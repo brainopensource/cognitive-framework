@@ -152,7 +152,7 @@ def _timestamp_checker(kind_name: str, value: Any) -> str:
 _IDENTIFIER = _string_checker(min_length=1, max_length=128)
 
 _ID_KINDS = (
-    "RunId", "EpisodeId", "TaskId", "ArtifactId", "ClaimId",
+    "RunId", "EpisodeId", "ProcessId", "TaskId", "ArtifactId", "ClaimId",
     "GrantId", "LeaseId", "ApprovalId", "CandidateId", "PrincipalId",
     "TenantId", "OwnerId", "EvaluatorId", "ToolCallId", "Identifier",
 )

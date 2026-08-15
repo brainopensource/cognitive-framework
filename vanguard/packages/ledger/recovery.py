@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from ..domain.ledger.events import EventEnvelope, parse_event_envelope
-from ..domain.primitives.primitives import int_string_from_int, int_string_to_int
 from ..ports.event_store import EventRange, EventStorePort
 
 __all__ = [
@@ -73,7 +72,7 @@ class RecoveryScanner:
 
         events = read_res.value
         last_event = events[-1]
-        last_seq_int = int_string_to_int(last_event.seq)
+        last_seq_int = int(last_event.seq)
 
         # Check if already terminated
         is_terminated = False
@@ -110,7 +109,7 @@ class RecoveryScanner:
         # Lease has expired: corpse has died.
         # Write terminal record outside the dying process (T3.6).
         terminal_event_kind = "RunRecovered" if action == "recovered" else "RunAborted"
-        terminal_seq_str = int_string_from_int(last_seq_int + 1)
+        terminal_seq_str = str(last_seq_int + 1)
         import uuid
         terminal_event_id = f"018f{uuid.uuid4().hex[4:12]}-7000-8000-{uuid.uuid4().hex[16:28]}"
 

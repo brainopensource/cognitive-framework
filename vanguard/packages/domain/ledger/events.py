@@ -23,6 +23,7 @@ from ..primitives.primitives import (
     ParseError,
     int_string_from_int,
     int_string_to_int,
+    parse,
     parse_digest,
     parse_episode_id,
     parse_principal_id,
@@ -203,10 +204,7 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
     seq = raw.get("seq")
     if not isinstance(seq, str):
         raise ParseError("EventEnvelope", "seq", f"seq must be an IntString, got {type(seq).__name__}")
-    try:
-        int_string_to_int(seq)
-    except Exception as exc:
-        raise ParseError("EventEnvelope", "seq", f"invalid IntString seq {seq!r}: {exc}") from exc
+    parse("IntString", seq)
 
     # timestamps
     occurred_at = raw.get("occurredAt")

@@ -4,6 +4,17 @@ Project decision: `CONDITIONAL GO — preparation and local schema work only`
 Decision: `DECISION-0001`, 2026-08-15  
 Merge condition: independent T0 reconstruction, prospective human timing sample, protected-branch evidence and baseline tag
 
+## Dispatch record — 2026-08-15
+
+| Developer | Local branch | Packet | Dispatch state |
+|---|---|---|---|
+| Dev 1 | `sprint1/dev-1-canonicalization` | `dev-1-packet.md` | dispatched for local tests/vectors |
+| Dev 2 | `sprint1/dev-2-effect-contracts` | `dev-2-packet.md` | dispatched for local tests/vectors |
+| Dev 3 | `sprint1/dev-3-evidence-contracts` | `dev-3-packet.md` | dispatched for local tests/vectors |
+| Dev 4 | `sprint1/dev-4-provider-process` | `dev-4-packet.md` | dispatched for local spike/schema candidates |
+
+Dispatch does not waive the merge condition. Independent review found `GAP-010..014`; human timing and hosted branch protection also remain open.
+
 ## Required reading order
 
 1. `docs/v4/09_vanguard_decision_register_v040.md`
@@ -21,4 +32,3 @@ Do not use Rev A/B, GTS-13, GTS-13B, obsolete reader packets or the Sprint 0 lea
 ## Current gate
 
 T1 rows `REQ-SCHEMA-001..012` are assigned and `open`. Work may begin on short-lived local branches, starting with tests and vectors. No schema may be marked locked, no durable event may be recorded against it and no product implementation may merge until the blockers above close. T0a remains disposable in `spike/` and cannot be imported.
-

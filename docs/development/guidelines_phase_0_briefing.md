@@ -60,10 +60,10 @@ These tasks establish the source of truth, merge gates, and developer packet.
 
 | Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **TODO** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 4 | Start after full S1 go |
-| **TODO** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 + leads | Assigned; not started |
-| **TODO** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 + leads | Assigned; not started |
-| **TODO** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 3/4 + Sr Dev | Assigned; not started |
+| **TODO** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 4 | Dispatched locally; no merge |
+| **TODO** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 + leads | Dispatched locally; no schema lock/merge |
+| **TODO** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 + leads | Dispatched locally; no schema lock/merge |
+| **TODO** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 3/4 + Sr Dev | Dispatched locally; no schema lock/merge |
 
 ### Sprint 2 · Real-Provider Disposable Slice, Kernel & Ledger (Weeks 5–6)
 

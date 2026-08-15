@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/receipt.schema.json",
+  "$comment": "Candidate owned by Sprint 1 S1-D2-003 / REQ-SCHEMA-006.",
+  "title": "Receipt",
+  "type": "object",
+  "required": ["descriptorDigest", "outcome", "observedAt", "resultDigest", "affectedResources"],
+  "properties": {
+    "descriptorDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
+    "grantId": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/GrantId" },
+    "outcome": { "enum": ["ok", "failed", "undeterminable"] },
+    "observedAt": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Timestamp" },
+    "resultDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
+    "affectedResources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["resource", "change"],
+        "properties": {
+          "resource": { "type": "string", "minLength": 1 },
+          "change": { "enum": ["created", "modified", "deleted", "observed"] },
+          "preDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
+          "postDigest": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" },
+          "patchRef": { "$ref": "../../../../schemas/v4/primitives.schema.json#/$defs/Digest" }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          { "if": { "properties": { "change": { "enum": ["modified", "deleted", "observed"] } }, "required": ["change"] }, "then": { "required": ["preDigest"] } },
+          { "if": { "properties": { "change": { "enum": ["created", "modified", "observed"] } }, "required": ["change"] }, "then": { "required": ["postDigest"] } }
+        ]
+      }
+    },
+    "workingDirectory": { "type": "string", "minLength": 1 },
+    "uncertainty": {
+      "type": "object",
+      "required": ["scope", "reason"],
+      "properties": {
+        "scope": { "enum": ["effect_occurrence", "evidence_completeness", "result"] },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "note": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "outcome": { "const": "undeterminable" } }, "required": ["outcome"] }, "then": { "required": ["uncertainty"] } }
+  ]
+}

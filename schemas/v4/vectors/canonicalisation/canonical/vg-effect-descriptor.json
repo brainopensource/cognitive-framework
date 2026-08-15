@@ -1,0 +1,1 @@
+{ "verb": "fs.write", "sinkClass": "workspace", "cwd": "/workspace", "args": { "path": "/workspace/src/a.ts", "bytes": "2048" }, "risk": "medium", "idempotencyKey": "k-1" }

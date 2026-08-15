@@ -1,0 +1,1 @@
+CT-14: version 7 specifically; a v4 carries no time component at all.

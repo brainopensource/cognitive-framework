@@ -1,0 +1,1 @@
+VG-04 §0.4: the whole point is that this value corrupts as a JSON number.

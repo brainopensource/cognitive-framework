@@ -1,0 +1,55 @@
+{
+  "id": "t3-event-bus",
+  "tier": 3,
+  "title": "Decoupled pub-sub event bus dispatcher",
+  "workspace": {
+    "bus.py": "from collections import defaultdict\n\nclass EventBus:\n    def __init__(self):\n        self.subscribers = defaultdict(list)\n\n    def subscribe(self, event_name: str, handler):\n        self.subscribers[event_name].append(handler)\n\n    def publish(self, event_name: str, payload):\n        pass\n",
+    "test_bus.py": "from bus import EventBus\n\ndef test_bus():\n    b = EventBus()\n    received = []\n    b.subscribe('user_created', lambda data: received.append(data))\n    b.publish('user_created', {'id': 42})\n    assert received == [{'id': 42}]\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"bus.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"bus.py\", \"target\": \"        pass\", \"replacement\": \"        for handler in self.subscribers.get(event_name, []):\\n            handler(payload)\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "id": "t1-palindrome-check",
+  "tier": 1,
+  "title": "Check if string is a valid palindrome ignoring non-alphanumeric",
+  "workspace": {
+    "str_utils.py": "def is_palindrome(s: str) -> bool:\n    return s == s[::-1]\n",
+    "test_palindrome.py": "from str_utils import is_palindrome\n\ndef test_is_palindrome():\n    assert is_palindrome('A man, a plan, a canal: Panama') is True\n    assert is_palindrome('race a car') is False\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"str_utils.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"str_utils.py\", \"target\": \"    return s == s[::-1]\", \"replacement\": \"    cleaned = [ch.lower() for ch in s if ch.isalnum()]\\n    return cleaned == cleaned[::-1]\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

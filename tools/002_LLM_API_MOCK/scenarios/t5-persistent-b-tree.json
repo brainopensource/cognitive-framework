@@ -1,0 +1,55 @@
+{
+  "id": "t5-persistent-b-tree",
+  "tier": 5,
+  "title": "Immutable persistent B-tree node lookup and insertion",
+  "workspace": {
+    "btree.py": "from dataclasses import dataclass\nfrom typing import Tuple\n\n@dataclass(frozen=True)\nclass BTreeNode:\n    keys: Tuple[int, ...]\n    children: Tuple['BTreeNode', ...]\n\ndef search_key(node: BTreeNode, key: int) -> bool:\n    return False\n",
+    "test_btree.py": "from btree import BTreeNode, search_key\n\ndef test_btree():\n    child = BTreeNode(keys=(10, 20), children=())\n    root = BTreeNode(keys=(30,), children=(child,))\n    assert search_key(root, 10) is True\n    assert search_key(root, 40) is False\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"btree.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"btree.py\", \"target\": \"def search_key(node: BTreeNode, key: int) -> bool:\\n    return False\", \"replacement\": \"def search_key(node: BTreeNode, key: int) -> bool:\\n    i = 0\\n    while i < len(node.keys) and key > node.keys[i]:\\n        i += 1\\n    if i < len(node.keys) and key == node.keys[i]:\\n        return True\\n    if not node.children:\\n        return False\\n    return search_key(node.children[i], key)\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

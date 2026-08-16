@@ -1,0 +1,55 @@
+{
+  "id": "t1-title-case",
+  "tier": 1,
+  "title": "Title case string maintaining minor word lowercase rules",
+  "workspace": {
+    "text.py": "def to_title_case(text: str) -> str:\n    return text.title()\n",
+    "test_text.py": "from text import to_title_case\n\ndef test_title_case():\n    assert to_title_case('the lord of the rings') == 'The Lord of the Rings'\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"text.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"text.py\", \"target\": \"    return text.title()\", \"replacement\": \"    minors = {'of', 'the', 'and', 'in', 'on', 'a', 'an'}\\n    words = text.split()\\n    res = []\\n    for idx, w in enumerate(words):\\n        if idx == 0 or w.lower() not in minors:\\n            res.append(w.capitalize())\\n        else:\\n            res.append(w.lower())\\n    return ' '.join(res)\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

@@ -103,7 +103,11 @@ def simulate_all() -> list[dict[str, Any]]:
 
 def _execute(workspace: Path, call: dict[str, Any]) -> str:
     name = call["function"]["name"]
-    args = json.loads(call["function"]["arguments"] or "{}")
+    raw_args = call["function"].get("arguments") or {}
+    if isinstance(raw_args, str):
+        args = json.loads(raw_args)
+    else:
+        args = raw_args
     if name == "view_file":
         path = workspace / args["path"]
         if not path.is_file():

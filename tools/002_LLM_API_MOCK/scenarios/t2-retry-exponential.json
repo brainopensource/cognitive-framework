@@ -1,0 +1,55 @@
+{
+  "id": "t2-retry-exponential",
+  "tier": 2,
+  "title": "Exponential backoff retry decorator",
+  "workspace": {
+    "retry.py": "import time\n\ndef retry_backoff(retries=3, delay=0.01):\n    def decorator(func):\n        def wrapper(*args, **kwargs):\n            return func(*args, **kwargs)\n        return wrapper\n    return decorator\n",
+    "test_retry.py": "from retry import retry_backoff\n\nattempts = 0\n@retry_backoff(retries=3, delay=0.01)\ndef flaky():\n    global attempts\n    attempts += 1\n    if attempts < 3:\n        raise ValueError('temp fail')\n    return 'ok'\n\ndef test_flaky():\n    assert flaky() == 'ok'\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"retry.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"retry.py\", \"target\": \"            return func(*args, **kwargs)\", \"replacement\": \"            current_delay = delay\\n            for i in range(retries):\\n                try:\\n                    return func(*args, **kwargs)\\n                except Exception:\\n                    if i == retries - 1:\\n                        raise\\n                    time.sleep(current_delay)\\n                    current_delay *= 2\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

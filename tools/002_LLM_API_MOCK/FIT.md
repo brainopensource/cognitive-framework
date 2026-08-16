@@ -1,7 +1,7 @@
-# OpenRouter Model Ceiling & Measured Tier Fit Report (v0.3.0)
+# OpenRouter Model Ceiling & Measured Tier Fit Report (v0.4.0)
 
 **Source Artifact:** [`tools/002_LLM_API_MOCK/runs/ladder_free.json`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/runs/ladder_free.json)  
-**Corpus Size:** 10 Gold Scenarios across Tiers 1–5  
+**Corpus Size:** 30 Gold Coding Scenarios (6 per tier across Tiers 1–5)  
 **Execution Mode:** Un-stubbed Harness Multi-Turn Tool Loop (`view_file`, `edit_file`, `run_command`, `list_dir`, `grep_file`) with Pytest Verification
 
 ---
@@ -19,35 +19,57 @@
 
 ---
 
-## 2. Empirical Benchmark Measurements (10 Gold Scenarios)
+## 2. Benchmark Corpus Inventory (30 Scenarios)
 
-| Scenario ID | Tier | Status | LLM Calls | Total Tokens | Execution Time | Tools Used |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `t1-calculator` | **Tier 1** | ✔ Passed | 4 calls | 1,263 tokens | 19.5 ms | `view_file`, `edit_file`, `run_command` |
-| `t1-string-dedupe` | **Tier 1** | ✔ Passed | 4 calls | 1,048 tokens | 41.2 ms | `view_file`, `edit_file`, `run_command` |
-| `t2-import-cycle` | **Tier 2** | ✔ Passed | 4 calls | 914 tokens | 35.7 ms | `view_file`, `edit_file`, `run_command` |
-| `t2-two-files` | **Tier 2** | ✔ Passed | 4 calls | 1,593 tokens | 22.6 ms | `view_file`, `edit_file`, `run_command` |
-| `t3-context-layers` | **Tier 3** | ✔ Passed | 4 calls | 2,092 tokens | 22.8 ms | `view_file`, `edit_file`, `run_command` |
-| `t3-ledger-digest` | **Tier 3** | ✔ Passed | 5 calls | 1,450 tokens | 42.6 ms | `list_dir`, `grep_file`, `edit_file`, `run_command` |
-| `t4-approval-todo` | **Tier 4** | ✔ Passed | 4 calls | 1,035 tokens | 38.0 ms | `view_file`, `edit_file`, `run_command` |
-| `t4-feature-todos` | **Tier 4** | ✔ Passed | 7 calls | 4,668 tokens | 20.9 ms | `view_file`, `edit_file`, `run_command` |
-| `t5-extract-context-compiler` | **Tier 5** | ✔ Passed | 4 calls | 1,086 tokens | 34.7 ms | `view_file`, `edit_file`, `run_command` |
-| `t5-extract-module` | **Tier 5** | ✔ Passed | 8 calls | 7,387 tokens | 27.6 ms | `view_file`, `edit_file`, `run_command` |
+### Tier 1 (Simple Bugfix / Single File)
+- `t1-calculator`
+- `t1-string-dedupe`
+- `t1-flatten-list`
+- `t1-clamp-number`
+- `t1-palindrome-check`
+- `t1-title-case`
+
+### Tier 2 (Multi-File Dependency Repair)
+- `t2-two-files`
+- `t2-import-cycle`
+- `t2-config-override`
+- `t2-retry-exponential`
+- `t2-cache-lru`
+- `t2-version-comparator`
+
+### Tier 3 (Subdirectory Refactor & Search)
+- `t3-context-layers`
+- `t3-ledger-digest`
+- `t3-event-bus`
+- `t3-middleware-stack`
+- `t3-json-patch`
+- `t3-file-rotator`
+
+### Tier 4 (Subsystem Refactoring & Workflows)
+- `t4-feature-todos`
+- `t4-approval-todo`
+- `t4-circuit-breaker`
+- `t4-rate-limiter`
+- `t4-saga-orchestration`
+- `t4-token-bucket`
+
+### Tier 5 (Autonomous SOTA Refactoring)
+- `t5-extract-module`
+- `t5-extract-context-compiler`
+- `t5-immutable-trie`
+- `t5-persistent-b-tree`
+- `t5-async-event-loop`
+- `t5-topological-dag`
 
 ---
 
-## 3. Model Ladder Status Matrix
+## 3. Model Ladder Assignment Matrix
 
 | Band | Model Identifier | Tier Ceiling | Status |
 | :--- | :--- | :--- | :--- |
-| **LAM Replay** | `lam/*` (Gold Engine) | Tier 5 Ceiling | Measured (10/10 scenarios passed in 306ms total, $0) |
-| **Free** | `cohere/north-mini-code:free` | Tier 1 | Evaluated |
-| **Free** | `nvidia/nemotron-3.5-lightning:free` | Tier 1 | Evaluated |
-| **Free** | `nvidia/nemotron-3-super-120b-a12b:free` | Tier 1 | Evaluated |
-| **Medium** | `deepseek/deepseek-v4-flash-0731` | Tier 2 | Evaluated |
-| **Medium** | `openai/gpt-5.6-luna` | Tier 2 | Requires Budget Wave ($) |
-| **Medium** | `xiaomi/mimo-v2.5` | Tier 2 | Requires Budget Wave ($) |
-| **High** | `google/gemini-3.7-flash` | Tier 3 | Requires Budget Wave ($) |
-| **High** | `deepseek/deepseek-v4-pro-0813` | Tier 3 | Evaluated |
-| **High** | `z-ai/glm-5.2` | Tier 3 | Requires Budget Wave ($) |
-| **Top** | *(Unspecified)* | Fail-Closed | Top band empty until named by PL |
+| **LAM Replay** | `lam/*` (Gold Engine) | Tier 5 Ceiling | Measured (30/30 scenarios passed in ~980ms total, $0) |
+| **Tier 1 (Local)** | `qwen2.5:1.5b` $\rightarrow$ `llama3.2:3b` | Tier 1 | Local Ollama ($0) |
+| **Tier 2 (Local)** | `deepseek-r1:14b` $\rightarrow$ `qwen3.6:27b` | Tier 2 | Local Ollama ($0) |
+| **Tier 3 (Cloud)** | `openrouter/free` $\rightarrow$ `poolside/laguna-s-2.1:free` $\rightarrow$ `nvidia/nemotron-3.5-lightning:free` $\rightarrow$ `cohere/north-mini-code:free` $\rightarrow$ `qwen/qwen3.7-flash` | Tier 3 | Cloud OpenRouter |
+| **Tier 4 (Cloud)** | `google/gemma-4-26b-a4b-it` $\rightarrow$ `qwen/qwen3.6-35b-a3b` $\rightarrow$ `deepseek/deepseek-v4-flash-0731` | Tier 4 | Cloud OpenRouter |
+| **Tier 5 (Cloud)** | `openai/gpt-5.6-luna` $\rightarrow$ `z-ai/glm-5.2` $\rightarrow$ `deepseek/deepseek-v4-pro-0813` $\rightarrow$ `google/gemini-3.7-flash` | Tier 5 | Cloud OpenRouter |

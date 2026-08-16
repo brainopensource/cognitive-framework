@@ -1,0 +1,242 @@
+[
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.search"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.search"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectReconciled",
+    "reason": "unknown",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectReconciled",
+    "reason": "unknown",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  }
+]

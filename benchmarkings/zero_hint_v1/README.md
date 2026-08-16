@@ -44,5 +44,36 @@ departures, recorded in each `runs/<id>/result.json`:
    `schema`; without that, most models cannot form valid calls).
 4. `maxTokens` raised from the adapter default of 256.
 
-A pass here is **agentic coding evidence**. It is not a Beta sellable-path
-claim and does not mark REQ-* covered.
+## How to run a live episode
+
+From the repo root (WSL). Oracle files are not copied into the workspace.
+
+```bash
+python3 benchmarkings/zero_hint_v1/run_live_agent.py --check-fixtures
+python3 benchmarkings/zero_hint_v1/run_live_agent.py \
+  --task test004_busy_merge \
+  --model ollama/llama3.2:3b \
+  --max-turns 16
+```
+
+`--model` may be `ollama/<tag>` or an OpenRouter id. Artifacts land in
+`tasks/<id>/runs/<utc>/` (`result.json`, `final.diff`, test tails).
+
+## Live evidence already captured (2026-08-16)
+
+These are **not** task passes. They are evidence that the production loop
+called a real model and executed real tools inside Bubblewrap.
+
+| Task | Model | Terminal | Tools that ran |
+|---|---|---|---|
+| `test004_busy_merge` | `llama3.2:3b` | `abandoned` (16-turn bound) | `fs.search`, then 13× `fs.read` of `busy.py` |
+| `test003_invoice_cents` | `llama3.2:3b` | `abandoned` (10-turn bound) | `fs.search`, then 9× `fs.read` of `invoicing.py` |
+| `test004_busy_merge` | `qwen3.6:27b` | `instrument_error` (provider timeout on turn 2) | `fs.search` |
+
+No live run applied a `patch.apply` that made public tests green. Small local
+models looped on read. 27B searched then exceeded HTTP time. OpenRouter
+`google/gemini-2.0-flash-001` returned HTTP 404; `deepseek/deepseek-chat`
+returned an empty completion.
+
+`test002_rate_window` is preregistered and gold-checked; it has not had a live
+episode yet.

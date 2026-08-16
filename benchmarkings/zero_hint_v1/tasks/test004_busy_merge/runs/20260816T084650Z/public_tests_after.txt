@@ -1,0 +1,46 @@
+
+.F.F
+======================================================================
+FAIL: test_order_does_not_matter (test_calendar.BusyMergeTests.test_order_does_not_matter)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/vg-zero-test004_busy_merge-yslfqwzn/workspace/tests/test_calendar.py", line 19, in test_order_does_not_matter
+    self.assertEqual(
+AssertionError: Lists differ: [(1, 3), (3, 5), (10, 12)] != [(1, 5), (10, 12)]
+
+First differing element 0:
+(1, 3)
+(1, 5)
+
+First list contains 1 additional elements.
+First extra element 2:
+(10, 12)
+
+- [(1, 3), (3, 5), (10, 12)]
+?      --------
+
++ [(1, 5), (10, 12)]
+
+======================================================================
+FAIL: test_touching_periods_are_one_period (test_calendar.BusyMergeTests.test_touching_periods_are_one_period)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/vg-zero-test004_busy_merge-yslfqwzn/workspace/tests/test_calendar.py", line 16, in test_touching_periods_are_one_period
+    self.assertEqual(merge_busy([(1, 2), (2, 3)]), [(1, 3)])
+AssertionError: Lists differ: [(1, 2), (2, 3)] != [(1, 3)]
+
+First differing element 0:
+(1, 2)
+(1, 3)
+
+First list contains 1 additional elements.
+First extra element 1:
+(2, 3)
+
+- [(1, 2), (2, 3)]
++ [(1, 3)]
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=2)

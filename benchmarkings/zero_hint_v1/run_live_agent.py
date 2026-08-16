@@ -141,7 +141,7 @@ def _first_tool_call_only(raw: bytes) -> bytes:
 
 
 def _http_post(
-    url: str, headers: dict[str, str], body: bytes, timeout: float = 180.0
+    url: str, headers: dict[str, str], body: bytes, timeout: float = 300.0
 ) -> tuple[int, dict[str, str], bytes]:
     try:
         payload = json.loads(body.decode("utf-8"))
@@ -353,7 +353,7 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         endpoint=model_cfg["endpoint"],
         environ=environ,
         stream=False,
-        max_retries=2,
+        max_retries=0,
         jitter=False,
         transport=_http_post,
     )

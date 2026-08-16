@@ -1,38 +1,31 @@
-# Sprint 6B Gate R9 — Honest Q2 Dogfood Execution Log
+# Sprint 6B Gate R9 — Q2 Dogfood Execution Log
 
-**Execution Timestamp:** `2026-08-16T06:59:29.562122+00:00`  
-**Harness Version:** `v0.4.1-beta`  
-**Evaluation Gate:** Chapter 10 Q2 (Three live bugs, zero mid-run hand-patches, would you reach for it again?)  
+**Execution Timestamp:** `2026-08-16T07:51:10.293449+00:00`  
+**Harness:** `Runtime.execute_harness` + LAM + Bubblewrap worker  
+**Evaluator:** UID `10002`, sealed oracle mount, signed Unix-socket verdict  
 
-## Summary Matrix
+| Task | Turns | Hand Patches | Restarts | Oracle | Signed Verdict | Result | Q2 |
+|---|---:|---:|---:|---|---|---|---|
+| `bug-001-single-file` | 4 | 0 | 0 | `vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py` | False | **FAIL** | **NO** |
+| `bug-002-multi-file` | 5 | 0 | 0 | `vanguard/packages/adapters/evaluators/suites/bug-002-multi-file/test_oracle.py` | False | **FAIL** | **NO** |
+| `bug-003-test-reaction` | 5 | 0 | 0 | `vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py` | False | **FAIL** | **NO** |
 
-| Task ID | Task Description | Turns | Hand Patches | Restarts | Cost (USD) | Oracle Verdict | Q2 Answer |
-|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `task-01-calc-off-by-one` | Calculator total off-by-one sum fix | 4 | 0 | 0 | $0.0015 | **PASS** | **YES** |
-| `task-02-string-dedupe` | Unique string deduplication preserving first occurrence | 4 | 0 | 0 | $0.0015 | **PASS** | **YES** |
-| `task-03-palindrome-check` | Palindrome validation ignoring non-alphanumeric | 4 | 0 | 0 | $0.0015 | **PASS** | **YES** |
+## Evidence
 
----
+### bug-001-single-file
+- Oracle: `vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py`
+- Diff digest: `sha256:a9927c61fbaf30c266080451df348b109c2e3ce3317e639c9a1d9a3b00f89380`
+- Terminal: `completed`; verdict: `inconclusive`
+- Detail: Repair complete.
 
-## Detailed Task Records
+### bug-002-multi-file
+- Oracle: `vanguard/packages/adapters/evaluators/suites/bug-002-multi-file/test_oracle.py`
+- Diff digest: `sha256:7bf56823dce2fe5dc028c0e9e1b7896042331e67a7c75aa27cbae93c9514334b`
+- Terminal: `completed`; verdict: `inconclusive`
+- Detail: Repair complete.
 
-### task-01-calc-off-by-one — Calculator total off-by-one sum fix
-- **Oracle File:** [`vanguard/packages/adapters/evaluators/suites/oracle_task_01.py`](file:////home/rocha/Coding/Aether-D-System/vanguard/packages/adapters/evaluators/suites/oracle_task_01.py)
-- **Diff Digest:** `sha256:3f1ccd453a8079221295c26973a5ae966e186810714709800a5bcde67659a6b3`
-- **Turns Taken:** 4
-- **Operator Verdict:** **YES** (Would reach for Vanguard again)
-- **Notes:** Clean automated resolution via LAM ModelPort. Zero manual intervention required.
-
-### task-02-string-dedupe — Unique string deduplication preserving first occurrence
-- **Oracle File:** [`vanguard/packages/adapters/evaluators/suites/oracle_task_02.py`](file:////home/rocha/Coding/Aether-D-System/vanguard/packages/adapters/evaluators/suites/oracle_task_02.py)
-- **Diff Digest:** `sha256:7b0dba384437374c2c77ce7a6230b91619c1d732cea260d1b75fc9bec4b7188d`
-- **Turns Taken:** 4
-- **Operator Verdict:** **YES** (Would reach for Vanguard again)
-- **Notes:** Clean automated resolution via LAM ModelPort. Zero manual intervention required.
-
-### task-03-palindrome-check — Palindrome validation ignoring non-alphanumeric
-- **Oracle File:** [`vanguard/packages/adapters/evaluators/suites/oracle_task_03.py`](file:////home/rocha/Coding/Aether-D-System/vanguard/packages/adapters/evaluators/suites/oracle_task_03.py)
-- **Diff Digest:** `sha256:c7373300f792032ad46778a54f7adeedd9d370dc42096f36515b64f8a6e4428c`
-- **Turns Taken:** 4
-- **Operator Verdict:** **YES** (Would reach for Vanguard again)
-- **Notes:** Clean automated resolution via LAM ModelPort. Zero manual intervention required.
+### bug-003-test-reaction
+- Oracle: `vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py`
+- Diff digest: `sha256:e43d7cbdc5d8faa4dceb8d7d6fdc4e2ba2419a38497b8dc2c37cf9581211c951`
+- Terminal: `completed`; verdict: `inconclusive`
+- Detail: Repair complete.

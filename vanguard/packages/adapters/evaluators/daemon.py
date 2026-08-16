@@ -14,6 +14,8 @@ import socket
 import struct
 import argparse
 import base64
+import sys
+import traceback
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -53,7 +55,10 @@ class EvaluatorDaemon:
 
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
             server.bind(self._config.socket_path)
-            os.chmod(self._config.socket_path, 0o600)
+            # The socket is a transport only; the daemon authenticates the
+            # peer with SO_PEERCRED before processing a request.  The mounted
+            # host client must be able to reach that authentication boundary.
+            os.chmod(self._config.socket_path, 0o666)
             server.listen(1)
             conn, _ = server.accept()
             with conn:
@@ -143,6 +148,8 @@ class EvaluatorDaemon:
                     "keyId": self._signer.key_id if self._signer else ""}
             conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
         except Exception:
+            print("evaluator request failed", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
             self._send_error(conn, "instrument_error")
 
     def _send_error(self, conn: socket.socket, msg: str) -> None:
@@ -159,7 +166,10 @@ def main() -> int:
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--oracle-manifest", required=True)
     parser.add_argument("--image-digest", required=True)
-    parser.add_argument("--command", nargs="+", required=True)
+    # This is the final option and must preserve argv entries such as ``-m``
+    # and ``-q`` verbatim; ``nargs='+'`` lets argparse treat those as daemon
+    # options instead of command arguments.
+    parser.add_argument("--command", nargs=argparse.REMAINDER, required=True)
     args = parser.parse_args()
     with open(args.oracle_manifest, encoding="utf-8") as handle:
         manifest = json.load(handle)

@@ -1,203 +1,327 @@
-"""Honest Chapter 10 Q2 Dogfood Runner for Vanguard v0.4.1 Release Gate R9.
+"""Run the preregistered Chapter 10 Q2 tasks through the production path.
 
-Owning contract: DOGFOOD-Q2, S6B-DOG-001, Gate R9.
-Executes 3 preregistered real bug tasks through the standard harness pipeline,
-evaluates using sealed test oracles, and records honest Q2 operator evidence.
+This runner is evidence-producing code, not a synthetic benchmark shortcut:
+the LAM proposal enters ``Runtime.execute_harness``, privileged changes cross
+the approval flow and Bubblewrap worker, and the verdict comes from a separate
+UID 10002 evaluator container over signed Unix-socket IPC.
 """
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
+import os
+import stat
 import subprocess
 import sys
 import tempfile
+import time
+from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterator, Mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.adapters.models.lam import LamModelAdapter
-from vanguard.packages.runtime.governance.approvals import OperatorSigner, ApprovalAuthority
-from vanguard.packages.runtime.root import Harness, Runtime, TaskContext
+from vanguard.packages.runtime.governance.approvals import OperatorSigner
+from vanguard.packages.runtime.root import Runtime, TaskContext
+from vanguard.packages.agency import RunTermination
 
 
-def run_task(task_id: str, title: str, bug_file: str, bug_code: str, fix_code: str, oracle_file: str, model_scenario: str) -> dict:
-    with tempfile.TemporaryDirectory() as td:
-        repo = Path(td)
-        (repo / bug_file).write_text(bug_code, encoding="utf-8")
-        
-        # Git repo init
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Dogfood Operator"], cwd=repo, check=True)
-        subprocess.run(["git", "config", "user.email", "operator@vanguard.dev"], cwd=repo, check=True)
-        subprocess.run(["git", "add", "."], cwd=repo, check=True)
-        subprocess.run(["git", "commit", "-m", f"initial broken state for {task_id}"], cwd=repo, check=True)
+MANIFEST = ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
+ORACLE_MANIFEST = ROOT / "docs/agile/sprint6B/preregistered_oracles.json"
+SUITE_ROOT = ROOT / "vanguard/packages/adapters/evaluators/suites"
 
-        signer = OperatorSigner(b"dogfood-operator-signing-key-01")
-        authority = ApprovalAuthority(signer.public_bytes)
-        
-        # Simulate autonomous run with LamModelAdapter
-        adapter = LamModelAdapter(model_name=model_scenario)
-        
-        # Turn 1: Read
-        r1 = adapter.propose([{"role": "user", "content": f"Fix bug in {bug_file}"}], tools=())
-        assert r1.ok, f"Turn 1 failed: {r1.error}"
-        
-        # Turn 2: Patch
-        r2 = adapter.propose([
-            {"role": "user", "content": f"Fix bug in {bug_file}"},
-            {"role": "tool", "content": bug_code}
-        ], tools=())
-        assert r2.ok, f"Turn 2 failed: {r2.error}"
-        
-        # Apply patch to workspace
-        (repo / bug_file).write_text(fix_code, encoding="utf-8")
-        
-        # Turn 3: Test
-        r3 = adapter.propose([
-            {"role": "user", "content": f"Fix bug in {bug_file}"},
-            {"role": "tool", "content": "file read"},
-            {"role": "tool", "content": "patch applied"}
-        ], tools=())
-        assert r3.ok, f"Turn 3 failed: {r3.error}"
-        
-        # Run sealed oracle test suite
-        oracle_path = ROOT / oracle_file
-        oracle_code = oracle_path.read_text(encoding="utf-8")
-        (repo / "test_oracle.py").write_text(oracle_code, encoding="utf-8")
-        
-        oracle_res = subprocess.run(
-            [sys.executable, "-m", "unittest", "test_oracle.py"],
-            cwd=repo,
-            capture_output=True,
-            text=True
+
+@dataclass(frozen=True)
+class DogfoodTask:
+    task_id: str
+    title: str
+    model: str
+    files: Mapping[str, str]
+    oracle: str
+    expected_receipts: tuple[str, ...]
+
+
+TASKS = (
+    DogfoodTask(
+        "bug-001-single-file",
+        "Single-file calculator formula repair",
+        "lam/t0-dogfood-bug-001",
+        {"src/calculator.py": "def calculate(A, B):\n    return (A + B) * A\n"},
+        "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py",
+        ("fs.read", "patch.apply", "proc.exec"),
+    ),
+    DogfoodTask(
+        "bug-002-multi-file",
+        "Multi-file import-cycle repair",
+        "lam/t0-dogfood-bug-002",
+        {
+            "db.py": "from models import User\n\ndef load():\n    return User()\n",
+            "models.py": "from db import User\n",
+        },
+        "vanguard/packages/adapters/evaluators/suites/bug-002-multi-file/test_oracle.py",
+        ("fs.read", "patch.apply", "patch.apply", "proc.exec"),
+    ),
+    DogfoodTask(
+        "bug-003-test-reaction",
+        "Parser repair retaining regression coverage",
+        "lam/t0-dogfood-bug-003",
+        {
+            "src/parser.py": "def parse(text):\n    return list(text.split())\n",
+            "test_parser.py": "def test_parser():\n    return None\n",
+        },
+        "vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py",
+        ("fs.read", "patch.apply", "patch.apply", "proc.exec"),
+    ),
+)
+
+
+@contextmanager
+def _environment(values: Mapping[str, str]) -> Iterator[None]:
+    previous = {key: os.environ.get(key) for key in values}
+    os.environ.update(values)
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=repo, check=True,
+                   capture_output=True, text=True)
+
+
+def _prepare_repo(root: Path, task: DogfoodTask) -> Path:
+    repo = root / "repo"
+    repo.mkdir()
+    os.chmod(repo, 0o755)
+    for relative, content in task.files.items():
+        path = repo / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        os.chmod(path.parent, 0o755)
+        path.write_text(content, encoding="utf-8")
+    _git(repo, "init")
+    _git(repo, "config", "user.name", "Dogfood Operator")
+    _git(repo, "config", "user.email", "operator@vanguard.dev")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", f"initial broken state for {task.task_id}")
+    return repo
+
+
+def _evaluator_process(root: Path, repo: Path, task: DogfoodTask, image: str,
+                       image_digest: str, key: bytes) -> tuple[subprocess.Popen[str], Path]:
+    socket_dir = root / "run"
+    socket_dir.mkdir()
+    os.chmod(socket_dir, 0o777)
+    oracle_dir = f"/sealed-oracle/{task.oracle.rsplit('/', 1)[0]}"
+    command = ["python3", "-m", "unittest", "discover", "-s", oracle_dir,
+               "-p", "test_oracle.py"]
+    args = [
+        "docker", "run", "--rm", "--network", "none", "--read-only",
+        "--cap-drop=ALL", "--security-opt", "no-new-privileges",
+        "--tmpfs", "/tmp:rw,nosuid,nodev",
+        "--user", "10002:10002",
+        "-w", "/workspace",
+        "-e", "PYTHONPATH=/workspace",
+        "-v", f"{repo}:/workspace:ro",
+        "-v", f"{socket_dir}:/run/evaluator:rw",
+        "-v", f"{ORACLE_MANIFEST}:/sealed-oracle/preregistered_oracles.json:ro",
+        "-v", f"{SUITE_ROOT}:/sealed-oracle/vanguard/packages/adapters/evaluators/suites:ro",
+        "-e", f"VANGUARD_EVALUATOR_PRIVATE_KEY_B64={base64.b64encode(key).decode('ascii')}",
+        "-e", "VANGUARD_EVALUATOR_VERDICT_KEY_ID=dogfood-evaluator-key",
+        image,
+        "--socket", "/run/evaluator/eval.sock",
+        "--workspace", "/workspace",
+        "--oracle-manifest", "/sealed-oracle/preregistered_oracles.json",
+        "--image-digest", image_digest,
+        "--command", *command,
+    ]
+    process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               text=True)
+    return process, socket_dir / "eval.sock"
+
+
+def _wait_for_socket(process: subprocess.Popen[str], socket_path: Path, timeout: float = 20.0) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if socket_path.exists():
+            return
+        if process.poll() is not None:
+            stderr = process.stderr.read() if process.stderr is not None else ""
+            raise RuntimeError(f"evaluator exited before handshake: {stderr[-2000:]}")
+        time.sleep(0.1)
+    raise TimeoutError(f"evaluator socket did not appear: {socket_path}")
+
+
+def _stop(process: subprocess.Popen[str]) -> None:
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+
+
+def _process_output(process: subprocess.Popen[str]) -> str:
+    chunks = []
+    if process.stdout is not None:
+        chunks.append(process.stdout.read())
+    if process.stderr is not None:
+        chunks.append(process.stderr.read())
+    return "\\n".join(chunk for chunk in chunks if chunk)[-2000:]
+
+
+def run_task(task: DogfoodTask, evaluator_image: str, evaluator_digest: str) -> dict[str, object]:
+    with tempfile.TemporaryDirectory(prefix=f"vg-dogfood-{task.task_id}-") as directory:
+        root = Path(directory)
+        repo = _prepare_repo(root, task)
+        evaluator_key = os.urandom(32)
+        evaluator_signer = VerdictSigner(evaluator_key, "dogfood-evaluator-key")
+        operator_signer = OperatorSigner(b"dogfood-operator-signing-key")
+        process, socket_path = _evaluator_process(
+            root, repo, task, evaluator_image, evaluator_digest, evaluator_key)
+        try:
+            _wait_for_socket(process, socket_path)
+            env = {
+                "VANGUARD_EVALUATOR_SOCKET": str(socket_path),
+                "VANGUARD_EVALUATOR_IMAGE_DIGEST": evaluator_digest,
+                "VANGUARD_EVALUATOR_VERDICT_KEY_ID": evaluator_signer.key_id,
+                "VANGUARD_EVALUATOR_VERDICT_PUBLIC_KEY": base64.b64encode(
+                    evaluator_signer.public_bytes).decode("ascii"),
+            }
+            with _environment(env):
+                result = Runtime.execute_harness(
+                    MANIFEST,
+                    TaskContext(
+                        brief=f"Repair the preregistered bug in {task.task_id} and verify it.",
+                        repo_path=repo,
+                        run_id=f"dogfood-{task.task_id}",
+                        episode_id=f"dogfood-episode-{task.task_id}",
+                        principal="dogfood-agent",
+                        max_turns=8,
+                    ),
+                    model=LamModelAdapter(model_name=task.model),
+                    approver=lambda challenge: operator_signer.approve(
+                        challenge, reviewer="dogfood-operator"),
+                    approval_key=operator_signer.public_bytes,
+                )
+            claims = tuple(result.verdict.claims) if result.verdict is not None else ()
+            passed = (
+                result.terminal is RunTermination.COMPLETED
+                and tuple(receipt.verb for receipt in result.receipts) == task.expected_receipts
+                and result.verdict is not None
+                and result.verdict.outcome == "claims"
+                and any(claim.get("event") == "EvaluationCompleted"
+                        and claim.get("status") == "passed" for claim in claims
+                        if isinstance(claim, Mapping))
+            )
+            diff = subprocess.run(["git", "diff", "--binary"], cwd=repo,
+                                  check=True, capture_output=True).stdout
+            _stop(process)
+            process_output = _process_output(process)
+            return {
+                "task_id": task.task_id,
+                "title": task.title,
+                "status": "PASS" if passed else "FAIL",
+                "turns": len(result.receipts) + 1,
+                "hand_patches": 0,
+                "restarts": 0,
+                "oracle": task.oracle,
+                "oracle_signed": bool(result.verdict and result.verdict.signature),
+                "diff_digest": "sha256:" + hashlib.sha256(diff).hexdigest(),
+                "operator_q2_reach_for_it": "YES" if passed else "NO",
+                "terminal": result.terminal.value,
+                "verdict": result.verdict.outcome if result.verdict else "missing",
+                "verdict_reason": result.verdict.reason if result.verdict else "missing",
+                "evaluator_output": process_output,
+                "detail": result.detail,
+            }
+        finally:
+            _stop(process)
+
+
+def _load_release_image() -> tuple[str, str]:
+    manifest = json.loads((ROOT / "containers/manifest.json").read_text(encoding="utf-8"))
+    evaluator = manifest["evaluator"]
+    return str(evaluator["imageName"]), str(evaluator["imageDigest"])
+
+
+def _write_log(results: list[dict[str, object]]) -> None:
+    path = ROOT / "docs/agile/sprint6B/dogfood-log.md"
+    now = datetime.now(timezone.utc).isoformat()
+    lines = [
+        "# Sprint 6B Gate R9 — Q2 Dogfood Execution Log",
+        "",
+        f"**Execution Timestamp:** `{now}`  ",
+        "**Harness:** `Runtime.execute_harness` + LAM + Bubblewrap worker  ",
+        "**Evaluator:** UID `10002`, sealed oracle mount, signed Unix-socket verdict  ",
+        "",
+        "| Task | Turns | Hand Patches | Restarts | Oracle | Signed Verdict | Result | Q2 |",
+        "|---|---:|---:|---:|---|---|---|---|",
+    ]
+    for result in results:
+        lines.append(
+            f"| `{result['task_id']}` | {result['turns']} | {result['hand_patches']} | "
+            f"{result['restarts']} | `{result['oracle']}` | "
+            f"{result['oracle_signed']} | **{result['status']}** | "
+            f"**{result['operator_q2_reach_for_it']}** |"
         )
-        passed = (oracle_res.returncode == 0)
-        
-        # Turn 4: Finish
-        r4 = adapter.propose([
-            {"role": "user", "content": f"Fix bug in {bug_file}"},
-            {"role": "tool", "content": "file read"},
-            {"role": "tool", "content": "patch applied"},
-            {"role": "tool", "content": oracle_res.stdout or "OK"}
-        ], tools=())
-        assert r4.ok, f"Turn 4 failed: {r4.error}"
-        
-        # Calculate final commit digest
-        diff_res = subprocess.run(["git", "diff"], cwd=repo, capture_output=True, text=True)
-        diff_digest = hashlib.sha256(diff_res.stdout.encode("utf-8")).hexdigest()
-        
-        return {
-            "task_id": task_id,
-            "title": title,
-            "status": "PASS" if passed else "FAIL",
-            "turns": 4,
-            "restarts": 0,
-            "hand_patches": 0,
-            "usd_micros": 1500,
-            "oracle_file": oracle_file,
-            "diff_digest": f"sha256:{diff_digest}",
-            "operator_q2_reach_for_it": "YES",
-            "operator_notes": "Clean automated resolution via LAM ModelPort. Zero manual intervention required.",
-        }
+    lines.extend(["", "## Evidence", ""])
+    for result in results:
+        lines.extend([
+            f"### {result['task_id']}",
+            f"- Oracle: `{result['oracle']}`",
+            f"- Diff digest: `{result['diff_digest']}`",
+            f"- Terminal: `{result['terminal']}`; verdict: `{result['verdict']}`",
+            f"- Verdict reason: `{result.get('verdict_reason', 'unknown')}`",
+            f"- Detail: {result['detail'] or 'none'}",
+            "",
+        ])
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
-    tasks = [
-        {
-            "task_id": "task-01-calc-off-by-one",
-            "title": "Calculator total off-by-one sum fix",
-            "bug_file": "calc.py",
-            "bug_code": "def total(items):\n    acc = 1\n    for x in items:\n        acc += x\n    return acc\n",
-            "fix_code": "def total(items):\n    acc = 0\n    for x in items:\n        acc += x\n    return acc\n",
-            "oracle_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_01.py",
-            "model_scenario": "lam/t1-calculator",
-        },
-        {
-            "task_id": "task-02-string-dedupe",
-            "title": "Unique string deduplication preserving first occurrence",
-            "bug_file": "dedupe.py",
-            "bug_code": "def unique_preserve(items):\n    return list(set(items))\n",
-            "fix_code": "def unique_preserve(items):\n    seen = set()\n    res = []\n    for x in items:\n        if x not in seen:\n            seen.add(x)\n            res.append(x)\n    return res\n",
-            "oracle_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_02.py",
-            "model_scenario": "lam/t1-string-dedupe",
-        },
-        {
-            "task_id": "task-03-palindrome-check",
-            "title": "Palindrome validation ignoring non-alphanumeric",
-            "bug_file": "str_utils.py",
-            "bug_code": "def is_palindrome(s: str) -> bool:\n    return s == s[::-1]\n",
-            "fix_code": "def is_palindrome(s: str) -> bool:\n    cleaned = [ch.lower() for ch in s if ch.isalnum()]\n    return cleaned == cleaned[::-1]\n",
-            "oracle_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_03.py",
-            "model_scenario": "lam/t1-palindrome-check",
-        },
-    ]
-
-    results = []
-    print("=== Executing Sprint 6B Gate R9 Dogfood Runs ===")
-    for t in tasks:
-        print(f"Running {t['task_id']}: {t['title']}...")
-        res = run_task(
-            task_id=t["task_id"],
-            title=t["title"],
-            bug_file=t["bug_file"],
-            bug_code=t["bug_code"],
-            fix_code=t["fix_code"],
-            oracle_file=t["oracle_file"],
-            model_scenario=t["model_scenario"],
-        )
-        results.append(res)
-        print(f"  -> {res['status']} in {res['turns']} turns (Q2 Reach-for-it: {res['operator_q2_reach_for_it']})")
-
-    # Generate dogfood-log.md
-    log_path = ROOT / "docs" / "agile" / "sprint6B" / "dogfood-log.md"
-    now_iso = datetime.now(timezone.utc).isoformat()
-    
-    lines = [
-        "# Sprint 6B Gate R9 — Honest Q2 Dogfood Execution Log",
-        "",
-        f"**Execution Timestamp:** `{now_iso}`  ",
-        "**Harness Version:** `v0.4.1-beta`  ",
-        "**Evaluation Gate:** Chapter 10 Q2 (Three live bugs, zero mid-run hand-patches, would you reach for it again?)  ",
-        "",
-        "## Summary Matrix",
-        "",
-        "| Task ID | Task Description | Turns | Hand Patches | Restarts | Cost (USD) | Oracle Verdict | Q2 Answer |",
-        "|---|---|:---:|:---:|:---:|:---:|:---:|:---:|",
-    ]
-    
-    for r in results:
-        cost = f"${r['usd_micros'] / 1_000_000:.4f}"
-        lines.append(
-            f"| `{r['task_id']}` | {r['title']} | {r['turns']} | {r['hand_patches']} | {r['restarts']} | {cost} | **{r['status']}** | **{r['operator_q2_reach_for_it']}** |"
-        )
-        
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## Detailed Task Records",
-        "",
-    ])
-    
-    for r in results:
-        lines.extend([
-            f"### {r['task_id']} — {r['title']}",
-            f"- **Oracle File:** [`{r['oracle_file']}`](file:///{ROOT / r['oracle_file']})",
-            f"- **Diff Digest:** `{r['diff_digest']}`",
-            f"- **Turns Taken:** {r['turns']}",
-            f"- **Operator Verdict:** **{r['operator_q2_reach_for_it']}** (Would reach for Vanguard again)",
-            f"- **Notes:** {r['operator_notes']}",
-            "",
-        ])
-        
-    log_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"\nDogfood log successfully recorded to {log_path}")
-    return 0
+    image, digest = _load_release_image()
+    results: list[dict[str, object]] = []
+    print("=== Sprint 6B Gate R9: production dogfood ===")
+    for task in TASKS:
+        print(f"Running {task.task_id}...")
+        try:
+            result = run_task(task, image, digest)
+        except Exception as exc:
+            result = {
+                "task_id": task.task_id,
+                "title": task.title,
+                "status": "FAIL",
+                "turns": 0,
+                "hand_patches": 0,
+                "restarts": 0,
+                "oracle": task.oracle,
+                "oracle_signed": False,
+                "diff_digest": "",
+                "operator_q2_reach_for_it": "NO",
+                "terminal": "error",
+                "verdict": "inconclusive",
+                "verdict_reason": "runner_error",
+                "detail": str(exc),
+            }
+        results.append(result)
+        print(f"  -> {result['status']} ({result['detail'] or result['terminal']})")
+    _write_log(results)
+    return 0 if all(result["status"] == "PASS" for result in results) else 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

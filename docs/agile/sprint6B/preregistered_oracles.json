@@ -1,0 +1,26 @@
+{
+  "version": "vg.4",
+  "oracles": [
+    {
+      "task_id": "task-01-calc-off-by-one",
+      "suite_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_01.py",
+      "target_file": "calc.py",
+      "sha256": "4b6c37ea492ee020c9f131a473a241cbca68615b136fc19d443ecb1e847cbbdb",
+      "description": "Calculator total off-by-one sum fix"
+    },
+    {
+      "task_id": "task-02-string-dedupe",
+      "suite_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_02.py",
+      "target_file": "dedupe.py",
+      "sha256": "8fa806ecbc4465bbd6978438186178cbb86015b6d01e149826a7cb8d5cebc4dc",
+      "description": "Unique string deduplication preserving first occurrence"
+    },
+    {
+      "task_id": "task-03-palindrome-check",
+      "suite_file": "vanguard/packages/adapters/evaluators/suites/oracle_task_03.py",
+      "target_file": "str_utils.py",
+      "sha256": "a358df5eec6c3997cb65860d5eb730ec5f97334752c1e8784d1bc91ebfcfeb8a",
+      "description": "Palindrome validation ignoring punctuation and case"
+    }
+  ]
+}

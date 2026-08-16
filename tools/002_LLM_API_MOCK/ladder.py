@@ -48,6 +48,11 @@ def load_api_key_secure() -> str:
     return ""
 
 
+from store import LamStore
+
+_STORE = LamStore()
+
+
 def openrouter_complete(
     model: str,
     messages: list[dict],
@@ -82,6 +87,28 @@ def openrouter_complete(
         return json.loads(resp.read().decode("utf-8"))
 
 
+def ollama_complete(
+    model: str,
+    messages: list[dict],
+    tools: list[dict] | None = None,
+    host: str = "http://127.0.0.1:11434",
+) -> dict:
+    """Call local Ollama using OpenAI-compatible /v1/chat/completions endpoint."""
+    url = f"{host}/v1/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    body: dict[str, Any] = {
+        "model": model.replace("ollama/", ""),
+        "messages": messages,
+        "temperature": 0.0,
+    }
+    if tools:
+        body["tools"] = tools
+
+    req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
 def run_ladder(
     model: str,
     scenario_id: str,
@@ -101,7 +128,7 @@ def run_ladder(
         # Real simulation run against offline LAM trajectory
         res = simulate_scenario(clean_scenario_id)
         wall_s = round(time.monotonic() - t0, 4)
-        return {
+        row = {
             "model": model,
             "scenario": clean_scenario_id,
             "tier": res["tier"],
@@ -115,6 +142,21 @@ def run_ladder(
             "wall_s": wall_s,
             "error": None,
         }
+        try:
+            _STORE.insert_trace(
+                scenario_id=clean_scenario_id,
+                backend="lam",
+                model=model,
+                passed=res["passed"],
+                llm_calls=res["llm_calls"],
+                prompt_tokens=res["prompt_tokens"],
+                completion_tokens=res["completion_tokens"],
+                usd=0.0,
+                wall_s=wall_s,
+            )
+        except Exception:
+            pass
+        return row
 
     # Live model branch
     if transport == "forbidden":

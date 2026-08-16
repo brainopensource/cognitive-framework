@@ -21,7 +21,9 @@ class TestProviderOptimizer(unittest.TestCase):
         rec = self.optimizer.recommend_provider(scenario_tier=1, policy="min-cost")
         self.assertEqual(rec["provider"], "ollama")
 
-        rec_t3 = self.optimizer.recommend_provider(scenario_tier=3, policy="min-cost")
+        rec_t3 = self.optimizer.recommend_provider(
+            scenario_tier=3, policy="min-cost", calibration_passed=True
+        )
         self.assertEqual(rec_t3["provider"], "openrouter")
         self.assertEqual(rec_t3["model"], "openrouter/free")
 
@@ -29,7 +31,9 @@ class TestProviderOptimizer(unittest.TestCase):
         rec1 = self.optimizer.recommend_provider(scenario_tier=1, policy="balanced")
         self.assertEqual(rec1["provider"], "ollama")
 
-        rec5 = self.optimizer.recommend_provider(scenario_tier=5, policy="balanced")
+        rec5 = self.optimizer.recommend_provider(
+            scenario_tier=5, policy="balanced", calibration_passed=True
+        )
         self.assertEqual(rec5["provider"], "openrouter")
         self.assertEqual(rec5["model"], "google/gemini-3.7-flash")
 

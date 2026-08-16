@@ -1,0 +1,63 @@
+{
+  "challenge_id": "tier2_event_bus",
+  "tier": 2,
+  "title": "Hierarchical Wildcard Event Emitter",
+  "model": "deepseek/deepseek-chat",
+  "verdict": "PASSED",
+  "oracle_passed": true,
+  "llm_calls": 5,
+  "max_calls": 10,
+  "total_tokens": 5325,
+  "prompt_tokens": 4535,
+  "completion_tokens": 790,
+  "cost_usd": 0.0008529999999999999,
+  "duration_s": 26.647075690001657,
+  "patch": "diff --git a/events/bus.py b/events/bus.py\nindex 6234078..f246d0d 100644\n--- a/events/bus.py\n+++ b/events/bus.py\n@@ -9,7 +9,9 @@ class Subscription:\n         self.active = True\n \n     def unsubscribe(self) -> None:\n-        self.active = False\n+        if self.active:\n+            self.active = False\n+            self.bus._subs.remove(self)\n \n class EventBus:\n     def __init__(self):\n@@ -26,4 +28,4 @@ class EventBus:\n             if s.active and topic_matches(s.pattern, topic):\n                 s.callback(topic, payload)\n                 count += 1\n-        return count\n+        return count\n\\ No newline at end of file\ndiff --git a/events/matcher.py b/events/matcher.py\nindex ca1f90b..0c95dda 100644\n--- a/events/matcher.py\n+++ b/events/matcher.py\n@@ -1,11 +1,17 @@\n import re\n \n def topic_matches(pattern: str, topic: str) -> bool:\n-    if pattern == topic or pattern == '**': return True\n+    if pattern == topic or pattern == '**':\n+        return True\n     parts = pattern.split('.')\n-    rx = []\n-    for p in parts:\n-        if p == '*': rx.append(r'[^.]+')\n-        elif p == '**': rx.append(r'.*')\n-        else: rx.append(re.escape(p))\n-    return bool(re.match('^' + r'\\.'.join(rx) + '$', topic))\n+    topic_parts = topic.split('.')\n+    if len(parts) != len(topic_parts):\n+        return False\n+    for p, t in zip(parts, topic_parts):\n+        if p == '*':\n+            continue\n+        elif p == '**':\n+            return True\n+        elif p != t:\n+            return False\n+    return True\n\\ No newline at end of file\n",
+  "turns": [
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "events/bus.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "events/matcher.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "fs.write",
+      "args": {
+        "path": "events/bus.py",
+        "content": "from typing import Callable, Any\nfrom .matcher import topic_matches\n\nclass Subscription:\n    def __init__(self, bus: 'EventBus', pattern: str, callback: Callable[[str, Any], None]):\n        self.bus = bus\n        self.pattern = pattern\n        self.callback = callback\n        self.active = True\n\n    def unsubscribe(self) -> None:\n        if self.active:\n            self.active = False\n            self.bus._subs.remove(self)\n\nclass EventBus:\n    def __init__(self):\n        self._subs: list[Subscription] = []\n\n    def subscribe(self, pattern: str, cb: Callable[[str, Any], None]) -> Subscription:\n        s = Subscription(self, pattern, cb)\n        self._subs.append(s)\n        return s\n\n    def publish(self, topic: str, payload: Any = None) -> int:\n        count = 0\n        for s in list(self._subs):\n            if s.active and topic_matches(s.pattern, topic):\n                s.callback(topic, payload)\n                count += 1\n        return count"
+      },
+      "note": "[turn_5] Action: fs.write\nArguments: {\"path\": \"events/bus.py\", \"content\": \"from typing import Callable, Any\\nfrom .matcher import topic_matches\\n\\nclass Subscription:\\n    def __init__(self, bus: 'EventBus', pattern: str, callback: Callable[[str, Any], None]):\\n        self.bus = bus\\n        self.pattern = pattern\\n        self.callback = callback\\n        self.active = True\\n\\n    def unsubscribe(self) -> None:\\n        if self.active:\\n            self.active = False\\n            self.bus._subs.remove(self)\\n\\nclass EventBus:\\n    def __init__(self):\\n        self._subs: list[Subscription] = []\\n\\n    def subscribe(self, pattern: str, cb: Callable[[str, Any], None]) -> Subscription:\\n        s = Subscription(self, pattern, cb)\\n        self._subs.append(s)\\n        return s\\n\\n    def publish(self, topic: str, payload: Any = None) -> int:\\n        count = 0\\n        for s in list(self._subs):\\n            if s.active and topic_matches(s.pattern, topic):\\n                s.callback(topic, payload)\\n                count += 1\\n        return count\"}"
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "fs.write",
+      "args": {
+        "path": "events/matcher.py",
+        "content": "import re\n\ndef topic_matches(pattern: str, topic: str) -> bool:\n    if pattern == topic or pattern == '**':\n        return True\n    parts = pattern.split('.')\n    topic_parts = topic.split('.')\n    if len(parts) != len(topic_parts):\n        return False\n    for p, t in zip(parts, topic_parts):\n        if p == '*':\n            continue\n        elif p == '**':\n            return True\n        elif p != t:\n            return False\n    return True"
+      },
+      "note": null
+    },
+    {
+      "turn": 5,
+      "kind": "finish",
+      "action": null,
+      "args": null,
+      "note": "The files have been successfully updated to fix the wildcard pattern matching and subscription unsubscribe leaks. The changes include:\n\n1. In `bus.py`:\n   - Modified the `unsubscribe` method to properly remove the subscription from the bus's list of subscriptions\n   - Added a check to ensure the subscription is active before removing it\n\n2. In `matcher.py`:\n   - Improved the `topic_matches` function to handle wildcard patterns more accurately\n   - Added proper length checking between pattern and topic parts\n   - Simplified the matching logic for '*' and '**' wildcards\n\nThe fixes are now complete and the files have been written successfully."
+    }
+  ]
+}

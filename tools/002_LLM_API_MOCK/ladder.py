@@ -20,7 +20,8 @@ from budget import allow_live_call, record_live_call
 from catalog import load_catalog
 from models import load_models, models_for_band
 from schema import ALLOWED_ATOMS
-from simulate import _execute, simulate_scenario
+from simulate import SYSTEM, _execute, simulate_scenario
+from verdict import evidence_label, pytest_passed
 
 
 def load_api_key_secure() -> str:
@@ -136,6 +137,7 @@ def run_ladder(
             "scenario": clean_scenario_id,
             "tier": res["tier"],
             "passed": res["passed"],
+            "evidence_label": res.get("evidence_label") or evidence_label("lam"),
             "llm_calls": res["llm_calls"],
             "prompt_tokens": res["prompt_tokens"],
             "completion_tokens": res["completion_tokens"],
@@ -193,7 +195,7 @@ def run_ladder(
     messages: list[dict[str, Any]] = [
         {
             "role": "system",
-            "content": "You are OpenCode, an expert software engineer. Solve the scenario in the workspace. Fix failing tests.",
+            "content": SYSTEM,
         },
         {"role": "user", "content": f"Solve scenario {clean_scenario_id}. Work in the workspace until tests pass."},
     ]
@@ -220,10 +222,7 @@ def run_ladder(
             messages.append(msg)
 
             if choice.get("finish_reason") == "stop" or not msg.get("tool_calls"):
-                # Check if tests pass
-                test_proc = subprocess.run("pytest", cwd=workspace, shell=True, capture_output=True, text=True)
-                if test_proc.returncode == 0 or "passed" in (msg.get("content") or "").lower():
-                    passed = True
+                passed = pytest_passed(workspace)
                 break
 
             for call in msg.get("tool_calls", []):
@@ -236,8 +235,6 @@ def run_ladder(
                         "content": obs,
                     }
                 )
-                if "passed" in obs.lower():
-                    passed = True
 
         except Exception as ex:
             error_msg = str(ex)
@@ -246,11 +243,13 @@ def run_ladder(
     wall_s = round(time.monotonic() - t0, 4)
     total_tokens = prompt_tokens + completion_tokens
 
+    live_backend = "ollama" if "ollama" in model else "openrouter"
     return {
         "model": model,
         "scenario": clean_scenario_id,
         "tier": tier,
         "passed": passed,
+        "evidence_label": evidence_label(live_backend),
         "llm_calls": llm_calls,
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,

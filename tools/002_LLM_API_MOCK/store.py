@@ -249,6 +249,12 @@ class LamStore:
             downgrade_passes = conn.execute("SELECT COUNT(*) FROM traces WHERE is_downgrade=1 AND passed=1;").fetchone()[0]
             downgrade_attempts = conn.execute("SELECT COUNT(*) FROM traces WHERE is_downgrade=1;").fetchone()[0]
             ceilings = [dict(r) for r in conn.execute("SELECT * FROM model_ceilings ORDER BY ceiling_tier DESC;").fetchall()]
+            live_pass_count = conn.execute(
+                "SELECT COUNT(*) FROM traces WHERE passed=1 AND backend != 'lam';"
+            ).fetchone()[0]
+            lam_replay_pass_count = conn.execute(
+                "SELECT COUNT(*) FROM traces WHERE passed=1 AND backend = 'lam';"
+            ).fetchone()[0]
 
         return {
             "total_scenarios": n_scenarios,
@@ -259,4 +265,6 @@ class LamStore:
             "avg_wall_s": round(avg_wall, 4),
             "downgrade_pass_rate": round(downgrade_passes / downgrade_attempts, 2) if downgrade_attempts else 0.0,
             "model_ceilings": ceilings,
+            "live_pass_count": live_pass_count,
+            "lam_replay_pass_count": lam_replay_pass_count,
         }

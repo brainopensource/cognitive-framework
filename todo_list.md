@@ -220,3 +220,10 @@ python3 tools/check_baseline_manifest.py
   - Implemented `lab/build.py` for manifest pack verification and composition digest calculation.
   - Unit tests: `test/lab/test_bench.py`, `test/lab/test_diff.py`, `test/lab/test_build.py` passed.
 
+### Sprint 9 — Autonomous Meta-Harness Loop
+
+- [ ] **Task S9.1: MetaLoopEngine wired into Runtime** — `vanguard/packages/runtime/loops/meta_loop.py` exists; **not** imported by `root.py`. Uses `sys.executable` without `import sys`. No CEI/FPSR writes. No unit tests found.
+- [ ] **Quality gate (re-run 2026-08-16):** full `unittest discover -s test -t .` is **not** green (490 ran, 1 failure, 14 errors, 2 skipped). Targeted S7–S8 tests: 25 OK. `check_boundaries` / `check_tcb_budget` / `scan_secrets` / `check_backend_artifacts --release` PASS.
+
+**Not ready for Sprint 10.** Close the full suite and either wire or defer `MetaLoopEngine` first.
+

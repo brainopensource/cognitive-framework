@@ -26,6 +26,11 @@ from typing import Any, Mapping
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+_LAM = ROOT / "tools" / "002_LLM_API_MOCK"
+if str(_LAM) not in sys.path:
+    sys.path.insert(0, str(_LAM))
+
+from verdict import evidence_label, leak_paths
 
 from vanguard.packages.adapters.models.env_loader import load_api_key
 from vanguard.packages.adapters.models.openrouter import OpenRouterModel
@@ -303,6 +308,9 @@ def load_task(task_id: str) -> TaskSpec:
 def _prepare_repo(root: Path, fixture: Path) -> Path:
     repo = root / "workspace"
     shutil.copytree(fixture, repo)
+    leaks = leak_paths(repo)
+    if leaks:
+        raise RuntimeError(f"workspace leak before episode: {leaks}")
     _git(repo, "init")
     _git(repo, "config", "user.name", "Zero Hint Lab")
     _git(repo, "config", "user.email", "lab@vanguard.local")
@@ -429,12 +437,15 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         and oracle_after["passed"]
         and set(changed) <= {task.allowed_source}
     )
+    public_overfit = bool(public_after["passed"] and not oracle_after["passed"])
     record = {
         "schemaVersion": "1.0",
         "taskId": task.task_id,
         "title": task.title,
         "runId": run_id,
         "status": "PASS" if passed else "FAIL",
+        "evidence_label": evidence_label("lab"),
+        "public_overfit": public_overfit,
         "agentic": True,
         "lamReplay": False,
         "singleShotGenerate": False,

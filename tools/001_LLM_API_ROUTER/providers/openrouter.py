@@ -25,12 +25,30 @@ def _load_env_api_key() -> str:
 
 
 MODEL_PRICING_MICROS = {
-    "google/gemini-2.0-flash-001": {"prompt": 10, "completion": 40},
-    "deepseek/deepseek-chat": {"prompt": 14, "completion": 28},
-    "deepseek/deepseek-r1": {"prompt": 55, "completion": 219},
-    "qwen/qwen-2.5-72b-instruct": {"prompt": 35, "completion": 40},
+    # OpenRouter Verified Free Models ($0.00)
     "openrouter/free": {"prompt": 0, "completion": 0},
+    "inclusionai/ling-3.0-tiny:free": {"prompt": 0, "completion": 0},
+    "poolside/laguna-s-2.1:free": {"prompt": 0, "completion": 0},
+    "cohere/north-mini-code:free": {"prompt": 0, "completion": 0},
+    "google/gemma-4-26b-a4b-it:free": {"prompt": 0, "completion": 0},
+    "nvidia/nemotron-3-super-120b-a12b:free": {"prompt": 0, "completion": 0},
+    "openai/gpt-oss-20b:free": {"prompt": 0, "completion": 0},
+    # OpenRouter Verified Low-Cost Paid Models
+    "deepseek/deepseek-v4-flash": {"prompt": 14, "completion": 28},
+    "deepseek/deepseek-v4-flash-0731": {"prompt": 14, "completion": 28},
+    "xiaomi/mimo-v2.5": {"prompt": 10, "completion": 30},
+    # OpenRouter Frontier Cloud Models
+    "z-ai/glm-5.2": {"prompt": 35, "completion": 140},
+    "openai/gpt-5.6-luna": {"prompt": 100, "completion": 400},
+    "deepseek/deepseek-v4-pro": {"prompt": 45, "completion": 180},
+    "minimax/minimax-m3": {"prompt": 20, "completion": 80},
+    # OpenAI & DeepSeek Direct
+    "gpt-4o": {"prompt": 250, "completion": 1000},
+    "openai/gpt-4o": {"prompt": 250, "completion": 1000},
+    "deepseek-reasoner": {"prompt": 55, "completion": 219},
+    "deepseek-coder": {"prompt": 14, "completion": 28},
 }
+
 
 
 class OpenRouterProvider(BaseLLMProvider):

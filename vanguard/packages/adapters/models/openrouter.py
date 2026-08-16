@@ -45,35 +45,60 @@ DEFAULT_MODEL = "openai/gpt-4o-mini"
 
 # Pricing per 1,000,000 tokens (USD): (prompt_per_1m, completion_per_1m, cached_prompt_per_1m)
 MODEL_PRICING: dict[str, tuple[float, float, float]] = {
+    # OpenRouter Verified Free Models ($0.00)
+    "openrouter/free": (0.0, 0.0, 0.0),
+    "inclusionai/ling-3.0-tiny:free": (0.0, 0.0, 0.0),
+    "poolside/laguna-s-2.1:free": (0.0, 0.0, 0.0),
+    "cohere/north-mini-code:free": (0.0, 0.0, 0.0),
+    "google/gemma-4-26b-a4b-it:free": (0.0, 0.0, 0.0),
+    "nvidia/nemotron-3-super-120b-a12b:free": (0.0, 0.0, 0.0),
+    "openai/gpt-oss-20b:free": (0.0, 0.0, 0.0),
+    # OpenRouter Verified Low-Cost Paid Models
+    "deepseek/deepseek-v4-flash": (0.14, 0.28, 0.014),
+    "deepseek/deepseek-v4-flash-0731": (0.14, 0.28, 0.014),
+    "xiaomi/mimo-v2.5": (0.10, 0.30, 0.01),
+    # OpenRouter Frontier Cloud Models
+    "z-ai/glm-5.2": (0.35, 1.40, 0.035),
+    "openai/gpt-5.6-luna": (1.00, 4.00, 0.25),
+    "deepseek/deepseek-v4-pro": (0.45, 1.80, 0.045),
+    "minimax/minimax-m3": (0.20, 0.80, 0.02),
+    # OpenAI & DeepSeek Direct
     "openai/gpt-4o-mini": (0.15, 0.60, 0.075),
+    "gpt-4o": (2.50, 10.00, 1.25),
     "openai/gpt-4o": (2.50, 10.00, 1.25),
-    "anthropic/claude-3.5-sonnet": (3.00, 15.00, 0.30),
-    "anthropic/claude-3-5-sonnet": (3.00, 15.00, 0.30),
-    "anthropic/claude-3.5-haiku": (0.80, 4.00, 0.08),
-    "anthropic/claude-3-5-haiku": (0.80, 4.00, 0.08),
-    "google/gemini-2.0-flash-001": (0.10, 0.40, 0.025),
-    "google/gemini-flash-1.5": (0.075, 0.30, 0.01875),
-    "deepseek/deepseek-chat": (0.14, 0.28, 0.014),
-    "deepseek/deepseek-r1": (0.55, 2.19, 0.14),
-    "meta-llama/llama-3.3-70b-instruct": (0.12, 0.30, 0.03),
+    "deepseek-reasoner": (0.55, 2.19, 0.14),
+    "deepseek-coder": (0.14, 0.28, 0.014),
 }
-DEFAULT_MODEL_PRICING: tuple[float, float, float] = (0.15, 0.60, 0.075)
+DEFAULT_MODEL_PRICING: tuple[float, float, float] = (0.14, 0.28, 0.014)
 
 # Integer USD micros per 1,000,000 tokens: (prompt_micros_per_1m, completion_micros_per_1m, cached_prompt_micros_per_1m)
 MODEL_PRICING_MICROS: dict[str, tuple[int, int, int]] = {
+    # OpenRouter Verified Free Models ($0.00)
+    "openrouter/free": (0, 0, 0),
+    "inclusionai/ling-3.0-tiny:free": (0, 0, 0),
+    "poolside/laguna-s-2.1:free": (0, 0, 0),
+    "cohere/north-mini-code:free": (0, 0, 0),
+    "google/gemma-4-26b-a4b-it:free": (0, 0, 0),
+    "nvidia/nemotron-3-super-120b-a12b:free": (0, 0, 0),
+    "openai/gpt-oss-20b:free": (0, 0, 0),
+    # OpenRouter Verified Low-Cost Paid Models
+    "deepseek/deepseek-v4-flash": (140_000, 280_000, 14_000),
+    "deepseek/deepseek-v4-flash-0731": (140_000, 280_000, 14_000),
+    "xiaomi/mimo-v2.5": (100_000, 300_000, 10_000),
+    # OpenRouter Frontier Cloud Models
+    "z-ai/glm-5.2": (350_000, 1_400_000, 35_000),
+    "openai/gpt-5.6-luna": (1_000_000, 4_000_000, 250_000),
+    "deepseek/deepseek-v4-pro": (450_000, 1_800_000, 45_000),
+    "minimax/minimax-m3": (200_000, 800_000, 20_000),
+    # OpenAI & DeepSeek Direct
     "openai/gpt-4o-mini": (150_000, 600_000, 75_000),
+    "gpt-4o": (2_500_000, 10_000_000, 1_250_000),
     "openai/gpt-4o": (2_500_000, 10_000_000, 1_250_000),
-    "anthropic/claude-3.5-sonnet": (3_000_000, 15_000_000, 300_000),
-    "anthropic/claude-3-5-sonnet": (3_000_000, 15_000_000, 300_000),
-    "anthropic/claude-3.5-haiku": (800_000, 4_000_000, 80_000),
-    "anthropic/claude-3-5-haiku": (800_000, 4_000_000, 80_000),
-    "google/gemini-2.0-flash-001": (100_000, 400_000, 25_000),
-    "google/gemini-flash-1.5": (75_000, 300_000, 18_750),
-    "deepseek/deepseek-chat": (140_000, 280_000, 14_000),
-    "deepseek/deepseek-r1": (550_000, 2_190_000, 140_000),
-    "meta-llama/llama-3.3-70b-instruct": (120_000, 300_000, 30_000),
+    "deepseek-reasoner": (550_000, 2_190_000, 140_000),
+    "deepseek-coder": (140_000, 280_000, 14_000),
 }
-DEFAULT_MODEL_PRICING_MICROS: tuple[int, int, int] = (150_000, 600_000, 75_000)
+DEFAULT_MODEL_PRICING_MICROS: tuple[int, int, int] = (140_000, 280_000, 14_000)
+
 
 Transport = Callable[
     [str, dict[str, str], bytes],
@@ -724,6 +749,7 @@ class OpenRouterModel:
         tool_payload = _tools_payload(tools)
         if tool_payload:
             body_obj["tools"] = tool_payload
+            body_obj["parallel_tool_calls"] = False
         payload = json.dumps(body_obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         headers = {
             "Content-Type": "application/json",
@@ -843,6 +869,12 @@ class OpenRouterModel:
 
         if self._recorder is not None:
             self._recorder.record_interaction(context, tools, sampling, proposal)
+
+        # In streaming/live mode, if a provider emits multiple parallel tool calls,
+        # normalize to the primary atomic action to satisfy the single-action protocol.
+        if proposal and isinstance(proposal.get("toolCalls"), list) and len(proposal["toolCalls"]) > 1:
+            proposal = dict(proposal)
+            proposal["toolCalls"] = [proposal["toolCalls"][0]]
 
         translated = ProposalTranslator.translate(proposal, tool_schemas=tools)
         if not translated.ok:

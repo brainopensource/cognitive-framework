@@ -60,6 +60,7 @@ class HarnessAnalyzer:
         md.append(f"**Total Scenarios:** {s['total_scenarios']} | **Total Traces:** {s['total_traces']}")
         md.append(f"**Total LLM Calls:** {s['total_calls']} | **Total Tokens:** {s['total_tokens']:,}")
         md.append(f"**Total Direct Spend:** ${s['total_usd']:.4f} USD | **Avg Wall Latency:** {s['avg_wall_s']}s")
+        md.append(f"**lam-replay passes:** {s.get('lam_replay_pass_count', 0)} | **live passes:** {s.get('live_pass_count', 0)}")
         md.append(f"**Tier-Downgrade Pass Rate:** {s['downgrade_pass_rate'] * 100:.1f}%\n")
 
         md.append("## 1. Model Tier Ceilings")

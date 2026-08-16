@@ -18,23 +18,33 @@ from providers import get_provider, LLMResponse
 MODEL_ALIASES = {
     # OpenRouter mappings
     "openrouter": {
-        "deepseek": "deepseek/deepseek-chat",
-        "deepseek-r1": "deepseek/deepseek-r1",
-        "gemini": "google/gemini-2.0-flash-001",
-        "qwen": "qwen/qwen-2.5-72b-instruct",
-        "qwen25": "qwen/qwen-2.5-72b-instruct",
         "free": "openrouter/free",
+        "ling": "inclusionai/ling-3.0-tiny:free",
+        "laguna": "poolside/laguna-s-2.1:free",
+        "north": "cohere/north-mini-code:free",
+        "gemma": "google/gemma-4-26b-a4b-it:free",
+        "nemotron": "nvidia/nemotron-3-super-120b-a12b:free",
+        "gpt-oss": "openai/gpt-oss-20b:free",
+        "deepseek-flash": "deepseek/deepseek-v4-flash",
+        "deepseek": "deepseek/deepseek-v4-flash",
+        "mimo": "xiaomi/mimo-v2.5",
+        "glm": "z-ai/glm-5.2",
+        "gpt-luna": "openai/gpt-5.6-luna",
+        "deepseek-pro": "deepseek/deepseek-v4-pro",
+        "minimax": "minimax/minimax-m3",
     },
     # Ollama mappings
     "ollama": {
-        "qwen": "qwen2.5:1.5b",
-        "qwen25": "qwen2.5:1.5b",
-        "qwen-large": "qwen3.6:27b",
         "llama": "llama3.2:3b",
-        "llama3": "llama3.2:3b",
-        "deepseek": "deepseek-r1:14b",
+        "llama3.2": "llama3.2:3b",
+        "qwen": "qwen2.5:1.5b",
+        "qwen2.5": "qwen2.5:1.5b",
+        "qwen-large": "qwen3.6:27b",
+        "qwen3.6": "qwen3.6:27b",
+        "deepseek-r1": "deepseek-r1:14b",
     },
 }
+
 
 
 def resolve_model(provider_name: str, model_arg: str) -> str:

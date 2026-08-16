@@ -1,0 +1,81 @@
+{
+  "challenge_id": "tier3_token_bucket",
+  "tier": 3,
+  "title": "Token Bucket Limiter with Monotonic Refill",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "verdict": "PASSED",
+  "oracle_passed": true,
+  "llm_calls": 7,
+  "max_calls": 10,
+  "total_tokens": 10227,
+  "prompt_tokens": 7169,
+  "completion_tokens": 3058,
+  "cost_usd": 0.0015340000000000002,
+  "duration_s": 47.90027052899677,
+  "patch": "diff --git a/ratelimit/bucket.py b/ratelimit/bucket.py\nindex f72cd5a..f8ae210 100644\n--- a/ratelimit/bucket.py\n+++ b/ratelimit/bucket.py\n@@ -1,7 +1,20 @@\n-import time, threading\n+import threading\n+import time\n+\n \n class TokenBucket:\n+    \"\"\"A thread-safe token bucket rate limiter.\n+\n+    Tokens are replenished continuously based on monotonic elapsed time,\n+    clamped to ``max_burst``, and all mutations are guarded by a lock so\n+    concurrent callers never observe or create a race condition.\n+    \"\"\"\n+\n     def __init__(self, rate_per_sec: float, max_burst: int):\n+        if rate_per_sec < 0:\n+            raise ValueError(\"rate_per_sec must be non-negative\")\n+        if max_burst < 0:\n+            raise ValueError(\"max_burst must be non-negative\")\n         self.rate = rate_per_sec\n         self.max_burst = max_burst\n         self.tokens = float(max_burst)\n@@ -12,9 +25,11 @@ class TokenBucket:\n         with self._lock:\n             now = time.monotonic()\n             elapsed = now - self.last_update\n-            self.tokens = min(float(self.max_burst), self.tokens + elapsed * self.rate)\n-            self.last_update = now\n+            if elapsed > 0:\n+                self.tokens = min(float(self.max_burst),\n+                                  self.tokens + elapsed * self.rate)\n+                self.last_update = now\n             if self.tokens >= tokens:\n                 self.tokens -= tokens\n                 return True\n-            return False\n+            return False\n\\ No newline at end of file\n",
+  "turns": [
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "ratelimit/bucket.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "ratelimit/__init__.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "fs.write",
+      "args": {
+        "path": "ratelimit/bucket.py",
+        "content": "import threading\nimport time\n\n\nclass TokenBucket:\n    \"\"\"A thread-safe token buck"
+      },
+      "note": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "ratelimit/bucket.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "fs.write",
+      "args": {
+        "path": "ratelimit/bucket.py",
+        "content": "import threading\nimport time\n\n\nclass TokenBucket:\n    \"\"\"A thread-safe token bucket rate limiter.\n\n    Tokens are replenished continuously based on monotonic elapsed time,\n    clamped to ``max_burst``, and all mutations are guarded by a lock so\n    concurrent callers never observe or create a race condition.\n    \"\"\"\n\n    def __init__(self, rate_per_sec: float, max_burst: int):\n        if rate_per_sec < 0:\n            raise ValueError(\"rate_per_sec must be non-negative\")\n        if max_burst < 0:\n            raise ValueError(\"max_burst must be non-negative\")\n        self.rate = rate_per_sec\n        self.max_burst = max_burst\n        self.tokens = float(max_burst)\n        self.last_update = time.monotonic()\n        self._lock = threading.Lock()\n\n    def consume(self, tokens: int = 1) -> bool:\n        with self._lock:\n            now = time.monotonic()\n            elapsed = now - self.last_update\n            if elapsed > 0:\n                self.tokens = min(float(self.max_burst),\n                                  self.tokens + elapsed * self.rate)\n                self.last_update = now\n            if self.tokens >= tokens:\n                self.tokens -= tokens\n                return True\n            return False"
+      },
+      "note": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "ratelimit/bucket.py"
+      },
+      "note": null
+    },
+    {
+      "turn": 7,
+      "kind": "finish",
+      "action": null,
+      "args": null,
+      "note": "All files have been inspected and corrected.\n\n**`ratelimit/bucket.py`** now:\n- Uses `time.monotonic()` for drift-free elapsed time (no reliance on wall clock).\n- Replenishes tokens based on monotonic elapsed time and clamps the token count to `max_burst` via `min(...)`.\n- Guards all token mutations (`refill` + `consume`) under `threading.Lock()`, preventing race conditions between concurrent callers.\n- Adds input validation for negative `rate_per_sec` and `max_burst`.\n\n**`ratelimit/__init__.py`** was already correct (exports `TokenBucket`) and required no changes.\n\nTask complete."
+    }
+  ]
+}

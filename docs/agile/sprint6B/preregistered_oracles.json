@@ -8,7 +8,7 @@
       "class": "single-file",
       "requiresTestReaction": false,
       "oracle": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py",
-      "oracleDigest": "sha256:5d355657fbb2a4a9184e2d12ff6068d4e1966fc120bf2cd8c36254168b4402a0"
+      "oracleDigest": "sha256:4c6779145851142822736070925ee043caa1f27e2c74c69e05591210ab5e7e7e"
     },
     {
       "id": "bug-002-multi-file",

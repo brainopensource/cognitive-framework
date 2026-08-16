@@ -30,11 +30,20 @@ class HarnessAnalyzer:
             # Query cost per tier
             cur = conn.execute("""
                 SELECT scenario_tier, COUNT(*) as trace_count, SUM(passed) as pass_count,
-                       SUM(usd) as total_usd, AVG(prompt_tokens + completion_tokens) as avg_tokens
+                       SUM(usd) as total_usd, AVG(prompt_tokens + completion_tokens) as avg_tokens,
+                       AVG(CAST(completion_tokens AS REAL) / MAX(1, prompt_tokens)) as avg_cei
                 FROM traces
                 GROUP BY scenario_tier;
             """)
             tier_costs = [dict(r) for r in cur.fetchall()]
+
+            # Calculate First-Pass Success Rate (FPSR)
+            first_pass_cur = conn.execute("""
+                SELECT COUNT(*) FROM traces WHERE passed = 1 AND llm_calls <= 4;
+            """)
+            first_pass_count = first_pass_cur.fetchone()[0] or 0
+            fpsr = round(first_pass_count / max(1, kpis["total_traces"]), 2)
+            kpis["first_pass_success_rate"] = fpsr
 
         return {
             "summary": kpis,

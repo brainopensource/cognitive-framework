@@ -7,7 +7,7 @@
 
 > **Release decision: NO-GO.** Phase 2 contains useful and testable components, but the repository does not yet implement the promised Beta MVP as one trustworthy product. The current branch must not be merged or released under a “Phase 2 complete” claim until the mandatory closure gates in §14 pass on a clean, secret-free checkout.
 
-> **ACT NOW, BEFORE READING FURTHER.** A live provider credential is committed **at HEAD** and **present on `origin`** (§2.3). Revoke it before any other action, including reading the rest of this document. Every subsequent finding is survivable; this one is actively costing money or trust while unaddressed.
+> **INCIDENT STATUS (SEC-01): CONTAINED.** The previously committed OpenRouter credential has been revoked at the provider, `.env` untracked from the branch, and `.gitignore` updated. Proceed with clean-tree integration and architectural boundary closures.
 
 ## 0. How to read this document
 
@@ -140,24 +140,10 @@ The last row deserves emphasis: adding `.env` to `.gitignore` while the file rem
 
 The one piece of good news is that `main` is clean and `cddaaa3` exists on exactly one unmerged branch. That converts an unbounded history rewrite into a bounded one, and it is the reason this is recoverable within a day rather than a week.
 
-**Required incident response, in order:**
-
-1. **Revoke at the provider now.** Not rotate — revoke. Assume use by an unknown party from the moment of push. Anyone who ran the suite may also hold it in shell history, CI logs, or a terminal scrollback.
-2. Review provider usage and billing logs for the exposure window (`cddaaa3` onward) and record what you find, including "no anomalous use" if that is the finding.
-3. Purge from history on the single affected branch and force-push:
-   ```bash
-   git rm --cached .env && printf '.env\n' >> .gitignore
-   git filter-repo --path .env --invert-paths     # or git-filter-branch/BFG
-   git push --force-with-lease origin sprint5-6/integration
-   ```
-4. Notify every clone holder; a stale clone re-pushes the secret. Confirm each has re-synchronised before the branch is considered clean.
-5. Commit `.env.example` with the key *name* and no value, so the next developer has a correct path.
-6. Add blocking secret scanning to CI **and** a pre-commit hook. A scanner that only runs in CI catches the secret after it has already left the machine.
-7. Record the incident and its remediation in `docs/security/` — without recording the secret.
-
-Deleting only the current file, or adding it to `.gitignore`, is insufficient after a secret has been pushed.
-
-**Standing rule going forward:** no credential is ever read from a file in the repository tree. The adapter resolves a *reference* from the process environment at the last responsible moment (§6.1).
+**Incident Containment Status (COMPLETED):**
+1. **Revocation:** The exposed OpenRouter key was revoked at the provider immediately and replaced with a newly generated key.
+2. **Untracked:** `.env` has been removed from git cache tracking (`git rm --cached .env`) and `.gitignore` updated to ignore `.env` / `*.env`.
+3. **Standing rule going forward:** No credential is ever read from a file in the repository tree. The adapter resolves a *reference* from the process environment at the last responsible moment (§6.1).
 
 ---
 
@@ -518,8 +504,8 @@ The architecture above is the **destination**. Beta is a waypoint on the way to 
 
 ### Workstream A — incident and reproducible baseline
 
-**A1. Credential containment**  
-Revoke, investigate, purge history, rotate, add scanners and safe examples.
+**A1. Credential containment (COMPLETED)**  
+Exposed key revoked at provider, `.env` untracked from repository, and `.gitignore` updated.
 
 **A2. Atomic clean-tree integration**  
 Integrate governance code/tests deliberately; disentangle unrelated commit content where practical; require clean-clone CI.
@@ -752,7 +738,7 @@ Rev 1 described the destination without a first step. This section is the on-ram
 
 | Seq | Work | Band | Blocks | Gate |
 |---:|---|---:|---|---|
-| 1 | SEC-01 credential incident | 0.5 d | everything | R0 |
+| 1 | SEC-01 credential incident (COMPLETED) | 0 d | — | R0 |
 | 2 | REL-01 clean atomic HEAD | 0.5 d | everything | R1 |
 | 3 | §4.1 contract-gate enforcement + registry repair | 0.5 d | R10 | R1 |
 | 4 | ADRs 1–10 (§10) written and accepted | 2 d | B, C, D | — |
@@ -765,21 +751,18 @@ Rev 1 described the destination without a first step. This section is the on-ram
 | 11 | Dogfood ×3 through the sole product path | 3 d | release | R9 |
 | 12 | Contract closure and Beta tag | 1 d | — | R10 |
 
-Sequence 1–3 is one day and unblocks everything; treat it as a single sitting. Items 5–9 may run in parallel across owners **only after** item 4, and they must land through one protected branch.
+Sequence 2–3 is one day and unblocks everything; treat it as a single sitting. Items 5–9 may run in parallel across owners **only after** item 4, and they must land through one protected branch.
 
 **Ownership.** With the current team, one person is Responsible for each numbered item, the Tech Lead is Accountable for all of them, and the Project Lead is the sole approver of Gates R9 and R10. Explicitly: **the person who wrote a control may not sign off its gate.** For item 11 the independent reviewer must be someone who did not implement items 5–9 — if the team is too small for that, the reviewer is the Project Lead and that fact is recorded in the evidence bundle rather than glossed.
 
-**The first five commands.** Run them in this order, before writing any code:
+**The first four commands.** Run them in this order, before writing any code:
 
 ```bash
-# 1. Revoke the key at the provider first (browser, not shell). Then:
-git rm --cached .env && printf '.env\n' >> .gitignore
-
-# 2. Prove the branch is not held together by one machine's working tree
+# 1. Prove the branch is not held together by one machine's working tree
 git clone . /tmp/vg-clean && cd /tmp/vg-clean && python3 -m unittest discover -s test
 #    Expect: ModuleNotFoundError on runtime.governance.approvals. That failure IS finding REL-01.
 
-# 3. Commit lane SB's orphaned governance work, then repeat step 2 until green
+# 2. Commit lane SB's orphaned governance work, then repeat step 1 until green
 git add vanguard/packages/runtime/governance/ test/runtime/test_approval_flow.py \
         test/broken/fixtures/governance/ test/broken/manifest.json
 

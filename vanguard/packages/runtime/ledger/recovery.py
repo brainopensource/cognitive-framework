@@ -110,8 +110,8 @@ class RecoveryScanner:
         # Write terminal record outside the dying process (T3.6).
         terminal_event_kind = "RunRecovered" if action == "recovered" else "RunAborted"
         terminal_seq_str = str(last_seq_int + 1)
-        import uuid
-        terminal_event_id = f"018f{uuid.uuid4().hex[4:12]}-7000-8000-{uuid.uuid4().hex[16:28]}"
+        from ...domain.primitives.primitives import uuidv7
+        terminal_event_id = uuidv7()
 
         payload = {
             "kind": terminal_event_kind,

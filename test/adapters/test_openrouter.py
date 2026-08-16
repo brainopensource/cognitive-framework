@@ -393,6 +393,79 @@ class OpenRouterModelContract(unittest.TestCase):
         prop_tokens = estimate_proposal_tokens({"text": "done", "toolCalls": []})
         self.assertGreater(prop_tokens, 0)
 
+    def test_streaming_sse_deltas_assembled_correctly(self) -> None:
+        sse_payload = (
+            b"data: {\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Hello \"}}]}\n\n"
+            b"data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"world!\"}}]}\n\n"
+            b"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":12,\"completion_tokens\":4,\"total_tokens\":16}}\n\n"
+            b"data: [DONE]\n\n"
+        )
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, sse_payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=True,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "Hello world!")
+        self.assertIn("usage", result.value)
+        self.assertEqual(result.value["usage"]["prompt_tokens"], 12)
+        self.assertEqual(result.value["usage"]["completion_tokens"], 4)
+        self.assertIn("usd_micros", result.value["usage"])
+        self.assertTrue(result.value["usage"]["pricing_known"])
+
+    def test_streaming_tool_calls_assembled_across_chunks(self) -> None:
+        sse_payload = (
+            b"data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"function\":{\"name\":\"fs.read\",\"arguments\":\"{\\\"path\\\":\"}}]}}]}\n\n"
+            b"data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"\\\"main.py\\\"}\"}}]}}]}\n\n"
+            b"data: {\"choices\":[],\"usage\":{\"prompt_tokens\":20,\"completion_tokens\":10,\"total_tokens\":30}}\n\n"
+            b"data: [DONE]\n\n"
+        )
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, sse_payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=True,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(len(result.value["toolCalls"]), 1)
+        tool_call = result.value["toolCalls"][0]
+        self.assertEqual(tool_call["name"], "fs.read")
+        self.assertEqual(tool_call["arguments"], {"path": "main.py"})
+
+    def test_unknown_model_pricing_marked_explicitly(self) -> None:
+        payload = json.dumps({
+            "choices": [{"message": {"role": "assistant", "content": "custom model reply"}}],
+            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
+        }).encode("utf-8")
+        port = OpenRouterModel(
+            model="custom/unknown-model-xyz",
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=False,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertFalse(result.value["usage"]["pricing_known"])
+        self.assertFalse(result.value["pricing_known"])
+        self.assertGreaterEqual(result.value["usage"]["usd_micros"], 0)
+
+    def test_malformed_sse_stream_fails_closed(self) -> None:
+        malformed_sse = b"data: {corrupted json line\n\ndata: [DONE]\n\n"
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, malformed_sse),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=True,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertIn("malformed", result.error.message.lower())
+
     @unittest.skipUnless(
         os.environ.get("OPENROUTER_API_KEY"),
         "live OpenRouter skipped: key unset",
@@ -406,9 +479,11 @@ class OpenRouterModelContract(unittest.TestCase):
         if result.ok:
             self.assertIn("usage", result.value)
             self.assertIn("cost_usd", result.value)
+            self.assertIn("usd_micros", result.value)
         if result.error is not None:
             self.assertNotIn(os.environ["OPENROUTER_API_KEY"], result.error.message)
 
 
 if __name__ == "__main__":
     unittest.main()
+

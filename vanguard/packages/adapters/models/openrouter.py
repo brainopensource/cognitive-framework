@@ -27,7 +27,10 @@ __all__ = [
     "DEFAULT_MODEL",
     "MODEL_PRICING",
     "DEFAULT_MODEL_PRICING",
+    "MODEL_PRICING_MICROS",
+    "DEFAULT_MODEL_PRICING_MICROS",
     "calculate_cost",
+    "calculate_cost_micros",
     "estimate_tokens",
     "estimate_context_tokens",
     "estimate_proposal_tokens",
@@ -52,6 +55,22 @@ MODEL_PRICING: dict[str, tuple[float, float, float]] = {
     "meta-llama/llama-3.3-70b-instruct": (0.12, 0.30, 0.03),
 }
 DEFAULT_MODEL_PRICING: tuple[float, float, float] = (0.15, 0.60, 0.075)
+
+# Integer USD micros per 1,000,000 tokens: (prompt_micros_per_1m, completion_micros_per_1m, cached_prompt_micros_per_1m)
+MODEL_PRICING_MICROS: dict[str, tuple[int, int, int]] = {
+    "openai/gpt-4o-mini": (150_000, 600_000, 75_000),
+    "openai/gpt-4o": (2_500_000, 10_000_000, 1_250_000),
+    "anthropic/claude-3.5-sonnet": (3_000_000, 15_000_000, 300_000),
+    "anthropic/claude-3-5-sonnet": (3_000_000, 15_000_000, 300_000),
+    "anthropic/claude-3.5-haiku": (800_000, 4_000_000, 80_000),
+    "anthropic/claude-3-5-haiku": (800_000, 4_000_000, 80_000),
+    "google/gemini-2.0-flash-001": (100_000, 400_000, 25_000),
+    "google/gemini-flash-1.5": (75_000, 300_000, 18_750),
+    "deepseek/deepseek-chat": (140_000, 280_000, 14_000),
+    "deepseek/deepseek-r1": (550_000, 2_190_000, 140_000),
+    "meta-llama/llama-3.3-70b-instruct": (120_000, 300_000, 30_000),
+}
+DEFAULT_MODEL_PRICING_MICROS: tuple[int, int, int] = (150_000, 600_000, 75_000)
 
 Transport = Callable[
     [str, dict[str, str], bytes],
@@ -125,6 +144,28 @@ def calculate_cost(
         + (completion_tokens * completion_price)
     ) / 1_000_000.0
     return round(cost, 8)
+
+
+def calculate_cost_micros(
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    cached_tokens: int = 0,
+    pricing_table_micros: Mapping[str, tuple[int, int, int]] | None = None,
+) -> tuple[int, bool]:
+    """Calculate USD micros and whether pricing was explicitly known."""
+    table = pricing_table_micros if pricing_table_micros is not None else MODEL_PRICING_MICROS
+    pricing_known = model in table
+    pricing = table.get(model, DEFAULT_MODEL_PRICING_MICROS)
+    prompt_price, completion_price, cached_price = pricing
+    uncached_prompt = max(0, prompt_tokens - cached_tokens)
+    micros = (
+        (uncached_prompt * prompt_price)
+        + (cached_tokens * cached_price)
+        + (completion_tokens * completion_price)
+    ) // 1_000_000
+    return max(0, micros), pricing_known
+
 
 
 def _http_post(
@@ -223,6 +264,110 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
     return {"text": text, "toolCalls": tool_calls}
 
 
+def _parse_sse_stream(
+    raw: bytes | str | Sequence[str] | Sequence[bytes],
+    *,
+    start_monotonic: float | None = None,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None, int]:
+    """Parse Server-Sent Events (SSE) stream from OpenRouter / OpenAI.
+
+    Returns (proposal, raw_usage, ttft_millis).
+    """
+    if isinstance(raw, bytes):
+        text = raw.decode("utf-8", "replace")
+    elif isinstance(raw, str):
+        text = raw
+    else:
+        text = "\n".join(
+            chunk.decode("utf-8", "replace") if isinstance(chunk, bytes) else str(chunk)
+            for chunk in raw
+        )
+
+    text_parts: list[str] = []
+    tool_calls_acc: dict[int, dict[str, Any]] = {}
+    raw_usage: dict[str, Any] | None = None
+    first_token_time: float | None = None
+
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(":"):
+            continue
+        if not line.startswith("data:"):
+            continue
+        data_str = line[5:].strip()
+        if data_str == "[DONE]":
+            break
+        try:
+            parsed = json.loads(data_str)
+        except json.JSONDecodeError:
+            return None, None, 0
+
+        if not isinstance(parsed, Mapping):
+            continue
+
+        if "usage" in parsed and isinstance(parsed["usage"], Mapping):
+            raw_usage = dict(parsed["usage"])
+
+        choices = parsed.get("choices")
+        if isinstance(choices, list) and choices:
+            choice = choices[0]
+            if isinstance(choice, Mapping):
+                delta = choice.get("delta")
+                if isinstance(delta, Mapping):
+                    content = delta.get("content")
+                    if isinstance(content, str) and content:
+                        if first_token_time is None and start_monotonic is not None:
+                            first_token_time = time.monotonic()
+                        text_parts.append(content)
+
+                    tool_calls = delta.get("tool_calls")
+                    if isinstance(tool_calls, list):
+                        for tc in tool_calls:
+                            if not isinstance(tc, Mapping):
+                                continue
+                            idx = int(tc.get("index", 0))
+                            if idx not in tool_calls_acc:
+                                tool_calls_acc[idx] = {
+                                    "id": str(tc.get("id", "")),
+                                    "name": "",
+                                    "arguments_str": "",
+                                }
+                            if tc.get("id"):
+                                tool_calls_acc[idx]["id"] = str(tc["id"])
+                            fn = tc.get("function")
+                            if isinstance(fn, Mapping):
+                                if fn.get("name"):
+                                    tool_calls_acc[idx]["name"] += str(fn["name"])
+                                if fn.get("arguments"):
+                                    tool_calls_acc[idx]["arguments_str"] += str(fn["arguments"])
+
+    ttft_millis = 0
+    if first_token_time is not None and start_monotonic is not None:
+        ttft_millis = max(1, int((first_token_time - start_monotonic) * 1000))
+
+    tool_calls_list: list[dict[str, Any]] = []
+    for idx in sorted(tool_calls_acc):
+        tc = tool_calls_acc[idx]
+        args_str = tc["arguments_str"]
+        args_obj: Any = {}
+        if args_str:
+            try:
+                args_obj = json.loads(args_str)
+            except json.JSONDecodeError:
+                args_obj = {"raw": args_str}
+        tool_calls_list.append({
+            "id": tc["id"],
+            "name": tc["name"],
+            "arguments": args_obj if isinstance(args_obj, Mapping) else {},
+        })
+
+    proposal_text = "".join(text_parts)
+    if not proposal_text and not tool_calls_list and raw_usage is None:
+        return None, None, 0
+
+    return {"text": proposal_text, "toolCalls": tool_calls_list}, raw_usage, ttft_millis
+
+
 class OpenRouterModel:
     """Live or cassette-backed ModelPort. Trust-spine tests must not construct this."""
 
@@ -242,6 +387,8 @@ class OpenRouterModel:
         jitter: bool = True,
         sleeper: Callable[[float], None] = time.sleep,
         pricing_table: Mapping[str, tuple[float, float, float]] | None = None,
+        pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
+        stream: bool = True,
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
@@ -255,6 +402,8 @@ class OpenRouterModel:
         self._jitter = jitter
         self._sleeper = sleeper
         self._pricing_table = pricing_table
+        self._pricing_micros_table = pricing_micros_table
+        self._stream = stream
         self._player = (
             CassettePlayer(cassette, match_mode="tape")
             if cassette is not None and mode == "replay"
@@ -322,7 +471,6 @@ class OpenRouterModel:
 
             if status in retry_statuses:
                 if attempts < max_retries:
-                    # Check Retry-After header
                     retry_after_val = None
                     for k, v in resp_headers.items():
                         if k.lower() == "retry-after":
@@ -390,6 +538,9 @@ class OpenRouterModel:
             "temperature": sampling.get("temperature", 0.0),
             "max_tokens": sampling.get("maxTokens", 256),
         }
+        if self._stream:
+            body_obj["stream"] = True
+            body_obj["stream_options"] = {"include_usage": True}
         tool_payload = _tools_payload(tools)
         if tool_payload:
             body_obj["tools"] = tool_payload
@@ -399,30 +550,45 @@ class OpenRouterModel:
             "Authorization": f"Bearer {secret}",
         }
 
+        start_time = time.monotonic()
         transport_result = self._execute_transport(headers, payload, secret)
         if isinstance(transport_result, Result):
             return transport_result
         status, resp_headers, raw = transport_result
 
-        decoded = raw.decode("utf-8", "replace")
-        try:
-            parsed = json.loads(decoded)
-        except json.JSONDecodeError:
-            return Result.fail(
-                kind="instrument_error",
-                message="provider response was not JSON",
-            )
-        if not isinstance(parsed, Mapping):
-            return Result.fail(kind="instrument_error", message="provider response was not an object")
-        proposal = _parse_proposal(parsed)
-        if proposal is None:
-            return Result.fail(
-                kind="instrument_error",
-                message="provider response did not contain a chat completion",
-            )
+        raw_usage = None
+        ttft_millis = 0
+        proposal = None
+
+        is_sse = b"data:" in raw or (isinstance(raw, str) and "data:" in raw)
+        if is_sse:
+            proposal, raw_usage, ttft_millis = _parse_sse_stream(raw, start_monotonic=start_time)
+            if proposal is None:
+                return Result.fail(
+                    kind="instrument_error",
+                    message="provider streaming response was malformed or empty",
+                )
+        else:
+            decoded = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
+            try:
+                parsed = json.loads(decoded)
+            except json.JSONDecodeError:
+                return Result.fail(
+                    kind="instrument_error",
+                    message="provider response was not JSON",
+                )
+            if not isinstance(parsed, Mapping):
+                return Result.fail(kind="instrument_error", message="provider response was not an object")
+            proposal = _parse_proposal(parsed)
+            if proposal is None:
+                return Result.fail(
+                    kind="instrument_error",
+                    message="provider response did not contain a chat completion",
+                )
+            if isinstance(parsed.get("usage"), Mapping):
+                raw_usage = dict(parsed["usage"])
 
         # Token usage and priced accounting
-        raw_usage = parsed.get("usage") if isinstance(parsed.get("usage"), Mapping) else None
         if raw_usage is not None:
             prompt_tokens = int(raw_usage.get("prompt_tokens") or 0)
             completion_tokens = int(raw_usage.get("completion_tokens") or 0)
@@ -454,6 +620,13 @@ class OpenRouterModel:
             cached_tokens=cached_tokens,
             pricing_table=self._pricing_table,
         )
+        usd_micros, pricing_known = calculate_cost_micros(
+            self._model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            cached_tokens=cached_tokens,
+            pricing_table_micros=self._pricing_micros_table,
+        )
 
         proposal["usage"] = {
             "prompt_tokens": prompt_tokens,
@@ -461,8 +634,13 @@ class OpenRouterModel:
             "cached_tokens": cached_tokens,
             "total_tokens": total_tokens,
             "cost_usd": cost_usd,
+            "usd_micros": usd_micros,
+            "pricing_known": pricing_known,
+            "ttft_millis": ttft_millis,
         }
         proposal["cost_usd"] = cost_usd
+        proposal["usd_micros"] = usd_micros
+        proposal["pricing_known"] = pricing_known
 
         if self._recorder is not None:
             self._recorder.record_interaction(context, tools, sampling, proposal)
@@ -471,3 +649,4 @@ class OpenRouterModel:
 
 # Canonical alias for ModelPort adapter naming
 OpenRouterModelAdapter = OpenRouterModel
+

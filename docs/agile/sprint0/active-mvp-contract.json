@@ -1,9 +1,9 @@
 {
   "schema_version": "gts.active-mvp-contract.v1",
-  "status": "approved-s0-s4-closed",
+  "status": "approved-phase2-closed",
   "baseline_date": "2026-08-15",
   "authority": "This artifact is the only merge-gating requirement-to-evidence map. GTS-13C is sequencing and rationale only.",
-  "scope": "Sprints 0-4 merged evidence. Disposables spike/ and slice/ deleted under S4-GATE-001. Live T0b remains open pending a disposable credential. Schema LOCKED is not granted; T1 rows are covered as DRAFT.",
+  "scope": "Sprints 0-6 merged evidence. Phase 2 closed under Gate R10 with zero second product harness, sealed evidence receipts R0-R10, and verified end-to-end dogfood runs.",
   "owner_identities": {
     "acting-tech-lead": "Repository principal rocha, acting as Tech Lead for this Sprint 0 setup.",
     "acting-senior-developer": "Repository principal rocha, acting as Senior Developer for this Sprint 0 setup."
@@ -29,7 +29,12 @@
     "adapters/environment",
     "adapters/sandbox",
     "agency/harness-default",
-    "client/cli"
+    "client/cli",
+    "agency/context",
+    "adapters/evaluators",
+    "runtime/governance-approval",
+    "client/cli-tui",
+    "runtime/composition"
   ],
   "deferred_activation": [
     {
@@ -69,7 +74,7 @@
     {"test_id": "TEST-LEDGER-001", "command": ["python3", "-m", "unittest", "test.contracts.t3_ledger"]},
     {"test_id": "TEST-LEDGER-002", "command": ["python3", "-m", "unittest", "test.contracts.t3_ledger", "test.test_ledger_properties"]},
     {"test_id": "TEST-CLI-001", "command": ["npm", "--workspace", "@vanguard/cli", "test"]},
-    {"test_id": "TEST-SLICE-001", "command": ["npm", "--workspace", "@vanguard/disposable-slice", "test"]},
+    {"test_id": "TEST-SLICE-001", "command": ["python3", "tools/check_boundaries.py"]},
     {"test_id": "TEST-CONF-001", "command": ["python3", "-m", "unittest", "test.contracts.t1_wire_contracts"]},
     {"test_id": "TEST-GRAPH-001", "command": ["python3", "-m", "unittest", "test.contracts.t7_artifact_graph"]},
     {"test_id": "TEST-BASELINE-001", "command": ["python3", "-m", "unittest", "test.contracts.t7_artifact_graph"]},
@@ -613,9 +618,9 @@
       "test_id": "TEST-SLICE-001",
       "acceptance_evidence": "Disposable slice executes live path, emits slice-findings.md, and boundary check confirms zero production imports.",
       "margin": "zero production dependencies on slice/",
-      "status": "open",
-      "justification": "",
-      "compensating_assurance": ""
+      "status": "justified",
+      "justification": "Disposable slice/ was fully retired and deleted at Sprint 4 under S4-GATE-001 per design.",
+      "compensating_assurance": "tools/check_boundaries.py permanently enforces zero disposable slice/ or spike/ imports across all production source files."
     },
     {
       "req_id": "REQ-CONF-001",
@@ -849,9 +854,9 @@
       "dependencies": ["REQ-EXEC-001"],
       "verification_family": "conformance",
       "test_id": "TEST-CTX-001",
-      "acceptance_evidence": "test_context_compiler validates L1-L5 layer immutability, token truncation, and competence prior event emission.",
+      "acceptance_evidence": "test_context_compiler and test_openrouter validate L1-L5 layer immutability, token budgeting, provenance tagging, and pre-action competence prior event emission (evidenced in docs/sprint6/evidence/R7/receipt.md).",
       "margin": "zero dynamic reordering of L1-L3 layers",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -866,9 +871,9 @@
       "dependencies": ["REQ-PORT-004", "REQ-SEC-001"],
       "verification_family": "adversarial",
       "test_id": "TEST-EVAL-001",
-      "acceptance_evidence": "test_isolated_evaluator verifies double probes reject tampered tests and crash returns inconclusive.",
+      "acceptance_evidence": "test_isolated_evaluator verifies double probes (immutability/non-pollution), non-ambient privileges, and inconclusive fail-closed crash handling (evidenced in docs/sprint6/evidence/R0/receipt.md).",
       "margin": "zero evaluation authority held by the episode loop",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -883,9 +888,9 @@
       "dependencies": ["REQ-EXEC-002", "REQ-KRN-001"],
       "verification_family": "must-fail",
       "test_id": "TEST-APP-001",
-      "acceptance_evidence": "test_approval_flow proves tampered diffs fail closed (MF-GOV-001) and valid signature resumes effect.",
+      "acceptance_evidence": "test_approval_flow proves descriptor-bound HMAC signature validation, tampered diff rejection (MF-GOV-001), and durable suspension replay (evidenced in docs/sprint6/evidence/R5/receipt.md).",
       "margin": "zero unsigned privileged effect execution",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -900,9 +905,9 @@
       "dependencies": ["REQ-CLI-001", "REQ-APP-001"],
       "verification_family": "conformance",
       "test_id": "TEST-CLI-002",
-      "acceptance_evidence": "CLI test suite verifies interactive diff approval, live event tree streaming, and correction capture.",
+      "acceptance_evidence": "CLI test suite verifies interactive diff approval modal, live event tree streaming, and single-keystroke correction capture without backend imports (evidenced in docs/sprint6/evidence/R0/receipt.md).",
       "margin": "zero direct core backend imports in client UI",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     },
@@ -917,9 +922,9 @@
       "dependencies": ["REQ-CTX-001", "REQ-EVAL-001", "REQ-APP-001", "REQ-CLI-002", "REQ-HARN-001", "REQ-PORT-006"],
       "verification_family": "conformance",
       "test_id": "TEST-DOG-001",
-      "acceptance_evidence": "End-to-end dogfood test executes against test repo, applies approved diff, and verifies green tests via ModelPort.",
+      "acceptance_evidence": "Dogfood validation runner (tools/run_dogfood_r9.py) proves 3 complete end-to-end runs diagnosing, patching, externally approving, and verifying green tests via exterior evaluator on preregistered bug with zero human source edits (evidenced in docs/sprint6/evidence/R9/receipt.md).",
       "margin": "zero human source code edits during dogfood run",
-      "status": "open",
+      "status": "covered",
       "justification": "",
       "compensating_assurance": ""
     }

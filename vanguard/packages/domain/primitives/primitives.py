@@ -20,7 +20,9 @@ the schema (see `SEMANTICS.md`, ADR candidates D1-001 and D1-002):
 
 from __future__ import annotations
 
+import random
 import re
+import time
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
@@ -37,6 +39,7 @@ __all__ = [
     "int_string_to_int",
     "int_string_from_int",
     "parse_mapping",
+    "uuidv7",
 ]
 
 
@@ -241,3 +244,14 @@ def int_string_from_int(kind: str, value: int) -> Primitive:
 def parse_mapping(kinds: Mapping[str, str], record: Mapping[str, Any]) -> dict[str, Primitive]:
     """Parse a whole record of primitives, failing on the first bad field."""
     return {field: parse(kind, record[field]) for field, kind in kinds.items()}
+
+
+def uuidv7(timestamp_ms: int | None = None) -> str:
+    """Generate an RFC 9562 UUIDv7 string with 48-bit timestamp."""
+    millis = timestamp_ms if timestamp_ms is not None else int(time.time() * 1000)
+    rand_a = random.getrandbits(12)
+    rand_b = random.getrandbits(62)
+    val = (millis << 80) | (0x7 << 76) | (rand_a << 64) | (0x2 << 62) | rand_b
+    hex_str = f"{val:032x}"
+    return f"{hex_str[:8]}-{hex_str[8:12]}-{hex_str[12:16]}-{hex_str[16:20]}-{hex_str[20:]}"
+

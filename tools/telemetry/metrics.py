@@ -141,6 +141,7 @@ class TokenCostSummary:
     cached_tokens: int = 0
     total_tokens: int = 0
     total_cost_usd: float = 0.0
+    total_usd_micros: int = 0
     by_model: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def add_usage(
@@ -149,6 +150,7 @@ class TokenCostSummary:
         completion_tokens: int,
         cached_tokens: int = 0,
         cost_usd: float = 0.0,
+        usd_micros: int = 0,
         model: str = "default",
     ) -> None:
         self.prompt_tokens += int(prompt_tokens)
@@ -156,6 +158,8 @@ class TokenCostSummary:
         self.cached_tokens += int(cached_tokens)
         self.total_tokens += int(prompt_tokens + completion_tokens)
         self.total_cost_usd = round(self.total_cost_usd + float(cost_usd), 8)
+        calculated_micros = int(usd_micros) if usd_micros > 0 else int(round(cost_usd * 1_000_000))
+        self.total_usd_micros += calculated_micros
 
         if model not in self.by_model:
             self.by_model[model] = {
@@ -164,6 +168,7 @@ class TokenCostSummary:
                 "cached_tokens": 0,
                 "total_tokens": 0,
                 "cost_usd": 0.0,
+                "usd_micros": 0,
             }
         m = self.by_model[model]
         m["prompt_tokens"] += int(prompt_tokens)
@@ -171,6 +176,7 @@ class TokenCostSummary:
         m["cached_tokens"] += int(cached_tokens)
         m["total_tokens"] += int(prompt_tokens + completion_tokens)
         m["cost_usd"] = round(m["cost_usd"] + float(cost_usd), 8)
+        m["usd_micros"] += calculated_micros
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -179,6 +185,7 @@ class TokenCostSummary:
             "cachedTokens": self.cached_tokens,
             "totalTokens": self.total_tokens,
             "totalCostUsd": self.total_cost_usd,
+            "totalUsdMicros": self.total_usd_micros,
             "byModel": {k: dict(v) for k, v in sorted(self.by_model.items())},
         }
 
@@ -190,6 +197,7 @@ class TelemetryReport:
     run_id: str
     task_id: str = ""
     status: str = "completed"
+    data_source: str = "live"
     turn_count: int = 0
     latency: LatencySummary = field(default_factory=LatencySummary)
     effect_overhead: EffectOverheadSummary = field(default_factory=EffectOverheadSummary)
@@ -204,6 +212,7 @@ class TelemetryReport:
             "runId": self.run_id,
             "taskId": self.task_id,
             "status": self.status,
+            "dataSource": self.data_source,
             "turnCount": self.turn_count,
             "startedAt": self.started_at,
             "completedAt": self.completed_at,
@@ -216,3 +225,4 @@ class TelemetryReport:
         if self.custom_metrics:
             res["customMetrics"] = dict(self.custom_metrics)
         return res
+

@@ -354,6 +354,70 @@
         "unbound-approval"
       ],
       "expected_failure": "tampered approval reached privileged effect"
+    },
+    {
+      "test_id": "MF-CTX-001",
+      "control": [
+        "python3",
+        "test/broken/fixtures/context/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/context/scenario.py",
+        "--variant",
+        "bypass-compiler"
+      ],
+      "expected_failure": "compiled context bypassed"
+    },
+    {
+      "test_id": "MF-CTX-002",
+      "control": [
+        "python3",
+        "test/broken/fixtures/context/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/context/scenario.py",
+        "--variant",
+        "dropped-observation"
+      ],
+      "expected_failure": "tool observation absent on turn 2"
+    },
+    {
+      "test_id": "MF-SEC-002",
+      "control": [
+        "python3",
+        "test/broken/fixtures/secrets/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/secrets/scenario.py",
+        "--variant",
+        "leaked-secret"
+      ],
+      "expected_failure": "secret in envelope"
+    },
+    {
+      "test_id": "MF-TEL-001",
+      "control": [
+        "python3",
+        "test/broken/fixtures/telemetry/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/telemetry/scenario.py",
+        "--variant",
+        "synthetic-in-live"
+      ],
+      "expected_failure": "synthetic timing in a live report"
     }
   ]
 }

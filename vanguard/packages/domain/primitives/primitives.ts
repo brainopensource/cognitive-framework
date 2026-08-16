@@ -219,3 +219,21 @@ export function intStringFromInt(kind: string, value: bigint): IntString {
   }
   return parse<IntString>(kind, value.toString());
 }
+
+/** Generate an RFC 9562 UUIDv7 string with 48-bit timestamp. */
+export function uuidv7(timestampMs?: number): string {
+  const millis = timestampMs ?? Date.now();
+  const randA = Math.floor(Math.random() * 0x1000);
+  const randB1 = Math.floor(Math.random() * 0x4000);
+  const randB2 = Math.floor(Math.random() * 0x100000000);
+  const randB3 = Math.floor(Math.random() * 0x10000);
+
+  const hexMillis = millis.toString(16).padStart(12, "0");
+  const hexRandA = randA.toString(16).padStart(3, "0");
+  const hexRandB1 = (0x8000 | randB1).toString(16).padStart(4, "0");
+  const hexRandB2 = randB2.toString(16).padStart(8, "0");
+  const hexRandB3 = randB3.toString(16).padStart(4, "0");
+
+  return `${hexMillis.slice(0, 8)}-${hexMillis.slice(8, 12)}-7${hexRandA}-${hexRandB1}-${hexRandB2}${hexRandB3}`;
+}
+

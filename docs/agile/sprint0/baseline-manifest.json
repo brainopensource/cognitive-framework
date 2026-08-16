@@ -42,13 +42,26 @@
           "sealed_digest": "sha256:4faac772e1aa62d140579f474e7bd627505e0bb6d810dae245a42c093eff6379"
         }
       ]
+    },
+    {
+      "sealed_at": "2026-08-15",
+      "approval_event": "GATE-R10-PHASE2-CLOSURE",
+      "authorising_commit": "pending",
+      "reason": "Phase 2 closed under Gate R10: Wave 2 components merged (agency/context, adapters/evaluators, runtime/governance-approval, client/cli-tui, runtime/composition), requirements marked covered with sealed evidence receipts, REQ-SLICE-001 closed as justified with boundary check compensating assurance.",
+      "files": [
+        {
+          "file": "docs/sprint0/active-mvp-contract.json",
+          "superseded_digest": "sha256:4eec41c99998e74787134946a8f0f846827d0b9f2747c3ce7ab6d1466cca05df",
+          "sealed_digest": "sha256:f74b2105520bae86f389414b5e3d36248c4aee9aa41be5c6acbd0c87ed44c09f"
+        }
+      ]
     }
   ],
   "files": {
     ".github/pull_request_template.md": "sha256:00363c6ae14a5fb8213b119d90e1249f1ea86e586b2af0ccc00d58fc22d10128",
     ".github/workflows/ci.yml": "sha256:3d6d1aa9afd2a9671f5b997a78d6e4b127687187bfa9c9a4b6c5bbc800231d19",
     "docs/sprint0/README.md": "sha256:b144072b28702e3d8ba4a8ca5bae52fe0380de1c0f57e31df9c85a3c1ba63418",
-    "docs/sprint0/active-mvp-contract.json": "sha256:4eec41c99998e74787134946a8f0f846827d0b9f2747c3ce7ab6d1466cca05df",
+    "docs/sprint0/active-mvp-contract.json": "sha256:f74b2105520bae86f389414b5e3d36248c4aee9aa41be5c6acbd0c87ed44c09f",
     "docs/sprint0/schema-archaeology/field-inventory.md": "sha256:18030909d97563848ad29d96aadd4ed25b1b8b69beb9945c175d16ec2674f2e9",
     "docs/sprint0/schema-archaeology/independent-review-2026-08-15.md": "sha256:e419a17156d4f8f5b4a1b1064232f5ddd1389cb62abd4ed3e611fc4fe196fee7",
     "docs/sprint0/schema-archaeology/reconstruction-gaps.md": "sha256:9cad48b29b0d777b0e6a30796ef24bead302ef9fd3e86d995de68864e2df1ba1",

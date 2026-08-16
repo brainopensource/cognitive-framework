@@ -66,6 +66,7 @@ from ..domain.artifacts.manifest import (
     parse_manifest,
 )
 from ..domain.ledger.events import EventEnvelope
+from ..domain.primitives.primitives import uuidv7
 from ..kernel import (
     Constraints,
     EffectRequest,
@@ -298,8 +299,15 @@ class _EnvironmentEffect:
         value = result.value
         digest = getattr(value, "result_digest", None) or getattr(
             value, "metadata", {}).get("digest") or "sha256:" + "0" * 64
+        detail = ""
+        if hasattr(value, "content") and value.content is not None:
+            detail = str(value.content)
+        elif hasattr(value, "matches") and value.matches is not None:
+            detail = json.dumps(value.matches)
+        elif hasattr(value, "files") and value.files is not None:
+            detail = json.dumps(value.files)
         return AdapterOutcome("ok", Occurrence.OCCURRED, {"usd_micros": 1},
-                              result_digest=digest)
+                              result_digest=digest, detail=detail)
 
 
 def _observation_of(request: Any) -> ObservationRequest:
@@ -368,7 +376,7 @@ class LedgerBridge:
     def _write(self, event: Event, *, role: str) -> None:
         self._seq += 1
         envelope = EventEnvelope(
-            event_id=f"018f3a2b-7c4d-7e1f-9a2b-{self._seq:012x}",
+            event_id=uuidv7(),
             scope="episode",
             seq=str(self._seq),
             occurred_at=event.at,
@@ -793,17 +801,20 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
     for request, result in witness.calls:
         if result.failure is not FailurePath.OK or result.outcome is None:
             continue
+        outcome_detail = result.detail or getattr(result.outcome, "detail", "")
         receipts.append(Receipt(
             verb=request.action,
             descriptor_digest=result.descriptor_digest or "",
             outcome=result.outcome.status,
-            detail=result.detail,
+            detail=outcome_detail,
         ))
+        text = f"{request.action} -> {result.outcome.status} ({result.outcome.result_digest})"
+        if outcome_detail:
+            text += f"\n{outcome_detail}"
         operator.note(
             label=f"{request.action}-{len(receipts)}",
             source=request.action,
-            text=f"{request.action} -> {result.outcome.status} "
-                 f"({result.outcome.result_digest})",
+            text=text,
         )
     witness.calls.clear()
 

@@ -24,9 +24,17 @@ __all__ = ["TelemetryCollector"]
 class TelemetryCollector:
     """Non-invasive telemetry collector accumulating latency, overhead, tokens and costs."""
 
-    def __init__(self, run_id: str = "run_default", task_id: str = "") -> None:
+    def __init__(
+        self,
+        run_id: str = "run_default",
+        task_id: str = "",
+        data_source: str = "live",
+    ) -> None:
+        if data_source not in {"live", "cassette", "synthetic"}:
+            raise ValueError(f"invalid data_source: {data_source!r}; must be live, cassette, or synthetic")
         self.run_id = run_id
         self.task_id = task_id
+        self.data_source = data_source
         self.turn_count = 0
         self.latency = LatencySummary()
         self.effect_overhead = EffectOverheadSummary()
@@ -45,8 +53,11 @@ class TelemetryCollector:
         ttft_ms: float,
         ttlt_ms: float = 0.0,
         turn_duration_ms: float = 0.0,
+        is_synthetic: bool = False,
     ) -> None:
         """Record turn latency to first token (TTFT) and total turn duration in ms."""
+        if is_synthetic and self.data_source == "live":
+            raise ValueError("synthetic timing forbidden in live telemetry report")
         self.turn_count += 1
         self.latency.add_turn(ttft_ms, ttlt_ms, turn_duration_ms)
 
@@ -57,8 +68,11 @@ class TelemetryCollector:
         exec_ms: float = 0.0,
         teardown_ms: float = 0.0,
         effect_kind: str = "",
+        is_synthetic: bool = False,
     ) -> None:
         """Record sandbox mount, double-probe, execution and teardown overhead in ms."""
+        if is_synthetic and self.data_source == "live":
+            raise ValueError("synthetic timing forbidden in live telemetry report")
         self.effect_overhead.add_effect(mount_ms, probe_ms, exec_ms, teardown_ms)
 
     def record_token_usage(
@@ -67,6 +81,7 @@ class TelemetryCollector:
         completion_tokens: int,
         cached_tokens: int = 0,
         cost_usd: float = 0.0,
+        usd_micros: int = 0,
         model: str = "default",
     ) -> None:
         """Record token usage and USD cost for a model interaction."""
@@ -75,10 +90,13 @@ class TelemetryCollector:
             completion_tokens=completion_tokens,
             cached_tokens=cached_tokens,
             cost_usd=cost_usd,
+            usd_micros=usd_micros,
             model=model,
         )
 
     def record_custom_metric(self, key: str, value: Any) -> None:
+        if self.data_source == "live" and (key == "synthetic" or getattr(value, "synthetic", False) is True):
+            raise ValueError("synthetic timing forbidden in live telemetry report")
         self._custom_metrics[key] = value
 
     def ingest_event(self, event: Any) -> None:
@@ -88,6 +106,10 @@ class TelemetryCollector:
             payload = event.get("payload", event)
         if not isinstance(payload, Mapping):
             return
+
+        # Fail closed if synthetic timing is injected into a live telemetry collector
+        if payload.get("synthetic") is True and self.data_source == "live":
+            raise ValueError("synthetic timing forbidden in live telemetry report")
 
         occurred_at = getattr(event, "occurred_at", "") or str(payload.get("occurredAt", ""))
         kind = payload.get("kind", "")
@@ -110,11 +132,14 @@ class TelemetryCollector:
                     completion_tokens=usage.get("completion_tokens") or usage.get("completionTokens") or 0,
                     cached_tokens=usage.get("cached_tokens") or usage.get("cachedTokens") or 0,
                     cost_usd=usage.get("cost_usd") or usage.get("costUsd") or proposal.get("cost_usd") or 0.0,
+                    usd_micros=usage.get("usd_micros") or usage.get("usdMicros") or 0,
                     model=payload.get("model", "default"),
                 )
             # Latency if recorded in event
             timing = payload.get("timing") or {}
             if isinstance(timing, Mapping):
+                if timing.get("synthetic") is True and self.data_source == "live":
+                    raise ValueError("synthetic timing forbidden in live telemetry report")
                 ttft = timing.get("ttftMs") or timing.get("ttft_ms") or 0.0
                 ttlt = timing.get("ttltMs") or timing.get("ttlt_ms") or 0.0
                 dur = timing.get("durationMs") or timing.get("duration_ms") or 0.0
@@ -124,6 +149,8 @@ class TelemetryCollector:
         elif kind in ("EffectStarted", "EffectCompleted", "EffectReconciled"):
             timing = payload.get("timing") or {}
             if isinstance(timing, Mapping):
+                if timing.get("synthetic") is True and self.data_source == "live":
+                    raise ValueError("synthetic timing forbidden in live telemetry report")
                 mount = timing.get("mountMs") or timing.get("mount_ms") or 0.0
                 probe = timing.get("probeMs") or timing.get("probe_ms") or 0.0
                 exec_time = timing.get("execMs") or timing.get("exec_ms") or 0.0
@@ -137,6 +164,7 @@ class TelemetryCollector:
             run_id=self.run_id,
             task_id=self.task_id,
             status=self.status,
+            data_source=self.data_source,
             turn_count=self.turn_count,
             latency=self.latency,
             effect_overhead=self.effect_overhead,
@@ -146,6 +174,7 @@ class TelemetryCollector:
             instrument_tuple=self._instrument_tuple.to_dict() if self._instrument_tuple else {},
             custom_metrics=self._custom_metrics,
         )
+
 
     def to_jsonl(self) -> str:
         """Format report as a single-line JSON string (JSON Lines)."""

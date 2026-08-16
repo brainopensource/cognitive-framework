@@ -117,6 +117,32 @@ class TelemetryCollectorTest(unittest.TestCase):
         self.assertEqual(report.latency.ttft_samples_ms, [150.0])
         self.assertEqual(report.effect_overhead.effect_count, 1)
 
+    def test_data_source_labeling_and_integer_micros(self) -> None:
+        collector = TelemetryCollector(run_id="run_cassette", data_source="cassette")
+        collector.record_token_usage(prompt_tokens=100, completion_tokens=50, cost_usd=0.00003, usd_micros=30)
+        report = collector.build_report()
+        self.assertEqual(report.data_source, "cassette")
+        report_dict = report.to_dict()
+        self.assertEqual(report_dict["dataSource"], "cassette")
+        self.assertEqual(report_dict["tokenCost"]["totalUsdMicros"], 30)
+
+    def test_live_collector_rejects_synthetic_timing(self) -> None:
+        collector = TelemetryCollector(run_id="run_live", data_source="live")
+        with self.assertRaises(ValueError) as ctx:
+            collector.record_turn_latency(ttft_ms=10.0, is_synthetic=True)
+        self.assertIn("synthetic timing forbidden in live", str(ctx.exception))
+
+        with self.assertRaises(ValueError) as ctx:
+            collector.ingest_event({
+                "payload": {
+                    "kind": "ProposalProduced",
+                    "synthetic": True,
+                    "timing": {"ttftMs": 5.0},
+                }
+            })
+        self.assertIn("synthetic timing forbidden in live", str(ctx.exception))
+
 
 if __name__ == "__main__":
     unittest.main()
+

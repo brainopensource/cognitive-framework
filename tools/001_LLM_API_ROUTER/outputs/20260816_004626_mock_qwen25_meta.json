@@ -1,0 +1,18 @@
+{
+  "timestamp": "20260816_004626",
+  "provider": "mock_catalog",
+  "model": "qwen25",
+  "requested_model": "qwen25",
+  "temperature": 0.2,
+  "prompt": "Write calculated_value = (A + B) * B\\nresultado = (A + B) + B\\nprint(f\"the value is {resultado:.2f}\")\\nTest Error: Expected multiplication!",
+  "latency_ms": 1,
+  "ttft_ms": 1,
+  "tokens": {
+    "prompt": 20,
+    "completion": 19,
+    "total": 39
+  },
+  "cost_usd_micros": 0,
+  "cost_usd": 0.0,
+  "response_file": "/home/rocha/Coding/Aether-D-System/tools/001_LLM_API_ROUTER/outputs/20260816_004626_mock_qwen25_response.md"
+}

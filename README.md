@@ -154,4 +154,11 @@ python3 tools/run_broken_tests.py
   - `model`: `gpt-4o` on `ModelRoute`
   - `api_key_env`: `"OPENAI_API_KEY"`
 
----
+## Ollama Guidelines
+
+  - **Tier 1 models**:
+    1. `llama3.2:3b`
+    2. `qwen2.5:1.5b`
+  - **Tier 2 models**:
+    3. `qwen3.6:27b`
+    4. `deepseek-r1:14b`

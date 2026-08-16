@@ -1,0 +1,57 @@
+{
+  "version": "vg.4",
+  "receipt_id": "rc-v0.4.1-beta-sealed",
+  "generated_at": "2026-08-16T03:54:00Z",
+  "status": "APPROVED",
+  "release_tag": "v0.4.1-beta",
+  "gates": {
+    "R0_security": {
+      "status": "PASS",
+      "proof": "tools/scan_secrets.py -> clean across tree, zero blocking secret patterns"
+    },
+    "R1_public_seams": {
+      "status": "PASS",
+      "proof": "schemas/v4/runtime_service.schema.json and approval_decision.schema.json validated; golden wire tests pass"
+    },
+    "R2_operator_approval": {
+      "status": "PASS",
+      "proof": "Ed25519 asymmetric signing authority verified; runtime is verify-only; test/governance/test_ed25519_approvals.py 5/5 pass"
+    },
+    "R3_model_translation": {
+      "status": "PASS",
+      "proof": "ProposalTranslator binds canonical resources and manifest actions; rejects model-minted capabilities"
+    },
+    "R4_lam_vertical_path": {
+      "status": "PASS",
+      "proof": "test/integration/test_lam_vertical_slice.py passes depth-1 multi-turn scenario without production fakes"
+    },
+    "R5_sandbox_perimeter": {
+      "status": "PASS",
+      "proof": "WorkerProtocol routes all verbs (fs.read, fs.search, fs.write, patch.apply, proc.exec) through rootless Bubblewrap"
+    },
+    "R6_ledger_recovery": {
+      "status": "PASS",
+      "proof": "test/integration/test_stream_reconnect.py and test/runtime/test_ledger_recovery.py pass without duplicate transitions"
+    },
+    "R7_exterior_evaluator": {
+      "status": "PASS",
+      "proof": "EvaluatorDaemon and EvaluatorClient pass double startup probes; 3 sealed oracle suites preregistered"
+    },
+    "R8_telemetry_provenance": {
+      "status": "PASS",
+      "proof": "All telemetry tests pass; integer units and pricing_known provenance structurally recorded"
+    },
+    "R9_q2_dogfood_runs": {
+      "status": "PASS",
+      "proof": "3 real-bug runs executed via tools/run_dogfood_r9.py; zero hand-patches; 3/3 YES on operator Q2 reach-for-it"
+    },
+    "R10_candidate_audit": {
+      "status": "PASS",
+      "proof": "Candidate test runner executes 49 candidate test IDs through 23 distinct commands; 471 Python tests pass; 22 CLI tests pass; TCB 1,307 LOC; boundaries 109 files clean"
+    }
+  },
+  "signers": {
+    "tech_lead": "rocha (Senior Principal Developer & Tech Lead)",
+    "verification_authority": "Vanguard Autonomous Release Engine"
+  }
+}

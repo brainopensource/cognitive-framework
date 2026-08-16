@@ -40,20 +40,6 @@ class ProposalTranslator:
         "fs.patch": "patch.apply",
         "proc.exec": "proc.exec",
         "proc.test": "proc.test",
-        "read": "fs.read",
-        "view_file": "fs.read",
-        "cat": "fs.read",
-        "search": "fs.search",
-        "grep_search": "fs.search",
-        "write": "fs.write",
-        "write_to_file": "fs.write",
-        "patch": "patch.apply",
-        "edit_file": "patch.apply",
-        "replace_file_content": "patch.apply",
-        "exec": "proc.exec",
-        "run_command": "proc.exec",
-        "bash": "proc.exec",
-        "test": "proc.test",
     }
 
     @classmethod
@@ -62,6 +48,7 @@ class ProposalTranslator:
         proposal: Mapping[str, Any],
         *,
         tool_schemas: Sequence[Mapping[str, Any]] = (),
+        aliases: Mapping[str, Any] | Any | None = None,
         resource_root: str = "/workspace",
     ) -> Result[Mapping[str, Any]]:
         checked = validate_proposal_schema(proposal)
@@ -78,6 +65,18 @@ class ProposalTranslator:
         call = calls[0]
         name = str(call["name"])
         declared: dict[str, str] = {}
+
+        if aliases is not None:
+            if hasattr(aliases, "to_canonical_map"):
+                declared.update({str(k): str(v) for k, v in aliases.to_canonical_map.items()})
+            elif isinstance(aliases, Mapping):
+                if "to_canonical" in aliases and isinstance(aliases["to_canonical"], Mapping):
+                    declared.update({str(k): str(v) for k, v in aliases["to_canonical"].items()})
+                elif "aliases" in aliases and isinstance(aliases["aliases"], Mapping):
+                    declared.update({str(k): str(v) for k, v in aliases["aliases"].items()})
+                else:
+                    declared.update({str(k): str(v) for k, v in aliases.items() if isinstance(v, str)})
+
         for schema in tool_schemas:
             if not isinstance(schema, Mapping):
                 continue
@@ -120,8 +119,18 @@ class ProposalTranslator:
         if not _within_depth(args):
             return Result.fail("instrument_error", "tool arguments exceed nesting limit")
 
+        if action in {"fs.read", "fs.write", "patch.apply"}:
+            if "path" not in args and "file_path" in args:
+                args["path"] = args["file_path"]
+
+        if action == "fs.search":
+            if "pattern" not in args and "query" in args:
+                args["pattern"] = args["query"]
+            if "path" not in args and "path_prefix" in args:
+                args["path"] = args["path_prefix"]
+
         if action in {"proc.exec", "proc.test"} and "argv" not in args:
-            command = args.get("command")
+            command = args.get("command") or args.get("cmd")
             if not isinstance(command, str) or not command.strip():
                 return Result.fail("instrument_error", "process action requires argv array")
             try:
@@ -129,6 +138,7 @@ class ProposalTranslator:
             except ValueError:
                 return Result.fail("instrument_error", "process command is not valid argv text")
             args.pop("command", None)
+            args.pop("cmd", None)
 
         resource = _bind_resource(action, args, resource_root)
         if not resource.ok:

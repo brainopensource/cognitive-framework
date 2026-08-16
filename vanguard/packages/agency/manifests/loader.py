@@ -46,6 +46,15 @@ class AliasTranslator:
             to_wire = {str(k): str(v) for k, v in data["to_wire"].items()}
             return cls(to_canon, to_wire)
 
+        if "aliases" in data and isinstance(data["aliases"], Mapping):
+            aliases = data["aliases"]
+            to_canon = {str(k): str(v) for k, v in aliases.items() if isinstance(k, str) and isinstance(v, str)}
+            to_wire = {}
+            for k, v in to_canon.items():
+                if v not in to_wire:
+                    to_wire[v] = k
+            return cls(to_canon, to_wire)
+
         # Flat dict format: model_name -> canonical_verb
         to_canon: dict[str, str] = {}
         to_wire: dict[str, str] = {}

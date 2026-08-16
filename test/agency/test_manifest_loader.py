@@ -85,6 +85,14 @@ class TestManifestLoader(unittest.TestCase):
         self.assertEqual(pack.to_canonical("bash"), "proc.exec")
         self.assertEqual(pack.to_wire("fs.read"), "read_file")
 
+    def test_load_vg_shell_only(self) -> None:
+        pack = self.loader.load_pack("vg-shell-only")
+        self.assertEqual(pack.name, "vg-shell-only")
+        self.assertEqual(pack.to_canonical("shell"), "proc.exec")
+        self.assertEqual(pack.to_canonical("bash"), "proc.exec")
+        self.assertEqual(pack.to_canonical("run_command"), "proc.exec")
+        self.assertEqual(pack.to_wire("proc.exec"), "shell")
+
     def test_missing_pack_raises_error(self) -> None:
         with self.assertRaises(ManifestLoadError):
             self.loader.load_pack("nonexistent-pack")

@@ -24,17 +24,17 @@ class TelemetryCollectorTest(unittest.TestCase):
         collector = TelemetryCollector(run_id="test_run_01", task_id="task_123")
 
         # Record 3 turns with varying TTFT
-        collector.record_turn_latency(ttft_ms=120.0, ttlt_ms=450.0, turn_duration_ms=450.0)
-        collector.record_turn_latency(ttft_ms=80.0, ttlt_ms=300.0, turn_duration_ms=300.0)
-        collector.record_turn_latency(ttft_ms=250.0, ttlt_ms=800.0, turn_duration_ms=800.0)
+        collector.record_turn_latency(ttft_ms=120, ttlt_ms=450, turn_duration_ms=450)
+        collector.record_turn_latency(ttft_ms=80, ttlt_ms=300, turn_duration_ms=300)
+        collector.record_turn_latency(ttft_ms=250, ttlt_ms=800, turn_duration_ms=800)
 
         # Record 2 effects
         collector.record_effect_timing(mount_ms=12.0, probe_ms=4.0, exec_ms=20.0, teardown_ms=6.0)
         collector.record_effect_timing(mount_ms=10.0, probe_ms=5.0, exec_ms=15.0, teardown_ms=5.0)
 
         # Record tokens and cost
-        collector.record_token_usage(prompt_tokens=500, completion_tokens=100, cached_tokens=200, cost_usd=0.00012, model="openai/gpt-4o-mini")
-        collector.record_token_usage(prompt_tokens=600, completion_tokens=150, cached_tokens=300, cost_usd=0.00015, model="openai/gpt-4o-mini")
+        collector.record_token_usage(prompt_tokens=500, completion_tokens=100, cached_tokens=200, usd_micros=120, model="openai/gpt-4o-mini")
+        collector.record_token_usage(prompt_tokens=600, completion_tokens=150, cached_tokens=300, usd_micros=150, model="openai/gpt-4o-mini")
 
         report = collector.build_report()
         self.assertEqual(report.run_id, "test_run_01")
@@ -59,12 +59,12 @@ class TelemetryCollectorTest(unittest.TestCase):
         self.assertEqual(tc_dict["completionTokens"], 250)
         self.assertEqual(tc_dict["cachedTokens"], 500)
         self.assertEqual(tc_dict["totalTokens"], 1350)
-        self.assertAlmostEqual(tc_dict["totalCostUsd"], 0.00027, places=6)
+        self.assertEqual(tc_dict["totalCostUsdMicros"], 270)
 
     def test_jsonl_formatting_and_export(self) -> None:
         collector = TelemetryCollector(run_id="run_jsonl", task_id="task_jsonl")
-        collector.record_turn_latency(ttft_ms=100.0, ttlt_ms=200.0)
-        collector.record_token_usage(prompt_tokens=200, completion_tokens=50, cost_usd=0.00005)
+        collector.record_turn_latency(ttft_ms=100, ttlt_ms=200)
+        collector.record_token_usage(prompt_tokens=200, completion_tokens=50, usd_micros=50)
 
         stream = io.StringIO()
         collector.export_jsonl(stream)
@@ -114,22 +114,22 @@ class TelemetryCollectorTest(unittest.TestCase):
         self.assertEqual(report.turn_count, 1)
         self.assertEqual(report.token_cost.prompt_tokens, 800)
         self.assertEqual(report.token_cost.cached_tokens, 400)
-        self.assertEqual(report.latency.ttft_samples_ms, [150.0])
+        self.assertEqual(report.latency.ttft_samples_ms, [150])
         self.assertEqual(report.effect_overhead.effect_count, 1)
 
     def test_data_source_labeling_and_integer_micros(self) -> None:
         collector = TelemetryCollector(run_id="run_cassette", data_source="cassette")
-        collector.record_token_usage(prompt_tokens=100, completion_tokens=50, cost_usd=0.00003, usd_micros=30)
+        collector.record_token_usage(prompt_tokens=100, completion_tokens=50, usd_micros=30)
         report = collector.build_report()
         self.assertEqual(report.data_source, "cassette")
         report_dict = report.to_dict()
         self.assertEqual(report_dict["dataSource"], "cassette")
-        self.assertEqual(report_dict["tokenCost"]["totalUsdMicros"], 30)
+        self.assertEqual(report_dict["tokenCost"]["totalCostUsdMicros"], 30)
 
     def test_live_collector_rejects_synthetic_timing(self) -> None:
         collector = TelemetryCollector(run_id="run_live", data_source="live")
         with self.assertRaises(ValueError) as ctx:
-            collector.record_turn_latency(ttft_ms=10.0, is_synthetic=True)
+            collector.record_turn_latency(ttft_ms=10, is_synthetic=True)
         self.assertIn("synthetic timing forbidden in live", str(ctx.exception))
 
         with self.assertRaises(ValueError) as ctx:

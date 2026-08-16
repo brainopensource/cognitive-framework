@@ -30,6 +30,10 @@ class CompatibilityKey:
     benchmark_id: str
     split_hash: str
     model_fingerprint: str
+    requested_model: str = ""
+    resolved_model: str = ""
+    pricing_source: str = ""
+    pricing_as_of: str = ""
     sampling_params: Mapping[str, Any] = field(default_factory=dict)
     harness_commit: str = "v0.5.0"
     agent_hash: str = "default_agent"
@@ -44,6 +48,10 @@ class CompatibilityKey:
             "benchmarkId": self.benchmark_id,
             "splitHash": self.split_hash,
             "modelFingerprint": self.model_fingerprint,
+            "requestedModel": self.requested_model,
+            "resolvedModel": self.resolved_model,
+            "pricingSource": self.pricing_source,
+            "pricingAsOf": self.pricing_as_of,
             "samplingParams": dict(sorted(self.sampling_params.items())),
             "harnessCommit": self.harness_commit,
             "agentHash": self.agent_hash,
@@ -108,13 +116,21 @@ class ObservationMetadata:
 
     timestamp: str
     run_id: str
+    data_source: str = "live"
+    failure_count: int = 0
     node_id: str = "local"
     operator: str = "automated"
+
+    def validate_provenance(self) -> None:
+        if self.data_source not in {"live", "cassette", "synthetic"}:
+            raise ValueError(f"invalid data_source: {self.data_source!r}; must be live, cassette, or synthetic")
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp,
             "runId": self.run_id,
+            "dataSource": self.data_source,
+            "failureCount": self.failure_count,
             "nodeId": self.node_id,
             "operator": self.operator,
         }
@@ -136,6 +152,9 @@ class InstrumentTuple:
             "stratification": self.stratification.to_dict(),
             "meta": self.meta.to_dict(),
         }
+
+    def validate_provenance(self) -> None:
+        self.meta.validate_provenance()
 
     def is_comparable_with(self, other: InstrumentTuple) -> tuple[bool, str]:
         """Check the M-18 comparability rule against another run tuple.

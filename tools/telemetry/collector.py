@@ -34,7 +34,7 @@ class TelemetryCollector:
             raise ValueError(f"invalid data_source: {data_source!r}; must be live, cassette, or synthetic")
         self.run_id = run_id
         self.task_id = task_id
-        self.data_source = data_source
+        self._data_source = data_source
         self.turn_count = 0
         self.latency = LatencySummary()
         self.effect_overhead = EffectOverheadSummary()
@@ -45,17 +45,23 @@ class TelemetryCollector:
         self._instrument_tuple: Optional[InstrumentTuple] = None
         self._custom_metrics: dict[str, Any] = {}
 
+    @property
+    def data_source(self) -> str:
+        return self._data_source
+
     def set_instrument_tuple(self, inst_tuple: InstrumentTuple) -> None:
         self._instrument_tuple = inst_tuple
 
     def record_turn_latency(
         self,
-        ttft_ms: float,
-        ttlt_ms: float = 0.0,
-        turn_duration_ms: float = 0.0,
+        ttft_ms: int,
+        ttlt_ms: int = 0,
+        turn_duration_ms: int = 0,
         is_synthetic: bool = False,
     ) -> None:
         """Record turn latency to first token (TTFT) and total turn duration in ms."""
+        if type(ttft_ms) is float or type(ttlt_ms) is float or type(turn_duration_ms) is float:
+            raise TypeError("latency metrics must be integers")
         if is_synthetic and self.data_source == "live":
             raise ValueError("synthetic timing forbidden in live telemetry report")
         self.turn_count += 1
@@ -80,16 +86,16 @@ class TelemetryCollector:
         prompt_tokens: int,
         completion_tokens: int,
         cached_tokens: int = 0,
-        cost_usd: float = 0.0,
         usd_micros: int = 0,
         model: str = "default",
     ) -> None:
         """Record token usage and USD cost for a model interaction."""
+        if type(usd_micros) is float:
+            raise TypeError("usd_micros must be an integer")
         self.token_cost.add_usage(
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             cached_tokens=cached_tokens,
-            cost_usd=cost_usd,
             usd_micros=usd_micros,
             model=model,
         )
@@ -128,11 +134,10 @@ class TelemetryCollector:
             usage = proposal.get("usage") or {}
             if isinstance(usage, Mapping):
                 self.token_cost.add_usage(
-                    prompt_tokens=usage.get("prompt_tokens") or usage.get("promptTokens") or 0,
-                    completion_tokens=usage.get("completion_tokens") or usage.get("completionTokens") or 0,
-                    cached_tokens=usage.get("cached_tokens") or usage.get("cachedTokens") or 0,
-                    cost_usd=usage.get("cost_usd") or usage.get("costUsd") or proposal.get("cost_usd") or 0.0,
-                    usd_micros=usage.get("usd_micros") or usage.get("usdMicros") or 0,
+                    prompt_tokens=int(usage.get("prompt_tokens") or usage.get("promptTokens") or 0),
+                    completion_tokens=int(usage.get("completion_tokens") or usage.get("completionTokens") or 0),
+                    cached_tokens=int(usage.get("cached_tokens") or usage.get("cachedTokens") or 0),
+                    usd_micros=int(usage.get("usd_micros") or usage.get("usdMicros") or 0),
                     model=payload.get("model", "default"),
                 )
             # Latency if recorded in event
@@ -140,9 +145,9 @@ class TelemetryCollector:
             if isinstance(timing, Mapping):
                 if timing.get("synthetic") is True and self.data_source == "live":
                     raise ValueError("synthetic timing forbidden in live telemetry report")
-                ttft = timing.get("ttftMs") or timing.get("ttft_ms") or 0.0
-                ttlt = timing.get("ttltMs") or timing.get("ttlt_ms") or 0.0
-                dur = timing.get("durationMs") or timing.get("duration_ms") or 0.0
+                ttft = int(timing.get("ttftMs") or timing.get("ttft_ms") or 0)
+                ttlt = int(timing.get("ttltMs") or timing.get("ttlt_ms") or 0)
+                dur = int(timing.get("durationMs") or timing.get("duration_ms") or 0)
                 if ttft > 0 or dur > 0:
                     self.latency.add_turn(ttft, ttlt, dur)
 

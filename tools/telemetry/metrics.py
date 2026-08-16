@@ -61,22 +61,22 @@ def calculate_percentiles(
 class LatencySummary:
     """Latency distribution summary across streaming turns."""
 
-    ttft_samples_ms: list[float] = field(default_factory=list)
-    ttlt_samples_ms: list[float] = field(default_factory=list)
-    turn_duration_samples_ms: list[float] = field(default_factory=list)
+    ttft_samples_ms: list[int] = field(default_factory=list)
+    ttlt_samples_ms: list[int] = field(default_factory=list)
+    turn_duration_samples_ms: list[int] = field(default_factory=list)
 
     def add_turn(
         self,
-        ttft_ms: float,
-        ttlt_ms: float = 0.0,
-        turn_duration_ms: float = 0.0,
+        ttft_ms: int,
+        ttlt_ms: int = 0,
+        turn_duration_ms: int = 0,
     ) -> None:
         if ttft_ms > 0:
-            self.ttft_samples_ms.append(float(ttft_ms))
+            self.ttft_samples_ms.append(int(ttft_ms))
         if ttlt_ms > 0:
-            self.ttlt_samples_ms.append(float(ttlt_ms))
+            self.ttlt_samples_ms.append(int(ttlt_ms))
         if turn_duration_ms > 0:
-            self.turn_duration_samples_ms.append(float(turn_duration_ms))
+            self.turn_duration_samples_ms.append(int(turn_duration_ms))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -140,8 +140,7 @@ class TokenCostSummary:
     completion_tokens: int = 0
     cached_tokens: int = 0
     total_tokens: int = 0
-    total_cost_usd: float = 0.0
-    total_usd_micros: int = 0
+    total_cost_usd_micros: int = 0
     by_model: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def add_usage(
@@ -149,7 +148,6 @@ class TokenCostSummary:
         prompt_tokens: int,
         completion_tokens: int,
         cached_tokens: int = 0,
-        cost_usd: float = 0.0,
         usd_micros: int = 0,
         model: str = "default",
     ) -> None:
@@ -157,9 +155,7 @@ class TokenCostSummary:
         self.completion_tokens += int(completion_tokens)
         self.cached_tokens += int(cached_tokens)
         self.total_tokens += int(prompt_tokens + completion_tokens)
-        self.total_cost_usd = round(self.total_cost_usd + float(cost_usd), 8)
-        calculated_micros = int(usd_micros) if usd_micros > 0 else int(round(cost_usd * 1_000_000))
-        self.total_usd_micros += calculated_micros
+        self.total_cost_usd_micros += int(usd_micros)
 
         if model not in self.by_model:
             self.by_model[model] = {
@@ -167,16 +163,14 @@ class TokenCostSummary:
                 "completion_tokens": 0,
                 "cached_tokens": 0,
                 "total_tokens": 0,
-                "cost_usd": 0.0,
-                "usd_micros": 0,
+                "cost_usd_micros": 0,
             }
         m = self.by_model[model]
         m["prompt_tokens"] += int(prompt_tokens)
         m["completion_tokens"] += int(completion_tokens)
         m["cached_tokens"] += int(cached_tokens)
         m["total_tokens"] += int(prompt_tokens + completion_tokens)
-        m["cost_usd"] = round(m["cost_usd"] + float(cost_usd), 8)
-        m["usd_micros"] += calculated_micros
+        m["cost_usd_micros"] += int(usd_micros)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -184,8 +178,7 @@ class TokenCostSummary:
             "completionTokens": self.completion_tokens,
             "cachedTokens": self.cached_tokens,
             "totalTokens": self.total_tokens,
-            "totalCostUsd": self.total_cost_usd,
-            "totalUsdMicros": self.total_usd_micros,
+            "totalCostUsdMicros": self.total_cost_usd_micros,
             "byModel": {k: dict(v) for k, v in sorted(self.by_model.items())},
         }
 

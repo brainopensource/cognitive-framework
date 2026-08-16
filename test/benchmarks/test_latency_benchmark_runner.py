@@ -82,7 +82,7 @@ class LatencyBenchmarkRunnerTest(unittest.TestCase):
         self.assertEqual(tc.completion_tokens, 120)
         self.assertEqual(tc.cached_tokens, 300)
         self.assertEqual(tc.total_tokens, 720)
-        self.assertAlmostEqual(tc.total_cost_usd, 0.00018, places=6)
+        self.assertEqual(tc.total_cost_usd_micros, 180)
 
         # Effect overhead checks
         oh = report.effect_overhead.to_dict()

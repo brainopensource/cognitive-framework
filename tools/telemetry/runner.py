@@ -66,7 +66,7 @@ class PairedComparisonResult:
     rejection_reason: str = ""
     p50_ttft_lift_ms: float = 0.0
     p95_ttft_lift_ms: float = 0.0
-    total_cost_delta_usd: float = 0.0
+    total_cost_delta_usd_micros: int = 0
     total_tokens_delta: int = 0
     overhead_delta_ms: float = 0.0
 
@@ -78,7 +78,7 @@ class PairedComparisonResult:
             "rejectionReason": self.rejection_reason,
             "p50TtftLiftMs": round(self.p50_ttft_lift_ms, 4),
             "p95TtftLiftMs": round(self.p95_ttft_lift_ms, 4),
-            "totalCostDeltaUsd": round(self.total_cost_delta_usd, 8),
+            "totalCostDeltaUsdMicros": self.total_cost_delta_usd_micros,
             "totalTokensDelta": self.total_tokens_delta,
             "overheadDeltaMs": round(self.overhead_delta_ms, 4),
         }
@@ -102,7 +102,13 @@ class LatencyBenchmarkRunner:
         simulate_sandbox: bool = True,
     ) -> BenchmarkRunResult:
         """Run a suite of benchmark tasks and collect detailed telemetry."""
-        collector = TelemetryCollector(run_id=f"run_{name}", task_id=name)
+        data_source = "live"
+        if type(model).__name__ == "CassettePlayer":
+            data_source = "cassette"
+        elif "mock" in type(model).__name__.lower() or "fake" in type(model).__name__.lower() or simulate_sandbox:
+            data_source = "synthetic"
+
+        collector = TelemetryCollector(run_id=f"run_{name}", task_id=name, data_source=data_source)
         if instrument_tuple:
             collector.set_instrument_tuple(instrument_tuple)
 
@@ -124,23 +130,25 @@ class LatencyBenchmarkRunner:
                 compl = int(usage.get("completion_tokens", 0))
                 cached = int(usage.get("cached_tokens", 0))
                 cost = float(usage.get("cost_usd", 0.0))
-                collector.record_token_usage(prompt, compl, cached, cost)
+                usd_micros = int(usage.get("usd_micros", cost * 1_000_000))
+                collector.record_token_usage(prompt, compl, cached, usd_micros)
 
-            collector.record_turn_latency(ttft_ms=ttft_ms, ttlt_ms=inference_ms, turn_duration_ms=inference_ms)
+            collector.record_turn_latency(ttft_ms=int(ttft_ms), ttlt_ms=int(inference_ms), turn_duration_ms=int(inference_ms))
 
             # Measure or simulate sandbox overhead if applicable
             if simulate_sandbox:
                 # Standard realistic sandbox timing in ms: mount ~15ms, probe ~5ms, exec ~10ms, teardown ~8ms
                 mount_t0 = self._clock()
-                mount_ms = 15.0
-                probe_ms = 5.0
-                exec_ms = 10.0
-                teardown_ms = 8.0
+                mount_ms = 15
+                probe_ms = 5
+                exec_ms = 10
+                teardown_ms = 8
                 collector.record_effect_timing(
                     mount_ms=mount_ms,
                     probe_ms=probe_ms,
                     exec_ms=exec_ms,
                     teardown_ms=teardown_ms,
+                    is_synthetic=True,
                 )
 
         total_duration_ms = (self._clock() - start_time) * 1000.0
@@ -178,8 +186,8 @@ class LatencyBenchmarkRunner:
         p95_a = rep_a.latency.to_dict()["ttft"]["p95"]
         p95_b = rep_b.latency.to_dict()["ttft"]["p95"]
 
-        cost_a = rep_a.token_cost.total_cost_usd
-        cost_b = rep_b.token_cost.total_cost_usd
+        cost_a = rep_a.token_cost.total_cost_usd_micros
+        cost_b = rep_b.token_cost.total_cost_usd_micros
 
         tokens_a = rep_a.token_cost.total_tokens
         tokens_b = rep_b.token_cost.total_tokens
@@ -193,7 +201,7 @@ class LatencyBenchmarkRunner:
             is_valid_comparison=True,
             p50_ttft_lift_ms=p50_b - p50_a,
             p95_ttft_lift_ms=p95_b - p95_a,
-            total_cost_delta_usd=cost_b - cost_a,
+            total_cost_delta_usd_micros=cost_b - cost_a,
             total_tokens_delta=tokens_b - tokens_a,
             overhead_delta_ms=overhead_b - overhead_a,
         )

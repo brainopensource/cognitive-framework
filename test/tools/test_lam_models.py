@@ -20,12 +20,14 @@ class TestLamModels(unittest.TestCase):
         self.assertIn("medium", models)
         self.assertIn("high", models)
         self.assertIn("top", models)
+        self.assertIn("tier1_local", models)
+        self.assertIn("tier2_local", models)
+        self.assertIn("tier3_cloud", models)
 
-    def test_top_band_is_empty_and_refuses_to_run(self) -> None:
-        models = load_models()
-        self.assertEqual(models["top"], [])
-        with self.assertRaises(RuntimeError):
-            models_for_band("top")
+    def test_top_band_returns_frontier_list(self) -> None:
+        top_models = models_for_band("top")
+        self.assertIsInstance(top_models, list)
+        self.assertGreaterEqual(len(top_models), 3)
 
     def test_free_band_returns_list(self) -> None:
         free_models = models_for_band("free")

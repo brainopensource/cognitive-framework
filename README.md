@@ -221,15 +221,19 @@ Decoupled extension primitives include:
 
 ---
 
-### 3) Task Complexity Hierarchy (Tier 1 → Tier 5)
+### 3) Task Complexity Hierarchy & 5-Tier Model Escalation Ladder
 
-| Tier | Complexity | Key Features Used | Example tasks |
-|---:|---|---|---|
-| Tier 1 | Single-file syntactic & typo fixes | `fs.read`, `fs.write`, ContextCompiler L1–L5 | Fix syntax errors, update static text, correct minor variable typos |
-| Tier 2 | Single-unit bug fix & test repair | `fs.read`, `fs.search`, `proc.exec`, `patch.apply`, Ed25519 | Fix off-by-one bugs, run unit tests, apply diffs and verify green |
-| Tier 3 | Multi-file feature implementation | Unified sandbox worker (bwrap), L5 context memory, multi-turn LAM/OpenRouter loop, exterior evaluator | Add REST endpoint across router/controller/service/DB, add CLI command, refactor module while keeping tests passing |
-| Tier 4 | Subsystem refactoring & diagnostic repair | Durable SQLite recovery, Ed25519 signing, competence prior recording, multi-turn feedback loops | Resolve async race conditions, upgrade major framework versions, fix multi-file state leakage |
-| Tier 5 | Autonomous agentic coding CLI (frontier) | Full Vanguard stack + `vg-code-default` harness, shell execution worker, self-correction & distillation | Full repo exploration and blueprinting, multi-hypothesis debugging, synthesize and present diffs for human co-pilot approval |
+Our architecture enforces a 5-tier model escalation ladder. Tiers 1–2 run exclusively on free local GPU models (Ollama). Tiers 3–5 escalate to cloud models (OpenRouter) as task complexity increases:
+
+| Tier | Complexity & Scope | Assigned Models (In Escalation Order) | Platform | Example Tasks |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1** | Single-file syntactic & typo fixes | `qwen2.5:1.5b` → `llama3.2:3b` | **Local Ollama** ($0) | Fix syntax errors, update static text, single-function deduplication (< 5s) |
+| **Tier 2** | Multi-file dependency repair | `deepseek-r1:14b` → `qwen3.6:27b` | **Local Ollama** ($0) | Fix off-by-one bugs, resolve circular imports, run unit tests and diffs |
+| **Tier 3** | Subdirectory refactor & search | `openrouter/free` → `poolside/laguna-s-2.1:free` → `nvidia/nemotron-3.5-lightning:free` → `cohere/north-mini-code:free` → `qwen/qwen3.7-flash` | **Cloud OpenRouter** (Light) | Multi-file features, sha256 digests across packages using `list_dir` and `grep_file` |
+| **Tier 4** | Subsystem refactoring & workflows | `google/gemma-4-26b-a4b-it` → `qwen/qwen3.6-35b-a3b` → `deepseek/deepseek-v4-flash-0731` | **Cloud OpenRouter** (Mid) | Resolve state machine transitions, multi-step approval workflows, async race conditions |
+| **Tier 5** | Autonomous SOTA refactoring | `openai/gpt-5.6-luna` → `z-ai/glm-5.2` → `deepseek/deepseek-v4-pro-0813` → `google/gemini-3.7-flash` | **Cloud OpenRouter** (Frontier SOTA) | Complex compiler module extraction, Persistent Immutable AVL Trees, full repo rebalancing |
+
+> **Offline Mock Acceleration:** Once a successful trace is recorded for any tier, the **LAM Engine** (`tools/002_LLM_API_MOCK`) replays the exact multi-turn cascade offline in **< 20 ms for $0**.
 
 ---
 

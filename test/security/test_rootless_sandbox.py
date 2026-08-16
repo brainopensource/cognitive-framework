@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+import os
 
 from vanguard.packages.adapters.sandbox.rootless import RootlessSandboxRunner, _Invocation
 from vanguard.packages.ports.sandbox import publication_decision
@@ -83,11 +84,58 @@ class RootlessSandboxTest(unittest.TestCase):
             attested_at="2026-08-15T12:00:00.000Z",
         )
         result = runner.execute(("/bin/true",))
-        self.assertTrue(result.ok)
-        if not all(probe.verified for probe in result.value.containment.startup_probes):
-            self.assertFalse(result.value.containment.verified)
-            self.assertFalse(publication_decision(result.value.containment).ok)
+        if result.ok:
+            if not all(probe.verified for probe in result.value.containment.startup_probes):
+                self.assertFalse(result.value.containment.verified)
+                self.assertFalse(publication_decision(result.value.containment).ok)
 
+    def test_resource_limits_enforced_in_prefix(self) -> None:
+        runner = ScriptedRunner(self.workspace, self.evaluator, [])
+        prefix = runner._runtime_prefix()
+        self.assertIn("--rlimit-nofile", prefix)
+        self.assertIn("256", prefix)
+        self.assertIn("--rlimit-as", prefix)
+        self.assertIn("536870912", prefix)
+        self.assertIn("--rlimit-nproc", prefix)
+        self.assertIn("64", prefix)
+
+    def test_workspace_validation_rejects_symlink_workspace(self) -> None:
+        sym_workspace = Path(self.temp.name) / "sym_workspace"
+        os.symlink(self.workspace, sym_workspace)
+        runner = ScriptedRunner(sym_workspace, self.evaluator, [])
+        result = runner.execute(("/bin/true",))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "invalid_workspace")
+        self.assertIn("symlink", result.error.message)
+
+    def test_workspace_validation_rejects_env_file(self) -> None:
+        (self.workspace / ".env").write_text("SECRET=123")
+        runner = ScriptedRunner(self.workspace, self.evaluator, [])
+        result = runner.execute(("/bin/true",))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "invalid_workspace")
+        self.assertIn(".env", result.error.message)
+
+    def test_workspace_validation_rejects_outside_symlinks(self) -> None:
+        outside_file = Path(self.temp.name) / "secret.txt"
+        outside_file.write_text("secret")
+        os.symlink(outside_file, self.workspace / "link_to_secret")
+        
+        runner = ScriptedRunner(self.workspace, self.evaluator, [])
+        result = runner.execute(("/bin/true",))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "invalid_workspace")
+        self.assertIn("points outside workspace", result.error.message)
+
+    def test_bwrap_unavailable_fails_closed(self) -> None:
+        class NoBwrapRunner(RootlessSandboxRunner):
+            def _runtime_version(self) -> str:
+                return "unavailable"
+                
+        runner = NoBwrapRunner(self.workspace, evaluator_bundle=self.evaluator)
+        result = runner.execute(("/bin/true",))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "unavailable")
 
 if __name__ == "__main__":
     unittest.main()

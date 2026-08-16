@@ -12,6 +12,7 @@ import hashlib
 import os
 import signal
 import subprocess
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,7 +21,16 @@ from typing import Sequence
 from ...ports.event_store import Result
 from ...ports.sandbox import ContainmentReport, ProbeResult, SandboxReceipt, SandboxResult
 
-__all__ = ["RootlessSandboxRunner"]
+__all__ = ["RootlessSandboxRunner", "WorkerSandboxReceipt"]
+
+
+@dataclass(frozen=True, slots=True)
+class WorkerSandboxReceipt(SandboxReceipt):
+    """Extended receipt carrying bounded outputs for the worker protocol."""
+    stdout: bytes = b""
+    stderr: bytes = b""
+    truncated: bool = False
+    duration_millis: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +38,8 @@ class _Invocation:
     returncode: int
     stdout: bytes
     stderr: bytes
+    truncated: bool = False
+    duration_millis: int = 0
     started: bool = True
 
 
@@ -44,20 +56,49 @@ class RootlessSandboxRunner:
         runtime: str = "/usr/bin/bwrap",
         timeout_seconds: float = 30.0,
         attested_at: str | None = None,
+        max_output_bytes: int = 10 * 1024 * 1024,
     ) -> None:
-        self.workspace = Path(workspace).resolve(strict=True)
+        self._raw_workspace = Path(workspace)
+        self.workspace = self._raw_workspace.resolve(strict=True)
         self.evaluator_bundle = Path(evaluator_bundle).resolve(strict=True)
         self.runtime = runtime
         self.timeout_seconds = timeout_seconds
         self._attested_at = attested_at
+        self.max_output_bytes = max_output_bytes
+
+    def _validate_workspace(self) -> Result[None]:
+        if not self.workspace.is_dir():
+            return Result.fail("invalid_workspace", "Workspace must be a directory")
+        if self._raw_workspace.is_symlink():
+            return Result.fail("invalid_workspace", "Workspace cannot be a symlink")
+        
+        # Check for symlinks pointing outside
+        for root, dirs, files in os.walk(self.workspace):
+            for name in dirs + files:
+                path = Path(root) / name
+                if path.is_symlink():
+                    target = path.resolve()
+                    try:
+                        target.relative_to(self.workspace)
+                    except ValueError:
+                        return Result.fail("invalid_workspace", f"Symlink {name} points outside workspace")
+                        
+        if (self.workspace / ".env").exists():
+            return Result.fail("invalid_workspace", ".env file found in workspace")
+            
+        return Result.success(None)
 
     def _runtime_prefix(self) -> list[str]:
         prefix = [
             self.runtime,
             "--unshare-all",
+            "--unshare-user",
             "--die-with-parent",
             "--new-session",
             "--clearenv",
+            "--rlimit-nofile", "256",
+            "--rlimit-as", "536870912",
+            "--rlimit-nproc", "64",
             "--ro-bind", "/usr", "/usr",
             "--symlink", "usr/bin", "/bin",
             "--symlink", "usr/lib", "/lib",
@@ -74,6 +115,7 @@ class RootlessSandboxRunner:
 
     def _run_isolated(self, argv: Sequence[str]) -> _Invocation:
         command = [*self._runtime_prefix(), "--", *argv]
+        start_time = time.monotonic()
         try:
             process = subprocess.Popen(
                 command,
@@ -81,16 +123,33 @@ class RootlessSandboxRunner:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 start_new_session=True,
+                env={}, # Ensure no host env leak
             )
         except OSError as exc:
             return _Invocation(126, b"", str(exc).encode(), started=False)
+            
         try:
             stdout, stderr = process.communicate(timeout=self.timeout_seconds)
+            truncated = False
+            if len(stdout) > self.max_output_bytes:
+                stdout = stdout[:self.max_output_bytes]
+                truncated = True
+            if len(stderr) > self.max_output_bytes:
+                stderr = stderr[:self.max_output_bytes]
+                truncated = True
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGKILL)
             stdout, stderr = process.communicate()
-            return _Invocation(124, stdout, stderr + b"\nworker process group timed out")
-        return _Invocation(process.returncode, stdout, stderr)
+            truncated = True
+            if len(stdout) > self.max_output_bytes:
+                stdout = stdout[:self.max_output_bytes]
+            if len(stderr) > self.max_output_bytes:
+                stderr = stderr[:self.max_output_bytes]
+            stderr += b"\nworker process group timed out"
+            
+        duration_millis = int((time.monotonic() - start_time) * 1000)
+        code = 124 if "timed out" in stderr.decode("utf-8", "ignore") else process.returncode
+        return _Invocation(code, stdout, stderr, truncated, duration_millis, started=True)
 
     @staticmethod
     def _observed(invocation: _Invocation, denied_when_nonzero: bool) -> tuple[str, bool]:
@@ -143,6 +202,14 @@ class RootlessSandboxRunner:
     def execute(self, argv: Sequence[str]) -> Result[SandboxResult]:
         if not argv or not all(isinstance(arg, str) and arg for arg in argv):
             return Result.fail("invalid_request", "sandbox argv must be a non-empty string sequence")
+            
+        val_res = self._validate_workspace()
+        if not val_res.ok:
+            return Result.fail(val_res.error.kind, val_res.error.message)
+            
+        rt_ver = self._runtime_version()
+        if rt_ver == "unavailable":
+            return Result.fail("unavailable", "Bubblewrap runtime is not available")
 
         probes = self._probes()
         invocation = self._run_isolated(tuple(argv))
@@ -150,13 +217,18 @@ class RootlessSandboxRunner:
         attested_at = self._attested_at or datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
         report = ContainmentReport(
             runtime="bubblewrap-rootless",
-            runtime_version=self._runtime_version(),
+            runtime_version=rt_ver,
             namespace="user,mount,ipc,pid,uts,cgroup,network",
             syscall_profile="namespace capability boundary; denial probe recorded",
             network_enforcement="outer bubblewrap network namespace",
             writable_mounts=("/workspace", "/tmp"),
             exposed_sockets=(),
-            resource_limits={"wallClockSeconds": self.timeout_seconds},
+            resource_limits={
+                "wallClockSeconds": self.timeout_seconds,
+                "nofile": 256,
+                "as_bytes": 536870912,
+                "nproc": 64
+            },
             startup_probes=probes,
             attested_at=attested_at,
             contained=verified,
@@ -166,7 +238,14 @@ class RootlessSandboxRunner:
         digest = "sha256:" + hashlib.sha256(invocation.stdout).hexdigest()
         return Result.success(
             SandboxResult(
-                receipt=SandboxReceipt(exit_code=invocation.returncode, stdout_digest=digest),
+                receipt=WorkerSandboxReceipt(
+                    exit_code=invocation.returncode, 
+                    stdout_digest=digest,
+                    stdout=invocation.stdout,
+                    stderr=invocation.stderr,
+                    truncated=invocation.truncated,
+                    duration_millis=invocation.duration_millis
+                ),
                 containment=report,
             )
         )

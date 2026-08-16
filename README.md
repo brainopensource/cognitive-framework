@@ -22,46 +22,42 @@ observe ──▶ propose ──▶ authorize ──▶ effect ──▶ receipt
 
 ---
 
-## 2. Orders of Abstraction (Hierarchical Taxonomy)
+## 2. Orders of Abstraction & Biological Framework Dictionary
 
-Vanguard is organized across **Six Orders of Abstraction**, building from immutable mathematical primitives up to multi-agent measurement swarms:
+Vanguard conceptualizes software architecture using a **Biological Hierarchy of Emergent Competence**.
+
+> [!IMPORTANT]
+> **Architectural Invariant (GTS-13C §3.6):** The biological vocabulary is **NOT an OOP class hierarchy** (we do *not* write `class Cell(Polymer)`). It is a conceptual taxonomy and an **emergent telemetry depth** logged in `lam.sqlite`. Build one recursive coordinator, and the biological hierarchy becomes an empirical finding in the ledger.
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ ORDER 5: ORGANISMS & SWARMS (Measurement Laboratory, Distillation & Multi-Agent)       │
-│ • Paired Laboratory Bench (`lab harness bench`), McNemar A/A Control (`vg-shell-only`) │
-│ • Out-of-Process Signed Evaluator (UID 10002), TableWorld Non-Coding Witness            │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORDER 4: CELLS & PACKS (Pure-Data Manifest Configurations)                              │
-│ • Manifest Packs: `vg-code-default`, `vg-code-claude-shaped`, `vg-code-opencode-shaped` │
-│ • Workspace Instruction Discovery: Dynamic `AGENTS.md` / `CLAUDE.md` Injection           │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORDER 3: POLYMERS & PROTEINS (Cognitive Engine & Recursion)                             │
-│ • Context Compiler L1–L5 (Byte-Stable System Prompt & Schemas KV-Cache Optimization)    │
-│ • `ProposalTranslator` & `EpisodeEngine` Depth-1 Single-Observation Recursion Loop      │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORDER 2: MOLECULES (Control Kernel & Sandbox Effector)                                  │
-│ • Attenuation Kernel (`kernel/dispatch.py`), Descriptor Leasing & USD Micro-Budgeting    │
-│ • Rootless Bubblewrap Worker Containment (`adapters/sandbox/rootless.py`)               │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORDER 1: ATOMS (Ports & Capabilities)                                                   │
-│ • Hexagonal Abstract Ports (`ModelPort`, `LedgerPort`, `EvaluatorPort`)                 │
-│ • Single-Verb Capabilities (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`) │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ ORDER 0: SUB-ATOMIC PRIMITIVES (Wire Contracts & Data Values)                           │
-│ • Canonical Value Objects, `EffectIntent`, `Receipt`, `CorrectionRecord`                │
-│ • SHA-256 Descriptors, Ed25519 Asymmetric Signatures, JsonSchema Verification Profiles  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ LEVEL 9: ENTITY / AGI SWARM       ──▶ Autonomous Multi-Agent Orchestration & Swarm Topology │
+│ LEVEL 8: ORGANS & SYSTEMS         ──▶ Paired Measurement Lab (`lab harness bench`)          │
+│ LEVEL 7: CELLS                    ──▶ Sandboxed Autonomous Agent Workspace & Lifecycle      │
+│ LEVEL 6: ORGANELLES               ──▶ Exterior Signed Evaluator (UID 10002) & Double Probes │
+│ LEVEL 5: GENES (DNA / RNA)        ──▶ Declarative Manifest Packs (`vg-code-*`, `AGENTS.md`)  │
+│ LEVEL 4: PROTEINS & ENZYMES       ──▶ Context Compactor (L1–L5) & `ProposalTranslator`      │
+│ LEVEL 3: LINEAR POLYMERS          ──▶ `EpisodeEngine` Depth-1 Multi-Turn Recursion Loop     │
+│ LEVEL 2: MOLECULES                ──▶ Attenuation Kernel & Rootless Bubblewrap Sandbox       │
+│ LEVEL 1: ATOMS                    ──▶ Abstract Ports (`ModelPort`) & Single Verbs (`fs.read`)│
+│ LEVEL 0: SUB-ATOMIC PRIMITIVES    ──▶ Canonical Wire Value Objects, Hashes & Ed25519 Keys   │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Detailed Layer Breakdown
+### Biological Dictionary: From Primitives to Emergent AGI
 
-* **Order 0 — Sub-Atomic Primitives (`domain/wire/contracts.py`):** Pure values, canonical JSON serialization, SHA-256 descriptor digests, and Ed25519 asymmetric signatures. Contains zero IO logic.
-* **Order 1 — Atoms / Ports & Verbs (`ports/`):** Hexagonal interfaces for models, ledgers, evaluators, and sandboxes. Single-action effectors (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`).
-* **Order 2 — Molecules / Kernel & Containment (`kernel/`, `adapters/sandbox/`):** Capability attenuation, USD micro-budget leases, and rootless Linux namespace isolation via Bubblewrap (`bwrap`).
-* **Order 3 — Polymers / Cognitive Engine (`agency/`):** Prefix-stable L1–L5 Context Compiler, manifest-driven `ProposalTranslator`, and the depth-1 `EpisodeEngine` recursion loop.
-* **Order 4 — Cells / Pure-Data Harness Manifests (`agency/manifests/`):** Competitor-shaped harnesses (`vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`) declared **strictly as pure JSON data**, without kernel diffs. Includes workspace instruction discovery (`AGENTS.md`, `CLAUDE.md`).
-* **Order 5 — Organisms & Swarms / Measurement & Evaluators (`lab/`, `adapters/evaluators/`):** Paired measurement laboratory (`lab harness bench`), control arm (`vg-shell-only`), out-of-process signed evaluator daemon (UID `10002`), TableWorld structured-data witness, and offline competence distillation (`O-01`).
+| Biological Tier | Biological Analogy | Vanguard Code Component & Realization | Emergent Competence |
+|---|---|---|---|
+| **0. Sub-Atomic** | Protons, Neutrons, Electrons (Pure energy/charge, no chemistry alone) | `domain/wire/contracts.py`: Canonical Value Objects, SHA-256 digests, Ed25519 asymmetric keys, JsonSchema contracts. | **Byte-Level Determinism** |
+| **1. Atoms** | Carbon, Hydrogen, Oxygen (Periodic table elements with valency & affinity) | `ports/`: `ModelPort`, `LedgerPort`, `EvaluatorPort`; Single Verbs (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`). | **Capability Valency** |
+| **2. Molecules** | Water, Glucose, Amino Acid Monomers (Atoms bound into functional units) | `kernel/dispatch.py`, `adapters/sandbox/rootless.py`: Attenuation Kernel, USD micro-budget leases, rootless Bubblewrap containerization. | **Sandboxed Isolation** |
+| **3. Linear Polymers** | Unfolded Peptide Chains (Sequential monomers linked in series) | `agency/episode/engine.py`: `EpisodeEngine` depth-1 sequential multi-turn recursion (`observe → propose → authorize → effect → receipt → evaluate`). | **Multi-Turn Traceability** |
+| **4. Functional Proteins** | Folded Enzymes & Molecular Motors (Folded polymers with active chemical catalytic function) | `agency/context/compiler.py`, `adapters/models/invocation.py`: L1–L5 Context Compactor, byte-stable system prompts, `ProposalTranslator`. | **Cognitive Pruning & Efficiency** |
+| **5. Genes (DNA / RNA)** | Nucleic Acid Sequence Manuals (Instructions dictating protein assembly) | `agency/manifests/`: Pure-data JSON Manifests (`vg-code-claude-shaped`, `vg-code-opencode-shaped`), `AGENTS.md` / `CLAUDE.md` context discovery. | **Declarative Harness Alignment** |
+| **6. Organelles** | Mitochondria, Ribosomes (Membrane-bound functional cellular machinery) | `adapters/evaluators/daemon.py`: Out-of-process signed Evaluator Daemon (UID `10002`) running sealed double probes. | **Un-gameable Verification** |
+| **7. Cells** | Single-cell Organisms (Self-contained, bounded factory operating continuously under DNA instructions) | `runtime/root.py`, `runtime/coordination.py`: Autonomous Agent Workspace runtime executing episodes end-to-end. | **Autonomous Problem Solving** |
+| **8. Organs & Systems** | Tissues, Muscular & Nervous Systems (Coordinated specialized cell groups) | `lab/`: Paired Measurement Laboratory (`lab harness bench`), McNemar A/A floor tracking against undeletable `vg-shell-only`. | **Empirical Benchmark Laboratory** |
+| **9. Entity / AGI Swarm** | Conscious Macro-Organism (Harmonious coordination of trillions of specialized nanomachines) | `runtime/governance/`: Multi-Agent Competence Distillation (`O-01`), Cross-Agent Delegation, and Heterogeneous Swarm Orchestration. | **Emergent Machine AGI** |
 
 ---
 

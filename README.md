@@ -162,3 +162,13 @@ python3 tools/run_broken_tests.py
   - **Tier 2 models**:
     3. `qwen3.6:27b`
     4. `deepseek-r1:14b`
+
+
+# SUGGESTIONS (UNDER BUDGET OF 0.5 US$)
+
+test with these 3 openrouter free models, nvidia/nemotron-3-super-120b-a12b:free, nvidia/nemotron-3.5-lightning:free and cohere/north-
+  mini-code:free to see how they fit in our tiers from 1 to 5.
+
+  then test with these 3 openrouter medium models openai/gpt-5.6-luna, deepseek/deepseek-v4-flash-0731 and xiaomi/mimo-v2.5;
+
+   google/gemini-3.7-flash deepseek/deepseek-v4-pro-0813 z-ai/glm-5.2 and then finally with these 3 top openrouter models

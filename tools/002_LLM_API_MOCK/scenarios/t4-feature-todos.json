@@ -1,0 +1,68 @@
+{
+  "id": "t4-feature-todos",
+  "tier": 4,
+  "title": "Add --json flag to a CLI: parse, render, tests, docs — sequenced todos",
+  "workspace": {
+    "cli.py": "import argparse\n\ndef main(argv):\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"name\")\n    args = parser.parse_args(argv)\n    print(f\"hello {args.name}\")\n    return 0\n",
+    "test_cli.py": "from cli import main\nimport io, sys\n\ndef test_hello(capsys):\n    main([\"ada\"])\n    assert \"hello ada\" in capsys.readouterr().out\n",
+    "README.md": "# greeter\nPrints hello.\n"
+  },
+  "turns": [
+    {
+      "tool_messages": 0,
+      "finish_reason": "tool_calls",
+      "content": "Todo: (1) read CLI (2) add --json (3) test (4) docs.",
+      "tool_calls": [
+        {"id": "t4a", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"cli.py\"}"}},
+        {"id": "t4b", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"test_cli.py\"}"}},
+        {"id": "t4c", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"README.md\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 3,
+      "finish_reason": "tool_calls",
+      "content": "Adding --json to the parser and renderer.",
+      "tool_calls": [
+        {"id": "t4d", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"cli.py\", \"target\": \"parser.add_argument(\\\"name\\\")\", \"replacement\": \"parser.add_argument(\\\"name\\\")\\n    parser.add_argument(\\\"--json\\\", action=\\\"store_true\\\")\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 4,
+      "finish_reason": "tool_calls",
+      "content": "Switching print to JSON when the flag is set.",
+      "tool_calls": [
+        {"id": "t4e", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"cli.py\", \"target\": \"print(f\\\"hello {args.name}\\\")\", \"replacement\": \"if args.json:\\n        print('{\\\"hello\\\": \\\"' + args.name + '\\\"}')\\n    else:\\n        print(f\\\"hello {args.name}\\\")\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 5,
+      "finish_reason": "tool_calls",
+      "content": "Adding a JSON test.",
+      "tool_calls": [
+        {"id": "t4f", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"test_cli.py\", \"target\": \"assert \\\"hello ada\\\" in capsys.readouterr().out\", \"replacement\": \"assert \\\"hello ada\\\" in capsys.readouterr().out\\n\\ndef test_json(capsys):\\n    main([\\\"ada\\\", \\\"--json\\\"])\\n    assert '{\\\"hello\\\": \\\"ada\\\"}' in capsys.readouterr().out\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 6,
+      "finish_reason": "tool_calls",
+      "content": "Documenting the flag.",
+      "tool_calls": [
+        {"id": "t4g", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"README.md\", \"target\": \"Prints hello.\", \"replacement\": \"Prints hello. Pass --json for machine output.\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 7,
+      "finish_reason": "tool_calls",
+      "content": "Running the suite.",
+      "tool_calls": [
+        {"id": "t4h", "type": "function", "function": {"name": "run_command", "arguments": "{\"command\": \"python3 -m pytest test_cli.py -q\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 8,
+      "finish_reason": "stop",
+      "content": "Feature complete: --json flag, test, and README. All todos closed.",
+      "tool_calls": []
+    }
+  ]
+}

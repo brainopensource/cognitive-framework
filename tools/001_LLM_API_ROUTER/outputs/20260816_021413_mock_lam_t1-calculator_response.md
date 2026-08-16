@@ -1,0 +1,1 @@
+I will inspect `src/calculator.py` to check the current implementation of `calculate_value`.

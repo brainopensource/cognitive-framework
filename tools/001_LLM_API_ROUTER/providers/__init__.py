@@ -6,6 +6,7 @@ from .base import BaseLLMProvider, LLMResponse
 from .openrouter import OpenRouterProvider
 from .ollama import OllamaProvider
 from .mock_provider import MockProvider
+from .groq import GroqProvider
 
 
 def get_provider(name: str, **kwargs) -> BaseLLMProvider:
@@ -14,7 +15,9 @@ def get_provider(name: str, **kwargs) -> BaseLLMProvider:
         return OpenRouterProvider(**kwargs)
     elif provider_name in ("ollama", "local"):
         return OllamaProvider(**kwargs)
+    elif provider_name in ("groq",):
+        return GroqProvider(**kwargs)
     elif provider_name in ("mock", "stub", "lam"):
         return MockProvider(**kwargs)
     else:
-        raise ValueError(f"Unknown provider '{name}'. Choose from: openrouter, ollama, mock")
+        raise ValueError(f"Unknown provider '{name}'. Choose from: openrouter, ollama, groq, mock")

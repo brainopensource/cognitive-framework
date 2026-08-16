@@ -43,6 +43,17 @@ MODEL_ALIASES = {
         "qwen3.6": "qwen3.6:27b",
         "deepseek-r1": "deepseek-r1:14b",
     },
+    # Groq mappings
+    "groq": {
+        "fast": "llama-3.1-8b-instant",
+        "llama": "llama-3.1-8b-instant",
+        "llama-fast": "llama-3.1-8b-instant",
+        "llama-3.1": "llama-3.1-8b-instant",
+        "120b": "openai/gpt-oss-120b",
+        "gpt-oss": "openai/gpt-oss-120b",
+        "gpt-oss-120b": "openai/gpt-oss-120b",
+        "powerful": "openai/gpt-oss-120b",
+    },
 }
 
 
@@ -81,7 +92,7 @@ Examples:
         "-provider", "--provider", "-p",
         type=str,
         default="openrouter",
-        choices=["openrouter", "or", "ollama", "local", "mock", "stub", "lam"],
+        choices=["openrouter", "or", "ollama", "local", "mock", "stub", "lam", "groq"],
         help="LLM provider backend (default: openrouter)",
     )
     parser.add_argument(

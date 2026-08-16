@@ -61,6 +61,10 @@ class IsolatedEvaluator:
             if instrument_problem is not None:
                 return self._inconclusive(instrument_problem)
 
+            terminal_problem = self._verify_terminal_evidence(run_ref)
+            if terminal_problem is not None:
+                return self._inconclusive(terminal_problem)
+
             immutable, immutable_details = self._probe_immutability()
             non_polluted, pollution_details = self._probe_non_pollution()
             if not immutable:
@@ -112,10 +116,9 @@ class IsolatedEvaluator:
                     ),
                 )
             )
-        except Exception:
-            # Socket drops, timeouts, perimeter crashes, malformed runner
-            # responses, and probe failures are instrument uncertainty.  No
-            # exception may become a fabricated task verdict or cross the port.
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             return self._inconclusive("instrument_error")
 
     def _validate_instrument(self) -> str | None:
@@ -129,26 +132,56 @@ class IsolatedEvaluator:
             return "instrument_configuration_invalid"
         return None
 
+    def _verify_terminal_evidence(self, run_ref: RunRef) -> str | None:
+        if not run_ref.episode_id:
+            return "evaluator_non_terminal_evidence"
+        return None
+
     def _probe_immutability(self) -> tuple[bool, tuple[str, ...]]:
         mismatches: list[str] = []
         if not self._oracle_digests:
             return False, ("oracle manifest is empty",)
 
+        oracle_dirs: set[Path] = set()
+
         for relative, expected in sorted(self._oracle_digests.items()):
             path = self._oracle_path(relative)
-            if path is None or not _DIGEST.fullmatch(expected) or not path.is_file():
+            if path is None or not _DIGEST.fullmatch(expected) or not path.is_file() or path.is_symlink():
                 mismatches.append(relative)
                 continue
+            
             actual = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
             if actual != expected:
                 mismatches.append(relative)
-        return not mismatches, tuple(mismatches)
+            else:
+                oracle_dirs.add(path.parent)
+
+        for d in oracle_dirs:
+            current = d
+            is_symlink = False
+            while current != self._workspace:
+                if current.is_symlink():
+                    is_symlink = True
+                    break
+                current = current.parent
+            
+            if is_symlink:
+                mismatches.append(str(d.relative_to(self._workspace)))
+                continue
+
+            for item in d.iterdir():
+                if item.is_file():
+                    rel_item = str(item.relative_to(self._workspace))
+                    if rel_item not in self._oracle_digests:
+                        mismatches.append(rel_item)
+
+        return not mismatches, tuple(sorted(set(mismatches)))
 
     def _oracle_path(self, relative: str) -> Path | None:
         pure = PurePosixPath(relative)
         if pure.is_absolute() or not pure.parts or ".." in pure.parts:
             return None
-        candidate = (self._workspace / Path(*pure.parts)).resolve()
+        candidate = (self._workspace / Path(*pure.parts)).resolve(strict=False)
         try:
             candidate.relative_to(self._workspace)
         except ValueError:
@@ -156,6 +189,31 @@ class IsolatedEvaluator:
         return candidate
 
     def _probe_non_pollution(self) -> tuple[bool, tuple[str, ...]]:
+        pollution: list[str] = []
+
+        for var in ("PYTHONPATH", "PYTHONSTARTUP", "LD_PRELOAD"):
+            if var in os.environ:
+                pollution.append(f"env:{var}")
+
+        for root, dirs, files in os.walk(self._workspace):
+            for name in dirs + files:
+                p = Path(root) / name
+                if p.is_symlink():
+                    try:
+                        target = p.resolve(strict=False)
+                        target.relative_to(self._workspace)
+                    except ValueError:
+                        pollution.append(str(p.relative_to(self._workspace)))
+
+        git_hooks = self._workspace / ".git" / "hooks"
+        if git_hooks.is_dir():
+            for root, dirs, files in os.walk(git_hooks):
+                for file in files:
+                    # Ignore standard samples usually placed by git init
+                    if not file.endswith(".sample"):
+                        p = Path(root) / file
+                        pollution.append(str(p.relative_to(self._workspace)))
+
         status = subprocess.run(
             ["git", "status", "--porcelain", "--untracked-files=all"],
             cwd=self._workspace,
@@ -167,20 +225,35 @@ class IsolatedEvaluator:
         if status.returncode != 0:
             raise RuntimeError("workspace tracking state unavailable")
 
-        pollution: list[str] = []
         for line in status.stdout.splitlines():
             if len(line) < 4:
                 continue
             relative = line[3:].strip().strip('"')
             path = PurePosixPath(relative)
             lowered_parts = tuple(part.lower() for part in path.parts)
+            
             if (
                 path.name.lower() in _POLLUTION_NAMES
                 or path.suffix.lower() == ".pth"
                 or "site-packages" in lowered_parts
             ):
                 pollution.append(relative)
-        return not pollution, tuple(sorted(pollution))
+                continue
+                
+            if path.name in ("requirements.txt", "poetry.lock", "Pipfile.lock"):
+                pollution.append(relative)
+                continue
+                
+            if path.name in ("python", "python3", "pip", "git", "bash", "sh"):
+                pollution.append(relative)
+                continue
+                
+            actual_path = self._workspace / Path(*path.parts)
+            if actual_path.is_file() and os.access(actual_path, os.X_OK):
+                pollution.append(relative)
+                continue
+
+        return not pollution, tuple(sorted(set(pollution)))
 
     def _tampered_claim(
         self,

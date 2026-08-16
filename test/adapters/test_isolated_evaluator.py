@@ -56,7 +56,7 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         evaluator = self._evaluator(runner=runner)
         self.oracle.write_text("assert False\n", encoding="utf-8")
 
-        result = evaluator.evaluate(RunRef("run-tampered"), self.protocol)
+        result = evaluator.evaluate(RunRef("run-tampered", episode_id="ep1"), self.protocol)
 
         self.assertTrue(result.ok)
         self.assertEqual(result.value.outcome, "claims")
@@ -71,7 +71,7 @@ class IsolatedEvaluatorContract(unittest.TestCase):
             "# candidate-planted pytest hook\n", encoding="utf-8"
         )
 
-        result = self._evaluator().evaluate(RunRef("run-polluted"), self.protocol)
+        result = self._evaluator().evaluate(RunRef("run-polluted", episode_id="ep1"), self.protocol)
 
         self.assertTrue(result.ok)
         self.assertEqual(result.value.claims[0]["event"], "EvaluationTampered")
@@ -82,7 +82,7 @@ class IsolatedEvaluatorContract(unittest.TestCase):
             raise ConnectionResetError("evaluator socket dropped")
 
         result = self._evaluator(runner=dropped).evaluate(
-            RunRef("run-dropped"), self.protocol
+            RunRef("run-dropped", episode_id="ep1"), self.protocol
         )
 
         self.assertTrue(result.ok)
@@ -91,7 +91,7 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         self.assertEqual(result.value.claims, ())
 
     def test_genuine_fix_returns_passed_with_both_probes(self) -> None:
-        result = self._evaluator().evaluate(RunRef("run-fixed"), self.protocol)
+        result = self._evaluator().evaluate(RunRef("run-fixed", episode_id="ep1"), self.protocol)
 
         self.assertTrue(result.ok)
         self.assertEqual(result.value.outcome, "claims")
@@ -104,6 +104,65 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         self.assertEqual(claim["evaluatorUid"], os.getuid())
         self.assertEqual(claim["imageDigest"], "sha256:" + "a" * 64)
 
+    def test_untracked_files_under_oracle_paths_fails(self) -> None:
+        (self.workspace / "untracked_oracle.py").write_text("assert True\n")
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertEqual(result.value.outcome, "claims")
+        self.assertFalse(result.value.claims[0]["probes"]["immutability"])
+
+    def test_oracle_directory_replaced_by_symlink(self) -> None:
+        digest = _digest(self.oracle)
+        self.oracle.unlink()
+        (self.workspace / "test_oracle.py").symlink_to(Path("/tmp"))
+        evaluator = IsolatedEvaluator(
+            workspace=self.workspace,
+            oracle_digests={"test_oracle.py": digest},
+            command=("python3", "-c", "raise SystemExit(0)"),
+            expected_uid=os.getuid(),
+            image_digest="sha256:" + "a" * 64
+        )
+        result = evaluator.evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["immutability"])
+
+    def test_executable_unexpected_location(self) -> None:
+        p = self.workspace / "malicious.sh"
+        p.write_text("echo 'hello'\n")
+        p.chmod(0o755)
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+
+    def test_path_shadowing(self) -> None:
+        p = self.workspace / "python"
+        p.write_text("")
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+
+    def test_modified_lockfile(self) -> None:
+        p = self.workspace / "requirements.txt"
+        p.write_text("requests==2.0")
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+
+    def test_git_hooks_modification(self) -> None:
+        p = self.workspace / ".git" / "hooks" / "pre-commit"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("exit 0")
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+
+    def test_symlink_outside_workspace(self) -> None:
+        p = self.workspace / "link"
+        p.symlink_to("/etc/passwd")
+        result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+        self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+
+    def test_unsafe_env_vars(self) -> None:
+        os.environ["PYTHONPATH"] = "/tmp"
+        try:
+            result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
+            self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+        finally:
+            del os.environ["PYTHONPATH"]
 
 if __name__ == "__main__":
     unittest.main()

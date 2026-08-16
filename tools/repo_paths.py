@@ -47,9 +47,14 @@ _STALE_TOKEN = re.compile(
     r")"
 )
 
-_ROOT_SENTINELS = (
+_ROOT_SENTINELS_LIVE = (
     Path("tools") / "repo_paths.py",
     Path("docs") / "main_v4",
+    Path(".github") / "workflows" / "ci.yml",
+)
+_ROOT_SENTINELS_LEGACY = (
+    Path("tools") / "repo_paths.py",
+    Path("docs") / "v4",
     Path(".github") / "workflows" / "ci.yml",
 )
 
@@ -72,10 +77,12 @@ def repo_root(start: Path | None = None) -> Path:
         if candidate in seen:
             continue
         seen.add(candidate)
-        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS):
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LIVE):
+            return candidate
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LEGACY):
             return candidate
     raise FileNotFoundError(
-        "cannot locate repository root: expected docs/main_v4 and tools/repo_paths.py"
+        "cannot locate repository root: expected docs/main_v4 or docs/v4 plus tools/repo_paths.py"
     )
 
 
@@ -84,19 +91,30 @@ def repo_path(*parts: str | os.PathLike[str]) -> Path:
 
 
 def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
-    return repo_path(CANONICAL["docs_main_v4"], *parts)
+    root = repo_root()
+    base = CANONICAL["docs_main_v4"] if (root / CANONICAL["docs_main_v4"]).exists() else "docs/v4"
+    return root.joinpath(base, *parts)
 
 
 def docs_agile(*parts: str | os.PathLike[str]) -> Path:
-    return repo_path(CANONICAL["docs_agile"], *parts)
+    root = repo_root()
+    if (root / CANONICAL["docs_agile"]).exists():
+        return root.joinpath(CANONICAL["docs_agile"], *parts)
+    return root.joinpath("docs", *parts)
 
 
 def docs_reviews(*parts: str | os.PathLike[str]) -> Path:
-    return repo_path(CANONICAL["docs_reviews"], *parts)
+    root = repo_root()
+    if (root / CANONICAL["docs_reviews"]).exists():
+        return root.joinpath(CANONICAL["docs_reviews"], *parts)
+    return root.joinpath("docs", "review", *parts)
 
 
 def docs_development_guides(*parts: str | os.PathLike[str]) -> Path:
-    return repo_path(CANONICAL["docs_development_guides"], *parts)
+    root = repo_root()
+    if (root / CANONICAL["docs_development_guides"]).exists():
+        return root.joinpath(CANONICAL["docs_development_guides"], *parts)
+    return root.joinpath("docs", "development", *parts)
 
 
 def active_mvp_contract() -> Path:

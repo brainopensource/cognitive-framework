@@ -222,7 +222,7 @@ def execute_single_dogfood_run(run_index: int) -> dict[str, Any]:
             approval_decisions.append(decision.to_dict())
         else:
             approval_decisions.append(str(decision))
-        return True
+        return decision
 
     test_bytes = (repo_dir / "test_slugify.py").read_bytes()
     oracle_digest = f"sha256:{hashlib.sha256(test_bytes).hexdigest()}"

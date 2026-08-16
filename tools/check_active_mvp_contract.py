@@ -35,7 +35,12 @@ REQUIRED_FIELDS = {
 }
 FAMILIES = {"architecture", "must-fail", "property", "conformance", "fault-injection", "adversarial"}
 STATUSES = {"open", "covered", "justified"}
-CONTRACT_STATUSES = {"closure-in-progress", "approved-phase2-closed", "approved"}
+CONTRACT_STATUSES = {
+    "closure-in-progress",
+    "approved-phase2-closed",
+    "approved",
+    "approved-s0-s4-closed",
+}
 COMPONENT_ALIASES = {"adapters/model": "adapters/models"}
 BROAD_COMMANDS = {("true",), ("echo", "ok"), ("exit", "0")}
 

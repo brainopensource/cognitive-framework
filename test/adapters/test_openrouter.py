@@ -12,6 +12,7 @@ import json
 import os
 import socket
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import patch
 

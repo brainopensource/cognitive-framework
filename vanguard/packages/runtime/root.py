@@ -37,19 +37,25 @@ human decision, binds it to the exact descriptor through
 runs the next episode segment. The model is never asked to re-propose what a
 human already approved.
 
-**What this module does not do.** It does not evaluate. `ICD §3` / `M5`: the
-verdict comes from an injected exterior evaluator, after the episode is
-terminal, and `agency` cannot reach it at all.
+**What this module does not do.** It does not grade the episode from inside
+the loop. `ICD §3` / `M5`: the verdict comes from the evaluator named by the
+manifest (or an injected override), after the episode is terminal, and
+`agency` cannot reach it at all. When the instrument cannot self-certify,
+the outcome is `inconclusive` — never a substituted fake pass.
 """
 
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.environment.git import GitEnvironment
+from ..adapters.evaluators.isolated import IsolatedEvaluator
+from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.stores.event_store import SqliteEventStore
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.context import (
@@ -101,6 +107,7 @@ from .governance.approvals import (
 
 __all__ = [
     "DEFAULT_BINDINGS",
+    "EVALUATOR_BINDINGS",
     "CompositionError",
     "EffectBinding",
     "Harness",
@@ -465,8 +472,9 @@ class _LayeredOperator:
                 episode_id=self._task.episode_id, run_id=self._task.run_id,
                 principal=self._task.principal, prior=self._task.competence_prior,
                 context=compiled)
+        # The provider contract is `messages` / digests / layers. The engine's
+        # flat view is compiled into L5; it is not a second wire dialect.
         bundle = dict(compiled.bundle())
-        bundle["episodeView"] = dict(view)
         self.contexts.append(bundle)
         return self._model.propose(bundle, tools, sampling)
 
@@ -484,6 +492,61 @@ def _environment_effector(context: BindingContext) -> Any:
     return _EnvironmentEffect(context.verb, context.environment, "apply")
 
 
+def _sandbox_effector(context: BindingContext) -> Any:
+    """Command verbs go through the rootless perimeter, not host `subprocess`."""
+    return _SandboxEffect(context.verb, context.repo_path)
+
+
+class _SandboxEffect:
+    """`kernel.EffectAdapter` over `RootlessSandboxRunner` (`SBOX-01`).
+
+    GitEnvironment remains the filesystem/git adapter. `proc.exec` is a
+    different port: host `subprocess.run` is not a sandbox.
+    """
+
+    def __init__(self, name: str, repo_path: Path) -> None:
+        self.name = name
+        self._repo = Path(repo_path)
+
+    def healthy(self) -> bool:
+        return Path("/usr/bin/bwrap").exists()
+
+    def execute(self, request: Any) -> Any:
+        from ..kernel import AdapterOutcome, Occurrence
+
+        argv = request.args.get("argv") or request.args.get("command")
+        if isinstance(argv, str):
+            argv = argv.split()
+        if not argv:
+            return AdapterOutcome(
+                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0},
+                detail="proc.exec requires argv")
+        sealed = Path(tempfile.mkdtemp(prefix="vg-sealed-")) / "bundle"
+        sealed.write_bytes(b"sealed-evaluator-placeholder\n")
+        try:
+            runner = RootlessSandboxRunner(self._repo, evaluator_bundle=sealed)
+        except (OSError, FileNotFoundError) as exc:
+            return AdapterOutcome(
+                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0}, detail=str(exc))
+        result = runner.execute(tuple(argv))
+        if not result.ok:
+            error = result.error
+            return AdapterOutcome(
+                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0},
+                detail=error.message if error is not None else "sandbox unavailable")
+        value = result.value
+        if value is None or not value.containment.verified:
+            return AdapterOutcome(
+                "error", Occurrence.UNDETERMINABLE, {"usd_micros": 0},
+                detail="sandbox containment unverified")
+        digest = getattr(value.receipt, "stdout_digest", None) or ("sha256:" + "0" * 64)
+        return AdapterOutcome(
+            "ok", Occurrence.OCCURRED, {"usd_micros": 1},
+            result_digest=digest,
+            detail=(getattr(value.receipt, "stdout", b"") or b"")[:2048].decode(
+                "utf-8", "replace"))
+
+
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
 #: (`01 §2`, open/closed); the dispatcher and the loop never change to
 #: accommodate one.
@@ -493,7 +556,13 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "fs.write": EffectBinding(_environment_effector),
     "patch.apply": EffectBinding(_environment_effector, carries_diff=True),
     "fs.patch": EffectBinding(_environment_effector, carries_diff=True),
-    "proc.exec": EffectBinding(_environment_effector),
+    "proc.exec": EffectBinding(_sandbox_effector),
+}
+
+#: Manifest evaluator name → constructor. Unknown names bind nothing.
+#: There is no FakeEvaluator row: absence is inconclusive, not a pass (`M5`).
+EVALUATOR_BINDINGS: Mapping[str, type] = {
+    "coding-oracle@3": IsolatedEvaluator,
 }
 
 
@@ -583,12 +652,12 @@ class Runtime:
         interactive: bool = True,
         *,
         model: Any = None,
-        approver: Callable[[Any], bool] | None = None,
+        approver: Callable[[Any], Any] | None = None,
         verifier: Any = None,
         store: EventStorePort | None = None,
         clock: Any = None,
         bindings: Mapping[str, EffectBinding] | None = None,
-        approval_key: bytes = b"composition-root-approval-key",
+        approval_key: bytes | None = None,
         max_segments: int = 8,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
@@ -646,7 +715,12 @@ class Runtime:
         authorization = None
         terminal = RunTermination.ABANDONED
         detail = ""
-        authority = ApprovalAuthority(approval_key)
+        # HMAC verify key is injected by the operator. The root never mints
+        # a default signature (`GOV-01`): a missing key can still *issue* a
+        # challenge, but it cannot accept a decision.
+        can_verify = approval_key is not None
+        authority = ApprovalAuthority(
+            approval_key if approval_key is not None else os.urandom(32))
         # The harness names its own patch verb; `VG-05` writes `fs.patch` and
         # `vg-code-default` writes `patch.apply`. The manifest wins.
         flow = ApprovalFlow(authority, patch_verb=harness.diff_verb() or "fs.patch")
@@ -673,8 +747,9 @@ class Runtime:
             if suspended is None:
                 break
             request, result = suspended
-            authorization = _resolve(flow, authority, request, result, harness,
-                                     approver, clock=clock, task=task_context)
+            authorization = _resolve(
+                flow, request, result, harness, approver,
+                clock=clock, task=task_context, can_verify=can_verify)
             if authorization is None or not authorization.approved:
                 break
             # `K-14`: the approved request re-enters at S1, not at S6, and the
@@ -690,8 +765,10 @@ class Runtime:
             authorization = None
 
         verdict = None
-        if verifier is not None:
-            evaluation = verifier.evaluate(
+        bound_verifier = verifier if verifier is not None else _evaluator_from_manifest(
+            harness, repo)
+        if bound_verifier is not None:
+            evaluation = bound_verifier.evaluate(
                 RunRef(run_id=task_context.run_id, episode_id=task_context.episode_id),
                 EvaluationProtocol(name=harness.evaluators[0] if harness.evaluators
                                    else "unnamed"))
@@ -826,19 +903,35 @@ def _suspension(witness: _WitnessKernel) -> tuple[EffectRequest, Any] | None:
     return None
 
 
-def _resolve(flow: ApprovalFlow, authority: ApprovalAuthority,
+def _evaluator_from_manifest(harness: Harness, repo: Path) -> Any | None:
+    """Bind the manifest's evaluator. Unknown names bind nothing — never a fake."""
+    if not harness.evaluators:
+        return None
+    constructor = EVALUATOR_BINDINGS.get(harness.evaluators[0])
+    if constructor is None:
+        return None
+    return constructor(
+        workspace=repo,
+        oracle_digests={},
+        command=("python3", "-m", "unittest", "discover", "-s", str(repo)),
+        expected_uid=10002,
+        image_digest="unverified",
+    )
+
+
+def _resolve(flow: ApprovalFlow,
              request: EffectRequest, result: Any, harness: Harness,
-             approver: Callable[[Any], bool] | None, *,
-             clock: Any, task: TaskContext) -> Any:
+             approver: Callable[[Any], Any] | None, *,
+             clock: Any, task: TaskContext, can_verify: bool) -> Any:
     """Put the exact descriptor in front of a human and bind their answer.
 
     `ADR-0057`: the human approves *this* descriptor. A `None` approver is a
     refusal, not a default-allow — an unattended run that silently approved its
     own privileged effects would make the whole flow decorative.
 
-    The signature is produced by the operator-held authority and re-verified
-    against the request *as it stands at resumption* (`K-15`), so an approval
-    cannot be transplanted onto a diff the human never read.
+    The signature is produced *outside* this process (`GOV-01`) and re-verified
+    against the request *as it stands at resumption* (`K-15`). A boolean
+    callback is not cryptographic authority.
     """
     if approver is None or request.action != harness.diff_verb():
         return None
@@ -847,7 +940,9 @@ def _resolve(flow: ApprovalFlow, authority: ApprovalAuthority,
                                  process_id=task.episode_id, expires_at=_FAR_FUTURE)
     except ApprovalFormatError:
         return None
-    if not approver(challenge):
+    answer = approver(challenge)
+    if answer is None or answer is False:
         return None
-    decision = authority.approve(challenge, reviewer=task.principal)
-    return flow.verify(challenge, decision, request, now=clock.now())
+    if not isinstance(answer, ApprovalDecision) or not can_verify:
+        return None
+    return flow.verify(challenge, answer, request, now=clock.now())

@@ -116,9 +116,7 @@ class IsolatedEvaluator:
                     ),
                 )
             )
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return self._inconclusive("instrument_error")
 
     def _validate_instrument(self) -> str | None:

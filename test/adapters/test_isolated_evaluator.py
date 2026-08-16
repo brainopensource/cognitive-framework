@@ -164,5 +164,20 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         finally:
             del os.environ["PYTHONPATH"]
 
+    @unittest.skipIf(not hasattr(os, "getuid") or os.getuid() == 10002,
+                     "this host already is the evaluator uid")
+    def test_default_uid_gate_is_inconclusive_off_the_daemon(self) -> None:
+        evaluator = IsolatedEvaluator(
+            workspace=self.workspace,
+            oracle_digests={"test_oracle.py": _digest(self.oracle)},
+            command=("python3", "-c", "raise SystemExit(0)"),
+            image_digest="sha256:" + "a" * 64,
+        )
+        result = evaluator.evaluate(RunRef("run-uid", episode_id="ep1"), self.protocol)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value.outcome, "inconclusive")
+        self.assertEqual(result.value.reason, "evaluator_identity_unverified")
+
+
 if __name__ == "__main__":
     unittest.main()

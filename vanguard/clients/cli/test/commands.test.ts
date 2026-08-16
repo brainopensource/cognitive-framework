@@ -120,22 +120,22 @@ test("LiveRuntimeClient supports startRun and headless prompt stream", async () 
   assert.equal(items[0]?.envelope.payload.kind, "EpisodeStarted");
 });
 
-test("LiveRuntimeClient supports lifecycle operations without failing not_available", async () => {
+test("LiveRuntimeClient refuses lifecycle stubs when no daemon peer exists", async () => {
   const client = new LiveRuntimeClient(undefined, { runId: "run-ops-1" });
   const started = await client.startRun({ repo: ".", runId: "run-ops-1" });
-  assert.equal(started.ok, true);
-
-  const runSnap = await client.getRun("run-ops-1");
-  assert.equal(runSnap.ok, true);
-  if (runSnap.ok) {
-    assert.equal(runSnap.value.runId, "run-ops-1");
+  assert.equal(started.ok, false);
+  if (!started.ok) {
+    assert.equal(started.error.code, "not_available");
   }
 
+  const runSnap = await client.getRun("run-ops-1");
+  assert.equal(runSnap.ok, false);
+
   const artifact = await client.explainArtifact("art-1");
-  assert.equal(artifact.ok, true);
+  assert.equal(artifact.ok, false);
 
   const approval = await client.resolveApproval({ approvalId: "appr-1", decision: "approve" });
-  assert.equal(approval.ok, true);
+  assert.equal(approval.ok, false);
 
   const correction = await client.recordCorrection({
     episodeId: "ep-1",
@@ -146,10 +146,10 @@ test("LiveRuntimeClient supports lifecycle operations without failing not_availa
     scope: "repo",
     correctingPrincipalRole: "operator",
   });
-  assert.equal(correction.ok, true);
+  assert.equal(correction.ok, false);
 
   const cancel = await client.requestCancel("run-ops-1");
-  assert.equal(cancel.ok, true);
+  assert.equal(cancel.ok, false);
 });
 
 test("parseEventEnvelope strictly rejects non-UUID, invalid timestamp, and missing fields", () => {
@@ -204,13 +204,12 @@ test("LiveRuntimeClient drops duplicate frames and respects afterSeq cursor", as
   assert.deepEqual(received.map((e) => e.seq), ["2", "3", "4"]);
 });
 
-test("LiveRuntimeClient reports daemon status cleanly", async () => {
+test("LiveRuntimeClient reports daemon unreachable when the socket has no peer", async () => {
   const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/mock-runtime.sock" });
   const status = await client.getDaemonStatus();
-  assert.equal(status.ok, true);
-  if (status.ok) {
-    assert.equal(status.value.socketPath, "/tmp/mock-runtime.sock");
-    assert.equal(status.value.version, "0.4.0");
+  assert.equal(status.ok, false);
+  if (!status.ok) {
+    assert.equal(status.error.code, "not_available");
   }
 });
 
@@ -226,8 +225,22 @@ test("streamRun returns exit code 0 for satisfied outcome", async () => {
   assert.equal(linesOut.length, 4);
 });
 
-test("approveDecision executes approve and reject with stable exit codes", async () => {
+test("approveDecision fails closed when the live daemon is not on the wire", async () => {
   const client = new LiveRuntimeClient(undefined, { runId: "appr-123" });
+  const linesApprove: string[] = [];
+  const codeApprove = await approveDecision(client, "appr-123", "approve", (l) => linesApprove.push(l));
+  assert.equal(codeApprove, 2);
+
+  const linesReject: string[] = [];
+  const codeReject = await approveDecision(client, "appr-123", "reject", (l) => linesReject.push(l));
+  assert.equal(codeReject, 2);
+});
+
+test("approveDecision maps approve and reject to stable exit codes on a JSONL feed", async () => {
+  async function* empty() {
+    return;
+  }
+  const client = new LiveRuntimeClient(empty(), { runId: "appr-123" });
   const linesApprove: string[] = [];
   const codeApprove = await approveDecision(client, "appr-123", "approve", (l) => linesApprove.push(l));
   assert.equal(codeApprove, 0);
@@ -238,13 +251,12 @@ test("approveDecision executes approve and reject with stable exit codes", async
   assert.equal(codeReject, 1);
 });
 
-test("manageDaemon handles status action cleanly", async () => {
+test("manageDaemon fails closed when the daemon socket has no peer", async () => {
   const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/test.sock" });
   const linesDaemon: string[] = [];
   const code = await manageDaemon(client, "status", (l) => linesDaemon.push(l));
-  assert.equal(code, 0);
-  assert.equal(JSON.parse(linesDaemon[0]!).command, "daemon_status");
-  assert.equal(JSON.parse(linesDaemon[0]!).socketPath, "/tmp/test.sock");
+  assert.equal(code, 2);
+  assert.equal(JSON.parse(linesDaemon[0]!).ok, false);
 });
 
 test("ReplayRuntimeClient rejects recordCorrection with permission_denied", async () => {

@@ -48,7 +48,22 @@ export class LiveRuntimeClient implements RuntimeClient {
     this.socketPath = options.socketPath ?? process.env.VANGUARD_RUNTIME_SOCKET ?? "/tmp/vanguard-runtime.sock";
   }
 
+  private isFeedMode(): boolean {
+    return this.lines !== undefined;
+  }
+
+  private unavailable(action: string): Result<never> {
+    return fail(
+      "not_available",
+      `RuntimeService daemon has no ${action} protocol at ${this.socketPath}`,
+      true,
+    );
+  }
+
   async startRun(request: StartRunRequest, _signal?: AbortSignal): Promise<Result<RunRef>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("startRun");
+    }
     if (request.runId) this.currentRunId = request.runId;
     this.status = "running";
     return {
@@ -161,6 +176,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async getRun(runId: string): Promise<Result<RunSnapshot>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("getRun");
+    }
     return {
       ok: true,
       value: {
@@ -172,6 +190,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async requestCancel(runId: string): Promise<Result<CommandReceipt>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("cancel");
+    }
     this.status = "cancelled";
     return {
       ok: true,
@@ -184,6 +205,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async requestCheckpoint(runId: string): Promise<Result<CommandReceipt>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("checkpoint");
+    }
     return {
       ok: true,
       value: {
@@ -195,6 +219,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async requestResume(request: ResumeRunRequest): Promise<Result<RunRef>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("resume");
+    }
     return {
       ok: true,
       value: {
@@ -204,6 +231,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async explainArtifact(artifactId: string): Promise<Result<ArtifactExplanation>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("explainArtifact");
+    }
     return {
       ok: true,
       value: {
@@ -218,6 +248,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async resolveApproval(request: ResolveApprovalRequest): Promise<Result<CommandReceipt>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("resolveApproval");
+    }
     return {
       ok: true,
       value: {
@@ -229,6 +262,9 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async recordCorrection(record: CorrectionRecord): Promise<Result<CommandReceipt>> {
+    if (!this.isFeedMode()) {
+      return this.unavailable("recordCorrection");
+    }
     this.corrections.push(record);
     return {
       ok: true,
@@ -241,14 +277,32 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async getDaemonStatus(_signal?: AbortSignal): Promise<Result<DaemonStatus>> {
-    return {
-      ok: true,
-      value: {
-        status: this.status === "running" ? "running" : "stopped",
-        socketPath: this.socketPath,
-        version: "0.4.0",
-      },
-    };
+    if (this.isFeedMode()) {
+      return fail("not_available", "JSONL feed mode has no RuntimeService daemon", false);
+    }
+    return await new Promise((resolve) => {
+      const socket = createConnection({ path: this.socketPath });
+      const timer = setTimeout(() => {
+        socket.destroy();
+        resolve(fail("not_available", `RuntimeService daemon not reachable at ${this.socketPath}`, true));
+      }, 400);
+      socket.once("connect", () => {
+        clearTimeout(timer);
+        socket.destroy();
+        resolve({
+          ok: true,
+          value: {
+            status: "running",
+            socketPath: this.socketPath,
+            version: "0.4.0",
+          },
+        });
+      });
+      socket.once("error", () => {
+        clearTimeout(timer);
+        resolve(fail("not_available", `RuntimeService daemon not reachable at ${this.socketPath}`, true));
+      });
+    });
   }
 }
 

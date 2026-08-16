@@ -39,14 +39,28 @@ import unittest
 from pathlib import Path
 
 from vanguard.packages.agency import RunTermination
+from vanguard.packages.adapters.evaluators.fake import FakeEvaluator
+from vanguard.packages.adapters.evaluators.isolated import IsolatedEvaluator
 from vanguard.packages.ports.evaluator import RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
+from vanguard.packages.runtime.governance.approvals import ApprovalAuthority
 from vanguard.packages.runtime.root import (
+    DEFAULT_BINDINGS,
+    EVALUATOR_BINDINGS,
     CompositionError,
     RunResult,
     Runtime,
     TaskContext,
+    _environment_effector,
+    _sandbox_effector,
 )
+
+OPERATOR_KEY = b"test-operator-held-approval-key"
+
+
+def sign_challenge(challenge):
+    """Operator-side signature. The runtime only verifies (`GOV-01`)."""
+    return ApprovalAuthority(OPERATOR_KEY).approve(challenge, reviewer="agent-1")
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFESTS = ROOT / "vanguard" / "packages" / "agency" / "manifests"
@@ -219,6 +233,11 @@ class Composition(unittest.TestCase):
         with self.assertRaises(CompositionError):
             Runtime.compose(CODE_DEFAULT, bindings={})
 
+    def test_proc_exec_is_bound_to_the_sandbox_not_the_host_environment(self) -> None:
+        """`SBOX-01`: command verbs must not inherit GitEnvironment.apply."""
+        self.assertIs(DEFAULT_BINDINGS["proc.exec"].factory, _sandbox_effector)
+        self.assertIsNot(DEFAULT_BINDINGS["proc.exec"].factory, _environment_effector)
+
     def test_a_manifest_that_does_not_resolve_fails_closed(self) -> None:
         with self.assertRaises(CompositionError):
             Runtime.compose(MANIFESTS / "does-not-exist" / "manifest.json")
@@ -244,7 +263,8 @@ class DogfoodGate(unittest.TestCase):
             competence_prior=0.6,
         )
         kwargs = {"manifest_path": CODE_DEFAULT, "task_context": task,
-                  "model": self.operator, "approver": lambda challenge: True,
+                  "model": self.operator, "approver": sign_challenge,
+                  "approval_key": OPERATOR_KEY,
                   "verifier": self.verifier}
         kwargs.update(overrides)
         return Runtime.execute_harness(**kwargs)
@@ -295,6 +315,13 @@ class DogfoodGate(unittest.TestCase):
         # the same verb.
         self.assertEqual(challenges[0].payload["descriptorDigest"], patch.descriptor_digest)
 
+    def test_a_boolean_approver_is_not_a_signature(self) -> None:
+        """`GOV-01`: a True callback must not mint the HMAC the runtime verifies."""
+        result = self.execute(approver=lambda challenge: True)
+
+        self.assertEqual((self.repo / "calc.py").read_text(encoding="utf-8"), BUGGY_SOURCE)
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+
     def test_a_refused_approval_leaves_the_file_untouched(self) -> None:
         """The approval is load-bearing, not ceremonial."""
         result = self.execute(approver=lambda challenge: False)
@@ -339,11 +366,18 @@ class DogfoodGate(unittest.TestCase):
         self.assertTrue(result.verdict.claims[0]["holds"])
         self.assertEqual(len(self.verifier.calls), 1)
 
-    def test_a_run_with_no_verifier_reports_no_verdict_rather_than_success(self) -> None:
-        """`M5` again, from the other side: absence of evaluation is not a pass."""
+    def test_unconfigured_evaluator_is_inconclusive_not_success(self) -> None:
+        """Wrong UID / unverified image is a real outcome, not a missing verdict
+        and not a fake pass (`REQ-EVAL-001`, `M5`)."""
         result = self.execute(verifier=None)
 
-        self.assertIsNone(result.verdict)
+        self.assertIsNotNone(result.verdict)
+        self.assertEqual(result.verdict.outcome, "inconclusive")
+        self.assertNotEqual(result.verdict.outcome, "claims")
+
+    def test_no_code_path_substitutes_a_fake_evaluator(self) -> None:
+        self.assertIs(EVALUATOR_BINDINGS.get("coding-oracle@3"), IsolatedEvaluator)
+        self.assertNotIn(FakeEvaluator, EVALUATOR_BINDINGS.values())
 
     # -- claim 6: it is all on the ledger, prior first ------------------
 
@@ -417,7 +451,8 @@ class LiveDogfood(unittest.TestCase):
 
         result = Runtime.execute_harness(
             manifest_path=CODE_DEFAULT, task_context=task,
-            model=OpenRouterModel(), approver=lambda challenge: True)
+            model=OpenRouterModel(), approver=sign_challenge,
+            approval_key=OPERATOR_KEY)
 
         # A live model may fail to repair the bug; that is a task outcome, not
         # a defect in the composition. What the composition must not do is

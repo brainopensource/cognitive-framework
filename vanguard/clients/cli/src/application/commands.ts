@@ -97,7 +97,7 @@ export async function approveDecision(
   const result = await client.resolveApproval({ approvalId: runId, decision });
   if (!result.ok) {
     write(jsonLine({ ok: false, error: result.error }));
-    return decision === "reject" ? 1 : 2;
+    return 2;
   }
   write(jsonLine(result.value));
   return decision === "approve" ? 0 : 1;

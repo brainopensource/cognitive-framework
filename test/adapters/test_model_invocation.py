@@ -17,21 +17,22 @@ class TestModelInvocation(unittest.TestCase):
         self.assertEqual(res.error.kind, "instrument_error")
 
     def test_translate_valid_tool_call(self):
-        for tool_name, action in [
-            ("fs.read", "read"),
-            ("fs.search", "search"),
-            ("patch.apply", "patch"),
-            ("proc.test", "test"),
+        for tool_name, action, args in [
+            ("fs.read", "fs.read", {"path": "src/a.py"}),
+            ("fs.search", "fs.search", {"pattern": "TODO", "path": "."}),
+            ("patch.apply", "patch.apply", {"path": ".", "patch": "diff"}),
+            ("proc.test", "proc.test", {"argv": ["pytest", "-q"]}),
         ]:
             proposal = {
                 "text": "",
-                "toolCalls": [{"name": tool_name, "arguments": {"foo": "bar"}}]
+                "toolCalls": [{"name": tool_name, "arguments": args}]
             }
             res = ProposalTranslator.translate(proposal)
             self.assertTrue(res.ok)
             self.assertEqual(res.value["kind"], "effect")
             self.assertEqual(res.value["action"], action)
-            self.assertEqual(res.value["args"], {"foo": "bar"})
+            self.assertEqual(res.value["args"], args)
+            self.assertIsNone(res.value["reservation"])
 
     def test_translate_unknown_tool_fails(self):
         proposal = {
@@ -103,3 +104,15 @@ class TestModelInvocation(unittest.TestCase):
         })
         self.assertTrue(result.ok)
         self.assertIsNone(result.value["reservation"])
+
+    def test_manifest_binds_declared_tool_and_rejects_escape(self):
+        result = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "x.py"}}]},
+            tool_schemas=({"name": "read", "verb": "fs.read"},),
+        )
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["resource"]["root"], "/workspace")
+        self.assertFalse(ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "../x"}}]},
+            tool_schemas=({"name": "read", "verb": "fs.read"},),
+        ).ok)

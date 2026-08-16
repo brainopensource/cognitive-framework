@@ -7,6 +7,8 @@ FROM alpine:3.19.1
 
 RUN apk add --no-cache \
     python3 \
+    py3-pip \
+    py3-cryptography \
     git \
     patch \
     grep \
@@ -17,6 +19,10 @@ RUN apk add --no-cache \
     && addgroup -g 10001 vgworker \
     && adduser -u 10001 -G vgworker -s /bin/sh -D vgworker \
     && rm -rf /var/cache/apk/*
+
+COPY pyproject.toml README.md /opt/vanguard/
+COPY vanguard /opt/vanguard/vanguard
+RUN python3 -m pip install --no-cache-dir --no-deps /opt/vanguard
 
 USER 10001:10001
 WORKDIR /workspace

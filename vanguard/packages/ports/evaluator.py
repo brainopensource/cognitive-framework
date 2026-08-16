@@ -45,6 +45,8 @@ class Verdict:
     outcome: str  # "claims" | "inconclusive"
     claims: tuple[Mapping[str, Any], ...] = ()
     reason: str = ""
+    signature: str | None = None
+    signer_key_id: str | None = None
 
 
 class EvaluatorPort(Protocol):

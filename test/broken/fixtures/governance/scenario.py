@@ -32,7 +32,8 @@ class BrokenApprovalPolicy(DescriptorBoundApprovalPolicy):
     """The planted defect: any approval-shaped value bypasses binding."""
 
     def authorize(self, request, *, widens_capability, requested_scope, spans=None):
-        decision = self._delegate.authorize(
+        base = getattr(self, "_base", getattr(self, "_delegate", None))
+        decision = base.authorize(
             request,
             widens_capability=widens_capability,
             requested_scope=requested_scope,

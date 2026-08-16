@@ -53,9 +53,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from ..adapters.environment.git import GitEnvironment
-from ..adapters.evaluators.isolated import IsolatedEvaluator
+from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
+from ..adapters.evaluators.client import EvaluatorClient
+from ..adapters.evaluators.unavailable import UnavailableEvaluator
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
+from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.context import (
@@ -225,7 +227,7 @@ class BindingContext:
     """Everything a factory may see. Deliberately small."""
 
     verb: str
-    environment: GitEnvironment
+    environment: Any
     repo_path: Path
 
 
@@ -275,7 +277,7 @@ class _EnvironmentEffect:
     (`F-22`), because resolving it either way manufactures evidence.
     """
 
-    def __init__(self, name: str, environment: GitEnvironment, call: str) -> None:
+    def __init__(self, name: str, environment: Any, call: str) -> None:
         self.name = name
         self._environment = environment
         self._call = call
@@ -493,58 +495,13 @@ def _environment_effector(context: BindingContext) -> Any:
 
 
 def _sandbox_effector(context: BindingContext) -> Any:
-    """Command verbs go through the rootless perimeter, not host `subprocess`."""
-    return _SandboxEffect(context.verb, context.repo_path)
+    """Compatibility binding for process verbs on the unified worker.
 
-
-class _SandboxEffect:
-    """`kernel.EffectAdapter` over `RootlessSandboxRunner` (`SBOX-01`).
-
-    GitEnvironment remains the filesystem/git adapter. `proc.exec` is a
-    different port: host `subprocess.run` is not a sandbox.
+    The name is retained for manifest/test compatibility; the returned adapter
+    is the same environment bridge used by filesystem effects, whose concrete
+    worker is rootless Bubblewrap-bound at composition time.
     """
-
-    def __init__(self, name: str, repo_path: Path) -> None:
-        self.name = name
-        self._repo = Path(repo_path)
-
-    def healthy(self) -> bool:
-        return Path("/usr/bin/bwrap").exists()
-
-    def execute(self, request: Any) -> Any:
-        from ..kernel import AdapterOutcome, Occurrence
-
-        argv = request.args.get("argv") or request.args.get("command")
-        if isinstance(argv, str):
-            argv = argv.split()
-        if not argv:
-            return AdapterOutcome(
-                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0},
-                detail="proc.exec requires argv")
-        sealed = Path(tempfile.mkdtemp(prefix="vg-sealed-")) / "bundle"
-        sealed.write_bytes(b"sealed-evaluator-placeholder\n")
-        try:
-            runner = RootlessSandboxRunner(self._repo, evaluator_bundle=sealed)
-        except (OSError, FileNotFoundError) as exc:
-            return AdapterOutcome(
-                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0}, detail=str(exc))
-        result = runner.execute(tuple(argv))
-        if not result.ok:
-            error = result.error
-            return AdapterOutcome(
-                "error", Occurrence.NOT_OCCURRED, {"usd_micros": 0},
-                detail=error.message if error is not None else "sandbox unavailable")
-        value = result.value
-        if value is None or not value.containment.verified:
-            return AdapterOutcome(
-                "error", Occurrence.UNDETERMINABLE, {"usd_micros": 0},
-                detail="sandbox containment unverified")
-        digest = getattr(value.receipt, "stdout_digest", None) or ("sha256:" + "0" * 64)
-        return AdapterOutcome(
-            "ok", Occurrence.OCCURRED, {"usd_micros": 1},
-            result_digest=digest,
-            detail=(getattr(value.receipt, "stdout", b"") or b"")[:2048].decode(
-                "utf-8", "replace"))
+    return _environment_effector(context)
 
 
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
@@ -562,7 +519,7 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
 #: Manifest evaluator name → constructor. Unknown names bind nothing.
 #: There is no FakeEvaluator row: absence is inconclusive, not a pass (`M5`).
 EVALUATOR_BINDINGS: Mapping[str, type] = {
-    "coding-oracle@3": IsolatedEvaluator,
+    "coding-oracle@3": EvaluatorClient,
 }
 
 
@@ -670,7 +627,14 @@ class Runtime:
         harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
                               bindings=bindings)
         repo = Path(task_context.repo_path).resolve()
-        environment = GitEnvironment(repo)
+        if not Path("/usr/bin/bwrap").exists():
+            raise CompositionError("rootless Bubblewrap is required for product effects")
+        sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
+        sealed_bundle = sealed_dir / "bundle"
+        sealed_bundle.write_bytes(b"sealed evaluator mount is intentionally unavailable to worker\n")
+        worker = WorkerProtocol(RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle))
+        environment = SandboxedEnvironmentAdapter(
+            worker, repo, environment_id=f"workspace:{repo}")
         clock = clock or _SystemClock()
         store = store or SqliteEventStore(":memory:")
         ledger = LedgerBridge(store, episode_id=task_context.episode_id)
@@ -739,7 +703,9 @@ class Runtime:
             outcome = engine.run(
                 episode_id=task_context.episode_id, run_id=task_context.run_id,
                 principal=task_context.principal, brief=task_context.brief,
-                spans=(_operator_span(),))
+                spans=(_operator_span(),),
+                receipt_labeller=lambda turn, dispatch: _admit_turn_result(
+                    operator, turn, dispatch))
             terminal, detail = outcome.terminal, outcome.episode.detail
             suspended = _suspension(witness)
             _record(receipts, operator, witness)
@@ -760,7 +726,7 @@ class Runtime:
                 clock=clock, ledger=ledger, events=ledger, sinks=harness.sinks))
             approved.dispatch(request, requested_scope=scope,
                               reservation=Reservation(usd_micros=100, millis=1000))
-            _record(receipts, operator, approved)
+            _record(receipts, operator, approved, admit_context=True)
             authorization = None
 
         verdict = None
@@ -860,7 +826,7 @@ def _operator_span() -> Span:
     return Span("brief-1", Trust.OPERATOR, "operator_brief")
 
 
-def _environment_map(environment: GitEnvironment, harness: Harness) -> str:
+def _environment_map(environment: Any, harness: Harness) -> str:
     """L3. Stable within a task, so it is read once and never re-read mid-run."""
     profile = environment.profile()
     if not profile.ok or profile.value is None:
@@ -871,9 +837,35 @@ def _environment_map(environment: GitEnvironment, harness: Harness) -> str:
             f"capabilities={','.join(sorted(harness.verbs))}")
 
 
+def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> None:
+    """Admit the just-produced tool result before the next model turn.
+
+    EpisodeEngine invokes this callback immediately after every dispatch. The
+    result is therefore available to the next proposal in the same episode,
+    rather than waiting until an approval suspension or terminal boundary.
+    """
+    outcome = getattr(result, "outcome", None)
+    if outcome is None:
+        # Approval suspension is not an observation of an executed effect.
+        # Do not let a control-plane challenge advance a workload scenario.
+        return None
+    detail = getattr(result, "detail", "") or getattr(outcome, "detail", "")
+    digest = getattr(outcome, "result_digest", None) or ""
+    text = f"tool result turn={turn} digest={digest}"
+    if detail:
+        text += f"\n{detail}"
+    operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
+    return None
+
+
 def _record(receipts: list[Receipt], operator: _LayeredOperator,
-            witness: _WitnessKernel) -> None:
-    """Turn dispatch outcomes into receipts, and admit each one to L5."""
+            witness: _WitnessKernel, *, admit_context: bool = False) -> None:
+    """Turn dispatch outcomes into root receipts.
+
+    Context admission normally happens at the engine callback so the next
+    turn sees the observation. ``admit_context`` remains available for the
+    approved dispatch performed between episode segments.
+    """
     for request, result in witness.calls:
         if result.failure is not FailurePath.OK or result.outcome is None:
             continue
@@ -887,11 +879,12 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
         text = f"{request.action} -> {result.outcome.status} ({result.outcome.result_digest})"
         if outcome_detail:
             text += f"\n{outcome_detail}"
-        operator.note(
-            label=f"{request.action}-{len(receipts)}",
-            source=request.action,
-            text=text,
-        )
+        if admit_context:
+            operator.note(
+                label=f"{request.action}-{len(receipts)}",
+                source=request.action,
+                text=text,
+            )
     witness.calls.clear()
 
 
@@ -909,12 +902,27 @@ def _evaluator_from_manifest(harness: Harness, repo: Path) -> Any | None:
     constructor = EVALUATOR_BINDINGS.get(harness.evaluators[0])
     if constructor is None:
         return None
+    if constructor is not EvaluatorClient:
+        return UnavailableEvaluator("unsupported_evaluator_binding")
+    import base64
+
+    socket_path = os.environ.get("VANGUARD_EVALUATOR_SOCKET")
+    image_digest = os.environ.get("VANGUARD_EVALUATOR_IMAGE_DIGEST")
+    key_id = os.environ.get("VANGUARD_EVALUATOR_VERDICT_KEY_ID")
+    public_key_encoded = os.environ.get("VANGUARD_EVALUATOR_VERDICT_PUBLIC_KEY")
+    if not socket_path or not image_digest or not key_id or not public_key_encoded:
+        return UnavailableEvaluator("evaluator_peer_unavailable")
+    try:
+        public_key = base64.b64decode(public_key_encoded, validate=True)
+    except Exception:
+        return UnavailableEvaluator("evaluator_key_unavailable")
     return constructor(
-        workspace=repo,
-        oracle_digests={},
-        command=("python3", "-m", "unittest", "discover", "-s", str(repo)),
+        socket_path=socket_path,
         expected_uid=10002,
-        image_digest="unverified",
+        expected_image_digest=image_digest,
+        timeout_seconds=60.0,
+        expected_verdict_key_id=key_id,
+        expected_verdict_public_key=public_key,
     )
 
 

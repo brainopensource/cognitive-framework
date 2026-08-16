@@ -11,13 +11,17 @@ from __future__ import annotations
 import json
 import os
 import socket
+import struct
+import argparse
+import base64
 from dataclasses import dataclass
 from typing import Mapping
 
 from vanguard.packages.adapters.evaluators.isolated import IsolatedEvaluator
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef
 
-__all__ = ["DaemonConfig", "EvaluatorDaemon"]
+__all__ = ["DaemonConfig", "EvaluatorDaemon", "main"]
 
 
 @dataclass(frozen=True)
@@ -29,11 +33,18 @@ class DaemonConfig:
     command: tuple[str, ...]
     expected_uid: int = 10002
     timeout_seconds: float = 60.0
+    verdict_private_key: bytes | None = None
+    verdict_key_id: str = "evaluator-key-default"
+    expected_client_uid: int | None = None
 
 
 class EvaluatorDaemon:
     def __init__(self, config: DaemonConfig) -> None:
         self._config = config
+        self._signer = (
+            VerdictSigner(config.verdict_private_key, config.verdict_key_id)
+            if config.verdict_private_key is not None else None
+        )
 
     def serve_once(self) -> None:
         if os.path.exists(self._config.socket_path):
@@ -41,10 +52,20 @@ class EvaluatorDaemon:
 
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
             server.bind(self._config.socket_path)
+            os.chmod(self._config.socket_path, 0o600)
             server.listen(1)
             conn, _ = server.accept()
             with conn:
+                if self._config.expected_client_uid is not None:
+                    creds = conn.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize("3i"))
+                    _, uid, _ = struct.unpack("3i", creds)
+                    if uid != self._config.expected_client_uid:
+                        return
                 self._handle_connection(conn)
+
+    def serve_forever(self) -> None:
+        while True:
+            self.serve_once()
 
     def _handle_connection(self, conn: socket.socket) -> None:
         try:
@@ -54,15 +75,25 @@ class EvaluatorDaemon:
                 "uid": os.getuid(),
                 "imageDigest": self._config.image_digest,
                 "nonce": nonce,
+                "verdictKeyId": self._signer.key_id if self._signer else None,
             }
+            if self._signer:
+                import base64
+                handshake["verdictPublicKey"] = base64.b64encode(self._signer.public_bytes).decode("ascii")
             conn.sendall(json.dumps(handshake).encode("utf-8") + b"\n")
 
-            f = conn.makefile("r", encoding="utf-8")
-            line = f.readline()
+            f = conn.makefile("r", encoding="utf-8", errors="strict")
+            line = f.readline(65_537)
             if not line:
+                return
+            if len(line.encode("utf-8")) > 65_536:
+                self._send_error(conn, "request_too_large")
                 return
 
             req = json.loads(line)
+            if not isinstance(req, dict) or set(req) - {"action", "runRef", "protocol", "nonce"}:
+                self._send_error(conn, "invalid_request")
+                return
             if req.get("nonce") != nonce:
                 self._send_error(conn, "invalid_nonce")
                 return
@@ -98,17 +129,18 @@ class EvaluatorDaemon:
                 return
 
             verdict = result.value
-            resp = {
-                "verdict": {
-                    "outcome": verdict.outcome,
-                    "claims": verdict.claims,
-                    "reason": verdict.reason,
-                }
+            verdict_data = {
+                "outcome": verdict.outcome,
+                "claims": verdict.claims,
+                "reason": verdict.reason,
             }
+            if self._signer is None:
+                verdict_data = {"outcome": "inconclusive", "claims": [], "reason": "evaluator_signer_unavailable"}
+            signature = self._signer.sign(verdict_data) if self._signer else ""
+            resp = {"verdict": verdict_data, "signature": signature,
+                    "keyId": self._signer.key_id if self._signer else ""}
             conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except Exception:
             self._send_error(conn, "instrument_error")
 
     def _send_error(self, conn: socket.socket, msg: str) -> None:
@@ -117,3 +149,32 @@ class EvaluatorDaemon:
             conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
         except Exception:
             pass
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Vanguard exterior evaluator daemon")
+    parser.add_argument("--socket", required=True)
+    parser.add_argument("--workspace", required=True)
+    parser.add_argument("--oracle-manifest", required=True)
+    parser.add_argument("--image-digest", required=True)
+    parser.add_argument("--command", nargs="+", required=True)
+    args = parser.parse_args()
+    manifest = json.loads(open(args.oracle_manifest, encoding="utf-8").read())
+    private_key_text = os.environ.get("VANGUARD_EVALUATOR_PRIVATE_KEY_B64", "")
+    private_key = base64.b64decode(private_key_text, validate=True) if private_key_text else None
+    daemon = EvaluatorDaemon(DaemonConfig(
+        socket_path=args.socket,
+        image_digest=args.image_digest,
+        workspace=args.workspace,
+        oracle_digests=manifest,
+        command=tuple(args.command),
+        expected_uid=10002,
+        verdict_private_key=private_key,
+        verdict_key_id=os.environ.get("VANGUARD_EVALUATOR_VERDICT_KEY_ID", "evaluator-key-default"),
+    ))
+    daemon.serve_forever()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

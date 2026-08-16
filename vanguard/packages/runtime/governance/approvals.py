@@ -10,6 +10,7 @@ Authority Model:
 - The Operator (CLI / Key Agent) holds the private Ed25519 signing key (`OperatorSigner`).
 - The Runtime holds strictly the public verification keys (`ApprovalAuthority`).
 - Verification is cryptographic, descriptor-bound, and evaluated against canonical bytes.
+- The Runtime cannot mint signatures (`GOV-01`).
 """
 
 from __future__ import annotations
@@ -114,7 +115,7 @@ class ApprovalAuthorization:
 
 
 class OperatorSigner:
-    """Operator-held Ed25519 signing agent. Used outside runtime (e.g. in CLI)."""
+    """Operator-held Ed25519 signing agent. Lives outside the runtime (e.g. in CLI)."""
 
     def __init__(
         self,
@@ -203,7 +204,7 @@ class OperatorSigner:
 
 
 class ApprovalAuthority:
-    """Runtime-held verification authority. Holds only public keys (`ADR-0062`)."""
+    """Runtime-held verification authority. Holds STRICTLY public keys (`GOV-01`, `ADR-0062`)."""
 
     def __init__(
         self,
@@ -215,7 +216,6 @@ class ApprovalAuthority:
         default_key_id: str = "operator-key-default",
     ) -> None:
         self._keys: dict[str, ed25519.Ed25519PublicKey] = {}
-        self._signer: OperatorSigner | None = None
         self.default_key_id = default_key_id
 
         if public_keys is None:
@@ -223,23 +223,21 @@ class ApprovalAuthority:
         elif isinstance(public_keys, ed25519.Ed25519PublicKey):
             self._keys[default_key_id] = public_keys
         elif isinstance(public_keys, bytes):
-            try:
-                if len(public_keys) == 32:
+            if len(public_keys) == 32:
+                try:
                     self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
                         public_keys
                     )
-                else:
+                except Exception:
                     derived = hashlib.sha256(public_keys).digest()
                     self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
                         derived
                     )
-            except Exception:
+            else:
                 derived = hashlib.sha256(public_keys).digest()
                 self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
                     derived
                 )
-            self._signer = OperatorSigner(public_keys, key_id=default_key_id)
-            self._keys[default_key_id] = self._signer.public_key
         elif isinstance(public_keys, Mapping):
             for kid, key in public_keys.items():
                 if isinstance(key, ed25519.Ed25519PublicKey):
@@ -249,11 +247,11 @@ class ApprovalAuthority:
                         try:
                             self._keys[kid] = ed25519.Ed25519PublicKey.from_public_bytes(key)
                         except Exception:
-                            signer = OperatorSigner(key, key_id=kid)
-                            self._keys[kid] = signer.public_key
+                            derived = hashlib.sha256(key).digest()
+                            self._keys[kid] = ed25519.Ed25519PublicKey.from_public_bytes(derived)
                     else:
-                        signer = OperatorSigner(key, key_id=kid)
-                        self._keys[kid] = signer.public_key
+                        derived = hashlib.sha256(key).digest()
+                        self._keys[kid] = ed25519.Ed25519PublicKey.from_public_bytes(derived)
                 else:
                     raise ValueError(f"invalid public key for key ID {kid!r}")
         else:
@@ -267,22 +265,16 @@ class ApprovalAuthority:
                 try:
                     self._keys[key_id] = ed25519.Ed25519PublicKey.from_public_bytes(key)
                 except Exception:
-                    self._keys[key_id] = OperatorSigner(key, key_id=key_id).public_key
+                    derived = hashlib.sha256(key).digest()
+                    self._keys[key_id] = ed25519.Ed25519PublicKey.from_public_bytes(derived)
             else:
-                self._keys[key_id] = OperatorSigner(key, key_id=key_id).public_key
+                derived = hashlib.sha256(key).digest()
+                self._keys[key_id] = ed25519.Ed25519PublicKey.from_public_bytes(derived)
         else:
             raise ValueError(f"invalid public key for key ID {key_id!r}")
 
-    def approve(self, challenge: ApprovalChallenge, *, reviewer: str) -> ApprovalDecision:
-        """Operator signing alias. Used in tests/simulations when key is available."""
-        if self._signer is not None:
-            return self._signer.approve(challenge, reviewer=reviewer)
-        signer = OperatorSigner(key_id=self.default_key_id)
-        self._keys[self.default_key_id] = signer.public_key
-        return signer.approve(challenge, reviewer=reviewer)
-
     def verify(self, decision: ApprovalDecision) -> bool:
-        public_key = self._keys.get(decision.key_id) or self._keys.get(self.default_key_id)
+        public_key = self._keys.get(decision.key_id)
         if public_key is None:
             return False
         try:

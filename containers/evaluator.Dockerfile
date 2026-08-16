@@ -7,6 +7,8 @@ FROM alpine:3.19.1
 
 RUN apk add --no-cache \
     python3 \
+    py3-pip \
+    py3-cryptography \
     git \
     coreutils \
     bash \
@@ -16,6 +18,10 @@ RUN apk add --no-cache \
     && mkdir -p /sealed-oracle /workspace /run/evaluator \
     && chown -R 10002:10002 /run/evaluator \
     && rm -rf /var/cache/apk/*
+
+COPY pyproject.toml README.md /opt/vanguard/
+COPY vanguard /opt/vanguard/vanguard
+RUN python3 -m pip install --no-cache-dir --no-deps /opt/vanguard
 
 USER 10002:10002
 WORKDIR /workspace

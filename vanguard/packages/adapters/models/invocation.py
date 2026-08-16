@@ -1,14 +1,21 @@
-"""Canonical ModelInvocation and provider-to-domain proposal translation.
+"""Canonical provider-to-domain proposal translation.
 
-Owning contract: S6B-MD-001, REQ-PORT-006, CT-33.
-The runtime, never the model, supplies authoritative resource identity,
-scope, reservation and capability.
+Provider output is untrusted data. This module validates its shape, resolves
+only manifest-declared tools, and binds a non-authoritative resource selector.
+Capabilities, scope, reservations and approvals remain kernel/runtime-owned.
 """
 
-from dataclasses import dataclass
-from typing import Any, Mapping
+from __future__ import annotations
+
 import json
+from dataclasses import dataclass
+from pathlib import PurePosixPath
+from typing import Any, Mapping, Sequence
+
 from ...ports.event_store import Result
+
+__all__ = ["ModelInvocation", "ProposalTranslator", "validate_proposal_schema"]
+
 
 @dataclass(frozen=True)
 class ModelInvocation:
@@ -20,120 +27,190 @@ class ModelInvocation:
     created_at: str
     source: str = "context_compiler"
 
+
 class ProposalTranslator:
+    """Translate raw provider DTOs into the canonical proposal mapping."""
+
     KNOWN_TOOLS = {
-        "fs.read": "read",
-        "fs.search": "search",
-        "patch.apply": "patch",
-        "proc.test": "test"
+        "fs.read": "fs.read",
+        "fs.search": "fs.search",
+        "fs.write": "fs.write",
+        "patch.apply": "patch.apply",
+        "fs.patch": "patch.apply",
+        "proc.exec": "proc.exec",
+        "proc.test": "proc.test",
+        "read": "fs.read",
+        "view_file": "fs.read",
+        "cat": "fs.read",
+        "search": "fs.search",
+        "grep_search": "fs.search",
+        "write": "fs.write",
+        "write_to_file": "fs.write",
+        "patch": "patch.apply",
+        "edit_file": "patch.apply",
+        "replace_file_content": "patch.apply",
+        "exec": "proc.exec",
+        "run_command": "proc.exec",
+        "bash": "proc.exec",
+        "test": "proc.test",
     }
 
     @classmethod
-    def translate(cls, proposal: Mapping[str, Any]) -> Result[Mapping[str, Any]]:
-        schema_result = validate_proposal_schema(proposal)
-        if not schema_result.ok:
-            return Result.fail(
-                kind=schema_result.error.kind,
-                message=schema_result.error.message,
-            )
+    def translate(
+        cls,
+        proposal: Mapping[str, Any],
+        *,
+        tool_schemas: Sequence[Mapping[str, Any]] = (),
+        resource_root: str = "/workspace",
+    ) -> Result[Mapping[str, Any]]:
+        checked = validate_proposal_schema(proposal)
+        if not checked.ok:
+            return Result.fail(checked.error.kind, checked.error.message)
 
         text = proposal.get("text", "")
-        tool_calls = proposal.get("toolCalls", [])
-        
-        if not tool_calls:
-            if not text:
-                return Result.fail(kind="instrument_error", message="Proposal has neither tool calls nor text.")
-            return Result.success({"kind": "finish", "note": text})
-            
-        if len(tool_calls) > 1:
-            return Result.fail(kind="instrument_error", message="Multiple actions in a single proposal are not supported.")
-            
-        call = tool_calls[0]
-        name = call.get("name", "")
-        if name not in cls.KNOWN_TOOLS:
-            return Result.fail(kind="instrument_error", message=f"Unknown tool name: {name}")
-            
-        action = cls.KNOWN_TOOLS[name]
-        args = call.get("arguments", {})
-        
-        if not isinstance(args, dict):
-            return Result.fail(kind="instrument_error", message="Malformed JSON arguments.")
-            
+        calls = proposal.get("toolCalls", [])
+        if not calls:
+            return Result.success({"kind": "finish", "note": text or "Task completed."})
+        if len(calls) != 1:
+            return Result.fail("instrument_error", "multiple actions in one proposal are unsupported")
+
+        call = calls[0]
+        name = str(call["name"])
+        declared: dict[str, str] = {}
+        for schema in tool_schemas:
+            if not isinstance(schema, Mapping):
+                continue
+            function = schema.get("function")
+            source = function if isinstance(function, Mapping) else schema
+            schema_name = source.get("name") if isinstance(source, Mapping) else None
+            verb = schema.get("verb")
+            if isinstance(schema_name, str) and isinstance(verb, str):
+                declared[schema_name] = verb
+
+        if declared:
+            action = declared.get(name)
+            if action is None:
+                return Result.fail("instrument_error", f"tool is not declared by manifest: {name}")
+            if action not in set(cls.KNOWN_TOOLS.values()):
+                return Result.fail("instrument_error", f"manifest declares unsupported tool: {action}")
+        else:
+            action = cls.KNOWN_TOOLS.get(name)
+            if action is None:
+                return Result.fail("instrument_error", f"unknown tool name: {name}")
+
+        raw_args = call.get("arguments", {})
+        if isinstance(raw_args, str):
+            try:
+                args = json.loads(raw_args)
+            except json.JSONDecodeError:
+                return Result.fail("instrument_error", "malformed JSON arguments")
+        else:
+            args = raw_args
+        if not isinstance(args, Mapping):
+            return Result.fail("instrument_error", "tool arguments must be an object")
+        args = dict(args)
+
         try:
-            args_str = json.dumps(args)
-            if len(args_str.encode('utf-8')) > 1048576:
-                return Result.fail(kind="instrument_error", message="Tool arguments exceed 1MB size limit.")
-        except Exception:
-            return Result.fail(kind="instrument_error", message="Malformed JSON arguments.")
-            
-        def check_depth(obj: Any, depth: int = 0) -> bool:
-            if depth > 20:
-                return False
-            if isinstance(obj, dict):
-                return all(check_depth(v, depth + 1) for v in obj.values())
-            if isinstance(obj, list):
-                return all(check_depth(v, depth + 1) for v in obj)
-            return True
-            
-        if not check_depth(args):
-            return Result.fail(kind="instrument_error", message="Tool arguments exceed 20 levels of nesting.")
-            
+            encoded = json.dumps(args, ensure_ascii=False, separators=(",", ":"))
+        except (TypeError, ValueError):
+            return Result.fail("instrument_error", "tool arguments are not JSON data")
+        if len(encoded.encode("utf-8")) > 1_048_576:
+            return Result.fail("instrument_error", "tool arguments exceed 1MB")
+        if not _within_depth(args):
+            return Result.fail("instrument_error", "tool arguments exceed nesting limit")
+
+        resource = _bind_resource(action, args, resource_root)
+        if not resource.ok:
+            return Result.fail(resource.error.kind, resource.error.message)
         return Result.success({
             "kind": "effect",
             "action": action,
-            "resource": {},
+            "resource": resource.value,
             "args": args,
-            # Authority is deliberately unresolved here. Runtime/kernel
-            # composition must bind resource and reservation from policy.
+            # Null is intentional: the provider has no reservation authority.
+            # The episode parser normalises this to an empty runtime request.
             "reservation": None,
         })
+
 
 def validate_proposal_schema(proposal: Mapping[str, Any]) -> Result[None]:
     if not isinstance(proposal, Mapping):
         return Result.fail("instrument_error", "provider proposal must be an object")
 
-    allowed_proposal_fields = {
-        "text", "toolCalls", "usage", "cost_usd", "usd_micros",
-        "pricing_known", "pricing_source", "resolved_model",
-    }
-    unknown = set(proposal) - allowed_proposal_fields
+    allowed = {"text", "toolCalls", "usage", "cost_usd", "usd_micros",
+               "pricing_known", "pricing_source", "resolved_model"}
+    unknown = set(proposal) - allowed
     if unknown:
-        return Result.fail(
-            "instrument_error",
-            f"provider proposal contains unsupported fields: {sorted(unknown)}",
-        )
+        return Result.fail("instrument_error", f"proposal contains unsupported fields: {sorted(unknown)}")
 
     text = proposal.get("text", "")
     if not isinstance(text, str):
         return Result.fail("instrument_error", "proposal text must be a string")
-
-    tool_calls = proposal.get("toolCalls", [])
-    if not isinstance(tool_calls, list):
+    calls = proposal.get("toolCalls", [])
+    if not isinstance(calls, list):
         return Result.fail("instrument_error", "toolCalls must be an array")
-    if not text and not tool_calls:
-        return Result.fail("instrument_error", "proposal must contain text or one tool call")
+    if not text and not calls:
+        return Result.fail("instrument_error", "proposal must contain text or a tool call")
 
-    authority_fields = {
-        "capability", "scope", "reservation", "approval", "approvalIdentity",
-        "evaluator", "grant", "principal",
-    }
-    for call in tool_calls:
+    forbidden = {"capability", "scope", "reservation", "approval", "approvalIdentity",
+                 "evaluator", "grant", "principal", "resource"}
+    for call in calls:
         if not isinstance(call, Mapping):
             return Result.fail("instrument_error", "each tool call must be an object")
-        unsupported = set(call) - {"id", "name", "arguments"}
-        if unsupported or authority_fields.intersection(call):
-            return Result.fail(
-                "instrument_error",
-                "tool call contains unsupported or privileged fields",
-            )
+        if set(call) - {"id", "name", "arguments"}:
+            return Result.fail("instrument_error", "tool call contains unsupported fields")
+        if forbidden.intersection(call):
+            return Result.fail("instrument_error", "provider cannot supply authority fields")
         name = call.get("name")
         if not isinstance(name, str) or not name:
-            return Result.fail("instrument_error", "tool call name must be non-empty")
+            return Result.fail("instrument_error", "tool name must be a non-empty string")
         call_id = call.get("id")
         if call_id is not None and (not isinstance(call_id, str) or not call_id):
             return Result.fail("instrument_error", "tool call id must be a non-empty string")
         arguments = call.get("arguments", {})
-        if not isinstance(arguments, Mapping):
-            return Result.fail("instrument_error", "tool call arguments must be an object")
+        if not isinstance(arguments, (Mapping, str)):
+            return Result.fail("instrument_error", "tool arguments must be an object or JSON string")
 
     return Result.success(None)
+
+
+def _within_depth(value: Any, depth: int = 0) -> bool:
+    if depth > 20:
+        return False
+    if isinstance(value, Mapping):
+        return all(_within_depth(item, depth + 1) for item in value.values())
+    if isinstance(value, list):
+        return all(_within_depth(item, depth + 1) for item in value)
+    return True
+
+
+def _bind_resource(action: str, args: Mapping[str, Any], root: str) -> Result[Mapping[str, Any]]:
+    if not isinstance(root, str) or not root or "\x00" in root:
+        return Result.fail("instrument_error", "invalid resource root")
+    if action in {"fs.read", "fs.write", "patch.apply"}:
+        path = args.get("path", ".")
+        if not isinstance(path, str) or not path or "\x00" in path:
+            return Result.fail("instrument_error", "filesystem action requires a path")
+        pure = PurePosixPath(path)
+        if pure.is_absolute() or ".." in pure.parts:
+            return Result.fail("instrument_error", "filesystem path escapes workspace")
+        return Result.success({"kind": "fs", "root": root, "path": str(pure)})
+    if action == "fs.search":
+        path = args.get("path", ".")
+        pattern = args.get("pattern")
+        if not isinstance(path, str) or not isinstance(pattern, str) or "\x00" in path + pattern:
+            return Result.fail("instrument_error", "search requires safe path and pattern")
+        pure = PurePosixPath(path)
+        if pure.is_absolute() or ".." in pure.parts:
+            return Result.fail("instrument_error", "search path escapes workspace")
+        return Result.success({"kind": "fs", "root": root, "path": str(pure), "pattern": pattern})
+    if action in {"proc.exec", "proc.test"}:
+        argv = args.get("argv")
+        if not isinstance(argv, list) and isinstance(args.get("command"), str):
+            argv = args["command"].split()
+        if not isinstance(argv, list) or not argv or not all(isinstance(x, str) and x for x in argv):
+            return Result.fail("instrument_error", "process action requires argv array")
+        if any("\x00" in x for x in argv):
+            return Result.fail("instrument_error", "process argv contains NUL")
+        return Result.success({"kind": "process", "root": root, "executable": argv[0]})
+    return Result.fail("instrument_error", f"unsupported action: {action}")

@@ -192,6 +192,11 @@ class CompiledContext:
                 "cacheBreakpoint": layer in self.breakpoints,
                 "content": "\n\n".join(block.text for block in blocks),
                 "provenance": tuple(block.provenance for block in blocks),
+                # Provider adapters that need observation cardinality (the
+                # stateless LAM is one) can consume the same immutable block
+                # boundaries without guessing from rendered text.
+                "fragments": tuple({"label": block.label, "content": block.text}
+                                    for block in blocks),
             })
         return tuple(rendered)
 

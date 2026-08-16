@@ -10,9 +10,11 @@ from __future__ import annotations
 import json
 import socket
 import struct
+import base64
 
 from vanguard.packages.ports.evaluator import EvaluationProtocol, EvaluatorPort, RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 
 __all__ = ["EvaluatorClient"]
 
@@ -24,11 +26,15 @@ class EvaluatorClient(EvaluatorPort):
         expected_uid: int,
         expected_image_digest: str,
         timeout_seconds: float,
+        expected_verdict_key_id: str | None = None,
+        expected_verdict_public_key: bytes | None = None,
     ) -> None:
         self._socket_path = socket_path
         self._expected_uid = expected_uid
         self._expected_image_digest = expected_image_digest
         self._timeout_seconds = timeout_seconds
+        self._expected_verdict_key_id = expected_verdict_key_id
+        self._expected_verdict_public_key = expected_verdict_public_key
 
     def evaluate(self, run_ref: RunRef, protocol: EvaluationProtocol) -> Result[Verdict]:
         try:
@@ -44,18 +50,32 @@ class EvaluatorClient(EvaluatorPort):
                 if uid != self._expected_uid:
                     return self._inconclusive("evaluator_identity_unverified")
 
-                f = sock.makefile("r", encoding="utf-8")
-                line = f.readline()
+                f = sock.makefile("r", encoding="utf-8", errors="strict")
+                line = f.readline(65_537)
                 if not line:
                     return self._inconclusive("evaluator_truncation")
+                if len(line.encode("utf-8")) > 65_536:
+                    return self._inconclusive("evaluator_truncation")
 
-                handshake = json.loads(line)
+                try:
+                    handshake = json.loads(line)
+                except (UnicodeError, json.JSONDecodeError):
+                    return self._inconclusive("evaluator_protocol_mismatch")
                 if handshake.get("protocol") != "vg-eval-v1":
                     return self._inconclusive("evaluator_protocol_mismatch")
                 if handshake.get("imageDigest") != self._expected_image_digest:
                     return self._inconclusive("evaluator_image_unverified")
 
                 nonce = handshake.get("nonce")
+                if self._expected_verdict_key_id is not None:
+                    if handshake.get("verdictKeyId") != self._expected_verdict_key_id:
+                        return self._inconclusive("evaluator_verdict_key_unverified")
+                    try:
+                        advertised_key = base64.b64decode(handshake.get("verdictPublicKey", ""), validate=True)
+                    except Exception:
+                        return self._inconclusive("evaluator_verdict_key_unverified")
+                    if self._expected_verdict_public_key != advertised_key:
+                        return self._inconclusive("evaluator_verdict_key_unverified")
 
                 req = {
                     "action": "evaluate",
@@ -72,28 +92,39 @@ class EvaluatorClient(EvaluatorPort):
 
                 sock.sendall(json.dumps(req).encode("utf-8") + b"\n")
 
-                resp_line = f.readline()
+                resp_line = f.readline(65_537)
                 if not resp_line:
-                    return self._inconclusive("evaluator_crash")
+                    return self._inconclusive("evaluator_truncation")
+                if len(resp_line.encode("utf-8")) > 65_536:
+                    return self._inconclusive("evaluator_truncation")
 
-                resp = json.loads(resp_line)
+                try:
+                    resp = json.loads(resp_line)
+                except (UnicodeError, json.JSONDecodeError):
+                    return self._inconclusive("evaluator_protocol_mismatch")
                 if "error" in resp:
-                    print(f"SERVER RETURNED ERROR: {resp['error']}")
                     return self._inconclusive("instrument_error")
 
                 v_data = resp.get("verdict", {})
+                signature = resp.get("signature")
+                key_id = resp.get("keyId")
+                if self._expected_verdict_public_key is not None:
+                    if key_id != self._expected_verdict_key_id or not isinstance(signature, str):
+                        return self._inconclusive("evaluator_verdict_unverified")
+                    if not VerdictSigner.verify(v_data, signature, self._expected_verdict_public_key):
+                        return self._inconclusive("evaluator_verdict_unverified")
                 verdict = Verdict(
                     outcome=v_data.get("outcome", "inconclusive"),
                     claims=tuple(v_data.get("claims", ())),
                     reason=v_data.get("reason", ""),
+                    signature=signature,
+                    signer_key_id=key_id,
                 )
                 return Result.success(verdict)
 
         except socket.timeout:
             return self._inconclusive("evaluator_timeout")
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return self._inconclusive("instrument_error")
 
     def _inconclusive(self, reason: str) -> Result[Verdict]:

@@ -112,6 +112,8 @@ def parse_proposal(value: Any) -> Proposal:
     resource = value.get("resource", {})
     args = value.get("args", {})
     reservation = value.get("reservation", {})
+    if reservation is None:
+        reservation = {}
     for name, member in (("resource", resource), ("args", args), ("reservation", reservation)):
         if not isinstance(member, Mapping):
             raise ProposalMalformed(f"{name} must be an object")

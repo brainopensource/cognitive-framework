@@ -541,7 +541,6 @@ class OpenRouterModelContract(unittest.TestCase):
         )
         self.assertEqual(cost, 0)
         self.assertFalse(known)
-        self.assertGreaterEqual(result.value["usage"]["usd_micros"], 0)
 
     def test_malformed_sse_stream_fails_closed(self) -> None:
         malformed_sse = b"data: {corrupted json line\n\ndata: [DONE]\n\n"

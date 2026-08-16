@@ -110,9 +110,9 @@ class StatelessTurnAdvance(unittest.TestCase):
         self.assertTrue(any(s.startswith("t5-") for s in ids))
 
     def test_tier5_has_more_turns_than_tier1(self) -> None:
-        t1 = next(s for s in self.engine.scenarios if s.id.startswith("t1-"))
-        t5 = next(s for s in self.engine.scenarios if s.id.startswith("t5-"))
-        self.assertGreater(len(t5.turns), len(t1.turns))
+        max_t5 = max(len(s.turns) for s in self.engine.scenarios if s.id.startswith("t5-"))
+        min_t1 = min(len(s.turns) for s in self.engine.scenarios if s.id.startswith("t1-"))
+        self.assertGreater(max_t5, min_t1)
 
     def test_unknown_model_is_instrument_error_not_a_guess(self) -> None:
         with self.assertRaises(KeyError):

@@ -2,5 +2,7 @@
 
 from .fake import FakeEvaluator
 from .isolated import IsolatedEvaluator
+from .signing import VerdictSigner
+from .unavailable import UnavailableEvaluator
 
-__all__ = ["FakeEvaluator", "IsolatedEvaluator"]
+__all__ = ["FakeEvaluator", "IsolatedEvaluator", "UnavailableEvaluator", "VerdictSigner"]

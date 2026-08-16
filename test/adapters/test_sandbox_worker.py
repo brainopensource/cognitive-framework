@@ -3,7 +3,9 @@ from __future__ import annotations
 import unittest
 from typing import Sequence
 
-from vanguard.packages.adapters.sandbox.worker import WorkerProtocol, WorkerOperation, WorkerResult
+from vanguard.packages.adapters.sandbox.worker import (
+    WorkerProtocol, WorkerOperation, WorkerResult, decode_worker_request, encode_worker_request,
+)
 from vanguard.packages.adapters.sandbox.rootless import WorkerSandboxReceipt
 from vanguard.packages.ports.sandbox import SandboxResult, ContainmentReport, SandboxRunner
 from vanguard.packages.ports.event_store import Result
@@ -21,10 +23,10 @@ class FakeSandboxRunner(SandboxRunner):
         report = ContainmentReport(
             runtime="fake", runtime_version="0", namespace="none",
             syscall_profile="none", network_enforcement="none",
-            writable_mounts=("host",), exposed_sockets=(),
+            writable_mounts=("/workspace",), exposed_sockets=(),
             resource_limits={}, startup_probes=(),
-            attested_at="2026-08-15T00:00:00Z", contained=False,
-            verified=False, visibility_mark="fake"
+            attested_at="2026-08-15T00:00:00Z", contained=True,
+            verified=True, visibility_mark="test-verified"
         )
         receipt = WorkerSandboxReceipt(
             exit_code=self.exit_code,
@@ -78,7 +80,7 @@ class TestSandboxWorker(unittest.TestCase):
         )
         res = worker.execute(op)
         self.assertTrue(res.ok)
-        self.assertEqual(runner.commands[0], ("grep", "-rn", "TODO", "src/"))
+        self.assertEqual(runner.commands[0], ("grep", "-rn", "--", "TODO", "src/"))
 
     def test_execute_patch_apply(self) -> None:
         runner = FakeSandboxRunner()
@@ -140,6 +142,22 @@ class TestSandboxWorker(unittest.TestCase):
         self.assertEqual(len(res.value.stdout), 100)
         self.assertEqual(len(res.value.stderr), 100)
         self.assertTrue(res.value.truncated)
+
+    def test_typed_wire_round_trip_and_digest_binding(self) -> None:
+        operation = WorkerOperation("fs.read", {"path": "x.py"}, request_id="req-1")
+        decoded = decode_worker_request(encode_worker_request(operation))
+        self.assertTrue(decoded.ok)
+        self.assertEqual(decoded.value.operation, "fs.read")
+        self.assertEqual(decoded.value.request_id, "req-1")
+
+        tampered = encode_worker_request(operation).replace(b"fs.read", b"fs.write")
+        self.assertFalse(decode_worker_request(tampered).ok)
+
+    def test_wire_rejects_invalid_utf8_and_unknown_fields(self) -> None:
+        self.assertFalse(decode_worker_request(b"\xff\n").ok)
+        operation = WorkerOperation("fs.read", {"path": "x.py"}, request_id="req-2")
+        frame = encode_worker_request(operation).rstrip(b"\n")[:-1] + b',"unknown":true}'
+        self.assertFalse(decode_worker_request(frame).ok)
 
 if __name__ == "__main__":
     unittest.main()

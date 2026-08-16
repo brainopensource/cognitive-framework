@@ -40,10 +40,10 @@ from pathlib import Path
 
 from vanguard.packages.agency import RunTermination
 from vanguard.packages.adapters.evaluators.fake import FakeEvaluator
-from vanguard.packages.adapters.evaluators.isolated import IsolatedEvaluator
+from vanguard.packages.adapters.evaluators.client import EvaluatorClient
 from vanguard.packages.ports.evaluator import RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
-from vanguard.packages.runtime.governance.approvals import ApprovalAuthority
+from vanguard.packages.runtime.governance.approvals import ApprovalAuthority, OperatorSigner
 from vanguard.packages.runtime.root import (
     DEFAULT_BINDINGS,
     EVALUATOR_BINDINGS,
@@ -55,12 +55,14 @@ from vanguard.packages.runtime.root import (
     _sandbox_effector,
 )
 
-OPERATOR_KEY = b"test-operator-held-approval-key"
+OPERATOR_SIGNER = OperatorSigner(b"test-operator-held-approval-key")
+OPERATOR_KEY = OPERATOR_SIGNER.public_bytes
 
 
 def sign_challenge(challenge):
     """Operator-side signature. The runtime only verifies (`GOV-01`)."""
-    return ApprovalAuthority(OPERATOR_KEY).approve(challenge, reviewer="agent-1")
+    return OPERATOR_SIGNER.approve(challenge, reviewer="agent-1")
+
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFESTS = ROOT / "vanguard" / "packages" / "agency" / "manifests"
@@ -376,7 +378,7 @@ class DogfoodGate(unittest.TestCase):
         self.assertNotEqual(result.verdict.outcome, "claims")
 
     def test_no_code_path_substitutes_a_fake_evaluator(self) -> None:
-        self.assertIs(EVALUATOR_BINDINGS.get("coding-oracle@3"), IsolatedEvaluator)
+        self.assertIs(EVALUATOR_BINDINGS.get("coding-oracle@3"), EvaluatorClient)
         self.assertNotIn(FakeEvaluator, EVALUATOR_BINDINGS.values())
 
     # -- claim 6: it is all on the ledger, prior first ------------------

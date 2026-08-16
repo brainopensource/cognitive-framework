@@ -7,12 +7,14 @@ import struct
 import tempfile
 import threading
 import time
+import hashlib
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from vanguard.packages.adapters.evaluators.client import EvaluatorClient
 from vanguard.packages.adapters.evaluators.daemon import DaemonConfig, EvaluatorDaemon
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef
 
 
@@ -24,15 +26,22 @@ class EvaluatorDaemonContract(unittest.TestCase):
         self.workspace.mkdir()
         import subprocess
         subprocess.run(["git", "init", "-q"], cwd=self.workspace, check=True)
+        self.oracle = self.workspace / "oracle.py"
+        self.oracle.write_text("assert True\n", encoding="utf-8")
+        subprocess.run(["git", "add", "oracle.py"], cwd=self.workspace, check=True)
         
+        self.private_key = b"k" * 32
+        self.signer = VerdictSigner(self.private_key, "eval-test")
         self.config = DaemonConfig(
             socket_path=self.socket_path,
             image_digest="sha256:" + "a" * 64,
             workspace=str(self.workspace),
-            oracle_digests={},
+            oracle_digests={"oracle.py": "sha256:" + hashlib.sha256(self.oracle.read_bytes()).hexdigest()},
             command=("python3", "-c", "print('ok')"),
             expected_uid=os.getuid(),
-            timeout_seconds=5.0
+            timeout_seconds=5.0,
+            verdict_private_key=self.private_key,
+            verdict_key_id="eval-test",
         )
         self.daemon = EvaluatorDaemon(self.config)
 
@@ -57,7 +66,9 @@ class EvaluatorDaemonContract(unittest.TestCase):
             socket_path=self.socket_path,
             expected_uid=os.getuid(),
             expected_image_digest="sha256:" + "a" * 64,
-            timeout_seconds=2.0
+            timeout_seconds=2.0,
+            expected_verdict_key_id="eval-test",
+            expected_verdict_public_key=self.signer.public_bytes,
         )
         
         result = client.evaluate(RunRef("run1", episode_id="ep1"), EvaluationProtocol("test"))
@@ -75,7 +86,9 @@ class EvaluatorDaemonContract(unittest.TestCase):
             socket_path=self.socket_path,
             expected_uid=os.getuid(),
             expected_image_digest="sha256:" + "a" * 64,
-            timeout_seconds=2.0
+            timeout_seconds=2.0,
+            expected_verdict_key_id="eval-test",
+            expected_verdict_public_key=self.signer.public_bytes,
         )
         
         result = client.evaluate(RunRef("run1", episode_id="ep1"), EvaluationProtocol("test"))

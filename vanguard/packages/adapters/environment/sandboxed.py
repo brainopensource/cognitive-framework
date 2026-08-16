@@ -10,6 +10,8 @@ never imports from the sandbox adapter family, preserving LT-5.
 from __future__ import annotations
 
 import datetime
+import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol
@@ -35,7 +37,7 @@ class WorkerRequest:
     """A request to the worker, defined here so the environment adapter
     can construct it without importing the sandbox adapter family."""
 
-    operation: str  # "fs.read" | "fs.search" | "patch.apply" | "proc.test"
+    operation: str  # filesystem and process verbs routed through WorkerProtocol
     args: Mapping[str, Any]
     working_directory: str = "."
     timeout_seconds: float = 30.0
@@ -80,11 +82,16 @@ class SandboxedEnvironmentAdapter:
         )
 
     def snapshot(self) -> Result[EnvironmentSnapshot]:
-        # Using a fixed snapshot since it's sandboxed, or perhaps use a fake digest
+        digest = hashlib.sha256()
+        for path in sorted(self.workspace.rglob("*")):
+            if path.is_symlink() or not path.is_file():
+                continue
+            digest.update(str(path.relative_to(self.workspace)).encode("utf-8"))
+            digest.update(path.read_bytes())
         return Result.success(
             EnvironmentSnapshot(
-                snapshot_id="sandbox-snapshot-1",
-                digest="sha256:0000000000000000000000000000000000000000000000000000000000000000",
+                snapshot_id="sandbox-" + digest.hexdigest()[:16],
+                digest="sha256:" + digest.hexdigest(),
                 created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             )
         )
@@ -127,15 +134,9 @@ class SandboxedEnvironmentAdapter:
             patch = req.patch or req.args.get("patch")
             if not patch:
                 return Result.fail("invalid_request", "patch content is required")
-            # Dry-run patch
-            # patch -p1 --dry-run
-            # We don't have a direct dry-run in worker protocol except by passing args if it was a proc.test
-            # Wait, WP6b says: "preview(req, grant) -> for patch.apply, does a dry-run via worker"
-            # Since WorkerProtocol maps "patch.apply" to `patch -p1`, and we don't have dry-run...
-            # Oh wait, we can pass it as proc.test!
             op = WorkerRequest(
-                operation="proc.test",
-                args={"argv": ["/bin/sh", "-c", "printf '%s' \"$1\" | patch -p1 --dry-run", "--", patch]},
+                operation="patch.apply",
+                args={"patch": patch, "dry_run": True},
                 working_directory=req.working_directory or ".",
                 timeout_seconds=30.0,
                 max_output_bytes=10*1024*1024,
@@ -144,7 +145,7 @@ class SandboxedEnvironmentAdapter:
             if not res.ok:
                 return Result.fail(res.error.kind, res.error.message)
             
-            return Result.success(EffectPreview(diff=res.value.stdout))
+            return Result.success(EffectPreview(diff=res.value.stdout, stat={"exit_code": res.value.exit_code}))
             
         return Result.fail("unsupported_verb", f"Verb {req.verb} not supported for preview")
 
@@ -167,7 +168,7 @@ class SandboxedEnvironmentAdapter:
                 
             return Result.success(
                 EffectReceipt(
-                    descriptor_digest="sha256:00",
+                    descriptor_digest=_descriptor_digest(req),
                     outcome="ok" if res.value.exit_code == 0 else "failed",
                     observed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     result_digest=res.value.stdout_digest,
@@ -176,7 +177,7 @@ class SandboxedEnvironmentAdapter:
                 )
             )
             
-        elif req.verb == "proc.test" or req.action == "test":
+        elif req.verb in {"proc.test", "proc.exec"} or req.action in {"test", "exec"}:
             cmd = req.command or req.args.get("argv")
             if not cmd:
                 return Result.fail("invalid_request", "command argv is required")
@@ -194,7 +195,7 @@ class SandboxedEnvironmentAdapter:
                 
             return Result.success(
                 EffectReceipt(
-                    descriptor_digest="sha256:00",
+                    descriptor_digest=_descriptor_digest(req),
                     outcome="ok" if res.value.exit_code == 0 else "failed",
                     observed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     result_digest=res.value.stdout_digest,
@@ -202,6 +203,30 @@ class SandboxedEnvironmentAdapter:
                     output=res.value.stdout + res.value.stderr,
                 )
             )
+
+        elif req.verb == "fs.write" or req.action == "write":
+            path = req.args.get("path")
+            content = req.args.get("content")
+            if not isinstance(path, str) or not isinstance(content, str):
+                return Result.fail("invalid_request", "fs.write requires path and content")
+            op = WorkerRequest(
+                operation="fs.write",
+                args={"path": path, "content": content},
+                working_directory=req.working_directory or ".",
+                timeout_seconds=30.0,
+                max_output_bytes=10 * 1024 * 1024,
+            )
+            res = self.worker.execute(op)
+            if not res.ok:
+                return Result.fail(res.error.kind, res.error.message)
+            return Result.success(EffectReceipt(
+                descriptor_digest=_descriptor_digest(req),
+                outcome="ok" if res.value.exit_code == 0 else "failed",
+                observed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                result_digest=res.value.stdout_digest,
+                exit_code=res.value.exit_code,
+                output=res.value.stdout + res.value.stderr,
+            ))
 
         return Result.fail("unsupported_verb", f"Verb {req.verb} not supported for apply")
 
@@ -213,3 +238,16 @@ class SandboxedEnvironmentAdapter:
 
     def dispose(self) -> Result[None]:
         return Result.success(None)
+
+
+def _descriptor_digest(request: EffectRequest) -> str:
+    payload = {
+        "verb": request.verb,
+        "action": request.action,
+        "args": dict(request.args),
+        "patch": request.patch,
+        "command": list(request.command) if request.command else None,
+        "working_directory": request.working_directory,
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()

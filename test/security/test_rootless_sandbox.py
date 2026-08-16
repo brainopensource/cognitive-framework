@@ -92,12 +92,11 @@ class RootlessSandboxTest(unittest.TestCase):
     def test_resource_limits_enforced_in_prefix(self) -> None:
         runner = ScriptedRunner(self.workspace, self.evaluator, [])
         prefix = runner._runtime_prefix()
-        self.assertIn("--rlimit-nofile", prefix)
-        self.assertIn("256", prefix)
-        self.assertIn("--rlimit-as", prefix)
-        self.assertIn("536870912", prefix)
-        self.assertIn("--rlimit-nproc", prefix)
-        self.assertIn("64", prefix)
+        self.assertIn("--unshare-all", prefix)
+        self.assertIn("--unshare-user", prefix)
+        self.assertIn("--die-with-parent", prefix)
+        self.assertIn("--new-session", prefix)
+        self.assertIn("--clearenv", prefix)
 
     def test_workspace_validation_rejects_symlink_workspace(self) -> None:
         sym_workspace = Path(self.temp.name) / "sym_workspace"

@@ -15,6 +15,7 @@ from vanguard.packages.runtime.governance.approvals import (
     ApprovalAuthority,
     ApprovalFlow,
     DescriptorBoundApprovalPolicy,
+    OperatorSigner,
 )
 
 
@@ -31,7 +32,8 @@ TAMPERED_DIFF = DIFF.replace("return True", "return privileged_value")
 
 class DescriptorBoundApprovalFlowTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.authority = ApprovalAuthority(b"operator-held-test-key")
+        self.signer = OperatorSigner(b"operator-held-test-key")
+        self.authority = ApprovalAuthority(self.signer.public_bytes)
         self.flow = ApprovalFlow(self.authority)
         self.parent_scope = Scope(
             actions=frozenset({"fs.patch"}),
@@ -83,7 +85,7 @@ class DescriptorBoundApprovalFlowTest(unittest.TestCase):
             process_id="approval-process-1",
             expires_at="2026-08-15T10:00:00.000Z",
         )
-        signed = self.authority.approve(challenge, reviewer="human-lead")
+        signed = self.signer.approve(challenge, reviewer="human-lead")
         tampered = fakes.request(action="fs.patch", args={"diff": TAMPERED_DIFF})
         authorization = self.flow.verify(
             challenge,
@@ -117,7 +119,7 @@ class DescriptorBoundApprovalFlowTest(unittest.TestCase):
             process_id="approval-process-1",
             expires_at="2026-08-15T10:00:00.000Z",
         )
-        signed = self.authority.approve(challenge, reviewer="human-lead")
+        signed = self.signer.approve(challenge, reviewer="human-lead")
         requested_event = event(
             1, "ApprovalRequested", **challenge.payload()
         )
@@ -157,7 +159,7 @@ class DescriptorBoundApprovalFlowTest(unittest.TestCase):
             process_id="approval-process-1",
             expires_at="2026-08-15T10:00:00.000Z",
         )
-        signed = self.authority.approve(challenge, reviewer="human-lead")
+        signed = self.signer.approve(challenge, reviewer="human-lead")
 
         expired = self.flow.verify(
             challenge,

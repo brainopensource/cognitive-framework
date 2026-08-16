@@ -432,10 +432,9 @@ class OpenRouterModelContract(unittest.TestCase):
         )
         result = port.propose(CONTEXT, TOOLS, SAMPLING)
         self.assertTrue(result.ok)
-        self.assertEqual(len(result.value["toolCalls"]), 1)
-        tool_call = result.value["toolCalls"][0]
-        self.assertEqual(tool_call["name"], "fs.read")
-        self.assertEqual(tool_call["arguments"], {"path": "main.py"})
+        self.assertEqual(result.value["kind"], "effect")
+        self.assertEqual(result.value["action"], "fs.read")
+        self.assertEqual(result.value["args"], {"path": "main.py"})
 
     def test_live_stream_transport_is_incremental_and_measures_first_delta(self) -> None:
         event = (

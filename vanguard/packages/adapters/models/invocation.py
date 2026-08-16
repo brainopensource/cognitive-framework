@@ -8,6 +8,7 @@ Capabilities, scope, reservations and approvals remain kernel/runtime-owned.
 from __future__ import annotations
 
 import json
+import shlex
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Any, Mapping, Sequence
@@ -119,6 +120,16 @@ class ProposalTranslator:
         if not _within_depth(args):
             return Result.fail("instrument_error", "tool arguments exceed nesting limit")
 
+        if action in {"proc.exec", "proc.test"} and "argv" not in args:
+            command = args.get("command")
+            if not isinstance(command, str) or not command.strip():
+                return Result.fail("instrument_error", "process action requires argv array")
+            try:
+                args["argv"] = shlex.split(command)
+            except ValueError:
+                return Result.fail("instrument_error", "process command is not valid argv text")
+            args.pop("command", None)
+
         resource = _bind_resource(action, args, resource_root)
         if not resource.ok:
             return Result.fail(resource.error.kind, resource.error.message)
@@ -206,8 +217,6 @@ def _bind_resource(action: str, args: Mapping[str, Any], root: str) -> Result[Ma
         return Result.success({"kind": "fs", "root": root, "path": str(pure), "pattern": pattern})
     if action in {"proc.exec", "proc.test"}:
         argv = args.get("argv")
-        if not isinstance(argv, list) and isinstance(args.get("command"), str):
-            argv = args["command"].split()
         if not isinstance(argv, list) or not argv or not all(isinstance(x, str) and x for x in argv):
             return Result.fail("instrument_error", "process action requires argv array")
         if any("\x00" in x for x in argv):

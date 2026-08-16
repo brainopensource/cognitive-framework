@@ -1,6 +1,6 @@
 {
   "name": "@vanguard/cli",
-  "version": "0.4.0-beta",
+  "version": "0.4.1-beta",
   "description": "Vanguard CLI client and minimal TUI for the vg-code-default harness",
   "license": "Apache-2.0",
   "type": "module",

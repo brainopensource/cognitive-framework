@@ -127,8 +127,10 @@ class WorkerProtocol:
         "proc.test",
     }
 
-    def __init__(self, runner: SandboxRunner) -> None:
+    def __init__(self, runner: SandboxRunner,
+                 allowed_executables: tuple[str, ...] = ("git", "pytest", "ruff", "python3")) -> None:
         self.runner = runner
+        self.allowed_executables = frozenset(allowed_executables)
 
     def execute(self, operation: WorkerOperation) -> Result[WorkerResult]:
         if operation.operation not in self.SUPPORTED_OPERATIONS:
@@ -152,7 +154,7 @@ class WorkerProtocol:
             path = pathlib.Path(path_str)
             if path.is_absolute() or ".." in path.parts:
                 return Result.fail("invalid_path", "Path must be relative and not traverse")
-            argv = ["cat", path_str]
+            argv = ["cat", "--", path_str]
 
         elif operation.operation == "fs.search":
             pattern = operation.args.get("pattern")
@@ -172,7 +174,10 @@ class WorkerProtocol:
             path = pathlib.Path(path_str)
             if path.is_absolute() or ".." in path.parts:
                 return Result.fail("invalid_path", "Path must be relative and not traverse")
-            argv = ["/usr/bin/python3", "-c", _SAFE_WRITE, "--", path_str, content]
+            # For ``python -c``, argv[0] is already ``-c``; inserting a
+            # conventional ``--`` would shift the path and write a file named
+            # ``--`` instead of the requested workspace target.
+            argv = ["/usr/bin/python3", "-c", _SAFE_WRITE, path_str, content]
 
         elif operation.operation in ("patch.apply", "fs.patch"):
             content = operation.args.get("patch") or operation.args.get("diff")
@@ -189,6 +194,9 @@ class WorkerProtocol:
                 return Result.fail(
                     "invalid_request", "proc execution requires argv array"
                 )
+            executable = pathlib.PurePosixPath(argv[0]).name
+            if executable not in self.allowed_executables:
+                return Result.fail("denied", f"process executable is not manifest-allowed: {executable}")
 
         final_argv = argv
         if str(wd) != ".":

@@ -53,7 +53,7 @@ class TestSandboxWorker(unittest.TestCase):
         res = worker.execute(op)
         self.assertTrue(res.ok)
         self.assertEqual(res.value.stdout, "file content")
-        self.assertEqual(runner.commands[0], ("cat", "dir/file.txt"))
+        self.assertEqual(runner.commands[0], ("cat", "--", "dir/file.txt"))
 
     def test_path_traversal_rejection(self) -> None:
         worker = WorkerProtocol(FakeSandboxRunner())
@@ -126,6 +126,12 @@ class TestSandboxWorker(unittest.TestCase):
         res = worker.execute(op)
         self.assertFalse(res.ok)
         self.assertEqual(res.error.kind, "invalid_request")
+
+    def test_proc_test_enforces_manifest_executable_allowlist(self) -> None:
+        worker = WorkerProtocol(FakeSandboxRunner())
+        res = worker.execute(WorkerOperation("proc.exec", {"argv": ["rm", "-rf", "."]}))
+        self.assertFalse(res.ok)
+        self.assertEqual(res.error.kind, "denied")
 
     def test_output_bounding(self) -> None:
         runner = FakeSandboxRunner(stdout=b"A" * 200, stderr=b"B" * 200)

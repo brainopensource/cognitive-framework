@@ -124,10 +124,22 @@ class GrantIssuer:
 
     def __init__(self, authenticator: HmacAuthenticator | None = None) -> None:
         self._authenticator = authenticator
+        self._id_counter = 0
         self._consumed: set[str] = set()
         self._revoked: set[str] = set()
         self._children: dict[str, set[str]] = {}
         self._issued: dict[str, Grant] = {}
+
+    def next_grant_id(self) -> str:
+        """Return an issuer-unique id across kernel instances.
+
+        Runtime approval resumption creates a fresh Kernel while retaining the
+        issuer state. IDs must therefore be owned by the issuer, not by each
+        short-lived dispatch facade, or the resumed grant can replay the first
+        grant's identifier.
+        """
+        self._id_counter += 1
+        return f"grant-{self._id_counter}"
 
     def issue(
         self,

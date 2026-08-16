@@ -16,6 +16,7 @@ Authority Model:
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
@@ -318,25 +319,24 @@ class ApprovalFlow:
             parse_timestamp(expires_at)
         except ParseError as exc:
             raise ApprovalFormatError("expires_at must be an RFC 3339 timestamp") from exc
-        if (
-            request.action != self._patch_verb
-            or request.declared_sink_class is not SinkClass.PRIVILEGED
-        ):
+        if request.declared_sink_class is not SinkClass.PRIVILEGED:
             raise ApprovalFormatError(
-                f"only privileged {self._patch_verb} effects use this approval flow"
+                "only privileged effects use this approval flow"
             )
         descriptor_digest = descriptor_of(request.action, request.args)
         if suspension.descriptor_digest != descriptor_digest:
             raise ApprovalFormatError("suspension token does not bind this request")
         if suspension.principal != request.principal:
             raise ApprovalFormatError("suspension principal does not bind this request")
-        normalized_diff = _diff_from(request)
+        normalized_diff = (_diff_from(request)
+                           if request.action == self._patch_verb
+                           else _request_material(request))
         return ApprovalChallenge(
             approval_id=suspension.token_id,
             process_id=process_id,
             action=request.action,
             normalized_diff=normalized_diff,
-            args_digest=_diff_digest(normalized_diff),
+            args_digest=_material_digest(normalized_diff),
             descriptor_digest=descriptor_digest,
             principal=request.principal,
             expires_at=expires_at,
@@ -358,7 +358,9 @@ class ApprovalFlow:
             return _denied(challenge, "approval_timestamp_invalid")
         expected_descriptor = descriptor_of(request.action, request.args)
         try:
-            expected_args = _diff_digest(_diff_from(request))
+            expected_material = (_diff_from(request)
+                                 if request.action == self._patch_verb
+                                 else _request_material(request))
         except (ApprovalFormatError, TypeError, ValueError):
             return _denied(challenge, "resumed_request_invalid")
 
@@ -366,7 +368,7 @@ class ApprovalFlow:
             (challenge.action == request.action, "action_binding_mismatch"),
             (challenge.principal == request.principal, "principal_binding_mismatch"),
             (
-                _diff_digest(challenge.normalized_diff) == challenge.args_digest,
+                _material_digest(challenge.normalized_diff) == challenge.args_digest,
                 "challenge_args_digest_mismatch",
             ),
             (decision.resolution == "approved", "approval_rejected"),
@@ -374,7 +376,8 @@ class ApprovalFlow:
             (decision.expires_at == challenge.expires_at, "expiry_binding_mismatch"),
             (now < challenge.expires_at, "approval_expired"),
             (decision.args_digest == challenge.args_digest, "decision_args_digest_mismatch"),
-            (expected_args == challenge.args_digest, "resumed_args_digest_mismatch"),
+            (_material_digest(expected_material) == challenge.args_digest,
+             "resumed_args_digest_mismatch"),
             (
                 decision.descriptor_digest == challenge.descriptor_digest,
                 "decision_descriptor_mismatch",
@@ -537,8 +540,19 @@ def _diff_from(request: EffectRequest) -> str:
     return normalise_unified_diff(diff)
 
 
-def _diff_digest(normalized_diff: str) -> str:
+def _material_digest(normalized_diff: str) -> str:
     return digest_of({"normalizedDiff": normalized_diff})
+
+
+def _request_material(request: EffectRequest) -> str:
+    """Canonical human-review material for non-patch privileged effects."""
+    try:
+        return json.dumps(
+            {"action": request.action, "args": dict(request.args)},
+            sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+    except (TypeError, ValueError) as exc:
+        raise ApprovalFormatError("privileged request arguments are not JSON data") from exc
 
 
 def _denied(challenge: ApprovalChallenge, reason: str) -> ApprovalAuthorization:

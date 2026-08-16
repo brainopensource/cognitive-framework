@@ -44,9 +44,12 @@ class IsolatedEvaluator:
         expected_uid: int = 10002,
         image_digest: str,
         timeout_seconds: float = 60.0,
+        oracle_root: Path | str | None = None,
         runner: Runner = subprocess.run,
     ) -> None:
         self._workspace = Path(workspace).resolve()
+        self._oracle_root = (Path(oracle_root).resolve() if oracle_root is not None
+                             else self._workspace)
         self._oracle_digests = dict(oracle_digests)
         self._command = tuple(command)
         self._expected_uid = expected_uid
@@ -157,19 +160,19 @@ class IsolatedEvaluator:
         for d in oracle_dirs:
             current = d
             is_symlink = False
-            while current != self._workspace:
+            while current != self._oracle_root:
                 if current.is_symlink():
                     is_symlink = True
                     break
                 current = current.parent
             
             if is_symlink:
-                mismatches.append(str(d.relative_to(self._workspace)))
+                mismatches.append(str(d.relative_to(self._oracle_root)))
                 continue
 
             for item in d.iterdir():
                 if item.is_file():
-                    rel_item = str(item.relative_to(self._workspace))
+                    rel_item = str(item.relative_to(self._oracle_root))
                     if rel_item not in self._oracle_digests:
                         mismatches.append(rel_item)
 
@@ -179,9 +182,9 @@ class IsolatedEvaluator:
         pure = PurePosixPath(relative)
         if pure.is_absolute() or not pure.parts or ".." in pure.parts:
             return None
-        candidate = (self._workspace / Path(*pure.parts)).resolve(strict=False)
+        candidate = (self._oracle_root / Path(*pure.parts)).resolve(strict=False)
         try:
-            candidate.relative_to(self._workspace)
+            candidate.relative_to(self._oracle_root)
         except ValueError:
             return None
         return candidate

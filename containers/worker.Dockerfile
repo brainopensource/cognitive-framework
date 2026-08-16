@@ -22,7 +22,7 @@ RUN apk add --no-cache \
 
 COPY pyproject.toml README.md /opt/vanguard/
 COPY vanguard /opt/vanguard/vanguard
-RUN python3 -m pip install --no-cache-dir --no-deps /opt/vanguard
+RUN python3 -m pip install --break-system-packages --no-cache-dir --no-deps /opt/vanguard
 
 USER 10001:10001
 WORKDIR /workspace

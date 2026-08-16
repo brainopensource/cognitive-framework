@@ -21,7 +21,7 @@ RUN apk add --no-cache \
 
 COPY pyproject.toml README.md /opt/vanguard/
 COPY vanguard /opt/vanguard/vanguard
-RUN python3 -m pip install --no-cache-dir --no-deps /opt/vanguard
+RUN python3 -m pip install --break-system-packages --no-cache-dir --no-deps /opt/vanguard
 
 USER 10002:10002
 WORKDIR /workspace
@@ -30,3 +30,4 @@ ENV HOME="/tmp"
 
 # Evaluator daemon runs over Unix socket in /run/evaluator/eval.sock
 ENTRYPOINT ["/usr/bin/python3", "-m", "vanguard.packages.adapters.evaluators.daemon"]
+CMD ["--socket", "/run/evaluator/eval.sock", "--workspace", "/workspace", "--oracle-manifest", "/sealed-oracle/preregistered_oracles.json", "--image-digest", "sha256:0ab368dd2071f556bf6987583ec210855341aab148b9100055d4cf37f2d34b89", "--command", "python3", "-m", "pytest", "-q"]

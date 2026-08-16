@@ -110,7 +110,11 @@ class SandboxedEnvironmentAdapter:
             res = self.worker.execute(op)
             if not res.ok:
                 return Result.fail(res.error.kind, res.error.message)
-            return Result.success(Observation(action="read", content=res.value.stdout))
+            return Result.success(Observation(
+                action="read", content=res.value.stdout,
+                metadata={"digest": res.value.stdout_digest,
+                          "truncated": res.value.truncated},
+            ))
             
         elif req.action == "search":
             if not req.pattern:
@@ -125,7 +129,11 @@ class SandboxedEnvironmentAdapter:
             res = self.worker.execute(op)
             if not res.ok:
                 return Result.fail(res.error.kind, res.error.message)
-            return Result.success(Observation(action="search", output=res.value.stdout))
+            return Result.success(Observation(
+                action="search", output=res.value.stdout,
+                metadata={"digest": res.value.stdout_digest,
+                          "truncated": res.value.truncated},
+            ))
             
         return Result.fail("unsupported_action", f"Action {req.action} not supported")
 

@@ -19,6 +19,7 @@ from typing import Any, Callable, Iterable, Iterator, Mapping, Sequence
 from ...ports.event_store import Result
 from ...ports.model import ContextBundle, Proposal, Sampling, ToolSchemas
 from .cassette import Cassette, CassettePlayer, CassetteRecorder
+from .invocation import ProposalTranslator
 from .routing import resolve_route, preflight_check
 
 __all__ = [
@@ -842,7 +843,21 @@ class OpenRouterModel:
 
         if self._recorder is not None:
             self._recorder.record_interaction(context, tools, sampling, proposal)
-        return Result.success(proposal)
+
+        translated = ProposalTranslator.translate(proposal, tool_schemas=tools)
+        if not translated.ok:
+            return Result.fail(translated.error.kind, translated.error.message)
+        canonical = dict(translated.value)
+        # Usage is measurement metadata, not authority. Keep it beside the
+        # canonical proposal for accounting without allowing it into args.
+        canonical["usage"] = proposal["usage"]
+        canonical["cost_usd"] = proposal["cost_usd"]
+        canonical["usd_micros"] = proposal["usd_micros"]
+        canonical["pricing_known"] = proposal["pricing_known"]
+        canonical["pricing_source"] = proposal["pricing_source"]
+        canonical["resolved_model"] = proposal["resolved_model"]
+        canonical["text"] = proposal.get("text", "")
+        return Result.success(canonical)
 
 
 # Canonical alias for ModelPort adapter naming

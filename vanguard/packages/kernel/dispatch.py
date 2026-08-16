@@ -119,7 +119,6 @@ class Kernel:
         self._ledger = ledger
         self._events = events
         self._sinks = sinks or SinkRegistry()
-        self._grant_counter = 0
 
     # ------------------------------------------------------------------
     # The sequence
@@ -208,10 +207,9 @@ class Kernel:
         grant: Grant | None = None
         requires_grant = self._sinks.requires_grant(request.action)
         if requires_grant:
-            self._grant_counter += 1
             try:
                 grant = self._issuer.issue(
-                    grant_id=f"grant-{self._grant_counter}",
+                    grant_id=self._issuer.next_grant_id(),
                     principal=request.principal,
                     descriptor_digest=descriptor,
                     scope=granted_scope,

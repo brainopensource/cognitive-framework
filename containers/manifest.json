@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
   "worker": {
-    "imageName": "vanguard-worker:v0.4.0-beta",
-    "imageDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "imageName": "vanguard-worker:v0.4.1-beta",
+    "imageDigest": "sha256:202c20f454eee8aa8df2048f035c72ef67eec10b34cd15f8eabfec4f6fe9b7b0",
     "uid": 10001,
     "gid": 10001,
     "user": "vgworker",
@@ -12,8 +12,8 @@
     "readOnlyMounts": ["/usr"]
   },
   "evaluator": {
-    "imageName": "vanguard-evaluator:v0.4.0-beta",
-    "imageDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "imageName": "vanguard-evaluator:v0.4.1-beta",
+    "imageDigest": "sha256:0ab368dd2071f556bf6987583ec210855341aab148b9100055d4cf37f2d34b89",
     "uid": 10002,
     "gid": 10002,
     "user": "vgeval",

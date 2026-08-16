@@ -71,7 +71,8 @@ class TestLamRuntimeVertical(unittest.TestCase):
                           f"receipts={result.receipts} "
                           f"events={[ (event.kind, event.reason, event.payload) for event in result.events ]} "
                           f"contexts={model.contexts}")
-            self.assertEqual((repo / "src/value.py").read_text(encoding="utf-8"), "VALUE = 2\n")
+            self.assertEqual((repo / "src/value.py").read_text(encoding="utf-8"), "VALUE = 2\n",
+                             f"receipts={result.receipts} events={[(e.kind, e.reason, e.payload) for e in result.events]}")
             self.assertEqual([receipt.verb for receipt in result.receipts],
                              ["fs.read", "patch.apply", "proc.exec"])
             self.assertEqual(result.verdict.outcome, "claims")

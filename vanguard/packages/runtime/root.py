@@ -311,10 +311,12 @@ class _EnvironmentEffect:
         detail = ""
         if hasattr(value, "content") and value.content is not None:
             detail = str(value.content)
-        elif hasattr(value, "matches") and value.matches is not None:
+        elif hasattr(value, "matches") and value.matches:
             detail = json.dumps(value.matches)
-        elif hasattr(value, "files") and value.files is not None:
+        elif hasattr(value, "files") and value.files:
             detail = json.dumps(value.files)
+        elif hasattr(value, "output") and value.output is not None:
+            detail = str(value.output)
         return AdapterOutcome("ok", Occurrence.OCCURRED, {"usd_micros": 1},
                               result_digest=digest, detail=detail)
 
@@ -940,7 +942,7 @@ def _resolve(flow: ApprovalFlow,
     against the request *as it stands at resumption* (`K-15`). A boolean
     callback is not cryptographic authority.
     """
-    if approver is None or request.action != harness.diff_verb():
+    if approver is None:
         return None
     try:
         challenge = flow.request(request, result.suspension,

@@ -36,6 +36,7 @@ class DaemonConfig:
     verdict_private_key: bytes | None = None
     verdict_key_id: str = "evaluator-key-default"
     expected_client_uid: int | None = None
+    oracle_root: str | None = None
 
 
 class EvaluatorDaemon:
@@ -121,6 +122,7 @@ class EvaluatorDaemon:
                 expected_uid=self._config.expected_uid,
                 image_digest=self._config.image_digest,
                 timeout_seconds=self._config.timeout_seconds,
+                oracle_root=self._config.oracle_root,
             )
 
             result = evaluator.evaluate(run_ref, protocol)
@@ -159,21 +161,47 @@ def main() -> int:
     parser.add_argument("--image-digest", required=True)
     parser.add_argument("--command", nargs="+", required=True)
     args = parser.parse_args()
-    manifest = json.loads(open(args.oracle_manifest, encoding="utf-8").read())
+    with open(args.oracle_manifest, encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    oracle_digests = _oracle_digests_from_manifest(manifest)
     private_key_text = os.environ.get("VANGUARD_EVALUATOR_PRIVATE_KEY_B64", "")
     private_key = base64.b64decode(private_key_text, validate=True) if private_key_text else None
     daemon = EvaluatorDaemon(DaemonConfig(
         socket_path=args.socket,
         image_digest=args.image_digest,
         workspace=args.workspace,
-        oracle_digests=manifest,
+        oracle_digests=oracle_digests,
         command=tuple(args.command),
         expected_uid=10002,
         verdict_private_key=private_key,
         verdict_key_id=os.environ.get("VANGUARD_EVALUATOR_VERDICT_KEY_ID", "evaluator-key-default"),
+        oracle_root="/sealed-oracle",
     ))
     daemon.serve_forever()
     return 0
+
+
+def _oracle_digests_from_manifest(manifest: object) -> dict[str, str]:
+    """Normalize either a sealed digest map or the preregistration manifest."""
+    if not isinstance(manifest, dict):
+        raise ValueError("oracle manifest must be an object")
+    if all(isinstance(key, str) and isinstance(value, str)
+           for key, value in manifest.items()):
+        return dict(manifest)
+    tasks = manifest.get("tasks")
+    if not isinstance(tasks, list):
+        raise ValueError("oracle manifest has no digest map or tasks")
+    result: dict[str, str] = {}
+    for task in tasks:
+        if not isinstance(task, dict):
+            raise ValueError("oracle task must be an object")
+        path, digest = task.get("oracle"), task.get("oracleDigest")
+        if not isinstance(path, str) or not isinstance(digest, str):
+            raise ValueError("oracle task requires oracle and oracleDigest")
+        result[path] = digest
+    if not result:
+        raise ValueError("oracle manifest has no tasks")
+    return result
 
 
 if __name__ == "__main__":

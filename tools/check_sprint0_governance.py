@@ -10,7 +10,7 @@ _TOOLS = Path(__file__).resolve().parent
 if str(_TOOLS) not in sys.path:
     sys.path.insert(0, str(_TOOLS))
 
-from repo_paths import docs_agile, docs_main_v4, repo_path, repo_root
+from repo_paths import docs_main_v4, repo_path, repo_root
 
 
 def _checks() -> dict[Path, list[str]]:

@@ -4,7 +4,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { explain, streamRun, streamTrace } from "../src/application/commands.js";
+import {
+  approveDecision,
+  explain,
+  manageDaemon,
+  resumeRun,
+  streamRun,
+  streamTrace,
+} from "../src/application/commands.js";
 import { ReplayRuntimeClient } from "../src/adapters/replay.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { jsonLine } from "../src/headless/jsonl.js";
@@ -206,6 +213,40 @@ test("LiveRuntimeClient reports daemon status cleanly", async () => {
     assert.equal(status.value.version, "0.4.0");
   }
 });
+
+test("streamRun returns exit code 0 for satisfied outcome", async () => {
+  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
+  async function* lines() {
+    for (const f of envelopes) yield JSON.stringify(f);
+  }
+  const client = new LiveRuntimeClient(lines());
+  const linesOut: string[] = [];
+  const exitCode = await streamRun(client, { repo: ".", headless: true }, (l) => linesOut.push(l));
+  assert.equal(exitCode, 0);
+  assert.equal(linesOut.length, 4);
+});
+
+test("approveDecision executes approve and reject with stable exit codes", async () => {
+  const client = new LiveRuntimeClient(undefined, { runId: "appr-123" });
+  const linesApprove: string[] = [];
+  const codeApprove = await approveDecision(client, "appr-123", "approve", (l) => linesApprove.push(l));
+  assert.equal(codeApprove, 0);
+  assert.equal(JSON.parse(linesApprove[0]!).command, "resolve_approval");
+
+  const linesReject: string[] = [];
+  const codeReject = await approveDecision(client, "appr-123", "reject", (l) => linesReject.push(l));
+  assert.equal(codeReject, 1);
+});
+
+test("manageDaemon handles status action cleanly", async () => {
+  const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/test.sock" });
+  const linesDaemon: string[] = [];
+  const code = await manageDaemon(client, "status", (l) => linesDaemon.push(l));
+  assert.equal(code, 0);
+  assert.equal(JSON.parse(linesDaemon[0]!).command, "daemon_status");
+  assert.equal(JSON.parse(linesDaemon[0]!).socketPath, "/tmp/test.sock");
+});
+
 
 
 

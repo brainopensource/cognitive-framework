@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 import React from "react";
 import { render } from "ink";
-import { explain, streamRun, streamTrace, type CliOptions } from "./application/commands.js";
+import {
+  approveDecision,
+  explain,
+  manageDaemon,
+  resumeRun,
+  streamRun,
+  streamTrace,
+  type CliOptions,
+} from "./application/commands.js";
 import { LiveRuntimeClient } from "./adapters/live.js";
 import { ReplayRuntimeClient } from "./adapters/replay.js";
 import { ScenarioRuntimeClient } from "./adapters/scenario.js";
@@ -13,23 +21,82 @@ process.stdout.on("error", (error) => {
 });
 
 function usage(): never {
-  console.error("Usage: vg run [repo] [--headless] [--replay <file.jsonl>] | vg trace <runId> [--replay <file.jsonl>] | vg why <artifact> [--replay <file.jsonl>]");
+  console.error(
+    "Usage:\n" +
+      "  vg daemon start|status|stop\n" +
+      "  vg run [repo] --headless --prompt <text> [--model <id>] [--manifest <id>]\n" +
+      "  vg approve <run-id> --decision approve|reject\n" +
+      "  vg resume <run-id> [--headless]\n" +
+      "  vg trace <run-id> [--headless] [--replay <file.jsonl>]\n" +
+      "  vg why <artifact> [--headless] [--replay <file.jsonl>]"
+  );
   process.exit(2);
 }
 
-function options(args: string[]): CliOptions {
-  const positional = args.filter((arg) => !arg.startsWith("--") && args[args.indexOf(arg) - 1] !== "--replay" && args[args.indexOf(arg) - 1] !== "--run-id" && args[args.indexOf(arg) - 1] !== "--resume" && args[args.indexOf(arg) - 1] !== "--checkpoint-every");
+function parseCliOptions(args: string[]): CliOptions {
   const value = (name: string) => {
     const index = args.indexOf(name);
-    return index >= 0 ? args[index + 1] : undefined;
+    return index >= 0 && index + 1 < args.length ? args[index + 1] : undefined;
   };
+  const flag = (name: string) => args.includes(name);
+
+  const flagNamesWithVal = new Set([
+    "--replay",
+    "--run-id",
+    "--resume",
+    "--checkpoint-every",
+    "--repo",
+    "--prompt",
+    "--model",
+    "--manifest",
+    "--decision",
+  ]);
+
+  const positional: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
+    if (arg.startsWith("--") || arg.startsWith("-")) {
+      if (flagNamesWithVal.has(arg)) i++;
+      continue;
+    }
+    positional.push(arg);
+  }
+
+  let prompt = value("--prompt");
+  let repo = value("--repo");
+  const decisionVal = value("--decision");
+  const decision: "approve" | "reject" | undefined =
+    decisionVal === "approve" || decisionVal === "reject" ? decisionVal : undefined;
+
+  if (positional.length > 0) {
+    if (!prompt && !repo) {
+      if (positional[0]!.startsWith(".") || positional[0]!.includes("/")) {
+        repo = positional[0];
+        if (positional.length > 1) prompt = positional.slice(1).join(" ");
+      } else {
+        prompt = positional.join(" ");
+      }
+    } else if (!prompt && repo) {
+      prompt = positional.join(" ");
+    } else if (prompt && !repo) {
+      repo = positional[0];
+    }
+  }
+
   return {
-    headless: args.includes("--headless"),
-    repo: positional[0] ?? ".",
-    runId: value("--run-id"),
+    headless: flag("--headless"),
+    scenario: flag("--scenario"),
+    prompt: prompt ?? "Execute default coding task",
+    brief: prompt ?? "Execute default coding task",
+    repo: repo ?? ".",
+    runId: value("--run-id") ?? (positional[0] && !prompt ? positional[0] : undefined),
     resumeFrom: value("--resume"),
     checkpointEvery: Number(value("--checkpoint-every") ?? 2),
     replay: value("--replay"),
+    model: value("--model"),
+    manifest: value("--manifest") ?? "vg-code-default",
+    decision,
+    autoApprove: flag("--yes") || flag("-y"),
   };
 }
 
@@ -46,19 +113,49 @@ async function* stdinLines(): AsyncIterable<string> {
 
 function clientFor(parsed: CliOptions): RuntimeClient {
   if (parsed.replay) return ReplayRuntimeClient.fromFile(parsed.replay);
-  if (!process.stdin.isTTY) return new LiveRuntimeClient(stdinLines());
-  return new ScenarioRuntimeClient();
+  if (parsed.scenario) return new ScenarioRuntimeClient();
+  if (!process.stdin.isTTY) return new LiveRuntimeClient(stdinLines(), { repo: parsed.repo, prompt: parsed.prompt, model: parsed.model });
+  return new LiveRuntimeClient(undefined, { repo: parsed.repo, prompt: parsed.prompt, model: parsed.model, autoApprove: parsed.autoApprove });
 }
 
-const [command, target, ...rest] = process.argv.slice(2);
-const parsed = options([target, ...rest].filter(Boolean));
+const [command, ...rest] = process.argv.slice(2);
+if (!command) usage();
+
+const parsed = parseCliOptions(rest);
 const runtime = clientFor(parsed);
 
+let exitCode = 0;
+
 if (command === "run") {
-  if (parsed.headless) await streamRun(runtime, parsed, console.log);
-  else render(<RunTui runtime={runtime} repo={parsed.repo} runId={parsed.runId} resumeFrom={parsed.resumeFrom} />);
+  if (parsed.headless) {
+    exitCode = await streamRun(runtime, parsed, console.log);
+  } else {
+    render(<RunTui runtime={runtime} repo={parsed.repo} runId={parsed.runId} resumeFrom={parsed.resumeFrom} />);
+  }
+} else if (command === "approve") {
+  const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
+  if (!runId || !parsed.decision) usage();
+  exitCode = await approveDecision(runtime, runId, parsed.decision, console.log);
+} else if (command === "resume") {
+  const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
+  if (!runId) usage();
+  exitCode = await resumeRun(runtime, { ...parsed, runId }, console.log);
 } else if (command === "trace") {
-  await streamTrace(runtime, target ?? usage(), console.log);
+  const target = rest.find((arg) => !arg.startsWith("-")) ?? usage();
+  exitCode = await streamTrace(runtime, target, console.log);
 } else if (command === "why") {
-  await explain(runtime, target ?? usage(), console.log);
-} else usage();
+  const target = rest.find((arg) => !arg.startsWith("-")) ?? usage();
+  exitCode = await explain(runtime, target, console.log);
+} else if (command === "daemon") {
+  const action = rest.find((a) => ["start", "status", "stop"].includes(a)) as "start" | "status" | "stop" | undefined;
+  if (!action) usage();
+  exitCode = await manageDaemon(runtime, action, console.log);
+} else {
+  usage();
+}
+
+if (parsed.headless) {
+  process.exit(exitCode);
+}
+
+

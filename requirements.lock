@@ -1,0 +1,4 @@
+# Locked dependencies for vanguard-runtime v0.4.0b1 (S6B-REL-002)
+# Core runtime is dependency-free (standard library only).
+# Development and testing dependencies pinned below:
+# ------------------------------------------------------------

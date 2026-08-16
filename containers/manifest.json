@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "worker": {
+    "imageName": "vanguard-worker:v0.4.0-beta",
+    "imageDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uid": 10001,
+    "gid": 10001,
+    "user": "vgworker",
+    "capabilities": ["read", "search", "patch", "test"],
+    "networkPolicy": "deny",
+    "writableMounts": ["/workspace", "/tmp"],
+    "readOnlyMounts": ["/usr"]
+  },
+  "evaluator": {
+    "imageName": "vanguard-evaluator:v0.4.0-beta",
+    "imageDigest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "uid": 10002,
+    "gid": 10002,
+    "user": "vgeval",
+    "socketPath": "/run/evaluator/eval.sock",
+    "networkPolicy": "deny",
+    "sealedOracleMount": "/sealed-oracle",
+    "readOnlyMounts": ["/sealed-oracle", "/workspace", "/usr"]
+  }
+}

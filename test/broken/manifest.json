@@ -338,6 +338,22 @@
         "--s4-exit"
       ],
       "expected_failure": "S4 exit requires spike/ to be absent"
+    },
+    {
+      "test_id": "MF-GOV-001",
+      "control": [
+        "python3",
+        "test/broken/fixtures/governance/scenario.py",
+        "--variant",
+        "reference"
+      ],
+      "broken": [
+        "python3",
+        "test/broken/fixtures/governance/scenario.py",
+        "--variant",
+        "unbound-approval"
+      ],
+      "expected_failure": "tampered approval reached privileged effect"
     }
   ]
 }

@@ -1,0 +1,71 @@
+name: vanguard-clean-candidate
+
+# S6B-GOV-005: clean-candidate job. Mandatory skips are fatal.
+# Does not publish, tag, or rewrite history.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sprint5-6/integration]
+
+permissions:
+  contents: read
+
+jobs:
+  clean-candidate:
+    name: S6B-GOV-005 — clean checkout gates
+    runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ""
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record candidate SHA
+        run: |
+          echo "CANDIDATE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          git rev-parse HEAD
+          test -z "$(git status --porcelain)"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Forbidden local state
+        run: |
+          test ! -e .env
+          test ! -d node_modules
+          python3 tools/scan_secrets.py
+
+      - name: Python unit tests
+        run: python3 -m unittest discover -s test
+
+      - name: Governance tools
+        run: |
+          python3 tools/audit_v4.py
+          python3 tools/check_sprint0_governance.py
+          python3 tools/check_schema_archaeology.py
+          python3 tools/check_baseline_manifest.py
+          python3 tools/check_active_mvp_contract.py
+          python3 tools/check_stale_paths.py
+          python3 tools/check_markdown_links.py
+          python3 tools/check_boundaries.py
+          python3 tools/check_tcb_budget.py
+          python3 tools/run_broken_tests.py
+          python3 tools/scan_secrets.py --all-refs
+
+      - name: Release validators must still fail while Beta is open
+        run: |
+          python3 tools/check_baseline_manifest.py --release && { echo "expected --release to fail"; exit 1; }
+          python3 tools/check_active_mvp_contract.py --release && { echo "expected contract --release to fail"; exit 1; }
+          true
+
+      - name: Mandatory skip is fatal
+        run: |
+          if grep -R "s6b-skip-mandatory" -n .github tools docs/agile/sprint6B >/dev/null 2>&1; then
+            echo "mandatory skip marker present"; exit 1
+          fi

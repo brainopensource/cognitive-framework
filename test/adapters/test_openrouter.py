@@ -435,6 +435,66 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(tool_call["name"], "fs.read")
         self.assertEqual(tool_call["arguments"], {"path": "main.py"})
 
+    def test_live_stream_transport_is_incremental_and_measures_first_delta(self) -> None:
+        event = (
+            "data: "
+            + json.dumps(
+                {"choices": [{"index": 0, "delta": {"content": "hé"}}]},
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+            + "\n\n"
+        ).encode("utf-8")
+        split = event.index(b"\xc3") + 1  # split the UTF-8 encoding of "é"
+        chunks = (event[:split], event[split:], b"data: [DONE]\n\n")
+        calls: list[bytes] = []
+        ticks = iter((100.0, 100.125))
+
+        def stream_transport(url: str, headers: dict[str, str], body: bytes):
+            del url, headers
+            calls.append(body)
+            return 200, {"content-type": "text/event-stream"}, iter(chunks)
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            stream_transport=stream_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            monotonic=lambda: next(ticks),
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "hé")
+        self.assertEqual(result.value["usage"]["ttft_millis"], 125)
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(json.loads(calls[0])["stream"])
+
+    def test_truncated_sse_stream_fails_closed(self) -> None:
+        truncated = b"data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"partial\"}}]}\n\n"
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, truncated),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertIn("truncated", result.error.message.lower())
+
+    def test_malformed_fragmented_tool_arguments_fail_closed(self) -> None:
+        sse_payload = (
+            b"data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"function\":{\"name\":\"fs.read\",\"arguments\":\"{bad\"}}]}}]}\n\n"
+            b"data: [DONE]\n\n"
+        )
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, sse_payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+
     def test_unknown_model_pricing_marked_explicitly(self) -> None:
         payload = json.dumps({
             "choices": [{"message": {"role": "assistant", "content": "custom model reply"}}],
@@ -486,4 +546,3 @@ class OpenRouterModelContract(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

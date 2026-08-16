@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/runtime-service.schema.json",
+  "$comment": "Owning contract: REQ-CLI-002, S6B-SA-001, DEC-6B-011, ADR-0062. RuntimeService NDJSON command and response frames.",
+  "title": "RuntimeServiceFrame",
+  "type": "object",
+  "required": ["version", "frameType", "frameId"],
+  "properties": {
+    "version": { "const": "vg.4" },
+    "frameType": {
+      "enum": [
+        "command",
+        "receipt",
+        "event",
+        "error"
+      ]
+    },
+    "frameId": { "type": "string", "minLength": 1 },
+    "command": {
+      "type": "object",
+      "required": ["name", "commandId", "idempotencyKey", "runId"],
+      "properties": {
+        "name": {
+          "enum": [
+            "StartRun",
+            "GetRun",
+            "StreamEvents",
+            "ResolveApproval",
+            "RecordCorrection",
+            "Cancel",
+            "Checkpoint",
+            "Resume",
+            "ExplainArtifact"
+          ]
+        },
+        "commandId": { "type": "string", "minLength": 1 },
+        "idempotencyKey": { "type": "string", "minLength": 1 },
+        "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
+        "actor": { "type": "string" },
+        "payload": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["commandId", "status"],
+      "properties": {
+        "commandId": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["accepted", "completed", "rejected", "error"] },
+        "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
+        "result": { "type": "object" },
+        "detail": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "event": { "$ref": "event-envelope.schema.json" },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

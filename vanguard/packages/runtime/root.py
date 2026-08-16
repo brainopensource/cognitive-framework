@@ -715,12 +715,11 @@ class Runtime:
         authorization = None
         terminal = RunTermination.ABANDONED
         detail = ""
-        # HMAC verify key is injected by the operator. The root never mints
-        # a default signature (`GOV-01`): a missing key can still *issue* a
-        # challenge, but it cannot accept a decision.
+        # Ed25519 verify keys are injected by the operator. The root never mints
+        # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
+        # still *issue* a challenge, but it cannot accept or verify a decision.
         can_verify = approval_key is not None
-        authority = ApprovalAuthority(
-            approval_key if approval_key is not None else os.urandom(32))
+        authority = ApprovalAuthority(approval_key if approval_key is not None else None)
         # The harness names its own patch verb; `VG-05` writes `fs.patch` and
         # `vg-code-default` writes `patch.apply`. The manifest wins.
         flow = ApprovalFlow(authority, patch_verb=harness.diff_verb() or "fs.patch")

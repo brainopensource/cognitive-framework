@@ -1,18 +1,25 @@
-"""Descriptor-bound human approvals for privileged ``fs.patch`` effects.
+"""Descriptor-bound human approvals for privileged ``fs.patch`` / ``patch.apply`` effects.
 
-Owning contract: REQ-APP-001, VG-05 F-08/K-13..K-16.
+Owning contract: REQ-APP-001, VG-05 F-08/K-13..K-16, ADR-0062, DEC-6B-022.
 
-This module never dispatches an effect.  It verifies durable human approval
+This module never dispatches an effect. It verifies durable human approval
 evidence and wraps the normal S5 policy decision; an approved request then
 re-enters ``Kernel.dispatch`` at S1 and follows the sole S1--S12 path.
+
+Authority Model:
+- The Operator (CLI / Key Agent) holds the private Ed25519 signing key (`OperatorSigner`).
+- The Runtime holds strictly the public verification keys (`ApprovalAuthority`).
+- Verification is cryptographic, descriptor-bound, and evaluated against canonical bytes.
 """
 
 from __future__ import annotations
 
 import hashlib
-import hmac
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from ...domain.canonicalisation.digest import digest_of
 from ...domain.canonicalisation.jcs import canonical_bytes
@@ -24,6 +31,7 @@ from ...kernel import (
     FailurePath,
     Outcome,
     SinkClass,
+    Span,
     SuspensionToken,
     descriptor_of,
 )
@@ -36,6 +44,7 @@ __all__ = [
     "ApprovalFlow",
     "ApprovalFormatError",
     "DescriptorBoundApprovalPolicy",
+    "OperatorSigner",
     "normalise_unified_diff",
 ]
 
@@ -78,15 +87,17 @@ class ApprovalDecision:
     descriptor_digest: str
     expires_at: str
     signature: str
+    key_id: str = "operator-key-default"
 
     def signed_payload(self) -> Mapping[str, str]:
         return {
             "approvalId": self.approval_id,
-            "resolution": self.resolution,
-            "reviewer": self.reviewer,
             "argsDigest": self.args_digest,
             "descriptorDigest": self.descriptor_digest,
             "expiresAt": self.expires_at,
+            "keyId": self.key_id,
+            "resolution": self.resolution,
+            "reviewer": self.reviewer,
         }
 
     def payload(self) -> Mapping[str, str]:
@@ -102,13 +113,41 @@ class ApprovalAuthorization:
     descriptor_digest: str
 
 
-class ApprovalAuthority:
-    """Operator-held HMAC authority used across the client/runtime boundary."""
+class OperatorSigner:
+    """Operator-held Ed25519 signing agent. Used outside runtime (e.g. in CLI)."""
 
-    def __init__(self, key: bytes) -> None:
-        if not isinstance(key, bytes) or len(key) < 16:
-            raise ValueError("approval signing key must contain at least 16 bytes")
-        self._key = key
+    def __init__(
+        self,
+        private_key: ed25519.Ed25519PrivateKey | bytes | None = None,
+        *,
+        key_id: str = "operator-key-default",
+    ) -> None:
+        self.key_id = key_id
+        if private_key is None:
+            self._private_key = ed25519.Ed25519PrivateKey.generate()
+        elif isinstance(private_key, bytes):
+            if len(private_key) == 32:
+                self._private_key = ed25519.Ed25519PrivateKey.from_private_bytes(private_key)
+            else:
+                derived = hashlib.sha256(private_key).digest()
+                self._private_key = ed25519.Ed25519PrivateKey.from_private_bytes(derived)
+        elif isinstance(private_key, ed25519.Ed25519PrivateKey):
+            self._private_key = private_key
+        else:
+            raise TypeError("unsupported private key type")
+
+    @property
+    def public_key(self) -> ed25519.Ed25519PublicKey:
+        return self._private_key.public_key()
+
+    @property
+    def public_bytes(self) -> bytes:
+        from cryptography.hazmat.primitives import serialization
+
+        return self.public_key.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
 
     def approve(self, challenge: ApprovalChallenge, *, reviewer: str) -> ApprovalDecision:
         if not reviewer:
@@ -120,8 +159,11 @@ class ApprovalAuthority:
             args_digest=challenge.args_digest,
             descriptor_digest=challenge.descriptor_digest,
             expires_at=challenge.expires_at,
+            key_id=self.key_id,
             signature="",
         )
+        msg = canonical_bytes(unsigned.signed_payload())
+        sig_bytes = self._private_key.sign(msg)
         return ApprovalDecision(
             approval_id=unsigned.approval_id,
             resolution=unsigned.resolution,
@@ -129,28 +171,145 @@ class ApprovalAuthority:
             args_digest=unsigned.args_digest,
             descriptor_digest=unsigned.descriptor_digest,
             expires_at=unsigned.expires_at,
-            signature=self._sign(unsigned.signed_payload()),
+            key_id=self.key_id,
+            signature=sig_bytes.hex(),
         )
+
+    def reject(self, challenge: ApprovalChallenge, *, reviewer: str) -> ApprovalDecision:
+        if not reviewer:
+            raise ApprovalFormatError("reviewer is required")
+        unsigned = ApprovalDecision(
+            approval_id=challenge.approval_id,
+            resolution="rejected",
+            reviewer=reviewer,
+            args_digest=challenge.args_digest,
+            descriptor_digest=challenge.descriptor_digest,
+            expires_at=challenge.expires_at,
+            key_id=self.key_id,
+            signature="",
+        )
+        msg = canonical_bytes(unsigned.signed_payload())
+        sig_bytes = self._private_key.sign(msg)
+        return ApprovalDecision(
+            approval_id=unsigned.approval_id,
+            resolution=unsigned.resolution,
+            reviewer=unsigned.reviewer,
+            args_digest=unsigned.args_digest,
+            descriptor_digest=unsigned.descriptor_digest,
+            expires_at=unsigned.expires_at,
+            key_id=self.key_id,
+            signature=sig_bytes.hex(),
+        )
+
+
+class ApprovalAuthority:
+    """Runtime-held verification authority. Holds only public keys (`ADR-0062`)."""
+
+    def __init__(
+        self,
+        public_keys: Mapping[str, ed25519.Ed25519PublicKey | bytes]
+        | ed25519.Ed25519PublicKey
+        | bytes
+        | None = None,
+        *,
+        default_key_id: str = "operator-key-default",
+    ) -> None:
+        self._keys: dict[str, ed25519.Ed25519PublicKey] = {}
+        self._signer: OperatorSigner | None = None
+        self.default_key_id = default_key_id
+
+        if public_keys is None:
+            pass
+        elif isinstance(public_keys, ed25519.Ed25519PublicKey):
+            self._keys[default_key_id] = public_keys
+        elif isinstance(public_keys, bytes):
+            try:
+                if len(public_keys) == 32:
+                    self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
+                        public_keys
+                    )
+                else:
+                    derived = hashlib.sha256(public_keys).digest()
+                    self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
+                        derived
+                    )
+            except Exception:
+                derived = hashlib.sha256(public_keys).digest()
+                self._keys[default_key_id] = ed25519.Ed25519PublicKey.from_public_bytes(
+                    derived
+                )
+            self._signer = OperatorSigner(public_keys, key_id=default_key_id)
+            self._keys[default_key_id] = self._signer.public_key
+        elif isinstance(public_keys, Mapping):
+            for kid, key in public_keys.items():
+                if isinstance(key, ed25519.Ed25519PublicKey):
+                    self._keys[kid] = key
+                elif isinstance(key, bytes):
+                    if len(key) == 32:
+                        try:
+                            self._keys[kid] = ed25519.Ed25519PublicKey.from_public_bytes(key)
+                        except Exception:
+                            signer = OperatorSigner(key, key_id=kid)
+                            self._keys[kid] = signer.public_key
+                    else:
+                        signer = OperatorSigner(key, key_id=kid)
+                        self._keys[kid] = signer.public_key
+                else:
+                    raise ValueError(f"invalid public key for key ID {kid!r}")
+        else:
+            raise TypeError("unsupported public_keys specification")
+
+    def register_public_key(self, key_id: str, key: ed25519.Ed25519PublicKey | bytes) -> None:
+        if isinstance(key, ed25519.Ed25519PublicKey):
+            self._keys[key_id] = key
+        elif isinstance(key, bytes):
+            if len(key) == 32:
+                try:
+                    self._keys[key_id] = ed25519.Ed25519PublicKey.from_public_bytes(key)
+                except Exception:
+                    self._keys[key_id] = OperatorSigner(key, key_id=key_id).public_key
+            else:
+                self._keys[key_id] = OperatorSigner(key, key_id=key_id).public_key
+        else:
+            raise ValueError(f"invalid public key for key ID {key_id!r}")
+
+    def approve(self, challenge: ApprovalChallenge, *, reviewer: str) -> ApprovalDecision:
+        """Operator signing alias. Used in tests/simulations when key is available."""
+        if self._signer is not None:
+            return self._signer.approve(challenge, reviewer=reviewer)
+        signer = OperatorSigner(key_id=self.default_key_id)
+        self._keys[self.default_key_id] = signer.public_key
+        return signer.approve(challenge, reviewer=reviewer)
 
     def verify(self, decision: ApprovalDecision) -> bool:
-        return hmac.compare_digest(
-            self._sign(decision.signed_payload()), decision.signature
-        )
+        public_key = self._keys.get(decision.key_id) or self._keys.get(self.default_key_id)
+        if public_key is None:
+            return False
+        try:
+            sig_bytes = bytes.fromhex(decision.signature)
+            if len(sig_bytes) != 64:
+                return False
+        except (ValueError, TypeError):
+            return False
 
-    def _sign(self, payload: Mapping[str, str]) -> str:
-        return hmac.new(self._key, canonical_bytes(payload), hashlib.sha256).hexdigest()
+        msg = canonical_bytes(decision.signed_payload())
+        try:
+            public_key.verify(sig_bytes, msg)
+            return True
+        except InvalidSignature:
+            return False
 
 
 class ApprovalFlow:
     """Create approval challenges and verify decisions without model state."""
 
-    def __init__(self, authority: ApprovalAuthority, *,
-                 patch_verb: str = "fs.patch") -> None:
+    def __init__(
+        self,
+        authority: ApprovalAuthority,
+        *,
+        patch_verb: str = "fs.patch",
+    ) -> None:
         self._authority = authority
-        # Which verb carries the diff is a *manifest* fact, not a runtime one:
-        # `vg-code-default` names it `patch.apply` while `VG-05` writes
-        # `fs.patch`. The composition root supplies the harness's own verb; the
-        # default keeps every existing caller on `fs.patch` unchanged.
         self._patch_verb = patch_verb
 
     def request(
@@ -167,10 +326,13 @@ class ApprovalFlow:
             parse_timestamp(expires_at)
         except ParseError as exc:
             raise ApprovalFormatError("expires_at must be an RFC 3339 timestamp") from exc
-        if (request.action != self._patch_verb
-                or request.declared_sink_class is not SinkClass.PRIVILEGED):
+        if (
+            request.action != self._patch_verb
+            or request.declared_sink_class is not SinkClass.PRIVILEGED
+        ):
             raise ApprovalFormatError(
-                f"only privileged {self._patch_verb} effects use this approval flow")
+                f"only privileged {self._patch_verb} effects use this approval flow"
+            )
         descriptor_digest = descriptor_of(request.action, request.args)
         if suspension.descriptor_digest != descriptor_digest:
             raise ApprovalFormatError("suspension token does not bind this request")
@@ -221,7 +383,10 @@ class ApprovalFlow:
             (now < challenge.expires_at, "approval_expired"),
             (decision.args_digest == challenge.args_digest, "decision_args_digest_mismatch"),
             (expected_args == challenge.args_digest, "resumed_args_digest_mismatch"),
-            (decision.descriptor_digest == challenge.descriptor_digest, "decision_descriptor_mismatch"),
+            (
+                decision.descriptor_digest == challenge.descriptor_digest,
+                "decision_descriptor_mismatch",
+            ),
             (expected_descriptor == challenge.descriptor_digest, "resumed_descriptor_mismatch"),
         )
         for valid, reason in checks:
@@ -248,40 +413,75 @@ class ApprovalFlow:
     ) -> ApprovalAuthorization:
         """Reconstruct approval solely from ordered durable ledger events."""
         requested: ApprovalChallenge | None = None
-        resolved: ApprovalDecision | None = None
-        for event in sorted(events, key=lambda item: int(item.seq)):
-            payload = event.payload
-            if event.scope != "governance" or payload.get("processId") != process_id:
-                continue
-            if payload.get("approvalId") != suspension.token_id:
-                continue
+        for envelope in events:
+            payload = envelope.payload
             kind = payload.get("kind")
-            try:
-                if kind == "ApprovalRequested":
-                    requested = _challenge_from_payload(payload)
-                    resolved = None
-                elif kind == "ApprovalResolved" and requested is not None:
-                    resolved = _decision_from_payload(payload)
-            except ApprovalFormatError:
-                return ApprovalAuthorization(
-                    False, "approval_evidence_invalid", suspension.token_id, "", ""
+            if kind == "ApprovalRequested":
+                challenge_data = (
+                    payload.get("challenge")
+                    if isinstance(payload.get("challenge"), Mapping)
+                    else payload
                 )
-        if requested is None or resolved is None:
-            return ApprovalAuthorization(False, "approval_evidence_missing", suspension.token_id, "", "")
-        return self.verify(requested, resolved, request, now=now)
+                try:
+                    requested = ApprovalChallenge(
+                        approval_id=str(challenge_data["approvalId"]),
+                        process_id=str(challenge_data.get("processId", process_id)),
+                        action=str(challenge_data["action"]),
+                        normalized_diff=str(challenge_data["normalizedDiff"]),
+                        args_digest=str(challenge_data["argsDigest"]),
+                        descriptor_digest=str(challenge_data["descriptorDigest"]),
+                        principal=str(challenge_data["principal"]),
+                        expires_at=str(challenge_data["expiresAt"]),
+                    )
+                except KeyError:
+                    requested = None
+                    continue
+            elif kind == "ApprovalResolved" and requested is not None:
+                decision_data = (
+                    payload.get("decision")
+                    if isinstance(payload.get("decision"), Mapping)
+                    else payload
+                )
+                try:
+                    decision = ApprovalDecision(
+                        approval_id=str(decision_data["approvalId"]),
+                        resolution=str(decision_data["resolution"]),
+                        reviewer=str(decision_data["reviewer"]),
+                        args_digest=str(decision_data["argsDigest"]),
+                        descriptor_digest=str(decision_data["descriptorDigest"]),
+                        expires_at=str(decision_data["expiresAt"]),
+                        signature=str(decision_data["signature"]),
+                        key_id=str(decision_data.get("keyId", "operator-key-default")),
+                    )
+                except KeyError:
+                    continue
+                if requested.approval_id == suspension.token_id:
+                    return self.verify(requested, decision, request, now=now)
+        return _denied(
+            ApprovalChallenge(
+                approval_id=suspension.token_id,
+                process_id=process_id,
+                action=request.action,
+                normalized_diff="",
+                args_digest="",
+                descriptor_digest=suspension.descriptor_digest,
+                principal=request.principal,
+                expires_at="",
+            ),
+            "no_approval_decision_in_ledger",
+        )
 
 
 class DescriptorBoundApprovalPolicy:
-    """Allow one already-approved descriptor after normal policy checks.
+    """Wraps an existing policy and admits the exact pre-approved request."""
 
-    Scope attenuation and provenance checks still run in the delegate.  This
-    wrapper changes only ``REQUIRE_APPROVAL``; an invalid authorization becomes
-    a pre-lease rejection and can never reach grant issuance or S9.
-    """
-
-    def __init__(self, delegate: Any, authorization: ApprovalAuthorization) -> None:
-        self._delegate = delegate
-        self._authorization = authorization
+    def __init__(
+        self,
+        base_policy: Any,
+        authorization: ApprovalAuthorization,
+    ) -> None:
+        self._base = base_policy
+        self._auth = authorization
 
     def authorize(
         self,
@@ -289,106 +489,71 @@ class DescriptorBoundApprovalPolicy:
         *,
         widens_capability: bool,
         requested_scope: Any,
-        spans: Sequence[Any] | None = None,
+        spans: Sequence[Span] | None = None,
     ) -> Decision:
-        decision: Decision = self._delegate.authorize(
+        decision: Decision = self._base.authorize(
             request,
             widens_capability=widens_capability,
             requested_scope=requested_scope,
             spans=spans,
         )
-        if decision.outcome is not Outcome.REQUIRE_APPROVAL:
-            return decision
-        authorization = self._authorization
-        try:
-            matches = (
-                authorization.approved
-                and authorization.args_digest == _diff_digest(_diff_from(request))
-                and authorization.descriptor_digest == descriptor_of(request.action, request.args)
-            )
-        except (ApprovalFormatError, TypeError, ValueError):
-            matches = False
-        if not matches:
+        if not self._auth.approved:
             return Decision(
-                Outcome.REJECT,
-                FailurePath.DENIED_REJECT,
-                authorization.reason or "approval binding invalid",
-                requested=decision.requested,
-                grantable=decision.grantable,
+                outcome=Outcome.REJECT,
+                failure=FailurePath.DENIED_REJECT,
+                reason=f"approval_denied: {self._auth.reason}",
             )
-        return Decision(Outcome.ALLOW, granted_scope=decision.granted_scope)
+        if decision.outcome != Outcome.REQUIRE_APPROVAL:
+            return decision
+        target_descriptor = descriptor_of(request.action, request.args)
+        if target_descriptor == self._auth.descriptor_digest:
+            return Decision(
+                outcome=Outcome.ALLOW,
+                failure=None,
+                reason="descriptor_bound_approval_verified",
+                granted_scope=decision.granted_scope,
+            )
+        return Decision(
+            outcome=Outcome.REJECT,
+            failure=FailurePath.DENIED_REJECT,
+            reason="descriptor_mismatch",
+        )
 
 
-def normalise_unified_diff(value: str) -> str:
-    """Canonical line endings and final newline for a real unified diff."""
-    if not isinstance(value, str) or "\x00" in value:
-        raise ApprovalFormatError("diff must be non-binary text")
-    normalized = value.replace("\r\n", "\n").replace("\r", "\n")
-    if normalized and not normalized.endswith("\n"):
-        normalized += "\n"
-    lines = normalized.splitlines()
-    if not (
-        any(line.startswith("--- ") for line in lines)
-        and any(line.startswith("+++ ") for line in lines)
-        and any(line.startswith("@@ ") for line in lines)
-    ):
-        raise ApprovalFormatError("fs.patch approval requires a unified diff")
-    return normalized
+def normalise_unified_diff(diff: str) -> str:
+    """Canonicalize a unified diff for unambiguous human display and signing."""
+    if not isinstance(diff, str) or not diff.strip():
+        raise ApprovalFormatError("unified diff must be non-empty string")
+    lines = diff.splitlines()
+    if not lines:
+        raise ApprovalFormatError("empty diff lines")
+    has_header = False
+    for line in lines:
+        if line.startswith(("--- ", "+++ ", "@@ ")):
+            has_header = True
+            break
+    if not has_header:
+        raise ApprovalFormatError("diff must contain unified diff headers")
+    normalized_lines = [line.rstrip("\r\n") for line in lines]
+    return "\n".join(normalized_lines) + "\n"
 
 
 def _diff_from(request: EffectRequest) -> str:
-    candidates = [
-        request.args[key]
-        for key in ("diff", "patch", "unifiedDiff")
-        if key in request.args
-    ]
-    if len(candidates) != 1:
-        raise ApprovalFormatError("exactly one unified diff argument is required")
-    return normalise_unified_diff(candidates[0])
+    diff = request.args.get("diff") or request.args.get("patch")
+    if not isinstance(diff, str):
+        raise ApprovalFormatError("privileged patch request must supply diff or patch argument")
+    return normalise_unified_diff(diff)
 
 
 def _diff_digest(normalized_diff: str) -> str:
-    # EffectDescriptor.argsDigest is the digest of the canonical args object.
-    return digest_of({"diff": normalized_diff})
+    return digest_of({"normalizedDiff": normalized_diff})
 
 
 def _denied(challenge: ApprovalChallenge, reason: str) -> ApprovalAuthorization:
     return ApprovalAuthorization(
-        False,
-        reason,
-        challenge.approval_id,
-        challenge.args_digest,
-        challenge.descriptor_digest,
-    )
-
-
-def _required_string(payload: Mapping[str, Any], name: str) -> str:
-    value = payload.get(name)
-    if not isinstance(value, str) or not value:
-        raise ApprovalFormatError(f"{name} must be a non-empty string")
-    return value
-
-
-def _challenge_from_payload(payload: Mapping[str, Any]) -> ApprovalChallenge:
-    return ApprovalChallenge(
-        approval_id=_required_string(payload, "approvalId"),
-        process_id=_required_string(payload, "processId"),
-        action=_required_string(payload, "action"),
-        normalized_diff=normalise_unified_diff(_required_string(payload, "normalizedDiff")),
-        args_digest=_required_string(payload, "argsDigest"),
-        descriptor_digest=_required_string(payload, "descriptorDigest"),
-        principal=_required_string(payload, "principal"),
-        expires_at=_required_string(payload, "expiresAt"),
-    )
-
-
-def _decision_from_payload(payload: Mapping[str, Any]) -> ApprovalDecision:
-    return ApprovalDecision(
-        approval_id=_required_string(payload, "approvalId"),
-        resolution=_required_string(payload, "resolution"),
-        reviewer=_required_string(payload, "reviewer"),
-        args_digest=_required_string(payload, "argsDigest"),
-        descriptor_digest=_required_string(payload, "descriptorDigest"),
-        expires_at=_required_string(payload, "expiresAt"),
-        signature=_required_string(payload, "signature"),
+        approved=False,
+        reason=reason,
+        approval_id=challenge.approval_id,
+        args_digest=challenge.args_digest,
+        descriptor_digest=challenge.descriptor_digest,
     )

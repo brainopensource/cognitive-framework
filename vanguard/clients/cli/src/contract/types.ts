@@ -107,6 +107,28 @@ export type ArtifactExplanation = {
   freshness: { source: StreamSource; asOfSeq?: string };
 };
 
+export type ApprovalChallenge = {
+  approvalId: string;
+  processId: string;
+  action: string;
+  normalizedDiff: string;
+  argsDigest: string;
+  descriptorDigest: string;
+  principal: string;
+  expiresAt: string;
+};
+
+export type ApprovalDecision = {
+  approvalId: string;
+  resolution: "approved" | "rejected";
+  reviewer: string;
+  argsDigest: string;
+  descriptorDigest: string;
+  expiresAt: string;
+  keyId: string;
+  signature: string;
+};
+
 export interface RuntimeClient {
   startRun(request: StartRunRequest, signal?: AbortSignal): Promise<Result<RunRef>>;
   streamEvents(cursor: EventCursor, signal?: AbortSignal): AsyncIterable<Result<StreamItem>>;
@@ -119,3 +141,4 @@ export interface RuntimeClient {
   recordCorrection(record: CorrectionRecord, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
   getDaemonStatus(signal?: AbortSignal): Promise<Result<DaemonStatus>>;
 }
+

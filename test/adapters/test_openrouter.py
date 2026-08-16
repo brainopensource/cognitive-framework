@@ -21,6 +21,7 @@ from vanguard.packages.adapters.models.openrouter import (
     OpenRouterModel,
     OpenRouterModelAdapter,
     calculate_cost,
+    calculate_cost_micros,
     estimate_context_tokens,
     estimate_proposal_tokens,
     estimate_tokens,
@@ -496,6 +497,25 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.error.kind, "instrument_error")
 
+    def test_non_streaming_malformed_tool_json_fails_closed(self) -> None:
+        payload = json.dumps({
+            "choices": [{"message": {
+                "content": None,
+                "tool_calls": [{
+                    "id": "call_bad",
+                    "function": {"name": "fs.read", "arguments": "{bad"},
+                }],
+            }}],
+        }).encode()
+        port = OpenRouterModel(
+            transport=lambda *_: (200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=False,
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+
     def test_unknown_model_pricing_marked_explicitly(self) -> None:
         payload = json.dumps({
             "choices": [{"message": {"role": "assistant", "content": "custom model reply"}}],
@@ -512,6 +532,15 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertFalse(result.value["usage"]["pricing_known"])
         self.assertFalse(result.value["pricing_known"])
+
+    def test_unknown_pricing_never_invents_a_cost(self) -> None:
+        cost, known = calculate_cost_micros(
+            "provider/model-without-pricing",
+            prompt_tokens=100,
+            completion_tokens=50,
+        )
+        self.assertEqual(cost, 0)
+        self.assertFalse(known)
         self.assertGreaterEqual(result.value["usage"]["usd_micros"], 0)
 
     def test_malformed_sse_stream_fails_closed(self) -> None:

@@ -3,6 +3,7 @@ import type { RuntimeClient } from "../contract/types.js";
 
 export type CliOptions = {
   headless: boolean;
+  feed?: boolean;
   prompt?: string;
   brief?: string;
   runId?: string;
@@ -16,6 +17,7 @@ export type CliOptions = {
   manifest?: string;
   decision?: "approve" | "reject";
   autoApprove?: boolean;
+  socketPath?: string;
 };
 
 export async function streamRun(
@@ -41,7 +43,8 @@ export async function streamRun(
   }
 
   const runId = started.value.runId;
-  let exitCode = 0;
+  let exitCode = 2; // Default to 2 (error) unless terminal confirmation received
+  let seenTerminal = false;
 
   for await (const result of client.streamEvents({ runId })) {
     if (!result.ok) {
@@ -54,17 +57,31 @@ export async function streamRun(
     const payload = result.value.envelope.payload;
 
     if (kind === "EpisodeCompleted") {
+      seenTerminal = true;
       const outcome = String(payload.outcome ?? "");
       if (outcome === "satisfied" || outcome === "completed") {
         exitCode = 0;
-      } else if (outcome === "aborted" || outcome === "cancelled" || outcome === "rejected" || outcome === "denied") {
+      } else if (
+        outcome === "aborted" ||
+        outcome === "cancelled" ||
+        outcome === "rejected" ||
+        outcome === "denied"
+      ) {
         exitCode = 1;
       } else {
         exitCode = 2;
       }
     } else if (kind === "RunAborted" || kind === "ApprovalDenied") {
+      seenTerminal = true;
       exitCode = 1;
+    } else if (kind === "RunFailed") {
+      seenTerminal = true;
+      exitCode = 2;
     }
+  }
+
+  if (!seenTerminal && exitCode === 2) {
+    return 2;
   }
 
   return exitCode;
@@ -76,7 +93,12 @@ export async function resumeRun(
   write: (line: string) => void
 ): Promise<number> {
   if (!options.runId) {
-    write(jsonLine({ ok: false, error: { code: "invalid_request", message: "runId required to resume", retryable: false } }));
+    write(
+      jsonLine({
+        ok: false,
+        error: { code: "invalid_request", message: "runId required to resume", retryable: false },
+      })
+    );
     return 2;
   }
   const resumed = await client.requestResume({ runId: options.runId, checkpointId: options.resumeFrom });
@@ -103,33 +125,35 @@ export async function approveDecision(
   return decision === "approve" ? 0 : 1;
 }
 
-export async function streamTrace(
-  client: RuntimeClient,
-  runId: string,
-  write: (line: string) => void
-): Promise<number> {
-  for await (const result of client.streamEvents({ runId })) {
-    if (!result.ok) {
-      write(jsonLine({ ok: false, error: result.error }));
-      return 2;
-    }
-    write(jsonLine(result.value));
-  }
-  return 0;
-}
-
 export async function explain(
   client: RuntimeClient,
-  artifact: string,
+  artifactId: string,
   write: (line: string) => void
 ): Promise<number> {
-  const result = await client.explainArtifact(artifact);
+  const result = await client.explainArtifact(artifactId);
   if (!result.ok) {
     write(jsonLine({ ok: false, error: result.error }));
     return 2;
   }
   write(jsonLine(result.value));
   return 0;
+}
+
+export async function streamTrace(
+  client: RuntimeClient,
+  runId: string,
+  write: (line: string) => void
+): Promise<number> {
+  let hasEvents = false;
+  for await (const result of client.streamEvents({ runId })) {
+    if (!result.ok) {
+      write(jsonLine({ ok: false, error: result.error }));
+      return 2;
+    }
+    hasEvents = true;
+    write(jsonLine(result.value));
+  }
+  return hasEvents ? 0 : 2;
 }
 
 export async function manageDaemon(
@@ -142,7 +166,6 @@ export async function manageDaemon(
     write(jsonLine({ ok: false, error: status.error }));
     return 2;
   }
-  write(jsonLine({ command: `daemon_${action}`, ...status.value }));
-  return 0;
+  write(jsonLine({ action, ...status.value }));
+  return status.value.status === "running" ? 0 : 1;
 }
-

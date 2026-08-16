@@ -50,6 +50,7 @@ function parseCliOptions(args: string[]): CliOptions {
     "--model",
     "--manifest",
     "--decision",
+    "--socket-path",
   ]);
 
   const positional: string[] = [];
@@ -85,6 +86,7 @@ function parseCliOptions(args: string[]): CliOptions {
 
   return {
     headless: flag("--headless"),
+    feed: flag("--feed"),
     scenario: flag("--scenario"),
     prompt: prompt ?? "Execute default coding task",
     brief: prompt ?? "Execute default coding task",
@@ -97,6 +99,7 @@ function parseCliOptions(args: string[]): CliOptions {
     manifest: value("--manifest") ?? "vg-code-default",
     decision,
     autoApprove: flag("--yes") || flag("-y"),
+    socketPath: value("--socket-path"),
   };
 }
 
@@ -114,8 +117,14 @@ async function* stdinLines(): AsyncIterable<string> {
 function clientFor(parsed: CliOptions): RuntimeClient {
   if (parsed.replay) return ReplayRuntimeClient.fromFile(parsed.replay);
   if (parsed.scenario) return new ScenarioRuntimeClient();
-  if (!process.stdin.isTTY) return new LiveRuntimeClient(stdinLines(), { repo: parsed.repo, prompt: parsed.prompt, model: parsed.model });
-  return new LiveRuntimeClient(undefined, { repo: parsed.repo, prompt: parsed.prompt, model: parsed.model, autoApprove: parsed.autoApprove });
+  if (parsed.feed) return new LiveRuntimeClient(stdinLines(), { repo: parsed.repo, prompt: parsed.prompt, model: parsed.model });
+  return new LiveRuntimeClient(undefined, {
+    repo: parsed.repo,
+    prompt: parsed.prompt,
+    model: parsed.model,
+    autoApprove: parsed.autoApprove,
+    socketPath: parsed.socketPath,
+  });
 }
 
 const [command, ...rest] = process.argv.slice(2);
@@ -154,8 +163,7 @@ if (command === "run") {
   usage();
 }
 
-if (parsed.headless) {
+process.exitCode = exitCode;
+if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why") {
   process.exit(exitCode);
 }
-
-

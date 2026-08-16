@@ -2,3 +2,10 @@
 
 Owning contract: REQ-BENCH-001, VG-07 §5.6, §5.8.
 """
+
+import sys
+from pathlib import Path
+
+_ROOT = str(Path(__file__).resolve().parents[2])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)

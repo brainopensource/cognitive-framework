@@ -86,4 +86,20 @@ class TestModelInvocation(unittest.TestCase):
 
     def test_validate_proposal_schema(self):
         res = validate_proposal_schema({})
-        self.assertTrue(res.ok)
+        self.assertFalse(res.ok)
+
+    def test_validate_proposal_schema_rejects_wrong_types_and_authority(self):
+        self.assertFalse(validate_proposal_schema({"text": 42}).ok)
+        self.assertFalse(validate_proposal_schema({"text": "ok", "toolCalls": {}}).ok)
+        self.assertFalse(validate_proposal_schema({
+            "text": "",
+            "toolCalls": [{"name": "fs.read", "arguments": {}, "reservation": "grant"}],
+        }).ok)
+
+    def test_translate_always_leaves_authority_for_runtime_binding(self):
+        result = ProposalTranslator.translate({
+            "text": "",
+            "toolCalls": [{"name": "fs.read", "arguments": {"path": "x.py"}}],
+        })
+        self.assertTrue(result.ok)
+        self.assertIsNone(result.value["reservation"])

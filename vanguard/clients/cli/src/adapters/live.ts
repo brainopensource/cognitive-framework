@@ -1,5 +1,6 @@
-import { createConnection, type Socket } from "node:net";
+import { createConnection } from "node:net";
 import { createInterface } from "node:readline";
+import { randomUUID } from "node:crypto";
 import { fail, parseJsonlLine } from "../contract/parse.js";
 import type {
   ArtifactExplanation,
@@ -52,19 +53,109 @@ export class LiveRuntimeClient implements RuntimeClient {
     return this.lines !== undefined;
   }
 
-  private unavailable(action: string): Result<never> {
-    return fail(
-      "not_available",
-      `RuntimeService daemon has no ${action} protocol at ${this.socketPath}`,
-      true,
-    );
+  private async sendCommand<T = Record<string, unknown>>(
+    name: string,
+    payload: Record<string, unknown>,
+    runId: string
+  ): Promise<Result<T>> {
+    return new Promise((resolve) => {
+      let resolved = false;
+      const socket = createConnection({ path: this.socketPath });
+
+      const cleanup = () => {
+        socket.removeAllListeners();
+        socket.destroy();
+      };
+
+      const timer = setTimeout(() => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        resolve(fail("not_available", `RuntimeService daemon timed out at ${this.socketPath}`, true));
+      }, 500);
+
+      socket.once("error", () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        cleanup();
+        resolve(fail("not_available", `RuntimeService daemon unreachable at ${this.socketPath}`, true));
+      });
+
+      socket.once("connect", () => {
+        const commandId = randomUUID();
+        const frameId = randomUUID();
+        const commandFrame = {
+          version: "vg.4",
+          frameType: "command",
+          frameId,
+          command: {
+            name,
+            commandId,
+            idempotencyKey: commandId,
+            runId,
+            actor: "operator",
+            payload,
+          },
+        };
+        socket.write(JSON.stringify(commandFrame) + "\n");
+        const rl = createInterface({ input: socket, crlfDelay: Infinity });
+        rl.once("line", (line) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timer);
+          cleanup();
+          try {
+            const resp = JSON.parse(line);
+            if (resp.frameType === "error") {
+              resolve(fail("invalid_request", resp.error?.message ?? "command failed", false));
+              return;
+            }
+            const receipt = resp.receipt;
+            if (!receipt) {
+              resolve(fail("invalid_request", "invalid response frame from daemon", false));
+              return;
+            }
+            if (receipt.status === "error") {
+              resolve(fail("invalid_request", receipt.detail ?? "command failed", false));
+              return;
+            }
+            resolve({ ok: true, value: (receipt.result ?? receipt) as T });
+          } catch (exc) {
+            resolve(fail("transport_interrupted", `failed to parse daemon response: ${exc}`, true));
+          }
+        });
+      });
+    });
   }
 
   async startRun(request: StartRunRequest, _signal?: AbortSignal): Promise<Result<RunRef>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("startRun");
+    if (this.isFeedMode()) {
+      if (request.runId) this.currentRunId = request.runId;
+      this.status = "running";
+      return {
+        ok: true,
+        value: {
+          runId: this.currentRunId,
+          episodeId: this.currentEpisodeId,
+        },
+      };
     }
-    if (request.runId) this.currentRunId = request.runId;
+
+    const runId = request.runId ?? this.currentRunId;
+    const res = await this.sendCommand<{ runId: string }>(
+      "StartRun",
+      {
+        manifestPath: request.manifest ?? this.options.manifest ?? "manifest.json",
+        repoPath: request.repo ?? this.options.repo ?? ".",
+        brief: request.brief ?? request.prompt ?? this.options.brief ?? this.options.prompt ?? "run",
+      },
+      runId
+    );
+    if (!res.ok) {
+      return res;
+    }
+    this.currentRunId = res.value.runId;
     this.status = "running";
     return {
       ok: true,
@@ -116,112 +207,175 @@ export class LiveRuntimeClient implements RuntimeClient {
       return;
     }
 
-    // Connect to RuntimeService daemon over Unix domain socket
-    let socket: Socket;
+    // Connect to Unix domain socket
+    const socket = createConnection({ path: this.socketPath });
+
     try {
-      socket = createConnection({ path: this.socketPath });
+      await new Promise<void>((resolve, reject) => {
+        socket.once("connect", () => resolve());
+        socket.once("error", (err) => reject(err));
+      });
     } catch {
-      yield fail("not_available", `RuntimeService daemon not reachable at ${this.socketPath}`, true);
+      yield fail("not_available", `RuntimeService daemon unreachable at ${this.socketPath}`, true);
       return;
     }
 
-    if (signal) {
-      signal.addEventListener("abort", () => {
-        socket.destroy();
-      });
-    }
+    const commandFrame = {
+      version: "vg.4",
+      frameType: "command",
+      frameId: randomUUID(),
+      command: {
+        name: "StreamEvents",
+        commandId: randomUUID(),
+        idempotencyKey: randomUUID(),
+        runId: cursor.runId,
+        actor: "operator",
+        payload: {
+          afterSeq: cursor.afterSeq ? parseInt(cursor.afterSeq, 10) : 0,
+        },
+      },
+    };
 
-    const rl = createInterface({ input: socket });
+    socket.write(JSON.stringify(commandFrame) + "\n");
+    const rl = createInterface({ input: socket, crlfDelay: Infinity });
 
     try {
       for await (const line of rl) {
         if (signal?.aborted) {
-          yield fail("transport_interrupted", "live stream aborted", true);
+          yield fail("transport_interrupted", "stream aborted", true);
           return;
         }
         if (!line.trim()) continue;
-        const parsed = parseJsonlLine(line);
-        if (!parsed.ok) {
-          yield parsed;
+
+        let frame: any;
+        try {
+          frame = JSON.parse(line);
+        } catch (exc) {
+          yield fail("transport_interrupted", `malformed json frame: ${exc}`, true);
           continue;
         }
-        const seq = BigInt(parsed.value.seq);
-        if (afterSeq !== undefined && seq <= afterSeq) {
-          continue;
-        }
-        if (this.lastSeenSeq > 0n && seq <= this.lastSeenSeq) {
-          continue;
-        }
-        this.lastSeenSeq = seq;
 
-        const item: StreamItem = {
-          contractVersion: "0.1",
-          source: "live",
-          envelope: parsed.value,
-        };
-
-        if (this.boundedBuffer.length >= LiveRuntimeClient.MAX_BUFFER_SIZE) {
-          this.boundedBuffer.shift();
+        if (frame.frameType === "error") {
+          yield fail("transport_interrupted", frame.error?.message ?? "stream error", true);
+          return;
         }
-        this.boundedBuffer.push(item);
 
-        yield { ok: true, value: item };
+        if (frame.frameType === "event" && frame.event) {
+          const envelope = frame.event;
+          const seq = BigInt(envelope.seq ?? "0");
+          if (afterSeq !== undefined && seq <= afterSeq) {
+            continue;
+          }
+          if (this.lastSeenSeq > 0n && seq <= this.lastSeenSeq) {
+            continue;
+          }
+          this.lastSeenSeq = seq;
+
+          const item: StreamItem = {
+            contractVersion: "0.1",
+            source: "live",
+            envelope,
+          };
+
+          if (this.boundedBuffer.length >= LiveRuntimeClient.MAX_BUFFER_SIZE) {
+            this.boundedBuffer.shift();
+          }
+          this.boundedBuffer.push(item);
+
+          yield { ok: true, value: item };
+        }
       }
       this.status = "completed";
     } catch {
       yield fail("transport_interrupted", "daemon connection closed unexpectedly", true);
     } finally {
+      socket.removeAllListeners();
       socket.destroy();
     }
   }
 
   async getRun(runId: string): Promise<Result<RunSnapshot>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("getRun");
+    if (this.isFeedMode()) {
+      return {
+        ok: true,
+        value: {
+          runId,
+          status: this.status,
+          seq: this.lastSeenSeq.toString(),
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string; eventCount?: number }>("GetRun", {}, runId);
+    if (!res.ok) return res;
     return {
       ok: true,
       value: {
         runId,
-        status: this.status,
+        status: res.value.status,
         seq: this.lastSeenSeq.toString(),
       },
     };
   }
 
   async requestCancel(runId: string): Promise<Result<CommandReceipt>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("cancel");
+    if (this.isFeedMode()) {
+      this.status = "cancelled";
+      return {
+        ok: true,
+        value: {
+          runId,
+          command: "cancel",
+          status: "requested",
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string }>("Cancel", {}, runId);
+    if (!res.ok) return res;
     this.status = "cancelled";
     return {
       ok: true,
       value: {
         runId,
         command: "cancel",
-        status: "requested",
+        status: "accepted",
       },
     };
   }
 
   async requestCheckpoint(runId: string): Promise<Result<CommandReceipt>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("checkpoint");
+    if (this.isFeedMode()) {
+      return {
+        ok: true,
+        value: {
+          runId,
+          command: "checkpoint",
+          status: "requested",
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string }>("Checkpoint", {}, runId);
+    if (!res.ok) return res;
     return {
       ok: true,
       value: {
         runId,
         command: "checkpoint",
-        status: "requested",
+        status: "accepted",
       },
     };
   }
 
   async requestResume(request: ResumeRunRequest): Promise<Result<RunRef>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("resume");
+    if (this.isFeedMode()) {
+      return {
+        ok: true,
+        value: {
+          runId: request.runId,
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string }>("Resume", {}, request.runId);
+    if (!res.ok) return res;
     return {
       ok: true,
       value: {
@@ -231,15 +385,27 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async explainArtifact(artifactId: string): Promise<Result<ArtifactExplanation>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("explainArtifact");
+    if (this.isFeedMode()) {
+      return {
+        ok: true,
+        value: {
+          artifactId,
+          status: "active",
+          prediction: `Live artifact ${artifactId} active under RuntimeService`,
+          activatedBy: [{ evidence: `live stream seq=${this.lastSeenSeq}`, strength: 1.0 }],
+          demotedBy: [],
+          freshness: { source: "live", asOfSeq: this.lastSeenSeq.toString() },
+        },
+      };
     }
+    const res = await this.sendCommand<{ explanation?: string }>("ExplainArtifact", { artifactId }, this.currentRunId);
+    if (!res.ok) return res;
     return {
       ok: true,
       value: {
         artifactId,
         status: "active",
-        prediction: `Live artifact ${artifactId} active under RuntimeService`,
+        prediction: res.value.explanation || `Live artifact ${artifactId} active under RuntimeService`,
         activatedBy: [{ evidence: `live stream seq=${this.lastSeenSeq}`, strength: 1.0 }],
         demotedBy: [],
         freshness: { source: "live", asOfSeq: this.lastSeenSeq.toString() },
@@ -248,30 +414,67 @@ export class LiveRuntimeClient implements RuntimeClient {
   }
 
   async resolveApproval(request: ResolveApprovalRequest): Promise<Result<CommandReceipt>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("resolveApproval");
+    if (this.isFeedMode()) {
+      return {
+        ok: true,
+        value: {
+          runId: this.currentRunId,
+          command: "resolve_approval",
+          status: "requested",
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string }>(
+      "ResolveApproval",
+      {
+        decision: {
+          approvalId: request.approvalId,
+          resolution: request.decision === "approve" ? "approved" : "rejected",
+          reviewer: "operator",
+          argsDigest: "",
+          descriptorDigest: "",
+          expiresAt: "",
+          signature: request.signature ?? "",
+        },
+      },
+      this.currentRunId
+    );
+    if (!res.ok) return res;
     return {
       ok: true,
       value: {
         runId: this.currentRunId,
         command: "resolve_approval",
-        status: "requested",
+        status: "accepted",
       },
     };
   }
 
   async recordCorrection(record: CorrectionRecord): Promise<Result<CommandReceipt>> {
-    if (!this.isFeedMode()) {
-      return this.unavailable("recordCorrection");
+    if (this.isFeedMode()) {
+      this.corrections.push(record);
+      return {
+        ok: true,
+        value: {
+          runId: this.currentRunId,
+          command: "record_correction",
+          status: "requested",
+        },
+      };
     }
+    const res = await this.sendCommand<{ status: string }>(
+      "RecordCorrection",
+      { correction: record },
+      this.currentRunId
+    );
+    if (!res.ok) return res;
     this.corrections.push(record);
     return {
       ok: true,
       value: {
         runId: this.currentRunId,
         command: "record_correction",
-        status: "requested",
+        status: "accepted",
       },
     };
   }
@@ -281,13 +484,20 @@ export class LiveRuntimeClient implements RuntimeClient {
       return fail("not_available", "JSONL feed mode has no RuntimeService daemon", false);
     }
     return await new Promise((resolve) => {
+      let resolved = false;
       const socket = createConnection({ path: this.socketPath });
       const timer = setTimeout(() => {
+        if (resolved) return;
+        resolved = true;
+        socket.removeAllListeners();
         socket.destroy();
         resolve(fail("not_available", `RuntimeService daemon not reachable at ${this.socketPath}`, true));
-      }, 400);
+      }, 300);
       socket.once("connect", () => {
+        if (resolved) return;
+        resolved = true;
         clearTimeout(timer);
+        socket.removeAllListeners();
         socket.destroy();
         resolve({
           ok: true,
@@ -299,11 +509,13 @@ export class LiveRuntimeClient implements RuntimeClient {
         });
       });
       socket.once("error", () => {
+        if (resolved) return;
+        resolved = true;
         clearTimeout(timer);
+        socket.removeAllListeners();
+        socket.destroy();
         resolve(fail("not_available", `RuntimeService daemon not reachable at ${this.socketPath}`, true));
       });
     });
   }
 }
-
-

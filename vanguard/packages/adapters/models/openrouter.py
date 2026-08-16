@@ -162,7 +162,11 @@ def calculate_cost_micros(
     """Calculate USD micros and whether pricing was explicitly known."""
     table = pricing_table_micros if pricing_table_micros is not None else MODEL_PRICING_MICROS
     pricing_known = model in table
-    pricing = table.get(model, DEFAULT_MODEL_PRICING_MICROS)
+    if not pricing_known:
+        # Unknown pricing is not permission to invent a default price. The
+        # caller receives an explicit unknown flag and zero measured cost.
+        return 0, False
+    pricing = table[model]
     prompt_price, completion_price, cached_price = pricing
     uncached_prompt = max(0, prompt_tokens - cached_tokens)
     micros = (
@@ -280,22 +284,34 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
     if not isinstance(text, str):
         return None
     tool_calls: list[dict[str, Any]] = []
-    raw_calls = message.get("tool_calls") or ()
+    raw_calls = message.get("tool_calls")
+    if raw_calls is None:
+        raw_calls = []
+    if not isinstance(raw_calls, list):
+        return None
     for raw in raw_calls:
         if not isinstance(raw, Mapping):
-            continue
+            return None
         function = raw.get("function") if isinstance(raw.get("function"), Mapping) else {}
+        if not function:
+            return None
         arguments: Any = function.get("arguments", {})
         if isinstance(arguments, str):
             try:
                 arguments = json.loads(arguments)
             except json.JSONDecodeError:
-                arguments = {"raw": arguments}
+                return None
+        if not isinstance(arguments, Mapping):
+            return None
+        name = function.get("name")
+        call_id = raw.get("id")
+        if not isinstance(name, str) or not name or not isinstance(call_id, str) or not call_id:
+            return None
         tool_calls.append(
             {
-                "id": str(raw.get("id", "")),
-                "name": str(function.get("name", "")),
-                "arguments": arguments if isinstance(arguments, Mapping) else {},
+                "id": call_id,
+                "name": name,
+                "arguments": dict(arguments),
             }
         )
     return {"text": text, "toolCalls": tool_calls}
@@ -409,6 +425,10 @@ def _parse_sse_stream(
                 if not isinstance(arguments, str):
                     return False
                 call["arguments_str"] += arguments
+                if len(call["arguments_str"].encode("utf-8")) > max_event_bytes:
+                    return False
+            if sum(len(value.encode("utf-8")) for value in text_parts) > max_event_bytes:
+                return False
                 note_first_delta()
         return True
 

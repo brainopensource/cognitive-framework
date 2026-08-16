@@ -4,9 +4,13 @@ Owning contract: REQ-BENCH-001, VG-07 §5.6, §5.8.
 Invariant: Telemetry suites run deterministically in CI against recorded golden cassettes.
 """
 
-from __future__ import annotations
-
+import sys
 import unittest
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 from tools.telemetry.runner import (
     BenchmarkTask,

@@ -1,26 +1,30 @@
-"""Recovery scanner and liveness lease controller outside the dying process.
+"""Recovery scanner, replay reducer, and liveness controller outside the dying process.
 
-Owning contract: VG-04 §12.4, GTS-13C T3.6.
+Owning contract: VG-04 §12.4, GTS-13C T3.6, DEC-6B-026, DEC-6B-027, ADR-0062.
 
 Invariants:
 - The terminal record (RunRecovered or RunAborted) is ALWAYS written by the
   external recovery controller, NEVER by the corpse / dying process.
 - Heartbeats indicate liveness; absence past lease expiration triggers recovery.
-- Scans are deterministic given a timestamp and lease bound.
+- Replay reduces the ledger and executes only the legal next transition.
+- Re-entry after approved suspension is at S1, never re-querying the model.
 """
 
 from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
-from ...domain.ledger.events import EventEnvelope, parse_event_envelope
+from ...domain.ledger.events import EventEnvelope
+from ...domain.primitives.primitives import uuidv7
 from ...ports.event_store import EventRange, EventStorePort
 
 __all__ = [
-    "RecoveryScanner",
+    "LedgerReplayState",
     "RecoveryRecord",
+    "RecoveryScanner",
+    "replay_ledger_state",
 ]
 
 
@@ -34,6 +38,73 @@ class RecoveryRecord:
     controller_principal: str
     terminal_event_id: str
     terminal_seq: str
+
+
+@dataclass(frozen=True, slots=True)
+class LedgerReplayState:
+    """State reconstructed solely from durable ledger events."""
+
+    run_id: str
+    status: str  # "active" | "suspended" | "completed" | "aborted" | "undeterminable"
+    last_seq: int
+    pending_approval: Mapping[str, Any] | None = None
+    resolved_approval: Mapping[str, Any] | None = None
+    unreconciled_intent: Mapping[str, Any] | None = None
+    receipts_count: int = 0
+    terminal_event: Mapping[str, Any] | None = None
+
+
+def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
+    """Reconstruct execution state from an ordered event stream."""
+    if not events:
+        return LedgerReplayState(run_id="", status="active", last_seq=0)
+
+    run_id = events[0].run_id or ""
+    last_seq = 0
+    status = "active"
+    pending_approval: Mapping[str, Any] | None = None
+    resolved_approval: Mapping[str, Any] | None = None
+    last_intent: Mapping[str, Any] | None = None
+    receipts_count = 0
+    terminal_event: Mapping[str, Any] | None = None
+
+    for ev in events:
+        try:
+            seq_val = int(ev.seq)
+            if seq_val > last_seq:
+                last_seq = seq_val
+        except (ValueError, TypeError):
+            pass
+
+        kind = ev.payload.get("kind", "")
+        if kind in ("EpisodeCompleted", "RunRecovered", "RunAborted", "RunFailed"):
+            status = "completed" if kind == "EpisodeCompleted" else "aborted"
+            terminal_event = dict(ev.payload)
+        elif kind == "ApprovalRequested":
+            status = "suspended"
+            pending_approval = ev.payload.get("challenge")
+        elif kind == "ApprovalResolved":
+            resolved_approval = ev.payload.get("decision")
+            status = "active"
+        elif kind == "EffectIntent":
+            last_intent = dict(ev.payload)
+        elif kind == "Receipt" or kind == "EffectCompleted":
+            last_intent = None
+            receipts_count += 1
+
+    if status == "active" and last_intent is not None:
+        status = "undeterminable"
+
+    return LedgerReplayState(
+        run_id=run_id,
+        status=status,
+        last_seq=last_seq,
+        pending_approval=pending_approval,
+        resolved_approval=resolved_approval,
+        unreconciled_intent=last_intent,
+        receipts_count=receipts_count,
+        terminal_event=terminal_event,
+    )
 
 
 def _parse_iso_to_millis(iso_str: str) -> int:
@@ -74,18 +145,14 @@ class RecoveryScanner:
         last_event = events[-1]
         last_seq_int = int(last_event.seq)
 
-        # Check if already terminated
         is_terminated = False
         last_heartbeat_time: Optional[str] = None
-        episode_id: Optional[str] = None
         tenant_id = last_event.tenant_id
         owner_id = last_event.owner_id
 
         for ev in events:
-            if ev.episode_id:
-                episode_id = ev.episode_id
             kind = ev.payload.get("kind", "")
-            if kind in ("EpisodeCompleted", "RunRecovered", "RunAborted"):
+            if kind in ("EpisodeCompleted", "RunRecovered", "RunAborted", "RunFailed"):
                 is_terminated = True
                 break
             if kind == "Heartbeat":
@@ -103,14 +170,10 @@ class RecoveryScanner:
         last_ms = _parse_iso_to_millis(last_heartbeat_time)
 
         if current_ms - last_ms < lease_timeout_ms:
-            # Lease is still healthy
             return None
 
-        # Lease has expired: corpse has died.
-        # Write terminal record outside the dying process (T3.6).
         terminal_event_kind = "RunRecovered" if action == "recovered" else "RunAborted"
         terminal_seq_str = str(last_seq_int + 1)
-        from ...domain.primitives.primitives import uuidv7
         terminal_event_id = uuidv7()
 
         payload = {
@@ -144,7 +207,9 @@ class RecoveryScanner:
 
         append_res = store.append([envelope])
         if not append_res.ok:
-            raise RuntimeError(f"Recovery controller failed to append terminal event: {append_res.error}")
+            raise RuntimeError(
+                f"Recovery controller failed to append terminal event: {append_res.error}"
+            )
 
         return RecoveryRecord(
             run_id=run_id,

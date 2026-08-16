@@ -3,11 +3,16 @@
 Owning contract: REQ-BENCH-001, VG-07 §5.6, §5.8.
 """
 
-from __future__ import annotations
+import sys
+import unittest
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 import io
 import json
-import unittest
 
 from tools.telemetry.collector import TelemetryCollector
 from tools.telemetry.tuple import (
@@ -29,8 +34,8 @@ class TelemetryCollectorTest(unittest.TestCase):
         collector.record_turn_latency(ttft_ms=250, ttlt_ms=800, turn_duration_ms=800)
 
         # Record 2 effects
-        collector.record_effect_timing(mount_ms=12.0, probe_ms=4.0, exec_ms=20.0, teardown_ms=6.0)
-        collector.record_effect_timing(mount_ms=10.0, probe_ms=5.0, exec_ms=15.0, teardown_ms=5.0)
+        collector.record_effect_timing(mount_ms=12, probe_ms=4, exec_ms=20, teardown_ms=6)
+        collector.record_effect_timing(mount_ms=10, probe_ms=5, exec_ms=15, teardown_ms=5)
 
         # Record tokens and cost
         collector.record_token_usage(prompt_tokens=500, completion_tokens=100, cached_tokens=200, usd_micros=120, model="openai/gpt-4o-mini")
@@ -95,14 +100,14 @@ class TelemetryCollectorTest(unittest.TestCase):
                         "cost_usd": 0.00018,
                     },
                 },
-                "timing": {"ttftMs": 150.0, "durationMs": 400.0},
+                "timing": {"ttftMs": 150, "durationMs": 400},
             }
         })
         collector.ingest_event({
             "payload": {
                 "kind": "EffectCompleted",
                 "occurredAt": "2026-08-15T20:00:02Z",
-                "timing": {"mountMs": 14.0, "probeMs": 3.0, "execMs": 25.0, "teardownMs": 5.0},
+                "timing": {"mountMs": 14, "probeMs": 3, "execMs": 25, "teardownMs": 5},
             }
         })
         collector.ingest_event({
@@ -145,4 +150,3 @@ class TelemetryCollectorTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

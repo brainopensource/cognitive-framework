@@ -1,4 +1,11 @@
+import sys
 import unittest
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 from tools.telemetry.collector import TelemetryCollector
 from tools.telemetry.tuple import InstrumentTuple, CompatibilityKey, TreatmentDimensions, StratificationFields, ObservationMetadata
 from tools.telemetry.runner import LatencyBenchmarkRunner, BenchmarkTask
@@ -29,6 +36,8 @@ class TestTelemetryProvenance(unittest.TestCase):
             collector.record_turn_latency(ttft_ms=10.5)
         with self.assertRaises(TypeError):
             collector.record_token_usage(prompt_tokens=10, completion_tokens=10, usd_micros=0.05)
+        with self.assertRaises(TypeError):
+            collector.record_effect_timing(mount_ms=1.5)
 
     def test_sandbox_timing_tagged_synthetic(self):
         runner = LatencyBenchmarkRunner()

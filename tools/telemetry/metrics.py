@@ -19,7 +19,7 @@ __all__ = [
 
 
 def calculate_percentiles(
-    samples: Sequence[float],
+    samples: Sequence[int],
     percentiles: Sequence[float] = (50.0, 95.0, 99.0),
 ) -> dict[str, float]:
     """Calculate exact percentiles using linear interpolation (nearest rank method).
@@ -71,6 +71,9 @@ class LatencySummary:
         ttlt_ms: int = 0,
         turn_duration_ms: int = 0,
     ) -> None:
+        _require_integer(ttft_ms, "ttft_ms")
+        _require_integer(ttlt_ms, "ttlt_ms")
+        _require_integer(turn_duration_ms, "turn_duration_ms")
         if ttft_ms > 0:
             self.ttft_samples_ms.append(int(ttft_ms))
         if ttlt_ms > 0:
@@ -91,24 +94,28 @@ class LatencySummary:
 class EffectOverheadSummary:
     """Breakdown of sandbox and effect execution overhead."""
 
-    mount_samples_ms: list[float] = field(default_factory=list)
-    probe_samples_ms: list[float] = field(default_factory=list)
-    exec_samples_ms: list[float] = field(default_factory=list)
-    teardown_samples_ms: list[float] = field(default_factory=list)
+    mount_samples_ms: list[int] = field(default_factory=list)
+    probe_samples_ms: list[int] = field(default_factory=list)
+    exec_samples_ms: list[int] = field(default_factory=list)
+    teardown_samples_ms: list[int] = field(default_factory=list)
     effect_count: int = 0
 
     def add_effect(
         self,
-        mount_ms: float = 0.0,
-        probe_ms: float = 0.0,
-        exec_ms: float = 0.0,
-        teardown_ms: float = 0.0,
+        mount_ms: int = 0,
+        probe_ms: int = 0,
+        exec_ms: int = 0,
+        teardown_ms: int = 0,
     ) -> None:
+        _require_integer(mount_ms, "mount_ms")
+        _require_integer(probe_ms, "probe_ms")
+        _require_integer(exec_ms, "exec_ms")
+        _require_integer(teardown_ms, "teardown_ms")
         self.effect_count += 1
-        self.mount_samples_ms.append(float(mount_ms))
-        self.probe_samples_ms.append(float(probe_ms))
-        self.exec_samples_ms.append(float(exec_ms))
-        self.teardown_samples_ms.append(float(teardown_ms))
+        self.mount_samples_ms.append(mount_ms)
+        self.probe_samples_ms.append(probe_ms)
+        self.exec_samples_ms.append(exec_ms)
+        self.teardown_samples_ms.append(teardown_ms)
 
     def to_dict(self) -> dict[str, Any]:
         total_mount = sum(self.mount_samples_ms)
@@ -130,6 +137,11 @@ class EffectOverheadSummary:
                 "overheadTotal": round(total_overhead, 4),
             },
         }
+
+
+def _require_integer(value: Any, name: str) -> None:
+    if type(value) is not int:
+        raise TypeError(f"{name} must be an integer")
 
 
 @dataclass
@@ -218,4 +230,3 @@ class TelemetryReport:
         if self.custom_metrics:
             res["customMetrics"] = dict(self.custom_metrics)
         return res
-

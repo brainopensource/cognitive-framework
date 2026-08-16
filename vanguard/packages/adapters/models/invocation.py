@@ -30,6 +30,13 @@ class ProposalTranslator:
 
     @classmethod
     def translate(cls, proposal: Mapping[str, Any]) -> Result[Mapping[str, Any]]:
+        schema_result = validate_proposal_schema(proposal)
+        if not schema_result.ok:
+            return Result.fail(
+                kind=schema_result.error.kind,
+                message=schema_result.error.message,
+            )
+
         text = proposal.get("text", "")
         tool_calls = proposal.get("toolCalls", [])
         
@@ -75,8 +82,58 @@ class ProposalTranslator:
             "kind": "effect",
             "action": action,
             "resource": {},
-            "args": args
+            "args": args,
+            # Authority is deliberately unresolved here. Runtime/kernel
+            # composition must bind resource and reservation from policy.
+            "reservation": None,
         })
 
 def validate_proposal_schema(proposal: Mapping[str, Any]) -> Result[None]:
+    if not isinstance(proposal, Mapping):
+        return Result.fail("instrument_error", "provider proposal must be an object")
+
+    allowed_proposal_fields = {
+        "text", "toolCalls", "usage", "cost_usd", "usd_micros",
+        "pricing_known", "pricing_source", "resolved_model",
+    }
+    unknown = set(proposal) - allowed_proposal_fields
+    if unknown:
+        return Result.fail(
+            "instrument_error",
+            f"provider proposal contains unsupported fields: {sorted(unknown)}",
+        )
+
+    text = proposal.get("text", "")
+    if not isinstance(text, str):
+        return Result.fail("instrument_error", "proposal text must be a string")
+
+    tool_calls = proposal.get("toolCalls", [])
+    if not isinstance(tool_calls, list):
+        return Result.fail("instrument_error", "toolCalls must be an array")
+    if not text and not tool_calls:
+        return Result.fail("instrument_error", "proposal must contain text or one tool call")
+
+    authority_fields = {
+        "capability", "scope", "reservation", "approval", "approvalIdentity",
+        "evaluator", "grant", "principal",
+    }
+    for call in tool_calls:
+        if not isinstance(call, Mapping):
+            return Result.fail("instrument_error", "each tool call must be an object")
+        unsupported = set(call) - {"id", "name", "arguments"}
+        if unsupported or authority_fields.intersection(call):
+            return Result.fail(
+                "instrument_error",
+                "tool call contains unsupported or privileged fields",
+            )
+        name = call.get("name")
+        if not isinstance(name, str) or not name:
+            return Result.fail("instrument_error", "tool call name must be non-empty")
+        call_id = call.get("id")
+        if call_id is not None and (not isinstance(call_id, str) or not call_id):
+            return Result.fail("instrument_error", "tool call id must be a non-empty string")
+        arguments = call.get("arguments", {})
+        if not isinstance(arguments, Mapping):
+            return Result.fail("instrument_error", "tool call arguments must be an object")
+
     return Result.success(None)

@@ -60,7 +60,7 @@ class TelemetryCollector:
         is_synthetic: bool = False,
     ) -> None:
         """Record turn latency to first token (TTFT) and total turn duration in ms."""
-        if type(ttft_ms) is float or type(ttlt_ms) is float or type(turn_duration_ms) is float:
+        if any(type(value) is not int for value in (ttft_ms, ttlt_ms, turn_duration_ms)):
             raise TypeError("latency metrics must be integers")
         if is_synthetic and self.data_source == "live":
             raise ValueError("synthetic timing forbidden in live telemetry report")
@@ -69,14 +69,16 @@ class TelemetryCollector:
 
     def record_effect_timing(
         self,
-        mount_ms: float = 0.0,
-        probe_ms: float = 0.0,
-        exec_ms: float = 0.0,
-        teardown_ms: float = 0.0,
+        mount_ms: int = 0,
+        probe_ms: int = 0,
+        exec_ms: int = 0,
+        teardown_ms: int = 0,
         effect_kind: str = "",
         is_synthetic: bool = False,
     ) -> None:
         """Record sandbox mount, double-probe, execution and teardown overhead in ms."""
+        if any(type(value) is not int for value in (mount_ms, probe_ms, exec_ms, teardown_ms)):
+            raise TypeError("effect timing metrics must be integers")
         if is_synthetic and self.data_source == "live":
             raise ValueError("synthetic timing forbidden in live telemetry report")
         self.effect_overhead.add_effect(mount_ms, probe_ms, exec_ms, teardown_ms)
@@ -90,7 +92,7 @@ class TelemetryCollector:
         model: str = "default",
     ) -> None:
         """Record token usage and USD cost for a model interaction."""
-        if type(usd_micros) is float:
+        if any(type(value) is not int for value in (prompt_tokens, completion_tokens, cached_tokens, usd_micros)):
             raise TypeError("usd_micros must be an integer")
         self.token_cost.add_usage(
             prompt_tokens=prompt_tokens,
@@ -145,9 +147,11 @@ class TelemetryCollector:
             if isinstance(timing, Mapping):
                 if timing.get("synthetic") is True and self.data_source == "live":
                     raise ValueError("synthetic timing forbidden in live telemetry report")
-                ttft = int(timing.get("ttftMs") or timing.get("ttft_ms") or 0)
-                ttlt = int(timing.get("ttltMs") or timing.get("ttlt_ms") or 0)
-                dur = int(timing.get("durationMs") or timing.get("duration_ms") or 0)
+                ttft = timing.get("ttftMs") if "ttftMs" in timing else timing.get("ttft_ms", 0)
+                ttlt = timing.get("ttltMs") if "ttltMs" in timing else timing.get("ttlt_ms", 0)
+                dur = timing.get("durationMs") if "durationMs" in timing else timing.get("duration_ms", 0)
+                if any(type(value) is not int for value in (ttft, ttlt, dur)):
+                    raise TypeError("event latency metrics must be integers")
                 if ttft > 0 or dur > 0:
                     self.latency.add_turn(ttft, ttlt, dur)
 
@@ -156,10 +160,12 @@ class TelemetryCollector:
             if isinstance(timing, Mapping):
                 if timing.get("synthetic") is True and self.data_source == "live":
                     raise ValueError("synthetic timing forbidden in live telemetry report")
-                mount = timing.get("mountMs") or timing.get("mount_ms") or 0.0
-                probe = timing.get("probeMs") or timing.get("probe_ms") or 0.0
-                exec_time = timing.get("execMs") or timing.get("exec_ms") or 0.0
-                teardown = timing.get("teardownMs") or timing.get("teardown_ms") or 0.0
+                mount = timing.get("mountMs") if "mountMs" in timing else timing.get("mount_ms", 0)
+                probe = timing.get("probeMs") if "probeMs" in timing else timing.get("probe_ms", 0)
+                exec_time = timing.get("execMs") if "execMs" in timing else timing.get("exec_ms", 0)
+                teardown = timing.get("teardownMs") if "teardownMs" in timing else timing.get("teardown_ms", 0)
+                if any(type(value) is not int for value in (mount, probe, exec_time, teardown)):
+                    raise TypeError("event effect metrics must be integers")
                 if any(v > 0 for v in (mount, probe, exec_time, teardown)):
                     self.effect_overhead.add_effect(mount, probe, exec_time, teardown)
 

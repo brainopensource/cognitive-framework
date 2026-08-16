@@ -1,16 +1,14 @@
-# Vanguard × LAM × Manifests — Sprint 7–9 Architect Plan
+# Vanguard × LAM × Manifests — Sprints 7–10 Master Architectural Roadmap
 
-**Status:** NON-NORMATIVE review and implementation guideline. Not listed in `docs/main_v4/00_vanguard_registry_v040.md` Chapter 2, therefore **not a contract** (`PR-3`). Where this file and a v4 owner disagree, the owner wins and this file is the defect.
+**Status:** NON-NORMATIVE review and implementation guideline. Updated post-Sprint 6B closure (`v0.4.1-beta` candidate sealed with R0–R10 proofs, Ed25519 asymmetric verification, rootless Bubblewrap worker, and live RuntimeService). Where this file and a v4 owner disagree, the v4 owner wins (`PR-3`).
 
-**Audience:** Project Lead, Tech Lead, Senior Architects implementing S7–S9 independently.
+**Audience:** Project Lead, Tech Lead, Senior Architects implementing S7–S10 independently.
 
 **Date:** 2026-08-16
 
 **Inspected corpus:** `docs/main_v4` VG-00 … VG-12 plus GTS-13C (`13_C_gts_mvp_program_and_engineering_plan.md`).
 
-**Inspected code (working tree, not a release SHA):** `vanguard/packages/{domain,ports,kernel,agency,runtime,adapters}`, `vanguard/clients/cli`, `tools/002_LLM_API_MOCK`.
-
-**Related non-owners:** `docs/reviews/todo/vanguard_harness_cli_architectural_review_phase_2.md` (eight-surface taxonomy); `docs/reviews/todo/mvp_beta_delivery_audit_2026-08-16.md` (Beta NO-GO); README §4 `vg-code-frontier` (product language, not a verb registry).
+**Inspected code:** `vanguard/packages/{domain,ports,kernel,agency,runtime,adapters}`, `vanguard/clients/cli`, `tools/002_LLM_API_MOCK`.
 
 ---
 
@@ -27,21 +25,22 @@ This is a **decision lock + packet map**, not a sprint backlog dump and not a se
 
 ---
 
-## 1. Destination thesis (what S7–S9 are for)
+## 1. Destination thesis (what S7–S10 are for)
 
 Vanguard’s mission (`VG-02`) is not “ship a Claude Code clone.” It is:
 
 > When an agent solves a task, **what solved it** — model, scaffold, prompt, tools, context policy, retry — must be separable, and the judge must be unreachable from the judged.
 
-Sprints 0–6 (Beta product slice) freeze **one** coding pack, `vg-code-default`, on **one** loop. GTS-13C Chapter 10 Q1–Q2 only. Q3–Q4, reconstructions, and TableWorld are S7–S9 by construction (`guidelines_phase_1_.md`, GTS-13C sprint table).
+Sprints 0–6 (Beta product slice `v0.4.1-beta`) froze **one** coding pack, `vg-code-default`, on **one** loop, establishing Chapter 10 Q1–Q2 closure.
 
-S7–S9 exist to make the framework **earn** three sentences:
+S7–S10 exist to make the framework **earn** four fundamental proofs:
 
 | Gate (Ch.10) | Sentence that must become true | Primary tickets |
 |---|---|---|
-| Q3 measurable | An A/A floor exists per task class against **`vg-shell-only`**. A paired comparison runs. The verifier–deployment gap has a number. | T8.1–T8.8 |
-| Configurability | Claude-Code-shaped, OpenCode-shaped, and mini-SWE-agent-shaped harnesses are **manifests**. `vg harness build \| run \| diff \| bench` exists. A reconstruction that requires a core change is a **finding**, not a feature. | T7.5–T7.7 |
-| Q4 general | One non-coding environment (TableWorld / structured-data reconciliation) is added through **registries, adapters, configuration only**. | T9.1–T9.3 |
+| **S7: Configurability** | Claude-Code-shaped, OpenCode-shaped, and mini-SWE-agent-shaped harnesses are **pure data manifests**. `vg harness build \| run \| diff \| bench` exists. Reconstructions require **zero core changes**. | T7.1–T7.7 |
+| **S8: Measurable (Q3)** | An A/A floor exists per task class against **`vg-shell-only`**. A paired comparison runs. The verifier–deployment gap has a measured number. | T8.1–T8.8 |
+| **S9: Generality (Q4)** | One non-coding environment (TableWorld / structured-data reconciliation) is added through **registries, adapters, and configuration only**. | T9.1–T9.3 |
+| **S10: Meta-Cognitive Release** | Exterior verdict telemetry, offline competence distillation, bounded non-authoritative memory recall, and full release gate dossier seal the Phase 3 MVP. | T10.1–T10.9 |
 
 S9 is the MVP **gate review**, not “we look like Grok Build.” Competence promotion (`VG-06` active competence, `VG-07` L4) is **after** the instrument exists. Open concept O-01: do not design the promotion topology until one distilled artifact clears A/A.
 
@@ -651,9 +650,18 @@ Kilo = OpenCode-shaped + prompt. Codex = default + process-definition emphasis. 
 
 **Done:** `lab harness diff` shows only artifacts/prompt/budget deltas.
 
-### Packet 13 — S9 gate dossier (leads)
+### Packet 13 — S9 Generality & Gate Dossier (leads)
 
 Answer GTS-13C Ch.10 four questions with **evidence paths**, not slides. Include negative results (degenerate A/A, reconstruction that needed a core change, TableWorld H0). Negative results are publishable (`VG-02`).
+
+### Packet 14 — S10 Meta-Cognitive Release, Offline Distillation & Release Dossier (leads & devs)
+
+**May start when:** S7–S9 gates are satisfied.
+
+- **Non-authoritative memory recall:** Integrate historical `CorrectionRecord` into L5 context compiler without granting instruction authority (`MEM-4`).
+- **Offline Competence Distillation (O-01):** Pipeline candidate skills/artifacts from successful paired trajectories into offline candidate registry; verify against holdout sets before promotion.
+- **Dynamic Workspace Context Injection:** Ensure `AGENTS.md` / `CLAUDE.md` discovery is parsed through standard `fs.read` observation into L3/L4.
+- **Phase 3 Release Sealing:** Run candidate release runner, verify zero regression on Beta invariants, and tag production `v1.0.0-phase3`.
 
 ---
 
@@ -711,18 +719,18 @@ Do not edit GTS-13C checkboxes as if they were git-tracked completion of the pro
 
 ---
 
-## 15. What “S9 done” looks like (operational)
+## 15. What “S10 Done” Looks Like (Operational Definition of Done)
 
-Not a Claude Code competitor. All of the following:
+Not a feature-bloated Claude Code competitor. All of the following verified:
 
-1. Three (or documented substitute) reconstruction packs compose without kernel/episode/wire diffs.
-2. `lab harness diff/bench` runs paired **cassette or live-labelled** tasks; LAM replay is a separate column.
-3. `vg-shell-only` still undeletable; at least one paired comparison **attempted**; degenerate A/A **refuses** rather than prints stars.
-4. CorrectionRecord cannot enter as unparsed JSON; style cannot be general.
-5. TableWorld either landed with zero core changes **or** H0 is a written finding.
-6. LAM records traces into a store; CI replays gold in milliseconds; live populate is budgeted and labelled.
-7. No public SWE number. No competence auto-promotion. No `proc.interactive` handle.
-8. Beta product-path defects (daemon, evaluator identity, approval crypto) are **either** closed **or** explicitly listed as still blocking Q1/Q2 so Q3 is not claimed.
+1. **Reconstruction Pure-Data Manifests:** Three reconstruction packs (`vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`) compose without kernel/episode/wire diffs.
+2. **Honest Measurement Laboratory:** `lab harness diff/bench` runs paired **cassette or live-labelled** tasks; LAM replay is a separate column.
+3. **Undeletable Control Arm:** `vg-shell-only` remains undeletable; paired comparisons run; degenerate A/A **refuses** rather than prints stars.
+4. **CorrectionRecord Integrity:** CorrectionRecord cannot enter as unparsed JSON; style/architecture cannot be general scope.
+5. **Generality Witness:** TableWorld landed with zero core changes behind standard `EnvironmentAdapter` and `EvaluatorPort`.
+6. **LAM Inner-Loop Gym:** LAM records gold traces into SQLite/JSONL store; CI replays gold in milliseconds; live populate is budgeted and labelled.
+7. **No Auto-Promotion or PTY Escapes:** No public SWE number overclaiming; zero competence auto-promotion inside the run loop; zero live PTY handles.
+8. **Phase 3 Release Candidate:** All Chapter 10 questions (Q1 composition, Q2 dogfood, Q3 measurement, Q4 generality) sealed with cryptographic evidence.
 
 That is the instrument. The competitor-shaped CLIs are **configurations of the instrument**. LAM is how those configurations get **cheap, honest, repeatable** inner-loop evidence while paid models stay on the other side of a ledger.
 
@@ -731,7 +739,7 @@ That is the instrument. The competitor-shaped CLIs are **configurations of the i
 ## 16. Reading order for a senior who joins tomorrow
 
 1. `VG-02` mission + non-claims (15 min).
-2. GTS-13C T6, T7, T8, T9 and Ch.6–8 (30 min).
+2. GTS-13C T6, T7, T8, T9, T10 and Ch.6–10 (30 min).
 3. `runtime/root.py` module docstring + `DEFAULT_BINDINGS` (20 min).
 4. `agency/episode/engine.py` + `adapters/models/invocation.py` (20 min).
 5. `VG-07` CL-1..3 and `VG-10` DEF-02, DEF-03, DEF-04, DEF-08 (15 min).

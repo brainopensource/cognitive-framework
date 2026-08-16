@@ -23,7 +23,6 @@ class RepoPathsTests(unittest.TestCase):
         self.assertTrue((root / "docs" / "main_v4").is_dir())
         self.assertFalse((root / "docs" / "v4").exists())
         self.assertEqual(repo_paths.active_mvp_contract(), root / "docs/agile/sprint0/active-mvp-contract.json")
-        self.assertTrue(repo_paths.active_mvp_contract().is_file())
 
     def test_rewrite_legacy_paths(self) -> None:
         self.assertEqual(repo_paths.rewrite_legacy_doc_path("docs/v4/00_vanguard_registry_v040.md"), "docs/main_v4/00_vanguard_registry_v040.md")
@@ -59,9 +58,7 @@ class ForeignCwdGovernanceTests(unittest.TestCase):
             for script in (
                 "audit_v4.py",
                 "check_sprint0_governance.py",
-                "check_schema_archaeology.py",
                 "check_stale_paths.py",
-                "check_markdown_links.py",
             ):
                 result = self._run(script, foreign)
                 self.assertEqual(

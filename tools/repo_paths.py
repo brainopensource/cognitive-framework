@@ -130,6 +130,9 @@ def schema_archaeology_traces() -> Path:
 
 
 def kernel_tcb_budget() -> Path:
+    p = repo_path("tools", "kernel-tcb-budget.json")
+    if p.exists():
+        return p
     return docs_agile("sprint2", "kernel-tcb-budget.json")
 
 

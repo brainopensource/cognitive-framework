@@ -17,7 +17,7 @@
       "tool_messages": 1,
       "finish_reason": "tool_calls",
       "content": "I found the bug and will apply the exact patch.",
-      "tool_calls": [{"id": "patch-1", "type": "function", "function": {"name": "patch", "arguments": {"patch": "--- a/src/value.py\\n+++ b/src/value.py\\n@@ -1 +1 @@\\n-VALUE = 1\\n+VALUE = 2\\n"}}}]
+      "tool_calls": [{"id": "patch-1", "type": "function", "function": {"name": "patch", "arguments": {"patch": "--- a/src/value.py\n+++ b/src/value.py\n@@ -1 +1 @@\n-VALUE = 1\n+VALUE = 2\n"}}}]
     },
     {
       "tool_messages": 2,

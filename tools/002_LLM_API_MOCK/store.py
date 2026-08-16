@@ -1,4 +1,4 @@
-"""SQLite storage engine for scenarios, traces, model ceilings, and budget events."""
+"""SQLite storage engine for rich harness pipeline metadata, traces, model ceilings, and budget events."""
 
 from __future__ import annotations
 
@@ -41,12 +41,20 @@ class LamStore:
                     scenario_id TEXT NOT NULL,
                     backend TEXT NOT NULL,
                     model TEXT NOT NULL,
+                    model_tier INTEGER DEFAULT 1,
+                    scenario_tier INTEGER DEFAULT 1,
                     passed INTEGER NOT NULL,
                     llm_calls INTEGER NOT NULL,
                     prompt_tokens INTEGER NOT NULL,
                     completion_tokens INTEGER NOT NULL,
                     usd REAL NOT NULL,
                     wall_s REAL NOT NULL,
+                    context_bytes INTEGER DEFAULT 0,
+                    compression_ratio REAL DEFAULT 1.0,
+                    memory_turns INTEGER DEFAULT 0,
+                    skills_used TEXT DEFAULT '[]',
+                    harness_version TEXT DEFAULT 'v0.4.1',
+                    is_downgrade INTEGER DEFAULT 0,
                     recorded_at TEXT NOT NULL,
                     blob_path TEXT,
                     FOREIGN KEY(scenario_id) REFERENCES scenarios(id)
@@ -68,6 +76,15 @@ class LamStore:
                     note TEXT NOT NULL
                 );
             """)
+            # Auto-migrate schema additions if table existed prior to update
+            cur = conn.execute("PRAGMA table_info(traces);")
+            existing_cols = {row["name"] for row in cur.fetchall()}
+            if "is_downgrade" not in existing_cols:
+                conn.execute("ALTER TABLE traces ADD COLUMN is_downgrade INTEGER DEFAULT 0;")
+            if "model_tier" not in existing_cols:
+                conn.execute("ALTER TABLE traces ADD COLUMN model_tier INTEGER DEFAULT 1;")
+            if "scenario_tier" not in existing_cols:
+                conn.execute("ALTER TABLE traces ADD COLUMN scenario_tier INTEGER DEFAULT 1;")
 
     def upsert_scenario(
         self,
@@ -109,25 +126,46 @@ class LamStore:
         completion_tokens: int,
         usd: float,
         wall_s: float,
+        model_tier: int = 1,
+        scenario_tier: int = 1,
+        context_bytes: int = 0,
+        compression_ratio: float = 1.0,
+        memory_turns: int = 0,
+        skills_used: Optional[List[str]] = None,
+        harness_version: str = "v0.4.1",
+        is_downgrade: bool = False,
         blob_path: Optional[str] = None,
     ) -> int:
         ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        skills_json = json.dumps(skills_used or [])
         with self._get_connection() as conn:
             cur = conn.execute(
                 """
-                INSERT INTO traces (scenario_id, backend, model, passed, llm_calls, prompt_tokens, completion_tokens, usd, wall_s, recorded_at, blob_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO traces (
+                    scenario_id, backend, model, model_tier, scenario_tier, passed, llm_calls,
+                    prompt_tokens, completion_tokens, usd, wall_s, context_bytes, compression_ratio,
+                    memory_turns, skills_used, harness_version, is_downgrade, recorded_at, blob_path
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
                 (
                     scenario_id,
                     backend,
                     model,
+                    model_tier,
+                    scenario_tier,
                     1 if passed else 0,
                     llm_calls,
                     prompt_tokens,
                     completion_tokens,
                     usd,
                     wall_s,
+                    context_bytes,
+                    compression_ratio,
+                    memory_turns,
+                    skills_json,
+                    harness_version,
+                    1 if is_downgrade else 0,
                     ts,
                     blob_path,
                 ),
@@ -136,15 +174,12 @@ class LamStore:
 
         # Update model ceiling if passed
         if passed:
-            tier = 1
-            if scenario_id.startswith("t") and scenario_id[1].isdigit():
-                tier = int(scenario_id[1])
-            self.update_model_ceiling(model, tier, trace_id)
+            self.update_model_ceiling(model, scenario_tier, trace_id)
 
         return trace_id
 
     def update_model_ceiling(self, model: str, tier: int, evidence_trace_id: int) -> None:
-        band = "free" if ":free" in model or "lam/" in model else "paid"
+        band = "free" if ":free" in model or "lam/" in model or "ollama/" in model else "paid"
         ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with self._get_connection() as conn:
             cur = conn.execute("SELECT ceiling_tier FROM model_ceilings WHERE model = ?;", (model,))
@@ -162,17 +197,6 @@ class LamStore:
                     (model, band, tier, evidence_trace_id, ts),
                 )
 
-    def log_budget_event(self, calls_delta: int, usd_delta: float, note: str) -> None:
-        ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        with self._get_connection() as conn:
-            conn.execute(
-                """
-                INSERT INTO budget_events (ts, calls_delta, usd_delta, note)
-                VALUES (?, ?, ?, ?);
-            """,
-                (ts, calls_delta, usd_delta, note),
-            )
-
     def get_summary_kpis(self) -> Dict[str, Any]:
         with self._get_connection() as conn:
             n_scenarios = conn.execute("SELECT COUNT(*) FROM scenarios;").fetchone()[0]
@@ -181,6 +205,8 @@ class LamStore:
             total_tokens = conn.execute("SELECT SUM(prompt_tokens + completion_tokens) FROM traces;").fetchone()[0] or 0
             total_usd = conn.execute("SELECT SUM(usd) FROM traces;").fetchone()[0] or 0.0
             avg_wall = conn.execute("SELECT AVG(wall_s) FROM traces;").fetchone()[0] or 0.0
+            downgrade_passes = conn.execute("SELECT COUNT(*) FROM traces WHERE is_downgrade=1 AND passed=1;").fetchone()[0]
+            downgrade_attempts = conn.execute("SELECT COUNT(*) FROM traces WHERE is_downgrade=1;").fetchone()[0]
             ceilings = [dict(r) for r in conn.execute("SELECT * FROM model_ceilings ORDER BY ceiling_tier DESC;").fetchall()]
 
         return {
@@ -190,5 +216,6 @@ class LamStore:
             "total_tokens": total_tokens,
             "total_usd": total_usd,
             "avg_wall_s": round(avg_wall, 4),
+            "downgrade_pass_rate": round(downgrade_passes / downgrade_attempts, 2) if downgrade_attempts else 0.0,
             "model_ceilings": ceilings,
         }

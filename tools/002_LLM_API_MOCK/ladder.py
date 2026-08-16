@@ -114,10 +114,13 @@ def run_ladder(
     scenario_id: str,
     complete: Callable[[str, list[dict], list[dict] | None], dict] | None = None,
     transport: str | None = None,
+    model_tier: int = 1,
 ) -> Dict[str, Any]:
     """Run a scenario against LAM offline model or live model, returning metrics dict."""
     t0 = time.monotonic()
     clean_scenario_id = scenario_id.replace("lam/", "")
+    scenario_tier = int(clean_scenario_id[1]) if clean_scenario_id.startswith("t") and clean_scenario_id[1].isdigit() else 1
+    is_downgrade = model_tier < scenario_tier
 
     # Safety check for unit tests
     if transport == "forbidden":
@@ -153,6 +156,9 @@ def run_ladder(
                 completion_tokens=res["completion_tokens"],
                 usd=0.0,
                 wall_s=wall_s,
+                model_tier=model_tier,
+                scenario_tier=scenario_tier,
+                is_downgrade=is_downgrade,
             )
         except Exception:
             pass

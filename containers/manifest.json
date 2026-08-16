@@ -13,7 +13,7 @@
   },
   "evaluator": {
     "imageName": "vanguard-evaluator:v0.4.1-beta",
-    "imageDigest": "sha256:d4d14fdbf7e6cb66945f37fe20ae478918f7d62ffc52687b292fc13b2bec8ca5",
+    "imageDigest": "sha256:a2405085fefdeda18e9485184cc7d999a53816bc8fa46253bb1d13876b40dd6f",
     "uid": 10002,
     "gid": 10002,
     "user": "vgeval",

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "test003_invoice_cents",
+  "title": "Invoice totals as exact integer cents",
+  "status": "preregistered_not_executed",
+  "taskShape": "one-file money arithmetic; binary float is insufficient",
+  "zeroHint": true,
+  "oracleVisibleToModel": false,
+  "workspace": {
+    "initialFixture": "fixture/initial",
+    "allowedTools": [
+      "fs.read",
+      "fs.search",
+      "patch.apply",
+      "proc.exec"
+    ],
+    "allowedChangedPaths": [
+      "invoicing.py"
+    ],
+    "publicTestCommand": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests"
+    ],
+    "oracleTestCommand": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "oracle",
+      "-p",
+      "test_*.py"
+    ]
+  },
+  "limits": {
+    "maxTurns": 16,
+    "maxModelCalls": 16,
+    "maxCompletionTokens": 2048
+  },
+  "evaluation": {
+    "oraclePath": "oracle",
+    "oracleVisibleToModel": false,
+    "humanSourceEditsAllowed": 0,
+    "oracleDigests": {
+      "oracle/test_invoicing_oracle.py": "sha256:98b0ae8cb5df9a0cee361a7092afce4a187e1074e0a9fd090e201d73736d621c"
+    }
+  }
+}

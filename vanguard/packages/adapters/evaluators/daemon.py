@@ -15,7 +15,6 @@ import struct
 import argparse
 import base64
 import sys
-import traceback
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -149,7 +148,6 @@ class EvaluatorDaemon:
             conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
         except Exception:
             print("evaluator request failed", file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
             self._send_error(conn, "instrument_error")
 
     def _send_error(self, conn: socket.socket, msg: str) -> None:
@@ -166,11 +164,14 @@ def main() -> int:
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--oracle-manifest", required=True)
     parser.add_argument("--image-digest", required=True)
+    parser.add_argument("--expected-client-uid", type=int, default=None)
     # This is the final option and must preserve argv entries such as ``-m``
     # and ``-q`` verbatim; ``nargs='+'`` lets argparse treat those as daemon
     # options instead of command arguments.
     parser.add_argument("--command", nargs=argparse.REMAINDER, required=True)
     args = parser.parse_args()
+    if not args.command:
+        parser.error("--command requires at least one argv entry")
     with open(args.oracle_manifest, encoding="utf-8") as handle:
         manifest = json.load(handle)
     oracle_digests = _oracle_digests_from_manifest(manifest)
@@ -183,6 +184,7 @@ def main() -> int:
         oracle_digests=oracle_digests,
         command=tuple(args.command),
         expected_uid=10002,
+        expected_client_uid=args.expected_client_uid,
         verdict_private_key=private_key,
         verdict_key_id=os.environ.get("VANGUARD_EVALUATOR_VERDICT_KEY_ID", "evaluator-key-default"),
         oracle_root="/sealed-oracle",

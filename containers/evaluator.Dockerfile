@@ -30,4 +30,4 @@ ENV HOME="/tmp"
 
 # Evaluator daemon runs over Unix socket in /run/evaluator/eval.sock
 ENTRYPOINT ["/usr/bin/python3", "-m", "vanguard.packages.adapters.evaluators.daemon"]
-CMD ["--socket", "/run/evaluator/eval.sock", "--workspace", "/workspace", "--oracle-manifest", "/sealed-oracle/preregistered_oracles.json", "--image-digest", "sha256:d4d14fdbf7e6cb66945f37fe20ae478918f7d62ffc52687b292fc13b2bec8ca5", "--command", "python3", "-m", "pytest", "-q"]
+CMD []

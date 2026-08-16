@@ -1,0 +1,11 @@
+The repository stores busy time as closed integer intervals `(start, end)` with `start <= end`.
+
+Behaviour required by the public tests:
+
+- `merge_busy(intervals)` returns a list of busy periods covering exactly the same integers as the input.
+- Periods that overlap or that share an endpoint become one period.
+- Output is sorted by start, then end, and contains no two mergeable neighbours.
+- Empty input yields an empty list.
+- Input order is not significant.
+
+Inspect the workspace, change only `busy.py`, and make the public tests pass. Use the read, search, patch, and test tools. Patch arguments are a workspace-relative `path` and a unified diff in `diff`. Test arguments are an `argv` array, for example `["python3", "-m", "unittest", "discover", "-s", "tests"]`.

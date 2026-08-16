@@ -13,6 +13,7 @@ import hashlib
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping, Sequence
 
@@ -119,7 +120,11 @@ class IsolatedEvaluator:
                     ),
                 )
             )
-        except Exception:
+        except Exception as exc:
+            # Keep the verdict fail-closed while leaving a bounded diagnostic
+            # for the supervised container log; the client still receives
+            # only the generic inconclusive outcome.
+            print(f"evaluator probe failed: {type(exc).__name__}", file=sys.stderr)
             return self._inconclusive("instrument_error")
 
     def _validate_instrument(self) -> str | None:
@@ -194,6 +199,8 @@ class IsolatedEvaluator:
 
         for var in ("PYTHONPATH", "PYTHONSTARTUP", "LD_PRELOAD"):
             if var in os.environ:
+                if var == "PYTHONPATH" and os.environ[var] == str(self._workspace):
+                    continue
                 pollution.append(f"env:{var}")
 
         for root, dirs, files in os.walk(self._workspace):
@@ -216,7 +223,8 @@ class IsolatedEvaluator:
                         pollution.append(str(p.relative_to(self._workspace)))
 
         status = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=all"],
+            ["git", "-c", f"safe.directory={self._workspace}", "status",
+             "--porcelain", "--untracked-files=all"],
             cwd=self._workspace,
             capture_output=True,
             text=True,

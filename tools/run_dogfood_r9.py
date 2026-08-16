@@ -12,7 +12,7 @@ import base64
 import hashlib
 import json
 import os
-import stat
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -123,7 +123,14 @@ def _evaluator_process(root: Path, repo: Path, task: DogfoodTask, image: str,
                        image_digest: str, key: bytes) -> tuple[subprocess.Popen[str], Path]:
     socket_dir = root / "run"
     socket_dir.mkdir()
-    os.chmod(socket_dir, 0o777)
+    os.chmod(socket_dir, 0o1777)
+    sealed = root / "sealed-oracle"
+    (sealed / "vanguard/packages/adapters/evaluators").mkdir(parents=True)
+    shutil.copy2(ORACLE_MANIFEST, sealed / "preregistered_oracles.json")
+    shutil.copytree(SUITE_ROOT,
+                    sealed / "vanguard/packages/adapters/evaluators/suites")
+    for path in sealed.rglob("*"):
+        os.chmod(path, 0o555 if path.is_dir() else 0o444)
     oracle_dir = f"/sealed-oracle/{task.oracle.rsplit('/', 1)[0]}"
     command = ["python3", "-m", "unittest", "discover", "-s", oracle_dir,
                "-p", "test_oracle.py"]
@@ -134,10 +141,10 @@ def _evaluator_process(root: Path, repo: Path, task: DogfoodTask, image: str,
         "--user", "10002:10002",
         "-w", "/workspace",
         "-e", "PYTHONPATH=/workspace",
+        "-e", "PYTHONDONTWRITEBYTECODE=1",
         "-v", f"{repo}:/workspace:ro",
         "-v", f"{socket_dir}:/run/evaluator:rw",
-        "-v", f"{ORACLE_MANIFEST}:/sealed-oracle/preregistered_oracles.json:ro",
-        "-v", f"{SUITE_ROOT}:/sealed-oracle/vanguard/packages/adapters/evaluators/suites:ro",
+        "-v", f"{sealed}:/sealed-oracle:ro",
         "-e", f"VANGUARD_EVALUATOR_PRIVATE_KEY_B64={base64.b64encode(key).decode('ascii')}",
         "-e", "VANGUARD_EVALUATOR_VERDICT_KEY_ID=dogfood-evaluator-key",
         image,
@@ -145,6 +152,7 @@ def _evaluator_process(root: Path, repo: Path, task: DogfoodTask, image: str,
         "--workspace", "/workspace",
         "--oracle-manifest", "/sealed-oracle/preregistered_oracles.json",
         "--image-digest", image_digest,
+        "--expected-client-uid", str(os.getuid()),
         "--command", *command,
     ]
     process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -245,6 +253,7 @@ def run_task(task: DogfoodTask, evaluator_image: str, evaluator_digest: str) -> 
                 "terminal": result.terminal.value,
                 "verdict": result.verdict.outcome if result.verdict else "missing",
                 "verdict_reason": result.verdict.reason if result.verdict else "missing",
+                "claims": claims,
                 "evaluator_output": process_output,
                 "detail": result.detail,
             }
@@ -286,6 +295,7 @@ def _write_log(results: list[dict[str, object]]) -> None:
             f"- Diff digest: `{result['diff_digest']}`",
             f"- Terminal: `{result['terminal']}`; verdict: `{result['verdict']}`",
             f"- Verdict reason: `{result.get('verdict_reason', 'unknown')}`",
+            f"- Claims: `{result.get('claims', ())}`",
             f"- Detail: {result['detail'] or 'none'}",
             "",
         ])

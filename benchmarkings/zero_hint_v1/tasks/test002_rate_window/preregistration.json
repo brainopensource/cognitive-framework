@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "test002_rate_window",
+  "title": "Per-key request admission over any closed window",
+  "status": "preregistered_not_executed",
+  "taskShape": "one-file admission control; tumbling window is insufficient",
+  "zeroHint": true,
+  "oracleVisibleToModel": false,
+  "workspace": {
+    "initialFixture": "fixture/initial",
+    "allowedTools": [
+      "fs.read",
+      "fs.search",
+      "patch.apply",
+      "proc.exec"
+    ],
+    "allowedChangedPaths": [
+      "rate_limit.py"
+    ],
+    "publicTestCommand": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests"
+    ],
+    "oracleTestCommand": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "oracle",
+      "-p",
+      "test_*.py"
+    ]
+  },
+  "limits": {
+    "maxTurns": 16,
+    "maxModelCalls": 16,
+    "maxCompletionTokens": 2048
+  },
+  "evaluation": {
+    "oraclePath": "oracle",
+    "oracleVisibleToModel": false,
+    "humanSourceEditsAllowed": 0,
+    "oracleDigests": {
+      "oracle/test_rate_limit_oracle.py": "sha256:73028b0ca06dbcbdbc3b48cafa60ed4c6ffb2a7f15983958694a6eb5152f14d4"
+    }
+  }
+}

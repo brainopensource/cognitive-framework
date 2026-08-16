@@ -1,0 +1,12 @@
+The repository computes invoice money as integer cents.
+
+Behaviour required by the public tests:
+
+- `line_cents(quantity, unit_price)` returns the charge for one line.
+- `invoice_cents(lines)` returns the sum of every line.
+- `quantity` is a non-negative integer.
+- `unit_price` is a decimal string with a dollars part and exactly two cents digits (example shape: `"19.99"`).
+- Results are integer cents. The sum of line results must equal the invoice result.
+- Invalid quantity or price shape raises `ValueError`.
+
+Inspect the workspace, change only `invoicing.py`, and make the public tests pass. Use the read, search, patch, and test tools. Patch arguments are a workspace-relative `path` and a unified diff in `diff`. Test arguments are an `argv` array, for example `["python3", "-m", "unittest", "discover", "-s", "tests"]`.

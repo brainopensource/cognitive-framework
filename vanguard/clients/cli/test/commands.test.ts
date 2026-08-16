@@ -247,6 +247,24 @@ test("manageDaemon handles status action cleanly", async () => {
   assert.equal(JSON.parse(linesDaemon[0]!).socketPath, "/tmp/test.sock");
 });
 
+test("ReplayRuntimeClient rejects recordCorrection with permission_denied", async () => {
+  const client = ReplayRuntimeClient.fromJsonl(cassette);
+  const res = await client.recordCorrection({
+    episodeId: "ep-1",
+    proposedPatchDigest: "sha256:1111",
+    acceptedPatchDigest: "sha256:2222",
+    reasonCodes: ["functional_defect"],
+    magnitude: "minor",
+    scope: "repo",
+    correctingPrincipalRole: "operator",
+  });
+  assert.equal(res.ok, false);
+  if (!res.ok) {
+    assert.equal(res.error.code, "permission_denied");
+  }
+});
+
+
 
 
 

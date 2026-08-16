@@ -1,3 +1,11 @@
+> **ADOPTED 2026-08-16 — archived after folding.**
+> Its tasks are carried as real backlog rows in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`
+> with honest done/todo status (several tasks were already completed — see `009 §3.2`).
+> Subordinate to `002` on all measurement questions.
+> This document is historical. Do not action it directly.
+
+---
+
 # Harness DNA (Pack) Improvements — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

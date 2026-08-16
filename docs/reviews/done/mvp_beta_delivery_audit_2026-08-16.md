@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **~85% FIXED by Sprint 6B.** P0-01..P0-07 closed; **P0-08 (secret history) and P1-01 (LICENSE) remain STILL-TRUE** and are Sprint 7 rows.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # MVP Beta Delivery Audit — Independent TODO and Ship Review
 
 **Review date:** 2026-08-16  

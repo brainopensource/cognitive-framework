@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **SUPERSEDED, and two rows disproved.** Sandbox-composition and HMAC-authority claims are WRONG at `0238b1a` (see `009 §3.3`).
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard Phases 0–2 Final Gate Review, Revision 3
 
 **Review date:** 2026-08-15  

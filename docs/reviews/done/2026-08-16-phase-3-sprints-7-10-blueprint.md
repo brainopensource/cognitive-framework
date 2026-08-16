@@ -1,3 +1,13 @@
+> **CLOSED 2026-08-16 — archived.**
+> **SUPERSEDED by `docs/reviews/doing/008_v043_delivery_plan_sprints_7_10_V043-REV.md` and `011`.**
+> Contradicts five locked decisions (see `001 §3.13`): builds a class hierarchy `GTS-13C §4.3` forbids;
+> places packages outside the `LT-1..LT-8` lattice; puts a TUI inside the runtime package;
+> renames `vg` to `agy`; and gates Sprint 10 on "100% tests pass + tag git" against a four-question
+> MVP gate. MVP gate questions Q3 and Q4 are absent from it entirely.
+> This document is historical. Do not action it directly.
+
+---
+
 # Phase 3 Master Architectural Blueprint: Sprints 7 to 10 (v0.4.1 Release)
 
 **Document Version:** 1.0.0  

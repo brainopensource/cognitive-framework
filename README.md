@@ -93,7 +93,7 @@ Aether-D-System/
 │   └── manifest.json                # Immutable release build SHA-256 digests
 ├── docs/
 │   ├── main_v4/                     # Normative Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
-│   ├── reviews/todo/                # S7–S10 Master Architectural Roadmap
+│   ├── reviews/done/                # S7–S10 Master Architectural Roadmap
 │   └── agile/sprint6B/              # Gate R0–R10 release evidence & dogfood log
 ├── tools/                           # Boundary check, TCB budget, secret scan, & dogfood tools
 └── vanguard/packages/               # Physical package boundaries (enforced in CI)

@@ -21,8 +21,8 @@ This backlog closes the open Beta work identified by:
 5. [`docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md`](../../main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) — S0–S12, sandbox, approval and TCB requirements;
 6. [`docs/main_v4/06_vanguard_competence_memory_and_evidence_v040.md`](../../main_v4/06_vanguard_competence_memory_and_evidence_v040.md) — exterior evaluation and double probes;
 7. [`docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md`](../../main_v4/13_C_gts_mvp_program_and_engineering_plan.md) — MVP gate and programme sequencing;
-8. [`docs/reviews/todo/phases_0-2_review_full_rev2.md`](../../reviews/todo/phases_0-2_review_full_rev2.md) — mandatory closure design and R0–R10;
-9. [`docs/reviews/todo/phases_0-2_review_full_rev3.md`](../../reviews/todo/phases_0-2_review_full_rev3.md) — final-gate implementation findings.
+8. [`docs/reviews/done/phases_0-2_review_full_rev2.md`](../../reviews/done/phases_0-2_review_full_rev2.md) — mandatory closure design and R0–R10;
+9. [`docs/reviews/done/phases_0-2_review_full_rev3.md`](../../reviews/done/phases_0-2_review_full_rev3.md) — final-gate implementation findings.
 
 Where this backlog conflicts with an approved v4 rule, the v4 owner wins until the Tech Lead and Project Lead append an explicit decision. This backlog does not silently amend normative contracts.
 

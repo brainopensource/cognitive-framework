@@ -1,13 +1,22 @@
 # 008 — The Corrected v0.4.3 Delivery Plan: Sprints 7–10
 
 **Status:** NON-NORMATIVE programme proposal. Supersedes
-`docs/superpowers/plans/2026-08-16-phase-3-sprints-7-10-blueprint.md` on adoption.
+`docs/reviews/done/2026-08-16-phase-3-sprints-7-10-blueprint.md` on adoption.
 Owns sequencing and rationale only; contracts remain with the v4 set, merge gating with the
 Active MVP Contract (`ADR-0046`, `GTS-13C` document map).
 **Date:** 2026-08-16 · **Branch/HEAD:** `sprints7-8/integration` @ `0238b1a`
 **Authority cited:** `GTS-13C` Ch. 10 (the four gate questions), Ch. 15, `ADR-0057`, `ADR-0058`.
 
 ---
+
+> **AMENDMENT (2026-08-16).** This plan's themes and gates stand. Two changes from `009`:
+> (a) sprints are now carried under **Waves W6–W9**, continuing the Sprint 6B wave numbering
+> (`todo_list.md` W0–W5) rather than restarting — see `011`;
+> (b) the packet decomposition from `vanguard_LAM_manifests_plan_sprint-7-to-9.md` (Packets 0–14,
+> each with an explicit *"may start when"* and stop condition) is **adopted** in preference to this
+> document's flatter lane lists. `011` is the executable form; this document remains the rationale.
+> Nine findings from `009 §3.1` that appear in no report here are added to `011`, including
+> **`SEC-01` secret history, which is not closed** (`007 §6` correction).
 
 ## 1. What changes, and why
 

@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **PROMOTE.** Fully carried forward into `010_v5_aether_roadmap_and_aci_harvest_V043-REV.md`.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard v0.4.2 and Aether V5 — Investigation of Harness-D-power/src
 
 **Status:** NON-NORMATIVE. Not in `docs/main_v4/00_vanguard_registry_v040.md` Chapter 2. Where this file and a v4 owner disagree, the owner wins (`PR-3`).

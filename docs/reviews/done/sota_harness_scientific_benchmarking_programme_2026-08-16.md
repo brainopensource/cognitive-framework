@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **PROMOTE + partially FIXED.** C1-C12, evidence labels, splits, outcome algebra and budget protocol promoted to `VG-07` and `002`. Headline defect C6 fixed (`simulate.py:83`).
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # SOTA Harness, Isolated Evaluation, and Scientific Measurement Programme
 
 **Classification:** Internal scientific audit and programme design (Tech Lead + Project Lead + measurement specialist).  

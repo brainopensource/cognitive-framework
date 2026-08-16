@@ -268,6 +268,7 @@ much smaller than it looks — it is §3 plus `004 §3`, roughly three weeks.
 
 | # | Item | Effort | Unblocks |
 |---|---|---|---|
+| H0 | **Gene digests — already implemented.** `root.py:606-609` computes a per-file SHA-256 map over every manifest component. Remaining work is *emitting* it into `result.json`'s `K_compat` block, not building it (`009 §5`) | 0.5 d | comparability |
 | H1 | One canonical alias shape; migrate tests; fix 3 failures | 1 d | green suite |
 | H2 | Composition-time validation: alias targets ⊆ declared verbs; tool `name` ∈ aliases ∪ verbs; **fail closed** + broken counterpart | 1 d | `N-17` |
 | H3 | **"An unread component is a composition error"** rule | 1 d | kills `FT-10` |

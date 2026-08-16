@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **PROMOTE.** Decisions D-01..D-15 become ADRs in `VG-09`; Packets 0-14 adopted into `011` and the sprint kits.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard × LAM × Manifests — Sprints 7–10 Master Architectural Roadmap
 
 **Status:** NON-NORMATIVE review and implementation guideline. Updated post-Sprint 6B closure (`v0.4.1-beta` candidate sealed with R0–R10 proofs, Ed25519 asymmetric verification, rootless Bubblewrap worker, and live RuntimeService). Where this file and a v4 owner disagree, the v4 owner wins (`PR-3`).

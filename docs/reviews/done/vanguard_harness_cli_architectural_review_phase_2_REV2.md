@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **PROMOTE.** 12-layer FUAA and the three-evidence-level model promoted to `VG-07` and `guidelines/00`.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Padrões de Harness para Agentic Coding CLIs
 
 ## Revisão arquitetural e síntese corrigida — 15 de agosto de 2026

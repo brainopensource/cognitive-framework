@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **SUPERSEDED by `ADR-0058`**, which this document produced.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard General Task Solver (GTS) — Technical Phase Review & Architecture Roadmap
 
 **Document:** `docs/review/todo/phases_review.md`  

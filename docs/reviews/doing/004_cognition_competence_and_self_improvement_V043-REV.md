@@ -184,7 +184,7 @@ behaviour that could turn out false?* Applied:
 | Import | Legitimate form | Illegitimate form present in our plans |
 |---|---|---|
 | CLS / hippocampal consolidation | Fast episodic store + slow consolidated store, offline interleaved replay, forgetting as competition — each makes a falsifiable prediction | "The event store is a hippocampus" |
-| Cellular hierarchy | **Depth labels applied by the trace viewer after a run** | **`Atom → Molecule → Cell → Body → Biome` as a class hierarchy to build** — present in `docs/superpowers/plans/2026-08-16-phase-3-sprints-7-10-blueprint.md` §2 and partially built in `runtime/coordination.py` |
+| Cellular hierarchy | **Depth labels applied by the trace viewer after a run** | **`Atom → Molecule → Cell → Body → Biome` as a class hierarchy to build** — present in `docs/reviews/done/2026-08-16-phase-3-sprints-7-10-blueprint.md` §2 and partially built in `runtime/coordination.py` |
 | Evolutionary computation | Pareto/QD archives, diversity as insurance, the failure of scalar fitness (`ADR-0015`) | "Evolution guarantees progress" |
 | Metacognition | Pre-action prior scored post-hoc; Brier score alertable (**implemented**) | "The system knows itself" |
 

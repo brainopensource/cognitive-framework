@@ -5,7 +5,7 @@
 **Owns:** the triage of every existing benchmark artifact, the evidence-class labelling regime,
 the A/A programme, and the rules that make the instrument refuse rather than report.
 **Authority cited:** `VG-02 §10 RSK-04/05/06`, `VG-07`, `GTS-13C` T8, Ch. 8, Ch. 10 Q3.
-**Predecessor:** `docs/reviews/todo/sota_harness_scientific_benchmarking_programme_2026-08-16.md`
+**Predecessor:** `docs/reviews/done/sota_harness_scientific_benchmarking_programme_2026-08-16.md`
 reached the same central conclusion on the same day and was not actioned. This document
 supersedes its triage section with concrete per-file rulings.
 
@@ -40,16 +40,102 @@ exist. Everything below follows from that.
 
 Classification per `VG-01 §4.1` labelling: a number without an evidence label is unpublished.
 
-### 2.1 Evidence classes (adopt these verbatim)
+### 2.1 Evidence classes — SUPERSEDED by the 9-label regime
 
-| Class | Definition | May be published as |
+> **AMENDMENT (2026-08-16, via `009 §3.4`).** The 6-class table below is subsumed by the
+> **9-label regime** already specified in
+> `sota_harness_scientific_benchmarking_programme_2026-08-16.md §3` and **partly implemented** at
+> `tools/002_LLM_API_MOCK/verdict.py:60` (`evidence_label`). Adopt the 9 labels; they distinguish
+> cases the 6 collapse. `bypass` and `degenerate` remain as **disqualifiers** that override any
+> label.
+
+| Label | Meaning | May support |
 |---|---|---|
-| `lab-execute-harness` | Produced by `Runtime.execute_harness` on the composed manifest, every effect through `Kernel.dispatch`, exterior evaluator | A harness measurement, with declared departures |
-| `cassette` | Replay of a recorded provider trajectory through the real loop | A determinism/regression measurement. **Never** a capability measurement |
-| `lam-replay` | Mock-provider replay | Engineering smoke only. Never published |
-| `live-<provider>-<tier>` | Real provider, real cost, through the real loop | A capability measurement of *that* model under *that* harness |
-| `bypass` | Anything that executed an effect outside `Kernel.dispatch` | **Not evidence about Vanguard.** May be published only as evidence about a raw model, labelled as such |
-| `degenerate` | Pre-condition already satisfied, or zero effects applied, or zero tokens spent | **Refuses to score.** Emits `inconclusive` |
+| `unit` / `property` / `must-fail` | CI | Framework correctness |
+| `lam-replay` | Gold-trajectory player | That the gym still matches the cassette. **Never** a capability claim |
+| `cassette-vanguard` | `CassettePlayer` on the `ModelPort` dialect | That the loop still matches a recorded **proposal** |
+| `single-shot-complete` | One `generate()` / chat completion | That a model can emit code from a spec |
+| `chat-patch-loop` | Host extracts markdown and overwrites files | That a model can repair when handed tests + tracebacks. **Not a harness measurement** |
+| `lab-execute-harness` | `Runtime.execute_harness` + declared lab departures | The production loop with a live model |
+| `product-cli` | `vg run` → daemon → same loop | Q2 dogfood |
+| `sealed-evaluator` | UID 10002, digest-verified oracle mount | Publication-grade verdict |
+| `aa-floor` / `paired-holdout` | T8 protocol | **Any lift claim at all** |
+
+**Two disqualifiers, applied before the label:**
+
+| Disqualifier | Trigger | Result |
+|---|---|---|
+| `bypass` | Any effect executed outside `Kernel.dispatch` | Not evidence about Vanguard. Publishable only as evidence about a raw model, labelled as such |
+| `degenerate` | Pre-condition already satisfied, zero effects applied, or zero tokens spent | **Refuses to score.** Emits `inconclusive` |
+
+**Cross-plane comparison is refused** (`M-18`): LAM-replay of `vg-code-default` against live
+`vg-shell-only` is the degenerate A/A that `D-06` already forbids.
+
+### 2.1a C1–C12 — the operational definition of "cheating"
+
+Promoted verbatim from the predecessor document (`009 §3.4`). A run **cheats** if any of these hold
+**and** the result is labelled as agentic competence:
+
+| ID | Defect | Why it invalidates |
+|---|---|---|
+| C1 | Gold tool trace replayed | The outcome is determined before the model "thinks" |
+| C2 | Solution in prompt, comments or README copied into the workspace | The answer is an observation |
+| C3 | Hidden oracle visible to the worker | The judge is not exterior (`CL-1`) |
+| C4 | Public tests are the only oracle and encode the algorithm | Holdout is empty; hardcoding expected values works |
+| C5 | Host-side apply (regex extract, write file) bypasses the kernel | The measured "harness" is a Python script |
+| C6 | Pass heuristic is `calls > 1` or `"passed" in output` | Success without pytest exit 0 |
+| C7 | Instrument error counted as task fail **or** task pass | `inconclusive` laundering (`T5.6`, `L-07`) |
+| C8 | Human edited source | Not Q2 |
+| C9 | Approval auto-signed but labelled product-unsupervised | Undeclared lab departure |
+| C10 | Compatibility key differs on an undeclared axis | Incomparable (`M-18`) |
+| C11 | Same instances tune prompts **and** claim lift | `CL-2` |
+| C12 | Classic textbook task with no private holdout | Pretraining contamination unmeasured |
+
+**Confirmed in this tree:** C5 (all four bypassing runners), C6 (**now fixed** — `simulate.py:83`),
+C10 (`live_medium_high.json` canary used as a tier ceiling), C4 (`bug-001` asserts a string in
+source text — a comment satisfies the judge). See `009 §3.1`.
+
+### 2.1b Outcome algebra — fail-closed
+
+| Outcome | Condition |
+|---|---|
+| `pass` | oracle exit 0 **and** public exit 0 **and** no instrument error **and** allowed paths only |
+| `public_overfit` | public green, oracle red — a **harness-hacking signal**, not a near-miss |
+| `fail` | oracle red, episode completed, no instrument error |
+| `abandoned` | turn / token / wall bound reached |
+| `inconclusive` | provider, sandbox, evaluator or transport failure |
+| `invalid` | leak-linter fail, human source edit, or oracle visible |
+
+**`pass` is the only promotion bit.**
+
+### 2.1c Splits and contamination (`M-19`, `M-20`)
+
+| Split | Access | Role |
+|---|---|---|
+| `DEV` | Unrestricted | Gym, prompt debugging |
+| `HOLDOUT` | Read at comparison time only | Model ceiling; DNA paired trials |
+| `SEALED` | Touch ledger; depleting | Publication / later training check |
+| `LIVE` | Operator | Verifier–deployment gap (`T8.7`) |
+| `DEPLOYMENT` | After ship | Correlation with HOLDOUT |
+
+Contamination is **one-way**. Using HOLDOUT to tune a system prompt **burns it to DEV forever**.
+Corpus membership must be checkable per instance before any `DEF-09` training.
+
+### 2.1d Citation hygiene — this applies to us, not only to the model
+
+Every number cited from outside this repository carries its **evidence class and scope**, or it is
+not cited. Two live examples of the failure, both from internal review prose:
+
+- *"Isolated subagent contexts yield up to 90% benchmark improvements and cut token bloat by 84%."*
+  **False as stated.** The 90.2% was a multi-agent system vs a single-agent baseline on **one
+  vendor's internal research eval** — not a public benchmark, and unrelated to capability leases.
+  The 84% was **context compaction** on a 100-turn web-search eval — not subagents. `003 §3.3`
+  states both correctly.
+- *"78.4% token reuse"* and *"lower-tier models pass Tier 3–4 thanks to the harness"* — appear in
+  internal KPI markdown with no measurement behind them.
+
+A programme whose entire thesis is *"when an agent solves a task, what solved it?"* cannot launder
+its own citations. This is `C10` applied to prose.
 
 ### 2.2 Per-artifact ruling
 

@@ -33,7 +33,7 @@ Build and prove one installable, fail-closed path from `vg` through RuntimeServi
 
 ### Read first — applies to every TODO
 
-1. [`docs/reviews/todo/mvp_beta_delivery_audit_2026-08-16.md`](../../reviews/todo/mvp_beta_delivery_audit_2026-08-16.md) — verified findings, missing product path, test evidence and release criteria.
+1. [`docs/reviews/done/mvp_beta_delivery_audit_2026-08-16.md`](../../reviews/done/mvp_beta_delivery_audit_2026-08-16.md) — verified findings, missing product path, test evidence and release criteria.
 2. [`docs/agile/sprint6B/backlog.md`](backlog.md) — ticket-level ownership, dependencies, acceptance evidence and R0–R10 gates.
 3. [`docs/agile/sprint0/active-mvp-contract.json`](../sprint0/active-mvp-contract.json) — authoritative requirement-to-test map; do not mark a row covered before real evidence exists.
 4. [`docs/agile/sprint0/system-architecture-icd.md`](../sprint0/system-architecture-icd.md) — package boundaries and authority ownership.

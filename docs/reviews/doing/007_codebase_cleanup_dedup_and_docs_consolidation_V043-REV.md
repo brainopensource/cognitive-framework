@@ -16,8 +16,8 @@ process fix that stops review documents accumulating faster than remediation.
 | Normative v4 set (`docs/main_v4/`, 16 files) | 4,928 | **Excellent. Keep. Amend two statements** |
 | Runtime (`vanguard/packages/`) | 15,569 | Sound core, three parallel loops, one god function |
 | Tests (`test/`) | 12,199 | Strong doctrine; three red; one suite correctly refusing |
-| **Review + plan documents** (`docs/reviews/todo/` + `docs/superpowers/plans/`) | **5,494** | **Larger than the specification it reviews. Ten NO-GO verdicts, none closed** |
-| Agile artifacts (`docs/agile/`) | ~1,300 | Sprint-local; retire on sprint close |
+| **Review + plan documents** (`docs/reviews/done/` + `docs/reviews/done/`) | **5,494** | **Larger than the specification it reviews. Ten NO-GO verdicts, none closed** |
+| Agile artifacts (`docs/scrum/sprints/`) | ~1,300 | Sprint-local; retire on sprint close |
 | `todo_list.md` | ~25,000 chars | A second, unregistered programme plan at repo root |
 
 **The signal:** 5,494 lines of review against 4,928 lines of specification, with zero closures.
@@ -100,7 +100,7 @@ the base). Collapses to one under `HarnessSession` (`003 §5.2`).
 `signing.py` (756 LOC) plus six oracle suites. `unavailable.py` and the deliberate absence of a
 `FakeEvaluator` binding are **correct and should stay** — absence must be inconclusive, not a
 pass. But `isolated.py` (298) and `client.py` (131) overlap; per
-`docs/reviews/todo/mvp_beta_delivery_audit_2026-08-16.md` §1.4, `IsolatedEvaluator` is currently
+`docs/reviews/done/mvp_beta_delivery_audit_2026-08-16.md` §1.4, `IsolatedEvaluator` is currently
 instantiated inside the runtime with an empty oracle and `image_digest="unverified"`. Resolve to
 **one** client that talks to the daemon, with attestation required and `inconclusive` when it is
 absent.
@@ -145,7 +145,13 @@ Adopt directory-as-state, which the repo already half-implements (`done/`, `todo
 **Rule:** a new review document may not be created while `doing/` holds 8. This is a WIP limit,
 and it is the only mechanism that reliably converts reviewing into deciding.
 
-### 5.3 Per-document rulings for `docs/reviews/todo/` (5,035 lines)
+### 5.3 Per-document rulings — SUPERSEDED BY `009 §2`
+
+> **CORRECTION (2026-08-16).** The rulings below were made from document **headers**, not bodies.
+> Reading all 13 in full showed they were wrong in both directions: three documents are stronger
+> than the corresponding `001`–`008` report, five are ~90% closed by Sprint 6B, and nine findings
+> are still live. **`009 §2` is the authoritative ruling.** The table below is retained only to
+> show what the header-level triage got wrong, which is itself the argument for `009`.
 
 | Document | Lines | Ruling |
 |---|---|---|
@@ -162,7 +168,7 @@ and it is the only mechanism that reliably converts reviewing into deciding.
 **Net: 5,035 → ~1,000 lines**, with three genuinely valuable frameworks promoted into the
 normative corpus where they will actually bind.
 
-### 5.4 `docs/superpowers/plans/` (615 lines)
+### 5.4 `docs/reviews/done/` (615 lines)
 
 | Document | Ruling |
 |---|---|
@@ -177,7 +183,7 @@ A second, unregistered programme plan competing with `GTS-13C`. `ADR-0046` is ex
 *"A statement appearing in two of them is a defect in ownership, fixed by deleting the copy, not
 by ranking them."*
 
-**Ruling:** move to `docs/agile/sprint6B/` as a sprint artifact (which is what it is — its header
+**Ruling:** move to `docs/scrum/sprints/sprint6B/` as a sprint artifact (which is what it is — its header
 says "Sprint 6B MVP Beta"), or convert to issue-tracker rows and delete. It must not live at repo
 root where it reads as authoritative.
 
@@ -195,14 +201,39 @@ recorded as corrections in `VG-09 §4`, which is the section that exists for exa
 
 ---
 
-## 6. `.gitignore` and hygiene — mostly already right
+## 6. `.gitignore` and hygiene — and a correction to this section
 
-Verified: `node_modules/`, `dist/`, `__pycache__/`, `*.pyc`, `.env` are all ignored, and
-`git ls-files` returns **zero** tracked matches. The earlier incident of a committed OpenRouter
-credential (`phases_0-2_review_full_rev2.md` SEC-01) was contained and the ignore rules hardened.
-`tools/scan_secrets.py` exists. **This is in good shape.**
+> **CORRECTION (2026-08-16, via `009 §5`).** This section originally read *"This is in good shape."*
+> **That was wrong**, and the error is instructive enough to leave visible rather than overwrite.
 
-Remaining: a `make clean` target for the untracked working-tree noise, and adding
+**What is right.** `node_modules/`, `dist/`, `__pycache__/`, `*.pyc`, `.env` are ignored and
+`git ls-files` returns zero tracked matches. `tools/scan_secrets.py` exists and is wired into CI.
+
+**What is wrong.** `git ls-files` reports **HEAD**, not **history**. Running the project's own tool
+in the mode the prior audit explicitly named:
+
+```
+$ python3 tools/scan_secrets.py            → SECRET SCAN PASS
+$ python3 tools/scan_secrets.py --all-refs → SECRET SCAN FAIL: reachable-object: env-named blob .env
+$ git for-each-ref | grep -c refs/original → 21
+```
+
+**`SEC-01` is not closed.** A reachable `.env` blob and 21 `refs/original` backup refs remain. The
+prior audit (`mvp_beta_delivery_audit` P0-08) said exactly this and was carried as stale.
+
+The generalisable defect is worse than the finding: **the scanner was run only in its passing
+mode.** `A-10` — a gate that cannot fail is not a gate — extends to a gate whose failing mode is
+never invoked. CI must run `--all-refs`, not the lenient default.
+
+**Remediation is a Joint-track Sprint 7 row** (`011`), sequenced deliberately: revoke/rotate at the
+provider **first**; then, with repository-owner authorisation, coordinate a history rewrite across
+every affected ref, remove backup refs, force-update the remote, invalidate stale clones, and
+verify both `--all-refs` and a clean-clone scan. **Never place the secret value in a ticket,
+command line, log or receipt.**
+
+Also open: no `LICENSE` file exists while `pyproject.toml` declares Apache-2.0 (`009 §3.1`).
+
+Remaining hygiene: a `make clean` target for untracked working-tree noise, and adding
 `tools/001_LLM_API_ROUTER/outputs/` to `.gitignore` (14 committed provider response artifacts).
 
 ---

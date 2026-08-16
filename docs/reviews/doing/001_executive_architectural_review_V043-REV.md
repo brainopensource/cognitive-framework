@@ -65,7 +65,7 @@ rather than reporting noise. That is `008`.
 | Contracts | `schemas/v4/` — 22 schema pairs, ~40 canonicalisation triples, ~60 selector-inclusion vectors |
 | Tests | `test/**`, 507 cases executed on this branch |
 | Evidence | `benchmarkings/**` result JSON + reports, `lab/`, `tools/` |
-| Prior review | 10 documents in `docs/reviews/todo/`, 3 in `docs/superpowers/plans/` |
+| Prior review | 10 documents in `docs/reviews/done/`, 3 in `docs/reviews/done/` |
 | External | 2026 literature on harness variance, compaction, verifier gaming, skill-library drift, agent protocols (cited in `002`, `004`, `006`) |
 
 **Test suite state on this branch:** `507 tests, 2 failures, 15 errors, 2 skipped`.
@@ -164,7 +164,7 @@ refuse rather than report"*. The instrument did not refuse.
 
 **In fairness:** not all of it is theatre. `result_tier1_lru_ttl_cache.json` contains a real
 multi-turn trajectory with genuine `fs.read`/`fs.write` calls and real file content, and
-`docs/reviews/todo/sota_harness_scientific_benchmarking_programme_2026-08-16.md` already
+`docs/reviews/done/sota_harness_scientific_benchmarking_programme_2026-08-16.md` already
 reached this conclusion independently (*"We are cheating in several published-looking numbers.
 We are not cheating in the one path that actually uses the production loop."*). That document
 is correct and was not actioned. See `002` for the full triage and the labelling regime.
@@ -351,7 +351,7 @@ definition of what changed"* and `FT-08` names the second patch path as a failur
 
 ### 3.13 [M-4] The Phase-3 blueprint has drifted off the specification
 
-`docs/superpowers/plans/2026-08-16-phase-3-sprints-7-10-blueprint.md` (52 lines) proposes:
+`docs/reviews/done/2026-08-16-phase-3-sprints-7-10-blueprint.md` (52 lines) proposes:
 
 | Blueprint says | Specification says |
 |---|---|
@@ -365,6 +365,27 @@ definition of what changed"* and `FT-08` names the second patch path as a failur
 The blueprint is a delivery plan for a demo. The specification is a plan for an instrument.
 `008` reconciles them.
 
+### 3.13b [H-7] `SEC-01` is not closed — secret history remains reachable
+
+> **Added 2026-08-16 via `009 §3.1`.** This finding appears in no other section of `001`–`008` and
+> corrects `007 §6`.
+
+```
+$ python3 tools/scan_secrets.py            → SECRET SCAN PASS
+$ python3 tools/scan_secrets.py --all-refs → SECRET SCAN FAIL: reachable-object: env-named blob .env
+$ git for-each-ref | grep -c refs/original → 21
+```
+
+A previously committed OpenRouter credential remains reachable in history, with 21 `refs/original`
+backup refs. The prior audit named this (`mvp_beta_delivery_audit` P0-08) and it was carried as
+stale. `007 §6` asserted the opposite on the evidence of `git ls-files`, **which reports HEAD, not
+history**.
+
+The generalisable defect: **the scanner was only ever run in its passing mode.** `A-10` extends to
+a gate whose failing mode is never invoked. Remediation order is non-negotiable — rotate at the
+provider first, then rewrite history under owner authorisation, then verify `--all-refs` **and** a
+clean-clone scan. Sprint 7 Joint track in `011`.
+
 ### 3.14 [L] Portability, hygiene, process
 
 - `/usr/bin/bwrap` hardcoded — the runtime cannot compose on macOS or Windows and the check is a
@@ -375,7 +396,7 @@ The blueprint is a delivery plan for a demo. The specification is a plan for an 
 - `workflow_visualizer.html` (48 KB) at repo root — an orphan of the rejected graph runtime.
 - Bare `except Exception: pass` at `root.py:722`, `root.py:796`, `engine.py:269`,
   `meta_loop.py:125`. Two are justified by `F-25` and say so; two are not.
-- **Ten NO-GO review documents sit in `docs/reviews/todo/` with none closed.** Reviews are
+- **Ten NO-GO review documents sit in `docs/reviews/done/` with none closed.** Reviews are
   accumulating faster than remediation, which is itself the leading indicator that the team is
   reviewing instead of deciding. `007 §5` proposes the closure protocol.
 

@@ -5,7 +5,7 @@
 Where any of these files and a v4 owner disagree, the owner wins (`PR-3`).
 **Scope reviewed:** `docs/main_v4/` (VG-00…VG-12 + GTS-13C, 4,928 lines) · `vanguard/packages/`
 (93 files, 15,569 LOC) · `schemas/v4/` · `test/` (507 cases executed) · `benchmarkings/` ·
-`docs/reviews/todo/` (10 documents) · `docs/superpowers/plans/` (3 documents) · 2026 external
+`docs/reviews/done/` (10 documents) · `docs/reviews/done/` (3 documents) · 2026 external
 literature.
 
 ---
@@ -22,8 +22,33 @@ literature.
 | **006** | [Tech Stack, Protocols & Polyglot Seams](006_tech_stack_protocols_and_polyglot_seams_V043-REV.md) | Python ratification and the `ADR-0001` defect, MCP/ACP/A2A posture, performance levers, security | Tech Lead, Senior A |
 | **007** | [Cleanup, Dedup & Docs Consolidation](007_codebase_cleanup_dedup_and_docs_consolidation_V043-REV.md) | The concrete delete/merge/relocate list; the review-WIP protocol | Everyone doing Sprint 7 |
 | **008** | [Corrected v0.4.3 Delivery Plan, S7–S10](008_v043_delivery_plan_sprints_7_10_V043-REV.md) | The sprint plan, gates, deferrals with triggers, the stakeholder paragraph | Project Lead, Scrum, Tech Lead |
+| **009** | [Prior Review Reconciliation](009_prior_review_reconciliation_V043-REV.md) | Finding-level verdict on all 13 prior documents; what is FIXED, STILL-TRUE, WRONG, PROMOTE | **Read before actioning any archived review** |
+| **010** | [V5 / Aether Roadmap & the ACI Harvest](010_v5_aether_roadmap_and_aci_harvest_V043-REV.md) | The 16-tree competitor harvest, ACI gifts, prefix discipline, V5-A…V5-M, the 200-year framing | Research Lead, Tech Lead |
+| **011** | [Phase 3 Master Backlog](011_master_backlog_phase3_V043-REV.md) | **The living tracker.** Waves W6–W9 / Sprints 7–10, every task and sub-task with honest status | **Everyone, daily** |
+
+### Execution artifacts (outside this directory)
+
+| Path | Contents |
+|---|---|
+| `docs/scrum/sprints/sprint07..10/` | Per-sprint kits: `README` + `lane-a` + `lane-b` + `lane-c` + `joint-track` |
+| `docs/scrum/development_guides/00..05_*.md` | Implementer guidelines — architecture decisions, layer/CI rules, pack authoring, measurement rules, testing doctrine, TDD workflow |
+| `docs/main_v4/09_…§12` | `ADR-0063` (Python ratified) · `ADR-0064` (gate status) · `ADR-0065` (D-01…D-15 binding) · `DECISION-0005/0006` |
+| `docs/reviews/done/` | All 18 archived reviews, each with a closure header naming its successor |
 
 ---
+
+## Added after the reconciliation pass (`009`)
+
+Two findings appear in no `001`–`008` report and were surfaced only by reading all 13 prior
+documents in full and re-verifying them against the tree:
+
+| # | Finding | Severity | Evidence |
+|---|---|---|---|
+| 0a | **`SEC-01` is not closed.** A previously committed credential remains reachable in git history | **High** | `scan_secrets.py --all-refs` → **FAIL: reachable-object: env-named blob .env**; 21 `refs/original`. `007 §6` asserted the opposite from `git ls-files`, **which reports HEAD, not history** |
+| 0b | **The `M-18` instrument tuple is implemented and unwired.** The mechanism that would refuse incomparable lifts exists and is dark | **High** | `tools/telemetry/tuple.py`; no runner emits it |
+
+**The generalisable defect behind 0a: the scanner was only ever run in its passing mode.** `A-10` —
+a gate that cannot fail is not a gate — extends to a gate whose failing mode is never invoked.
 
 ## The five findings that matter most
 
@@ -87,12 +112,12 @@ Point it there. That is three rules and one day.
 Prior review work that reached compatible conclusions and should be credited rather than
 duplicated:
 
-- `docs/reviews/todo/sota_harness_scientific_benchmarking_programme_2026-08-16.md` — reached the
+- `docs/reviews/done/sota_harness_scientific_benchmarking_programme_2026-08-16.md` — reached the
   benchmark-integrity conclusion independently, on the same day. **Correct, and not actioned.**
   `002` supersedes its triage section with per-file rulings.
-- `docs/reviews/todo/phases_0-2_review_full_rev2.md` — the Beta/GA fence in its §7.1 is good
+- `docs/reviews/done/phases_0-2_review_full_rev2.md` — the Beta/GA fence in its §7.1 is good
   practice and survives into `008`.
-- `docs/reviews/todo/vanguard_harness_cli_architectural_review_phase_2*.md` — the three-evidence-level
+- `docs/reviews/done/vanguard_harness_cli_architectural_review_phase_2*.md` — the three-evidence-level
   model and the produto/harness/modelo/protocolo separation should be **promoted into `VG-07`**,
   not left as review material.
 

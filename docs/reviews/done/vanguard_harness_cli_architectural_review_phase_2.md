@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **SUPERSEDED by REV2** (same thesis, later revision).
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Revisão arquitetural de Agentic Coding Harnesses e implicações para o VANGUARD v4.0
 
 **Data de corte:** 2026-08-15  

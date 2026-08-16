@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **SUPERSEDED by Sprint 6B closure.** Its Beta/GA fence (§7.1) is carried into `011`.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard Phases 0–2 Full Technical Audit, Revision 2
 
 **Audit purpose:** establish the corrective engineering program required before Vanguard may be represented, built, or shipped as a Beta MVP.  

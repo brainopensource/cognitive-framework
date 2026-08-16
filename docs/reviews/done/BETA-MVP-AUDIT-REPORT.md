@@ -1,3 +1,11 @@
+> **CLOSED 2026-08-16 — archived from `docs/reviews/todo/`.**
+> **~90% FIXED by Sprint 6B.** 8 of 9 blockers closed. Its 8 SOTA properties promoted to `guidelines/00`.
+> Finding-level verdicts and evidence: `docs/reviews/doing/009_prior_review_reconciliation_V043-REV.md`.
+> Surviving findings are tracked in `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md`.
+> This document is historical. Do not action it directly.
+
+---
+
 # Vanguard / Aether-D-System — Sprint 5–6 Beta Audit
 
 **Classification:** Internal engineering audit (architecture, trust, loop engineering)  

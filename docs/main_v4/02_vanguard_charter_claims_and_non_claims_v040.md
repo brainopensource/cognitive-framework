@@ -193,7 +193,8 @@ Rationale and seams are owned by `03 §12`; security properties by `05`.
 
 | Area | Decision |
 |---|---|
-| Control plane | TypeScript (strict) on Node.js LTS. Alternative runtimes stay behind a conformance matrix and soak test |
+| Control plane | **Python (`ADR-0063`, 2026-08-16).** Reversed on evidence from the original TypeScript-on-Node decision (`ADR-0001`), whose stated reversal condition — decisive team-composition shift — had fired. Alternative runtimes stay behind a conformance matrix and soak test |
+| Interaction client | TypeScript (strict) on Node.js LTS. Also the `ADR-0014` second-language contract reader |
 | Wire contracts | JSON Schema 2020-12, normative, with semantic specification and golden vectors |
 | Validation | A TypeScript validator as *implementation*, verified against the schemas — never as the source of truth |
 | Canonicalisation | RFC 8785 / JCS, with conformance vectors |

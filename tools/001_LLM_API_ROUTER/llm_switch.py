@@ -54,6 +54,44 @@ MODEL_ALIASES = {
         "gpt-oss-120b": "openai/gpt-oss-120b",
         "powerful": "openai/gpt-oss-120b",
     },
+    # Cloudflare Workers AI mappings - FREE PLAN ONLY
+    "cloudflare": {
+        # Fast & lightweight (8B)
+        "llama": "@cf/meta/llama-3.1-8b-instruct",
+        "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
+        # Balanced performance (20B)
+        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss": "@cf/openai/gpt-oss-20b",
+        "20b": "@cf/openai/gpt-oss-20b",
+        # Powerful models (26B+)
+        "gemma": "@cf/google/gemma-4-26b-a4b-it",
+        "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
+        "nemotron": "@cf/nvidia/nemotron-3-120b-a12b",
+        "nemotron-120b": "@cf/nvidia/nemotron-3-120b-a12b",
+        "glm": "@cf/zai-org/glm-4.7-flash",
+        "glm-flash": "@cf/zai-org/glm-4.7-flash",
+        # Default to fast model
+        "default": "@cf/meta/llama-3.1-8b-instruct",
+    },
+    # Cloudflare short alias - FREE PLAN ONLY
+    "cf": {
+        # Fast & lightweight (8B)
+        "llama": "@cf/meta/llama-3.1-8b-instruct",
+        "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
+        # Balanced performance (20B)
+        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss": "@cf/openai/gpt-oss-20b",
+        "20b": "@cf/openai/gpt-oss-20b",
+        # Powerful models (26B+)
+        "gemma": "@cf/google/gemma-4-26b-a4b-it",
+        "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
+        "nemotron": "@cf/nvidia/nemotron-3-120b-a12b",
+        "nemotron-120b": "@cf/nvidia/nemotron-3-120b-a12b",
+        "glm": "@cf/zai-org/glm-4.7-flash",
+        "glm-flash": "@cf/zai-org/glm-4.7-flash",
+        # Default to fast model
+        "default": "@cf/meta/llama-3.1-8b-instruct",
+    },
 }
 
 
@@ -92,7 +130,7 @@ Examples:
         "-provider", "--provider", "-p",
         type=str,
         default="openrouter",
-        choices=["openrouter", "or", "ollama", "local", "mock", "stub", "lam", "groq"],
+        choices=["openrouter", "or", "ollama", "local", "mock", "stub", "lam", "groq", "cloudflare", "cf"],
         help="LLM provider backend (default: openrouter)",
     )
     parser.add_argument(

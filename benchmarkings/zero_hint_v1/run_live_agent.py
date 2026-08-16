@@ -107,7 +107,7 @@ LIVE_TOOL_SCHEMAS: tuple[dict[str, Any], ...] = (
 class TaskSpec:
     task_id: str
     title: str
-    allowed_source: str
+    allowed_sources: tuple[str, ...]
     prompt: str
     fixture: Path
     oracle: Path
@@ -181,7 +181,8 @@ class LiveModel:
         merged = dict(sampling)
         merged.setdefault("temperature", 0.0)
         merged["maxTokens"] = max(int(merged.get("maxTokens") or 0), self._max_tokens)
-        return self._inner.propose(context, LIVE_TOOL_SCHEMAS, merged)
+        pack_tools = tools if tools else LIVE_TOOL_SCHEMAS
+        return self._inner.propose(context, pack_tools, merged)
 
 
 class CountingModel:
@@ -190,6 +191,10 @@ class CountingModel:
         self.calls = 0
         self.errors: list[str] = []
         self.kinds: list[str] = []
+        self.actions: list[str] = []
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+        self.usd_micros = 0
 
     def propose(self, context: Mapping[str, Any], tools: Any, sampling: Mapping[str, Any]) -> Any:
         self.calls += 1
@@ -200,6 +205,13 @@ class CountingModel:
             return result
         value = getattr(result, "value", {}) or {}
         self.kinds.append(str(value.get("kind") or value.get("action") or "unknown"))
+        action = value.get("action")
+        if isinstance(action, str):
+            self.actions.append(action)
+        usage = value.get("usage") if isinstance(value.get("usage"), Mapping) else {}
+        self.prompt_tokens += int(usage.get("prompt_tokens") or 0)
+        self.completion_tokens += int(usage.get("completion_tokens") or 0)
+        self.usd_micros += int(usage.get("usd_micros") or 0)
         return result
 
 
@@ -296,7 +308,7 @@ def load_task(task_id: str) -> TaskSpec:
     return TaskSpec(
         task_id=meta["taskId"],
         title=meta["title"],
-        allowed_source=workspace["allowedChangedPaths"][0],
+        allowed_sources=tuple(workspace["allowedChangedPaths"]),
         prompt=prompt,
         fixture=path / "fixture" / "initial",
         oracle=path / "oracle",
@@ -333,10 +345,24 @@ def _event_summary(events: Any) -> list[dict[str, Any]]:
     return rows
 
 
-def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) -> dict[str, Any]:
+def resolve_manifest_path(name: str) -> Path:
+    if name.endswith("manifest.json") or name.endswith(".json"):
+        path = Path(name)
+        return path if path.is_absolute() else ROOT / path
+    return ROOT / "vanguard/packages/agency/manifests" / name / "manifest.json"
+
+
+def run_task(
+    task: TaskSpec,
+    *,
+    model_cfg: Mapping[str, str],
+    max_turns: int,
+    manifest_path: Path,
+) -> dict[str, Any]:
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = TASKS_DIR / task.task_id / "runs" / run_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    composed = Runtime.compose(manifest_path, episode_id=f"zero-hint-episode-{task.task_id}")
 
     secret, secret_source = _load_secret()
     if model_cfg["provider"] == "openrouter" and not secret:
@@ -374,7 +400,7 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         public_before = _run_tests(repo, task.public_cmd)
         try:
             result = Runtime.execute_harness(
-                MANIFEST,
+                manifest_path,
                 TaskContext(
                     brief=task.prompt,
                     repo_path=repo,
@@ -435,7 +461,7 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         terminal == "completed"
         and public_after["passed"]
         and oracle_after["passed"]
-        and set(changed) <= {task.allowed_source}
+        and set(changed) <= set(task.allowed_sources)
     )
     public_overfit = bool(public_after["passed"] and not oracle_after["passed"])
     record = {
@@ -452,7 +478,6 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         "labDepartures": [
             "auto_approve_privileged_diff",
             "oracle_after_episode_not_isolated_evaluator",
-            "provider_tool_json_schema_injected",
             "maxTokens_2048",
             "first_tool_call_only_wire_filter",
             "http_timeout_180s",
@@ -462,6 +487,10 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
             "secretSource": secret_source if model_cfg["provider"] == "openrouter" else "ollama-local",
             "calls": model.calls,
             "proposalKinds": model.kinds,
+            "actions": model.actions,
+            "promptTokens": model.prompt_tokens,
+            "completionTokens": model.completion_tokens,
+            "usdMicros": model.usd_micros,
             "providerErrors": model.errors[:8],
         },
         "bwrapPresent": Path("/usr/bin/bwrap").exists(),
@@ -477,6 +506,9 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         "hashes": {
             "finalDiff": "sha256:" + hashlib.sha256(diff).hexdigest(),
         },
+        "manifest": composed.harness,
+        "gene_digests": dict(composed.gene_digests),
+        "treatment": {"manifest": composed.harness},
     }
     (out_dir / "result.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     (out_dir / "events.sanitized.json").write_text(json.dumps(events, indent=2) + "\n", encoding="utf-8")
@@ -514,6 +546,13 @@ def write_preregistration() -> None:
             "allowed": ["busy.py"],
             "oracle": "oracle/test_calendar_oracle.py",
         },
+        {
+            "taskId": "test005_named_amounts",
+            "title": "Parse named amounts across two modules",
+            "taskShape": "multi-file parse plus aggregate; public tests do not encode oracle edges",
+            "allowed": ["pkg/parser.py", "pkg/stats.py"],
+            "oracle": "oracle/test_ledger_oracle.py",
+        },
     ]
     for spec in specs:
         task_dir = TASKS_DIR / spec["taskId"]
@@ -550,13 +589,19 @@ def write_preregistration() -> None:
         )
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run zero-hint live coding tasks")
     parser.add_argument("--task", action="append", dest="tasks")
     parser.add_argument("--model", default=None)
     parser.add_argument("--max-turns", type=int, default=16)
+    parser.add_argument("--manifest", default="vg-code-default")
     parser.add_argument("--write-preregistration", action="store_true")
     parser.add_argument("--check-fixtures", action="store_true")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
 
     if args.write_preregistration:
@@ -568,25 +613,37 @@ def main(argv: list[str] | None = None) -> int:
         "test002_rate_window",
         "test003_invoice_cents",
         "test004_busy_merge",
+        "test005_named_amounts",
     ]
     if args.check_fixtures:
         failed = 0
         for task_id in task_ids:
             task = load_task(task_id)
+            leaks = leak_paths(task.fixture)
             public = _run_tests(task.fixture, task.public_cmd)
-            print(f"{task_id} public tests initially passing={public['passed']} code={public['returncode']}")
-            if public["passed"]:
+            print(
+                f"{task_id} public tests initially passing={public['passed']} "
+                f"code={public['returncode']} leaks={leaks}"
+            )
+            if public["passed"] or leaks:
                 failed += 1
         return 1 if failed else 0
 
     model_cfg = _pick_model(args.model)
+    manifest_path = resolve_manifest_path(args.manifest)
     print(f"model {model_cfg['provider']}:{model_cfg['model']}")
+    print(f"manifest {manifest_path}")
     print(f"bwrap {Path('/usr/bin/bwrap').exists()}")
     overall = 0
     for task_id in task_ids:
         task = load_task(task_id)
         print(f"running {task.task_id}...")
-        record = run_task(task, model_cfg=model_cfg, max_turns=args.max_turns)
+        record = run_task(
+            task,
+            model_cfg=model_cfg,
+            max_turns=args.max_turns,
+            manifest_path=manifest_path,
+        )
         print(
             f"  -> {record.get('status')} terminal={record.get('terminal')} "
             f"calls={record.get('model', {}).get('calls')} "

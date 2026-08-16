@@ -1,16 +1,6 @@
 {
-  "to_canonical": {
-    "Read": "fs.read",
-    "Edit": "patch.apply",
-    "Write": "patch.apply",
-    "Bash": "proc.exec",
-    "Glob": "fs.search",
-    "Grep": "fs.search"
-  },
-  "to_wire": {
-    "fs.read": "Read",
-    "patch.apply": "Edit",
-    "proc.exec": "Bash",
-    "fs.search": "Glob"
-  }
+  "Read": "fs.read",
+  "Grep": "fs.search",
+  "Edit": "patch.apply",
+  "Bash": "proc.exec"
 }

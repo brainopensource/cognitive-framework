@@ -117,6 +117,33 @@ class TestModelInvocation(unittest.TestCase):
             tool_schemas=({"name": "read", "verb": "fs.read"},),
         ).ok)
 
+    def test_search_root_aliases_stay_inside_workspace(self):
+        schemas = ({"name": "search", "verb": "fs.search"},)
+        for path in ("", "/", "/workspace"):
+            result = ProposalTranslator.translate(
+                {"text": "", "toolCalls": [{"name": "search", "arguments": {"path": path, "pattern": "def "}}]},
+                tool_schemas=schemas,
+            )
+            self.assertTrue(result.ok, path)
+            self.assertEqual(result.value["args"]["path"], ".")
+
+    def test_workspace_absolute_paths_are_bound_inside_the_root(self):
+        result = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "/workspace/pkg/parser.py"}}]},
+            tool_schemas=({"name": "read", "verb": "fs.read"},),
+        )
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["args"]["path"], "pkg/parser.py")
+        self.assertEqual(result.value["resource"]["path"], "pkg/parser.py")
+
+        result = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "/workspace/pkg/parser.py"}}]},
+            tool_schemas=({"name": "read", "verb": "fs.read"},),
+        )
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["args"]["path"], "pkg/parser.py")
+        self.assertEqual(result.value["resource"]["path"], "pkg/parser.py")
+
     def test_aliases_mapping_resolves_and_normalizes_arguments(self):
         aliases = {
             "to_canonical": {

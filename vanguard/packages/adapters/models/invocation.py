@@ -91,8 +91,6 @@ class ProposalTranslator:
             action = declared.get(name)
             if action is None and name in set(declared.values()):
                 action = name
-            if action is None and name in cls.KNOWN_TOOLS:
-                action = cls.KNOWN_TOOLS[name]
             if action is None:
                 return Result.fail("instrument_error", f"tool is not declared by manifest: {name}")
             if action not in set(cls.KNOWN_TOOLS.values()):
@@ -209,26 +207,41 @@ def _within_depth(value: Any, depth: int = 0) -> bool:
     return True
 
 
+def _workspace_relative(path: str, root: str) -> Result[str]:
+    if not isinstance(path, str) or "\x00" in path:
+        return Result.fail("instrument_error", "filesystem action requires a path")
+    if path in {"", ".", "/"}:
+        return Result.success(".")
+    pure = PurePosixPath(path)
+    if pure.is_absolute():
+        try:
+            pure = pure.relative_to(PurePosixPath(root))
+        except ValueError:
+            return Result.fail("instrument_error", "filesystem path escapes workspace")
+    if ".." in pure.parts:
+        return Result.fail("instrument_error", "filesystem path escapes workspace")
+    return Result.success("." if str(pure) == "." else str(pure))
+
+
 def _bind_resource(action: str, args: Mapping[str, Any], root: str) -> Result[Mapping[str, Any]]:
     if not isinstance(root, str) or not root or "\x00" in root:
         return Result.fail("instrument_error", "invalid resource root")
     if action in {"fs.read", "fs.write", "patch.apply"}:
-        path = args.get("path", ".")
-        if not isinstance(path, str) or not path or "\x00" in path:
-            return Result.fail("instrument_error", "filesystem action requires a path")
-        pure = PurePosixPath(path)
-        if pure.is_absolute() or ".." in pure.parts:
-            return Result.fail("instrument_error", "filesystem path escapes workspace")
-        return Result.success({"kind": "fs", "root": root, "path": str(pure)})
+        bound = _workspace_relative(str(args.get("path", ".")), root)
+        if not bound.ok:
+            return bound
+        args["path"] = bound.value
+        return Result.success({"kind": "fs", "root": root, "path": bound.value})
     if action == "fs.search":
         path = args.get("path", ".")
         pattern = args.get("pattern")
-        if not isinstance(path, str) or not isinstance(pattern, str) or "\x00" in path + pattern:
+        if not isinstance(pattern, str) or "\x00" in str(path) + pattern:
             return Result.fail("instrument_error", "search requires safe path and pattern")
-        pure = PurePosixPath(path)
-        if pure.is_absolute() or ".." in pure.parts:
+        bound = _workspace_relative(str(path), root)
+        if not bound.ok:
             return Result.fail("instrument_error", "search path escapes workspace")
-        return Result.success({"kind": "fs", "root": root, "path": str(pure), "pattern": pattern})
+        args["path"] = bound.value
+        return Result.success({"kind": "fs", "root": root, "path": bound.value, "pattern": pattern})
     if action in {"proc.exec", "proc.test"}:
         argv = args.get("argv")
         if not isinstance(argv, list) or not argv or not all(isinstance(x, str) and x for x in argv):

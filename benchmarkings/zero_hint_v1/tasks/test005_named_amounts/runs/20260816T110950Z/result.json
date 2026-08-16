@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "test005_named_amounts",
+  "title": "Parse named amounts across two modules",
+  "runId": "20260816T110950Z",
+  "status": "FAIL",
+  "evidence_label": "lab-execute-harness",
+  "public_overfit": false,
+  "agentic": true,
+  "lamReplay": false,
+  "singleShotGenerate": false,
+  "labDepartures": [
+    "auto_approve_privileged_diff",
+    "oracle_after_episode_not_isolated_evaluator",
+    "maxTokens_2048",
+    "first_tool_call_only_wire_filter",
+    "http_timeout_180s"
+  ],
+  "model": {
+    "provider": "ollama",
+    "model": "llama3.2:3b",
+    "endpoint": "http://127.0.0.1:11434/v1/chat/completions",
+    "secretSource": "ollama-local",
+    "calls": 1,
+    "proposalKinds": [
+      "finish"
+    ],
+    "providerErrors": []
+  },
+  "bwrapPresent": true,
+  "terminal": "completed",
+  "detail": "{\"name\":\"shell\",\"parameters\":[{\"argv\":[\"python3\", \"-m\", \"pytest\", \"discover\", \"-s\", \"tests\"]}]}",
+  "elapsedMs": 931,
+  "receipts": [],
+  "events": [
+    {
+      "kind": "ProposalProduced",
+      "reason": "finish",
+      "action": null
+    }
+  ],
+  "changedPaths": [],
+  "publicTestsBefore": {
+    "passed": false,
+    "returncode": 1
+  },
+  "publicTestsAfter": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests"
+    ],
+    "returncode": 1,
+    "passed": false,
+    "stdout_tail": "",
+    "stderr_tail": "E\n======================================================================\nERROR: test_two_named_amounts (test_ledger.NamedAmountTests.test_two_named_amounts)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/workspace/tests/test_ledger.py\", line 11, in test_two_named_amounts\n    rows = parse_rows([\"alice,10\", \"bob,20\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/workspace/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+  },
+  "oracleAfter": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "oracle",
+      "-p",
+      "test_*.py"
+    ],
+    "returncode": 1,
+    "passed": false,
+    "stdout_tail": "",
+    "stderr_tail": "EE\n======================================================================\nERROR: test_blank_lines_and_whitespace (test_ledger_oracle.NamedAmountOracle.test_blank_lines_and_whitespace)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/eval/oracle/test_ledger_oracle.py\", line 11, in test_blank_lines_and_whitespace\n    rows = parse_rows([\"  alice, 10 \", \"\", \"bob,5\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/eval/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n======================================================================\nERROR: test_duplicate_names_accumulate (test_ledger_oracle.NamedAmountOracle.test_duplicate_names_accumulate)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/eval/oracle/test_ledger_oracle.py\", line 15, in test_duplicate_names_accumulate\n    rows = parse_rows([\"a,1\", \"a,2\", \"b,3\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-6fdhi_mh/eval/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (errors=2)\n"
+  },
+  "hashes": {
+    "finalDiff": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "manifest": "vg-shell-only",
+  "gene_digests": {
+    "vg-shell-only/context-policy.json": "sha256:4a07014dc52b0a3a2bc7b6543034e8fbd79a91dd1113ee4d4e926a533939e477",
+    "vg-shell-only/routing-policy.json": "sha256:b45c1887b0e535d764ac68b1fba66bc0050980854b23d526c48e37903dfcd8ee",
+    "vg-shell-only/system-prompt.txt": "sha256:39c8e8da9898bef269c2440a4a7a61ed3b7b14cfc847fa6140b1807a61549db6",
+    "vg-shell-only/shell-tool.json": "sha256:0c9dda804a62f1bcc90c8839bd7c6082d6198795abc9286aa38dc80675ef97fe",
+    "vg-shell-only/budget-policy.json": "sha256:6d86aaf242a789e14f256ca975e983524087fd31b7d5ba4de778132630a1e977",
+    "aliases.json": "sha256:25ef0ac0a8d4ca90daa4694b91f21fbae89d83d81dcb8e532e6a6c16003cf7bf"
+  },
+  "treatment": {
+    "manifest": "vg-shell-only"
+  }
+}

@@ -1,1 +1,1 @@
-{"name":"shell","verb":"proc.exec","description":"Execute one allowlisted repository command through the environment boundary."}
+{"name":"shell","verb":"proc.exec","description":"Run one allowlisted command (git, pytest, ruff, python3).","schema":{"type":"object","properties":{"argv":{"type":"array","items":{"type":"string"},"description":"Argument vector; argv[0] is the executable"}},"required":["argv"],"additionalProperties":false}}

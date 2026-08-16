@@ -10,7 +10,7 @@
     {
       "verb": "proc.exec",
       "sink": "privileged",
-      "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff"},
+      "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"},
       "risk": "high"
     }
   ],

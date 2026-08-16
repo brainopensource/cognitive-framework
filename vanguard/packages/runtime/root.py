@@ -46,6 +46,7 @@ the outcome is `inconclusive` — never a substituted fake pass.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
@@ -250,6 +251,7 @@ class Harness:
     evaluators: tuple[str, ...]
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
+    gene_digests: Mapping[str, str] = field(default_factory=dict)
 
     @property
     def composition_digest(self) -> str:
@@ -599,6 +601,17 @@ class Runtime:
                 schemas.append(json.loads(contents[tool_path]))
             except json.JSONDecodeError as exc:
                 raise CompositionError(f"tool schema is not JSON: {tool_path}: {exc}") from exc
+        schemas = cls._schemas_with_aliases(schemas, pack.translator)
+
+        gene_digests = {
+            relative: "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+            for relative, text in contents.items()
+        }
+        aliases_file = directory / "aliases.json"
+        if aliases_file.is_file():
+            gene_digests["aliases.json"] = "sha256:" + hashlib.sha256(
+                aliases_file.read_bytes()
+            ).hexdigest()
 
         return Harness(
             harness=manifest.harness,
@@ -612,6 +625,7 @@ class Runtime:
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,
+            gene_digests=gene_digests,
         )
 
     # -- the entrypoint --------------------------------------------------
@@ -817,6 +831,21 @@ class Runtime:
             contents[relative] = text
             artifacts.append(ArtifactFile(relative, kind, text))
         return tuple(artifacts), contents
+
+    @staticmethod
+    def _schemas_with_aliases(schemas: list[dict[str, Any]], translator: Any) -> list[dict[str, Any]]:
+        """Expose pack aliases as extra tool names. Canonical verbs stay bound."""
+        aliases = getattr(translator, "to_canonical_map", None) or {}
+        by_verb = {str(item.get("verb")): item for item in schemas if item.get("verb")}
+        names = {str(item.get("name")) for item in schemas}
+        extra: list[dict[str, Any]] = []
+        for name, verb in aliases.items():
+            if name in names or verb not in by_verb:
+                continue
+            clone = dict(by_verb[verb])
+            clone["name"] = name
+            extra.append(clone)
+        return schemas + extra
 
     @staticmethod
     def _budget(raw: str, path: str) -> Mapping[str, int]:

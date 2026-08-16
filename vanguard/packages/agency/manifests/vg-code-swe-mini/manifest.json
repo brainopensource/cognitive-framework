@@ -3,34 +3,21 @@
   "components": {
     "system_prompt": ["vg-code-swe-mini/system-prompt.txt"],
     "tools": [
-      "vg-code-swe-mini/read-tool.json",
-      "vg-code-swe-mini/edit-tool.json",
-      "vg-code-swe-mini/bash-tool.json"
+      "vg-code-default/read-tool.json",
+      "vg-code-default/search-tool.json",
+      "vg-code-default/patch-tool.json",
+      "vg-code-default/test-tool.json"
     ],
-    "context_policy": ["vg-code-swe-mini/context-policy.json"],
-    "routing_policy": ["vg-code-swe-mini/routing-policy.json"]
+    "context_policy": ["vg-code-default/context-policy.json"],
+    "routing_policy": ["vg-code-default/routing-policy.json"]
   },
   "capabilities": [
-    {
-      "verb": "fs.read",
-      "sink": "observation",
-      "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]},
-      "risk": "low"
-    },
-    {
-      "verb": "patch.apply",
-      "sink": "privileged",
-      "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]},
-      "risk": "medium"
-    },
-    {
-      "verb": "proc.exec",
-      "sink": "privileged",
-      "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3,bash,sh"},
-      "risk": "high"
-    }
+    {"verb": "fs.read", "sink": "observation", "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]}, "risk": "low"},
+    {"verb": "fs.search", "sink": "observation", "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]}, "risk": "low"},
+    {"verb": "patch.apply", "sink": "privileged", "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]}, "risk": "medium"},
+    {"verb": "proc.exec", "sink": "privileged", "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"}, "risk": "high"}
   ],
   "evaluators": ["coding-oracle@3"],
-  "budgetPolicy": "vg-code-swe-mini/budget-policy.json",
+  "budgetPolicy": "vg-code-default/budget-policy.json",
   "undeletable": false
 }

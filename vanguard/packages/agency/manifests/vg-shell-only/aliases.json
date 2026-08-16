@@ -1,18 +1,1 @@
-{
-  "passthrough": true,
-  "aliases": {
-    "bash": "proc.exec",
-    "sh": "proc.exec",
-    "shell": "proc.exec",
-    "run_command": "proc.exec"
-  },
-  "to_canonical": {
-    "shell": "proc.exec",
-    "bash": "proc.exec",
-    "sh": "proc.exec",
-    "run_command": "proc.exec"
-  },
-  "to_wire": {
-    "proc.exec": "shell"
-  }
-}
+{"shell":"proc.exec"}

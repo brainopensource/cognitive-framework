@@ -22,8 +22,8 @@ def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALL
 
     tier = raw.get("tier")
     if tier is not None:
-        if not isinstance(tier, int) or tier < 1 or tier > 5:
-            raise ValueError(f"Scenario tier '{tier}' must be an integer 1..5")
+        if not isinstance(tier, int) or tier < 1 or tier > 6:
+            raise ValueError(f"Scenario tier '{tier}' must be an integer 1..6")
 
     workspace = raw.get("workspace")
     if workspace is not None:

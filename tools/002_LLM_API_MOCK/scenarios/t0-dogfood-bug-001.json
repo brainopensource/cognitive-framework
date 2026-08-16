@@ -1,0 +1,24 @@
+{
+  "id": "t0-dogfood-bug-001",
+  "tier": 1,
+  "title": "Dogfood single-file calculator repair",
+  "workspace": {},
+  "turns": [
+    {
+      "tool_messages": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [{"id": "r1", "type": "function", "function": {"name": "read", "arguments": "{\"path\": \"src/calculator.py\"}"}}]
+    },
+    {
+      "tool_messages": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [{"id": "p1", "type": "function", "function": {"name": "patch", "arguments": "{\"path\": \"src/calculator.py\", \"patch\": \"--- a/src/calculator.py\\n+++ b/src/calculator.py\\n@@ -1,2 +1,2 @@\\n def calculate(A, B):\\n-    return (A + B) * A\\n+    return (A + B) * B\\n\"}"}}]
+    },
+    {
+      "tool_messages": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [{"id": "t1", "type": "function", "function": {"name": "test", "arguments": "{\"argv\": [\"python3\", \"-m\", \"compileall\", \"-q\", \".\"]}"}}]
+    },
+    {"tool_messages": 3, "finish_reason": "stop", "content": "Repair complete."}
+  ]
+}

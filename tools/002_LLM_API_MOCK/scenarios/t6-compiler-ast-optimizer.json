@@ -1,0 +1,55 @@
+{
+  "id": "t6-compiler-ast-optimizer",
+  "tier": 6,
+  "title": "Multi-pass AST transformation for constant folding",
+  "workspace": {
+    "ast_opt.py": "class ASTOptimizer:\n    def fold_constants(self, expr: tuple) -> Any:\n        # Bug: returns expression as is without folding arithmetic\n        return expr\n",
+    "test_ast_opt.py": "from ast_opt import ASTOptimizer\n\ndef test_fold():\n    opt = ASTOptimizer()\n    assert opt.fold_constants(('+', 2, 3)) == 5\n    assert opt.fold_constants(('+', ('*', 2, 4), 5)) == 13\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"ast_opt.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"ast_opt.py\", \"target\": \"    def fold_constants(self, expr: tuple) -> Any:\\n        # Bug: returns expression as is without folding arithmetic\\n        return expr\", \"replacement\": \"    def fold_constants(self, expr: Any) -> Any:\\n        if not isinstance(expr, tuple):\\n            return expr\\n        op, left, right = expr[0], self.fold_constants(expr[1]), self.fold_constants(expr[2])\\n        if isinstance(left, (int, float)) and isinstance(right, (int, float)):\\n            if op == '+': return left + right\\n            if op == '*': return left * right\\n            if op == '-': return left - right\\n        return (op, left, right)\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

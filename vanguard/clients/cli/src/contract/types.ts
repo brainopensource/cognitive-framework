@@ -55,20 +55,38 @@ export type StreamItem = {
 
 export type StartRunRequest = {
   repo: string;
+  prompt?: string;
+  brief?: string;
   runId?: string;
   resumeFrom?: string;
   checkpointEvery?: number;
+  model?: string;
+  manifest?: string;
+  autoApprove?: boolean;
 };
 
 export type RunRef = { runId: string; episodeId?: string };
 export type RunSnapshot = { runId: string; status: string; seq: string };
 export type CommandReceipt = {
   runId: string;
-  command: "cancel" | "checkpoint" | "resume" | "resolve_approval" | "record_correction";
-  status: "requested";
+  command: "cancel" | "checkpoint" | "resume" | "resolve_approval" | "record_correction" | "daemon_signal";
+  status: "requested" | "accepted" | "rejected";
 };
 export type ResumeRunRequest = { runId: string; checkpointId?: string };
-export type ResolveApprovalRequest = { approvalId: string; decision: "approve" | "reject" };
+export type ResolveApprovalRequest = {
+  approvalId: string;
+  decision: "approve" | "reject";
+  signature?: string;
+  signerKeyRef?: string;
+};
+
+export type DaemonStatus = {
+  status: "running" | "stopped" | "unresponsive";
+  socketPath: string;
+  pid?: number;
+  version?: string;
+  uptimeSeconds?: number;
+};
 
 export type CorrectionRecord = {
   episodeId: string;
@@ -99,4 +117,5 @@ export interface RuntimeClient {
   explainArtifact(artifactId: string, signal?: AbortSignal): Promise<Result<ArtifactExplanation>>;
   resolveApproval(request: ResolveApprovalRequest, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
   recordCorrection(record: CorrectionRecord, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
+  getDaemonStatus(signal?: AbortSignal): Promise<Result<DaemonStatus>>;
 }

@@ -2,6 +2,9 @@ import type { ClientFailure, EventEnvelope, Result, StreamItem } from "./types.j
 
 const INT_STRING = /^(0|[1-9][0-9]*)$/;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DIGEST_REGEX = /^sha256:[0-9a-f]{64}$/;
+
 const REQUIRED = [
   "schemaVersion",
   "eventId",
@@ -21,6 +24,14 @@ const REQUIRED = [
   "payload",
 ] as const;
 
+export function isUuid(value: unknown): value is string {
+  return typeof value === "string" && UUID_REGEX.test(value);
+}
+
+export function isDigest(value: unknown): value is string {
+  return typeof value === "string" && DIGEST_REGEX.test(value);
+}
+
 export function fail<T = never>(code: ClientFailure["code"], message: string, retryable = false): Result<T> {
   return { ok: false, error: { code, message, retryable } };
 }
@@ -34,6 +45,7 @@ export function parseEventEnvelope(value: unknown): Result<EventEnvelope> {
     if (source[field] === undefined) return fail("invalid_request", `EventEnvelope missing ${field}`);
   }
   if (source.schemaVersion !== "vg.4") return fail("incompatible_version", "schemaVersion must be vg.4");
+  if (!isUuid(source.eventId)) return fail("invalid_request", "EventEnvelope eventId must be a valid UUID");
   const scope = source.scope;
   if (scope !== "episode" && scope !== "governance" && scope !== "evolution" && scope !== "recovery") {
     return fail("invalid_request", "EventEnvelope scope is not recognised");

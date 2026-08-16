@@ -8,6 +8,7 @@ import { explain, streamRun, streamTrace } from "../src/application/commands.js"
 import { ReplayRuntimeClient } from "../src/adapters/replay.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { jsonLine } from "../src/headless/jsonl.js";
+import { parseEventEnvelope } from "../src/contract/parse.js";
 import type { EventEnvelope, StreamItem } from "../src/contract/types.js";
 
 function packageRoot(): string {
@@ -84,3 +85,90 @@ test("jsonLine emits a single parseable object with no escape sequences", () => 
   assert.equal(line.includes("\u001b"), false);
   assert.equal(JSON.parse(line).envelope.payload.kind, "UnknownFutureEvent");
 });
+
+test("LiveRuntimeClient supports startRun and headless prompt stream", async () => {
+  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
+  async function* lines() {
+    for (const e of envelopes) yield JSON.stringify(e);
+  }
+  const client = new LiveRuntimeClient(lines(), { repo: "./test-repo", prompt: "fix bug in main.py" });
+  const started = await client.startRun({
+    repo: "./test-repo",
+    prompt: "fix bug in main.py",
+    runId: "run-live-test",
+  });
+  assert.equal(started.ok, true);
+  if (started.ok) {
+    assert.equal(started.value.runId, "run-live-test");
+  }
+
+  const collected: string[] = [];
+  await streamRun(
+    client,
+    { repo: "./test-repo", prompt: "fix bug in main.py", headless: true, runId: "run-live-test" },
+    (line: string) => collected.push(line)
+  );
+  const items = parseLines(collected);
+  assert.equal(items[0]?.source, "live");
+  assert.equal(items[0]?.envelope.payload.kind, "EpisodeStarted");
+});
+
+test("LiveRuntimeClient supports lifecycle operations without failing not_available", async () => {
+  const client = new LiveRuntimeClient(undefined, { runId: "run-ops-1" });
+  const started = await client.startRun({ repo: ".", runId: "run-ops-1" });
+  assert.equal(started.ok, true);
+
+  const runSnap = await client.getRun("run-ops-1");
+  assert.equal(runSnap.ok, true);
+  if (runSnap.ok) {
+    assert.equal(runSnap.value.runId, "run-ops-1");
+  }
+
+  const artifact = await client.explainArtifact("art-1");
+  assert.equal(artifact.ok, true);
+
+  const approval = await client.resolveApproval({ approvalId: "appr-1", decision: "approve" });
+  assert.equal(approval.ok, true);
+
+  const correction = await client.recordCorrection({
+    episodeId: "ep-1",
+    proposedPatchDigest: "sha256:1111",
+    acceptedPatchDigest: "sha256:2222",
+    reasonCodes: ["functional_defect"],
+    magnitude: "minor",
+    scope: "repo",
+    correctingPrincipalRole: "operator",
+  });
+  assert.equal(correction.ok, true);
+
+  const cancel = await client.requestCancel("run-ops-1");
+  assert.equal(cancel.ok, true);
+});
+
+test("parseEventEnvelope strictly rejects non-UUID, invalid timestamp, and missing fields", () => {
+  const valid = JSON.parse(cassette.trim().split("\n")[0]!) as EventEnvelope;
+  assert.equal(parseEventEnvelope(valid).ok, true);
+
+  // Non-UUID eventId
+  const badUuid = { ...valid, eventId: "not-a-uuid" };
+  const resUuid = parseEventEnvelope(badUuid);
+  assert.equal(resUuid.ok, false);
+  if (!resUuid.ok) assert.equal(resUuid.error.message.includes("UUID"), true);
+
+  // Invalid schema version
+  const badVersion = { ...valid, schemaVersion: "vg.3" };
+  const resVer = parseEventEnvelope(badVersion);
+  assert.equal(resVer.ok, false);
+
+  // Invalid timestamp
+  const badTime = { ...valid, occurredAt: "yesterday" };
+  const resTime = parseEventEnvelope(badTime);
+  assert.equal(resTime.ok, false);
+
+  // Missing seq
+  const missingSeq = { ...valid, seq: undefined };
+  const resSeq = parseEventEnvelope(missingSeq);
+  assert.equal(resSeq.ok, false);
+});
+
+

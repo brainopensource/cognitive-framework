@@ -1,366 +1,202 @@
 # Vanguard General Task Solver (GTS)
 
-> **A verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
+> **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
+
+[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.4.1--beta-blue.svg)](docs/agile/sprint6B/RELEASE_CANDIDATE_RECEIPT.json)
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal_plane_separated-green.svg)](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md)
+[![Verification](https://img.shields.io/badge/Tests-488_passed-success.svg)](tools/run_active_contract_tests.py)
+[![TCB Budget](https://img.shields.io/badge/TCB_LOC-1315%2F1438-brightgreen.svg)](tools/check_tcb_budget.py)
 
 ---
 
-## 1. Architectural Blueprint & Six-Plane Separation
+## 1. Executive Summary & Core Thesis
 
-Vanguard is structured around six distinct planes with strict OS and process-level isolation:
+Vanguard is an agentic coding and general task solver framework built on a fundamental security and architectural thesis (`VG-02`):
 
+> **When an agent solves a task, what solved it — model, scaffold, prompt, tools, context policy, retry — must be separable, and the judge must be unreachable from the judged.**
+
+Vanguard enforces an invariant, deterministic turn lifecycle across all domains:
 ```text
-Interaction  ── CLI · TUI · Inspector · Web Surface
-     │  authenticated requests, event subscriptions
-Cognition    ── Episodes · Operators · Context Compaction
-     │  proposals
-Control      ── Broker · Policy Kernel · Attenuation · Leases
-     │  scoped capability grants
-Workload     ── Sandboxed Environment Adapters (Git, FS, Shell, LSP)
-     │  receipts
-Evidence     ── Exterior Evaluators · Claims · Invalidation Probes
-     │  unreachable verdicts
-Evolution    ── Distillation · Attestation · Promotion Pointers
-     └──────── signed activation pointer ──▶ Cognition
-```
-
-Every capability in the system reduces to one universal invariant protocol:
-```text
-observe → propose → authorise → effect → receipt → evaluate
+observe ──▶ propose ──▶ authorize ──▶ effect ──▶ receipt ──▶ evaluate
 ```
 
 ---
 
-## 2. Physical Repository Tree
+## 2. Orders of Abstraction (Hierarchical Taxonomy)
+
+Vanguard is organized across **Six Orders of Abstraction**, building from immutable mathematical primitives up to multi-agent measurement swarms:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ ORDER 5: ORGANISMS & SWARMS (Measurement Laboratory, Distillation & Multi-Agent)       │
+│ • Paired Laboratory Bench (`lab harness bench`), McNemar A/A Control (`vg-shell-only`) │
+│ • Out-of-Process Signed Evaluator (UID 10002), TableWorld Non-Coding Witness            │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ ORDER 4: CELLS & PACKS (Pure-Data Manifest Configurations)                              │
+│ • Manifest Packs: `vg-code-default`, `vg-code-claude-shaped`, `vg-code-opencode-shaped` │
+│ • Workspace Instruction Discovery: Dynamic `AGENTS.md` / `CLAUDE.md` Injection           │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ ORDER 3: POLYMERS & PROTEINS (Cognitive Engine & Recursion)                             │
+│ • Context Compiler L1–L5 (Byte-Stable System Prompt & Schemas KV-Cache Optimization)    │
+│ • `ProposalTranslator` & `EpisodeEngine` Depth-1 Single-Observation Recursion Loop      │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ ORDER 2: MOLECULES (Control Kernel & Sandbox Effector)                                  │
+│ • Attenuation Kernel (`kernel/dispatch.py`), Descriptor Leasing & USD Micro-Budgeting    │
+│ • Rootless Bubblewrap Worker Containment (`adapters/sandbox/rootless.py`)               │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ ORDER 1: ATOMS (Ports & Capabilities)                                                   │
+│ • Hexagonal Abstract Ports (`ModelPort`, `LedgerPort`, `EvaluatorPort`)                 │
+│ • Single-Verb Capabilities (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`) │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ ORDER 0: SUB-ATOMIC PRIMITIVES (Wire Contracts & Data Values)                           │
+│ • Canonical Value Objects, `EffectIntent`, `Receipt`, `CorrectionRecord`                │
+│ • SHA-256 Descriptors, Ed25519 Asymmetric Signatures, JsonSchema Verification Profiles  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Detailed Layer Breakdown
+
+* **Order 0 — Sub-Atomic Primitives (`domain/wire/contracts.py`):** Pure values, canonical JSON serialization, SHA-256 descriptor digests, and Ed25519 asymmetric signatures. Contains zero IO logic.
+* **Order 1 — Atoms / Ports & Verbs (`ports/`):** Hexagonal interfaces for models, ledgers, evaluators, and sandboxes. Single-action effectors (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`).
+* **Order 2 — Molecules / Kernel & Containment (`kernel/`, `adapters/sandbox/`):** Capability attenuation, USD micro-budget leases, and rootless Linux namespace isolation via Bubblewrap (`bwrap`).
+* **Order 3 — Polymers / Cognitive Engine (`agency/`):** Prefix-stable L1–L5 Context Compiler, manifest-driven `ProposalTranslator`, and the depth-1 `EpisodeEngine` recursion loop.
+* **Order 4 — Cells / Pure-Data Harness Manifests (`agency/manifests/`):** Competitor-shaped harnesses (`vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`) declared **strictly as pure JSON data**, without kernel diffs. Includes workspace instruction discovery (`AGENTS.md`, `CLAUDE.md`).
+* **Order 5 — Organisms & Swarms / Measurement & Evaluators (`lab/`, `adapters/evaluators/`):** Paired measurement laboratory (`lab harness bench`), control arm (`vg-shell-only`), out-of-process signed evaluator daemon (UID `10002`), TableWorld structured-data witness, and offline competence distillation (`O-01`).
+
+---
+
+## 3. Six-Plane Architectural Blueprint
+
+Vanguard isolates responsibilities into six decoupled planes ([`03_vanguard_architecture_planes_and_execution_model_v040.md`](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md)):
+
+```text
+Interaction  ──▶ CLI · TUI · Inspector · Web Surface
+                     │ (authenticated RPC requests)
+Cognition    ──▶ Episodes · Operators · Context Compaction (L1–L5)
+                     │ (proposals)
+Control      ──▶ Broker · Attenuation Kernel · Leases · Ed25519 Approvals
+                     │ (scoped capability grants)
+Workload     ──▶ Sandboxed Environment Adapters (Git, FS, Shell, LSP)
+                     │ (execution receipts)
+Evidence     ──▶ Exterior Evaluators (UID 10002) · Claims · Oracle Probes
+                     │ (unreachable signed verdicts)
+Evolution    ──▶ Distillation · Attestation · Promotion Pointers (O-01)
+```
+
+---
+
+## 4. Repository Structure & Package Lattice
 
 ```text
 Aether-D-System/
-├── .github/
-│   └── workflows/ci.yml             # CI testing, boundary checks & PR requirement gates
-├── cv13/                            # Onboarding packet & verification keys
+├── .github/workflows/ci.yml         # Boundary, TCB, secret scan, & test CI gates
+├── benchmarkings/                   # Empirical benchmark suites & live zero-hint runners
+├── containers/                      # OCI build files & manifest.json digests
+│   ├── worker.Dockerfile            # Bubblewrap worker container (UID 10001)
+│   ├── evaluator.Dockerfile         # Signed evaluator daemon container (UID 10002)
+│   └── manifest.json                # Immutable release build SHA-256 digests
 ├── docs/
-│   ├── development_guides/          # Sprint briefings & leadership guidelines
-│   ├── reviews/                     # Historical design reviews & AI guidelines
-│   ├── agile/                       # Sprint records, Active MVP Contract, archaeology
-│   │   ├── sprint0/
-│   │   │   ├── active-mvp-contract.json
-│   │   │   ├── system-architecture-icd.md
-│   │   │   ├── verification-threat-evaluation-plan.md
-│   │   │   └── schema-archaeology/
-│   │   └── sprint6B/                # Current Beta-closure backlog (RELEASE NO-GO)
-│   └── main_v4/                     # Normative Vanguard v4 specification corpus
-│       ├── 00..12 Normative Specs
-│       └── 13_C_gts_mvp_plan.md
-├── schemas/
-│   └── v4/                          # Canonical JSON Schema reader/writer profiles
-├── test/
-│   └── broken/                      # Defective mock counterparts for must-fail tests
-├── tools/                           # Automated CI linters, boundary, & contract checkers
-└── vanguard/
-    └── packages/                    # Physical package boundaries (enforced by CI)
-        ├── domain/                  # Pure values, wire contracts, and state reducers
-        ├── ports/                   # Abstract interfaces (ModelPort, LedgerPort, etc.)
-        │   └── fakes/               # In-memory deterministic test doubles
-        ├── kernel/                  # Capability attenuation, budget leases, & dispatch
-        ├── agency/                  # Episode recursion, context compiler, & operators
-        ├── runtime/                 # Composition root & daemon lifecycle
-        │   └── governance/          # Durable state machines, approvals, & releases
-        └── adapters/                # Concrete environment implementations (Git, Model, CLI)
+│   ├── main_v4/                     # Normative Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
+│   ├── reviews/todo/                # S7–S10 Master Architectural Roadmap
+│   └── agile/sprint6B/              # Gate R0–R10 release evidence & dogfood log
+├── tools/                           # Boundary check, TCB budget, secret scan, & dogfood tools
+└── vanguard/packages/               # Physical package boundaries (enforced in CI)
+    ├── domain/                      # Pure values, wire contracts, state reducers (Order 0)
+    ├── ports/                       # Abstract interfaces & in-memory fakes (Order 1)
+    ├── kernel/                      # Attenuation kernel, budget leases, dispatch (Order 2)
+    ├── agency/                      # Context compiler, proposal translator, episode engine (Order 3)
+    │   └── manifests/               # Data-only harness configurations (Order 4)
+    ├── runtime/                     # Composition root & daemon lifecycle
+    │   └── governance/              # Ed25519 approval flow & release signoff
+    └── adapters/                    # Concrete adapters (Model, Sandbox, Evaluator) (Order 1/2/5)
 ```
 
----
+### CI Architectural Boundary Lattice
 
-## 3. Package Dependency Lattice & CI Rules
-
-Dependency direction is strictly enforced in CI (`tools/check_boundaries.py`):
+Import direction is strictly unidirectional (`tools/check_boundaries.py`):
 
 $$\text{domain} \longleftarrow \text{ports} \longleftarrow \text{kernel} \longleftarrow \text{agency} \longleftarrow \text{runtime} \longrightarrow \text{adapters}$$
 
-* **`domain`**: Imports nothing. Pure business logic, canonical serialization, and state reducers.
-* **`ports`**: Imports `domain` only. Pure abstract interfaces.
-* **`kernel`**: Imports `domain` and `ports`. Capability verification and budget leases.
-* **`agency`**: Imports `domain`, `ports`, and `kernel`. Cognitive episode coordination.
-* **`adapters`**: Imports `domain` and `ports`. Zero knowledge of kernel or cognition.
-* **`runtime`**: Injects concrete adapters into ports at composition root.
+- **`domain`**: Standard library only. Imports nothing else in the repository.
+- **`ports`**: Imports `domain` only.
+- **`kernel`**: Imports `domain` and `ports`.
+- **`agency`**: Imports `domain`, `ports`, and `kernel`.
+- **`adapters`**: Imports `domain` and `ports`. Zero direct imports of `kernel` or `agency`.
+- **`runtime`**: Composition root injecting concrete adapters into abstract ports.
 
 ---
 
-## 4. MVP Roadmap: Waves to Lightweight Coding Agent
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│ WAVE 1: FOUNDATION & CONTRACTS (Sprint 0 – Sprint 1)                   │
-│ • Sprint 0: Governance, ICD, CI boundaries, schema archaeology         │
-│ • Sprint 1: Wire contracts (T1), provider probe in spike/ (T0a)        │
-├────────────────────────────────────────────────────────────────────────┤
-│ WAVE 2: KERNEL, LEDGER & ENGINE (Sprint 2 – Sprint 5)                  │
-│ • Sprint 2: Disposable E2E slice (T0b), ledger store (T3), kernel (T2) │
-│ • Sprint 3: Dispatch mediation, crash recovery, cassette replay (T3.8) │
-│ • Sprint 4: Episode recursion (T4), process engine, S4 deletion gate   │
-│ • Sprint 5: Exterior evaluator isolation & double probe (T5)           │
-├────────────────────────────────────────────────────────────────────────┤
-│ WAVE 3: TYPED CODING AGENT & BENCHMARKS (Sprint 6 – Sprint 9)          │
-│ • Sprint 6: Git adapter, typed tools (read/search/patch/test), CLI TUI │
-│             👉 DELIVERS: Production-grade lightweight Coding Agent     │
-│ • Sprint 7: Competitor harness manifests (Claude-Code, OpenCode)       │
-│ • Sprint 8: Paired McNemar runner, A/A floor, generality test (T9)     │
-│ • Sprint 9: Final MVP Gate Review & Release                            │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 5. Verification & Quality Gates
-
-Run these commands locally to verify full compliance:
-
-```bash
-# 1. Check architectural boundary imports & cycles
-python3 tools/check_boundaries.py
-
-# 2. Check 12/12 mechanical acceptance rules
-python3 tools/cv_checks.py
-
-# 3. Check Active MVP Contract coverage
-python3 tools/check_active_mvp_contract.py
-
-# 4. Verify that must-fail tests catch broken implementations
-python3 tools/run_broken_tests.py
-```
-
-
-## Openrouter Guidelines
-
-- **OpenRouter**:
-  - `base_url`: `https://openrouter.ai/api/v1`
-  - `api_key_env`: `"OPENROUTER_API_KEY"` on `ModelRoute` (the engine reads the env var)
-  - **Verified Free Models**:
-    1. `openrouter/free`
-    2. `inclusionai/ling-3.0-tiny:free`
-    3. `poolside/laguna-s-2.1:free`
-    4. `cohere/north-mini-code:free`
-    5. `google/gemma-4-26b-a4b-it:free`
-    6. `nvidia/nemotron-3-super-120b-a12b:free`
-    7. `openai/gpt-oss-20b:free`
-  - **Verified Low-Cost Paid Models**:
-    8. `deepseek/deepseek-v4-flash`
-    9. `xiaomi/mimo-v2.5`
-  - **Frontier Cloud Models**: `z-ai/glm-5.2`, `openai/gpt-5.6-luna`, `deepseek/deepseek-v4-pro`, `minimax/minimax-m3`
-- **DeepSeek API**:
-  - `base_url`: `https://api.deepseek.com/v1`
-  - `model`: `deepseek-reasoner` or `deepseek-coder` on `ModelRoute`
-  - `api_key_env`: `"DEEPSEEK_API_KEY"`
-- **OpenAI**:
-  - `base_url`: `https://api.openai.com/v1`
-  - `model`: `gpt-4o` on `ModelRoute`
-  - `api_key_env`: `"OPENAI_API_KEY"`
-
-## Ollama Guidelines
-
-  - **Tier 1 models**:
-    1. `llama3.2:3b`
-    2. `qwen2.5:1.5b`
-  - **Tier 2 models**:
-    3. `qwen3.6:27b`
-    4. `deepseek-r1:14b`
-
-
-# SUGGESTIONS (UNDER BUDGET OF 0.5 US$)
-
-test with these 3 openrouter free models, nvidia/nemotron-3-super-120b-a12b:free, nvidia/nemotron-3.5-lightning:free and cohere/north-
-  mini-code:free to see how they fit in our tiers from 1 to 5.
-
-  then test with these 3 openrouter medium models openai/gpt-5.6-luna, deepseek/deepseek-v4-flash-0731 and xiaomi/mimo-v2.5;
-
-   google/gemini-3.7-flash deepseek/deepseek-v4-pro-0813 z-ai/glm-5.2 and then finally with these 3 top openrouter models
-  
-
-## Milestones — MVP Beta
-
-This section maps what Vanguard v0.4.1 currently provides, what the framework builder can generate, and how
-task complexity maps from Tier 1 (simple fixes) to Tier 5 (frontier autonomous refactoring).
-
----
-
-### 1) What vg-code-default Provides Today
-
-In the `vg-code-default` harness we currently provide:
-
-- **Headless & TUI Coding CLI (`vg`)**: Autonomous or interactive CLI driven by a line-delimited JSON-RPC wire protocol.
-- **Typed sandboxed effect verbs (5)**:
-  - `fs.read` — Scoped file reading inside a Bubblewrap container.
-  - `fs.search` — Pattern matching and regex workspace searching.
-  - `fs.write` — Atomic file writes with path sanitization.
-  - `patch.apply` / `fs.patch` — Descriptor-bound unified-diff application with human signoff.
-  - `proc.exec` — Containerized test execution (`pytest`, `unittest`, `npm test`) in isolated namespaces.
-- **Prefix-stable context memory (L1–L5)**: Byte-stable system prompts and tool schemas (L1–L3) for KV-cache reuse; mid-run observations are admitted only into L5.
-- **Asymmetric human approval (Ed25519)**: Operator signs the exact normalized diff before any state mutation.
-- **Durable ledger recovery & idempotency**: SQLite WAL ledger records every EffectIntent and Receipt; on restart it resumes at the next legal transition without re-querying the model.
-- **Exterior UID 10002 verification**: Results evaluated by an out-of-process test daemon with double probes (immutable oracle, non-polluting workspace).
-
----
-
-### 2) What the Framework Builder Can Create (Harness Manifests)
-
-The Vanguard engine is domain-agnostic (ADR-0060). New harnesses can be declared by adding a manifest directory, for example:
+## 5. Master Roadmap & Sprint Overview
 
 ```text
-my-custom-harness/
-├── manifest.json         # capability declarations, risk levels, budget ceilings, evaluator IDs
-├── system-prompt.txt     # specialized system persona / brief
-├── tool-schemas/         # JSON Schemas for custom tools
-├── budget-policy.json    # USD micros, wall-clock, token, and byte ceilings
-└── context-policy.json   # compaction and layer-retention rules
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 1 & 2: FOUNDATION, KERNEL & BETA RELEASE (Sprint 0 – Sprint 6B) [COMPLETE]      │
+│ • Sprint 0–1: Governance, ICD, CI boundaries, wire contracts (T1)                   │
+│ • Sprint 2–5:  Ledger store, attenuation kernel (T2), Episode recursion (T4), UID 10002 │
+│ • Sprint 6A-B: Rootless Bubblewrap worker, Ed25519 approval, Gate R9 Dogfood 3/3 PASS│
+│                👉 DELIVERS: Vanguard MVP Beta v0.4.1-beta Release Candidate           │
+├──────────────────────────────────────────────────────────────────────────────────────┤
+│ PHASE 3: HARNESS RECONSTRUCTIONS, MEASUREMENT & RELEASE (Sprint 7 – Sprint 10)       │
+│ • Sprint 7: Pure-data manifests (`vg-code-claude-shaped`, `vg-code-opencode-shaped`),  │
+│             aliases.json translation, dynamic `AGENTS.md` context discovery          │
+│ • Sprint 8: Laboratory bench (`lab harness bench`), paired A/A control against       │
+│             `vg-shell-only`, verifier-deployment gap measurement                     │
+│ • Sprint 9: TableWorld non-coding structured-data witness with zero kernel changes   │
+│ • Sprint 10: Non-authoritative memory recall (L5), offline distillation (O-01),     │
+│              and Phase 3 release gate dossier                                        │
+└──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Decoupled extension primitives include:
+---
 
-- **Custom tool schemas & verbs** — Bind domain verbs (e.g. `db.query`, `web.fetch`, `docker.build`, `ast.analyze`, `git.rebase`) to sandboxed adapter factories.
-- **Domain-specific risk & approval policies** — Assign risk levels (low/medium/high/critical) per verb to trigger human approval, external key verification, or auto-grants.
-- **Custom model providers & routing** — Target local models (Ollama), deterministic offline mocks (LAM), or cloud providers (OpenRouter, OpenAI, Anthropic) behind a single `ModelPort`.
-- **Pluggable exterior evaluators** — Swap unit-test evaluators for web regression checkers, AST linters, or formal-verification solvers (UID 10002).
+## 6. Model Escalation & Routing Hierarchy
+
+Vanguard abstracts models behind `ModelPort`. Local GPU models ($0) handle routine syntactic tasks, while cloud models (OpenRouter/OpenAI/Anthropic) handle high-tier refactoring:
+
+| Escalation Tier | Complexity & Scope | Target Models | Platform / Provider | Benchmark Validation |
+|---|---|---|---|---|
+| **Tier 1** | Single-file typos, syntax fixes | `qwen2.5:1.5b` → `llama3.2:3b` | Local Ollama ($0) | Single-file calculator repair (< 1s) |
+| **Tier 2** | Multi-file dependency & import repair | `deepseek-r1:14b` → `qwen3.6:27b` | Local Ollama ($0) | Import-cycle repair, test reaction |
+| **Tier 3** | Subdirectory refactoring & search | `openrouter/free` → `meta-llama/llama-3.3-70b-instruct` | Cloud OpenRouter | Thread-safe Token Bucket Rate Limiter |
+| **Tier 4** | Subsystem state machines & concurrency | `deepseek/deepseek-chat` → `gpt-4o` → `claude-3.5-sonnet` | Cloud OpenRouter / OpenAI | DAG Dependency Resolver with Cycle Detection |
+| **Tier 5** | Frontier autonomous refactoring | `claude-3.5-sonnet` → `deepseek-r1` → `gpt-4.5` | Cloud OpenRouter / Anthropic | Incremental Stratified Datalog Fixed-Point Engine |
 
 ---
 
-### 3) Task Complexity Hierarchy & 5-Tier Model Escalation Ladder
+## 7. Verification & Release Verification Commands
 
-Our architecture enforces a 5-tier model escalation ladder. Tiers 1–2 run exclusively on free local GPU models (Ollama). Tiers 3–5 escalate to cloud models (OpenRouter) as task complexity increases:
+Verify repository integrity, boundaries, TCB budget, and test suite locally:
 
-| Tier | Complexity & Scope | Assigned Models (In Escalation Order) | Platform | Example Tasks |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tier 1** | Single-file syntactic & typo fixes | `qwen2.5:1.5b` → `llama3.2:3b` | **Local Ollama** ($0) | Fix syntax errors, update static text, single-function deduplication (< 5s) |
-| **Tier 2** | Multi-file dependency repair | `deepseek-r1:14b` → `qwen3.6:27b` | **Local Ollama** ($0) | Fix off-by-one bugs, resolve circular imports, run unit tests and diffs |
-| **Tier 3** | Subdirectory refactor & search | `openrouter/free` → `poolside/laguna-s-2.1:free` → `nvidia/nemotron-3.5-lightning:free` → `cohere/north-mini-code:free` → `qwen/qwen3.7-flash` | **Cloud OpenRouter** (Light) | Multi-file features, sha256 digests across packages using `list_dir` and `grep_file` |
-| **Tier 4** | Subsystem refactoring & workflows | `google/gemma-4-26b-a4b-it` → `qwen/qwen3.6-35b-a3b` → `deepseek/deepseek-v4-flash-0731` | **Cloud OpenRouter** (Mid) | Resolve state machine transitions, multi-step approval workflows, async race conditions |
-| **Tier 5** | Autonomous SOTA refactoring | `openai/gpt-5.6-luna` → `z-ai/glm-5.2` → `deepseek/deepseek-v4-pro-0813` → `google/gemini-3.7-flash` | **Cloud OpenRouter** (Frontier SOTA) | Complex compiler module extraction, Persistent Immutable AVL Trees, full repo rebalancing |
+```bash
+# 1. Verify Backend Artifacts & OCI Image Manifests (--release)
+python3 tools/check_backend_artifacts.py --release
 
-> **Offline Mock Acceleration:** Once a successful trace is recorded for any tier, the **LAM Engine** (`tools/002_LLM_API_MOCK`) replays the exact multi-turn cascade offline in **< 20 ms for $0**.
+# 2. Check Package Import Boundaries (115 source files)
+python3 tools/check_boundaries.py
 
----
+# 3. Check Kernel Trusted Computing Base (TCB) LOC Budget (Limit <= 1438 LOC)
+python3 tools/check_tcb_budget.py
 
-### 4) Path to a "Claude Code" / "OpenCode" Competitor
+# 4. Check Secret Patterns Across Repository
+python3 tools/scan_secrets.py
 
-To evolve `vg-code-default` into a frontier-grade harness (`vg-code-frontier`), add the following primitives:
+# 5. Run Sprint 6B Gate R9 Production Dogfood (3/3 PASS)
+python3 tools/run_dogfood_r9.py
 
-1. **Interactive workspace map** (`repo.tree` / `ast.search`) — high-level semantic context indexing.
-2. **Terminal shell co-pilot** (`proc.interactive`) — safe shell execution inside Bubblewrap with real-time stream parsing.
-3. **Multi-file diff staging** (`patch.bundle`) — atomic multi-file transaction patches.
-4. **Correction memory & self-improvement** — persist human corrections (RecordCorrection) into competence artifacts so the agent learns and avoids repeating the same mistakes.
-
----
-
-### Original (preserved raw content)
-
-The following is the original Milestones block preserved verbatim to ensure no content was removed during formatting.
-
-```markdown
-# MILESTONES MVP BETA
-
-Here is the exact mapping of what our v0.4.1 codebase currently has, what the framework builder engine can
-  create in a decoupled way, and how general + coding tasks map from Tier 1 (Simple Fixes) to Tier 5 (Frontier
-  Autonomous Refactoring like Claude Code / OpenCode).
-  ──────
-  ## 1. What Features Our v0.4.1 Harness (vg-code-default) Has Today
-
-  In our codebase (vg-code-default), the vg-code-default harness provides:
-
-  1. Headless & TUI Coding CLI (vg): Autonomous or interactive CLI execution driven by line-delimited JSON-RPC
-  wire protocol.
-  2. 5 Typed Sandboxed Effect Verbs:
-      • fs.read — Scoped file reading inside Bubblewrap container.
-      • fs.search — Pattern matching & regex workspace searching.
-      • fs.write — Atomic file write with path sanitization.
-      • patch.apply / fs.patch — Descriptor-bound unified diff application with human signoff.
-      • proc.exec — Containerized test execution (pytest, unittest, npm test) inside isolated namespaces.
-  3. Prefix-Stable Context Memory (L1–L5): Maintains byte-stable system prompts & tool schemas (L1–L3) for zero-
-  cost KV-cache reuse, admitting mid-run tool observations only into L5.
-  4. Asymmetric Human Approval (Ed25519): Interactive signoff where the operator holds the private key and signs
-  the exact normalized diff before any state-mutating patch application.
-  5. Durable Ledger Recovery & Idempotency: SQLite WAL transaction log that records every EffectIntent and
-  Receipt. On crash/restart, it resumes at the exact next legal transition without calling the LLM again.
-  6. Exterior UID 10002 Verification: Evaluates results using an out-of-process test daemon with double probes
-  (immutability of test oracle and non-pollution of workspace).
-  ──────
-  ## 2. What Features the Framework Builder Can Create for New Harnesses (Decoupled Decoupled Plugins)
-
-  The Vanguard framework is 100% domain-agnostic (ADR-0060). The engine (kernel/ and agency/episode/) has zero
-  hardcoded coding logic. You can build entirely new agentic harnesses simply by declaring a new manifest
-  directory without touching core runtime code:
-
-    my-custom-harness/
-      ├── manifest.json         # Capability declarations, risk levels, budget ceilings, evaluator IDs
-      ├── system-prompt.txt     # Specialized system persona / Brief
-      ├── tool-schemas/         # JSON Schemas for custom tools
-      ├── budget-policy.json    # USD micros, wall-clock, token, and byte ceilings
-      └── context-policy.json   # Compaction and layer retention rules
-
-  ### Decoupled Extension Primitives:
-
-  • Custom Tool Schema & Verbs: Bind any domain verb (db.query, web.fetch, docker.build, ast.analyze, git.
-  rebase) to a corresponding sandboxed adapter factory.
-  • Domain-Specific Risk & Approval Policies: Assign risk levels (low, medium, high, critical) per verb to
-  automatically trigger human approval, external key verification, or auto-grant.
-  • Custom Model Providers & Routing: Target local models (Ollama), deterministic offline mocks (LAM), or cloud
-  providers (OpenRouter, OpenAI, Anthropic) behind one invariant ModelPort.
-  • Pluggable Exterior Evaluators: Swap out Python unit test evaluators for Web regression checkers, AST linter
-  validators, or formal verification solvers under UID 10002.
-  ──────
-  ## 3. Task Complexity Hierarchy: Tier 1 to Tier 5 (Claude Code / OpenCode Competence)
-
-   Task Tier │ Task Complexity Level          │ Features Utilized in Vanguard  │ Concrete Task Examples
-  ───────────┼────────────────────────────────┼────────────────────────────────┼────────────────────────────────
-    Tier 1   │ Single-File Syntactic & Typos  │ fs.read, fs.write,             │ • Fix syntax errors & broken
-             │ (Simple)                       │ ContextCompiler L1–L5.         │ imports.• Update static text
-             │                                │                                │ strings or docstrings.•
-             │                                │                                │ Correct minor variable typos
-             │                                │                                │ in a single function.
-    Tier 2   │ Single-Unit Bug Fix & Test     │ fs.read, fs.search, proc.exec, │ • Off-by-one error repair in
-             │ Repair (Intermediate)          │ patch.apply, Ed25519 approval. │ an algorithm.• Run unit test,
-             │                                │                                │ observe failure output, apply
-             │                                │                                │ diff, verify green test.• Fix
-             │                                │                                │ failing API response parsing.
-    Tier 3   │ Multi-File Feature             │ Unified Sandbox Worker         │ • Implement a new REST
-             │ Implementation (Advanced)      │ (bwrap), Context L5 dialogue   │ endpoint across router,
-             │                                │ memory, Multi-turn             │ controller, service, and DB
-             │                                │ LAM/OpenRouter loop, Exterior  │ layers.• Add a new command to
-             │                                │ Evaluator UID 10002.           │ the CLI client.• Refactor a
-             │                                │                                │ module into sub-packages while
-             │                                │                                │ keeping tests green.
-    Tier 4   │ Subsystem Refactoring &        │ Durable SQLite Recovery,       │ • Resolve complex async race
-             │ Diagnostic Repair (Frontier -  │ Ed25519 Descriptor Signing,    │ conditions across multiple
-             │ Opus Class)                    │ Competence Prior Recording,    │ services.• Upgrade major
-             │                                │ Multi-turn tool feedback       │ framework dependency (e.g.,
-             │                                │ loops.                         │ Python 3.10 → 3.12 or React 17
-             │                                │                                │ → 18).• Fix multi-file state
-             │                                │                                │ leakage or memory leak
-             │                                │                                │ reported by benchmarks.
-    Tier 5   │ Autonomous Agentic Coding CLI  │ Full Vanguard Stack + vg-code- │ • Full Repository Exploration
-             │ (Claude Code / OpenCode Goal)  │ default harness pack + Shell   │ & Blueprinting: Auto-discover
-             │                                │ Execution Worker + Self-       │ workspace topology, run tests,
-             │                                │ Correction & Distillation.     │ synthesize fix plan.•
-             │                                │                                │ Autonomous Multi-Hypothesis
-             │                                │                                │ Debugging: Branch workspace,
-             │                                │                                │ execute experiments, pick
-             │                                │                                │ optimal patch.• Interactive
-             │                                │                                │ Human Co-Pilot: Present diffs,
-             │                                │                                │ accept live corrections,
-             │                                │                                │ update competence memory.
-  ──────
-  ## 4. Path to Building Our Own "Claude Code CLI / OpenCode"
-
-  With Vanguard v0.4.1, we have built the secure, durable, sandboxed kernel and protocol foundation.
-
-  To turn Vanguard into a full Claude Code / OpenCode CLI competitor, we simply add a higher-tier harness pack
-  (vg-code-frontier) containing:
-
-  1. Interactive Workspace Map Tool (repo.tree / ast.search): High-level semantic context indexing.
-  2. Terminal Shell Co-Pilot Tool (proc.interactive): Safe shell execution inside Bubblewrap with real-time
-  stream parsing.
-  3. Multi-File Diff Staging (patch.bundle): Multi-file atomic transaction patches.
-  4. Correction Memory & Self-Improvement: Persisting human feedback (RecordCorrection) into
-
-    G
-     C
-
-  competence artifacts so the agent avoids repeating past user corrections.
+# 6. Execute Complete Unit Test Suite (488/488 Tests Green)
+python3 -m unittest discover -s test -t .
 ```
 
+---
+
+## 8. Alignment Matrix with `docs/main_v4`
+
+| Specification File | Purpose in Vanguard | Alignment Status |
+|---|---|---|
+| [`00_vanguard_registry_v040.md`](docs/main_v4/00_vanguard_registry_v040.md) | Document index, precedence rules (`PR-3`), & terminology | **Fully Aligned** |
+| [`01_vanguard_engineering_handbook_v040.md`](docs/main_v4/01_vanguard_engineering_handbook_v040.md) | Engineering guidelines & architecture standards | **Fully Aligned** |
+| [`02_vanguard_charter_claims_and_non_claims_v040.md`](docs/main_v4/02_vanguard_charter_claims_and_non_claims_v040.md) | Non-claims, separability thesis, & negative result validity | **Fully Aligned** |
+| [`03_vanguard_architecture_planes_and_execution_model_v040.md`](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md) | Six-plane separation & universal turn lifecycle | **Fully Aligned** |
+| [`05_vanguard_kernel_capabilities_and_security_v040.md`](docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) | Capability attenuation, budget leases, & kernel security | **Fully Aligned** |
+| [`09_vanguard_decision_register_v040.md`](docs/main_v4/09_vanguard_decision_register_v040.md) | Architectural Decision Records (ADRs) | **Fully Aligned** |
+| [`13_C_gts_mvp_program_and_engineering_plan.md`](docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md) | GTS MVP program plan, sprint definitions, & Ch.10 gate questions | **Fully Aligned** |

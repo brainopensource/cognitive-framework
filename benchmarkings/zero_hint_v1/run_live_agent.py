@@ -122,6 +122,49 @@ class SkipEvaluator:
         )
 
 
+def _first_tool_call_only(raw: bytes) -> bytes:
+    """Lab depth-1 filter: keep the first provider tool call. Kernel still rejects >1."""
+    try:
+        body = json.loads(raw.decode("utf-8"))
+        choices = body.get("choices")
+        if not isinstance(choices, list) or not choices:
+            return raw
+        message = (choices[0] or {}).get("message") or {}
+        calls = message.get("tool_calls")
+        if isinstance(calls, list) and len(calls) > 1:
+            message["tool_calls"] = calls[:1]
+            choices[0]["message"] = message
+            return json.dumps(body, ensure_ascii=False).encode("utf-8")
+    except (UnicodeError, json.JSONDecodeError, TypeError, AttributeError):
+        return raw
+    return raw
+
+
+def _http_post(
+    url: str, headers: dict[str, str], body: bytes, timeout: float = 180.0
+) -> tuple[int, dict[str, str], bytes]:
+    try:
+        payload = json.loads(body.decode("utf-8"))
+        if isinstance(payload, dict) and payload.get("tools"):
+            payload["parallel_tool_calls"] = False
+        body = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    except (UnicodeError, json.JSONDecodeError, TypeError):
+        pass
+    request = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            resp_headers = {k.lower(): v for k, v in response.headers.items()}
+            raw = response.read()
+            return int(response.status), resp_headers, _first_tool_call_only(raw)
+    except urllib.error.HTTPError as exc:
+        resp_headers = (
+            {k.lower(): v for k, v in exc.headers.items()}
+            if hasattr(exc, "headers") and exc.headers is not None
+            else {}
+        )
+        return int(exc.code), resp_headers, exc.read() or b""
+
+
 class LiveModel:
     """Inject sampling and OpenAI tool parameters; do not change the kernel."""
 
@@ -312,6 +355,7 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
         stream=False,
         max_retries=2,
         jitter=False,
+        transport=_http_post,
     )
     model = CountingModel(LiveModel(inner, max_tokens=2048))
 
@@ -399,6 +443,8 @@ def run_task(task: TaskSpec, *, model_cfg: Mapping[str, str], max_turns: int) ->
             "oracle_after_episode_not_isolated_evaluator",
             "provider_tool_json_schema_injected",
             "maxTokens_2048",
+            "first_tool_call_only_wire_filter",
+            "http_timeout_180s",
         ],
         "model": {
             **dict(model_cfg),

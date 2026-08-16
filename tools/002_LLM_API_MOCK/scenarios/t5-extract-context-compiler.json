@@ -1,0 +1,55 @@
+{
+  "id": "t5-extract-context-compiler",
+  "tier": 5,
+  "title": "Extract modular compiler context builder",
+  "workspace": {
+    "compiler.py": "def compile_source(src: str) -> dict:\n    # Unextracted context helper\n    ctx = {'raw': src, 'tokens': len(src.split())}\n    return {'status': 'ok', 'context': ctx}\n",
+    "test_compiler.py": "from compiler import compile_source\n\ndef test_compile_source():\n    res = compile_source('hello world')\n    assert res['status'] == 'ok'\n    assert res['context']['tokens'] == 2\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"compiler.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"compiler.py\", \"target\": \"def compile_source(src: str) -> dict:\", \"replacement\": \"def build_context(src: str) -> dict:\\n    return {'raw': src, 'tokens': len(src.split())}\\n\\ndef compile_source(src: str) -> dict:\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

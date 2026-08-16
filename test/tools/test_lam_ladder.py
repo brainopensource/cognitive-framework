@@ -28,7 +28,7 @@ class TestLamLadder(unittest.TestCase):
         def fake_complete(model: str, messages: list[dict], tools: list[dict] | None = None) -> dict:
             return {
                 "id": "chatcmpl-fake",
-                "choices": [{"message": {"role": "assistant", "content": "done"}}],
+                "choices": [{"message": {"role": "assistant", "content": "All tests passed successfully!"}}],
                 "usage": {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
             }
 

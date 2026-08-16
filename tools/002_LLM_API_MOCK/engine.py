@@ -42,7 +42,7 @@ class LamEngine:
             raw = json.loads(path.read_text(encoding="utf-8"))
             turns = tuple(
                 Turn(
-                    tool_messages=int(turn["tool_messages"]),
+                    tool_messages=int(turn.get("tool_messages", turn.get("tool_messages_seen", 0))),
                     finish_reason=str(turn["finish_reason"]),
                     content=str(turn.get("content") or ""),
                     tool_calls=tuple(turn.get("tool_calls") or ()),

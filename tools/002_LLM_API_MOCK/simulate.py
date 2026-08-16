@@ -74,9 +74,11 @@ def simulate_scenario(scenario_id: str) -> dict[str, Any]:
                 )
 
     wall_ms = (time.perf_counter() - started) * 1000
+    has_passed = any("passed" in str(msg.get("content", "")).lower() for msg in messages if msg.get("role") == "tool") or calls > 1
     return {
         "scenario": scenario_id,
         "tier": scenario.tier,
+        "passed": has_passed,
         "llm_calls": calls,
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,

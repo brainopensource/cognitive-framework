@@ -116,3 +116,47 @@ class TestModelInvocation(unittest.TestCase):
             {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "../x"}}]},
             tool_schemas=({"name": "read", "verb": "fs.read"},),
         ).ok)
+
+    def test_aliases_mapping_resolves_and_normalizes_arguments(self):
+        aliases = {
+            "to_canonical": {
+                "Read": "fs.read",
+                "Edit": "patch.apply",
+                "Bash": "proc.exec",
+                "Glob": "fs.search",
+            }
+        }
+        # Read with file_path argument alias
+        res = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "Read", "arguments": {"file_path": "foo.py"}}]},
+            aliases=aliases,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(res.value["action"], "fs.read")
+        self.assertEqual(res.value["args"]["path"], "foo.py")
+
+        # Bash with command string argument
+        res = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "Bash", "arguments": {"command": "pytest -v"}}]},
+            aliases=aliases,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(res.value["action"], "proc.exec")
+        self.assertEqual(res.value["args"]["argv"], ["pytest", "-v"])
+
+        # Undeclared tool with aliases present fails
+        res = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "NonExistent", "arguments": {}}]},
+            aliases=aliases,
+        )
+        self.assertFalse(res.ok)
+        self.assertEqual(res.error.kind, "instrument_error")
+
+    def test_undeclared_competitor_name_fails_without_schema_or_aliases(self):
+        # Without schemas/aliases, hardcoded competitor name fails because KNOWN_TOOLS shrunk
+        res = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "x.py"}}]},
+        )
+        self.assertFalse(res.ok)
+        self.assertEqual(res.error.kind, "instrument_error")
+

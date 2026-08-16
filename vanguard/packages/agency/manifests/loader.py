@@ -129,7 +129,12 @@ class ManifestLoader:
         """Load a manifest pack by name (relative to base_dir) or explicit Path."""
         pack_path = Path(pack_name_or_path)
         if not pack_path.is_absolute():
-            pack_path = self.base_dir / pack_path
+            if pack_path.resolve().is_dir() and (pack_path.resolve() / "manifest.json").exists():
+                pack_path = pack_path.resolve()
+            elif (self.base_dir / pack_path).exists():
+                pack_path = (self.base_dir / pack_path).resolve()
+            else:
+                pack_path = (self.base_dir / pack_path).resolve()
 
         if not pack_path.exists() or not pack_path.is_dir():
             raise ManifestLoadError(f"Manifest pack directory does not exist: {pack_path}")

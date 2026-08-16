@@ -89,6 +89,10 @@ class ProposalTranslator:
 
         if declared:
             action = declared.get(name)
+            if action is None and name in set(declared.values()):
+                action = name
+            if action is None and name in cls.KNOWN_TOOLS:
+                action = cls.KNOWN_TOOLS[name]
             if action is None:
                 return Result.fail("instrument_error", f"tool is not declared by manifest: {name}")
             if action not in set(cls.KNOWN_TOOLS.values()):

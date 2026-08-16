@@ -66,6 +66,9 @@ from ..agency.context import (
     ContextCompiler,
     Fragment,
 )
+from ..agency.manifests.discovery import WorkspaceDiscovery
+from ..agency.manifests.loader import ManifestLoader, ManifestLoadError
+from .coordination import EpisodeCoordinator
 from ..domain.artifacts.graph import ArtifactFile, LogicalEdit, Workspace
 from ..domain.artifacts.manifest import (
     FrozenHarness,
@@ -138,6 +141,7 @@ ROLE_KIND: Mapping[str, str] = {
 #: than defaulting to generous (`F-12`).
 BUDGET_DIMENSION: Mapping[str, str] = {
     "usdMicros": "usd_micros",
+    "costMicros": "usd_micros",
     "wallClockMillis": "millis",
     "tokens": "tokens",
     "bytes": "bytes",
@@ -245,6 +249,7 @@ class Harness:
     budget: Mapping[str, int]
     evaluators: tuple[str, ...]
     bindings: Mapping[str, EffectBinding]
+    translator: Any = None
 
     @property
     def composition_digest(self) -> str:
@@ -543,18 +548,25 @@ class Runtime:
     ) -> Harness:
         """Freeze one harness. Every failure here is a failure *before* a run."""
         table = DEFAULT_BINDINGS if bindings is None else bindings
+        loader = ManifestLoader()
         path = Path(manifest_path)
-        directory = path.parent
+        if not path.is_absolute() and not path.exists():
+            candidate = loader.base_dir / path
+            if candidate.exists():
+                path = candidate
+        if path.is_dir():
+            path = path / "manifest.json"
+
         try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
+            pack = loader.load_pack(path.parent if path.name == "manifest.json" else path)
+            manifest = pack.manifest
+            translator = pack.translator
+        except ManifestLoadError as exc:
+            raise CompositionError(str(exc)) from exc
         except (OSError, json.JSONDecodeError) as exc:
             raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
 
-        try:
-            manifest = parse_manifest(raw)
-        except ManifestError as exc:
-            raise CompositionError(str(exc)) from exc
-
+        directory = path.parent
         artifacts, contents = cls._artifacts(manifest, directory)
         workspace = Workspace.empty().apply(
             LogicalEdit(f"compose {manifest.harness}", artifacts))
@@ -599,6 +611,7 @@ class Runtime:
             budget=cls._budget(contents[manifest.budget_policy], manifest.budget_policy),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},
+            translator=translator,
         )
 
     # -- the entrypoint --------------------------------------------------
@@ -667,15 +680,33 @@ class Runtime:
             risk_of=harness.risk_of,
         )
 
+        discovery = WorkspaceDiscovery(repo)
+        discovered_env = discovery.render_environment_text()
+        base_env = _environment_map(environment, harness)
+        env_text = f"{base_env}\n\n{discovered_env}" if discovered_env else base_env
+
         compiler = ContextCompiler(
             system_core=harness.system_core,
             tool_schemas=harness.tool_schemas,
-            environment=_environment_map(environment, harness),
+            environment=env_text,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
         operator = _LayeredOperator(
             model, compiler, task=task_context,
             recorder=CompetencePriorRecorder(clock=clock, events=ledger))
+
+        lam_db = os.environ.get("VANGUARD_LAM_DB", "tools/002_LLM_API_MOCK/lam.sqlite")
+        coordinator = None
+        budget_tokens = int(harness.budget.get("tokens", 64_000) or 64_000)
+        try:
+            coordinator = EpisodeCoordinator(lam_db)
+            coordinator.open_episode(
+                task_id=task_context.brief,
+                budget_tokens=budget_tokens,
+                episode_id=task_context.episode_id,
+            )
+        except Exception:
+            coordinator = None
 
         receipts: list[Receipt] = []
         authorization = None
@@ -741,6 +772,16 @@ class Runtime:
                                    else "unnamed"))
             verdict = evaluation.value if evaluation.ok else None
 
+        if coordinator is not None:
+            try:
+                tokens_used = sum(
+                    int(ctx.get("total_tokens", 0)) if isinstance(ctx, dict) else 0
+                    for ctx in operator.contexts
+                ) or 100
+                coordinator.consume(task_context.episode_id, min(tokens_used, budget_tokens))
+            except Exception:
+                pass
+
         environment.dispose()
         return RunResult(
             harness=harness.harness,
@@ -767,6 +808,8 @@ class Runtime:
         for role, relative in wanted:
             kind = ROLE_KIND.get(role, role)
             source = root / relative
+            if not source.exists():
+                source = directory / Path(relative).name
             try:
                 text = source.read_text(encoding="utf-8")
             except OSError as exc:

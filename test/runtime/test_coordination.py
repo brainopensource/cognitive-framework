@@ -96,6 +96,60 @@ class DepthAndBudget(unittest.TestCase):
         self.assertEqual(row["depth_label"], "Atom")
         self.assertEqual(row["tokens_used"], 12)
 
+    def test_execute_harness_writes_episode_depth_row(self) -> None:
+        import os
+        import subprocess
+        from vanguard.packages.runtime.root import Runtime, TaskContext
+        from test.integration.test_reconstruction_packs import (
+            build_repo,
+            unified_diff,
+            SuiteVerifier,
+            PackScriptedOperator,
+            sign_challenge,
+            OPERATOR_KEY,
+        )
+
+        repo = build_repo()
+        self.addCleanup(lambda: subprocess.run(["rm", "-rf", str(repo)], check=False))
+        diff = unified_diff(repo)
+        verifier = SuiteVerifier(repo)
+        resource = {"kind": "fs", "root": str(repo), "paths": [str(repo)]}
+        script = [
+            {"kind": "effect", "action": "fs.read", "resource": resource, "args": {"path": "calc.py"}},
+            {"kind": "effect", "action": "patch.apply", "resource": resource, "args": {"diff": diff}},
+            {"kind": "finish", "note": "done"},
+        ]
+        operator = PackScriptedOperator(script)
+        task = TaskContext(
+            brief="Fix bug",
+            repo_path=repo,
+            run_id="run-coord-1",
+            episode_id="ep-coord-1",
+            principal="agent-1",
+            competence_prior=0.5,
+        )
+
+        old_db = os.environ.get("VANGUARD_LAM_DB")
+        try:
+            os.environ["VANGUARD_LAM_DB"] = str(self.db)
+            res = Runtime.execute_harness(
+                manifest_path="vg-code-default",
+                task_context=task,
+                model=operator,
+                approver=sign_challenge,
+                approval_key=OPERATOR_KEY,
+                verifier=verifier,
+            )
+            ep = self.coord.get_episode("ep-coord-1")
+            self.assertEqual(ep["depth"], 0)
+            self.assertEqual(ep["depth_label"], "Atom")
+            self.assertGreater(ep["tokens_used"], 0)
+        finally:
+            if old_db is not None:
+                os.environ["VANGUARD_LAM_DB"] = old_db
+            else:
+                os.environ.pop("VANGUARD_LAM_DB", None)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,8 @@
 {
-  "depth": "1",
+  "tokens": "64000",
+  "wallClockMillis": "1800000",
+  "usdMicros": "1000000",
   "effects": "16",
-  "maxTurns": 16,
-  "costMicros": "1000000"
+  "depth": "1",
+  "maxTurns": 16
 }

@@ -201,3 +201,22 @@ python3 tools/check_baseline_manifest.py
   - Registered all manifest packs in `vanguard/packages/agency/manifests/registry.json`.
   - Zero microkernel mutations in `vanguard/packages/kernel/` verified via `tools/check_boundaries.py`.
 
+### Lane B (Dev B) — Measurement Laboratory & Control Bench
+
+- [x] **Task B.1 (Sprint 7): Unified EpisodeCoordinator & lam.sqlite Depth Logger**
+  - Implemented `vanguard/packages/runtime/coordination.py` with recursive sub-episode budget attenuation and depth tracking.
+  - Emergent depth labels (Atom, Molecule, Polymer, Cell, Body) recorded in `lam.sqlite` without OOP class bloat.
+  - Wired into `Runtime.execute_harness` to record real episode execution depth.
+  - Unit tests: `test/runtime/test_coordination.py` passed.
+
+- [x] **Task B.2 (Sprint 8): Undeletable Control Baseline Pack (vg-shell-only)**
+  - Created minimalist negative control arm under `vanguard/packages/agency/manifests/vg-shell-only/`.
+  - Bound to single `proc.exec` capability with raw shell command passthrough.
+  - Unit tests: `test/lab/test_bench.py` and `test/integration/test_reconstruction_packs.py` passed.
+
+- [x] **Task B.3 (Sprint 8): Measurement Laboratory CLI (lab/bench.py, lab/diff.py, lab/build.py)**
+  - Implemented `lab/bench.py` for paired McNemar statistical significance testing across harness packs.
+  - Implemented `lab/diff.py` for side-by-side terminal cascade diffs and token comparisons.
+  - Implemented `lab/build.py` for manifest pack verification and composition digest calculation.
+  - Unit tests: `test/lab/test_bench.py`, `test/lab/test_diff.py`, `test/lab/test_build.py` passed.
+

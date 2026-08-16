@@ -196,3 +196,27 @@ python3 -m unittest discover -s test -t .
 | [`05_vanguard_kernel_capabilities_and_security_v040.md`](docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) | Capability attenuation, budget leases, & kernel security | **Fully Aligned** |
 | [`09_vanguard_decision_register_v040.md`](docs/main_v4/09_vanguard_decision_register_v040.md) | Architectural Decision Records (ADRs) | **Fully Aligned** |
 | [`13_C_gts_mvp_program_and_engineering_plan.md`](docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md) | GTS MVP program plan, sprint definitions, & Ch.10 gate questions | **Fully Aligned** |
+
+
+
+
+
+Subatômico (Prótons, Nêutrons e Elétrons): Os tijolos de energia e carga elétrica pura. Sozinhos, não têm química.
+
+Átomos (Carbono, Hidrogênio, Oxigênio...): Quando os prótons e elétrons se juntam, emergem os elementos da tabela periódica. Eles ganham propriedades como "afinidade" ou "repulsão" por outros átomos.
+
+Moléculas (Aminoácidos, Água, Glicose): Átomos se ligam. Um átomo de carbono sozinho não faz nada, mas quando se junta com hidrogênio, nitrogênio e oxigênio na ordem certa, emerge um aminoácido (a célula da sua linha de montagem).
+
+Polímeros - Linear: As moléculas pequenas (monômeros) se ligam em uma fita única e contínua. Aqui emerge a propriedade do dobramento e da forma tridimensional.
+
+Polimero - Proteinas e Enzimas: O polímero se dobra e ganha uma função mecânica ou química. Agora ele é uma ferramenta ativa (a tesoura, o motor, a chave).
+
+Polimero - Genes (DNA / RNA): São polímeros de outro tipo (ácidos nucleicos) que guardam a informação e a ordem exata para a fábrica de proteínas funcionar. O DNA é o "manual de instruções" da fábrica.
+
+Organelas (Mitocôndrias, Ribossomos): São formadas quando membranas de gordura (lipídios) encapsulam grupos de proteínas funcionais para trabalharem juntas. A mitocôndria vira a usina de energia; o ribossomo vira a linha de montagem.
+
+Células: A primeira unidade que consideramos "viva". É o fechamento da fábrica. Uma célula é uma cidade fechada onde bilhões de proteínas (polímeros dobrados) trabalham sem parar, seguindo as ordens do DNA, para manter a estrutura funcionando e se duplicando.
+
+Órgãos (Músculo, Coração): Bilhões de células trabalhando juntas de forma coordenada.
+
+Entity: Um sistema consciente feito de trilhões de nanomáquinas que sequer sabem que você existe, mas que trabalham em perfeita harmonia.

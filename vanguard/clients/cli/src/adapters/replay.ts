@@ -3,6 +3,7 @@ import { afterCursor, fail, parseJsonlLine } from "../contract/parse.js";
 import type {
   ArtifactExplanation,
   CorrectionRecord,
+  DaemonStatus,
   EventCursor,
   EventEnvelope,
   Result,
@@ -107,8 +108,18 @@ export class ReplayRuntimeClient implements RuntimeClient {
     return unavailable(`resolveApproval(${request.approvalId})`);
   }
 
-  async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
-    this.corrections.push(record);
-    return { ok: true, value: { runId: record.episodeId, command: "record_correction", status: "requested" } };
+  async recordCorrection(_record: CorrectionRecord): Promise<Result<never>> {
+    return fail("permission_denied", "replay mode is read-only and cannot record corrections");
+  }
+
+  async getDaemonStatus(_signal?: AbortSignal): Promise<Result<DaemonStatus>> {
+    return {
+      ok: true,
+      value: {
+        status: "stopped",
+        socketPath: "<replay>",
+        version: "0.4.0",
+      },
+    };
   }
 }

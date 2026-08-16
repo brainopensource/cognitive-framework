@@ -171,4 +171,41 @@ test("parseEventEnvelope strictly rejects non-UUID, invalid timestamp, and missi
   assert.equal(resSeq.ok, false);
 });
 
+test("LiveRuntimeClient drops duplicate frames and respects afterSeq cursor", async () => {
+  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
+  // Feed frames with duplicates: seq 1, 2, 2, 3, 4
+  const framesWithDuplicates = [
+    envelopes[0]!,
+    envelopes[1]!,
+    envelopes[1]!, // duplicate
+    envelopes[2]!,
+    envelopes[3]!,
+  ];
+
+  async function* lines() {
+    for (const f of framesWithDuplicates) yield JSON.stringify(f);
+  }
+
+  const client = new LiveRuntimeClient(lines());
+  const received: EventEnvelope[] = [];
+  for await (const item of client.streamEvents({ runId: "run-1", afterSeq: "1" })) {
+    if (item.ok) received.push(item.value.envelope);
+  }
+
+  // afterSeq: "1" should skip seq 1, and duplicate seq 2 should be dropped
+  assert.equal(received.length, 3);
+  assert.deepEqual(received.map((e) => e.seq), ["2", "3", "4"]);
+});
+
+test("LiveRuntimeClient reports daemon status cleanly", async () => {
+  const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/mock-runtime.sock" });
+  const status = await client.getDaemonStatus();
+  assert.equal(status.ok, true);
+  if (status.ok) {
+    assert.equal(status.value.socketPath, "/tmp/mock-runtime.sock");
+    assert.equal(status.value.version, "0.4.0");
+  }
+});
+
+
 

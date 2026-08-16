@@ -2,6 +2,7 @@ import { fail } from "../contract/parse.js";
 import type {
   ArtifactExplanation,
   CorrectionRecord,
+  DaemonStatus,
   EventCursor,
   EventEnvelope,
   Result,
@@ -112,5 +113,16 @@ export class ScenarioRuntimeClient implements RuntimeClient {
   async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
     this.corrections.push(record);
     return { ok: true, value: { runId: record.episodeId, command: "record_correction", status: "requested" } };
+  }
+
+  async getDaemonStatus(_signal?: AbortSignal): Promise<Result<DaemonStatus>> {
+    return {
+      ok: true,
+      value: {
+        status: "running",
+        socketPath: "<scenario>",
+        version: "0.4.0",
+      },
+    };
   }
 }

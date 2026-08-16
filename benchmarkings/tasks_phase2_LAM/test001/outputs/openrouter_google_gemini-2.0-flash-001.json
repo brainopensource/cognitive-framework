@@ -1,0 +1,25 @@
+{
+  "label": "Tier 4 (Gemini 2.0 Flash)",
+  "provider": "openrouter",
+  "model": "google/gemini-2.0-flash-001",
+  "easy": {
+    "ok": false,
+    "latency_ms": 52,
+    "ttft_ms": 0,
+    "tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_usd_micros": 0,
+    "content": ""
+  },
+  "hard": {
+    "ok": false,
+    "latency_ms": 216,
+    "ttft_ms": 0,
+    "tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "cost_usd_micros": 0,
+    "content": ""
+  }
+}

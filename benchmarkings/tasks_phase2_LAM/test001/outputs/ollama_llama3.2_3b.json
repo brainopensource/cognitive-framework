@@ -1,0 +1,23 @@
+{
+  "label": "Tier 1: Llama 3.2 3B (Small)",
+  "tier": 1,
+  "model": "llama3.2:3b",
+  "easy": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 4763,
+    "tokens": 188,
+    "prompt_tokens": 96,
+    "completion_tokens": 92,
+    "content": "```python\ndef remove_duplicates(items: list) -> list:\n    \"\"\"\n    Removes duplicates from a list while preserving the original order of first occurrence.\n\n    Args:\n        items (list): The input list to remove duplicates from.\n\n    Returns:\n        list: A new list with duplicates removed, maintaining the original order.\n    \"\"\"\n    seen = set()\n    return [item for item in items if not (item in seen or seen.add(item))]\n```"
+  },
+  "hard": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 4062,
+    "tokens": 465,
+    "prompt_tokens": 134,
+    "completion_tokens": 331,
+    "content": "```python\nfrom collections import defaultdict, deque\n\ndef topological_sort(graph: dict[str, list[str]]) -> tuple[list[str], list[str] | None]:\n    \"\"\"\n    Performs a topological sort on the given graph.\n\n    Args:\n        graph (dict[str, list[str]]): The input graph represented as an adjacency list.\n\n    Returns:\n        tuple[list[str], list[str] | None]: A tuple containing the sorted nodes and either None or a cycle path.\n    \"\"\"\n\n    # Initialize in-degree dictionary\n    in_degree = defaultdict(int)\n    \n    # Populate in-degree dictionary\n    for node, neighbors in graph.items():\n        for neighbor in neighbors:\n            in_degree[neighbor] += 1\n    \n    # Initialize queue with nodes having an in-degree of 0\n    queue = deque([node for node, degree in in_degree.items() if degree == 0])\n    \n    # Initialize lists to store sorted nodes and cycle path\n    sorted_nodes = []\n    cycle_path = None\n    \n    # Perform topological sort\n    while queue:\n        node = queue.popleft()\n        sorted_nodes.append(node)\n        \n        # Decrease in-degree of neighboring nodes\n        for neighbor in graph[node]:\n            in_degree[neighbor] -= 1\n            \n            # Add to queue if in-degree becomes 0\n            if in_degree[neighbor] == 0:\n                queue.append(neighbor)\n    \n    # Check for cycles\n    if len(sorted_nodes) != len(graph):\n        cycle_path = [node for node in graph if node not in sorted_nodes]\n    \n    return (sorted_nodes, cycle_path)\n```"
+  }
+}

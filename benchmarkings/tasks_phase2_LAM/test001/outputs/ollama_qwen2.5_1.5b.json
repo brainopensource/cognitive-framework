@@ -1,0 +1,23 @@
+{
+  "label": "Tier 1: Qwen 2.5 1.5B (Minimal)",
+  "tier": 1,
+  "model": "qwen2.5:1.5b",
+  "easy": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 4169,
+    "tokens": 212,
+    "prompt_tokens": 101,
+    "completion_tokens": 111,
+    "content": "```python\ndef remove_duplicates(items: list) -> list:\n    \"\"\"\n    Removes duplicate items from a list while preserving the original order of first occurrence.\n\n    Args:\n    - items (list): A list containing elements that may have duplicates.\n\n    Returns:\n    - list: A new list with duplicates removed, maintaining the original order of first appearance.\n    \"\"\"\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```"
+  },
+  "hard": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 3543,
+    "tokens": 517,
+    "prompt_tokens": 139,
+    "completion_tokens": 378,
+    "content": "```python\nfrom collections import defaultdict\n\ndef topological_sort(graph: dict[str, list[str]]) -> tuple[list[str], list[str] | None]:\n    \"\"\"\n    Returns a topological order of dependency keys from the given graph.\n\n    Parameters:\n    graph (dict): A dictionary representing an undirected graph where each key is a node and its value is a list of nodes it depends on.\n\n    Returns:\n    tuple: A sorted list of nodes in topological order, or None if there's a cycle.\n    \"\"\"\n    def dfs(node):\n        if node in visited:\n            return\n        if node in cycle_nodes:\n            raise ValueError(\"Cycle detected\")\n        for neighbor in graph[node]:\n            dfs(neighbor)\n        stack.append(node)\n\n    # Initialize variables\n    sorted_nodes = []\n    cycle_nodes = None\n\n    for node in graph.keys():\n        if node not in visited:\n            try:\n                dfs(node)\n            except ValueError as e:\n                cycle_nodes = list(reversed(stack))\n                return (sorted_nodes, cycle_nodes)\n\n    while stack:\n        node = stack.pop()\n        sorted_nodes.append(node)\n\n    # Check for disconnected subgraphs\n    for node in graph.keys():\n        if node not in visited and node not in topological_order:\n            raise ValueError(\"Disconnected subgraph detected\")\n\n    return tuple(sorted_nodes), cycle_nodes\n\n# Example usage\nif __name__ == \"__main__\":\n    graph = {\n        'A': ['B', 'C'],\n        'B': ['D'],\n        'C': ['E'],\n        'D': [],\n        'E': []\n    }\n\n    try:\n        sorted_order, cycle = topological_sort(graph)\n        print(\"Topological order:\", sorted_order)\n        if cycle is not None:\n            print(\"Cycle detected:\", cycle)\n    except ValueError as e:\n        print(e)\n```"
+  }
+}

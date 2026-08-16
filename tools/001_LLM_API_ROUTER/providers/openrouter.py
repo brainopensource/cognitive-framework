@@ -80,7 +80,7 @@ class OpenRouterProvider(BaseLLMProvider):
 
         try:
             req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers)
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=25) as resp:
                 if stream:
                     chunks = []
                     for line in resp:

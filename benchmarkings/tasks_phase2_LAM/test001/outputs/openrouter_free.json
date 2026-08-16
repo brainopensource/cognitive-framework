@@ -1,0 +1,19 @@
+{
+  "model": "openrouter/free",
+  "easy": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 18896,
+    "ttft_ms": 18896,
+    "tokens": 875,
+    "content": "\n\n```python\ndef remove_duplicates(items: list) -> list:\n    \"\"\"Remove duplicates from a list while preserving the order of first occurrence.\"\"\"\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n```\n"
+  },
+  "hard": {
+    "ok": true,
+    "error": null,
+    "latency_ms": 50823,
+    "ttft_ms": 50823,
+    "tokens": 2461,
+    "content": "```python\ndef topological_sort(graph: dict[str, list[str]]) -> tuple[list[str], list[str] | None]:\n    \"\"\"Return topological order or cycle nodes.\"\"\"\n    visited, on_stack, stack, order = set(), set(), [], []\n    cycle = []  # will hold list of nodes forming a cycle\n\n    def dfs(u):\n        nonlocal cycle\n        visited.add(u)\n        on_stack.add(u)\n        stack.append(u)\n        for v in graph.get(u, []):\n            if v not in visited:\n                if dfs(v):\n                    return True\n            elif v in on_stack:\n                idx = stack.index(v)\n                cycle = stack[idx:]  # nodes from v to u forming the cycle\n                return True\n        on_stack.remove(u)\n        stack.pop()\n        order.append(u)\n        return False\n\n    # include nodes that appear only as dependencies\n    all_nodes = set(graph) | {n for lst in graph.values() for n in lst}\n    for n in all_nodes:\n        if n not in visited:\n            if dfs(n):\n                break\n\n    if cycle:\n        return ([], cycle)\n    return (order[::-1], None)\n```"
+  }
+}

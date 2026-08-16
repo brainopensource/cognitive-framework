@@ -1,0 +1,23 @@
+{
+  "label": "Tier 2: Qwen 3.6 27B (Large Mid)",
+  "tier": 2,
+  "model": "qwen3.6:27b",
+  "easy": {
+    "ok": false,
+    "error": "Ollama connection to http://127.0.0.1:11434 failed: timed out",
+    "latency_ms": 120042,
+    "tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "content": ""
+  },
+  "hard": {
+    "ok": false,
+    "error": "Ollama connection to http://127.0.0.1:11434 failed: timed out",
+    "latency_ms": 120112,
+    "tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "content": ""
+  }
+}

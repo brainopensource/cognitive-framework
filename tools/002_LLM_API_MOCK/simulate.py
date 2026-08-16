@@ -133,6 +133,27 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
         if completed.returncode == 0:
             return out or "passed"
         return f"exit {completed.returncode}\n{out}"
+    if name == "list_dir":
+        rel = args.get("path", ".")
+        target_dir = workspace / rel
+        if not target_dir.is_dir():
+            return f"error: not a directory: {rel}"
+        items = sorted(str(p.relative_to(target_dir)) for p in target_dir.rglob("*"))
+        return json.dumps({"status": "success", "files": items})
+    if name == "grep_file":
+        query = args.get("query", "")
+        hits = []
+        for file_path in sorted(workspace.rglob("*")):
+            if file_path.is_file():
+                try:
+                    for line_no, line in enumerate(file_path.read_text(encoding="utf-8").splitlines(), 1):
+                        if query in line:
+                            hits.append(f"{file_path.relative_to(workspace)}:{line_no}:{line}")
+                            if len(hits) >= 64:
+                                break
+                except Exception:
+                    continue
+        return "\n".join(hits) if hits else "no matches found"
     return f"error: unknown tool {name}"
 
 

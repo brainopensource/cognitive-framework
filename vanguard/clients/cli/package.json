@@ -1,10 +1,20 @@
 {
   "name": "@vanguard/cli",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.4.0-beta",
+  "description": "Vanguard CLI client and minimal TUI for the vg-code-default harness",
+  "license": "Apache-2.0",
   "type": "module",
   "bin": {
-    "vg": "dist/main.js"
+    "vg": "dist/src/main.js"
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "fixtures/**/*.jsonl",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

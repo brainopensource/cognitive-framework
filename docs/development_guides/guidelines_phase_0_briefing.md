@@ -1,0 +1,105 @@
+# Phase 0 & Baseline Engineering Briefing
+## Task Complexity, Review Governance & Sprint Execution Guide
+
+**Audience:** Project Manager (PM), Scrum Master, Tech Lead, and Lead Developers  
+**Reference Documents:** `docs/v4/13_C_gts_mvp_program_and_engineering_plan.md`, `docs/development/guidelines_phase_0.md`  
+**Purpose:** Provide an operational dashboard mapping task complexity (Levels 0–5), pacing guidelines (when to speed up vs. when to pause for review/gates), and ownership to ensure an uncompromised engineering baseline before and during development.
+
+---
+
+## 1. Pacing & Governance Framework
+
+To balance velocity with safety, all tasks are classified into two execution tracks:
+
+* 🟢 **FAST TRACK (Levels 0–2):** Autonomous, high-speed execution by Developers and Scrum. No architecture approval needed before PR creation; standard automated CI checks and code review apply.
+* 🔴 **GATE & REVIEW TRACK (Levels 3–5):** High design risk, invariant contracts, security perimeters, or merge-gating rules. **Requires explicit Tech Lead / Project Lead sign-off before merging.**
+
+### Complexity Scale (0 to 5)
+
+| Level | Profile | Scope & Typical Activities | Governance / Pacing |
+| :---: | :--- | :--- | :--- |
+| **0** | **Junior Dev / PM Assistant** | Mechanical documentation, moving superseded files, checklist maintenance. | 🟢 Fast Track (Async review) |
+| **1** | **Developer** | Basic CLI scripts, JSON/YAML schemas, boilerplate adapters, standard unit tests. | 🟢 Fast Track (Peer review) |
+| **2** | **Mid Developer** | CI automation scripts, schema parsers, event serializers, standard port adapters. | 🟢 Fast Track (CI automated gate) |
+| **3** | **Senior Developer** | Must-fail test suites, fault-injection runners, OS containment specs, event reducers. | 🔴 Gate Track (Sr Dev + TL sign-off) |
+| **4** | **Lead Architect / Sr Dev** | Package isolation rules, Port interface definitions, sink classification, attenuation algebra. | 🔴 Gate Track (Tech Lead approval) |
+| **5** | **Tech Lead / Principal** | Authoritative Decision Record, mathematical boundary laws, Active MVP Contract gating. | 🔴 Gate Track (Joint TL + PL sign-off) |
+
+---
+
+## 2. Phase 0 Baseline Preparation Matrix (Before S1 Merge)
+
+These tasks establish the source of truth, merge gates, and developer packet.
+
+| Status | Task ID | Task Description | Output / Artifact | Complexity (0–5) | Track | Primary Owner | Review / Sign-off Gate |
+| :---: | :--- | :--- | :--- | :---: | :---: | :--- | :--- |
+| **DONE** | **B-01** | **Register GTS-13C & Archive Superseded** | GTS-13C is the active plan (ADR-0046) | **0** | 🟢 FAST | PM / Scrum | 13/13B remain lead-only |
+| **DONE** | **B-02** | **Create Decision Record** | ADR-0045..0053 plus approval events and reversal conditions | **5** | 🔴 GATE | Tech Lead + Project Lead | Joint approval recorded |
+| **DONE** | **B-03** | **System Architecture & ICD** | Package isolation, sink classification and port signatures | **4** | 🔴 GATE | Tech Lead + Sr Dev | Approved |
+| **DONE** | **B-04** | **Active MVP Contract Matrix** | 22 assigned rows; Gate A/B scripts | **5** | 🔴 GATE | Tech Lead + Req Owners | 100% assignment; 100% merged scope |
+| **DONE** | **B-05** | **Verification, Threat & Eval Plan** | Threat model, must-fail catalogue and evaluation protocol | **3** | 🔴 GATE | Sr Dev | Approved for S0 scope |
+| **TODO** | **B-06** | **Automate CI & Traceability Gates** | Boundaries and PR-body `req_id` enforcement done; remaining margin reporting open | **2** | 🟢 FAST | Sr Dev + Dev | Complete margin reporting |
+| **TODO** | **B-07** | **Convert GTS-13C into Backlog** | Markdown backlog exists; issue-tracker import remains | **1** | 🟢 FAST | PM + Scrum | Create real tracker tickets |
+| **DONE** | **B-08** | **Assemble Clean Developer Packet** | Sprint 1–4 packets plus `docs/sprint3-4/lane-*.md` | **0** | 🟢 FAST | PM | S3–S4 lanes ready |
+| **TODO** | **B-09** | **Hosted branch protection** | Tag `v0.0.0-sprint0` is **DONE**; `main` protection unverified | **5** | 🔴 GATE | Project Lead + Tech Lead | Enable GitHub protection |
+
+---
+
+## 3. Sprint 0 through Sprint 2 Task Breakdown & Complexity
+
+### Sprint 0 · Infrastructure, Baseline & Schema Archaeology (Weeks 1–2)
+
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **TODO** | **T0.1–T0.4** | Independent blind reconstruction completed and added GAP-010..014; remediation/re-signoff remains | **3** | 🔴 GATE | Tech Lead + Sr Dev | Residual; does not re-open T2/T3 |
+| **TODO** | **T0.5–T0.6** | Non-coding trace exists; prospective human timing remains | **2** | 🟢 FAST | Dev + PM | Residual |
+| **DONE** | **T10.1–T10.3** | Package scaffold, forbidden imports and eight broken counterparts | **2** | 🟢 FAST | Sr Dev + Dev | CI passes |
+| **TODO** | **T10.4–T10.9** | Rule map exists; margin alarms and remaining continuous controls remain | **2** | 🟢 FAST | Dev | Continuous through S8 |
+
+### Sprint 1 · Contracts, Wire Schema & Disposable API Spike (Weeks 3–4)
+
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **DONE** | **T0a.1–T0a.3** | Disposable Provider API Spike in `spike/` | **1** | 🟢 FAST | Dev 3 | Merged; delete S4 |
+| **DONE** | **T1.1–T1.3** | Canonicalisation, primitives and selector algebra | **4** | 🔴 GATE | Dev 1 | Covered DRAFT |
+| **DONE** | **T1.4–T1.6** | EffectDescriptor, CapabilityGrant and Receipt | **4** | 🔴 GATE | Dev 2 | Covered DRAFT |
+| **DONE** | **T1.7–T1.11** | Envelope, Artifact, Claim, Correction and Recording | **3** | 🔴 GATE | Dev 2 | Covered DRAFT |
+| **DONE** | **T6.4** | CLI/TUI foundation — `vg run`, `vg trace`, `vg why` | **2** | 🟢 FAST | Dev 4 | `REQ-CLI-001` covered (mock) |
+
+### Sprint 2 · Real-Provider Disposable Slice, Kernel & Ledger (Weeks 5–6)
+
+| Status | Task ID | Task Summary | Complexity (0–5) | Track | Owner | When to Review / Action |
+| :---: | :--- | :--- | :---: | :---: | :--- | :--- |
+| **DONE** | **T0b.1–T0b.3** | Disposable E2E Slice (deterministic) | **2** | 🟢 FAST | Sr Dev + Dev | Live credential residual `REQ-SLICE-001` |
+| **DONE** | **T2.1–T2.10** | Kernel capabilities through dispatch | **4** | 🔴 GATE | Sr Dev + Tech Lead | `REQ-KRN-001..003` |
+| **DONE** | **T3.1–T3.8** | Event store, reducer, recovery, cassettes | **3** | 🔴 GATE | Dev + Sr Dev | `REQ-LEDGER-001..002` |
+| **DONE** | **T1.12–T1.15** | Process contracts, reader profiles, dual-language | **2** | 🟢 FAST | Dev + Sr Dev | `REQ-CONF-001` |
+| **DONE** | **T7.1–T7.4** | Artifact graph + `vg-shell-only` | **2** | 🟢 FAST | Tech Lead | `REQ-GRAPH-001`, `REQ-BASELINE-001` |
+
+---
+
+## 4. Key Architectural Alignment Reminders for PM & Scrum
+
+1. **Meta-Harness Equivalence**:
+   - The Meta-Harness 5-tuple $\mathcal{M}$ is our `HarnessManifest`.
+   - Level 4 "Cells" are **Episodes** (coordinating open-ended reasoning).
+   - Level 1–2 Tools are **Effects / Adapters** behind ports, not Episodes.
+   - Competitor reconstructions (Claude-Code-shaped, OpenCode-shaped) are **falsification tests for `C-01`**. If a reconstruction forces an engine change, that is an invaluable finding, not a bug.
+2. **Two-Clock Split**:
+   - **Fast Clock (Enforcement / Permanent):** Capability checks, sandbox isolation, event recording. Never expires.
+   - **Slow Clock (Compensation / Temporary):** Scaffolding compensating for model flaws (prompts, retrieval hacks). Must declare `compensatesFor` and carries expiration triggers.
+3. **Disposable Code Rule (`spike/` & `slice/`)**:
+   - Built to learn in S1/S2; **must be deleted outright at S4 exit review**. CI prevents production imports.
+4. **Active MVP Contract Gates**:
+   - **Gate A (Sprint 0 Baseline):** 100% of rows have `req_id`, component, owner, `test_id`, and evidence defined (`status: open` is allowed).
+   - **Gate B (Ongoing PRs):** 100% of merged-scope components must be `covered` or `justified`. Zero unmapped code merges.
+
+---
+
+## 5. Immediate Next Steps for Leadership
+
+1. **Residual — Tech Lead:** GAP-010..014 self-contained evidence bundle (schema LOCKED blocker).
+2. **Residual — live T0b:** supply disposable OpenRouter-compatible key; then close `REQ-SLICE-001`.
+3. **Residual — Project Lead:** enable GitHub branch protection on `main`.
+4. **S3 — developers:** execute `docs/sprint3/` packets; do not start S4 implementation until S3-INT is green.
+5. **DONE — S0–S2 engineering:** kernel, ledger, T1 DRAFT, T7 baseline, mock CLI, deterministic slice.

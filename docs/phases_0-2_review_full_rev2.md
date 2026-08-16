@@ -7,6 +7,36 @@
 
 > **Release decision: NO-GO.** Phase 2 contains useful and testable components, but the repository does not yet implement the promised Beta MVP as one trustworthy product. The current branch must not be merged or released under a “Phase 2 complete” claim until the mandatory closure gates in §14 pass on a clean, secret-free checkout.
 
+> **ACT NOW, BEFORE READING FURTHER.** A live provider credential is committed **at HEAD** and **present on `origin`** (§2.3). Revoke it before any other action, including reading the rest of this document. Every subsequent finding is survivable; this one is actively costing money or trust while unaddressed.
+
+## 0. How to read this document
+
+### 0.1 Severity legend
+
+| Level | Meaning | Consequence |
+|---|---|---|
+| **Critical** | Active harm, or a claim the system cannot support | Blocks all release work until closed |
+| **High** | Beta claim is false without it | Blocks the Beta gate (§14) |
+| **Medium** | Correctness or maintainability risk that compounds | Must have an owner and a dated plan; may ship with a recorded exception |
+| **Low** | Hygiene | Backlog |
+
+### 0.2 The distinction this document depends on
+
+Every finding is tagged **Beta-blocking** or **GA-blocking**. `ADR-0057` scopes Beta to `GTS-13C` Chapter 10 **Q1 (is the boundary real?)** and **Q2 (is it useful?)**, and explicitly defers **Q3 (measurability)** and **Q4 (generality)** to S7–S9. A remediation program that treats every finding as Beta-blocking is not more rigorous — it is unschedulable, and a team facing an unschedulable program cherry-picks. §7.1 draws that fence explicitly. Rev 1 of this audit did not, which is its most consequential omission.
+
+### 0.3 Change log against revision 1
+
+| # | Change | Reason |
+|---|---|---|
+| 1 | SEC-01 escalated: the credential is at HEAD and on `origin`, not merely in history | Blast radius was understated; remediation now requires history rewrite plus force-push coordination |
+| 2 | Added §4.1 — the contract checker structurally cannot fail on the open rows | “Keep rows open” was a promise with no enforcement behind it |
+| 3 | Added §7.1 — Beta/GA scope fence, resolving the conflict with `ADR-0057` | Rev 1 demanded Q3 work (telemetry rigour, A/A) at the Beta gate, contradicting an accepted ADR |
+| 4 | Corrected §13 `REQ-SLICE-001` definition of done | Rev 1 required executing an artifact that `ADR-0047` deleted at S4; the row was conflated with `S5-DC-002` |
+| 5 | Added §9.1 — every new gate requires a registered broken counterpart | The repository already enforces `M6` via `test/broken/`; the matrix did not invoke it |
+| 6 | Added revocation/kill-switch and secret-in-context rows to §9 | Threat-model items 3 and 1 had no corresponding control |
+| 7 | Added §12.1 — RACI, effort bands, and the first five commands | A senior developer could not start from rev 1 on Monday morning |
+| 8 | Added §14.0 gate applicability and §16 document control | Gates had no owner, no evidence location, and no sign-off record |
+
 ---
 
 ## 1. Executive conclusion
@@ -91,20 +121,43 @@ M  vanguard/packages/runtime/governance/__init__.py
 
 Passing dirty-tree tests are therefore not releasable evidence.
 
-### 2.3 Secret incident
+### 2.3 Secret incident — SEC-01
 
-A plaintext OpenRouter credential is tracked in `.env` from commit `cddaaa3`. The credential value is deliberately omitted here.
+A plaintext OpenRouter credential is committed in `.env`. The credential value is deliberately omitted from this document.
 
-Required incident response:
+**Verified blast radius** (established by inspection, not assumption):
 
-1. Revoke the credential at the provider before any other release work.
-2. Determine exposure scope: local clones, remotes, CI logs, artifacts, backups, forks, and caches.
-3. Rotate dependent credentials and review provider usage logs.
-4. Purge the secret from all reachable Git history, coordinate clone re-synchronization, and invalidate cached artifacts.
-5. Add `.env` patterns, a committed `.env.example`, pre-commit detection, and blocking CI secret scanning.
-6. Record the incident and remediation without recording the secret itself.
+| Question | Finding | Consequence |
+|---|---|---|
+| Which commit introduced it? | `cddaaa3` | Single introduction point |
+| Is it still tracked at HEAD? | **Yes** | Not a historical artifact — it is in the working product |
+| Is it on a remote? | **Yes**, `origin/sprint5-6/integration` | Left the machine; must be treated as compromised |
+| Is `main` affected? | **No** — `main` is clean | Rewrite is confined to one unmerged branch |
+| How many commits touch `.env`? | One | Rewrite is mechanically simple |
+| Was `.gitignore` updated? | Yes, in the uncommitted worktree | **Insufficient and dangerous** — it hides the file from `git status` while leaving it tracked |
 
-Deleting only the current file or adding it to `.gitignore` is insufficient after a secret has been committed.
+The last row deserves emphasis: adding `.env` to `.gitignore` while the file remains tracked makes the problem *less* visible without making it smaller. Whoever staged that change likely believed the issue was closed.
+
+The one piece of good news is that `main` is clean and `cddaaa3` exists on exactly one unmerged branch. That converts an unbounded history rewrite into a bounded one, and it is the reason this is recoverable within a day rather than a week.
+
+**Required incident response, in order:**
+
+1. **Revoke at the provider now.** Not rotate — revoke. Assume use by an unknown party from the moment of push. Anyone who ran the suite may also hold it in shell history, CI logs, or a terminal scrollback.
+2. Review provider usage and billing logs for the exposure window (`cddaaa3` onward) and record what you find, including "no anomalous use" if that is the finding.
+3. Purge from history on the single affected branch and force-push:
+   ```bash
+   git rm --cached .env && printf '.env\n' >> .gitignore
+   git filter-repo --path .env --invert-paths     # or git-filter-branch/BFG
+   git push --force-with-lease origin sprint5-6/integration
+   ```
+4. Notify every clone holder; a stale clone re-pushes the secret. Confirm each has re-synchronised before the branch is considered clean.
+5. Commit `.env.example` with the key *name* and no value, so the next developer has a correct path.
+6. Add blocking secret scanning to CI **and** a pre-commit hook. A scanner that only runs in CI catches the secret after it has already left the machine.
+7. Record the incident and its remediation in `docs/security/` — without recording the secret.
+
+Deleting only the current file, or adding it to `.gitignore`, is insufficient after a secret has been pushed.
+
+**Standing rule going forward:** no credential is ever read from a file in the repository tree. The adapter resolves a *reference* from the process environment at the last responsible moment (§6.1).
 
 ---
 
@@ -168,6 +221,28 @@ One precision correction: `LedgerBridge` event IDs are UUIDv7-*shaped* and pass 
 | `REQ-BENCH-001` | Sprint 6 telemetry program | Referenced by packet and commit but absent from registry | Governance defect; define before implementation acceptance |
 
 `S5-INT-001` has no credible integration evidence. Commit ownership is contaminated: commit `f1008d8`, labeled S6 DC telemetry, includes evaluator implementation/tests, context tests, Sprint 6 documentation, and unrelated `runtime_jit.py` changes.
+
+### 4.1 Enforcement gap — the contract gate cannot currently fail
+
+`tools/check_active_mvp_contract.py` forces a row to `covered` or `justified` **only when its `component` appears in `merged_components`**:
+
+```python
+if row.get("component") in merged:
+    merged_rows += 1
+    if status in {"covered", "justified"}: merged_complete += 1
+    else: errors.append(f"{label}: merged component requirement remains open")
+```
+
+None of the six open components — `agency/context`, `adapters/evaluators`, `runtime/governance-approval`, `client/cli-tui`, `runtime/composition`, `slice/e2e` — is in that list. The checker therefore prints `CONTRACT PASS` today and would keep printing it if the rows stayed open until the heat death of the universe.
+
+This matters more than it first appears. This audit's central instruction is *"keep the affected rows open"* (§15). That instruction is currently enforced by nothing but goodwill, and the previous review's proposal to *"mark rows covered as a final task"* would have passed CI unchallenged. **Both the discipline and its violation are invisible to the gate.**
+
+**Required, and cheap — do it in Workstream A:** add the five Wave 2 components to `merged_components`, then run the checker and *observe it fail with five errors*. If it passes, the amendment did not take effect. A gate whose failure mode has never been observed is not a gate (`M6`); this is the repository's own doctrine applied to its own governance tooling.
+
+Two further registry defects:
+
+- `TEST-SLICE-001` is registered as `npm --workspace @vanguard/disposable-slice test`. That workspace was deleted at S4. The command cannot run, so the row can never move on evidence — a gate that cannot fail *or* pass.
+- `TEST-APP-001` and `TEST-DOG-001` both resolve to `python3 -m unittest discover -s test/runtime`. Two contract rows gated by one command means neither is independently falsifiable; a regression in approvals and a regression in composition are indistinguishable to the registry.
 
 ---
 
@@ -399,6 +474,44 @@ Define `REQ-BENCH-001` before accepting telemetry against it. Support A/A calibr
 
 No component should possess enough authority to propose, approve, execute, and verify the same effect.
 
+### 7.1 Beta scope fence — what this program will and will not deliver
+
+The architecture above is the **destination**. Beta is a waypoint on the way to it, and conflating the two is how a remediation program becomes unschedulable.
+
+`ADR-0057` scopes Beta to Chapter 10 **Q1 + Q2** and explicitly places TableWorld and A/A measurement outside it. Sections 6.10, 8-F and 14-R8 of this audit demand telemetry rigour, A/A calibration and paired trials — that is **Q3**, deferred by an accepted ADR to S7–S9. Left unreconciled, an engineer reading this document is instructed to satisfy a gate that governance has already deferred.
+
+**Ruling (Tech Lead + Project Lead, requires your countersignature):** `ADR-0057` stands. Q3 and Q4 remain out of Beta. The measurement findings in §6.10 are real defects and stay in this report, but they are **GA-blocking**, not Beta-blocking, with one exception carved out below.
+
+| # | Finding | Beta | GA | Rationale for the split |
+|---|---|:---:|:---:|---|
+| SEC-01 | Committed credential | ● | ● | Active harm. Blocks everything. |
+| REL-01 | HEAD not reproducible | ● | ● | Nothing below can be evidenced without it. |
+| §4.1 | Contract gate cannot fail | ● | ● | Without it every other closure is unenforced. |
+| GOV-01 | Runtime holds the approval signer | ● | ● | Q1 *is* "is the boundary real?". A runtime that mints its own approvals has no boundary. |
+| EVAL-01 | Evaluator exteriority nominal | ● | ● | Same: `M5` is the load-bearing claim of the whole thesis. |
+| SBOX-01 | Effects bypass the sandbox | ● | ● | Q1. Also the only control standing between the tool and the operator's laptop. |
+| ARCH-01 | Two unconnected runtimes | ● | ● | Q2 asks "would you reach for it?" — unanswerable without one product path. |
+| CLI-01 | Live transport absent | ● | ● | Same as ARCH-01; they are one deliverable. |
+| REC-01 | Resumption not ledger-only | ● | ● | An approval that a crash can duplicate is not an approval. |
+| CTX-01 | Compiled context not authoritative | ● | ● | A model that cannot see its own tool output cannot fix a second bug. Q2. |
+| TEL-01 | Synthetic values indistinguishable from measured | ◐ | ● | **Carve-out:** the *labelling* half is Beta-blocking — a synthetic number that can be mistaken for a measurement is a false claim, and false claims are what this audit exists to prevent. The *rigour* half (A/A floors, paired trials, confidence intervals) is Q3 and waits. |
+| EVT-01 | Event identity / bridge fragmentation | ◐ | ● | Real UUIDv7 and one bridge are Beta (cheap, and duplicate IDs corrupt the evidence bundle). Cross-language conformance generation is GA. |
+| ARCH-02 | Hardcoded bindings, duplicated governance | ○ | ● | Q4 (generality) is explicitly deferred. Record the debt; do not refactor during a closure wave (`M9`). |
+| §11.5 | SBOM, signed artifacts, pinned images | ○ | ● | No external consumers exist yet. Real, not now. |
+
+● Blocking ◐ Partially blocking (see rationale) ○ Deferred with recorded debt
+
+**Explicitly out of scope for Beta**, to be written into the plan so that nobody quietly adds them back:
+
+- microVM or gVisor isolation (bubblewrap/rootless OCI is the Beta baseline);
+- generated cross-language wire contracts (golden round-trip conformance tests suffice);
+- key rotation infrastructure and revocation lists (one operator key, manual revocation, documented);
+- SBOM, provenance attestation, signed release artifacts;
+- A/A floors, paired trials, preregistered statistical protocols;
+- non-coding environments and the generality falsifier.
+
+**Why draw the fence here.** Every item on the blocking side is one where *shipping without it would require stating something untrue* — that effects are isolated, that a human authorised the patch, that evidence is exterior, that the tool works end to end. Every item on the deferred side is one where the honest statement is simply "not yet", which a Beta is entitled to say. That is the test applied to each row, and it is the test to apply to anything anyone proposes adding later.
+
 ---
 
 ## 8. Corrective implementation program
@@ -522,6 +635,27 @@ Include commit IDs, manifests, image digests, provider/model version, ledger exp
 | CLI | Invalid envelope field/type/scope | Rejected before domain construction |
 | Telemetry | Model failure or evaluator inconclusive | Counted explicitly, never success latency only |
 | Telemetry | Synthetic timing enters live report | Schema/policy rejection |
+| Revocation | Capability revoked mid-run; runtime attempts a further effect | Denied, `CapabilityRevoked` recorded, run terminates (`VG-03 §3`) |
+| Revocation | Kill switch during a suspended approval | No effect executes on resume; state is reconstructable |
+| Secrets | Credential reachable from a compiled context, ledger payload, or event envelope | Test fails; `REQ-TRUST-001` forbids secrets in events |
+| Secrets | Credential present in a cassette, error message, or telemetry record | Redaction test fails; release blocked |
+| Context | Compiled context bypassed by any production model call | Composition-boundary test fails |
+| Governance | Contract row set to `covered` without a sealed gate receipt | `check_active_mvp_contract.py` rejects (Gate R10) |
+
+### 9.1 Every new gate needs a registered broken counterpart
+
+The repository already enforces `M6` mechanically: `test/broken/` holds deliberately defective implementations and `tools/run_broken_tests.py` asserts each one is observed *failing*. Twenty-two counterparts exist today.
+
+**This matrix is not satisfied by a passing test.** Each row above must ship with an entry in `test/broken/manifest.json` whose defective counterpart is observed failing — otherwise a reviewer cannot distinguish a control that works from a control that is unreachable. That distinction is not hypothetical here: `VG-03 §6.5` records a prior injection defence in this very codebase that passed review, had a test, and was dead code for a year.
+
+Concretely, for each of Workstreams B, C, D and E:
+
+1. Write the adversarial test and watch it **fail** against the current implementation.
+2. Implement the control until it passes.
+3. Add the broken counterpart to `test/broken/manifest.json`.
+4. Confirm `tools/run_broken_tests.py` reports the new counterpart failing.
+
+A workstream exit gate is not met until step 4 is green. Reviewers should reject any exit-gate claim whose counterpart count did not increase.
 
 ---
 
@@ -610,6 +744,57 @@ No broad exception handler should silently map programmer defects to normal retr
 
 Parallel work is appropriate after ADR boundaries are fixed, but final integration must be serialized through one protected branch with clean-tree evidence.
 
+### 12.1 Execution plan — what a developer does on day one
+
+Rev 1 described the destination without a first step. This section is the on-ramp.
+
+**Effort bands** are calendar-days for one competent senior developer, assuming ADR decisions arrive without delay. They are estimates for sequencing, not commitments.
+
+| Seq | Work | Band | Blocks | Gate |
+|---:|---|---:|---|---|
+| 1 | SEC-01 credential incident | 0.5 d | everything | R0 |
+| 2 | REL-01 clean atomic HEAD | 0.5 d | everything | R1 |
+| 3 | §4.1 contract-gate enforcement + registry repair | 0.5 d | R10 | R1 |
+| 4 | ADRs 1–10 (§10) written and accepted | 2 d | B, C, D | — |
+| 5 | SBOX-01 rootless effect perimeter | 4 d | dogfood | R3 |
+| 6 | EVAL-01 evaluator daemon + supervisor + IPC | 6 d | dogfood | R4 |
+| 7 | GOV-01 external signer + REC-01 ledger resumption | 6 d | dogfood | R5 |
+| 8 | ARCH-01 + CLI-01 runtime service and live CLI | 8 d | dogfood | R6 |
+| 9 | CTX-01 canonical model invocation + streaming | 4 d | dogfood | R7 |
+| 10 | TEL-01 labelling carve-out only (§7.1) | 1 d | — | R8 (partial) |
+| 11 | Dogfood ×3 through the sole product path | 3 d | release | R9 |
+| 12 | Contract closure and Beta tag | 1 d | — | R10 |
+
+Sequence 1–3 is one day and unblocks everything; treat it as a single sitting. Items 5–9 may run in parallel across owners **only after** item 4, and they must land through one protected branch.
+
+**Ownership.** With the current team, one person is Responsible for each numbered item, the Tech Lead is Accountable for all of them, and the Project Lead is the sole approver of Gates R9 and R10. Explicitly: **the person who wrote a control may not sign off its gate.** For item 11 the independent reviewer must be someone who did not implement items 5–9 — if the team is too small for that, the reviewer is the Project Lead and that fact is recorded in the evidence bundle rather than glossed.
+
+**The first five commands.** Run them in this order, before writing any code:
+
+```bash
+# 1. Revoke the key at the provider first (browser, not shell). Then:
+git rm --cached .env && printf '.env\n' >> .gitignore
+
+# 2. Prove the branch is not held together by one machine's working tree
+git clone . /tmp/vg-clean && cd /tmp/vg-clean && python3 -m unittest discover -s test
+#    Expect: ModuleNotFoundError on runtime.governance.approvals. That failure IS finding REL-01.
+
+# 3. Commit lane SB's orphaned governance work, then repeat step 2 until green
+git add vanguard/packages/runtime/governance/ test/runtime/test_approval_flow.py \
+        test/broken/fixtures/governance/ test/broken/manifest.json
+
+# 4. Make the contract gate able to fail (§4.1): add the five Wave 2 components
+#    to merged_components, then:
+python3 tools/check_active_mvp_contract.py
+#    Expect: five "merged component requirement remains open" errors.
+#    If this PASSES, the amendment did not take effect. Do not proceed.
+
+# 5. Re-seal the baseline manifest with a provenance record, then confirm the full gate set
+python3 tools/check_baseline_manifest.py && python3 tools/run_broken_tests.py
+```
+
+Steps 2 and 4 are designed to **fail**. A developer who reports them passing on the first attempt has not performed them. This is the same discipline the codebase applies to its own controls, turned on the remediation program itself.
+
 ---
 
 ## 13. Definition of done by contract row
@@ -649,11 +834,22 @@ Parallel work is appropriate after ADR boundaries are fixed, but final integrati
 - Zero manual source edits.
 - Sealed, independently reviewable evidence bundle.
 
-### `REQ-SLICE-001`
+### `REQ-SLICE-001` — corrected in revision 2
 
-- Disposable credential used through protected CI or controlled environment.
-- Successful live provider receipt, latency classification, usage, cost, and redaction evidence sealed.
-- Credential revoked after use where required.
+Revision 1 required executing a disposable live slice. **That is not satisfiable and the requirement never asked for it.** The row's own normative statement reads: *"A disposable end-to-end slice … remains unimportable by production code, **and is deleted at S4**."* Deletion is the acceptance criterion. `ADR-0047` deleted it on schedule; the registered command points at a workspace that no longer exists.
+
+Revision 1 conflated this row with backlog ticket `S5-DC-002` ("live disposable key test execution receipt"), which is a *different* piece of work that happens to cite the same row — itself a governance defect worth recording.
+
+**Tech Lead ruling required. Two admissible options; option A is recommended:**
+
+**Option A — close as `justified` (recommended).** The artifact did what it was for and was removed by design.
+- `justification`: the slice was disposable by construction and deleted at S4 per `ADR-0047`; a deleted artifact cannot carry a running test.
+- `compensating_assurance`: `tools/check_boundaries.py` proves zero production imports of `slice/`; the same vertical path (prompt → model → patch → approval → apply → test → result) is now permanently covered by `TEST-DOG-001` under Gate R9.
+- Re-point `TEST-SLICE-001` at `python3 tools/check_boundaries.py`, which is the surviving falsifiable evidence.
+
+**Option B — amend the row.** Rewrite the statement to describe the live-provider receipt that `S5-DC-002` actually intends, give it a new registered command, and keep it `open` until Gate R7 produces that receipt. This is honest but creates a new requirement under an old identifier, which the archaeology trail will have to explain forever.
+
+What is **not** admissible is leaving the row `open` against a command that can neither pass nor fail.
 
 ### `REQ-BENCH-001`
 
@@ -665,6 +861,32 @@ Parallel work is appropriate after ADR boundaries are fixed, but final integrati
 ## 14. Beta release gates
 
 All gates are mandatory. A pass in one does not compensate for another.
+
+### 14.0 Applicability, evidence, and sign-off
+
+Per the scope fence (§7.1), **R0–R7, R9 and R10 are Beta-blocking. R8 is Beta-blocking only in its labelling half** — no synthetic value may be presentable as a measurement — with its statistical half deferred to Q3 (S7–S9).
+
+Each gate produces a receipt, not an assertion. A gate is closed when:
+
+1. its evidence artifact exists under `docs/sprint6/evidence/<gate>/`, referencing the exact candidate SHA;
+2. its adversarial counterpart is registered and observed failing (§9.1);
+3. a signer who did not implement the control has countersigned it.
+
+| Gate | Evidence artifact | Signer |
+|---|---|---|
+| R0 | Revocation receipt, history scan, scanner output | Security/release lead |
+| R1 | Clean-container build log at candidate SHA | Integration lead |
+| R2 | Boundary, TCB, and no-fallback test output | Tech Lead |
+| R3 | Sandbox profile + escape/network/secret test output | Systems owner |
+| R4 | Supervisor attestation record + tamper/pollution/drop results | Systems owner |
+| R5 | Kill/restart matrix results + signed approval sample | Governance owner |
+| R6 | Recorded `vg` session transcript + reconnect/cursor results | Client owner |
+| R7 | Live streaming receipt + second-turn observation proof | Model owner |
+| R8 | Labelled telemetry export (live/cassette/synthetic separated) | Measurement owner |
+| R9 | Sealed dogfood bundle (§8-G3), three runs | Independent reviewer |
+| R10 | Contract diff + gate receipts + re-sealed baseline manifest | Project Lead |
+
+**R10 is the only gate that may change a contract row.** No workstream, and no developer, marks a row `covered` as part of its own work.
 
 ### Gate R0 — security hygiene
 
@@ -743,3 +965,35 @@ Until then:
 - do not publish performance or security claims based on the current component tests.
 
 This report changes no production code. It defines the remediation and acceptance standard against which the next implementation work should be reviewed.
+
+### 15.1 What this audit does not claim
+
+Stated so that the next reader does not over-read it:
+
+- It does not claim the kernel is wrong. `S0–S12`, attenuation, the governor and the grant issuer were reviewed and are sound; the TCB is 1,307 logical lines against a 1,438 alarm.
+- It does not claim the tests are worthless. They are accurate about the components they cover; the defect is that component coverage was reported as system delivery.
+- It does not claim the team overstated things in bad faith. Every finding here is the ordinary consequence of parallel lanes integrating late without a clean-tree gate. The fix is the gate, not blame.
+- It does not establish that the credential was used by a third party — only that it must be assumed to have been.
+
+---
+
+## 16. Document control
+
+| Field | Value |
+|---|---|
+| Document | Vanguard Phases 0–2 Full Technical Audit |
+| Revision | 2 |
+| Status | **Draft — awaiting Tech Lead and Project Lead countersignature** |
+| Candidate SHA reviewed | `57e0eb8` |
+| `main` at review time | clean of `SEC-01` |
+| Supersedes | Revision 1; the optimistic Phase 2 completion report; the interim remediation list |
+| Normative conflicts raised | `ADR-0057` (Beta scope) — resolved by ruling in §7.1, requires countersignature |
+| Rulings requiring approval | §7.1 scope fence · §13 `REQ-SLICE-001` disposition · §4.1 registry repair |
+| Next review | On completion of Workstream A, before Workstream B begins |
+
+**Countersignature.** §7.1 and §13 contain rulings I have made in the Tech Lead / Project Lead capacity. They change what Beta means and what a contract row asserts. They are not effective until the accountable humans sign them, and neither should be treated as settled by the fact that they appear in this document.
+
+| Role | Name | Decision | Date |
+|---|---|---|---|
+| Tech Lead | | ☐ Accept ☐ Amend ☐ Reject | |
+| Project Lead | | ☐ Accept ☐ Amend ☐ Reject | |

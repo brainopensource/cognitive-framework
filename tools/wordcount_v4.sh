@@ -7,7 +7,7 @@
 #   3. A word is a whitespace-separated token containing >= 1 alphanumeric char.
 # Markdown tables, headings, links and blockquotes DO count. Code does not.
 #
-# Usage: tools/wordcount_v4.sh docs/v4/*.md
+# Usage: tools/wordcount_v4.sh docs/main_v4/*.md
 # Exit status is always 0; budget enforcement is CI's job (CI-5).
 
 total=0

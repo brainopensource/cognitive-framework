@@ -8,12 +8,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
 
-MANIFEST = Path("test/broken/manifest.json")
+from repo_paths import repo_root
+
+MANIFEST = repo_root() / "test" / "broken" / "manifest.json"
 
 
 def run(command: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, text=True, capture_output=True, check=False)
+    return subprocess.run(command, text=True, capture_output=True, check=False, cwd=repo_root())
 
 
 def main() -> int:

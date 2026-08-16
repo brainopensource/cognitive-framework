@@ -11,8 +11,14 @@ import re, sys, glob, os, subprocess
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-os.chdir(ROOT / "docs" / "v4")
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from repo_paths import docs_main_v4, repo_root
+
+ROOT = repo_root()
+os.chdir(docs_main_v4())
 AUDIT_TOOL = ROOT / "tools" / "audit_v4.py"
 WORDCOUNT_TOOL = ROOT / "tools" / "wordcount_v4.sh"
 

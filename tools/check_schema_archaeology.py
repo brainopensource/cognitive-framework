@@ -7,8 +7,13 @@ import csv
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
 
-TRACE_DIR = Path("docs/sprint0/schema-archaeology/traces")
+from repo_paths import schema_archaeology_traces
+
+TRACE_DIR = schema_archaeology_traces()
 EXPECTED = {"BUG-01.tsv", "BUG-02.tsv", "BUG-03.tsv", "NONCODE-01.tsv"}
 KINDS = {"observation", "proposal", "effect", "receipt", "judgement"}
 REQUIRED_COLUMNS = {

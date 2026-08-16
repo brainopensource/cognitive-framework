@@ -417,7 +417,21 @@
         "--variant",
         "synthetic-in-live"
       ],
-      "expected_failure": "synthetic timing in a live report"
+      "expected_failure": "synthetic timing forbidden"
+    },
+    {
+      "test_id": "MF-GOV-PATH-001",
+      "control": [
+        "python3",
+        "tools/check_stale_paths.py"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_stale_paths.py",
+        "--root",
+        "test/broken/fixtures/stale_paths"
+      ],
+      "expected_failure": "STALE PATH"
     }
   ]
 }

@@ -26,6 +26,12 @@ jobs:
       - name: T11 — governance artifacts and safeguards
         run: python3 tools/check_sprint0_governance.py
 
+      - name: S6B-GOV-001 — stale documentation paths
+        run: python3 tools/check_stale_paths.py
+
+      - name: S6B-GOV-001 / QA-004 — local markdown links
+        run: python3 tools/check_markdown_links.py
+
       - name: T0 — trace structure and field-inventory evidence
         run: python3 tools/check_schema_archaeology.py
 
@@ -63,14 +69,14 @@ jobs:
       # CI-5 per-document and normative subtotal word caps
       - name: CI-5 — word budgets
         run: |
-          sh tools/wordcount_v4.sh docs/v4/[0-9][0-9]_vanguard_*.md
+          sh tools/wordcount_v4.sh docs/main_v4/[0-9][0-9]_vanguard_*.md
           python3 - <<'EOF'
           import subprocess, glob, re, sys, os
-          reg = open("docs/v4/00_vanguard_registry_v040.md").read()
+          reg = open("docs/main_v4/00_vanguard_registry_v040.md").read()
           caps = {m[0]: int(m[2].replace(",", ""))
                   for m in re.findall(r"\|\s*(\d\d)\s*\|[^|]*\|\s*(Normative|Supporting)\s*\|\s*([\d,]+)\s*\|", reg)}
           fail = False
-          for p in sorted(glob.glob("docs/v4/[0-9][0-9]_vanguard_*.md")):
+          for p in sorted(glob.glob("docs/main_v4/[0-9][0-9]_vanguard_*.md")):
               n = int(subprocess.run(["sh", "tools/wordcount_v4.sh", p],
                                      capture_output=True, text=True).stdout.split()[0])
               d = os.path.basename(p)[:2]
@@ -118,9 +124,9 @@ jobs:
       # CI-8 the vision annex is quarantined
       - name: CI-8 — vision annex quarantine
         run: |
-          head -20 docs/v4/12_vanguard_vision_annex_v040.md | grep -q "NON-NORMATIVE" \
+          head -20 docs/main_v4/12_vanguard_vision_annex_v040.md | grep -q "NON-NORMATIVE" \
             || { echo "CI-8 FAIL: missing non-normative header"; exit 1; }
-          if grep -rn '`12`' docs/v4/ --include='0[0-9]_*.md' --include='1[01]_*.md' \
+          if grep -rn '`12`' docs/main_v4/ --include='0[0-9]_*.md' --include='1[01]_*.md' \
                | grep -v 'VISION\|12_vanguard\|Vision Annex'; then
             echo "CI-8 FAIL: a document cites the vision annex as authority"; exit 1
           fi

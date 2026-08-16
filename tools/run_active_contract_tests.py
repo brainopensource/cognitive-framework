@@ -8,8 +8,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
 
-CONTRACT = Path("docs/sprint0/active-mvp-contract.json")
+from repo_paths import active_mvp_contract, repo_root
+
+CONTRACT = active_mvp_contract()
 
 
 def main() -> int:
@@ -45,7 +50,7 @@ def main() -> int:
     failures = 0
     for command, test_ids in commands.items():
         print(f"CONTRACT TEST RUN: {','.join(sorted(test_ids))} -> {' '.join(command)}")
-        result = subprocess.run(command, text=True, capture_output=True, check=False)
+        result = subprocess.run(command, text=True, capture_output=True, check=False, cwd=repo_root())
         if result.stdout:
             print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
         if result.stderr:

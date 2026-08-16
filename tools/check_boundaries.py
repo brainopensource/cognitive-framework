@@ -10,6 +10,12 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from repo_paths import repo_root
+
 
 SOURCE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}
 IGNORED_PARTS = {".git", ".venv", "node_modules", "__pycache__", "dist", "build"}
@@ -227,10 +233,10 @@ def check(root: Path, s4_exit: bool) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--root", type=Path, default=None)
     parser.add_argument("--s4-exit", action="store_true")
     args = parser.parse_args()
-    root = args.root.resolve()
+    root = args.root.resolve() if args.root is not None else repo_root()
     errors = check(root, args.s4_exit)
     if errors:
         for error in errors:

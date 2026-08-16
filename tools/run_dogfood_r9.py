@@ -302,7 +302,7 @@ def main() -> int:
         runs_data.append(summary)
         print(f"Run #{i} completed: Terminal={summary['terminal']}, VerdictPassed={summary['verdict']['passed']}, Events={summary['event_count']}")
 
-    evidence_dir = ROOT / "docs/sprint6/evidence/R9"
+    evidence_dir = ROOT / "docs/agile/sprint6/evidence/R9"
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
     bundle_file = evidence_dir / "dogfood_bundle.json"

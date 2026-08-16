@@ -38,19 +38,18 @@ Aether-D-System/
 │   └── workflows/ci.yml             # CI testing, boundary checks & PR requirement gates
 ├── cv13/                            # Onboarding packet & verification keys
 ├── docs/
-│   ├── development/                 # Sprint briefings & leadership guidelines
-│   │   ├── guidelines_phase_0.md
-│   │   └── guidelines_phase_0_briefing.md
-│   ├── review/                      # Historical design reviews & AI guidelines
-│   ├── sprint0/                     # Sprint 0 governance, ICD, & schema archaeology
-│   │   ├── active-mvp-contract.json
-│   │   ├── system-architecture-icd.md
-│   │   ├── verification-threat-evaluation-plan.md
-│   │   └── schema-archaeology/      # Trace logs, field inventory, & blind reviews
-│   ├── sprint1/                     # Sprint 1 backlog & developer packets
-│   └── v4/                          # Normative Vanguard v4 Specification Corpus
-│       ├── 00..12 Normative Specs   # Core contracts, kernel security, & memory
-│       └── 13_C_gts_mvp_plan.md     # Master MVP engineering & task backlog
+│   ├── development_guides/          # Sprint briefings & leadership guidelines
+│   ├── reviews/                     # Historical design reviews & AI guidelines
+│   ├── agile/                       # Sprint records, Active MVP Contract, archaeology
+│   │   ├── sprint0/
+│   │   │   ├── active-mvp-contract.json
+│   │   │   ├── system-architecture-icd.md
+│   │   │   ├── verification-threat-evaluation-plan.md
+│   │   │   └── schema-archaeology/
+│   │   └── sprint6B/                # Current Beta-closure backlog (RELEASE NO-GO)
+│   └── main_v4/                     # Normative Vanguard v4 specification corpus
+│       ├── 00..12 Normative Specs
+│       └── 13_C_gts_mvp_plan.md
 ├── schemas/
 │   └── v4/                          # Canonical JSON Schema reader/writer profiles
 ├── test/

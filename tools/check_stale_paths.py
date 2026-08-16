@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Fail when live tools, CI, manifests or indexes still cite obsolete docs paths."""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from repo_paths import repo_root, stale_path_matches
+
+SCAN_GLOBS = (
+    ".github/**/*",
+    "tools/**/*",
+    "README.md",
+    "docs/README.md",
+    "docs/agile/sprint0/active-mvp-contract.json",
+    "docs/agile/sprint0/baseline-manifest.json",
+    "test/test_repo_paths.py",
+    "test/contracts/__init__.py",
+)
+
+SKIP_SUFFIXES = {".pyc", ".png", ".jpg", ".svg", ".woff", ".woff2"}
+SKIP_PARTS = {".git", "__pycache__", "node_modules", ".venv"}
+# The registry and its unit tests must name obsolete prefixes in order to reject them.
+SKIP_NAMES = {"repo_paths.py", "test_repo_paths.py"}
+
+
+def iter_scan_files(root: Path) -> list[Path]:
+    files: set[Path] = set()
+    for pattern in SCAN_GLOBS:
+        for path in root.glob(pattern):
+            if not path.is_file():
+                continue
+            if path.suffix.lower() in SKIP_SUFFIXES:
+                continue
+            if set(path.parts) & SKIP_PARTS:
+                continue
+            if path.name in SKIP_NAMES:
+                continue
+            files.add(path)
+    return sorted(files)
+
+
+def check(root: Path) -> list[str]:
+    errors: list[str] = []
+    scanned = iter_scan_files(root)
+    if not scanned:
+        return [f"no files matched scan globs under {root}"]
+    for path in scanned:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        matches = stale_path_matches(text)
+        if matches:
+            rel = path.relative_to(root) if path.is_relative_to(root) else path
+            unique = ", ".join(sorted(set(matches)))
+            errors.append(f"{rel}: stale path(s) {unique}")
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", type=Path, default=None)
+    args = parser.parse_args()
+    root = args.root.resolve() if args.root is not None else repo_root()
+    errors = check(root)
+    if errors:
+        for error in errors:
+            print(f"STALE PATH FAIL: {error}")
+        return 1
+    print(f"STALE PATH PASS: {len(iter_scan_files(root))} files scanned; no obsolete docs/ layout tokens")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

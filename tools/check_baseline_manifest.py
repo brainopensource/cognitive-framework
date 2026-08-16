@@ -3,24 +3,46 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
 
-MANIFEST = Path("docs/sprint0/baseline-manifest.json")
+from repo_paths import baseline_manifest, repo_root, stale_path_matches
+
+
+MANIFEST = baseline_manifest()
 
 
 def main() -> int:
-    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--release",
+        action="store_true",
+        help="Fail unless git tag and branch protection are verified (R10).",
+    )
+    args = parser.parse_args()
+    root = repo_root()
+    try:
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"BASELINE FAIL: cannot load {MANIFEST}: {exc}")
+        return 1
     failures: list[str] = []
     files = data.get("files")
     if data.get("schema_version") != "gts.sprint0-baseline-manifest.v1" or not isinstance(files, dict) or not files:
         print("BASELINE FAIL: malformed manifest")
         return 1
+    for name in files:
+        if stale_path_matches(name):
+            failures.append(f"stale path in manifest key: {name}")
     for name, expected in sorted(files.items()):
-        path = Path(name)
+        path = root / name
         if not path.is_file():
             failures.append(f"missing {name}")
             continue
@@ -32,8 +54,12 @@ def main() -> int:
     if failures:
         return 1
     print(f"BASELINE PASS: {len(files)} local artifacts match APPROVAL-0002 manifest")
-    if data.get("git_tag_status") != "created" or data.get("branch_protection_status") != "verified":
+    external_open = data.get("git_tag_status") != "created" or data.get("branch_protection_status") != "verified"
+    if external_open:
         print("BASELINE EXTERNAL GATES OPEN: Git tag and/or branch protection are not established")
+        if args.release:
+            print("BASELINE FAIL: --release requires verified git tag and branch protection")
+            return 1
     return 0
 
 

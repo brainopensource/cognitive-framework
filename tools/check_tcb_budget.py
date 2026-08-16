@@ -8,6 +8,12 @@ import json
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from repo_paths import kernel_tcb_budget, repo_root
+
 
 def logical_lines(path: Path) -> int:
     """Count stable physical logic lines; blanks and comment-only lines do not count."""
@@ -20,11 +26,16 @@ def logical_lines(path: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=Path("."))
-    parser.add_argument("--budget", type=Path, default=Path("docs/sprint2/kernel-tcb-budget.json"))
+    parser.add_argument("--root", type=Path, default=None)
+    parser.add_argument("--budget", type=Path, default=None)
     args = parser.parse_args()
-    root = args.root.resolve()
-    budget_path = args.budget if args.budget.is_absolute() else root / args.budget
+    root = args.root.resolve() if args.root is not None else repo_root()
+    if args.budget is None:
+        budget_path = kernel_tcb_budget()
+    else:
+        budget_path = args.budget if args.budget.is_absolute() else root / args.budget
+    if not budget_path.exists() and (root / "docs/agile/sprint2/kernel-tcb-budget.json").exists():
+        budget_path = root / "docs/agile/sprint2/kernel-tcb-budget.json"
 
     try:
         budget = json.loads(budget_path.read_text(encoding="utf-8"))

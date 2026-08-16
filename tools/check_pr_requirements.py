@@ -9,8 +9,13 @@ import re
 import sys
 from pathlib import Path
 
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
 
-CONTRACT = Path("docs/sprint0/active-mvp-contract.json")
+from repo_paths import active_mvp_contract
+
+CONTRACT = active_mvp_contract()
 REQ_PATTERN = re.compile(r"\bREQ-[A-Z]+-[0-9]{3}\b")
 
 

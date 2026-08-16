@@ -11,8 +11,14 @@ import re, sys, glob, os
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-os.chdir(ROOT / "docs" / "v4")
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from repo_paths import docs_main_v4, repo_root
+
+ROOT = repo_root()
+os.chdir(docs_main_v4())
 
 RULE_IN_TABLE = re.compile(r"\|\s*\*{0,2}`?([A-Z]{1,4})-(\d{1,4})`?\*{0,2}\s*\|")
 RULE_IN_QUOTE = re.compile(r"^>\s*\*\*`([A-Z]{1,4})-(\d{1,4})`")

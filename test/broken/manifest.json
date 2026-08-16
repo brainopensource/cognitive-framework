@@ -432,6 +432,20 @@
         "test/broken/fixtures/stale_paths"
       ],
       "expected_failure": "STALE PATH"
+    },
+    {
+      "test_id": "MF-SEC-SCAN-001",
+      "control": [
+        "python3",
+        "tools/scan_secrets.py"
+      ],
+      "broken": [
+        "python3",
+        "tools/scan_secrets.py",
+        "--root",
+        "test/broken/fixtures/secret_leak"
+      ],
+      "expected_failure": "SECRET SCAN FAIL"
     }
   ]
 }

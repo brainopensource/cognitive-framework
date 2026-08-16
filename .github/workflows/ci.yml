@@ -47,6 +47,11 @@ jobs:
       - name: T10/T11 — execute every Active MVP Contract test
         run: python3 tools/run_active_contract_tests.py
 
+      - name: S6B-SEC-002 — blocking secret scan (tree/diff; no live credentials)
+        env:
+          OPENROUTER_API_KEY: ""
+        run: python3 tools/scan_secrets.py
+
   docs-gates:
     name: CI-1..CI-8 — document integrity
     runs-on: ubuntu-latest

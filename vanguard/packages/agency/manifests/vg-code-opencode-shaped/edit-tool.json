@@ -1,0 +1,14 @@
+{
+  "name": "edit_file",
+  "verb": "patch.apply",
+  "description": "Edit file with search/replace text block.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": { "type": "string" },
+      "target": { "type": "string" },
+      "replacement": { "type": "string" }
+    },
+    "required": ["path", "target", "replacement"]
+  }
+}

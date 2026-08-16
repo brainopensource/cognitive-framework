@@ -1,0 +1,15 @@
+{
+  "to_canonical": {
+    "view_file": "fs.read",
+    "edit_file": "patch.apply",
+    "run_command": "proc.exec",
+    "list_dir": "fs.search",
+    "grep_file": "fs.search"
+  },
+  "to_wire": {
+    "fs.read": "view_file",
+    "patch.apply": "edit_file",
+    "proc.exec": "run_command",
+    "fs.search": "grep_file"
+  }
+}

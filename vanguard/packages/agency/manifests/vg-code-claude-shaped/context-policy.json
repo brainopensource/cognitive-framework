@@ -1,0 +1,3 @@
+{
+  "compaction": "recency_with_eviction"
+}

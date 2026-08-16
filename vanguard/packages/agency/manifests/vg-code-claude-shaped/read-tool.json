@@ -1,0 +1,12 @@
+{
+  "name": "Read",
+  "verb": "fs.read",
+  "description": "Read file contents at specified relative path within workspace.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "file_path": { "type": "string" }
+    },
+    "required": ["file_path"]
+  }
+}

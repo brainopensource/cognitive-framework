@@ -1,0 +1,12 @@
+{
+  "to_canonical": {
+    "read_file": "fs.read",
+    "edit_file": "patch.apply",
+    "bash": "proc.exec"
+  },
+  "to_wire": {
+    "fs.read": "read_file",
+    "patch.apply": "edit_file",
+    "proc.exec": "bash"
+  }
+}

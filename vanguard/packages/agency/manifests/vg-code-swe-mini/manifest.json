@@ -1,0 +1,36 @@
+{
+  "harness": "vg-code-swe-mini",
+  "components": {
+    "system_prompt": ["vg-code-swe-mini/system-prompt.txt"],
+    "tools": [
+      "vg-code-swe-mini/read-tool.json",
+      "vg-code-swe-mini/edit-tool.json",
+      "vg-code-swe-mini/bash-tool.json"
+    ],
+    "context_policy": ["vg-code-swe-mini/context-policy.json"],
+    "routing_policy": ["vg-code-swe-mini/routing-policy.json"]
+  },
+  "capabilities": [
+    {
+      "verb": "fs.read",
+      "sink": "observation",
+      "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]},
+      "risk": "low"
+    },
+    {
+      "verb": "patch.apply",
+      "sink": "privileged",
+      "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]},
+      "risk": "medium"
+    },
+    {
+      "verb": "proc.exec",
+      "sink": "privileged",
+      "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3,bash,sh"},
+      "risk": "high"
+    }
+  ],
+  "evaluators": ["coding-oracle@3"],
+  "budgetPolicy": "vg-code-swe-mini/budget-policy.json",
+  "undeletable": false
+}

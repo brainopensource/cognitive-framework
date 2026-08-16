@@ -1,0 +1,9 @@
+{
+  "passthrough": true,
+  "aliases": {
+    "bash": "proc.exec",
+    "sh": "proc.exec",
+    "shell": "proc.exec",
+    "run_command": "proc.exec"
+  }
+}

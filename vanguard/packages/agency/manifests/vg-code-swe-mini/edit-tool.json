@@ -1,0 +1,14 @@
+{
+  "name": "edit_file",
+  "verb": "patch.apply",
+  "description": "Edit file with old and new content strings.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": { "type": "string" },
+      "old_str": { "type": "string" },
+      "new_str": { "type": "string" }
+    },
+    "required": ["path", "old_str", "new_str"]
+  }
+}

@@ -175,3 +175,29 @@ python3 tools/check_active_mvp_contract.py --release
 # 7. Check baseline manifest integrity
 python3 tools/check_baseline_manifest.py
 ```
+
+---
+
+## 6. Phase 3 (Sprints 7 & 8) — Manifest Engine & Competitor Reconstructions
+
+### Lane A (Dev A) — Manifest Engine & Pure-Data Packs
+
+- [x] **Task A.1 (Sprint 7): Manifest Loader & Aliases Engine**
+  - Implemented `vanguard/packages/agency/manifests/loader.py` for parsing `manifest.json` schemas.
+  - Implemented `AliasTranslator` providing bidirectional tool verb translation via `aliases.json` (e.g. `read_file` / `Read` ↔ `fs.read`, `edit_file` / `Edit` ↔ `patch.apply`, `bash` / `Bash` ↔ `proc.exec`).
+  - Unit tests: `test/agency/test_manifest_loader.py` passed.
+
+- [x] **Task A.2 (Sprint 7): Workspace Discovery Engine**
+  - Implemented `vanguard/packages/agency/manifests/discovery.py` to auto-discover workspace instruction files (`AGENTS.md`, `CLAUDE.md`, `PROJECT.md`).
+  - Ingested guidelines into prefix-stable L3/L4 context layers (`Layer.ENVIRONMENT` / `Fragment`).
+  - Unit tests: `test/agency/test_workspace_discovery.py` passed.
+
+- [x] **Task A.3 (Sprint 8): Reconstruction Manifest Packs**
+  - Authored pure-data JSON manifest packs under `vanguard/packages/agency/manifests/`:
+    - `vg-code-default/` (added `aliases.json`)
+    - `vg-code-claude-shaped/` (`Read` / `Edit` / `Bash` / `Glob` / `Grep` tool shapes + `manifest.json`, `aliases.json`, policies)
+    - `vg-code-opencode-shaped/` (`view_file` / `edit_file` / `run_command` / `list_dir` / `grep_file` + `manifest.json`, `aliases.json`, policies)
+    - `vg-code-swe-mini/` (`read_file` / `edit_file` / `bash` + `manifest.json`, `aliases.json`, policies)
+  - Registered all manifest packs in `vanguard/packages/agency/manifests/registry.json`.
+  - Zero microkernel mutations in `vanguard/packages/kernel/` verified via `tools/check_boundaries.py`.
+

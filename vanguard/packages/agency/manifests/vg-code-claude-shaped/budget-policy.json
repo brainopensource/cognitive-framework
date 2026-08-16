@@ -1,0 +1,6 @@
+{
+  "depth": "1",
+  "effects": "32",
+  "maxTurns": 32,
+  "costMicros": "1000000"
+}

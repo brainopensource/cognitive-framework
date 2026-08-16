@@ -190,7 +190,11 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             continue
         for line, spec in imports:
             if source_area == "lab":
-                errors.append(f"{source.relative_to(root)}:{line}: lab/ must import nothing ({spec!r})")
+                target_area, _ = area_from_spec(spec)
+                if spec.startswith(".") or target_area:
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: lab/ must import nothing ({spec!r})"
+                    )
                 continue
             resolved = resolve_relative(source, spec)
             if resolved and resolved in files:

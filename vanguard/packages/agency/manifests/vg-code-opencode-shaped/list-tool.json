@@ -1,0 +1,12 @@
+{
+  "name": "list_dir",
+  "verb": "fs.search",
+  "description": "List files in directory.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": { "type": "string" }
+    },
+    "required": ["path"]
+  }
+}

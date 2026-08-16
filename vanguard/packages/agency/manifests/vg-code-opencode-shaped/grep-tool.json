@@ -1,0 +1,12 @@
+{
+  "name": "grep_file",
+  "verb": "fs.search",
+  "description": "Grep search files for pattern.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "pattern": { "type": "string" }
+    },
+    "required": ["pattern"]
+  }
+}

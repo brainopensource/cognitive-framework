@@ -1,4 +1,3 @@
-import json
+from vanguard.packages.kernel import Governor
 
-result = json.dumps({"invalid": True})
-
+result = Governor

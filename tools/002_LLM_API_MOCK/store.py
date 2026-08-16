@@ -57,7 +57,25 @@ class LamStore:
                     is_downgrade INTEGER DEFAULT 0,
                     recorded_at TEXT NOT NULL,
                     blob_path TEXT,
+                    harness TEXT,
+                    cascade TEXT,
+                    episode_id TEXT,
+                    parent_id TEXT,
+                    task_id TEXT,
+                    depth INTEGER,
                     FOREIGN KEY(scenario_id) REFERENCES scenarios(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS episodes (
+                    episode_id TEXT PRIMARY KEY,
+                    parent_id TEXT,
+                    task_id TEXT NOT NULL,
+                    depth INTEGER NOT NULL,
+                    depth_label TEXT NOT NULL,
+                    budget_tokens INTEGER NOT NULL,
+                    remaining_tokens INTEGER NOT NULL,
+                    tokens_used INTEGER NOT NULL DEFAULT 0,
+                    recorded_at TEXT NOT NULL
                 );
 
                 CREATE TABLE IF NOT EXISTS model_ceilings (
@@ -85,6 +103,16 @@ class LamStore:
                 conn.execute("ALTER TABLE traces ADD COLUMN model_tier INTEGER DEFAULT 1;")
             if "scenario_tier" not in existing_cols:
                 conn.execute("ALTER TABLE traces ADD COLUMN scenario_tier INTEGER DEFAULT 1;")
+            for col, decl in (
+                ("harness", "TEXT"),
+                ("cascade", "TEXT"),
+                ("episode_id", "TEXT"),
+                ("parent_id", "TEXT"),
+                ("task_id", "TEXT"),
+                ("depth", "INTEGER"),
+            ):
+                if col not in existing_cols:
+                    conn.execute(f"ALTER TABLE traces ADD COLUMN {col} {decl};")
 
     def upsert_scenario(
         self,
@@ -135,6 +163,12 @@ class LamStore:
         harness_version: str = "v0.4.1",
         is_downgrade: bool = False,
         blob_path: Optional[str] = None,
+        harness: Optional[str] = None,
+        cascade: Optional[List[str]] = None,
+        episode_id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        task_id: Optional[str] = None,
+        depth: Optional[int] = None,
     ) -> int:
         ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         skills_json = json.dumps(skills_used or [])
@@ -144,9 +178,10 @@ class LamStore:
                 INSERT INTO traces (
                     scenario_id, backend, model, model_tier, scenario_tier, passed, llm_calls,
                     prompt_tokens, completion_tokens, usd, wall_s, context_bytes, compression_ratio,
-                    memory_turns, skills_used, harness_version, is_downgrade, recorded_at, blob_path
+                    memory_turns, skills_used, harness_version, is_downgrade, recorded_at, blob_path,
+                    harness, cascade, episode_id, parent_id, task_id, depth
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
                 (
                     scenario_id,
@@ -168,6 +203,12 @@ class LamStore:
                     1 if is_downgrade else 0,
                     ts,
                     blob_path,
+                    harness,
+                    json.dumps(cascade or []),
+                    episode_id,
+                    parent_id,
+                    task_id,
+                    depth,
                 ),
             )
             trace_id = cur.lastrowid or 0

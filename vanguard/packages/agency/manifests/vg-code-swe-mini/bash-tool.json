@@ -1,0 +1,12 @@
+{
+  "name": "bash",
+  "verb": "proc.exec",
+  "description": "Run shell command.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "command": { "type": "string" }
+    },
+    "required": ["command"]
+  }
+}

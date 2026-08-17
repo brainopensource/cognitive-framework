@@ -78,6 +78,8 @@ from ..domain.artifacts.manifest import (
     parse_manifest,
 )
 from ..domain.ledger.events import EventEnvelope
+from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
+from ..domain.ledger.state import LedgerState
 from ..kernel import (
     Constraints,
     EffectRequest,
@@ -102,7 +104,7 @@ from ..ports.environment import EffectRequest as EnvironmentRequest
 from ..ports.environment import ObservationRequest
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.determinism import ClockPort, RandomPort
-from ..ports.event_store import EventStorePort
+from ..ports.event_store import EventRange, EventStorePort
 from .determinism import SystemClock, SystemRandom, event_id
 from .governance.approvals import (
     ApprovalAuthority,
@@ -627,13 +629,10 @@ class HarnessSession:
         harness: Harness,
         ports: SessionPorts,
         task: TaskContext,
-        *,
-        max_segments: int = 8,
     ) -> None:
         self.harness = harness
         self.ports = ports
         self.task = task
-        self.max_segments = max_segments
         self.calls: list[tuple[EffectRequest, Any]] = []
 
         repo = Path(task.repo_path)
@@ -696,6 +695,33 @@ class HarnessSession:
             # and `vg-code-default` writes `patch.apply`. The manifest wins.
             patch_verb=harness.diff_verb() or "fs.patch")
 
+    # -- the ledger is the only memory ------------------------------------
+
+    def ledger_state(self) -> LedgerState:
+        """Reduce this episode's events. Nothing in memory contributes.
+
+        `A-07`: everything is an event and every surface is a projection of
+        it. `domain/ledger/reducer.py` already reconstructs episode state for
+        crash recovery -- approval suspension is the same mechanism with a
+        different trigger, so this is a reuse, not new machinery.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        envelopes = read.value if read.ok and read.value is not None else ()
+        return reconstruct_state(envelopes)
+
+    def turns_consumed(self) -> int:
+        """Turns this episode has already spent, counted from the ledger.
+
+        One `ProposalProduced` per turn. Reading it here rather than from
+        `_LayeredOperator._dialogue` is what makes re-entry a resume: no live
+        object has to survive the approval boundary for the bound to hold.
+        """
+        return len(self.ledger_state().proposals)
+
+    def state_digest(self) -> str:
+        """`T3.6`. The digest a resumed run must reproduce from events alone."""
+        return compute_state_digest(self.ledger_state())
+
     # -- the kernel seam --------------------------------------------------
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
@@ -714,12 +740,23 @@ class HarnessSession:
         terminal = RunTermination.ABANDONED
         detail = ""
 
-        for _ in range(self.max_segments):
+        # `S8-A-02`. This used to be a bounded segment loop building a fresh
+        # `Episode` each pass with a fresh `max_turns` -- so the real bound was
+        # the product of the two limits (8x8=64), nothing stated it, and an
+        # agreeable reviewer bought the run another eight turns per approval.
+        # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
+        # not each segment of it, and an exhausted budget is terminal.
+        while True:
+            remaining = task.max_turns - self.turns_consumed()
+            if remaining <= 0:
+                terminal = RunTermination.ABANDONED
+                detail = f"max_turns ({task.max_turns}) exhausted across approval"
+                break
             self.policy.bind(authorization)
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=self.ledger, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=task.max_turns)
+                max_turns=remaining)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -883,7 +920,6 @@ class Runtime:
         clock: Any = None,
         bindings: Mapping[str, EffectBinding] | None = None,
         approval_key: bytes | None = None,
-        max_segments: int = 8,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -923,8 +959,7 @@ class Runtime:
             approval_key=approval_key,
             interactive=interactive,
         )
-        return HarnessSession(harness, ports, task_context,
-                              max_segments=max_segments).run()
+        return HarnessSession(harness, ports, task_context).run()
 
     # -- composition internals -------------------------------------------
 

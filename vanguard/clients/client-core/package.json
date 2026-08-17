@@ -1,0 +1,79 @@
+{
+  "name": "@vanguard/client-core",
+  "version": "0.4.1-beta",
+  "description": "Vanguard client core: contracts, parsers, adapters, signers, and reducers",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./contract/types.js": {
+      "types": "./dist/src/contract/types.d.ts",
+      "default": "./dist/src/contract/types.js"
+    },
+    "./contract/parse.js": {
+      "types": "./dist/src/contract/parse.d.ts",
+      "default": "./dist/src/contract/parse.js"
+    },
+    "./adapters/signer.js": {
+      "types": "./dist/src/adapters/signer.d.ts",
+      "default": "./dist/src/adapters/signer.js"
+    },
+    "./adapters/transport.js": {
+      "types": "./dist/src/adapters/transport.d.ts",
+      "default": "./dist/src/adapters/transport.js"
+    },
+    "./adapters/live.js": {
+      "types": "./dist/src/adapters/live.d.ts",
+      "default": "./dist/src/adapters/live.js"
+    },
+    "./adapters/replay.js": {
+      "types": "./dist/src/adapters/replay.d.ts",
+      "default": "./dist/src/adapters/replay.js"
+    },
+    "./adapters/scenario.js": {
+      "types": "./dist/src/adapters/scenario.d.ts",
+      "default": "./dist/src/adapters/scenario.js"
+    },
+    "./application/run-view.js": {
+      "types": "./dist/src/application/run-view.d.ts",
+      "default": "./dist/src/application/run-view.js"
+    },
+    "./application/approvals.js": {
+      "types": "./dist/src/application/approvals.d.ts",
+      "default": "./dist/src/application/approvals.js"
+    },
+    "./application/commands.js": {
+      "types": "./dist/src/application/commands.d.ts",
+      "default": "./dist/src/application/commands.js"
+    },
+    "./application/corrections.js": {
+      "types": "./dist/src/application/corrections.d.ts",
+      "default": "./dist/src/application/corrections.js"
+    }
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build --silent && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "canonicalize": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

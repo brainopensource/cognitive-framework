@@ -90,10 +90,10 @@ Wave 4  [TODO]   live UDS both skins
 
 | ID | Scope | Depends | DoD | Status |
 |---|---|---|---|---|
-| FE-1-1 | types + parse package | — | core `typecheck && test` | `[TODO]` |
-| FE-1-2 | signer + RuntimeClient | FE-1-1 | JCS golden | `[TODO]` |
-| FE-1-3 | `reduceRunView` + approvals | FE-1-1 | reducer tests in core | `[TODO]` |
-| FE-1-4 | live/replay/scenario adapters | FE-1-2 | CLI suite green via re-export | `[TODO]` |
+| FE-1-1 | types + parse package | — | core `typecheck && test` | `[DONE]` |
+| FE-1-2 | signer + RuntimeClient | FE-1-1 | JCS golden | `[DONE]` |
+| FE-1-3 | `reduceRunView` + approvals | FE-1-1 | reducer tests in core | `[DONE]` |
+| FE-1-4 | live/replay/scenario adapters | FE-1-2 | CLI suite green via re-export | `[DONE]` |
 
 Kit: `sprints_front/lane_core_wave1.md`
 

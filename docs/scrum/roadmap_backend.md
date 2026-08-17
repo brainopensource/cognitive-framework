@@ -120,6 +120,16 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | S22-B-04 | `[DONE] ✅` | BETA | Harvest SOP documented in `docs/scrum/sprints/wave20/evidence/s21-g-03-harvest-sop.md` |
 | S22-B-05 | `[DONE] ✅` | BETA | DoD: `test.agency.test_reconstructions` green, `check_boundaries.py` pass |
 
+### Sprints 23–27 — Single-Turn Briefs, Pack DNA, Protocol Dogfood & Sibling Harvest
+
+| ID | Status | Lane | Task |
+|---|---|---|---|
+| B-23-01..03 | `[DONE] ✅` | BETA | S23: Greenfield TASK.md brief sentence 1 isolated to `app/server.py` (killed "and"); AGENTS.md single-file-per-turn rule |
+| B-24-01..06 | `[DONE] ✅` | BETA | S24: Pi-length system prompt, aliases, ACI schema thickening, 3 skills (Turn1/2/3), file-todo via Edit, brief_exempt compact |
+| B-25-01..04 | `[DONE] ✅` | BETA | S25: DOGFOOD-01 syntax receipt re-read guidance, DOGFOOD-02 timeout receipt, DOGFOOD-03 ungranted alias compose rejection, REFERENCE.md pack-only |
+| B-26-01..03 | `[DONE] ✅` | BETA | S26: Harvest 5 atoms from siblings to Vanguard slots (write-first, pagination, inspect-before-edit, empty ack, permission modes); rejected MCP/loops |
+| B-27-01..03 | `[DONE] ✅` | BETA | S27: Sequenced scaffold skill for live 14b runs without fixture tampering; Q2 remains `[TODO]` for live human dogfooding |
+
 ### Parity matrix (OpenCode / Claude atoms → Vanguard) · S21-G-01
 
 Not a second board. Slot = pack gene, adapter, or port. **Reject** = their loop / MCP / LLM-judge.

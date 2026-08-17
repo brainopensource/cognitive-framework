@@ -75,6 +75,24 @@ class TestPackReconstructions(unittest.TestCase):
         self.assertGreaterEqual(diff_swe, 3, f"SWE-mini differences {diff_swe} < 3")
         self.assertGreaterEqual(diff_opencode, 3, f"OpenCode-shaped differences {diff_opencode} < 3")
 
+    def test_product_pack_declares_index_and_skills(self) -> None:
+        """W11-B / W12-B: vg-code-default declares IndexPort retrieval and skill artifacts."""
+        default_pack = self.loader.load_pack("vg-code-default")
+        self.assertIn("retrieval_policy", default_pack.components_data)
+        retrieval = default_pack.components_data["retrieval_policy"]
+        retrieval_obj = retrieval[0] if isinstance(retrieval, list) else retrieval
+        self.assertEqual(retrieval_obj.get("provider"), "IndexPort")
+
+        # Verify skills loaded
+        skills = default_pack.components_data.get("skill") or default_pack.components_data.get("skills")
+        self.assertIsNotNone(skills)
+        self.assertIsInstance(skills, list)
+        self.assertGreaterEqual(len(skills), 3)
+        skill_ids = [s.get("id") for s in skills]
+        self.assertIn("pytest-green", skill_ids)
+        self.assertIn("read-receipt-before-repatch", skill_ids)
+        self.assertIn("scaffold-python-api-static-html", skill_ids)
+
 
 if __name__ == "__main__":
     unittest.main()

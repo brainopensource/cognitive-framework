@@ -49,6 +49,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -247,6 +248,7 @@ class Harness:
     system_core: str
     tool_schemas: tuple[Mapping[str, Any], ...]
     budget: Mapping[str, int]
+    effect_budget: int
     evaluators: tuple[str, ...]
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
@@ -536,6 +538,49 @@ EVALUATOR_BINDINGS: Mapping[str, type] = {
 # ---------------------------------------------------------------------------
 
 
+def _bwrap_path(*, which: Callable[[str], str | None] = shutil.which) -> str:
+    """Locate rootless Bubblewrap on PATH.
+
+    `N-06` requires containment, not a particular filesystem layout. Asking for
+    an absolute path made composition a claim about one distribution: a host
+    with bubblewrap under /nix/store, /usr/local/bin or /opt could not compose
+    at all. The refusal names the remedy, because "required" without "install
+    this" is a dead end for whoever hits it.
+    """
+
+    found = which("bwrap")
+    if found is None:
+        raise CompositionError(
+            "rootless Bubblewrap is required for product effects, and no 'bwrap' "
+            "was found on PATH. Install bubblewrap (Debian/Ubuntu: "
+            "'apt install bubblewrap'; Fedora: 'dnf install bubblewrap'), or put "
+            "an existing bwrap on PATH."
+        )
+    return found
+
+
+def _reservation_for(budget: Mapping[str, int], effects: int) -> Reservation:
+    """One dispatch's share of the frozen budget policy.
+
+    `K-14` re-enters an approved request at S1, and that re-entry has to hold a
+    reservation. Inventing one at the call site meant the manifest's ceilings
+    did not govern the single dispatch a human had explicitly authorised.
+
+    The share is the run ceiling divided by the effect count the policy itself
+    declares, so a manifest that budgets 128 effects reserves 1/128th per
+    dispatch. Reserving the *whole* ceiling would be equally derived and
+    equally wrong: it denies the second effect of every run.
+
+    A dimension the policy does not name reserves nothing rather than a guess.
+    """
+
+    share = max(int(effects), 1)
+    return Reservation(
+        usd_micros=int(budget.get("usd_micros", 0) or 0) // share,
+        millis=int(budget.get("millis", 0) or 0) // share,
+    )
+
+
 class Runtime:
     """Assembles a harness from a manifest and runs one episode against it."""
 
@@ -621,11 +666,14 @@ class Runtime:
             system_core=system_core,
             tool_schemas=tuple(schemas),
             budget=cls._budget(contents[manifest.budget_policy], manifest.budget_policy),
+            effect_budget=cls._effect_budget(
+                contents[manifest.budget_policy], manifest.budget_policy),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,
             gene_digests=gene_digests,
         )
+
 
     # -- the entrypoint --------------------------------------------------
 
@@ -655,12 +703,12 @@ class Runtime:
         harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
                               bindings=bindings)
         repo = Path(task_context.repo_path).resolve()
-        if not Path("/usr/bin/bwrap").exists():
-            raise CompositionError("rootless Bubblewrap is required for product effects")
+        bwrap = _bwrap_path()
         sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
         sealed_bundle = sealed_dir / "bundle"
         sealed_bundle.write_bytes(b"sealed evaluator mount is intentionally unavailable to worker\n")
-        worker = WorkerProtocol(RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle))
+        worker = WorkerProtocol(
+            RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle, runtime=bwrap))
         environment = SandboxedEnvironmentAdapter(
             worker, repo, environment_id=f"workspace:{repo}")
         clock = clock or _SystemClock()
@@ -689,6 +737,9 @@ class Runtime:
             # Every non-`low` capability the manifest declares is descriptor-
             # bound to a human. The threshold is one number and the manifest
             # supplies the risks it applies to.
+            # TODO(S8-B-04): this literal is the last composition value the
+            # manifest does not own. It is replaced by the approval-threshold
+            # manifest component; Lane B lands that, not this sprint.
             approval_required_above="low",
             risk_of=harness.risk_of,
         )
@@ -758,7 +809,7 @@ class Runtime:
                 classifier=classifier, governor=governor, issuer=issuer,
                 clock=clock, ledger=ledger, events=ledger, sinks=harness.sinks))
             approved.dispatch(request, requested_scope=scope,
-                              reservation=Reservation(usd_micros=100, millis=1000))
+                              reservation=_reservation_for(harness.budget, harness.effect_budget))
             _record(receipts, operator, approved, admit_context=True)
             authorization = None
 
@@ -822,6 +873,26 @@ class Runtime:
             clone["name"] = name
             extra.append(clone)
         return schemas + extra
+
+    @staticmethod
+    def _effect_budget(raw: str, path: str) -> int:
+        """How many effects the policy budgets for one run.
+
+        `F-12`: a policy that declines to bound its effect count gets 1, so the
+        first dispatch reserves the whole ceiling and the second is denied.
+        An absent bound is not a generous bound.
+        """
+        try:
+            policy = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise CompositionError(f"budget policy is not JSON: {path}: {exc}") from exc
+        if "effects" not in policy:
+            return 1
+        try:
+            return max(int(policy["effects"]), 1)
+        except (TypeError, ValueError) as exc:
+            raise CompositionError(
+                f"budget policy effects is not an integer: {path}") from exc
 
     @staticmethod
     def _budget(raw: str, path: str) -> Mapping[str, int]:

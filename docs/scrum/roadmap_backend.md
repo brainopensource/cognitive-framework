@@ -161,7 +161,7 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 
 | ID | Was | Now | Why |
 |---|---|---|---|
-| S8-B-01 | `[CLAIMED — UNREACHABLE]` | **`[DONE]`** | Option (a) delivered: `ProposalKind.SPAWN` wired into episode loop; child `Scope` built fail-closed from `args["scope"]` (missing/junk fails closed); narrowing to `fs.read` prevents `patch.apply`; updated docstrings; 13 tests green. |
+| S8-B-01 | `[CLAIMED — UNREACHABLE]` | **`[DONE]`** | Option (a) delivered: `ProposalKind.SPAWN` wired into episode loop; child `Scope` built fail-closed from `args["scope"]` (missing/junk fails closed); updated docstrings. **Correction (`8f5f16d`, alfa):** the earlier "narrowing to `fs.read` prevents `patch.apply`" claim was verified only against a mock kernel whose own `dispatch` implemented the scope check. Against the real `Kernel`/`StandardPolicy` the child **executed** `patch.apply` — `authorize` never checks `request.action ∈ requested_scope.actions` and the widening predicate reads the principal's held authority, not the episode scope. Child engines are now `attenuated=True` and refuse to emit a request outside their grant; 3 new tests verified failing without the guard. Kernel-side enforcement remains open — needs an ADR (`ADR-0054`). |
 | S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. |
 | S8-A-02 | `[DONE]` | `[DONE]` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
 

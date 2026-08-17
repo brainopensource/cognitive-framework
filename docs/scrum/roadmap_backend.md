@@ -18,7 +18,7 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 
 | Owner | Prefix | Does | Does not |
 |---|---|---|---|
-| **ALFA** | `[alfa]` | Green `t7` + keep `approval_policy` kind row. **S10-A-01…04** (`invocation.py` domain out, `proc.test` bind/delete, `BlobStorePort`+`IndexPort`, `vg why`). | `kernel/**`, `agency/episode/**`, packs, CLI default, telemetry, ADR-0067 |
+| **ALFA** | `[alfa]` | ✅ all rows done. Green `t7` + keep `approval_policy` kind row. **S10-A-01…04** (`invocation.py` domain out, `proc.test` bind/delete, `BlobStorePort`+`IndexPort`, `vg why`). | `kernel/**`, `agency/episode/**`, packs, CLI default, telemetry, ADR-0067 |
 | **BETA** | `[beta]` | Product-default pack + `vg run` default + ACI tool-schema thicken + bind IndexPort when ALFA lands it. P0/P1 in `features_to_add_v430.md`. | `kernel/**`, `engine.py`, `runtime/root.py`, TableWorld/lab rebuild, dogfood-as-DONE without a human |
 | **GAMMA** (CTO+PL+TL+senior) | `[gamma]` | **Everything else still `[TODO]` / `[BLOCKED]` on this file** — Joint, kernel sealed-flag ADR, dogfood *execution*, spend/release text, node suite, daemon J1, Claim wire. See table below. | ALFA’s S10-A files, BETA’s product pack/CLI default, V5 / \(G_C\) / playbooks / MCP *code* |
 
@@ -27,9 +27,9 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | ID | Status | Owner | What |
 |---|---|---|---|
 | S10-A-01 | `[DONE] ✅` | ALFA | Domain out of `invocation.py` (`854e8e8`). Translator is schema+selector; no verb table. |
-| S10-A-02 | `[TODO] ❌` | ALFA bind + BETA JSON | **DECISION (CTO 2026-08-17): DELETE the `proc.test` orphan.** Tests = allowlisted `proc.exec` (`pytest` already on the selector). No second privileged process path. |
-| S10-A-03 | `[TODO] ❌` | ALFA | `BlobStorePort` + `IndexPort` (Aider slot) |
-| S10-A-04 | `[TODO] ❌` | ALFA | `vg why <artifact>` load-bearing |
+| S10-A-02 | `[DONE] ✅` | ALFA | Orphan deleted (`4ee8aaf`) from `WorkerProtocol.SUPPORTED_OPERATIONS` + dispatch. Also fixed: `sandboxed.py` sent `operation="proc.test"` for **every** process call, so the allowlist and ledger saw a name the harness never granted — now `proc.exec`. 3 agreement tests both directions. ⚠️ `test/adapters/test_sandbox_worker.py::test_execute_proc_test` + `::test_proc_test_rejects_shell_string` are red — they assert the deleted op; owner must retarget at `proc.exec`. |
+| S10-A-03 | `[DONE] ✅` | ALFA | `BlobStorePort` + `IndexPort` (`6f392f4`), two impls each per `T10.2`. Index is observation-only — a test asserts no `propose`/`rank`/`select`/`dispatch`. Real index is a regex scan; tree-sitter can replace the body without the port moving. |
+| S10-A-04 | `[DONE] ✅` | ALFA | `vg why` load-bearing (`20e26c9`). `_cmd_ExplainArtifact` returned `{"explanation": ""}`; now derives activation from the ledger, prediction + demotion from the `Claim` store. Absence is reported, never smoothed — unevidenced must not resemble well-evidenced. |
 | P0 / P1 pack+CLI | `[TODO] ❌` | BETA | **Plan approved — execute** `plan_p0_p1_product_pack.md`. Also retarget `test_translate_unknown_tool_fails` (unknown verbs fail at composition, not a builtin list). |
 | S8-J-08 / ADR-0067 | `[DONE] ✅` | **GAMMA** | `Scope.sealed` via `attenuate()`; membership keyed on sealed, not depth. TCB 1333/1438. |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key in the dashboard **first**. No history rewrite until then |

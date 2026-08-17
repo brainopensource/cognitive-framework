@@ -26,12 +26,12 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 
 | ID | Status | Owner | What |
 |---|---|---|---|
-| S10-A-01 | `[TODO] ❌` | ALFA | Domain out of `invocation.py` |
-| S10-A-02 | `[TODO] ❌` | ALFA | `proc.test` bind or delete |
+| S10-A-01 | `[DONE] ✅` | ALFA | Domain out of `invocation.py` (`854e8e8`). Translator is schema+selector; no verb table. |
+| S10-A-02 | `[TODO] ❌` | ALFA bind + BETA JSON | **DECISION (CTO 2026-08-17): DELETE the `proc.test` orphan.** Tests = allowlisted `proc.exec` (`pytest` already on the selector). No second privileged process path. |
 | S10-A-03 | `[TODO] ❌` | ALFA | `BlobStorePort` + `IndexPort` (Aider slot) |
 | S10-A-04 | `[TODO] ❌` | ALFA | `vg why <artifact>` load-bearing |
-| P0 / P1 pack+CLI | `[TODO] ❌` | BETA | Product-default pack, headless `vg run`, thicken same verbs — `features_to_add_v430.md` |
-| S8-J-08 / ADR-0067 | `[BLOCKED]` | **GAMMA** | Sealed/no-widen flag on `Scope` via `attenuate()`; then `authorize` membership. Agency guard at `8f5f16d` stays. Four `expectedFailure` in `test/kernel/test_scope_membership.py` |
+| P0 / P1 pack+CLI | `[TODO] ❌` | BETA | **Plan approved — execute** `plan_p0_p1_product_pack.md`. Also retarget `test_translate_unknown_tool_fails` (unknown verbs fail at composition, not a builtin list). |
+| S8-J-08 / ADR-0067 | `[DONE] ✅` | **GAMMA** | `Scope.sealed` via `attenuate()`; membership keyed on sealed, not depth. TCB 1333/1438. |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key in the dashboard **first**. No history rewrite until then |
 | S8-J-01 | `[TODO] ❌` | GAMMA | VG-04 Claim reader fields + golden vectors; then emit `support_count` / `last_corroborated_at` / `protection_class` |
 | S8-J-03 + Q2 | `[TODO] ❌` | GAMMA | **Execute** DOGFOOD-01..03 (protocol is `[DONE]` as S9-J-01). Interactive, no mid-run hand-patch. LAM cassettes do not count |
@@ -274,7 +274,7 @@ Lane C coding `[DONE]`. No published **lift** / no cloud spend until S9-J-03.
 | S9-C-07 | `[DONE] ✅` | C | Seeded sabotage: cheats must fail (`test/lab/test_seeded_sabotage.py`) |
 | S9-B-01 | `[DONE] ✅` | B | Real reconstructions: 4 packs differ on ≥3 DNA dimensions (`test/agency/test_reconstructions.py`) + `REFERENCE.md` per pack |
 | S9-B-02 | `[DONE] ✅` | B | `vg harness build\|run\|diff\|bench` (`lab/build.py`, `lab/run.py`, `lab/diff.py`, `lab/bench.py`) with pre-reg hash enforcement |
-| S8-J-08 | `[BLOCKED]` | A | **ADR-0067 kernel scope membership — proposed, not implemented.** Attempted in `policy.py` and reverted: a blanket `action ∉ requested_scope.actions` deny breaks `test_widening_alone_is_not_a_violation`, where widening under *trusted* justification is a designed property. Keying on `depth > 0` also fails — spine's `requested_scope()` is depth 1, strictly narrower, and still legitimately widens. **Needs a sealed/no-widening flag on `Scope` set by `attenuate()`** = `kernel/attenuation.py`, outside the policy.py-only exception. Exploit path stays closed at the agency boundary (`8f5f16d`); `test/kernel/test_scope_membership.py` keeps 4 `expectedFailure` markers so the gap is live. |
+| S8-J-08 | `[DONE] ✅` | A | **ADR-0067 accepted.** `Scope.sealed` set by `attenuate()` when the parent withholds verbs; `authorize` denies `action ∉ requested_scope.actions` only when sealed. Spine trusted-widening preserved. TCB 1333/1438. |
 | S9-A-01 | `[DONE] ✅` | A | Instrument fields on `RunResult` — `gene_digests`, `state_digest`, per-arm `instrument_error`. **Finding:** `composition_digest` binds `episode_id`, so `gene_digests` is the cross-run pack identity attribution must group on. Recorded, not changed (`L-1`). |
 | S9-A-02 | `[DONE] ✅` | A | Integer micros/tokens/USD only — `runtime/telemetry.py::RunTelemetry`, rejects floats and `bool`; absent stays `None`, never `0`. |
 | S9-A-03 | `[DONE] ✅` | A | `RunResult.replay_gaps()` — executable audit vs Phase 4 `V5-A`, with a failing counterpart (`A-10`). |
@@ -292,8 +292,8 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
-| S10-A-01 | `[TODO] ❌` | A → **ALFA** | Domain out of `invocation.py` into manifest rows |
-| S10-A-02 | `[TODO] ❌` | A → **ALFA** | `proc.test` bind or delete orphan |
+| S10-A-01 | `[DONE] ✅` | A → **ALFA** | Domain out of `invocation.py` (`854e8e8`) |
+| S10-A-02 | `[TODO] ❌` | A → **ALFA** | **DELETE `proc.test` orphan**; tests via allowlisted `proc.exec` (BETA freezes pack JSON) |
 | S10-A-03 | `[TODO] ❌` | A → **ALFA** | `BlobStorePort` + `IndexPort` (fake + real; Aider repo-map slot) |
 | S10-A-04 | `[TODO] ❌` | A → **ALFA** | `vg why <artifact>` |
 | S10-B-01 | `[DONE] ✅` | B | TableWorld (`adapters/environment/tableworld.py`, `vg-table-default` pack, invariant evaluator, abstention on inconsistency) |

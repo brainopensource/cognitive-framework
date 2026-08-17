@@ -201,6 +201,15 @@ class ConstraintCeilings(unittest.TestCase):
                      constraints=fakes.constraints(), depth=parent.constraints.max_depth)
         self.assertFalse(attenuate(deep, fakes.child_scope()).ok)
 
+    def test_a_child_is_sealed_when_the_parent_withholds_verbs(self) -> None:
+        """`ADR-0067`: withheld verbs mark the grant sealed; equal verbs do not."""
+        parent = fakes.parent_scope()
+        narrowed = attenuate(parent, fakes.child_scope()).granted
+        self.assertTrue(narrowed.sealed)
+        same = attenuate(parent, fakes.child_scope(actions=parent.actions,
+                                                  resources=parent.resources)).granted
+        self.assertFalse(same.sealed)
+
 
 class GrantObligations(unittest.TestCase):
     """`K-18`..`K-21`, `K-49` — and `MF-KRN-003`, `MF-KRN-005`."""

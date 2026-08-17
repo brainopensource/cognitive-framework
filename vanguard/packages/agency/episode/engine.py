@@ -14,9 +14,9 @@ There is exactly one path from a proposal to an effect and it is
 `Kernel.dispatch` (`05 §2.1`, `AT-01`). This module builds an `EffectRequest`
 and hands it over; it issues no grant, opens no lease, and resolves no denial.
 
-Depth-1 (`REQ-EXEC-001`): a turn produces one effect request. Recursion is a
-budget dimension the kernel already enforces, and this engine never re-enters
-itself.
+Recursion (`S8-B-01`): when a proposal requests `spawn`, the engine delegates
+to `spawn()`, executing an attenuated child episode under budget conservation
+and returning a value-only outcome (ADR-0060).
 
 The provider is consumed structurally (`propose(context, tools, sampling)`
 returning a typed result — `ICD §4`). It is annotated `Any` on purpose: the
@@ -29,6 +29,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Any, Mapping, Sequence
 
+from ...domain.canonicalisation.digest import digest_of
 from ...kernel import (
     EffectRequest,
     Event,
@@ -192,6 +193,44 @@ class EpisodeEngine:
             if terminal is not None:
                 episode = episode.terminated(terminal, proposal.note)
                 break
+
+            # -- spawn proposal runs an attenuated child episode (S8-B-01 / ADR-0060) --
+            if proposal.kind == ProposalKind.SPAWN or proposal.action in ("agency.spawn", "spawn"):
+                child_brief = str(proposal.args.get("brief") or proposal.note or "")
+                raw_scope = proposal.args.get("scope")
+                child_scope = raw_scope if isinstance(raw_scope, Scope) else self._scope
+                spawn_res = self.spawn(
+                    child_scope=child_scope,
+                    brief=child_brief,
+                    episode_id=f"{episode.episode_id}.child.{episode.turn_count}",
+                    run_id=episode.run_id,
+                    principal=episode.principal,
+                    parent_episode_id=episode.episode_id,
+                    parent_lease=self._parent_lease,
+                )
+                turn = Turn(
+                    index=episode.turn_count,
+                    state_digest=episode.state_digest(),
+                    proposal_descriptor=proposal.descriptor,
+                    receipt_digest=digest_of({
+                        "spawn": spawn_res.ok,
+                        "detail": spawn_res.detail,
+                        "payload": spawn_res.payload,
+                    }),
+                    progress_signal="ok" if spawn_res.ok else "spawn_denied",
+                )
+                repeats = episode.repeats(turn, limit=self._no_progress_limit)
+                episode = episode.with_turn(turn)
+                if not spawn_res.ok and "depth ceiling" in spawn_res.detail:
+                    episode = episode.terminated(RunTermination.ABANDONED, spawn_res.detail)
+                    break
+                if repeats:
+                    episode = episode.terminated(
+                        RunTermination.ABANDONED,
+                        f"no progress over {self._no_progress_limit} turns",
+                    )
+                    break
+                continue
 
             # -- authorise + effect + receipt, through the one path ------
             request = self._to_effect_request(episode, proposal, accumulated)

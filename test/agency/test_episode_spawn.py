@@ -314,6 +314,46 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
             gov.reserve("run-1", Reservation(usd_micros=5_000), parent_lease_id=l1.lease_id)
         self.assertEqual(cm.exception.reason, "parent_closed")
 
+    def test_model_proposal_triggers_spawn_in_episode_loop(self) -> None:
+        """A model proposal of kind='spawn' starts a recursive child episode in the loop (Choice A reachable)."""
+        from vanguard.packages.ports.event_store import Result
+
+        class MultiTurnModel:
+            def __init__(self) -> None:
+                self.parent_turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                ep_id = str(view.get("episodeId", ""))
+                if "child" in ep_id:
+                    return Result.success({"kind": "finish", "note": "child finished subtask"})
+                self.parent_turns += 1
+                if self.parent_turns == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "child subtask"},
+                        "note": "spawning helper",
+                    })
+                return Result.success({"kind": "finish", "note": "task completed after child"})
+
+        engine = EpisodeEngine(
+            kernel=self.kernel,
+            model=MultiTurnModel(),
+            clock=self.clock,
+            events=self.events,
+            scope=self.parent_scope,
+        )
+
+        outcome = engine.run(
+            episode_id="ep-parent-spawn-loop",
+            run_id="run-1",
+            principal="parent-agent",
+            brief="coordinate work",
+        )
+
+        self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
+        self.assertEqual(outcome.episode.turn_count, 1)
+        self.assertEqual(outcome.episode.turns[0].progress_signal, "ok")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,1 +1,1 @@
-{"name":"read","verb":"fs.read","description":"Read file content from the workspace with selector verification."}
+{"name":"read","verb":"fs.read","description":"Read a workspace file.","schema":{"type":"object","properties":{"path":{"type":"string","description":"Workspace-relative path"}},"required":["path"],"additionalProperties":false}}

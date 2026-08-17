@@ -30,7 +30,7 @@ from vanguard.packages.ports.event_store import Result
 
 
 CONTEXT = {"blocks": [{"label": "L5", "content": "say hello"}]}
-TOOLS = [{"name": "read", "schema": {"type": "object"}}]
+TOOLS = [{"name": "read", "verb": "fs.read", "schema": {"type": "object"}}]
 SAMPLING = {"temperature": 0.0, "maxTokens": 8}
 PROPOSAL = {"text": "hello from cassette", "toolCalls": []}
 SECRET = "sk-test-secret-do-not-leak"

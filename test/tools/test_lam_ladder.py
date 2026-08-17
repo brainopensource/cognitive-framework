@@ -33,7 +33,8 @@ class TestLamLadder(unittest.TestCase):
             }
 
         row = run_ladder("nvidia/nemotron-3-super-120b-a12b:free", "t1-calculator", complete=fake_complete)
-        self.assertTrue(row["passed"])
+        self.assertFalse(row["passed"])
+        self.assertEqual(row["evidence_label"], "live-openrouter")
         self.assertEqual(row["total_tokens"], 30)
 
     def test_escalation_stops_on_failure(self) -> None:

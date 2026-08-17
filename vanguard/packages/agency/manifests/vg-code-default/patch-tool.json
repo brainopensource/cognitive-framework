@@ -1,1 +1,1 @@
-{"name":"patch","verb":"patch.apply","description":"Apply a validated unified diff patch to workspace files."}
+{"name":"patch","verb":"patch.apply","description":"Apply a unified diff to the workspace.","schema":{"type":"object","properties":{"path":{"type":"string","description":"Primary file touched by the diff"},"diff":{"type":"string","description":"Unified diff text"}},"required":["path","diff"],"additionalProperties":false}}

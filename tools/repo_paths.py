@@ -6,13 +6,18 @@ locations through this module. Callers must not scatter replacement
 literals for the documentation move:
 
     docs/v4            -> docs/main_v4
-    docs/sprintN       -> docs/agile/sprintN
+    docs/sprintN       -> docs/scrum/sprints/sprintN
+    docs/agile/sprintN -> docs/scrum/sprints/sprintN
     docs/review        -> docs/reviews
-    docs/development   -> docs/development_guides
+    docs/development   -> docs/scrum/development_guides
 
 Commands are independent of the process working directory: ``repo_root()``
 walks from this file (and, if needed, from cwd) until the live layout is
 found. A missing file is never treated as satisfied evidence.
+
+S7-A-07: the `docs/agile` -> `docs/scrum` restructure moved every sprint
+directory under `docs/scrum/sprints/`. The pre-restructure layout is kept as a
+resolution fallback only; it is never the answer on a live tree.
 """
 
 from __future__ import annotations
@@ -23,8 +28,16 @@ from pathlib import Path
 
 CANONICAL = {
     "docs_main_v4": "docs/main_v4",
-    "docs_agile": "docs/agile",
+    "docs_scrum": "docs/scrum",
+    "docs_sprints": "docs/scrum/sprints",
     "docs_reviews": "docs/reviews",
+    "docs_development_guides": "docs/scrum/development_guides",
+}
+
+# Pre-restructure layout, retained for resolution fallback only.
+LEGACY = {
+    "docs_scrum": "docs/agile",
+    "docs_sprints": "docs/agile",
     "docs_development_guides": "docs/development_guides",
 }
 
@@ -33,7 +46,7 @@ LIVE_PREFIXES = tuple(CANONICAL.values()) + (
     "docs/agile/",
     "docs/main_v4/",
     "docs/reviews/",
-    "docs/development_guides/",
+    "docs/scrum/",
 )
 
 # Obsolete layouts left behind by the documentation move.
@@ -96,11 +109,24 @@ def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     return root.joinpath(base, *parts)
 
 
-def docs_agile(*parts: str | os.PathLike[str]) -> Path:
+def docs_scrum(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
-    if (root / CANONICAL["docs_agile"]).exists():
-        return root.joinpath(CANONICAL["docs_agile"], *parts)
+    if (root / CANONICAL["docs_scrum"]).exists():
+        return root.joinpath(CANONICAL["docs_scrum"], *parts)
+    if (root / LEGACY["docs_scrum"]).exists():
+        return root.joinpath(LEGACY["docs_scrum"], *parts)
     return root.joinpath("docs", *parts)
+
+
+def docs_sprint(sprint: str, *parts: str | os.PathLike[str]) -> Path:
+    """Resolve a sprint directory. Sprints live under `docs/scrum/sprints/`."""
+
+    root = repo_root()
+    if (root / CANONICAL["docs_sprints"]).exists():
+        return root.joinpath(CANONICAL["docs_sprints"], sprint, *parts)
+    if (root / LEGACY["docs_sprints"]).exists():
+        return root.joinpath(LEGACY["docs_sprints"], sprint, *parts)
+    return root.joinpath("docs", sprint, *parts)
 
 
 def docs_reviews(*parts: str | os.PathLike[str]) -> Path:
@@ -114,45 +140,58 @@ def docs_development_guides(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
     if (root / CANONICAL["docs_development_guides"]).exists():
         return root.joinpath(CANONICAL["docs_development_guides"], *parts)
+    if (root / LEGACY["docs_development_guides"]).exists():
+        return root.joinpath(LEGACY["docs_development_guides"], *parts)
     return root.joinpath("docs", "development", *parts)
 
 
 def active_mvp_contract() -> Path:
-    return docs_agile("sprint0", "active-mvp-contract.json")
+    return docs_sprint("sprint0", "active-mvp-contract.json")
 
 
 def baseline_manifest() -> Path:
-    return docs_agile("sprint0", "baseline-manifest.json")
+    return docs_sprint("sprint0", "baseline-manifest.json")
 
 
 def schema_archaeology_traces() -> Path:
-    return docs_agile("sprint0", "schema-archaeology", "traces")
+    return docs_sprint("sprint0", "schema-archaeology", "traces")
+
+
+def preregistered_oracles() -> Path:
+    return docs_sprint("sprint6B", "preregistered_oracles.json")
 
 
 def kernel_tcb_budget() -> Path:
-    return docs_agile("sprint2", "kernel-tcb-budget.json")
+    p = repo_path("tools", "kernel-tcb-budget.json")
+    if p.exists():
+        return p
+    return docs_sprint("sprint2", "kernel-tcb-budget.json")
 
 
 def rewrite_legacy_doc_path(value: str) -> str:
     """Map a single obsolete docs path to the live layout. Identity if already live."""
 
     text = value.replace("\\", "/")
-    if text.startswith("docs/development_guides"):
+    if text.startswith("docs/scrum"):
         return value
     if text.startswith("docs/reviews"):
         return value
     if text.startswith("docs/main_v4"):
         return value
-    if text.startswith("docs/agile/"):
-        return value
     if text.startswith("docs/v4"):
         return "docs/main_v4" + text[len("docs/v4") :]
+    if text.startswith("docs/agile/sprint"):
+        return "docs/scrum/sprints/" + text[len("docs/agile/") :]
+    if text.startswith("docs/agile/"):
+        return "docs/scrum/" + text[len("docs/agile/") :]
     if text.startswith("docs/sprint"):
-        return "docs/agile/" + text[len("docs/") :]
+        return "docs/scrum/sprints/" + text[len("docs/") :]
+    if text.startswith("docs/development_guides"):
+        return "docs/scrum/development_guides" + text[len("docs/development_guides") :]
     if text.startswith("docs/review"):
         return "docs/reviews" + text[len("docs/review") :]
     if text.startswith("docs/development"):
-        return "docs/development_guides" + text[len("docs/development") :]
+        return "docs/scrum/development_guides" + text[len("docs/development") :]
     return value
 
 

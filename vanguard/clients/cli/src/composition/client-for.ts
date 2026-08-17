@@ -1,0 +1,44 @@
+import { LiveRuntimeClient } from "../adapters/live.js";
+import { ReplayRuntimeClient } from "../adapters/replay.js";
+import { ScenarioRuntimeClient } from "../adapters/scenario.js";
+import { OperatorSigner } from "../adapters/signer.js";
+import type { CliOptions } from "../application/commands.js";
+import type { RuntimeClient } from "../contract/types.js";
+import { demoFixturePath, packageRootFrom } from "./catalog.js";
+
+async function* stdinLines(): AsyncIterable<string> {
+  let buffer = "";
+  for await (const chunk of process.stdin) {
+    buffer += String(chunk);
+    const parts = buffer.split(/\r?\n/);
+    buffer = parts.pop() ?? "";
+    for (const line of parts) if (line.trim()) yield line;
+  }
+  if (buffer.trim()) yield buffer;
+}
+
+export function clientFor(parsed: CliOptions): RuntimeClient {
+  if (parsed.demo) {
+    const scenario = parsed.demoScenario ?? "successful-episode";
+    const path = demoFixturePath(packageRootFrom(import.meta.url), scenario);
+    return ReplayRuntimeClient.fromFile(path, "mock");
+  }
+  if (parsed.replay) return ReplayRuntimeClient.fromFile(parsed.replay);
+  if (parsed.scenario) return new ScenarioRuntimeClient();
+  if (parsed.feed) {
+    return new LiveRuntimeClient(stdinLines(), {
+      repo: parsed.repo,
+      prompt: parsed.prompt,
+      model: parsed.model,
+    });
+  }
+  return new LiveRuntimeClient(undefined, {
+    repo: parsed.repo,
+    prompt: parsed.prompt,
+    model: parsed.model,
+    autoApprove: parsed.autoApprove,
+    socketPath: parsed.socketPath,
+    manifest: parsed.manifest,
+    signer: OperatorSigner.loadOrCreate(),
+  });
+}

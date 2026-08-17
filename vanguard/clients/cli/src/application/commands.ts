@@ -18,6 +18,8 @@ export type CliOptions = {
   decision?: "approve" | "reject";
   autoApprove?: boolean;
   socketPath?: string;
+  demo?: boolean;
+  demoScenario?: string;
 };
 
 export async function streamRun(
@@ -156,11 +158,23 @@ export async function streamTrace(
   return hasEvents ? 0 : 2;
 }
 
+const J1_MESSAGE =
+  "Daemon self-launch is not available until Joint note J1 (the RuntimeService server module has no __main__). Start the RuntimeService process yourself, then use vg daemon status.";
+
 export async function manageDaemon(
   client: RuntimeClient,
   action: "start" | "status" | "stop",
   write: (line: string) => void
 ): Promise<number> {
+  if (action === "start" || action === "stop") {
+    write(
+      jsonLine({
+        ok: false,
+        error: { code: "not_available", message: J1_MESSAGE, retryable: false, details: { joint: "J1", action } },
+      })
+    );
+    return 2;
+  }
   const status = await client.getDaemonStatus();
   if (!status.ok) {
     write(jsonLine({ ok: false, error: status.error }));

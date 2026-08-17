@@ -12,9 +12,9 @@ _TOOLS = Path(__file__).resolve().parent
 if str(_TOOLS) not in sys.path:
     sys.path.insert(0, str(_TOOLS))
 
-from repo_paths import docs_agile, repo_root, stale_path_matches
+from repo_paths import docs_sprint, repo_root, stale_path_matches
 
-SCHEMA_PATH = docs_agile("sprint6B", "gate-receipt.schema.json")
+SCHEMA_PATH = docs_sprint("sprint6B", "gate-receipt.schema.json")
 GATES = {f"R{i}" for i in range(11)}
 RESULTS = {"PASS", "FAIL", "BLOCKED"}
 RELATIONS = {"same-commit", "ci-artifact", "follow-up-commit"}

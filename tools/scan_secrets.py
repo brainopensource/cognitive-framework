@@ -27,7 +27,9 @@ FAKE_ALLOWLIST = {
 RULES = (
     ("openrouter-key-assignment", re.compile(r"OPENROUTER_API_KEY\s*=\s*['\"]?(sk-|or-)")),
     ("generic-sk-live", re.compile(r"sk-or-v1-[A-Za-z0-9]{16,}")),
-    ("pem-private-key", re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----")),
+    # A bare PEM header carries no key material; security prose quotes it constantly.
+    # Real key material always has a base64 body on the following line, so require one.
+    ("pem-private-key", re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----\s*\r?\n[A-Za-z0-9+/=]{32,}")),
     ("aws-access-key", re.compile(r"AKIA[0-9A-Z]{16}")),
 )
 

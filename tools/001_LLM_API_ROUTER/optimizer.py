@@ -25,9 +25,24 @@ class ProviderOptimizer:
         scenario_tier: int,
         policy: str = "balanced",
         budget_remaining_usd: float = 0.50,
+        calibration_passed: bool = False,
     ) -> Dict[str, Any]:
-        """Recommend the optimal model provider based on scenario tier and optimization policy."""
+        """Recommend a provider. Paid/high tiers require calibration_passed."""
         policy_clean = policy.lower().strip()
+
+        if not calibration_passed:
+            if scenario_tier <= 2 or policy_clean in {"min-cost", "balanced"}:
+                if scenario_tier <= 2:
+                    return {
+                        "provider": "ollama",
+                        "model": "llama3.2:3b",
+                        "reason": "Calibration-first: local until a hidden-oracle patch exists",
+                    }
+                return {
+                    "provider": "ollama",
+                    "model": "llama3.2:3b",
+                    "reason": "Calibration-first: refuse paid routing before T1 pass",
+                }
 
         if policy_clean == "min-cost" or budget_remaining_usd <= 0.0:
             if scenario_tier <= 2:

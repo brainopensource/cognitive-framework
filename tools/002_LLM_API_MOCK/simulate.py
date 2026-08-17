@@ -11,13 +11,19 @@ from typing import Any
 
 from engine import LamEngine
 from pricing import sonnet_usd
+from verdict import evidence_label, pytest_passed
 
 _HERE = Path(__file__).resolve().parent
 _ENGINE = LamEngine.from_directory(_HERE / "scenarios")
 
+_PACK_PROMPT = (
+    Path(__file__).resolve().parents[2]
+    / "vanguard/packages/agency/manifests/vg-code-default/system-prompt.txt"
+)
 SYSTEM = (
-    "You are OpenCode, an expert autonomous software engineer. "
-    "Use provided tools to investigate and fix bugs. Never guess file contents."
+    _PACK_PROMPT.read_text(encoding="utf-8").strip()
+    if _PACK_PROMPT.is_file()
+    else "Act on the repository task using typed tools. Verify tests pass."
 )
 
 
@@ -74,11 +80,12 @@ def simulate_scenario(scenario_id: str) -> dict[str, Any]:
                 )
 
     wall_ms = (time.perf_counter() - started) * 1000
-    has_passed = any("passed" in str(msg.get("content", "")).lower() for msg in messages if msg.get("role") == "tool") or calls > 1
+    has_passed = pytest_passed(workspace)
     return {
         "scenario": scenario_id,
         "tier": scenario.tier,
         "passed": has_passed,
+        "evidence_label": evidence_label("lam"),
         "llm_calls": calls,
         "prompt_tokens": prompt_tokens,
         "completion_tokens": completion_tokens,

@@ -195,12 +195,50 @@ class GitEnvironment:
                 return Result.fail("instrument_error", f"failed to read {path_str}: {exc}")
 
             norm_rel = os.path.normpath(path_str).replace("\\", "/")
+            lines = content.splitlines(keepends=True)
+            total_lines = len(lines)
+
+            offset_val = req.args.get("offset")
+            limit_val = req.args.get("limit")
+
+            if offset_val is not None or limit_val is not None or total_lines > 100:
+                try:
+                    offset = max(0, int(offset_val)) if offset_val is not None else 0
+                except (ValueError, TypeError):
+                    offset = 0
+                try:
+                    limit = max(1, int(limit_val)) if limit_val is not None else 100
+                except (ValueError, TypeError):
+                    limit = 100
+
+                selected_lines = lines[offset:offset + limit]
+                paginated_content = "".join(selected_lines)
+                has_more = (offset + len(selected_lines)) < total_lines
+                if has_more:
+                    paginated_content += f"\n[... {total_lines - (offset + len(selected_lines))} remaining lines. Use offset={offset + len(selected_lines)} to continue ...]\n"
+
+                return Result.success(
+                    Observation(
+                        action="read",
+                        content=paginated_content,
+                        files=(norm_rel,),
+                        metadata={
+                            "bytes": len(content.encode("utf-8")),
+                            "digest": _compute_file_digest(content),
+                            "total_lines": total_lines,
+                            "offset": offset,
+                            "limit": limit,
+                            "has_more": has_more,
+                        },
+                    )
+                )
+
             return Result.success(
                 Observation(
                     action="read",
                     content=content,
                     files=(norm_rel,),
-                    metadata={"bytes": len(content.encode("utf-8")), "digest": _compute_file_digest(content)},
+                    metadata={"bytes": len(content.encode("utf-8")), "digest": _compute_file_digest(content), "total_lines": total_lines},
                 )
             )
 
@@ -219,6 +257,9 @@ class GitEnvironment:
             )
             matches: list[dict[str, Any]] = []
             matching_files: list[str] = []
+            file_match_counts: dict[str, int] = {}
+            max_snippets_per_file = 3
+
             if grep_proc.returncode == 0:
                 for line in grep_proc.stdout.splitlines():
                     parts = line.split(":", 2)
@@ -228,16 +269,20 @@ class GitEnvironment:
                             l_num = int(line_no)
                         except ValueError:
                             l_num = 1
-                        matches.append({"file": f_path, "line": l_num, "content": text})
                         if f_path not in matching_files:
                             matching_files.append(f_path)
+                            file_match_counts[f_path] = 0
+                        if file_match_counts[f_path] < max_snippets_per_file:
+                            snippet_text = text[:120] + ("..." if len(text) > 120 else "")
+                            matches.append({"file": f_path, "line": l_num, "content": snippet_text})
+                            file_match_counts[f_path] += 1
 
             return Result.success(
                 Observation(
                     action=action,
                     matches=tuple(matches),
                     files=tuple(matching_files),
-                    metadata={"total_matches": len(matches)},
+                    metadata={"total_matches": len(matches), "matching_files": len(matching_files)},
                 )
             )
 
@@ -570,6 +615,19 @@ class GitEnvironment:
                     file_path.write_text(content, encoding="utf-8")
 
             result_digest = digest_of({"affected": [a.resource for a in affected], "diff": diff_txt})
+
+            # Non-evaluating syntax observation receipt (S8-B-09 / A-05)
+            syntax_receipts: list[str] = []
+            import ast
+            for rel_name, content in planned_files.items():
+                if content is not None and rel_name.endswith(".py"):
+                    try:
+                        ast.parse(content, filename=rel_name)
+                    except SyntaxError as syn_err:
+                        syntax_receipts.append(f"syntax_observation: {rel_name}:{syn_err.lineno}: {syn_err.msg}")
+
+            receipt_output = "\n".join(syntax_receipts) if syntax_receipts else None
+
             return Result.success(
                 EffectReceipt(
                     descriptor_digest=descriptor_digest,
@@ -578,6 +636,7 @@ class GitEnvironment:
                     result_digest=result_digest,
                     affected_resources=tuple(affected),
                     diff=diff_txt,
+                    output=receipt_output,
                 )
             )
 
@@ -651,6 +710,10 @@ class GitEnvironment:
                 output = proc.stdout + (("\n" + proc.stderr) if proc.stderr else "")
             except OSError as exc:
                 return Result.fail("instrument_error", f"failed to execute command {cmd!r}: {exc}")
+
+            # Empty-output acknowledgement (S8-B-08)
+            if exit_code == 0 and not output.strip():
+                output = "Command executed successfully with no output."
 
             outcome = "ok" if exit_code == 0 else "failed"
             result_digest = digest_of({"command": list(cmd), "exit_code": exit_code, "output": output})

@@ -7,8 +7,8 @@ import { fileURLToPath } from "node:url";
 import { reduceRunView, emptyRunView } from "../src/application/run-view.js";
 import { captureCorrection, correctionReasonForKey } from "../src/application/corrections.js";
 import { dispatchApproval } from "../src/application/approvals.js";
-import { approvalActionForKey } from "../src/ui/keys.js";
-import { colorizeUnifiedDiff } from "../src/ui/diff.js";
+import { approvalActionForKey } from "../src/tui/keys.js";
+import { colorizeUnifiedDiff } from "../src/tui/diff.js";
 import type {
   CorrectionRecord,
   EventEnvelope,
@@ -145,4 +145,20 @@ test("headless command module does not import Ink UI screens", () => {
   while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
   const source = readFileSync(join(dir, "src/application/commands.ts"), "utf8");
   assert.equal(/from ["'].*ui\//.test(source), false);
+  assert.equal(/from ["'].*tui\//.test(source), false);
+});
+
+test("application layer does not import tui presentation", () => {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
+  const files = [
+    "src/application/commands.ts",
+    "src/application/run-view.ts",
+    "src/application/approvals.ts",
+    "src/application/corrections.ts",
+  ];
+  for (const rel of files) {
+    const source = readFileSync(join(dir, rel), "utf8");
+    assert.equal(/from ["'].*\/tui\//.test(source), false, rel);
+  }
 });

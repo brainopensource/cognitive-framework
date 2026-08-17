@@ -1,17 +1,33 @@
-# `vg` CLI / TUI (T6.4 scaffold)
+# `vg` CLI / TUI
 
-This is the approved permanent client boundary described in [`docs/development/cli_tui_architecture.md`](../../../docs/development/cli_tui_architecture.md). It stays outside the six core packages and may depend only on the domain wire vocabulary and the runtime client surface.
+Ink client for the RuntimeService daemon. Architecture: [`docs/scrum/development_guides/cli_tui_architecture.md`](../../../docs/scrum/development_guides/cli_tui_architecture.md). Lane lock: [`docs/scrum/development_guides/frontend_senior_review_and_two_lanes.md`](../../../docs/scrum/development_guides/frontend_senior_review_and_two_lanes.md).
 
-This package provides the operator surface before the real runtime is available. It uses a deterministic `MockRuntime` behind the same `RuntimePort` that the runtime composition root will implement later.
+Requires Node ≥ 20. Do not import `vanguard/packages`.
+
+## Install
+
+```bash
+# channel 1
+bash install.sh
+# channel 2
+npm install -g .
+```
+
+## Flags
+
+`vg --help` lists: `--headless --feed --scenario --demo --replay --run-id --resume --checkpoint-every --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y --help`.
+
+Socket path: `--socket-path` → `VANGUARD_RUNTIME_SOCKET` → `/tmp/vanguard-runtime.sock`.
+
+## Examples
 
 ```bash
 npm install
-npm run vg -- run . --headless --run-id demo
-npm run vg -- run .
-npm run vg -- trace demo --headless
-npm run vg -- why typed-tools --headless
+npm run typecheck && npm test
+vg run --demo --headless
+vg run . --headless --prompt "fix the test" --manifest ./manifest.json
+vg daemon status
+vg --help
 ```
 
-The headless mode emits one JSON object per line for integration tests. The TUI shows the same event stream and supports `c` to cancel and `q` to quit. Checkpoints are emitted every two steps by default; use `--checkpoint-every N`. `--resume RUN_ID` exercises the resume path in the mock adapter.
-
-Integration boundary: replace `MockRuntime` construction in `src/main.tsx` with the runtime client/daemon adapter. Commands and TUI should continue to consume only `RuntimePort` and `RuntimeEvent`.
+`--demo` replays `fixtures/sessions/` and labels `source: mock`. It does not open the daemon socket.

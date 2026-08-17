@@ -23,6 +23,7 @@ __all__ = [
     "ProposalKind",
     "ProposalMalformed",
     "RunTermination",
+    "SpawnResult",
     "Turn",
 ]
 
@@ -45,6 +46,20 @@ class RunTermination(str, Enum):
     ABANDONED = "abandoned"
 
 
+@dataclass(frozen=True, slots=True)
+class SpawnResult:
+    """The structured, value-only outcome of spawning a child episode (S8-B-01).
+
+    Never carries a mutable engine handle or shared mutable state.
+    """
+
+    ok: bool
+    payload: Any = None
+    terminal: RunTermination = RunTermination.COMPLETED
+    detail: str = ""
+    turns: int = 0
+
+
 class ProposalKind(str, Enum):
     """What the operator asked for this turn."""
 
@@ -52,6 +67,7 @@ class ProposalKind(str, Enum):
     FINISH = "finish"
     ABSTAIN = "abstain"
     ESCALATE = "escalate"
+    SPAWN = "spawn"
 
 
 #: Terminals a non-effect proposal reduces to directly (`VG-03 §6.1`).
@@ -103,6 +119,19 @@ def parse_proposal(value: Any) -> Proposal:
     except ValueError as exc:
         raise ProposalMalformed(f"unknown proposal kind {raw_kind!r}") from exc
 
+    if kind == ProposalKind.SPAWN:
+        args = value.get("args", {})
+        if args is None:
+            args = {}
+        if not isinstance(args, Mapping):
+            raise ProposalMalformed("args must be an object")
+        return Proposal(
+            kind=kind,
+            action=str(value.get("action") or "spawn"),
+            args=dict(args),
+            note=str(value.get("note", "")),
+        )
+
     if kind is not ProposalKind.EFFECT:
         return Proposal(kind=kind, note=str(value.get("note", "")))
 
@@ -149,7 +178,7 @@ class Turn:
 
 @dataclass(frozen=True, slots=True)
 class Episode:
-    """Immutable episode state. Depth-1: an episode spawns no sub-episode."""
+    """Immutable episode state. Recursion: an episode may spawn child episodes under attenuated scope (S8-B-01)."""
 
     episode_id: str
     run_id: str

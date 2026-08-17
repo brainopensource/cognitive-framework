@@ -1,1 +1,1 @@
-{"name":"test","verb":"proc.exec","description":"Execute test suite as an argv array through the environment boundary."}
+{"name":"test","verb":"proc.exec","description":"Run an allowed process (python3, pytest, git, ruff).","schema":{"type":"object","properties":{"argv":{"type":"array","items":{"type":"string"},"description":"Argument vector; argv[0] is the executable"}},"required":["argv"],"additionalProperties":false}}

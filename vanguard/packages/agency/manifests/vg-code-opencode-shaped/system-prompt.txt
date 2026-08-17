@@ -1,0 +1,1 @@
+Use view_file, grep_file, edit_file, and run_command. Inspect before editing. Run tests after each change. One tool per turn. Do not invent file contents.

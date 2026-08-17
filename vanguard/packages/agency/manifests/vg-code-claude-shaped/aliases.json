@@ -1,0 +1,6 @@
+{
+  "Read": "fs.read",
+  "Grep": "fs.search",
+  "Edit": "patch.apply",
+  "Bash": "proc.exec"
+}

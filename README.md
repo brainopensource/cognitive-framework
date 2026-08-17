@@ -93,7 +93,7 @@ Aether-D-System/
 │   └── manifest.json                # Immutable release build SHA-256 digests
 ├── docs/
 │   ├── main_v4/                     # Normative Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
-│   ├── reviews/todo/                # S7–S10 Master Architectural Roadmap
+│   ├── reviews/done/                # S7–S10 Master Architectural Roadmap
 │   └── agile/sprint6B/              # Gate R0–R10 release evidence & dogfood log
 ├── tools/                           # Boundary check, TCB budget, secret scan, & dogfood tools
 └── vanguard/packages/               # Physical package boundaries (enforced in CI)
@@ -149,13 +149,37 @@ $$\text{domain} \longleftarrow \text{ports} \longleftarrow \text{kernel} \longle
 
 Vanguard abstracts models behind `ModelPort`. Local GPU models ($0) handle routine syntactic tasks, while cloud models (OpenRouter/OpenAI/Anthropic) handle high-tier refactoring:
 
-| Escalation Tier | Complexity & Scope | Target Models | Platform / Provider | Benchmark Validation |
-|---|---|---|---|---|
-| **Tier 1** | Single-file typos, syntax fixes | `qwen2.5:1.5b` → `llama3.2:3b` | Local Ollama ($0) | Single-file calculator repair (< 1s) |
-| **Tier 2** | Multi-file dependency & import repair | `deepseek-r1:14b` → `qwen3.6:27b` | Local Ollama ($0) | Import-cycle repair, test reaction |
-| **Tier 3** | Subdirectory refactoring & search | `openrouter/free` → `meta-llama/llama-3.3-70b-instruct` | Cloud OpenRouter | Thread-safe Token Bucket Rate Limiter |
-| **Tier 4** | Subsystem state machines & concurrency | `deepseek/deepseek-chat` → `gpt-4o` → `claude-3.5-sonnet` | Cloud OpenRouter / OpenAI | DAG Dependency Resolver with Cycle Detection |
-| **Tier 5** | Frontier autonomous refactoring | `claude-3.5-sonnet` → `deepseek-r1` → `gpt-4.5` | Cloud OpenRouter / Anthropic | Incremental Stratified Datalog Fixed-Point Engine |
+# Openrouter Guidelines
+
+    OpenRouter:
+        base_url: https://openrouter.ai/api/v1
+        api_key_env: "OPENROUTER_API_KEY" on ModelRoute (the engine reads the env var)
+        Verified Free Models:
+            openrouter/free
+            inclusionai/ling-3.0-tiny:free
+            poolside/laguna-s-2.1:free
+            cohere/north-mini-code:free
+            google/gemma-4-26b-a4b-it:free
+            nvidia/nemotron-3-super-120b-a12b:free
+            openai/gpt-oss-20b:free
+        Verified Low-Cost Paid Models: 8. deepseek/deepseek-v4-flash 9. xiaomi/mimo-v2.5
+        Frontier Cloud Models: z-ai/glm-5.2, openai/gpt-5.6-luna, deepseek/deepseek-v4-pro, minimax/minimax-m3
+    DeepSeek API:
+        base_url: https://api.deepseek.com/v1
+        model: deepseek-reasoner or deepseek-coder on ModelRoute
+        api_key_env: "DEEPSEEK_API_KEY"
+    OpenAI:
+        base_url: https://api.openai.com/v1
+        model: gpt-4o on ModelRoute
+        api_key_env: "OPENAI_API_KEY"
+
+Ollama Guidelines
+
+    Tier 1 models:
+        llama3.2:3b
+        qwen2.5:1.5b
+    Tier 2 models: 3. qwen3.6:27b 4. deepseek-r1:14b
+
 
 ---
 
@@ -196,3 +220,27 @@ python3 -m unittest discover -s test -t .
 | [`05_vanguard_kernel_capabilities_and_security_v040.md`](docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) | Capability attenuation, budget leases, & kernel security | **Fully Aligned** |
 | [`09_vanguard_decision_register_v040.md`](docs/main_v4/09_vanguard_decision_register_v040.md) | Architectural Decision Records (ADRs) | **Fully Aligned** |
 | [`13_C_gts_mvp_program_and_engineering_plan.md`](docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md) | GTS MVP program plan, sprint definitions, & Ch.10 gate questions | **Fully Aligned** |
+
+
+
+
+
+Subatômico (Prótons, Nêutrons e Elétrons): Os tijolos de energia e carga elétrica pura. Sozinhos, não têm química.
+
+Átomos (Carbono, Hidrogênio, Oxigênio...): Quando os prótons e elétrons se juntam, emergem os elementos da tabela periódica. Eles ganham propriedades como "afinidade" ou "repulsão" por outros átomos.
+
+Moléculas (Aminoácidos, Água, Glicose): Átomos se ligam. Um átomo de carbono sozinho não faz nada, mas quando se junta com hidrogênio, nitrogênio e oxigênio na ordem certa, emerge um aminoácido (a célula da sua linha de montagem).
+
+Polímeros - Linear: As moléculas pequenas (monômeros) se ligam em uma fita única e contínua. Aqui emerge a propriedade do dobramento e da forma tridimensional.
+
+Polimero - Proteinas e Enzimas: O polímero se dobra e ganha uma função mecânica ou química. Agora ele é uma ferramenta ativa (a tesoura, o motor, a chave).
+
+Polimero - Genes (DNA / RNA): São polímeros de outro tipo (ácidos nucleicos) que guardam a informação e a ordem exata para a fábrica de proteínas funcionar. O DNA é o "manual de instruções" da fábrica.
+
+Organelas (Mitocôndrias, Ribossomos): São formadas quando membranas de gordura (lipídios) encapsulam grupos de proteínas funcionais para trabalharem juntas. A mitocôndria vira a usina de energia; o ribossomo vira a linha de montagem.
+
+Células: A primeira unidade que consideramos "viva". É o fechamento da fábrica. Uma célula é uma cidade fechada onde bilhões de proteínas (polímeros dobrados) trabalham sem parar, seguindo as ordens do DNA, para manter a estrutura funcionando e se duplicando.
+
+Órgãos (Músculo, Coração): Bilhões de células trabalhando juntas de forma coordenada.
+
+Entity: Um sistema consciente feito de trilhões de nanomáquinas que sequer sabem que você existe, mas que trabalham em perfeita harmonia.

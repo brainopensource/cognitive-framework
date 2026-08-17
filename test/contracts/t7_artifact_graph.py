@@ -196,8 +196,9 @@ class CodeDefaultHarnessContract(unittest.TestCase):
 
     def test_registry_contains_both_manifests_and_protects_undeletable_control(self) -> None:
         registry = ManifestRegistry.parse(json.loads((MANIFESTS / "registry.json").read_text()))
-        self.assertEqual(len(registry.entries), 2)
         by_name = {entry.name: entry for entry in registry.entries}
+        self.assertIn("vg-shell-only", by_name)
+        self.assertIn("vg-code-default", by_name)
         self.assertTrue(by_name["vg-shell-only"].undeletable)
         self.assertFalse(by_name["vg-code-default"].undeletable)
 
@@ -207,8 +208,9 @@ class CodeDefaultHarnessContract(unittest.TestCase):
 
         # Product default can be replaced or removed without error
         updated = registry.remove("vg-code-default")
-        self.assertEqual(len(updated.entries), 1)
-        self.assertEqual(updated.entries[0].name, "vg-shell-only")
+        remaining = {entry.name: entry for entry in updated.entries}
+        self.assertNotIn("vg-code-default", remaining)
+        self.assertIn("vg-shell-only", remaining)
 
 
 if __name__ == "__main__":

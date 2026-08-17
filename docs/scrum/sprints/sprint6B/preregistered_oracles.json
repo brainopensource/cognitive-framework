@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "vg.4",
+  "status": "preregistered-not-run",
+  "releaseUse": "development-copy-requires-independent-sealed-mount",
+  "tasks": [
+    {
+      "id": "bug-001-single-file",
+      "class": "single-file",
+      "requiresTestReaction": false,
+      "oracle": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py",
+      "oracleDigest": "sha256:4c6779145851142822736070925ee043caa1f27e2c74c69e05591210ab5e7e7e"
+    },
+    {
+      "id": "bug-002-multi-file",
+      "class": "multi-file",
+      "requiresTestReaction": false,
+      "oracle": "vanguard/packages/adapters/evaluators/suites/bug-002-multi-file/test_oracle.py",
+      "oracleDigest": "sha256:2023d54692510b0565e8450fcf219680ccaaed5c07d3d6e6d6b9c4b2a0cd3beb"
+    },
+    {
+      "id": "bug-003-test-reaction",
+      "class": "test-reaction",
+      "requiresTestReaction": true,
+      "oracle": "vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py",
+      "oracleDigest": "sha256:4e3677a03ba2d8bdd3ec626764c44a91d8320daac9434107ca2e2e9a46f95f0e"
+    }
+  ],
+  "rebindings": [
+    {
+      "id": "bug-001-single-file",
+      "reason": "oracle edited by dd581a2 after the S6B preregistration; rebound before any scored run",
+      "task": "S7-A-07"
+    }
+  ]
+}

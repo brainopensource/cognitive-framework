@@ -1,0 +1,18 @@
+
+E
+======================================================================
+ERROR: test_two_named_amounts (test_ledger.NamedAmountTests.test_two_named_amounts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/vg-zero-test005_named_amounts-czctom0t/workspace/tests/test_ledger.py", line 11, in test_two_named_amounts
+    rows = parse_rows(["alice,10", "bob,20"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/vg-zero-test005_named_amounts-czctom0t/workspace/pkg/parser.py", line 7, in parse_rows
+    name, raw = line.split(":")
+    ^^^^^^^^^
+ValueError: not enough values to unpack (expected 2, got 1)
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

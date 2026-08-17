@@ -28,6 +28,9 @@ FIXME/TODO pointing at the defect.
 | `test002_rate_window` | per-key request admission over a time window | `python3 -m unittest discover -s tests` |
 | `test003_invoice_cents` | invoice totals in integer cents | `python3 -m unittest discover -s tests` |
 | `test004_busy_merge` | merge closed busy intervals | `python3 -m unittest discover -s tests` |
+| `test005_named_amounts` | two-module parse + aggregate (multi-file) | `python3 -m unittest discover -s tests` |
+
+Paired DNA protocol: `PAIRING.md`. Packs: `--manifest vg-code-default` (default) or `vg-shell-only`.
 
 ## Honest status of the product path
 
@@ -35,14 +38,12 @@ FIXME/TODO pointing at the defect.
 worker, descriptor-bound patch approval). Dogfood in-tree still uses LAM.
 `tasks_phase2_LAM/test001/run_*.py` calls the router **without tools**.
 
-This runner uses the production loop with a live `OpenRouterModel`. Lab-only
+This runner uses the production loop with a live provider model. Lab-only
 departures, recorded in each `runs/<id>/result.json`:
 
 1. Auto-approval of privileged diffs (no human in the loop).
 2. Oracle evaluation after the episode, not IsolatedEvaluator UID 10002.
-3. Tool JSON parameters injected at the provider wire (pack files still omit
-   `schema`; without that, most models cannot form valid calls).
-4. `maxTokens` raised from the adapter default of 256.
+3. `maxTokens` raised from the adapter default of 256. Pack tool `schema` fields are data, not a runner inject.
 
 ## How to run a live episode
 
@@ -51,9 +52,10 @@ From the repo root (WSL). Oracle files are not copied into the workspace.
 ```bash
 python3 benchmarkings/zero_hint_v1/run_live_agent.py --check-fixtures
 python3 benchmarkings/zero_hint_v1/run_live_agent.py \
-  --task test004_busy_merge \
+  --task test005_named_amounts \
+  --manifest vg-code-default \
   --model ollama/llama3.2:3b \
-  --max-turns 16
+  --max-turns 8
 ```
 
 `--model` may be `ollama/<tag>` or an OpenRouter id. Artifacts land in

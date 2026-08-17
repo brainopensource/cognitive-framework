@@ -7,6 +7,9 @@ export type PendingApproval = {
   unifiedDiff: string;
   proposedPatchDigest: string;
   episodeId: string;
+  argsDigest: string;
+  descriptorDigest: string;
+  expiresAt: string;
 };
 
 export type RunViewModel = {
@@ -49,9 +52,12 @@ export function reduceRunView(previous: RunViewModel, envelope: EventEnvelope): 
   if (kind === "ApprovalRequested") {
     next.pendingApproval = {
       approvalId: String(envelope.payload.approvalId ?? ""),
-      unifiedDiff: String(envelope.payload.unifiedDiff ?? envelope.payload.diff ?? ""),
+      unifiedDiff: String(envelope.payload.unifiedDiff ?? envelope.payload.diff ?? envelope.payload.normalizedDiff ?? ""),
       proposedPatchDigest: String(envelope.payload.proposedPatchDigest ?? ""),
       episodeId: envelope.episodeId ?? String(envelope.payload.episodeId ?? ""),
+      argsDigest: String(envelope.payload.argsDigest ?? ""),
+      descriptorDigest: String(envelope.payload.descriptorDigest ?? ""),
+      expiresAt: String(envelope.payload.expiresAt ?? ""),
     };
   }
   if (kind === "ApprovalResolved") next.pendingApproval = undefined;

@@ -1,3 +1,0 @@
-trace_id	step_id	previous_step_id	step_kind	actor_id	started_at	ended_at	elapsed_ms	hands_on_ms	environment_snapshot	resource_selector	content_or_args_ref	purpose_or_hypothesis	observed_or_proposed_outcome	result_or_receipt_ref	uncertainty	provenance	acceptance_condition_ref	next_step_reason	correction_of	redaction_note
-BUG-XX	S0001		observation	ENGINEER-XX	YYYY-MM-DDTHH:MM:SS.mmmZ	YYYY-MM-DDTHH:MM:SS.mmmZ	0	0	git:<commit> + worktree:<digest>	path:<repo-relative-path>	sha256:<digest> or redacted inline value	What this observation is meant to resolve	What was actually observed	sha256:<receipt-or-output>	known|unknown|undeterminable	origin=<...>; integrity=<...>; confidentiality=<...>	AC-XX	Why the next step follows		State what was removed and why
-

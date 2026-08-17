@@ -37,6 +37,36 @@ ALLOWED = {
     "client": {"domain", "runtime"},
 }
 
+# S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
+# language. Process creation belongs to adapters/sandbox/ alone; this rule is
+# the static half of that guarantee.
+SUBPROCESS_MODULES = {"subprocess", "os.popen", "pty", "child_process", "node:child_process"}
+SUBPROCESS_HOME = ("vanguard", "packages", "adapters", "sandbox")
+
+# Triaged exceptions, each named individually. A wildcard here would defeat the
+# rule, so entries are exact repo-relative paths and every one carries its
+# justification. Adding a row is a deliberate act with a reviewer attached.
+SUBPROCESS_ALLOWLIST = {
+    # The exterior judge executes the oracle in its own process. A-05/LT-4: the
+    # evaluator is architecturally unreachable from the agent it judges, so it
+    # cannot borrow the agent's sandbox to do this.
+    "vanguard/packages/adapters/evaluators/isolated.py",
+    # EnvironmentPort's git-backed snapshot/diff. Host git invocation behind the
+    # port. Candidate for containment once the sandbox grows a git verb.
+    "vanguard/packages/adapters/environment/git.py",
+    # `git ls-files --error-unmatch` proving the .env is untracked before a
+    # secret is read. Read-only query, no agent-supplied argv.
+    "vanguard/packages/adapters/models/env_loader.py",
+}
+
+# S7-A-03 (A-05, LT-4): a component that can construct its own evaluator is a
+# second judge. Evaluator exteriority is a property of the import graph, not of
+# good intentions -- so no path runs from cognition or the runtime into the
+# evaluator adapters, save the composition root's explicit binding table.
+EVALUATOR_FAMILY = "evaluators"
+EVALUATOR_IMPORT_SOURCES = {"agency", "runtime", "governance"}
+EVALUATOR_BINDING_SITE = "vanguard/packages/runtime/root.py"
+
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
     r"[\"']([^\"']+)[\"']"
@@ -47,6 +77,7 @@ def source_files(root: Path) -> list[Path]:
     starts = [
         root / "vanguard" / "packages",
         root / "vanguard" / "clients",
+        root / "benchmarkings",
         root / "spike",
         root / "slice",
         root / "lab",
@@ -64,7 +95,7 @@ def source_files(root: Path) -> list[Path]:
 def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
     rel = path.resolve().relative_to(root.resolve())
     parts = rel.parts
-    if parts and parts[0] in {"spike", "slice", "lab"}:
+    if parts and parts[0] in {"spike", "slice", "lab", "benchmarkings"}:
         return parts[0], None
     if len(parts) >= 3 and parts[:2] == ("vanguard", "packages"):
         package = parts[2]
@@ -171,14 +202,26 @@ def find_cycles(graph: dict[Path, set[Path]]) -> list[list[Path]]:
 
 def check(root: Path, s4_exit: bool) -> list[str]:
     errors: list[str] = []
+    # S7-A-01 (VG-03 4, LT-1..LT-8): the lattice is closed. Anything sitting
+    # directly under vanguard/packages/ that the ICD does not name is a build
+    # failure -- directory *or* module. Closing over directories alone let a
+    # top-level module ride in beside the six packages unnamed, which is how an
+    # unlisted subsystem enters the tree without ever facing a boundary row.
     packages_root = root / "vanguard" / "packages"
     if packages_root.is_dir():
         for child in sorted(packages_root.iterdir()):
-            if child.is_dir() and child.name not in PACKAGE_NAMES and child.name not in IGNORED_PARTS:
-                errors.append(
-                    f"unknown core package {child.name!r}; ICD permits exactly: "
-                    + ", ".join(sorted(PACKAGE_NAMES))
-                )
+            if child.name in PACKAGE_NAMES or child.name in IGNORED_PARTS:
+                continue
+            if child.is_dir():
+                kind = "package"
+            elif child.suffix in SOURCE_SUFFIXES and child.name != "__init__.py":
+                kind = "module"
+            else:
+                continue
+            errors.append(
+                f"unknown core {kind} {child.name!r}; ICD permits exactly: "
+                + ", ".join(sorted(PACKAGE_NAMES))
+            )
     files = source_files(root)
     graph: dict[Path, set[Path]] = defaultdict(set)
     for source in files:
@@ -190,15 +233,68 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             continue
         for line, spec in imports:
             if source_area == "lab":
-                errors.append(f"{source.relative_to(root)}:{line}: lab/ must import nothing ({spec!r})")
+                target_area, _ = area_from_spec(spec)
+                if spec.startswith(".") or target_area:
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: lab/ must import nothing ({spec!r})"
+                    )
                 continue
             resolved = resolve_relative(source, spec)
             if resolved and resolved in files:
-                graph[source].add(resolved)
+                # benchmarkings is a client boundary, not part of the core
+                # package-cycle graph; its import allowlist is checked below.
+                if source_area != "benchmarkings":
+                    graph[source].add(resolved)
                 target_area, target_family = area_for(resolved, root)
             else:
                 target_area, target_family = area_from_spec(spec)
+            rel_parts = source.relative_to(root).parts
+            rel_source = source.relative_to(root).as_posix()
+            # Scoped to the core packages. benchmarkings/ is a measurement
+            # client governed by its own allowlist row above, not by N-06.
+            if (
+                spec in SUBPROCESS_MODULES
+                and rel_parts[:2] == ("vanguard", "packages")
+                and rel_source not in SUBPROCESS_ALLOWLIST
+            ):
+                if rel_parts[: len(SUBPROCESS_HOME)] != SUBPROCESS_HOME:
+                    errors.append(
+                        f"{rel_source}:{line}: subprocess is confined to "
+                        f"vanguard/packages/adapters/sandbox/ (N-06); {spec!r} is reachable here "
+                        f"without a grant. Route it through SandboxPort, or add an explicit, "
+                        f"justified row to SUBPROCESS_ALLOWLIST"
+                    )
+                    continue
+            if (
+                source_area in EVALUATOR_IMPORT_SOURCES
+                and target_area == "adapters"
+                and target_family == EVALUATOR_FAMILY
+                and rel_source != EVALUATOR_BINDING_SITE
+            ):
+                errors.append(
+                    f"{rel_source}:{line}: {source_area} may not reach adapters/evaluators "
+                    f"({spec!r}); A-05/LT-4 -- a component that can construct its own evaluator "
+                    f"is a second judge. Only {EVALUATOR_BINDING_SITE}'s EVALUATOR_BINDINGS "
+                    f"may name one"
+                )
+                continue
             lowered_spec = spec.lower().replace("_", "-")
+            if source_area == "benchmarkings":
+                # Benchmarks are measurement clients, never model adapters.  The
+                # composition root is the sole permitted runtime entrypoint.
+                if target_area == "runtime" and not (
+                    spec == "vanguard.packages.runtime.root"
+                    or spec.startswith("vanguard.packages.runtime.root.")
+                ):
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                    )
+                    continue
+                if target_area is not None and target_area not in {"benchmarkings", "runtime", "ports"}:
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                    )
+                    continue
             if source_area == "governance" and "model" in lowered_spec:
                 errors.append(f"{source.relative_to(root)}:{line}: governance may not depend on model APIs ({spec!r})")
                 continue

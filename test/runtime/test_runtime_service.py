@@ -99,8 +99,20 @@ class TestRuntimeService(unittest.TestCase):
                 "idempotencyKey": "idem-corr-1",
                 "runId": "run-200",
                 "actor": "operator",
+                # `S8-A-04`: a CorrectionRecord, not a free-form note. The
+                # old payload here was never a valid record -- it passed only
+                # because nothing parsed it.
                 "payload": {
-                    "correction": {"reason": "style", "feedback": "use snake_case"}
+                    "correction": {
+                        "episodeId": "01890000-0000-7000-8000-000000000001",
+                        "proposedPatchDigest": "sha256:" + "a" * 64,
+                        "acceptedPatchDigest": "sha256:" + "b" * 64,
+                        "reasonCodes": ["style"],
+                        "magnitude": "minor",
+                        # `D-07`: taste stays local to the people it came from.
+                        "scope": "team",
+                        "correctingPrincipalRole": "user",
+                    }
                 },
             },
         }

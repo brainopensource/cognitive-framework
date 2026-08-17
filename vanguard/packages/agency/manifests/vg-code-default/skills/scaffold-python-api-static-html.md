@@ -1,5 +1,32 @@
 # Skill: Scaffold Python API and Static HTML
-1. Write backend API handlers (e.g., standard library `http.server` or FastAPI) in the Python workspace.
-2. Place static HTML, CSS, and JS assets in the designated static root.
-3. Write unit tests for API endpoints and static asset serving.
-4. Run `Bash` with `["python3", "-m", "unittest", ...]` to verify everything works.
+Concrete file layout to create for a Python HTTP API + Static HTML task:
+
+1. Create `app/server.py` with standard library `http.server`:
+```python
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import json
+
+class Handler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/api/health":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok"}).encode("utf-8"))
+        else:
+            super().do_GET()
+```
+
+2. Create `static/index.html`:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>App</title></head>
+<body><h1>App</h1></body>
+</html>
+```
+
+3. Run verification tests:
+```bash
+python3 -m unittest test_app.py
+```

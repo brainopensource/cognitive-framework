@@ -99,6 +99,16 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | S20-B-05 | `[DONE] ✅` | BETA | Workspaces intact with RED tests; `REFERENCE.md` pack-only |
 | S20-B-06 | `[DONE] ✅` | BETA | DoD: `test.agency.test_reconstructions` green, `check_boundaries.py` pass |
 
+### Sprint 21 — Greenfield Harvest & Non-Empty Map Drive
+
+| ID | Status | Lane | Task |
+|---|---|---|---|
+| S21-B-01 | `[DONE] ✅` | BETA | Greenfield harvest branch in `system-prompt.txt`: write-first via `patch.apply` when no source files exist |
+| S21-B-02 | `[DONE] ✅` | BETA | `scaffold-python-api-static-html.md` concrete file layouts (`app/server.py`, `static/index.html`) for 14b copy-shape |
+| S21-B-03 | `[DONE] ✅` | BETA | Tool schemas: required params present; missing path returns typed `not_found` receipt |
+| S21-B-04 | `[DONE] ✅` | BETA | IndexPort non-blocking; read map only if non-empty |
+| S21-B-05 | `[DONE] ✅` | BETA | Fixtures remain RED; DoD passed (reconstructions + adapters + boundaries) |
+
 ADR-0067 is **`[DONE]`** (`704a773`), not blocked. Agency guard `8f5f16d` stays. You still rotate the OpenRouter key (`S7-J-04`) before any real-model claim.
 
 ### Deprecated (do not execute; left for audit)

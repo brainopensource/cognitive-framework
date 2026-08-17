@@ -2,6 +2,22 @@
   "schema_version": "gts.broken-test-manifest.v1",
   "cases": [
     {
+      "test_id": "MF-S7-C-001",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/benchmarking_valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/benchmarking_adapter_import"
+      ],
+      "expected_failure": "benchmarkings may import only runtime.root + ports"
+    },
+    {
       "test_id": "MF-S0-001",
       "control": [
         "python3",

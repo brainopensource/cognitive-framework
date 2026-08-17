@@ -16,7 +16,7 @@
 4. [Staffing model](#4-staffing-model)
 5. [Delivery playbook (ASAP)](#5-delivery-playbook-asap)
 6. [BACKEND — Phase 3 Task Board (Sprints 7–10)](#backend)
-7. [FRONTEND — Interaction plane](#frontend)
+7. [FRONTEND — Interaction plane (two lanes)](#frontend)
 
 ---
 
@@ -34,6 +34,7 @@
 | **Canvas** | Filterable view of the same board | `canvases/s7-s10-task-board.canvas.tsx` | Anything (mirror only) |
 | **Frontend concepts** | Interaction-plane contracts (when created) | `docs/front_v4/` — **does not exist yet** | Control-plane law |
 | **Frontend sprints** | FE sprint kits (when created) | `docs/scrum/sprints_front/` — **does not exist yet** | Backend `S7–S10` IDs |
+| **FE review prompt** | Specialist review + two-lane plan | [`development_guides/frontend_senior_review_and_two_lanes.md`](development_guides/frontend_senior_review_and_two_lanes.md) | Backend tasks |
 
 ```text
   docs/main_v4/          NORMATIVE (VG-00…VG-12, GTS-13C)
@@ -68,7 +69,7 @@
 |---|---|---|---|
 | Backend Phase 3 | `S{7–10}-{A\|B\|C\|J}-{nn}` | `S7-A-04` | [`sprints/sprint07`](sprints/sprint07/) … [`sprint10`](sprints/sprint10/) |
 | Backend waves | `W6…W9` inside **Phase 3** | Sprint 7 = Wave 6 | same kits + [`011`](../reviews/doing/011_master_backlog_phase3_V043-REV.md) |
-| Frontend (interim) | `FE-{wave}{nn}` | `FE-101` = FE Wave 1 | **not** `S1` — avoids colliding with closed backend Sprint 1 |
+| Frontend (interim) | `FE-{wave}{nn}` + lanes **FE-A** / **FE-B** | `FE-101` = FE Wave 1, Lane A | **not** `S1` — avoids colliding with closed backend Sprint 1 |
 | Legacy (closed / partial) | `sprint6B/`, `sprint7_8/` | historical | read-only; do not schedule new work there |
 
 > **FE “Sprint 1” ≠ backend Sprint 1.** Prefer saying **FE Wave 1** (or `FE-1xx`) so calendars and standups cannot collide.
@@ -100,12 +101,14 @@
 
 | Expected | Status today |
 |---|---|
-| `docs/front_v4/` | **Missing** — create as FE concept set (mirror `main_v4` discipline: registry + one owner per contract) |
-| `docs/scrum/sprints_front/` | **Missing** — create FE Wave 1–4 kits with `FE-xxx` IDs matching the table below |
+| Specialist prompt | [`frontend_senior_review_and_two_lanes.md`](development_guides/frontend_senior_review_and_two_lanes.md) — **run this before large FE coding** |
+| Two lanes | **FE-A** CLI/TUI · **FE-B** IDE — see [#frontend](#frontend) |
+| `docs/front_v4/` | **Missing** — specialist may create (registry + one owner per contract) |
+| `docs/scrum/sprints_front/` | **Missing** — specialist creates kits after review; this ROADMAP stays a navigator |
 | Interim FE architecture | [`development_guides/cli_tui_architecture.md`](development_guides/cli_tui_architecture.md) |
-| FE task rows in this roadmap | **Staging only** until moved into `sprints_front/` + a FE backlog sibling of `011` |
+| FE task rows in this roadmap | **Staging** mapped to FE-A / FE-B until `sprints_front/` owns status |
 
-Until those folders exist, FE work must still obey: client of the runtime only — no second control plane ([`cli_tui_architecture.md`](development_guides/cli_tui_architecture.md)).
+Until those folders exist, FE work must still obey: client of the runtime only — no second control plane ([`cli_tui_architecture.md`](development_guides/cli_tui_architecture.md)). Base code: `vanguard/clients/cli/` (extend). Optional prototype (not a merge): Harness-D-power `docs_front` / `src_front` — harvest only if better.
 
 ### 0.7 Are we badly organized?
 
@@ -186,7 +189,8 @@ Full gate text: [`GTS-13C`](../main_v4/13_C_gts_mvp_program_and_engineering_plan
 | **B** | Senior B — Workload & Evidence | `agency/manifests`, `adapters`, `test/agency`, `test/lab` |
 | **C** | Senior C — Measurement & Lab | `benchmarkings/**`, LAM mock, `lab/**`, `test/broken` |
 | **J** | Tech + Project Lead — Joint | `docs/main_v4`, `LICENSE`, secrets history |
-| **FE** | Frontend track | `vanguard/clients/cli/**`, `vanguard-ide/**` |
+| **FE-A** | Dev Frontend A — CLI / TUI | `vanguard/clients/cli/**`, install scripts |
+| **FE-B** | Dev Frontend B — IDE | `vanguard-ide/**` (after live CLI checkpoint, unless contract frozen) |
 
 ---
 
@@ -196,7 +200,7 @@ Full gate text: [`GTS-13C`](../main_v4/13_C_gts_mvp_program_and_engineering_plan
 2. **Order of sprints (do not skip)** — S7 subtraction (Q1) → S8 recursion/manifests (Q1/Q2) → S9 instrument (Q3) → S10 TableWorld + gate (Q4). Features before S7 exit gate contaminate every later measurement.
 3. **Daily rhythm** — Morning: pick next `[TODO]` in your lane with depends met → mark `[IN_PROGRESS]` in `011`. PR cites ≥1 `req_id`. Done only when DoD command passes. Hand-off file conflicts via PR comment (especially `runtime/root.py`).
 4. **Client ASAP definition** — Client delivery = Sprint 10 four-question gate with evidence pack (`S10-C-03` / `S10-J-01`), not green CI alone. Ship honest claims only (`S10-J-03`). Parallelize ACI (`S8-B-06..09`) and junior tasks (`S7-A-07`, `S7-J-05`, `S8-B-08`, `S10-A-02`) to keep seniors on spawn / resume / A/A / TableWorld.
-5. **Frontend fast path** — Demo (`FE-203` + `FE-104`) → live wire (`FE-101`/`102`/`201`) → IDE fork (`FE-301`…). Promote rows into `sprints_front/` before treating them as authoritative.
+5. **Frontend** — Run [`frontend_senior_review_and_two_lanes.md`](development_guides/frontend_senior_review_and_two_lanes.md). Until remapped: FE-A starts `--demo` (`FE-203`+`FE-104`); FE-B does not merge live-dependent IDE until FE-A live checkpoint (`FE-101`/`102`/`201`). Optional harvest from Harness-D-power is **not** required.
 
 ---
 
@@ -357,47 +361,81 @@ Client delivery = Sprint 10 four-question gate with evidence pack (S10-C-03 / S1
 
 # FRONTEND
 
-## Interaction-plane task board
+**Lead prompt (run before large FE coding):** [`development_guides/frontend_senior_review_and_two_lanes.md`](development_guides/frontend_senior_review_and_two_lanes.md)
 
-**Task provenance (staging):** rows below are **not** yet owned by a `docs/front_v4/` registry or `docs/scrum/sprints_front/` kits — those folders **do not exist yet**. Until they do, treat this table as a draft backlog. Interim architecture: [`cli_tui_architecture.md`](development_guides/cli_tui_architecture.md). Prefer speech **FE Wave 1–4** (not “Sprint 1”) so IDs never collide with backend Sprint 7–10.
+The specialist **reviews**, then **plans** Waves → Sprints → Tasks, then Tech Lead signs off. Rows below are the **starting map** (staging). The specialist may remap, drop, or replace any `FE-xxx` if a better SOTA CLI/IDE exists. Optional ideas (Harness-D-power cassettes, xyflow, Tauri) are **not rules**.
 
-| Task ID | Sub-Tasks | Description | Feature / Code | Sprint & Wave | Complexity (0–100) | Files & LOC | Modules & Classes | Tier |
-|---|---|---|---|---|---|---|---|---|
-| FE-101 | • Socket connect • NDJSON frame parser • RPC caller • Event dispatcher | Build resilient UDS & Named Pipe client with auto-reconnect and frame buffering. | LiveDaemonClient handleData() callRPC() scheduleReconnect() | Sprint 1 Wave 1 | 65 / 100 Stream chunk boundary splitting & network reconnection resilience. | 2 files ~320 LOC | vanguard/clients/cli/ • adapters/live.ts • contract/wire.ts | 4★ Senior Dev |
-| FE-102 | • Keypair generation • RFC 8785 JCS • Ed25519 signing • Key storage (0600) | Cryptographic operator signer for approving high-risk agent capabilities outside Python memory. | OperatorSigner canonicalize() signApproval() | Sprint 1 Wave 1 | 75 / 100 RFC 8785 byte canonicalization and asymmetric signature parity with Python. | 2 files ~180 LOC | vanguard/clients/cli/ • adapters/signer.ts • application/signer.ts | 4★ Senior / Tech Lead |
-| FE-103 | • Session hook • Ring buffer (5k) • Token stream reducer | React hook managing session lifecycle (idle → running → waiting_approval). | useVanguardRun useEventStream resolveApproval() | Sprint 1 Wave 1 | 50 / 100 Managing fast-firing state events without UI stutter or re-render lag. | 2 files ~260 LOC | vanguard/clients/cli/ • ui/hooks/useVanguardRun.ts • application/session.ts | 3★ Normal Dev |
-| FE-104 | • Stream renderer • Diff viewer • Approval modal • Budget gauge | React + Ink visual components for token streaming, thinking collapsible, diffs, and prompts. | \<StreamRenderer\> \<DiffViewer\> \<ApprovalModal\> \<BudgetMeter\> | Sprint 1 Wave 1 | 55 / 100 Terminal Flexbox layout math and ANSI color formatting. | 5 files ~580 LOC | vanguard/clients/cli/ • ui/StreamRenderer.tsx • ui/DiffViewer.tsx • ui/ApprovalModal.tsx | 3★ Normal Dev |
-| FE-105 | • CLI main entry • Ink render bootstrap • Unit test suite | CLI entrypoint bootstrap and unit tests using ink-testing-library. | main.ts tui.tsx render() | Sprint 1 Wave 1 | 45 / 100 Terminal lifecycle and exit signal handling (SIGINT/SIGTERM). | 3 files ~220 LOC | vanguard/clients/cli/ • main.tsx • tui.tsx • test/tui.test.ts | 3★ Normal Dev |
-| FE-201 | • Health probe • Auto-spawn daemon • Lockfile & PID • /shutdown command | Auto-supervise Python background daemon on vg launch without user intervention. | DaemonSupervisor checkHealth() spawnDaemon() stopDaemon() | Sprint 2 Wave 2 | 70 / 100 Cross-platform process detachment, PID file locks, orphan process reaping. | 2 files ~290 LOC | vanguard/clients/cli/ • runtime/supervisor.ts • runtime/paths.ts | 4★ Senior Dev |
-| FE-202 | • Fetch manifests • Manifest card • Grant badges • Budget tuner | Interactive manifest selector (vg-code-default, vg-code-swe-mini, vg-shell-only). | ManifestExplorer \<ManifestCard\> tuneBudget() | Sprint 2 Wave 2 | 45 / 100 Dynamic form generation and CLI prompt routing. | 2 files ~240 LOC | vanguard/clients/cli/ • application/ManifestExplorer.ts • ui/ManifestCard.tsx | 3★ Normal Dev |
-| FE-203 | • Replay adapter • JSONL fixtures • --demo CLI flag | Zero-API-key interactive demo mode with realistic token streaming delays for presentations. | ReplayAdapter streamFixture() demoCLI() | Sprint 2 Wave 2 | 40 / 100 Simulating asynchronous timers and keystroke mock events. | 4 files ~310 LOC | vanguard/clients/cli/ • adapters/replay.ts • fixtures/sessions/*.jsonl | 2★ Junior / Mid Dev |
-| FE-204 | • Binary packaging • install.sh script • Shell PATH config | NPM package configuration and one-line zero-dependency curl \| sh installer script. | npm run build install.sh configurePath() | Sprint 2 Wave 2 | 50 / 100 Cross-platform shell portability (POSIX sh, Bash, Zsh, PowerShell). | 2 files ~180 LOC | • vanguard/clients/cli/package.json • tools/distribution/install.sh | 3★ DevOps / Senior |
-| FE-301 | • Track Code-OSS • Strip MS telemetry • Open-VSX config • Dark theme assets | Debloat Code-OSS / VSCodium base: remove Microsoft telemetry, accounts, and proprietary URLs. | scrub_code_oss.sh product.json gulpfile.vscode.js | Sprint 3 Wave 3 | 80 / 100 Navigating upstream VS Code build systems, Gulp pipelines, and patching product configs. | 3 files ~380 LOC | vanguard-ide/ • product.json • tools/ide/scrub_code_oss.sh | 5★ Principal / Lead |
-| FE-302 | • Extension manifest • WebviewProvider • React bundle embed • CSP headers | Built-in VS Code extension embedding React Vanguard interface in the Secondary Sidebar. | VanguardViewProvider resolveWebviewView() postMessage() | Sprint 3 Wave 3 | 65 / 100 Webview security sandbox isolation and React packaging in VS Code. | 4 files ~420 LOC | vanguard-ide/extensions/ • vanguard-panel/src/extension.ts • VanguardViewProvider.ts | 4★ Senior Dev |
-| FE-303 | • Extension socket • Bidirectional relay • Stream persistence | Extension Host Node.js socket connecting Webview to local Vanguard daemon over UDS. | DaemonBridge onMessage() forwardToDaemon() | Sprint 3 Wave 3 | 60 / 100 Three-way event propagation: Webview ↔ Extension Host ↔ Python Socket. | 2 files ~290 LOC | vanguard-ide/extensions/ • vanguard-panel/src/DaemonBridge.ts | 4★ Senior Dev |
-| FE-304 | • Active file watcher • Cursor selection • Git branch reader • Context bar pill | Live editor context sync: inject active file, cursor range, and git status into Vanguard prompt bar. | WorkspaceContext onDidChangeActiveEditor getGitStatus() | Sprint 3 Wave 3 | 50 / 100 VS Code Extension API subscription management and debounce optimizations. | 2 files ~260 LOC | vanguard-ide/extensions/ • vanguard-panel/src/WorkspaceContext.ts | 3★ Normal Dev |
-| FE-401 | • Monaco decorations • CodeLens buttons • Inline diff sign • Clear highlights | Render proposed agent code changes directly in the active editor with [Accept & Sign] buttons. | InlineDiffProvider ApprovalCodeLens applyDecoration() | Sprint 4 Wave 4 | 75 / 100 Monaco editor text range calculation and coordinate-accurate inline diff painting. | 2 files ~360 LOC | vanguard-ide/extensions/ • InlineDiffProvider.ts • ApprovalCodeLens.ts | 4★ Senior Dev |
-| FE-402 | • Secret regex engine • Masking formatter • DLP rule config | Local Data Loss Prevention filter redacting API keys, passwords, and PII before API calls. | DLPFilter maskSecrets() loadBlocklist() | Sprint 4 Wave 4 | 55 / 100 High-speed non-backtracking regex parsing over large codebase buffers. | 2 files ~220 LOC | vanguard/clients/cli/ • application/dlp.ts • vanguard-panel/src/DLPFilter.ts | 3★ Normal Dev |
-| FE-403 | • Headless E2E tests • Vector conformance • 100-run soak test | Comprehensive E2E test suite running real SWE tasks against live daemon and mock engine. | run_e2e_scenarios() verify_vectors() run_soak_test() | Sprint 4 Wave 4 | 60 / 100 Orchestrating multi-process test runners and verifying 0-leak memory profiles. | 3 files ~340 LOC | vanguard/clients/cli/ • test/e2e/*.test.ts • tools/ci/run_soak.sh | 4★ QA / Senior Dev |
-| FE-404 | • Linux AppImage • Windows MSI installer • macOS DMG build | Desktop application packaging for Linux, Windows, and macOS with embedded runtimes. | package-desktop.sh InnoSetup.iss build_matrix.yml | Sprint 4 Wave 4 | 70 / 100 Cross-platform binary code signing, bundling embedded runtimes and DLLs. | 4 files ~280 LOC | vanguard-ide/build/ • package-desktop.sh • tools/release/build_matrix.yml | 4★ DevOps / Release |
+Interim law: [`cli_tui_architecture.md`](development_guides/cli_tui_architecture.md). Base code: `vanguard/clients/cli/`. Prefer speech **FE Wave / FE Sprint** (not backend “Sprint 1”).
+
+## Two lanes
+
+| Lane | Dev | Write scope | Starts |
+|---|---|---|---|
+| **FE-A** | Frontend A — Senior CLI | `vanguard/clients/cli/**`, `tools/distribution/**` | Now — Wave 1 demo |
+| **FE-B** | Frontend B — Senior / Principal IDE | `vanguard-ide/**` | Prepare fork in parallel; **merge live-dependent UI only after FE-A live checkpoint** |
+
+Shared modules (DLP, `RuntimeClient` types): **FE-A owns**; FE-B consumes. Do not duplicate wire types.
+
+## Waves → sprints (skeleton)
+
+| Wave | Suggested FE sprints | Lane | Checkpoint |
+|---|---|---|---|
+| **FE-W1** Foundation & demo | **FE-S1a** demo TUI · **FE-S1b** session + tests | A | `--demo` labelled; zero API keys |
+| **FE-W2** Live CLI | **FE-S2a** UDS + signer · **FE-S2b** supervisor + install | A | `vg` starts daemon; approvals sign |
+| **FE-W3** IDE shell | **FE-S3a** fork/extension decision executed · **FE-S3b** webview + bridge | B | Sidebar uses same daemon contract |
+| **FE-W4** IDE polish | **FE-S4a** inline diff + sign · **FE-S4b** DLP, E2E, packages | B (+ A) | Distributable IDE; soak |
+
+Doc/refactor (specialist may add): create `docs/front_v4/` registry; create `docs/scrum/sprints_front/` kits; delete FE theatre (fake diffs/graphs) if any land; do not copy `docs_front` wholesale.
+
+## Optional suggestions (not required)
+
+Use only if they beat what is already in `vanguard/clients/cli/` and VG-04:
+
+- Cassette play/pause/step UX for `--demo` (replay already exists).
+- Integer budget meter; unprivileged client (all effects still through kernel).
+- Reject: Tauri as a second product shell; xyflow DAG as the main UX; `ApproveMutation` / meta-loop chrome; `ws://8080` instead of UDS/JSONL.
+
+## Interaction-plane task board (starting IDs)
+
+**Task provenance (staging):** not yet owned by `docs/front_v4/` or `docs/scrum/sprints_front/`. Lane column is the default split.
+
+| Task ID | Lane | FE Wave / Sprint | Sub-Tasks | Description | Feature / Code | Complexity (0–100) | Files & LOC | Modules & Classes | Tier |
+|---|---|---|---|---|---|---|---|---|---|
+| FE-101 | A | W2 / S2a | • Socket connect • NDJSON frame parser • RPC caller • Event dispatcher | Build resilient UDS & Named Pipe client with auto-reconnect and frame buffering. | LiveDaemonClient handleData() callRPC() scheduleReconnect() | 65 / 100 Stream chunk boundary splitting & network reconnection resilience. | 2 files ~320 LOC | vanguard/clients/cli/ • adapters/live.ts • contract/wire.ts | 4★ Senior Dev |
+| FE-102 | A | W2 / S2a | • Keypair generation • RFC 8785 JCS • Ed25519 signing • Key storage (0600) | Cryptographic operator signer for approving high-risk agent capabilities outside Python memory. | OperatorSigner canonicalize() signApproval() | 75 / 100 RFC 8785 byte canonicalization and asymmetric signature parity with Python. | 2 files ~180 LOC | vanguard/clients/cli/ • adapters/signer.ts • application/signer.ts | 4★ Senior / Tech Lead |
+| FE-103 | A | W1 / S1b | • Session hook • Ring buffer (5k) • Token stream reducer | React hook managing session lifecycle (idle → running → waiting_approval). | useVanguardRun useEventStream resolveApproval() | 50 / 100 Managing fast-firing state events without UI stutter or re-render lag. | 2 files ~260 LOC | vanguard/clients/cli/ • ui/hooks/useVanguardRun.ts • application/session.ts | 3★ Normal Dev |
+| FE-104 | A | W1 / S1a | • Stream renderer • Diff viewer • Approval modal • Budget gauge | React + Ink visual components for token streaming, thinking collapsible, diffs, and prompts. | \<StreamRenderer\> \<DiffViewer\> \<ApprovalModal\> \<BudgetMeter\> | 55 / 100 Terminal Flexbox layout math and ANSI color formatting. | 5 files ~580 LOC | vanguard/clients/cli/ • ui/StreamRenderer.tsx • ui/DiffViewer.tsx • ui/ApprovalModal.tsx | 3★ Normal Dev |
+| FE-105 | A | W1 / S1b | • CLI main entry • Ink render bootstrap • Unit test suite | CLI entrypoint bootstrap and unit tests using ink-testing-library. | main.ts tui.tsx render() | 45 / 100 Terminal lifecycle and exit signal handling (SIGINT/SIGTERM). | 3 files ~220 LOC | vanguard/clients/cli/ • main.tsx • tui.tsx • test/tui.test.ts | 3★ Normal Dev |
+| FE-201 | A | W2 / S2b | • Health probe • Auto-spawn daemon • Lockfile & PID • /shutdown command | Auto-supervise Python background daemon on vg launch without user intervention. | DaemonSupervisor checkHealth() spawnDaemon() stopDaemon() | 70 / 100 Cross-platform process detachment, PID file locks, orphan process reaping. | 2 files ~290 LOC | vanguard/clients/cli/ • runtime/supervisor.ts • runtime/paths.ts | 4★ Senior Dev |
+| FE-202 | A | W2 / S2b | • Fetch manifests • Manifest card • Grant badges • Budget tuner | Interactive manifest selector (vg-code-default, vg-code-swe-mini, vg-shell-only). | ManifestExplorer \<ManifestCard\> tuneBudget() | 45 / 100 Dynamic form generation and CLI prompt routing. | 2 files ~240 LOC | vanguard/clients/cli/ • application/ManifestExplorer.ts • ui/ManifestCard.tsx | 3★ Normal Dev |
+| FE-203 | A | W1 / S1a | • Replay adapter • JSONL fixtures • --demo CLI flag | Zero-API-key interactive demo mode with realistic token streaming delays for presentations. | ReplayAdapter streamFixture() demoCLI() | 40 / 100 Simulating asynchronous timers and keystroke mock events. | 4 files ~310 LOC | vanguard/clients/cli/ • adapters/replay.ts • fixtures/sessions/*.jsonl | 2★ Junior / Mid Dev |
+| FE-204 | A | W2 / S2b | • Binary packaging • install.sh script • Shell PATH config | NPM package configuration and one-line zero-dependency curl \| sh installer script. | npm run build install.sh configurePath() | 50 / 100 Cross-platform shell portability (POSIX sh, Bash, Zsh, PowerShell). | 2 files ~180 LOC | • vanguard/clients/cli/package.json • tools/distribution/install.sh | 3★ DevOps / Senior |
+| FE-301 | B | W3 / S3a | • Track Code-OSS • Strip MS telemetry • Open-VSX config • Dark theme assets | Debloat Code-OSS / VSCodium base: remove Microsoft telemetry, accounts, and proprietary URLs. | scrub_code_oss.sh product.json gulpfile.vscode.js | 80 / 100 Navigating upstream VS Code build systems, Gulp pipelines, and patching product configs. | 3 files ~380 LOC | vanguard-ide/ • product.json • tools/ide/scrub_code_oss.sh | 5★ Principal / Lead |
+| FE-302 | B | W3 / S3b | • Extension manifest • WebviewProvider • React bundle embed • CSP headers | Built-in VS Code extension embedding React Vanguard interface in the Secondary Sidebar. | VanguardViewProvider resolveWebviewView() postMessage() | 65 / 100 Webview security sandbox isolation and React packaging in VS Code. | 4 files ~420 LOC | vanguard-ide/extensions/ • vanguard-panel/src/extension.ts • VanguardViewProvider.ts | 4★ Senior Dev |
+| FE-303 | B | W3 / S3b | • Extension socket • Bidirectional relay • Stream persistence | Extension Host Node.js socket connecting Webview to local Vanguard daemon over UDS. | DaemonBridge onMessage() forwardToDaemon() | 60 / 100 Three-way event propagation: Webview ↔ Extension Host ↔ Python Socket. | 2 files ~290 LOC | vanguard-ide/extensions/ • vanguard-panel/src/DaemonBridge.ts | 4★ Senior Dev |
+| FE-304 | B | W3 / S3b | • Active file watcher • Cursor selection • Git branch reader • Context bar pill | Live editor context sync: inject active file, cursor range, and git status into Vanguard prompt bar. | WorkspaceContext onDidChangeActiveEditor getGitStatus() | 50 / 100 VS Code Extension API subscription management and debounce optimizations. | 2 files ~260 LOC | vanguard-ide/extensions/ • vanguard-panel/src/WorkspaceContext.ts | 3★ Normal Dev |
+| FE-401 | B | W4 / S4a | • Monaco decorations • CodeLens buttons • Inline diff sign • Clear highlights | Render proposed agent code changes directly in the active editor with [Accept & Sign] buttons. | InlineDiffProvider ApprovalCodeLens applyDecoration() | 75 / 100 Monaco editor text range calculation and coordinate-accurate inline diff painting. | 2 files ~360 LOC | vanguard-ide/extensions/ • InlineDiffProvider.ts • ApprovalCodeLens.ts | 4★ Senior Dev |
+| FE-402 | A owns / B consumes | W4 / S4b | • Secret regex engine • Masking formatter • DLP rule config | Local Data Loss Prevention filter redacting API keys, passwords, and PII before API calls. | DLPFilter maskSecrets() loadBlocklist() | 55 / 100 High-speed non-backtracking regex parsing over large codebase buffers. | 2 files ~220 LOC | vanguard/clients/cli/ • application/dlp.ts • vanguard-panel/src/DLPFilter.ts | 3★ Normal Dev |
+| FE-403 | A (+ B soak) | W4 / S4b | • Headless E2E tests • Vector conformance • 100-run soak test | Comprehensive E2E test suite running real SWE tasks against live daemon and mock engine. | run_e2e_scenarios() verify_vectors() run_soak_test() | 60 / 100 Orchestrating multi-process test runners and verifying 0-leak memory profiles. | 3 files ~340 LOC | vanguard/clients/cli/ • test/e2e/*.test.ts • tools/ci/run_soak.sh | 4★ QA / Senior Dev |
+| FE-404 | B | W4 / S4b | • Linux AppImage • Windows MSI installer • macOS DMG build | Desktop application packaging for Linux, Windows, and macOS with embedded runtimes. | package-desktop.sh InnoSetup.iss build_matrix.yml | 70 / 100 Cross-platform binary code signing, bundling embedded runtimes and DLLs. | 4 files ~280 LOC | vanguard-ide/build/ • package-desktop.sh • tools/release/build_matrix.yml | 4★ DevOps / Release |
 
 ## Simple Execution Instructions: What to Do & How (Fast Delivery)
 
-To deliver this product to your client as quickly and cleanly as possible, follow this exact sequence:
+To deliver this product to your client as quickly and cleanly as possible, follow this exact sequence. **FE-A owns steps 1–2. FE-B owns step 3 after the live CLI checkpoint** (B may prepare FE-301 in parallel). The specialist prompt may change this if a better SOTA path exists.
 
-### Step 1: Deliver the Instant Demo Beta (Within 2–3 Days)
+### Step 1: Deliver the Instant Demo Beta (Within 2–3 Days) — Lane FE-A
 
 • Assign TASK-FE-203 and TASK-FE-104 to 1 or 2 developers.
 • Hook up the React+Ink terminal UI to replay.ts with the pre-recorded fixture.
 • Client Deliverable: Run `npx @vanguard/cli --demo`. The client immediately sees a beautiful Claude Code-level terminal UI streaming tokens, showing diffs, and requesting operator approvals with zero setup or API keys.
 
-### Step 2: Wire Up the Live Python Backend (Sprint 1 & 2)
+### Step 2: Wire Up the Live Python Backend (FE-W2) — Lane FE-A
 
 • Implement TASK-FE-101 (LiveDaemonClient) and TASK-FE-102 (OperatorSigner).
 • Implement TASK-FE-201 (DaemonSupervisor) so that when the user runs vg, it automatically starts the Python backend daemon in the background invisibly.
 • Client Deliverable: `curl -fsSL https://your-domain.com/install.sh | sh` gives the user a working live AI coding CLI on their machine.
 
-### Step 3: Launch the VS Code Fork (Sprint 3 & 4)
+### Step 3: Launch the VS Code Fork (FE-W3 & FE-W4) — Lane FE-B
 
 • Run the Code-OSS debloating script (TASK-FE-301) to strip Microsoft telemetry and brand the IDE.
 • Embed the React UI inside the Secondary Sidebar (TASK-FE-302 & TASK-FE-303).

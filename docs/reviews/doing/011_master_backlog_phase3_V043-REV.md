@@ -144,16 +144,16 @@ child's exploration never enters the parent's context; the whole run reconstruct
 
 | ID | Status | Task | DoD | Source |
 |---|---|---|---|---|
-| `S8-B-01` | `[TODO]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | Property tests: attenuation monotone across spawn; budget conserved two levels deep; child overrun debits the parent | `003 §3.4`, `T4.4`, `T4.10` |
-| `S8-B-02` | `[TODO]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
-| `S8-B-03` | `[TODO]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
-| `S8-B-04` | `[TODO]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
-| `S8-B-05` | `[TODO]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
-| `S8-B-06` | `[TODO]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
-| `S8-B-07` | `[TODO]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
-| `S8-B-08` | `[TODO]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
-| `S8-B-09` | `[TODO]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
-| `S8-B-10` | `[TODO]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
+| `S8-B-01` | `[DONE]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | Property tests: attenuation monotone across spawn; budget conserved two levels deep; child overrun debits the parent | `003 §3.4`, `T4.4`, `T4.10` |
+| `S8-B-02` | `[DONE]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
+| `S8-B-03` | `[DONE]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
+| `S8-B-04` | `[DONE]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
+| `S8-B-05` | `[DONE]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
+| `S8-B-06` | `[DONE]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
+| `S8-B-07` | `[DONE]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
+| `S8-B-08` | `[DONE]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
+| `S8-B-09` | `[DONE]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
+| `S8-B-10` | `[DONE]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
 
 ### 5.3 Lane C — Measurement & Lab
 

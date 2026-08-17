@@ -47,6 +47,7 @@ def source_files(root: Path) -> list[Path]:
     starts = [
         root / "vanguard" / "packages",
         root / "vanguard" / "clients",
+        root / "benchmarkings",
         root / "spike",
         root / "slice",
         root / "lab",
@@ -64,7 +65,7 @@ def source_files(root: Path) -> list[Path]:
 def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
     rel = path.resolve().relative_to(root.resolve())
     parts = rel.parts
-    if parts and parts[0] in {"spike", "slice", "lab"}:
+    if parts and parts[0] in {"spike", "slice", "lab", "benchmarkings"}:
         return parts[0], None
     if len(parts) >= 3 and parts[:2] == ("vanguard", "packages"):
         package = parts[2]
@@ -203,6 +204,22 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             else:
                 target_area, target_family = area_from_spec(spec)
             lowered_spec = spec.lower().replace("_", "-")
+            if source_area == "benchmarkings":
+                # Benchmarks are measurement clients, never model adapters.  The
+                # composition root is the sole permitted runtime entrypoint.
+                if target_area == "runtime" and not (
+                    spec == "vanguard.packages.runtime.root"
+                    or spec.startswith("vanguard.packages.runtime.root.")
+                ):
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                    )
+                    continue
+                if target_area is not None and target_area not in {"benchmarkings", "runtime", "ports"}:
+                    errors.append(
+                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                    )
+                    continue
             if source_area == "governance" and "model" in lowered_spec:
                 errors.append(f"{source.relative_to(root)}:{line}: governance may not depend on model APIs ({spec!r})")
                 continue

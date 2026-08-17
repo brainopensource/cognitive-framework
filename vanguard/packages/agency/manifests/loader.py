@@ -27,6 +27,16 @@ class ManifestLoadError(ValueError):
     pass
 
 
+# Registered component consumers for fail-closed manifest composition (S7-B-02 / S8-B-02..04)
+REGISTERED_COMPONENT_CONSUMERS: Mapping[str, str] = {
+    "system_prompt": "runtime.root:system_core",
+    "tools": "runtime.root:tool_schemas",
+    "context_policy": "vanguard.packages.agency.context.compaction",
+    "routing_policy": "vanguard.packages.adapters.models.routing",
+    "approval_policy": "vanguard.packages.runtime.governance.approvals",
+}
+
+
 @dataclass(frozen=True, slots=True)
 class AliasTranslator:
     """Bidirectional verb translator for a manifest pack.
@@ -40,39 +50,34 @@ class AliasTranslator:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "AliasTranslator":
-        """Construct translator from raw dict (supporting flat or nested format)."""
-        if "to_canonical" in data and "to_wire" in data:
-            to_canon = {str(k): str(v) for k, v in data["to_canonical"].items()}
-            to_wire = {str(k): str(v) for k, v in data["to_wire"].items()}
-            return cls(to_canon, to_wire)
+        """Construct translator from flat dict format: model_alias -> canonical_verb."""
+        if not isinstance(data, Mapping):
+            raise ManifestLoadError("aliases must be a JSON object mapping alias names to canonical verbs")
+        if "to_canonical" in data or "aliases" in data:
+            raise ManifestLoadError("aliases must use canonical flat shape {'alias': 'verb'}")
 
-        if "aliases" in data and isinstance(data["aliases"], Mapping):
-            aliases = data["aliases"]
-            to_canon = {str(k): str(v) for k, v in aliases.items() if isinstance(k, str) and isinstance(v, str)}
-            to_wire = {}
-            for k, v in to_canon.items():
-                if v not in to_wire:
-                    to_wire[v] = k
-            return cls(to_canon, to_wire)
-
-        # Flat dict format: model_name -> canonical_verb
         to_canon: dict[str, str] = {}
         to_wire: dict[str, str] = {}
         for key, val in data.items():
-            if isinstance(key, str) and isinstance(val, str):
-                to_canon[key] = val
-                if val not in to_wire:
-                    to_wire[val] = key
+            if not isinstance(key, str) or not isinstance(val, str):
+                raise ManifestLoadError(f"alias mapping entries must be str -> str, got {key!r}: {val!r}")
+            to_canon[key] = val
+            if val not in to_wire:
+                to_wire[val] = key
 
         return cls(to_canon, to_wire)
 
     def to_canonical(self, tool_name: str) -> str:
         """Translate model tool alias -> canonical verb."""
-        return self.to_canonical_map.get(tool_name, tool_name)
+        if tool_name not in self.to_canonical_map:
+            raise KeyError(f"Unknown tool alias: {tool_name!r}")
+        return self.to_canonical_map[tool_name]
 
     def to_wire(self, canonical_verb: str) -> str:
         """Translate canonical verb -> model tool alias."""
-        return self.to_wire_map.get(canonical_verb, canonical_verb)
+        if canonical_verb not in self.to_wire_map:
+            raise KeyError(f"Unknown canonical verb: {canonical_verb!r}")
+        return self.to_wire_map[canonical_verb]
 
 
 @dataclass(frozen=True, slots=True)
@@ -158,6 +163,8 @@ class ManifestLoader:
         except Exception as exc:
             raise ManifestLoadError(f"Invalid harness manifest in {manifest_file}: {exc}") from exc
 
+        declared_verbs = {cap.verb for cap in parsed_manifest.capabilities}
+
         # Load aliases.json if present
         aliases_file = pack_path / "aliases.json"
         if aliases_file.exists():
@@ -167,6 +174,13 @@ class ManifestLoader:
                 translator = AliasTranslator.from_dict(raw_aliases)
             except Exception as exc:
                 raise ManifestLoadError(f"Failed to parse {aliases_file}: {exc}") from exc
+
+            # Fail-closed: every alias target must be a declared capability verb
+            for alias_name, target_verb in translator.to_canonical_map.items():
+                if target_verb not in declared_verbs:
+                    raise ManifestLoadError(
+                        f"Alias target {target_verb!r} for alias {alias_name!r} is not a declared capability verb: {sorted(declared_verbs)}"
+                    )
         else:
             # Default identity translator based on declared capabilities
             canon_map = {cap.verb: cap.verb for cap in parsed_manifest.capabilities}
@@ -175,21 +189,54 @@ class ManifestLoader:
         # Read auxiliary component data (tools, system prompts, etc.)
         components_data: dict[str, list[Any]] = {}
         for role, paths in parsed_manifest.components:
+            # Fail-closed: every component role must have a registered consumer (S7-B-02)
+            if role not in REGISTERED_COMPONENT_CONSUMERS:
+                raise ManifestLoadError(
+                    f"Unconsumed component role {role!r} has no registered consumer; unread components are forbidden at composition"
+                )
+
             role_items: list[Any] = []
             for item_path_str in paths:
                 item_path = self.base_dir / item_path_str
                 if not item_path.exists():
+                    item_path = pack_path / item_path_str
+                if not item_path.exists():
                     item_path = pack_path / Path(item_path_str).name
-                if item_path.exists():
-                    if item_path.suffix == ".json":
-                        try:
-                            with open(item_path, "r", encoding="utf-8") as f:
-                                role_items.append(json.load(f))
-                        except Exception:
-                            role_items.append(item_path.read_text(encoding="utf-8"))
-                    else:
-                        role_items.append(item_path.read_text(encoding="utf-8"))
+                if not item_path.exists():
+                    raise ManifestLoadError(f"Component file does not exist: {item_path_str}")
+
+                if item_path.suffix == ".json":
+                    try:
+                        with open(item_path, "r", encoding="utf-8") as f:
+                            role_items.append(json.load(f))
+                    except Exception as exc:
+                        raise ManifestLoadError(f"Failed to parse component JSON in {item_path}: {exc}") from exc
+                else:
+                    role_items.append(item_path.read_text(encoding="utf-8"))
             components_data[role] = role_items
+
+        # Fail-closed: validate tool schemas against declared aliases union capabilities
+        valid_tool_names = set(translator.to_canonical_map.keys()) | declared_verbs
+        for tool_schema in components_data.get("tools", []):
+            if isinstance(tool_schema, Mapping):
+                func = tool_schema.get("function")
+                source = func if isinstance(func, Mapping) else tool_schema
+                s_name = source.get("name") if isinstance(source, Mapping) else None
+                s_verb = tool_schema.get("verb")
+
+                verb_resolved = bool(s_verb and s_verb in declared_verbs)
+                name_resolved = bool(s_name and (s_name in valid_tool_names or s_name in declared_verbs))
+
+                if s_verb and not verb_resolved:
+                    raise ManifestLoadError(
+                        f"Tool schema verb {s_verb!r} is not a declared capability verb: {sorted(declared_verbs)}"
+                    )
+                if s_name and not name_resolved and not verb_resolved:
+                    raise ManifestLoadError(
+                        f"Tool schema name {s_name!r} is neither a declared verb nor a known alias: {sorted(valid_tool_names)}"
+                    )
+                if not s_name and not s_verb:
+                    raise ManifestLoadError("Tool schema must declare a 'name' or 'verb'")
 
         return LoadedManifestPack(
             manifest=parsed_manifest,

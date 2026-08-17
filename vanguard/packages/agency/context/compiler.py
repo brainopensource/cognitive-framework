@@ -36,6 +36,7 @@ import math
 from typing import Any, Mapping, Sequence
 
 from ...kernel import Event
+from .compaction import CompactionStrategy, resolve_compaction_strategy
 from .layers import (
     BREAKPOINT_LAYERS,
     Block,
@@ -60,28 +61,19 @@ _PRIOR_PLACES = 4
 
 
 class ContextBudgetExceeded(ValueError):
-    """The floor does not fit the window (`REQ-CTX-001`).
-
-    `M6`'s twin: a requirement that cannot be satisfied is not a requirement.
-    Once `L5` and the `L4` notes are gone, what remains is the system core, the
-    schemas, the environment and the brief — none of which may be truncated. If
-    that does not fit, the composition is wrong and shipping a silently
-    over-budget prompt would hide it behind a provider error much later.
-    """
+    """The task plus the stable prefix exceeds the token budget (`VG-03 §10.2`)."""
+    pass
 
 
 class CacheBreakpointCeilingExceeded(ValueError):
-    """More breakpoints than the provider accepts, raised **at assembly**.
-
-    `VG-03 §10.2`: never discovered afterwards from cache-hit telemetry.
-    """
+    """More cache breakpoints requested than the ceiling (`VG-03 §10.2`)."""
+    pass
 
 
 class ContextCompiler:
-    """Assembles `[L1][L2][L3][L4][L5]` under a token ceiling.
+    """The L1-L5 context compiler.
 
-    Layers `L1`–`L3` are rendered once, here, and are the same bytes for every
-    call this object serves.
+    Pure function: prompt vector in, compiled context out.
     """
 
     def __init__(
@@ -93,17 +85,23 @@ class ContextCompiler:
         token_ceiling: int = 64_000,
         breakpoint_ceiling: int = 4,
         source: str = "manifest",
+        context_policy: Mapping[str, Any] | str | None = None,
+        compaction_strategy: CompactionStrategy | None = None,
     ) -> None:
         if token_ceiling <= 0:
             raise ValueError("token_ceiling must be positive")
-        # The breakpoint ceiling is *not* checked here: it is only violated
-        # once the layers that would carry a breakpoint are actually non-empty,
-        # and that is a per-call fact. It is checked at assembly, where it is
-        # known — which is also where `VG-03 §10.2` requires it to raise.
         self._token_ceiling = token_ceiling
         self._breakpoint_ceiling = breakpoint_ceiling
         self._prefix = self._render_prefix(system_core, tool_schemas, environment, source)
         self._prefix_tokens = sum(block.token_estimate for block in self._prefix)
+
+        if compaction_strategy is not None:
+            self._compaction_strategy = compaction_strategy
+            self._compaction_options = context_policy if isinstance(context_policy, Mapping) else {}
+        else:
+            strat, opts = resolve_compaction_strategy(context_policy)
+            self._compaction_strategy = strat
+            self._compaction_options = opts
 
     # -- composition-time rendering -------------------------------------
 
@@ -181,46 +179,14 @@ class ContextCompiler:
 
     def _fit(self, floor: int, notes: list[Block],
              dialogue: list[Block]) -> tuple[list[str], list[str]]:
-        """Bring the vector under the ceiling, cheapest loss first.
-
-        The ladder is `VG-03 §10.3` read in loss order, and the order is the
-        requirement rather than an optimisation:
-
-        1. `result_eviction` over `L5`, oldest first — keep that a result
-           arrived, drop the body. Usually the correct first move.
-        2. Drop whole `L5` fragments, oldest first, for everything eviction
-           cannot reach (an operator note is not a result body).
-        3. Drop `L4` notes, oldest first. The brief is never reached.
-
-        `L1` and `L2` are absent from the ladder because they are absent from
-        the ladder — no step below can touch them.
-        """
-        elided: list[str] = []
-        dropped: list[str] = []
-
-        def total() -> int:
-            return (floor
-                    + sum(block.token_estimate for block in notes)
-                    + sum(block.token_estimate for block in dialogue))
-
-        for index, block in enumerate(dialogue):
-            if total() <= self._token_ceiling:
-                break
-            if not block.evictable:
-                continue
-            dialogue[index] = _receipt_for(block)
-            elided.append(block.label)
-
-        while total() > self._token_ceiling and dialogue:
-            removed = dialogue.pop(0)
-            dropped.append(removed.label)
-            if removed.label in elided:
-                elided.remove(removed.label)
-
-        while total() > self._token_ceiling and notes:
-            dropped.append(notes.pop(0).label)
-
-        return elided, dropped
+        """Bring the vector under the ceiling according to the configured CompactionStrategy."""
+        return self._compaction_strategy.compact(
+            floor=floor,
+            ceiling=self._token_ceiling,
+            notes=notes,
+            dialogue=dialogue,
+            options=self._compaction_options,
+        )
 
 
 def _receipt_for(block: Block) -> Block:

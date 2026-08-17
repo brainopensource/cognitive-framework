@@ -56,15 +56,24 @@ def seed_pair(db: Path, rows: list[tuple[str, str, int, int, str]]) -> None:
         conn.commit()
 
 
+from vanguard.packages.domain.artifacts.manifest import ManifestRegistry, ManifestError
+
+
 class ShellOnlyControl(unittest.TestCase):
     def test_vg_shell_only_is_undeletable_single_proc_exec(self) -> None:
-        manifest = json.loads((MANIFESTS / "vg-shell-only" / "manifest.json").read_text())
-        aliases = json.loads((MANIFESTS / "vg-shell-only" / "aliases.json").read_text())
+        manifest = json.loads((MANIFESTS / "vg-shell-only" / "manifest.json").read_text(encoding="utf-8"))
+        aliases = json.loads((MANIFESTS / "vg-shell-only" / "aliases.json").read_text(encoding="utf-8"))
         self.assertTrue(manifest["undeletable"])
         verbs = {cap["verb"] for cap in manifest["capabilities"]}
         self.assertEqual(verbs, {"proc.exec"})
-        self.assertEqual(set(aliases["aliases"].values()), {"proc.exec"})
-        self.assertTrue(aliases["passthrough"])
+        self.assertEqual(set(aliases.values()), {"proc.exec"})
+        self.assertEqual(aliases, {"shell": "proc.exec"})
+
+        registry_data = json.loads((MANIFESTS / "registry.json").read_text(encoding="utf-8"))
+        registry = ManifestRegistry.parse(registry_data)
+        with self.assertRaises(ManifestError) as ctx:
+            registry.remove("vg-shell-only")
+        self.assertIn("undeletable", str(ctx.exception))
 
 
 class McNemarBench(unittest.TestCase):

@@ -23,6 +23,7 @@ __all__ = [
     "ProposalKind",
     "ProposalMalformed",
     "RunTermination",
+    "SpawnResult",
     "Turn",
 ]
 
@@ -43,6 +44,20 @@ class RunTermination(str, Enum):
     INSTRUMENT_ERROR = "instrument_error"
     RUNTIME_ERROR = "runtime_error"
     ABANDONED = "abandoned"
+
+
+@dataclass(frozen=True, slots=True)
+class SpawnResult:
+    """The structured, value-only outcome of spawning a child episode (S8-B-01).
+
+    Never carries a mutable engine handle or shared mutable state.
+    """
+
+    ok: bool
+    payload: Any = None
+    terminal: RunTermination = RunTermination.COMPLETED
+    detail: str = ""
+    turns: int = 0
 
 
 class ProposalKind(str, Enum):

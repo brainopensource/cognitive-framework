@@ -25,6 +25,7 @@ export function DetailPane({
       {!approval && why ? <Text>{why}</Text> : undefined}
       {!approval && !why && selected?.kind === "thought" ? <Text>{selected.text}</Text> : undefined}
       {!approval && !why && selected?.kind === "tool" ? <Text>{selected.name} [{selected.status}]</Text> : undefined}
+      {!approval && !why && selected?.kind === "opaque" ? <Text>{selected.label}</Text> : undefined}
       {!approval && !why && !selected ? <Text dimColor>(select a row)</Text> : undefined}
     </Box>
   );

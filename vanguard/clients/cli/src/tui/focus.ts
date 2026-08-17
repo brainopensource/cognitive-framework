@@ -1,6 +1,6 @@
 import type { Result } from "@vanguard/client-core";
 
-export type TuiMode = "prompt" | "approval" | "correct" | "help" | "run";
+export type TuiMode = "prompt" | "approval" | "correct" | "help" | "run" | "resume";
 
 export const HELP_TEXT = [
   "vg keys",
@@ -9,6 +9,7 @@ export const HELP_TEXT = [
   "  y / n / c      approve / reject / correct (approval mode only)",
   "  j k / PgUp PgDn  scroll transcript (run mode)",
   "  w              explain selected tool (why); shows not_available if empty",
+  "  r              resume: type run id then Enter (or vg run --resume <id>)",
   "  ctrl+c         requestCancel",
   "  Esc            requestCancel unless prompt or help",
   "  ?              toggle this help",
@@ -33,12 +34,12 @@ export function submitBrief(brief: string): Result<{ brief: string }> {
 
 export function shouldRequestCancel(mode: TuiMode, event: { ctrlC: boolean; escape: boolean }): boolean {
   if (event.ctrlC) return true;
-  if (event.escape && mode !== "prompt" && mode !== "help") return true;
+  if (event.escape && mode !== "prompt" && mode !== "help" && mode !== "resume") return true;
   return false;
 }
 
 export function shouldQuit(mode: TuiMode, input: string): boolean {
-  return input === "q" && mode !== "prompt";
+  return input === "q" && mode !== "prompt" && mode !== "resume";
 }
 
 export function modeAfterPendingApproval(mode: TuiMode, pending: boolean): TuiMode {

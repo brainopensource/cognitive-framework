@@ -99,9 +99,11 @@ Wave 2 copy-paste prompts: [`sprints_front/wave2_implementer_prompts.md`](sprint
 | FE-1-5 | Public API freeze + commands.ts import hygiene | FE-1-4 | barrel + CLI still green | `[DONE]` |
 | FE-1-6 | `selectStatusBar` + `windowTranscript` | FE-1-3 | selector unit tests | `[DONE]` |
 | FE-1-7 | `toTraceGraph(envelopes)` | FE-1-1 | golden vs successful-episode.jsonl | `[DONE]` |
-| FE-1-8 | `subscribeRun` + AbortSignal | FE-1-4 | fake-iterable abort test | `[DONE]` |
+| FE-1-9 | `buildResumeRequest` + `describeResumeFailure` | FE-1-4 | refusal + verbatim failure messages | `[DONE]` |
+| FE-1-10 | `formatExplanation` + `whyFromResult` | FE-1-1 | golden vs why-typed-tools.jsonl | `[DONE]` |
+| FE-1-11 | `selectSessionChrome` + `attachLive` factory | FE-1-5 | connect-or-fail + README SDK table | `[DONE]` |
 
-Kits: `sprints_front/lane_core_wave1.md`, `lane_core_wave2.md`
+Kits: `sprints_front/lane_core_wave1.md`, `lane_core_wave2.md`, `lane_core_wave3.md`
 
 ### 5.3 Lane FE-2 — Ink TUI
 

@@ -1,27 +1,28 @@
-# Wave 11–13 — PO acceptance (coding harness backend)
+# Wave 11–20 — PO acceptance (coding harness backend)
 
-Not a second board. Status lives on `docs/scrum/roadmap_backend.md`. **REQ-TRUST-001.**
+Not a second board. Status: `docs/scrum/roadmap_backend.md`. **REQ-TRUST-001.** Product version: **v0.4.5-beta** (`pyproject.toml`).
 
-## Product
-
-`vg-code-default` compiles into an isolated episode that can **inspect → edit → pytest** on a workspace. Greenfield and bugfix are the same `HarnessSession.run` path. Two modes: `interactive=True` (approvals) and `interactive=False` (BENCHMARK fail-closed).
-
-Compiler + pack + MOCK driver **is not** a daily-driver Claude. We do not publish a SWE score.
+Compiler + pack + honest driver **is not** a daily-driver Claude. We do not publish a SWE score.
 
 ## Done when (evidence)
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | `lab/run.py` multi-turn from ledger, not `{turnCount: 1}` stub | `[TODO]` | This tree: `lab/run.py` still stubs. ALFA claims `runtime/repair.py` @ `954478f` — **those files are not on this tree.** |
-| 2 | Privileged verbs: INTERACTIVE suspends, BENCHMARK denies | `[TODO]` in this tree | Claimed W11-A; `runtime/root.py` still has the two modes. Proof tests not re-verified here as ALFA-owned files. |
-| 3 | Session log = ledger projection `vg.coding-session.v1` | `[DONE]` | `tools/export_coding_session.py`; no second DB |
-| 4 | Skill prefix ≤4k; bodies via `fs.read` | formatter `[DONE]`; pack genes `[TODO]` BETA | `format_skill_index`; `docs/scrum/sprints/wave11/skill.example.json` |
-| 5 | File-todo, not a kernel verb | `[TODO]` BETA | — |
-| 6 | MOCK dogfood dirs exist | `[TODO]` BETA | LAM keeps missing tasks in the denominator (`test/lab/test_coding_instrument.py`) |
-| Q2 | Live DOGFOOD-01..03, no mid-run hand-patch | `[TODO]` human | Runbook: `docs/scrum/sprints/wave11/s8-j-03-dogfood-runbook.md` |
+| 1 | `lab/run.py` computes nothing; driver is `runtime/lab_driver.py` | `[DONE]` | Shim + `test_lab_run_shim_computes_nothing`. ALFA `890216b` / `9192be1` |
+| 2 | INTERACTIVE suspends, BENCHMARK denies (real policy) | `[DONE]` (ALFA cited) | S18 `9192be1` — not re-run in this GAMMA session |
+| 3 | Session log `vg.coding-session.v1` from ledger envelopes | `[DONE]` | `tools/export_coding_session.py`; ALFA kind-attribute fix |
+| 4 | Skill prefix ≤4k; bodies via `fs.read` | `[DONE]` | `format_skill_index` + BETA `test_skills_are_load_bearing_not_decorative` (`005dd95`) |
+| 5 | File-todo, not a kernel verb | `[DONE]` | `.vanguard/todo.md` via `patch.apply` (BETA) |
+| 6 | MOCK dogfood dirs exist (4/4 in denominator) | `[DONE]` | `lab/tasks/dogfood-0N-*` + `greenfield-api-html`; LAM `workspaceMissingCount=0` |
+| 7 | MOCK is a real loop (not fabricated `turnCount:1`) | `[DONE]` (ALFA cited) | 4 turns → `attempts_exhausted`; tape ≠ gold |
+| 8 | Live `oracle_green` or live tool-calling turn | `[TODO]` | Ollama ran; no green; no archived first live turn |
+| Q2 | Live DOGFOOD-01..03, no mid-run hand-patch | `[TODO]` human | `s8-j-03-dogfood-runbook.md` |
+| Spend | S9-J-03 | `[TODO]` | — |
+| Claude daily-driver | — | `[TODO]` | v0.5+ |
 
 ## Human-only
 
 - Rotate OpenRouter key (`S7-J-04`).
 - Spend sign-off (`S9-J-03`).
-- Live Q2 execution (`S8-J-03`).
+- Live Q2 (`S8-J-03`).
+- Frontend / daemon (`FE-N1`) later.

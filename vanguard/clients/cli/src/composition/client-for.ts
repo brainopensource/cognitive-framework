@@ -1,4 +1,5 @@
 import {
+  attachLive,
   LiveRuntimeClient,
   OperatorSigner,
   ReplayRuntimeClient,
@@ -19,6 +20,7 @@ async function* stdinLines(): AsyncIterable<string> {
   if (buffer.trim()) yield buffer;
 }
 
+/** --demo/--replay/--scenario = mock; --feed = stdin NDJSON; else attachLive (no fixture fallback). */
 export function clientFor(parsed: CliOptions): RuntimeClient {
   if (parsed.demo) {
     const scenario = parsed.demoScenario ?? "successful-episode";
@@ -34,11 +36,9 @@ export function clientFor(parsed: CliOptions): RuntimeClient {
       model: parsed.model,
     });
   }
-  return new LiveRuntimeClient(undefined, {
+  return attachLive({
     repo: parsed.repo,
-    prompt: parsed.prompt,
     model: parsed.model,
-    autoApprove: parsed.autoApprove,
     socketPath: parsed.socketPath,
     manifest: parsed.manifest,
     signer: OperatorSigner.loadOrCreate(),

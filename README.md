@@ -2,7 +2,7 @@
 
 > **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
 
-[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.4.1--beta-blue.svg)](docs/agile/sprint6B/RELEASE_CANDIDATE_RECEIPT.json)
+[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.4.5--beta-blue.svg)](docs/scrum/sprints/wave20/evidence/s20-g-03-release-claims.md)
 [![Architecture](https://img.shields.io/badge/Architecture-Hexagonal_plane_separated-green.svg)](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md)
 [![Verification](https://img.shields.io/badge/Tests-488_passed-success.svg)](tools/run_active_contract_tests.py)
 [![TCB Budget](https://img.shields.io/badge/TCB_LOC-1315%2F1438-brightgreen.svg)](tools/check_tcb_budget.py)

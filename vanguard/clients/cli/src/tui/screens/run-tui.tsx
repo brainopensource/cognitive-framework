@@ -18,6 +18,7 @@ import {
 } from "../focus.js";
 import { useVanguardRun } from "../hooks/use-vanguard-run.js";
 import { DEFAULT_TRANSCRIPT_HEIGHT, moveTranscriptCursor, windowTranscript } from "../transcript-window.js";
+import { whyText } from "../why-display.js";
 
 export function RunTui({
   runtime,
@@ -38,14 +39,14 @@ export function RunTui({
   const { stdout } = useStdout();
   const columns = stdout?.columns ?? 80;
   const stacked = columns < 80;
-  const { view, status, activeRunId, source, lastSeq, begin } = useVanguardRun(runtime, {
+  const { view, status, activeRunId, source, lastSeq, begin, beginResume } = useVanguardRun(runtime, {
     repo,
     runId,
     resumeFrom,
     brief: initialBrief,
     autostart,
   });
-  const [mode, setMode] = useState<TuiMode>(autostart ? "run" : "prompt");
+  const [mode, setMode] = useState<TuiMode>(autostart ? (resumeFrom ? "run" : "run") : "prompt");
   const [previousMode, setPreviousMode] = useState<TuiMode>(autostart ? "run" : "prompt");
   const [buffer, setBuffer] = useState(autostart ? "" : initialBrief);
   const [cursor, setCursor] = useState(0);
@@ -84,7 +85,7 @@ export function RunTui({
       if (activeRunId) void runtime.requestCancel(activeRunId);
       return;
     }
-    if (mode === "prompt") {
+    if (mode === "prompt" || mode === "resume") {
       if (key.return) {
         const submitted = submitBrief(buffer);
         if (!submitted.ok) {
@@ -93,7 +94,8 @@ export function RunTui({
         }
         setLocalStatus(undefined);
         setMode("run");
-        begin(submitted.value.brief);
+        if (mode === "resume") beginResume(submitted.value.brief);
+        else begin(submitted.value.brief);
         return;
       }
       if (key.tab) {
@@ -144,11 +146,14 @@ export function RunTui({
         setCursor((c) => moveTranscriptCursor(c, windowed.total, DEFAULT_TRANSCRIPT_HEIGHT, -1));
         return;
       }
+      if (input === "r") {
+        setBuffer(activeRunId);
+        setMode("resume");
+        return;
+      }
       if (input === "w") {
         const artifactId = selected?.kind === "tool" ? selected.name : "unknown";
-        void runtime.explainArtifact(artifactId).then((result) => {
-          setWhy(result.ok ? JSON.stringify(result.value) : result.error.code);
-        });
+        void runtime.explainArtifact(artifactId).then((result) => setWhy(whyText(result)));
       }
     }
   });
@@ -157,19 +162,15 @@ export function RunTui({
   const hints =
     mode === "prompt"
       ? "Enter start · Tab run · empty Enter = invalid_request"
-      : view.pendingApproval
-        ? (mode === "correct" ? "taxonomy keys" : "y/n/c · ? help")
-        : "Tab prompt · ctrl+c cancel · ? help · q quit";
+      : mode === "resume"
+        ? "Enter resume run id · empty Enter = invalid_request"
+        : view.pendingApproval
+          ? (mode === "correct" ? "taxonomy keys" : "y/n/c · ? help")
+          : "Tab prompt · r resume · w why · ctrl+c cancel · ? help · q quit";
 
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-      <StatusBar
-        source={source}
-        seq={lastSeq}
-        tokens={view.tokens}
-        costMicros={view.costMicros}
-        kind={kind}
-      />
+      <StatusBar view={view} source={source} lastSeq={lastSeq} lastKind={kind} />
       <Box flexDirection={stacked ? "column" : "row"}>
         <TranscriptPane rows={windowed.rows} selected={0} />
         {mode === "help" ? <HelpOverlay /> : <DetailPane mode={mode} approval={view.pendingApproval} selected={selected} why={why} />}

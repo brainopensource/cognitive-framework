@@ -11,6 +11,9 @@ export function TranscriptPane({ rows, selected }: { rows: TranscriptRow[]; sele
         if (row.kind === "thought") {
           return <Text key={`t-${index}`}>{mark} · {row.text}</Text>;
         }
+        if (row.kind === "opaque") {
+          return <Text key={`o-${index}`}>{mark} {row.label}</Text>;
+        }
         return <Text key={`tool-${index}`}>{mark} {row.name} [{row.status}]</Text>;
       })}
     </Box>

@@ -11,7 +11,7 @@ export function PromptBar({
   buffer: string;
   hints: string;
 }) {
-  const focused = mode === "prompt";
+  const focused = mode === "prompt" || mode === "resume";
   return (
     <Box flexDirection="column">
       <Text>

@@ -1,14 +1,18 @@
 import React from "react";
 import { Text } from "ink";
 import { theme } from "../theme/tokens.js";
-import { formatStatusBar } from "../status-bar.js";
+import { statusBarFromView } from "../status-bar.js";
+import type { RunViewModel, StreamSource } from "@vanguard/client-core";
 
 export function StatusBar(props: {
-  source: string;
-  seq?: string;
-  tokens: number;
-  costMicros: string;
-  kind: string;
+  view: RunViewModel;
+  source: StreamSource | "unknown";
+  lastSeq?: string;
+  lastKind?: string;
 }) {
-  return <Text color={theme.accent} bold>{formatStatusBar(props)}</Text>;
+  return (
+    <Text color={theme.accent} bold>
+      {statusBarFromView(props)}
+    </Text>
+  );
 }

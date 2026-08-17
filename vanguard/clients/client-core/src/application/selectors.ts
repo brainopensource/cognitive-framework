@@ -50,3 +50,24 @@ export function windowTranscript(
     total,
   };
 }
+
+export type SessionChromeModel = StatusBarModel & {
+  runId: string;
+  daemon: "running" | "not_available" | "unknown";
+};
+
+export function selectSessionChrome(input: {
+  view: RunViewModel;
+  source: StreamSource | "unknown";
+  lastSeq?: string;
+  lastKind?: string;
+  runId?: string;
+  daemon?: "running" | "not_available" | "unknown";
+}): SessionChromeModel {
+  const statusBar = selectStatusBar(input);
+  return {
+    ...statusBar,
+    runId: input.runId ?? "",
+    daemon: input.daemon ?? "unknown",
+  };
+}

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
-import { manageDaemon, streamRun } from "../src/application/commands.js";
+import { manageDaemon, resumeRun, streamRun } from "../src/application/commands.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { ReplayRuntimeClient } from "../src/adapters/replay.js";
 import { parseCliOptions, USAGE } from "../src/composition/parse-cli.js";
@@ -65,6 +65,15 @@ test("manageDaemon start is not_available (Joint J1)", async () => {
   const body = JSON.parse(lines[0]!);
   assert.equal(body.error.code, "not_available");
   assert.equal(String(body.error.message).includes("J1"), true);
+});
+
+test("resumeRun without daemon is not_available and does not emit mock events", async () => {
+  const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/missing-vg.sock" });
+  const lines: string[] = [];
+  const code = await resumeRun(client, { repo: ".", runId: "run-missing", headless: true }, (l) => lines.push(l));
+  assert.equal(code, 2);
+  assert.equal(JSON.parse(lines[0]!).error.code, "not_available");
+  assert.equal(lines.some((line) => line.includes("\"source\":\"mock\"")), false);
 });
 
 test("getDaemonStatus does not invent a version string", async () => {

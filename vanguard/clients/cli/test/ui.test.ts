@@ -18,6 +18,10 @@ import {
 } from "../src/tui/focus.js";
 import { windowTranscript } from "../src/tui/transcript-window.js";
 import { formatStatusBar } from "../src/tui/status-bar.js";
+import { performResume } from "../src/composition/resume-session.js";
+import { whyText } from "../src/tui/why-display.js";
+import { HELP_TEXT } from "../src/tui/focus.js";
+import { subscribeRun } from "@vanguard/client-core";
 import type {
   CorrectionRecord,
   EventEnvelope,
@@ -131,6 +135,58 @@ test("status bar labels mock and never looks live", () => {
   });
   assert.match(line, /source: mock/);
   assert.equal(/source: live/.test(line), false);
+  assert.match(line, /daemon: unknown/);
+  assert.equal(/policy: daemon/.test(line), false);
+});
+
+test("subscribeRun abort does not throw", async () => {
+  const ac = new AbortController();
+  ac.abort();
+  let streamed = 0;
+  await subscribeRun(
+    {
+      async *streamEvents() {
+        streamed += 1;
+        yield {
+          ok: true as const,
+          value: { contractVersion: "0.1" as const, source: "live" as const, envelope: envelope("Heartbeat") },
+        };
+      },
+    },
+    { runId: "run-1" },
+    { onItem() {} },
+    ac.signal
+  );
+  assert.equal(streamed, 0);
+});
+
+test("resume not_available does not start a mock stream", async () => {
+  let streams = 0;
+  const client = {
+    async requestResume() {
+      return { ok: false as const, error: { code: "not_available" as const, message: "no daemon", retryable: false } };
+    },
+    async *streamEvents() {
+      streams += 1;
+    },
+  };
+  const result = await performResume(client, "run-1");
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, "not_available");
+  assert.equal(streams, 0);
+});
+
+test("whyText prints error.code only when explainArtifact fails", () => {
+  const text = whyText({
+    ok: false,
+    error: { code: "not_available", message: "no evidence", retryable: false },
+  });
+  assert.equal(text, "not_available");
+});
+
+test("help lists resume commands", () => {
+  assert.match(HELP_TEXT, /vg run --resume/);
+  assert.match(HELP_TEXT, /\br\b/);
 });
 
 test("approve and reject callbacks submit resolveApproval receipts only", async () => {
@@ -194,6 +250,8 @@ test("TUI presentation consumes @vanguard/client-core", () => {
     "src/composition/operator-approval.ts",
     "src/tui/hooks/use-vanguard-run.ts",
     "src/tui/screens/run-tui.tsx",
+    "src/tui/status-bar.ts",
+    "src/composition/resume-session.ts",
   ];
   for (const rel of files) {
     const source = readFileSync(join(dir, rel), "utf8");

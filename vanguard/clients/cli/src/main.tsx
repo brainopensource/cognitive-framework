@@ -39,7 +39,7 @@ if (command === "run") {
         repo={parsed.repo}
         runId={parsed.runId}
         resumeFrom={parsed.resumeFrom}
-        autostart={parsed.promptExplicit}
+        autostart={parsed.promptExplicit || Boolean(parsed.resumeFrom)}
         initialBrief={parsed.promptExplicit ? (parsed.prompt ?? "") : ""}
       />
     );
@@ -67,6 +67,6 @@ if (command === "run") {
 }
 
 process.exitCode = exitCode;
-if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why") {
+if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why" || command === "resume") {
   process.exit(exitCode);
 }

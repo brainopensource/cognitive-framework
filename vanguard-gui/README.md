@@ -16,3 +16,18 @@ npm run dev
 
 `--workspaces=false` keeps the parent repository workspace from interpreting
 this standalone app's local `@vanguard/client-core` file dependency.
+
+The app has an explicit Replay/Live switch. Replay loads only
+`public/successful-episode.jsonl` with `source: mock`; Live calls
+`attachLive()` and reports `not_available` when the daemon socket cannot be
+reached. It never falls back to the replay fixture in Live mode.
+
+If the system npm installation is broken, use a clean Node 20+ environment
+with Corepack and the pinned package manager from `packageManager`:
+
+```sh
+corepack enable
+pnpm install --ignore-workspace
+pnpm run typecheck
+pnpm run dev
+```

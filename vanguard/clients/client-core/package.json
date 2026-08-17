@@ -66,6 +66,18 @@
     "./application/subscribe-run.js": {
       "types": "./dist/src/application/subscribe-run.d.ts",
       "default": "./dist/src/application/subscribe-run.js"
+    },
+    "./application/resume.js": {
+      "types": "./dist/src/application/resume.d.ts",
+      "default": "./dist/src/application/resume.js"
+    },
+    "./application/why.js": {
+      "types": "./dist/src/application/why.d.ts",
+      "default": "./dist/src/application/why.js"
+    },
+    "./application/attach.js": {
+      "types": "./dist/src/application/attach.d.ts",
+      "default": "./dist/src/application/attach.js"
     }
   },
   "files": [

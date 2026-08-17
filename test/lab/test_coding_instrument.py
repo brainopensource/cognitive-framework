@@ -86,10 +86,17 @@ class TestLamDenominator(unittest.TestCase):
         self.assertEqual(report["passRateDenominator"], 4)
         self.assertEqual(report["passRateNumerator"], 1)
 
-    def test_default_map_does_not_omit_beta_dirs(self) -> None:
+    def test_default_map_resolves_beta_kebab_dirs(self) -> None:
         mapping = default_workspace_map(ROOT)
         self.assertEqual(set(mapping), set(PREREGISTERED_TASKS))
-        self.assertTrue(all(v is None or isinstance(v, Path) for v in mapping.values()))
+        missing = [task_id for task_id, path in mapping.items() if path is None]
+        self.assertEqual(missing, [], f"declared dirs missing: {missing}")
+
+    def test_lab_run_shim_computes_nothing(self) -> None:
+        self.assertIn("vanguard.packages.runtime.lab_driver", LAB_RUN)
+        self.assertNotIn("HarnessSession", LAB_RUN)
+        self.assertIn("cannot claim an outcome", LAB_RUN)
+        self.assertIn("subprocess.run", LAB_RUN)
 
     def test_mock_cannot_wear_live_label(self) -> None:
         with self.assertRaises(ValueError):
@@ -112,10 +119,6 @@ class TestAntiCheat(unittest.TestCase):
                     self.fail("coding_lam must not embed a host pytest oracle")
         self.assertNotIn("subprocess", LAM_SRC)
         self.assertNotIn("sqlite3", LAM_SRC)
-
-    def test_lab_run_stub_is_not_a_live_claim(self) -> None:
-        self.assertIn("turnCount", LAB_RUN)
-        self.assertNotIn("HarnessSession", LAB_RUN)
 
     def test_no_llm_judge_in_lam_or_lar(self) -> None:
         blob = LAM_SRC + LAR_SRC

@@ -235,10 +235,11 @@ recorded in writing above.
 | S9-C-07 | `[TODO]` | C | Seeded sabotage: cheats must fail |
 | S9-B-01 | `[TODO]` | B | Real reconstructions: differ on ≥3 DNA dimensions |
 | S9-B-02 | `[TODO]` | B | `vg harness build\|run\|diff\|bench` (`bench` waits C-02) |
-| S9-A-01 | `[TODO]` | A | Instrument fields on `RunResult` (after S8-A-01 — now unblocked) |
-| S9-A-02 | `[TODO]` | A | Integer micros/tokens/USD only |
-| S9-A-03 | `[TODO]` | A | Recording enough to replay a bench run |
-| S9-A-04 | `[TODO]` | A | Ledger queries for paired runner |
+| S8-J-08 | `[BLOCKED]` | A | **ADR-0067 kernel scope membership — proposed, not implemented.** Attempted in `policy.py` and reverted: a blanket `action ∉ requested_scope.actions` deny breaks `test_widening_alone_is_not_a_violation`, where widening under *trusted* justification is a designed property. Keying on `depth > 0` also fails — spine's `requested_scope()` is depth 1, strictly narrower, and still legitimately widens. **Needs a sealed/no-widening flag on `Scope` set by `attenuate()`** = `kernel/attenuation.py`, outside the policy.py-only exception. Exploit path stays closed at the agency boundary (`8f5f16d`); `test/kernel/test_scope_membership.py` keeps 4 `expectedFailure` markers so the gap is live. |
+| S9-A-01 | `[DONE]` | A | Instrument fields on `RunResult` — `gene_digests`, `state_digest`, per-arm `instrument_error`. **Finding:** `composition_digest` binds `episode_id`, so `gene_digests` is the cross-run pack identity attribution must group on. Recorded, not changed (`L-1`). |
+| S9-A-02 | `[DONE]` | A | Integer micros/tokens/USD only — `runtime/telemetry.py::RunTelemetry`, rejects floats and `bool`; absent stays `None`, never `0`. |
+| S9-A-03 | `[DONE]` | A | `RunResult.replay_gaps()` — executable audit vs Phase 4 `V5-A`, with a failing counterpart (`A-10`). |
+| S9-A-04 | `[DONE]` | A | `state_digest` + `HarnessSession.ledger_state()` for Lane C's paired runner. |
 | S9-J-01 | `[TODO]` | J | Q2 dogfood ×3, installed CLI, no hand-patch |
 | S9-J-02 | `[TODO]` | J | Countersign pre-reg hashes; no optional stopping |
 | S9-J-03 | `[TODO]` | J | Spend authorisation |

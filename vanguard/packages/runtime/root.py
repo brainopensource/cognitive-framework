@@ -368,7 +368,20 @@ class _EnvironmentEffect:
             detail = json.dumps(value.files)
         elif hasattr(value, "output") and value.output is not None:
             detail = str(value.output)
-        return AdapterOutcome("ok", Occurrence.OCCURRED, {"usd_micros": 1},
+        # `result.ok` means the *port call* succeeded, not that the command
+        # did. An `EffectReceipt` reports `outcome="failed"` on a non-zero
+        # exit, and collapsing that to `ok` made a failing test suite
+        # indistinguishable from a passing one on the ledger -- which makes an
+        # exterior oracle impossible to derive and every run unmeasurable.
+        receipt_outcome = getattr(value, "outcome", None)
+        status = "ok"
+        if isinstance(receipt_outcome, str) and receipt_outcome not in {"", "ok"}:
+            status = "error"
+        exit_code = getattr(value, "exit_code", None)
+        if isinstance(exit_code, int) and not isinstance(exit_code, bool):
+            # Carried so a reader can tell *why* it failed without re-running.
+            detail = f"[exit {exit_code}] {detail}" if detail else f"[exit {exit_code}]"
+        return AdapterOutcome(status, Occurrence.OCCURRED, {"usd_micros": 1},
                               result_digest=digest, detail=detail)
 
 

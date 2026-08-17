@@ -90,3 +90,37 @@ def coding_tape(
     tape.append({"kind": "finish",
                  "note": "mock brain exhausted its scripted behaviour"})
     return tape
+
+
+def verify_argv_from_task(task_dir: Any) -> list[str] | None:
+    """The verification command the task declares for itself.
+
+    `TASK.md` states `Verify with ["python3", "-m", "unittest", ...]`. Reading
+    it here means the *harness* decides what counts as done, not the agent: if
+    the agent's own `proc.exec` were the oracle, a model could exit 0 on any
+    trivial command and score green.
+    """
+    import json
+    import re
+    from pathlib import Path
+
+    candidate = Path(task_dir) / "TASK.md"
+    if not candidate.is_file():
+        return None
+    try:
+        text = candidate.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    # Tasks phrase it as "Verify with", "Verify using" or "pass via", so the
+    # command is found by *shape* rather than by prose. Keying on one wording
+    # silently left half the set without an oracle, and a task with no oracle
+    # can never be scored -- it would have looked like a hard task.
+    for candidate_text in re.findall(r"(\[[^\]]*\])", text):
+        try:
+            argv = json.loads(candidate_text)
+        except json.JSONDecodeError:
+            continue
+        if (isinstance(argv, list) and len(argv) >= 2
+                and all(isinstance(a, str) and a for a in argv)):
+            return list(argv)
+    return None

@@ -36,7 +36,8 @@ class TheTaskSetIsDeclaredNotDiscovered(unittest.TestCase):
                          ["DOGFOOD-01", "DOGFOOD-02", "DOGFOOD-03"])
 
     def test_the_greenfield_set_names_one(self) -> None:
-        self.assertEqual([t["id"] for t in GREENFIELD_SET], ["GREENFIELD-01"])
+        self.assertEqual([t["id"] for t in GREENFIELD_SET],
+                         ["GREENFIELD-API-HTML"])
 
     def test_resolution_does_not_filter_by_existence(self) -> None:
         resolved = resolve_task_set(DOGFOOD_SET, root=ROOT)

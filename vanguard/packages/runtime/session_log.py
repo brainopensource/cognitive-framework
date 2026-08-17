@@ -23,7 +23,7 @@ __all__ = ["SessionLog", "SessionLogEntry", "session_log"]
 _TURN_KINDS = ("ProposalProduced",)
 #: Payload kinds that close one, carrying what actually happened.
 _RECEIPT_KINDS = ("EffectCompleted", "EffectRejected", "AuthorizationDenied",
-                  "ApprovalRequested")
+                  "ApprovalRequested", "EffectFailed")
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,6 +122,33 @@ def _payload(event: Any) -> Mapping[str, Any]:
     return payload if isinstance(payload, Mapping) else {}
 
 
+def _kind(event: Any, payload: Mapping[str, Any]) -> str:
+    """The event kind, wherever this producer puts it.
+
+    Kernel `Event` carries `kind` as an attribute and leaves it out of the
+    payload; ledger envelopes carry it inside. Reading only one shape is how
+    this projection silently returned an empty log for every real run while
+    passing against synthetic events built the way it expected.
+    """
+    attribute = getattr(event, "kind", None)
+    if isinstance(attribute, str) and attribute:
+        return attribute
+    return str(payload.get("kind", ""))
+
+
+def _verb(payload: Mapping[str, Any]) -> str | None:
+    """The verb a proposal names, in either wire shape."""
+    action = payload.get("action")
+    if isinstance(action, str) and action:
+        return action
+    calls = payload.get("toolCalls")
+    if isinstance(calls, Sequence) and calls and isinstance(calls[0], Mapping):
+        candidate = calls[0].get("action") or calls[0].get("name")
+        if isinstance(candidate, str):
+            return candidate
+    return None
+
+
 def _int_or_none(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
@@ -141,18 +168,14 @@ def session_log(events: Iterable[Any]) -> SessionLog:
 
     for event in events:
         payload = _payload(event)
-        kind = str(payload.get("kind", ""))
+        kind = _kind(event, payload)
 
         if kind in _TURN_KINDS:
             flush()
             turn += 1
-            calls = payload.get("toolCalls")
-            verb = None
-            if isinstance(calls, Sequence) and calls and isinstance(calls[0], Mapping):
-                verb = calls[0].get("action") or calls[0].get("name")
             open_entry = {
                 "turn": turn,
-                "verb": str(verb) if isinstance(verb, str) else None,
+                "verb": _verb(payload),
                 "compacted": bool(payload.get("compacted", False)),
                 "cache_miss": (None if "cacheMiss" not in payload
                                else bool(payload.get("cacheMiss"))),
@@ -163,13 +186,15 @@ def session_log(events: Iterable[Any]) -> SessionLog:
 
         if kind in _RECEIPT_KINDS and open_entry is not None:
             open_entry["receipt"] = kind
-            reason = payload.get("reason") or payload.get("detail")
-            if isinstance(reason, str):
+            # Producers disagree about where the reason lives: kernel events
+            # put it on the event, envelopes in the payload. A blank reason on
+            # a refusal is a refusal nobody can act on.
+            reason = (payload.get("reason") or payload.get("detail")
+                      or getattr(event, "reason", None))
+            if isinstance(reason, str) and reason:
                 open_entry["detail"] = reason
             if open_entry.get("verb") is None:
-                action = payload.get("action")
-                if isinstance(action, str):
-                    open_entry["verb"] = action
+                open_entry["verb"] = _verb(payload)
             continue
 
         if kind == "ContextCompacted" and open_entry is not None:

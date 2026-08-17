@@ -18,19 +18,24 @@ from typing import Mapping, Sequence
 
 __all__ = ["DOGFOOD_SET", "GREENFIELD_SET", "resolve_task_set", "missing_tasks"]
 
-#: BETA's dogfood workspaces. Paths are the contract; the dirs may not exist yet.
+#: BETA's dogfood workspaces. **Protocol ids are stable; directory names are
+#: not.** These pointed at `benchmarkings/dogfood/DOGFOOD-0N` and reported 3 of
+#: 3 missing -- the instrument working exactly as intended, because a wrong
+#: constant surfaced as a named absence rather than as a smaller task set.
+#: Corrected to BETA's paths (`2a793c4`).
 DOGFOOD_SET: tuple[Mapping[str, str], ...] = (
-    {"id": "DOGFOOD-01", "workspace": "benchmarkings/dogfood/DOGFOOD-01"},
-    {"id": "DOGFOOD-02", "workspace": "benchmarkings/dogfood/DOGFOOD-02"},
-    {"id": "DOGFOOD-03", "workspace": "benchmarkings/dogfood/DOGFOOD-03"},
+    {"id": "DOGFOOD-01",
+     "workspace": "lab/tasks/dogfood-01-multi-turn-file-rollback"},
+    {"id": "DOGFOOD-02",
+     "workspace": "lab/tasks/dogfood-02-subprocess-timeout-censoring"},
+    {"id": "DOGFOOD-03",
+     "workspace": "lab/tasks/dogfood-03-manifest-alias-shadowing"},
 )
 
 #: One greenfield task: a Python HTTP API plus a static HTML page. No Svelte,
-#: no build step, no network. The fixture in `test/runtime/fixtures/` is the
-#: reference shape; BETA may land a richer one at the same id.
+#: no build step, no network. Starts red, by design.
 GREENFIELD_SET: tuple[Mapping[str, str], ...] = (
-    {"id": "GREENFIELD-01",
-     "workspace": "test/runtime/fixtures/greenfield_api"},
+    {"id": "GREENFIELD-API-HTML", "workspace": "lab/tasks/greenfield-api-html"},
 )
 
 

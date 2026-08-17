@@ -110,11 +110,31 @@ def run_coding_lam(
 
 
 def default_workspace_map(repo_root: Path) -> dict[str, Path | None]:
-    """BETA's expected layout. Absence is None, never omitted."""
-    lab = repo_root / "lab" / "tasks"
-    return {
-        "DOGFOOD-01": lab / "DOGFOOD-01" if (lab / "DOGFOOD-01").is_dir() else None,
-        "DOGFOOD-02": lab / "DOGFOOD-02" if (lab / "DOGFOOD-02").is_dir() else None,
-        "DOGFOOD-03": lab / "DOGFOOD-03" if (lab / "DOGFOOD-03").is_dir() else None,
-        "GREENFIELD-API-HTML": lab / "GREENFIELD-API-HTML" if (lab / "GREENFIELD-API-HTML").is_dir() else None,
-    }
+    """BETA's layout, read from the one declared task set. Absence is None.
+
+    This used to spell the directories itself (`lab/tasks/DOGFOOD-01`), which
+    is not what BETA landed (`lab/tasks/dogfood-01-multi-turn-file-rollback`),
+    so every task resolved to `None` and the whole split reported
+    `inconclusive:workspace_missing`. The instrument was behaving correctly --
+    a wrong constant surfaced as a named absence rather than a smaller task set
+    -- but there were **two** copies of the constant, here and in
+    `runtime/task_sets.py`, and two copies of a path is one copy that is wrong.
+
+    The declared set is now the single source. Existence is still evaluated
+    here, and a missing directory is still `None` rather than omitted.
+    """
+    import sys
+
+    root = str(repo_root)
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from vanguard.packages.runtime.task_sets import (  # noqa: E402
+        DOGFOOD_SET,
+        GREENFIELD_SET,
+        resolve_task_set,
+    )
+
+    resolved = resolve_task_set(DOGFOOD_SET + GREENFIELD_SET, root=repo_root)
+    return {task["id"]: (Path(task["workspace"])
+                         if Path(task["workspace"]).is_dir() else None)
+            for task in resolved}

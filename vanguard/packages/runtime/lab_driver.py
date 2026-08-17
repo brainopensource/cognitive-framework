@@ -44,6 +44,8 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
+from .mock_coding_tape import brief_from_task_dir, coding_tape
+from .determinism import SystemClock
 from .model_selection import ModelUnavailable, select_model
 from .repair import StopReason, drive_until_green
 from .root import HarnessSession, Runtime, SessionPorts, TaskContext
@@ -78,6 +80,14 @@ def run_lab_task(
             "detail": "task directory does not exist", "turns": 0, "session": [],
         }
 
+    harness_preview = Runtime.compose(pack_name, episode_id="lab-episode-1")
+    if not tape and model_port == "mock":
+        # `S18-A-01`. An empty tape proposes nothing, so every MOCK run
+        # reported `turns: 0 / model_not_invoked` -- a failure of the brain
+        # binding, not a measurement. The scripted tape takes real turns and
+        # still cannot fix anything, which is the correct MOCK.
+        tape = coding_tape(verbs=harness_preview.verbs)
+
     try:
         selected = select_model(model_port, model_name=model_name, tape=tape)
     except ModelUnavailable as unavailable:
@@ -89,14 +99,17 @@ def run_lab_task(
             "detail": unavailable.reason, "turns": 0, "session": [],
         }
 
-    harness = Runtime.compose(pack_name, episode_id="lab-episode-1")
+    harness = harness_preview
     store = SqliteEventStore(":memory:")
+    # The task states its own goal (`TASK.md`); the harness telling the model
+    # what the task is would be a different experiment.
+    brief = brief_from_task_dir(task_path) or brief
 
     def run_once(attempt: int) -> Any:
         ports = SessionPorts(
             model=selected.model,
             environment=_environment_for(task_path),
-            clock=None, store=store, interactive=interactive)
+            clock=SystemClock(), store=store, interactive=interactive)
         task = TaskContext(
             brief=brief, repo_path=task_path,
             run_id=f"lab-run-{attempt}", episode_id="lab-episode-1",
@@ -112,7 +125,7 @@ def run_lab_task(
     events = outcome.results[-1].events if outcome.results else ()
     log = session_log(events)
     if jsonl_out is not None:
-        _write_jsonl(Path(jsonl_out), events)
+        _write_jsonl(Path(jsonl_out), store, "lab-episode-1")
 
     return {
         "harness": harness.harness,
@@ -143,13 +156,23 @@ def _environment_for(task_path: Path) -> Any:
     return GitEnvironmentAdapter(str(task_path))
 
 
-def _write_jsonl(target: Path, events: Sequence[Any]) -> None:
+def _write_jsonl(target: Path, store: Any, episode_id: str) -> int:
+    """Export the **ledger**, not the in-process trace.
+
+    `RunResult.events` are kernel `Event` objects; the store holds `vg.4`
+    `EventEnvelope`s. Writing the former produced a file
+    `tools/export_coding_session.py` refused with
+    `must be 'vg.4', got None` -- correctly, because it was not a ledger
+    export. The store is the ledger, so the export reads the store.
+    """
+    from ..adapters.stores.ledger_jsonl import export_jsonl
+    from ..ports.event_store import EventRange
+
+    read = store.read(EventRange(episode_id=episode_id))
+    envelopes = read.value if read.ok and read.value is not None else ()
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open("w", encoding="utf-8") as writer:
-        for event in events:
-            payload = getattr(event, "to_dict", None)
-            writer.write(json.dumps(payload() if payload else {"event": str(event)},
-                                    sort_keys=True) + "\n")
+        return export_jsonl(envelopes, writer)
 
 
 def main() -> int:

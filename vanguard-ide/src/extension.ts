@@ -13,13 +13,11 @@ import {
   ApprovalCodeLensProvider,
   APPROVE_COMMAND,
   REJECT_COMMAND,
-  registerPendingApproval,
   clearPendingApproval,
   signApproval,
 } from "./providers/ApprovalCodeLensProvider";
 import { OperatorSigner } from "./adapters/signer";
 import { LiveRuntimeClient, resolveSocketPath } from "./adapters/live";
-import type { ApprovalChallenge } from "./contract/types";
 
 export function activate(context: vscode.ExtensionContext): void {
   const signer = new OperatorSigner();

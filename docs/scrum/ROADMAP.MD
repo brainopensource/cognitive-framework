@@ -78,18 +78,20 @@ Wave kits: `sprints_front/lane_a_wave1.md` (A1–A5), `sprints_front/lane_a_wave
 
 ### 3.2 Lane FE-B — IDE extension (`vanguard-ide/**`)
 
-| ID | Scope | Depends | Acceptance |
-|---|---|---|---|
-| FE-B1 | Extension scaffold (TS, `vscode` engine, esbuild): sidebar, commands, CodeLens stub | — | `cd vanguard-ide && npm run typecheck && npm run build` |
-| FE-B2 | Vendor `contract/` + `RuntimeClient` port + replay vs CLI fixtures | — (freeze at FE-A wave-1 start) | replay adapter reads `vanguard/clients/cli/fixtures/*.jsonl` |
-| FE-B3 | Webview run stream (thoughts/tools/budget); tokens from front_v4/004 | FE-B1, FE-B2 | webview renders from replay without a daemon |
-| FE-B4 | Approval UX: diff + CodeLens + Ed25519 (port of FE-A3) | FE-B3, FE-A3 for signer semantics | approve/reject path on replay challenge |
-| FE-B5 | Live socket bridge (same frames, same path resolution) | FE-B2 | live stream against real daemon |
-| FE-B6 | Editor context into `StartRun` brief only; new fields = Joint | FE-B5 | payload stays within existing `StartRun` shape |
-| FE-B7 | E2E matrix per front_v4/007 | FE-B5 | unit → VG-04 vectors → replay E2E → live E2E |
-| FE-B8 | `.vsix` + Open-VSX / private dist note | FE-B1 | `npm run build` produces `.vsix` |
+| ID | Scope | Depends | Acceptance | Status |
+|---|---|---|---|---|
+| FE-B1 | Extension scaffold (TS, `vscode` engine, esbuild): sidebar, commands, CodeLens stub | — | `cd vanguard-ide && npm run typecheck && npm run build` | Done |
+| FE-B2 | Vendor `contract/` + `RuntimeClient` port + replay vs CLI fixtures | — (freeze at FE-A wave-1 start) | replay adapter reads `vanguard/clients/cli/fixtures/*.jsonl` | Done |
+| FE-B3 | Webview run stream (thoughts/tools/budget); tokens from front_v4/004 | FE-B1, FE-B2 | webview renders from replay without a daemon | Done |
+| FE-B4 | Approval UX: diff + CodeLens + Ed25519 (port of FE-A3) | FE-B3, FE-A3 for signer semantics | approve/reject path on replay challenge | Done |
+| FE-B5 | Live socket bridge (same frames, same path resolution) | FE-B2 | live stream against real daemon | Done |
+| FE-B6 | Editor context into `StartRun` brief only; new fields = Joint | FE-B5 | payload stays within existing `StartRun` shape | Done |
+| FE-B7 | E2E matrix per front_v4/007 | FE-B5 | unit → VG-04 vectors → replay E2E → live E2E | Done |
+| FE-B8 | `.vsix` + Open-VSX / private dist note | FE-B1 | `npm run build` produces `.vsix` | Done |
 
 Wave kits: `sprints_front/lane_b_wave1.md` (B1–B4), `sprints_front/lane_b_wave2.md` (B5–B8).
+
+**Lane FE-B: complete** (2026-08-16). All tasks B1–B8 delivered and verified under `vanguard-ide/**`.
 
 **Parallel rule:** FE-B1–B4 need only frozen contract + fixtures. FE-A waves run concurrently.
 

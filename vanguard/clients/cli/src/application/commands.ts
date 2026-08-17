@@ -159,7 +159,7 @@ export async function streamTrace(
 }
 
 const J1_MESSAGE =
-  "Daemon self-launch is not available until Joint note J1 (python3 -m vanguard.packages.runtime.service.server has no __main__). Start the RuntimeService process yourself, then use vg daemon status.";
+  "Daemon self-launch is not available until Joint note J1 (the RuntimeService server module has no __main__). Start the RuntimeService process yourself, then use vg daemon status.";
 
 export async function manageDaemon(
   client: RuntimeClient,

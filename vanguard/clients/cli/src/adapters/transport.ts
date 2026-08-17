@@ -181,7 +181,7 @@ export class SocketTransport implements RuntimeTransport {
       };
       socket.write(JSON.stringify(commandFrame) + "\n");
       const rl = createInterface({ input: socket, crlfDelay: Infinity });
-      let disconnected = false;
+      let disconnected = true;
 
       try {
         for await (const line of rl) {
@@ -197,7 +197,6 @@ export class SocketTransport implements RuntimeTransport {
           }
           if (frame.value.frameType === "error") {
             yield fail("transport_interrupted", frame.value.message, true);
-            disconnected = true;
             break;
           }
           if (frame.value.frameType !== "event") continue;
@@ -216,6 +215,7 @@ export class SocketTransport implements RuntimeTransport {
         socket.destroy();
       }
 
+      if (signal?.aborted) return;
       if (!disconnected) return;
       attempt += 1;
       if (attempt > this.options.maxReconnects) {

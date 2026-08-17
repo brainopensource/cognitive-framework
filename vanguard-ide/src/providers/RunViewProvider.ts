@@ -3,7 +3,6 @@
 // FE-B6: editor context (active file, selection, git branch) folded into StartRun.brief only.
 
 import * as vscode from "vscode";
-import * as path from "node:path";
 import * as fs from "node:fs";
 import { ReplayRuntimeClient } from "../adapters/replay";
 import { LiveRuntimeClient, resolveSocketPath } from "../adapters/live";

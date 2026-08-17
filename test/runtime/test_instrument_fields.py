@@ -191,3 +191,45 @@ class LedgerQueriesForThePairedRunner(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoVerbLacksABinding(unittest.TestCase):
+    """`S10-A-02`. The translator and the binding table must agree.
+
+    `proc.test` sat in the translator's verb table with no entry in
+    `DEFAULT_BINDINGS` and no adapter behind it — reachable in principle,
+    unwireable in practice. It is deleted rather than bound: tests run as
+    allowlisted `proc.exec` (`pytest` is already on that selector), so there is
+    one privileged process path with one allowlist instead of two that have to
+    be kept in agreement (`D-04`).
+    """
+
+    def test_every_bound_verb_has_a_worker_operation_or_an_environment_one(self) -> None:
+        from vanguard.packages.adapters.sandbox.worker import WorkerProtocol
+        from vanguard.packages.runtime.root import DEFAULT_BINDINGS
+
+        supported = set(WorkerProtocol.SUPPORTED_OPERATIONS)
+        self.assertTrue(set(DEFAULT_BINDINGS) <= supported,
+                        f"bound but unsupported: {sorted(set(DEFAULT_BINDINGS) - supported)}")
+
+    def test_the_worker_supports_no_operation_nothing_can_bind(self) -> None:
+        """The other direction: an operation with no binding is an orphan."""
+
+        from vanguard.packages.adapters.sandbox.worker import WorkerProtocol
+        from vanguard.packages.runtime.root import DEFAULT_BINDINGS
+
+        orphans = set(WorkerProtocol.SUPPORTED_OPERATIONS) - set(DEFAULT_BINDINGS)
+        self.assertEqual(orphans, set(), f"unbindable worker operations: {sorted(orphans)}")
+
+    def test_the_deleted_verb_is_gone_from_the_runtime_and_the_sandbox(self) -> None:
+        from pathlib import Path
+
+        packages = Path(__file__).resolve().parents[2] / "vanguard" / "packages"
+        for module in ("runtime/root.py", "adapters/sandbox/worker.py",
+                       "adapters/environment/sandboxed.py",
+                       "adapters/models/invocation.py"):
+            source = (packages / module).read_text(encoding="utf-8")
+            code = "\n".join(line for line in source.splitlines()
+                             if not line.lstrip().startswith("#"))
+            with self.subTest(module=module):
+                self.assertNotIn("proc.test", code)

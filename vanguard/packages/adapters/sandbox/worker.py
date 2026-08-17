@@ -123,8 +123,11 @@ class WorkerProtocol:
         "fs.write",
         "patch.apply",
         "fs.patch",
+        # `S10-A-02`: `proc.test` is deleted, not bound. Tests run as
+        # allowlisted `proc.exec` (`pytest` is already on the selector), so
+        # there is one privileged process path with one allowlist rather than
+        # two that must be kept in agreement.
         "proc.exec",
-        "proc.test",
     }
 
     def __init__(self, runner: SandboxRunner,
@@ -186,7 +189,7 @@ class WorkerProtocol:
             flag = " --dry-run" if operation.args.get("dry_run") is True else ""
             argv = ["/bin/sh", "-c", f'printf "%s" "$1" | patch -p1{flag}', "--", content]
 
-        elif operation.operation in ("proc.exec", "proc.test"):
+        elif operation.operation == "proc.exec":
             cmd_argv = operation.args.get("argv")
             if isinstance(cmd_argv, list) and all(isinstance(a, str) for a in cmd_argv):
                 argv = cmd_argv

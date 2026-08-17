@@ -383,3 +383,9 @@ python3 tools/telemetry/coding_lar.py --out docs/scrum/sprints/wave11/evidence/l
 
 Arms when a backend is actually up: `mock` · `ollama:deepseek-r1` · `openrouter-free` · `deepseek-flash`. MOCK must not wear a live label. Paid OpenRouter is forbidden until S9-J-03. Live why-not: `docs/scrum/sprints/wave11/s9-j-live-models-why-not.md`.
 
+
+### Wave 14–16 · ALFA status
+
+- **W14-A** — `[DONE]` (`2855aca`, `890216b`). `runtime/model_selection.py`: mock default/CI brain; ollama probed **once**, fail-closed `instrument_error:ollama_unavailable`; OpenRouter/DeepSeek free-band only, paid refused even when named (`top: []` until S9-J-03); no fourth HTTP client. **`lab/run.py` was fabricating** `{"status":"completed","turnCount":1}` — driver now composes and runs a real `HarnessSession` from `runtime/lab_driver.py` (`lab/` may import nothing, which is why the stub could only lie). Both modes re-proved under a *proposing* model against the real `StandardPolicy`. Registered the `skills` artifact kind (57 errors, same one-row fix as `approval_policy`).
+- **W15-A** — `[DONE]` (`f22536a`). `runtime/scoring.py` scores arms from the ledger projection only; `rate_text()` never prints a bare rate. Seven anti-cheat gates (host oracle, gold patch, model-as-judge, dropped denominator, MOCK-as-live, oracle-in-prompt, second loop/dispatch), comment-stripped so a rule cannot be satisfied by its own comment, and **proven able to fail** per `A-10`. LAR read-only. Five termination names, budget ≠ attempts.
+- **W16-A** — `[DONE]` (see commit). `runtime/task_sets.py` declares DOGFOOD-01..03 + GREENFIELD-01; **declared not globbed**, so absence is reported rather than shrinking the set. Currently 4 tasks / 3 missing (BETA's dirs not landed) with denominator 4. Live smoke skips closed and is opt-in; Ollama `deepseek-r1` reachable here, nothing paid contacted, **no lift number and no Q2 claim**.

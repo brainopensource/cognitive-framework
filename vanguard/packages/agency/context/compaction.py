@@ -6,6 +6,7 @@ and frozen at composition time.
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
 from .layers import Block, Layer
@@ -144,11 +145,92 @@ class RecencyWindowStrategy:
         return elided, dropped
 
 
+@dataclass
+class StructuredRecord:
+    """Structured compaction state tracking (S10-B-03, VG-03 §10.4)."""
+
+    decisions: list[str] = field(default_factory=list)
+    invariants: list[str] = field(default_factory=list)
+    open_items: list[str] = field(default_factory=list)
+    artifacts: list[str] = field(default_factory=list)
+    dead_ends: list[str] = field(default_factory=list)
+
+    def to_summary_text(self) -> str:
+        lines = ["[Structured Consolidation Record]"]
+        if self.decisions:
+            lines.append("Decisions: " + "; ".join(self.decisions))
+        if self.invariants:
+            lines.append("Invariants: " + "; ".join(self.invariants))
+        if self.open_items:
+            lines.append("Open: " + "; ".join(self.open_items))
+        if self.artifacts:
+            lines.append("Artifacts: " + "; ".join(self.artifacts))
+        if self.dead_ends:
+            lines.append("DeadEnds (abandoned paths): " + "; ".join(self.dead_ends))
+        return "\n".join(lines)
+
+
+class StructuredConsolidateStrategy:
+    """Consolidates dialogue into a StructuredRecord with deadEnds tracking (S10-B-03).
+    
+    Prevents re-exploring abandoned paths by preserving explicit deadEnds while reducing transcript tokens.
+    """
+
+    def compact(
+        self,
+        floor: int,
+        ceiling: int,
+        notes: list[Block],
+        dialogue: list[Block],
+        options: Mapping[str, Any] | None = None,
+    ) -> tuple[list[str], list[str]]:
+        elided: list[str] = []
+        dropped: list[str] = []
+
+        def total() -> int:
+            return floor + sum(b.token_estimate for b in notes) + sum(b.token_estimate for b in dialogue)
+
+        if total() <= ceiling:
+            return elided, dropped
+
+        # Extract structured information from dialogue blocks to be consolidated
+        rec = StructuredRecord()
+        to_consolidate: list[Block] = []
+
+        while total() > ceiling and dialogue:
+            b = dialogue.pop(0)
+            dropped.append(b.label)
+            to_consolidate.append(b)
+            # Scan text for dead ends / decisions
+            if "failed" in b.text.lower() or "error" in b.text.lower() or "dead end" in b.text.lower():
+                rec.dead_ends.append(f"{b.label}: {b.text[:60].strip()}")
+            elif "decision" in b.text.lower() or "selected" in b.text.lower():
+                rec.decisions.append(f"{b.label}: {b.text[:60].strip()}")
+
+        if to_consolidate:
+            summary_block = Block(
+                layer=Layer.DIALOGUE,
+                source="structured_consolidate",
+                label="structured_record",
+                text=rec.to_summary_text(),
+                evictable=False,
+            )
+            dialogue.insert(0, summary_block)
+            elided.append("structured_record")
+
+        while total() > ceiling and notes:
+            dropped.append(notes.pop(0).label)
+
+        return elided, dropped
+
+
 COMPACTION_REGISTRY: dict[str, CompactionStrategy] = {
     "result_eviction": ResultEvictionStrategy(),
     "result-eviction": ResultEvictionStrategy(),
     "recency_window": RecencyWindowStrategy(),
     "recency-window": RecencyWindowStrategy(),
+    "structured_consolidate": StructuredConsolidateStrategy(),
+    "structured-consolidate": StructuredConsolidateStrategy(),
 }
 
 

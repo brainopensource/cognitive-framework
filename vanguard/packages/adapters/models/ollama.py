@@ -15,6 +15,33 @@ Transport = Callable[[str, bytes], tuple[int, bytes]]
 __all__ = ["OllamaModel"]
 
 
+def _tool_payload(tool: Mapping[str, Any]) -> dict[str, Any]:
+    """Render a manifest tool schema in the provider's function-calling shape.
+
+    The manifest writes `{name, verb, description, schema}`; Ollama and every
+    OpenAI-compatible endpoint want `{"type": "function", "function": {name,
+    description, parameters}}`. Passing the manifest shape through unchanged
+    produced `HTTP 500` on every request, which surfaced as
+    `instrument_error: model_not_invoked` -- a live model that was never
+    actually asked anything.
+
+    A tool already in provider shape is passed through, so a pack may supply
+    either.
+    """
+    if isinstance(tool.get("function"), Mapping):
+        return dict(tool)
+    parameters = tool.get("schema") or tool.get("parameters") or {
+        "type": "object", "properties": {}}
+    return {
+        "type": "function",
+        "function": {
+            "name": str(tool.get("name") or tool.get("verb") or ""),
+            "description": str(tool.get("description") or ""),
+            "parameters": dict(parameters),
+        },
+    }
+
+
 class OllamaModel:
     def __init__(
         self,
@@ -40,7 +67,7 @@ class OllamaModel:
         body = {
             "model": self.model,
             "messages": _messages(context),
-            "tools": [dict(tool) for tool in tools],
+            "tools": [_tool_payload(tool) for tool in tools],
             "stream": False,
             "options": dict(sampling),
         }

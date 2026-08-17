@@ -92,11 +92,28 @@ def select_model(
     if choice == "ollama":
         from ..adapters.models.ollama import OllamaModel
 
-        name = model_name or DEFAULT_OLLAMA_MODEL
         endpoint = environ.get("VANGUARD_OLLAMA_ENDPOINT",
                                "http://127.0.0.1:11434/api/chat")
-        if not (probe or _probe_http)(endpoint):
-            raise ModelUnavailable("ollama", f"no daemon answering at {endpoint}")
+        # A reachable daemon is not a usable model. Probing only the root
+        # reported `ollama:deepseek-r1` available while the tag was not pulled,
+        # and every task then failed with `model_not_invoked` in 0.0s -- an
+        # instrument error dressed as four measurements. The probe resolves the
+        # tag or refuses.
+        if probe is not None:
+            name = model_name or DEFAULT_OLLAMA_MODEL
+            if not probe(endpoint):
+                raise ModelUnavailable("ollama", f"no daemon answering at {endpoint}")
+        else:
+            installed = _ollama_tags(endpoint)
+            if not installed:
+                raise ModelUnavailable(
+                    "ollama", f"no daemon answering at {endpoint}")
+            name = _resolve_tag(model_name or DEFAULT_OLLAMA_MODEL, installed)
+            if name is None:
+                raise ModelUnavailable(
+                    "ollama",
+                    f"{model_name or DEFAULT_OLLAMA_MODEL!r} is not pulled; "
+                    f"installed: {', '.join(sorted(installed))}")
         return SelectedModel(port="ollama",
                              model=OllamaModel(model=name, endpoint=endpoint),
                              label=f"ollama:{name}")
@@ -135,6 +152,38 @@ def _probe_http(endpoint: str) -> bool:
             return 200 <= getattr(response, "status", 200) < 500
     except Exception:
         return False
+
+
+def _ollama_tags(endpoint: str) -> tuple[str, ...]:
+    """Tags the daemon actually has. Empty means unreachable or empty."""
+    import json
+    import urllib.request
+
+    root = endpoint.split("/api/")[0]
+    try:
+        with urllib.request.urlopen(f"{root}/api/tags", timeout=3.0) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return ()
+    models = payload.get("models")
+    if not isinstance(models, list):
+        return ()
+    return tuple(str(entry.get("name", "")) for entry in models
+                 if isinstance(entry, dict) and entry.get("name"))
+
+
+def _resolve_tag(wanted: str, installed: Sequence[str]) -> str | None:
+    """Exact match, else the first tag of the same family (`name:variant`).
+
+    Asking for `deepseek-r1` when `deepseek-r1:14b` is pulled should work --
+    the family is what was requested and the variant is a local detail. Asking
+    for a family nobody has must still fail.
+    """
+    if wanted in installed:
+        return wanted
+    prefix = f"{wanted.split(':')[0]}:"
+    matches = sorted(tag for tag in installed if tag.startswith(prefix))
+    return matches[0] if matches else None
 
 
 def _free_band() -> Sequence[str]:

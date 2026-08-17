@@ -148,11 +148,28 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 | S8-J-02 | `[TODO]` | Confirm ADR-0060: no domain nouns in `agency/episode/` |
 | S8-J-03 | `[TODO]` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
 | S8-J-04 | `[TODO]` | Full suite with `node` installed (today: 14 reader errors) |
-| S8-J-05 | `[TODO]` | `doing/` 12 → 8 |
+| S8-J-05 | `[TODO]` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
 | S8-J-06 | `[TODO]` | ADR-0066 (was S7-J-08) |
 | S8-J-07 | `[TODO]` | VG-07 promotion (was S7-J-06) |
 
-**S8 exit still open until:** S8-A-02 green · Joint J-02 glance · sprint receipt written. Do not call Sprint 8 closed on B/C alone.
+**S8 exit still open until:** S8-A-02 green · `spawn` reachable or declared dormant · Joint J-02 · sprint receipt. Do not call Sprint 8 closed on B/C alone.
+
+### TL audit 2026-08-17 — two blockers, status corrections
+
+Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
+604 tests · 0 failures · 14 node-absent errors · 12/12 gates PASS · TCB 1315/1438 · LLM rule respected.
+
+| ID | Was | Now | Why |
+|---|---|---|---|
+| S8-B-01 | `[DONE]` | **`[CLAIMED — UNREACHABLE]`** | `spawn` has **no production call site**, no `ProposalKind.SPAWN`, no manifest verb, and `SpawnResult` has no consumer. `engine.py:17-19` and `state.py:167` still say *"never re-enters itself"* / *"spawns no sub-episode"* — and both are still accurate. The sprint sentence is true of the test suite, not the system. |
+| S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. Attribution is wrong though — production code landed in untagged `ce15850`; `c8976fc` added tests only; the cited `fc9f5f4` is the approval_policy commit. |
+| S8-A-02 | `[IN_PROGRESS]` | `[IN_PROGRESS]` | Correct call. `root.py:717` still loops `max_segments`; real turn bound is **8×8=64**, the exact defect the exit gate names. No resume-from-ledger. |
+
+**Sprint 9 opens for Lane C only.** C starts `S9-C-01`→`C-02`→`C-03` now; both blockers are independent of it.
+**C must not publish an A/A floor until S8-A-02 is green** — a floor measured against a 64-turn bound we intend to change is not a floor.
+**A and B are blocked from S9** until their row above is cleared.
+
+**Commit discipline:** a lane-prefixed commit must carry the production change it names. Three of this sprint's rows were fixed, verified and recorded in three different commits.
 
 ---
 

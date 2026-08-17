@@ -20,17 +20,17 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 |---|---|---|---|
 | **ALFA** | `[alfa]` | ✅ all rows done. Green `t7` + keep `approval_policy` kind row. **S10-A-01…04** (`invocation.py` domain out, `proc.test` bind/delete, `BlobStorePort`+`IndexPort`, `vg why`). | `kernel/**`, `agency/episode/**`, packs, CLI default, telemetry, ADR-0067 |
 | **BETA** | `[beta]` | Product-default pack + `vg run` default + ACI tool-schema thicken + bind IndexPort when ALFA lands it. P0/P1 in `features_to_add_v430.md`. | `kernel/**`, `engine.py`, `runtime/root.py`, TableWorld/lab rebuild, dogfood-as-DONE without a human |
-| **GAMMA** (CTO+PL+TL+senior) | `[gamma]` | **Everything else still `[TODO]` / `[BLOCKED]` on this file** — Joint, kernel sealed-flag ADR, dogfood *execution*, spend/release text, node suite, daemon J1, Claim wire. See table below. | ALFA’s S10-A files, BETA’s product pack/CLI default, V5 / \(G_C\) / playbooks / MCP *code* |
+| **GAMMA** (CTO+PL+TL+senior) | `[gamma]` | Joint leftovers (key, spend, live Q2). Parallel to W11–13: session projector + skill-index formatter (do not take `lab/run.py`, packs, or `runtime/root.py`). | ALFA’s live-loop files, BETA’s pack/task dirs, V5 / playbooks / MCP *code* |
 
 ### Remaining work (this is the live backlog)
 
 | ID | Status | Owner | What |
 |---|---|---|---|
 | S10-A-01 | `[DONE] ✅` | ALFA | Domain out of `invocation.py` (`854e8e8`). Translator is schema+selector; no verb table. |
-| S10-A-02 | `[DONE] ✅` | ALFA | Orphan deleted (`4ee8aaf`) from `WorkerProtocol.SUPPORTED_OPERATIONS` + dispatch. Also fixed: `sandboxed.py` sent `operation="proc.test"` for **every** process call, so the allowlist and ledger saw a name the harness never granted — now `proc.exec`. 3 agreement tests both directions. ⚠️ `test/adapters/test_sandbox_worker.py::test_execute_proc_test` + `::test_proc_test_rejects_shell_string` are red — they assert the deleted op; owner must retarget at `proc.exec`. |
+| S10-A-02 | `[DONE] ✅` | ALFA | Orphan deleted (`4ee8aaf`). Worker tests in-tree now assert `proc.exec` (`test_execute_proc_exec`). |
 | S10-A-03 | `[DONE] ✅` | ALFA | `BlobStorePort` + `IndexPort` (`6f392f4`), two impls each per `T10.2`. Index is observation-only — a test asserts no `propose`/`rank`/`select`/`dispatch`. Real index is a regex scan; tree-sitter can replace the body without the port moving. |
 | S10-A-04 | `[DONE] ✅` | ALFA | `vg why` load-bearing (`20e26c9`). `_cmd_ExplainArtifact` returned `{"explanation": ""}`; now derives activation from the ledger, prediction + demotion from the `Claim` store. Absence is reported, never smoothed — unevidenced must not resemble well-evidenced. |
-| P0 / P1 pack+CLI | `[TODO] ❌` | BETA | **Plan approved — execute** `plan_p0_p1_product_pack.md`. Also retarget `test_translate_unknown_tool_fails` (unknown verbs fail at composition, not a builtin list). |
+| P0 / P1 pack+CLI | `[DONE] ✅` | BETA | `d4d5878` product-default `vg-code-default`, ACI thicken, MOCK `lab/run.py` one-shot. IndexPort row still Wave 11. |
 | S8-J-08 / ADR-0067 | `[DONE] ✅` | **GAMMA** | `Scope.sealed` via `attenuate()`; membership keyed on sealed, not depth. TCB 1333/1438. |
 | S8-J-01 | `[DONE] ✅` | GAMMA | VG-04 Claim optional hedge fields on the wire (`ADR-0068`). Golden: `hedge-fields.json`. |
 | S8-J-05 | `[DONE] ✅` | GAMMA | `doing/` cap: 002/006/008/009 → `done/`; `011` supersession recorded in `000_INDEX` |
@@ -41,11 +41,38 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S10-J-03 | `[DONE] ✅` | GAMMA | Proven-claims-only text (`s10-j-03-release-claims.md`) |
 | S10-J-04 | `[DONE] ✅` | GAMMA | O-01 not fired; O-03 spawn live but playbooks still deferred; **no V5** |
 | S8-J-03 + Q2 | `[TODO] ❌` | GAMMA | **Execute** DOGFOOD-01..03. Protocol is not execution. MOCK is not Q2. |
-| S8-J-04 | `[DONE] ✅` | GAMMA | Node ≥22.18: contract readers green. Local v22.18.0. Two remaining failures are ALFA A-02 `proc.test` tests in `test/adapters/` (not this row). |
+| S8-J-04 | `[DONE] ✅` | GAMMA | Node ≥22.18: contract readers green. Local v22.18.0. |
 | S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key. Note prepared; not rotated. |
 | FE-N1 (frontend board) | `[TODO] ❌` | GAMMA | `vg daemon` still `not_available` for start — RuntimeService exists; CLI supervisor not wired |
 | Merge / ship | `[TODO] ❌` | GAMMA | `feat_sprint_special` green, receipts, no decorative genes |
+| W11-J session log | `[DONE] ✅` | GAMMA | `project_coding_session` + `tools/export_coding_session.py` (`vg.coding-session.v1`). Alfa binds export; do not invent a second DB. |
+| W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index` (≤4k, omit whole cards). Beta lands `skill` genes; Alfa puts the block in the compiler. Template: `docs/scrum/sprints/wave11/skill.example.json`. |
+| PO acceptance | `[DONE] ✅` | GAMMA | `docs/scrum/sprints/wave11/PO_ACCEPTANCE.md` — Q2 still human. |
+
+### Waves 11–13 — backend coding harness (no TUI)
+
+Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops: tools, memory, compact, spawn, two modes (autonomous = `interactive=False` / BENCHMARK fail-closed; assisted = `interactive=True` / approvals). Greenfield and bugfix are the same `lab/run.py` / `HarnessSession.run` path. Not a second agent loop. Not MCP. Not playbooks.
+
+| Wave | Makes true | ALFA | BETA |
+|---|---|---|---|
+| **11 Live loop** | Multi-turn coding episode on MOCK, then Ollama/free; session log from the ledger | W11-A | W11-B |
+| **12 DNA** | Skills index, file-todo, IndexPort in the pack, compact/cache measured | W12-A | W12-B |
+| **13 Prove** | MOCK dogfood + one greenfield task; measurements from the ledger | W13-A | W13-B |
+
+**W11-A** `runtime/**`, `ports/**` (not packs): (1) `HarnessSession.run` / `lab/run.py` multi-turn until tests or budget, not one frozen shot. (2) Two modes already exist (`root.py` `interactive` → `Mode.INTERACTIVE` vs `BENCHMARK`) — prove privileged `patch.apply`/`proc.exec` **suspend for approval** vs **deny without a human**. (3) Session export: turn, verb, receipt, compact/cache miss, tokens — ledger only, no second DB. (4) Compose binds `IndexPort` when the pack declares it.
+
+**W11-B** packs + `test/adapters/**`: (1) Retarget worker tests at `proc.exec` — **already in tree** as `test_execute_proc_exec`. (2) Pack row for IndexPort + “read the map first” prompt line. (3) `approval_policy` distinguishes the two modes. (4) Default pack prompt: inspect → edit → `pytest` via Bash. Decorative genes fail.
+
+**W12-A**: Skill bodies via `fs.read`; prefix holds ≤4k names+descriptions (Reasonix). Cache-miss attribution already exists — emit it on the session log. `deadEnds` + brief exempt from compact. Spawn for explore uses sealed child (ADR-0067 already in).
+
+**W12-B**: `skill` artifacts in `vg-code-default` (kind exists). Todo = workspace `TODO.md` (or `.vanguard/todo.md`) the model patches — **not** a playbook engine, **not** a new kernel verb. Long-term = `AGENTS.md` + notes. Short-term = episode ledger.
+
+**W13-A**: MOCK runner for DOGFOOD-01..03 workspaces + one greenfield “Python API + static HTML” (no Svelte required). Stop on allowlisted `proc.exec` pytest green or budget. Export the session log.
+
+**W13-B**: Three tiny task dirs + greenfield fixture; `REFERENCE.md`; reconstructions still ≥3 DNA dims. Do not mark Q2 `[DONE]` (that is live human dogfood + spend).
+
+ADR-0067 is **`[DONE]`** (`704a773`), not blocked. Agency guard `8f5f16d` stays. You still rotate the OpenRouter key (`S7-J-04`) before any real-model claim.
 
 ### Deprecated (do not execute; left for audit)
 
@@ -330,3 +357,10 @@ Rejected forever here: second agent loop that grades itself; Atom→Biome classe
 2. **Q2 Useful?** Three real bugs, interactive, no mid-run hand-patch. Honest “reach for it again?”
 3. **Q3 Measurable?** Per-class A/A vs `vg-shell-only`. One paired comparison. Gap number or dated “why not”.
 4. **Q4 General?** TableWorld added; published LOC change in `kernel/` + `agency/episode/`.
+
+
+### Wave 11–13 · ALFA status
+
+- **W11-A** — `[DONE] ✅` (`954478f`) — `runtime/repair.py` multi-turn until oracle green or budget, five named stop reasons (budget vs attempts kept distinct); two modes proved against the real policy (INTERACTIVE→REQUIRE_APPROVAL, BENCHMARK→DENIED_ASK_FAIL_CLOSED, no hang); `runtime/session_log.py` is a ledger projection, no second DB (asserted in source); IndexPort bound only when the pack declares it, else `CompositionError`.
+- **W12-A** — `[DONE] ✅` (`6774dac`) — `runtime/skill_index.py` ≤4k chars names+descriptions, bodies via `fs.read`, budget enforced with dropped skills named; brief compaction-exemption proved; `dead_end_details` + `cache_miss_attribution()` on the session log; sealed spawn-for-explore tested against the real `StandardPolicy` (consumes gamma's ADR-0067, kernel untouched).
+- **W13-A** — `[DONE] ✅` (see commit) — `runtime/dogfood.py` MOCK driver; **absent workspaces stay in the denominator** as `inconclusive:workspace_missing` (BETA's DOGFOOD-01..03 dirs not yet on the tree); oracle exterior (no subprocess/pytest in source); session JSON byte-stable across writes; greenfield fixture `test/runtime/fixtures/greenfield_api/` starts red, proved by running its own suite.

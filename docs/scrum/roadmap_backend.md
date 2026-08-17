@@ -119,7 +119,7 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 
 | ID | Status | Task |
 |---|---|---|
-| S8-B-01 | `[DONE]` | `EpisodeEngine.spawn` (attenuation, causation, typed return, workspace `finally`) |
+| S8-B-01 | **`[SENT BACK]`** | `spawn` is now **reachable** from a model proposal (`ProposalKind.SPAWN`, `engine.py:198`) — that half is done. **But the child is not attenuated on that path and it fails open:** `parse_proposal` yields plain dicts and `Scope` is never built from `args`, so `isinstance(raw_scope, Scope)` is always false and `child_scope` falls back to `self._scope` — the parent's **full** scope. Probed: a model asking to narrow to `fs.read` got a child with `patch.apply` + `proc.exec`, request silently discarded. Fix list in the close receipt §3 |
 | S8-B-01a | `[DONE]` | `parent_lease` on child requests; budget conservation properties (`fc9f5f4`) |
 | S8-B-02 | `[DONE]` | `CompactionStrategy` registry; metamorphic green |
 | S8-B-03 | `[DONE]` | `ModelRouter` from `routing_policy` |
@@ -152,7 +152,18 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 | S8-J-06 | `[TODO]` | ADR-0066 (was S7-J-08) |
 | S8-J-07 | `[TODO]` | VG-07 promotion (was S7-J-06) |
 
-**S8 exit still open until:** S8-A-02 green · `spawn` reachable or declared dormant · Joint J-02 · sprint receipt. Do not call Sprint 8 closed on B/C alone.
+**S8 exit still open until:** ~~S8-A-02 green~~ ✅ · **`spawn` attenuation fixed (B)** ❌ · ~~Joint J-02~~ ✅ · clean close receipt.
+
+### Close attempt 2026-08-17 — **REFUSED.** Sprint 8 remains OPEN.
+
+Receipt: `docs/scrum/sprints/sprint08/evidence/s8-close-receipt.md`.
+615 tests · 0 failures · 14 node-absent errors · 12/12 gates · TCB 1315 unchanged · boundaries PASS (167 files).
+
+- **Lane A `S8-A-02`: CLEARED.** `max_segments` → 0; resume reconstructs `state_digest` from the ledger alone; the 8×8=64 bound is dead. Verified, not reported.
+- **Lane B `S8-B-01`: SENT BACK.** Model-proposed spawn works, but grants the child the parent's **full authority** and silently drops the model's narrowing request. Fails open — the one direction this codebase never fails. Fix list: close receipt §3.
+- **Joint `S8-J-02`: RE-RUN on the spawn diff, ADR-0060 HELD.** Zero domain nouns; `brief`/`scope`/`spawn` are episode-kernel vocabulary. Must be re-run **again** after B's fix.
+
+**Sprint 10: not started, not authorised.**
 
 ### TL audit 2026-08-17 — two blockers, status corrections
 
@@ -171,7 +182,7 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 
 **Commit discipline:** a lane-prefixed commit must carry the production change it names. Three of this sprint's rows were fixed, verified and recorded in three different commits.
 
-### Lane B — `spawn` choice: **PENDING, NOT YET RECORDED** (as of `70802a9`, 2026-08-17)
+### Lane B — `spawn` choice: **(a) WIRE IT, chosen `7e42230`. Reachability accepted; attenuation SENT BACK.**
 
 Lane B has committed nothing since the audit. The choice is B's to make and must be written **here**,
 signed, before `S8-B-01` moves off `[CLAIMED — UNREACHABLE]`.

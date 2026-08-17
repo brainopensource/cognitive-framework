@@ -1,0 +1,4 @@
+{
+  "strategy": "single",
+  "model": "starcoder2-15b"
+}

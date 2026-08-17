@@ -8,8 +8,9 @@
       "vg-code-default/patch-tool.json",
       "vg-code-default/test-tool.json"
     ],
-    "context_policy": ["vg-code-default/context-policy.json"],
-    "routing_policy": ["vg-code-default/routing-policy.json"]
+    "context_policy": ["vg-code-opencode-shaped/context-policy.json"],
+    "routing_policy": ["vg-code-opencode-shaped/routing-policy.json"],
+    "approval_policy": ["vg-code-opencode-shaped/approval-policy.json"]
   },
   "capabilities": [
     {"verb": "fs.read", "sink": "observation", "selector": {"kind":"fs","root":"/workspace","paths":["/workspace"]}, "risk": "low"},

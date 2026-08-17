@@ -1,0 +1,4 @@
+{
+  "strategy": "result-eviction",
+  "eviction_token_threshold": 4000
+}

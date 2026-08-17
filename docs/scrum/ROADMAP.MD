@@ -37,6 +37,7 @@ Backend sprints keep `S7-…` / `sprint07` numbering. Frontend waves use **`FE-A
 Backend delivery continues under `docs/scrum/sprints/sprint07`–`sprint10` and `docs/reviews/doing/`. Frontend must not edit `vanguard/packages/**`, `benchmarkings/**`, backend tools/CI, or `docs/main_v4/**`.
 
 - Lane B Sprint 8: `S8-B-01a` and `S8-B-04` DONE (2026-08-16, `fc9f5f4`) — `parent_lease` + `approval_policy`.
+- Lane C Sprint 8: `S8-C-02`, `S8-C-03`, and `S8-C-04` DONE (2026-08-16, `a0c15fc`) — cache-hit replay metric, prefix-miss attribution, and frozen LAM regex/schema.
 
 Wire lock: **ADR-0062** + VG-04 §0 / §12 / §15. Implemented frames: `vanguard/packages/runtime/service/server.py`.
 

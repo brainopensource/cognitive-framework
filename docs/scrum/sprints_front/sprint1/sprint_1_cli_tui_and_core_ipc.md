@@ -1,5 +1,7 @@
 # Sprint 1: Core Wire IPC, Live Daemon Client & React+Ink Terminal TUI (`vg`)
 
+**Status:** `VOID` — use `sprints_front/lane_core_wave1.md` and `lane_a_wave*.md`. Do not implement this kit (JSON-RPC / Named Pipe invention / old IDs).
+
 **Sprint ID:** `SPRINT-FE-01`  
 **Phase / Wave:** `Wave 1 — Terminal Interaction Surface`  
 **Foundation Docs:** [`docs/front_v4/002_vanguard_frontend_architecture_and_planes.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/002_vanguard_frontend_architecture_and_planes.md), [`docs/front_v4/003_vanguard_wire_protocols_rpc_and_mcp_spec.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/003_vanguard_wire_protocols_rpc_and_mcp_spec.md), [`docs/front_v4/004_vanguard_uiux_views_and_interaction_workflows.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/004_vanguard_uiux_views_and_interaction_workflows.md), [`docs/front_v4/006_vanguard_frontend_dev_guide_and_pseudocode.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/006_vanguard_frontend_dev_guide_and_pseudocode.md)  

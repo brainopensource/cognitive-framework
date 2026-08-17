@@ -13,6 +13,7 @@ from .events import (
     EventEnvelope,
     parse_event_envelope,
 )
+from .coding_session import project_coding_session
 from .reducer import (
     ReducerError,
     compute_state_digest,
@@ -53,4 +54,5 @@ __all__ = [
     "reduce_batch",
     "reconstruct_state",
     "compute_state_digest",
+    "project_coding_session",
 ]

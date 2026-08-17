@@ -1,5 +1,8 @@
 # Sprint 2: Manifest DNA Engine, Daemon Supervisor & Single-Command Distribution
 
+**Status:** `VOID` — manifests are backend/BETA; CLI packaging is FE-2-7. Do not implement this kit.
+
+
 **Sprint ID:** `SPRINT-FE-02`  
 **Phase / Wave:** `Wave 2 — Autonomous Supervisor & Zero-Config Packaging`  
 **Foundation Docs:** [`docs/front_v4/005_vanguard_harnesses_manifests_and_dna_workflows.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/005_vanguard_harnesses_manifests_and_dna_workflows.md), [`docs/front_v4/008_vanguard_build_packaging_and_distribution.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/008_vanguard_build_packaging_and_distribution.md), [`docs/front_v4/011_vanguard_mock_prototype_and_demo_spec.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/011_vanguard_mock_prototype_and_demo_spec.md)  

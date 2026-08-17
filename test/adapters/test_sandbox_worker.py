@@ -100,11 +100,11 @@ class TestSandboxWorker(unittest.TestCase):
         self.assertEqual(cmd[2], 'printf "%s" "$1" | patch -p1')
         self.assertEqual(cmd[4], "--- a/file\n+++ b/file\n")
 
-    def test_execute_proc_test(self) -> None:
+    def test_execute_proc_exec(self) -> None:
         runner = FakeSandboxRunner()
         worker = WorkerProtocol(runner)
         op = WorkerOperation(
-            operation="proc.test",
+            operation="proc.exec",
             args={"argv": ["pytest", "tests/"]},
             working_directory=".",
             timeout_seconds=30.0,
@@ -114,10 +114,10 @@ class TestSandboxWorker(unittest.TestCase):
         self.assertTrue(res.ok)
         self.assertEqual(runner.commands[0], ("pytest", "tests/"))
 
-    def test_proc_test_rejects_shell_string(self) -> None:
+    def test_proc_exec_rejects_shell_string(self) -> None:
         worker = WorkerProtocol(FakeSandboxRunner())
         op = WorkerOperation(
-            operation="proc.test",
+            operation="proc.exec",
             args={"argv": "pytest tests/"},
             working_directory=".",
             timeout_seconds=30.0,
@@ -127,7 +127,7 @@ class TestSandboxWorker(unittest.TestCase):
         self.assertFalse(res.ok)
         self.assertEqual(res.error.kind, "invalid_request")
 
-    def test_proc_test_enforces_manifest_executable_allowlist(self) -> None:
+    def test_proc_exec_enforces_manifest_executable_allowlist(self) -> None:
         worker = WorkerProtocol(FakeSandboxRunner())
         res = worker.execute(WorkerOperation("proc.exec", {"argv": ["rm", "-rf", "."]}))
         self.assertFalse(res.ok)

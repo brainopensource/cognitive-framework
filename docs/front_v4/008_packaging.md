@@ -1,22 +1,20 @@
 # 008 — Packaging (Proposed)
 
 Status: `Proposed`  
-Date: 2026-08-16
+Date: 2026-08-17
 
-## Channels in this phase
+## Channels in this phase (Phase 1)
 
 | # | Channel | Notes |
 |---|---|---|
-| 1 | `curl \| sh` via repo `install.sh` (FE-A9) | Documents Node ≥ 20, socket path, `--demo` |
+| 1 | `curl \| sh` via repo `install.sh` | Documents Node ≥ 20, socket path, `--demo` |
 | 2 | npm global `@vanguard/cli` (`vg` bin) | `vanguard/clients/cli/package.json` |
 
-## Deferred to Phase 4
+## GUI Packaging (Phase 2)
 
-Tauri, AppImage with embedded Python, MSI, notarization, Code-OSS branded IDE installers.
+Standalone desktop application packaging (Tauri 2 / Electron binary or AppImage/DMG/MSI) belongs to Lane FE-3 in Phase 2.
 
-## IDE distribution (FE-B8)
-
-`.vsix` plus a short Open-VSX / private marketplace note. No MSI/notarization program.
+VS Code extension packaging (`.vsix`) is VOID.
 
 ## Do not cite
 

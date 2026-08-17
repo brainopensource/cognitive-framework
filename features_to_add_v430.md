@@ -135,7 +135,7 @@ These are **in the runtime / packs / adapters**, not “we shipped OpenCode.”
 | Headless CLI | `vg run --headless --manifest … --prompt …` | `clients/cli` |
 | Second domain (not coding) | TableWorld | S10-B-01 (proves the compiler, not the coding CLI) |
 
-**Honest gaps vs a daily OpenCode:** live LLM dogfood not run; daemon still thin; kernel action-membership still agency-only (`ADR-0067` proposed); `S10-A` (domain-out-of-invocation, `proc.test`, blob/index, `vg why` load-bearing) still Lane A; no LSP/repo-map yet; no MCP; playbooks deferred.
+**Honest gaps vs a daily OpenCode:** live LLM dogfood not run; `lab/run.py` still a one-shot stub while `HarnessSession.run` already loops; daemon/TUI ignored for this product cut; no LSP; no MCP; playbooks deferred. Session measurement projector exists (`tools/export_coding_session.py`); skill prefix formatter exists (`format_skill_index`) but is not yet bound in the compiler or pack.
 
 ---
 
@@ -203,7 +203,13 @@ vg run --headless \
   --prompt "Fix DOGFOOD-01. Do not stop until tests pass."
 ```
 
-When that returns a ledger of patches + passing `proc.exec` tests **with no human mid-run edit**, the framework is a coding harness. A Python+Svelte webapp is the same command with a bigger prompt — not a new architecture.
+When that returns a ledger of patches + passing `proc.exec` tests **with no human mid-run edit**, the framework is a coding harness. Measure it with:
+
+```bash
+python3 tools/export_coding_session.py --jsonl path/to/episode.jsonl
+```
+
+A Python API + static HTML greenfield is the same command with a bigger prompt — not a new architecture. PO checklist: `docs/scrum/sprints/wave11/PO_ACCEPTANCE.md`.
 
 ---
 

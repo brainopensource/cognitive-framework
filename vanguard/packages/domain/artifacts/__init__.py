@@ -11,6 +11,13 @@ from .graph import (
     LogicalEdit,
     Workspace,
 )
+from .skill_index import (
+    MAX_SKILL_INDEX_CHARS,
+    SkillCard,
+    SkillIndexError,
+    format_skill_index,
+    parse_skill_card,
+)
 from .manifest import (
     CapabilityRequirement,
     FrozenHarness,
@@ -28,4 +35,6 @@ __all__ = [
     "CapabilityRequirement", "FrozenHarness", "HarnessManifest", "ManifestRegistry",
     "RegisteredManifest", "ManifestError",
     "compose", "parse_manifest",
+    "MAX_SKILL_INDEX_CHARS", "SkillCard", "SkillIndexError",
+    "format_skill_index", "parse_skill_card",
 ]

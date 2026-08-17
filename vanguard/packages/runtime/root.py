@@ -65,6 +65,7 @@ from ..adapters.evaluators.unavailable import UnavailableEvaluator
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.repo_index import FileRepoIndex
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.context import (
     CompetencePriorRecorder,
@@ -108,6 +109,7 @@ from ..ports.environment import EffectRequest as EnvironmentRequest
 from ..ports.environment import ObservationRequest
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.determinism import ClockPort, RandomPort
+from ..ports.index import IndexPort
 from ..ports.event_store import EventRange, EventStorePort
 from .determinism import SystemClock, SystemRandom, event_id
 from .telemetry import RunTelemetry
@@ -285,6 +287,10 @@ class Harness:
     tool_schemas: tuple[Mapping[str, Any], ...]
     budget: Mapping[str, int]
     effect_budget: int
+    #: `W11-A`. Component path the pack declared for its repository index, or
+    #: `None`. Declared, never inferred: a harness that did not ask for an
+    #: index must not silently acquire one.
+    index_component: str | None
     evaluators: tuple[str, ...]
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
@@ -610,6 +616,9 @@ class SessionPorts:
     store: EventStorePort
     #: `S8-A-03`. Pinned by `Recording.seed` on a replay; live when recording.
     random: RandomPort | None = None
+    #: `W11-A`. Bound only when the pack declares an index component. `None`
+    #: means the harness declared none -- not that indexing failed.
+    index: IndexPort | None = None
     verifier: Any = None
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
@@ -679,6 +688,19 @@ class HarnessSession:
                 BindingContext(verb=verb, environment=ports.environment, repo_path=repo))
             for verb in harness.verbs
         }
+        # `W11-A`. The index is bound only when the pack declares it. A
+        # harness that did not ask for one must not silently acquire it: an
+        # unread component is a composition error (`S7-B-02`), and an unasked-
+        # for one is a capability nobody authorised.
+        self.index: IndexPort | None = None
+        if harness.index_component is not None:
+            self.index = ports.index or FileRepoIndex()
+            self.index.index(str(repo))
+        elif ports.index is not None:
+            raise CompositionError(
+                "an IndexPort was supplied but the manifest declares no index "
+                "component; bind it in the pack or do not pass it")
+
         self.scope = _scope_for(harness, repo)
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
@@ -976,6 +998,10 @@ class Runtime:
             budget=cls._budget(contents[manifest.budget_policy], manifest.budget_policy),
             effect_budget=cls._effect_budget(
                 contents[manifest.budget_policy], manifest.budget_policy),
+            index_component=next(
+                (path for role, paths in manifest.components
+                 if role in {"index_policy", "repo_index"} for path in paths),
+                None),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,

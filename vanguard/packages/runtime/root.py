@@ -78,7 +78,6 @@ from ..domain.artifacts.manifest import (
     parse_manifest,
 )
 from ..domain.ledger.events import EventEnvelope
-from ..domain.primitives.primitives import uuidv7
 from ..kernel import (
     Constraints,
     EffectRequest,
@@ -102,7 +101,9 @@ from ..kernel import (
 from ..ports.environment import EffectRequest as EnvironmentRequest
 from ..ports.environment import ObservationRequest
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
+from ..ports.determinism import ClockPort, RandomPort
 from ..ports.event_store import EventStorePort
+from .determinism import SystemClock, SystemRandom, event_id
 from .governance.approvals import (
     ApprovalAuthority,
     ApprovalDecision,
@@ -365,7 +366,14 @@ class LedgerBridge:
     is already released by the time anything is emitted — `K-06`).
     """
 
-    def __init__(self, store: EventStorePort, *, episode_id: str) -> None:
+    def __init__(self, store: EventStorePort, *, episode_id: str,
+                 clock: ClockPort | None = None,
+                 random: RandomPort | None = None) -> None:
+        # `S8-A-03`: event ids come from the injected pair, never from the
+        # process-global RNG and wall clock. A recorded run replays to the
+        # same bytes only if the ids do.
+        self._clock = clock or SystemClock()
+        self._random = random or SystemRandom()
         self.store = store
         self.events: list[Event] = []
         self._episode_id = episode_id
@@ -395,7 +403,7 @@ class LedgerBridge:
     def _write(self, event: Event, *, role: str) -> None:
         self._seq += 1
         envelope = EventEnvelope(
-            event_id=uuidv7(),
+            event_id=event_id(clock=self._clock, random=self._random),
             scope="episode",
             seq=str(self._seq),
             occurred_at=event.at,
@@ -415,16 +423,6 @@ class LedgerBridge:
         result = self.store.append([envelope])
         if not result.ok:
             raise OSError(result.error.message if result.error else "append rejected")
-
-
-class _SystemClock:
-    """`CT-08` timestamps. Injected, never read from inside `domain`."""
-
-    def now(self) -> str:
-        from datetime import datetime, timezone
-
-        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") \
-            + f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
 
 
 class _LayeredOperator:
@@ -575,6 +573,8 @@ class SessionPorts:
     environment: Any
     clock: Any
     store: EventStorePort
+    #: `S8-A-03`. Pinned by `Recording.seed` on a replay; live when recording.
+    random: RandomPort | None = None
     verifier: Any = None
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
@@ -638,7 +638,9 @@ class HarnessSession:
 
         repo = Path(task.repo_path)
         self.repo = repo
-        self.ledger = LedgerBridge(ports.store, episode_id=task.episode_id)
+        self.ledger = LedgerBridge(
+            ports.store, episode_id=task.episode_id,
+            clock=ports.clock, random=ports.random)
 
         self.adapters = {
             verb: harness.bindings[verb].factory(
@@ -914,7 +916,7 @@ class Runtime:
         ports = SessionPorts(
             model=model,
             environment=environment,
-            clock=clock or _SystemClock(),
+            clock=clock or SystemClock(),
             store=store or SqliteEventStore(":memory:"),
             verifier=verifier,
             approver=approver,

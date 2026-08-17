@@ -508,3 +508,19 @@ Flags: `--pack --task-dir --model mock\|ollama\|openrouter\|deepseek --model-nam
 **Two instrument defects fixed:** duplicate ledger sequences across attempts (each attempt is now its own episode; `reduce_event` was right to refuse `Non-monotonic sequence`), and a completed run reporting `model_not_invoked` (terminal now beats the no-turns proxy).
 
 DoD: `test/runtime` 337 OK · `check_boundaries` PASS (229) · TCB 1333/1438. Evidence: `docs/scrum/sprints/sprint21/evidence/`.
+
+
+### Sprint 22 · ALFA — `C-01`: the refusal reaches the ledger (`557191e`)
+
+**Defect.** `agency/episode/engine.py` terminated on three paths *before* `_emit_proposal` (provider raised · provider returned no proposal · translator refused the shape) and all three left **no event at all**. A live greenfield run produced `events: []` — an episode that really ran, invisible to the ledger (`A-07`).
+
+**`C-01`, one function.** `EpisodeEngine._emit_terminal` emits `EpisodeCompleted` — an existing kind the reducer already understands — with the outcome and the refusal detail. No new kind, no parallel store, no second loop, no kernel change. Deliberately **not** a `ProposalProduced`: no turn occurred, and recording one would claim a turn the episode never took.
+
+**After**, four consecutive live greenfield runs, deterministic:
+`instrument_error:multi_action_proposal`, `turns=0`, `terminalRefusal={outcome: instrument_error, detail: "multiple actions in one proposal are unsupported", afterTurn: 0}`. The exported JSONL now carries the envelope where it was empty.
+
+**Both directions tested** — batch refused is recorded (terminal present, reason carried, no `ProposalProduced`, session log surfaces it, provider exceptions too); single tool still dispatches (`fs.read` produces a turn, no refusal reported, MOCK run unchanged, ledger still reduces). Engine regression suite 55 tests unchanged.
+
+`instrument_error:multi_action_proposal` stays inconclusive, in the denominator, never `oracle_green`. Live tests keep their measured-rate budget and skip closed — nothing tuned toward 6/6. Pack one-tool-per-turn remains BETA `S22-B`.
+
+DoD: `test/runtime` **351 OK** · `check_boundaries` PASS (229) · TCB 1333/1438. Evidence: `docs/scrum/sprints/sprint22/evidence/`.

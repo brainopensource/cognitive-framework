@@ -171,11 +171,11 @@ child's exploration never enters the parent's context; the whole run reconstruct
 
 | ID | Status | Task | DoD | Source |
 |---|---|---|---|---|
-| `S8-A-01` | `[TODO]` | **Decompose `execute_harness`** → `compose / HarnessSession / run`; **one `Kernel` per run** (three are built today); ports injected | `HarnessSession` unit-testable without a live model; `_WitnessKernel` deleted | `003` A7, `007` D9 |
-| `S8-A-02` | `[TODO]` | **Suspend/resume from the ledger** — approval suspension becomes terminal-with-continuation inside the engine; re-entry reduces the ledger for that `episodeId`; delete the segment loop | An episode suspended and resumed reconstructs an identical `state_digest` **from the ledger alone**; `max_turns` and no-progress detection survive an approval | `003` A9, `T3.6` |
-| `S8-A-03` | `[TODO]` | **`RandomPort` + determinism-complete `ClockPort`** | Replay is byte-identical; `Recording` can drive counterfactual re-execution | `004` G3, `003` A12 |
-| `S8-A-04` | `[TODO]` | **`RecordCorrection` calls `parse_wire("CorrectionRecord")`** | Invalid `style` + `scope: general` is **rejected**; valid record round-trips; no promotion path | `009 §3.1`, `D-07` |
-| `S8-A-05` | `[TODO]` | **`Claim` as a `domain/` type** — non-empty `invalidationConditions` at parse; ≥1 **automatic** condition (substrate-digest change); `support_count`/`last_corroborated_at`/`protection_class` recorded-not-consumed | Empty invalidation array fails at parse; a substrate change marks the claim stale **without human review** (`C-12`) | `004` G1–G2 |
+| `S8-A-01` | `[DONE]` | **Decompose `execute_harness`** → `compose / HarnessSession / run`; **one `Kernel` per run** (three are built today); ports injected | `HarnessSession` unit-testable without a live model; `_WitnessKernel` deleted | `003` A7, `007` D9 |
+| `S8-A-02` | `[IN_PROGRESS]` | **Suspend/resume from the ledger** — approval suspension becomes terminal-with-continuation inside the engine; re-entry reduces the ledger for that `episodeId`; delete the segment loop | An episode suspended and resumed reconstructs an identical `state_digest` **from the ledger alone**; `max_turns` and no-progress detection survive an approval | `003` A9, `T3.6` |
+| `S8-A-03` | `[DONE]` | **`RandomPort` + determinism-complete `ClockPort`** | Replay is byte-identical; `Recording` can drive counterfactual re-execution | `004` G3, `003` A12 |
+| `S8-A-04` | `[DONE]` | **`RecordCorrection` calls `parse_wire("CorrectionRecord")`** | Invalid `style` + `scope: general` is **rejected**; valid record round-trips; no promotion path | `009 §3.1`, `D-07` |
+| `S8-A-05` | `[DONE]` | **`Claim` as a `domain/` type** — non-empty `invalidationConditions` at parse; ≥1 **automatic** condition (substrate-digest change); `support_count`/`last_corroborated_at`/`protection_class` recorded-not-consumed | Empty invalidation array fails at parse; a substrate change marks the claim stale **without human review** (`C-12`) | `004` G1–G2 |
 
 ### 5.2 Lane B — Workload & Evidence
 

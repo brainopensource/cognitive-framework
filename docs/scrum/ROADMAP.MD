@@ -20,7 +20,7 @@ Authority: `docs/main_v4/` is normative for product and wire.
 - [`development_guides/cli_tui_architecture.md`](development_guides/cli_tui_architecture.md) (Hexagonal client, `@vanguard/client-core`)
 - [`development_guides/tui_product_surface.md`](development_guides/tui_product_surface.md) (Claude-class Ink chrome)
 - [`development_guides/gui_ide_slots.md`](development_guides/gui_ide_slots.md) (Slot-based standalone GUI)
-- [`sprints_front/README.md`](sprints_front/README.md) (Delta kits: `lane_core_wave1.md`, `lane_a_wave1.md`, `lane_a_wave2.md`, `lane_gui_wave1.md`)
+- [`sprints_front/README.md`](sprints_front/README.md) (kits) · Wave 2 prompts: [`sprints_front/wave2_implementer_prompts.md`](sprints_front/wave2_implementer_prompts.md)
 
 ---
 

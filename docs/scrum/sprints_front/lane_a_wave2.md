@@ -1,5 +1,7 @@
 # Lane FE-A · Wave 2 — product surface
 
+**Status:** FE-A6–A10 / FE-2-3…FE-2-7 `[DONE]` in-tree (Wave 1 close). Active Wave 2 TUI sprint is **`lane_tui_wave2.md` (FE-2-8)**. FE-2-9 remains Wave 3.
+
 **Write scope:** `vanguard/clients/cli/**`  
 **DoD default:** `cd vanguard/clients/cli && npm run typecheck && npm test`
 

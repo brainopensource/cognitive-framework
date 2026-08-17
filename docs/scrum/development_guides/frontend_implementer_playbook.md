@@ -157,13 +157,16 @@ A coding IDE is a **workbench**: activity bar + editor groups + panel + status b
 
 ```text
 Wave 0  docs frozen (this file + board)          [DONE]
-Wave 1  FE-1 core extract ∥ FE-3 shell+replay ∥ FE-2 keep cli green
-Wave 2  FE-2 SOTA TUI     ∥ FE-3 files/editor/term
-Wave 3  FE-2 resume/why   ∥ FE-3 approve/git/palette/canvas
+Wave 1  FE-1 extract ∥ FE-2 core wire + demo/headless ∥ FE-3 shell+replay  [DONE]
+Wave 2  FE-1 selectors/graph/subscribe ∥ FE-2 SOTA TUI ∥ FE-3 files/Monaco/PTY
+Wave 3  FE-2 resume/why ∥ FE-3 approve/git/palette/canvas
 Wave 4  live UDS both skins (needs daemon runner — J1 for spawn only)
+Wave 5  installers, soak, dogfood → ship
 ```
 
-FE-3 Wave 1 does **not** wait for FE-1-4 if FE-1-1+FE-1-3 types/reducers are published (or FE-3 vendors a copy of `types.ts`+`run-view.ts` until extract merges — prefer wait on FE-1-1).
+Wave 2 copy-paste prompts: `docs/scrum/sprints_front/wave2_implementer_prompts.md`.
+
+FE-2/FE-3 Wave 2 must **not** wait for FE-1-6/1-7: use local windowing until `windowTranscript` / `toTraceGraph` exist, then swap imports.
 
 ---
 
@@ -196,23 +199,22 @@ FE-3 Wave 1 does **not** wait for FE-1-4 if FE-1-1+FE-1-3 types/reducers are pub
 
 ### Wave 2
 
-**FE-2 group “Claude chrome”** (`tui_product_surface.md`, `lane_a_wave2.md`)
+**FE-1 group “SDK”** (`lane_core_wave2.md`) — `selectStatusBar`, `windowTranscript`, `toTraceGraph`, `subscribeRun`, commands.ts import hygiene.
+
+**FE-2 group “Claude chrome”** (`tui_product_surface.md`, `lane_tui_wave2.md`)
 
 | ID | Task | Subtasks |
 |---|---|---|
-| FE-2-3 | `--demo` | catalog `fixtures/sessions/`; no UDS |
-| FE-2-4 | Approve | diff; y/n/c; signer; no empty digests |
-| FE-2-5 | Daemon honesty | J1 text on start/stop |
-| FE-2-6 | Headless | JSONL stdout; exit codes |
-| FE-2-7 | Distro | `install.sh`; `--help` |
+| FE-2-3…2-7 | demo / approve / J1 / headless / help | `[DONE]` Wave 1 |
 | FE-2-8 | SOTA chrome | status; windowed transcript; prompt vs approval focus; ctrl+c → `requestCancel` |
 
-**FE-3 group “workbench slots”**
+**FE-3 group “workbench slots”** (`lane_gui_wave2.md`)
 
 | ID | Task | Subtasks |
 |---|---|---|
-| FE-3-3 | Files + Monaco | tree virt; open file; encoding UTF-8 |
-| FE-3-4 | xterm PTY | bash; optional `vg` |
+| FE-3-0 | Toolchain | lockfile; Vite installs; `npm run dev` |
+| FE-3-3 | Files + Monaco | tree virt; open file; encoding UTF-8; dispose models |
+| FE-3-4 | xterm PTY | bash or honest `not_available`; optional `vg` |
 
 ### Wave 3
 

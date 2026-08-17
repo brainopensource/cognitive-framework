@@ -34,7 +34,7 @@ Statuses: `[DONE]` `[DOING]` `[TODO]` `[BLOCKED]` `[VOID]` `[DEFERRED]`
 | Harvest atoms vs loops | `features_to_add_v430.md` |
 | Event names | VG-04 §12.2 (`docs/main_v4/04_…`) |
 | Frames | `docs/front_v4/003_wire_consumer.md` + `server.py` |
-| Kits | `sprints_front/lane_core_wave1.md`, `lane_a_wave1.md`, `lane_a_wave2.md`, `lane_gui_wave1.md` |
+| Kits | `sprints_front/lane_core_wave1.md`, `lane_core_wave2.md`, `lane_tui_wave2.md`, `lane_gui_wave2.md`, `wave2_implementer_prompts.md` |
 | Navigator | `docs/scrum/ROADMAP.MD` |
 
 VOID: `sprints_front/sprint1`–`sprint4`, `lane_b_wave*.md`, VS Code extension / Code-OSS fork.
@@ -55,11 +55,10 @@ VOID: `sprints_front/sprint1`–`sprint4`, `lane_b_wave*.md`, VS Code extension 
 | Phase | Focus | Status |
 |---|---|---|
 | **0 Docs** | Law, playbook, kits, void extension | `[DONE]` |
-| **1 Wave 1–3** | Core extract + SOTA TUI + GUI slots | `[TODO]` implementers |
+| **1 Wave 1** | Core extract + CLI wire + GUI scaffold/replay | `[DONE]` 2026-08-17 |
+| **1 Wave 2–3** | SOTA TUI chrome + GUI files/Monaco/PTY + core selectors | `[DOING]` Wave 2 prompts |
 | **2 Live** | Both skins on real daemon | `[TODO]` / `[BLOCKED]` J1 runner |
 | **4+** | LSP servers, J5 transports, RAG views | `[DEFERRED]` |
-
-CLI hygiene FE-A1–A10 (dead code, transports, JCS, `--demo`, soak) already landed **inside** `vanguard/clients/cli` — still **extract** to client-core (FE-1).
 
 ---
 
@@ -67,11 +66,14 @@ CLI hygiene FE-A1–A10 (dead code, transports, JCS, `--demo`, soak) already lan
 
 ```text
 Wave 0  [DONE]   docs
-Wave 1  [TODO]   FE-1 extract ∥ FE-2 stay green ∥ FE-3 Tauri+replay
-Wave 2  [TODO]   FE-2 Claude chrome ∥ FE-3 files/Monaco/PTY
+Wave 1  [DONE]   FE-1 extract ∥ FE-2 core wire + demo/headless ∥ FE-3 shell+replay
+Wave 2  [DOING]  FE-1 selectors/graph/subscribe ∥ FE-2 Claude chrome ∥ FE-3 files/Monaco/PTY
 Wave 3  [TODO]   FE-2 resume/why ∥ FE-3 approve/git/palette/canvas
 Wave 4  [TODO]   live UDS both skins
+Wave 5  [TODO]   installers, soak, dogfood → ship
 ```
+
+Wave 2 copy-paste prompts: [`sprints_front/wave2_implementer_prompts.md`](sprints_front/wave2_implementer_prompts.md)
 
 ---
 
@@ -94,39 +96,44 @@ Wave 4  [TODO]   live UDS both skins
 | FE-1-2 | signer + RuntimeClient | FE-1-1 | JCS golden | `[DONE]` |
 | FE-1-3 | `reduceRunView` + approvals | FE-1-1 | reducer tests in core | `[DONE]` |
 | FE-1-4 | live/replay/scenario adapters | FE-1-2 | CLI suite green via re-export | `[DONE]` |
+| FE-1-5 | Public API freeze + commands.ts import hygiene | FE-1-4 | barrel + CLI still green | `[TODO]` Wave 2 |
+| FE-1-6 | `selectStatusBar` + `windowTranscript` | FE-1-3 | selector unit tests | `[TODO]` Wave 2 |
+| FE-1-7 | `toTraceGraph(envelopes)` | FE-1-1 | golden vs successful-episode.jsonl | `[TODO]` Wave 2 |
+| FE-1-8 | `subscribeRun` + AbortSignal | FE-1-4 | fake-iterable abort test | `[TODO]` Wave 2 |
 
-Kit: `sprints_front/lane_core_wave1.md`
+Kits: `sprints_front/lane_core_wave1.md`, `lane_core_wave2.md`
 
 ### 5.3 Lane FE-2 — Ink TUI
 
 | ID | Scope | Depends | DoD | Status |
 |---|---|---|---|---|
 | FE-2-0 | Prior CLI deltas (delete dead, transports, demo, soak) | — | `cli` tests green | `[DONE]` in-tree |
-| FE-2-1 | Import client-core | FE-1-4 | `cd vanguard/clients/cli && npm run typecheck && npm test` | `[TODO]` |
-| FE-2-2 | `src/tui/**` hexagonal | FE-2-1 | `ui.test.ts` | `[DONE]` layout; re-wire after FE-1 |
-| FE-2-3 | `--demo` `source: mock` | FE-2-1 | no daemon | `[DONE]`; keep after extract |
-| FE-2-4 | y/n/c approve | FE-2-1 | no empty digests | `[DONE]` path; polish Wave 2 |
+| FE-2-1 | Import client-core | FE-1-4 | `cd vanguard/clients/cli && npm run typecheck && npm test` | `[DONE]` 40/40 |
+| FE-2-2 | `src/tui/**` hexagonal | FE-2-1 | `ui.test.ts` | `[DONE]` |
+| FE-2-3 | `--demo` `source: mock` | FE-2-1 | no daemon | `[DONE]` |
+| FE-2-4 | y/n/c approve | FE-2-1 | no empty digests | `[DONE]` |
 | FE-2-5 | daemon `not_available` J1 | — | no fake running | `[DONE]` |
 | FE-2-6 | `--headless` JSONL | FE-2-1 | exit codes | `[DONE]` |
 | FE-2-7 | `install.sh` + `--help` | FE-2-3 | flags listed | `[DONE]` |
-| FE-2-8 | SOTA chrome (`tui_product_surface.md`) | FE-2-2 | virtualized transcript, prompt, ctrl+c | `[TODO]` |
-| FE-2-9 | Resume UX → `requestResume` | FE-2-1 | honest `not_available` | `[TODO]` |
+| FE-2-8 | SOTA chrome (`tui_product_surface.md`) | FE-2-2 | virtualized transcript, prompt, ctrl+c | `[TODO]` Wave 2 |
+| FE-2-9 | Resume UX → `requestResume` | FE-2-1 | honest `not_available` | `[TODO]` Wave 3 |
 
-Kits: `lane_a_wave1.md`, `lane_a_wave2.md`
+Kits: `lane_a_wave1.md`, `lane_tui_wave2.md` (Wave 2 sprint), `lane_a_wave2.md` (historical FE-A6–A10)
 
 ### 5.4 Lane FE-3 — `vanguard-gui/` (Tauri 2)
 
 | ID | Scope | Depends | DoD | Status |
 |---|---|---|---|---|
-| FE-3-1 | Shell + slot registry + ADR-FE-GUI-001 | — | `npm run dev` | `[TODO]` |
-| FE-3-2 | Replay run panel | FE-1-1, FE-1-3 | fixture, `source: mock` | `[TODO]` |
-| FE-3-3 | File tree + Monaco | FE-3-1 | open file | `[TODO]` |
-| FE-3-4 | xterm + PTY (`vg` optional) | FE-3-1 | interactive shell | `[TODO]` |
-| FE-3-5 | xyflow event view | FE-3-2 | VG-04 kinds only | `[TODO]` |
-| FE-3-6 | Monaco diff + signer | FE-3-2 | `resolveApproval` | `[TODO]` |
-| FE-3-7 | Palette + git status display | FE-3-1 | ≥3 actions; branch label | `[TODO]` |
+| FE-3-0 | Toolchain: lockfile + Vite install | — | `npm install && npm run dev` | `[TODO]` Wave 2 (Wave 1 blocker) |
+| FE-3-1 | Shell + slot registry + ADR-FE-GUI-001 | — | `npm run typecheck` | `[DONE]` scaffold; dev blocked until FE-3-0 |
+| FE-3-2 | Replay run panel | FE-1-1, FE-1-3 | fixture, `source: mock` | `[DONE]` in-browser; not virtualized |
+| FE-3-3 | File tree + Monaco | FE-3-1 | open file | `[TODO]` Wave 2 (stubs today) |
+| FE-3-4 | xterm + PTY (`vg` optional) | FE-3-1 | interactive shell or honest `not_available` | `[TODO]` Wave 2 |
+| FE-3-5 | xyflow event view | FE-3-2, FE-1-7 | VG-04 kinds only | `[TODO]` Wave 3 |
+| FE-3-6 | Monaco diff + signer | FE-3-2 | `resolveApproval` | `[TODO]` Wave 3 |
+| FE-3-7 | Palette + git status display | FE-3-1 | ≥3 actions; branch label | `[TODO]` Wave 3 |
 
-Kit: `sprints_front/lane_gui_wave1.md`
+Kits: `sprints_front/lane_gui_wave1.md`, `lane_gui_wave2.md`
 
 ---
 

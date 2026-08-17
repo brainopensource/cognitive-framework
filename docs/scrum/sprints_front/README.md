@@ -5,10 +5,14 @@ Numbering: **FE-1-n** (Core), **FE-2-n** (TUI), **FE-3-n** (GUI)
 
 | Kit | Lane | Contents |
 |---|---|---|
-| `lane_core_wave1.md` | **FE-1 (Core)** | FE-1-1 … FE-1-4 (extract `@vanguard/client-core`) |
-| `lane_a_wave1.md` | **FE-2 (TUI Wave 1)** | FE-2-1 … FE-2-2 (core re-export, TUI tree) |
-| `lane_a_wave2.md` | **FE-2 (TUI Wave 2)** | FE-2-3 … FE-2-9 (demo, approvals, headless, SOTA chrome, resume) |
-| `lane_gui_wave1.md` | **FE-3 (GUI Wave 1)** | FE-3-1 … FE-3-6 (GUI scaffold, client-core import, replay, slot stubs) |
+| `lane_core_wave1.md` | **FE-1 (Core Wave 1)** | FE-1-1 … FE-1-4 extract `[DONE]` |
+| `lane_core_wave2.md` | **FE-1 (Core Wave 2)** | FE-1-5 … FE-1-8 selectors / graph / subscribe |
+| `lane_a_wave1.md` | **FE-2 (TUI Wave 1)** | FE-2-1 … FE-2-2 |
+| `lane_a_wave2.md` | **FE-2 historical** | FE-A6–A10 + FE-2-8/9 notes; Wave 2 sprint is `lane_tui_wave2.md` |
+| `lane_tui_wave2.md` | **FE-2 (TUI Wave 2)** | FE-2-8 SOTA chrome |
+| `lane_gui_wave1.md` | **FE-3 (GUI Wave 1)** | FE-3-1 … FE-3-2 scaffold + replay |
+| `lane_gui_wave2.md` | **FE-3 (GUI Wave 2)** | FE-3-0 toolchain, FE-3-3 files/Monaco, FE-3-4 PTY |
+| `wave2_implementer_prompts.md` | **all** | Three copy-paste Wave 2 prompts |
 
 Also: `frontend_implementer_playbook.md` (start here), `tui_product_surface.md` (FE-2), `gui_ide_slots.md` (FE-3).
 

@@ -20,7 +20,12 @@ function unavailable(method: string): Result<never> {
   return fail("not_available", `${method} is not available on the replay adapter`);
 }
 
-function projectExplanation(envelopes: readonly EventEnvelope[], artifactId: string): ArtifactExplanation {
+function projectExplanation(
+  envelopes: readonly EventEnvelope[],
+  artifactId: string,
+  source: StreamItem["source"],
+): ArtifactExplanation {
+  const freshnessSource = source === "live" ? "replay" : source;
   const matches = envelopes.filter((envelope) => envelope.payload.kind === "ActivationChanged" && envelope.payload.artifactId === artifactId);
   const latest = matches.at(-1);
   if (!latest) {
@@ -30,7 +35,7 @@ function projectExplanation(envelopes: readonly EventEnvelope[], artifactId: str
       prediction: "No activation pointer is present in the recorded ledger.",
       activatedBy: [],
       demotedBy: [],
-      freshness: { source: "replay" },
+      freshness: { source: freshnessSource },
     };
   }
   const payload = latest.payload;
@@ -43,16 +48,19 @@ function projectExplanation(envelopes: readonly EventEnvelope[], artifactId: str
     prediction: typeof payload.prediction === "string" ? payload.prediction : "",
     activatedBy,
     demotedBy,
-    freshness: { source: "replay", asOfSeq: latest.seq },
+    freshness: { source: freshnessSource, asOfSeq: latest.seq },
   };
 }
 
 export class ReplayRuntimeClient implements RuntimeClient {
   private readonly corrections: CorrectionRecord[] = [];
 
-  private constructor(private readonly envelopes: readonly EventEnvelope[]) {}
+  private constructor(
+    private readonly envelopes: readonly EventEnvelope[],
+    private readonly streamSource: StreamItem["source"] = "replay",
+  ) {}
 
-  static fromJsonl(text: string): ReplayRuntimeClient {
+  static fromJsonl(text: string, source: StreamItem["source"] = "replay"): ReplayRuntimeClient {
     const envelopes: EventEnvelope[] = [];
     for (const line of text.split(/\r?\n/)) {
       if (!line.trim()) continue;
@@ -60,11 +68,11 @@ export class ReplayRuntimeClient implements RuntimeClient {
       if (!parsed.ok) throw new Error(parsed.error.message);
       envelopes.push(parsed.value);
     }
-    return new ReplayRuntimeClient(envelopes);
+    return new ReplayRuntimeClient(envelopes, source);
   }
 
-  static fromFile(path: string): ReplayRuntimeClient {
-    return ReplayRuntimeClient.fromJsonl(readFileSync(path, "utf8"));
+  static fromFile(path: string, source: StreamItem["source"] = "replay"): ReplayRuntimeClient {
+    return ReplayRuntimeClient.fromJsonl(readFileSync(path, "utf8"), source);
   }
 
   async startRun(request: StartRunRequest): Promise<Result<RunRef>> {
@@ -77,7 +85,7 @@ export class ReplayRuntimeClient implements RuntimeClient {
     for (const envelope of this.envelopes) {
       if (envelope.runId !== undefined && envelope.runId !== cursor.runId) continue;
       if (!afterCursor(envelope.seq, cursor.afterSeq)) continue;
-      yield { ok: true, value: { contractVersion: "0.1", source: "replay", envelope } };
+      yield { ok: true, value: { contractVersion: "0.1", source: this.streamSource, envelope } };
     }
   }
 
@@ -101,7 +109,7 @@ export class ReplayRuntimeClient implements RuntimeClient {
   }
 
   async explainArtifact(artifactId: string): Promise<Result<ArtifactExplanation>> {
-    return { ok: true, value: projectExplanation(this.envelopes, artifactId) };
+    return { ok: true, value: projectExplanation(this.envelopes, artifactId, this.streamSource) };
   }
 
   async resolveApproval(request: ResolveApprovalRequest): Promise<Result<never>> {

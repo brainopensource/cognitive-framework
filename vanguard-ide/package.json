@@ -1,0 +1,100 @@
+{
+  "name": "vanguard-ide",
+  "displayName": "Vanguard IDE",
+  "description": "Vanguard agent runtime IDE integration \u2014 sidebar, CodeLens, run stream, approval UX",
+  "version": "0.4.1-beta",
+  "publisher": "vanguard",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vanguard-sidebar",
+          "title": "Vanguard",
+          "icon": "media/vanguard-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "vanguard-sidebar": [
+        {
+          "type": "webview",
+          "id": "vanguard.runView",
+          "name": "Run",
+          "when": "true"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vanguard.startRun",
+        "title": "Vanguard: Start Run",
+        "category": "Vanguard"
+      },
+      {
+        "command": "vanguard.cancelRun",
+        "title": "Vanguard: Cancel Run",
+        "category": "Vanguard"
+      },
+      {
+        "command": "vanguard.replayFixture",
+        "title": "Vanguard: Replay Fixture (no daemon)",
+        "category": "Vanguard"
+      },
+      {
+        "command": "vanguard.showStatus",
+        "title": "Vanguard: Show Daemon Status",
+        "category": "Vanguard"
+      }
+    ],
+    "configuration": {
+      "title": "Vanguard",
+      "properties": {
+        "vanguard.socketPath": {
+          "type": "string",
+          "default": "",
+          "description": "Unix domain socket path. Overrides VANGUARD_RUNTIME_SOCKET and /tmp/vanguard-runtime.sock."
+        },
+        "vanguard.manifestPath": {
+          "type": "string",
+          "default": "manifest.json",
+          "description": "Default manifest path for StartRun."
+        },
+        "vanguard.autoApprove": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto-approve all approvals (development only)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "compile:webview": "esbuild src/webview/index.ts --bundle --outfile=dist/webview.js --format=iife --platform=browser --sourcemap",
+    "build": "npm run compile && npm run compile:webview && node scripts/bundle-vsix.js",
+    "build:ext": "npm run compile && npm run compile:webview",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build:ext && node --test dist/test/*.test.js",
+    "test:unit": "node --test dist/test/unit.test.js",
+    "test:replay": "node --test dist/test/replay.test.js",
+    "test:vectors": "node --test dist/test/vectors.test.js",
+    "vscode:prepublish": "npm run build:ext"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2"
+  }
+}

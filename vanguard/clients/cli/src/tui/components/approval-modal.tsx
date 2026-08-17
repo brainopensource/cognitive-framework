@@ -1,17 +1,10 @@
 import React from "react";
 import { Box, Text } from "ink";
-import { colorizeUnifiedDiff } from "./diff.js";
-import type { PendingApproval } from "../application/run-view.js";
+import { colorizeUnifiedDiff } from "../diff.js";
+import type { PendingApproval } from "../../application/run-view.js";
 
-export function ApprovalModal({ approval, onApprove, onReject, onCorrect }: {
-  approval: PendingApproval;
-  onApprove: () => void;
-  onReject: () => void;
-  onCorrect: () => void;
-}) {
-  void onApprove;
-  void onReject;
-  void onCorrect;
+/** Display-only: keyboard routing lives in RunTui, not in unused callbacks. */
+export function ApprovalModal({ approval }: { approval: PendingApproval }) {
   const lines = colorizeUnifiedDiff(approval.unifiedDiff);
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="yellow" paddingX={1}>

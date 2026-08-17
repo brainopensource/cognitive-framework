@@ -107,6 +107,7 @@ class EpisodeEngine:
         max_turns: int = 8,
         no_progress_limit: int = 3,
         sink_class: SinkClass = SinkClass.PRIVILEGED,
+        parent_lease: str | None = None,
     ) -> None:
         self._kernel = kernel
         self._model = model
@@ -118,6 +119,7 @@ class EpisodeEngine:
         self._max_turns = max_turns
         self._no_progress_limit = no_progress_limit
         self._sink_class = sink_class
+        self._parent_lease = parent_lease
 
     # ------------------------------------------------------------------
 
@@ -283,6 +285,7 @@ class EpisodeEngine:
             run_id=episode.run_id,
             depth=episode.depth,
             justifying_spans=tuple(spans),
+            parent_lease=self._parent_lease,
             declared_sink_class=self._sink_class,
         )
 
@@ -303,6 +306,7 @@ class EpisodeEngine:
         run_id: str,
         principal: str,
         parent_episode_id: str | None = None,
+        parent_lease: str | None = None,
         workspace: Any = None,
         workspace_factory: Any = None,
         max_turns: int | None = None,
@@ -365,6 +369,7 @@ class EpisodeEngine:
                 max_turns=max_turns if max_turns is not None else self._max_turns,
                 no_progress_limit=self._no_progress_limit,
                 sink_class=self._sink_class,
+                parent_lease=parent_lease or self._parent_lease,
             )
 
             child_outcome = child_engine.run(

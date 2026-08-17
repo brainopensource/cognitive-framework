@@ -89,3 +89,53 @@ export function afterCursor(seq: string, afterSeq?: string): boolean {
   const right = BigInt(afterSeq);
   return left > right;
 }
+
+export type ParsedDaemonFrame =
+  | { frameType: "receipt"; receipt: Record<string, unknown> }
+  | { frameType: "error"; message: string }
+  | { frameType: "event"; event: EventEnvelope }
+  | { frameType: "command"; raw: Record<string, unknown> };
+
+export function parseDaemonFrame(value: unknown): Result<ParsedDaemonFrame> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return fail("invalid_request", "daemon frame must be a JSON object");
+  }
+  const source = value as Record<string, unknown>;
+  const frameType = source.frameType;
+  if (frameType === "error") {
+    const err = source.error;
+    const message =
+      err !== null && typeof err === "object" && !Array.isArray(err) && typeof (err as { message?: unknown }).message === "string"
+        ? (err as { message: string }).message
+        : "daemon error frame";
+    return { ok: true, value: { frameType: "error", message } };
+  }
+  if (frameType === "receipt") {
+    const receipt = source.receipt;
+    if (receipt === null || typeof receipt !== "object" || Array.isArray(receipt)) {
+      return fail("invalid_request", "invalid response frame from daemon");
+    }
+    return { ok: true, value: { frameType: "receipt", receipt: receipt as Record<string, unknown> } };
+  }
+  if (frameType === "event") {
+    const parsed = parseEventEnvelope(source.event);
+    if (!parsed.ok) return parsed;
+    return { ok: true, value: { frameType: "event", event: parsed.value } };
+  }
+  if (frameType === "command") {
+    return { ok: true, value: { frameType: "command", raw: source } };
+  }
+  return fail("invalid_request", `unsupported daemon frameType ${String(frameType)}`);
+}
+
+export function parseDaemonLine(line: string): Result<ParsedDaemonFrame> {
+  const trimmed = line.trim();
+  if (!trimmed) return fail("invalid_request", "empty daemon line");
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return fail("transport_interrupted", "malformed json frame", true);
+  }
+  return parseDaemonFrame(parsed);
+}

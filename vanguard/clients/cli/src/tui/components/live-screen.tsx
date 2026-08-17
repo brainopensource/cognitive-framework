@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text } from "ink";
-import type { RunViewModel } from "../application/run-view.js";
+import type { RunViewModel } from "../../application/run-view.js";
 
 export function LiveScreen({ view, repo }: { view: RunViewModel; repo: string }) {
   return (

@@ -23,6 +23,12 @@ INSTRUMENT_CAUSES: tuple[tuple[str, str], ...] = (
     # one effect, so the translator refuses -- correctly. This is a harness
     # constraint meeting an over-eager model, not a model failing the task.
     ("multiple actions in one proposal", "multi_action_proposal"),
+    # The model asked for a path outside the workspace. Containment refused,
+    # correctly -- but this is a *model* mistake, not a provider fault, and
+    # lumping it with transport errors hid how often models try it.
+    ("escapes workspace", "path_escape_refused"),
+    ("streaming response was malformed", "provider_malformed_response"),
+    ("truncated, or empty", "provider_malformed_response"),
     ("timed out", "provider_timeout"),
     ("timeout", "provider_timeout"),
     ("is not pulled", "model_tag_absent"),

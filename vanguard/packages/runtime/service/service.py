@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
 from ...domain.primitives.primitives import uuidv7
+from ...domain.wire.contracts import parse_wire
 from ..governance.approvals import (
     ApprovalAuthority,
     ApprovalChallenge,
@@ -236,7 +237,13 @@ class RuntimeService:
     def _cmd_RecordCorrection(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
-        correction = payload.get("correction", {})
+        # `S8-A-04`. The wire contract already carries the reason-code enum and
+        # `D-07`'s rule that a `style` or `architecture_preference` correction
+        # may not be scoped wider than the people it came from. Appending an
+        # unparsed payload meant none of that was enforced and the corpus could
+        # hold corrections the normative reader rejects. `WireError` is a
+        # `ValueError`, so a bad record surfaces as a command error frame.
+        correction = parse_wire("CorrectionRecord", payload.get("correction"))
         now = _utc_now()
         seq = self.store.append_event(
             run_id,

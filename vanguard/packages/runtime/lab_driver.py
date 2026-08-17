@@ -89,6 +89,10 @@ def run_lab_task(
             "detail": "task directory does not exist", "turns": 0, "session": [],
         }
 
+    # Keep the caller's task identity in the report.  `task_path` becomes an
+    # ephemeral isolated copy below, and must never escape as a dangling path.
+    reported_task_path = task_path
+
     harness_preview = Runtime.compose(pack_name, episode_id="lab-episode-1")
     if not tape and model_port == "mock":
         # `S18-A-01`. An empty tape proposes nothing, so every MOCK run
@@ -104,20 +108,25 @@ def run_lab_task(
     # Every run gets its own copy. Running in place would let one run inherit
     # the previous run's edits -- the second arm would then be scored on work
     # the first arm did, which is the quietest way to fake a result.
+    cleanup_roots: list[Path] = []
     if isolate:
         staging = Path(tempfile.mkdtemp(prefix="vg-lab-ws-"))
+        cleanup_roots.append(staging)
         task_path = Path(shutil.copytree(task_path, staging / task_path.name))
 
     try:
         selected = select_model(model_port, model_name=model_name, tape=tape)
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
-        return {
-            "harness": pack_name, "taskDir": str(task_path),
+        result = {
+            "harness": pack_name, "taskDir": str(reported_task_path),
             "outcome": classify_instrument_error(unavailable.reason),
             "modelPort": unavailable.port,
             "detail": unavailable.reason, "turns": 0, "session": [],
         }
+        for root in reversed(cleanup_roots):
+            shutil.rmtree(root, ignore_errors=True)
+        return result
 
     # `--approve-writes` is a **labelled lab departure**, never a default.
     # BENCHMARK denies privileged verbs with no human (`K-17`), so a repair can
@@ -152,7 +161,7 @@ def run_lab_task(
         episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
-            environment=_environment_for(task_path),
+            environment=_environment_for(task_path, cleanup_roots),
             clock=SystemClock(), store=store, interactive=interactive,
             approver=approver, approval_key=approval_key)
         task = TaskContext(
@@ -164,7 +173,7 @@ def run_lab_task(
     # through the same sandbox. Reading the agent's `proc.exec` receipts
     # instead would let a model exit 0 on any trivial command and score green.
     verify_argv = verify_argv_from_task(task_path)
-    environment_for_oracle = _environment_for(task_path)
+    environment_for_oracle = _environment_for(task_path, cleanup_roots)
 
     def declared_oracle(_result: Any) -> bool:
         if verify_argv is None:
@@ -199,9 +208,9 @@ def run_lab_task(
         # Exported by run, so every attempt's episode is in the one file.
         _write_jsonl(Path(jsonl_out), store, "lab-run")
 
-    return {
+    result = {
         "harness": harness.harness,
-        "taskDir": str(task_path),
+        "taskDir": str(reported_task_path),
         "outcome": stop_reason,
         "attempts": outcome.attempts,
         "turns": outcome.telemetry.turns,
@@ -218,6 +227,14 @@ def run_lab_task(
         "terminalRefusal": log.terminal_refusal,
         **selected.to_dict(),
     }
+    # A benchmark may launch hundreds of sessions.  The isolated workspace and
+    # sealed worker bundle are per-run state, never evidence, so retaining them
+    # after the ledger has been exported is both a disk leak and a needless
+    # exposure window.  `ignore_errors` keeps an already-complete measurement
+    # from being rewritten as a cleanup failure.
+    for root in reversed(cleanup_roots):
+        shutil.rmtree(root, ignore_errors=True)
+    return result
 
 
 def _verify(environment: Any, argv: Sequence[str]) -> bool:
@@ -242,7 +259,7 @@ def _verdict_is_green(result: Any) -> bool:
     return bool(verdict is not None and getattr(verdict, "passed", False))
 
 
-def _environment_for(task_path: Path) -> Any:
+def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -> Any:
     """The sandboxed environment, exactly as `execute_harness` composes it.
 
     This used to return `GitEnvironmentAdapter`, which runs `proc.exec` through
@@ -261,6 +278,8 @@ def _environment_for(task_path: Path) -> Any:
 
     repo = task_path.resolve()
     sealed_dir = Path(tempfile.mkdtemp(prefix="vg-lab-sealed-"))
+    if cleanup_roots is not None:
+        cleanup_roots.append(sealed_dir)
     sealed_bundle = sealed_dir / "bundle"
     sealed_bundle.write_bytes(
         b"sealed evaluator mount is intentionally unavailable to worker\n")

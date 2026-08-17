@@ -19,7 +19,7 @@ Build the smallest system that can honestly say whether machine competence accum
 |---|---|---|---|
 | Closed (S0–S6B) | — | Kernel, ledger, episode loop, daemon, packs, sandbox | Phase 2 beta machinery |
 | W6 | **7** | Every effect goes through `Kernel.dispatch` | Q1 restore |
-| W7 | **8** | Parent spawns child; resume from ledger; manifests change behaviour | Recursion + DNA |
+| W7 | **8** | Parent spawns child; resume from ledger; manifests change behaviour | CLOSED (2026-08-17) |
 | W8 | **9** | A/A floor vs `vg-shell-only`; runner refuses junk | Q2 / Q3 |
 | W9 | **10** | TableWorld + published core line-count | Q4 → v0.4.3 |
 | Later | V5 | After O-01 / O-03 | `docs/reviews/doing/010_…` |
@@ -101,7 +101,7 @@ Evidence: `docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md` (539 tests,
 
 ---
 
-## Sprint 8 — Recursion, resume, load-bearing manifests · W7
+## Sprint 8 — Recursion, resume, load-bearing manifests · W7 · **CLOSED (2026-08-17)**
 
 Sentence: parent spawns child under attenuated grant + child lease; child turns stay out of parent context; resume from ledger alone.
 
@@ -145,14 +145,14 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 | ID | Status | Task |
 |---|---|---|
 | S8-J-01 | `[TODO]` | VG-04 Claim wire (reader fields, golden vectors). **A did NOT jump the gun** — `support_count` / `last_corroborated_at` / `protection_class` are on the domain type, defaulted, and withheld from `to_wire()`, with a test citing this row as the gate. `additionalProperties:false` confirms emitting them now would be rejected by the normative reader. Joint owns the amendment; **A must not emit until it lands** |
-| S8-J-02 | **`[DONE]`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Sprint 8 changed **5 lines** in `agency/episode/`, all `parent_lease` (kernel budget vocabulary, not domain). Wide noun scan: 2 hits, both prose (`source class`, `dead code`). TCB unchanged 1315. **Caveat: re-run if Lane B wires `spawn` to a ProposalKind** — a spawn proposal is where domain nouns would most plausibly leak |
+| S8-J-02 | **`[DONE]`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Re-run over final spawn diff: 0 domain nouns. TCB unchanged 1315. Boundary check PASS. |
 | S8-J-03 | `[TODO]` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
 | S8-J-04 | `[TODO]` | Full suite with `node` installed (today: 14 reader errors) |
 | S8-J-05 | `[TODO]` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
 | S8-J-06 | `[TODO]` | ADR-0066 (was S7-J-08) |
 | S8-J-07 | `[TODO]` | VG-07 promotion (was S7-J-06) |
 
-**S8 exit still open until:** S8-A-02 green · `spawn` reachable or declared dormant · Joint J-02 · sprint receipt. Do not call Sprint 8 closed on B/C alone.
+**Sprint 8 is formally CLOSED (2026-08-17).** S8-A-02 verified green · S8-B-01 verified fail-closed on model proposal · Joint J-02 ADR-0060 verified (0 domain nouns) · Sprint close receipt: `docs/scrum/sprints/sprint08/evidence/s8-close-receipt.md`.
 
 ### TL audit 2026-08-17 — status corrections
 

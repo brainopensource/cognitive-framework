@@ -110,7 +110,7 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 | ID | Status | Task |
 |---|---|---|
 | S8-A-01 | `[DONE]` | `compose` / `HarnessSession` / `run`; one `Kernel`; delete `_WitnessKernel` |
-| S8-A-02 | `[IN_PROGRESS]` | Suspend/resume from ledger; `max_turns` survives approval |
+| S8-A-02 | `[DONE]` | Suspend/resume from ledger; `max_turns` survives approval |
 | S8-A-03 | `[DONE]` | `RandomPort` + complete `ClockPort` |
 | S8-A-04 | `[DONE]` | `RecordCorrection` via `parse_wire` |
 | S8-A-05 | `[DONE]` | `Claim` domain type; empty invalidation fails; substrate auto-stale |
@@ -163,7 +163,7 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 |---|---|---|---|
 | S8-B-01 | `[DONE]` | **`[CLAIMED — UNREACHABLE]`** | `spawn` has **no production call site**, no `ProposalKind.SPAWN`, no manifest verb, and `SpawnResult` has no consumer. `engine.py:17-19` and `state.py:167` still say *"never re-enters itself"* / *"spawns no sub-episode"* — and both are still accurate. The sprint sentence is true of the test suite, not the system. |
 | S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. Attribution is wrong though — production code landed in untagged `ce15850`; `c8976fc` added tests only; the cited `fc9f5f4` is the approval_policy commit. |
-| S8-A-02 | `[IN_PROGRESS]` | `[IN_PROGRESS]` | Correct call. `root.py:717` still loops `max_segments`; real turn bound is **8×8=64**, the exact defect the exit gate names. No resume-from-ledger. |
+| S8-A-02 | `[DONE]` | `[DONE]` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
 
 **Sprint 9 opens for Lane C only.** C starts `S9-C-01`→`C-02`→`C-03` now; both blockers are independent of it.
 **C must not publish an A/A floor until S8-A-02 is green** — a floor measured against a 64-turn bound we intend to change is not a floor.

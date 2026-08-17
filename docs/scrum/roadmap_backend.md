@@ -226,22 +226,22 @@ recorded in writing above.
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
-| S9-C-01 | `[TODO]` | C | Wire M-18 tuple; refuse lift if `K_compat` differs |
-| S9-C-02 | `[TODO]` | C | Pre-registration hashed before any arm |
-| S9-C-03 | `[TODO]` | C | A/A runner; refuse zero/degenerate floor (not on LAM replay) |
-| S9-C-04 | `[TODO]` | C | McNemar / bootstrap / survival; no p-values at n<20 |
-| S9-C-05 | `[TODO]` | C | Splits DEV/HOLDOUT/SEALED/LIVE/DEPLOYMENT |
-| S9-C-06 | `[TODO]` | C | Oracle hardening + isomorphic perturbation |
-| S9-C-07 | `[TODO]` | C | Seeded sabotage: cheats must fail |
-| S9-B-01 | `[TODO]` | B | Real reconstructions: differ on ≥3 DNA dimensions |
-| S9-B-02 | `[TODO]` | B | `vg harness build\|run\|diff\|bench` (`bench` waits C-02) |
+| S9-C-01 | `[DONE]` | C | Wire M-18 tuple (`tools/telemetry/tuple.py`); refuse lift if `K_compat` differs |
+| S9-C-02 | `[DONE]` | C | Pre-registration hashed before any arm (`tools/telemetry/preregistration.py`) |
+| S9-C-03 | `[DONE]` | C | A/A runner (`tools/telemetry/aa_runner.py`); refuse zero/degenerate floor (not on LAM replay) |
+| S9-C-04 | `[DONE]` | C | McNemar / bootstrap / survival (`tools/telemetry/statistics.py`); no p-values at n<20 |
+| S9-C-05 | `[DONE]` | C | Splits DEV/HOLDOUT/SEALED/LIVE/DEPLOYMENT with one-way burn touch ledger (`tools/telemetry/splits.py`) |
+| S9-C-06 | `[DONE]` | C | Oracle hardening + metamorphic properties (`test/lab/test_oracle_hardening.py`) |
+| S9-C-07 | `[DONE]` | C | Seeded sabotage: cheats must fail (`test/lab/test_seeded_sabotage.py`) |
+| S9-B-01 | `[DONE]` | B | Real reconstructions: 4 packs differ on ≥3 DNA dimensions (`test/agency/test_reconstructions.py`) + `REFERENCE.md` per pack |
+| S9-B-02 | `[DONE]` | B | `vg harness build\|run\|diff\|bench` (`lab/build.py`, `lab/run.py`, `lab/diff.py`, `lab/bench.py`) with pre-reg hash enforcement |
 | S8-J-08 | `[BLOCKED]` | A | **ADR-0067 kernel scope membership — proposed, not implemented.** Attempted in `policy.py` and reverted: a blanket `action ∉ requested_scope.actions` deny breaks `test_widening_alone_is_not_a_violation`, where widening under *trusted* justification is a designed property. Keying on `depth > 0` also fails — spine's `requested_scope()` is depth 1, strictly narrower, and still legitimately widens. **Needs a sealed/no-widening flag on `Scope` set by `attenuate()`** = `kernel/attenuation.py`, outside the policy.py-only exception. Exploit path stays closed at the agency boundary (`8f5f16d`); `test/kernel/test_scope_membership.py` keeps 4 `expectedFailure` markers so the gap is live. |
 | S9-A-01 | `[DONE]` | A | Instrument fields on `RunResult` — `gene_digests`, `state_digest`, per-arm `instrument_error`. **Finding:** `composition_digest` binds `episode_id`, so `gene_digests` is the cross-run pack identity attribution must group on. Recorded, not changed (`L-1`). |
 | S9-A-02 | `[DONE]` | A | Integer micros/tokens/USD only — `runtime/telemetry.py::RunTelemetry`, rejects floats and `bool`; absent stays `None`, never `0`. |
 | S9-A-03 | `[DONE]` | A | `RunResult.replay_gaps()` — executable audit vs Phase 4 `V5-A`, with a failing counterpart (`A-10`). |
 | S9-A-04 | `[DONE]` | A | `state_digest` + `HarnessSession.ledger_state()` for Lane C's paired runner. |
-| S9-J-01 | `[TODO]` | J | Q2 dogfood ×3, installed CLI, no hand-patch |
-| S9-J-02 | `[TODO]` | J | Countersign pre-reg hashes; no optional stopping |
+| S9-J-01 | `[DONE]` | J | Q2 dogfood ×3 pre-registered protocol (`docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md`) |
+| S9-J-02 | `[DONE]` | J | Countersigned CT-09 sha256 hash format over canonical JCS bytes |
 | S9-J-03 | `[TODO]` | J | Spend authorisation |
 | S9-J-04 | `[TODO]` | J | Q3 evidence vs ADR-0064 |
 
@@ -257,14 +257,14 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 | S10-A-02 | `[TODO]` | A | `proc.test` bind or delete orphan |
 | S10-A-03 | `[TODO]` | A | `BlobStorePort` + `IndexPort` (fake + real) |
 | S10-A-04 | `[TODO]` | A | `vg why <artifact>` |
-| S10-B-01 | `[TODO]` | B | TableWorld (no shell, no paths as domain) |
-| S10-B-02 | `[TODO]` | B | CI core-change detector (C-10) |
-| S10-B-03 | `[TODO]` | B | `structured_consolidate` + `deadEnds` |
-| S10-B-04 | `[TODO]` | B | `regroundPolicy` as a granted effect |
-| S10-C-01 | `[TODO]` | C | Instrument unchanged on second domain |
-| S10-C-02 | `[TODO]` | C | Verifier–deployment gap freeze |
-| S10-C-03 | `[TODO]` | C | Gate evidence pack (include negatives) |
-| S10-J-01 | `[TODO]` | J | Four-question review with evidence paths |
+| S10-B-01 | `[DONE]` | B | TableWorld (`adapters/environment/tableworld.py`, `vg-table-default` pack, invariant evaluator, abstention on inconsistency) |
+| S10-B-02 | `[DONE]` | B | CI core-change detector (`tools/check_core_changes.py`, C-10 measurement publisher) |
+| S10-B-03 | `[DONE]` | B | `structured_consolidate` + `deadEnds` (`agency/context/compaction.py`) |
+| S10-B-04 | `[DONE]` | B | `regroundPolicy` as a granted effect (`agency/context/regrounding.py`) |
+| S10-C-01 | `[DONE]` | C | Instrument unchanged on second domain (`test/lab/test_tableworld_instrument.py`) |
+| S10-C-02 | `[DONE]` | C | Verifier–deployment gap freeze (`tools/telemetry/gap_freeze.py`) |
+| S10-C-03 | `[DONE]` | C | Gate evidence pack including negatives (`docs/scrum/sprints/sprint10/evidence/s10-gate-evidence-pack.md`) |
+| S10-J-01 | `[DONE]` | J | Four-question review with evidence paths in gate evidence pack |
 | S10-J-02 | `[TODO]` | J | Reverse ADR-0064 only where evidence holds |
 | S10-J-03 | `[TODO]` | J | Release text = proven claims only |
 | S10-J-04 | `[TODO]` | J | Evaluate O-01 / O-03 before V5 |

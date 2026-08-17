@@ -21,7 +21,7 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 |---|---|---|---|
 | **ALFA** | `[alfa]` | ✅ all rows done. Green `t7` + keep `approval_policy` kind row. **S10-A-01…04** (`invocation.py` domain out, `proc.test` bind/delete, `BlobStorePort`+`IndexPort`, `vg why`). | `kernel/**`, `agency/episode/**`, packs, CLI default, telemetry, ADR-0067 |
 | **BETA** | `[beta]` | Product-default pack + `vg run` default + ACI tool-schema thicken + bind IndexPort when ALFA lands it. P0/P1 in `features_to_add_v430.md`. | `kernel/**`, `engine.py`, `runtime/root.py`, TableWorld/lab rebuild, dogfood-as-DONE without a human |
-| **GAMMA** (CTO+PL+TL+senior) | `[gamma]` | Trust-spine close: coding LAM/LAR, anti-cheat, honest board, Node 22.18 in CI. | ALFA `runtime/root.py` / repair driver, BETA packs/task dirs, V5 / playbooks / MCP *code*, TUI/daemon as product |
+| **GAMMA** (CTO+PL+TL) | `[gamma]` | Board, claims, merge bar, v0.5 **proposal**. | Packs, `lab_driver`, TUI, Q2, spend, VG-04 rewrite |
 
 ### Remaining work (this is the live backlog)
 
@@ -46,12 +46,13 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key. Note prepared; not rotated. |
 | FE-N1 (frontend board) | `[DEPRECATED]` | GAMMA | Ignored for this cut — product is backend harness, not TUI daemon start |
-| Merge / ship | `[TODO] ❌` | GAMMA | S21-G-04 **named cause** on live greenfield (`multi_action_proposal`); MOCK `turns>0`. Merge still needs `s20-g-03-release-claims.md` checklist. **Builder, not a win.** |
+| Merge / ship | `[TODO] ❌` | GAMMA | S22: named `multi_action_proposal` + `terminalRefusal`; MOCK greenfield 4 turns. Checklist `s20-g-03`. **Builder, not a win.** Live tests skip-closed/rate only. |
 | W11-J session log | `[DONE] ✅` | GAMMA | `project_coding_session` + `tools/export_coding_session.py` |
-| W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index`; BETA genes `[DONE]` `005dd95` |
+| W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index`; BETA genes `[DONE]` |
 | W14-J coding LAM/LAR | `[DONE] ✅` | GAMMA | LAM consumes `task_sets.py`; 4/4 present; LAR review only |
 | W20-G v0.4.5 claims | `[DONE] ✅` | GAMMA | `s20-g-03-release-claims.md` — no coding win, no GUI, no lift |
-| S21-G parity / harvest | `[DONE] ✅` | GAMMA | Parity matrix on this file; `s21-g-02-greenfield-zero-turn.md`; `s21-g-03-harvest-sop.md` |
+| S21-G parity / harvest | `[DONE] ✅` | GAMMA | Parity matrix; harvest SOP (no competitor loop) |
+| S22-G close | `[DONE] ✅` | GAMMA | `sprint22/evidence/s22-g-close.md`; B-23 TASK.md spot-checked; `v050-concept-lock-proposal.md` |
 | PO acceptance | `[DONE] ✅` (honest) | GAMMA | `PO_ACCEPTANCE.md` — live tool-call, Q2, spend, Claude daily-driver still TODO |
 
 ### Waves 11–13 — backend coding harness (no TUI)
@@ -144,7 +145,7 @@ Not a second board. Slot = pack gene, adapter, or port. **Reject** = their loop 
 | Skills index + body via read | Claude | `skill` genes + `format_skill_index` | `test_skills_are_load_bearing_not_decorative` | `[DONE]` |
 | File-todo | Claude / OpenCode | `.vanguard/todo.md` via `patch.apply` | pack prompt | `[DONE]` |
 | Compact; brief exempt | Claude, OpenCode | `context_policy` | S20-B-03 | `[DONE]` |
-| Empty-repo **write-first** | OpenCode, Claude, Aider add-file | pack branch: no `src/**` → `patch.apply` first | S21-B-01 `[DONE]` gene; **live still** `instrument_error:multi_action_proposal` | **open on live** |
+| Empty-repo **write-first** | OpenCode, Claude, Aider add-file | pack + TASK.md turn-1 = `app/server.py` only (spot-check) | S21–S23 genes; live still `multi_action_proposal` 4/4 | **open on live** |
 | One effect per turn | VG (stricter) | translator | `outcome_labels` `multi_action_proposal` | constraint, not a score |
 | Sealed spawn | Claude/OpenCode Task *idea* | ADR-0067 | `NarrowedChildCannotEscalate` | `[DONE]` |
 | Headless runner | OpenCode, Claude SDK | shim → `lab_driver` | `test_lab_run_shim_computes_nothing` | `[DONE]` |
@@ -502,7 +503,7 @@ LAM reads `runtime/task_sets.py`. MOCK must not wear a live label. Paid OpenRout
 
 Flags: `--pack --task-dir --model mock\|ollama\|openrouter\|deepseek --model-name --interactive\|--benchmark --max-turns --max-attempts --jsonl-out --json`. Default `--model mock`. No daemon exists; none was invented. JSONL is `vg.4` from the store → `python3 tools/export_coding_session.py --jsonl <file>`.
 
-**S21-G-04 merge gate.** Live greenfield stop is **named** (`instrument_error:multi_action_proposal`), not soup. MOCK greenfield `turns>0` (`test_s21_named_causes`). That **unblocks** merge-from-honesty; it does **not** ship a coding win. Checklist: `s20-g-03-release-claims.md`. Do not compare model tags until greenfield live records a tool-calling verb.
+**S21-G-04 merge gate.** Live greenfield stop is **named** (`instrument_error:multi_action_proposal` + S22 `terminalRefusal`), not soup. MOCK greenfield 4 turns. That **unblocks** merge-from-honesty; it does **not** ship a coding win. Checklist: `s20-g-03-release-claims.md`. v0.5 lock **proposal** only: `docs/scrum/sprints/wave20/evidence/v050-concept-lock-proposal.md`.
 
 
 ### Sprint 21 · ALFA — every zero-turn run names its cause (`101c96d`)
@@ -534,3 +535,22 @@ DoD: `test/runtime` 337 OK · `check_boundaries` PASS (229) · TCB 1333/1438. Ev
 `instrument_error:multi_action_proposal` stays inconclusive, in the denominator, never `oracle_green`. Live tests keep their measured-rate budget and skip closed — nothing tuned toward 6/6. Pack one-tool-per-turn remains BETA `S22-B`.
 
 DoD: `test/runtime` **351 OK** · `check_boundaries` PASS (229) · TCB 1333/1438. Evidence: `docs/scrum/sprints/sprint22/evidence/`.
+
+
+### Sprints 23–27 · ALFA — headless harness, honesty gates, local campaign
+
+**A-23-02 — how to read `turns=0` + `terminalRefusal`.** It means **the translator refused the model's answer**, not that the model scored zero. The model replied; it batched several tool calls into one turn; one turn is one effect, so the proposal was refused before it became a turn. `turns=0` with a `terminalRefusal` is a *harness* event. A model that scored zero looks different: turns ≥ 1 with no `oracle_green`.
+
+**A-25-01 — frozen v0.4.5 flags.**
+
+`--pack` · `--task-dir` · `--model mock|ollama|openrouter|deepseek` · `--model-name` · `--interactive`|`--benchmark` · `--max-turns` · `--max-attempts` · `--jsonl-out` · `--json`. Default `--model mock`. Entrypoints: `python3 lab/run.py` (stdlib shim, computes nothing) and `python3 -m vanguard.packages.runtime.lab_driver`. No daemon; `EpisodeEngine` is never forked.
+
+**Validated this pass** (`0c4ba18`): S23 taxonomy + dropped-denominator cheat fails (2→1, 1/2→1/1) · S25-04 no session DB, translator refusal projects `denialCount: 0` · S26 five distinct stop reasons, MOCK 4/4 tasks ≥1 turn and never `oracle_green`, `NarrowedChildCannotEscalate` green · **S24-A-03/04 write path**: INTERACTIVE completes `patch.apply` with `ApprovalRequested` on the ledger and the next turn reads the new bytes; BENCHMARK denies the same verb, requests no approval, leaves the workspace unchanged (`K-17`). Gate proven able to fail — a refusing approver blocks the write.
+
+**S27 local campaign** (`9436670`), two arms, denominator 4 each, **nothing resolved, nothing paid**: `llama3.2:3b` 0/4 with real verbs (`fs.read`, `proc.exec`, `fs.search`) on 3 tasks; `deepseek-r1:14b` 0/4, no tool call on any task, one `instrument_error:provider_timeout` — recorded as a **labelled skip, not a leaderboard row**.
+
+⚠️ **Correction to the S22 note.** Greenfield was reported as "4/4 `multi_action_proposal`, deterministic". That was one session's sample. In S27 greenfield returned a prose finish (1 turn, no verb) on both arms. Greenfield *sometimes* trips the one-effect rule and sometimes returns prose — my earlier advice to BETA that the two-deliverable brief deterministically causes batching was overstated.
+
+**Blocked:** `S24-A-01/02` await BETA `B-23` (`greenfield-api-html/TASK.md` still asks for a server *and* a static page). `A-27-03` paid call stays closed — its gate is a greenfield verb, and greenfield produced none.
+
+DoD: `test/runtime` **362 OK** · `check_boundaries` PASS (229) · TCB 1333/1438.

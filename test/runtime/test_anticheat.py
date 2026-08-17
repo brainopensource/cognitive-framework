@@ -66,8 +66,13 @@ class NoGoldPatchInTheWorkspace(unittest.TestCase):
         for name in DRIVERS:
             with self.subTest(module=name):
                 code = _code(RUNTIME / name).lower()
+                # The invariant is "no reference solution enters the
+                # workspace", not "no copy call exists". Banning `shutil.copy`
+                # outright flagged the per-run workspace *isolation* copy,
+                # which is the opposite of a gold patch -- it stops one run
+                # inheriting another's edits.
                 for forbidden in ("gold_patch", "goldpatch", "reference_solution",
-                                  "solution.py", "shutil.copy", "copytree"):
+                                  "solution.py", "/solution", "expected_output"):
                     self.assertNotIn(forbidden, code)
 
 
@@ -205,7 +210,12 @@ class LarIsReadOnly(unittest.TestCase):
         for name in DRIVERS:
             with self.subTest(module=name):
                 code = _code(RUNTIME / name).lower()
-                for forbidden in ("lar", "optimis", "optimiz", "rewrite_prompt"):
+                # `lar` as a bare substring matches "dec-lar-ed". A rule that
+                # fires on an ordinary English word is a rule that will be
+                # deleted the first time it cries wolf, so it matches the
+                # module the way an import would.
+                for forbidden in ("import lar", "from lar", "lar.", "coding_lar",
+                                  "optimis", "optimiz", "rewrite_prompt"):
                     self.assertNotIn(forbidden, code)
 
     def test_the_scorer_writes_nothing(self) -> None:

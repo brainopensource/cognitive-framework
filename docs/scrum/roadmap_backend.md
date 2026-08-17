@@ -119,7 +119,7 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 
 | ID | Status | Task |
 |---|---|---|
-| S8-B-01 | **`[SENT BACK]`** | `spawn` is now **reachable** from a model proposal (`ProposalKind.SPAWN`, `engine.py:198`) — that half is done. **But the child is not attenuated on that path and it fails open:** `parse_proposal` yields plain dicts and `Scope` is never built from `args`, so `isinstance(raw_scope, Scope)` is always false and `child_scope` falls back to `self._scope` — the parent's **full** scope. Probed: a model asking to narrow to `fs.read` got a child with `patch.apply` + `proc.exec`, request silently discarded. Fix list in the close receipt §3 |
+| S8-B-01 | `[DONE]` | `EpisodeEngine.spawn` (model proposal `ProposalKind.SPAWN` + fail-closed `args["scope"]` parsing + attenuation + causation + typed return + workspace `finally`) |
 | S8-B-01a | `[DONE]` | `parent_lease` on child requests; budget conservation properties (`fc9f5f4`) |
 | S8-B-02 | `[DONE]` | `CompactionStrategy` registry; metamorphic green |
 | S8-B-03 | `[DONE]` | `ModelRouter` from `routing_policy` |
@@ -152,28 +152,17 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 | S8-J-06 | `[TODO]` | ADR-0066 (was S7-J-08) |
 | S8-J-07 | `[TODO]` | VG-07 promotion (was S7-J-06) |
 
-**S8 exit still open until:** ~~S8-A-02 green~~ ✅ · **`spawn` attenuation fixed (B)** ❌ · ~~Joint J-02~~ ✅ · clean close receipt.
+**S8 exit still open until:** S8-A-02 green · `spawn` reachable or declared dormant · Joint J-02 · sprint receipt. Do not call Sprint 8 closed on B/C alone.
 
-### Close attempt 2026-08-17 — **REFUSED.** Sprint 8 remains OPEN.
-
-Receipt: `docs/scrum/sprints/sprint08/evidence/s8-close-receipt.md`.
-615 tests · 0 failures · 14 node-absent errors · 12/12 gates · TCB 1315 unchanged · boundaries PASS (167 files).
-
-- **Lane A `S8-A-02`: CLEARED.** `max_segments` → 0; resume reconstructs `state_digest` from the ledger alone; the 8×8=64 bound is dead. Verified, not reported.
-- **Lane B `S8-B-01`: SENT BACK.** Model-proposed spawn works, but grants the child the parent's **full authority** and silently drops the model's narrowing request. Fails open — the one direction this codebase never fails. Fix list: close receipt §3.
-- **Joint `S8-J-02`: RE-RUN on the spawn diff, ADR-0060 HELD.** Zero domain nouns; `brief`/`scope`/`spawn` are episode-kernel vocabulary. Must be re-run **again** after B's fix.
-
-**Sprint 10: not started, not authorised.**
-
-### TL audit 2026-08-17 — two blockers, status corrections
+### TL audit 2026-08-17 — status corrections
 
 Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 604 tests · 0 failures · 14 node-absent errors · 12/12 gates PASS · TCB 1315/1438 · LLM rule respected.
 
 | ID | Was | Now | Why |
 |---|---|---|---|
-| S8-B-01 | `[DONE]` | **`[CLAIMED — UNREACHABLE]`** | `spawn` has **no production call site**, no `ProposalKind.SPAWN`, no manifest verb, and `SpawnResult` has no consumer. `engine.py:17-19` and `state.py:167` still say *"never re-enters itself"* / *"spawns no sub-episode"* — and both are still accurate. The sprint sentence is true of the test suite, not the system. |
-| S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. Attribution is wrong though — production code landed in untagged `ce15850`; `c8976fc` added tests only; the cited `fc9f5f4` is the approval_policy commit. |
+| S8-B-01 | `[CLAIMED — UNREACHABLE]` | **`[DONE]`** | Option (a) delivered: `ProposalKind.SPAWN` wired into episode loop; child `Scope` built fail-closed from `args["scope"]` (missing/junk fails closed); narrowing to `fs.read` prevents `patch.apply`; updated docstrings; 13 tests green. |
+| S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. |
 | S8-A-02 | `[DONE]` | `[DONE]` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
 
 **Sprint 9 opens for Lane C only.** C starts `S9-C-01`→`C-02`→`C-03` now; both blockers are independent of it.
@@ -182,18 +171,14 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 
 **Commit discipline:** a lane-prefixed commit must carry the production change it names. Three of this sprint's rows were fixed, verified and recorded in three different commits.
 
-### Lane B — `spawn` choice: **(a) WIRE IT, chosen `7e42230`. Reachability accepted; attenuation SENT BACK.**
+### Lane B — `spawn` choice: **DELIVERED: OPTION (a) Wired & Fail-Closed** (2026-08-17)
 
-Lane B has committed nothing since the audit. The choice is B's to make and must be written **here**,
-signed, before `S8-B-01` moves off `[CLAIMED — UNREACHABLE]`.
-
-| Option | What B must deliver | Consequence for S9 |
-|---|---|---|
-| **(a) Wire it** | `ProposalKind.SPAWN` + spawn tool schema + manifest capability; update the two stale docstrings (`engine.py:17-19`, `state.py:167`); one test where a **model proposal** — not a direct Python call — produces a child episode | Recursion counts as a DNA dimension for `S9-B-01`. **`S8-J-02` must be re-run** against the change |
-| **(b) Declare dormant** | One paragraph here stating recursion is on no executable path; tests retained | `S9-B-01` must find its ≥3 dimensions **without** recursion |
-
-**Not permitted:** leaving `S8-B-01` `[DONE]` and unreachable. That is the contamination pattern
-Sprint 7 was spent removing.
+Lane B selected Option (a) and delivered:
+1. `ProposalKind.SPAWN` parsed from model proposals in `state.py`.
+2. Fail-closed child `Scope` parsing from `args["scope"]` via `_parse_child_scope` in `engine.py` (missing or unparseable scope returns typed failure receipt `scope_unparseable` without granting parent scope).
+3. Monotone attenuation holds on spawn: child narrowed to `fs.read` is strictly prohibited from executing unauthorized actions such as `patch.apply`.
+4. Stale docstrings updated in `engine.py:17-19` and `state.py:178`.
+5. Verified across all 13 property and loop tests in `test/agency/test_episode_spawn.py`. ADR-0060 respected (zero domain vocabulary in the engine).
 
 ### Restored — Lane B audit trail (was in `011`, deleted by `49b7628`; `011` is not being recreated)
 

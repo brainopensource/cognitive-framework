@@ -314,45 +314,172 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
             gov.reserve("run-1", Reservation(usd_micros=5_000), parent_lease_id=l1.lease_id)
         self.assertEqual(cm.exception.reason, "parent_closed")
 
-    def test_model_proposal_triggers_spawn_in_episode_loop(self) -> None:
-        """A model proposal of kind='spawn' starts a recursive child episode in the loop (Choice A reachable)."""
+    def test_spawn_proposal_builds_scope_from_args(self) -> None:
+        """TL receipt 1: Scope is built from proposal args['scope']."""
         from vanguard.packages.ports.event_store import Result
 
-        class MultiTurnModel:
+        captured_tools: list[Any] = []
+
+        class ScopeObservingModel:
             def __init__(self) -> None:
                 self.parent_turns = 0
 
             def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
                 ep_id = str(view.get("episodeId", ""))
                 if "child" in ep_id:
-                    return Result.success({"kind": "finish", "note": "child finished subtask"})
+                    captured_tools.append(tools)
+                    return Result.success({"kind": "finish", "note": "child done"})
                 self.parent_turns += 1
                 if self.parent_turns == 1:
                     return Result.success({
                         "kind": "spawn",
-                        "args": {"brief": "child subtask"},
-                        "note": "spawning helper",
+                        "args": {
+                            "brief": "narrowed subtask",
+                            "scope": {"actions": ["fs.read", "fs.search"]},
+                        },
+                        "note": "spawning narrowed helper",
                     })
-                return Result.success({"kind": "finish", "note": "task completed after child"})
+                return Result.success({"kind": "finish", "note": "parent done"})
+
+        tools = [
+            {"verb": "fs.read", "name": "read_file"},
+            {"verb": "fs.search", "name": "search_files"},
+            {"verb": "patch.apply", "name": "apply_patch"},
+            {"verb": "proc.exec", "name": "run_command"},
+        ]
+        engine = EpisodeEngine(
+            kernel=self.kernel,
+            model=ScopeObservingModel(),
+            clock=self.clock,
+            events=self.events,
+            scope=self.parent_scope,
+            tools=tools,
+        )
+        outcome = engine.run(
+            episode_id="ep-parent-scoped-spawn",
+            run_id="run-1",
+            principal="parent-agent",
+            brief="test scope from args",
+        )
+        self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
+        self.assertTrue(len(captured_tools) > 0)
+        child_tool_verbs = [t.get("verb") for t in captured_tools[0]]
+        self.assertEqual(sorted(child_tool_verbs), ["fs.read", "fs.search"])
+        self.assertNotIn("patch.apply", child_tool_verbs)
+        self.assertNotIn("proc.exec", child_tool_verbs)
+
+    def test_spawn_proposal_fails_closed_when_scope_missing_or_junk(self) -> None:
+        """TL receipt 2: Missing or unparseable scope fails closed without granting parent's full scope."""
+        from vanguard.packages.ports.event_store import Result
+
+        class JunkScopeModel:
+            def __init__(self) -> None:
+                self.parent_turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                self.parent_turns += 1
+                if self.parent_turns == 1:
+                    # Missing scope
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "missing scope"},
+                        "note": "no scope passed",
+                    })
+                if self.parent_turns == 2:
+                    # Junk scope
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "junk scope", "scope": "invalid string"},
+                        "note": "junk scope passed",
+                    })
+                return Result.success({"kind": "finish", "note": "parent finished"})
 
         engine = EpisodeEngine(
             kernel=self.kernel,
-            model=MultiTurnModel(),
+            model=JunkScopeModel(),
             clock=self.clock,
             events=self.events,
             scope=self.parent_scope,
         )
-
         outcome = engine.run(
-            episode_id="ep-parent-spawn-loop",
+            episode_id="ep-parent-junk-spawn",
             run_id="run-1",
             principal="parent-agent",
-            brief="coordinate work",
+            brief="test fail-closed junk scope",
         )
-
         self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
-        self.assertEqual(outcome.episode.turn_count, 1)
-        self.assertEqual(outcome.episode.turns[0].progress_signal, "ok")
+        # 2 failed spawn turns recorded with fail-closed signals, plus finish
+        self.assertEqual(outcome.episode.turn_count, 2)
+        self.assertEqual(outcome.episode.turns[0].progress_signal, "scope_unparseable")
+        self.assertEqual(outcome.episode.turns[1].progress_signal, "scope_unparseable")
+
+    def test_spawn_narrowed_child_cannot_execute_unauthorized_action(self) -> None:
+        """TL receipt 3: Model narrowed to fs.read produces a child that cannot patch.apply."""
+        from vanguard.packages.ports.event_store import Result
+
+        class ChildAttemptingUnauthorizedActionModel:
+            def __init__(self) -> None:
+                self.parent_turns = 0
+                self.child_turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                ep_id = str(view.get("episodeId", ""))
+                if "child" in ep_id:
+                    self.child_turns += 1
+                    if self.child_turns == 1:
+                        # Child attempts to propose patch.apply which was not granted
+                        return Result.success({
+                            "kind": "effect",
+                            "action": "patch.apply",
+                            "resource": {"kind": "fs", "path": "/workspace/main.py"},
+                            "args": {"patch": "diff"},
+                            "note": "attempt unauthorized patch",
+                        })
+                    return Result.success({"kind": "finish", "note": "child finished after denial"})
+                self.parent_turns += 1
+                if self.parent_turns == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {
+                            "brief": "read-only child",
+                            "scope": {"actions": ["fs.read"]},
+                        },
+                        "note": "spawning read-only helper",
+                    })
+                return Result.success({"kind": "finish", "note": "parent finished"})
+
+        from vanguard.packages.kernel.attenuation import Scope
+        from vanguard.packages.kernel.model import AdapterOutcome, FailurePath
+        from vanguard.packages.kernel.dispatch import DispatchResult
+
+        # Mock kernel: dispatches return DENIED_SCOPE_ESCALATION if requested action not in child's scope
+        def mock_dispatch(request: Any, requested_scope: Scope, reservation: Any) -> Any:
+            if request.action not in requested_scope.actions:
+                return DispatchResult(
+                    failure=FailurePath.DENIED_SCOPE_ESCALATION,
+                    detail=f"action {request.action} not granted in scope",
+                )
+            return DispatchResult(
+                failure=FailurePath.OK,
+                outcome=AdapterOutcome(status="ok"),
+            )
+
+        self.kernel.dispatch.side_effect = mock_dispatch
+
+        engine = EpisodeEngine(
+            kernel=self.kernel,
+            model=ChildAttemptingUnauthorizedActionModel(),
+            clock=self.clock,
+            events=self.events,
+            scope=self.parent_scope,
+        )
+        outcome = engine.run(
+            episode_id="ep-parent-narrowed-child",
+            run_id="run-1",
+            principal="parent-agent",
+            brief="test narrowed child authorization",
+        )
+        self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
 
 
 if __name__ == "__main__":

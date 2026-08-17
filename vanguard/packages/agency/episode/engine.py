@@ -31,6 +31,7 @@ from typing import Any, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
 from ...kernel import (
+    Constraints,
     EffectRequest,
     Event,
     FailurePath,
@@ -90,6 +91,60 @@ class EpisodeOutcome:
     def terminal(self) -> RunTermination:
         assert self.episode.terminal is not None  # the loop only returns terminal states
         return self.episode.terminal
+
+
+def _parse_child_scope(raw_scope: Any, parent: Scope) -> Scope | None:
+    """Build child Scope from model proposal args["scope"]. Fail-closed on missing/junk."""
+    if isinstance(raw_scope, Scope):
+        return raw_scope
+    if not isinstance(raw_scope, Mapping):
+        return None
+
+    actions_raw = raw_scope.get("actions")
+    if actions_raw is None:
+        return None
+    if isinstance(actions_raw, (list, tuple, set, frozenset)):
+        if not all(isinstance(a, str) and a for a in actions_raw):
+            return None
+        actions = frozenset(actions_raw)
+    else:
+        return None
+
+    resources_raw = raw_scope.get("resources")
+    if resources_raw is None:
+        resources = parent.resources
+    elif isinstance(resources_raw, (list, tuple)):
+        if not all(isinstance(r, Mapping) for r in resources_raw):
+            return None
+        resources = tuple(dict(r) for r in resources_raw)
+    else:
+        return None
+
+    constraints_raw = raw_scope.get("constraints")
+    if constraints_raw is None:
+        constraints = parent.constraints
+    elif isinstance(constraints_raw, Constraints):
+        constraints = constraints_raw
+    elif isinstance(constraints_raw, Mapping):
+        try:
+            constraints = Constraints(
+                expires_at=constraints_raw.get("expires_at") or constraints_raw.get("expiresAt") or parent.constraints.expires_at,
+                max_uses=int(constraints_raw["max_uses"]) if "max_uses" in constraints_raw else (int(constraints_raw["maxUses"]) if "maxUses" in constraints_raw else parent.constraints.max_uses),
+                budget_usd_micros=int(constraints_raw["budget_usd_micros"]) if "budget_usd_micros" in constraints_raw else (int(constraints_raw["budgetUsdMicros"]) if "budgetUsdMicros" in constraints_raw else parent.constraints.budget_usd_micros),
+                max_depth=int(constraints_raw["max_depth"]) if "max_depth" in constraints_raw else (int(constraints_raw["maxDepth"]) if "maxDepth" in constraints_raw else parent.constraints.max_depth),
+                network_policy=str(constraints_raw.get("network_policy") or constraints_raw.get("networkPolicy") or parent.constraints.network_policy),
+            )
+        except (ValueError, TypeError, KeyError):
+            return None
+    else:
+        return None
+
+    return Scope(
+        actions=actions,
+        resources=resources,
+        constraints=constraints,
+        depth=parent.depth,
+    )
 
 
 class EpisodeEngine:
@@ -196,9 +251,32 @@ class EpisodeEngine:
 
             # -- spawn proposal runs an attenuated child episode (S8-B-01 / ADR-0060) --
             if proposal.kind == ProposalKind.SPAWN or proposal.action in ("agency.spawn", "spawn"):
-                child_brief = str(proposal.args.get("brief") or proposal.note or "")
                 raw_scope = proposal.args.get("scope")
-                child_scope = raw_scope if isinstance(raw_scope, Scope) else self._scope
+                child_scope = _parse_child_scope(raw_scope, self._scope)
+                if child_scope is None:
+                    # Fail-closed: missing or unparseable scope produces a typed failure, never parent's full grant
+                    turn = Turn(
+                        index=episode.turn_count,
+                        state_digest=episode.state_digest(),
+                        proposal_descriptor=proposal.descriptor,
+                        receipt_digest=digest_of({
+                            "spawn": False,
+                            "detail": "missing or unparseable child scope (fail-closed)",
+                            "payload": None,
+                        }),
+                        progress_signal="scope_unparseable",
+                    )
+                    repeats = episode.repeats(turn, limit=self._no_progress_limit)
+                    episode = episode.with_turn(turn)
+                    if repeats:
+                        episode = episode.terminated(
+                            RunTermination.ABANDONED,
+                            f"no progress over {self._no_progress_limit} turns",
+                        )
+                        break
+                    continue
+
+                child_brief = str(proposal.args.get("brief") or proposal.note or "")
                 spawn_res = self.spawn(
                     child_scope=child_scope,
                     brief=child_brief,

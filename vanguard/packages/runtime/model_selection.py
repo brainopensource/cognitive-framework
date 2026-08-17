@@ -32,6 +32,10 @@ MODEL_PORTS = ("mock", "ollama", "openrouter", "deepseek")
 
 #: Default local tag. Overridable, because whatever is pulled locally wins.
 DEFAULT_OLLAMA_MODEL = "deepseek-r1"
+#: Local reasoning models emit a long think block before their first token, and
+#: a 60s ceiling turned that into `instrument_error: timed out` on the larger
+#: briefs -- an instrument failure that reads like a model scoring zero.
+DEFAULT_LOCAL_TIMEOUT_SECONDS = 300.0
 #: `D-13` / `S7-C-06`: `top` is empty until the Project Lead names ids.
 FREE_BAND = "free"
 
@@ -64,6 +68,7 @@ def select_model(
     *,
     model_name: str | None = None,
     tape: Sequence[Any] = (),
+    timeout_seconds: float | None = None,
     probe: Callable[[str], bool] | None = None,
     free_models: Callable[[], Sequence[str]] | None = None,
     env: Any = None,
@@ -115,7 +120,10 @@ def select_model(
                     f"{model_name or DEFAULT_OLLAMA_MODEL!r} is not pulled; "
                     f"installed: {', '.join(sorted(installed))}")
         return SelectedModel(port="ollama",
-                             model=OllamaModel(model=name, endpoint=endpoint),
+                             model=OllamaModel(
+                                 model=name, endpoint=endpoint,
+                                 timeout_seconds=timeout_seconds
+                                 or DEFAULT_LOCAL_TIMEOUT_SECONDS),
                              label=f"ollama:{name}")
 
     if choice in {"openrouter", "deepseek"}:

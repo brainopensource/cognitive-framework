@@ -122,7 +122,16 @@ def run_lab_task(
         max_attempts=max_attempts,
     )
 
-    events = outcome.results[-1].events if outcome.results else ()
+    # `S20-A-01`. When a run produced no turn, the *provider's* reason is the
+    # finding -- `model_not_invoked` is only the shape of the failure, not its
+    # cause, and reporting the shape made a timeout read like a model that
+    # scored zero.
+    last = outcome.results[-1] if outcome.results else None
+    detail = outcome.detail
+    if outcome.stop_reason == StopReason.INSTRUMENT_ERROR and last is not None:
+        detail = getattr(last, "detail", "") or detail
+
+    events = last.events if last is not None else ()
     log = session_log(events)
     if jsonl_out is not None:
         _write_jsonl(Path(jsonl_out), store, "lab-episode-1")
@@ -139,7 +148,7 @@ def run_lab_task(
         "session": [entry.to_dict() for entry in log.entries],
         "deadEnds": [dict(entry) for entry in log.dead_end_details],
         "cacheMissAttribution": [dict(e) for e in log.cache_miss_attribution()],
-        "detail": outcome.detail,
+        "detail": detail,
         **selected.to_dict(),
     }
 

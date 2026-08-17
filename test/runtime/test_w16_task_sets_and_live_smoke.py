@@ -128,16 +128,22 @@ class TheLiveSmokeSkipsClosed(unittest.TestCase):
         self.assertTrue(selected.label)
 
     def test_an_absent_backend_is_never_reported_as_a_pass(self) -> None:
-        """The property that matters even when nothing is reachable."""
+        """The property that matters even when nothing is reachable.
+
+        Pinned to a tag that cannot exist rather than to "ollama is down".
+        On a machine where the daemon *is* up this test used to make a real
+        inference call and take minutes; an unavailability test that depends on
+        the thing being unavailable tests the machine, not the code.
+        """
 
         from vanguard.packages.runtime.lab_driver import run_lab_task
 
         with tempfile.TemporaryDirectory() as tmp:
-            result = run_lab_task("vg-code-default", tmp, model_port="ollama")
-        self.assertIn(result["outcome"],
-                      (StopReason.INSTRUMENT_ERROR, StopReason.ORACLE_GREEN))
-        if result["outcome"] == StopReason.INSTRUMENT_ERROR:
-            self.assertTrue(result["detail"])
+            result = run_lab_task("vg-code-default", tmp, model_port="ollama",
+                                  model_name="definitely-not-a-pulled-tag")
+        self.assertEqual(result["outcome"], StopReason.INSTRUMENT_ERROR)
+        self.assertIn("not pulled", result["detail"])
+        self.assertNotEqual(result["outcome"], StopReason.ORACLE_GREEN)
 
     def test_the_live_gate_is_opt_in_so_ci_stays_on_mock(self) -> None:
         if not self.LIVE:

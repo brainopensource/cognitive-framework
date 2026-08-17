@@ -15,8 +15,9 @@ from ..canonicalisation.digest import digest_of
 BUILTIN_KINDS = (
     "system_prompt", "tool_schema", "tool_impl", "middleware", "skill",
     "context_policy", "retrieval_policy", "compaction_policy", "routing_policy",
-    "budget_policy", "subagent_config", "playbook", "process_definition",
-    "runtime_image", "operator", "competence_claim",
+    "budget_policy", "approval_policy", "skills", "subagent_config",
+    "playbook", "process_definition", "runtime_image", "operator",
+    "competence_claim",
 )
 
 

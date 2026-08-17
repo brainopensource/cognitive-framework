@@ -185,13 +185,17 @@ class SandboxedEnvironmentAdapter:
                 )
             )
             
-        elif req.verb in {"proc.test", "proc.exec"} or req.action in {"test", "exec"}:
+        elif req.verb == "proc.exec" or req.action in {"test", "exec"}:
             cmd = req.command or req.args.get("argv")
             if not cmd:
                 return Result.fail("invalid_request", "command argv is required")
                 
             op = WorkerRequest(
-                operation="proc.test",
+                # `S10-A-02`. This said `proc.test` for every process call,
+                # including ones the manifest declared as `proc.exec` -- so the
+                # worker allowlist and the ledger saw an operation name the
+                # harness never granted.
+                operation="proc.exec",
                 args={"argv": list(cmd)},
                 working_directory=req.working_directory or ".",
                 timeout_seconds=30.0,

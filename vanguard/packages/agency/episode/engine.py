@@ -231,17 +231,20 @@ class EpisodeEngine:
                 # that raises anyway is still an instrument error, never a
                 # task verdict (`VG-03 §6.2`).
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
+                self._emit_terminal(episode, "instrument_error", str(exc))
                 break
             if not getattr(result, "ok", False):
                 error = getattr(result, "error", None)
-                episode = episode.terminated(
-                    RunTermination.INSTRUMENT_ERROR,
-                    getattr(error, "message", "") or "provider returned no proposal")
+                reason = (getattr(error, "message", "")
+                          or "provider returned no proposal")
+                episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, reason)
+                self._emit_terminal(episode, "instrument_error", reason)
                 break
             try:
                 proposal = parse_proposal(getattr(result, "value", None))
             except ProposalMalformed as exc:
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
+                self._emit_terminal(episode, "instrument_error", str(exc))
                 break
 
             self._emit_proposal(episode, proposal)
@@ -405,6 +408,35 @@ class EpisodeEngine:
             "lastProgressSignal": (episode.turns[-1].progress_signal
                                    if episode.turns else None),
         }
+
+    def _emit_terminal(self, episode: Episode, outcome: str, detail: str) -> None:
+        """`EpisodeCompleted` — record a termination that produced no turn (`C-01`).
+
+        The three paths above end an episode *before* `_emit_proposal`, so a
+        provider that timed out, raised, or answered with a shape the
+        translator refuses left **no event at all**. The ledger showed an
+        episode that never happened, and a refused batch of tool calls was
+        indistinguishable from a model that was never asked (`A-07`,
+        `REQ-TRUST-001`).
+
+        This emits the terminal the episode actually reached, using the
+        existing `EpisodeCompleted` kind the reducer already understands. It is
+        not a turn -- no turn occurred -- and it opens no second store.
+        """
+        self._events.emit(Event(
+            kind="EpisodeCompleted",
+            reason=outcome,
+            at=self._clock.now(),
+            run_id=episode.run_id,
+            principal=episode.principal,
+            payload={
+                "episodeId": episode.episode_id,
+                "outcome": outcome,
+                "turn": episode.turn_count,
+                # The refusal reason, which is the whole point of the event.
+                "detail": detail,
+            },
+        ))
 
     def _emit_proposal(self, episode: Episode, proposal: Proposal) -> None:
         """`ProposalProduced` — the one event the loop appends itself.

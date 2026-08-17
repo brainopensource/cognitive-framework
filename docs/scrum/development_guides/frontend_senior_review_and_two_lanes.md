@@ -1,10 +1,10 @@
-# Frontend lock — two lanes, CLI TUI now, IDE extension next
+# Frontend lock — TUI now, standalone GUI later, three lanes
 
 Status: `RATIFIED — Tech Lead, frontend`  
-Decision date: 2026-08-16  
-Revision: 1.0  
+Decision date: 2026-08-17  
+Revision: 2.0  
 Authority: top frontend law below `docs/main_v4/`. Does not amend VG-04, ADR-0062, or backend sprint gates.  
-Supersedes: the open “senior review / two lanes” prompt (this file is now the decision record).
+Supersedes: `frontend_final_plan.md` (extension-first, `vanguard-ide/**`, FE-B1–B8 — marked spent & VOID).
 
 Backend freeze: `vanguard/packages/**`, `benchmarkings/**`, backend tools/CI, and `docs/main_v4/**` are not frontend write scope. All FE work consumes the existing daemon over the shipped vg.4-frame protocol.
 
@@ -14,10 +14,10 @@ Backend freeze: `vanguard/packages/**`, `benchmarkings/**`, backend tools/CI, an
 
 | Prompt claim | Verdict | Meaning |
 |---|---|---|
-| Keep the Ink CLI / hexagonal client | **Extend** | Lane FE-A deltas against `vanguard/clients/cli/**`. Do not rewrite. |
+| Keep the Ink CLI / hexagonal client | **Extend** | Lane FE-2 deltas against `vanguard/clients/cli/**`. Do not rewrite. |
 | `docs/front_v4/003` JSON-RPC / Ping / LedgerEvent / 4 MiB frames | **Replace** | That protocol is not implemented. Consumer note cites VG-04 + ADR-0062 + `server.py`. |
-| Standalone Code-OSS “Vanguard IDE” fork now | **Replace** | Standard VS Code extension at `vanguard-ide/`. Fork is Phase-4+ reversal path only. |
-| Sequential FE then IDE | **Reshape** | Two parallel lanes from day one. Shared freeze is contract + fixtures, already in-tree. |
+| Standalone Code-OSS fork or VS Code extension | **Void** | Extension-first (`vanguard-ide/**`, FE-B1–B8) is VOID. Code-OSS fork remains out of scope. Standalone GUI app is Phase 2. |
+| Two lanes (CLI vs Extension) | **Reshape** | **Three parallel lanes**: FE-1 (`client-core`), FE-2 (`cli` TUI), FE-3 (`vanguard-gui` shell). |
 
 ---
 
@@ -25,40 +25,38 @@ Backend freeze: `vanguard/packages/**`, `benchmarkings/**`, backend tools/CI, an
 
 | # | Decision | Rationale |
 |---|---|---|
-| D1 | **Wire protocol = vg.4 frames as implemented** in `vanguard/packages/runtime/service/server.py` and `vanguard/clients/cli/src/adapters/live.ts`. | Backend is frozen. A JSON-RPC 2.0 / `Ping` / `LedgerEvent` / 4 MiB-frame spec describes nothing that exists. |
-| D2 | **TUI = keep the Ink stack and hexagonal layout** in `vanguard/clients/cli/`. Fix deltas; do not rewrite. | Layering is correct (no vanguard-package imports; boundary test exists). Problems are dead code and missing deltas. |
-| D3 | **IDE = standard VS Code extension** at `vanguard-ide/` (webview panel + CodeLens + daemon bridge on the same socket). **No Code-OSS fork now.** | A fork is a multi-person maintenance program. An extension delivers the same operator UX and keeps lane B unblocked. Standalone IDE via a VSCodium-style Code-OSS build is a Phase-4+ productization option (reversal path in `docs/front_v4/009`). |
-| D4 | **Two lanes, parallel from day one.** FE-A: `vanguard/clients/cli/**`. FE-B: `vanguard-ide/**`. | Dependency is the frozen client-side wire contract + replay fixtures (`src/contract/`, `fixtures/*.jsonl`, `adapters/replay.ts`). FE-B develops against replay/mock daemon. |
+| D1 | **Wire protocol = vg.4 frames as implemented** in `vanguard/packages/runtime/service/server.py` and `vanguard/clients/cli/src/adapters/live.ts`. | Backend is frozen. A JSON-RPC 2.0 / `Ping` / `LedgerEvent` / 4 MiB-frame spec describes nothing that exists. Frame limit is 1 MiB (`MAX_FRAME_BYTES = 1024 * 1024`). No new verbs. |
+| D2 | **TUI = keep the Ink stack and hexagonal layout** in `vanguard/clients/cli/`. Fix deltas; do not rewrite in a new framework. | Layering is correct. CLI presentation consumes `@vanguard/client-core`. |
+| D3 | **IDE = future standalone GUI app (working name `vanguard-gui/` or `apps/desktop/`). Extension-not-fork is VOID. Code-OSS fork remains out of scope.** | A full Code-OSS fork is an unmaintainable multi-million line sync nightmare. A VS Code extension is constrained by extension APIs and carries IDE bloat. Standalone GUI app consumes `@vanguard/client-core` with slot-based architecture (Monaco, xterm PTY, xyflow event viewer). |
+| D4 | **Three parallel FE lanes from day one, disjoint write scopes.** FE-1: `@vanguard/client-core`. FE-2: `vanguard/clients/cli/**`. FE-3: `vanguard-gui/**`. | One client core, two skins (TUI, GUI), plus headless (`vg --headless`). Never a third wire. Ink screens are not embeddable in GUI; GUI embeds terminal PTY running `vg` or directly calls `RuntimeClient`. |
 | D5 | **`docs/front_v4/` is Proposed** until per-file ratification is recorded in this document. | The registry was never ratified. 003 contradicted VG-04 / ADR-0062 and the daemon. |
-| D6 | **Backend gaps become Joint notes, not FE workarounds.** No client-side invention of RPCs, manifest schemas, or daemon entrypoints. | Do not silently fork the wire. ROADMAP §0.2 rule 2. |
+| D6 | **Backend gaps become Joint notes (J1–J5), not FE workarounds.** No client-side invention of RPCs, manifest schemas, or daemon entrypoints. | Do not silently fork the wire. |
 
 ---
 
-## 3. Lane ownership
+## 3. Lane ownership & write scopes
 
-| Lane | Path | Owner | Must not edit |
+| Lane | Role / Scope | Path | Must not edit |
 |---|---|---|---|
-| FE-A | `vanguard/clients/cli/**` | CLI / TUI | `vanguard-ide/**`, `vanguard/packages/**`, `docs/main_v4/**` |
-| FE-B | `vanguard-ide/**` | IDE extension | `vanguard/clients/cli/**`, `vanguard/packages/**`, `docs/main_v4/**` |
-| Joint | notes only | Tech + Project Lead | FE does not implement J1–J5 |
+| **FE-1** | **Core (TUI workstream — finishes CLI brain)**: Move/re-export contract, parse, `RuntimeClient`, live/replay/scenario, signer, run-view reducer, approvals app. | `vanguard/clients/client-core/` (or `vanguard/clients/cli/packages/core/`) | Daemon Python (`vanguard/packages/**`), GUI chrome, pack JSON |
+| **FE-2** | **TUI product (finishes Ink CLI)**: Presentation only (`tui/`, `composition/`, `headless/`, `install.sh`). Live/headless `vg run`, honest J1 `not_available`, P0-4 approval prompt (`y/n/c`), `--demo` labelled `source: mock`. | `vanguard/clients/cli/**` | `client-core` internals (except import updates), `vanguard-gui/**`, pack files |
+| **FE-3** | **GUI start (future IDE — thin, parallel)**: App shell scaffold (`vanguard-gui/**`), imports `@vanguard/client-core`, replay fixture run panel, placeholder slots (file tree, Monaco stub, xterm PTY stub, xyflow event viewer). | `vanguard-gui/**` (or `apps/desktop/`) | CLI TUI, core wire verbs, competitor IDE submodules |
 
-Shared code (contract types, parse, signer) is **owned by FE-A**. FE-B consumes it by **vendoring** into `vanguard-ide/src/contract/` (build step; no monorepo runtime dependency). FE-B never edits the CLI tree and vice versa.
-
-Parallel proof: FE-B1–B4 are completable against the FE-A-wave-1-start commit (fixture + contract freeze).
+**Parallel proof:** FE-3 develops against frozen `client-core` types + replay fixtures (`fixtures/*.jsonl`). FE-2 finishes Ink screens concurrently. Neither waits on the other.
 
 ---
 
-## 4. Navigator
+## 4. GUI Slot Bind List (Phase 2)
 
-| Artifact | Role |
-|---|---|
-| This file | Binding FE law (D1–D6, Joint notes, ratification) |
-| `docs/scrum/ROADMAP.MD` | Navigator + FE-A / FE-B board (IDs, depends, DoD commands) |
-| `docs/scrum/development_guides/cli_tui_architecture.md` | Binding CLI module tree, adapters, fixtures |
-| `docs/front_v4/` | Proposed consumer notes (not VG-04) |
-| `docs/scrum/sprints_front/` | Lane-tagged delta kits |
+The GUI is a modular slot-based app, **not a VS Code clone or competitor loop rewrite**:
+- **Files/Tabs:** Monaco Editor or CodeMirror 6 + virtualized file tree; workspace root from `StartRun.repo`.
+- **Terminal:** `@xterm/xterm` + native PTY (optionally running interactive `vg`).
+- **Git:** Native `git` CLI runner; ledger remains source of truth.
+- **Diff / Approve:** Monaco Diff Editor + existing `OperatorSigner` (RFC 8785 Ed25519) on `ApprovalRequested`.
+- **Run / Budget / Trace:** `reduceRunView` + VG-04 envelopes (`BudgetCommitted`, `ObservationProduced`, `OperatorInvoked`).
+- **Workflow Canvas:** `@xyflow/react` **ONLY as a passive visualizer of VG-04 event streams** — never a second agent DAG engine.
 
-Sprint numbering is `FE-A-n` / `FE-B-n` waves. Do not reuse backend “Sprint 1–4” or `sprint07..10` IDs (ROADMAP §0.3).
+**Out of v0.4.3 GUI scope:** In-memory vector DB, RAG pipelines, Obsidian graph clones, organic polymer workflows, MCP daemon bridges, playbooks.
 
 ---
 
@@ -66,56 +64,49 @@ Sprint numbering is `FE-A-n` / `FE-B-n` waves. Do not reuse backend “Sprint 1�
 
 | ID | Request | FE until Joint lands |
 |---|---|---|
-| J1 | Daemon self-launch entrypoint (`python3 -m vanguard.packages.runtime.service.server` currently has no `__main__`) | FE-A7 ships `not_available` with actionable text; no fake daemon lifecycle |
+| J1 | Daemon self-launch entrypoint (`python3 -m vanguard.packages.runtime.service.server` currently has no `__main__`) | FE-2 / FE-3 ship `not_available` with actionable text; no fake daemon lifecycle |
 | J2 | `Ping` / health verb (supervisor probe is connect-only today) | Status remains connect-or-fail; do not invent a health frame |
 | J3 | `ListManifests` verb | Selector ships with user-provided manifest path only; FE must not read `vanguard/packages/` |
-| J4 | Populated approval challenge digests | FE-A8 signs only fields present on the challenge; empty placeholders are forbidden |
+| J4 | Populated approval challenge digests | Signer signs only fields present on the challenge; empty placeholders are forbidden |
 | J5 | Wire-change wishes (e.g. Windows Named Pipe transport) | File the note; no FE-side transport invention |
 
 ---
 
-## 6. `docs/front_v4/` ratification log
+## 6. Ratification log for `docs/front_v4/`
 
-Until a row is `Ratified` here, the file header remains `Proposed`.
-
-| File | Disposition (2026-08-16) | Ratified |
+| File | Disposition (2026-08-17) | Ratified |
 |---|---|---|
-| `001` backlog | Revised: FE-A / FE-B IDs; Tauri / EPIC-09 / M4 soak removed | No |
-| `002` architecture | Revised: INVAR-FE-01..04 kept; tree matches CLI; Named Pipe/TCP proposed | No |
-| `003` wire consumer | **Rewritten** as vg.4-frame consumer note | No |
-| `004` UI/UX | Revised: VG-04 §12.2 event names | No |
-| `005` manifests | Revised: real schema; daemon discovery is J3 | No |
-| `006` RuntimeClient guide | **Rewritten** from shipped interface | No |
-| `007` testing | Revised: VG-04 vectors + `test/contracts/t1_wire_contracts.py` | No |
-| `008` packaging | Revised: channels 1–2 only | No |
-| `009` IDE | Revised: extension-first, fork deferred | No |
-| `010` enterprise | **Rewritten** as Phase-4+ one-pager | No |
-| `011` demo | Revised: real fixtures, `source: mock` | No |
-| `012` FE ADRs | Revised: cite ADR-0062; D3 replaces fork-now | No |
+| `001` backlog | Revised: FE-1 / FE-2 / FE-3 IDs; extension epic voided; standalone GUI Phase 2 | No |
+| `002` architecture | Revised: INVAR-FE-01..04 kept; trees: `client-core`, `cli`, `vanguard-gui` | No |
+| `003` wire consumer | vg.4-frame consumer note (no JSON-RPC, 1 MiB frame limit) | No |
+| `004` UI/UX | Revised: VG-04 §12.2 event names; shared token names for TUI and GUI | No |
+| `005` manifests | Path-only discovery; daemon discovery is J3 | No |
+| `006` RuntimeClient | Re-homed to `@vanguard/client-core` interface | No |
+| `007` testing | Pyramid: unit → VG-04 vectors → replay E2E → live E2E; no `.vsix` | No |
+| `008` packaging | Channels 1–2 for `vg`; standalone GUI desktop installer Phase 2 | No |
+| `009` IDE | **Rewritten**: Vanguard GUI — standalone app, extension void, fork deferred; slots table | No |
+| `010` phase 4 | Phase-4+ (RAG, enterprise graphs) one-pager | No |
+| `011` demo | Real fixtures (`source: mock`), shared between TUI and GUI | No |
+| `012` ADRs | D3 = standalone GUI; extension ADRs voided; D1–D6 locked | No |
 
 ---
 
-## 7. Thrown away
+## 7. Explicitly thrown away
 
-- Invented JSON-RPC 2.0 / `Ping` / `LedgerEvent` / 4 MiB client frames as FE law.
-- Tauri, AppImage-embedded-Python, and `github.com/vanguard-ai/*` infra claims.
-- Code-OSS-fork-now; EPIC-09; M4 1000-run soak as FE work.
-- Sequential “finish CLI then start IDE.”
-- Client-side invention of daemon verbs or manifest schemas.
-
-Old `sprints_front/sprint1–4` kits (if present) are replaced by `lane_a_wave*.md` / `lane_b_wave*.md`. Mined deltas: reconnect, JCS, key persistence, `--demo`, webview/CodeLens, E2E pyramid.
+- VS Code extension approach (`vanguard-ide/**`, FE-B1–B8, CodeLens-as-plan) — **VOID**.
+- Code-OSS 2M-line full fork as current work.
+- Invented JSON-RPC 2.0 / `Ping` / `LedgerEvent` / 4 MiB frames.
+- Embedding Ink components inside React/GUI (Ink is terminal-only; reuse is `client-core` + PTY).
+- Submoduling competitor loops (OpenCode, Cline, Void, PearAI).
 
 ---
 
-## 8. Verification (docs + boundary)
+## 8. Product surfaces (implementers)
 
-```text
-# no invented JSON-RPC vocabulary in FE docs
-grep -r "jsonrpc" docs/front_v4 docs/scrum/sprints_front
+| Skin | Spec | Lane |
+|---|---|---|
+| Ink TUI (Claude-class operator loop) | `tui_product_surface.md` | FE-2 |
+| Standalone GUI (slot IDE) | `gui_ide_slots.md` | FE-3 |
+| Shared brain | `@vanguard/client-core` | FE-1 |
+| Implementer start | `frontend_implementer_playbook.md` | all |
 
-# FE must not import core packages
-grep -r "vanguard/packages" vanguard/clients/cli/src vanguard-ide/src
-
-# FE must not edit frozen trees
-# (reviewer check) vanguard/packages/**  benchmarkings/**  docs/main_v4/**
-```

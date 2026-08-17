@@ -1,10 +1,9 @@
 # Vanguard Lean VS Code / Code-OSS Fork Engineering Specification
 
-**Document ID:** `VG-FE-009`  
-**Version:** `0.4.1-beta`  
-**Status:** `Normative / Authoritative`  
-**Owner:** `IDE Engineering Lead & Principal Systems Architect`  
-**Target:** `vanguard-ide / Code-OSS Fork`
+**Status:** `VOID` — superseded by D3 standalone GUI (`009_ide_extension.md`, `gui_ide_slots.md`). Do not implement.
+
+**Document ID:** `VG-FE-009` (historical)
+
 
 ---
 

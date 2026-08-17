@@ -34,6 +34,9 @@ REGISTERED_COMPONENT_CONSUMERS: Mapping[str, str] = {
     "context_policy": "vanguard.packages.agency.context.compaction",
     "routing_policy": "vanguard.packages.adapters.models.routing",
     "approval_policy": "vanguard.packages.runtime.governance.approvals",
+    "retrieval_policy": "vanguard.packages.ports.index:IndexPort",
+    "skills": "vanguard.packages.agency.context.compiler",
+    "skill": "vanguard.packages.agency.context.compiler",
 }
 
 

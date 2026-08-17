@@ -1,0 +1,5 @@
+{
+  "maxTurns": 8,
+  "budget_usd_micros": 100000,
+  "rateLimitPerMinute": 60
+}

@@ -7,7 +7,7 @@
   "git_tag_status": "unverified",
   "branch_protection_status": "unverified",
   "files": {
-    "docs/main_v4/09_vanguard_decision_register_v040.md": "sha256:0d6751675fb5eee0ebf2958db558240ba696f62f23602a367645ea738447cae0",
+    "docs/main_v4/09_vanguard_decision_register_v040.md": "sha256:4439413af299c60111cdac12999765866effa30c322dc5a933a440422be39c7a",
     "tools/check_boundaries.py": "sha256:299b5925ef1e78c22822441b6a5281847f9a4fabc4caab1b333ba2bbd9a32941",
     "tools/check_active_mvp_contract.py": "sha256:bdf10a90bfdb98671df2274d3951898693031d65faebfc8347f8488278d198e7",
     "tools/check_pr_requirements.py": "sha256:631f16520255cfbea70956c5f57e3704517a5c7b07da394c418fa1b4f60a6a52",

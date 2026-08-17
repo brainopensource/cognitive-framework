@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Vanguard General Task Solver (GTS) — a verifiable, modular meta-harness runtime built around a strict
 `observe → propose → authorize → effect → receipt → evaluate` turn lifecycle, where the exterior judge
-that evaluates a run is architecturally unreachable from the agent it judges. Currently `v0.4.1-beta`.
+that evaluates a run is architecturally unreachable from the agent it judges. Currently `v0.4.5-beta`.
 
 This is a polyglot monorepo: a stdlib-only Python core (`vanguard-runtime`) plus a TypeScript/Ink CLI/TUI
 client (`@vanguard/cli`), managed as an npm workspace.

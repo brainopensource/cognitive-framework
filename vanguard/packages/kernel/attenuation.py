@@ -93,12 +93,18 @@ def _exceeds(child: int | None, parent: int | None) -> bool:
 
 @dataclass(frozen=True, slots=True)
 class Scope:
-    """The authority surface of a grant or a request for one."""
+    """The authority surface of a grant or a request for one.
+
+    `sealed` is set by `attenuate()` when the parent withholds verbs. A sealed
+    grant may not execute an action outside `actions` (`ADR-0067`). Unsealed
+    grants may still widen on trusted justification.
+    """
 
     actions: frozenset[str]
     resources: tuple[Mapping[str, Any], ...]
     constraints: Constraints
     depth: int = 0
+    sealed: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,7 +166,11 @@ def attenuate(parent: Scope, request: Scope) -> AttenuationResult:
         return AttenuationResult(None, AttenuationDenied(
             "depth", depth, parent.constraints.max_depth))
 
-    return AttenuationResult(replace(request, depth=depth))
+    return AttenuationResult(replace(
+        request,
+        depth=depth,
+        sealed=request.sealed or request.actions < parent.actions,
+    ))
 
 
 _FIELD_BY_DIMENSION = {

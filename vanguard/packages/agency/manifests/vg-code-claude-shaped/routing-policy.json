@@ -1,0 +1,6 @@
+{
+  "strategy": "tier-escalation",
+  "primary_model": "claude-3-5-sonnet",
+  "escalation_model": "claude-3-opus",
+  "escalate_after_attempts": 2
+}

@@ -1,35 +1,50 @@
-# Frontend sprint kits
+# Frontend sprint delta kits
 
-Status: `BINDING for FE lanes` under the two-lanes lock  
-Numbering: **FE-A-n / FE-B-n** (not Sprint 1–4; ROADMAP §0.3)
+Status: `BINDING for FE lanes` under `frontend_senior_review_and_two_lanes.md`  
+Numbering: **FE-1-n** (Core), **FE-2-n** (TUI), **FE-3-n** (GUI)
 
-| Kit | Contents |
-|---|---|
-| `lane_a_wave1.md` | FE-A1 … FE-A5 |
-| `lane_a_wave2.md` | FE-A6 … FE-A10 |
-| `lane_b_wave1.md` | FE-B1 … FE-B4 |
-| `lane_b_wave2.md` | FE-B5 … FE-B8 |
+| Kit | Lane | Contents |
+|---|---|---|
+| `lane_core_wave1.md` | **FE-1 (Core Wave 1)** | FE-1-1 … FE-1-4 extract `[DONE]` |
+| `lane_core_wave2.md` | **FE-1 (Core Wave 2)** | FE-1-5 … FE-1-8 selectors / graph / subscribe |
+| `lane_a_wave1.md` | **FE-2 (TUI Wave 1)** | FE-2-1 … FE-2-2 |
+| `lane_a_wave2.md` | **FE-2 historical** | FE-A6–A10 + FE-2-8/9 notes; Wave 2 sprint is `lane_tui_wave2.md` |
+| `lane_tui_wave2.md` | **FE-2 (TUI Wave 2)** | FE-2-8 SOTA chrome |
+| `lane_gui_wave1.md` | **FE-3 (GUI Wave 1)** | FE-3-1 … FE-3-2 scaffold + replay |
+| `lane_gui_wave2.md` | **FE-3 (GUI Wave 2)** | FE-3-0 toolchain, FE-3-3 files/Monaco, FE-3-4 PTY |
+| `wave2_implementer_prompts.md` | **all** | Three copy-paste Wave 2 prompts |
 
-Replaces any `sprints_front/sprint1.md` … `sprint4.md`.
+Also: `frontend_implementer_playbook.md` (start here), `tui_product_surface.md` (FE-2), `gui_ide_slots.md` (FE-3).
 
-## Lane rules
+*Note: `sprints_front/sprint1`–`sprint4` and `lane_b_wave*.md` are VOID.*
 
-- FE-A writes only `vanguard/clients/cli/**` (plus FE docs if the task says so).
-- FE-B writes only `vanguard-ide/**`.
-- Shared contract is owned by FE-A; FE-B vendors copies.
-- Backend trees stay frozen. Joint notes J1–J5 are requests, not FE PRs.
-- Every task is a **delta** against files that exist (or a new `vanguard-ide/` tree for B1).
+---
 
-## Default DoD commands
+## Lane Rules & Write Scopes
+
+1. **FE-1 (Core):** Writes `vanguard/clients/client-core/**` (or `vanguard/clients/cli/packages/core/`). Must not touch UI chrome or daemon Python.
+2. **FE-2 (TUI):** Writes `vanguard/clients/cli/**` presentation only. Imports `@vanguard/client-core`.
+3. **FE-3 (GUI):** Writes `vanguard-gui/**` (or `apps/desktop/`). Imports `@vanguard/client-core`.
+4. **Backend frozen:** Backend trees stay frozen. Joint notes J1–J5 are requests, not FE PRs.
+
+---
+
+## Default DoD Commands
 
 ```bash
+# FE-1 (Client Core)
+cd vanguard/clients/client-core && npm run typecheck && npm test
+
+# FE-2 (CLI TUI)
 cd vanguard/clients/cli && npm run typecheck && npm test
-cd vanguard-ide && npm run typecheck && npm run build
+
+# FE-3 (Standalone GUI)
+cd vanguard-gui && npm run typecheck && npm run dev
 ```
 
-Boundary:
+Boundary verification:
 
 ```bash
-# expect no hits in application/UI sources
-grep -r "vanguard/packages" vanguard/clients/cli/src vanguard-ide/src || true
+# Expect no imports of vanguard/packages in any frontend client
+grep -rn "vanguard/packages" vanguard/clients/ vanguard-gui/src || true
 ```

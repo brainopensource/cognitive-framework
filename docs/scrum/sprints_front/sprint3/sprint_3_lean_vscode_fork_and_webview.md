@@ -1,5 +1,8 @@
 # Sprint 3: Lean Code-OSS Fork, Telemetry Scrubbing & Native Sidebar Webview
 
+**Status:** `VOID` — Code-OSS fork and VS Code extension are D3 VOID. Use `lane_gui_wave1.md`.
+
+
 **Sprint ID:** `SPRINT-FE-03`  
 **Phase / Wave:** `Wave 3 — Integrated IDE Surface (Vanguard for VS Code)`  
 **Foundation Docs:** [`docs/front_v4/009_vanguard_lean_vscode_fork_engineering_spec.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/009_vanguard_lean_vscode_fork_engineering_spec.md), [`docs/front_v4/004_vanguard_uiux_views_and_interaction_workflows.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/004_vanguard_uiux_views_and_interaction_workflows.md)  

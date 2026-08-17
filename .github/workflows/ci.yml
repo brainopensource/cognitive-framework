@@ -22,6 +22,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18'
 
       - name: T11 — governance artifacts and safeguards
         run: python3 tools/check_sprint0_governance.py
@@ -188,6 +191,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18'
 
       # ADR-0048: model behaviour must not become a prerequisite of kernel
       # verification. The key is unset explicitly rather than merely absent,

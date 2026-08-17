@@ -1,4 +1,6 @@
-import type { CliOptions } from "../application/commands.js";
+import type { CliOptions } from "@vanguard/client-core";
+
+export type ParsedCli = CliOptions & { promptExplicit: boolean };
 
 export const USAGE =
   "Usage:\n" +
@@ -18,7 +20,7 @@ export function usage(): never {
   process.exit(2);
 }
 
-export function parseCliOptions(args: string[]): CliOptions {
+export function parseCliOptions(args: string[]): ParsedCli {
   const value = (name: string) => {
     const index = args.indexOf(name);
     return index >= 0 && index + 1 < args.length ? args[index + 1] : undefined;
@@ -60,7 +62,8 @@ export function parseCliOptions(args: string[]): CliOptions {
     positional.push(arg);
   }
 
-  let prompt = value("--prompt") ?? value("--brief");
+  const promptFromFlags = value("--prompt") ?? value("--brief");
+  let prompt = promptFromFlags;
   let repo = value("--repo");
   const decisionVal = value("--decision");
   const decision: "approve" | "reject" | undefined =
@@ -81,6 +84,8 @@ export function parseCliOptions(args: string[]): CliOptions {
     }
   }
 
+  const promptExplicit = Boolean(prompt);
+
   return {
     headless: flag("--headless"),
     feed: flag("--feed"),
@@ -99,5 +104,6 @@ export function parseCliOptions(args: string[]): CliOptions {
     socketPath: value("--socket-path"),
     demo,
     demoScenario,
+    promptExplicit,
   };
 }

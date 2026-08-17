@@ -1,5 +1,8 @@
 # Sprint 4: Inline CodeLens Diffs, Enterprise Telemetry & End-to-End Release
 
+**Status:** `VOID` — CodeLens/extension/enterprise-in-client are out of plan. Use `lane_gui_wave1.md` + `010_phase4_considerations.md`.
+
+
 **Sprint ID:** `SPRINT-FE-04`  
 **Phase / Wave:** `Wave 4 — Full SOTA Enterprise Experience & Distribution`  
 **Foundation Docs:** [`docs/front_v4/007_vanguard_testing_verification_and_e2e_matrix.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/007_vanguard_testing_verification_and_e2e_matrix.md), [`docs/front_v4/010_vanguard_enterprise_security_governance_and_telemetry.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/010_vanguard_enterprise_security_governance_and_telemetry.md), [`docs/front_v4/012_vanguard_frontend_decision_register_and_anti_patterns.md`](file:///home/rocha/Coding/Aether-D-System/docs/front_v4/012_vanguard_frontend_decision_register_and_anti_patterns.md)  

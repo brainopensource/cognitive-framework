@@ -8,7 +8,7 @@ import {
   resumeRun,
   streamRun,
   streamTrace,
-} from "./application/commands.js";
+} from "@vanguard/client-core";
 import { clientFor } from "./composition/client-for.js";
 import { parseCliOptions, usage, USAGE } from "./composition/parse-cli.js";
 import { RunTui } from "./tui/screens/run-tui.js";
@@ -33,7 +33,16 @@ if (command === "run") {
   if (parsed.headless) {
     exitCode = await streamRun(runtime, parsed, console.log);
   } else {
-    render(<RunTui runtime={runtime} repo={parsed.repo} runId={parsed.runId} resumeFrom={parsed.resumeFrom} />);
+    render(
+      <RunTui
+        runtime={runtime}
+        repo={parsed.repo}
+        runId={parsed.runId}
+        resumeFrom={parsed.resumeFrom}
+        autostart={parsed.promptExplicit || Boolean(parsed.resumeFrom)}
+        initialBrief={parsed.promptExplicit ? (parsed.prompt ?? "") : ""}
+      />
+    );
   }
 } else if (command === "approve") {
   const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
@@ -58,6 +67,6 @@ if (command === "run") {
 }
 
 process.exitCode = exitCode;
-if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why") {
+if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why" || command === "resume") {
   process.exit(exitCode);
 }

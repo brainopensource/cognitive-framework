@@ -1,9 +1,12 @@
-import { LiveRuntimeClient } from "../adapters/live.js";
-import { ReplayRuntimeClient } from "../adapters/replay.js";
-import { ScenarioRuntimeClient } from "../adapters/scenario.js";
-import { OperatorSigner } from "../adapters/signer.js";
-import type { CliOptions } from "../application/commands.js";
-import type { RuntimeClient } from "../contract/types.js";
+import {
+  attachLive,
+  LiveRuntimeClient,
+  OperatorSigner,
+  ReplayRuntimeClient,
+  ScenarioRuntimeClient,
+  type CliOptions,
+  type RuntimeClient,
+} from "@vanguard/client-core";
 import { demoFixturePath, packageRootFrom } from "./catalog.js";
 
 async function* stdinLines(): AsyncIterable<string> {
@@ -17,6 +20,7 @@ async function* stdinLines(): AsyncIterable<string> {
   if (buffer.trim()) yield buffer;
 }
 
+/** --demo/--replay/--scenario = mock; --feed = stdin NDJSON; else attachLive (no fixture fallback). */
 export function clientFor(parsed: CliOptions): RuntimeClient {
   if (parsed.demo) {
     const scenario = parsed.demoScenario ?? "successful-episode";
@@ -32,11 +36,9 @@ export function clientFor(parsed: CliOptions): RuntimeClient {
       model: parsed.model,
     });
   }
-  return new LiveRuntimeClient(undefined, {
+  return attachLive({
     repo: parsed.repo,
-    prompt: parsed.prompt,
     model: parsed.model,
-    autoApprove: parsed.autoApprove,
     socketPath: parsed.socketPath,
     manifest: parsed.manifest,
     signer: OperatorSigner.loadOrCreate(),

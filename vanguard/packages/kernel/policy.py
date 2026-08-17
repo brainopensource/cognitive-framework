@@ -92,6 +92,19 @@ class StandardPolicy:
                 alertable=True,
             )
 
+        # 1b. Sealed membership (`ADR-0067`). Keyed on the caller's grant, not
+        #     on depth and not on a proper-subset requested_scope: spine's
+        #     unsealed narrower scope may still widen on trusted justification.
+        if requested_scope.sealed and request.action not in requested_scope.actions:
+            return Decision(
+                Outcome.REJECT,
+                FailurePath.DENIED_SCOPE_ESCALATION,
+                f"action {request.action!r} outside sealed scope",
+                requested=sorted((request.action,)),
+                grantable=sorted(requested_scope.actions),
+                alertable=True,
+            )
+
         # 2. The authority predicate. `F-09`: untrusted content may inform
         #    work, never authorise it. Evaluated over the *accumulated* spans.
         predicate = authority_violation(

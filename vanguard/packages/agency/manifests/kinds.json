@@ -14,5 +14,6 @@
   {"kind":"process_definition","schema":"schema://vanguard/artifacts/process_definition"},
   {"kind":"runtime_image","schema":"schema://vanguard/artifacts/runtime_image"},
   {"kind":"operator","schema":"schema://vanguard/artifacts/operator"},
+  {"kind":"approval_policy","schema":"schema://vanguard/artifacts/approval_policy"},
   {"kind":"competence_claim","schema":"schema://vanguard/artifacts/competence_claim"}
 ]

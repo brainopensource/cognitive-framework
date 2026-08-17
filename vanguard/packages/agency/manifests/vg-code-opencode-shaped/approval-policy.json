@@ -1,0 +1,4 @@
+{
+  "threshold": "standard",
+  "escalate_on": ["patch.apply"]
+}

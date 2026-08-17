@@ -39,7 +39,10 @@ class TestModelInvocation(unittest.TestCase):
             "text": "",
             "toolCalls": [{"name": "fs.unknown", "arguments": {}}]
         }
-        res = ProposalTranslator.translate(proposal)
+        res = ProposalTranslator.translate(
+            proposal,
+            tool_schemas=({"name": "read", "verb": "fs.read"},),
+        )
         self.assertFalse(res.ok)
 
     def test_translate_malformed_args_fails(self):

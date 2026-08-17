@@ -8,10 +8,11 @@ Capabilities, scope, reservations and approvals remain kernel/runtime-owned.
 from __future__ import annotations
 
 import json
+import re
 import shlex
 from dataclasses import dataclass
 from pathlib import PurePosixPath
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, MutableMapping, Sequence
 
 from ...ports.event_store import Result
 
@@ -32,15 +33,22 @@ class ModelInvocation:
 class ProposalTranslator:
     """Translate raw provider DTOs into the canonical proposal mapping."""
 
-    KNOWN_TOOLS = {
-        "fs.read": "fs.read",
-        "fs.search": "fs.search",
-        "fs.write": "fs.write",
-        "patch.apply": "patch.apply",
-        "fs.patch": "patch.apply",
-        "proc.exec": "proc.exec",
-        "proc.test": "proc.test",
+    #: Provider tool-calling vocabulary, keyed by the *declared schema
+    #: property* it fills. This is adapter knowledge, not domain knowledge:
+    #: knowing that one provider writes `file_path` where another writes `path`
+    #: is precisely what a model adapter is for. It names no Vanguard verb, so
+    #: a new domain adds nothing here (`S10-A-01`, `C-01`).
+    #:
+    #: A synonym is consulted only when the tool's own schema declares the
+    #: target property and the model did not supply it.
+    PROVIDER_SYNONYMS: Mapping[str, tuple[str, ...]] = {
+        "path": ("file_path", "filepath", "path_prefix"),
+        "pattern": ("query", "regex"),
     }
+
+    #: Free-text command forms a provider may send where the schema declares an
+    #: argument vector. Split with `shlex`, never with `str.split`.
+    COMMAND_SYNONYMS: tuple[str, ...] = ("command", "cmd")
 
     @classmethod
     def translate(
@@ -50,6 +58,7 @@ class ProposalTranslator:
         tool_schemas: Sequence[Mapping[str, Any]] = (),
         aliases: Mapping[str, Any] | Any | None = None,
         resource_root: str = "/workspace",
+        capabilities: Sequence[Mapping[str, Any]] = (),
     ) -> Result[Mapping[str, Any]]:
         checked = validate_proposal_schema(proposal)
         if not checked.ok:
@@ -77,6 +86,10 @@ class ProposalTranslator:
                 else:
                     declared.update({str(k): str(v) for k, v in aliases.items() if isinstance(v, str)})
 
+        # verb -> declared args schema, and verb -> declared selector. Both are
+        # manifest data; the translator reads them and knows nothing else.
+        schema_of: dict[str, Mapping[str, Any]] = {}
+        selector_of: dict[str, Mapping[str, Any]] = {}
         for schema in tool_schemas:
             if not isinstance(schema, Mapping):
                 continue
@@ -86,19 +99,48 @@ class ProposalTranslator:
             verb = schema.get("verb")
             if isinstance(schema_name, str) and isinstance(verb, str):
                 declared[schema_name] = verb
+            if isinstance(verb, str):
+                args_schema = schema.get("schema")
+                if not isinstance(args_schema, Mapping) and isinstance(source, Mapping):
+                    args_schema = source.get("parameters")
+                if isinstance(args_schema, Mapping):
+                    schema_of[verb] = args_schema
+                selector = schema.get("selector")
+                if isinstance(selector, Mapping):
+                    selector_of[verb] = selector
+        for row in capabilities or ():
+            if not isinstance(row, Mapping):
+                continue
+            verb, selector = row.get("verb"), row.get("selector")
+            if isinstance(verb, str) and isinstance(selector, Mapping):
+                selector_of.setdefault(verb, selector)
 
+        # The manifest is the only authority on which verbs exist. There is no
+        # builtin table to fall back to: a translator carrying its own list of
+        # legal verbs is a second place a domain has to be registered, and the
+        # two drift (`C-01`, `ADR-0060`).
         if declared:
             action = declared.get(name)
             if action is None and name in set(declared.values()):
                 action = name
             if action is None:
-                return Result.fail("instrument_error", f"tool is not declared by manifest: {name}")
-            if action not in set(cls.KNOWN_TOOLS.values()):
-                return Result.fail("instrument_error", f"manifest declares unsupported tool: {action}")
+                # Fails closed against the pack that *is* declared.
+                return Result.fail("instrument_error",
+                                   f"tool is not declared by manifest: {name}")
+        elif _is_canonical_verb(name):
+            # No pack was supplied. The translator has no opinion about which
+            # verbs exist -- carrying a builtin list is what made this file the
+            # second place a domain had to be registered (`C-01`) -- but it can
+            # tell a canonical verb from an alias by *shape*: `namespace.verb`
+            # is already canonical and passes through unresolved.
+            action = name
         else:
-            action = cls.KNOWN_TOOLS.get(name)
-            if action is None:
-                return Result.fail("instrument_error", f"unknown tool name: {name}")
+            # A bare tool name is a pack alias, and only a pack can resolve it.
+            # Rejecting here rather than guessing is what keeps a competitor's
+            # tool vocabulary out of this file (`C-01`).
+            return Result.fail(
+                "instrument_error",
+                f"{name!r} is an alias; no manifest was supplied to resolve it")
 
         raw_args = call.get("arguments", {})
         if isinstance(raw_args, str):
@@ -121,28 +163,44 @@ class ProposalTranslator:
         if not _within_depth(args):
             return Result.fail("instrument_error", "tool arguments exceed nesting limit")
 
-        if action in {"fs.read", "fs.write", "patch.apply"}:
-            if "path" not in args and "file_path" in args:
-                args["path"] = args["file_path"]
-
-        if action == "fs.search":
-            if "pattern" not in args and "query" in args:
-                args["pattern"] = args["query"]
-            if "path" not in args and "path_prefix" in args:
-                args["path"] = args["path_prefix"]
-
-        if action in {"proc.exec", "proc.test"} and "argv" not in args:
-            command = args.get("command") or args.get("cmd")
+        # Normalise provider vocabulary against the *declared* schema. Nothing
+        # here knows which verb it is normalising: the tool's own schema says
+        # which properties exist, and a synonym is consulted only for a
+        # property that schema declares.
+        properties = _declared_properties(schema_of.get(action))
+        for target, synonyms in cls.PROVIDER_SYNONYMS.items():
+            # When the pack declared a schema, only its properties are filled.
+            # With no schema there is nothing to consult, so a synonym present
+            # in the call is taken at face value.
+            if (properties and target not in properties) or target in args:
+                continue
+            for synonym in synonyms:
+                if synonym in args:
+                    args[target] = args[synonym]
+                    break
+        wants_argv = "argv" in properties or (
+            not properties and any(key in args for key in cls.COMMAND_SYNONYMS))
+        if wants_argv and "argv" not in args:
+            command = next((args[key] for key in cls.COMMAND_SYNONYMS
+                            if isinstance(args.get(key), str)), None)
             if not isinstance(command, str) or not command.strip():
-                return Result.fail("instrument_error", "process action requires argv array")
+                return Result.fail("instrument_error", "action requires an argv array")
             try:
                 args["argv"] = shlex.split(command)
             except ValueError:
-                return Result.fail("instrument_error", "process command is not valid argv text")
-            args.pop("command", None)
-            args.pop("cmd", None)
+                return Result.fail("instrument_error", "command is not valid argv text")
+            for key in cls.COMMAND_SYNONYMS:
+                args.pop(key, None)
 
-        resource = _bind_resource(action, args, resource_root)
+        missing = _missing_required(schema_of.get(action), args)
+        if missing:
+            return Result.fail(
+                "instrument_error",
+                f"{name}: missing required argument(s): {', '.join(missing)}")
+
+        selector = selector_of.get(action) or _selector_from_schema(
+            properties or frozenset(args))
+        resource = _bind_resource(selector, args, resource_root)
         if not resource.ok:
             return Result.fail(resource.error.kind, resource.error.message)
         return Result.success({
@@ -223,30 +281,104 @@ def _workspace_relative(path: str, root: str) -> Result[str]:
     return Result.success("." if str(pure) == "." else str(pure))
 
 
-def _bind_resource(action: str, args: Mapping[str, Any], root: str) -> Result[Mapping[str, Any]]:
+#: `namespace.verb`, both segments non-empty and dot-free. A shape test, not a
+#: list: it admits any `namespace`-qualified verb and enumerates none of them.
+_CANONICAL_VERB = re.compile(r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
+
+
+def _is_canonical_verb(name: str) -> bool:
+    return bool(_CANONICAL_VERB.match(name))
+
+
+def _declared_properties(args_schema: Any) -> frozenset[str]:
+    """Property names the tool's own schema declares. Empty when undeclared."""
+    if not isinstance(args_schema, Mapping):
+        return frozenset()
+    properties = args_schema.get("properties")
+    if not isinstance(properties, Mapping):
+        return frozenset()
+    return frozenset(str(key) for key in properties)
+
+
+def _missing_required(args_schema: Any, args: Mapping[str, Any]) -> tuple[str, ...]:
+    """Required properties the call did not supply.
+
+    Refusing at translation tells the model what it left out. Letting it
+    through means the failure surfaces states later, naming an adapter instead
+    of the argument.
+    """
+    if not isinstance(args_schema, Mapping):
+        return ()
+    required = args_schema.get("required")
+    if not isinstance(required, (list, tuple)):
+        return ()
+    return tuple(str(key) for key in required
+                 if str(key) not in args or args.get(str(key)) is None)
+
+
+def _selector_from_schema(properties: frozenset[str]) -> Mapping[str, Any] | None:
+    """Infer a selector when the manifest declared none for this verb.
+
+    Still property-driven, never verb-driven: an argument vector binds a
+    process selector, a path or pattern binds a filesystem selector. Callers
+    that pass only an alias table (no tool schemas) fall back to the argument
+    keys actually supplied, which is the weakest signal available and is used
+    only when the manifest offered nothing stronger.
+
+    A manifest that supplies a real selector always wins.
+    """
+    if "argv" in properties:
+        return {"kind": "process", "uriPattern": ""}
+    if "path" in properties or "pattern" in properties:
+        return {"kind": "fs"}
+    return {"kind": "generic"}
+
+
+def _bind_resource(selector: Any, args: MutableMapping[str, Any],
+                   root: str) -> Result[Mapping[str, Any]]:
+    """Bind the declared selector to this call's arguments.
+
+    Dispatch is on the **selector kind the manifest declares**, never on the
+    verb. Workspace containment is a property of a filesystem selector, not of
+    any particular filesystem verb, so a new domain declaring its own selector
+    kind binds through the generic branch without a line changing here
+    (`S10-A-01`, `C-01`).
+    """
     if not isinstance(root, str) or not root or "\x00" in root:
         return Result.fail("instrument_error", "invalid resource root")
-    if action in {"fs.read", "fs.write", "patch.apply"}:
-        bound = _workspace_relative(str(args.get("path", ".")), root)
-        if not bound.ok:
-            return bound
-        args["path"] = bound.value
-        return Result.success({"kind": "fs", "root": root, "path": bound.value})
-    if action == "fs.search":
-        path = args.get("path", ".")
+    if not isinstance(selector, Mapping):
+        return Result.fail("instrument_error",
+                           "manifest declares no selector for this verb")
+
+    kind = str(selector.get("kind") or "generic")
+    bound: dict[str, Any] = {"kind": kind, "root": root}
+
+    if kind == "fs":
+        path = _workspace_relative(str(args.get("path", ".")), root)
+        if not path.ok:
+            return path
+        args["path"] = path.value
+        bound["path"] = path.value
         pattern = args.get("pattern")
-        if not isinstance(pattern, str) or "\x00" in str(path) + pattern:
-            return Result.fail("instrument_error", "search requires safe path and pattern")
-        bound = _workspace_relative(str(path), root)
-        if not bound.ok:
-            return Result.fail("instrument_error", "search path escapes workspace")
-        args["path"] = bound.value
-        return Result.success({"kind": "fs", "root": root, "path": bound.value, "pattern": pattern})
-    if action in {"proc.exec", "proc.test"}:
-        argv = args.get("argv")
-        if not isinstance(argv, list) or not argv or not all(isinstance(x, str) and x for x in argv):
-            return Result.fail("instrument_error", "process action requires argv array")
-        if any("\x00" in x for x in argv):
-            return Result.fail("instrument_error", "process argv contains NUL")
-        return Result.success({"kind": "process", "root": root, "executable": argv[0]})
-    return Result.fail("instrument_error", f"unsupported action: {action}")
+        if isinstance(pattern, str):
+            if "\x00" in pattern:
+                return Result.fail("instrument_error", "pattern contains NUL")
+            bound["pattern"] = pattern
+        return Result.success(bound)
+
+    argv = args.get("argv")
+    if isinstance(argv, list):
+        if not argv or not all(isinstance(item, str) and item for item in argv):
+            return Result.fail("instrument_error", "action requires a non-empty argv array")
+        if any("\x00" in item for item in argv):
+            return Result.fail("instrument_error", "argv contains NUL")
+        # A selector naming an executable pattern binds the head of argv, which
+        # is what the sandbox allowlist is checked against.
+        bound["kind"] = "process" if selector.get("uriPattern") else kind
+        bound["executable"] = argv[0]
+        return Result.success(bound)
+
+    for key in ("uriPattern", "paths"):
+        if key in selector:
+            bound[key] = selector[key]
+    return Result.success(bound)

@@ -1,5 +1,7 @@
 # Lane FE-A · Wave 2 — product surface
 
+**Status:** FE-A6–A10 / FE-2-3…FE-2-7 `[DONE]` in-tree (Wave 1 close). Active Wave 2 TUI sprint is **`lane_tui_wave2.md` (FE-2-8)**. FE-2-9 remains Wave 3.
+
 **Write scope:** `vanguard/clients/cli/**`  
 **DoD default:** `cd vanguard/clients/cli && npm run typecheck && npm test`
 
@@ -58,3 +60,20 @@
 **Depends:** FE-A6.
 
 **DoD:** named fixtures exist; soak test is deterministic (fake clock / replay).
+
+---
+
+## FE-2-8 — Claude-class chrome
+
+**Delta:** implement `docs/scrum/development_guides/tui_product_surface.md` layout: status bar (`source`, seq, budget), virtualized transcript, prompt bar, `ctrl+c` → `requestCancel`. No new verbs.
+
+**DoD:** `ui.test.ts` + typecheck; `NO_COLOR` still honest.
+
+---
+
+## FE-2-9 — Resume chrome
+
+**Delta:** TUI/headless path that calls `requestResume` with durable run id. If daemon returns `not_available`, show that text — no fake resume.
+
+**DoD:** tests with replay/scenario or live `not_available`.
+

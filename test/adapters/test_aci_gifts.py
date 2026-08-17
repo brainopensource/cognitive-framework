@@ -106,6 +106,39 @@ class TestACIGifts(unittest.TestCase):
         self.assertIsNotNone(receipt.output)
         self.assertIn("syntax_observation", receipt.output)
 
+    def test_p1_2_whole_file_write_via_patch_apply(self) -> None:
+        """P1-2: Models that supply full file content instead of unified diff are accepted cleanly."""
+        req = EffectRequest(
+            action="patch",
+            verb="patch.apply",
+            args={"path": "new_module.py", "content": "print('hello whole file')\n"},
+        )
+        res = self.env.apply(req)
+        self.assertTrue(res.ok)
+        receipt = res.value
+        self.assertEqual(receipt.outcome, "ok")
+        created_file = self.repo_dir / "new_module.py"
+        self.assertTrue(created_file.exists())
+        self.assertEqual(created_file.read_text(encoding="utf-8"), "print('hello whole file')\n")
+
+    def test_p1_1_search_with_glob_and_max_results(self) -> None:
+        """P1-1: Thickened search schema filters with glob and caps max_results."""
+        for i in range(5):
+            (self.repo_dir / f"test_{i}.py").write_text("def find_me(): pass\n", encoding="utf-8")
+        (self.repo_dir / "other.txt").write_text("def find_me(): pass\n", encoding="utf-8")
+        import subprocess
+        subprocess.run(["git", "add", "."], cwd=self.repo_dir, check=True)
+
+        req = ObservationRequest(
+            action="search",
+            pattern="find_me",
+            args={"glob": "*.py", "max_results": 2},
+        )
+        res = self.env.observe(req)
+        self.assertTrue(res.ok)
+        obs = res.value
+        self.assertTrue(len(obs.matches) <= 2)
+
 
 if __name__ == "__main__":
     unittest.main()

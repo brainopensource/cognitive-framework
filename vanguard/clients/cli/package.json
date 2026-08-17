@@ -18,12 +18,14 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prebuild": "npm run build --prefix ../client-core --silent",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build --silent && node --test --test-isolation=none dist/test/*.test.js",
+    "pretypecheck": "npm run build --prefix ../client-core --silent",
+    "test": "npm run build --silent && node --test dist/test/*.test.js",
     "vg": "node --import tsx/esm src/main.tsx"
   },
   "dependencies": {
-    "canonicalize": "^2.1.0",
+    "@vanguard/client-core": "file:../client-core",
     "ink": "^5.1.0",
     "react": "^18.3.1"
   },

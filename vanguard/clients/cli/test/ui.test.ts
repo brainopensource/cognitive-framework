@@ -7,8 +7,21 @@ import { fileURLToPath } from "node:url";
 import { reduceRunView, emptyRunView } from "../src/application/run-view.js";
 import { captureCorrection, correctionReasonForKey } from "../src/application/corrections.js";
 import { dispatchApproval } from "../src/application/approvals.js";
+import { submitInteractiveApproval } from "../src/composition/operator-approval.js";
+import { OperatorSigner } from "../src/adapters/signer.js";
 import { approvalActionForKey } from "../src/tui/keys.js";
 import { colorizeUnifiedDiff } from "../src/tui/diff.js";
+import {
+  shouldDispatchApproval,
+  shouldRequestCancel,
+  submitBrief,
+} from "../src/tui/focus.js";
+import { windowTranscript } from "../src/tui/transcript-window.js";
+import { formatStatusBar } from "../src/tui/status-bar.js";
+import { performResume } from "../src/composition/resume-session.js";
+import { whyText } from "../src/tui/why-display.js";
+import { HELP_TEXT } from "../src/tui/focus.js";
+import { subscribeRun } from "@vanguard/client-core";
 import type {
   CorrectionRecord,
   EventEnvelope,
@@ -79,6 +92,103 @@ test("approval modal keys dispatch approve, reject, and correct without mutating
   assert.equal(approvalActionForKey("q"), undefined);
 });
 
+test("prompt mode does not dispatch approval on y", () => {
+  assert.equal(shouldDispatchApproval("prompt", "y"), false);
+  assert.equal(shouldDispatchApproval("approval", "y"), true);
+  assert.equal(shouldDispatchApproval("run", "y"), false);
+});
+
+test("empty Enter does not start a run", () => {
+  const result = submitBrief("   ");
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.error.code, "invalid_request");
+  const ok = submitBrief("fix the test");
+  assert.equal(ok.ok, true);
+});
+
+test("windowTranscript clamps 100 thoughts to height", () => {
+  const view = {
+    ...emptyRunView(),
+    thoughts: Array.from({ length: 100 }, (_, i) => `thought-${i}`),
+  };
+  const win = windowTranscript(view, 0, 16);
+  assert.equal(win.rows.length, 16);
+  assert.equal(win.total, 100);
+  const end = windowTranscript(view, 10_000, 16);
+  assert.equal(end.rows.length, 16);
+  assert.equal(end.cursor, 84);
+});
+
+test("ctrl+c maps to cancel; Esc in prompt does not", () => {
+  assert.equal(shouldRequestCancel("prompt", { ctrlC: true, escape: false }), true);
+  assert.equal(shouldRequestCancel("prompt", { ctrlC: false, escape: true }), false);
+  assert.equal(shouldRequestCancel("run", { ctrlC: false, escape: true }), true);
+});
+
+test("status bar labels mock and never looks live", () => {
+  const line = formatStatusBar({
+    source: "mock",
+    seq: "3",
+    tokens: 42,
+    costMicros: "900",
+    kind: "BudgetCommitted",
+  });
+  assert.match(line, /source: mock/);
+  assert.equal(/source: live/.test(line), false);
+  assert.match(line, /daemon: unknown/);
+  assert.equal(/policy: daemon/.test(line), false);
+});
+
+test("subscribeRun abort does not throw", async () => {
+  const ac = new AbortController();
+  ac.abort();
+  let streamed = 0;
+  await subscribeRun(
+    {
+      async *streamEvents() {
+        streamed += 1;
+        yield {
+          ok: true as const,
+          value: { contractVersion: "0.1" as const, source: "live" as const, envelope: envelope("Heartbeat") },
+        };
+      },
+    },
+    { runId: "run-1" },
+    { onItem() {} },
+    ac.signal
+  );
+  assert.equal(streamed, 0);
+});
+
+test("resume not_available does not start a mock stream", async () => {
+  let streams = 0;
+  const client = {
+    async requestResume() {
+      return { ok: false as const, error: { code: "not_available" as const, message: "no daemon", retryable: false } };
+    },
+    async *streamEvents() {
+      streams += 1;
+    },
+  };
+  const result = await performResume(client, "run-1");
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, "not_available");
+  assert.equal(streams, 0);
+});
+
+test("whyText prints error.code only when explainArtifact fails", () => {
+  const text = whyText({
+    ok: false,
+    error: { code: "not_available", message: "no evidence", retryable: false },
+  });
+  assert.equal(text, "not_available");
+});
+
+test("help lists resume commands", () => {
+  assert.match(HELP_TEXT, /vg run --resume/);
+  assert.match(HELP_TEXT, /\br\b/);
+});
+
 test("approve and reject callbacks submit resolveApproval receipts only", async () => {
   const client = new RecordingClient();
   const approved = await dispatchApproval(client, "appr-1", "y");
@@ -89,6 +199,64 @@ test("approve and reject callbacks submit resolveApproval receipts only", async 
     { approvalId: "appr-1", decision: "approve" },
     { approvalId: "appr-1", decision: "reject" },
   ]);
+});
+
+const CHALLENGE_DIGEST_A = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const CHALLENGE_DIGEST_B = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+test("interactive y/n with challenge digests attaches an OperatorSigner signature", async () => {
+  const client = new RecordingClient();
+  const signer = new OperatorSigner();
+  const pending = {
+    approvalId: "appr-1",
+    unifiedDiff: "+x\n",
+    proposedPatchDigest: DIGEST_A,
+    episodeId: "episode-1",
+    argsDigest: CHALLENGE_DIGEST_A,
+    descriptorDigest: CHALLENGE_DIGEST_B,
+    expiresAt: "2026-08-16T00:00:00.000Z",
+  };
+  const approved = await submitInteractiveApproval(client, pending, "y", signer);
+  assert.equal(approved.ok, true);
+  assert.equal(client.approvals[0]?.decision, "approve");
+  assert.equal(typeof client.approvals[0]?.signature, "string");
+  assert.ok((client.approvals[0]?.signature ?? "").length > 0);
+  assert.equal(client.approvals[0]?.signerKeyRef, signer.keyId);
+});
+
+test("interactive approval without challenge digests does not fabricate a signature", async () => {
+  const client = new RecordingClient();
+  const pending = {
+    approvalId: "appr-1",
+    unifiedDiff: "+x\n",
+    proposedPatchDigest: DIGEST_A,
+    episodeId: "episode-1",
+    argsDigest: "",
+    descriptorDigest: "",
+    expiresAt: "",
+  };
+  const result = await submitInteractiveApproval(client, pending, "y", new OperatorSigner());
+  assert.equal(result.ok, true);
+  assert.deepEqual(client.approvals, [{ approvalId: "appr-1", decision: "approve" }]);
+});
+
+test("TUI presentation consumes @vanguard/client-core", () => {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
+  const files = [
+    "src/main.tsx",
+    "src/composition/client-for.ts",
+    "src/composition/parse-cli.ts",
+    "src/composition/operator-approval.ts",
+    "src/tui/hooks/use-vanguard-run.ts",
+    "src/tui/screens/run-tui.tsx",
+    "src/tui/status-bar.ts",
+    "src/composition/resume-session.ts",
+  ];
+  for (const rel of files) {
+    const source = readFileSync(join(dir, rel), "utf8");
+    assert.match(source, /@vanguard\/client-core/, rel);
+  }
 });
 
 test("correction keys map onto VG-04 reason codes including security and architecture", () => {

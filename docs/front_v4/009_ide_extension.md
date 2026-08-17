@@ -1,19 +1,33 @@
-# 009 — Vanguard IDE — extension-first, fork deferred (Proposed)
+# 009 — Vanguard GUI — Standalone IDE App (Proposed)
 
 Status: `Proposed`  
-Date: 2026-08-16  
-Directory name: **`vanguard-ide/`** (repository root, sibling to `vanguard/`).
+Date: 2026-08-17  
+Directory name: **`vanguard-gui/`** (or `apps/desktop/`).
 
 ## Decision (D3)
 
-Ship a **standard VS Code extension** (`engines.vscode`, TypeScript, esbuild). Contributes: sidebar webview view, commands, CodeLens. Talks to the daemon with the same vg.4 frames as the CLI (vendored contract).
+Ship a **standalone GUI IDE** at **`vanguard-gui/`** (Phase 2). Stack frozen: **Tauri 2 + React + TypeScript**. Consumes `@vanguard/client-core` over vg.4 frames.
 
-A Code-OSS / VSCodium **fork is not in scope**. Sprint estimates of a ~380 LOC fork are not a plan.
+- **VS Code Extension (`vanguard-ide/**`, FE-B*) is VOID.**
+- **Code-OSS fork is out of scope.**
 
-## Reversal path (Phase-4+)
+Bind OSS **libraries** (Monaco, xterm, arborist, xyflow-as-view). Do not vendor IDE repositories. See `gui_ide_slots.md`.
 
-If productization later requires a branded standalone editor, reopen a fork program (upstream tracking, signing, per-OS CI). Until then, keep research in the appendix; do not staff it.
+## Slot-Based Modular Architecture
 
-## Appendix — fork research (not current work)
+The GUI binds lightweight open-source building blocks into dedicated UI slots:
 
-Debloat and `product.json` customization are relevant **only** if the reversal fires. Do not claim a specific upstream `product.json` layout as current fact; verify against the Code-OSS version you would pin at that time. Do not treat `vanguard-ide/` as a fork tree today — it is the extension package.
+| UI Slot | Technology / Library | Role |
+|---|---|---|
+| **Editor** | Monaco Editor or CodeMirror 6 | Code editing, syntax highlighting, keybindings. |
+| **Diff** | Monaco Diff Editor | Patch review during `ApprovalRequested`. |
+| **Terminal** | `@xterm/xterm` + native PTY | Interactive shell / terminal running `vg`. |
+| **File Tree** | Virtualized tree (`react-arborist` or clean DOM tree) | Workspace files from active repo. |
+| **Git** | Native `git` CLI runner | Staging, uncommitted changes, branches. |
+| **Run Stream** | `reduceRunView` (from `@vanguard/client-core`) | Real-time thoughts, tool calls, and budget tracker. |
+| **Workflow Canvas** | `@xyflow/react` | **Passive visualizer** of VG-04 event trajectories only. |
+| **Signer** | `OperatorSigner` (RFC 8785 Ed25519) | Signs approval decisions locally. |
+
+## Terminal Integration
+
+The GUI does not embed Ink components directly into the DOM (Ink is terminal-only). Instead, the GUI embeds `@xterm/xterm` connected to a PTY process running the `vg` CLI or shell.

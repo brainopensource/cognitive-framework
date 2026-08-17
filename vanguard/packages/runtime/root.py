@@ -57,7 +57,7 @@ import shutil
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, ClassVar, Mapping, Sequence
 
 from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
 from ..adapters.evaluators.client import EvaluatorClient
@@ -65,6 +65,7 @@ from ..adapters.evaluators.unavailable import UnavailableEvaluator
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.repo_index import FileRepoIndex
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.context import (
     CompetencePriorRecorder,
@@ -108,8 +109,10 @@ from ..ports.environment import EffectRequest as EnvironmentRequest
 from ..ports.environment import ObservationRequest
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.determinism import ClockPort, RandomPort
+from ..ports.index import IndexPort
 from ..ports.event_store import EventRange, EventStorePort
 from .determinism import SystemClock, SystemRandom, event_id
+from .telemetry import RunTelemetry
 from .governance.approvals import (
     ApprovalAuthority,
     ApprovalDecision,
@@ -140,6 +143,8 @@ ROLE_KIND: Mapping[str, str] = {
     "tools": "tool_schema",
     "context_policy": "context_policy",
     "routing_policy": "routing_policy",
+    "approval_policy": "approval_policy",
+    "skills": "skills",
     "retrieval_policy": "retrieval_policy",
     "compaction_policy": "compaction_policy",
 }
@@ -222,6 +227,33 @@ class RunResult:
     store: EventStorePort
     verdict: Verdict | None = None
     detail: str = ""
+    #: `S9-A-01`. Per-component digests, so attribution can name a component
+    #: rather than a run. Empty means the harness carried none, and that is a
+    #: replay gap, not a default.
+    gene_digests: Mapping[str, str] = field(default_factory=dict)
+    #: `S9-A-02`. Integers or absent, never floats and never a fabricated zero.
+    telemetry: RunTelemetry = field(default_factory=lambda: RunTelemetry(turns=0))
+    #: `S9-A-01`. Why this arm produced no usable measurement. `None` means the
+    #: instrument worked -- it does not mean the run succeeded.
+    instrument_error: str | None = None
+    #: `S9-A-04`. The ledger reduction Lane C's paired runner pairs on.
+    state_digest: str = ""
+
+    #: Digests a benchmarked run must carry to be replayable (Phase 4 `V5-A`).
+    #: `ClassVar` -- a constant, not a field.
+    REPLAY_REQUIRED: ClassVar[tuple[str, ...]] = (
+        "composition_digest", "gene_digests", "state_digest")
+
+    def replay_gaps(self) -> tuple[str, ...]:
+        """Which replay inputs this result is missing. Empty means replayable.
+
+        `S9-A-03`. An executable audit rather than a prose claim: a run that
+        cannot be replayed should say so in its own result, at the moment it is
+        produced, not be discovered unreplayable a sprint later when the corpus
+        is being re-derived.
+        """
+        return tuple(name for name in self.REPLAY_REQUIRED
+                     if not getattr(self, name, None))
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,6 +288,10 @@ class Harness:
     tool_schemas: tuple[Mapping[str, Any], ...]
     budget: Mapping[str, int]
     effect_budget: int
+    #: `W11-A`. Component path the pack declared for its repository index, or
+    #: `None`. Declared, never inferred: a harness that did not ask for an
+    #: index must not silently acquire one.
+    index_component: str | None
     evaluators: tuple[str, ...]
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
@@ -581,6 +617,9 @@ class SessionPorts:
     store: EventStorePort
     #: `S8-A-03`. Pinned by `Recording.seed` on a replay; live when recording.
     random: RandomPort | None = None
+    #: `W11-A`. Bound only when the pack declares an index component. `None`
+    #: means the harness declared none -- not that indexing failed.
+    index: IndexPort | None = None
     verifier: Any = None
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
@@ -650,6 +689,19 @@ class HarnessSession:
                 BindingContext(verb=verb, environment=ports.environment, repo_path=repo))
             for verb in harness.verbs
         }
+        # `W11-A`. The index is bound only when the pack declares it. A
+        # harness that did not ask for one must not silently acquire it: an
+        # unread component is a composition error (`S7-B-02`), and an unasked-
+        # for one is a capability nobody authorised.
+        self.index: IndexPort | None = None
+        if harness.index_component is not None:
+            self.index = ports.index or FileRepoIndex()
+            self.index.index(str(repo))
+        elif ports.index is not None:
+            raise CompositionError(
+                "an IndexPort was supplied but the manifest declares no index "
+                "component; bind it in the pack or do not pass it")
+
         self.scope = _scope_for(harness, repo)
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
@@ -798,7 +850,53 @@ class HarnessSession:
             store=ports.store,
             verdict=verdict,
             detail=detail,
+            gene_digests=dict(harness.gene_digests),
+            telemetry=self._telemetry(),
+            instrument_error=self._instrument_error(),
+            state_digest=self.state_digest(),
         )
+
+    # -- what the instrument reads ----------------------------------------
+
+    def _telemetry(self) -> RunTelemetry:
+        """Integer telemetry, with absence preserved (`S9-A-02`).
+
+        A provider that reported no usage did not report zero usage. Summing
+        `.get(key, 0)` across contexts would turn a silent provider into a free
+        run, and a corpus of free runs is how a cost claim becomes fiction.
+        """
+        prompt: int | None = None
+        completion: int | None = None
+        for context in self.operator.contexts:
+            if not isinstance(context, Mapping):
+                continue
+            for key, current in (("prompt_tokens", prompt),
+                                 ("completion_tokens", completion)):
+                reported = context.get(key)
+                if isinstance(reported, bool) or not isinstance(reported, int):
+                    continue
+                if key == "prompt_tokens":
+                    prompt = reported if current is None else current + reported
+                else:
+                    completion = reported if current is None else current + reported
+        return RunTelemetry(
+            turns=self.turns_consumed(),
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+        )
+
+    def _instrument_error(self) -> str | None:
+        """Why this arm produced no usable measurement, or `None`.
+
+        `None` means the instrument worked. It does not mean the run
+        succeeded -- a refused run is a result, an unmeasured one is not.
+        """
+        if self.turns_consumed() == 0:
+            # No proposal ever reached the ledger: the provider did not answer.
+            # `S7-C-02` calls this `model_not_invoked`, and it is an
+            # instrument failure, not a cheap run.
+            return "model_not_invoked"
+        return None
 
     def _evaluate(self) -> Any:
         """`ICD 3` / `M5`: the verdict comes from outside the episode."""
@@ -901,6 +999,10 @@ class Runtime:
             budget=cls._budget(contents[manifest.budget_policy], manifest.budget_policy),
             effect_budget=cls._effect_budget(
                 contents[manifest.budget_policy], manifest.budget_policy),
+            index_component=next(
+                (path for role, paths in manifest.components
+                 if role in {"index_policy", "repo_index"} for path in paths),
+                None),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,

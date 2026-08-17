@@ -1,42 +1,42 @@
 # 001 — Frontend backlog (Proposed)
 
 Status: `Proposed`  
-Date: 2026-08-16  
-Maps to: `docs/scrum/ROADMAP.MD` §3 and `docs/scrum/sprints_front/`
+Date: 2026-08-17  
+Maps to: `docs/scrum/roadmap_frontend.md` and `docs/scrum/sprints_front/`
 
-IDs are **FE-A\*** / **FE-B\*** only. There is no Tauri epic, no EPIC-09, no M4 1000-run soak, and no invented target files under `vanguard/packages/`.
+IDs are **FE-1\*** (Client Core), **FE-2\*** (Ink TUI CLI), and **FE-3\*** (Standalone GUI Start). VS Code extension (`FE-B*`) and Code-OSS fork are VOID.
 
-## Lane FE-A — `vanguard/clients/cli/**`
-
-| ID | Summary | Kit |
-|---|---|---|
-| FE-A1 | Delete `src/commands.ts`, `src/runtime.ts`, `src/mock-runtime.ts`; wire `adapters/signer.ts` | wave1 |
-| FE-A2 | Split `LiveRuntimeClient` transports; parse frames | wave1 |
-| FE-A3 | RFC-8785 JCS + `~/.vanguard/keys` 0600 | wave1 |
-| FE-A4 | Move UI to `src/tui/{components,screens,hooks,theme}/`; `useVanguardRun` | wave1 |
-| FE-A5 | Reconnect / backoff / timeouts | wave1 |
-| FE-A6 | `vg --demo` replay + `source: mock` + `fixtures/sessions/` | wave2 |
-| FE-A7 | Honest daemon lifecycle (`not_available` until J1) | wave2 |
-| FE-A8 | Approval challenge fields; no fabricated why evidence | wave2 |
-| FE-A9 | `install.sh` + npm global; flag docs | wave2 |
-| FE-A10 | Fixture catalog + soak in `vanguard/clients/cli/test/` | wave2 |
-
-## Lane FE-B — `vanguard-ide/**`
+## Lane FE-1 — `@vanguard/client-core`
 
 | ID | Summary | Kit |
 |---|---|---|
-| FE-B1 | Extension scaffold | wave1 |
-| FE-B2 | Vendor contract + replay | wave1 |
-| FE-B3 | Webview run stream | wave1 |
-| FE-B4 | Approval CodeLens + signer port | wave1 |
-| FE-B5 | Live UDS bridge | wave2 |
-| FE-B6 | Editor context in existing `StartRun` brief | wave2 |
-| FE-B7 | E2E pyramid | wave2 |
-| FE-B8 | `.vsix` packaging | wave2 |
+| FE-1-1 | Extract types, parse, and result helpers into client-core | lane_core_wave1 |
+| FE-1-2 | Move `OperatorSigner` (RFC 8785 Ed25519) + `RuntimeClient` port | lane_core_wave1 |
+| FE-1-3 | Move `run-view` reducer + approvals application logic | lane_core_wave1 |
+| FE-1-4 | Move `LiveRuntimeClient`, `ReplayRuntimeClient`, `ScenarioRuntimeClient` | lane_core_wave1 |
 
-## Removed from earlier drafts
+## Lane FE-2 — `vanguard/clients/cli/**` (Ink TUI Product)
 
-- Tauri desktop (ROADMAP rejects it for this phase).
-- EPIC-09 / standalone Code-OSS fork-now (see 009).
-- M4 soak of 1000 live daemon runs as a frontend gate.
-- Target paths that never existed (`src/commands.ts` as the *product* surface after A1 is deleted, not expanded).
+| ID | Summary | Kit |
+|---|---|---|
+| FE-2-1 | Wire CLI to import `@vanguard/client-core` | lane_a_wave1 |
+| FE-2-2 | TUI screens (`tui/screens/`) with hexagonal layout | lane_a_wave1 |
+| FE-2-3 | `vg --demo` replay + `source: mock` | lane_a_wave2 |
+| FE-2-4 | Interactive approval prompt (`y`/`n`/`c`) | lane_a_wave2 |
+| FE-2-5 | Honest daemon lifecycle (`not_available` until J1) | lane_a_wave2 |
+| FE-2-6 | `vg --headless` script execution mode | lane_a_wave2 |
+| FE-2-7 | `install.sh` + global bin packaging | lane_a_wave2 |
+| FE-2-8 | Claude-class chrome: status bar, virtualized transcript, prompt bar, interrupt (`tui_product_surface.md`) | lane_a_wave2 |
+| FE-2-9 | Resume chrome calling `requestResume` (no new wire) | lane_a_wave2 |
+
+## Lane FE-3 — `vanguard-gui/**` (Standalone GUI IDE App — Phase 2)
+
+| ID | Summary | Kit |
+|---|---|---|
+| FE-3-1 | App shell (**Tauri 2 + React**, `vanguard-gui/`) + ADR-FE-GUI-001 | lane_gui_wave1 |
+| FE-3-2 | Import `@vanguard/client-core` + render replay run stream without daemon | lane_gui_wave1 |
+| FE-3-3 | Slot placeholder: File tree & Monaco Editor tab | lane_gui_wave1 |
+| FE-3-4 | Slot placeholder: `@xterm/xterm` PTY terminal pane (running `vg`) | lane_gui_wave1 |
+| FE-3-5 | Slot placeholder: `@xyflow/react` VG-04 event visualizer tab | lane_gui_wave1 |
+| FE-3-6 | Slot: Monaco diff + Ed25519 Approve/Reject | lane_gui_wave1 |
+| FE-3-7 | Slot registry + command palette + git status chrome | lane_gui_wave1 |

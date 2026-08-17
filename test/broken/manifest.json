@@ -198,6 +198,22 @@
       "expected_failure": "unknown core package 'ledger'"
     },
     {
+      "test_id": "MF-S7-A-01-001",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/rogue_module"
+      ],
+      "expected_failure": "unknown core module 'loops.py'"
+    },
+    {
       "test_id": "MF-KRN-001",
       "control": [
         "python3",
@@ -489,7 +505,9 @@
       "test_id": "MF-SEC-SCAN-001",
       "control": [
         "python3",
-        "tools/scan_secrets.py"
+        "tools/scan_secrets.py",
+        "--root",
+        "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",

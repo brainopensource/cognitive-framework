@@ -172,14 +172,26 @@ def find_cycles(graph: dict[Path, set[Path]]) -> list[list[Path]]:
 
 def check(root: Path, s4_exit: bool) -> list[str]:
     errors: list[str] = []
+    # S7-A-01 (VG-03 4, LT-1..LT-8): the lattice is closed. Anything sitting
+    # directly under vanguard/packages/ that the ICD does not name is a build
+    # failure -- directory *or* module. Closing over directories alone let a
+    # top-level module ride in beside the six packages unnamed, which is how an
+    # unlisted subsystem enters the tree without ever facing a boundary row.
     packages_root = root / "vanguard" / "packages"
     if packages_root.is_dir():
         for child in sorted(packages_root.iterdir()):
-            if child.is_dir() and child.name not in PACKAGE_NAMES and child.name not in IGNORED_PARTS:
-                errors.append(
-                    f"unknown core package {child.name!r}; ICD permits exactly: "
-                    + ", ".join(sorted(PACKAGE_NAMES))
-                )
+            if child.name in PACKAGE_NAMES or child.name in IGNORED_PARTS:
+                continue
+            if child.is_dir():
+                kind = "package"
+            elif child.suffix in SOURCE_SUFFIXES and child.name != "__init__.py":
+                kind = "module"
+            else:
+                continue
+            errors.append(
+                f"unknown core {kind} {child.name!r}; ICD permits exactly: "
+                + ", ".join(sorted(PACKAGE_NAMES))
+            )
     files = source_files(root)
     graph: dict[Path, set[Path]] = defaultdict(set)
     for source in files:

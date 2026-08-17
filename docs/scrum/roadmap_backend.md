@@ -7,7 +7,7 @@ Branch: `sprints7-8/integration`
 **Spec (locked):** `docs/main_v4/` — especially `13_C_gts_mvp_program_and_engineering_plan.md` (plan/rationale, not a second board) and VG-02 / VG-03 / VG-04 / VG-05.  
 **How-to:** `docs/scrum/sprints/sprint07` … `sprint10` (lane kits). Do not copy status into the kits.
 
-This file is the only backend backlog. Mark `[DONE]` here when the DoD command passed.
+This file is the only backend backlog. Mark `[DONE] ✅` here when the DoD command passed.
 
 ---
 
@@ -38,11 +38,11 @@ Simplified. Detail lives in closed sprint folders under `docs/scrum/sprints/spri
 
 | ID | Status | What |
 |---|---|---|
-| S0–S4 | `[DONE]` | Contracts, kernel dispatch S0–S12, ledger, must-fail suite, `spike/`/`slice/` disposable by CI |
-| S5–S6 | `[DONE]` | Episode engine depth-1, environments, evaluators exterior, wire VG-04 |
-| S6B | `[DONE]` | Ed25519 approvals, `RuntimeService`, bwrap worker, LAM/Ollama ports, `--candidate` contract |
-| Packs | `[DONE]` | `vg-code-default`, `vg-shell-only`, claude/opencode/swe-mini shaped manifests (prompt+alias; DNA still thin until S8) |
-| Lab CLI | `[DONE]` | `lab/{bench,diff,build}.py` exist |
+| S0–S4 | `[DONE] ✅` | Contracts, kernel dispatch S0–S12, ledger, must-fail suite, `spike/`/`slice/` disposable by CI |
+| S5–S6 | `[DONE] ✅` | Episode engine depth-1, environments, evaluators exterior, wire VG-04 |
+| S6B | `[DONE] ✅` | Ed25519 approvals, `RuntimeService`, bwrap worker, LAM/Ollama ports, `--candidate` contract |
+| Packs | `[DONE] ✅` | `vg-code-default`, `vg-shell-only`, claude/opencode/swe-mini shaped manifests (prompt+alias; DNA still thin until S8) |
+| Lab CLI | `[DONE] ✅` | `lab/{bench,diff,build}.py` exist |
 
 ---
 
@@ -56,48 +56,48 @@ Evidence: `docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md` (539 tests,
 
 | ID | Status | Task |
 |---|---|---|
-| S7-A-01 | `[DONE]` | Lattice CI: no extra top-level package under `vanguard/packages/` |
-| S7-A-02 | `[DONE]` | `subprocess` only from `adapters/sandbox/` |
-| S7-A-03 | `[DONE]` | No evaluator import from `agency/` or `runtime/` |
-| S7-A-04 | `[DONE]` | Delete `runtime/loops/` |
-| S7-A-05 | `[DONE]` | Delete `coordination.py`; depth = ledger projection |
-| S7-A-06 | `[DONE]` | No hardcoded bwrap path / reservation / fake tokens |
-| S7-A-07 | `[DONE]` | `repo_paths` after `docs/agile` → `docs/scrum` |
+| S7-A-01 | `[DONE] ✅` | Lattice CI: no extra top-level package under `vanguard/packages/` |
+| S7-A-02 | `[DONE] ✅` | `subprocess` only from `adapters/sandbox/` |
+| S7-A-03 | `[DONE] ✅` | No evaluator import from `agency/` or `runtime/` |
+| S7-A-04 | `[DONE] ✅` | Delete `runtime/loops/` |
+| S7-A-05 | `[DONE] ✅` | Delete `coordination.py`; depth = ledger projection |
+| S7-A-06 | `[DONE] ✅` | No hardcoded bwrap path / reservation / fake tokens |
+| S7-A-07 | `[DONE] ✅` | `repo_paths` after `docs/agile` → `docs/scrum` |
 
 ### Lane B
 
 | ID | Status | Task |
 |---|---|---|
-| S7-B-01 | `[DONE]` | One alias shape; unknown alias fails at compose |
-| S7-B-02 | `[DONE]` | Unread manifest component fails compose |
-| S7-B-03 | `[DONE]` | Metamorphic context_policy test (green via S8 compaction) |
-| S7-B-04 | `[DONE]` | `gene_digests` on results |
-| S7-B-05 | `[DONE]` | `vg-shell-only` undeletable bench test |
+| S7-B-01 | `[DONE] ✅` | One alias shape; unknown alias fails at compose |
+| S7-B-02 | `[DONE] ✅` | Unread manifest component fails compose |
+| S7-B-03 | `[DONE] ✅` | Metamorphic context_policy test (green via S8 compaction) |
+| S7-B-04 | `[DONE] ✅` | `gene_digests` on results |
+| S7-B-05 | `[DONE] ✅` | `vg-shell-only` undeletable bench test |
 
 ### Lane C
 
 | ID | Status | Task |
 |---|---|---|
-| S7-C-01 | `[DONE]` | `benchmarkings/` may import `runtime.root` + `ports` only |
-| S7-C-02 | `[DONE]` | `guard.py` refuses degenerate runs |
-| S7-C-03 | `[DONE]` | Delete four bypass runners |
-| S7-C-04 | `[DONE]` | Retraction + `_external_model_probes/` |
-| S7-C-05 | `[DONE]` | Sole runner: `zero_hint_v1/run_live_agent.py` |
-| S7-C-06 | `[DONE]` | `models.json` `top: []` fail-closed |
-| S7-C-07 | `[DONE]` | LAM gym uses pack system prompt, not competitor persona |
+| S7-C-01 | `[DONE] ✅` | `benchmarkings/` may import `runtime.root` + `ports` only |
+| S7-C-02 | `[DONE] ✅` | `guard.py` refuses degenerate runs |
+| S7-C-03 | `[DONE] ✅` | Delete four bypass runners |
+| S7-C-04 | `[DONE] ✅` | Retraction + `_external_model_probes/` |
+| S7-C-05 | `[DONE] ✅` | Sole runner: `zero_hint_v1/run_live_agent.py` |
+| S7-C-06 | `[DONE] ✅` | `models.json` `top: []` fail-closed |
+| S7-C-07 | `[DONE] ✅` | LAM gym uses pack system prompt, not competitor persona |
 
 ### Joint
 
 | ID | Status | Task |
 |---|---|---|
-| S7-J-01 | `[DONE]` | ADR-0063 Python; reverse ADR-0001 |
-| S7-J-02 | `[DONE]` | ADR-0064 gate status |
-| S7-J-03 | `[DONE]` | ADR-0065 D-01…D-15 binding |
-| S7-J-04 | `[TODO]` | SEC-01. **Blocked on the CTO: rotate in the OpenRouter dashboard first** — engineering cannot and must not do this. Tree is clean (`.env` untracked + gitignored, scan PASS); disclosure is historical: 1 reachable `.env` blob, **21 `refs/original/**`**, 3 remote branches. Rewrite stays gated on rotation + written per-ref sign-off. Detail: `docs/scrum/sprints/sprint08/evidence/s7-j-04-key-rotation.md`. Does not block S8/S9 coding |
-| S7-J-05 | `[DONE]` | `LICENSE` Apache-2.0 on disk |
-| S7-J-06 | `[TODO]` | Promote measurement science into VG-07 |
-| S7-J-07 | `[TODO]` | `doing/` cap 8 (now over) |
-| S7-J-08 | `[TODO]` | ADR-0066 MCP rules **before** MCP code |
+| S7-J-01 | `[DONE] ✅` | ADR-0063 Python; reverse ADR-0001 |
+| S7-J-02 | `[DONE] ✅` | ADR-0064 gate status |
+| S7-J-03 | `[DONE] ✅` | ADR-0065 D-01…D-15 binding |
+| S7-J-04 | `[TODO] ❌` | SEC-01. **Blocked on the CTO: rotate in the OpenRouter dashboard first** — engineering cannot and must not do this. Tree is clean (`.env` untracked + gitignored, scan PASS); disclosure is historical: 1 reachable `.env` blob, **21 `refs/original/**`**, 3 remote branches. Rewrite stays gated on rotation + written per-ref sign-off. Detail: `docs/scrum/sprints/sprint08/evidence/s7-j-04-key-rotation.md`. Does not block S8/S9 coding |
+| S7-J-05 | `[DONE] ✅` | `LICENSE` Apache-2.0 on disk |
+| S7-J-06 | `[TODO] ❌` | Promote measurement science into VG-07 |
+| S7-J-07 | `[TODO] ❌` | `doing/` cap 8 (now over) |
+| S7-J-08 | `[TODO] ❌` | ADR-0066 MCP rules **before** MCP code |
 
 ---
 
@@ -109,48 +109,48 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 
 | ID | Status | Task |
 |---|---|---|
-| S8-A-01 | `[DONE]` | `compose` / `HarnessSession` / `run`; one `Kernel`; delete `_WitnessKernel` |
-| S8-A-02 | `[DONE]` | Suspend/resume from ledger; `max_turns` survives approval |
-| S8-A-03 | `[DONE]` | `RandomPort` + complete `ClockPort` |
-| S8-A-04 | `[DONE]` | `RecordCorrection` via `parse_wire` |
-| S8-A-05 | `[DONE]` | `Claim` domain type; empty invalidation fails; substrate auto-stale |
+| S8-A-01 | `[DONE] ✅` | `compose` / `HarnessSession` / `run`; one `Kernel`; delete `_WitnessKernel` |
+| S8-A-02 | `[DONE] ✅` | Suspend/resume from ledger; `max_turns` survives approval |
+| S8-A-03 | `[DONE] ✅` | `RandomPort` + complete `ClockPort` |
+| S8-A-04 | `[DONE] ✅` | `RecordCorrection` via `parse_wire` |
+| S8-A-05 | `[DONE] ✅` | `Claim` domain type; empty invalidation fails; substrate auto-stale |
 
 ### Lane B
 
 | ID | Status | Task |
 |---|---|---|
-| S8-B-01 | `[DONE]` | `EpisodeEngine.spawn` (model proposal `ProposalKind.SPAWN` + fail-closed `args["scope"]` parsing + attenuation + causation + typed return + workspace `finally`) |
-| S8-B-01a | `[DONE]` | `parent_lease` on child requests; budget conservation properties (`fc9f5f4`) |
-| S8-B-02 | `[DONE]` | `CompactionStrategy` registry; metamorphic green |
-| S8-B-03 | `[DONE]` | `ModelRouter` from `routing_policy` |
-| S8-B-04 | `[DONE]` | `approval_policy` component (`fc9f5f4`) |
-| S8-B-05 | `[DONE]` | Child isolation: only return in parent L5 |
-| S8-B-06 | `[DONE]` | ACI paginated `fs.read` |
-| S8-B-07 | `[DONE]` | ACI succinct `fs.search` |
-| S8-B-08 | `[DONE]` | ACI empty `proc.exec` ack |
-| S8-B-09 | `[DONE]` | Lint-on-patch as receipt, not verdict |
-| S8-B-10 | `[DONE]` | `maxTurns` from `budget_policy` |
+| S8-B-01 | `[DONE] ✅` | `EpisodeEngine.spawn` (model proposal `ProposalKind.SPAWN` + fail-closed `args["scope"]` parsing + attenuation + causation + typed return + workspace `finally`) |
+| S8-B-01a | `[DONE] ✅` | `parent_lease` on child requests; budget conservation properties (`fc9f5f4`) |
+| S8-B-02 | `[DONE] ✅` | `CompactionStrategy` registry; metamorphic green |
+| S8-B-03 | `[DONE] ✅` | `ModelRouter` from `routing_policy` |
+| S8-B-04 | `[DONE] ✅` | `approval_policy` component (`fc9f5f4`) |
+| S8-B-05 | `[DONE] ✅` | Child isolation: only return in parent L5 |
+| S8-B-06 | `[DONE] ✅` | ACI paginated `fs.read` |
+| S8-B-07 | `[DONE] ✅` | ACI succinct `fs.search` |
+| S8-B-08 | `[DONE] ✅` | ACI empty `proc.exec` ack |
+| S8-B-09 | `[DONE] ✅` | Lint-on-patch as receipt, not verdict |
+| S8-B-10 | `[DONE] ✅` | `maxTurns` from `budget_policy` |
 
 ### Lane C
 
 | ID | Status | Task |
 |---|---|---|
-| S8-C-01 | `[DONE]` | `EpisodeDepthProjection` (landed in S7-A-05; do not rebuild) |
-| S8-C-02 | `[DONE]` | Cache-hit / prefix-stability over cassette (`a0c15fc`) |
-| S8-C-03 | `[DONE]` | Prefix-miss: `system` / `tools` / `compact` / `snip` |
-| S8-C-04 | `[DONE]` | LAM `t0-`/`t6-` regex vs corpus |
+| S8-C-01 | `[DONE] ✅` | `EpisodeDepthProjection` (landed in S7-A-05; do not rebuild) |
+| S8-C-02 | `[DONE] ✅` | Cache-hit / prefix-stability over cassette (`a0c15fc`) |
+| S8-C-03 | `[DONE] ✅` | Prefix-miss: `system` / `tools` / `compact` / `snip` |
+| S8-C-04 | `[DONE] ✅` | LAM `t0-`/`t6-` regex vs corpus |
 
 ### Joint
 
 | ID | Status | Task |
 |---|---|---|
-| S8-J-01 | `[TODO]` | VG-04 Claim wire (reader fields, golden vectors). **A did NOT jump the gun** — `support_count` / `last_corroborated_at` / `protection_class` are on the domain type, defaulted, and withheld from `to_wire()`, with a test citing this row as the gate. `additionalProperties:false` confirms emitting them now would be rejected by the normative reader. Joint owns the amendment; **A must not emit until it lands** |
-| S8-J-02 | **`[DONE]`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Re-run over final spawn diff: 0 domain nouns. TCB unchanged 1315. Boundary check PASS. |
-| S8-J-03 | `[TODO]` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
-| S8-J-04 | `[TODO]` | Full suite with `node` installed (today: 14 reader errors) |
-| S8-J-05 | `[TODO]` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
-| S8-J-06 | `[TODO]` | ADR-0066 (was S7-J-08) |
-| S8-J-07 | `[TODO]` | VG-07 promotion (was S7-J-06) |
+| S8-J-01 | `[TODO] ❌` | VG-04 Claim wire (reader fields, golden vectors). **A did NOT jump the gun** — `support_count` / `last_corroborated_at` / `protection_class` are on the domain type, defaulted, and withheld from `to_wire()`, with a test citing this row as the gate. `additionalProperties:false` confirms emitting them now would be rejected by the normative reader. Joint owns the amendment; **A must not emit until it lands** |
+| S8-J-02 | **`[DONE] ✅`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Re-run over final spawn diff: 0 domain nouns. TCB unchanged 1315. Boundary check PASS. |
+| S8-J-03 | `[TODO] ❌` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
+| S8-J-04 | `[TODO] ❌` | Full suite with `node` installed (today: 14 reader errors) |
+| S8-J-05 | `[TODO] ❌` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
+| S8-J-06 | `[TODO] ❌` | ADR-0066 (was S7-J-08) |
+| S8-J-07 | `[TODO] ❌` | VG-07 promotion (was S7-J-06) |
 
 **Sprint 8 is formally CLOSED (2026-08-17).** S8-A-02 verified green · S8-B-01 verified fail-closed on model proposal · Joint J-02 ADR-0060 verified (0 domain nouns) · Sprint close receipt: `docs/scrum/sprints/sprint08/evidence/s8-close-receipt.md`.
 
@@ -161,9 +161,9 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 
 | ID | Was | Now | Why |
 |---|---|---|---|
-| S8-B-01 | `[CLAIMED — UNREACHABLE]` | **`[DONE]`** | Option (a) delivered: `ProposalKind.SPAWN` wired into episode loop; child `Scope` built fail-closed from `args["scope"]` (missing/junk fails closed); updated docstrings. **Correction (`8f5f16d`, alfa):** the earlier "narrowing to `fs.read` prevents `patch.apply`" claim was verified only against a mock kernel whose own `dispatch` implemented the scope check. Against the real `Kernel`/`StandardPolicy` the child **executed** `patch.apply` — `authorize` never checks `request.action ∈ requested_scope.actions` and the widening predicate reads the principal's held authority, not the episode scope. Child engines are now `attenuated=True` and refuse to emit a request outside their grant; 3 new tests verified failing without the guard. Kernel-side enforcement remains open — needs an ADR (`ADR-0054`). |
-| S8-B-01a | `[DONE]` | `[DONE]` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. |
-| S8-A-02 | `[DONE]` | `[DONE]` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
+| S8-B-01 | `[CLAIMED — UNREACHABLE]` | **`[DONE] ✅`** | Option (a) delivered: `ProposalKind.SPAWN` wired into episode loop; child `Scope` built fail-closed from `args["scope"]` (missing/junk fails closed); updated docstrings. **Correction (`8f5f16d`, alfa):** the earlier "narrowing to `fs.read` prevents `patch.apply`" claim was verified only against a mock kernel whose own `dispatch` implemented the scope check. Against the real `Kernel`/`StandardPolicy` the child **executed** `patch.apply` — `authorize` never checks `request.action ∈ requested_scope.actions` and the widening predicate reads the principal's held authority, not the episode scope. Child engines are now `attenuated=True` and refuse to emit a request outside their grant; 3 new tests verified failing without the guard. Kernel-side enforcement remains open — needs an ADR (`ADR-0054`). |
+| S8-B-01a | `[DONE] ✅` | `[DONE] ✅` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. |
+| S8-A-02 | `[DONE] ✅` | `[DONE] ✅` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
 
 **Sprint 9 opens for Lane C only.** C starts `S9-C-01`→`C-02`→`C-03` now; both blockers are independent of it.
 **C must not publish an A/A floor until S8-A-02 is green** — a floor measured against a 64-turn bound we intend to change is not a floor.
@@ -200,9 +200,9 @@ Preserved here because the finding is still load-bearing and its original home w
 > fund a child) is tested. The finding is resolved. Attribution remains wrong: the production change
 > landed in untagged `ce15850`, `c8976fc` added tests only, and the backlog cited `fc9f5f4`.
 >
-> Also preserved from `011`: `S8-B-04` was corrected `[CLAIMED]` → `[TODO]` at the S7 close because
+> Also preserved from `011`: `S8-B-04` was corrected `[CLAIMED]` → `[TODO] ❌` at the S7 close because
 > `root.py:740` still carried the `TODO(S8-B-04)` literal with no test. It has since landed properly
-> (`fc9f5f4`) and is `[DONE]`. `S8-B-02/03/05/06..10` were TL-verified `[DONE]` at that audit.
+> (`fc9f5f4`) and is `[DONE] ✅`. `S8-B-02/03/05/06..10` were TL-verified `[DONE] ✅` at that audit.
 
 ---
 
@@ -226,24 +226,24 @@ recorded in writing above.
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
-| S9-C-01 | `[DONE]` | C | Wire M-18 tuple (`tools/telemetry/tuple.py`); refuse lift if `K_compat` differs |
-| S9-C-02 | `[DONE]` | C | Pre-registration hashed before any arm (`tools/telemetry/preregistration.py`) |
-| S9-C-03 | `[DONE]` | C | A/A runner (`tools/telemetry/aa_runner.py`); refuse zero/degenerate floor (not on LAM replay) |
-| S9-C-04 | `[DONE]` | C | McNemar / bootstrap / survival (`tools/telemetry/statistics.py`); no p-values at n<20 |
-| S9-C-05 | `[DONE]` | C | Splits DEV/HOLDOUT/SEALED/LIVE/DEPLOYMENT with one-way burn touch ledger (`tools/telemetry/splits.py`) |
-| S9-C-06 | `[DONE]` | C | Oracle hardening + metamorphic properties (`test/lab/test_oracle_hardening.py`) |
-| S9-C-07 | `[DONE]` | C | Seeded sabotage: cheats must fail (`test/lab/test_seeded_sabotage.py`) |
-| S9-B-01 | `[DONE]` | B | Real reconstructions: 4 packs differ on ≥3 DNA dimensions (`test/agency/test_reconstructions.py`) + `REFERENCE.md` per pack |
-| S9-B-02 | `[DONE]` | B | `vg harness build\|run\|diff\|bench` (`lab/build.py`, `lab/run.py`, `lab/diff.py`, `lab/bench.py`) with pre-reg hash enforcement |
+| S9-C-01 | `[DONE] ✅` | C | Wire M-18 tuple (`tools/telemetry/tuple.py`); refuse lift if `K_compat` differs |
+| S9-C-02 | `[DONE] ✅` | C | Pre-registration hashed before any arm (`tools/telemetry/preregistration.py`) |
+| S9-C-03 | `[DONE] ✅` | C | A/A runner (`tools/telemetry/aa_runner.py`); refuse zero/degenerate floor (not on LAM replay) |
+| S9-C-04 | `[DONE] ✅` | C | McNemar / bootstrap / survival (`tools/telemetry/statistics.py`); no p-values at n<20 |
+| S9-C-05 | `[DONE] ✅` | C | Splits DEV/HOLDOUT/SEALED/LIVE/DEPLOYMENT with one-way burn touch ledger (`tools/telemetry/splits.py`) |
+| S9-C-06 | `[DONE] ✅` | C | Oracle hardening + metamorphic properties (`test/lab/test_oracle_hardening.py`) |
+| S9-C-07 | `[DONE] ✅` | C | Seeded sabotage: cheats must fail (`test/lab/test_seeded_sabotage.py`) |
+| S9-B-01 | `[DONE] ✅` | B | Real reconstructions: 4 packs differ on ≥3 DNA dimensions (`test/agency/test_reconstructions.py`) + `REFERENCE.md` per pack |
+| S9-B-02 | `[DONE] ✅` | B | `vg harness build\|run\|diff\|bench` (`lab/build.py`, `lab/run.py`, `lab/diff.py`, `lab/bench.py`) with pre-reg hash enforcement |
 | S8-J-08 | `[BLOCKED]` | A | **ADR-0067 kernel scope membership — proposed, not implemented.** Attempted in `policy.py` and reverted: a blanket `action ∉ requested_scope.actions` deny breaks `test_widening_alone_is_not_a_violation`, where widening under *trusted* justification is a designed property. Keying on `depth > 0` also fails — spine's `requested_scope()` is depth 1, strictly narrower, and still legitimately widens. **Needs a sealed/no-widening flag on `Scope` set by `attenuate()`** = `kernel/attenuation.py`, outside the policy.py-only exception. Exploit path stays closed at the agency boundary (`8f5f16d`); `test/kernel/test_scope_membership.py` keeps 4 `expectedFailure` markers so the gap is live. |
-| S9-A-01 | `[DONE]` | A | Instrument fields on `RunResult` — `gene_digests`, `state_digest`, per-arm `instrument_error`. **Finding:** `composition_digest` binds `episode_id`, so `gene_digests` is the cross-run pack identity attribution must group on. Recorded, not changed (`L-1`). |
-| S9-A-02 | `[DONE]` | A | Integer micros/tokens/USD only — `runtime/telemetry.py::RunTelemetry`, rejects floats and `bool`; absent stays `None`, never `0`. |
-| S9-A-03 | `[DONE]` | A | `RunResult.replay_gaps()` — executable audit vs Phase 4 `V5-A`, with a failing counterpart (`A-10`). |
-| S9-A-04 | `[DONE]` | A | `state_digest` + `HarnessSession.ledger_state()` for Lane C's paired runner. |
-| S9-J-01 | `[DONE]` | J | Q2 dogfood ×3 pre-registered protocol (`docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md`) |
-| S9-J-02 | `[DONE]` | J | Countersigned CT-09 sha256 hash format over canonical JCS bytes |
-| S9-J-03 | `[TODO]` | J | Spend authorisation |
-| S9-J-04 | `[TODO]` | J | Q3 evidence vs ADR-0064 |
+| S9-A-01 | `[DONE] ✅` | A | Instrument fields on `RunResult` — `gene_digests`, `state_digest`, per-arm `instrument_error`. **Finding:** `composition_digest` binds `episode_id`, so `gene_digests` is the cross-run pack identity attribution must group on. Recorded, not changed (`L-1`). |
+| S9-A-02 | `[DONE] ✅` | A | Integer micros/tokens/USD only — `runtime/telemetry.py::RunTelemetry`, rejects floats and `bool`; absent stays `None`, never `0`. |
+| S9-A-03 | `[DONE] ✅` | A | `RunResult.replay_gaps()` — executable audit vs Phase 4 `V5-A`, with a failing counterpart (`A-10`). |
+| S9-A-04 | `[DONE] ✅` | A | `state_digest` + `HarnessSession.ledger_state()` for Lane C's paired runner. |
+| S9-J-01 | `[DONE] ✅` | J | Q2 dogfood ×3 pre-registered protocol (`docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md`) |
+| S9-J-02 | `[DONE] ✅` | J | Countersigned CT-09 sha256 hash format over canonical JCS bytes |
+| S9-J-03 | `[TODO] ❌` | J | Spend authorisation |
+| S9-J-04 | `[TODO] ❌` | J | Q3 evidence vs ADR-0064 |
 
 ---
 
@@ -253,21 +253,21 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
-| S10-A-01 | `[TODO]` | A | Domain out of `invocation.py` into manifest rows |
-| S10-A-02 | `[TODO]` | A | `proc.test` bind or delete orphan |
-| S10-A-03 | `[TODO]` | A | `BlobStorePort` + `IndexPort` (fake + real) |
-| S10-A-04 | `[TODO]` | A | `vg why <artifact>` |
-| S10-B-01 | `[DONE]` | B | TableWorld (`adapters/environment/tableworld.py`, `vg-table-default` pack, invariant evaluator, abstention on inconsistency) |
-| S10-B-02 | `[DONE]` | B | CI core-change detector (`tools/check_core_changes.py`, C-10 measurement publisher) |
-| S10-B-03 | `[DONE]` | B | `structured_consolidate` + `deadEnds` (`agency/context/compaction.py`) |
-| S10-B-04 | `[DONE]` | B | `regroundPolicy` as a granted effect (`agency/context/regrounding.py`) |
-| S10-C-01 | `[DONE]` | C | Instrument unchanged on second domain (`test/lab/test_tableworld_instrument.py`) |
-| S10-C-02 | `[DONE]` | C | Verifier–deployment gap freeze (`tools/telemetry/gap_freeze.py`) |
-| S10-C-03 | `[DONE]` | C | Gate evidence pack including negatives (`docs/scrum/sprints/sprint10/evidence/s10-gate-evidence-pack.md`) |
-| S10-J-01 | `[DONE]` | J | Four-question review with evidence paths in gate evidence pack |
-| S10-J-02 | `[TODO]` | J | Reverse ADR-0064 only where evidence holds |
-| S10-J-03 | `[TODO]` | J | Release text = proven claims only |
-| S10-J-04 | `[TODO]` | J | Evaluate O-01 / O-03 before V5 |
+| S10-A-01 | `[TODO] ❌` | A | Domain out of `invocation.py` into manifest rows |
+| S10-A-02 | `[TODO] ❌` | A | `proc.test` bind or delete orphan |
+| S10-A-03 | `[TODO] ❌` | A | `BlobStorePort` + `IndexPort` (fake + real) |
+| S10-A-04 | `[TODO] ❌` | A | `vg why <artifact>` |
+| S10-B-01 | `[DONE] ✅` | B | TableWorld (`adapters/environment/tableworld.py`, `vg-table-default` pack, invariant evaluator, abstention on inconsistency) |
+| S10-B-02 | `[DONE] ✅` | B | CI core-change detector (`tools/check_core_changes.py`, C-10 measurement publisher) |
+| S10-B-03 | `[DONE] ✅` | B | `structured_consolidate` + `deadEnds` (`agency/context/compaction.py`) |
+| S10-B-04 | `[DONE] ✅` | B | `regroundPolicy` as a granted effect (`agency/context/regrounding.py`) |
+| S10-C-01 | `[DONE] ✅` | C | Instrument unchanged on second domain (`test/lab/test_tableworld_instrument.py`) |
+| S10-C-02 | `[DONE] ✅` | C | Verifier–deployment gap freeze (`tools/telemetry/gap_freeze.py`) |
+| S10-C-03 | `[DONE] ✅` | C | Gate evidence pack including negatives (`docs/scrum/sprints/sprint10/evidence/s10-gate-evidence-pack.md`) |
+| S10-J-01 | `[DONE] ✅` | J | Four-question review with evidence paths in gate evidence pack |
+| S10-J-02 | `[TODO] ❌` | J | Reverse ADR-0064 only where evidence holds |
+| S10-J-03 | `[TODO] ❌` | J | Release text = proven claims only |
+| S10-J-04 | `[TODO] ❌` | J | Evaluate O-01 / O-03 before V5 |
 
 ---
 

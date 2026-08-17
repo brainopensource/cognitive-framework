@@ -141,21 +141,28 @@ class ShellBaselineContract(unittest.TestCase):
         self.assertEqual(result, "3 passed")
         self.assertEqual(calls, [("proc.exec", capability.selector)])
 
+#: Manifest component role -> artifact kind, for the roles whose names differ.
+#: Mirrors `runtime.root.ROLE_KIND`; every other role is its own kind.
+_ROLE_KIND = {"system_prompt": "system_prompt", "tools": "tool_schema"}
+
+
 def _code_default_workspace() -> Workspace:
-    kinds = {
-        "system-prompt.txt": "system_prompt",
-        "read-tool.json": "tool_schema",
-        "search-tool.json": "tool_schema",
-        "patch-tool.json": "tool_schema",
-        "test-tool.json": "tool_schema",
-        "context-policy.json": "context_policy",
-        "routing-policy.json": "routing_policy",
-        "budget-policy.json": "budget_policy",
-    }
+    """Register exactly the components the manifest declares.
+
+    Derived rather than hardcoded: the previous fixture listed the eight files
+    it knew about, so the first pack component added anywhere else in the tree
+    broke composition here with `component does not resolve`. A fixture that
+    has to be edited whenever the thing it tests grows is a fixture that will
+    be wrong before it is noticed.
+    """
+    manifest = parse_manifest(
+        json.loads((MANIFESTS / "vg-code-default" / "manifest.json").read_text()))
+    wanted = [(role, path) for role, paths in manifest.components for path in paths]
+    wanted.append(("budget_policy", manifest.budget_policy))
     artifacts = tuple(
-        ArtifactFile(f"vg-code-default/{name}", kind,
-                     (MANIFESTS / "vg-code-default" / name).read_text())
-        for name, kind in kinds.items()
+        ArtifactFile(path, _ROLE_KIND.get(role, role),
+                     (MANIFESTS / path).read_text())
+        for role, path in wanted
     )
     return Workspace.empty().apply(LogicalEdit("register vg-code-default", artifacts))
 

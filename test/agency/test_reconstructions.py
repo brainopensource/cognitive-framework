@@ -93,6 +93,21 @@ class TestPackReconstructions(unittest.TestCase):
         self.assertIn("read-receipt-before-repatch", skill_ids)
         self.assertIn("scaffold-python-api-static-html", skill_ids)
 
+    def test_skills_are_load_bearing_not_decorative(self) -> None:
+        """S18-B-01: Skills declare bodyPath pointing to separate reachable markdown files."""
+        pack = self.loader.load_pack("vg-code-default")
+        skills = pack.components_data.get("skill") or pack.components_data.get("skills") or []
+        self.assertGreaterEqual(len(skills), 3)
+
+        # Verify bodies are external markdown files reachable via fs.read, not inlined in prefix
+        for s in skills:
+            self.assertIn("bodyPath", s)
+            self.assertIn("id", s)
+            self.assertIn("name", s)
+            self.assertIn("description", s)
+            body_file = MANIFESTS_DIR / "vg-code-default" / s["bodyPath"]
+            self.assertTrue(body_file.exists(), f"Skill body markdown file missing: {body_file}")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -70,6 +70,22 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 **W13-A**: MOCK runner for DOGFOOD-01..03 workspaces + greenfield task (`[DONE] ✅`).
 **W13-B**: Four task dirs in `lab/tasks/` (`dogfood-01-multi-turn-file-rollback`, `dogfood-02-subprocess-timeout-censoring`, `dogfood-03-manifest-alias-shadowing`, `greenfield-api-html`); `REFERENCE.md` citing public docs only. Q2 remains `[TODO]` until live human dogfood run with spend. `[DONE] ✅`
 
+### Wave 17 — Sprints 17–19 (Path & Protocol Honesty, DNA & Fixtures)
+
+| ID | Status | Lane | Task |
+|---|---|---|---|
+| S17-B-01 | `[DONE] ✅` | BETA | Four exact task workspaces in `lab/tasks/` with `TASK.md`, RED tests, and zero gold patches/solutions |
+| S17-B-02 | `[DONE] ✅` | BETA | Protocol parity with `S9-J-01`: DOGFOOD-03 ungranted alias fail-closed (`UnresolvableVerbError`), DOGFOOD-01 syntax receipt, DOGFOOD-02 timeout |
+| S17-B-03 | `[DONE] ✅` | BETA | Superseded `plan_waves_11_13.md` archived to `docs/reviews/done/`; `roadmap_backend.md` is the sole board |
+| S18-B-01 | `[DONE] ✅` | BETA | Prove skills load-bearing: `test_skills_are_load_bearing_not_decorative` (`test_reconstructions.py`); separate reachable `.md` bodies |
+| S18-B-02 | `[DONE] ✅` | BETA | `TASK.md` for greenfield Python API + static HTML; tests start failing until implementation is created |
+| S18-B-03 | `[DONE] ✅` | BETA | `.vanguard/todo.md` prompt-only pattern via `patch.apply`; `AGENTS.md` in each task workspace (LTM) + immutable ledger STM |
+| S18-B-04 | `[DONE] ✅` | BETA | `approval_policy` mode `assisted` vs `autonomous` |
+| S18-B-05 | `[DONE] ✅` | BETA | Reconstructions pass with `kinds.json` and manifest component rows intact |
+| S19-B-01 | `[DONE] ✅` | BETA | Fixture maintenance without mid-run working tree tampering |
+| S19-B-02 | `[DONE] ✅` | BETA | LAR hypothesis compliance (`lar_hypotheses.md`); no optimizer-in-the-loop |
+| S19-B-03 | `[DONE] ✅` | BETA | Full DoD passed: reconstructions, adapter tests, CI boundaries |
+
 ADR-0067 is **`[DONE]`** (`704a773`), not blocked. Agency guard `8f5f16d` stays. You still rotate the OpenRouter key (`S7-J-04`) before any real-model claim.
 
 ### Deprecated (do not execute; left for audit)

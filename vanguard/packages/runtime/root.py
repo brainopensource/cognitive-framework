@@ -28,14 +28,18 @@ third. Both are adapters between ports, which is composition; neither decides
 policy, and neither is a second path to an effect (`AT-01`).
 
 **Approval and resumption.** `K-13`/`K-14`: no lease is held across a
-suspension and re-entry is at S1, never at S6. The episode engine is depth-1
-and *terminates* on suspension — it has no resume, deliberately, because a
-loop that could resume itself past an approval would be a loop that could
-decide it had been approved. So resumption lives here: the root takes the
-human decision, binds it to the exact descriptor through
-`DescriptorBoundApprovalPolicy`, re-dispatches that one request at S1, and
-runs the next episode segment. The model is never asked to re-propose what a
+suspension and re-entry is at S1, never at S6. The episode engine *terminates*
+on suspension — it has no resume of its own, deliberately, because a loop that
+could resume itself past an approval would be a loop that could decide it had
+been approved. So resumption lives here: the root takes the human decision,
+binds it to the exact descriptor through `DescriptorBoundApprovalPolicy`,
+re-dispatches that one request at S1, and re-enters (`S8-A-02`) against a turn
+budget read back from the ledger. The model is never asked to re-propose what a
 human already approved.
+
+The engine is no longer depth-1: `S8-B-01` gives it `spawn`, so an episode may
+run an attenuated child. That is recursion *downward* under a narrowed grant,
+which is a different thing from an episode resuming itself past a human.
 
 **What this module does not do.** It does not grade the episode from inside
 the loop. `ICD §3` / `M5`: the verdict comes from the evaluator named by the

@@ -164,8 +164,11 @@ class EpisodeEngine:
         no_progress_limit: int = 3,
         sink_class: SinkClass = SinkClass.PRIVILEGED,
         parent_lease: str | None = None,
+        attenuated: bool = False,
     ) -> None:
         self._kernel = kernel
+        #: True when this engine runs a spawned child under a narrowed grant.
+        self._attenuated = attenuated
         self._model = model
         self._clock = clock
         self._events = events
@@ -310,6 +313,44 @@ class EpisodeEngine:
                     break
                 continue
 
+            # -- an attenuated child may not exceed its granted actions ---
+            # `S8-B-01`. The scope a child holds is the whole content of the
+            # word "attenuated": a child narrowed to a subset of verbs that can
+            # still request the others has not been attenuated, it has been
+            # relabelled.
+            #
+            # Scoped to children on purpose. A depth-0 episode's relationship
+            # to its own scope is the kernel's business, and it already records
+            # those refusals as events (`F-09`); intercepting them here would
+            # replace a recorded denial with a silent skip, which is the
+            # `A-07` failure mode. A child's grant has no such recorded check,
+            # because the classifier consults the principal's held authority
+            # rather than the episode's current scope -- see the note on
+            # `spawn`.
+            #
+            # Generic over the action set: no verb is named, so `ADR-0060`
+            # holds and adding a domain is still zero lines in this file.
+            if self._attenuated and proposal.action not in self._scope.actions:
+                turn = Turn(
+                    index=episode.turn_count,
+                    state_digest=episode.state_digest(),
+                    proposal_descriptor=proposal.descriptor,
+                    receipt_digest=digest_of({
+                        "denied": "scope_escalation",
+                        "action": proposal.action,
+                    }),
+                    progress_signal="scope_escalation_denied",
+                )
+                repeats = episode.repeats(turn, limit=self._no_progress_limit)
+                episode = episode.with_turn(turn)
+                if repeats:
+                    episode = episode.terminated(
+                        RunTermination.ABANDONED,
+                        f"no progress over {self._no_progress_limit} turns",
+                    )
+                    break
+                continue
+
             # -- authorise + effect + receipt, through the one path ------
             request = self._to_effect_request(episode, proposal, accumulated)
             outcome = self._kernel.dispatch(
@@ -438,6 +479,23 @@ class EpisodeEngine:
         the tree. The return value is a typed SpawnResult containing text or
         structured data, never a mutable handle. Workspace is destroyed in
         finally (N-16).
+
+        **Why the child engine is marked `attenuated`.** `attenuate()` narrows
+        the child's `Scope`, but narrowing the scope is not by itself enough to
+        stop the child acting outside it: `StandardPolicy.authorize` attenuates
+        `requested_scope` against the policy's parent and never checks that
+        `request.action` is a member of `requested_scope.actions`, and the
+        classifier's widening predicate is computed against the *principal's
+        held authority* rather than the episode's current scope. So a child
+        narrowed to a read verb was still authorised for any verb the principal
+        held -- measured end to end, a child narrowed to one read verb reached
+        a privileged adapter.
+
+        The child engine therefore refuses to emit a request outside its own
+        granted actions. That is a containment the engine can enforce without
+        holding authority: it is declining to *ask*, not deciding an answer.
+        Closing the same gap inside the kernel is a `kernel/` change and needs
+        its own ADR (`ADR-0054`); it is reported, not made here.
         """
         # Depth check: recursion ceiling
         current_depth = self._scope.depth
@@ -487,6 +545,7 @@ class EpisodeEngine:
                 no_progress_limit=self._no_progress_limit,
                 sink_class=self._sink_class,
                 parent_lease=parent_lease or self._parent_lease,
+                attenuated=True,
             )
 
             child_outcome = child_engine.run(

@@ -482,5 +482,175 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
 
 
+class NarrowedChildCannotEscalate(unittest.TestCase):
+    """S8-B-01 / TL receipt 3, against the REAL kernel.
+
+    The pre-existing coverage for this used a mock kernel whose `dispatch`
+    side-effect implemented the scope check itself, so it proved the mock and
+    not the engine. Wired end-to-end against a real `Kernel`, `StandardPolicy`,
+    `StandardClassifier` and `Governor`, a child narrowed to `fs.read`
+    **executed** `patch.apply`. These tests hold that shut.
+    """
+
+    RESOURCE = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+    VERBS = ("fs.read", "patch.apply")
+
+    def setUp(self) -> None:
+        from vanguard.packages.kernel import (
+            GrantIssuer, Governor, HeldAuthority, Kernel, Mode,
+            SinkClass, SinkRegistry, StandardClassifier, StandardPolicy,
+        )
+
+        self.executed: list[str] = []
+        outer = self
+
+        class Adapter:
+            def __init__(self, name: str) -> None:
+                self.name = name
+
+            def healthy(self) -> bool:
+                return True
+
+            def execute(self, req: Any) -> Any:
+                from vanguard.packages.kernel.model import AdapterOutcome
+                outer.executed.append(req.action)
+                return AdapterOutcome(status="ok", result_digest="sha256:" + "0" * 64)
+
+        class Silent:
+            def emit(self, event: Any) -> None: ...
+            def append_intent(self, event: Any) -> None: ...
+
+        self.parent_scope = Scope(
+            actions=frozenset(self.VERBS),
+            resources=(self.RESOURCE,),
+            constraints=Constraints(
+                expires_at="2099-01-01T00:00:00.000Z", max_uses=100,
+                budget_usd_micros=1_000_000, max_depth=4),
+            depth=0,
+        )
+        sinks = SinkRegistry()
+        sinks.register("fs.read", SinkClass.OBSERVATION)
+        sinks.register("patch.apply", SinkClass.PRIVILEGED)
+        self.silent = Silent()
+        self.kernel = Kernel(
+            adapters={v: Adapter(v) for v in self.VERBS},
+            policy=StandardPolicy(
+                parent_scope=self.parent_scope, mode=Mode.BENCHMARK,
+                approval_required_above="high",
+                risk_of={v: "low" for v in self.VERBS}),
+            classifier=StandardClassifier([
+                HeldAuthority("agent-1", frozenset(self.VERBS),
+                              (self.RESOURCE,), max_depth=4)]),
+            governor=Governor({"usd_micros": 1_000_000, "millis": 1_000_000}),
+            issuer=GrantIssuer(), clock=MockClock(),
+            ledger=self.silent, events=self.silent, sinks=sinks)
+
+    def _run(self, model: Any) -> Any:
+        engine = EpisodeEngine(
+            kernel=self.kernel, model=model, clock=MockClock(),
+            events=self.silent, scope=self.parent_scope,
+            tools=({"name": "fs.read"}, {"name": "patch.apply"}), max_turns=6)
+        return engine.run(episode_id="ep-parent", run_id="run-1",
+                          principal="agent-1", brief="narrowing probe")
+
+    def test_a_child_narrowed_to_fs_read_cannot_execute_patch_apply(self) -> None:
+        """The fail-open the TL found: this executed `patch.apply` before."""
+        from vanguard.packages.ports.event_store import Result
+
+        class Escalating:
+            def __init__(self) -> None:
+                self.parent = 0
+                self.child = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                if "child" in str(view.get("episodeId", "")):
+                    self.child += 1
+                    if self.child == 1:
+                        return Result.success({
+                            "kind": "effect", "action": "patch.apply",
+                            "resource": NarrowedChildCannotEscalate.RESOURCE,
+                            "args": {"diff": "x"}, "note": "escalate"})
+                    return Result.success({"kind": "finish", "note": "child done"})
+                self.parent += 1
+                if self.parent == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "read-only helper",
+                                 "scope": {"actions": ["fs.read"]}},
+                        "note": "spawn"})
+                return Result.success({"kind": "finish", "note": "parent done"})
+
+        self._run(Escalating())
+        self.assertNotIn("patch.apply", self.executed,
+                         "child narrowed to fs.read reached a privileged adapter")
+
+    def test_the_granted_verb_still_works_in_the_child(self) -> None:
+        """Fail-closed must not mean fail-useless."""
+        from vanguard.packages.ports.event_store import Result
+
+        class Reader:
+            def __init__(self) -> None:
+                self.parent = 0
+                self.child = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                if "child" in str(view.get("episodeId", "")):
+                    self.child += 1
+                    if self.child == 1:
+                        return Result.success({
+                            "kind": "effect", "action": "fs.read",
+                            "resource": NarrowedChildCannotEscalate.RESOURCE,
+                            "args": {"path": "calc.py"}, "note": "read"})
+                    return Result.success({"kind": "finish", "note": "child done"})
+                self.parent += 1
+                if self.parent == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "read-only helper",
+                                 "scope": {"actions": ["fs.read"]}},
+                        "note": "spawn"})
+                return Result.success({"kind": "finish", "note": "parent done"})
+
+        self._run(Reader())
+        self.assertIn("fs.read", self.executed)
+        self.assertNotIn("patch.apply", self.executed)
+
+    def test_a_parent_holding_both_verbs_may_still_use_both(self) -> None:
+        """The refusal is scoped to the episode's grant, not to the verb."""
+        from vanguard.packages.ports.event_store import Result
+
+        class ParentPatches:
+            def __init__(self) -> None:
+                self.turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                self.turns += 1
+                if self.turns == 1:
+                    return Result.success({
+                        "kind": "effect", "action": "patch.apply",
+                        "resource": NarrowedChildCannotEscalate.RESOURCE,
+                        "args": {"diff": "x"}, "note": "parent patch"})
+                return Result.success({"kind": "finish", "note": "done"})
+
+        self._run(ParentPatches())
+        self.assertIn("patch.apply", self.executed)
+
+
+class Adr0060HoldsForTheEngine(unittest.TestCase):
+    """No file, repo, patch or test vocabulary enters `agency/episode/`."""
+
+    def test_the_engine_names_no_domain_verb(self) -> None:
+        from pathlib import Path
+
+        source = Path(
+            "vanguard/packages/agency/episode/engine.py"
+        ).read_text(encoding="utf-8")
+        # `agency.spawn`/`spawn` is the engine's own control verb, not a domain
+        # capability, so it is excluded from this sweep.
+        for token in ('"fs.read"', '"patch.apply"', '"proc.exec"', '"fs.write"',
+                      "pytest", "unittest", "git "):
+            self.assertNotIn(token, source, f"ADR-0060: {token!r} in the engine")
+
+
 if __name__ == "__main__":
     unittest.main()

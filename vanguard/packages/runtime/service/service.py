@@ -14,7 +14,9 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
 from ...domain.primitives.primitives import uuidv7
+from ...domain.evidence.claim import Claim, ClaimError, parse_claim
 from ...domain.wire.contracts import parse_wire
+from ..explain import explain_artifact
 from ..governance.approvals import (
     ApprovalAuthority,
     ApprovalChallenge,
@@ -49,6 +51,26 @@ class ActiveRunContext:
     lock: threading.Lock = field(default_factory=threading.Lock)
 
 
+@dataclass(frozen=True, slots=True)
+class _EventView:
+    """Envelope-shaped read of a stored event row, for the explain reducer."""
+
+    record: Mapping[str, Any]
+
+    @property
+    def payload(self) -> Mapping[str, Any]:
+        payload = self.record.get("payload")
+        return payload if isinstance(payload, Mapping) else {}
+
+    @property
+    def occurred_at(self) -> Any:
+        return self.record.get("occurredAt")
+
+    @property
+    def seq(self) -> Any:
+        return self.record.get("seq")
+
+
 class RuntimeService:
     """Generic durable runtime service engine."""
 
@@ -58,8 +80,12 @@ class RuntimeService:
         *,
         authority: ApprovalAuthority | None = None,
         harness_runner: Callable[..., Any] | None = None,
+        claims: Sequence[Mapping[str, Any]] = (),
     ) -> None:
         self.store = inbox_store or ServiceInboxStore(":memory:")
+        #: Evidence claims available to `vg why` (`S8-A-05`). Injected rather
+        #: than read from disk: the service composes no store of its own.
+        self.claims: tuple[Mapping[str, Any], ...] = tuple(claims)
         self.authority = authority or ApprovalAuthority()
         self._harness_runner = harness_runner
         self._active_runs: dict[str, ActiveRunContext] = {}
@@ -278,7 +304,41 @@ class RuntimeService:
     def _cmd_ExplainArtifact(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
-        return {"runId": run_id, "artifact": payload.get("artifactId", ""), "explanation": ""}
+        """`vg why <artifact>` (`S10-A-04`).
+
+        This returned `{"explanation": ""}` -- the command existed and answered
+        nothing, which is worse than absent because it looks answered. It now
+        derives all three answers from the ledger and the supplied claims, and
+        says plainly when an artifact has no evidence rather than returning an
+        empty section that reads like "nothing is wrong".
+        """
+        artifact_id = str(payload.get("artifactId", ""))
+        if not artifact_id:
+            raise ValueError("ExplainArtifact requires artifactId")
+        explanation = explain_artifact(
+            artifact_id,
+            events=self._explain_events(run_id),
+            claims=self._claims_for(artifact_id),
+            substrate_profile=payload.get("substrateProfile"),
+        )
+        return {"runId": run_id, "artifact": artifact_id,
+                "explanation": explanation.to_dict()}
+
+    def _explain_events(self, run_id: str) -> list[Any]:
+        """Ledger events for the run, as envelope-shaped objects."""
+        return [_EventView(record) for record in self.store.get_events(run_id)]
+
+    def _claims_for(self, artifact_id: str) -> list[Claim]:
+        """Claims naming this artifact. Unparseable claims are skipped, not guessed."""
+        found: list[Claim] = []
+        for raw in self.claims:
+            try:
+                claim = parse_claim(raw)
+            except ClaimError:
+                continue
+            if claim.subject == artifact_id:
+                found.append(claim)
+        return found
 
     # -- Event Streaming -----------------------------------------------------
 

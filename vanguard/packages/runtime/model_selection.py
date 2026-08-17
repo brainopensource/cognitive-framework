@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 #: Selectable ports. `mock` is the default and the only one CI may rely on.
-MODEL_PORTS = ("mock", "ollama", "openrouter", "deepseek")
+MODEL_PORTS = ("mock", "ollama", "openrouter", "deepseek", "router")
 
 #: Default local tag. Overridable, because whatever is pulled locally wins.
 DEFAULT_OLLAMA_MODEL = "deepseek-r1"
@@ -145,6 +145,16 @@ def select_model(
                 choice, f"{name!r} is not in the free band; refusing to spend")
         return SelectedModel(port=choice, model=OpenRouterModel(model=name),
                              label=f"{choice}:{name}")
+
+    if choice == "router":
+        from ..adapters.models.openrouter import OpenRouterModel
+        key = environ.get("OPENROUTER_API_KEY")
+        if not key:
+            raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        allowed = list(free_models() if free_models is not None else _free_band())
+        name = model_name or (allowed[0] if allowed else "openrouter/free")
+        return SelectedModel(port="router", model=OpenRouterModel(model=name),
+                             label=f"router:{name}")
 
     raise ModelUnavailable(choice, "unreachable")
 

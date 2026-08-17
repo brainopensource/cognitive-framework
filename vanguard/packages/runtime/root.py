@@ -743,7 +743,26 @@ class HarnessSession:
         discovery = WorkspaceDiscovery(repo)
         discovered_env = discovery.render_environment_text()
         base_env = _environment_map(ports.environment, harness)
-        env_text = f"{base_env}\n\n{discovered_env}" if discovered_env else base_env
+        env_parts = [base_env]
+        if discovered_env:
+            env_parts.append(discovered_env)
+        if self.index is not None:
+            files_res = self.index.files()
+            if files_res.ok and files_res.value is not None:
+                symbols_res = self.index.symbols()
+                slist = list(symbols_res.value) if symbols_res.ok and symbols_res.value is not None else []
+                sym_by_file: dict[str, list[str]] = {}
+                for s in slist:
+                    sym_by_file.setdefault(s.path, []).append(f"{s.kind} {s.name}:{s.line}")
+                lines = ["=== Workspace Repository Map ==="]
+                for f in files_res.value:
+                    syms = sym_by_file.get(f, [])
+                    if syms:
+                        lines.append(f"- {f} ({', '.join(syms)})")
+                    else:
+                        lines.append(f"- {f}")
+                env_parts.append("\n".join(lines))
+        env_text = "\n\n".join(part for part in env_parts if part)
         compiler = ContextCompiler(
             system_core=harness.system_core,
             tool_schemas=harness.tool_schemas,

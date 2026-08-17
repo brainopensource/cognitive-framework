@@ -77,6 +77,8 @@ def run_lab_task(
     jsonl_out: Path | str | None = None,
     approve_writes: bool = False,
     isolate: bool = True,
+    tier_escalation: bool = False,
+    tiers: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -159,8 +161,20 @@ def run_lab_task(
         # from the workspace as it stands, so it is a new episode; the run id
         # is what groups them.
         episode_id = f"lab-episode-{attempt}"
+        current_model = selected.model
+        if tier_escalation and tiers:
+            tier_model_name = tiers[min(max(0, attempt - 1), len(tiers) - 1)]
+            try:
+                esc_selected = select_model(
+                    model_port if model_port != "mock" else "openrouter",
+                    model_name=tier_model_name,
+                    tape=tape,
+                )
+                current_model = esc_selected.model
+            except Exception:
+                current_model = selected.model
         ports = SessionPorts(
-            model=selected.model,
+            model=current_model,
             environment=_environment_for(task_path, cleanup_roots),
             clock=SystemClock(), store=store, interactive=interactive,
             approver=approver, approval_key=approval_key)
@@ -322,6 +336,10 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=4)
     parser.add_argument("--jsonl-out", default=None)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--tier-escalation", action="store_true",
+                        help="Escalate model tier on subsequent attempts")
+    parser.add_argument("--tiers", nargs="+", default=None,
+                        help="Ordered list of models for tier escalation")
 
     args = parser.parse_args()
     result = run_lab_task(
@@ -329,6 +347,7 @@ def main() -> int:
         model_port=args.model, model_name=args.model_name,
         interactive=args.interactive, max_turns=args.max_turns,
         max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
+        tier_escalation=args.tier_escalation, tiers=args.tiers,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

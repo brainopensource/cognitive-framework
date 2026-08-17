@@ -60,6 +60,18 @@ class SessionLog:
         return {"turns": [entry.to_dict() for entry in self.entries]}
 
     @property
+    def dead_end_details(self) -> tuple[Mapping[str, Any], ...]:
+        """Refused turns with their verb and reason (`W12-A`).
+
+        The next attempt should be told what has already been refused rather
+        than rediscovering it, and a report should distinguish a run that
+        explored badly from one that was refused repeatedly.
+        """
+        return tuple({"turn": e.turn, "verb": e.verb, "reason": e.detail}
+                     for e in self.entries
+                     if e.receipt in {"EffectRejected", "AuthorizationDenied"})
+
+    @property
     def dead_ends(self) -> tuple[int, ...]:
         """Turns whose effect was refused. `W12-A`: a refusal is a dead end.
 
@@ -73,6 +85,36 @@ class SessionLog:
     @property
     def cache_misses(self) -> tuple[int, ...]:
         return tuple(e.turn for e in self.entries if e.cache_miss)
+
+    def cache_miss_attribution(self) -> tuple[Mapping[str, Any], ...]:
+        """Why the prefix stopped matching, per missed turn (`W12-A`).
+
+        A cache-miss count is a number nobody can act on. What a pack author
+        needs is *which turn* missed and *what changed on it* -- a compaction
+        rewrote the prefix, or the turn before it was refused and the dialogue
+        diverged. Attribution is derived from the log, so it cannot disagree
+        with the turns it explains.
+        """
+        attribution: list[Mapping[str, Any]] = []
+        for index, entry in enumerate(self.entries):
+            if not entry.cache_miss:
+                continue
+            previous = self.entries[index - 1] if index else None
+            if entry.compacted:
+                cause = "compaction_rewrote_the_prefix"
+            elif previous is not None and previous.receipt in {
+                    "EffectRejected", "AuthorizationDenied"}:
+                cause = "prior_turn_refused"
+            elif index == 0:
+                cause = "cold_prefix"
+            else:
+                cause = "unattributed"
+            attribution.append({
+                "turn": entry.turn,
+                "cause": cause,
+                "verb": entry.verb,
+            })
+        return tuple(attribution)
 
 
 def _payload(event: Any) -> Mapping[str, Any]:

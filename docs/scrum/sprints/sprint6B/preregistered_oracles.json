@@ -8,7 +8,7 @@
       "class": "single-file",
       "requiresTestReaction": false,
       "oracle": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py",
-      "oracleDigest": "sha256:4c6779145851142822736070925ee043caa1f27e2c74c69e05591210ab5e7e7e"
+      "oracleDigest": "sha256:4de334010f16e1b294ef8fe1bbde5874177f810bec66590d38a2ba49ca5a8f36"
     },
     {
       "id": "bug-002-multi-file",
@@ -30,6 +30,11 @@
       "id": "bug-001-single-file",
       "reason": "oracle edited by dd581a2 after the S6B preregistration; rebound before any scored run",
       "task": "S7-A-07"
+    },
+    {
+      "id": "bug-001-single-file",
+      "reason": "oracle hardened with metamorphic invariant checks by S9-C-06",
+      "task": "S9-C-06"
     }
   ]
 }

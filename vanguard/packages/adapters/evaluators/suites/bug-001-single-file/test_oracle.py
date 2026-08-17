@@ -23,6 +23,19 @@ class CalculatorOracle(unittest.TestCase):
         self.assertEqual(fn(2, 3), 15)
         self.assertEqual(fn(0, 4), 16)
         self.assertEqual(fn(1, 1), 2)
+        # Extra numeric cases and edge conditions (S9-C-06)
+        self.assertEqual(fn(-2, 3), 3)
+        self.assertEqual(fn(10, 5), 75)
+        self.assertEqual(fn(-5, -2), 14)
+        self.assertEqual(fn(0, 0), 0)
+
+    def test_metamorphic_invariant(self) -> None:
+        """Metamorphic property: fn(A, B) must identically equal A*B + B^2."""
+        fn = _load_calculator()
+        for a in (-10, -1, 0, 1, 5, 12):
+            for b in (-5, 0, 2, 7):
+                expected = (a + b) * b
+                self.assertEqual(fn(a, b), expected, f"Metamorphic invariant failed for A={a}, B={b}")
 
 
 if __name__ == "__main__":

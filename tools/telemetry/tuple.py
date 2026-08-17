@@ -22,6 +22,18 @@ from typing import Any, Mapping, Optional
 
 from vanguard.packages.domain.canonicalisation.digest import digest_of
 
+PLACEHOLDER_DIGESTS = frozenset({
+    "v0.5.0",
+    "default_agent",
+    "sha256:evaluator_default",
+    "sha256:containment_default",
+})
+
+
+class IncomparableLiftError(ValueError):
+    """Raised when an experimental lift is requested across non-comparable arms (M-18 violation)."""
+    pass
+
 
 @dataclass(frozen=True)
 class CompatibilityKey:
@@ -35,13 +47,27 @@ class CompatibilityKey:
     pricing_source: str = ""
     pricing_as_of: str = ""
     sampling_params: Mapping[str, Any] = field(default_factory=dict)
-    harness_commit: str = "v0.5.0"
-    agent_hash: str = "default_agent"
-    evaluator_image_digest: str = "sha256:evaluator_default"
-    containment_digest: str = "sha256:containment_default"
+    harness_commit: str = ""
+    agent_hash: str = ""
+    evaluator_image_digest: str = ""
+    containment_digest: str = ""
     substrate_profile: str = "linux_x86_64"
     runner_version: str = "1.0.0"
     schema_version: str = "vg.4"
+
+    def validate_non_placeholder(self) -> None:
+        """Fail-closed on placeholder digests (S9-C-01 DoD)."""
+        placeholders = []
+        if self.harness_commit in PLACEHOLDER_DIGESTS or not self.harness_commit:
+            placeholders.append(f"harness_commit={self.harness_commit!r}")
+        if self.agent_hash in PLACEHOLDER_DIGESTS or not self.agent_hash:
+            placeholders.append(f"agent_hash={self.agent_hash!r}")
+        if self.evaluator_image_digest in PLACEHOLDER_DIGESTS or not self.evaluator_image_digest:
+            placeholders.append(f"evaluator_image_digest={self.evaluator_image_digest!r}")
+        if self.containment_digest in PLACEHOLDER_DIGESTS or not self.containment_digest:
+            placeholders.append(f"containment_digest={self.containment_digest!r}")
+        if placeholders:
+            raise ValueError(f"placeholder or empty digest not permitted in published M-18 tuple: {', '.join(placeholders)}")
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -80,7 +106,7 @@ class TreatmentDimensions:
     custom_axes: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        data = {
+        data: dict[str, Any] = {
             "manifest": self.manifest,
             "cacheEnabled": self.cache_enabled,
         }
@@ -101,7 +127,7 @@ class StratificationFields:
     custom_fields: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        data = {
+        data: dict[str, Any] = {
             "difficulty": self.difficulty,
             "language": self.language,
         }
@@ -156,6 +182,9 @@ class InstrumentTuple:
     def validate_provenance(self) -> None:
         self.meta.validate_provenance()
 
+    def validate_non_placeholder(self) -> None:
+        self.compat_key.validate_non_placeholder()
+
     def is_comparable_with(self, other: InstrumentTuple) -> tuple[bool, str]:
         """Check the M-18 comparability rule against another run tuple.
         
@@ -167,7 +196,6 @@ class InstrumentTuple:
             return False, "Other object is not an InstrumentTuple"
 
         if self.compat_key != other.compat_key:
-            # Determine specific mismatch
             my_dict = self.compat_key.to_dict()
             other_dict = other.compat_key.to_dict()
             diffs = [k for k in my_dict if my_dict[k] != other_dict.get(k)]
@@ -177,6 +205,44 @@ class InstrumentTuple:
             return False, "Stratification fields mismatch across compared arms"
 
         if self.treatment == other.treatment:
-            return False, "Treatment dimensions are identical (A/A comparison; no lift to compute)"
+            return False, "Treatment dimensions are identical (A/A comparison; no treatment lift to compute)"
 
         return True, ""
+
+
+def compute_lift(
+    tuple_a: InstrumentTuple,
+    result_a: Mapping[str, Any],
+    tuple_b: InstrumentTuple,
+    result_b: Mapping[str, Any],
+    strict: bool = False,
+) -> dict[str, Any]:
+    """Compute lift between treatment arm B and baseline arm A under M-18 rules.
+    
+    Refuses comparison if K_compat differs or stratification differs.
+    """
+    comparable, reason = tuple_a.is_comparable_with(tuple_b)
+    if not comparable:
+        if strict:
+            raise IncomparableLiftError(reason)
+        return {
+            "refused": True,
+            "reason": reason,
+            "lift": None,
+            "pass_rate_a": result_a.get("pass_rate", 0.0),
+            "pass_rate_b": result_b.get("pass_rate", 0.0),
+        }
+
+    rate_a = float(result_a.get("pass_rate", 0.0))
+    rate_b = float(result_b.get("pass_rate", 0.0))
+    diff = rate_b - rate_a
+    rel_lift = (diff / rate_a) if rate_a > 0 else 0.0
+
+    return {
+        "refused": False,
+        "reason": None,
+        "absolute_lift": round(diff, 4),
+        "relative_lift": round(rel_lift, 4),
+        "pass_rate_a": rate_a,
+        "pass_rate_b": rate_b,
+    }

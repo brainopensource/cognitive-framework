@@ -128,19 +128,42 @@ def format_report(result: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Paired McNemar pack comparison")
-    parser.add_argument("--pack-a", required=True)
-    parser.add_argument("--pack-b", required=True)
-    parser.add_argument("--db", default="lam.sqlite")
-    parser.add_argument("--json", action="store_true")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--pack-a", required=True, help="Baseline manifest pack name")
+    parser.add_argument("--pack-b", required=True, help="Comparison manifest pack name")
+    parser.add_argument("--db", default="lam.sqlite", help="Path to sqlite traces db")
+    parser.add_argument("--prereg", help="Path to pre-registration JSON file")
+    parser.add_argument("--json", action="store_true", help="Output JSON instead of text report")
     args = parser.parse_args(argv)
-    result = compare_packs(args.db, args.pack_a, args.pack_b)
+
+    prereg_meta = None
+    if args.prereg:
+        p_path = Path(args.prereg)
+        if not p_path.exists():
+            print(f"Pre-registration file not found: {args.prereg}", file=sys.stderr)
+            return 2
+        prereg_data = json.loads(p_path.read_text(encoding="utf-8"))
+        is_lam_replay = (prereg_data.get("backend") == "lam-replay")
+        prereg_meta = {
+            "preregistrationId": prereg_data.get("preregistrationId"),
+            "hash": prereg_data.get("hash"),
+            "isReplay": is_lam_replay,
+            "q3Eligible": not is_lam_replay,
+        }
+
+    res = compare_packs(args.db, args.pack_a, args.pack_b)
+    if prereg_meta:
+        res["preregistration"] = prereg_meta
+        if not prereg_meta["q3Eligible"]:
+            res["q3Eligible"] = False
+            res["q3Warning"] = "Backend is lam-replay; results are not Q3-eligible"
+
     if args.json:
-        sys.stdout.write(json.dumps(result, indent=2) + "\n")
+        print(json.dumps(res, indent=2))
     else:
-        sys.stdout.write(format_report(result))
+        print(format_report(res))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

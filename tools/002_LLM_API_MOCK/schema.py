@@ -6,6 +6,14 @@ import re
 from typing import Any, Mapping, Sequence
 
 ALLOWED_ATOMS = ("view_file", "edit_file", "run_command", "grep_file", "list_dir")
+# t0 calibration scenarios predate the canonical LAM atom vocabulary and use
+# their own explicitly frozen tool dialect. They are validated under this
+# separate schema; t1-t6 use ALLOWED_ATOMS.
+CALIBRATION_ATOMS = ("read", "patch", "test")
+# The corpus deliberately contains calibration (t0), task (t1-t5), and
+# integration/deep (t6) scenarios. Freeze that vocabulary explicitly rather
+# than silently accepting arbitrary tier names.
+SCENARIO_ID_PATTERN = re.compile(r"^t[0-6]-")
 
 
 def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALLOWED_ATOMS) -> None:
@@ -17,8 +25,10 @@ def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALL
     if not scenario_id or not isinstance(scenario_id, str):
         raise ValueError("Scenario missing valid 'id' string")
 
-    if not re.match(r"^t[1-5]-", scenario_id):
-        raise ValueError(f"Scenario id '{scenario_id}' must match pattern '^t[1-5]-'")
+    if not SCENARIO_ID_PATTERN.match(scenario_id):
+        raise ValueError(f"Scenario id '{scenario_id}' must match pattern '^t[0-6]-'")
+
+    effective_atoms = CALIBRATION_ATOMS if scenario_id.startswith("t0-") else allowed_atoms
 
     tier = raw.get("tier")
     if tier is not None:
@@ -55,8 +65,8 @@ def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALL
         for tc in tool_calls:
             func = tc.get("function", {})
             name = func.get("name")
-            if name not in allowed_atoms:
-                raise ValueError(f"Turn {idx} tool call '{name}' not in allowed atoms {allowed_atoms}")
+            if name not in effective_atoms:
+                raise ValueError(f"Turn {idx} tool call '{name}' not in allowed atoms {effective_atoms}")
 
         tool_messages = turn.get("tool_messages_seen", idx)
         if isinstance(tool_messages, int):

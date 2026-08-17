@@ -1,9 +1,11 @@
-import { LiveRuntimeClient } from "../adapters/live.js";
-import { ReplayRuntimeClient } from "../adapters/replay.js";
-import { ScenarioRuntimeClient } from "../adapters/scenario.js";
-import { OperatorSigner } from "../adapters/signer.js";
-import type { CliOptions } from "../application/commands.js";
-import type { RuntimeClient } from "../contract/types.js";
+import {
+  LiveRuntimeClient,
+  OperatorSigner,
+  ReplayRuntimeClient,
+  ScenarioRuntimeClient,
+  type CliOptions,
+  type RuntimeClient,
+} from "@vanguard/client-core";
 import { demoFixturePath, packageRootFrom } from "./catalog.js";
 
 async function* stdinLines(): AsyncIterable<string> {

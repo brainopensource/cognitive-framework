@@ -8,7 +8,7 @@ import {
   resumeRun,
   streamRun,
   streamTrace,
-} from "./application/commands.js";
+} from "@vanguard/client-core";
 import { clientFor } from "./composition/client-for.js";
 import { parseCliOptions, usage, USAGE } from "./composition/parse-cli.js";
 import { RunTui } from "./tui/screens/run-tui.js";

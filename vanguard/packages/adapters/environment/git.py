@@ -35,7 +35,7 @@ from ...ports.environment import (
 )
 from ...ports.event_store import Result
 
-__all__ = ["GitEnvironment"]
+__all__ = ["GitEnvironment", "GitEnvironmentAdapter"]
 
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
@@ -842,3 +842,6 @@ class GitEnvironment:
                 shutil.rmtree(self._working_dir, ignore_errors=True)
         self._disposed = True
         return Result.success(None)
+
+
+GitEnvironmentAdapter = GitEnvironment

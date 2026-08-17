@@ -1,1 +1,1 @@
-export { approvalActionForKey, type ApprovalAction } from "../application/approvals.js";
+export { approvalActionForKey, type ApprovalAction } from "@vanguard/client-core";

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
-import { captureCorrection } from "../../application/corrections.js";
-import { dispatchApproval } from "../../application/approvals.js";
-import type { RuntimeClient } from "../../contract/types.js";
+import { captureCorrection, type RuntimeClient } from "@vanguard/client-core";
+import { submitInteractiveApproval } from "../../composition/operator-approval.js";
 import { ApprovalModal } from "../components/approval-modal.js";
 import { ConnectionBadge } from "../components/connection-badge.js";
 import { CorrectionPrompt } from "../components/correction-prompt.js";
 import { LiveScreen } from "../components/live-screen.js";
 import { useVanguardRun } from "../hooks/use-vanguard-run.js";
 import { approvalActionForKey } from "../keys.js";
+import { sourceLabel } from "../theme/tokens.js";
 
 export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeClient; repo: string; runId?: string; resumeFrom?: string }) {
   const { exit } = useApp();
@@ -38,7 +38,9 @@ export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeC
     }
     if (view.pendingApproval) {
       const action = approvalActionForKey(input);
-      if (action === "approve" || action === "reject") void dispatchApproval(runtime, view.pendingApproval.approvalId, input);
+      if (action === "approve" || action === "reject") {
+        void submitInteractiveApproval(runtime, view.pendingApproval, input);
+      }
       if (action === "correct") setMode("correct");
       return;
     }
@@ -47,7 +49,7 @@ export function RunTui({ runtime, repo, runId, resumeFrom }: { runtime: RuntimeC
 
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-      <Text color="cyan" bold>VG / RUN</Text>
+      <Text color="cyan" bold>VG / RUN · {sourceLabel(source)}</Text>
       <ConnectionBadge source={source} />
       <Text>status: <Text color="yellow">{status}</Text></Text>
       <LiveScreen view={view} repo={repo} />

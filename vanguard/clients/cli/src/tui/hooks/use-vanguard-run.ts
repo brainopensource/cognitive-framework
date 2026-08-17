@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { emptyRunView, reduceRunView, type RunViewModel } from "../../application/run-view.js";
-import type { RuntimeClient, StreamSource } from "../../contract/types.js";
+import {
+  emptyRunView,
+  reduceRunView,
+  type RuntimeClient,
+  type RunViewModel,
+  type StreamSource,
+} from "@vanguard/client-core";
 
 export function useVanguardRun(runtime: RuntimeClient, repo: string, runId?: string, resumeFrom?: string) {
   const [view, setView] = useState<RunViewModel>(emptyRunView);

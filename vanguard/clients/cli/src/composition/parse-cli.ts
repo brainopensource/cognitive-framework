@@ -1,4 +1,4 @@
-import type { CliOptions } from "../application/commands.js";
+import type { CliOptions } from "@vanguard/client-core";
 
 export const USAGE =
   "Usage:\n" +

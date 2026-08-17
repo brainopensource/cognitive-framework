@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import { reduceRunView, emptyRunView } from "../src/application/run-view.js";
 import { captureCorrection, correctionReasonForKey } from "../src/application/corrections.js";
 import { dispatchApproval } from "../src/application/approvals.js";
+import { submitInteractiveApproval } from "../src/composition/operator-approval.js";
+import { OperatorSigner } from "../src/adapters/signer.js";
 import { approvalActionForKey } from "../src/tui/keys.js";
 import { colorizeUnifiedDiff } from "../src/tui/diff.js";
 import type {
@@ -89,6 +91,62 @@ test("approve and reject callbacks submit resolveApproval receipts only", async 
     { approvalId: "appr-1", decision: "approve" },
     { approvalId: "appr-1", decision: "reject" },
   ]);
+});
+
+const CHALLENGE_DIGEST_A = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const CHALLENGE_DIGEST_B = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+test("interactive y/n with challenge digests attaches an OperatorSigner signature", async () => {
+  const client = new RecordingClient();
+  const signer = new OperatorSigner();
+  const pending = {
+    approvalId: "appr-1",
+    unifiedDiff: "+x\n",
+    proposedPatchDigest: DIGEST_A,
+    episodeId: "episode-1",
+    argsDigest: CHALLENGE_DIGEST_A,
+    descriptorDigest: CHALLENGE_DIGEST_B,
+    expiresAt: "2026-08-16T00:00:00.000Z",
+  };
+  const approved = await submitInteractiveApproval(client, pending, "y", signer);
+  assert.equal(approved.ok, true);
+  assert.equal(client.approvals[0]?.decision, "approve");
+  assert.equal(typeof client.approvals[0]?.signature, "string");
+  assert.ok((client.approvals[0]?.signature ?? "").length > 0);
+  assert.equal(client.approvals[0]?.signerKeyRef, signer.keyId);
+});
+
+test("interactive approval without challenge digests does not fabricate a signature", async () => {
+  const client = new RecordingClient();
+  const pending = {
+    approvalId: "appr-1",
+    unifiedDiff: "+x\n",
+    proposedPatchDigest: DIGEST_A,
+    episodeId: "episode-1",
+    argsDigest: "",
+    descriptorDigest: "",
+    expiresAt: "",
+  };
+  const result = await submitInteractiveApproval(client, pending, "y", new OperatorSigner());
+  assert.equal(result.ok, true);
+  assert.deepEqual(client.approvals, [{ approvalId: "appr-1", decision: "approve" }]);
+});
+
+test("TUI presentation consumes @vanguard/client-core", () => {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
+  const files = [
+    "src/main.tsx",
+    "src/composition/client-for.ts",
+    "src/composition/parse-cli.ts",
+    "src/composition/operator-approval.ts",
+    "src/tui/hooks/use-vanguard-run.ts",
+    "src/tui/screens/run-tui.tsx",
+  ];
+  for (const rel of files) {
+    const source = readFileSync(join(dir, rel), "utf8");
+    assert.match(source, /@vanguard\/client-core/, rel);
+  }
 });
 
 test("correction keys map onto VG-04 reason codes including security and architecture", () => {

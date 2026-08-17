@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { manageDaemon, streamRun } from "../src/application/commands.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
@@ -17,6 +18,16 @@ function root(): string {
 test("usage documents all flags", () => {
   for (const flag of ["--demo", "--socket-path", "--manifest", "--replay", "--headless", "--yes", "--help"]) {
     assert.equal(USAGE.includes(flag), true, flag);
+  }
+});
+
+test("vg --help prints every documented flag", () => {
+  const bin = join(root(), "dist/src/main.js");
+  const result = spawnSync(process.execPath, [bin, "--help"], { encoding: "utf8" });
+  assert.equal(result.status, 0);
+  const text = `${result.stdout}${result.stderr}`;
+  for (const flag of ["--demo", "--socket-path", "--manifest", "--replay", "--headless", "--yes", "--help"]) {
+    assert.equal(text.includes(flag), true, flag);
   }
 });
 

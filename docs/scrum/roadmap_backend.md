@@ -86,6 +86,17 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | S19-B-02 | `[DONE] ✅` | BETA | LAR hypothesis compliance (`lar_hypotheses.md`); no optimizer-in-the-loop |
 | S19-B-03 | `[DONE] ✅` | BETA | Full DoD passed: reconstructions, adapter tests, CI boundaries |
 
+### Sprint 20 — v0.4.5 Pack Usability & Tool Invocation Drive
+
+| ID | Status | Lane | Task |
+|---|---|---|---|
+| S20-B-01 | `[DONE] ✅` | BETA | Thicken `vg-code-default/system-prompt.txt`: mandatory first actions `fs.read`/`fs.search`, never answer without a tool, pytest only via `proc.exec` |
+| S20-B-02 | `[DONE] ✅` | BETA | Clear, concise tool schemas in `vg-code-default/` (`read-tool.json`, `search-tool.json`, `patch-tool.json`, `test-tool.json`) preserving aliases |
+| S20-B-03 | `[DONE] ✅` | BETA | `context_policy`: `brief_exempt: true`, `evict_old_tool_results: true`; skills body path `fs.read` |
+| S20-B-04 | `[DONE] ✅` | BETA | LAR hypothesis check (no ungrounded optimiser genes) |
+| S20-B-05 | `[DONE] ✅` | BETA | Workspaces intact with RED tests; `REFERENCE.md` pack-only |
+| S20-B-06 | `[DONE] ✅` | BETA | DoD: `test.agency.test_reconstructions` green, `check_boundaries.py` pass |
+
 ADR-0067 is **`[DONE]`** (`704a773`), not blocked. Agency guard `8f5f16d` stays. You still rotate the OpenRouter key (`S7-J-04`) before any real-model claim.
 
 ### Deprecated (do not execute; left for audit)

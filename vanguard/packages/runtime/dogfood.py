@@ -84,7 +84,7 @@ class DogfoodReport:
     def inconclusive(self) -> tuple[str, ...]:
         return tuple(task.task_id for task in self.tasks
                      if task.outcome.startswith("inconclusive:")
-                     or task.outcome == StopReason.INSTRUMENT_ERROR)
+                     or task.outcome.startswith(StopReason.INSTRUMENT_ERROR))
 
     def to_dict(self) -> dict[str, Any]:
         return {

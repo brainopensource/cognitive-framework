@@ -192,7 +192,11 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = lab_run.run_lab_task(
                 "vg-code-default", tmp, model_port="openrouter")
-            self.assertEqual(result["outcome"], StopReason.INSTRUMENT_ERROR)
+            # `S21-A-01`: the category is no longer the whole answer.
+            self.assertTrue(result["outcome"].startswith(
+                StopReason.INSTRUMENT_ERROR))
+            self.assertEqual(result["outcome"],
+                             "instrument_error:provider_key_missing")
             self.assertNotEqual(result["outcome"], StopReason.ORACLE_GREEN)
 
     def test_the_cli_exposes_the_required_switches(self) -> None:

@@ -47,6 +47,7 @@ from ..adapters.stores.event_store import SqliteEventStore
 from .mock_coding_tape import brief_from_task_dir, coding_tape
 from .determinism import SystemClock
 from .model_selection import ModelUnavailable, select_model
+from .outcome_labels import classify_instrument_error
 from .repair import StopReason, drive_until_green
 from .root import HarnessSession, Runtime, SessionPorts, TaskContext
 from .session_log import session_log
@@ -86,7 +87,11 @@ def run_lab_task(
         # reported `turns: 0 / model_not_invoked` -- a failure of the brain
         # binding, not a measurement. The scripted tape takes real turns and
         # still cannot fix anything, which is the correct MOCK.
-        tape = coding_tape(verbs=harness_preview.verbs)
+        # One pass per attempt, or attempt 2 exhausts the tape and reports
+        # `tape_exhausted` -- a true statement about the fake, and a
+        # useless one about the loop.
+        tape = coding_tape(verbs=harness_preview.verbs,
+                           attempts=max(int(max_attempts), 1))
 
     try:
         selected = select_model(model_port, model_name=model_name, tape=tape)
@@ -94,7 +99,7 @@ def run_lab_task(
         # Fail closed with a named reason. Not a skip, not a pass.
         return {
             "harness": pack_name, "taskDir": str(task_path),
-            "outcome": StopReason.INSTRUMENT_ERROR,
+            "outcome": classify_instrument_error(unavailable.reason),
             "modelPort": unavailable.port,
             "detail": unavailable.reason, "turns": 0, "session": [],
         }
@@ -106,14 +111,20 @@ def run_lab_task(
     brief = brief_from_task_dir(task_path) or brief
 
     def run_once(attempt: int) -> Any:
+        # Each attempt is its own **episode**, not a re-entry into the last
+        # one. Re-using one episode id across attempts restarted the ledger's
+        # sequence counter and wrote duplicate seqs, which `reduce_event`
+        # correctly refused with `Non-monotonic sequence`. An attempt starts
+        # from the workspace as it stands, so it is a new episode; the run id
+        # is what groups them.
+        episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
             environment=_environment_for(task_path),
             clock=SystemClock(), store=store, interactive=interactive)
         task = TaskContext(
             brief=brief, repo_path=task_path,
-            run_id=f"lab-run-{attempt}", episode_id="lab-episode-1",
-            max_turns=max_turns)
+            run_id="lab-run", episode_id=episode_id, max_turns=max_turns)
         return HarnessSession(harness, ports, task).run()
 
     outcome = drive_until_green(
@@ -128,18 +139,26 @@ def run_lab_task(
     # scored zero.
     last = outcome.results[-1] if outcome.results else None
     detail = outcome.detail
-    if outcome.stop_reason == StopReason.INSTRUMENT_ERROR and last is not None:
-        detail = getattr(last, "detail", "") or detail
+    stop_reason = outcome.stop_reason
+    if stop_reason == StopReason.INSTRUMENT_ERROR:
+        if last is not None:
+            detail = getattr(last, "detail", "") or detail
+        # `S21-A-01`. `instrument_error` is a category, not a finding: the
+        # provider never answering, a local backend timing out, and a model emitting
+        # a shape the translator refuses are different facts that all reduced
+        # to one word, and each of them read like the model scoring zero.
+        stop_reason = classify_instrument_error(detail)
 
     events = last.events if last is not None else ()
     log = session_log(events)
     if jsonl_out is not None:
-        _write_jsonl(Path(jsonl_out), store, "lab-episode-1")
+        # Exported by run, so every attempt's episode is in the one file.
+        _write_jsonl(Path(jsonl_out), store, "lab-run")
 
     return {
         "harness": harness.harness,
         "taskDir": str(task_path),
-        "outcome": outcome.stop_reason,
+        "outcome": stop_reason,
         "attempts": outcome.attempts,
         "turns": outcome.telemetry.turns,
         "promptTokens": outcome.telemetry.prompt_tokens,
@@ -165,7 +184,7 @@ def _environment_for(task_path: Path) -> Any:
     return GitEnvironmentAdapter(str(task_path))
 
 
-def _write_jsonl(target: Path, store: Any, episode_id: str) -> int:
+def _write_jsonl(target: Path, store: Any, run_id: str) -> int:
     """Export the **ledger**, not the in-process trace.
 
     `RunResult.events` are kernel `Event` objects; the store holds `vg.4`
@@ -177,7 +196,7 @@ def _write_jsonl(target: Path, store: Any, episode_id: str) -> int:
     from ..adapters.stores.ledger_jsonl import export_jsonl
     from ..ports.event_store import EventRange
 
-    read = store.read(EventRange(episode_id=episode_id))
+    read = store.read(EventRange(run_id=run_id))
     envelopes = read.value if read.ok and read.value is not None else ()
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open("w", encoding="utf-8") as writer:

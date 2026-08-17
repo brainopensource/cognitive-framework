@@ -141,7 +141,7 @@ class TheLiveSmokeSkipsClosed(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = run_lab_task("vg-code-default", tmp, model_port="ollama",
                                   model_name="definitely-not-a-pulled-tag")
-        self.assertEqual(result["outcome"], StopReason.INSTRUMENT_ERROR)
+        self.assertEqual(result["outcome"], "instrument_error:model_tag_absent")
         self.assertIn("not pulled", result["detail"])
         self.assertNotEqual(result["outcome"], StopReason.ORACLE_GREEN)
 

@@ -101,7 +101,8 @@ def score_arm(label: str, task_reports: Sequence[Mapping[str, Any]]) -> ArmScore
         terminations[outcome] = terminations.get(outcome, 0) + 1
         if outcome == StopReason.ORACLE_GREEN:
             resolved += 1
-        if outcome.startswith(INCONCLUSIVE_PREFIX) or outcome == StopReason.INSTRUMENT_ERROR:
+        if (outcome.startswith(INCONCLUSIVE_PREFIX)
+                or outcome.startswith(StopReason.INSTRUMENT_ERROR)):
             inconclusive.append(str(report.get("taskId") or report.get("task_id") or "unnamed"))
 
         turns += int(report.get("turns", 0) or 0)

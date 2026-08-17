@@ -96,7 +96,15 @@ def drive_until_green(
                 completion += telemetry.completion_tokens
                 seen_any_tokens = True
 
-        if getattr(result, "instrument_error", None):
+        # A run that reached a terminal state ran. `HarnessSession` derives
+        # `instrument_error` from "this episode recorded no turn", which is a
+        # good proxy on a run that never started and a false positive on one
+        # that completed -- a finish proposal can terminate an episode whose
+        # turn never lands in that episode's slice of the ledger. Trusting the
+        # proxy over the terminal reported `model_not_invoked` for a model that
+        # had plainly answered. The terminal wins.
+        completed = str(getattr(result, "terminal", "")).endswith("COMPLETED")
+        if getattr(result, "instrument_error", None) and not completed:
             stop = StopReason.INSTRUMENT_ERROR
             detail = str(result.instrument_error)
             break

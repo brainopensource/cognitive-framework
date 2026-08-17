@@ -56,3 +56,7 @@ rewrite changes published history and every clone must be re-cloned.
 
 Rotation: **not done** (CTO). Rewrite: **not started**, correctly — it is gated on rotation and on
 sign-off, neither of which has happened.
+
+**GAMMA 2026-08-17:** prepared this note only. Did not rotate. Did not rewrite history. Did not
+open the OpenRouter console.
+

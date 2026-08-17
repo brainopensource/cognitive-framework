@@ -28,6 +28,8 @@ The conditions under which an improvement claim is trustworthy, the apparatus th
 
 **A number produced outside the rules in §5 is not a number.** That sentence is the entire normative content of this document, and the rest is how to comply with it.
 
+**Implementation binding (`S8-J-07`, 2026-08-17).** The in-tree apparatus that must obey §5 is `tools/telemetry/` (`tuple.py` M-18, `preregistration.py`, `aa_runner.py`, `statistics.py`, `splits.py`, `gap_freeze.py`) and `lab/{build,run,diff,bench}.py`. A lift across differing `K_compat` is refused. Degenerate A/A designs are refused. p-values at n<20 are refused. This does not publish a floor number; spend (`S9-J-03`) still gates live arms.
+
 ---
 
 ## 1. The three closure conditions

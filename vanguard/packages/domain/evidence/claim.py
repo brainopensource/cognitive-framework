@@ -20,12 +20,9 @@ quietly and every number computed from it keeps looking fine. Automatic
 staleness is a pure function of two digests, so nothing has to remember to run.
 
 **Recorded, not consumed.** `support_count`, `last_corroborated_at` and
-`protection_class` are carried on the type and read by nothing. This is the
-argument `T4.11` already accepted for the competence prior: recording now costs
-nothing, and retrofitting later costs a corpus migration. They are deliberately
-withheld from `to_wire()` -- `VG-04` sets `additionalProperties: false`, so
-emitting them before the Joint amendment (`S8-J-01`) would produce claims the
-normative reader rejects.
+`protection_class` are optional on the wire (`S8-J-01`). They never move
+staleness or validity. Defaults (`0` / `None` / `"none"`) are omitted so
+existing claims keep their canonical bytes.
 """
 
 from __future__ import annotations
@@ -179,7 +176,7 @@ class Claim:
     contradicts: tuple[str, ...] = ()
     expires_at: str | None = None
 
-    # -- recorded, not consumed (withheld from the wire until `S8-J-01`) ----
+    # -- recorded, not consumed (optional on the wire; S8-J-01) -------------
     support_count: int = 0
     last_corroborated_at: str | None = None
     protection_class: str = "none"
@@ -226,6 +223,12 @@ class Claim:
                 wire[key] = list(value)
         if self.expires_at is not None:
             wire["expiresAt"] = self.expires_at
+        if self.support_count:
+            wire["supportCount"] = self.support_count
+        if self.last_corroborated_at is not None:
+            wire["lastCorroboratedAt"] = self.last_corroborated_at
+        if self.protection_class != "none":
+            wire["protectionClass"] = self.protection_class
         return wire
 
 
@@ -335,6 +338,17 @@ def parse_claim(
     ), path)
     if protection_class not in PROTECTION_CLASSES:
         raise ClaimError(f"{path}/protectionClass", f"expected one of {PROTECTION_CLASSES}")
+    if "supportCount" in value:
+        raw_count = value["supportCount"]
+        if not isinstance(raw_count, int) or isinstance(raw_count, bool) or raw_count < 0:
+            raise ClaimError(f"{path}/supportCount", "expected a non-negative integer")
+        support_count = raw_count
+    if "lastCorroboratedAt" in value and value["lastCorroboratedAt"] is not None:
+        last_corroborated_at = _text(value["lastCorroboratedAt"], f"{path}/lastCorroboratedAt")
+    if "protectionClass" in value:
+        protection_class = _text(value["protectionClass"], f"{path}/protectionClass")
+        if protection_class not in PROTECTION_CLASSES:
+            raise ClaimError(f"{path}/protectionClass", f"expected one of {PROTECTION_CLASSES}")
 
     return Claim(
         id=_text(value["id"], f"{path}/id"),

@@ -189,6 +189,21 @@
     },
     "expiresAt": {
       "$ref": "primitives.reader.schema.json#/$defs/Timestamp"
+    },
+    "supportCount": {
+      "type": "integer",
+      "minimum": 0,
+      "$comment": "S8-J-01 optional hedge. Recorded, not consumed for staleness."
+    },
+    "lastCorroboratedAt": {
+      "$ref": "primitives.reader.schema.json#/$defs/Timestamp"
+    },
+    "protectionClass": {
+      "enum": [
+        "none",
+        "load_bearing",
+        "pinned"
+      ]
     }
   },
   "additionalProperties": true

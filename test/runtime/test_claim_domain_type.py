@@ -144,16 +144,22 @@ class RecordedNotConsumed(unittest.TestCase):
         self.assertEqual(claim.support_count, 3)
         self.assertEqual(claim.protection_class, "load_bearing")
 
-    def test_they_do_not_leak_into_the_wire_shape(self) -> None:
-        """`VG-04` sets additionalProperties:false; Joint owns the amendment.
+    def test_they_emit_on_the_wire_when_set(self) -> None:
+        """`S8-J-01`: optional hedge fields are named in the writer schema."""
 
-        Until `S8-J-01` lands, emitting these would produce a claim the
-        normative reader rejects. They are recorded on the domain type and
-        withheld from the wire.
-        """
-
-        claim = parse_claim(wire(), support_count=3, protection_class="load_bearing")
+        claim = parse_claim(wire(), support_count=3,
+                            last_corroborated_at="2026-08-16T00:00:00.000Z",
+                            protection_class="load_bearing")
         emitted = claim.to_wire()
+        self.assertEqual(emitted["supportCount"], 3)
+        self.assertEqual(emitted["lastCorroboratedAt"], "2026-08-16T00:00:00.000Z")
+        self.assertEqual(emitted["protectionClass"], "load_bearing")
+        round_trip = parse_claim(emitted)
+        self.assertEqual(round_trip.support_count, 3)
+        self.assertEqual(round_trip.protection_class, "load_bearing")
+
+    def test_defaults_keep_the_historical_wire_shape(self) -> None:
+        emitted = parse_claim(wire()).to_wire()
         for field in ("supportCount", "lastCorroboratedAt", "protectionClass"):
             self.assertNotIn(field, emitted)
 
@@ -165,7 +171,6 @@ class RecordedNotConsumed(unittest.TestCase):
                                 protection_class="load_bearing")
         self.assertEqual(plain.is_stale_under(substrate_profile=DIGEST_A),
                          supported.is_stale_under(substrate_profile=DIGEST_A))
-        self.assertEqual(plain.to_wire(), supported.to_wire())
 
 
 class ClaimIsPure(unittest.TestCase):

@@ -32,19 +32,19 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S10-A-04 | `[DONE] ✅` | ALFA | `vg why` load-bearing (`20e26c9`). `_cmd_ExplainArtifact` returned `{"explanation": ""}`; now derives activation from the ledger, prediction + demotion from the `Claim` store. Absence is reported, never smoothed — unevidenced must not resemble well-evidenced. |
 | P0 / P1 pack+CLI | `[TODO] ❌` | BETA | **Plan approved — execute** `plan_p0_p1_product_pack.md`. Also retarget `test_translate_unknown_tool_fails` (unknown verbs fail at composition, not a builtin list). |
 | S8-J-08 / ADR-0067 | `[DONE] ✅` | **GAMMA** | `Scope.sealed` via `attenuate()`; membership keyed on sealed, not depth. TCB 1333/1438. |
-| S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key in the dashboard **first**. No history rewrite until then |
-| S8-J-01 | `[TODO] ❌` | GAMMA | VG-04 Claim reader fields + golden vectors; then emit `support_count` / `last_corroborated_at` / `protection_class` |
-| S8-J-03 + Q2 | `[TODO] ❌` | GAMMA | **Execute** DOGFOOD-01..03 (protocol is `[DONE]` as S9-J-01). Interactive, no mid-run hand-patch. LAM cassettes do not count |
-| S8-J-04 | `[TODO] ❌` | GAMMA | Full suite with `node` installed (clear the 14–15 reader errors) |
-| S8-J-05 | `[TODO] ❌` | GAMMA | `doing/` 12 → 8 + record `011` supersession (`49b7628`) |
-| S8-J-06 / S7-J-08 | `[TODO] ❌` | GAMMA | ADR-0066 MCP **rules** (no MCP adapter code) |
-| S8-J-07 / S7-J-06 | `[TODO] ❌` | GAMMA | Promote measurement science into VG-07 |
-| S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation (written sign-off). Until then: MOCK / Ollama / OpenRouter `free` only |
-| S9-J-04 | `[TODO] ❌` | GAMMA | Q3 evidence vs ADR-0064 (dated “why not” is allowed) |
-| S10-J-02 | `[TODO] ❌` | GAMMA | Reverse ADR-0064 only where evidence holds |
-| S10-J-03 | `[TODO] ❌` | GAMMA | Release text = proven claims only |
-| S10-J-04 | `[TODO] ❌` | GAMMA | Evaluate O-01 / O-03 **before** V5 — do not start V5 |
-| FE-N1 (frontend board) | `[TODO] ❌` | GAMMA | Real daemon supervisor so `vg daemon` is not `not_available` — **after** ALFA S10-A; do not collide with BETA’s default-manifest CLI work |
+| S8-J-01 | `[DONE] ✅` | GAMMA | VG-04 Claim optional hedge fields on the wire (`ADR-0068`). Golden: `hedge-fields.json`. |
+| S8-J-05 | `[DONE] ✅` | GAMMA | `doing/` cap: 002/006/008/009 → `done/`; `011` supersession recorded in `000_INDEX` |
+| S8-J-06 / S7-J-08 | `[DONE] ✅` | GAMMA | ADR-0066 MCP **rules**, zero MCP adapter code |
+| S8-J-07 / S7-J-06 | `[DONE] ✅` | GAMMA | VG-07 binds `tools/telemetry/` |
+| S9-J-04 | `[DONE] ✅` | GAMMA | Q3 dated why-not: instrument exists, no published floor (`s9-j-04-q3.md`) |
+| S10-J-02 | `[DONE] ✅` | GAMMA | Reverse ADR-0064 for Q1+Q4 only (`s10-j-02-adr0064.md`) |
+| S10-J-03 | `[DONE] ✅` | GAMMA | Proven-claims-only text (`s10-j-03-release-claims.md`) |
+| S10-J-04 | `[DONE] ✅` | GAMMA | O-01 not fired; O-03 spawn live but playbooks still deferred; **no V5** |
+| S8-J-03 + Q2 | `[TODO] ❌` | GAMMA | **Execute** DOGFOOD-01..03. Protocol is not execution. MOCK is not Q2. |
+| S8-J-04 | `[DONE] ✅` | GAMMA | Node ≥22.18: contract readers green. Local v22.18.0. Two remaining failures are ALFA A-02 `proc.test` tests in `test/adapters/` (not this row). |
+| S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation |
+| S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key. Note prepared; not rotated. |
+| FE-N1 (frontend board) | `[TODO] ❌` | GAMMA | `vg daemon` still `not_available` for start — RuntimeService exists; CLI supervisor not wired |
 | Merge / ship | `[TODO] ❌` | GAMMA | `feat_sprint_special` green, receipts, no decorative genes |
 
 ### Deprecated (do not execute; left for audit)
@@ -56,7 +56,7 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S7-J-06, S7-J-07, S7-J-08 as separate builds | `[DEPRECATED]` duplicates | Use S8-J-07, S8-J-05, S8-J-06. Close the S7 rows when the S8 twin lands |
 | Recreate `011` / `ROADMAP.MD` / `backlog_backend.md` | `[DEPRECATED]` | This file is the only backend board |
 | V5, \(G_C\), playbooks, MCP **code**, optimiser, training | `[DEPRECATED]` for v0.4.3 | “Not this version” below. ADR-0066 text is in-scope; MCP implementation is not |
-| Kernel membership in `policy.py` alone | `[DEPRECATED]` approach | Measured and reverted (`cf97e77`). Needs `attenuation.py` sealed flag |
+| Kernel membership in `policy.py` alone | `[DEPRECATED]` approach | Measured and reverted (`cf97e77`). Superseded by `ADR-0067` sealed flag |
 | Mock-kernel tests as spawn proof | `[DEPRECATED]` | Real Kernel only (`NarrowedChildCannotEscalate`) |
 
 ---
@@ -195,13 +195,13 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 
 | ID | Status | Task |
 |---|---|---|
-| S8-J-01 | `[TODO] ❌` | VG-04 Claim wire (reader fields, golden vectors). **A did NOT jump the gun** — `support_count` / `last_corroborated_at` / `protection_class` are on the domain type, defaulted, and withheld from `to_wire()`, with a test citing this row as the gate. `additionalProperties:false` confirms emitting them now would be rejected by the normative reader. Joint owns the amendment; **A must not emit until it lands** |
+| S8-J-01 | `[DONE] ✅` | VG-04 Claim hedge fields on the wire (`ADR-0068`). Golden `hedge-fields.json`. Defaults omit. |
 | S8-J-02 | **`[DONE] ✅`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Re-run over final spawn diff: 0 domain nouns. TCB unchanged 1315. Boundary check PASS. |
-| S8-J-03 | `[TODO] ❌` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
-| S8-J-04 | `[TODO] ❌` | Full suite with `node` installed (today: 14 reader errors) |
-| S8-J-05 | `[TODO] ❌` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
-| S8-J-06 | `[TODO] ❌` | ADR-0066 (was S7-J-08) |
-| S8-J-07 | `[TODO] ❌` | VG-07 promotion (was S7-J-06) |
+| S8-J-03 | `[TODO] ❌` | Q1/Q2 evidence; **execute** DOGFOOD-01..03 (protocol is S9-J-01). MOCK is not Q2. |
+| S8-J-04 | `[DONE] ✅` | Full suite readers green with Node ≥22.18 (`s8-j-04-node.md`). Two `proc.test` adapter tests are a foreign A-02 leftover. |
+| S8-J-05 | `[DONE] ✅` | `doing/` cap: 002/006/008/009 archived; `011` supersession in `000_INDEX` |
+| S8-J-06 | `[DONE] ✅` | ADR-0066 MCP rules, zero MCP adapter code |
+| S8-J-07 | `[DONE] ✅` | VG-07 implementation binding to `tools/telemetry/` |
 
 **Sprint 8 is formally CLOSED (2026-08-17).** S8-A-02 verified green · S8-B-01 verified fail-closed on model proposal · Joint J-02 ADR-0060 verified (0 domain nouns) · Sprint close receipt: `docs/scrum/sprints/sprint08/evidence/s8-close-receipt.md`.
 
@@ -282,7 +282,7 @@ Lane C coding `[DONE]`. No published **lift** / no cloud spend until S9-J-03.
 | S9-J-01 | `[DONE] ✅` | J | Q2 dogfood ×3 pre-registered protocol (`docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md`) |
 | S9-J-02 | `[DONE] ✅` | J | Countersigned CT-09 sha256 hash format over canonical JCS bytes |
 | S9-J-03 | `[TODO] ❌` | J | Spend authorisation |
-| S9-J-04 | `[TODO] ❌` | J | Q3 evidence vs ADR-0064 |
+| S9-J-04 | `[DONE] ✅` | J | Q3 dated why-not (`docs/scrum/sprints/sprint09/evidence/s9-j-04-q3.md`) |
 
 ---
 
@@ -304,9 +304,9 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 | S10-C-02 | `[DONE] ✅` | C | Verifier–deployment gap freeze (`tools/telemetry/gap_freeze.py`) |
 | S10-C-03 | `[DONE] ✅` | C | Gate evidence pack including negatives (`docs/scrum/sprints/sprint10/evidence/s10-gate-evidence-pack.md`) |
 | S10-J-01 | `[DONE] ✅` | J | Four-question review with evidence paths in gate evidence pack |
-| S10-J-02 | `[TODO] ❌` | J → **GAMMA** | Reverse ADR-0064 only where evidence holds |
-| S10-J-03 | `[TODO] ❌` | J → **GAMMA** | Release text = proven claims only |
-| S10-J-04 | `[TODO] ❌` | J → **GAMMA** | Evaluate O-01 / O-03 before V5 |
+| S10-J-02 | `[DONE] ✅` | J → **GAMMA** | Reverse ADR-0064 for Q1+Q4 only |
+| S10-J-03 | `[DONE] ✅` | J → **GAMMA** | Release text = proven claims only |
+| S10-J-04 | `[DONE] ✅` | J → **GAMMA** | O-01 / O-03 evaluated; V5 not opened |
 
 ---
 

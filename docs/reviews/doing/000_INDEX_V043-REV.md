@@ -15,16 +15,16 @@ literature.
 | # | Document | Owns | Read if you are |
 |---|---|---|---|
 | **001** | [Executive Architectural Review](001_executive_architectural_review_V043-REV.md) | The ruling, severity-ranked findings, MVP-gate status, the order of work | **everyone — start here** |
-| **002** | [Measurement & Evidence Integrity](002_measurement_and_evidence_integrity_V043-REV.md) | Benchmark triage, evidence-class labelling, the A/A programme, what we may and may not say | Tech Lead, measurement, anyone about to publish a number |
+| **002** | [Measurement & Evidence Integrity](../done/002_measurement_and_evidence_integrity_V043-REV.md) | Benchmark triage, evidence-class labelling, the A/A programme, what we may and may not say | Tech Lead, measurement, anyone about to publish a number |
 | **003** | [Core Architecture & Coupling](003_core_architecture_and_coupling_V043-REV.md) | The three-loop problem, recursion, resume, the composition-root decomposition, layer contracts | Senior A + Senior B |
 | **004** | [Cognition, Competence & Self-Improvement](004_cognition_competence_and_self_improvement_V043-REV.md) | $G_C/G_E/A_t$, operators-as-data, memory and library drift, context engineering, what to defer | Research Lead, Tech Lead |
 | **005** | [The Harness Manifest Framework](005_harness_manifest_framework_V043-REV.md) | What a manifest must express before `C-01` is testable; decorative fields; S7 repairs | Senior B, product |
-| **006** | [Tech Stack, Protocols & Polyglot Seams](006_tech_stack_protocols_and_polyglot_seams_V043-REV.md) | Python ratification and the `ADR-0001` defect, MCP/ACP/A2A posture, performance levers, security | Tech Lead, Senior A |
+| **006** | [Tech Stack, Protocols & Polyglot Seams](../done/006_tech_stack_protocols_and_polyglot_seams_V043-REV.md) | Python ratification and the `ADR-0001` defect, MCP/ACP/A2A posture, performance levers, security | Tech Lead, Senior A |
 | **007** | [Cleanup, Dedup & Docs Consolidation](007_codebase_cleanup_dedup_and_docs_consolidation_V043-REV.md) | The concrete delete/merge/relocate list; the review-WIP protocol | Everyone doing Sprint 7 |
-| **008** | [Corrected v0.4.3 Delivery Plan, S7–S10](008_v043_delivery_plan_sprints_7_10_V043-REV.md) | The sprint plan, gates, deferrals with triggers, the stakeholder paragraph | Project Lead, Scrum, Tech Lead |
-| **009** | [Prior Review Reconciliation](009_prior_review_reconciliation_V043-REV.md) | Finding-level verdict on all 13 prior documents; what is FIXED, STILL-TRUE, WRONG, PROMOTE | **Read before actioning any archived review** |
+| **008** | [Corrected v0.4.3 Delivery Plan, S7–S10](../done/008_v043_delivery_plan_sprints_7_10_V043-REV.md) | The sprint plan, gates, deferrals with triggers, the stakeholder paragraph | Project Lead, Scrum, Tech Lead |
+| **009** | [Prior Review Reconciliation](../done/009_prior_review_reconciliation_V043-REV.md) | Finding-level verdict on all 13 prior documents; what is FIXED, STILL-TRUE, WRONG, PROMOTE | **Read before actioning any archived review** |
 | **010** | [V5 / Aether Roadmap & the ACI Harvest](010_v5_aether_roadmap_and_aci_harvest_V043-REV.md) | The 16-tree competitor harvest, ACI gifts, prefix discipline, V5-A…V5-M, the 200-year framing | Research Lead, Tech Lead |
-| **011** | *Removed.* Execution board is `docs/scrum/roadmap_backend.md` (and FE: `docs/scrum/roadmap_frontend.md`). Reviews in this folder stay findings, not a todo list. | — | Daily work: those two roadmaps |
+| **011** | *Removed (`49b7628`).* Execution board is `docs/scrum/roadmap_backend.md` (and FE: `docs/scrum/roadmap_frontend.md`). **S8-J-05:** the silent drop is recorded here; `011` is not recreated. Reviews in this folder stay findings, not a todo list. `doing/` cap 8: 002, 006, 008, 009 moved to `docs/reviews/done/` 2026-08-17. | — | Daily work: those two roadmaps |
 
 ### Execution artifacts (outside this directory)
 

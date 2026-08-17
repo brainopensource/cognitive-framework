@@ -1,8 +1,25 @@
 #!/usr/bin/env python3
-"""Run one task directory against one frozen harness pack (S9-B-02).
+"""Run one task directory against one frozen harness pack (`W14-A`).
+
+**This driver used to fabricate its result.** It read the manifest, never
+composed anything, never ran a turn, and returned
+`{"status": "completed", "turnCount": 1}` regardless of what the task was or
+whether any work happened. A harness that reports completion for work it did
+not do is worse than one that reports nothing (`REQ-TRUST-001`).
+
+It now composes a real `Harness`, runs a real `HarnessSession`, and reports
+what the ledger says. Greenfield and bugfix are the same path: one compose, one
+episode tree, tools, receipts, ledger. There is no second agent loop here --
+the repair driver re-enters `HarnessSession.run()` and nothing else.
 
 CLI:
-  python3 lab/run.py --pack vg-code-default --task-dir /path/to/task [--mock] [--json]
+  python3 lab/run.py --pack vg-code-default --task-dir DIR
+      [--model mock|ollama|openrouter|deepseek] [--model-name TAG]
+      [--interactive | --benchmark] [--max-turns N] [--max-attempts N]
+      [--jsonl-out FILE] [--json]
+
+The JSONL is the ledger export; project it with
+  python3 tools/export_coding_session.py --jsonl FILE
 """
 
 from __future__ import annotations
@@ -11,58 +28,154 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-def _find_manifests_dir() -> Path:
-    repo_root = Path(__file__).resolve().parents[1]
-    return repo_root / "vanguard" / "packages" / "agency" / "manifests"
+from vanguard.packages.adapters.stores.event_store import SqliteEventStore  # noqa: E402
+from vanguard.packages.runtime.model_selection import (  # noqa: E402
+    ModelUnavailable,
+    select_model,
+)
+from vanguard.packages.runtime.repair import StopReason, drive_until_green  # noqa: E402
+from vanguard.packages.runtime.root import (  # noqa: E402
+    HarnessSession,
+    Runtime,
+    SessionPorts,
+    TaskContext,
+)
+from vanguard.packages.runtime.session_log import session_log  # noqa: E402
+
+DEFAULT_BRIEF = ("Inspect the workspace, make the failing suite pass, and run "
+                 "the tests through the allowlisted process verb.")
 
 
 def run_lab_task(
     pack_name: str,
     task_dir: Path | str,
-    manifests_dir: Path | None = None,
+    *,
+    model_port: str = "mock",
+    model_name: str | None = None,
+    tape: Sequence[Any] = (),
+    interactive: bool = False,
+    max_turns: int = 8,
+    max_attempts: int = 4,
+    brief: str = DEFAULT_BRIEF,
+    oracle: Any = None,
+    jsonl_out: Path | str | None = None,
 ) -> dict[str, Any]:
-    base_dir = manifests_dir or _find_manifests_dir()
-    pack_dir = base_dir / pack_name
-    manifest_file = pack_dir / "manifest.json"
+    """Compose, run, and report from the ledger. Never from a literal."""
 
-    if not manifest_file.exists():
-        raise FileNotFoundError(f"Pack manifest not found: {manifest_file}")
-
-    manifest_raw = json.loads(manifest_file.read_text(encoding="utf-8"))
     task_path = Path(task_dir)
+    if not task_path.is_dir():
+        # Counted, not skipped -- the denominator lesson from W13-A.
+        return {
+            "harness": pack_name, "taskDir": str(task_path),
+            "outcome": "inconclusive:workspace_missing",
+            "detail": "task directory does not exist", "turns": 0, "session": [],
+        }
 
-    verbs = [c.get("verb", "") for c in manifest_raw.get("capabilities", [])]
+    try:
+        selected = select_model(model_port, model_name=model_name, tape=tape)
+    except ModelUnavailable as unavailable:
+        # Fail closed with a named reason. Not a skip, not a pass.
+        return {
+            "harness": pack_name, "taskDir": str(task_path),
+            "outcome": StopReason.INSTRUMENT_ERROR,
+            "modelPort": unavailable.port,
+            "detail": unavailable.reason, "turns": 0, "session": [],
+        }
 
-    result = {
-        "harness": manifest_raw.get("harness", pack_name),
+    harness = Runtime.compose(pack_name, episode_id="lab-episode-1")
+    store = SqliteEventStore(":memory:")
+
+    def run_once(attempt: int) -> Any:
+        ports = SessionPorts(
+            model=selected.model,
+            environment=_environment_for(task_path),
+            clock=None, store=store, interactive=interactive)
+        task = TaskContext(
+            brief=brief, repo_path=task_path,
+            run_id=f"lab-run-{attempt}", episode_id="lab-episode-1",
+            max_turns=max_turns)
+        return HarnessSession(harness, ports, task).run()
+
+    outcome = drive_until_green(
+        run_once,
+        oracle=oracle or _verdict_is_green,
+        max_attempts=max_attempts,
+    )
+
+    events = outcome.results[-1].events if outcome.results else ()
+    log = session_log(events)
+    if jsonl_out is not None:
+        _write_jsonl(Path(jsonl_out), events)
+
+    return {
+        "harness": harness.harness,
         "taskDir": str(task_path),
-        "modelPort": "mock-lab-model",
-        "status": "completed",
-        "verbs": verbs,
-        "turnCount": 1,
-        "detail": "Task executed against frozen harness",
+        "outcome": outcome.stop_reason,
+        "attempts": outcome.attempts,
+        "turns": outcome.telemetry.turns,
+        "promptTokens": outcome.telemetry.prompt_tokens,
+        "completionTokens": outcome.telemetry.completion_tokens,
+        "mode": "interactive" if interactive else "benchmark",
+        "session": [entry.to_dict() for entry in log.entries],
+        "deadEnds": [dict(entry) for entry in log.dead_end_details],
+        "cacheMissAttribution": [dict(e) for e in log.cache_miss_attribution()],
+        "detail": outcome.detail,
+        **selected.to_dict(),
     }
-    return result
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run one task against frozen harness")
-    parser.add_argument("--pack", required=True, help="Harness pack name")
-    parser.add_argument("--task-dir", required=True, help="Path to task directory")
-    parser.add_argument("--mock", action="store_true", default=True, help="Use labelled mock model")
-    parser.add_argument("--json", action="store_true", help="Output JSON format")
+def _verdict_is_green(result: Any) -> bool:
+    """The oracle is the run's own exterior verdict, never a suite run here."""
+    verdict = getattr(result, "verdict", None)
+    return bool(verdict is not None and getattr(verdict, "passed", False))
+
+
+def _environment_for(task_path: Path) -> Any:
+    from vanguard.packages.adapters.environment.git import GitEnvironmentAdapter
+
+    return GitEnvironmentAdapter(str(task_path))
+
+
+def _write_jsonl(target: Path, events: Sequence[Any]) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w", encoding="utf-8") as writer:
+        for event in events:
+            payload = getattr(event, "to_dict", None)
+            writer.write(json.dumps(payload() if payload else {"event": str(event)},
+                                    sort_keys=True) + "\n")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run one task against a frozen harness")
+    parser.add_argument("--pack", required=True)
+    parser.add_argument("--task-dir", required=True)
+    parser.add_argument("--model", default="mock",
+                        choices=("mock", "ollama", "openrouter", "deepseek"))
+    parser.add_argument("--model-name", default=None)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--interactive", action="store_true")
+    mode.add_argument("--benchmark", action="store_true")
+    parser.add_argument("--max-turns", type=int, default=8)
+    parser.add_argument("--max-attempts", type=int, default=4)
+    parser.add_argument("--jsonl-out", default=None)
+    parser.add_argument("--json", action="store_true")
 
     args = parser.parse_args()
-    res = run_lab_task(args.pack, args.task_dir)
-
-    if args.json:
-        print(json.dumps(res, indent=2))
-    else:
-        print(f"Harness: {res['harness']} | Task: {res['taskDir']} | Status: {res['status']}")
+    result = run_lab_task(
+        args.pack, args.task_dir,
+        model_port=args.model, model_name=args.model_name,
+        interactive=args.interactive, max_turns=args.max_turns,
+        max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
+    )
+    print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
+    return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

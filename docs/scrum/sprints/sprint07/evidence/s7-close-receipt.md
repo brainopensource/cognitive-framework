@@ -61,7 +61,7 @@ The reader deliberately refuses to degrade — a run without the TypeScript read
 about cross-language agreement — so this is the harness working as designed, not a defect.
 
 **On a runner with `node` present this must be 0 errors.** That is an S8 Joint check, not a
-Sprint 7 debt: see `S8-J-02`.
+Sprint 7 debt: see `S8-J-04`.
 
 ## 4. Structural deletions confirmed on disk
 
@@ -181,10 +181,10 @@ fails if any of them fails.
 | Item | State | Owner | Due |
 |---|---|---|---|
 | `S7-J-04` git history rewrite for the leaked key | **open** — key rotation at provider is the CTO's action and is not verifiable from this repo | CTO + Tech Lead | does **not** block S8/S9 coding |
-| `node`-absent reader errors | open | Joint `S8-J-02` | Sprint 8 |
-| `ADR-0066` (MCP adapter rules) | open | Joint `S8-J-04` | Sprint 8 |
-| `docs/reviews/doing/` over cap (12 files, cap 8) | open | Joint `S8-J-03` | Sprint 8 |
-| `VG-07` reconciliation | open | Joint `S8-J-05` | Sprint 8 |
+| `node`-absent reader errors | open | Joint `S8-J-04` | Sprint 8 |
+| `ADR-0066` (MCP adapter rules) | open | Joint `S8-J-06` | Sprint 8 |
+| `docs/reviews/doing/` over cap (12 files, cap 8) | open | Joint `S8-J-05` | Sprint 8 |
+| `VG-07` reconciliation | open | Joint `S8-J-07` | Sprint 8 |
 
 `--all-refs` secret scanning and the history rewrite are **not** evidenced here. `scan_secrets.py`
 tree mode is green; ref-history mode is a separate, owner-gated action under `S7-J-04`.

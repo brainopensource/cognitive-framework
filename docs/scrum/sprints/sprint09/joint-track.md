@@ -1,6 +1,19 @@
 # Sprint 9 · Joint Track
 
-**Owners:** Tech Lead + Project Lead · **Refinement:** PLANNED, NOT REFINED
+**Owners:** Tech Lead + Project Lead · **Refinement:** **REFINED AND OPEN (2026-08-16)**
+
+> **`S9-J-03` is the gate on every number this programme publishes.** Until the Project Lead signs
+> it: no cloud spend of any amount, and **nobody publishes a delta** — no lift, p-value, interval or
+> comparative claim, from any lane. Lane C builds the instrument; it does not report through it.
+>
+> The three Q2 dogfood bugs for `S9-J-01` are **already pre-registered by name** in
+> `docs/scrum/sprints/sprint08/joint-track.md §S8-J-03` (`DOGFOOD-01`, `-02`, `-03`), together with
+> the substitution rule. Do not choose bugs in Sprint 9 — that is the whole point of naming them in
+> Sprint 8.
+>
+> **`tools/002_LLM_API_MOCK/scenarios/t0-dogfood-bug-00{1,2,3}` are NOT Q2 evidence.** Despite the
+> names they are LAM cassette replays; replay cannot answer *"would you reach for it again?"*
+> because nobody reached for anything.
 
 ---
 

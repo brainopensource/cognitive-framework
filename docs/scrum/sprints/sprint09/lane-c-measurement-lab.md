@@ -1,6 +1,33 @@
 # Sprint 9 · Lane C — Measurement & Lab (primary lane)
 
-**Owner:** Senior C · **Backlog:** `011 §6` · **Refinement:** PLANNED, NOT REFINED
+**Owner:** Senior C · **Backlog:** `011 §6` · **Refinement:** **REFINED AND OPEN (2026-08-16)**
+**Commit prefix:** `[lane-c]`
+
+## ▶ YOUR S9 FIRST TASK: `S9-C-01` — **NOT BLOCKED. START NOW, IN PARALLEL WITH SPRINT 8.**
+
+**You lead Sprint 9.** Lanes A and B support you, and both of their S9 first tasks are blocked on
+Sprint 8 — yours is not. `S9-C-01` → `S9-C-02` → `S9-C-03` is the spine of the sprint and every
+step runs against `tools/002_LLM_API_MOCK` and `vg-shell-only`. None of it needs Sprint 8.
+
+**DoD command:** `python3 -m unittest discover -s test/lab -t .` — green, **and** a lift computed
+across differing `K_compat` **refuses**.
+
+**Binding limits while you work ahead:**
+
+- **Nobody publishes a delta.** Build the instrument; do not report a result through it.
+- **No cloud spend of any amount** until the Project Lead signs `S9-J-03`.
+- **Never `band=top`.** `models.json` keeps `top: []`; `models_for_band("top")` refuses and that
+  refusal is asserted by `test/tools/test_lam_models.py`. Do not name frontier ids.
+- **An A/A floor from LAM replay is not a floor** — replay is deterministic, variance ≈ 0, and the
+  run invents significance (`D-06`, `CL-3`). Build against replay; never report a floor from it.
+- **Fail closed on placeholder digests.** `harness_commit: "v0.5.0"` and
+  `evaluator_image_digest: "sha256:evaluator_default"` are lies on a published row.
+
+> A degenerate floor is a **valid outcome**; the runner refuses rather than printing zero variance.
+> If the floor swallows the deltas we meant to claim, `RSK-06` requires reducing claim ambition —
+> **not** raising N until something is significant.
+
+---
 
 ---
 

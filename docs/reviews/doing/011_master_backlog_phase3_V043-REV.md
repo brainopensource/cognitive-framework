@@ -47,7 +47,41 @@ not a backlog row — it is a ticket.**
 | `scan_secrets.py --all-refs` | **FAIL** — reachable `.env` blob, 21 `refs/original` |
 | Gate status (`ADR-0064`) | Q1 partial+regressed · Q2 not demonstrated · Q3 not met · Q4 not met |
 
-**Field note (2026-08-16):** Sprint 7 is **not closed.** A: `S7-A-07` only (A-01…A-06 still `[TODO]`; shared dirty tree voided the 2F/15E cite). B: S7-B `[DONE]` per lane; S8-B rows are `[CLAIMED]`, not TL-verified — do not open S8-A/C on that report. C: `S7-C-01` `[IN_PROGRESS]` until `S7-C-03` deletes the four runners. Joint J-04…J-08 `[TODO]`. TL prompt: `docs/scrum/development_guides/tech_lead_sprint7_exit_review.md`.
+**Field note — SUPERSEDED (2026-08-16, morning):** *Sprint 7 is not closed. A: `S7-A-07` only… B: S8-B rows `[CLAIMED]`… C: `S7-C-01` `[IN_PROGRESS]`… Joint J-04…J-08 `[TODO]`.* Retained for audit; the statuses it cites no longer match the tree.
+
+**Field note — SPRINT 7 ENGINEERING CLOSED (2026-08-16, TL + PL verification run):**
+Branch `sprints7-8/integration` @ `248be91`. Verified on disk and by command, not by lane report.
+
+| Metric | Value at close |
+|---|---|
+| Suite | **539 tests · 0 failures · 14 errors · 2 skipped** |
+| All 14 errors | `ReaderUnavailable: node is required` — **the exact class the S7 exit gate admits**; 0 other errors |
+| `check_boundaries.py` | PASS, 154 source files |
+| `run_broken_tests.py` | PASS, **38** broken counterparts observed failing |
+| `check_tcb_budget.py` | PASS, 1,315 / 1,438 |
+| `grep -rn "runtime.loops\|EpisodeCoordinator" vanguard/` | **empty** |
+| `scan_secrets.py` (tree) | **PASS** (was FAIL — see D3) |
+| `scan_secrets.py --all-refs` | **still FAIL** — reachable `.env` blob, 21 `refs/original`. `S7-J-04`, carried, **does not block S8/S9** |
+| All 12 CI gates | **PASS** (3 were failing on files deleted by `0a9ac8b` — see D1) |
+
+**Lane verdicts.** A: `S7-A-01…A-07` **`[DONE]`**, verified — `runtime/loops/` and `coordination.py`
+gone, five rules live in the boundary table with planted counterparts failing. B: `S7-B-01…B-05`
+**`[DONE]`**, verified — 13 loader tests, 3 bench tests, metamorphic green. C: `S7-C-01…C-05`
+**`[DONE]`**, verified — four runners gone, `guard.py` present, `RETRACTION.md` present, `top: []`
+held, no adapter import in `benchmarkings/` (the single `OpenRouterModel` grep hit is a docstring
+compliance statement in `zero_hint_v1/run_live_agent.py:7`, not an import).
+
+**Four defects found at close that no lane reported** — D1 `S7-CLEAN-001` (`0a9ac8b`) deleted the
+Active MVP Contract and the T0 archaeology traces while three CI gates still referenced them;
+D2 the baseline manifest was sealed mid-sprint (`6ed94fe`) then invalidated by `S7-A-03`
+(`c5ff05f`) rewriting a sealed file; D3 the `pem-private-key` rule fired on security prose;
+D4 `test_lam_models.py` asserted the *retired* band vocabulary, i.e. it asserted that the `top`
+spend control does not exist. All four repaired at close. Full evidence with commands and outputs:
+**`docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md`**.
+
+**Integration branch — one name.** `sprints7-8/integration` is canonical and carries Sprint 8.
+`sprint7/integration` held **zero** unique commits (strict ancestor) and is **deleted** local and
+`origin`. Every S8/S9 kit cites the canonical name; no doc may reintroduce `sprint07/integration`.
 
 ---
 
@@ -145,20 +179,34 @@ child's exploration never enters the parent's context; the whole run reconstruct
 
 ### 5.2 Lane B — Workload & Evidence
 
-Lane B marked these `[DONE]` before Sprint 7 exit. Status is **`[CLAIMED]`** until TL audit (ADR-0060, property tests, no kernel nouns). Not a reason to start S8-A or S8-C.
+**TL audit complete (2026-08-16). Verdict: ACCEPTED as the Sprint 8 starting point — not sent back.**
+Lane B put real, tested code on the tree ahead of the sprint. `ADR-0060` holds: `agency/episode/`
+introduces **no domain vocabulary** (`spawn` speaks scope, lease, depth, causation — no `file`,
+`repo`, `patch`, `test`). TCB unchanged at 1,315 — recursion did not grow the kernel. Row statuses
+below are the TL's, not the lane's, and were set by reading the tree.
+
+**One material gap, and it is in the centre row.** `S8-B-01`'s DoD names three property tests. One
+exists. The other two — *"budget conserved two levels deep"* and *"child overrun debits the
+parent"* — are absent, **and the mechanism they would test is not wired**: `spawn` builds the child
+`EpisodeEngine` on the shared `Kernel`, but no `parent_lease` is ever set on an effect request
+(`engine.py:196`), so the `Governor` lease tree is never built. Shared ceilings give conservation
+*incidentally*; the DoD asks for it *structurally*, and `Governor.reserve(..., parent_lease_id=…)`
+already implements `F-13` ("a closed parent cannot fund a child") waiting to be called.
+**This is a finish, not a rewrite — it is Lane B's first Sprint 8 task.** `spawn` is otherwise sound
+and Lane A must **not** delete or relocate it while decomposing `root.py` (`S8-A-01`).
 
 | ID | Status | Task | DoD | Source |
 |---|---|---|---|---|
-| `S8-B-01` | `[CLAIMED]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | Property tests: attenuation monotone across spawn; budget conserved two levels deep; child overrun debits the parent | `003 §3.4`, `T4.4`, `T4.10` |
-| `S8-B-02` | `[CLAIMED]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
-| `S8-B-03` | `[CLAIMED]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
-| `S8-B-04` | `[CLAIMED]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
-| `S8-B-05` | `[CLAIMED]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
-| `S8-B-06` | `[CLAIMED]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
-| `S8-B-07` | `[CLAIMED]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
-| `S8-B-08` | `[CLAIMED]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
-| `S8-B-09` | `[CLAIMED]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
-| `S8-B-10` | `[CLAIMED]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
+| `S8-B-01` | `[CLAIMED]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | **Attenuation/depth/causation/typed-return/workspace-finally: VERIFIED** (7 tests, `test/agency/test_episode_spawn.py`). **Budget half NOT wired** — no `parent_lease` on any effect request; the two budget property tests are absent. Finish = `S8-B-01a` | `003 §3.4`, `T4.4`, `T4.10` |
+| `S8-B-02` | `[DONE]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
+| `S8-B-03` | `[DONE]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
+| `S8-B-04` | `[TODO]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | **NOT DONE.** Registered in `manifests/loader.py:36`, but `root.py:740` still carries `TODO(S8-B-04)` and the literal, and no test asserts the behaviour. Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
+| `S8-B-05` | `[DONE]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
+| `S8-B-06` | `[DONE]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
+| `S8-B-07` | `[DONE]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
+| `S8-B-08` | `[DONE]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
+| `S8-B-09` | `[DONE]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
+| `S8-B-10` | `[DONE]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
 
 ### 5.3 Lane C — Measurement & Lab
 

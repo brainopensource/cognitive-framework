@@ -1,6 +1,29 @@
 # Sprint 9 · Lane B — Workload & Evidence
 
-**Owner:** Senior B · **Backlog:** `011 §6` · **Refinement:** PLANNED, NOT REFINED
+**Owner:** Senior B · **Backlog:** `011 §6` · **Refinement:** **REFINED AND OPEN (2026-08-16)**
+**Commit prefix:** `[lane-b]`
+
+## ▶ YOUR S9 FIRST TASK: `S9-B-01` — **BLOCKED BY `S8-B-01a` AND `S8-B-04`**
+
+Each pack must differ on **≥3** dimensions. Compaction (`S8-B-02`) and routing (`S8-B-03`) are real
+and `[DONE]`. **Approval policy is not real until `S8-B-04` lands**, so a pack cannot yet differ on
+it — and `S8-B-04` is your own Sprint 8 row. Finish `S8-B-01a`, then `S8-B-04`, then this unblocks.
+
+**DoD command when unblocked:** `python3 -m unittest discover -s test/agency -t .` — green, each pack
+composing with **zero** `agency/episode/` edits.
+
+**Authorised to start NOW, in parallel with Sprint 8:** the `REFERENCE.md` per pack — the public docs
+read and, explicitly, **what was not copied**. Prose against public sources, no code, and the part
+most likely to be rushed if it waits. Include the honesty label: these reconstruct **tool surface +
+prompt + policy**, not any vendor's scheduler. Depth-1 serialisation stands (`D-02`, `D-09`).
+
+**`S9-B-02`:** `build`, `run` and `diff` are **NOT blocked** — start them whenever you have room.
+**`bench` is BLOCKED BY `S9-C-02`**, because it enforces a pre-registration hash whose format is
+Lane C's output.
+
+**You may not** publish any pack comparison or claim the packs differ *meaningfully* until the A/A
+floor exists and `S9-J-03` is signed. Three packs that differ is a fact; three packs that differ by a
+meaningful amount is a claim.
 
 ---
 

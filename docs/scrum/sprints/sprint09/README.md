@@ -1,7 +1,66 @@
 # Sprint 9 (Wave 8) — The Instrument (Q3)
 
-**Phase:** 3 · **Wave:** W8 · **Timebox:** 2–3 weeks · **Refinement:** PLANNED, NOT REFINED
+**Phase:** 3 · **Wave:** W8 · **Timebox:** 2–3 weeks
+**Refinement:** **REFINED AND OPEN (2026-08-16)** — opened alongside Sprint 8 so prep runs in
+parallel. Read §0 before starting anything.
 **Backlog:** `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md §6`
+**Target branch:** `sprints7-8/integration` until Sprint 8 closes, then `sprint9/integration`.
+
+---
+
+## 0. Start here — first task per lane, and what is blocked
+
+Sprint 9 is **Lane C's sprint.** A and B support it. That asymmetry decides what can start early:
+Lane C's first task has no Sprint 8 dependency and **starts now**; Lanes A and B are blocked on
+Sprint 8 shapes and have prep work instead.
+
+| Lane | S9 first task | Status | DoD command |
+|---|---|---|---|
+| **C** *(leads)* | **`S9-C-01`** — wire the `M-18` instrument tuple so a lift across differing `K_compat` **refuses**. Then `S9-C-02` (pre-registration) and `S9-C-03` (A/A runner) against `vg-shell-only` with `tools/002_LLM_API_MOCK` | **FREE — start now, parallel with Sprint 8** | `python3 -m unittest discover -s test/lab -t .` → OK, **and** a lift across differing `K_compat` refuses |
+| **A** | **`S9-A-01`** — instrument fields on `RunResult` (`gene_digests`, composition digest, per-arm instrument-error reason, integer turn/token/cost) | **BLOCKED BY `S8-A-01`** | `python3 -m unittest discover -s test/runtime -t .` → OK with the new fields asserted |
+| **B** | **`S9-B-01`** — three reconstructions differing on ≥3 dimensions | **BLOCKED BY `S8-B-01a` + `S8-B-04`** | `python3 -m unittest discover -s test/agency -t .` → OK, each pack composes with **zero** `agency/episode/` edits |
+| **Joint** | `S9-J-03` spend authorisation | Leads only | — |
+
+### 0.1 Blocked rows, stated plainly
+
+| Row | Blocked by | Why it genuinely cannot start |
+|---|---|---|
+| `S9-A-01` | `S8-A-01` | `RunResult` is produced by `HarnessSession.run()`, which does not exist yet. Adding the fields to today's shape means adding them twice. |
+| `S9-A-02` | `S9-A-01` | Integer-telemetry discipline applies to the fields `S9-A-01` adds. |
+| `S9-B-01` | `S8-B-01a`, `S8-B-04` | Packs must differ on ≥3 dimensions. Compaction and routing are real; **approval policy is not real until `S8-B-04`**, so a pack cannot yet differ on it. |
+| `S9-B-02` `bench` | `S9-C-02` | `bench` enforces a pre-registration hash, whose format is `S9-C-02`'s output. `build`/`run`/`diff` are **not** blocked — see §0.2. |
+| `S9-J-01` Q2 dogfood | `S8-J-03` | Bugs are pre-registered in Sprint 8 (**already named** — `DOGFOOD-01..03`) so tasks cannot be chosen after seeing the harness behave. |
+| **Every comparative claim** | `S9-J-03` | No cloud spend and no published delta until the Project Lead signs. |
+
+### 0.2 What may start now, in parallel with Sprint 8
+
+Blocked does not mean idle. Each lane has authorised prep:
+
+- **C** — `S9-C-01`, `S9-C-02` and `S9-C-03` against MOCK: the `M-18` tuple, the pre-registration
+  format (hypothesis, arms, N, MDE, oracle, hashed before the first arm runs), and the A/A runner
+  with its refusal path. This is the bulk of the sprint and none of it needs Sprint 8.
+- **A** — audit `Recording` against Phase 4 `V5-A`: which digests must a benchmarked run carry to
+  replay (tool-schema, context-compiler, manifest, composition)? Prose, no code. A gap found here is
+  an `L-1` envelope decision needing an ADR, and is far cheaper to find now.
+- **B** — `REFERENCE.md` per pack: the public docs read and, explicitly, what was **not** copied.
+  Prose against public sources, no code, and the part most likely to be rushed if left to Sprint 9.
+
+### 0.3 The spend and claim rule — binding, no exceptions
+
+1. **`tools/002_LLM_API_MOCK` first**, always. Ollama if already present. OpenRouter **free tier
+   only**. **Never `band=top`** — `models.json` keeps `top: []` and `models_for_band("top")`
+   refuses; that refusal is the spend control, asserted by `test/tools/test_lam_models.py`.
+2. **Nobody publishes a delta.** No lift, p-value, interval or comparative claim until the A/A floor
+   exists **and** the Project Lead has signed `S9-J-03`.
+3. **No cloud spend of any amount** before `S9-J-03`. Local calibration must first show a model can
+   `patch.apply` — if none can, that is a harness/tool-schema defect and **cloud will not fix a
+   dialect bug** (stop condition 4).
+4. **An A/A floor from LAM replay is not a floor.** Replay is deterministic, variance ≈ 0, and the
+   run invents significance (`D-06`, `CL-3`). Build the harness against replay; never report a floor
+   from it.
+5. **A degenerate floor is a valid outcome.** The runner refuses and emits `inconclusive` rather
+   than printing zero variance. If the floor swallows the deltas we meant to claim, `RSK-06`
+   requires **reducing claim ambition** — not raising N until something is significant.
 
 ---
 

@@ -2,9 +2,87 @@
 
 **Phase:** 3 · **Wave:** W7 · **Timebox:** 2–3 weeks · 3 lanes + Joint
 **Backlog:** `docs/reviews/doing/011_master_backlog_phase3_V043-REV.md §5`
-**Refinement status:** **PLANNED, NOT REFINED.** Task shapes and DoDs are firm; step-level
-breakdowns are written at sprint planning once Sprint 7's deletions have landed. Do not treat
-estimates here as commitments.
+**Target branch:** `sprints7-8/integration` — **the one integration branch.** `sprint07/integration`
+is deleted (local and `origin`); it held zero unique commits. Do not recreate it.
+**Refinement status:** **REFINED AND OPEN (2026-08-16).** Opened by TL + PL after Sprint 7
+engineering closed at `248be91`. Sprint 7 evidence:
+`docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md`.
+
+---
+
+## 0. Start here — first task per lane
+
+**Developers A, B and C may begin immediately.** These three tasks are disjoint in files and have no
+dependency on each other. Take your lane's row, run its DoD command, commit with your lane prefix.
+
+| Lane | First task | One-line scope | DoD command |
+|---|---|---|---|
+| **A** | **`S8-A-01`** — decompose `execute_harness` into `compose / HarnessSession / run`; one `Kernel` per run (three are built today); delete `_WitnessKernel` | `runtime/root.py`, `test/runtime/**` | `python3 -m unittest discover -s test/runtime -t .` → OK, and `HarnessSession` constructs with **fakes only, no live model** |
+| **B** | **`S8-B-01a`** — finish `spawn`'s budget half: set `parent_lease` on child effect requests so the `Governor` lease tree is real; add the two missing property tests | `agency/episode/engine.py`, `test/agency/test_episode_spawn.py` | `python3 -m unittest test.agency.test_episode_spawn -v` → OK **including** `budget conserved two levels deep` and `child overrun debits the parent` |
+| **C** | **`S8-C-02`** — cache-hit rate over a fixed replay (**`S8-C-01` is already done — see §0.1**) | `benchmarkings/**`, `tools/telemetry/**` | `python3 -m unittest discover -s test/lab -t .` → OK, and the metric emits from a cassette replay with **no network** |
+| **Joint** | `S8-J-04` (node-present suite) | Leads only | — |
+
+### 0.1 `S8-C-01` is already delivered — do not rebuild it
+
+`EpisodeDepthProjection` (`runtime/ledger/projections.py:117`) already **is** the `S8-C-01` row.
+Lane A landed it under `S7-A-05`. It derives depth from the `causationId` chain, stores nothing,
+returns `None` rather than fabricating a root when the chain leaves the ledger, and applies the
+`Atom/Molecule/Polymer/Cell/Body` labels **in the projection over an integer** — no class hierarchy,
+exactly as `GTS-13C §4.3` requires. Tested in `test/runtime/test_episode_depth_projection.py`.
+
+**`S8-C-01` = `[DONE]`. Lane C starts at `S8-C-02`.** The file sits in Lane A's Sprint 7 scope and
+Lane C's Sprint 8 scope: Lane C owns it from now on; Lane A raises a PR comment rather than editing.
+
+### 0.2 What runs in parallel, and what waits
+
+```
+FREE TO RUN NOW, IN PARALLEL — no cross-lane dependency
+  A: S8-A-01 (root.py)            B: S8-B-01a (engine.py)      C: S8-C-02 (benchmarkings)
+  A: S8-A-03 RandomPort/ClockPort  B: S8-B-04 approval_policy   C: S8-C-03 prefix-miss
+  A: S8-A-04 RecordCorrection      (B-06..B-10 ACI: DONE)       C: S8-C-04 LAM regex
+  A: S8-A-05 Claim  <-- do EARLY, it is the format lock
+
+WAITS
+  S8-A-02 resume-from-ledger   BLOCKED BY S8-A-01 (needs HarnessSession to re-enter)
+  S8-J-01 VG-04 Claim wire     BLOCKED BY S8-A-05 (a note only until A-05 lands)
+```
+
+**The one hard cross-lane rule this sprint.** Lane A decomposes `root.py`; Lane B owns
+`agency/episode/engine.py`. **Lane A must not delete, relocate or inline `EpisodeEngine.spawn`**
+while decomposing. If `S8-A-01` appears to require touching `spawn`, that is a hand-off to Lane B,
+not a quick edit. Conversely Lane B does not edit `root.py` — `S8-B-04` clears the
+`TODO(S8-B-04)` at `root.py:740` **through a PR comment to Lane A**, not directly.
+
+### 0.3 LLM rule — binding on all three lanes
+
+1. **`tools/002_LLM_API_MOCK` first.** Every test and every DoD command in this sprint runs against
+   the mock. No exceptions.
+2. **Ollama if present** on the machine. Do not install it to satisfy a row.
+3. **OpenRouter free tier only.** `band=free`.
+4. **Never `band=top`.** `models.json` keeps `top: []` and `models_for_band("top")` **refuses**.
+   That refusal is the spend control and is now asserted by
+   `test/tools/test_lam_models.py::test_top_band_refuses_while_unnamed`. Do not name frontier ids.
+   Do not "temporarily" populate the array.
+5. **No lifts, no p-values, no deltas, no comparative claims in Sprint 8.** The instrument does not
+   exist until Sprint 9 and the A/A floor is unknown. A number without a floor is not a result.
+6. **No cloud spend** until the Project Lead signs `S9-J-03`.
+
+### 0.4 Test commands — corrected
+
+`python3 -m unittest test.tools` exits **5** (`NO TESTS RAN`): `test.tools` is a package, and
+loading a package discovers nothing. The command was wrong, not the tests.
+
+```bash
+python3 -m unittest discover -s test/tools -t .      # 37 tests, exit 0   <-- use this
+python3 -m unittest discover -s test -t .            # full suite
+python3 -m unittest discover -s test/runtime -t .    # Lane A
+python3 -m unittest discover -s test/agency -t .     # Lane B
+python3 -m unittest discover -s test/lab -t .        # Lane C
+```
+
+Full suite is green at **539 tests, 0 failures**. The **14** remaining errors are all
+`ReaderUnavailable: node is required` — install `node` and they disappear. **If you see a 15th
+error or any failure, it is yours.** That is the baseline you are held to.
 
 ---
 

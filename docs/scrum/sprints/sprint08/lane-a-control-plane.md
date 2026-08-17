@@ -1,9 +1,54 @@
 # Sprint 8 · Lane A — Control Plane
 
-**Owner:** Senior A · **Backlog:** `011 §5.1` · **Refinement:** PLANNED, NOT REFINED
+**Owner:** Senior A · **Backlog:** `011 §5.1` · **Refinement:** **REFINED AND OPEN (2026-08-16)**
+**Branch:** `sprints7-8/integration` · **Commit prefix:** `[lane-a]`
 **Write scope:** `vanguard/packages/runtime/**` · `vanguard/packages/ports/**` ·
 `vanguard/packages/domain/evidence/**` (new) · `test/runtime/**`
-**Do not touch:** `kernel/**` · `agency/**` (Lane B) · `benchmarkings/**`
+**Do not touch:** `kernel/**` · `agency/**` (Lane B) · `benchmarkings/**` ·
+`runtime/ledger/projections.py` (**Lane C owns it from Sprint 8** — PR comment, not an edit)
+
+---
+
+## ▶ YOUR FIRST TASK: `S8-A-01` — decompose `execute_harness`
+
+Start here, day one. It is the row the rest of your sprint hangs off, and `S8-A-02` is blocked
+until it lands.
+
+**DoD command:**
+```bash
+python3 -m unittest discover -s test/runtime -t .
+```
+Green, **and** `HarnessSession` constructs and runs a turn against injected fakes — **no live model,
+no `bwrap`, no network**. Use `tools/002_LLM_API_MOCK`. Plus `grep -c "Kernel(" root.py` → `1`.
+
+### Two rules that bind you this sprint
+
+1. **Do not delete, relocate or inline `EpisodeEngine.spawn`.** Lane B's `spawn` is on the tree,
+   TL-verified, and is Lane B's first Sprint 8 task to finish. If decomposing `root.py` looks like
+   it requires touching `agency/episode/engine.py`, that is a **hand-off to Lane B**, not a quick
+   edit. This is the single most likely way this sprint breaks.
+2. **`root.py:740` carries `TODO(S8-B-04)`.** That literal is Lane B's row but your file. Lane B
+   will raise a PR comment; you make the edit. Do not clear it unilaterally and do not let it rot.
+
+**Then, in any order — all independent, all free to run in parallel:** `S8-A-03`
+(`RandomPort`/`ClockPort`), `S8-A-04` (`RecordCorrection` `parse_wire`), and `S8-A-05` (`Claim`
+domain type). **Do `S8-A-05` early:** it is the format lock (`L-1`), it gates the Joint row
+`S8-J-01`, and changing it later means re-running everything ever recorded.
+
+**`S8-A-02` (resume-from-ledger) is `BLOCKED BY S8-A-01`** — it needs `HarnessSession` to re-enter.
+
+## ▶ YOUR SPRINT 9 FIRST TASK: `S9-A-01` — surface the instrument's fields on `RunResult`
+
+**`BLOCKED BY S8-A-01`.** `RunResult` is produced by `HarnessSession.run()`, which does not exist
+until `S8-A-01` lands. Adding fields to today's shape means adding them twice.
+
+**You may start now:** write down, against `S9-A-03`, exactly which digests a benchmarked run must
+carry to be replayable — tool-schema, context-compiler, manifest, composition. That is an audit of
+`Recording` against `Phase 4 V5-A`, needs no code, and if it finds a gap the gap is an `L-1`
+envelope decision needing an ADR — far better discovered now than in Sprint 9.
+
+**Stop condition carried into S9:** if the instrument needs a field the event envelope does not
+carry, **stop and write the ADR.** Do not add it inline.
 
 ---
 

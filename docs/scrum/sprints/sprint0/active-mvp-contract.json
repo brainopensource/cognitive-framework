@@ -22,7 +22,7 @@
     {
       "source": "The 34 Sprints 0-6 rows present in the pre-0a9ac8b contract and not carried forward here",
       "reason": "Their registered commands were not re-observed during the Sprint 7 close, so carrying their prior status would restate an unverified claim. Subtraction sprint rules forbid that.",
-      "activation_gate": "Tech Lead contract amendment; a row reactivates only with its command observed green and a SHA-bound receipt. Reactivation is scheduled as S8-J-06."
+      "activation_gate": "Tech Lead contract amendment; a row reactivates only with its command observed green and a SHA-bound receipt. Reactivation is scheduled as S8-J-08."
     }
   ],
   "test_registry": [

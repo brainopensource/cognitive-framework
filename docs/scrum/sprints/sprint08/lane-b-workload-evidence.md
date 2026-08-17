@@ -1,8 +1,61 @@
 # Sprint 8 · Lane B — Workload & Evidence
 
-**Owner:** Senior B · **Backlog:** `011 §5.2` · **Refinement:** PLANNED, NOT REFINED
+**Owner:** Senior B · **Backlog:** `011 §5.2` · **Refinement:** **REFINED AND OPEN (2026-08-16)**
+**Branch:** `sprints7-8/integration` · **Commit prefix:** `[lane-b]`
 **Write scope:** `agency/episode/**` · `agency/context/**` · `agency/manifests/**` · `adapters/**`
 **Do not touch:** `kernel/**` · `runtime/**` (Lane A) · `benchmarkings/**`
+
+---
+
+## ▶ YOUR FIRST TASK: `S8-B-01a` — finish `spawn`'s budget half
+
+**Your pre-sprint `spawn` work was audited and ACCEPTED, not sent back.** Attenuation, depth
+ceiling, `causationId`, typed `SpawnResult`, and workspace-destroy-in-`finally` are all verified
+across 7 tests. `ADR-0060` held — no domain vocabulary entered the engine. TCB did not move.
+
+**One gap, and it is the centre of the row.** `S8-B-01`'s DoD names three property tests; one
+exists. The two missing ones are the budget pair, and the mechanism they would test is not wired:
+
+- `spawn` builds the child engine on the shared `Kernel`, so ceilings are shared and conservation
+  holds **incidentally**. The DoD asks for it **structurally**.
+- No `parent_lease` is ever set on an effect request (`engine.py:196`), so the `Governor` lease tree
+  is never built. `Governor.reserve(run_id, reservation, parent_lease_id=…)` already implements
+  `F-13` — *"a closed parent cannot fund a child"* — and is simply never called with a parent.
+
+- [ ] Thread the parent's `Lease` through `spawn` into the child's effect requests
+- [ ] Property test: **budget conserved two levels deep** — for every dimension,
+      `spent + held + remaining == ceiling` after a grandchild runs
+- [ ] Property test: **child overrun debits the parent**
+- [ ] Test: a **closed** parent lease cannot fund a child (`F-13`)
+- [ ] Commit `[lane-b] S8-B-01a`
+
+**DoD command:**
+```bash
+python3 -m unittest test.agency.test_episode_spawn -v
+```
+Green **including** the two budget properties. Then `S8-B-01` flips `[CLAIMED]` → `[DONE]`.
+
+> **Reuse, do not reimplement.** If you find yourself writing budget arithmetic in
+> `agency/episode/`, stop — that arithmetic lives in `kernel/budget.py` and `kernel/` is outside
+> your write scope. Needing to change it is a **finding**, not a task (stop condition 1).
+
+**Then:** `S8-B-04` (`approval_policy`) — the only other Lane B row still `[TODO]`. It clears
+`TODO(S8-B-04)` at `root.py:740`, which is **Lane A's file**: raise a PR comment, do not edit it.
+Rows `S8-B-02, B-03, B-05, B-06…B-10` are **`[DONE]` and TL-verified** — do not redo them.
+
+## ▶ YOUR SPRINT 9 FIRST TASK: `S9-B-01` — reconstructions that actually differ
+
+**`BLOCKED BY S8-B-01a` and `S8-B-04`.** `S9-B-01` requires each pack to differ on ≥3 of
+compaction · routing · approval · turn budget · tool surface. Compaction and routing are real as of
+Sprint 8; **approval policy is not real until `S8-B-04` lands**, so a pack cannot yet differ on it.
+
+**You may start now, in parallel with Sprint 8:** the `REFERENCE.md` per pack — the public docs read
+and, explicitly, what was **not** copied. That is prose against public sources, needs no code, and
+is the part most likely to be rushed if left to Sprint 9.
+
+**You may not:** publish any pack comparison, or claim the packs differ behaviourally, until
+`S9-C-03`'s A/A floor exists. Three packs that differ is a fact; three packs that differ *by a
+meaningful amount* is a claim, and claims wait for the instrument.
 
 > **This is the only sprint in Phase 3 where `agency/episode/` may be edited**, and only for
 > `spawn`. Every edit is priced against `ADR-0060`: it must add **no domain vocabulary**. If you

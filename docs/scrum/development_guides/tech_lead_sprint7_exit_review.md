@@ -1,75 +1,57 @@
-# Prompt — Tech Lead + Project Lead: Sprint 7 exit / proceed to Sprint 8
+# Prompt — Tech Lead + Project Lead: Sprint 7 field review (final)
 
-Broad review briefing. **You decide.** Lane kits and `011` are evidence, not a script. Do not rubber-stamp a green suite if the design is wrong; do not block Sprint 8 for paperwork that does not change Q1.
+**You decide.** This is a go/no-go after A/B/C started Sprint 7 in one shared tree. Frontend is out of scope.
 
-**Scope of this review:** backend Vanguard work **after Sprint 6 / 6B** — especially Sprint 7 (A/B/C + Joint) — and whether Sprint 8 may start. Frontend is out of scope.
+Sprint 7 is **not closed.** Do not treat Lane B’s `[DONE]` on Sprint 8 as S7 exit.
 
 ---
 
-## ROLE
+## Copy-paste prompt
 
 ```text
-You are Tech Lead and Project Lead for Aether Vanguard. Review the work completed (or claimed complete) by Senior A, B, and C after Sprint 6B, focused on Sprint 7. Decide whether we may open Sprint 8.
+You are Tech Lead and Project Lead. Review what Seniors A, B, and C actually shipped in Sprint 7 (and B’s early Sprint 8), against the kits and 011. Decide: hold / finish S7 / waive into S8.
 
-## Ask
-1. What actually landed vs what was supposed to land (honest status, not ROADMAP prose).
-2. Is the design sound, or did anyone work around a boundary (second loop, bypass runner, unread policy, silent alias, kernel edit, theatre numbers)?
-3. What is missing, wrong, or too dangerous to carry into Sprint 8?
-4. Verdict: **proceed to Sprint 8** / **proceed with named waivers** / **hold** — with why.
-5. Joint items (SEC-01, LICENSE, VG-07 promo, ADR-0066, Q1 reverse-or-not) — close, defer with owner, or block. You own these; do not dump them on A/B/C.
+## Ask (one page)
+1. Honest status vs claims (especially B marking S8-B-* DONE before S7 subtraction closed).
+2. Design: any second loop, bypass runner still scored, kernel edit, silent alias, unread-component exemption, spawn without ledger resume?
+3. Process: shared dirty tree, stash risk, missing Active MVP Contract / receipts after the docs purge — what you will fix vs what lanes may continue.
+4. Verdict: **HOLD S8** until named S7 rows land / **S7 continue in worktrees** / **S8 with waivers** — named.
+5. Joint this week vs not blocking (SEC-01, LICENSE, VG-07, ADR-0066, Q1 reverse-or-not, restore contract JSON).
 
-You may override 011 rows, lane DoDs, and LOC targets if the evidence is better than the plan. If the plan was wrong, say so.
+You may override 011. Demand command+output for anything that would close Q1. A lane report is not a receipt.
 
-## Where to look (cite; do not restack)
-Navigator: docs/scrum/ROADMAP.MD (backend board is a mirror — status lives in 011)
-Living backlog: docs/reviews/doing/011_master_backlog_phase3_V043-REV.md §4 (S7) and §5 (S8)
-Law: docs/main_v4/ especially VG-03, VG-05, VG-09 (ADR-0063…0065, DECISION-0005/0006)
-Sprint 7 kits:
-  docs/scrum/sprints/sprint07/README.md
-  docs/scrum/sprints/sprint07/joint-track.md
-  docs/scrum/sprints/sprint07/lane-a-control-plane.md
-  docs/scrum/sprints/sprint07/lane-b-workload-evidence.md
-  docs/scrum/sprints/sprint07/lane-c-measurement-lab.md
-Sprint 8 (only to judge “safe to start”; it is PLANNED, NOT REFINED):
-  docs/scrum/sprints/sprint08/README.md
-  docs/scrum/sprints/sprint08/lane-a-control-plane.md
-  docs/scrum/sprints/sprint08/lane-b-workload-evidence.md
-  docs/scrum/sprints/sprint08/lane-c-measurement-lab.md
-Code: vanguard/packages/**, tools/check_boundaries.py, benchmarkings/**, test/broken/**
-Predecessor (archive): docs/scrum/sprints/sprint6B/, sprint7_8/ — do not reopen as a third board.
+## Field snapshot (2026-08-16 — verify in git, do not trust this paragraph)
 
-## How to work (keep it short)
-- Run or demand receipts (command + output) for anything you would reverse Q1 on. A narrative PR is not enough.
-- Sample design, do not re-implement the sprint. Look for: leftover runtime/loops, OpenRouterModel in benchmarkings, identity alias fallback, unread components exempted silently, kernel touched, new features shipped in a subtraction sprint.
-- Sprint 8 starts only if S7 did not leave a second execution path or a scorer that still grades theatre. Recursion on a contaminated tree is wasted.
-- S7-B-03 remaining RED is expected (greens in S8-B-02). Do not treat that as a hold by itself.
-- S8 kits are unrefined — if you proceed, say whether planning refinement is required before A starts execute_harness / B starts spawn.
+Lane A: S7-A-07 claimed DONE (repo_paths + 3 tests). Stopped before A-01: C has check_boundaries.py open; 2F/15E baseline voided by in-flight C/B; stash briefly captured other lanes’ work. Missing active-mvp-contract.json / dogfood-log / receipts after purge — PR req_id cite is currently unsatisfiable. A-01…A-06 TODO. Do not start S8-A until S7-A exit (loops/coordination still present).
 
-## Deliverable (for yourselves — one page)
-- Per lane A/B/C: accept / accept-with-fix / reject (one sentence each)
-- Joint: what you will do this week vs what does not block S8
-- Q1: reverse ADR-0064 Q1, or explicitly leave it unreversed
-- Go / no-go Sprint 8, and the first S8 constraint (if any)
+Lane B: S7-B-01…B-05 marked DONE in 011; agency tests reported 83/83. S8-B-01…B-10 marked DONE in 011 (spawn, compaction, router, approval_policy, ACI) — **premature vs plan** (S8 after S7 exit; spawn depends on A’s session/resume still TODO). Treat S8-B as CLAIMED/VERIFY; audit ADR-0060, property tests, no kernel nouns. Do not open S8-A/C on that claim alone.
+
+Lane C: S7-C-01 implemented (benchmarkings import gate + broken counterpart). Left [TODO] until C-03 deletes four runners — correct. Full-repo check_boundaries FAILS on existing bypasses by design. C-02…C-06 TODO. C-07 already DONE from 009.
+
+Joint: J-01…J-03 ADRs filed. J-04 SEC-01, J-05 LICENSE, J-06 VG-07, J-07 WIP protocol, J-08 ADR-0066 still TODO.
+
+Likely starting point: **HOLD full Sprint 8.** Finish S7-A (isolate worktrees) + S7-C-02/03+ in parallel; **audit B’s S8** as a preview PR, not as sprint close.
+
+## Where to look
+docs/scrum/ROADMAP.MD (status mirror — 011 wins)
+docs/reviews/doing/011_master_backlog_phase3_V043-REV.md §4–5
+docs/main_v4/ VG-03, VG-05, VG-09
+docs/scrum/sprints/sprint07/README.md + joint-track.md + lane-a/b/c
+docs/scrum/sprints/sprint08/README.md + lane-a/b/c (S8 still PLANNED, NOT REFINED)
+Code: runtime/loops still there?, grep OpenRouterModel benchmarkings/, loader.py aliases, agency/episode spawn, tools/check_boundaries.py
+
+## Deliverable
+- A / B / C: accept | accept-with-fix | reject — one sentence each
+- Worktree/branch rule for the rest of S7
+- Who restores Active MVP Contract (Joint vs A)
+- Q1: do not reverse unless architecture tests + no second path
+- Go / no-go S8
 ```
 
 ---
 
-## Appendix — published S7 exit checklist (inventory, not the assignment)
+## Appendix — S7 exit (use if it changes the verdict)
 
-Use if useful. Skip boxes that do not change the go/no-go.
+unittest 0 failures (node-absent errors only) · check_boundaries PASS + planted counterparts fail · degenerate run refused · alias + unread component fail closed · scan_secrets --all-refs · TCB · net LOC −1530 · no runtime.loops.
 
-From `sprint07/README.md` §7 (need command + output if you rely on them):
-
-- unittest discover → 0 failures; errors only node-absent readers
-- check_boundaries.py PASS; each new rule fails its planted counterpart
-- run_broken_tests.py counterparts fail as designed
-- planted degenerate benchmark → inconclusive / refused
-- composition fails undeclared alias **and** unread component
-- scan_secrets.py --all-refs PASS
-- check_tcb_budget.py PASS
-- net LOC ≈ −1,530
-- grep runtime.loops / EpisodeCoordinator empty
-
-Joint sign-off (`joint-track.md`): LICENSE; ADR-0066; VG-07 promotion; Q1 evidence pack; SEC-01 rotate-then-rewrite (never paste the secret). A hold on history rewrite is allowed if Q1 code evidence is otherwise clean — say so explicitly.
-
-S8 is recursion/resume/load-bearing manifests. Do not start it to “make progress” if S7 subtraction did not land.
+S7-B-03 green via S8-B-02 is OK only after you accept that S8-B work; it is not S7 exit by itself.

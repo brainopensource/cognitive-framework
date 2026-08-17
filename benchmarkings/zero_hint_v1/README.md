@@ -38,7 +38,7 @@ Paired DNA protocol: `PAIRING.md`. Packs: `--manifest vg-code-default` (default)
 worker, descriptor-bound patch approval). Dogfood in-tree still uses LAM.
 `tasks_phase2_LAM/test001/run_*.py` calls the router **without tools**.
 
-This runner uses the production loop with a live `OpenRouterModel`. Lab-only
+This runner uses the production loop with a live provider model. Lab-only
 departures, recorded in each `runs/<id>/result.json`:
 
 1. Auto-approval of privileged diffs (no human in the loop).

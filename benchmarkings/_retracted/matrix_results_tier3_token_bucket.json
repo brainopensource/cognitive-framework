@@ -1,5 +1,6 @@
 [
-  {
+{
+  "evidence_label": "degenerate",
     "challenge_id": "tier3_token_bucket",
     "harness": "vg-code-default",
     "model": "deepseek/deepseek-v4-flash-0731",

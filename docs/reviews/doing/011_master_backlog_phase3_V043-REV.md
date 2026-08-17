@@ -19,6 +19,7 @@ is now a closed Sprint 6B record).
 | Status | Meaning |
 |---|---|
 | `[DONE]` | Verified complete: named file/test exists and passes |
+| `[CLAIMED]` | Lane reports DoD met; **TL has not verified**; not sprint-closed |
 | `[IN_PROGRESS]` | Started, has an owner |
 | `[TODO]` | Specified, bounded, ready |
 | `[BLOCKED]` | Precondition unmet — the blocker is named |
@@ -45,6 +46,8 @@ not a backlog row — it is a ticket.**
 | `scan_secrets.py` | PASS |
 | `scan_secrets.py --all-refs` | **FAIL** — reachable `.env` blob, 21 `refs/original` |
 | Gate status (`ADR-0064`) | Q1 partial+regressed · Q2 not demonstrated · Q3 not met · Q4 not met |
+
+**Field note (2026-08-16):** Sprint 7 is **not closed.** A: `S7-A-07` only (A-01…A-06 still `[TODO]`; shared dirty tree voided the 2F/15E cite). B: S7-B `[DONE]` per lane; S8-B rows are `[CLAIMED]`, not TL-verified — do not open S8-A/C on that report. C: `S7-C-01` `[IN_PROGRESS]` until `S7-C-03` deletes the four runners. Joint J-04…J-08 `[TODO]`. TL prompt: `docs/scrum/development_guides/tech_lead_sprint7_exit_review.md`.
 
 ---
 
@@ -76,7 +79,7 @@ architecture test that fails against a planted broken counterpart.
 | `S7-A-04` | `[TODO]` | **DELETE `runtime/loops/`** | 1 Delete package + `test/runtime/test_meta_loop.py` · 2 Confirm no importers · 3 Record salvage mapping in the PR body | `grep -rn "runtime.loops"` empty; suite no worse than baseline | `vanguard/packages/runtime/loops/` | `S7-A-02`, `S7-A-03` | `001 §3.1`, `007` D1–D2 |
 | `S7-A-05` | `[TODO]` | **DELETE `runtime/coordination.py`** | 1 Delete · 2 Remove `root.py:712-723` wiring and the `... or 100` at `:793` · 3 Convert `test_coordination.py` into a ledger-projection test | No second budget store; depth derives from ledger events | `runtime/coordination.py`, `runtime/root.py`, `runtime/ledger/projections.py` | `S7-A-04` | `003 §4`, `007` D3 |
 | `S7-A-06` | `[TODO]` | **Remove hardcoded composition values** | 1 `/usr/bin/bwrap` → `shutil.which` probe with a named remedy · 2 `approval_required_above="low"` → TODO marker for `S8-B-04` · 3 `Reservation(100,1000)` → from budget policy | Composition succeeds on a host with `bwrap` elsewhere on PATH; no absolute-path literal remains | `runtime/root.py:659,693,775` | — | `003 §5.1`, `007` R1–R4 |
-| `S7-A-07` | `[DONE]` | **Repair restructure breakage** | 1 `tools/repo_paths.py`: `docs/agile` → `docs/scrum` · 2 Fix `test_repo_paths.py`, `test_oracle_registry.py`, `test/contracts/__init__.py` | The 3 restructure-caused failures go green; baseline returns to 2F/15E | `tools/repo_paths.py`, 3 test files | — | `011 §2` |
+| `S7-A-07` | `[DONE]` | **Repair restructure breakage** | 1 `tools/repo_paths.py`: `docs/agile` → `docs/scrum` · 2 Fix `test_repo_paths.py`, `test_oracle_registry.py`, `test/contracts/__init__.py` | The 3 restructure-caused failures went green. **2F/15E baseline later voided** by in-flight C/B + shared dirty tree — do not cite as S7 exit. | `tools/repo_paths.py`, 3 test files | — | `011 §2` |
 
 ### 4.2 Lane B — Workload & Evidence
 
@@ -84,7 +87,7 @@ architecture test that fails against a planted broken counterpart.
 |---|---|---|---|---|---|---|---|
 | `S7-B-01` | `[DONE]` | **Canonical alias shape + fail-closed validation** | 1 Pick the flat `{"alias":"verb"}` form (4 of 5 packs use it) · 2 Migrate the tests, not the data · 3 At composition assert every alias target ∈ declared verbs · 4 Assert every tool schema `name` ∈ aliases ∪ verbs · 5 Broken counterpart | 3 red tests go green; a planted mismatched alias raises `CompositionError`; **`to_canonical` no longer falls back to identity** | `agency/manifests/loader.py:41-71`, `*/aliases.json`, `test/agency/test_manifest_loader.py` | — | `005` H1–H2, `N-17` |
 | `S7-B-02` | `[DONE]` | **"An unread component is a composition error"** | 1 `compose()` asserts every `components` entry has a registered consumer · 2 Broken counterpart with an orphan component | A manifest declaring an unconsumed component fails composition. **This is the rule that kills `FT-10` structurally** | `runtime/root.py` `compose`, `domain/artifacts/manifest.py` | `S7-B-01` | `005` H3 |
-| `S7-B-03` | `[DONE]` | **Metamorphic policy-digest test** | 1 Recompose with a mutated `context_policy` · 2 Assert ≥1 observable differs | Currently **fails** — proving the decorative-field defect. Goes green in `S8-B-02` | `test/agency/test_manifest_metamorphic.py` (new) | `S7-B-02` | `005` H4 |
+| `S7-B-03` | `[DONE]` | **Metamorphic policy-digest test** | 1 Recompose with a mutated `context_policy` · 2 Assert ≥1 observable differs | Lane B reports green via `S8-B-02` — **TL verify**; originally expected FAIL until Sprint 8 | `test/agency/test_manifest_metamorphic.py` (new) | `S7-B-02` | `005` H4 |
 | `S7-B-04` | `[DONE]` | **Emit `gene_digests` into results** | 1 `gene_digests` **already exists** at `root.py:606-609` — emit into `RunResult` and `result.json` `K_compat` | Two composes of the same pack give identical digests; a prompt byte change moves exactly one | `runtime/root.py`, `benchmarkings/zero_hint_v1/run_live_agent.py` | — | `005` H0, `009 §5` |
 | `S7-B-05` | `[DONE]` | **Fix `test_bench` alias `KeyError`** | 1 `vg-shell-only` undeletability guard currently errors, so the `L-15` protection is not running | `test/lab/test_bench.py` green; undeletable flag actually asserted | `test/lab/test_bench.py` | `S7-B-01` | `005 §5.2` |
 
@@ -92,12 +95,12 @@ architecture test that fails against a planted broken counterpart.
 
 | ID | Status | Task | Sub-tasks | DoD / verification | Target files | Requires | Source |
 |---|---|---|---|---|---|---|---|
-| `S7-C-01` | `[TODO]` | **`benchmarkings/` dependency gate** | 1 Rule: `benchmarkings/**` may import `runtime.root` + `ports` only · 2 Broken counterpart | A benchmark importing `adapters.models` fails the build. **Makes a bypassing runner unwritable** | `tools/check_boundaries.py` | — | `002` M1, `003` A1 |
-| `S7-C-02` | `[TODO]` | **`benchmarkings/guard.py` refusal conditions** | 1 `pre_passed` on a repair task → `inconclusive:precondition_satisfied` · 2 zero effects + post-pass → `inconclusive:no_intervention` · 3 zero tokens → `inconclusive:model_not_invoked` · 4 provider error → `inconclusive:instrument_error`, excluded from **both** numerator and denominator · 5 evaluator absent → `inconclusive:no_verdict` · 6 containment absent → publication blocked · 7 broken counterpart per condition | A planted degenerate run is **refused**, not scored. Reuse `tools/002_LLM_API_MOCK/verdict.py` (`pytest_passed`, `evidence_label`, `leak_paths`) | `benchmarkings/guard.py` (new), `test/broken/` | — | `002` M2, `009 §3.4` |
-| `S7-C-03` | `[TODO]` | **DELETE the four bypassing runners** | 1 `swe_pro_tiers/runner.py` · 2 `swe_pro_tiers/run_matrix_evaluation.py` · 3 `run_agentic_live_challenge.py` · 4 `run_live_proof.py` | `grep -rn "OpenRouterModel" benchmarkings/` returns only the promoted runner | `benchmarkings/**` | `S7-C-01` | `007` D4–D7 |
-| `S7-C-04` | `[TODO]` | **Retraction sweep** | 1 `matrix_results_*.json` → `benchmarkings/_retracted/` + `RETRACTION.md` naming the defect, date and preventing rule · 2 Non-degenerate rows → `_external_model_probes/` relabelled as model probes · 3 Apply the 9-label regime | Every surviving artifact carries an evidence label; every retracted one carries a stated cause | `benchmarkings/**` | `S7-C-03` | `002` M3, `002 §2.1` |
-| `S7-C-05` | `[TODO]` | **Promote the honest runner** | 1 `zero_hint_v1/run_live_agent.py` is the sole benchmark entrypoint · 2 Label `lab-execute-harness` · 3 Record `labDepartures` | One entrypoint; it calls `Runtime.execute_harness` | `benchmarkings/zero_hint_v1/` | `S7-C-03` | `002` M4 |
-| `S7-C-06` | `[TODO]` | **`models.json` `top` fail-closed** | 1 Set `top: []` · 2 `models_for_band("top")` raises until the Project Lead names ids in the Decision Register · 3 Reconcile the drifted `tier1_local…tier6_cloud` bands against `free/medium/high/top` | Requesting band `top` raises with the PL message | `tools/002_LLM_API_MOCK/models.json`, `models.py` | — | `D-13`, `009 §3.1` |
+| `S7-C-01` | `[DONE]` | **`benchmarkings/` dependency gate** | 1 Rule: `benchmarkings/**` may import `runtime.root` + `ports` only · 2 Broken counterpart | Full-tree boundary check passes after bypass cleanup; planted adapter import fails. | `tools/check_boundaries.py` | — | `002` M1, `003` A1 |
+| `S7-C-02` | `[DONE]` | **`benchmarkings/guard.py` refusal conditions** | 1 `pre_passed` on a repair task → `inconclusive:precondition_satisfied` · 2 zero effects + post-pass → `inconclusive:no_intervention` · 3 zero tokens → `inconclusive:model_not_invoked` · 4 provider error → `inconclusive:instrument_error`, excluded from **both** numerator and denominator · 5 evaluator absent → `inconclusive:no_verdict` · 6 containment absent → publication blocked · 7 broken counterpart per condition | Six planted degenerate runs are refused, not scored. | `benchmarkings/guard.py` (new), `test/broken/` | — | `002` M2, `009 §3.4` |
+| `S7-C-03` | `[DONE]` | **DELETE the four bypassing runners** | 1 `swe_pro_tiers/runner.py` · 2 `swe_pro_tiers/run_matrix_evaluation.py` · 3 `run_agentic_live_challenge.py` · 4 `run_live_proof.py` | `grep -rn "OpenRouterModel" benchmarkings/` returns only the promoted runner | `benchmarkings/**` | `S7-C-01` | `007` D4–D7 |
+| `S7-C-04` | `[DONE]` | **Retraction sweep** | 1 `matrix_results_*.json` → `benchmarkings/_retracted/` + `RETRACTION.md` naming the defect, date and preventing rule · 2 Non-degenerate rows → `_external_model_probes/` relabelled as model probes · 3 Apply the 9-label regime | Retracted and external-probe artifacts are separated, labelled, and retain stated cause/limitation. | `benchmarkings/**` | `S7-C-03` | `002` M3, `002 §2.1` |
+| `S7-C-05` | `[DONE]` | **Promote the honest runner** | 1 `zero_hint_v1/run_live_agent.py` is the sole benchmark entrypoint · 2 Label `lab-execute-harness` · 3 Record `labDepartures` | Sole retained production runner calls `Runtime.execute_harness` and records guard, label, and departures. | `benchmarkings/zero_hint_v1/` | `S7-C-03` | `002` M4 |
+| `S7-C-06` | `[DONE]` | **`models.json` `top` fail-closed** | 1 Set `top: []` · 2 `models_for_band("top")` raises until the Project Lead names ids in the Decision Register · 3 Reconcile the drifted `tier1_local…tier6_cloud` bands against `free/medium/high/top` | Canonical bands are `free/medium/high/top`; `top` raises with the PL message. | `tools/002_LLM_API_MOCK/models.json`, `models.py` | — | `D-13`, `009 §3.1` |
 | `S7-C-07` | `[DONE]` | **LAM competitor persona removed** | Verified during `009` verification: `simulate.py:23-27` `SYSTEM` reads the pack's own `system-prompt.txt` with a neutral fallback | No competitor persona in the gym | `tools/002_LLM_API_MOCK/simulate.py` | — | `009 §5a` |
 
 ### 4.4 Joint / Leads
@@ -142,18 +145,20 @@ child's exploration never enters the parent's context; the whole run reconstruct
 
 ### 5.2 Lane B — Workload & Evidence
 
+Lane B marked these `[DONE]` before Sprint 7 exit. Status is **`[CLAIMED]`** until TL audit (ADR-0060, property tests, no kernel nouns). Not a reason to start S8-A or S8-C.
+
 | ID | Status | Task | DoD | Source |
 |---|---|---|---|---|
-| `S8-B-01` | `[DONE]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | Property tests: attenuation monotone across spawn; budget conserved two levels deep; child overrun debits the parent | `003 §3.4`, `T4.4`, `T4.10` |
-| `S8-B-02` | `[DONE]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
-| `S8-B-03` | `[DONE]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
-| `S8-B-04` | `[DONE]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
-| `S8-B-05` | `[DONE]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
-| `S8-B-06` | `[DONE]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
-| `S8-B-07` | `[DONE]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
-| `S8-B-08` | `[DONE]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
-| `S8-B-09` | `[DONE]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
-| `S8-B-10` | `[DONE]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
+| `S8-B-01` | `[CLAIMED]` | **`EpisodeEngine.spawn`** — child scope ⊆ parent (reuse `kernel/attenuation.py`), child lease on remainder (reuse `Governor`), `depth` a real budget dimension, child events carry `causationId`, return is text/payload **never a handle**, workspace destroyed in `finally` | Property tests: attenuation monotone across spawn; budget conserved two levels deep; child overrun debits the parent | `003 §3.4`, `T4.4`, `T4.10` |
+| `S8-B-02` | `[CLAIMED]` | **`CompactionStrategy` protocol + registry** — register `result_eviction`, `recency_window`; selected by `context_policy`; frozen at composition | `S7-B-03` metamorphic test goes **green**; changing `context_policy` changes an observable | `004` G5, `005` H5 |
+| `S8-B-03` | `[CLAIMED]` | **`ModelRouter` protocol + registry** — wire the existing unwired `adapters/models/routing.py`; selected by `routing_policy` | Changing `routing_policy` changes the model selected | `005` H6, `010` §4 |
+| `S8-B-04` | `[CLAIMED]` | **`approval_policy` manifest component** — replaces the hardcoded `"low"` threshold | Two packs with different approval policies behave differently | `005` H7, `S7-A-06` |
+| `S8-B-05` | `[CLAIMED]` | **Operator context isolation** — child gets a fresh compiler prefix; only the return enters the parent's L5 | Test: a child's intermediate turns are absent from the parent's compiled context | `VG-03 §10.3`, `003 §3.4` |
+| `S8-B-06` | `[CLAIMED]` | **ACI-1 paginated `fs.read`** (100 lines + offset) | Adapter + schema + prompt convention; large file no longer dumps | `010 §2` |
+| `S8-B-07` | `[CLAIMED]` | **ACI-2 succinct `fs.search`** (file hits first, capped snippets) | Search returns a file list, not a dump | `010 §2` |
+| `S8-B-08` | `[CLAIMED]` | **ACI-3 empty-output acknowledgement** on `proc.exec` | Silent command returns explicit text, not `""` | `010 §2` |
+| `S8-B-09` | `[CLAIMED]` | **ACI-4 lint-on-patch as an observation receipt** | Syntax failure is a **receipt**, never a verdict — `A-05` preserved | `010 §2` |
+| `S8-B-10` | `[CLAIMED]` | **ACI-6 `maxTurns` from `budget_policy`** | Engine reads the frozen policy; a 32-turn pack runs 32 turns | `010 §2`, `D-12` |
 
 ### 5.3 Lane C — Measurement & Lab
 

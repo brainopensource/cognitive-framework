@@ -1,4 +1,5 @@
 {
+  "evidence_label": "chat-patch-loop",
   "challenge_id": "tier3_token_bucket",
   "tier": 3,
   "title": "Token Bucket Limiter with Monotonic Refill",

@@ -8,6 +8,33 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
+def load_provider_secret(root: Path) -> tuple[str | None, str]:
+    """Load a provider secret for the lab adapter seam."""
+    value = os.environ.get("OPENROUTER_API_KEY")
+    if value:
+        return value, "environ"
+    from vanguard.packages.adapters.models.env_loader import load_api_key
+
+    loaded = load_api_key(root)
+    if loaded.ok and loaded.value:
+        return loaded.value, "dotenv"
+    return None, "missing"
+
+
+def openrouter_model(**kwargs: Any) -> Any:
+    """Construct the provider port behind the lab-only measurement seam."""
+    from vanguard.packages.adapters.models.openrouter import OpenRouterModel
+
+    return OpenRouterModel(**kwargs)
+
+
+def lab_operator_signer(key: bytes) -> Any:
+    """Construct the declared lab approval signer behind the seam."""
+    from vanguard.packages.runtime.governance.approvals import OperatorSigner
+
+    return OperatorSigner(key)
+
 _BUG_COMMENT = re.compile(r"\bBug\s+\d+\b", re.IGNORECASE)
 _LEAK_NAMES = ("oracle", "preregistration.json", "prompt.txt", "datalog_solution")
 

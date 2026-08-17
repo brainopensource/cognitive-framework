@@ -1,4 +1,5 @@
 {
+  "evidence_label": "chat-patch-loop",
   "timestamp": "2026-08-16T08:11:14Z",
   "model_tested": "nvidia/nemotron-3.5-lightning:free",
   "prompt_leaks": "NONE (Zero-Hint Prompt)",

@@ -30,6 +30,7 @@
 | **Reviews** | Findings & rulings that feed tickets | [`docs/reviews/doing/`](../reviews/doing/) — index [`000_INDEX`](../reviews/doing/000_INDEX_V043-REV.md) | Normative contracts (never) |
 | **Master backlog** | **Task IDs + status** for backend Phase 3 | [`011_master_backlog_phase3_V043-REV.md`](../reviews/doing/011_master_backlog_phase3_V043-REV.md) | Architecture law |
 | **Sprint kits** | How / who / DoD for a sprint | [`docs/scrum/sprints/`](sprints/) | New task IDs inventing work |
+| **S7 exit review** | TL+PL go/no-go after A/B/C started | [`tech_lead_sprint7_exit_review.md`](development_guides/tech_lead_sprint7_exit_review.md) | Frontend |
 | **This roadmap** | Staffing view, effort heuristics, navigation | [`docs/scrum/ROADMAP.MD`](ROADMAP.MD) | Status flips, new requirements |
 | **Canvas** | Filterable view of the same board | `canvases/s7-s10-task-board.canvas.tsx` | Anything (mirror only) |
 | **Frontend concepts** | Interaction-plane contracts (when created) | `docs/front_v4/` — **does not exist yet** | Control-plane law |
@@ -43,7 +44,7 @@
   docs/reviews/doing/    NON-NORMATIVE findings → tickets
         │
         ▼
-  011 master backlog     LIVING task IDs + [TODO|IN_PROGRESS|DONE]
+  011 master backlog     LIVING task IDs + [TODO|IN_PROGRESS|DONE|CLAIMED]
         │
         ├── docs/scrum/sprints/sprint07..10/     playbooks (lanes A/B/C/J)
         └── docs/scrum/ROADMAP.MD                this file (mirror + links)
@@ -212,22 +213,24 @@ Full gate text: [`GTS-13C`](../main_v4/13_C_gts_mvp_program_and_engineering_plan
 
 Estimates are planning heuristics (complexity 0–100, LOC Δ, effort-days) for staffing — not contracts. Normative truth stays in `docs/main_v4/`.
 
+**Field status 2026-08-16 (lane reports; TL must verify):** Sprint 7 **not closed**. A: `S7-A-07` only. B: S7-B claimed **DONE**; S8-B claimed **DONE** early → **VERIFY**. C: `S7-C-01` code landed, DoD waits on `S7-C-03`. Joint J-04…J-08 **TODO**. Prompt: [`tech_lead_sprint7_exit_review.md`](development_guides/tech_lead_sprint7_exit_review.md).
+
+Status vocabulary here: `DONE` = 011/DoD · `IN_PROGRESS` = code started, DoD open · `VERIFY` = 011 `[CLAIMED]` (lane report, TL not yet) · `TODO` = not started.
+
 ### Snapshot
 
 | Metric | Value |
 |---|---|
-| Total tasks | **81** |
-| Open | **77** |
-| Done | **4** |
-| Open effort (sum) | **~147d** |
-| Lane A open | **~40d** |
-| Lane B open | **~42d** |
-| Lane C open | **~42d** |
-| Joint open | **~23d** |
+| Total tasks (table) | **77** (plus J-01…J-03 and C-07 already closed in `011`, not all listed) |
+| `DONE` in table | **S7-A-07**, **S7-B-01…B-05** (6) |
+| `IN_PROGRESS` | **S7-C-01** |
+| `VERIFY` | **S8-B-01…B-10** (claimed; audit) |
+| Remaining S7 coding | **A-01…A-06**, **C-02…C-06**, Joint **J-04…J-08** |
+| Sprint 7 closed? | **No** |
 
 ### Staffing snapshot
 
-Three coding lanes are already defined (A/B/C) plus Joint for leads. Parallelism works only inside a sprint’s dependency order — Sprint 7 subtraction first. Net open LOC Δ ≈ 9445 (negative = deletion). Calendar ~8–10 weeks per delivery plan 008 if lanes stay full-time.
+Three coding lanes are already defined (A/B/C) plus Joint for leads. **Isolate worktrees** — a shared dirty tree voided the 2F/15E baseline. Sprint 7 subtraction first; do not treat B’s S8 claim as S7 exit. Calendar ~8–10 weeks per delivery plan 008 if lanes stay full-time.
 
 ### Task table
 
@@ -241,13 +244,13 @@ Columns: ID · Sprint/Wave · Lane · Status · Task · Sub-tasks · Surfaces ·
 | S7-A-04 | S7 W6 | A | TODO | DELETE runtime/loops/ | 1 Delete package + test · 2 Confirm no importers · 3 Salvage map in PR | delete runtime/loops/**, test_meta_loop.py | 40 | Deletion is easy; verifying no silent importers + salvage mapping is the work. | 8 | -400 | runtime/loops/MetaLoopEngine (delete) | ★★★★☆ senior | 2.5 | S7-A-02, S7-A-03 | REJECTED to rebuild. Net LOC strongly negative. |
 | S7-A-05 | S7 W6 | A | TODO | DELETE runtime/coordination.py | 1 Delete · 2 Unwire root.py · 3 Convert test → ledger projection | coordination.py, root.py:712-723,793; projections | 55 | Must re-home depth/budget semantics into ledger projections without breaking resume later. | 5 | -200 | runtime/coordination, runtime/root, ledger/projections | ★★★★☆ senior | 2.25 | S7-A-04 | Depth returns as S8-C-01 projection. |
 | S7-A-06 | S7 W6 | A | TODO | Remove hardcoded composition values | 1 bwrap via which · 2 approval TODO→S8-B-04 · 3 Reservation from budget_policy | root.py:659,693,775 | 35 | Small edits; careful not to invent S8 policy early. | 2 | 40 | runtime/root.compose | ★★★☆☆ mid | 1.25 | — | approval_required_above stays TODO until S8-B-04. |
-| S7-A-07 | S7 W6 | A | TODO | Repair docs/agile→docs/scrum restructure breakage | 1 repo_paths.py · 2 Fix 3 tests/contracts | tools/repo_paths.py + 3 tests | 15 | Path string fix + green the 3 known failures. | 4 | 20 | tools/repo_paths | ★☆☆☆☆ very simple | 0.5 | — | Day-1 unblocker for everyone. |
-| S7-B-01 | S7 W6 | B | TODO | Canonical alias shape + fail-closed validation | 1 Flat {alias:verb} · 2 Migrate tests · 3 Assert targets ∈ verbs · 4 Schema names ∈ aliases∪verbs · 5 Broken counterpart | agency/manifests/loader.py:41-71, aliases.json, tests | 50 | Data vs test migration choice + fail-closed without breaking good packs. | 10 | 120 | agency/manifests/loader.to_canonical | ★★★☆☆ mid | 2 | — | Turns 3 red alias tests green. |
-| S7-B-02 | S7 W6 | B | TODO | Unread component = composition error | 1 compose() asserts consumer · 2 Broken orphan component | runtime/root.compose, domain/artifacts/manifest | 45 | Needs consumer registry mapping; touches shared root.py (Lane A owns). | 4 | 80 | runtime/root.compose, Manifest | ★★★★☆ senior | 1.5 | S7-B-01 | Coordinate with A on root.py. |
-| S7-B-03 | S7 W6 | B | TODO | Metamorphic policy-digest test | 1 Mutate context_policy · 2 Assert ≥1 observable differs | test/agency/test_manifest_metamorphic.py (new) | 30 | Writing a good red metamorphic test; goes green in S8-B-02. | 1 | 80 | test only (intentionally red) | ★★★☆☆ mid | 1.25 | S7-B-02 | Expected FAIL until Sprint 8. |
-| S7-B-04 | S7 W6 | B | TODO | Emit gene_digests into results | 1 Already at root.py:606-609 · 2 Emit RunResult + result.json K_compat | runtime/root, zero_hint_v1/run_live_agent.py | 25 | Plumbing; gene_digests already computed. | 3 | 40 | Runtime.RunResult, K_compat | ★★☆☆☆ junior | 1 | — | Quick win for measurement honesty. |
-| S7-B-05 | S7 W6 | B | TODO | Fix test_bench alias KeyError | 1 Undeletability guard currently errors first | test/lab/test_bench.py | 20 | Depends on B-01 alias shape. | 2 | 30 | lab bench tests | ★★☆☆☆ junior | 0.75 | S7-B-01 | Exit-gate item for S7. |
-| S7-C-01 | S7 W6 | C | TODO | benchmarkings/ dependency gate | 1 Only runtime.root + ports · 2 Broken counterpart | check_boundaries.py | 30 | Import allowlist design. | 3 | 50 | tools/check_boundaries | ★★★☆☆ mid | 1 | — | Before deleting runners. |
+| S7-A-07 | S7 W6 | A | DONE | Repair docs/agile→docs/scrum restructure breakage | 1 repo_paths.py · 2 Fix 3 tests/contracts | tools/repo_paths.py + 3 tests | 15 | Path string fix + green the 3 known failures. | 4 | 20 | tools/repo_paths | ★☆☆☆☆ very simple | 0.5 | — | **DONE (A).** Stopped before A-01: shared tree / contract purge. |
+| S7-B-01 | S7 W6 | B | DONE | Canonical alias shape + fail-closed validation | 1 Flat {alias:verb} · 2 Migrate tests · 3 Assert targets ∈ verbs · 4 Schema names ∈ aliases∪verbs · 5 Broken counterpart | agency/manifests/loader.py:41-71, aliases.json, tests | 50 | Data vs test migration choice + fail-closed without breaking good packs. | 10 | 120 | agency/manifests/loader.to_canonical | ★★★☆☆ mid | 2 | — | Turns 3 red alias tests green. |
+| S7-B-02 | S7 W6 | B | DONE | Unread component = composition error | 1 compose() asserts consumer · 2 Broken orphan component | runtime/root.compose, domain/artifacts/manifest | 45 | Needs consumer registry mapping; touches shared root.py (Lane A owns). | 4 | 80 | runtime/root.compose, Manifest | ★★★★☆ senior | 1.5 | S7-B-01 | Coordinate with A on root.py. |
+| S7-B-03 | S7 W6 | B | DONE | Metamorphic policy-digest test | 1 Mutate context_policy · 2 Assert ≥1 observable differs | test/agency/test_manifest_metamorphic.py (new) | 30 | Writing a good red metamorphic test; goes green in S8-B-02. | 1 | 80 | test only (intentionally red) | ★★★☆☆ mid | 1.25 | S7-B-02 | **DONE (B).** Greened via S8-B-02 — TL verify. |
+| S7-B-04 | S7 W6 | B | DONE | Emit gene_digests into results | 1 Already at root.py:606-609 · 2 Emit RunResult + result.json K_compat | runtime/root, zero_hint_v1/run_live_agent.py | 25 | Plumbing; gene_digests already computed. | 3 | 40 | Runtime.RunResult, K_compat | ★★☆☆☆ junior | 1 | — | Quick win for measurement honesty. |
+| S7-B-05 | S7 W6 | B | DONE | Fix test_bench alias KeyError | 1 Undeletability guard currently errors first | test/lab/test_bench.py | 20 | Depends on B-01 alias shape. | 2 | 30 | lab bench tests | ★★☆☆☆ junior | 0.75 | S7-B-01 | Exit-gate item for S7. |
+| S7-C-01 | S7 W6 | C | IN_PROGRESS | benchmarkings/ dependency gate | 1 Only runtime.root + ports · 2 Broken counterpart | check_boundaries.py | 30 | Import allowlist design. | 3 | 50 | tools/check_boundaries | ★★★☆☆ mid | 1 | — | **IN_PROGRESS.** Rule live; full DoD waits on S7-C-03 deletes. |
 | S7-C-02 | S7 W6 | C | TODO | benchmarkings/guard.py refusal conditions | 1–7 refusal labels + broken counterparts | benchmarkings/guard.py (new); reuse MOCK verdict.py | 60 | 7 refusal conditions + correct numerator/denominator exclusion. | 6 | 250 | benchmarkings.guard, verdict helpers | ★★★★☆ senior | 2.75 | — | Core of Q1 measurement integrity. |
 | S7-C-03 | S7 W6 | C | TODO | DELETE four bypassing runners | 1–4 named runners | swe_pro_tiers/*, run_agentic_live_challenge, run_live_proof | 35 | Delete + grep proof + update docs/refs. | 8 | -600 | benchmarkings runners (delete) | ★★★☆☆ mid | 3 | S7-C-01 | Critical finding #2 remediation. |
 | S7-C-04 | S7 W6 | C | TODO | Retraction sweep | 1 Move to _retracted · 2 Relabel probes · 3 9-label regime | benchmarkings/** JSON + RETRACTION.md | 40 | Judgement calls on which rows are probes vs claims. | 15 | 80 | benchmarkings artifacts (relabel) | ★★★☆☆ mid | 1.5 | S7-C-03 | Communication hygiene for client. |
@@ -263,16 +266,16 @@ Columns: ID · Sprint/Wave · Lane · Status · Task · Sub-tasks · Surfaces ·
 | S8-A-03 | S8 W7 | A | TODO | RandomPort + ClockPort complete | Byte-identical replay; Recording drives counterfactuals | ports + adapters fakes | 55 | All nondeterminism sources must be inventoried. | 6 | 180 | RandomPort, ClockPort, Recording | ★★★★☆ senior | 2.25 | S8-A-01 | Enables V5-A later. |
 | S8-A-04 | S8 W7 | A | TODO | RecordCorrection parse_wire | Reject invalid style+general; round-trip valid; no promotion | parse_wire(CorrectionRecord) | 35 | Schema + rejection paths. | 4 | 80 | CorrectionRecord, parse_wire | ★★★☆☆ mid | 1.25 | — | D-07. |
 | S8-A-05 | S8 W7 | A | TODO | Claim as domain type | Non-empty invalidation; ≥1 automatic; support fields recorded-not-consumed | domain/ Claim type + parse | 65 | New domain type + C-12 auto-stale semantics. | 6 | 220 | domain.Claim | ★★★★☆ senior | 2.75 | S8-J-01 (wire) | Coordinate with Joint wire amendment. |
-| S8-B-01 | S8 W7 | B | TODO | EpisodeEngine.spawn | Attenuated grant · child lease · depth budget · causationId · no handle return · destroy workspace | agency/episode, kernel/attenuation, Governor | 95 | Property tests on attenuation + budget conservation two levels deep. | 12 | 450 | EpisodeEngine.spawn, attenuation, Governor | ★★★★★ principal/TL | 4.25 | S7 boundary rules | Highest S8 risk; Lane B primary. |
-| S8-B-02 | S8 W7 | B | TODO | CompactionStrategy protocol + registry | result_eviction, recency_window; selected by context_policy | compaction registry + compose freeze | 70 | Protocol design + observable change proof. | 8 | 280 | CompactionStrategy, context_policy | ★★★★☆ senior | 3 | S7-B-03 | Salvage from rejected MetaLoop. |
-| S8-B-03 | S8 W7 | B | TODO | ModelRouter protocol + registry | Wire adapters/models/routing.py; selected by routing_policy | routing.py (exists unwired) | 55 | Existing code; wiring + freeze-at-compose. | 6 | 150 | ModelRouter, routing_policy | ★★★★☆ senior | 2.25 | — | ACI harvest related. |
-| S8-B-04 | S8 W7 | B | TODO | approval_policy manifest component | Replace hardcoded low threshold | manifest component + compose | 45 | Closes S7-A-06 TODO. | 5 | 120 | approval_policy | ★★★☆☆ mid | 1.75 | S7-A-06 | Mid complexity. |
-| S8-B-05 | S8 W7 | B | TODO | Operator context isolation | Fresh child compiler prefix; only return enters parent L5 | context compiler / L5 | 70 | Subtle context-leak bugs; needs strong test. | 5 | 150 | context compiler, spawn return path | ★★★★☆ senior | 2.5 | S8-B-01 | VG-03 §10.3. |
-| S8-B-06 | S8 W7 | B | TODO | ACI-1 paginated fs.read | 100 lines + offset; schema + prompt convention | fs.read adapter + schema | 30 | Straightforward adapter change. | 4 | 80 | fs.read | ★★☆☆☆ junior | 1.25 | — | Parallelizable ACI batch. |
-| S8-B-07 | S8 W7 | B | TODO | ACI-2 succinct fs.search | File hits first, capped snippets | fs.search | 30 | Similar to B-06. | 3 | 70 | fs.search | ★★☆☆☆ junior | 1.25 | — | ACI batch. |
-| S8-B-08 | S8 W7 | B | TODO | ACI-3 empty-output acknowledgement | Silent command → explicit text | proc.exec | 15 | Tiny adapter fix. | 2 | 25 | proc.exec | ★☆☆☆☆ very simple | 0.5 | — | Junior-friendly. |
-| S8-B-09 | S8 W7 | B | TODO | ACI-4 lint-on-patch observation receipt | Syntax failure is receipt never verdict | patch.apply observation path | 40 | Must not invent evaluator path. | 4 | 90 | patch.apply receipts | ★★★☆☆ mid | 1.5 | — | A-05 sensitive. |
-| S8-B-10 | S8 W7 | B | TODO | ACI-6 maxTurns from budget_policy | Engine reads frozen policy | budget_policy → EpisodeEngine | 35 | Must survive approval boundary (with A-02). | 4 | 70 | budget_policy, max_turns | ★★★☆☆ mid | 1.25 | S8-A-02 (hard bound across approval) | D-12. |
+| S8-B-01 | S8 W7 | B | VERIFY | EpisodeEngine.spawn | Attenuated grant · child lease · depth budget · causationId · no handle return · destroy workspace | agency/episode, kernel/attenuation, Governor | 95 | Property tests on attenuation + budget conservation two levels deep. | 12 | 450 | EpisodeEngine.spawn, attenuation, Governor | ★★★★★ principal/TL | 4.25 | S7 boundary rules | **VERIFY / 011 `[CLAIMED]`.** Do not treat as S7 exit. |
+| S8-B-02 | S8 W7 | B | VERIFY | CompactionStrategy protocol + registry | result_eviction, recency_window; selected by context_policy | compaction registry + compose freeze | 70 | Protocol design + observable change proof. | 8 | 280 | CompactionStrategy, context_policy | ★★★★☆ senior | 3 | S7-B-03 | Salvage from rejected MetaLoop. |
+| S8-B-03 | S8 W7 | B | VERIFY | ModelRouter protocol + registry | Wire adapters/models/routing.py; selected by routing_policy | routing.py (exists unwired) | 55 | Existing code; wiring + freeze-at-compose. | 6 | 150 | ModelRouter, routing_policy | ★★★★☆ senior | 2.25 | — | ACI harvest related. |
+| S8-B-04 | S8 W7 | B | VERIFY | approval_policy manifest component | Replace hardcoded low threshold | manifest component + compose | 45 | Closes S7-A-06 TODO. | 5 | 120 | approval_policy | ★★★☆☆ mid | 1.75 | S7-A-06 | Mid complexity. |
+| S8-B-05 | S8 W7 | B | VERIFY | Operator context isolation | Fresh child compiler prefix; only return enters parent L5 | context compiler / L5 | 70 | Subtle context-leak bugs; needs strong test. | 5 | 150 | context compiler, spawn return path | ★★★★☆ senior | 2.5 | S8-B-01 | VG-03 §10.3. |
+| S8-B-06 | S8 W7 | B | VERIFY | ACI-1 paginated fs.read | 100 lines + offset; schema + prompt convention | fs.read adapter + schema | 30 | Straightforward adapter change. | 4 | 80 | fs.read | ★★☆☆☆ junior | 1.25 | — | Parallelizable ACI batch. |
+| S8-B-07 | S8 W7 | B | VERIFY | ACI-2 succinct fs.search | File hits first, capped snippets | fs.search | 30 | Similar to B-06. | 3 | 70 | fs.search | ★★☆☆☆ junior | 1.25 | — | ACI batch. |
+| S8-B-08 | S8 W7 | B | VERIFY | ACI-3 empty-output acknowledgement | Silent command → explicit text | proc.exec | 15 | Tiny adapter fix. | 2 | 25 | proc.exec | ★☆☆☆☆ very simple | 0.5 | — | Junior-friendly. |
+| S8-B-09 | S8 W7 | B | VERIFY | ACI-4 lint-on-patch observation receipt | Syntax failure is receipt never verdict | patch.apply observation path | 40 | Must not invent evaluator path. | 4 | 90 | patch.apply receipts | ★★★☆☆ mid | 1.5 | — | A-05 sensitive. |
+| S8-B-10 | S8 W7 | B | VERIFY | ACI-6 maxTurns from budget_policy | Engine reads frozen policy | budget_policy → EpisodeEngine | 35 | Must survive approval boundary (with A-02). | 4 | 70 | budget_policy, max_turns | ★★★☆☆ mid | 1.25 | S8-A-02 (hard bound across approval) | D-12. |
 | S8-C-01 | S8 W7 | C | TODO | Depth as ledger projection | Atom…Body labels as projection never classes | ledger/projections | 55 | Semantic remapping after S7-A-05 delete. | 5 | 180 | ledger projections (depth labels) | ★★★★☆ senior | 2.25 | S7-A-05 | Salvage of rejected class hierarchy. |
 | S8-C-02 | S8 W7 | C | TODO | Cache-hit-rate metric over fixed replay | Prefix-stability CI metric | telemetry + CI | 50 | Need stable replay harness for metric. | 5 | 150 | prefix/cache metrics | ★★★☆☆ mid | 2 | S8-A-03 helpful | 006 S5. |
 | S8-C-03 | S8 W7 | C | TODO | V5-L prefix-miss attribution | system/tools/compact/snip reasons | telemetry on model calls | 55 | Instrumentation across compiler stages. | 6 | 160 | context compiler telemetry | ★★★★☆ senior | 2.25 | S8-C-02 | Feeds cost control. |

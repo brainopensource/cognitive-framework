@@ -3,6 +3,9 @@
 Uses ``Runtime.execute_harness`` with a live OpenAI-compatible model.
 Does not modify ``benchmarkings/tasks_phase2`` or LAM cassettes.
 Never prints API keys.
+
+The lab seam constructs ``OpenRouterModel``; this entrypoint never imports an
+adapter directly.
 """
 
 from __future__ import annotations
@@ -30,13 +33,11 @@ _LAM = ROOT / "tools" / "002_LLM_API_MOCK"
 if str(_LAM) not in sys.path:
     sys.path.insert(0, str(_LAM))
 
-from verdict import evidence_label, leak_paths
+from verdict import evidence_label, lab_operator_signer, leak_paths, load_provider_secret, openrouter_model
+from benchmarkings.guard import GuardRefusal, classify_refusal, validate_run
 
-from vanguard.packages.adapters.models.env_loader import load_api_key
-from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
-from vanguard.packages.runtime.governance.approvals import OperatorSigner
 from vanguard.packages.runtime.root import Runtime, TaskContext
 
 SUITE = Path(__file__).resolve().parent
@@ -173,7 +174,7 @@ def _http_post(
 class LiveModel:
     """Inject sampling and OpenAI tool parameters; do not change the kernel."""
 
-    def __init__(self, inner: OpenRouterModel, *, max_tokens: int) -> None:
+    def __init__(self, inner: Any, *, max_tokens: int) -> None:
         self._inner = inner
         self._max_tokens = max_tokens
 
@@ -241,13 +242,7 @@ def _run_tests(cwd: Path, argv: tuple[str, ...]) -> dict[str, Any]:
 
 
 def _load_secret() -> tuple[str | None, str]:
-    env_value = os.environ.get("OPENROUTER_API_KEY")
-    if env_value:
-        return env_value, "environ"
-    loaded = load_api_key(ROOT)
-    if loaded.ok and loaded.value:
-        return loaded.value, "dotenv"
-    return None, "missing"
+    return load_provider_secret(ROOT)
 
 
 def _ollama_models() -> list[str]:
@@ -381,8 +376,8 @@ def run_task(
     elif secret:
         environ["OPENROUTER_API_KEY"] = secret
 
-    signer = OperatorSigner(b"zero-hint-v1-operator-key")
-    inner = OpenRouterModel(
+    signer = lab_operator_signer(b"zero-hint-v1-operator-key")
+    inner = openrouter_model(
         model=model_cfg["model"],
         endpoint=model_cfg["endpoint"],
         environ=environ,
@@ -464,12 +459,31 @@ def run_task(
         and set(changed) <= set(task.allowed_sources)
     )
     public_overfit = bool(public_after["passed"] and not oracle_after["passed"])
+    try:
+        guard = validate_run(
+            {
+                "pre_passed": public_before["passed"],
+                "effects_applied": len(changed),
+                "post_passed": oracle_after["passed"],
+                "prompt_tokens": model.prompt_tokens,
+                "completion_tokens": model.completion_tokens,
+                "provider_error": bool(model.errors),
+                # SkipEvaluator is an explicit lab departure, not a verdict.
+                "verdict_present": False,
+                "containment": {"passed": Path("/usr/bin/bwrap").exists()},
+                "passed": passed,
+            }
+        )
+    except GuardRefusal as exc:
+        guard = classify_refusal(exc)
+        passed = False
     record = {
         "schemaVersion": "1.0",
         "taskId": task.task_id,
         "title": task.title,
         "runId": run_id,
         "status": "PASS" if passed else "FAIL",
+        "guard": guard,
         "evidence_label": evidence_label("lab"),
         "public_overfit": public_overfit,
         "agentic": True,

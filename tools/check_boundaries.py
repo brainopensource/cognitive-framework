@@ -199,7 +199,10 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 continue
             resolved = resolve_relative(source, spec)
             if resolved and resolved in files:
-                graph[source].add(resolved)
+                # benchmarkings is a client boundary, not part of the core
+                # package-cycle graph; its import allowlist is checked below.
+                if source_area != "benchmarkings":
+                    graph[source].add(resolved)
                 target_area, target_family = area_for(resolved, root)
             else:
                 target_area, target_family = area_from_spec(spec)

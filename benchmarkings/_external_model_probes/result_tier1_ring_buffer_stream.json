@@ -1,4 +1,5 @@
 {
+  "evidence_label": "chat-patch-loop",
   "challenge_id": "tier1_ring_buffer_stream",
   "tier": 1,
   "title": "Circular Ring Buffer with Read Pointers",

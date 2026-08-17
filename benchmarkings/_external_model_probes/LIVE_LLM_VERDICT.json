@@ -1,4 +1,5 @@
 {
+  "evidence_label": "chat-patch-loop",
   "model": "deepseek/deepseek-chat",
   "timestamp": "2026-08-16 08:20:09Z",
   "turns_used": 1,

@@ -214,6 +214,22 @@
       "expected_failure": "unknown core module 'loops.py'"
     },
     {
+      "test_id": "MF-S7-A-02-001",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/sandbox_subprocess_valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/agency_subprocess"
+      ],
+      "expected_failure": "subprocess is confined to vanguard/packages/adapters/sandbox/"
+    },
+    {
       "test_id": "MF-KRN-001",
       "control": [
         "python3",

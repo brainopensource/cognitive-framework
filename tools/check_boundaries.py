@@ -37,6 +37,28 @@ ALLOWED = {
     "client": {"domain", "runtime"},
 }
 
+# S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
+# language. Process creation belongs to adapters/sandbox/ alone; this rule is
+# the static half of that guarantee.
+SUBPROCESS_MODULES = {"subprocess", "os.popen", "pty", "child_process", "node:child_process"}
+SUBPROCESS_HOME = ("vanguard", "packages", "adapters", "sandbox")
+
+# Triaged exceptions, each named individually. A wildcard here would defeat the
+# rule, so entries are exact repo-relative paths and every one carries its
+# justification. Adding a row is a deliberate act with a reviewer attached.
+SUBPROCESS_ALLOWLIST = {
+    # The exterior judge executes the oracle in its own process. A-05/LT-4: the
+    # evaluator is architecturally unreachable from the agent it judges, so it
+    # cannot borrow the agent's sandbox to do this.
+    "vanguard/packages/adapters/evaluators/isolated.py",
+    # EnvironmentPort's git-backed snapshot/diff. Host git invocation behind the
+    # port. Candidate for containment once the sandbox grows a git verb.
+    "vanguard/packages/adapters/environment/git.py",
+    # `git ls-files --error-unmatch` proving the .env is untracked before a
+    # secret is read. Read-only query, no agent-supplied argv.
+    "vanguard/packages/adapters/models/env_loader.py",
+}
+
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
     r"[\"']([^\"']+)[\"']"
@@ -218,6 +240,23 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 target_area, target_family = area_for(resolved, root)
             else:
                 target_area, target_family = area_from_spec(spec)
+            rel_parts = source.relative_to(root).parts
+            rel_source = source.relative_to(root).as_posix()
+            # Scoped to the core packages. benchmarkings/ is a measurement
+            # client governed by its own allowlist row above, not by N-06.
+            if (
+                spec in SUBPROCESS_MODULES
+                and rel_parts[:2] == ("vanguard", "packages")
+                and rel_source not in SUBPROCESS_ALLOWLIST
+            ):
+                if rel_parts[: len(SUBPROCESS_HOME)] != SUBPROCESS_HOME:
+                    errors.append(
+                        f"{rel_source}:{line}: subprocess is confined to "
+                        f"vanguard/packages/adapters/sandbox/ (N-06); {spec!r} is reachable here "
+                        f"without a grant. Route it through SandboxPort, or add an explicit, "
+                        f"justified row to SUBPROCESS_ALLOWLIST"
+                    )
+                    continue
             lowered_spec = spec.lower().replace("_", "-")
             if source_area == "benchmarkings":
                 # Benchmarks are measurement clients, never model adapters.  The

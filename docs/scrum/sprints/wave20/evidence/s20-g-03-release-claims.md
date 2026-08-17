@@ -35,6 +35,6 @@ Do not merge until these are green **on the merge commit**:
 - `python3 tools/scan_secrets.py`
 - `lab/run.py` still delegates only (no fabricated `turnCount`)
 
-ALFA reported 309 runtime tests OK @ `6344e97` / board `5c2f7ae`. BETA `005dd95`. GAMMA does not re-attest those runs from this session’s broken shell.
+ALFA reported **351** runtime tests OK @ S22 `557191e`. BETA S22 `9e90c00`. S21-A 337 @ prior close. GAMMA does not re-attest from this session.
 
-**v0.5** (not this tag): live model completes ≥1 tool-calling turn on this pack; then Claude-80% productization.
+**v0.5** (not this tag): concept proposal `docs/scrum/sprints/wave20/evidence/v050-concept-lock-proposal.md`. Do not implement TUI here.

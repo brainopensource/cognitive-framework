@@ -36,6 +36,15 @@ test("parseCliOptions captures --demo scenario", () => {
   assert.equal(parsed.demo, true);
   assert.equal(parsed.demoScenario, "authorization-denied");
   assert.equal(parsed.headless, true);
+  assert.equal(parsed.promptExplicit, false);
+});
+
+test("parseCliOptions marks --prompt as explicit for TUI autostart", () => {
+  const flagged = parseCliOptions(["--prompt", "fix tests"]);
+  assert.equal(flagged.promptExplicit, true);
+  assert.equal(flagged.prompt, "fix tests");
+  const implicit = parseCliOptions([]);
+  assert.equal(implicit.promptExplicit, false);
 });
 
 test("demo replay labels source mock", async () => {

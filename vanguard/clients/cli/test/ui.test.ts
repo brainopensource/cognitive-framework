@@ -11,6 +11,13 @@ import { submitInteractiveApproval } from "../src/composition/operator-approval.
 import { OperatorSigner } from "../src/adapters/signer.js";
 import { approvalActionForKey } from "../src/tui/keys.js";
 import { colorizeUnifiedDiff } from "../src/tui/diff.js";
+import {
+  shouldDispatchApproval,
+  shouldRequestCancel,
+  submitBrief,
+} from "../src/tui/focus.js";
+import { windowTranscript } from "../src/tui/transcript-window.js";
+import { formatStatusBar } from "../src/tui/status-bar.js";
 import type {
   CorrectionRecord,
   EventEnvelope,
@@ -79,6 +86,51 @@ test("approval modal keys dispatch approve, reject, and correct without mutating
   assert.equal(approvalActionForKey("n"), "reject");
   assert.equal(approvalActionForKey("c"), "correct");
   assert.equal(approvalActionForKey("q"), undefined);
+});
+
+test("prompt mode does not dispatch approval on y", () => {
+  assert.equal(shouldDispatchApproval("prompt", "y"), false);
+  assert.equal(shouldDispatchApproval("approval", "y"), true);
+  assert.equal(shouldDispatchApproval("run", "y"), false);
+});
+
+test("empty Enter does not start a run", () => {
+  const result = submitBrief("   ");
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.error.code, "invalid_request");
+  const ok = submitBrief("fix the test");
+  assert.equal(ok.ok, true);
+});
+
+test("windowTranscript clamps 100 thoughts to height", () => {
+  const view = {
+    ...emptyRunView(),
+    thoughts: Array.from({ length: 100 }, (_, i) => `thought-${i}`),
+  };
+  const win = windowTranscript(view, 0, 16);
+  assert.equal(win.rows.length, 16);
+  assert.equal(win.total, 100);
+  const end = windowTranscript(view, 10_000, 16);
+  assert.equal(end.rows.length, 16);
+  assert.equal(end.cursor, 84);
+});
+
+test("ctrl+c maps to cancel; Esc in prompt does not", () => {
+  assert.equal(shouldRequestCancel("prompt", { ctrlC: true, escape: false }), true);
+  assert.equal(shouldRequestCancel("prompt", { ctrlC: false, escape: true }), false);
+  assert.equal(shouldRequestCancel("run", { ctrlC: false, escape: true }), true);
+});
+
+test("status bar labels mock and never looks live", () => {
+  const line = formatStatusBar({
+    source: "mock",
+    seq: "3",
+    tokens: 42,
+    costMicros: "900",
+    kind: "BudgetCommitted",
+  });
+  assert.match(line, /source: mock/);
+  assert.equal(/source: live/.test(line), false);
 });
 
 test("approve and reject callbacks submit resolveApproval receipts only", async () => {

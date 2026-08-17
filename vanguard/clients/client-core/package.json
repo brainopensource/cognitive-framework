@@ -54,6 +54,18 @@
     "./application/corrections.js": {
       "types": "./dist/src/application/corrections.d.ts",
       "default": "./dist/src/application/corrections.js"
+    },
+    "./application/selectors.js": {
+      "types": "./dist/src/application/selectors.d.ts",
+      "default": "./dist/src/application/selectors.js"
+    },
+    "./application/trace-graph.js": {
+      "types": "./dist/src/application/trace-graph.d.ts",
+      "default": "./dist/src/application/trace-graph.js"
+    },
+    "./application/subscribe-run.js": {
+      "types": "./dist/src/application/subscribe-run.d.ts",
+      "default": "./dist/src/application/subscribe-run.js"
     }
   },
   "files": [

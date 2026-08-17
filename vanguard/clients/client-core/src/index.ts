@@ -14,3 +14,6 @@ export * from "./application/run-view.js";
 export * from "./application/approvals.js";
 export * from "./application/commands.js";
 export * from "./application/corrections.js";
+export * from "./application/selectors.js";
+export * from "./application/trace-graph.js";
+export * from "./application/subscribe-run.js";

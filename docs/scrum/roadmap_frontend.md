@@ -96,10 +96,10 @@ Wave 2 copy-paste prompts: [`sprints_front/wave2_implementer_prompts.md`](sprint
 | FE-1-2 | signer + RuntimeClient | FE-1-1 | JCS golden | `[DONE]` |
 | FE-1-3 | `reduceRunView` + approvals | FE-1-1 | reducer tests in core | `[DONE]` |
 | FE-1-4 | live/replay/scenario adapters | FE-1-2 | CLI suite green via re-export | `[DONE]` |
-| FE-1-5 | Public API freeze + commands.ts import hygiene | FE-1-4 | barrel + CLI still green | `[TODO]` Wave 2 |
-| FE-1-6 | `selectStatusBar` + `windowTranscript` | FE-1-3 | selector unit tests | `[TODO]` Wave 2 |
-| FE-1-7 | `toTraceGraph(envelopes)` | FE-1-1 | golden vs successful-episode.jsonl | `[TODO]` Wave 2 |
-| FE-1-8 | `subscribeRun` + AbortSignal | FE-1-4 | fake-iterable abort test | `[TODO]` Wave 2 |
+| FE-1-5 | Public API freeze + commands.ts import hygiene | FE-1-4 | barrel + CLI still green | `[DONE]` |
+| FE-1-6 | `selectStatusBar` + `windowTranscript` | FE-1-3 | selector unit tests | `[DONE]` |
+| FE-1-7 | `toTraceGraph(envelopes)` | FE-1-1 | golden vs successful-episode.jsonl | `[DONE]` |
+| FE-1-8 | `subscribeRun` + AbortSignal | FE-1-4 | fake-iterable abort test | `[DONE]` |
 
 Kits: `sprints_front/lane_core_wave1.md`, `lane_core_wave2.md`
 

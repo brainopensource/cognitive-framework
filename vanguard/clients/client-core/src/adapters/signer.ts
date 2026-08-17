@@ -1,4 +1,3 @@
-import canonicalize from "canonicalize";
 import { generateKeyPairSync, sign, type KeyObject, createPrivateKey } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -6,11 +5,18 @@ import { join } from "node:path";
 import type { ApprovalChallenge, ApprovalDecision } from "../contract/types.js";
 
 export function jcsCanonicalize(value: unknown): string {
-  const text = canonicalize(value);
-  if (typeof text !== "string") {
-    throw new Error("RFC 8785 canonicalize produced no string");
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
   }
-  return text;
+  if (Array.isArray(value)) {
+    return "[" + value.map((item) => jcsCanonicalize(item)).join(",") + "]";
+  }
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  const pairs = keys
+    .filter((key) => obj[key] !== undefined)
+    .map((key) => JSON.stringify(key) + ":" + jcsCanonicalize(obj[key]));
+  return "{" + pairs.join(",") + "}";
 }
 
 export function defaultKeyDir(): string {

@@ -2,11 +2,9 @@ import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import {
   parseEventEnvelope,
-  parseJsonlLine,
   isUuid,
   isDigest,
   fail,
-  afterCursor,
   emptyRunView,
   reduceRunView,
   OperatorSigner,
@@ -39,13 +37,17 @@ describe("client-core — parseEventEnvelope", () => {
   it("parses valid vg.4 envelope", () => {
     const res = parseEventEnvelope(VALID_ENVELOPE);
     assert.ok(res.ok);
-    assert.equal(res.value.schemaVersion, "vg.4");
+    if (res.ok) {
+      assert.equal(res.value.schemaVersion, "vg.4");
+    }
   });
 
   it("rejects non-object envelope", () => {
     const res = parseEventEnvelope("invalid");
     assert.ok(!res.ok);
-    assert.equal(res.error.code, "invalid_request");
+    if (!res.ok) {
+      assert.equal(res.error.code, "invalid_request");
+    }
   });
 
   it("rejects invalid UUID", () => {
@@ -66,7 +68,9 @@ describe("client-core — helpers", () => {
   it("fail constructs failure Result", () => {
     const res = fail("not_found", "item missing", false);
     assert.ok(!res.ok);
-    assert.equal(res.error.code, "not_found");
+    if (!res.ok) {
+      assert.equal(res.error.code, "not_found");
+    }
   });
 });
 

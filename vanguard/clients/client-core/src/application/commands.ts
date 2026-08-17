@@ -1,7 +1,8 @@
+import type { RuntimeClient } from "../contract/types.js";
+
 export function jsonLine(value: unknown): string {
   return JSON.stringify(value);
 }
-import type { RuntimeClient } from "../contract/types.js";
 
 export type CliOptions = {
   headless: boolean;
@@ -23,6 +24,8 @@ export type CliOptions = {
   demo?: boolean;
   demoScenario?: string;
 };
+
+export type HeadlessRunOptions = CliOptions;
 
 export async function streamRun(
   client: RuntimeClient,

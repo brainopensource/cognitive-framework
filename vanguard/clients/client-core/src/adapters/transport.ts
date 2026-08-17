@@ -113,7 +113,7 @@ export class SocketTransport implements RuntimeTransport {
         };
         socket.write(JSON.stringify(commandFrame) + "\n");
         const rl = createInterface({ input: socket, crlfDelay: Infinity });
-        rl.once("line", (line) => {
+        rl.once("line", (line: string) => {
           if (resolved) return;
           resolved = true;
           clearTimeout(timer);

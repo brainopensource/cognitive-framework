@@ -33,7 +33,16 @@ if (command === "run") {
   if (parsed.headless) {
     exitCode = await streamRun(runtime, parsed, console.log);
   } else {
-    render(<RunTui runtime={runtime} repo={parsed.repo} runId={parsed.runId} resumeFrom={parsed.resumeFrom} />);
+    render(
+      <RunTui
+        runtime={runtime}
+        repo={parsed.repo}
+        runId={parsed.runId}
+        resumeFrom={parsed.resumeFrom}
+        autostart={parsed.promptExplicit}
+        initialBrief={parsed.promptExplicit ? (parsed.prompt ?? "") : ""}
+      />
+    );
   }
 } else if (command === "approve") {
   const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));

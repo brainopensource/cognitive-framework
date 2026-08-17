@@ -252,6 +252,68 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         self.assertNotIn("100 files listed", parent_texts)
         self.assertIn("Found 2 matching endpoints in auth.py", parent_texts)
 
+    def test_budget_conserved_two_levels_deep(self) -> None:
+        """Property: for every dimension, spent + held + remaining == ceiling across parent/child/grandchild leases."""
+        from vanguard.packages.kernel.budget import Governor, Reservation
+
+        ceilings = {"usd_micros": 100_000, "millis": 60_000, "tokens": 10_000, "bytes": 50_000}
+        gov = Governor(ceilings)
+
+        # Parent reserves
+        l1 = gov.reserve("run-1", Reservation(usd_micros=40_000, tokens=4_000, millis=20_000, bytes_=20_000))
+        # Child reserves under parent
+        l2 = gov.reserve("run-1", Reservation(usd_micros=20_000, tokens=2_000, millis=10_000, bytes_=10_000), parent_lease_id=l1.lease_id)
+        # Grandchild reserves under child
+        l3 = gov.reserve("run-1", Reservation(usd_micros=10_000, tokens=1_000, millis=5_000, bytes_=5_000), parent_lease_id=l2.lease_id)
+
+        # Grandchild commits
+        gov.commit(l3, {"usd_micros": 8_000, "tokens": 800, "millis": 4_000, "bytes": 4_000})
+        # Child commits
+        gov.commit(l2, {"usd_micros": 15_000, "tokens": 1_500, "millis": 8_000, "bytes": 8_000})
+        # Parent commits
+        gov.commit(l1, {"usd_micros": 10_000, "tokens": 1_000, "millis": 5_000, "bytes": 5_000})
+
+        # Invariant check: spent + held + remaining == ceiling for every dimension
+        ledger = gov.ledger()
+        for dim, entry in ledger.items():
+            self.assertEqual(
+                entry["spent"] + entry["held"] + entry["remaining"],
+                entry["ceiling"],
+                f"Conservation invariant violated for dimension {dim}: {entry}",
+            )
+
+    def test_child_overrun_debits_parent_budget(self) -> None:
+        """Property: child effect overrun debits reality and updates remaining budget (K-07)."""
+        from vanguard.packages.kernel.budget import Governor, Reservation
+
+        ceilings = {"usd_micros": 50_000}
+        gov = Governor(ceilings)
+
+        # Parent lease
+        l1 = gov.reserve("run-1", Reservation(usd_micros=30_000))
+        # Child lease
+        l2 = gov.reserve("run-1", Reservation(usd_micros=10_000), parent_lease_id=l1.lease_id)
+
+        # Child overruns reservation: spent 15_000 against 10_000 reservation
+        gov.commit(l2, {"usd_micros": 15_000})
+
+        self.assertEqual(gov.spent("usd_micros"), 15_000)
+        # Held remaining is parent's 30_000
+        self.assertEqual(gov.remaining("usd_micros"), 50_000 - 15_000 - 30_000)
+
+    def test_closed_parent_lease_cannot_fund_child(self) -> None:
+        """F-13: A closed parent lease cannot fund a child reservation."""
+        from vanguard.packages.kernel.budget import BudgetDenied, Governor, Reservation
+
+        gov = Governor({"usd_micros": 50_000})
+        l1 = gov.reserve("run-1", Reservation(usd_micros=20_000))
+        gov.release(l1)
+
+        # Attempt child reservation on released/closed parent
+        with self.assertRaises(BudgetDenied) as cm:
+            gov.reserve("run-1", Reservation(usd_micros=5_000), parent_lease_id=l1.lease_id)
+        self.assertEqual(cm.exception.reason, "parent_closed")
+
 
 if __name__ == "__main__":
     unittest.main()

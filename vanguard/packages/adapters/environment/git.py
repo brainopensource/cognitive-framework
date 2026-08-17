@@ -247,9 +247,20 @@ class GitEnvironment:
             if not isinstance(pattern, str):
                 return Result.fail("invalid_request", "search requires a pattern string")
 
+            path_filter = req.path or req.args.get("path") or req.args.get("glob")
+            max_results_val = req.args.get("max_results")
+            try:
+                max_results = int(max_results_val) if max_results_val is not None else 50
+            except (ValueError, TypeError):
+                max_results = 50
+
             # Execute git grep
+            cmd = ["git", "grep", "-n", "--", pattern]
+            if path_filter and isinstance(path_filter, str) and path_filter not in (".", "/workspace", ""):
+                cmd.extend(["--", path_filter])
+
             grep_proc = subprocess.run(
-                ["git", "grep", "-n", "--", pattern],
+                cmd,
                 cwd=self._working_dir,
                 capture_output=True,
                 text=True,
@@ -262,6 +273,8 @@ class GitEnvironment:
 
             if grep_proc.returncode == 0:
                 for line in grep_proc.stdout.splitlines():
+                    if len(matches) >= max_results:
+                        break
                     parts = line.split(":", 2)
                     if len(parts) >= 3:
                         f_path, line_no, text = parts[0], parts[1], parts[2]
@@ -499,8 +512,11 @@ class GitEnvironment:
             return disposed_err
 
         action = req.action
+        if action == "patch" and req.patch is None and "diff" not in req.args and "content" in req.args:
+            action = "write"
+
         if action == "patch" or req.patch is not None:
-            patch_content = req.patch or req.args.get("patch", "")
+            patch_content = req.patch or req.args.get("patch") or req.args.get("diff", "")
             if not isinstance(patch_content, str):
                 return Result.fail("invalid_request", "patch preview requires patch text")
             val_res = self._parse_and_validate_patch(patch_content)
@@ -594,8 +610,11 @@ class GitEnvironment:
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
 
         action = req.action
+        if action == "patch" and req.patch is None and "diff" not in req.args and "content" in req.args:
+            action = "write"
+
         if action == "patch" or req.patch is not None:
-            patch_content = req.patch or req.args.get("patch", "")
+            patch_content = req.patch or req.args.get("patch") or req.args.get("diff", "")
             if not isinstance(patch_content, str):
                 return Result.fail("invalid_request", "patch apply requires patch text")
             val_res = self._parse_and_validate_patch(patch_content)

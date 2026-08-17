@@ -93,7 +93,7 @@ Evidence: `docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md` (539 tests,
 | S7-J-01 | `[DONE]` | ADR-0063 Python; reverse ADR-0001 |
 | S7-J-02 | `[DONE]` | ADR-0064 gate status |
 | S7-J-03 | `[DONE]` | ADR-0065 D-01…D-15 binding |
-| S7-J-04 | `[TODO]` | SEC-01: rotate leaked key, then authorised history rewrite; `--all-refs` still FAIL |
+| S7-J-04 | `[TODO]` | SEC-01. **Blocked on the CTO: rotate in the OpenRouter dashboard first** — engineering cannot and must not do this. Tree is clean (`.env` untracked + gitignored, scan PASS); disclosure is historical: 1 reachable `.env` blob, **21 `refs/original/**`**, 3 remote branches. Rewrite stays gated on rotation + written per-ref sign-off. Detail: `docs/scrum/sprints/sprint08/evidence/s7-j-04-key-rotation.md`. Does not block S8/S9 coding |
 | S7-J-05 | `[DONE]` | `LICENSE` Apache-2.0 on disk |
 | S7-J-06 | `[TODO]` | Promote measurement science into VG-07 |
 | S7-J-07 | `[TODO]` | `doing/` cap 8 (now over) |
@@ -144,8 +144,8 @@ Sentence: parent spawns child under attenuated grant + child lease; child turns 
 
 | ID | Status | Task |
 |---|---|---|
-| S8-J-01 | `[TODO]` | VG-04 Claim wire (reader fields, golden vectors) — after S8-A-05 |
-| S8-J-02 | `[TODO]` | Confirm ADR-0060: no domain nouns in `agency/episode/` |
+| S8-J-01 | `[TODO]` | VG-04 Claim wire (reader fields, golden vectors). **A did NOT jump the gun** — `support_count` / `last_corroborated_at` / `protection_class` are on the domain type, defaulted, and withheld from `to_wire()`, with a test citing this row as the gate. `additionalProperties:false` confirms emitting them now would be rejected by the normative reader. Joint owns the amendment; **A must not emit until it lands** |
+| S8-J-02 | **`[DONE]`** | **ADR-0060 HELD.** `docs/scrum/sprints/sprint08/evidence/s8-j-02-adr0060-diff.md`. Sprint 8 changed **5 lines** in `agency/episode/`, all `parent_lease` (kernel budget vocabulary, not domain). Wide noun scan: 2 hits, both prose (`source class`, `dead code`). TCB unchanged 1315. **Caveat: re-run if Lane B wires `spawn` to a ProposalKind** — a spawn proposal is where domain nouns would most plausibly leak |
 | S8-J-03 | `[TODO]` | Q1/Q2 evidence; dogfood bugs named `DOGFOOD-01..03` (do not count LAM cassettes) |
 | S8-J-04 | `[TODO]` | Full suite with `node` installed (today: 14 reader errors) |
 | S8-J-05 | `[TODO]` | `doing/` 12 → 8 — **and record the `011` supersession**: `49b7628` deleted the master backlog (TL-verified statuses + Lane B audit) without the authorising row. Consolidation is fine; the silent drop is not |
@@ -171,6 +171,43 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 
 **Commit discipline:** a lane-prefixed commit must carry the production change it names. Three of this sprint's rows were fixed, verified and recorded in three different commits.
 
+### Lane B — `spawn` choice: **PENDING, NOT YET RECORDED** (as of `70802a9`, 2026-08-17)
+
+Lane B has committed nothing since the audit. The choice is B's to make and must be written **here**,
+signed, before `S8-B-01` moves off `[CLAIMED — UNREACHABLE]`.
+
+| Option | What B must deliver | Consequence for S9 |
+|---|---|---|
+| **(a) Wire it** | `ProposalKind.SPAWN` + spawn tool schema + manifest capability; update the two stale docstrings (`engine.py:17-19`, `state.py:167`); one test where a **model proposal** — not a direct Python call — produces a child episode | Recursion counts as a DNA dimension for `S9-B-01`. **`S8-J-02` must be re-run** against the change |
+| **(b) Declare dormant** | One paragraph here stating recursion is on no executable path; tests retained | `S9-B-01` must find its ≥3 dimensions **without** recursion |
+
+**Not permitted:** leaving `S8-B-01` `[DONE]` and unreachable. That is the contamination pattern
+Sprint 7 was spent removing.
+
+### Restored — Lane B audit trail (was in `011`, deleted by `49b7628`; `011` is not being recreated)
+
+Preserved here because the finding is still load-bearing and its original home was removed.
+
+> **TL audit of Lane B's pre-Sprint-8 `spawn`, 2026-08-16 (S7 close).** Verdict: **ACCEPTED as the
+> Sprint 8 starting point, not sent back.** Attenuation, depth ceiling, `causationId`, typed
+> `SpawnResult` and workspace-destroy-in-`finally` verified across 7 tests. `ADR-0060` held; TCB
+> unchanged.
+>
+> **One material gap, in the centre row.** `S8-B-01`'s DoD named three property tests; one existed.
+> The missing pair was the budget properties — *"budget conserved two levels deep"* and *"child
+> overrun debits the parent"* — and the mechanism was unwired: `spawn` built the child on the shared
+> `Kernel`, but no `parent_lease` was set on any effect request (`engine.py:196`), so the `Governor`
+> lease tree was never built. Shared ceilings gave conservation *incidentally*; the DoD asked for it
+> *structurally*. Recorded as a finish, not a rewrite → `S8-B-01a`.
+>
+> **Closed 2026-08-17.** `parent_lease` now reaches `Governor.reserve`; F-13 (a closed parent cannot
+> fund a child) is tested. The finding is resolved. Attribution remains wrong: the production change
+> landed in untagged `ce15850`, `c8976fc` added tests only, and the backlog cited `fc9f5f4`.
+>
+> Also preserved from `011`: `S8-B-04` was corrected `[CLAIMED]` → `[TODO]` at the S7 close because
+> `root.py:740` still carried the `TODO(S8-B-04)` literal with no test. It has since landed properly
+> (`fc9f5f4`) and is `[DONE]`. `S8-B-02/03/05/06..10` were TL-verified `[DONE]` at that audit.
+
 ---
 
 ## Sprint 9 — The instrument · W8
@@ -178,6 +215,18 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 Sentence: A/A noise floor per task class vs `vg-shell-only`; refuse degenerate designs.
 
 Lane C leads. No published delta. No cloud spend until S9-J-03.
+
+**OPEN FOR LANE C ONLY (2026-08-17).** C is cleared to code `S9-C-01`, `S9-C-02`, `S9-C-03` now,
+against `vg-shell-only` with `tools/002_LLM_API_MOCK`. Both Sprint 8 blockers are independent of C.
+
+> **HARD STOP — no A/A number until `S8-A-02` is green.** Build the runner and its refusal path;
+> **hold the number.** The real turn bound today is `max_turns 8 × max_segments 8 = 64`, and
+> `S8-A-02` is about to change it. A floor measured against a bound we intend to change is not a
+> floor, and re-measuring afterwards invalidates everything derived from it.
+> Emitting a floor before A-02 is green is a Sprint 9 stop condition, not a scheduling preference.
+
+**Lanes A and B are NOT open for Sprint 9** until `S8-A-02` is green and B's `spawn` choice is
+recorded in writing above.
 
 | ID | Status | Lane | Task |
 |---|---|---|---|

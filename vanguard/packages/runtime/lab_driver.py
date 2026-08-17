@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 """Run one task directory against one frozen harness pack (`W14-A`).
 
+**Why this is not `lab/run.py`.** `lab/` must import nothing -- the boundary
+checker enforces it, because `lab/` is disposable and nothing disposable may
+become load-bearing. That rule is also the reason the old `lab/run.py` could
+only ever fabricate: unable to reach the runtime, it returned a literal
+`{"status": "completed", "turnCount": 1}` for every task, whatever happened.
+A driver that cannot call the thing it claims to drive is a driver that lies.
+
+So the driver lives here, in the composition layer that is allowed to know
+concrete implementations, and `lab/run.py` is gone rather than left as a stub
+that reports success.
+
+  python3 -m vanguard.packages.runtime.lab_driver --pack … --task-dir …
+
 **This driver used to fabricate its result.** It read the manifest, never
 composed anything, never ran a turn, and returned
 `{"status": "completed", "turnCount": 1}` regardless of what the task was or
@@ -13,7 +26,7 @@ episode tree, tools, receipts, ledger. There is no second agent loop here --
 the repair driver re-enters `HarnessSession.run()` and nothing else.
 
 CLI:
-  python3 lab/run.py --pack vg-code-default --task-dir DIR
+  python3 -m vanguard.packages.runtime.lab_driver --pack vg-code-default --task-dir DIR
       [--model mock|ollama|openrouter|deepseek] [--model-name TAG]
       [--interactive | --benchmark] [--max-turns N] [--max-attempts N]
       [--jsonl-out FILE] [--json]
@@ -30,23 +43,11 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
-_ROOT = Path(__file__).resolve().parents[1]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-
-from vanguard.packages.adapters.stores.event_store import SqliteEventStore  # noqa: E402
-from vanguard.packages.runtime.model_selection import (  # noqa: E402
-    ModelUnavailable,
-    select_model,
-)
-from vanguard.packages.runtime.repair import StopReason, drive_until_green  # noqa: E402
-from vanguard.packages.runtime.root import (  # noqa: E402
-    HarnessSession,
-    Runtime,
-    SessionPorts,
-    TaskContext,
-)
-from vanguard.packages.runtime.session_log import session_log  # noqa: E402
+from ..adapters.stores.event_store import SqliteEventStore
+from .model_selection import ModelUnavailable, select_model
+from .repair import StopReason, drive_until_green
+from .root import HarnessSession, Runtime, SessionPorts, TaskContext
+from .session_log import session_log
 
 DEFAULT_BRIEF = ("Inspect the workspace, make the failing suite pass, and run "
                  "the tests through the allowlisted process verb.")
@@ -137,7 +138,7 @@ def _verdict_is_green(result: Any) -> bool:
 
 
 def _environment_for(task_path: Path) -> Any:
-    from vanguard.packages.adapters.environment.git import GitEnvironmentAdapter
+    from ..adapters.environment.git import GitEnvironmentAdapter
 
     return GitEnvironmentAdapter(str(task_path))
 

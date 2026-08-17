@@ -144,6 +144,7 @@ ROLE_KIND: Mapping[str, str] = {
     "context_policy": "context_policy",
     "routing_policy": "routing_policy",
     "approval_policy": "approval_policy",
+    "skills": "skills",
     "retrieval_policy": "retrieval_policy",
     "compaction_policy": "compaction_policy",
 }

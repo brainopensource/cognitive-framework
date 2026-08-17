@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import lab.run as lab_run
+import vanguard.packages.runtime.lab_driver as lab_run
 from vanguard.packages.kernel import (
     Constraints,
     EffectRequest,

@@ -230,6 +230,22 @@
       "expected_failure": "subprocess is confined to vanguard/packages/adapters/sandbox/"
     },
     {
+      "test_id": "MF-S7-A-03-001",
+      "control": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/runtime_evaluator_valid"
+      ],
+      "broken": [
+        "python3",
+        "tools/check_boundaries.py",
+        "--root",
+        "test/broken/fixtures/runtime_evaluator_import"
+      ],
+      "expected_failure": "runtime may not reach adapters/evaluators"
+    },
+    {
       "test_id": "MF-KRN-001",
       "control": [
         "python3",

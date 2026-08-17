@@ -59,6 +59,14 @@ SUBPROCESS_ALLOWLIST = {
     "vanguard/packages/adapters/models/env_loader.py",
 }
 
+# S7-A-03 (A-05, LT-4): a component that can construct its own evaluator is a
+# second judge. Evaluator exteriority is a property of the import graph, not of
+# good intentions -- so no path runs from cognition or the runtime into the
+# evaluator adapters, save the composition root's explicit binding table.
+EVALUATOR_FAMILY = "evaluators"
+EVALUATOR_IMPORT_SOURCES = {"agency", "runtime", "governance"}
+EVALUATOR_BINDING_SITE = "vanguard/packages/runtime/root.py"
+
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
     r"[\"']([^\"']+)[\"']"
@@ -257,6 +265,19 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                         f"justified row to SUBPROCESS_ALLOWLIST"
                     )
                     continue
+            if (
+                source_area in EVALUATOR_IMPORT_SOURCES
+                and target_area == "adapters"
+                and target_family == EVALUATOR_FAMILY
+                and rel_source != EVALUATOR_BINDING_SITE
+            ):
+                errors.append(
+                    f"{rel_source}:{line}: {source_area} may not reach adapters/evaluators "
+                    f"({spec!r}); A-05/LT-4 -- a component that can construct its own evaluator "
+                    f"is a second judge. Only {EVALUATOR_BINDING_SITE}'s EVALUATOR_BINDINGS "
+                    f"may name one"
+                )
+                continue
             lowered_spec = spec.lower().replace("_", "-")
             if source_area == "benchmarkings":
                 # Benchmarks are measurement clients, never model adapters.  The

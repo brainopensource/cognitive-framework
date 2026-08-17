@@ -168,6 +168,8 @@ def run_lab_task(
         "deadEnds": [dict(entry) for entry in log.dead_end_details],
         "cacheMissAttribution": [dict(e) for e in log.cache_miss_attribution()],
         "detail": detail,
+        # `C-01`: a refusal that produced no turn is still on the ledger.
+        "terminalRefusal": log.terminal_refusal,
         **selected.to_dict(),
     }
 

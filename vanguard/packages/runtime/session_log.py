@@ -55,9 +55,17 @@ class SessionLogEntry:
 @dataclass(frozen=True, slots=True)
 class SessionLog:
     entries: tuple[SessionLogEntry, ...] = ()
+    #: `C-01`. Why the episode ended when it ended without a turn. `None` on a
+    #: run that produced turns normally. An episode that refused the model's
+    #: first answer used to leave nothing behind at all.
+    terminal_refusal: Mapping[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {"turns": [entry.to_dict() for entry in self.entries]}
+        rendered: dict[str, Any] = {
+            "turns": [entry.to_dict() for entry in self.entries]}
+        if self.terminal_refusal is not None:
+            rendered["terminalRefusal"] = dict(self.terminal_refusal)
+        return rendered
 
     @property
     def dead_end_details(self) -> tuple[Mapping[str, Any], ...]:
@@ -159,6 +167,7 @@ def session_log(events: Iterable[Any]) -> SessionLog:
     entries: list[SessionLogEntry] = []
     turn = 0
     open_entry: dict[str, Any] | None = None
+    refusal: Mapping[str, Any] | None = None
 
     def flush() -> None:
         nonlocal open_entry
@@ -200,5 +209,12 @@ def session_log(events: Iterable[Any]) -> SessionLog:
         if kind == "ContextCompacted" and open_entry is not None:
             open_entry["compacted"] = True
 
+        if kind == "EpisodeCompleted":
+            outcome = str(payload.get("outcome", ""))
+            reason = str(payload.get("detail", "") or "")
+            if outcome and outcome != "resolved":
+                refusal = {"outcome": outcome, "detail": reason,
+                           "afterTurn": len(entries) + (1 if open_entry else 0)}
+
     flush()
-    return SessionLog(entries=tuple(entries))
+    return SessionLog(entries=tuple(entries), terminal_refusal=refusal)

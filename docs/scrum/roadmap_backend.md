@@ -46,11 +46,12 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key. Note prepared; not rotated. |
 | FE-N1 (frontend board) | `[DEPRECATED]` | GAMMA | Ignored for this cut — product is backend harness, not TUI daemon start |
-| Merge / ship | `[TODO] ❌` | GAMMA | v0.4.5-beta **prepared**. Merge `main` only if ALFA/BETA DoD still green + `s20-g-03-release-claims.md` checklist |
+| Merge / ship | `[TODO] ❌` | GAMMA | S21-G-04 **named cause** on live greenfield (`multi_action_proposal`); MOCK `turns>0`. Merge still needs `s20-g-03-release-claims.md` checklist. **Builder, not a win.** |
 | W11-J session log | `[DONE] ✅` | GAMMA | `project_coding_session` + `tools/export_coding_session.py` |
 | W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index`; BETA genes `[DONE]` `005dd95` |
 | W14-J coding LAM/LAR | `[DONE] ✅` | GAMMA | LAM consumes `task_sets.py`; 4/4 present; LAR review only |
 | W20-G v0.4.5 claims | `[DONE] ✅` | GAMMA | `s20-g-03-release-claims.md` — no coding win, no GUI, no lift |
+| S21-G parity / harvest | `[DONE] ✅` | GAMMA | Parity matrix on this file; `s21-g-02-greenfield-zero-turn.md`; `s21-g-03-harvest-sop.md` |
 | PO acceptance | `[DONE] ✅` (honest) | GAMMA | `PO_ACCEPTANCE.md` — live tool-call, Q2, spend, Claude daily-driver still TODO |
 
 ### Waves 11–13 — backend coding harness (no TUI)
@@ -108,6 +109,28 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | S21-B-03 | `[DONE] ✅` | BETA | Tool schemas: required params present; missing path returns typed `not_found` receipt |
 | S21-B-04 | `[DONE] ✅` | BETA | IndexPort non-blocking; read map only if non-empty |
 | S21-B-05 | `[DONE] ✅` | BETA | Fixtures remain RED; DoD passed (reconstructions + adapters + boundaries) |
+
+### Parity matrix (OpenCode / Claude atoms → Vanguard) · S21-G-01
+
+Not a second board. Slot = pack gene, adapter, or port. **Reject** = their loop / MCP / LLM-judge.
+
+| Atom | Who | Vanguard slot | Test / evidence | Status |
+|---|---|---|---|---|
+| Multi-turn tool loop | All | `EpisodeEngine` + `lab_driver` | `test/runtime` S18 tape; live dogfood verbs | `[DONE]` |
+| Read / Grep / Edit / Bash names | Claude, OpenCode | `aliases.json` + `fs.*` / `patch.apply` / `proc.exec` | reconstructions; ACI adapter tests | `[DONE]` |
+| Pack = DNA | OpenCode | `vg-code-default` | `test_product_pack_declares_index_and_skills` | `[DONE]` |
+| AGENTS.md first | OpenCode, Claude | discovery + prompt | `test_workspace_discovery`; S20 prompt | `[DONE]` |
+| Repo map as observation | Aider | IndexPort row; read map **only if non-empty** | S21-B-04; compose `index_component` may be None | `[DONE]` |
+| Skills index + body via read | Claude | `skill` genes + `format_skill_index` | `test_skills_are_load_bearing_not_decorative` | `[DONE]` |
+| File-todo | Claude / OpenCode | `.vanguard/todo.md` via `patch.apply` | pack prompt | `[DONE]` |
+| Compact; brief exempt | Claude, OpenCode | `context_policy` | S20-B-03 | `[DONE]` |
+| Empty-repo **write-first** | OpenCode, Claude, Aider add-file | pack branch: no `src/**` → `patch.apply` first | S21-B-01 `[DONE]` gene; **live still** `instrument_error:multi_action_proposal` | **open on live** |
+| One effect per turn | VG (stricter) | translator | `outcome_labels` `multi_action_proposal` | constraint, not a score |
+| Sealed spawn | Claude/OpenCode Task *idea* | ADR-0067 | `NarrowedChildCannotEscalate` | `[DONE]` |
+| Headless runner | OpenCode, Claude SDK | shim → `lab_driver` | `test_lab_run_shim_computes_nothing` | `[DONE]` |
+| TUI / MCP / LSP | Claude, OpenCode, Kilo | — | — | **reject for v0.4.5** |
+
+Harvest SOP: `docs/scrum/sprints/wave20/evidence/s21-g-03-harvest-sop.md`. Greenfield 0-turn archive: `docs/scrum/sprints/wave20/evidence/s21-g-02-greenfield-zero-turn.md`.
 
 ADR-0067 is **`[DONE]`** (`704a773`), not blocked. Agency guard `8f5f16d` stays. You still rotate the OpenRouter key (`S7-J-04`) before any real-model claim.
 
@@ -459,4 +482,19 @@ LAM reads `runtime/task_sets.py`. MOCK must not wear a live label. Paid OpenRout
 
 Flags: `--pack --task-dir --model mock\|ollama\|openrouter\|deepseek --model-name --interactive\|--benchmark --max-turns --max-attempts --jsonl-out --json`. Default `--model mock`. No daemon exists; none was invented. JSONL is `vg.4` from the store → `python3 tools/export_coding_session.py --jsonl <file>`.
 
-DoD: `test/runtime` 322 OK · `check_boundaries` PASS (226) · TCB 1333/1438. **Tag-ready, not Q2.**
+**S21-G-04 merge gate.** Live greenfield stop is **named** (`instrument_error:multi_action_proposal`), not soup. MOCK greenfield `turns>0` (`test_s21_named_causes`). That **unblocks** merge-from-honesty; it does **not** ship a coding win. Checklist: `s20-g-03-release-claims.md`. Do not compare model tags until greenfield live records a tool-calling verb.
+
+
+### Sprint 21 · ALFA — every zero-turn run names its cause (`101c96d`)
+
+**Greenfield cause found by falsification, not assumption.** Compose succeeds (11 tools, 4 verbs) · `index_component` is `None` · `TASK.md` binds (248 chars) · `AGENTS.md` present · `max_turns` was 4. All six hypotheses false. The cause is **`instrument_error:multi_action_proposal`** — the model batches tool calls into one turn and the translator refuses, because one turn is one effect. The refusal is right; calling it the same word as a missing daemon was not.
+
+**Labelled outcomes.** `instrument_error:<cause>` over eleven known causes (`multi_action_proposal`, `provider_timeout`, `model_tag_absent`, `provider_unreachable`, `provider_key_missing`, `paid_model_refused`, `provider_server_error`, `malformed_proposal`, `undeclared_tool`, `tape_exhausted`, `model_not_invoked`) plus `unclassified` for anything unseen. All stay in the denominator.
+
+**S21-A-02.** MOCK runs **4 turns** on the empty greenfield tree — the loop is not skipped for an empty workspace. Live `turns=0` is **not a driver bug**: `agency/episode/engine.py:235-245` terminates on a failed proposal **before** `_emit_proposal`, so a refused proposal reaches no ledger event. ⚠️ **Ledger-completeness gap for `engine.py`'s owner** (`A-07`) — reported, not edited.
+
+**S21-A-03.** `ollama:llama3.2:3b`, pack unmodified, **measured tool-call rate 4/6** on DOGFOOD-01. Live verbs: `fs.search`, `patch.apply`, `proc.exec`. Test budgets 3 independent runs and fails if none tool-calls; daemon down skips closed.
+
+**Two instrument defects fixed:** duplicate ledger sequences across attempts (each attempt is now its own episode; `reduce_event` was right to refuse `Non-monotonic sequence`), and a completed run reporting `model_not_invoked` (terminal now beats the no-turns proxy).
+
+DoD: `test/runtime` 337 OK · `check_boundaries` PASS (229) · TCB 1333/1438. Evidence: `docs/scrum/sprints/sprint21/evidence/`.

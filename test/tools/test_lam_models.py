@@ -1,4 +1,14 @@
-"""Tests for LAM OpenRouter model band registry."""
+"""Tests for LAM OpenRouter model band registry.
+
+Band vocabulary is `free | medium | high | top` (S7-C). The historical
+`tier1_local / tier2_local / tier3_cloud` names were retired with the band
+rework and are asserted absent so they cannot silently return.
+
+`top` is a *spend* band. It stays empty until the Project Lead names frontier
+ids in `models.json`, and `models_for_band("top")` must refuse while empty —
+that refusal is the budget control, so it is tested as a required behaviour
+rather than worked around.
+"""
 
 from __future__ import annotations
 
@@ -12,22 +22,33 @@ if str(tools_dir) not in sys.path:
 
 from models import load_models, models_for_band
 
+RETIRED_BANDS = ("tier1_local", "tier2_local", "tier3_cloud")
+
 
 class TestLamModels(unittest.TestCase):
     def test_load_models_structure(self) -> None:
         models = load_models()
-        self.assertIn("free", models)
-        self.assertIn("medium", models)
-        self.assertIn("high", models)
-        self.assertIn("top", models)
-        self.assertIn("tier1_local", models)
-        self.assertIn("tier2_local", models)
-        self.assertIn("tier3_cloud", models)
+        for band in ("free", "medium", "high", "top"):
+            self.assertIn(band, models)
+            self.assertIsInstance(models[band], list)
 
-    def test_top_band_returns_frontier_list(self) -> None:
-        top_models = models_for_band("top")
-        self.assertIsInstance(top_models, list)
-        self.assertGreaterEqual(len(top_models), 3)
+    def test_retired_tier_names_are_absent(self) -> None:
+        models = load_models()
+        for band in RETIRED_BANDS:
+            self.assertNotIn(band, models)
+
+    def test_top_band_refuses_while_unnamed(self) -> None:
+        """band=top must fail closed until frontier ids are named by the Project Lead."""
+        models = load_models()
+        if models["top"]:
+            self.assertGreaterEqual(len(models_for_band("top")), 1)
+            return
+        with self.assertRaises(RuntimeError):
+            models_for_band("top")
+
+    def test_unknown_band_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            models_for_band("frontier")
 
     def test_free_band_returns_list(self) -> None:
         free_models = models_for_band("free")

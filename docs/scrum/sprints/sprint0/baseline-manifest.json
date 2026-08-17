@@ -8,12 +8,13 @@
   "branch_protection_status": "unverified",
   "files": {
     "docs/main_v4/09_vanguard_decision_register_v040.md": "sha256:0d6751675fb5eee0ebf2958db558240ba696f62f23602a367645ea738447cae0",
-    "tools/check_boundaries.py": "sha256:8416cb8400fa6656a582049cb5141903cc7c6bfb160d7c6886e7f59950ad99fc",
+    "tools/check_boundaries.py": "sha256:299b5925ef1e78c22822441b6a5281847f9a4fabc4caab1b333ba2bbd9a32941",
     "tools/check_active_mvp_contract.py": "sha256:bdf10a90bfdb98671df2274d3951898693031d65faebfc8347f8488278d198e7",
     "tools/check_pr_requirements.py": "sha256:631f16520255cfbea70956c5f57e3704517a5c7b07da394c418fa1b4f60a6a52",
     "tools/check_schema_archaeology.py": "sha256:c3a2006290da91e0f770fd2877f524563385a64afa471b0b28febe61e7e74a67",
     "tools/check_sprint0_governance.py": "sha256:adf5b3941e80b9fbfd9b63aa559ac77ec644dd9293c71392a36da63037d35c75",
     "tools/run_active_contract_tests.py": "sha256:6283d92b28ab0b75cc8c75466908af512f46ef31bfda59353020ca709a883821",
     "tools/run_broken_tests.py": "sha256:08aeee89104d4d202f6dbf287a1a576af1d770df78676cca6614ee370aa1dba3"
-  }
+  },
+  "seal_note": "Re-sealed at the Sprint 7 close. The 2026-08-16 mid-sprint seal (S7-B-04, 6ed94fe) was invalidated by S7-A-03 (c5ff05f), which rewrote the sealed tools/check_boundaries.py. Rule for S8/S9: the seal is the last task of a sprint, never a mid-sprint row."
 }

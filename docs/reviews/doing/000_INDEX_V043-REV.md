@@ -24,7 +24,7 @@ literature.
 | **008** | [Corrected v0.4.3 Delivery Plan, S7–S10](008_v043_delivery_plan_sprints_7_10_V043-REV.md) | The sprint plan, gates, deferrals with triggers, the stakeholder paragraph | Project Lead, Scrum, Tech Lead |
 | **009** | [Prior Review Reconciliation](009_prior_review_reconciliation_V043-REV.md) | Finding-level verdict on all 13 prior documents; what is FIXED, STILL-TRUE, WRONG, PROMOTE | **Read before actioning any archived review** |
 | **010** | [V5 / Aether Roadmap & the ACI Harvest](010_v5_aether_roadmap_and_aci_harvest_V043-REV.md) | The 16-tree competitor harvest, ACI gifts, prefix discipline, V5-A…V5-M, the 200-year framing | Research Lead, Tech Lead |
-| **011** | [Phase 3 Master Backlog](011_master_backlog_phase3_V043-REV.md) | **The living tracker.** Waves W6–W9 / Sprints 7–10, every task and sub-task with honest status | **Everyone, daily** |
+| **011** | *Removed.* Execution board is `docs/scrum/roadmap_backend.md` (and FE: `docs/scrum/roadmap_frontend.md`). Reviews in this folder stay findings, not a todo list. | — | Daily work: those two roadmaps |
 
 ### Execution artifacts (outside this directory)
 

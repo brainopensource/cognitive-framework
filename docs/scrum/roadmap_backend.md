@@ -1,13 +1,63 @@
 # Backend roadmap
 
 Status: living board  
-Updated: 2026-08-16  
-Branch: `sprints7-8/integration`
+Updated: 2026-08-17  
+Branch: `feat_sprint_special`
 
 **Spec (locked):** `docs/main_v4/` — especially `13_C_gts_mvp_program_and_engineering_plan.md` (plan/rationale, not a second board) and VG-02 / VG-03 / VG-04 / VG-05.  
-**How-to:** `docs/scrum/sprints/sprint07` … `sprint10` (lane kits). Do not copy status into the kits.
+**How-to:** `docs/scrum/sprints/sprint07` … `sprint10` (lane kits). Do not copy status into the kits.  
+**Product harvest:** `features_to_add_v430.md` (atoms from Aider / OpenCode / Claude Code — not a second board).
 
-This file is the only backend backlog. Mark `[DONE] ✅` here when the DoD command passed.
+This file is the only backend backlog. Mark `[DONE] ✅` here when the DoD command passed. `[DEPRECATED]` = scheduling or duplicate row; do not execute. `[BLOCKED]` = design named, not coded.
+
+---
+
+## Now — v0.4.3 coding CLI (who does what)
+
+Goal: one `vg run` harness in the middle of **Aider** (repo map as observation), **OpenCode** (pack + `AGENTS.md` + headless), **Claude Code** (`Read`/`Grep`/`Edit`/`Bash`, `max_turns`, isolated spawn). Greenfield and bugfix are the same command. Not a second agent loop.
+
+| Owner | Prefix | Does | Does not |
+|---|---|---|---|
+| **ALFA** | `[alfa]` | Green `t7` + keep `approval_policy` kind row. **S10-A-01…04** (`invocation.py` domain out, `proc.test` bind/delete, `BlobStorePort`+`IndexPort`, `vg why`). | `kernel/**`, `agency/episode/**`, packs, CLI default, telemetry, ADR-0067 |
+| **BETA** | `[beta]` | Product-default pack + `vg run` default + ACI tool-schema thicken + bind IndexPort when ALFA lands it. P0/P1 in `features_to_add_v430.md`. | `kernel/**`, `engine.py`, `runtime/root.py`, TableWorld/lab rebuild, dogfood-as-DONE without a human |
+| **GAMMA** (CTO+PL+TL+senior) | `[gamma]` | **Everything else still `[TODO]` / `[BLOCKED]` on this file** — Joint, kernel sealed-flag ADR, dogfood *execution*, spend/release text, node suite, daemon J1, Claim wire. See table below. | ALFA’s S10-A files, BETA’s product pack/CLI default, V5 / \(G_C\) / playbooks / MCP *code* |
+
+### Remaining work (this is the live backlog)
+
+| ID | Status | Owner | What |
+|---|---|---|---|
+| S10-A-01 | `[TODO] ❌` | ALFA | Domain out of `invocation.py` |
+| S10-A-02 | `[TODO] ❌` | ALFA | `proc.test` bind or delete |
+| S10-A-03 | `[TODO] ❌` | ALFA | `BlobStorePort` + `IndexPort` (Aider slot) |
+| S10-A-04 | `[TODO] ❌` | ALFA | `vg why <artifact>` load-bearing |
+| P0 / P1 pack+CLI | `[TODO] ❌` | BETA | Product-default pack, headless `vg run`, thicken same verbs — `features_to_add_v430.md` |
+| S8-J-08 / ADR-0067 | `[BLOCKED]` | **GAMMA** | Sealed/no-widen flag on `Scope` via `attenuate()`; then `authorize` membership. Agency guard at `8f5f16d` stays. Four `expectedFailure` in `test/kernel/test_scope_membership.py` |
+| S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key in the dashboard **first**. No history rewrite until then |
+| S8-J-01 | `[TODO] ❌` | GAMMA | VG-04 Claim reader fields + golden vectors; then emit `support_count` / `last_corroborated_at` / `protection_class` |
+| S8-J-03 + Q2 | `[TODO] ❌` | GAMMA | **Execute** DOGFOOD-01..03 (protocol is `[DONE]` as S9-J-01). Interactive, no mid-run hand-patch. LAM cassettes do not count |
+| S8-J-04 | `[TODO] ❌` | GAMMA | Full suite with `node` installed (clear the 14–15 reader errors) |
+| S8-J-05 | `[TODO] ❌` | GAMMA | `doing/` 12 → 8 + record `011` supersession (`49b7628`) |
+| S8-J-06 / S7-J-08 | `[TODO] ❌` | GAMMA | ADR-0066 MCP **rules** (no MCP adapter code) |
+| S8-J-07 / S7-J-06 | `[TODO] ❌` | GAMMA | Promote measurement science into VG-07 |
+| S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation (written sign-off). Until then: MOCK / Ollama / OpenRouter `free` only |
+| S9-J-04 | `[TODO] ❌` | GAMMA | Q3 evidence vs ADR-0064 (dated “why not” is allowed) |
+| S10-J-02 | `[TODO] ❌` | GAMMA | Reverse ADR-0064 only where evidence holds |
+| S10-J-03 | `[TODO] ❌` | GAMMA | Release text = proven claims only |
+| S10-J-04 | `[TODO] ❌` | GAMMA | Evaluate O-01 / O-03 **before** V5 — do not start V5 |
+| FE-N1 (frontend board) | `[TODO] ❌` | GAMMA | Real daemon supervisor so `vg daemon` is not `not_available` — **after** ALFA S10-A; do not collide with BETA’s default-manifest CLI work |
+| Merge / ship | `[TODO] ❌` | GAMMA | `feat_sprint_special` green, receipts, no decorative genes |
+
+### Deprecated (do not execute; left for audit)
+
+| Item | Status | Why |
+|---|---|---|
+| “Sprint 9 opens for Lane C only” / “A and B blocked from S9” | `[DEPRECATED]` | S8-A-02 and spawn are `[DONE]`. S9 coding rows are `[DONE]` |
+| “HARD STOP — no A/A number until S8-A-02” as a coding blocker | `[DEPRECATED]` | A-02 green. Publishing a **lift** still needs S9-J-03 / S9-J-04 |
+| S7-J-06, S7-J-07, S7-J-08 as separate builds | `[DEPRECATED]` duplicates | Use S8-J-07, S8-J-05, S8-J-06. Close the S7 rows when the S8 twin lands |
+| Recreate `011` / `ROADMAP.MD` / `backlog_backend.md` | `[DEPRECATED]` | This file is the only backend board |
+| V5, \(G_C\), playbooks, MCP **code**, optimiser, training | `[DEPRECATED]` for v0.4.3 | “Not this version” below. ADR-0066 text is in-scope; MCP implementation is not |
+| Kernel membership in `policy.py` alone | `[DEPRECATED]` approach | Measured and reverted (`cf97e77`). Needs `attenuation.py` sealed flag |
+| Mock-kernel tests as spawn proof | `[DEPRECATED]` | Real Kernel only (`NarrowedChildCannotEscalate`) |
 
 ---
 
@@ -21,8 +71,9 @@ Build the smallest system that can honestly say whether machine competence accum
 | W6 | **7** | Every effect goes through `Kernel.dispatch` | Q1 restore |
 | W7 | **8** | Parent spawns child; resume from ledger; manifests change behaviour | CLOSED (2026-08-17) |
 | W8 | **9** | A/A floor vs `vg-shell-only`; runner refuses junk | Q2 / Q3 |
-| W9 | **10** | TableWorld + published core line-count | Q4 → v0.4.3 |
-| Later | V5 | After O-01 / O-03 | `docs/reviews/doing/010_…` |
+| W9 | **10** | TableWorld + published core line-count | Q4 (B/C `[DONE]`; A still open) |
+| W10 | **product** | One coding `vg run` (Aider/OpenCode/Claude middle) | ALFA S10-A + BETA P0/P1 + GAMMA Joint/dogfood |
+| Later | V5 | After O-01 / O-03 | `docs/reviews/doing/010_…` — **not this tag** |
 
 **v0.4.3 ships when GTS-13C Ch. 10 is evidenced:** boundary real · three real bugs on the installed path · A/A floor · non-coding env with measured core churn. CI green alone does not ship.
 
@@ -95,9 +146,9 @@ Evidence: `docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md` (539 tests,
 | S7-J-03 | `[DONE] ✅` | ADR-0065 D-01…D-15 binding |
 | S7-J-04 | `[TODO] ❌` | SEC-01. **Blocked on the CTO: rotate in the OpenRouter dashboard first** — engineering cannot and must not do this. Tree is clean (`.env` untracked + gitignored, scan PASS); disclosure is historical: 1 reachable `.env` blob, **21 `refs/original/**`**, 3 remote branches. Rewrite stays gated on rotation + written per-ref sign-off. Detail: `docs/scrum/sprints/sprint08/evidence/s7-j-04-key-rotation.md`. Does not block S8/S9 coding |
 | S7-J-05 | `[DONE] ✅` | `LICENSE` Apache-2.0 on disk |
-| S7-J-06 | `[TODO] ❌` | Promote measurement science into VG-07 |
-| S7-J-07 | `[TODO] ❌` | `doing/` cap 8 (now over) |
-| S7-J-08 | `[TODO] ❌` | ADR-0066 MCP rules **before** MCP code |
+| S7-J-06 | `[DEPRECATED]` → S8-J-07 | Promote measurement science into VG-07 (**do S8-J-07**, then mark this done) |
+| S7-J-07 | `[DEPRECATED]` → S8-J-05 | `doing/` cap 8 (**do S8-J-05**) |
+| S7-J-08 | `[DEPRECATED]` → S8-J-06 | ADR-0066 MCP rules **before** MCP code (**do S8-J-06**) |
 
 ---
 
@@ -165,9 +216,7 @@ Full audit: `docs/scrum/sprints/sprint08/evidence/s8-audit-2026-08-17.md`.
 | S8-B-01a | `[DONE] ✅` | `[DONE] ✅` | Confirmed real: `parent_lease` reaches `Governor.reserve`; F-13 tested. |
 | S8-A-02 | `[DONE] ✅` | `[DONE] ✅` | Segment loop deleted; `grep -c max_segments root.py` → 0. Measured before: `max_turns=4` gave 8 proposals. After: 2→2, 4→4, 8→8, terminal ABANDONED with the exhaustion stated. Re-entry reduces the ledger via `domain/ledger/reducer.py`; `state_digest()` reproduced with the session object deleted. `agency/episode/engine.py` untouched. |
 
-**Sprint 9 opens for Lane C only.** C starts `S9-C-01`→`C-02`→`C-03` now; both blockers are independent of it.
-**C must not publish an A/A floor until S8-A-02 is green** — a floor measured against a 64-turn bound we intend to change is not a floor.
-**A and B are blocked from S9** until their row above is cleared.
+**`[DEPRECATED]` scheduling (2026-08-17):** “Sprint 9 opens for Lane C only” / “A and B blocked from S9”. S8-A-02 and spawn are closed; S9 lanes A/B/C coding are `[DONE]`. Remaining S9 work is Joint (J-03 spend, J-04 Q3).
 
 **Commit discipline:** a lane-prefixed commit must carry the production change it names. Three of this sprint's rows were fixed, verified and recorded in three different commits.
 
@@ -210,19 +259,9 @@ Preserved here because the finding is still load-bearing and its original home w
 
 Sentence: A/A noise floor per task class vs `vg-shell-only`; refuse degenerate designs.
 
-Lane C leads. No published delta. No cloud spend until S9-J-03.
+Lane C coding `[DONE]`. No published **lift** / no cloud spend until S9-J-03.
 
-**OPEN FOR LANE C ONLY (2026-08-17).** C is cleared to code `S9-C-01`, `S9-C-02`, `S9-C-03` now,
-against `vg-shell-only` with `tools/002_LLM_API_MOCK`. Both Sprint 8 blockers are independent of C.
-
-> **HARD STOP — no A/A number until `S8-A-02` is green.** Build the runner and its refusal path;
-> **hold the number.** The real turn bound today is `max_turns 8 × max_segments 8 = 64`, and
-> `S8-A-02` is about to change it. A floor measured against a bound we intend to change is not a
-> floor, and re-measuring afterwards invalidates everything derived from it.
-> Emitting a floor before A-02 is green is a Sprint 9 stop condition, not a scheduling preference.
-
-**Lanes A and B are NOT open for Sprint 9** until `S8-A-02` is green and B's `spawn` choice is
-recorded in writing above.
+**`[DEPRECATED]` (2026-08-17):** “OPEN FOR LANE C ONLY” and the A-02 64-turn hard stop as a *coding* gate. `S8-A-02` is `[DONE]`. The runner exists (`S9-C-03`). A published floor number still waits on spend (S9-J-03) and Q3 write-up (S9-J-04).
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
@@ -253,10 +292,10 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 
 | ID | Status | Lane | Task |
 |---|---|---|---|
-| S10-A-01 | `[TODO] ❌` | A | Domain out of `invocation.py` into manifest rows |
-| S10-A-02 | `[TODO] ❌` | A | `proc.test` bind or delete orphan |
-| S10-A-03 | `[TODO] ❌` | A | `BlobStorePort` + `IndexPort` (fake + real) |
-| S10-A-04 | `[TODO] ❌` | A | `vg why <artifact>` |
+| S10-A-01 | `[TODO] ❌` | A → **ALFA** | Domain out of `invocation.py` into manifest rows |
+| S10-A-02 | `[TODO] ❌` | A → **ALFA** | `proc.test` bind or delete orphan |
+| S10-A-03 | `[TODO] ❌` | A → **ALFA** | `BlobStorePort` + `IndexPort` (fake + real; Aider repo-map slot) |
+| S10-A-04 | `[TODO] ❌` | A → **ALFA** | `vg why <artifact>` |
 | S10-B-01 | `[DONE] ✅` | B | TableWorld (`adapters/environment/tableworld.py`, `vg-table-default` pack, invariant evaluator, abstention on inconsistency) |
 | S10-B-02 | `[DONE] ✅` | B | CI core-change detector (`tools/check_core_changes.py`, C-10 measurement publisher) |
 | S10-B-03 | `[DONE] ✅` | B | `structured_consolidate` + `deadEnds` (`agency/context/compaction.py`) |
@@ -265,9 +304,9 @@ Sentence: non-coding env runs; kernel + episode LOC delta published whatever it 
 | S10-C-02 | `[DONE] ✅` | C | Verifier–deployment gap freeze (`tools/telemetry/gap_freeze.py`) |
 | S10-C-03 | `[DONE] ✅` | C | Gate evidence pack including negatives (`docs/scrum/sprints/sprint10/evidence/s10-gate-evidence-pack.md`) |
 | S10-J-01 | `[DONE] ✅` | J | Four-question review with evidence paths in gate evidence pack |
-| S10-J-02 | `[TODO] ❌` | J | Reverse ADR-0064 only where evidence holds |
-| S10-J-03 | `[TODO] ❌` | J | Release text = proven claims only |
-| S10-J-04 | `[TODO] ❌` | J | Evaluate O-01 / O-03 before V5 |
+| S10-J-02 | `[TODO] ❌` | J → **GAMMA** | Reverse ADR-0064 only where evidence holds |
+| S10-J-03 | `[TODO] ❌` | J → **GAMMA** | Release text = proven claims only |
+| S10-J-04 | `[TODO] ❌` | J → **GAMMA** | Evaluate O-01 / O-03 before V5 |
 
 ---
 

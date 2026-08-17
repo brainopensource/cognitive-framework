@@ -427,25 +427,6 @@ class _SystemClock:
             + f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
 
 
-class _WitnessKernel:
-    """A pass-through that remembers the request behind each dispatch.
-
-    The suspension path returns a token but not the request it suspended, and
-    the approval flow needs the request to bind the descriptor. Recording it
-    here keeps `DispatchResult` from growing a field that only one caller
-    reads, and adds no path: every call still lands on `Kernel.dispatch`.
-    """
-
-    def __init__(self, kernel: Kernel) -> None:
-        self.kernel = kernel
-        self.calls: list[tuple[EffectRequest, Any]] = []
-
-    def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
-        result = self.kernel.dispatch(request, **kwargs)
-        self.calls.append((request, result))
-        return result
-
-
 class _LayeredOperator:
     """Compiles L1–L5 for each turn and hands the bundle to the real model.
 
@@ -581,6 +562,215 @@ def _reservation_for(budget: Mapping[str, int], effects: int) -> Reservation:
     )
 
 
+@dataclass(frozen=True, slots=True)
+class SessionPorts:
+    """Everything a session needs from outside itself.
+
+    Every field is injected, which is the whole point of `S8-A-01`: a session
+    built from fakes runs a turn with no live model, no bubblewrap and no
+    network, so the control plane is testable without the world.
+    """
+
+    model: Any
+    environment: Any
+    clock: Any
+    store: EventStorePort
+    verifier: Any = None
+    approver: Callable[[Any], Any] | None = None
+    approval_key: bytes | None = None
+    interactive: bool = True
+
+
+class _SwappablePolicy:
+    """One policy object whose delegate the session may replace.
+
+    `K-14` binds an approved request to its exact descriptor, which means the
+    policy in force changes once a human has decided. The kernel takes its
+    policy at construction, so the old code built a second `Kernel` to carry
+    the second policy -- and a third for the re-dispatch. Holding the delegate
+    here keeps **one kernel per run** without `kernel/` learning anything about
+    approvals: it still sees a single object satisfying `authorize`.
+    """
+
+    def __init__(self, base: Any) -> None:
+        self.base = base
+        self._current: Any = base
+
+    def bind(self, authorization: Any | None) -> None:
+        self._current = (
+            self.base if authorization is None
+            else DescriptorBoundApprovalPolicy(self.base, authorization)
+        )
+
+    def authorize(self, request: EffectRequest, **kwargs: Any) -> Any:
+        return self._current.authorize(request, **kwargs)
+
+
+class HarnessSession:
+    """Wiring for one run. `run()` owns the lifecycle, not the wiring.
+
+    `execute_harness` was 175 lines performing eleven responsibilities and
+    building three kernels with identical collaborators, because the segment
+    loop was compensating for a missing suspend/resume (`003` A7, `007` D9).
+    Construction happens here, once; `run()` reads it.
+
+    The session is also the kernel the engine sees. It forwards every dispatch
+    to the one real `Kernel` and remembers the request behind each result,
+    because the suspension path returns a token but not the request the
+    approval flow needs to bind. That observation used to live in a separate
+    pass-through wrapper class; holding it on the session removes the wrapper
+    without growing `DispatchResult` a field only one caller reads.
+    """
+
+    def __init__(
+        self,
+        harness: Harness,
+        ports: SessionPorts,
+        task: TaskContext,
+        *,
+        max_segments: int = 8,
+    ) -> None:
+        self.harness = harness
+        self.ports = ports
+        self.task = task
+        self.max_segments = max_segments
+        self.calls: list[tuple[EffectRequest, Any]] = []
+
+        repo = Path(task.repo_path)
+        self.repo = repo
+        self.ledger = LedgerBridge(ports.store, episode_id=task.episode_id)
+
+        self.adapters = {
+            verb: harness.bindings[verb].factory(
+                BindingContext(verb=verb, environment=ports.environment, repo_path=repo))
+            for verb in harness.verbs
+        }
+        self.scope = _scope_for(harness, repo)
+        classifier = StandardClassifier([
+            HeldAuthority(task.principal, frozenset(harness.verbs),
+                          (_resource_for(repo),), max_depth=4)])
+        self.policy = _SwappablePolicy(StandardPolicy(
+            parent_scope=self.scope,
+            mode=Mode.INTERACTIVE if ports.interactive else Mode.BENCHMARK,
+            # Every non-`low` capability the manifest declares is descriptor-
+            # bound to a human. The threshold is one number and the manifest
+            # supplies the risks it applies to.
+            # TODO(S8-B-04): this literal is the last composition value the
+            # manifest does not own. It is replaced by the approval-threshold
+            # manifest component; Lane B lands that, not this sprint.
+            approval_required_above="low",
+            risk_of=harness.risk_of,
+        ))
+
+        # One kernel per run (`S8-A-01` DoD). Everything that used to vary
+        # between the three constructions now varies behind `_SwappablePolicy`.
+        self.kernel = Kernel(
+            adapters=self.adapters, policy=self.policy, classifier=classifier,
+            governor=Governor(harness.budget), issuer=GrantIssuer(),
+            clock=ports.clock, ledger=self.ledger, events=self.ledger,
+            sinks=harness.sinks)
+
+        discovery = WorkspaceDiscovery(repo)
+        discovered_env = discovery.render_environment_text()
+        base_env = _environment_map(ports.environment, harness)
+        env_text = f"{base_env}\n\n{discovered_env}" if discovered_env else base_env
+        compiler = ContextCompiler(
+            system_core=harness.system_core,
+            tool_schemas=harness.tool_schemas,
+            environment=env_text,
+            token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
+        )
+        self.operator = _LayeredOperator(
+            ports.model, compiler, task=task,
+            recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger))
+
+        # Ed25519 verify keys are injected by the operator. The root never mints
+        # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
+        # still *issue* a challenge, but it cannot accept or verify a decision.
+        self.can_verify = ports.approval_key is not None
+        self.flow = ApprovalFlow(
+            ApprovalAuthority(ports.approval_key),
+            # The harness names its own patch verb; `VG-05` writes `fs.patch`
+            # and `vg-code-default` writes `patch.apply`. The manifest wins.
+            patch_verb=harness.diff_verb() or "fs.patch")
+
+    # -- the kernel seam --------------------------------------------------
+
+    def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
+        """Forward to the one kernel, remembering the request behind the result."""
+        result = self.kernel.dispatch(request, **kwargs)
+        self.calls.append((request, result))
+        return result
+
+    # -- the lifecycle ----------------------------------------------------
+
+    def run(self) -> RunResult:
+        """Run the episode, resolve approvals, evaluate from outside."""
+        harness, task, ports = self.harness, self.task, self.ports
+        receipts: list[Receipt] = []
+        authorization = None
+        terminal = RunTermination.ABANDONED
+        detail = ""
+
+        for _ in range(self.max_segments):
+            self.policy.bind(authorization)
+            engine = EpisodeEngine(
+                kernel=self, model=self.operator, clock=ports.clock,
+                events=self.ledger, scope=self.scope, tools=harness.tool_schemas,
+                max_turns=task.max_turns)
+            outcome = engine.run(
+                episode_id=task.episode_id, run_id=task.run_id,
+                principal=task.principal, brief=task.brief,
+                spans=(_operator_span(),),
+                receipt_labeller=lambda turn, dispatch: _admit_turn_result(
+                    self.operator, turn, dispatch))
+            terminal, detail = outcome.terminal, outcome.episode.detail
+            suspended = _suspension(self.calls)
+            _record(receipts, self.operator, self.calls)
+            if suspended is None:
+                break
+            request, result = suspended
+            authorization = _resolve(
+                self.flow, request, result, harness, ports.approver,
+                clock=ports.clock, task=task, can_verify=self.can_verify)
+            if authorization is None or not authorization.approved:
+                break
+            # `K-14`: the approved request re-enters at S1, not at S6, and the
+            # model is not asked to re-propose what a human already approved.
+            self.policy.bind(authorization)
+            self.dispatch(request, requested_scope=self.scope,
+                          reservation=_reservation_for(harness.budget,
+                                                       harness.effect_budget))
+            _record(receipts, self.operator, self.calls, admit_context=True)
+            authorization = None
+
+        verdict = self._evaluate()
+        ports.environment.dispose()
+        return RunResult(
+            harness=harness.harness,
+            composition_digest=harness.composition_digest,
+            terminal=terminal,
+            receipts=tuple(receipts),
+            events=tuple(self.ledger.events),
+            store=ports.store,
+            verdict=verdict,
+            detail=detail,
+        )
+
+    def _evaluate(self) -> Any:
+        """`ICD 3` / `M5`: the verdict comes from outside the episode."""
+        bound = self.ports.verifier
+        if bound is None:
+            bound = _evaluator_from_manifest(self.harness, self.repo)
+        if bound is None:
+            return None
+        evaluation = bound.evaluate(
+            RunRef(run_id=self.task.run_id, episode_id=self.task.episode_id),
+            EvaluationProtocol(
+                name=self.harness.evaluators[0] if self.harness.evaluators else "unnamed"))
+        return evaluation.value if evaluation.ok else None
+
+
 class Runtime:
     """Assembles a harness from a manifest and runs one episode against it."""
 
@@ -703,6 +893,10 @@ class Runtime:
         harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
                               bindings=bindings)
         repo = Path(task_context.repo_path).resolve()
+
+        # Runtime phase. Composition has already succeeded; a host without
+        # bubblewrap is a failure of *this* run, not of the harness, so the
+        # probe lives here and not behind `compose`.
         bwrap = _bwrap_path()
         sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
         sealed_bundle = sealed_dir / "bundle"
@@ -711,129 +905,24 @@ class Runtime:
             RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle, runtime=bwrap))
         environment = SandboxedEnvironmentAdapter(
             worker, repo, environment_id=f"workspace:{repo}")
-        clock = clock or _SystemClock()
-        store = store or SqliteEventStore(":memory:")
-        ledger = LedgerBridge(store, episode_id=task_context.episode_id)
 
         if model is None:
             from ..adapters.models.openrouter import OpenRouterModel
 
             model = OpenRouterModel()
 
-        adapters = {
-            verb: harness.bindings[verb].factory(
-                BindingContext(verb=verb, environment=environment, repo_path=repo))
-            for verb in harness.verbs
-        }
-        scope = _scope_for(harness, repo)
-        classifier = StandardClassifier([
-            HeldAuthority(task_context.principal, frozenset(harness.verbs),
-                          (_resource_for(repo),), max_depth=4)])
-        governor = Governor(harness.budget)
-        issuer = GrantIssuer()
-        base_policy = StandardPolicy(
-            parent_scope=scope,
-            mode=Mode.INTERACTIVE if interactive else Mode.BENCHMARK,
-            # Every non-`low` capability the manifest declares is descriptor-
-            # bound to a human. The threshold is one number and the manifest
-            # supplies the risks it applies to.
-            # TODO(S8-B-04): this literal is the last composition value the
-            # manifest does not own. It is replaced by the approval-threshold
-            # manifest component; Lane B lands that, not this sprint.
-            approval_required_above="low",
-            risk_of=harness.risk_of,
+        ports = SessionPorts(
+            model=model,
+            environment=environment,
+            clock=clock or _SystemClock(),
+            store=store or SqliteEventStore(":memory:"),
+            verifier=verifier,
+            approver=approver,
+            approval_key=approval_key,
+            interactive=interactive,
         )
-
-        discovery = WorkspaceDiscovery(repo)
-        discovered_env = discovery.render_environment_text()
-        base_env = _environment_map(environment, harness)
-        env_text = f"{base_env}\n\n{discovered_env}" if discovered_env else base_env
-
-        compiler = ContextCompiler(
-            system_core=harness.system_core,
-            tool_schemas=harness.tool_schemas,
-            environment=env_text,
-            token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
-        )
-        operator = _LayeredOperator(
-            model, compiler, task=task_context,
-            recorder=CompetencePriorRecorder(clock=clock, events=ledger))
-
-        receipts: list[Receipt] = []
-        authorization = None
-        terminal = RunTermination.ABANDONED
-        detail = ""
-        # Ed25519 verify keys are injected by the operator. The root never mints
-        # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
-        # still *issue* a challenge, but it cannot accept or verify a decision.
-        can_verify = approval_key is not None
-        authority = ApprovalAuthority(approval_key if approval_key is not None else None)
-        # The harness names its own patch verb; `VG-05` writes `fs.patch` and
-        # `vg-code-default` writes `patch.apply`. The manifest wins.
-        flow = ApprovalFlow(authority, patch_verb=harness.diff_verb() or "fs.patch")
-
-        for _ in range(max_segments):
-            policy: Any = base_policy
-            if authorization is not None:
-                policy = DescriptorBoundApprovalPolicy(base_policy, authorization)
-            witness = _WitnessKernel(Kernel(
-                adapters=adapters, policy=policy, classifier=classifier,
-                governor=governor, issuer=issuer, clock=clock, ledger=ledger,
-                events=ledger, sinks=harness.sinks))
-            engine = EpisodeEngine(
-                kernel=witness, model=operator, clock=clock, events=ledger,
-                scope=scope, tools=harness.tool_schemas,
-                max_turns=task_context.max_turns)
-            outcome = engine.run(
-                episode_id=task_context.episode_id, run_id=task_context.run_id,
-                principal=task_context.principal, brief=task_context.brief,
-                spans=(_operator_span(),),
-                receipt_labeller=lambda turn, dispatch: _admit_turn_result(
-                    operator, turn, dispatch))
-            terminal, detail = outcome.terminal, outcome.episode.detail
-            suspended = _suspension(witness)
-            _record(receipts, operator, witness)
-            if suspended is None:
-                break
-            request, result = suspended
-            authorization = _resolve(
-                flow, request, result, harness, approver,
-                clock=clock, task=task_context, can_verify=can_verify)
-            if authorization is None or not authorization.approved:
-                break
-            # `K-14`: the approved request re-enters at S1, not at S6, and the
-            # model is not asked to re-propose what a human already approved.
-            approved = _WitnessKernel(Kernel(
-                adapters=adapters,
-                policy=DescriptorBoundApprovalPolicy(base_policy, authorization),
-                classifier=classifier, governor=governor, issuer=issuer,
-                clock=clock, ledger=ledger, events=ledger, sinks=harness.sinks))
-            approved.dispatch(request, requested_scope=scope,
-                              reservation=_reservation_for(harness.budget, harness.effect_budget))
-            _record(receipts, operator, approved, admit_context=True)
-            authorization = None
-
-        verdict = None
-        bound_verifier = verifier if verifier is not None else _evaluator_from_manifest(
-            harness, repo)
-        if bound_verifier is not None:
-            evaluation = bound_verifier.evaluate(
-                RunRef(run_id=task_context.run_id, episode_id=task_context.episode_id),
-                EvaluationProtocol(name=harness.evaluators[0] if harness.evaluators
-                                   else "unnamed"))
-            verdict = evaluation.value if evaluation.ok else None
-
-        environment.dispose()
-        return RunResult(
-            harness=harness.harness,
-            composition_digest=harness.composition_digest,
-            terminal=terminal,
-            receipts=tuple(receipts),
-            events=tuple(ledger.events),
-            store=store,
-            verdict=verdict,
-            detail=detail,
-        )
+        return HarnessSession(harness, ports, task_context,
+                              max_segments=max_segments).run()
 
     # -- composition internals -------------------------------------------
 
@@ -980,14 +1069,15 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> No
 
 
 def _record(receipts: list[Receipt], operator: _LayeredOperator,
-            witness: _WitnessKernel, *, admit_context: bool = False) -> None:
+            calls: list[tuple[EffectRequest, Any]], *,
+            admit_context: bool = False) -> None:
     """Turn dispatch outcomes into root receipts.
 
     Context admission normally happens at the engine callback so the next
     turn sees the observation. ``admit_context`` remains available for the
     approved dispatch performed between episode segments.
     """
-    for request, result in witness.calls:
+    for request, result in calls:
         if result.failure is not FailurePath.OK or result.outcome is None:
             continue
         outcome_detail = result.detail or getattr(result.outcome, "detail", "")
@@ -1006,11 +1096,11 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
                 source=request.action,
                 text=text,
             )
-    witness.calls.clear()
+    calls.clear()
 
 
-def _suspension(witness: _WitnessKernel) -> tuple[EffectRequest, Any] | None:
-    for request, result in witness.calls:
+def _suspension(calls: list[tuple[EffectRequest, Any]]) -> tuple[EffectRequest, Any] | None:
+    for request, result in calls:
         if result.failure is FailurePath.APPROVAL_SUSPENDED and result.suspension:
             return request, result
     return None

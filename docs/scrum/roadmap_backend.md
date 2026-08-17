@@ -2,7 +2,8 @@
 
 Status: living board  
 Updated: 2026-08-17  
-Branch: `feat_sprint_special`
+Branch: `feat_sprint_special`  
+Product: **v0.4.5-beta** (prepare `main`; merge only after checklist in `docs/scrum/sprints/wave20/evidence/s20-g-03-release-claims.md`)
 
 **Spec (locked):** `docs/main_v4/` — especially `13_C_gts_mvp_program_and_engineering_plan.md` (plan/rationale, not a second board) and VG-02 / VG-03 / VG-04 / VG-05.  
 **How-to:** `docs/scrum/sprints/sprint07` … `sprint10` (lane kits). Do not copy status into the kits.  
@@ -12,7 +13,7 @@ This file is the only backend backlog. Mark `[DONE] ✅` here when the DoD comma
 
 ---
 
-## Now — v0.4.3 coding CLI (who does what)
+## Now — v0.4.5-beta coding harness (who does what)
 
 Goal: one `vg run` harness in the middle of **Aider** (repo map as observation), **OpenCode** (pack + `AGENTS.md` + headless), **Claude Code** (`Read`/`Grep`/`Edit`/`Bash`, `max_turns`, isolated spawn). Greenfield and bugfix are the same command. Not a second agent loop.
 
@@ -45,11 +46,12 @@ Goal: one `vg run` harness in the middle of **Aider** (repo map as observation),
 | S9-J-03 | `[TODO] ❌` | GAMMA / human | Spend authorisation |
 | S7-J-04 | `[TODO] ❌` | **GAMMA / human CTO** | Rotate OpenRouter key. Note prepared; not rotated. |
 | FE-N1 (frontend board) | `[DEPRECATED]` | GAMMA | Ignored for this cut — product is backend harness, not TUI daemon start |
-| Merge / ship | `[TODO] ❌` | GAMMA | `feat_sprint_special` green, receipts, no decorative genes |
-| W11-J session log | `[DONE] ✅` | GAMMA | `project_coding_session` + `tools/export_coding_session.py` (`vg.coding-session.v1`) |
-| W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index` (≤4k). Pack genes still BETA |
-| W14-J coding LAM/LAR | `[DONE] ✅` | GAMMA | `tools/telemetry/coding_{instrument,lam,lar}.py`. Missing dirs stay in denominator. LAR = docs review only. REQ-TRUST-001 |
-| PO acceptance | `[DONE] ✅` (honest) | GAMMA | `docs/scrum/sprints/wave11/PO_ACCEPTANCE.md` — boxes 1,2,5,6,Q2 still TODO |
+| Merge / ship | `[TODO] ❌` | GAMMA | v0.4.5-beta **prepared**. Merge `main` only if ALFA/BETA DoD still green + `s20-g-03-release-claims.md` checklist |
+| W11-J session log | `[DONE] ✅` | GAMMA | `project_coding_session` + `tools/export_coding_session.py` |
+| W12-J skill index | `[DONE] ✅` | GAMMA | `format_skill_index`; BETA genes `[DONE]` `005dd95` |
+| W14-J coding LAM/LAR | `[DONE] ✅` | GAMMA | LAM consumes `task_sets.py`; 4/4 present; LAR review only |
+| W20-G v0.4.5 claims | `[DONE] ✅` | GAMMA | `s20-g-03-release-claims.md` — no coding win, no GUI, no lift |
+| PO acceptance | `[DONE] ✅` (honest) | GAMMA | `PO_ACCEPTANCE.md` — live tool-call, Q2, spend, Claude daily-driver still TODO |
 
 ### Waves 11–13 — backend coding harness (no TUI)
 
@@ -384,38 +386,43 @@ Rejected forever here: second agent loop that grades itself; Atom→Biome classe
 4. **Q4 General?** TableWorld added; published LOC change in `kernel/` + `agency/episode/`.
 
 
-### Wave 11–13 · ALFA status (claimed vs this tree)
+### Wave 11–19 · status on this tree (GAMMA S20-G-01)
 
-GAMMA spot-check 2026-08-17: **`lab/run.py` is still the `{turnCount: 1}` stub** (no `HarnessSession`). `vanguard/packages/runtime/` has no `repair.py`, `dogfood.py`, `session_log.py`, or `skill_index.py`. Treat ALFA shas as **claimed on another worktree** until those files merge here. W11–13 **B** remain TODO (plan only; no `lab/tasks/DOGFOOD-*`).
+ALFA W11–16 files **are** in this checkout (`lab_driver`, `task_sets`, shim `lab/run.py`). BETA four kebab dirs **are** present. Prior “stub / 3 missing / stale tree” text is **void**.
 
-- **W11-A** — `[CLAIMED]` (`954478f`) — not present in this checkout. Do not ship Q2 on this claim.
-- **W12-A** — `[CLAIMED]` (`6774dac`) — not present in this checkout.
-- **W13-A** — `[CLAIMED]` — denominator invariant **re-implemented for measurement** in `tools/telemetry/coding_lam.py` (GAMMA) so missing BETA dirs cannot be dropped even without ALFA's driver.
+| Lane | Shas | Fact |
+|---|---|---|
+| ALFA S17–S19 | `9192be1`, `6344e97`, board `5c2f7ae` | 4/4 declared; MOCK 4 turns `attempts_exhausted`; live no `oracle_green` |
+| BETA W11–13 + W17 | `2a793c4`, `005dd95` | Pack DNA + `lab/tasks/dogfood-01-…` / `greenfield-api-html` |
+| GAMMA W20 | this change | Claims + LAM snapshot; Q2 still TODO |
 
-### Operator one-pager (coding harness backend)
+### Operator one-pager (v0.4.5-beta)
 
 Not a daily-driver Claude. Not a published lift.
 
 ```bash
-# MOCK measurement (CI brain). Missing task dirs stay in the denominator.
-python3 -c "from pathlib import Path; from tools.telemetry.coding_lam import default_workspace_map, run_coding_lam; \
-print(run_coding_lam(default_workspace_map(Path('.')), arm='mock')['workspaceMissingCount'])"
-
-# Ledger projection when an episode JSONL exists
+python3 lab/run.py --pack vg-code-default --task-dir lab/tasks/dogfood-01-multi-turn-file-rollback --model mock
+python3 -m vanguard.packages.runtime.lab_driver --pack vg-code-default --task-dir lab/tasks/greenfield-api-html --model ollama --json
 python3 tools/export_coding_session.py --jsonl path/to/episode.jsonl
-
-# Offline LAR (writes docs, never packs)
-python3 tools/telemetry/coding_lar.py --out docs/scrum/sprints/wave11/evidence/lar_hypotheses.md
 ```
 
-Arms when a backend is actually up: `mock` · `ollama:deepseek-r1` · `openrouter-free` · `deepseek-flash`. MOCK must not wear a live label. Paid OpenRouter is forbidden until S9-J-03. Live why-not: `docs/scrum/sprints/wave11/s9-j-live-models-why-not.md`.
+LAM reads `runtime/task_sets.py`. MOCK must not wear a live label. Paid OpenRouter forbidden until S9-J-03. Claims: `docs/scrum/sprints/wave20/evidence/s20-g-03-release-claims.md`.
 
+### Human leftovers (not this tag)
+
+| ID | Status | What |
+|---|---|---|
+| S7-J-04 | `[TODO]` | Rotate OpenRouter key (CTO) |
+| S9-J-03 | `[TODO]` | Spend authorisation |
+| S8-J-03 / Q2 | `[TODO]` | Live interactive dogfood, no mid-run hand-patch |
+| FE-N1 / GUI | later | Not v0.4.5 |
+| v0.5 | later | ≥1 live tool-calling turn, then Claude-80% atoms |
 
 ### Wave 14–16 · ALFA status
 
 - **W14-A** — `[DONE]` (`2855aca`, `890216b`). `runtime/model_selection.py`: mock default/CI brain; ollama probed **once**, fail-closed `instrument_error:ollama_unavailable`; OpenRouter/DeepSeek free-band only, paid refused even when named (`top: []` until S9-J-03); no fourth HTTP client. **`lab/run.py` was fabricating** `{"status":"completed","turnCount":1}` — driver now composes and runs a real `HarnessSession` from `runtime/lab_driver.py` (`lab/` may import nothing, which is why the stub could only lie). Both modes re-proved under a *proposing* model against the real `StandardPolicy`. Registered the `skills` artifact kind (57 errors, same one-row fix as `approval_policy`).
 - **W15-A** — `[DONE]` (`f22536a`). `runtime/scoring.py` scores arms from the ledger projection only; `rate_text()` never prints a bare rate. Seven anti-cheat gates (host oracle, gold patch, model-as-judge, dropped denominator, MOCK-as-live, oracle-in-prompt, second loop/dispatch), comment-stripped so a rule cannot be satisfied by its own comment, and **proven able to fail** per `A-10`. LAR read-only. Five termination names, budget ≠ attempts.
-- **W16-A** — `[DONE]` (see commit). `runtime/task_sets.py` declares DOGFOOD-01..03 + GREENFIELD-01; **declared not globbed**, so absence is reported rather than shrinking the set. Currently 4 tasks / 3 missing (BETA's dirs not landed) with denominator 4. Live smoke skips closed and is opt-in; Ollama `deepseek-r1` reachable here, nothing paid contacted, **no lift number and no Q2 claim**.
+- **W16-A** — `[DONE]`. Declared set; **S17 retargeted** to BETA kebab paths — 4/4 present (no longer “3 missing”).
 
 
 ### Sprints 17–19 · ALFA status
@@ -423,3 +430,23 @@ Arms when a backend is actually up: `mock` · `ollama:deepseek-r1` · `openroute
 - **S17** — `[DONE]` (`9192be1`). `runtime/task_sets.py` points at BETA's real paths (`lab/tasks/dogfood-0N-…`, `lab/tasks/greenfield-api-html`); protocol ids unchanged; **4 tasks / 0 missing**. `tools/telemetry/coding_lam.py::default_workspace_map` spelled the same paths a second time with the same error and now reads the declared set — one copy of a path, no second denominator.
 - **S18** — `[DONE]` (`9192be1`). `runtime/mock_coding_tape.py` gives MOCK real turns (read → edit → test → finish, filtered to granted verbs, brief from the task's own `TASK.md`). It is a **behaviour script, not a solution** — a working diff would be a gold patch and `oracle_green` from MOCK would be the bug. All four tasks: 4 turns, `attempts_exhausted`, 2 dead ends. Both modes proved end-to-end (BENCHMARK `AuthorizationDenied`, INTERACTIVE `ApprovalRequested`). **Two bugs in my own W11 code found by running it for real:** `session_log` read the event kind from the payload while kernel `Event` carries it as an attribute (empty log on every real run); `--jsonl-out` wrote kernel Events, which the exporter correctly refused as not-`vg.4` — it now exports the store's envelopes.
 - **S19** — `[DONE]` (see commit). Live `ollama:deepseek-r1:14b` on all four. Denominator 4, **nothing resolved**, no lift published, no Q2 claim. The model answers but does not reliably tool-call against this pack. Exposed two instrument defects, both mine: a **fail-open probe** (daemon reachable ≠ tag pulled) and the **wrong tool shape** sent to the endpoint (HTTP 500 → `model_not_invoked`). OpenRouter/DeepSeek: no key, dated skip. Evidence: `docs/scrum/sprints/sprint19/evidence/`.
+
+
+### Sprint 20 · ALFA — v0.4.5 runner freeze (`f049212`)
+
+**Target met.** `ollama:llama3.2:3b` on `vg-code-default`, **pack prompt unmodified**, completes real tool-calling turns. DOGFOOD-01: 4 turns (`fs.search`→completed, `patch.apply`→denied, `fs.search`→completed). Live verbs seen: `fs.search`, `patch.apply`, `proc.exec`. Denials are `denied_ask_fail_closed` — BENCHMARK refusing privileged verbs without a human (`K-17` working). **Nothing resolved, denominator 4, no lift, no Q2.** Evidence: `docs/scrum/sprints/sprint20/evidence/`.
+
+**S20-A-01 causes named, not scored.** `deepseek-r1:14b` does not tool-call — prose with the pack prompt *and* with an explicit "MUST call one tool" nudge, while `llama3.2:3b` and `qwen3.6:27b` tool-call through the same adapter and same pack. Not adapter, not pack. Greenfield's remaining cause is `multiple actions in one proposal are unsupported` — one turn is one effect; a harness constraint, not a model score.
+
+**Instrument defects fixed:** 60s timeout turned a reasoning model's think block into `timed out` while the driver reported `model_not_invoked` (shape, not cause) — local timeout now 300s, and the run's own `detail` wins. Greenfield went 0→1 turn on that alone.
+
+**v0.4.5 entrypoints (frozen).**
+
+| | |
+|---|---|
+| shim | `python3 lab/run.py --pack P --task-dir D [flags]` |
+| driver | `python3 -m vanguard.packages.runtime.lab_driver …` |
+
+Flags: `--pack --task-dir --model mock\|ollama\|openrouter\|deepseek --model-name --interactive\|--benchmark --max-turns --max-attempts --jsonl-out --json`. Default `--model mock`. No daemon exists; none was invented. JSONL is `vg.4` from the store → `python3 tools/export_coding_session.py --jsonl <file>`.
+
+DoD: `test/runtime` 322 OK · `check_boundaries` PASS (226) · TCB 1333/1438. **Tag-ready, not Q2.**

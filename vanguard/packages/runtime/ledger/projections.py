@@ -20,6 +20,7 @@ from ...ports.event_store import EventRange, EventStorePort
 __all__ = [
     "Projection",
     "RunSummaryProjection",
+    "EpisodeDepthProjection",
     "BudgetProjection",
     "AuditProjection",
     "ArtifactRegistryProjection",
@@ -111,6 +112,79 @@ class RunSummaryProjection(Projection):
             "grantsCount": self.grants_count,
             "denialsCount": self.denials_count,
         }
+
+
+class EpisodeDepthProjection(Projection):
+    """Recursion depth derived from `causationId`, with emergent labels.
+
+    S7-A-05 / A-07. Depth is not stored anywhere: it is the length of the
+    causation chain from an episode back to a root, recomputed on read. The
+    biological names are applied here, over an integer, and are never types --
+    nothing may branch on an `Atom` or a `Body` because neither exists as a
+    class.
+
+    An episode whose parent has not been observed has *no* depth. Rooting it at
+    zero would fabricate a fact the ledger does not carry.
+    """
+
+    # Index is the depth. Anything deeper saturates at the last label.
+    _LABELS = ("Atom", "Molecule", "Polymer", "Cell", "Body")
+
+    def __init__(self) -> None:
+        self.parents: dict[str, Optional[str]] = {}
+
+    def apply(self, event: EventEnvelope) -> None:
+        if event.payload.get("kind") != "EpisodeStarted":
+            return
+        episode_id = event.episode_id or event.payload.get("episodeId")
+        if not isinstance(episode_id, str) or not episode_id:
+            return
+        causation = event.payload.get("causationId")
+        self.parents[episode_id] = causation if isinstance(causation, str) and causation else None
+
+    def _walk(self, episode_id: str) -> Optional[int]:
+        """Chain length to a root, or None if the chain leaves the ledger."""
+
+        depth = 0
+        seen: set[str] = set()
+        current = episode_id
+        while True:
+            if current in seen:  # a causation cycle is not a depth
+                return None
+            seen.add(current)
+            if current not in self.parents:
+                return None
+            parent = self.parents[current]
+            if parent is None:
+                return depth
+            depth += 1
+            current = parent
+
+    def depth_of(self, episode_id: str) -> Optional[int]:
+        if episode_id not in self.parents:
+            return None
+        return self._walk(episode_id)
+
+    def label_of(self, episode_id: str) -> Optional[str]:
+        depth = self.depth_of(episode_id)
+        if depth is None:
+            return None
+        return self._LABELS[min(depth, len(self._LABELS) - 1)]
+
+    def to_dict(self) -> dict[str, Any]:
+        episodes: dict[str, Any] = {}
+        unresolved: list[str] = []
+        for episode_id in sorted(self.parents):
+            depth = self.depth_of(episode_id)
+            if depth is None:
+                unresolved.append(episode_id)
+                continue
+            episodes[episode_id] = {
+                "parent": self.parents[episode_id],
+                "depth": depth,
+                "label": self._LABELS[min(depth, len(self._LABELS) - 1)],
+            }
+        return {"episodes": episodes, "unresolved": unresolved}
 
 
 class BudgetProjection(Projection):

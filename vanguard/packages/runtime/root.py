@@ -69,7 +69,6 @@ from ..agency.context import (
 )
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.manifests.loader import ManifestLoader, ManifestLoadError
-from .coordination import EpisodeCoordinator
 from ..domain.artifacts.graph import ArtifactFile, LogicalEdit, Workspace
 from ..domain.artifacts.manifest import (
     FrozenHarness,
@@ -709,19 +708,6 @@ class Runtime:
             model, compiler, task=task_context,
             recorder=CompetencePriorRecorder(clock=clock, events=ledger))
 
-        lam_db = os.environ.get("VANGUARD_LAM_DB", "tools/002_LLM_API_MOCK/lam.sqlite")
-        coordinator = None
-        budget_tokens = int(harness.budget.get("tokens", 64_000) or 64_000)
-        try:
-            coordinator = EpisodeCoordinator(lam_db)
-            coordinator.open_episode(
-                task_id=task_context.brief,
-                budget_tokens=budget_tokens,
-                episode_id=task_context.episode_id,
-            )
-        except Exception:
-            coordinator = None
-
         receipts: list[Receipt] = []
         authorization = None
         terminal = RunTermination.ABANDONED
@@ -785,16 +771,6 @@ class Runtime:
                 EvaluationProtocol(name=harness.evaluators[0] if harness.evaluators
                                    else "unnamed"))
             verdict = evaluation.value if evaluation.ok else None
-
-        if coordinator is not None:
-            try:
-                tokens_used = sum(
-                    int(ctx.get("total_tokens", 0)) if isinstance(ctx, dict) else 0
-                    for ctx in operator.contexts
-                ) or 100
-                coordinator.consume(task_context.episode_id, min(tokens_used, budget_tokens))
-            except Exception:
-                pass
 
         environment.dispose()
         return RunResult(

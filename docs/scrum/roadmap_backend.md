@@ -110,6 +110,16 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | S21-B-04 | `[DONE] ✅` | BETA | IndexPort non-blocking; read map only if non-empty |
 | S21-B-05 | `[DONE] ✅` | BETA | Fixtures remain RED; DoD passed (reconstructions + adapters + boundaries) |
 
+### Sprint 22 — Strict Single-Action Discipline & Greenfield Turn Sequencing
+
+| ID | Status | Lane | Task |
+|---|---|---|---|
+| S22-B-01 | `[DONE] ✅` | BETA | Strict single-action rule in `system-prompt.txt`: exactly ONE tool call per turn, no parallel tool emissions |
+| S22-B-02 | `[DONE] ✅` | BETA | Schema descriptions updated: "Single action; do not emit parallel calls" in `read-tool.json`, `search-tool.json`, `patch-tool.json`, `test-tool.json` |
+| S22-B-03 | `[DONE] ✅` | BETA | `scaffold-python-api-static-html.md` sequenced explicitly across Turn 1 (server.py), Turn 2 (index.html), and Turn 3 (test execution) |
+| S22-B-04 | `[DONE] ✅` | BETA | Harvest SOP documented in `docs/scrum/sprints/wave20/evidence/s21-g-03-harvest-sop.md` |
+| S22-B-05 | `[DONE] ✅` | BETA | DoD: `test.agency.test_reconstructions` green, `check_boundaries.py` pass |
+
 ### Parity matrix (OpenCode / Claude atoms → Vanguard) · S21-G-01
 
 Not a second board. Slot = pack gene, adapter, or port. **Reject** = their loop / MCP / LLM-judge.

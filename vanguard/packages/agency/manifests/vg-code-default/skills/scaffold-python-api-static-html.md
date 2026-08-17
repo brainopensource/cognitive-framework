@@ -1,7 +1,7 @@
 # Skill: Scaffold Python API and Static HTML
-Concrete file layout to create for a Python HTTP API + Static HTML task:
+Perform one action per turn to avoid multi-action proposal rejection:
 
-1. Create `app/server.py` with standard library `http.server`:
+- **Turn 1**: Write `app/server.py` via `Edit` (patch.apply with content):
 ```python
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
@@ -17,7 +17,7 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
 ```
 
-2. Create `static/index.html`:
+- **Turn 2**: Write `static/index.html` via `Edit` (patch.apply with content):
 ```html
 <!DOCTYPE html>
 <html>
@@ -26,7 +26,7 @@ class Handler(SimpleHTTPRequestHandler):
 </html>
 ```
 
-3. Run verification tests:
+- **Turn 3**: Run tests via `Bash` (proc.exec):
 ```bash
 python3 -m unittest test_app.py
 ```

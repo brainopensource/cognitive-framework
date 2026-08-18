@@ -1,0 +1,471 @@
+{
+  "schema_version": "gts.active-mvp-contract.v1",
+  "status": "closure-in-progress",
+  "baseline_date": "2026-08-16",
+  "authority": "This artifact is the only merge-gating requirement-to-evidence map. GTS-13C is sequencing and rationale only.",
+  "scope": "Thin contract restored at the Sprint 7 close. Commit 0a9ac8b deleted the original at docs/agile/sprint0/ while three CI gates still referenced it. A row appears here only if its registered command was observed passing on the close runner; rows whose command needs an absent 'node' are carried as open rather than dropped or claimed. Evidence: docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md",
+  "owner_identities": {
+    "acting-tech-lead": "Repository principal rocha, acting as Tech Lead for this Sprint 0 setup.",
+    "acting-senior-developer": "Repository principal rocha, acting as Senior Developer for this Sprint 0 setup."
+  },
+  "merged_components": [
+    "agency/episode",
+    "docs/governance",
+    "event-ledger",
+    "kernel",
+    "ports/event-store",
+    "runtime/governance",
+    "runtime/trust-spine",
+    "tools/ci"
+  ],
+  "deferred_activation": [
+    {
+      "source": "The 34 Sprints 0-6 rows present in the pre-0a9ac8b contract and not carried forward here",
+      "reason": "Their registered commands were not re-observed during the Sprint 7 close, so carrying their prior status would restate an unverified claim. Subtraction sprint rules forbid that.",
+      "activation_gate": "Tech Lead contract amendment; a row reactivates only with its command observed green and a SHA-bound receipt. Reactivation is scheduled as S8-J-08."
+    }
+  ],
+  "test_registry": [
+    {
+      "test_id": "TEST-ARCH-001",
+      "command": [
+        "python3",
+        "tools/check_boundaries.py"
+      ]
+    },
+    {
+      "test_id": "TEST-ARCH-003",
+      "command": [
+        "python3",
+        "tools/check_boundaries.py"
+      ]
+    },
+    {
+      "test_id": "TEST-ARCH-004",
+      "command": [
+        "python3",
+        "tools/check_boundaries.py"
+      ]
+    },
+    {
+      "test_id": "TEST-ARCH-005",
+      "command": [
+        "python3",
+        "tools/check_boundaries.py"
+      ]
+    },
+    {
+      "test_id": "TEST-BROKEN-001",
+      "command": [
+        "python3",
+        "tools/run_broken_tests.py"
+      ]
+    },
+    {
+      "test_id": "TEST-KERNEL-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.kernel.test_attenuation",
+        "test.kernel.test_dispatch",
+        "test.kernel.test_provenance"
+      ]
+    },
+    {
+      "test_id": "TEST-KERNEL-003",
+      "command": [
+        "python3",
+        "tools/check_tcb_budget.py"
+      ]
+    },
+    {
+      "test_id": "TEST-GOV-001",
+      "command": [
+        "python3",
+        "tools/check_sprint0_governance.py"
+      ]
+    },
+    {
+      "test_id": "TEST-CONTRACT-001",
+      "command": [
+        "python3",
+        "tools/check_active_mvp_contract.py"
+      ]
+    },
+    {
+      "test_id": "TEST-LEDGER-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.contracts.t3_ledger"
+      ]
+    },
+    {
+      "test_id": "TEST-PORT-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.contracts.test_event_store_port"
+      ]
+    },
+    {
+      "test_id": "TEST-EXEC-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "test/agency"
+      ]
+    },
+    {
+      "test_id": "TEST-EXEC-002",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "test/runtime"
+      ]
+    },
+    {
+      "test_id": "TEST-TRUST-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.trust.test_spine"
+      ]
+    },
+    {
+      "test_id": "TEST-SCHEMA-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.contracts.test_t1"
+      ]
+    },
+    {
+      "test_id": "TEST-CONF-001",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.contracts.t1_wire_contracts"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "req_id": "REQ-ARCH-001",
+      "source": "GTS-13C T10.1; VG-03 LT-1..LT-6; ADR-0050",
+      "statement": "Every source import follows the domain <- ports <- kernel <- agency <- runtime -> adapters dependency lattice and the source graph is acyclic.",
+      "rationale": "A mechanically enforced lattice prevents authority inversion and architectural drift.",
+      "component": "tools/ci",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "architecture",
+      "test_id": "TEST-ARCH-001",
+      "acceptance_evidence": "python3 tools/check_boundaries.py exits 0 for the repository and non-zero for forbidden-direction and cycle fixtures.",
+      "margin": "zero forbidden edges and zero cycles",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-ARCH-003",
+      "source": "GTS-13C T10.1/T10.4; VG-03 LT-4; ADR-0050",
+      "statement": "runtime/governance imports only domain, ports and kernel and has no agency, model or adapter dependency.",
+      "rationale": "Finite approvals and releases must remain deterministic, restartable and exterior to cognition.",
+      "component": "tools/ci",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-ARCH-001"
+      ],
+      "verification_family": "architecture",
+      "test_id": "TEST-ARCH-003",
+      "acceptance_evidence": "Boundary checker reports no prohibited governance edge.",
+      "margin": "zero prohibited imports",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-ARCH-004",
+      "source": "GTS-13C T10.4; VG-05 AT-02/AT-06",
+      "statement": "agency has no adapter or evaluator dependency and no source module outside runtime imports a concrete adapter.",
+      "rationale": "Cognition must not acquire a second effect path or construct its own judge.",
+      "component": "tools/ci",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-ARCH-001"
+      ],
+      "verification_family": "architecture",
+      "test_id": "TEST-ARCH-004",
+      "acceptance_evidence": "Boundary checker reports no prohibited agency or adapter edge.",
+      "margin": "zero prohibited imports",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-ARCH-005",
+      "source": "ICD \u00a71/\u00a72; GTS-13C T10.1; approved CLI architecture \u00a71",
+      "statement": "vanguard/packages contains exactly the six approved core packages, unknown package directories fail CI, and clients are outside that lattice with imports limited to domain and the runtime client surface.",
+      "rationale": "Silently skipping an unknown package disables the boundary gate for precisely the code most likely to drift.",
+      "component": "tools/ci",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-ARCH-001"
+      ],
+      "verification_family": "must-fail",
+      "test_id": "TEST-ARCH-005",
+      "acceptance_evidence": "Boundary CI scans clients and rejects MF-S0-009's seventh-package fixture while the repository passes with only the approved six package directories.",
+      "margin": "exactly six core package names and zero prohibited client imports",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-TEST-001",
+      "source": "GTS-13C T10.3; VG-01 M6",
+      "statement": "Every registered must-fail control has a passing reference command and a deliberately broken counterpart that fails for the declared reason.",
+      "rationale": "A gate never observed rejecting a defect is not established as a control.",
+      "component": "tools/ci",
+      "owner": "acting-senior-developer",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-ARCH-001"
+      ],
+      "verification_family": "must-fail",
+      "test_id": "TEST-BROKEN-001",
+      "acceptance_evidence": "python3 tools/run_broken_tests.py emits a receipt for every manifest case and exits 0 only for the expected pass/fail pair.",
+      "margin": "100% registered broken counterparts observed failing",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-KRN-001",
+      "source": "GTS-13C T2.1-T2.5; VG-05 K-18..K-33",
+      "statement": "The kernel distinguishes principals, binds grants to exact descriptors, permits attenuation only by narrowing, emits explicit alertable denials, and conserves budget lease trees including overruns.",
+      "rationale": "Authority and budget defects are silent privilege escalation unless checked as algebraic and point-of-effect invariants.",
+      "component": "kernel",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "property",
+      "test_id": "TEST-KERNEL-001",
+      "acceptance_evidence": "The kernel suite covers attenuation monotonicity, descriptor substitution, replay/expiry/forgery, provenance accumulation, denial alerts, and budget conservation/overrun debit.",
+      "margin": "zero widening, unbound grants, silent denials, or unaccounted budget",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-KRN-003",
+      "source": "GTS-13C T2.10; ADR-0054; verification plan \u00a76",
+      "statement": "Policy-kernel source size is measured against a reviewed baseline, growth raises an alarm, and each kernel design change carries a reconstructable ADR.",
+      "rationale": "An unmeasured TCB expands until auditability is only an assertion.",
+      "component": "kernel",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "architecture",
+      "test_id": "TEST-KERNEL-003",
+      "acceptance_evidence": "check_tcb_budget emits the per-file 1,307-line baseline receipt, MF-KRN-011 proves the alarm fires, and ADR-0054 records the dispatch decision and reversal condition.",
+      "margin": "review alarm at 131 lines above the measured baseline; growth is reviewed, not silently prohibited",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-GOV-001",
+      "source": "Sprint 0 mandate Chapters 1-2; ADR-0045/0046",
+      "statement": "The repository declares one authority chain, keeps the Decision Record append-only, and states that GTS-13C cannot decide contracts or gate merges.",
+      "rationale": "Duplicate normative ownership makes conflicts irreconstructable.",
+      "component": "docs/governance",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "architecture",
+      "test_id": "TEST-GOV-001",
+      "acceptance_evidence": "Sprint 0 governance audit verifies artifact presence, authority text and append-only Decision Record declaration.",
+      "margin": "one owner per contract",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-GOV-002",
+      "source": "Sprint 0 mandate Chapter 4 Gate A; ADR-0052",
+      "statement": "Every active contract row has a stable requirement ID, component, requirement owner, test owner, test ID, dependencies and expected acceptance evidence.",
+      "rationale": "Baseline coverage measures accountable assignment before implementation exists.",
+      "component": "tools/ci",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-GOV-001"
+      ],
+      "verification_family": "conformance",
+      "test_id": "TEST-CONTRACT-001",
+      "acceptance_evidence": "Contract validator reports baseline_assignment_coverage=100% with unique req_id/test_id values.",
+      "margin": "exactly 100%",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-LEDGER-001",
+      "source": "GTS-13C T3.1-T3.5; VG-04 CT-40..CT-50",
+      "statement": "The event ledger provides transactional monotonic append, a pure associative reducer, digest-identical reconstruction, rebuildable projections, and correlation-preserving JSONL export with redaction.",
+      "rationale": "The ledger is the source of reconstruction truth; caches and exports must never become alternate histories.",
+      "component": "event-ledger",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-PORT-001"
+      ],
+      "verification_family": "property",
+      "test_id": "TEST-LEDGER-001",
+      "acceptance_evidence": "T3 contract and randomized property suites prove atomic rollback, monotonic sequence, batch associativity, state digest replay, projection rebuild, and correlation-preserving export/import.",
+      "margin": "zero replay digest divergence and zero partially committed batches",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-PORT-001",
+      "source": "ICD \u00a74/\u00a77(6); VG-01 \u00a72 Liskov; GTS-13C T3.1",
+      "statement": "The active EventStorePort has one shared behavioural contract suite, a deterministic in-memory fake, and a transactional SQLite/WAL real adapter with typed failure substitution.",
+      "rationale": "An interface or fake alone does not establish that runtime implementations are substitutable on success and failure paths.",
+      "component": "ports/event-store",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "conformance",
+      "test_id": "TEST-PORT-001",
+      "acceptance_evidence": "test_event_store_port executes the same append/read/digest/conflict contract against InMemoryEventStore and SqliteEventStore.",
+      "margin": "zero behavioural differences in the shared contract",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-EXEC-001",
+      "source": "GTS-13C T4.1-T4.5; VG-03 \u00a76; ADR-0050; ADR-0055",
+      "statement": "The episode loop reduces observe-propose-authorise-effect-receipt on a cassette or fake model, records every effect through Kernel.dispatch, terminates without requesting evaluation, and forbids cognitive identifiers in agency/.",
+      "rationale": "A first deterministic slice proves the loop against the existing kernel before a real provider can mask missing control flow.",
+      "component": "agency/episode",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-LEDGER-001"
+      ],
+      "verification_family": "property",
+      "test_id": "TEST-EXEC-001",
+      "acceptance_evidence": "Cassette-driven episode reaches a terminal run state; no evaluator call; agency identifier lint clean. 2026-08-15: test/agency 23/23 pass.",
+      "margin": "zero self-evaluation paths and zero kernel bypasses",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-EXEC-002",
+      "source": "GTS-13C T4.8; ADR-0050; ADR-0055",
+      "statement": "A ProcessInstance advances only through declared transitions, blocks on pending approvals, and after interruption resumes to the same state from the ledger without executing an episode.",
+      "rationale": "Privileged git apply in beta needs a human-readable finite process, not an agent loop.",
+      "component": "runtime/governance",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "property",
+      "test_id": "TEST-EXEC-002",
+      "acceptance_evidence": "Restart-resume property: interrupted instance reconstitutes identical currentState without ModelPort. 2026-08-15: test/runtime 3/3 pass.",
+      "margin": "zero governance transitions requiring a model",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-TRUST-001",
+      "source": "ADR-0048; GTS-13C T4.1-T4.7; VG-08 Increment A",
+      "statement": "A scripted trajectory with no model dependency proves denial, attenuation, budget exhaustion, event atomicity, kill recovery, secret non-disclosure, and that spike/ and slice/ are absent after the S4 exit.",
+      "rationale": "Model behaviour must not become a prerequisite of kernel verification.",
+      "component": "runtime/trust-spine",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-EXEC-001",
+        "REQ-EXEC-002"
+      ],
+      "verification_family": "adversarial",
+      "test_id": "TEST-TRUST-001",
+      "acceptance_evidence": "test.trust.test_spine passes with OPENROUTER_API_KEY unset; MF-S4-001 absence check green. 2026-08-15: test_spine 22/22 pass.",
+      "margin": "zero model imports on the gate path",
+      "status": "covered",
+      "justification": "",
+      "compensating_assurance": "",
+      "evidence_receipt": "docs/scrum/sprints/sprint07/evidence/s7-close-receipt.md"
+    },
+    {
+      "req_id": "REQ-SCHEMA-001",
+      "source": "GTS-13C T1.1; VG-04 CT-04/CT-09 and D-1..D-6",
+      "statement": "Canonical bytes use RFC 8785/JCS without local variation and at least 40 golden input-to-canonical-to-sha256 triples agree across readers.",
+      "rationale": "Descriptor, artifact and event identity must remain byte-stable across languages.",
+      "component": "schemas/v4-v0.1",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [],
+      "verification_family": "conformance",
+      "test_id": "TEST-SCHEMA-001",
+      "acceptance_evidence": "Forty or more shared golden triples pass in both first-lock readers with identical canonical bytes and digests.",
+      "margin": "zero cross-reader mismatches",
+      "status": "open",
+      "justification": "",
+      "compensating_assurance": ""
+    },
+    {
+      "req_id": "REQ-CONF-001",
+      "source": "GTS-13C T1.13-T1.15; VG-04 \u00a70/\u00a714",
+      "statement": "Wire schemas produce strict writer profiles, forward-compatible reader profiles, dual-language TypeScript/Python agreement on shared golden vectors, and surviving readers under minor migration bumps.",
+      "rationale": "Dual-language reader conformance is the only defense against silent wire format drift across independent consumers.",
+      "component": "schemas/conformance",
+      "owner": "acting-tech-lead",
+      "test_owner": "acting-senior-developer",
+      "dependencies": [
+        "REQ-SCHEMA-001"
+      ],
+      "verification_family": "conformance",
+      "test_id": "TEST-CONF-001",
+      "acceptance_evidence": "Both TypeScript and Python readers agree on 100% of golden vector fixtures and survive forward-compatibility minor bumps.",
+      "margin": "zero vector disagreements and zero unpreserved unknown fields in readers",
+      "status": "open",
+      "justification": "",
+      "compensating_assurance": ""
+    }
+  ]
+}

@@ -141,6 +141,7 @@ def run_lab_task(
     # `labDepartures` is what stops an assisted run being read as an
     # unattended one.
     departures: list[str] = []
+    grant = None
     if not isolate:
         # `S050-C-02`: mutating the caller's own workspace is a labelled lab
         # departure for the same reason `--approve-writes` is one -- a run
@@ -149,7 +150,24 @@ def run_lab_task(
         departures.append("in_place")
     approver = None
     approval_key = None
-    if approve_writes:
+    if interactive and not isolate:
+        # `S060-G-01` / `TSK-HAR-002`: INTERACTIVE `--in-place` mints a bounded
+        # AutonomousGrant for the task workspace. BENCHMARK mode must not mint.
+        from .autonomous_grant import create_autonomous_grant
+        from .governance.approvals import OperatorSigner
+
+        grant_signer_key = b"vanguard-autonomous-operator-seed-key"
+        grant = create_autonomous_grant(
+            task_path,
+            allowed_verbs=tuple(harness_preview.verbs),
+            max_turns=max_turns,
+            max_attempts=max_attempts,
+            seed_key=grant_signer_key,
+        )
+        signer = OperatorSigner(grant_signer_key)
+        approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
+        approval_key = signer.public_bytes
+    elif approve_writes:
         from .governance.approvals import OperatorSigner
 
         signer = OperatorSigner(b"vanguard-lab-operator-key")
@@ -240,6 +258,7 @@ def run_lab_task(
         "labDepartures": departures,
         # `C-01`: a refusal that produced no turn is still on the ledger.
         "terminalRefusal": log.terminal_refusal,
+        "grantId": grant.grant_id if grant is not None else None,
         **selected.to_dict(),
     }
     # A benchmark may launch hundreds of sessions.  The isolated workspace and

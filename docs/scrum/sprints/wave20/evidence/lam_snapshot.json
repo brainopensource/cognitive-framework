@@ -1,0 +1,62 @@
+{
+  "schema": "vg.coding-instrument.v1",
+  "recordedAt": "2026-08-17",
+  "arm": "mock",
+  "modelPort": "mock",
+  "q2": false,
+  "publishedLift": null,
+  "note": "Path snapshot on this checkout. No driver sessions bound here, so rows are driver_not_bound while dirs exist — not oracle_green. ALFA MOCK/live scores are cited in lam_snapshot.md, not invented as greens.",
+  "family": "vg-code-default",
+  "denominator": 4,
+  "workspaceMissingCount": 0,
+  "oracleGreenCount": 0,
+  "passRateNumerator": 0,
+  "passRateDenominator": 4,
+  "tasks": [
+    {
+      "taskId": "DOGFOOD-01",
+      "workspace": "lab/tasks/dogfood-01-multi-turn-file-rollback",
+      "present": true,
+      "termination": "inconclusive:driver_not_bound",
+      "oracle_green": false,
+      "inDenominator": true
+    },
+    {
+      "taskId": "DOGFOOD-02",
+      "workspace": "lab/tasks/dogfood-02-subprocess-timeout-censoring",
+      "present": true,
+      "termination": "inconclusive:driver_not_bound",
+      "oracle_green": false,
+      "inDenominator": true
+    },
+    {
+      "taskId": "DOGFOOD-03",
+      "workspace": "lab/tasks/dogfood-03-manifest-alias-shadowing",
+      "present": true,
+      "termination": "inconclusive:driver_not_bound",
+      "oracle_green": false,
+      "inDenominator": true
+    },
+    {
+      "taskId": "GREENFIELD-API-HTML",
+      "workspace": "lab/tasks/greenfield-api-html",
+      "present": true,
+      "termination": "inconclusive:driver_not_bound",
+      "oracle_green": false,
+      "inDenominator": true
+    }
+  ],
+  "alfaCitedMock": {
+    "sha": "9192be1",
+    "termination": "attempts_exhausted",
+    "turns": 4,
+    "oracle_green": false
+  },
+  "alfaCitedOllama": {
+    "sha": "6344e97",
+    "dogfood": "attempts_exhausted",
+    "greenfield": "instrument_error_then_probe_fix",
+    "oracle_green": false,
+    "liveToolCallingTurn": false
+  }
+}

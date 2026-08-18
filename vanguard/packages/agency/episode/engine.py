@@ -338,6 +338,13 @@ class EpisodeEngine:
             # Generic over the action set: no verb is named, so `ADR-0060`
             # holds and adding a domain is still zero lines in this file.
             if self._attenuated and proposal.action not in self._scope.actions:
+                # `TSK-CORE-004`: this refuse has no kernel dispatch behind
+                # it (`self._kernel.dispatch` is never called), so unlike the
+                # F-09/F-10 denials the kernel records for its own path,
+                # nothing durable existed for this one -- only the local
+                # `Turn`. Append `AuthorizationDenied` so the ledger carries
+                # it too, not only in-memory episode state (`A-07`).
+                self._emit_scope_escalation_denied(episode, proposal)
                 turn = Turn(
                     index=episode.turn_count,
                     state_digest=episode.state_digest(),
@@ -441,6 +448,33 @@ class EpisodeEngine:
                 "detail": detail,
             },
         ))
+
+    def _emit_scope_escalation_denied(self, episode: Episode, proposal: Proposal) -> None:
+        """`AuthorizationDenied` for the engine-side sealed-scope refuse.
+
+        Distinct writer from the kernel's own `F-09`/`F-10` denials -- this
+        fires before `Kernel.dispatch` is ever called, so it is the only
+        durable record a scope-escalating child proposal gets (`TSK-CORE-004`,
+        `A-07`).
+        """
+        event = Event(
+            kind="AuthorizationDenied",
+            reason="scope_escalation",
+            at=self._clock.now(),
+            run_id=episode.run_id,
+            principal=episode.principal,
+            payload={
+                "episodeId": episode.episode_id,
+                "turn": episode.turn_count,
+                "action": proposal.action,
+                "proposalDescriptor": proposal.descriptor,
+            },
+        )
+        try:
+            self._events.emit(event)
+        except Exception:
+            # `F-25`: emission failure never fails the work it describes.
+            pass
 
     def _emit_proposal(self, episode: Episode, proposal: Proposal) -> None:
         """`ProposalProduced` — the one event the loop appends itself.

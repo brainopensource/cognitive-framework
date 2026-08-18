@@ -55,7 +55,7 @@ Vanguard conceptualizes software architecture using a **Biological Hierarchy of 
 | **4. Functional Proteins** | Folded Enzymes & Molecular Motors (Folded polymers with active chemical catalytic function) | `agency/context/compiler.py`, `adapters/models/invocation.py`: L1–L5 Context Compactor, byte-stable system prompts, `ProposalTranslator`. | **Cognitive Pruning & Efficiency** |
 | **5. Genes (DNA / RNA)** | Nucleic Acid Sequence Manuals (Instructions dictating protein assembly) | `agency/manifests/`: Pure-data JSON Manifests (`vg-code-claude-shaped`, `vg-code-opencode-shaped`), `AGENTS.md` / `CLAUDE.md` context discovery. | **Declarative Harness Alignment** |
 | **6. Organelles** | Mitochondria, Ribosomes (Membrane-bound functional cellular machinery) | `adapters/evaluators/daemon.py`: Out-of-process signed Evaluator Daemon (UID `10002`) running sealed double probes. | **Un-gameable Verification** |
-| **7. Cells** | Single-cell Organisms (Self-contained, bounded factory operating continuously under DNA instructions) | `runtime/root.py`, `runtime/coordination.py`: Autonomous Agent Workspace runtime executing episodes end-to-end. | **Autonomous Problem Solving** |
+| **7. Cells** | Single-cell Organisms (Self-contained, bounded factory operating continuously under DNA instructions) | `runtime/root.py`, `runtime/coding_coordinator.py`: Autonomous Agent Workspace runtime executing episodes end-to-end. | **Autonomous Problem Solving** |
 | **8. Organs & Systems** | Tissues, Muscular & Nervous Systems (Coordinated specialized cell groups) | `lab/`: Paired Measurement Laboratory (`lab harness bench`), McNemar A/A floor tracking against undeletable `vg-shell-only`. | **Empirical Benchmark Laboratory** |
 | **9. Entity / AGI Swarm** | Conscious Macro-Organism (Harmonious coordination of trillions of specialized nanomachines) | `runtime/governance/`: Multi-Agent Competence Distillation (`O-01`), Cross-Agent Delegation, and Heterogeneous Swarm Orchestration. | **Emergent Machine AGI** |
 
@@ -207,7 +207,7 @@ Aether-D-System/
             │   ├── isolated.py   # Isolated process test runner for local evaluations
             │   └── signing.py    # Ed25519 payload signing and cryptographic verifier attestations
             ├── stores/           # Storage implementation backends
-            │   ├── sqlite_event.py # SQLite-backed event store for persistent episode logs
+            │   ├── event_store.py  # SQLite-backed event store for persistent episode logs
             │   └── fs_blob.py    # Filesystem-backed binary artifact store
             └── environment/      # Concrete host environment hooks and workspace initialization
 ```

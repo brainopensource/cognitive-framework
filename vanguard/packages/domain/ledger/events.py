@@ -74,8 +74,10 @@ EVENT_KINDS = frozenset({
     "EffectPreviewed",
     "EffectStarted",
     "EffectCompleted",
+    "EffectRejected",
     "EffectReconciled",
     "ConflictDetected",
+    "KernelAlarm",
     # Evidence
     "EvaluationRequested",
     "EvidenceClaimProduced",

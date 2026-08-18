@@ -1,0 +1,1 @@
+tools/run_v0450_greenfield_campaign.py --arms adaptive --trials 1

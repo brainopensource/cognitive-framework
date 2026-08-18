@@ -53,7 +53,9 @@ from vanguard.packages.runtime.root import (
     TaskContext,
     _admit_turn_result,
     _environment_effector,
+    _operator_span,
     _sandbox_effector,
+    _span_for,
 )
 from vanguard.packages.kernel import Trust
 
@@ -230,6 +232,38 @@ class AdmitTurnResult(unittest.TestCase):
         self.assertIsNotNone(span)
         self.assertEqual(span.trust, Trust.UNTRUSTED_EXTERNAL)
         self.assertNotEqual(span.trust, Trust.OPERATOR)
+
+
+class SourceClassTrust(unittest.TestCase):
+    """`TSK-CORE-003`/`K-31`: trust is declared per source class, not minted
+    at the call site. `_span_for` is the one place that constructs a `Span`,
+    and `Trust.OPERATOR` appears in this module only inside its table."""
+
+    def test_operator_span_is_operator_trust_by_declared_source_class(self) -> None:
+        span = _operator_span()
+
+        self.assertEqual(span.source_class, "operator_brief")
+        self.assertEqual(span.trust, Trust.OPERATOR)
+
+    def test_no_call_site_literal_mints_operator_trust(self) -> None:
+        import inspect
+
+        import vanguard.packages.runtime.root as root_module
+
+        source = inspect.getsource(root_module)
+        # The only live (non-comment) source line naming `Trust.OPERATOR` is
+        # the source-class table's own declaration; every call site goes
+        # through `_span_for` by source-class string instead.
+        occurrences = [
+            line for line in source.splitlines()
+            if "Trust.OPERATOR" in line and not line.lstrip().startswith("#")
+        ]
+        self.assertEqual(len(occurrences), 1, occurrences)
+        self.assertIn("_SOURCE_CLASS_TRUST", source)
+
+    def test_an_unknown_source_class_is_refused_not_silently_operator(self) -> None:
+        with self.assertRaises(KeyError):
+            _span_for("x", "not_a_declared_source_class")
 
 
 class Composition(unittest.TestCase):
@@ -425,13 +459,21 @@ class DogfoodGate(unittest.TestCase):
 
     # -- claim 6: it is all on the ledger, prior first ------------------
 
-    def test_the_competence_prior_is_the_first_event_on_the_ledger(self) -> None:
-        """`S5-SA-002`: *pre-action*. A prior emitted after the first proposal
-        is conditioned on evidence it claims not to have seen."""
+    def test_the_ledger_begins_with_episode_started(self) -> None:
+        """`TSK-LED-002`/`G-050-03`: the durable beginning of a run is written
+        from packages, before anything else lands on the ledger."""
         result = self.execute()
 
         kinds = [event.kind for event in result.events]
-        self.assertEqual(kinds[0], "CompetencePriorRecorded")
+        self.assertEqual(kinds[0], "EpisodeStarted")
+
+    def test_the_competence_prior_precedes_the_first_proposal(self) -> None:
+        """`S5-SA-002`: *pre-action*. A prior emitted after the first proposal
+        is conditioned on evidence it claims not to have seen. `EpisodeStarted`
+        legitimately precedes it (`G-050-03`); no proposal may."""
+        result = self.execute()
+
+        kinds = [event.kind for event in result.events]
         self.assertLess(kinds.index("CompetencePriorRecorded"),
                         kinds.index("ProposalProduced"))
 

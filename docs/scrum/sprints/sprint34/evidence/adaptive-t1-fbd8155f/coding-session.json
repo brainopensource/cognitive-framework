@@ -1,0 +1,121 @@
+{
+  "activeStepId": null,
+  "attempts": 6,
+  "completionTokens": 4000,
+  "detail": "scripted adaptive greenfield path",
+  "modelRoutes": [
+    {
+      "band": "medium",
+      "model": "deepseek/deepseek-v4-flash",
+      "reason": "initial_plan",
+      "role": "architect"
+    },
+    {
+      "band": "free",
+      "model": "openrouter/free",
+      "reason": "ready_step",
+      "role": "executor"
+    },
+    {
+      "band": "medium",
+      "model": "deepseek/deepseek-v4-flash",
+      "reason": "repeated_failure",
+      "role": "diagnostic"
+    },
+    {
+      "band": "free",
+      "model": "openrouter/free",
+      "reason": "descend_after_recovery",
+      "role": "executor"
+    }
+  ],
+  "outcome": "oracle_green",
+  "phase": "complete",
+  "planDigest": "sha256:8236c5e932e1c6eef4543d506f7536c9eaf6e79fca0ece86bad0d93bfbd0205a",
+  "projections": [
+    {
+      "kind": "plan",
+      "model": "deepseek/deepseek-v4-flash",
+      "stepTotal": 2
+    },
+    {
+      "kind": "step",
+      "stepId": "step-001",
+      "stepIndex": 1,
+      "stepTotal": 2,
+      "text": "Create HTTP API"
+    },
+    {
+      "kind": "read",
+      "path": "app/server.py missing"
+    },
+    {
+      "kind": "write",
+      "path": "app/server.py",
+      "text": "+112"
+    },
+    {
+      "exitCode": 1,
+      "failures": 2,
+      "kind": "test",
+      "path": "test.test_server"
+    },
+    {
+      "fingerprint": "fp-test-server",
+      "kind": "escalate",
+      "text": "repeated failure fingerprint x2"
+    },
+    {
+      "kind": "diagnose",
+      "model": "deepseek/deepseek-v4-flash"
+    },
+    {
+      "kind": "resume",
+      "model": "openrouter/free"
+    },
+    {
+      "kind": "write",
+      "path": "app/server.py",
+      "text": "+8/-3"
+    },
+    {
+      "kind": "verified",
+      "stepId": "step-001"
+    },
+    {
+      "kind": "step",
+      "stepId": "step-002",
+      "stepIndex": 2,
+      "stepTotal": 2,
+      "text": "Create browser UI"
+    },
+    {
+      "kind": "write",
+      "path": "static/index.html",
+      "text": "+40"
+    },
+    {
+      "kind": "verified",
+      "stepId": "step-002"
+    },
+    {
+      "exitCode": 0,
+      "kind": "oracle",
+      "text": "final acceptance exit 0"
+    },
+    {
+      "kind": "complete",
+      "outcome": "oracle_green",
+      "spentUsdMicros": 13400,
+      "turns": 27
+    }
+  ],
+  "promptTokens": 12000,
+  "runId": "adaptive-t1-fbd8155f",
+  "spentUsdMicros": 13400,
+  "turns": 27,
+  "verifiedStepIds": [
+    "step-001",
+    "step-002"
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "band": "medium",
+    "model": "deepseek/deepseek-v4-flash",
+    "reason": "initial_plan",
+    "role": "architect"
+  },
+  {
+    "band": "free",
+    "model": "openrouter/free",
+    "reason": "ready_step",
+    "role": "executor"
+  },
+  {
+    "band": "medium",
+    "model": "deepseek/deepseek-v4-flash",
+    "reason": "repeated_failure",
+    "role": "diagnostic"
+  },
+  {
+    "band": "free",
+    "model": "openrouter/free",
+    "reason": "descend_after_recovery",
+    "role": "executor"
+  }
+]

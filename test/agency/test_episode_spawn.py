@@ -511,6 +511,59 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         )
         self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
 
+    def test_scope_escalation_refuse_writes_authorization_denied(self) -> None:
+        """`TSK-CORE-004`: the engine-side sealed-scope refuse never reaches
+        `Kernel.dispatch`, so it is the only writer for this denial -- append
+        `AuthorizationDenied` so it is durable on the ledger, not only a
+        local `Turn` (`A-07`)."""
+        from vanguard.packages.ports.event_store import Result
+
+        class ChildAttemptingUnauthorizedActionModel:
+            def __init__(self) -> None:
+                self.parent_turns = 0
+                self.child_turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                if "child" in str(view.get("episodeId", "")):
+                    self.child_turns += 1
+                    if self.child_turns == 1:
+                        return Result.success({
+                            "kind": "effect", "action": "patch.apply",
+                            "resource": {"kind": "fs", "path": "/workspace/main.py"},
+                            "args": {"patch": "diff"}, "note": "attempt unauthorized patch",
+                        })
+                    return Result.success({"kind": "finish", "note": "child finished after denial"})
+                self.parent_turns += 1
+                if self.parent_turns == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "read-only child", "scope": {"actions": ["fs.read"]}},
+                        "note": "spawning read-only helper",
+                    })
+                return Result.success({"kind": "finish", "note": "parent finished"})
+
+        engine = EpisodeEngine(
+            kernel=self.kernel,
+            model=ChildAttemptingUnauthorizedActionModel(),
+            clock=self.clock,
+            events=self.events,
+            scope=self.parent_scope,
+        )
+        engine.run(
+            episode_id="ep-parent-authz-denied",
+            run_id="run-1",
+            principal="parent-agent",
+            brief="test scope escalation is durable",
+        )
+
+        # The child's dispatch mock must never have been asked to authorize
+        # the unauthorized verb: the engine refused before dispatch.
+        self.kernel.dispatch.assert_not_called()
+        denials = [e for e in self.events.events if e.kind == "AuthorizationDenied"]
+        self.assertEqual(len(denials), 1)
+        self.assertEqual(denials[0].reason, "scope_escalation")
+        self.assertEqual(denials[0].payload["action"], "patch.apply")
+
 
 class NarrowedChildCannotEscalate(unittest.TestCase):
     """S8-B-01 / TL receipt 3, against the REAL kernel.

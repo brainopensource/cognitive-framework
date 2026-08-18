@@ -72,10 +72,6 @@ def main(argv: list[str] | None = None) -> int:
                         default="docs/scrum/sprints/sprint34/evidence")
     args = parser.parse_args(argv)
 
-    if args.live:
-        print("live campaign refused: product HarnessSession binder not yet wired "
-              "through coding_entrypoint; use fake validation first", file=sys.stderr)
-        return 3
     if args.trials < 1 or args.trials > 3:
         print("initial campaign is fixed at 1..3 trials; expand only after review",
               file=sys.stderr)
@@ -110,7 +106,8 @@ def main(argv: list[str] | None = None) -> int:
                 "recoveryModels": arm["recoveryModels"],
                 "budgetUsdMicros": max(0, args.budget_usd_micros - spent),
                 "interactive": True,
-                "fakeBackend": arm["fakeBackend"],
+                "fakeBackend": None if args.live else arm["fakeBackend"],
+                "live": args.live,
                 "json": True,
                 "headless": True,
             }
@@ -170,8 +167,8 @@ def main(argv: list[str] | None = None) -> int:
                     f"- outcome: {result.get('outcome')}\n"
                     f"- exit: {code} (mapped {exit_code_for(str(result.get('outcome')))})\n"
                     f"- spentUsdMicros: {cost}\n"
-                    f"- fake: {arm['fakeBackend']}\n"
-                    f"- live: false\n"
+                    f"- fake: {None if args.live else arm['fakeBackend']}\n"
+                    f"- live: {args.live}\n"
                     f"- timestamp: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n"
                 ),
             })
@@ -186,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps({
         "campaign": "v0450-greenfield",
-        "live": False,
+        "live": args.live,
         "ceilingUsdMicros": args.budget_usd_micros,
         "aggregateSpentUsdMicros": spent,
         "denominator": len(rows),

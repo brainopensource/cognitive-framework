@@ -836,6 +836,26 @@ class HarnessSession:
         terminal = RunTermination.ABANDONED
         detail = ""
 
+        # `TSK-LED-002` / `G-050-03`: the ledger's first durable event is
+        # written from packages, not a CLI fixture. Guarded on ledger status
+        # rather than a local flag: a process-restart resume constructs a
+        # fresh `HarnessSession` (fresh `LedgerBridge`) for the same
+        # `episode_id`, and the guard must survive that reconstruction too,
+        # or resume would double-append the beginning of the run.
+        if self.ledger_state().episode.status == "pending":
+            self.ledger.emit(Event(
+                kind="EpisodeStarted",
+                reason="composed",
+                at=ports.clock.now(),
+                run_id=task.run_id,
+                principal=task.principal,
+                payload={
+                    "episodeId": task.episode_id,
+                    "harness": harness.harness,
+                    "compositionDigest": harness.composition_digest,
+                },
+            ))
+
         # `S8-A-02`. This used to be a bounded segment loop building a fresh
         # `Episode` each pass with a fresh `max_turns` -- so the real bound was
         # the product of the two limits (8x8=64), nothing stated it, and an
@@ -1220,10 +1240,25 @@ def _scope_for(harness: Harness, repo: Path) -> Scope:
     )
 
 
+#: `TSK-CORE-003` / `K-31`: the declaration a span's trust comes from, made
+#: once here rather than as a literal at each call site. `_span_for` is the
+#: only place in this module that constructs a `Span`, so no call site can
+#: independently judge -- and no call site can mint `Trust.OPERATOR` by
+#: writing the enum member itself.
+_SOURCE_CLASS_TRUST: Mapping[str, Trust] = {
+    "operator_brief": Trust.OPERATOR,
+    "tool_result": Trust.UNTRUSTED_EXTERNAL,
+}
+
+
+def _span_for(span_id: str, source_class: str) -> Span:
+    return Span(span_id, _SOURCE_CLASS_TRUST[source_class], source_class)
+
+
 def _operator_span() -> Span:
     """The brief is operator-authored, so it may justify capability widening
     (`M4`, `F-09`). Trust is set by source class at construction (`K-30`)."""
-    return Span("brief-1", Trust.OPERATOR, "operator_brief")
+    return _span_for("brief-1", "operator_brief")
 
 
 def _environment_map(environment: Any, harness: Harness) -> str:
@@ -1260,11 +1295,7 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     if detail:
         text += f"\n{detail}"
     operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
-    return Span(
-        span_id=f"tool-result-{turn}",
-        trust=Trust.UNTRUSTED_EXTERNAL,
-        source_class="tool_result",
-    )
+    return _span_for(f"tool-result-{turn}", "tool_result")
 
 
 def _record(receipts: list[Receipt], operator: _LayeredOperator,

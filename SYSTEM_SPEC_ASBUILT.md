@@ -763,3 +763,557 @@ No inspector exists in the backend (the CLI is out of scope). What the backend p
 theory does not model: `inconclusive:workspace_missing`, `inconclusive:precondition_satisfied`,
 `inconclusive:no_intervention`, `inconclusive:model_not_invoked`, `inconclusive:instrument_error`,
 `inconclusive:no_verdict` (the six guarded by `MF-S7-C-02-001`…`006` in `test/broken/manifest.json`).
+
+---
+
+## 3. Core Contracts & Wire Schema (VG-04)
+
+`schemas/v4/` holds **38 artefacts**: 15 writer schemas with 15 generated `.reader.` counterparts, plus
+`MANIFEST.md`, `README.md`, `port-interfaces.md`, `model_proposal.schema.json`,
+`runtime-service.schema.json`, `worker_protocol.schema.json`, `approval-decision.schema.json` and a
+`vectors/` directory. The in-tree Python reader profile is `domain/wire/contracts.py` (362 lines).
+
+### 3.1 Source of truth and wire conventions (`CT-01` … `CT-13`)
+
+`domain/wire/contracts.py:355 parse_wire(kind, value)` is the reader entry point, dispatching through
+`_PARSERS` (line 340) over ten kinds: `EffectDescriptor`, `CapabilityGrant`, `Receipt`, `EventEnvelope`,
+`Artifact`, `EvidenceClaim`, `CorrectionRecord`, `Recording`, `ProcessDefinition`, `ProcessInstance`.
+
+| # | As-built |
+|---|---|
+| `CT-01` | Schemas exist and are validated in CI. **The Python types are hand-written, not generated** — `contracts.py` is a hand-authored validator, and `domain/ledger/events.py:106 EventEnvelope` is a hand-written dataclass |
+| `CT-02` | **Not held for Python.** `tools/reader_profile.py` generates the reader `.json` profiles from writer schemas; it does not generate Python types |
+| `CT-03` | Held at the reader: `parse_wire` validates and returns `deepcopy` (line 363); `kernel/dispatch.py:410 _validate` is the S1 parse. `tools/check_boundaries.py` has no cast lint (`AT-10` unimplemented) |
+| `CT-04` | Held by construction — JSON only |
+| `CT-05` | Enforced per-field: `_parse_effect` filters `None` (`grants.py:56-59` for descriptors); optional fields are `if field in source` throughout |
+| `CT-06` | Held: `Constraints.budget_usd_micros: int` (`attenuation.py:53`); `runtime/coding_budget.py:1-5` states integer microdollars, 1 USD = 1,000,000 |
+| `CT-07` | Held: `Reservation.millis: int` (`budget.py:47`); `runtime/telemetry.py:1-9` — "Every quantity … is an integer or absent. No float is ever the truth" |
+| `CT-08` | Held: `_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$")` (`primitives.py:72`), with leap-year validation (`_check_timestamp`, line 86) |
+| `CT-09` | Held: `_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")` (`primitives.py:73`) |
+| `CT-10` | Held: every enum in the tree is a `str, Enum` or a literal tuple |
+| `CT-11` | Held: `parse_wire` returns a lossless `deepcopy` including unknown fields (`contracts.py:363`); writer strictness lives in `schemas/v4/*.schema.json` (`additionalProperties: false`) |
+| `CT-12` | Held by `_array`/`_object` helpers (`contracts.py:32,26`) |
+| `CT-13` | Not explicitly checked; no lone-surrogate guard exists |
+
+Canonicalisation: `domain/canonicalisation/jcs.py` (226 lines) implements RFC 8785 with a
+`CanonicalisationError`; `digest.py:? digest_of` wraps it. `utf16_sort_key` is used for member ordering
+(referenced at `selectors/resource_selector.py:288`). Golden vectors live in `schemas/v4/vectors/`, exercised
+by `test/contracts/t1_dev1_canonicalisation.py`.
+
+Large integers: `_INT_STRING = re.compile(r"^(0|[1-9][0-9]*)$")` (`primitives.py:74`) with
+`int_string_to_int` / `int_string_from_int` (`primitives.py:228,235`). Matches the spec's `IntString` regex
+exactly.
+
+Naming: wire fields are `camelCase`; Python symbols are `snake_case`; event kinds are past-tense verb phrases
+throughout `EVENT_KINDS` (`events.py:53-101`) — held.
+
+### 3.2 Primitives and branded identifiers (`CT-14` … `CT-16`)
+
+`domain/primitives/primitives.py` (257 lines). `Primitive` (line 56) is a frozen wrapper;
+`parse(kind, value)` (line 194) dispatches through `_CHECKERS` (line 163). `_ID_KINDS` (line 157) enumerates
+the branded identifier kinds; convenience parsers exist for `Digest`, `Timestamp`, `PrincipalId`, `EpisodeId`
+(lines 209-227).
+
+| # | As-built |
+|---|---|
+| `CT-14` | Held: `_UUIDV7` regex (`primitives.py:75-78`) and a generator `uuidv7(timestamp_ms)` (line 249). `seq` carries causal order as an `IntString` on the envelope (`events.py`, `contracts.py:212`) |
+| `CT-15` | **Inverted at the descriptor.** `grants.py:56-58 descriptor_of` explicitly *excludes* `toolCallId`, `callId`, `requestId` — correct for `D-3`. There is no code path that stores or echoes a provider-assigned `ToolCallId` verbatim, so the "never regenerated" half has no counterpart |
+| `CT-16` | Held: `EventEnvelope` requires `principal`, `tenantId`, `ownerId` from the first version (`contracts.py:205-211`); `dispatch.py:415` rejects a missing principal as `"principal is required (CT-16)"` |
+
+**Emergent, undocumented in theory:** `principalRole` is a **required** envelope field with a six-value enum
+`{user, operator, episode, process, evaluator, release}` (`events.py:50 VALID_PRINCIPAL_ROLES`;
+`contracts.py:216`). This is `T2.1`'s principal model promoted onto the wire; VG-04 §12.1 has no such field.
+
+### 3.3 Content addressing and blobs (`CT-17` … `CT-20`)
+
+`ports/blob_store.py:25 BlobStorePort` — `put(bytes) -> Result[str]`, `get(digest) -> Result[bytes]`,
+`has(digest) -> bool`. Two implementations in `adapters/stores/blob_store.py` (89 lines): in-memory and
+on-disk content-addressed.
+
+| # | As-built |
+|---|---|
+| `CT-17` | Held — addressed by digest of bytes |
+| `CT-18` | **Not implemented.** There is no atomic event+blob commit and no staging/reconciliation between the two stores; they are independent ports |
+| `CT-19` | **Not implemented.** `BlobStorePort` has no classification parameter and no encryption hook. Classification lives only on the event envelope (`confidentiality`) |
+| `CT-20` | Held by construction |
+
+### 3.4 Provenance — six orthogonal axes (`CT-21` … `CT-23`)
+
+**Major shape divergence.** The spec's six orthogonal axes (`origin`, `instructionAuthority`, `integrity`,
+`confidentiality`, `epistemic`, `influence`) are split across three unrelated places, and no single type
+carries six axes.
+
+| Spec axis | As-built |
+|---|---|
+| `origin` | Wire `provenance` object (`contracts.py:103-111 _provenance`) and `Span.source_class` (`kernel/model.py:80`) |
+| `instructionAuthority` | `kernel/model.py:40 Trust` — a **single ordered five-value enum** (`OPERATOR` 0, `SYSTEM` 1, `AGENT_DERIVED` 2, `UNTRUSTED_DERIVED` 3, `UNTRUSTED_EXTERNAL` 4, ranks at lines 66-72). Its docstring states it "is not a general lattice … this is the instruction-authority axis alone" |
+| `integrity` | No enforcing type |
+| `confidentiality` | Envelope field only: `VALID_CONFIDENTIALITIES = {public, internal, confidential, restricted}` (`events.py:46`) |
+| `epistemic` | **No counterpart.** The six-value lattice (`observed`, `derived`, `hypothesised`, `corroborated`, `contradicted`, `retracted`) appears nowhere |
+| `influence` | **No counterpart** |
+
+`T2.9`'s four-axis rename (`origin`, `integrity`, `sensitivity`, `trust`) is also not literally present;
+`Trust` is the only enum. This resolves contradiction `X-05` toward a **fifth** shape: one ordered trust enum
+plus separate envelope classification fields.
+
+| # | As-built |
+|---|---|
+| `CT-21` | **Not held by type signature.** `agency/context/layers.py:89 Fragment(source, label, text)` accepts a raw `str`; `blocks_of(layer, fragments)` (line 229) turns them into `Block`s. Provenance is attached by the constructing call site |
+| `CT-22` | Held in `kernel/`: `Span` is constructed with its trust; `Accumulation.extend` will only lower a label on re-entry (`provenance.py:60-68`). Not held in the production wiring (§4.7) |
+| `CT-23` | **Not enforced.** `runtime/root.py:1210 _operator_span()` returns a literal `Span("brief-1", Trust.OPERATOR, "operator_brief")` at a call site; there is no per-source-class label registry |
+
+### 3.5 Context blocks and epistemic state
+
+`agency/context/layers.py:105 Block` is the unit of assembly and carries `source`, `label`, `text`, `layer`,
+`evictable`, with `provenance` (line 123) and `identity` (line 134) properties, `byte_length` (line 115) and
+`token_estimate` (line 119). It does **not** carry an epistemic state — the axis does not exist in code.
+
+### 3.6 Capabilities and effect descriptors
+
+#### 3.6.1 Why a verb set is insufficient
+
+Held: `Scope` (`kernel/attenuation.py:95`) carries `actions` **and** `resources` **and** `constraints`, and
+`attenuate()` checks all three plus depth.
+
+#### 3.6.2 The grant
+
+`domain/selectors/resource_selector.py:49` declares the **VG-04 selector kind set exactly**:
+
+```python
+SELECTOR_KINDS = ("fs", "network", "secret", "git", "table", "browser", "generic")
+```
+
+The GTS-13C `T1.3` kinds (`path`, `glob`, `command`, `host`, `record`) are **not** in the parser — resolving
+contradiction `X-06` in VG-04's favour at the domain layer. However, the shipped manifests use both worlds:
+`vg-code-default/manifest.json` declares `{"kind":"fs","root":"/workspace","paths":["/workspace"]}` (VG-04
+shape) for `fs.read`/`fs.search`/`patch.apply`, and `{"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"}`
+for `proc.exec` — an allowlist encoded inside a `generic` URI string rather than a `command` selector.
+
+Two distinct `CapabilityGrant` shapes exist:
+
+**In-kernel** — `kernel/grants.py:62 Grant`:
+```
+grant_id, principal, descriptor_digest, scope: Scope, expires_at, purpose_digest,
+single_use=True, parent_grant_id=None, authenticator=None, approval_ref=None
+```
+
+**On the wire** — `domain/wire/contracts.py:147 _parse_grant`, required fields:
+`grantId, principal, descriptorDigest, actions, selector, constraints, expiry, maxUses, purposeDigest`;
+optional `parentGrantId`, `approvalRef`, `authenticator`; `constraints` requires `budgetLeaseId` and
+optionally carries `maxBytes`, `maxEffects`, `environmentSnapshot`, `networkPolicy` (`deny|allowlist`),
+`requirePreview`, `requireApprovalAboveRisk`.
+
+The wire shape is a **merge** of VG-04 and `T1.5`: it keeps `actions` (plural, VG-04) and `purposeDigest`
+(VG-04, required by `N-03`) while using a **singular** `selector` (`T1.5`) rather than `resources[]`. This is
+a third resolution of `X-07`. `discloseToModel: false` is a literal on the `secret` selector
+(`resource_selector.py:288`) but it is a normal Python bool, not a type-level literal.
+
+`CT-51` is enforced at construction: `GrantIssuer.issue` raises `MissingDescriptorBinding` on an empty
+`descriptor_digest` (`grants.py:158-162`) **and** on an empty `purpose_digest` (lines 163-166).
+`descriptorDigest` is computed at S3 (`dispatch.py:159`) and verified at S8 (`dispatch.py:267-276` →
+`grants.py:207-212`). `MF-KRN-003` fails against a grant that omits or bypasses the binding.
+
+#### 3.6.3 Attenuation rules (`CT-24` … `CT-28`)
+
+| # | As-built |
+|---|---|
+| `CT-24` | Held: `AttenuationDenied(dimension, requested, grantable)` (`attenuation.py:112-119`) |
+| `CT-25` | Held with an explicit source comment at `attenuation.py:150` — "the grantable subset is *reported*, never substituted" |
+| `CT-26` | Held: `HmacAuthenticator` (`grants.py:93`); `issue(cross_process=True)` refuses without one (`grants.py:178-182`); `verify` fails `F-17 GRANT_FORGED` (`grants.py:196-201`) |
+| `CT-27` | Held: `dispatch.py:218` — `single_use=request.idempotency_key is None` |
+| `CT-28` | Held negatively: there is no fixed TTL constant. `expires_at` comes from `granted_scope.constraints.expires_at` (`dispatch.py:215`) |
+
+#### 3.6.4 Selector inclusion (`CT-52`)
+
+**Implemented per-kind and fully.** `domain/selectors/resource_selector.py` (450 lines):
+`parse_selector` (line 258), `canonicalise_selector` (line 373), `_includes_parsed` (line 383),
+`decide(parent, child) -> Decision` (line 431), `includes(parent, child) -> bool` (line 448).
+
+| Kind | Implementation |
+|---|---|
+| `fs` | Same root + normalised prefix match: `_normalise_path` (line 96), `_normalise_root` (line 119), `_path_under` (line 328), `_prune_paths` (line 336) |
+| `network` | `_normalise_host` (line 129) with IDNA/lowercasing, `_host_covers` (line 341) implementing the wildcard rule, `_normalise_port` (line 154), `_prune_hosts` (line 362) |
+| `secret` | Literal ref subset; `discloseToModel` forced `False` at parse (line 288) |
+| `git` | `_expand_ref` (line 197) full-ref expansion |
+| `table` | `_parse_range` (line 207), `_range_contains` (line 230), `_render_range` (line 226), `_prune_ranges` (line 367) — interval containment |
+| `browser` | `_normalise_origin` (line 166), exact scheme/host/port equality |
+| `generic` | Literal `uriPattern` equality |
+
+`decide()` is total and denies undefined and cross-kind pairs — the `K-48` fail-closed requirement. Consumed
+by `kernel/attenuation.py:140-155`, `kernel/classifier.py:121-122`, and `kernel/attenuation.py:199
+resource_subset`. Property-tested in `test/contracts/t1_dev1_selectors.py`.
+
+#### 3.6.5 Execution capabilities
+
+`ports/sandbox.py:38 ContainmentReport` and `:57 SandboxReceipt` carry the perimeter facts.
+`adapters/sandbox/rootless.py:199 execute()` builds the report from real probes (line 211) and sets
+`visibility_mark` to `"probe-verified-rootless"` or `"unverified-rootless-perimeter"` (line 233).
+Environment-variable **keys not values** and the redacted-output requirement are handled in
+`adapters/sandbox/worker.py`. The spec's full receipt field list (image digest, normalised argv, working
+directory, mounts, network policy, resource limits, exit/cancellation/timeout, containment runtime) is
+substantially present via `ContainmentReport` fields `syscall_profile`, `startup_probes`, `visibility_mark`
+plus runtime/version (line 187 `_runtime_version`).
+
+#### 3.6.6 The effect descriptor and normalisation (`D-1` … `D-6`)
+
+`kernel/grants.py:46 descriptor_of(action, args)`:
+
+```python
+normalised = {k: v for k, v in args.items()
+              if v is not None and k not in ("toolCallId", "callId", "requestId")}
+return digest_of({"action": action, "args": normalised})
+```
+
+| # | As-built |
+|---|---|
+| `D-1` | Held — `digest_of` canonicalises via JCS |
+| `D-2` | **Not in `descriptor_of`.** Path normalisation happens in `domain/selectors/resource_selector.py:96 _normalise_path` (selectors) and `adapters/models/invocation.py:268 _workspace_relative` (proposal translation), not on the descriptor's args |
+| `D-3` | **Held explicitly** — the three call-identifier keys are dropped. Guarded by `MF-28` in the spec map (no in-tree test of that ID; the behaviour is covered by `test/kernel/test_dispatch.py`) |
+| `D-4` | Held — no trimming or case-folding |
+| `D-5` | Held — `v is not None` filter |
+| `D-6` | Held via JCS number canonicalisation (`jcs.py`) |
+
+The wire `EffectDescriptor` (`contracts.py:126`) is a **different, richer shape** than the kernel's descriptor
+digest: `{verb, sinkClass, selector, args, argsDigest, idempotencyKey, riskTier, provenance}` plus optional
+`workingDirectory`, `readSet`, `writeSet`. The reader recomputes `digest_of(args)` and rejects a mismatched
+`argsDigest` (lines 134-136). Note the field is `verb`, not `name`/`action`; the kernel's `EffectRequest` uses
+`action` (`kernel/model.py:87`) and `ports/environment.py:90 EffectRequest` uses **both** `verb` and `action`.
+
+### 3.7 Budgets, reservations and leases (`CT-29` … `CT-32`)
+
+`kernel/budget.py:44 Reservation` has **four** dimensions: `usd_micros`, `millis`, `tokens`, `bytes_`.
+
+Neither spec vector matches: VG-04 §6 names cost, tokens, wall-clock, turns, depth, concurrency;
+GTS-13C names `{tokens, wallClock, cost, effects, evaluations, depth}`. As built, **`turns` and `depth` are
+enforced outside the `Reservation`** (turn ceiling in `EpisodeEngine._max_turns`; depth in
+`Constraints.max_depth`), and `concurrency`, `effects` and `evaluations` are absent. There is **no
+`EvaluationBudget`** — `CT-32` has no counterpart.
+
+| # | As-built |
+|---|---|
+| `CT-29` | Partial: `Lease.lease_id` exists and `parent_lease` is carried on `EffectRequest`, but the emitted `EffectCompleted` payload carries `settlement`, not the lease id (`dispatch.py:361-366`). The wire `Receipt` (`contracts.py:176`) has no lease field at all — matching spec ambiguity `Y-04` |
+| `CT-30` | Held: `BudgetDenied(dimension, requested, remaining, reason)` |
+| `CT-31` | Held: `Governor.commit` retains negative settlement (`budget.py:145-149`) |
+| `CT-32` | **Not implemented** |
+
+`Governor.ledger()` (`budget.py:96`) exposes `{ceiling, spent, held, remaining}` per dimension, and
+`test/kernel/test_dispatch.py:321 test_ceiling_is_conserved_across_many_effects` asserts conservation.
+
+**Emergent, undocumented in theory:** `runtime/coding_budget.py` (243 lines) is a **second budget
+controller** — a hard pre-call worst-case reservation in integer microdollars for paid model calls, sitting
+above the kernel `Governor` and outside the dispatch sequence. Its docstring states it "Never represents
+unknown pricing or missing usage as zero."
+
+### 3.8 Tools
+
+A tool declares name, required capability, argument schema, read set and write set. As built, a tool is a
+JSON artefact in a manifest pack — e.g. `agency/manifests/vg-code-default/read-tool.json`,
+`search-tool.json`, `patch-tool.json`, `test-tool.json`, and `vg-shell-only/shell-tool.json`. The manifest's
+`capabilities[]` rows carry `{verb, sink, selector, risk}` (`vg-code-default/manifest.json`).
+
+`readSet`/`writeSet` are **schema-optional and unconsumed** (§2.7). There is **no commutativity flag**
+anywhere — `AT-05` and `REJ-05` are held by absence.
+
+**Emergent, undocumented in theory:** `adapters/models/invocation.py:33 ProposalTranslator` (384 lines total)
+maps a provider tool-call into a canonical `EffectRequest`. It is **schema-and-selector driven, not a verb
+table** (`docs/scrum/roadmap_backend.md:30`, `S10-A-01`, commit `854e8e8`): `_selector_from_schema`
+(line 319), `_bind_resource` (line 337), `_is_canonical_verb` (line 289), `_workspace_relative` (line 268),
+`validate_proposal_schema` (line 217), `_within_depth` (line 258). Each manifest pack carries an
+`aliases.json` mapping provider-facing tool names onto canonical verbs. This whole layer — provider tool name
+→ alias → canonical verb → selector-bound resource — has no VG-04 counterpart.
+
+### 3.9 The model interface (`CT-33` … `CT-34`)
+
+`ports/model.py:30 ModelPort` — `propose(ContextBundle, ToolSchemas, Sampling) -> Result[Proposal]`, matching
+GTS-13C §5.2's `ModelPort` name and signature rather than VG-04's `ModelProvider`.
+
+| # | As-built |
+|---|---|
+| `CT-33` | Held at the port: every adapter returns `Result` (`ports/event_store.py:37`), and `Result.fail(kind, message, retryable)` (line 49) carries the error kind. Belt-and-braces at the caller: `engine.py:228-234` catches a raising provider and still terminates as `INSTRUMENT_ERROR` |
+| `CT-34` | Held — adapters raise only on programmer error |
+
+Adapters: `openrouter.py` (896), `ollama.py` (137), `lam.py` (120, deterministic mock), `fake.py` (38),
+`cassette.py` (190, record/replay), plus `routing.py` (154) and `env_loader.py` (121).
+`runtime/model_selection.py:1-9` records the *skip-closed vs skip-as-pass* distinction: a backend that is not
+there produces a named `instrument_error`, never a skipped test reporting success.
+
+### 3.10 Task, plan, proposal, effect request
+
+| Spec type | As-built |
+|---|---|
+| `TaskSpec` | **No wire type.** `runtime/root.py:189 TaskContext` is the application value; `EpisodeStarted` payloads carry a `taskSpec` mapping by convention only |
+| `PlanArtifact` | **No wire type.** `runtime/coding_plan.py` (223 lines) holds a runtime-owned, validated plan; its docstring: "a model can propose an `implemented` step, but only an exterior verifier may move it to `verified`" |
+| `Proposal` | Two: `ports/model.py Proposal` (the port's return) and `agency/episode/state.py:86 Proposal` with `ProposalKind` (line 63) `{effect, finish, abstain, escalate, spawn}` and `parse_proposal` (line 107) |
+| `EffectRequest` | **Three distinct types with the same name** — `kernel/model.py:87` (action/resource/args/principal/run_id/depth/justifying_spans/parent_lease/declared_sink_class/idempotency_key), `ports/environment.py:90` (verb/action/args…), and the wire `EffectDescriptor` |
+
+`ProposalKind.SPAWN` and `ESCALATE` are additions over the spec's `finish`/`abstain`.
+`TERMINAL_FOR_KIND` (`state.py`) maps non-effect kinds directly to terminals.
+
+Step-level attribution — "which operator produced which proposal" — is **not recorded**: the
+`ProposalProduced` payload (`engine.py:441-466`) carries the descriptor and action but no operator identity,
+because no operator identity exists.
+
+"An operator receives no effect capabilities by default" is realised at the episode level:
+`EpisodeEngine.spawn` fails closed when the child scope is missing or unparseable (`engine.py:263-286`) rather
+than inheriting the parent's grant.
+
+### 3.11 The competence and evidence graph
+
+#### 3.11.1 Why a graph
+
+**Not implemented as a competence graph.** `domain/artifacts/graph.py:85 ArtifactGraph` is a *harness
+composition* graph — `ArtifactKind` (line 29), `KindRegistry` (line 39), `ArtifactFile` (line 65),
+`LogicalEdit` (line 142), `Commit` (line 156), `Workspace` (line 165). It answers "which files compose this
+harness pack", not "which competence artifacts contradict which".
+
+There is no contradiction search, no partial supersession, no per-domain activation, no quarantine, and no
+lineage-preserving forgetting anywhere in `vanguard/packages/`.
+
+The four quadrants (`R`/`O`/`M`/`P`) do not appear. The live kind set is `BUILTIN_KINDS`
+(`domain/artifacts/graph.py:19`) / `agency/manifests/kinds.json` — 17 rows.
+
+#### 3.11.2 The contracts
+
+**`CompetenceArtifact` does not exist.** The wire `Artifact` (`contracts.py:231 _parse_artifact`) is the
+`T1.8` shape, not the VG-04 shape:
+
+```
+required: artifactId, kind, class, hypothesis, evidenceRefs,
+          invalidationConditions, riskDelta, contentDigest
+class ∈ {enforcement, compensation};  compensatesFor required iff compensation (lines 236-240)
+contentDigest must bind the immutable content (lines 245-250)
+```
+
+Absent VG-04 fields: `artifactVersion`, `body: BlobRef`, `interfaceSchema`, `createdBy`, `createdFrom`,
+`dependencies`, `supersedes`, `createdAt`. Present non-VG-04 fields: `class`, `compensatesFor`, `hypothesis`,
+`riskDelta` (this is `L-12`).
+
+**`EvidenceClaim` exists in two forms.** Wire: `contracts.py:252 _parse_claim` requires
+`id, subject, predicate, value, protocol, evaluator{evaluatorId,class,imageDigest}, environmentProfile,
+substrateProfile, taskDistribution, uncertainty, validity{domains[]}, invalidationConditions`.
+Domain: `domain/evidence/claim.py:159 Claim` with `InvalidationCondition` (line 85), `Evaluator` (line 108),
+`Uncertainty` (line 122), `Validity` (line 145), parsed by `parse_claim` (line 322).
+Missing from both: `evidenceRefs`, `derivedFrom`, `contradicts`, `expiresAt`.
+
+`ADR-0068` hedge fields (`supportCount`, `lastCorroboratedAt`, `protectionClass`) are carried by the writer
+schema (`schemas/v4/evidence-claim.schema.json`, golden vector `hedge-fields.json` per
+`docs/scrum/roadmap_backend.md:36`) and pass through the reader as unknown-field preservation. They are
+recorded and never consumed — held.
+
+**Typed edges** (`derived_from`, `requires`, `supersedes`, `contradicts`, `evaluated_by`, `valid_under`) and
+**states** (`candidate`, `active`, `quarantined`, `deprecated`, `retired`) have **no counterpart**.
+
+#### 3.11.3 Invalidation conditions (`INV-1`, `INV-2`)
+
+`InvalidationCondition` (`domain/evidence/claim.py:85`) carries `condition`, `checkKind`, optional `checkRef`.
+Both invariants are enforced **at parse**:
+
+- `INV-1`: `_invalidation(value, path)` (`contracts.py:113`) calls `_array(..., nonempty=True)`; an empty
+  array raises `WireError("minItems", ...)`. Same in `claim.py:235 _parse_conditions`.
+- `INV-2`: `contracts.py:120-124` — `checkKind == "automatic"` requires `checkRef`, validated as an
+  `EvaluatorId`.
+
+`InvalidationCheckRecord` has a writer + reader schema (`schemas/v4/invalidation-check-record*.json`) — the
+`CT-53` separation of mutable check state from the content-addressed artifact — but **no producer and no
+consumer in `vanguard/packages/`**. Nothing ever runs an invalidation check.
+
+#### 3.11.4 Lifecycle rules (`CT-35` … `CT-39`, `CT-53`)
+
+| # | As-built |
+|---|---|
+| `CT-35` | Held at the type: `Artifact` has no status field, and `contentDigest` must bind the content (`contracts.py:245-250`) |
+| `CT-36` | `ArtifactRegistryProjection` (`runtime/ledger/projections.py:300`) tracks activation from events; retirement is a projection state, lineage is the ledger. But no `ActivationChanged` is ever emitted |
+| `CT-37` | No quarantine state exists |
+| `CT-38` | No expiry mechanism exists |
+| `CT-39` | Vacuous — no versioning exists |
+| `CT-53` | **Held and tested at the type.** `_parse_artifact` recomputes `digest_of(content)` over a fixed key set that excludes any mutable field (`contracts.py:247-250`), and check state lives in a separate schema |
+
+### 3.12 The instrument tuple (shape)
+
+**Not in `vanguard/packages/`.** Implemented at `tools/telemetry/tuple.py` (248 lines) with
+`tools/telemetry/coding_instrument.py` (69 lines). Tested by `test/lab/test_tuple.py` and
+`test/benchmarks/test_instrument_tuple.py`. See §6.5.4.
+
+The closest backend artefact is `ports/sandbox.py:38 ContainmentReport`, which `K-45` requires to be part of
+the tuple; there is no code path that composes a containment report *into* an instrument tuple.
+
+### 3.13 The event stream
+
+#### 3.13.1 The envelope
+
+`domain/ledger/events.py:106 EventEnvelope` (dataclass) and `contracts.py:206 _parse_event` (reader).
+Required wire fields: `schemaVersion` (const `"vg.4"`, line 211), `eventId` (UUIDv7), `scope`, `traceId`,
+`spanId`, `seq` (IntString), `occurredAt`, `recordedAt`, `principal`, **`principalRole`**, `tenantId`,
+`ownerId`, `confidentiality`, `retentionClass`, `trainability`, `redactionStatus`, `payload`.
+
+The `scope` discriminator is implemented with **full conditional enforcement in both directions**
+(`contracts.py:219-226`):
+- `episode|recovery` require `runId`; `episode` requires `episodeId`;
+- `governance|evolution` may **not** carry `runId`; anything but `episode` may not carry `episodeId`.
+
+This is `MF-35`'s property ("an evolution event forced to carry a synthetic run identifier") enforced at parse.
+
+Differences from VG-04 §12.1: `principalRole` is added (see §3.2); `branchId` and `parentEventId` are absent;
+`encryptionKeyRef` and `environmentSnapshot` are not required and not present in the dataclass.
+`processId` (the `T1.7` field) is **not** an envelope field — process association is by
+`payload.processId` (`runtime/governance/engine.py:19-22`), which is a convention, not a contract.
+This resolves `X-08` toward VG-04 with one addition and two omissions.
+
+The four projections the spec requires a single stream to serve are partly realised:
+`adapters/stores/ledger_jsonl.py:41 redact_envelope` with `RedactionPolicy` (line 32) produces the redacted
+operational trace, preserving `traceId`/`spanId` correlation. Encrypted raw audit, content-free metrics and
+the training projection have no code.
+
+#### 3.13.2 The minimum event set
+
+`EVENT_KINDS` (`domain/ledger/events.py:53-101`) contains **all 33** spec event kinds and no others.
+
+**But the emitted set is far smaller.** Counting emitters in `vanguard/packages/` (excluding
+`events.py`'s declaration and the reducer/projection *consumers*):
+
+| Group | Emitted in production code? |
+|---|---|
+| `EpisodeStarted`, `EpisodeCompleted` | Yes — `engine.py:412 _emit_terminal`, `runtime/root.py` |
+| `EpisodeStateChanged` | **No emitter** (reduced at `reducer.py:104`, projected at `projections.py:79`) |
+| `ObservationRequested`, `ObservationProduced` | **No emitter** |
+| `OperatorSelected`, `OperatorInvoked` | **No emitter** (no operators exist) |
+| `ProposalProduced` | Yes — `engine.py:441` |
+| `AuthorizationRequested` | **No emitter** |
+| `CapabilityGranted` | **No emitter** — the kernel issues a grant at S6 but emits no event for it |
+| `AuthorizationDenied` | Yes — `dispatch.py:195` |
+| `CapabilityRevoked` | **No emitter.** `GrantIssuer.revoke` (`grants.py:225`) returns the revoked ids "so the caller can emit one `CapabilityRevoked` per grant"; **no caller exists** |
+| `BudgetReserved`, `BudgetCommitted` | **No emitter** |
+| `BudgetReleased` | Yes — `dispatch.py:231` (denial path only) |
+| `EffectPreviewed` | **No emitter** |
+| `EffectStarted` | Yes — S8a intent, `dispatch.py:279` |
+| `EffectCompleted` | Yes — `dispatch.py:361` |
+| `EffectReconciled` | Yes — `dispatch.py:354` (`F-22` path) |
+| `ConflictDetected` | **No emitter** |
+| `EvaluationRequested` | **No emitter** |
+| `EvidenceClaimProduced` | **No emitter** |
+| `ArtifactCreated`, `ActivationChanged`, `CompetencePriorRecorded` | `CompetencePriorRecorded` yes — `agency/context/compiler.py:209 CompetencePriorRecorder.record` (line 228). The other two: **no emitter** |
+| `ApprovalRequested` | Yes — `dispatch.py:189` |
+| `ApprovalResolved` | Emitted through the governance/approval flow (`runtime/governance/approvals.py:296 ApprovalFlow`) |
+| `Heartbeat`, `RunRecovered`, `RunAborted` | `RunRecovered`/`RunAborted` yes — `runtime/ledger/recovery.py`; `Heartbeat` is consumed, produced by the run owner |
+| `CandidateBuilt`, `CandidateAttested`, `CanaryPromoted`, `RollbackTriggered` | **No emitter** — the Evolution plane has no runtime component |
+
+`AuthorizationDenied` carries reason, `requested`, `grantable` and `untrustedSpans`, and is flagged
+`alertable` for `F-10`/`F-17` (`dispatch.py:195-203`) — held.
+`CompetencePriorRecorded` carries a pre-action prior and the digest of the exact context vector
+(`compiler.py:228-...`), recorded before turn 1 reaches the provider (`root.py:513-519`) — held.
+
+**Emergent, undocumented in theory — two event kinds the kernel emits that are not in `EVENT_KINDS`:**
+`"EffectRejected"` (`dispatch.py:172, 348, 372`) and `"KernelAlarm"` (`dispatch.py:319, 344`). These reach the
+store as `payload.kind` strings; `_parse_event` only requires `payload.kind` to be a *string*
+(`contracts.py:229-230`), so nothing rejects them. `EVENT_KINDS` is imported by `domain/__init__.py` and used
+only by `test/contracts/t3_ledger.py:22` — **the frozenset is not enforced anywhere in production code.**
+
+#### 3.13.3 Storage (`CT-40` … `CT-43`)
+
+| # | As-built |
+|---|---|
+| `CT-40` | Held: `adapters/stores/event_store.py:121 SqliteEventStore`, `PRAGMA journal_mode = WAL` (line 139), `synchronous` defaults to `"FULL"` (line 124), single-writer monotonic `seq` per run enforced in the transaction (lines 182-196) |
+| `CT-41` | Partial: blobs are addressed by digest outside the DB (`adapters/stores/blob_store.py`). **No versioned migration mechanism exists** — no migrations directory, no schema-version column beyond the envelope field |
+| `CT-42` | Held: `adapters/stores/ledger_jsonl.py` is export/import only; the primary store is SQLite. `MF-23` guards the inverse in the spec map (no in-tree test of that ID) |
+| `CT-43` | Held: `ports/event_store.py:64 EventStorePort` with `read(range_query)` (line 71) and `digest()` (line 75); readers go through the port |
+
+`InMemoryEventStore` (line 30) is the second implementation for `T10.2`.
+
+#### 3.13.4 Recovery events
+
+`Heartbeat`, `RunRecovered`, `RunAborted` are declared, reduced and produced by
+`runtime/ledger/recovery.py:124 RecoveryScanner`. `EffectReconciled` carries
+`{"occurrence": "undeterminable"}` on the `F-22` path (`dispatch.py:354-357`) — the preserved-uncertainty
+state, held.
+
+### 3.14 Port interfaces (VG-04 §13)
+
+**The port roster diverges substantially from both spec rosters.** Live inventory of
+`vanguard/packages/ports/` (9 modules, 738 LOC), all `typing.Protocol`, several `runtime_checkable`:
+
+| Module | Symbol | VG-04 name | GTS-13C name |
+|---|---|---|---|
+| `model.py:30` | `ModelPort` | `ModelProvider` ✗ | `ModelPort` ✓ |
+| `environment.py:140` | `EnvironmentAdapter` | `EnvironmentAdapter` ✓ | `EnvironmentPort` ✗ |
+| `evaluator.py:52` | `EvaluatorPort` | `EvaluatorPort` ✓ | `EvaluatorPort` ✓ |
+| `event_store.py:64` | `EventStorePort` | `EventStore` ✗ | `EventStorePort` ✓ |
+| `blob_store.py:25` | `BlobStorePort` | `BlobStore` ✗ | `BlobStorePort` ✓ |
+| `index.py:42` | `IndexPort` | absent | `IndexPort` ✓ |
+| `determinism.py:35,22` | `ClockPort`, `RandomPort` | absent | `ClockPort`, `RandomPort` ✓ |
+| `sandbox.py:68` | `SandboxRunner` | `SandboxRunner` ✓ | absent |
+| `kernel.py:38,46,64,71` | `Clock`, `EffectAdapter`, `EventSink`, `Ledger` | absent | absent |
+
+**Absent from code entirely:** `OperatorRunner`, `ObservationSource`, `PolicyEngine`, `Governor` (as a port).
+`Governor` exists only as a **concrete class inside the kernel** (`kernel/budget.py:71`), and policy is a
+concrete `StandardPolicy` (`kernel/policy.py:56`) injected as `policy: Any` into `Kernel.__init__`
+(`dispatch.py:104`) — a duck-typed seam with no declared interface.
+
+**Emergent, undocumented in theory — `ports/kernel.py`.** Four kernel-facing protocols the spec does not
+name: `Clock` (`now() -> str`), `EffectAdapter` (`name`, `healthy()`, `execute(request)`), `EventSink`
+(`emit(event)`), `Ledger` (`append_intent(event)`). The split between `EventSink.emit` (never raises, `F-25`)
+and `Ledger.append_intent` (must raise, `F-21a`) is load-bearing and is documented at
+`runtime/root.py:413-423 LedgerBridge`.
+
+**`SandboxRunner` returns a structured report, not a boolean** — held. `ports/sandbox.py:38 ContainmentReport`
+plus `ProbeResult` (line 28), `SandboxReceipt` (line 57), `SandboxResult` (line 63), and a free function
+`publication_decision(report) -> Result[None]` (line 75) that returns `Result.fail("denied", "unverified
+containment report blocks publication")` when `not report.verified`. That is `K-44` as executable code.
+
+### 3.15 Configuration schemas
+
+Held. `domain/artifacts/manifest.py:105 parse_manifest` rejects unknown/ill-typed rows at authoring time
+(`ManifestError`, line 11); `compose(manifest, graph, episode_id)` (line 143) resolves names against the
+`ArtifactGraph` and freezes; `runtime/root.py:179 CompositionError` fails the composition, not the first use.
+`agency/manifests/loader.py` (259 lines) loads packs; `discovery.py` (106 lines) handles between-run
+workspace discovery.
+
+Manifest schemas: `schemas/v4/harness-manifest.schema.json` + reader. Six packs ship:
+`vg-code-default`, `vg-shell-only`, `vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`,
+`vg-table-default` — note `vg-table-default` exists on disk but is **not** in
+`agency/manifests/registry.json`, which lists five.
+
+### 3.16 Cross-language contract
+
+Two implementations exist: Python (`domain/wire/contracts.py`) and TypeScript (`domain/wire/contracts.ts`,
+referenced by `README.md:212`; the TS tree is out of scope). Vectors are data in `schemas/v4/vectors/`,
+exercised by `test/contracts/` (121 test methods) including `t1_wire_contracts.py`, `test_t1.py`,
+`schema_subset.py` and a `readers/` subpackage.
+
+Inter-process frame requirements (max size, request id, version negotiation, cancellation frame,
+backpressure, separate diagnostics channel, content references, authenticated channel): partially realised in
+`schemas/v4/runtime-service.schema.json` and `worker_protocol.schema.json`. Grants crossing a process boundary
+are authenticated (`HmacAuthenticator`); approvals crossing one are Ed25519-signed
+(`runtime/governance/approvals.py`); the evaluator channel uses SO_PEERCRED + image digest + Ed25519 verdict
+signing. Backpressure and an explicit cancellation frame have no implementation.
+
+### 3.17 Versioning and compatibility (`CT-44` … `CT-50`)
+
+| # | As-built |
+|---|---|
+| `CT-44` | Held for **fields** — `parse_wire` deep-copies unknown fields. Held for **event kinds** only accidentally: `payload.kind` is any string, so an unknown kind is preserved because nothing validates it |
+| `CT-45` | Held informally; no exhaustive matching on extensible enums (reducers use `if/elif` chains with implicit fall-through, e.g. `reducer.py:53-460`) |
+| `CT-46` | **No migration mechanism exists** — no migrations package, no migration registry |
+| `CT-47` | **No migration rehearsal in CI** |
+| `CT-48` | Partial: `schemaVersion` is a hard const `"vg.4"` (`contracts.py:211-213`); an unknown version is rejected rather than accepted silently. Corpora do not record their derivation version |
+| `CT-49` | Held by construction — `EVENT_KINDS` is append-only in practice |
+| `CT-50` | No deprecation mechanism exists |
+
+### 3.18 Conformance
+
+| Kind | As-built |
+|---|---|
+| Vector conformance | `schemas/v4/vectors/`, `test/contracts/t1_dev1_canonicalisation.py`, `test/contracts/readers/` |
+| Property tests | `test/contracts/t1_dev1_selectors.py` (selector inclusion reflexive/transitive), `test/test_ledger_properties.py`, `test/kernel/test_attenuation.py` |
+| Round-trip tests | `test/contracts/t1_wire_contracts.py`, `test/contracts/test_t1.py` |
+| Must-fail tests | 38 cases, `tools/run_broken_tests.py` (see §9.6) |
+
+`test/contracts/` holds 121 test methods across 16 modules.
+
+### 3.19 What locks here
+
+The three locks are realised as: the corpus format (`domain/wire/contracts.py` + `schemas/v4/`), the wire
+interface definition (`schemas/v4/*.schema.json`), and the seams (subprocess/NDJSON, UDS).
+
+`schemas/v4/MANIFEST.md` exists and carries schema status. The operational rule ("a schema marked `DRAFT` may
+not be used to record anything intended to survive") has **no code enforcer** — nothing reads `MANIFEST.md`
+status at runtime, and the live SQLite ledger records against DRAFT schemas.

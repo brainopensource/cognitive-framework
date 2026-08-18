@@ -14,6 +14,22 @@ reported where the theory document names them explicitly (notably §6).
 Section numbering and headings mirror `SYSTEM_SPEC_THEORY.md` exactly so the two can be diffed
 section-by-section. This document records **what the code does**, not whether that is correct.
 
+## Table of Contents
+
+0. [Document Registry, Precedence & Identifier Namespaces (VG-00)](#0-document-registry-precedence--identifier-namespaces-vg-00)
+1. [System Identity, Claims & Non-Claims (VG-02)](#1-system-identity-claims--non-claims-vg-02)
+2. [Turn Lifecycle, Planes & Execution Model (VG-03)](#2-turn-lifecycle-planes--execution-model-vg-03)
+3. [Core Contracts & Wire Schema (VG-04)](#3-core-contracts--wire-schema-vg-04)
+4. [Policy Kernel, Capability Attenuation & Security Model (VG-05)](#4-policy-kernel-capability-attenuation--security-model-vg-05)
+5. [Competence, Memory & Evidence Model (VG-06)](#5-competence-memory--evidence-model-vg-06)
+6. [Loop Engineering, Measurement & Self-Improvement (VG-07)](#6-loop-engineering-measurement--self-improvement-vg-07)
+7. [Architectural Decision Record Summary (VG-09)](#7-architectural-decision-record-summary-vg-09)
+8. [Deferred & Rejected Design Space (VG-10)](#8-deferred--rejected-design-space-vg-10)
+9. [Build Plan, Programme Spine & Roadmap Milestones (VG-08, GTS-13C)](#9-build-plan-programme-spine--roadmap-milestones-vg-08-gts-13c)
+10. [Engineering Handbook Principles (VG-01)](#10-engineering-handbook-principles-vg-01)
+11. [Convergence Evidence & Vision Annex (VG-11, VG-12)](#11-convergence-evidence--vision-annex-vg-11-vg-12)
+12. [Appendix — Internal Contradictions & Ambiguities in the Corpus](#12-appendix--internal-contradictions--ambiguities-in-the-corpus)
+
 **Measured baselines used throughout:**
 
 | Measurement | Value | Source |
@@ -1329,3 +1345,885 @@ interface definition (`schemas/v4/*.schema.json`), and the seams (subprocess/NDJ
 `schemas/v4/MANIFEST.md` exists and carries schema status. The operational rule ("a schema marked `DRAFT` may
 not be used to record anything intended to survive") has **no code enforcer** — nothing reads `MANIFEST.md`
 status at runtime, and the live SQLite ledger records against DRAFT schemas.
+
+---
+
+## 4. Policy Kernel, Capability Attenuation & Security Model (VG-05)
+
+The kernel is nine files under `vanguard/packages/kernel/`: `__init__.py`, `attenuation.py`, `budget.py`,
+`classifier.py`, `dispatch.py`, `grants.py`, `model.py`, `policy.py`, `provenance.py`. Logical TCB size is
+**1,333** / alarm **1,438** (`tools/kernel-tcb-budget.json`: baseline 1,307 + 131). `tools/check_tcb_budget.py`
+and must-fail `MF-KRN-011` enforce the tripwire.
+
+### 4.1 Audit stance
+
+`K-01` is a comment doctrine, not a single gate. Four assurance kinds as built:
+
+1. **Architecture tests** — `tools/check_boundaries.py` plus kernel unit tests (`AT-08`/`AT-09` live; `AT-10`–`AT-12` do not).
+2. **Must-fail tests** — 11 `MF-KRN-*` cases plus related `MF-S0-*` / `MF-SEC-*` (see §9.6). Spec IDs `MF-01`…`MF-37` are not the live harness IDs.
+3. **Fault injection** — `test/kernel/test_dispatch.py` covers ordering and fail-closed exits; not every `F-nn` is injected there (F-14…F-17 live in `test/kernel/test_attenuation.py`).
+4. **Adversarial audit of the verifier before a training run** — **no code**; no training run exists.
+
+### 4.2 The trusted computing base
+
+The *policy-kernel* ceiling is measured. The larger TCB (OS, bwrap, sqlite, `cryptography`, evaluator image,
+identity) is **not** enumerated as a versioned declaration in `vanguard/packages/`. `K-02` is therefore held
+for the kernel LOC tripwire and unmet as a dependency declaration.
+
+#### 4.2.1 Mutability classes (`R0` … `R4`)
+
+**No code counterpart.** There is no `R0`/`R1` table, no dispatcher pre-check rejecting those targets
+(`K-03` **Absent**), and no closed adapter table keyed on mutability class. The closed adapter table that
+does exist is `Kernel._adapters` (`dispatch.py:113`) populated at composition (`runtime/root.py` binding
+table) — unknown actions fail at S2 (`F-02`), which is a weaker property than `K-03`.
+
+### 4.3 The security claim `S1`
+
+| Clause | As-built |
+|---|---|
+| (a) effect outside granted actions and resources | Held for privileged sinks via S5 + `attenuate()` + sealed membership (`policy.py:95-106`). Observation/pure sinks skip the grant (`classifier.py:92 requires_grant` only for `PRIVILEGED`) |
+| (b) child outside parent | Held at `attenuate()`; child episodes get a parsed child `Scope` (`engine.py:263-286`) |
+| (c) modify the verifier | Import-graph only (`AT-02` / `MF-S0-005`). No `AT-12` selector reachability check. Worker probe asserts evaluator path unreadability (`rootless.py` mount probe) |
+| (d) exceed limits without debit | Held: `Governor.commit` retains negative settlement (`budget.py:145-149`) |
+| (e) untrusted content authorises widening | Library held (`authority_violation`, `provenance.py:130-143`). **Production wiring is weak** — see §4.7 |
+| (f) promote a claim without independent evidence | Vacuous — no promotion path exists |
+| (g) reach runtime/config/keys/update | Vacuous for update (no updater). Keys live in env (`VANGUARD_EVALUATOR_VERDICT_PUBLIC_KEY`, approval keys). No capability resolver that names those paths |
+
+There is **no** `Principal::EvidencePlane` ingress into `Kernel.dispatch`. Evaluators never import `Kernel`
+or `EffectRequest`. Dual-ingress (`ADR-0061`) is spec-only; production effects enter only via
+`EpisodeEngine` → `Kernel.dispatch`.
+
+### 4.4 The dispatch sequence `S0` … `S12`
+
+Implemented in `kernel/dispatch.py` (`Kernel.dispatch` `:127`, `_guarded` `:238`). Docstring at `:1-37`
+matches the spec diagram.
+
+| Stage | As-built |
+|---|---|
+| S0 ENTER | `EffectRequest` constructed by `EpisodeEngine._to_effect_request` (`engine.py:467-480`), not inside `dispatch` |
+| S1 PARSE | `_validate` (`dispatch.py:139-142`, `:410-428`) |
+| S2 RESOLVE | adapter lookup + `healthy()` (`:144-156`) — before any lease (`K-04`) |
+| S3 DESCRIBE | `descriptor_of` (`:158-162`) |
+| S4 CLASSIFY | `_classifier.widens_capability` (`:164-174`); exception → `F-05` fail-closed |
+| S5 AUTHORIZE | `_policy.authorize` (`:176-202`) |
+| S6 GRANT | `_issuer.issue` **only if** `requires_grant` (`:206-222`); observation/pure skip |
+| S7 RESERVE | `_governor.reserve` (`:224-233`) |
+| S8 VERIFY | inside `_guarded` (`:267-276`) |
+| S8a INTENT | `_ledger.append_intent` (`:278-293`) before S9 (`K-47`) |
+| S9 DISPATCH | `adapter.execute` (`:295-307`) |
+| S10 COMMIT | `_governor.commit` (`:309-314`) |
+| S11 RELEASE | `finally` (`:315-322`) |
+| S12 EMIT | `_finish` after `finally` (`:324-328`, `:330-361`) |
+
+Approval suspension (`F-08`) exits **before S6/S7** (`:187-193`) — `K-13`/`K-14` held.
+
+#### 4.4.1 Ordering rules
+
+| # | As-built |
+|---|---|
+| `K-04` | **Held** — S2 before S7 |
+| `K-05` | **Held** — S8 inside `_guarded` after S7 |
+| `K-06` | **Held** — S11 `finally` before S12 |
+| `K-07` | **Held** — negative settlement retained |
+| `K-08` | **Held** — classifier call, never a constant (`MF-KRN-001`) |
+| `K-47` | **Held** — S8a before S9 |
+
+#### 4.4.2 Failure paths (`F-01` … `F-25`)
+
+`FailurePath` at `kernel/model.py:121-154` is the live table (26 members counting `OK` and `F-21a`).
+`ALERTABLE` (`model.py:157-163`) is `{F-10, F-17, F-24, F-21a}`.
+
+| ID | As-built |
+|---|---|
+| `F-01`…`F-05` | **Held** — returned from `dispatch` before the lease |
+| `F-06` | **Partial** — fallback when `decision.failure` is unset (`dispatch.py:195`). `StandardPolicy` never sets `DENIED_REJECT` |
+| `F-07` | **Held** — benchmark mode (`policy.py:126-127`) |
+| `F-08` | **Held** — interactive approval (`policy.py:128-129`, `dispatch.py:191-193`) |
+| `F-09` | **Held** in library — `authority_violation` (`provenance.py:130-143`, `policy.py:117-118`). Production span set is usually just the operator brief (see §4.7) |
+| `F-10` | **Held** — attenuate deny + sealed-scope membership (`policy.py:88-106`) |
+| `F-11` | **Held** — `MissingDescriptorBinding` / `ValueError` at issue (`dispatch.py:222`) |
+| `F-12` / `F-13` | **Held** — `BudgetDenied` (`budget.py:115,119` → `dispatch.py:228-229`) |
+| `F-14`…`F-17` | **Held** — `GrantIssuer.verify` (`grants.py:188-218`) |
+| `F-18`…`F-21` | **Held** — `_failure_for` maps adapter status (`dispatch.py:403-406`) |
+| `F-21a` | **Held** — intent append fail (`dispatch.py:291-292`); also emits `KernelAlarm` (`:341-343`) |
+| `F-22` | **Held** — adapter exception → `UNDETERMINABLE` (`:300-306`) |
+| `F-23` | **Held** — commit except (`:313-314`) |
+| `F-24` | **Partial** — `raise KernelAlarm` (`:319-322`); never returned as `DispatchResult.LEASE_LEAK` |
+| `F-25` | **Partial** — `_publish` swallows emit failure (`:380-386`); enum value is never returned |
+
+**Divergence from spec text "F-24 is the only kernel alarm":** `KernelAlarm` is also emitted on `F-21a`
+(`dispatch.py:341-343`) without raising. Class docstring at `:93-94` still says F-24 only.
+
+`AT-09` exhaustiveness is asserted by `test/kernel/test_dispatch.py`.
+
+#### 4.4.3 Idempotence and replay (`K-09` … `K-12`)
+
+| # | As-built |
+|---|---|
+| `K-09` | **Partial** — S1–S8 are functions of request + kernel state; not proven as a replay property test |
+| `K-10` | **Held** for grants — `single_use` when `idempotency_key is None` (`dispatch.py:218`) |
+| `K-11` | **Partial** — resume reconstructs from the ledger (`test/runtime/test_resume_from_ledger.py`); grants are not reused across resume as a documented API |
+| `K-12` | **Absent** as a recorded-replay bypass of S9. Cassette replay is a *model* adapter (`adapters/models/cassette.py`), not a kernel replay of effects |
+
+#### 4.4.4 Suspension (`K-13` … `K-17`)
+
+`SuspensionToken` (`dispatch.py:65-73`) binds `descriptor_digest` (`K-15`). No lease is opened (`K-13`).
+Re-entry is at S1 (`K-14` comments at `:187-188`). Expiry is a token field (`K-16`); benchmark mode is `F-07`
+(`K-17`). Interactive resume after `F-08` is an in-process queue (`RuntimeService._cmd_ResolveApproval`),
+not a ledger `ApprovalResolved` event (see §3.13.2).
+
+### 4.5 Grants — kernel obligations (`K-18` … `K-22`)
+
+`Grant` (`grants.py:62-74`): `grant_id`, `principal`, `descriptor_digest`, `scope`, `expires_at`,
+`purpose_digest`, `single_use`, `parent_grant_id`, `authenticator`, `approval_ref`.
+
+| # | As-built |
+|---|---|
+| `K-18` | **Held** — empty `descriptor_digest` / `purpose_digest` refused (`grants.py:158-166`); S8 recomputes |
+| `K-19` | **Held** — `single_use=request.idempotency_key is None` |
+| `K-20` | **Held** — `HmacAuthenticator`; `issue(cross_process=True)` refuses without one (`grants.py:178-182`) |
+| `K-21` | **Partial** — `expires_at` comes from constraints, no fixed TTL; **no renew API** |
+| `K-22` | **Absent** as kernel code — subprocess containment is the sandbox, not a grant comment |
+
+`K-49` revoke is transitive (`grants.py:225-241`) but **never called** and never emits `CapabilityRevoked`.
+
+### 4.6 Attenuation (`K-23` … `K-27`, `K-48`, `K-49`)
+
+`attenuate()` (`attenuation.py:131`) returns `AttenuationDenied` or a narrowed `Scope`. `Scope.sealed`
+(`attenuation.py:98-107`, set at `:172`) implements `ADR-0067`: `StandardPolicy` denies
+`request.action ∉ requested_scope.actions` **only when sealed** (`policy.py:95-106`) as `F-10`.
+
+| # | As-built |
+|---|---|
+| `K-23` | **Held** |
+| `K-48` | **Held** — `decide()` total, denies undefined and cross-kind (`resource_selector.py:431`) |
+| `K-24` | **Held** — `depth = parent.depth + 1`; classifier widens when `depth > max_depth` |
+| `K-25` / `K-26` | **Held** — denial records requested vs grantable; no silent intersection |
+| `K-27` | **Held** — `F-10` is `ALERTABLE` |
+| `K-49` | **Partial** — revoke exists; no event, no caller |
+
+### 4.7 Provenance and the authority predicate (clause S1(e))
+
+Library: `kernel/provenance.py`. `Accumulation.extend` only lowers labels (`:60-73`). `advance_turn` (`:75-90`)
+is the K-33 union. `child_return` (`:92-99`) labels returned text `UNTRUSTED_DERIVED`.
+`authority_violation` (`:130-143`) is F-09 when widening ∧ any untrusted span.
+
+**Production wiring does not feed the library.**
+
+- `_operator_span()` (`runtime/root.py:1210-1213`) returns a literal `Span("brief-1", Trust.OPERATOR, "operator_brief")`.
+- `EpisodeEngine` only accumulates a span if `receipt_labeller` returns one (`engine.py:366-369`).
+- Production `_admit_turn_result` (`root.py:1228-1245`) notes the tool result into L5 and **`return None`** —
+  tool results never become justifying spans.
+- `spawn()` (`engine.py:490-615`) never calls `Accumulation.child_return`; the child `run()` is given **no spans**.
+
+So `K-28`–`K-31` hold as types and unit tests (`test/kernel/test_provenance.py`). `K-32` holds
+(`StandardClassifier.widens_capability`, `classifier.py:109-124`, `MF-KRN-001`). `K-33` holds in the library
+and **fails in production composition**. `K-31` (labels per source class, never at a call site) is also
+weakened by the literal `_operator_span`.
+
+#### 4.7.1 The two operands
+
+Classifier operand: **Held**. Span-accumulation operand: **not wired**. `MF-KRN-002` fails a reset in a
+broken fixture; the production engine never accumulates tool-result spans, so a reset is indistinguishable
+from the live path.
+
+#### 4.7.2 What provenance does not do
+
+Matches the spec's negative claims. Intent binding (purpose digest + approval) exists for privileged
+effects; the production predicate rarely sees untrusted spans to refuse.
+
+### 4.8 The workload perimeter (`K-34` … `K-46`)
+
+`adapters/sandbox/rootless.py:46 RootlessSandboxRunner`. bwrap argv (`:91-111`): `--unshare-all`,
+`--unshare-user`, `--die-with-parent`, `--new-session`, `--clearenv`, `--ro-bind /usr`, `--proc`, `--dev`,
+`--tmpfs /tmp`, `--bind` workspace. **No `--seccomp`**, no rlimits, no `--uid`.
+
+Startup probes (`:162-185`): mount (evaluator path unreadability), egress (UDP 1.1.1.1:53), syscall
+(`unshare --mount`). `ContainmentReport` (`ports/sandbox.py:38-53`) is the report type.
+`publication_decision` (`sandbox.py:75-83`) implements `K-44`.
+
+| # | As-built |
+|---|---|
+| `K-34` | **Partial** — namespaces via unshare; runner does not set UID (image docs claim worker 10001) |
+| `K-35` | **Held** — writable `/workspace` and `/tmp` only |
+| `K-36` | **Held** as deny-by-default (net unshared). No allowlist-egress path |
+| `K-37` | **Partial** — limits reported on the report, not applied in bwrap argv |
+| `K-38` | **Held** on timeout — `os.killpg` (`rootless.py:138`) |
+| `K-39` | **Absent** — syscall probe only, no seccomp filter |
+| `K-40` | **Inverted** — evaluator is a **separate** daemon (UID 10002), not inside the worker perimeter. The mount probe asserts the evaluator bundle is *unreadable* from the worker |
+| `K-41` | **Absent** — stock `/usr/bin/bwrap`, not a statically linked supervisor |
+| `K-42` | **Held** — probes |
+| `K-43` | **Held** — `verified=False` / `visibility_mark="unverified-rootless-perimeter"` |
+| `K-44` | **Held** — `publication_decision` |
+| `K-45` | **Absent** — report is not composed into the instrument tuple |
+| `K-46` | **Held** — `adapters/sandbox/fake.py` marks itself unverified |
+
+### 4.9 Self-modification (clause S1(g)) — `SA-1` … `SA-6`
+
+**All six Absent** as code. No candidate workspace, no digest-identified install, no rollback predecessor,
+no autonomous promotion of `R0`/`R1`. Held vacuously in the sense that no self-update path exists (`RSK-08`).
+`rule_test_map.py` marks the family untestable.
+
+### 4.10 Architecture tests (`AT-01` … `AT-12`)
+
+| # | As-built |
+|---|---|
+| `AT-01` | **Partial** — comments on `Kernel` / `__init__.py`; lattice prevents agency from importing adapters; composition root is `runtime/root.py`. Not a dedicated "only root imports adapters" scanner |
+| `AT-02` | **Held** — evaluator import ban + `MF-S0-005` / `MF-S7-A-03-001` |
+| `AT-03` | **Held** — `"client": {"domain","runtime"}` |
+| `AT-04` | **Partial** — `Span.source_class` exists; no exhaustive source-class registry |
+| `AT-05` | **Held** by absence — no commutativity flag |
+| `AT-06` | **Held** — kernel imports only domain/ports |
+| `AT-07` | **Partial** — `check_tcb_budget.py`, `check_core_changes.py`; not a review rule per TCB path |
+| `AT-08` | **Held** — TCB budget + `MF-KRN-011` |
+| `AT-09` | **Held** — `test_dispatch.py` exhaustiveness |
+| `AT-10` | **Absent** — no cast lint |
+| `AT-11` | **Absent** — no startup UID/topology assertion in tests |
+| `AT-12` | **Absent** — no capability→verifier-path check |
+
+### 4.11 Threat model
+
+No code artefact enumerates `A1`–`A7` or `T-01`–`T-08`. Control coverage:
+
+| Attack | As-built residual |
+|---|---|
+| `T-01` injection → escalation | Predicate library exists; production spans do not accumulate tool results. Perimeter is the load-bearing control |
+| `T-02` verifier compromise | Unreachability is an import rule + separate UID. No `AT-12` |
+| `T-03` tool escape | Classifier is not load-bearing (`K-39` absent) |
+| `T-04` budget evasion | In-flight overrun before commit, as specified |
+| `T-05`/`T-06` memory/corpus | No memory write path, no corpus |
+| `T-07` release pipeline | No release pipeline |
+| `T-08` recovery-path forgery | Recovery is exterior (`recovery.py`). **Heartbeats are not authenticated** |
+
+### 4.12 Audit checklist (one-day reviewer)
+
+Answered from code, not as a passing audit:
+
+1. Model-output → effect path is `EpisodeEngine` → `Kernel.dispatch` only. Dual EvidencePlane ingress does not exist.
+2. Widening is a classifier call; `MF-KRN-001` exists. Production spans do not accumulate.
+3. `MF-KRN-002` exists; production `receipt_labeller` returns `None`.
+4. `AT-12` does not exist — cannot name a selector check that refuses verifier paths.
+5. Over-broad request → `AttenuationDenied` / `F-10` alertable. Sealed-scope membership is the extra gate.
+6. Containment is probed; unverified blocks publication via `publication_decision`.
+7. Terminal record: `RecoveryScanner` writes `RunRecovered`/`RunAborted`. `F-22` preserves undeterminable.
+8. Cross-process grants: HMAC. Heartbeats: none.
+9. Planes: worker/evaluator UIDs in Dockerfiles; no AT-11 runtime assert. Cognition+Control share one process.
+10. Live must-fail IDs are `MF-KRN-*` / `MF-S0-*` / …, not `MF-01`…`MF-37`. Until `CI-9` is a failing gate, VG-05's own caveat applies: rules are asserted, not proven by the spec's ID map.
+
+---
+
+## 5. Competence, Memory & Evidence Model (VG-06)
+
+### 5.1 The governing asymmetry
+
+`MEM-1` has no pipeline to violate. A `Verdict` (`ports/evaluator.py:42`) is produced by the exterior
+evaluator and is **not** used to admit a semantic claim. `runtime/root.py:788-791` states the ledger is the
+only memory.
+
+### 5.2 The four stores
+
+| Store | As-built |
+|---|---|
+| Working | Episode context: `ContextCompiler` + `_LayeredOperator.note` (L5) |
+| Episodic | `EventStorePort` / SQLite ledger + JSONL export |
+| Semantic claims | `domain/evidence/claim.py Claim` as a value type; injected list for `vg why` (`service.py:83-88,331-336`). No store, no write gate, no retrieval |
+| Competence | Harness `ArtifactGraph` (`domain/artifacts/graph.py:85`) — composition, not competence. `CompetencePriorRecorded` is the only competence-named event that is emitted |
+
+### 5.3 The claim pipeline
+
+**Absent.** No extractor, contradiction search, corroboration, quarantine, activation, or demotion engine.
+`EvidenceClaimProduced` is never emitted. `Claim.contradicts` / `derived_from` / `evidence_refs` are fields
+that nothing walks. Hedge fields are recorded and never consumed (`claim.py:22-25, 179-182`).
+
+`MEM-2`…`MEM-7`: parse-time field presence on `Claim` covers `MEM-2` shape; `MEM-3`–`MEM-7` have no
+implementation. `MEM-7` trainability is an envelope enum only.
+
+### 5.4 Verification
+
+#### 5.4.1 Evaluator classes
+
+`ports/evaluator.py` / `IsolatedEvaluator` implement a mechanically-reproducible class (command + probes).
+No ranker, no learned proxy, no human-adjudicated class as code. `V-01`…`V-04` are held by absence of a
+ranker that admits.
+
+#### 5.4.2 Verifier unreachability
+
+Layer 1 (import): **Held** (`AT-02`). Layer 2 (`K-03` dispatch-time R0/R1 reject): **Absent**. Layer 3
+(read-only mount of evaluator inputs): **Held** as a worker probe that the evaluator path is unreadable,
+not as a shared mount.
+
+#### 5.4.3 The double probe
+
+**Held** inside `IsolatedEvaluator`: `_probe_immutability` (`isolated.py:146`) and `_probe_non_pollution`
+(`:197`). Verdict evidence carries `immutability` / `nonPollution` (`:273-286`). A probe failure yields
+inconclusive, not a pass (`:72-91`).
+
+#### 5.4.4 Inconclusive as a first-class state (`V-05` … `V-09`)
+
+**Held** as `runtime/outcome_labels.py` plus six must-fail cases `MF-S7-C-02-001`…`006`
+(`inconclusive:precondition_satisfied`, `no_intervention`, `model_not_invoked`, `instrument_error`,
+`no_verdict`, containment publication block). Provider failure → `RunTermination.INSTRUMENT_ERROR`, not a
+task failure. `V-06`/`V-07` (denominator hygiene, per-arm instrument-error rate) live in
+`tools/telemetry/statistics.py` / `aa_runner.py`, not in `vanguard/packages/`.
+
+### 5.5 Promotion, activation and demotion
+
+**Absent** as engines. `ArtifactRegistryProjection` (`projections.py:300`) would consume `ActivationChanged`;
+nothing emits it. `vg why` (`_cmd_ExplainArtifact`) reports absence rather than smoothing
+(`roadmap_backend.md` S10-A-04; `service.py:331-336`).
+
+#### 5.5.1 Three stages, in order
+
+No hard-constraint gate, no frontier, no per-context activation policy. `runtime/repair.py` retries a
+harness; it does not rank competence artifacts.
+
+#### 5.5.2 Promotion criteria — all must hold for domain D
+
+No promotion criteria evaluator. Ablation, holdout-for-derivation, and reversible activation are unimplemented.
+
+#### 5.5.3 Demotion and anti-ossification (`V-10` … `V-13`)
+
+`V-10` invalidation conditions are required at parse and **never run**. `V-11`–`V-13` have no counterpart.
+
+### 5.6 The outer loop
+
+**Absent** as distillation/bandit. The closest outer loop is `runtime/repair.py:58 drive_until_green` plus
+`runtime/tier_escalation.py` (salvage of deleted `MetaLoopEngine` — docstring `:4-10`: no second dispatch
+path, no grading of own escalation). That is repair, not competence promotion.
+
+### 5.7 Substrate invariance
+
+Substrate fields exist on `Claim` (`substrate_profile`) and on the instrument tuple in `tools/telemetry/tuple.py`.
+No migration protocol, no portability classification, no substrate-debt metric in `vanguard/packages/`.
+
+### 5.8 Honest limits
+
+Corroborated: no `EvaluationBudget`; ablation is not implemented; TableWorld is not a second domain through
+the engine (see `C-10`).
+
+---
+
+## 6. Loop Engineering, Measurement & Self-Improvement (VG-07)
+
+VG-07's in-tree apparatus is **outside** `vanguard/packages/`: `tools/telemetry/` and `lab/{build,run,diff,bench}.py`,
+bound by `S8-J-07`. `check_boundaries.py` forbids `lab/` from importing anything.
+
+### 6.1 The three closure conditions
+
+| # | As-built |
+|---|---|
+| `CL-1` | **Held architecturally** — evaluator import ban + separate daemon. Production evaluation is still *triggered* by the runtime (`root.py:935`), not by a ledger observer |
+| `CL-2` | **Partial** — `tools/telemetry/splits.py` implements HOLDOUT/SEALED burn. No promotion path to violate or satisfy it in packages |
+| `CL-3` | **Partial** — `tools/telemetry/aa_runner.py` refuses degenerate 0%/100% A/A; `statistics.py` refuses p-values at n<20 (`M-28` comment) |
+
+### 6.2 Levels of loop engineering — vocabulary, never a roadmap
+
+`M-01` is held as practice: no ticket in `vanguard/packages/` is named "L6". As-built loop depth: L1 tool loop
+(`EpisodeEngine`) + partial L2 (compaction yes, re-grounding unwired) + spawn as a narrow L3. L4/L5 absent.
+`runtime/loops/` **does not exist**; `MetaLoopEngine` was deleted (`tier_escalation.py:4-10`).
+
+### 6.3 Long-horizon instrumentation
+
+Consolidation-loss runner: **absent**. Re-grounding: `RegroundPolicy` exists, **never called**. Retrieval
+value: `IndexPort` is observation-only (ALFA S10-A-03: tests assert no `propose`/`rank`/`select`/`dispatch`).
+
+### 6.4 Distillation and promotion pipeline
+
+**Absent** in packages. Evolution event kinds have zero emitters (see §3.13.2). `tools/telemetry/gap_freeze.py`
+is a promotion-freeze helper for the lab, not a runtime promoter.
+
+### 6.5 The measurement doctrine (`M-02` … `M-20`)
+
+Most `M-*` IDs do not appear in `vanguard/packages/`. Coded outside packages:
+
+| ID / spirit | Where |
+|---|---|
+| `M-18` incomparable lift refused | `tools/telemetry/tuple.py:1-34, 189-220` |
+| `M-19` split burn | `tools/telemetry/splits.py` |
+| `M-07` spirit (degenerate A/A) | `tools/telemetry/aa_runner.py:7-8` |
+| `M-28` small-n p-value refuse | `tools/telemetry/statistics.py:9,57` |
+| Integer quantities | `runtime/telemetry.py:1-9` |
+| Arm scoring from ledger | `runtime/scoring.py` (`W15-A`) |
+
+`K_compat` refusal on the tuple is the live `M-18` gate. `lab/bench.py` is paired McNemar over `lam.sqlite`.
+
+### 6.6 Optimisation and what it cannot do
+
+No optimiser in packages. Repair (`runtime/repair.py`) retries the same harness; it does not rewrite the
+kernel or the evaluator.
+
+### 6.7 The release pipeline (`M-21` … `M-24`)
+
+**Absent.** `CandidateBuilt` / `CandidateAttested` / `CanaryPromoted` / `RollbackTriggered` never emitted.
+No canary, no signed promotion, no tested rollback of a successor.
+
+### 6.8 The transfer experiment (impoverished-ontology, Phase 2)
+
+**Absent** as a runner. TableWorld exists as a toy environment not bound through `EnvironmentAdapter` / the
+episode engine — it cannot currently witness `H0`.
+
+### 6.9 The experiment registry (`M-25` … `M-28`)
+
+**No runtime registry.** `M-28` appears as a comment in `statistics.py`. Preregistration helper:
+`tools/telemetry/preregistration.py`.
+
+### 6.10 Preparation for search, process rewards and reflection
+
+**Absent** (`DEF-06` honoured). Contracts declare the event kinds; no engines.
+
+---
+
+## 7. Architectural Decision Record Summary (VG-09)
+
+ADRs are documentation. Code cites a **subset** as docstring anchors. Grep of `ADR-00` in `vanguard/packages/`:
+`0039`, `0047`, `0048`, `0054`, `0057`, `0058`, `0060`, `0062`, `0067`. `0068` behaviour (hedge fields) is
+implemented without the ID. `0050` appears in schema `$comment`s. `tools/` cites **zero** ADR IDs.
+
+### 7.1 Foundational decisions
+
+| ADR | As-built |
+|---|---|
+| `0000` | Docs only |
+| `0001` | **Reversed by `ADR-0063`** — control plane is Python (125 modules) |
+| `0002` | **Held** — subprocess + NDJSON seams |
+| `0003` | **Held** — no runtime workflow graph; `ProcessEngine` is governance, not agent topology |
+| `0004` | **Partial** — evaluator unreachable by import; no `AT-12` |
+| `0005` | **Held** — `compose()` freezes `FrozenHarness` |
+| `0006` | **Held** — index is Python regex (`adapters/stores/repo_index.py`); tree-sitter not in TCB |
+| `0007` | **Not held** — no parallel execution (`C-04`) |
+
+### 7.2 Adjudications between the two pre-v4 lineages
+
+| ADR | As-built |
+|---|---|
+| `0008` | Schemas exist; Python reader is hand-written, not generated |
+| `0009` | **Held** — `domain/canonicalisation/jcs.py` |
+| `0010` | **Held** — SQLite WAL + JSONL export |
+| `0011` | **Held** — `Scope` has actions + resources + constraints |
+| `0012` | **Held** — `K-26` |
+| `0013` | **Held** — controller, worker, evaluator (updater absent) |
+| `0014` | Python + TypeScript readers exist (`domain/contracts.ts`) |
+| `0015` | Vacuous — no promotion |
+| `0016` | **Not held** — no operator-as-data |
+| `0017` | **Not held** — `ArtifactGraph` is harness composition |
+| `0018` | **Held** at parse (`INV-1`) |
+| `0019` | Vacuous — no self-mod path |
+| `0020` | Docs only |
+
+### 7.3 Corrections — each bound to the test that now catches it
+
+Live must-fail IDs are `MF-KRN-*`, not `MF-01`…`MF-37`. Approximate mapping:
+
+| ADR | Spec catch | Live catch |
+|---|---|---|
+| `0027` | `MF-01` / `K-32` | `MF-KRN-001` constant-classifier |
+| `0028` | `MF-02` / `K-33` | `MF-KRN-002` span-reset (library; prod spans not accumulated) |
+| `0039` | `MF-31` / `CT-51` | `MF-KRN-003` unbound-grant |
+| `0023` | `AT-08` | `MF-KRN-011` TCB ALARM |
+| `0044` | `MF-36` / `K-47` | `MF-KRN-010` late-intent |
+| `0021`/`0022` | `MF-11`/`MF-13` | sandbox probes + `MF-S7-C-02-006` publication block |
+| `0031` | `MF-17` / `V-05` | `MF-S7-C-02-004` `inconclusive:instrument_error` |
+
+### 7.4 Deferrals with a scheduled reversal
+
+`0035` five-process split: not started. `0036` third language: absent. `0037` memory-write tests: absent.
+`0038` schema LOCKED: still DRAFT (`schemas/v4/MANIFEST.md`).
+
+### 7.5 Sprint 0 governance baseline (`ADR-0045` … `ADR-0053`)
+
+| ADR | As-built |
+|---|---|
+| `0045` | Docs |
+| `0046` | Docs — GTS-13C still the programme plan |
+| `0047` | **Held** — `spike/`/`slice/` absent; `--s4-exit` + `MF-S4-001` |
+| `0048` | Trust-spine tests exist (`test/trust/test_spine.py`) with fake/LAM models |
+| `0049` | **Held** — `vg-code-default` verbs `fs.read`/`fs.search`/`patch.apply`/`proc.exec`; `vg-shell-only` ships |
+| `0050` | **Held** — `ProcessDefinition`/`ProcessInstance`/`ProcessEngine` |
+| `0051` | **Held** — sink-class mediation; privileged only for grants |
+| `0052` | Active MVP Contract tools exist (`tools/check_active_mvp_contract.py`, `run_active_contract_tests.py`) |
+| `0053` | Docs |
+
+### 7.6 Kernel, sprint-structure and phase-authorisation decisions
+
+Cited in code:
+
+| ADR | Where |
+|---|---|
+| `0054` | TCB baseline; `engine.py:530` |
+| `0057` | Privileged-apply approval; `runtime/root.py:1` |
+| `0058` | `runtime/root.py:1323` |
+| `0060` | Zero core lines for a new domain; `engine.py:334-335`, `invocation.py`, `root.py` |
+| `0062` | Inbox/outbox + approvals; `service.py:3`, `inbox.py`, `recovery.py:3` |
+| `0063` | Python control plane (implicit) |
+| `0066` | MCP is not an authority path (commented; zero MCP adapter code) |
+| `0067` | `Scope.sealed`; `attenuation.py:99`, `policy.py:95` |
+| `0068` | Claim hedge fields without the ID in source |
+
+`0061` (dual dispatch ingress) is **not** realised for EvidencePlane (see §4.3). `0064`/`0065` are docs.
+
+### 7.7 What belongs in the register
+
+No code enforcer that a decision must be an ADR. `tools/check_pr_requirements.py` requires a `REQ-*` cite,
+not an ADR cite.
+
+---
+
+## 8. Deferred & Rejected Design Space (VG-10)
+
+### 8.1 Deferred (`DEF-01` … `DEF-12`)
+
+| # | As-built |
+|---|---|
+| `DEF-01` | **Honoured** — no authoring canvas in packages (GUI is out of scope) |
+| `DEF-02` | **Honoured** — no semantic-memory pipeline |
+| `DEF-03` | **Partially superseded** — `EpisodeEngine.spawn` is live (`engine.py:490`). Not general subagents / playbooks |
+| `DEF-04` | **Partial** — `IndexPort` exists (observation-only). Browser / web search **absent** |
+| `DEF-05` | **Honoured** — no systems-language index |
+| `DEF-06` | **Honoured** for engines; event kinds declared |
+| `DEF-07` | **Honoured** — no updater |
+| `DEF-08` | **Honoured** — no public-benchmark gate |
+| `DEF-09` | **Honoured** — no training path |
+| `DEF-10` | **Honoured** |
+| `DEF-11` | **Superseded in part** — three compaction strategies exist; default is still recency-window |
+| `DEF-12` | **Superseded for privileged approval** (`ADR-0057`, `approvals.py`). General session-suspend is an in-process queue, not a ledger `ApprovalResolved` |
+
+### 8.2 Rejected (`REJ-01` … `REJ-12`) — never classify these as "missing"
+
+| # | As-built |
+|---|---|
+| `REJ-01` | **Held** — no runtime workflow graph |
+| `REJ-02` | **Held** — no L6+ tickets in packages |
+| `REJ-03` | **Held** |
+| `REJ-04` | **Held** |
+| `REJ-05` | **Held** |
+| `REJ-06` | **Held** — `Trust` is one axis, not a unified lattice |
+| `REJ-07` | **Held** — classifier is a parser; perimeter is bwrap |
+| `REJ-08` | **Held** — enforcement at `Kernel.dispatch` |
+| `REJ-09` | **Held** in packages |
+| `REJ-10` | **Contradicted by `README.md`** — nine-level "Biological Hierarchy" is the README's second section. No code module implements it |
+| `REJ-11` | **Held** — no scalar promotion |
+| `REJ-12` | **Held** |
+
+Additionally: `MetaLoopEngine` / `runtime/loops/` **rejected and deleted** (`DECISION-0005`; salvage in
+`tier_escalation.py`). MCP as authority path **rejected** (`ADR-0066`); zero MCP adapter code.
+
+### 8.3 How an entry moves
+
+No mechanised register. Roadmap rows in `docs/scrum/roadmap_backend.md` are the living board.
+
+---
+
+## 9. Build Plan, Programme Spine & Roadmap Milestones (VG-08, GTS-13C)
+
+Living board: `docs/scrum/roadmap_backend.md` (updated 2026-08-17, product **v0.4.5-beta**). `TK-*` IDs
+have **zero** occurrences in `vanguard/packages/`.
+
+### 9.1 Phase 0 scope (VG-08)
+
+**In, as-built:** schemas + Python/TS readers; episode engine; budgets/leases; grants; SQLite event store +
+JSONL export; blob store; fake + real model adapters; Git environment; separately-identified evaluator;
+rootless worker with probes; crash recovery scanner; CI boundary/property/conformance/must-fail.
+
+**In the spec, weak or missing in code:** TableWorld as an `EnvironmentAdapter` (it is not); operators;
+`vg run` is a client (out of scope) over `RuntimeService`; measurement/A/A floor was spec-out of Phase 0
+but `tools/telemetry/` now exists (`Y-15`).
+
+**Out, still out:** canvas/GUI (present as `vanguard-gui/` but out of this document's scope); browser;
+semantic memory; automatic promotion; general subagents; training; autonomous updater.
+
+### 9.2 Phase 0 hypotheses
+
+| # | As-built |
+|---|---|
+| `H0` | **Not witnessed.** TableWorld is not routed through the episode engine. `check_core_changes.py` mechanises the "zero kernel/engine lines" half |
+| `H1` | **Partial** — privileged effects yes; observation/pure skip grants |
+| `H2` | **Partial** — probes + namespaces; no seccomp (`K-39`); no AT-11 |
+| `H3` | **Held** — `F-22` / `RecoveryScanner` |
+| `H4` | Open — PO acceptance records live tool-call / Q2 / spend / Claude daily-driver still TODO (`roadmap_backend.md`) |
+| `H5` | **Held** — reducer + replay tests |
+
+### 9.3 Three increments
+
+- **A Trust Spine** — present (`test/trust/test_spine.py`, fake/LAM).
+- **B Coding Cell** — present as coding runtime modules + `vg-code-default`; live coding win not claimed.
+- **C Generality Witness** — **not met.** TableWorld is a side type; `vg-table-default` is unregistered.
+
+### 9.4 Phase 0 tickets (`TK-00` … `TK-12`)
+
+No `TK-*` symbols in packages. Substance mapping: `TK-00` boundaries CI; `TK-01` schemas + JCS + vectors;
+`TK-02` grants/selectors; `TK-03` `Governor`; `TK-04` event store/reducer; `TK-05` `RecoveryScanner`;
+`TK-06` `Kernel.dispatch`; `TK-07` redaction/export (partial); `TK-08` rootless probes; `TK-09` isolated
+evaluator; `TK-10` episode + providers; `TK-11` git environment; `TK-12` TableWorld **incomplete**.
+
+### 9.5 CI gates (VG-08 §4)
+
+`.github/workflows/ci.yml` (`vanguard-v4-gates`) runs `sprint0-gates` and `docs-gates`. Present:
+`check_boundaries.py`, `check_tcb_budget.py`, `run_broken_tests.py`, `run_active_contract_tests.py`,
+schema validation, `scan_secrets.py`, `check_stale_paths.py`, `audit_v4.py`, `wordcount_v4.sh`,
+`rule_test_map.py` (exits 0 with `gaps=133`). **Absent as named gates:** cast lint (`AT-10`), fault-injection
+of every `F-nn` as a CI job (unit tests cover a subset).
+
+### 9.6 The must-fail suite (`MF-01` … `MF-37`)
+
+**`MF-01`…`MF-37` appear nowhere in code or tests.** The live harness is `test/broken/manifest.json` (38
+cases). `tools/run_broken_tests.py` requires the control to exit 0 and the broken counterpart to exit
+non-zero **with the declared `expected_failure` substring**.
+
+Live IDs:
+
+`MF-S7-C-02-001`…`006`, `MF-S7-C-001`, `MF-S0-001`…`009`, `MF-S7-A-01-001`, `MF-S7-A-02-001`,
+`MF-S7-A-03-001`, `MF-KRN-001`…`011`, `MF-S4-001`, `MF-GOV-001`, `MF-CTX-001`, `MF-CTX-002`,
+`MF-SEC-002`, `MF-TEL-001`, `MF-GOV-PATH-001`, `MF-SEC-SCAN-001`.
+
+Kernel family vs spec table (closest analogue, not a bijection):
+
+| Live | Broken variant / intent | Spec analogue |
+|---|---|---|
+| `MF-KRN-001` | `constant-classifier` | `MF-01` / `K-32` |
+| `MF-KRN-002` | `span-reset` | `MF-02` / `K-33` |
+| `MF-KRN-003` | unbound grant | `MF-31` / `CT-51` |
+| `MF-KRN-004` | widening attenuation | `MF-04` / `K-23` |
+| `MF-KRN-005` | permissive grant | `MF-05` / `K-26` |
+| `MF-KRN-006` | leaked lease | `MF-06` / `K-06` |
+| `MF-KRN-007` | clamped overrun | `MF-07` / `K-07` |
+| `MF-KRN-008` | permissive sink | `MF-KRN-008` (no MF-01–37 twin) |
+| `MF-KRN-009` | unrecorded effect | skip-record (`SinkClass` docstring) |
+| `MF-KRN-010` | late intent | `MF-36` / `K-47` |
+| `MF-KRN-011` | TCB ALARM | `AT-08` |
+
+This is why `rule_test_map.py`'s `tested=28` is a **spec cross-reference count** of `MF-nn` mentions next to
+rule IDs in `docs/main_v4/`, not a count of `test/broken/` cases.
+
+### 9.7 The rule-to-test map and its untestable classes
+
+Live output `rules=203 tested=28 untestable=42 gaps=133`. `CI-9` **does not fail the build**. Compensating
+assurance for architectural prohibitions is `check_boundaries.py` (stronger than a runtime test). Statistical
+refusal tests exist in `tools/telemetry/`. `SA-5` is vacuously held (no autonomous path).
+
+### 9.8 Phase 0 exit criterion
+
+**Not closed.** `CI-9` is red by construction. TableWorld does not witness `H0`. Dogfood 60% / fourteen-day
+window is not mechanised. Roadmap PO acceptance is marked done *honestly* with live tool-call still TODO.
+
+### 9.9 GTS-13C — programme artifact ownership
+
+Docs. Code ownership follows the package lattice, not the 13C artifact table.
+
+### 9.10 GTS-13C — the task spine (`T0` … `T11`)
+
+Present in spirit: T1 contracts, T2 kernel, T4 episode, T6 coding harness, T7 manifests, T10 two-impls +
+governance area. T8 measurement lives in `tools/telemetry/`. T3 operators **absent**. T5 playbooks **absent**.
+T9 evolution **absent**. T11 enterprise **absent**.
+
+### 9.11 `T1` — contract deliverables
+
+38 schema artefacts; hand-written Python reader; TS reader at `domain/contracts.ts`; vectors under
+`schemas/v4/vectors/`; `test/contracts/` 121 methods.
+
+### 9.12 `T2` — kernel deliverables
+
+Nine kernel files; `FailurePath`; grants; attenuation; governor; provenance library. Dual-ingress EvidencePlane
+**not** delivered. `principalRole` six-value enum **is** delivered.
+
+### 9.13 `T4` — the execution spine
+
+`EpisodeEngine` + `RunTermination` eight values (`ADR-0057`). Spawn live. Playbooks not.
+
+### 9.14 `T6` — the coding harness
+
+~2,088 LOC coding-named modules + `vg-code-default`. Live coding win not claimed.
+
+### 9.15 `T7` — artifact graph and harness manifests
+
+`kinds.json` 17 rows; six packs on disk, five registered; `compose()` freeze; `vg-table-default` orphan.
+
+### 9.16 `T10` — engineering discipline
+
+`check_boundaries.py` (incl. governance special-case and closed package set), `check_tcb_budget.py`,
+`check_core_changes.py` (`M11`/`ADR-0060`), two impls per several ports.
+
+### 9.17 GTS-13C spine — one primitive, two coordinators, five nouns
+
+One primitive: the episode loop. Coordinators: `EpisodeEngine` and `ProcessEngine` (governance). Nouns in
+code: grants, events, manifests, receipts, verdicts. Operators and playbooks are reserved kinds only.
+
+### 9.18 GTS-13C locked concepts (`L-01` … `L-18`) and open concepts (`O-01` … `O-11`)
+
+Locks with code: schemas, kernel roster, evaluator exteriority, NDJSON seams, sink-class mediation,
+integer money. Open: spawn is done (`O-03` on the roadmap); playbooks still deferred; competence graph not
+started (roadmap explicit).
+
+### 9.19 Where every capability lives (the falsification test for the abstraction)
+
+Adding a domain is supposed to be zero lines in `kernel/` and `agency/episode/` (`ADR-0060`,
+`check_core_changes.py`). Coding still leaked `domain/ledger/coding_session.py` into domain.
+
+### 9.20 Sprint schedule (GTS-13C Part II)
+
+Superseded as a schedule by `docs/scrum/roadmap_backend.md` waves/sprints (S6B–S34 rows). Not restated here.
+
+### 9.21 Test doctrine — six families (GTS-13C Ch. 8)
+
+Present: unit, property (`test/kernel/test_attenuation.py`, selector properties), vectors, must-fail,
+cassettes (`adapters/models/cassette.py`). Fault injection of the full `F-nn` table is incomplete. Live
+canary is out of packages.
+
+### 9.22 Margins — carried and alarmed
+
+TCB alarm +131 is the only mechanised margin. Cost/latency margins are not CI gates.
+
+### 9.23 The MVP gate — four questions (GTS-13C Ch. 10)
+
+Roadmap / `ADR-0064` record Q1–Q4 as not met or honest-partial. Q3 has a dated why-not (`S9-J-04`).
+This document does not re-score them.
+
+### 9.24 How the MVP grows itself — four stages
+
+Stage 1 (ledger accumulates) is **partial** — 11 of 34 kinds emitted. Stages 2–4 (attribution, proposal,
+structure) are **absent**.
+
+### 9.25 The Active MVP Contract (GTS-13C Ch. 15)
+
+**Implemented as tools, not as a kernel type.** `tools/check_active_mvp_contract.py` /
+`tools/run_active_contract_tests.py`. Header measurement: `closure-in-progress`; baseline 16/16; merged-scope
+14/14. `req_id` family in packages is the `REQ-*` list in §0.4 (not `REQ-KRN-014` as the theory example).
+`check_pr_requirements.py` is the PR cite gate.
+
+### 9.26 Standing programme risks (GTS-13C Ch. 14)
+
+Code-visible: specification capture (`CI-9` red, 133 gaps); TCB tripwire live; disposable `spike/`/`slice/`
+deleted; mediation drift tested by `MF-KRN-008`; process/episode split held (`ProcessEngine` vs
+`EpisodeEngine`). Unmechanised: dogfood rate, Conway drift, contract inflation.
+
+---
+
+## 10. Engineering Handbook Principles (VG-01)
+
+VG-01 is practice. Enforcement is tools, not a runtime module.
+
+### 10.1 Mental models (`M1` … `M11`)
+
+| # | As-built |
+|---|---|
+| `M1` | **Held** for the agent loop; `ProcessEngine` is the carved exception (`X-03`) |
+| `M2` | **Partial** — EffectAdapter + Evaluator exist; ObservationSource and CognitiveOperator do not |
+| `M3` | **Held** as split: `Kernel.dispatch` vs `RootlessSandboxRunner` |
+| `M4` | **Library held, production weak** (§4.7) |
+| `M5` | **Held** as import unreachability |
+| `M6` | **Held** — `run_broken_tests.py` |
+| `M7` | **Not held** — no competence graph |
+| `M8` | Docs/CI (`audit_v4.py`); not packages |
+| `M9` | Practice |
+| `M10` | **Held** — no plugin runtime in kernel; index is a port |
+| `M11` | **Held as a lint** (`check_core_changes.py`); contradicted by `coding_session.py` in domain |
+
+### 10.2 SOLID, concretely
+
+Kernel files are one-job modules (`model.py` docstring). Ports are narrow. Substitutability: `ModelPort`
+returns `Result` (`CT-33`); `EvaluatorPort` inconclusive-not-pass; `SandboxRunner` reports; `EnvironmentAdapter`
+returns `Result[T]`. DI enforced by `check_boundaries.py`.
+
+### 10.3 The shape of a change
+
+Not mechanised beyond PR requirement cites and boundary/TCB gates.
+
+### 10.4 Testing taxonomy — seven kinds
+
+Six of seven exist (see §9.21). Live canary is not a packages test.
+
+### 10.5 Practices and working agreements
+
+`AGENTS.md` / `CLAUDE.md` at repo root. Discovery scans those names into L3/L4 (`agency/manifests/discovery.py`).
+
+### 10.6 Review checklist
+
+No code.
+
+### 10.7 ADR format
+
+Docs. Code cites IDs in comments only.
+
+### 10.8 Repository layout (VG-01 §8)
+
+Live layout is VG-03/T10.1: `vanguard/packages/{domain,ports,kernel,agency,runtime,adapters}` plus
+`runtime/governance/` as a boundary **area**, `vanguard/clients/`, `lab/`, `benchmarkings/`. Not
+`policy-kernel/` or `controller/`. Closed package set is CI-enforced.
+
+### 10.9 Glossary
+
+No glossary type in code. Wire names are `camelCase`; Python is `snake_case`.
+
+### 10.10 The ten rules
+
+Not enumerated in packages. Closest mechanical set is `check_boundaries.py` + `check_tcb_budget.py` +
+`run_broken_tests.py` + `scan_secrets.py`.
+
+---
+
+## 11. Convergence Evidence & Vision Annex (VG-11, VG-12)
+
+### 11.1 Independent design convergence (VG-11) — EVIDENCE, secondary
+
+No code. Eight convergent conclusions vs as-built: (1) loop not graph — held; (2) single authorisation point
+— held for `Kernel.dispatch`, with sink-class skip for non-privileged; (3) evaluator unreachable — import
+held, trigger is runtime-side; (4) measurement apparatus — outside packages; (5) instrument ≠ task failure —
+held (`INSTRUMENT_ERROR`, inconclusive labels); (6) trajectory as substrate — ledger partial (11/34 kinds);
+(7) freeze at composition — held; (8) must-fail — 38 live cases, wrong ID family.
+
+### 11.2 Vision annex (VG-12) — NON-NORMATIVE
+
+No ticket in packages cites VG-12. `README.md` nevertheless carries the biological hierarchy that `REJ-10`
+and VG-12 exist to quarantine. Competence-prior recording (`CompetencePriorRecorded`) is the one
+metacognition-shaped mechanism that shipped.
+
+---
+
+## 12. Appendix — Internal Contradictions & Ambiguities in the Corpus
+
+These are spec-vs-spec conflicts. This section records **which side the code took**.
+
+### 12.1 Load-bearing contradictions
+
+| # | Code resolution |
+|---|---|
+| **X-01** | **Sink-class mediation** (`ADR-0051`): grants only for `PRIVILEGED`. All three classes still traverse `Kernel.dispatch` and are recorded |
+| **X-02** | **Optional grant** — `EnvironmentAdapter.observe(..., grant: Optional[Any] = None)` |
+| **X-03** | **Both exist** — episode loop + `ProcessEngine` / `governance/` as a first-class boundary area |
+| **X-04** | **VG-03 axes** (`ADR-0057`) — `RunTermination` eight values; verdict is a separate `Verdict` |
+| **X-05** | **Fifth shape** — one ordered `Trust` enum + envelope `confidentiality`; no `epistemic`/`influence` types |
+| **X-06** | **VG-04 kinds** in `SELECTOR_KINDS`; manifests encode command allowlists as `generic` URI strings, not GTS `command` |
+| **X-07** | **Merge** — kernel `Grant` has actions + resources + `purpose_digest`; wire grant has plural `actions` and singular `selector` |
+| **X-08** | **VG-04 envelope** + required `principalRole`; no `branchId`/`processId` on the envelope |
+| **X-09** | **GTS-leaning ports** plus extras: `ModelPort`, `EnvironmentAdapter`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `IndexPort`, `ClockPort`, `RandomPort`, `SandboxRunner`, and `ports/kernel.py` (`Clock`, `EffectAdapter`, `EventSink`, `Ledger`). No `OperatorRunner`/`ObservationSource`/`PolicyEngine` port |
+| **X-10** | **VG-03 + T10.1** layout with `governance/` special-cased |
+| **X-11** | `tools/telemetry/splits.py` uses HOLDOUT/SEALED (three-split spirit) |
+| **X-12** | Lab uses McNemar (`lab/bench.py`); telemetry refuses small-n p-values rather than a full T8.3 stack |
+| **X-13** | Wire `principalRole` is T2.1's six. Kernel ingress is Episode-only. Phase 0 identities: controller + worker 10001 + evaluator 10002 |
+| **X-14** | `Reservation` is `{usd_micros, millis, tokens, bytes_}`; turns/depth enforced outside it |
+| **X-15** | Privileged approval shipped; `ApprovalResolved` as a ledger event did not |
+
+### 12.2 Ambiguities and undefined terms
+
+| # | As-built |
+|---|---|
+| **Y-01** | Resolved in code as `Trust` five-value enum (`kernel/model.py:40-52`) |
+| **Y-02** | Resolved as 1,307 + 131 = 1,438 in `kernel-tcb-budget.json`; live 1,333 |
+| **Y-03** | README/comments say "Attenuation Kernel"; class is `Kernel` |
+| **Y-04** | Port `EffectReceipt` + kernel `AdapterOutcome`; wire `Receipt` has no lease id |
+| **Y-05** | Only verifier admits a `Verdict`; no activation-policy admit path |
+| **Y-06** | `RISK_ORDER = ("low","medium","high","critical")` (`attenuation.py:41`) |
+| **Y-07** | Live verbs `fs.read`, `fs.search`, `patch.apply`, `proc.exec` plus classifier prefixes |
+| **Y-08** | VG-07 cites `tools/telemetry/` — those files exist |
+| **Y-09** | Docs |
+| **Y-10** | **Confirmed** — live `MF-KRN-*`/`MF-S0-*`/… vs spec `MF-01`…`MF-37` |
+| **Y-11`–`Y-18` | Docs/governance; not packages |
+| **Y-19** | `FailurePath` includes `F-21a` as its own member; `AT-09` tests the enum, not `F-01..F-25` as a range |
+| **Y-20** | No `Broker` type; `Kernel` + `StandardPolicy` |
+
+### 12.3 Known-open governance gates (spec-recorded, not implementation observations)
+
+As of this tree: `CI-9` still reports `gaps=133` and exits 0; schemas remain DRAFT; `SEC-01` has
+`tools/scan_secrets.py` + `MF-SEC-SCAN-001`; Active MVP Contract tools exist and report closure-in-progress;
+VG-05 caveat still applies — a rule whose only test ID is an `MF-01`…`MF-37` string in `docs/main_v4/` is
+not an established control in `test/broken/`.
+

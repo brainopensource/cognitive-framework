@@ -1,33 +1,49 @@
-# 009 — Vanguard GUI — Standalone IDE App (Proposed)
+---
+id: FE-09
+file: 009_ide_extension.md
+title: "Vanguard v4.0 — Standalone GUI IDE Architecture & Slot Model"
+version: 4.0.0
+status: PROPOSED
+authority_scope: >
+  Modular slot architecture, embedded component libraries, and desktop shell
+  specifications for `vanguard-gui`.
+supersedes: none
+superseded_by: none
+budget_words: 2500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17  
-Directory name: **`vanguard-gui/`** (or `apps/desktop/`).
+# Vanguard v4.0 — Standalone GUI IDE Architecture & Slot Model
 
-## Decision (D3)
+> **Who this is for.** Desktop application developers building the Phase 2 GUI.
 
-Ship a **standalone GUI IDE** at **`vanguard-gui/`** (Phase 2). Stack frozen: **Tauri 2 + React + TypeScript**. Consumes `@vanguard/client-core` over vg.4 frames.
+---
 
-- **VS Code Extension (`vanguard-ide/**`, FE-B*) is VOID.**
-- **Code-OSS fork is out of scope.**
+## 1. Core Architecture & Stack Decision (D3)
 
-Bind OSS **libraries** (Monaco, xterm, arborist, xyflow-as-view). Do not vendor IDE repositories. See `gui_ide_slots.md`.
+Ship a **standalone GUI IDE** at **`vanguard-gui/`** (Phase 2).
+- **Technology Stack**: Tauri 2 + React + TypeScript.
+- **Consumption**: Consumes `@vanguard/client-core` over standard vg.4 frames.
+- **Status**: VS Code extension (`FE-B*`) and Code-OSS fork are VOID.
 
-## Slot-Based Modular Architecture
+---
 
-The GUI binds lightweight open-source building blocks into dedicated UI slots:
+## 2. Slot-Based Modular Architecture
 
 | UI Slot | Technology / Library | Role |
 |---|---|---|
-| **Editor** | Monaco Editor or CodeMirror 6 | Code editing, syntax highlighting, keybindings. |
+| **Editor** | Monaco Editor / CodeMirror 6 | Code editing, syntax highlighting, keybindings. |
 | **Diff** | Monaco Diff Editor | Patch review during `ApprovalRequested`. |
-| **Terminal** | `@xterm/xterm` + native PTY | Interactive shell / terminal running `vg`. |
-| **File Tree** | Virtualized tree (`react-arborist` or clean DOM tree) | Workspace files from active repo. |
+| **Terminal** | `@xterm/xterm` + native PTY | Interactive shell running `vg` CLI. |
+| **File Tree** | Virtualized tree component | Workspace navigation. |
 | **Git** | Native `git` CLI runner | Staging, uncommitted changes, branches. |
-| **Run Stream** | `reduceRunView` (from `@vanguard/client-core`) | Real-time thoughts, tool calls, and budget tracker. |
+| **Run Stream** | `reduceRunView` | Real-time events, tool calls, and budget tracker. |
 | **Workflow Canvas** | `@xyflow/react` | **Passive visualizer** of VG-04 event trajectories only. |
-| **Signer** | `OperatorSigner` (RFC 8785 Ed25519) | Signs approval decisions locally. |
+| **Signer** | `OperatorSigner` (RFC 8785 Ed25519) | Local cryptographic signing for approval decisions. |
 
-## Terminal Integration
+---
 
-The GUI does not embed Ink components directly into the DOM (Ink is terminal-only). Instead, the GUI embeds `@xterm/xterm` connected to a PTY process running the `vg` CLI or shell.
+## 3. Terminal Integration
+
+The GUI embeds `@xterm/xterm` connected to a PTY process running the `vg` CLI or shell. Ink components are terminal-only and are not rendered into the browser DOM.

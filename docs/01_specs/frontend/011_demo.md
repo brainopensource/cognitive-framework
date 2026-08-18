@@ -1,22 +1,38 @@
-# 011 — Demo spec (Proposed)
+---
+id: FE-11
+file: 011_demo.md
+title: "Vanguard v4.0 — Mock Prototype & Demo Specification"
+version: 4.0.0
+status: DISPOSABLE
+authority_scope: >
+  Offline fixture playback, `--demo` catalog specifications, and replay rules.
+supersedes: none
+superseded_by: none
+budget_words: 1500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17
+# Vanguard v4.0 — Mock Prototype & Demo Specification
 
-## Fixtures
+> **Who this is for.** Anyone testing or demonstrating Vanguard frontend surfaces offline.
 
-Real paths: `vanguard/clients/cli/fixtures/*.jsonl` today; `vanguard/clients/cli/fixtures/sessions/` for `--demo` catalog.
+---
 
-Do not invent fixtures under `docs/` or `tools/ci/`.
+## 1. Demo Fixtures & Storage
 
-## Labelling
+- Standard fixtures live under `vanguard/clients/cli/fixtures/*.jsonl`.
+- Catalog demonstrations live under `vanguard/clients/cli/fixtures/sessions/`.
+- No mock fixtures may be stored under `docs/`.
 
-Mandatory: `source: mock` on every demo/replay surface (CLI header, JSONL `StreamItem.source`, GUI badge). Replay of a recorded live ledger still must not claim `live` unless the socket is connected.
+---
 
-## `vg --demo`
+## 2. Mandatory Mock Labelling
 
-Extends `adapters/replay.ts` in `@vanguard/client-core`. Default: no daemon socket required.
+Every replay and demo surface must display `source: mock` explicitly on headers, JSONL stream items, and GUI badges. Offline replays must never claim live status.
 
-## Standalone GUI Replay
+---
 
-FE-3: The standalone GUI shell must render `successful-episode.jsonl` (and peers) **without** a running daemon via `ReplayRuntimeClient`.
+## 3. Daemonless Execution
+
+Both `vg --demo` and the standalone GUI shell render full episode lifecycles offline via `ReplayRuntimeClient` without requiring an active daemon socket.

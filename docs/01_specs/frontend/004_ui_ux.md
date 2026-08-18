@@ -1,30 +1,51 @@
-# 004 — UI / UX (Proposed)
+---
+id: FE-04
+file: 004_ui_ux.md
+title: "Vanguard v4.0 — UI/UX Views & Interaction Workflows"
+version: 4.0.0
+status: LIVING
+authority_scope: >
+  State machines, color tokens, and labelling rules across Ink TUI
+  and Standalone GUI IDE surfaces.
+supersedes: none
+superseded_by: none
+budget_words: 2000
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17  
-Event names: VG-04 §12.2 only.  
-Skins: Ink TUI (`tui_product_surface.md`) and GUI slots (`gui_ide_slots.md`) share tokens and reducers.
+# Vanguard v4.0 — UI/UX Views & Interaction Workflows
 
-## Run state machine (derived, not a second ledger)
+> **Who this is for.** Designers and frontend developers implementing TUI and GUI views.
 
-| Kind | Typical view effect |
+---
+
+## 1. Derived Run State Machine
+
+| Event Kind | Typical View Effect |
 |---|---|
-| `EpisodeStarted` | run active |
-| `EpisodeStateChanged` | status text from payload |
-| `EpisodeCompleted` | terminal success/fail from payload |
-| `AuthorizationDenied` | hard fail banner |
-| `BudgetReserved` / `BudgetCommitted` / `BudgetReleased` | budget panel |
-| `EffectPreviewed` / `EffectStarted` / `EffectCompleted` / `EffectReconciled` | tool / effect timeline |
-| `ApprovalRequested` | TUI modal / GUI approve slot pending |
-| `ApprovalResolved` | close pending chrome; never mark approved on local click alone |
-| `Heartbeat` / `RunRecovered` / `RunAborted` | connection / recovery chrome |
+| `EpisodeStarted` | Run active indicator |
+| `EpisodeStateChanged` | Status text update from payload |
+| `EpisodeCompleted` | Terminal success / failure banner |
+| `AuthorizationDenied` | Hard failure alert banner |
+| `BudgetReserved` / `BudgetCommitted` / `BudgetReleased` | Budget tracker panel |
+| `EffectPreviewed` / `EffectStarted` / `EffectCompleted` | Effect timeline item |
+| `ApprovalRequested` | Interactive modal / pending approval panel |
+| `ApprovalResolved` | Close pending modal; update timeline state |
+| `Heartbeat` / `RunRecovered` / `RunAborted` | Connection & recovery status |
 
-Unknown `payload.kind`: keep in the timeline as opaque; do not crash (`CT-44`).
+Unknown `payload.kind` events are preserved opaquely in the timeline without crashing the UI (`CT-44`).
 
-## Tokens (TUI + GUI)
+---
 
-Semantic names: `success`, `warning`, `danger`, `muted`, `accent`. Information must survive `NO_COLOR` in the TUI. GUI maps the same names to CSS variables (not VS Code workbench APIs).
+## 2. Color Tokens & Design Tokens
 
-## Labelling
+Semantic names: `success`, `warning`, `danger`, `muted`, `accent`.
+- **TUI**: Information must remain distinguishable under `NO_COLOR`.
+- **GUI**: Maps identical semantic names to standard CSS variables.
 
-`source: mock` vs `replay` vs `live` must be visible on the run header in **both** skins.
+---
+
+## 3. Mandatory Source Labelling
+
+`source: mock` vs `source: replay` vs `source: live` must be explicitly visible on the header in both TUI and GUI.

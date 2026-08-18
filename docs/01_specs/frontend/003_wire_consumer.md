@@ -1,12 +1,26 @@
-# 003 — Wire consumer note (Proposed)
+---
+id: FE-03
+file: 003_wire_consumer.md
+title: "Vanguard v4.0 — Wire Protocol Consumer Contracts"
+version: 4.0.0
+status: NORMATIVE
+authority_scope: >
+  Client-side wire protocol consumption, NDJSON framing, command payloads,
+  and RFC 8785 (JCS) cryptographic signing rules.
+supersedes: none
+superseded_by: none
+budget_words: 2500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-16  
-**This file is not a protocol spec.** Normative sources: VG-04 §0, §12, §15; ADR-0062 (`docs/main_v4/09_vanguard_decision_register_v040.md`). Implementation: `vanguard/packages/runtime/service/server.py`, `service.py`; client: `vanguard/clients/cli/src/adapters/live.ts`.
+# Vanguard v4.0 — Wire Protocol Consumer Contracts
 
-Do not add verbs. Do not describe a second envelope format.
+> **Who this is for.** Client transport implementers consuming daemon event streams.
 
-## Frames as implemented
+---
+
+## 1. Frame Structure & Protocols
 
 NDJSON over Unix domain socket. `version: "vg.4"`. Maximum frame size **1 MiB** (`MAX_FRAME_BYTES = 1024 * 1024`).
 
@@ -19,20 +33,17 @@ NDJSON over Unix domain socket. `version: "vg.4"`. Maximum frame size **1 MiB** 
 
 **Command names in `RuntimeService`:** `StartRun`, `GetRun`, `StreamEvents`, `ResolveApproval`, `Cancel`, `Checkpoint`, `Resume`, `RecordCorrection`, `ExplainArtifact`.
 
-There is no health command. Connect-only probe is current supervisor behavior (Joint **J2**).
+---
 
-## Socket path resolution (CLI / IDE live adapter)
+## 2. Socket Path Resolution
 
-1. `--socket-path` (or IDE setting equivalent)
-2. `VANGUARD_RUNTIME_SOCKET`
-3. `/tmp/vanguard-runtime.sock`
+1. `--socket-path` (CLI argument or GUI setting)
+2. `VANGUARD_RUNTIME_SOCKET` environment variable
+3. `/tmp/vanguard-runtime.sock` (Default fallback)
 
-## JCS (RFC 8785)
+---
 
-Canonicalisation applies to **approval bytes**, not to inventing a house JSON encoding for all frames.
+## 3. Cryptographic Canonicalisation (RFC 8785 JCS)
 
-Sign `ApprovalDecision` fields derived from `ApprovalChallenge`: `approvalId`, `argsDigest`, `descriptorDigest`, `expiresAt`, `keyId`, `resolution`, `reviewer`. Use a conformant RFC 8785 library (FE-A3). Do not treat `JSON.stringify(..., Object.keys().sort())` as JCS.
-
-## StartRun payload (do not extend)
-
-`manifestPath`, `repoPath`, `brief`. New fields require a Joint note (D6).
+Canonicalisation applies strictly to **approval decision bytes**:
+Sign `ApprovalDecision` fields derived from `ApprovalChallenge`: `approvalId`, `argsDigest`, `descriptorDigest`, `expiresAt`, `keyId`, `resolution`, `reviewer`. Use conformant RFC 8785 canonicalisation.

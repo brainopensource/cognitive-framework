@@ -1,31 +1,39 @@
-# 006 — RuntimeClient implementer note (Proposed)
+---
+id: FE-06
+file: 006_runtime_client.md
+title: "Vanguard v4.0 — Runtime Client Implementer Specifications"
+version: 4.0.0
+status: NORMATIVE
+authority_scope: >
+  Protocol interfaces, buffer management, error handling, and key storage
+  for `@vanguard/client-core`.
+supersedes: none
+superseded_by: none
+budget_words: 2500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17  
-Source: `@vanguard/client-core` (`src/contract/types.ts`, `parse.ts`, `adapters/live.ts`, `replay.ts`, `scenario.ts`, `signer.ts`).
+# Vanguard v4.0 — Runtime Client Implementer Specifications
 
-## Port
+> **Who this is for.** TypeScript engineers building adapters and client ports for daemon communication.
 
-`RuntimeClient` methods return `Promise<Result<T>>` except `streamEvents`, which is `AsyncIterable<Result<StreamItem>>`. Failures are `ClientFailure` codes; do not throw for expected daemon/transport errors.
+---
 
-`StreamItem` always includes `contractVersion: "0.1"`, `source`, and a parsed `envelope`.
+## 1. Port Interface Contracts
 
-## Live frames
+`RuntimeClient` methods return `Promise<Result<T>>` except `streamEvents`, which returns `AsyncIterable<Result<StreamItem>>`.
 
-See `003_wire_consumer.md`. Transports: `SocketTransport` (UDS) and `FeedTransport` (injected lines). Incoming lines are parsed (`parse.ts`); `frame: any` is forbidden (`CT-03`).
+Failures use explicit `ClientFailure` error codes; do not throw unhandled exceptions for expected transport errors.
 
-## Ring buffer
+---
 
-Live adapter retains at most **10_000** `StreamItem`s (`MAX_BUFFER_SIZE`). Drop oldest. Reducers must tolerate truncated history after reconnect (`afterSeq`).
+## 2. Event Ring Buffer
 
-## Keys (FE-1-2 / FE-A3)
+The live client adapter retains a ring buffer of at most **10,000** `StreamItem`s (`MAX_BUFFER_SIZE`), dropping the oldest when capacity is exceeded. Reducers must tolerate reconnects with historical sequences (`afterSeq`).
 
-Operator Ed25519 private key persists under `~/.vanguard/keys` with mode **0600**. Never log PEM. Signing input is RFC-8785 canonical JSON of the decision payload (003). Round-trip against Python `OperatorSigner` golden vectors.
+---
 
-## Honest holes
+## 3. Cryptographic Key Persistence
 
-| Method | Until backend supports it |
-|---|---|
-| `getDaemonStatus` | Connect-only; do not hardcode a marketing version as proof of health |
-| `explainArtifact` | `not_available` if daemon has no projection |
-| `manageDaemon` / spawn | `not_available` until Joint **J1** |
+The operator Ed25519 private key is persisted under `~/.vanguard/keys` with permissions **`0600`**. Keys must never be logged or transmitted in cleartext. Signing input is strictly RFC 8785 canonical JSON.

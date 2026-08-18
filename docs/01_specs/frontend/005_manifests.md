@@ -1,33 +1,45 @@
-# 005 — Manifests in the client (Proposed)
+---
+id: FE-05
+file: 005_manifests.md
+title: "Vanguard v4.0 — Manifest Consumption in Clients"
+version: 4.0.0
+status: NORMATIVE
+authority_scope: >
+  Client-side display, validation, and execution rules for harness manifest packs.
+supersedes: none
+superseded_by: none
+budget_words: 2000
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-16  
-Schema owner: `vanguard/packages/domain/artifacts/manifest.py` (`parse_manifest`). FE must not fork the schema.
+# Vanguard v4.0 — Manifest Consumption in Clients
 
-## Real shape
+> **Who this is for.** Engineers presenting harness configurations and capabilities to users.
+
+---
+
+## 1. Schema Shape & Requirements
+
+Schema owner: `vanguard/packages/domain/artifacts/manifest.py`. The client must not fork the schema.
 
 Required keys:
-
-```text
-{ harness, components, capabilities[{verb, sink, selector, risk}], evaluators, budgetPolicy }
+```json
+{
+  "harness": "string",
+  "components": {},
+  "capabilities": [{ "verb": "string", "sink": "string", "selector": {}, "risk": "string" }],
+  "evaluators": {},
+  "budgetPolicy": {}
+}
 ```
 
-`sink` ∈ `{pure, observation, privileged}`.
+`sink` $\in$ `{pure, observation, privileged}`.
 
-The client may **display** a user-supplied manifest file (path on `StartRun.manifestPath`). The client must **not** walk `vanguard/packages/agency/manifests/` as a discovery API.
+---
 
-## Discovery
+## 2. Discovery & Selection
 
-A `ListManifests` daemon verb does **not** exist. That is Joint **J3**. Until then:
-
-- operator passes `--manifest` / IDE setting with a filesystem path;
-- missing path → `invalid_request` / `not_found`;
-- no silent default that reads the core tree.
-
-## Subagents
-
-Multi-agent / subagent UX is **Phase-2 deferred (DEF-03)**. Do not ship subagent panels as product.
-
-## Capabilities UI
-
-Show declared `verb` / `sink` / `risk` from the file the user pointed at. Do not invent extra capability rows.
+- The client displays user-supplied manifest files passed via `--manifest` or workspace configuration.
+- The client does not crawl backend source trees directly.
+- Missing manifest paths trigger an explicit `invalid_request` error.

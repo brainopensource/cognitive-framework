@@ -1,24 +1,36 @@
-# 007 — Frontend testing (Proposed)
+---
+id: FE-07
+file: 007_testing.md
+title: "Vanguard v4.0 — Frontend Testing & Verification Matrix"
+version: 4.0.0
+status: LIVING
+authority_scope: >
+  Testing pyramid, golden vector compliance, replay fixtures, and E2E verification
+  for all frontend packages.
+supersedes: none
+superseded_by: none
+budget_words: 2000
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17
+# Vanguard v4.0 — Frontend Testing & Verification Matrix
 
-## Pyramid
+> **Who this is for.** Anyone writing tests or adding CI gates for frontend components.
 
-1. **Unit** — reducers, parse, signer (`@vanguard/client-core` tests; TUI component tests in `vanguard/clients/cli/test/`).
-2. **VG-04 golden vectors** — client parse agrees with schema vectors; do not edit vectors to pass.
-3. **Wire contracts** — `test/contracts/t1_wire_contracts.py` (backend-owned; FE consumes, does not relocate).
-4. **Replay E2E** — JSONL fixtures under `vanguard/clients/cli/fixtures/` run through both TUI (`vg --demo`) and GUI replay panel without daemon.
-5. **Live E2E** — real daemon UDS; not substitutable by mock.
+---
 
-Soak harness lives in `vanguard/clients/cli/test/`, **not** `tools/ci/`.
+## 1. Testing Pyramid
 
-## Phantom paths (do not use)
+1. **Unit Tests**: Reducers, parsing logic, and cryptographic signers under `vanguard/clients/client-core/test/` and `vanguard/clients/cli/test/`.
+2. **VG-04 Golden Vectors**: Client parser agrees with canonical schema vectors without modifying test vectors.
+3. **Wire Contracts**: Conformance verification against `test/contracts/t1_wire_contracts.py`.
+4. **Replay E2E**: Verified against JSONL fixtures under `vanguard/clients/cli/fixtures/`.
+5. **Live E2E**: Real daemon UDS integration tests.
 
-- `docs/development/cli_tui_architecture.md` — live path is `docs/scrum/development_guides/cli_tui_architecture.md`
-- `tools/ci/` frontend soak
-- `github.com/vanguard-ai/*` CI templates
+---
 
-## GUI Testing (FE-3)
+## 2. Soak & Conformance Harnesses
 
-Unit tests in `vanguard-gui` test panel renders against replay fixtures. No `.vsix` testing required (extension is VOID).
+- Client test harnesses live in `vanguard/clients/cli/test/`.
+- Frontend GUI tests render against immutable replay fixtures.

@@ -1,23 +1,36 @@
-# 010 — Phase-4+ considerations (Proposed)
+---
+id: FE-10
+file: 010_phase4_considerations.md
+title: "Vanguard v4.0 — Enterprise Governance & Security Scope"
+version: 4.0.0
+status: PROPOSED
+authority_scope: >
+  Long-term enterprise considerations, client governance boundaries,
+  and out-of-scope non-claims for frontend clients.
+supersedes: none
+superseded_by: none
+budget_words: 1500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17  
-One page. Not a delivery kit.
+# Vanguard v4.0 — Enterprise Governance & Security Scope
 
-## In scope later
+> **Who this is for.** Security architects and frontend developers evaluating enterprise features.
 
-- Language servers in the GUI editor slot (harvest P3 “LSP-as-IDE”).
-- Extra installers (MSI, notarized macOS, AppImage) for `vanguard-gui`.
-- Named Pipe / TCP **after** the daemon owns them (J5).
-- RAG / knowledge graphs / playbooks — backend-first; GUI only views ledger.
+---
 
-## Out of FE scope (do not invent in the client)
+## 1. Planned Future Scope (Post-v0.5.0)
 
-- SIEM / DLP in TUI or GUI. Egress is daemon / kernel / sandbox.
-- Client-side SSO as a substitute for operator Ed25519 (ADR-0062).
-- VS Code extension marketplace / `.vsix` (VOID).
-- Code-OSS fork as the IDE strategy.
+- Language server integration in the GUI editor slot.
+- Native enterprise platform installers (MSI, notarized macOS, AppImage).
+- Windows Named Pipe & TCP socket support once daemon implements them (J5).
+- Passive DAG playback of knowledge graphs and playbooks.
 
-## Now
+---
 
-FE-1 client-core, FE-2 TUI, FE-3 GUI scaffold. File J1–J5 instead of workarounds.
+## 2. Explicit Non-Claims for Frontend Clients
+
+- No client-side SIEM/DLP (egress filtering is strictly enforced by daemon/kernel/sandbox).
+- No client-side SSO bypass of the operator Ed25519 signature requirement (ADR-0062).
+- No VS Code marketplace extension distribution.

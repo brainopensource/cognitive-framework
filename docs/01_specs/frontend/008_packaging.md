@@ -1,21 +1,33 @@
-# 008 — Packaging (Proposed)
+---
+id: FE-08
+file: 008_packaging.md
+title: "Vanguard v4.0 — Build, Packaging & Distribution"
+version: 4.0.0
+status: LIVING
+authority_scope: >
+  Release channels, installer scripts, global bin distribution, and desktop bundling.
+supersedes: none
+superseded_by: none
+budget_words: 1500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-Status: `Proposed`  
-Date: 2026-08-17
+# Vanguard v4.0 — Build, Packaging & Distribution
 
-## Channels in this phase (Phase 1)
+> **Who this is for.** DevOps, release engineers, and frontend packaging developers.
 
-| # | Channel | Notes |
+---
+
+## 1. Active Release Channels (Phase 1)
+
+| # | Channel | Target Artifact & Requirements |
 |---|---|---|
-| 1 | `curl \| sh` via repo `install.sh` | Documents Node ≥ 20, socket path, `--demo` |
-| 2 | npm global `@vanguard/cli` (`vg` bin) | `vanguard/clients/cli/package.json` |
+| 1 | `curl \| sh` via `install.sh` | Requires Node $\ge$ 20, configures socket path, supports `--demo`. |
+| 2 | npm global package | `@vanguard/cli` publishing binary `vg` (`vanguard/clients/cli/package.json`). |
 
-## GUI Packaging (Phase 2)
+---
 
-Standalone desktop application packaging (Tauri 2 / Electron binary or AppImage/DMG/MSI) belongs to Lane FE-3 in Phase 2.
+## 2. Desktop GUI Packaging (Phase 2)
 
-VS Code extension packaging (`.vsix`) is VOID.
-
-## Do not cite
-
-Invented org URLs (`github.com/vanguard-ai/*`) or dead relative links to `docs/development/`. Use this repository’s paths.
+Standalone desktop application packaging (Tauri 2 / AppImage / DMG / MSI) belongs to Lane `FE-3` in Phase 2. VS Code extension packaging (`.vsix`) is VOID.

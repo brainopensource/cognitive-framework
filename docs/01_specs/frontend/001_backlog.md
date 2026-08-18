@@ -1,9 +1,22 @@
-# 001 — Frontend Backlog (Pending Work)
+---
+id: FE-01
+file: 001_backlog.md
+title: "Vanguard v4.0 — Frontend Backlog & Implementation Spine"
+version: 4.0.0
+status: LIVING
+authority_scope: >
+  Frontend backlog, lane ownership, and task tracking for CLI TUI surfaces
+  and the standalone GUI IDE application.
+supersedes: none
+superseded_by: none
+budget_words: 2500
+owners: [Tech Lead]
+last_reviewed: 2026-08-17
+---
 
-> **Status**: Living Frontend Backlog (Pending Tasks Only)
-> **Date**: 2026-08-17
-> **Scope**: CLI TUI Enhancements (`FE-2`) and Standalone GUI App (`FE-3`).
-> **Note**: Lane `FE-1` (`@vanguard/client-core`) and base TUI commands (`FE-2-1`..`FE-2-7`) are **100% IMPLEMENTED**.
+# Vanguard v4.0 — Frontend Backlog & Implementation Spine
+
+> **Who this is for.** Frontend engineers and agents implementing Client Core (`FE-1`), CLI TUI (`FE-2`), and Standalone GUI IDE (`FE-3`).
 
 ---
 

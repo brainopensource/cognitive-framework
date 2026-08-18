@@ -1,6 +1,0 @@
-{
-  "id": "pytest-green",
-  "name": "Get pytest green",
-  "description": "Run allowlisted pytest, read the failure, patch, repeat. Do not invent a test runner verb.",
-  "bodyPath": "skills/pytest-green.md"
-}

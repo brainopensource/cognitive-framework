@@ -12,6 +12,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import vanguard.packages.runtime.lab_driver as lab_run
 from vanguard.packages.kernel import (
@@ -208,6 +209,30 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
     def test_a_non_green_run_exits_non_zero(self) -> None:
         source = inspect.getsource(lab_run.main)
         self.assertIn("ORACLE_GREEN", source)
+
+    def test_isolated_run_reclaims_its_workspace_and_sealed_bundles(self) -> None:
+        """Repeated benchmark arms must not accumulate disposable sandboxes."""
+
+        task = (Path(__file__).resolve().parents[2] / "lab" / "tasks" /
+                "dogfood-01-multi-turn-file-rollback")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            created: list[Path] = []
+
+            def make_dir(*, prefix: str) -> str:
+                directory = root / f"{prefix}{len(created)}"
+                directory.mkdir()
+                created.append(directory)
+                return str(directory)
+
+            with patch.object(lab_run.tempfile, "mkdtemp", side_effect=make_dir):
+                result = lab_run.run_lab_task(
+                    "vg-code-default", task, max_attempts=1)
+
+            self.assertGreater(result["turns"], 0)
+            self.assertEqual(result["taskDir"], str(task))
+            self.assertTrue(created)
+            self.assertTrue(all(not directory.exists() for directory in created))
 
 
 class TheExporterOpensNoStore(unittest.TestCase):

@@ -1,54 +1,65 @@
-"""Name why a run produced nothing (`S21-A-01`, `REQ-TRUST-001`).
+"""Canonical outcome labels and failure causes (REQ-TRUST-001, S21, S31, S32).
 
-`instrument_error` is a category, not a finding. Four different failures --
-the provider never answered, the daemon timed out, the model emitted a shape
-the translator refuses, the workspace was not there -- all reduced to the same
-word, and a reader could not tell which had happened without opening the log.
-Worse, each of them looked like the model scoring zero.
-
-So a zero-turn run is labelled `instrument_error:<cause>`, and the cause comes
-from the run's own detail rather than from a guess. An unrecognised detail is
-`instrument_error:unclassified` and keeps the original text: inventing a
-category for a message nobody has seen before is how a taxonomy starts lying.
+Holds explicit, attributable outcome strings so that budget exhaustion, attempts exhaustion,
+instrument errors, verification failures, and progress stalls are distinguishable across telemetry.
 """
 
 from __future__ import annotations
 
-__all__ = ["INSTRUMENT_CAUSES", "classify_instrument_error"]
-
-#: detail fragment -> cause slug. Ordered: the first match wins, so more
-#: specific fragments precede the general ones.
-INSTRUMENT_CAUSES: tuple[tuple[str, str], ...] = (
-    # The model answered, but with several tool calls in one turn. One turn is
-    # one effect, so the translator refuses -- correctly. This is a harness
-    # constraint meeting an over-eager model, not a model failing the task.
-    ("multiple actions in one proposal", "multi_action_proposal"),
-    ("timed out", "provider_timeout"),
-    ("timeout", "provider_timeout"),
-    ("is not pulled", "model_tag_absent"),
-    ("no daemon answering", "provider_unreachable"),
-    ("api_key", "provider_key_missing"),
-    ("not in the free band", "paid_model_refused"),
-    ("refusing to spend", "paid_model_refused"),
-    ("http 5", "provider_server_error"),
-    ("http 4", "provider_request_rejected"),
-    ("malformed json", "malformed_proposal"),
-    ("tool arguments", "malformed_proposal"),
-    ("is not declared by manifest", "undeclared_tool"),
-    ("unsupported action", "undeclared_tool"),
-    ("scripted model exhausted", "tape_exhausted"),
-    # Last: the provider produced no proposal at all. Only correct when
-    # nothing more specific matched, which is why it sits at the bottom.
-    ("model_not_invoked", "model_not_invoked"),
-)
+__all__ = [
+    "OutcomeLabel",
+    "classify_failure_cause",
+    "classify_instrument_error",
+]
 
 
-def classify_instrument_error(detail: str | None) -> str:
-    """Return `instrument_error:<cause>` for a run that produced no turn."""
-    text = (detail or "").strip().lower()
-    if not text:
-        return "instrument_error:unclassified"
-    for fragment, cause in INSTRUMENT_CAUSES:
-        if fragment in text:
-            return f"instrument_error:{cause}"
-    return "instrument_error:unclassified"
+class OutcomeLabel:
+    """Canonical terminal outcome labels."""
+
+    ORACLE_GREEN = "oracle_green"
+    STEP_VERIFIED = "step_verified"
+    BUDGET_EXHAUSTED = "budget_exhausted"
+    ATTEMPTS_EXHAUSTED = "attempts_exhausted"
+    NO_PROGRESS = "no_progress"
+    INSTRUMENT_ERROR = "instrument_error"
+    REPLAN_REQUESTED = "replan_requested"
+    DIAGNOSTIC_NEEDED = "diagnostic_needed"
+    ABSTAINED = "abstained"
+    DENIED_SCOPE_ESCALATION = "denied_scope_escalation"
+    PRICE_UNKNOWN = "instrument_error:price_unknown"
+    PROVIDER_KEY_MISSING = "instrument_error:provider_key_missing"
+    WORKSPACE_MISSING = "instrument_error:workspace_missing"
+    PAID_MODEL_REFUSED = "instrument_error:paid_model_refused"
+    UNCLASSIFIED = "instrument_error:unclassified"
+
+
+def classify_failure_cause(detail: str) -> str:
+    """Map a detailed error string to a canonical failure cause."""
+    lowered = (detail or "").lower()
+    if not lowered:
+        return OutcomeLabel.UNCLASSIFIED
+    if "multiple actions" in lowered or "multi_action" in lowered:
+        return "instrument_error:multi_action_proposal"
+    if "timed out" in lowered or "timeout" in lowered:
+        return "instrument_error:provider_timeout"
+    if "is not pulled" in lowered or "tag_absent" in lowered:
+        return "instrument_error:model_tag_absent"
+    if "no daemon answering" in lowered or "unreachable" in lowered:
+        return "instrument_error:provider_unreachable"
+    if "key" in lowered and ("missing" in lowered or "not set" in lowered):
+        return OutcomeLabel.PROVIDER_KEY_MISSING
+    if "refusing to spend" in lowered or "free band" in lowered:
+        return OutcomeLabel.PAID_MODEL_REFUSED
+    if "model_not_invoked" in lowered:
+        return "instrument_error:model_not_invoked"
+    if "price" in lowered and ("unknown" in lowered or "not registered" in lowered):
+        return OutcomeLabel.PRICE_UNKNOWN
+    if "workspace" in lowered and ("missing" in lowered or "not exist" in lowered):
+        return OutcomeLabel.WORKSPACE_MISSING
+    if "malformed" in lowered:
+        return "instrument_error:provider_malformed_response"
+    return OutcomeLabel.UNCLASSIFIED
+
+
+#: Backward-compatible alias used in runtime drivers
+classify_instrument_error = classify_failure_cause

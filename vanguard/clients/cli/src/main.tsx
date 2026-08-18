@@ -6,8 +6,10 @@ import {
   explain,
   manageDaemon,
   resumeRun,
+  runCodingCommand,
   streamRun,
   streamTrace,
+  type CodingRequest,
 } from "@vanguard/client-core";
 import { clientFor } from "./composition/client-for.js";
 import { parseCliOptions, usage, USAGE } from "./composition/parse-cli.js";
@@ -27,6 +29,36 @@ const [command, ...rest] = argv;
 const parsed = parseCliOptions(rest);
 const runtime = clientFor(parsed);
 
+function codingRequestFromParsed(
+  cmd: "code" | "explain" | "resume",
+  overrides: Partial<CodingRequest> = {}
+): CodingRequest {
+  return {
+    command: cmd,
+    workspace: parsed.repo,
+    brief: parsed.brief,
+    question: parsed.question,
+    runId: parsed.runId,
+    resumeFrom: parsed.resumeFrom,
+    plannerModel: parsed.plannerModel ?? "deepseek/deepseek-v4-flash",
+    executorBand: parsed.executorBand ?? "free",
+    executorModels: [],
+    recoveryModels: parsed.recoveryModel ? [parsed.recoveryModel] : [],
+    reviewerModel: null,
+    maxTurnsPerEpisode: parsed.maxTurns ?? 40,
+    maxEpisodes: parsed.maxEpisodes ?? 12,
+    maxReplans: parsed.maxReplans ?? 2,
+    maxPaidCalls: (parsed.budgetUsdMicros ?? 0) > 0 ? 20 : 0,
+    budgetUsdMicros: parsed.budgetUsdMicros ?? 0,
+    interactive: Boolean(parsed.interactive),
+    dryPlan: Boolean(parsed.dryPlan),
+    jsonlOut: parsed.jsonlOut,
+    json: Boolean(parsed.json),
+    headless: Boolean(parsed.headless || parsed.json),
+    ...overrides,
+  };
+}
+
 let exitCode = 0;
 
 if (command === "run") {
@@ -44,6 +76,22 @@ if (command === "run") {
       />
     );
   }
+} else if (command === "code") {
+  if ((parsed as { budgetError?: string }).budgetError) {
+    console.error((parsed as { budgetError?: string }).budgetError);
+    process.exit(2);
+  }
+  if (parsed.executorBand && parsed.executorBand !== "free" && (parsed.budgetUsdMicros ?? 0) <= 0 && !parsed.dryPlan) {
+    // Default execution stays free. Paid/medium bands require an explicit budget.
+    // The Python entrypoint still refuses frontier without authorization.
+  }
+  const request = codingRequestFromParsed(parsed.resumeFrom ? "resume" : "code", {
+    runId: parsed.resumeFrom ?? parsed.runId,
+  });
+  exitCode = await runCodingCommand(request, console.log);
+} else if (command === "explain") {
+  if (!parsed.question) usage();
+  exitCode = await runCodingCommand(codingRequestFromParsed("explain"), console.log);
 } else if (command === "approve") {
   const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
   if (!runId || !parsed.decision) usage();
@@ -59,7 +107,11 @@ if (command === "run") {
   const target = rest.find((arg) => !arg.startsWith("-") && arg !== parsed.demoScenario) ?? usage();
   exitCode = await explain(runtime, target, console.log);
 } else if (command === "daemon") {
-  const action = rest.find((a) => ["start", "status", "stop"].includes(a)) as "start" | "status" | "stop" | undefined;
+  const action = rest.find((a) => ["start", "status", "stop"].includes(a)) as
+    | "start"
+    | "status"
+    | "stop"
+    | undefined;
   if (!action) usage();
   exitCode = await manageDaemon(runtime, action, console.log);
 } else {
@@ -67,6 +119,16 @@ if (command === "run") {
 }
 
 process.exitCode = exitCode;
-if (parsed.headless || command === "daemon" || command === "approve" || command === "trace" || command === "why" || command === "resume") {
+if (
+  parsed.headless ||
+  parsed.json ||
+  command === "daemon" ||
+  command === "approve" ||
+  command === "trace" ||
+  command === "why" ||
+  command === "resume" ||
+  command === "code" ||
+  command === "explain"
+) {
   process.exit(exitCode);
 }

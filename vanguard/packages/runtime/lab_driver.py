@@ -39,12 +39,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
-from .mock_coding_tape import brief_from_task_dir, coding_tape
+from ..adapters.stores.repo_index import FileRepoIndex
+from .mock_coding_tape import (
+    brief_from_task_dir,
+    coding_tape,
+    verify_argv_from_task,
+)
 from .determinism import SystemClock
 from .model_selection import ModelUnavailable, select_model
 from .outcome_labels import classify_instrument_error
@@ -69,6 +76,10 @@ def run_lab_task(
     brief: str = DEFAULT_BRIEF,
     oracle: Any = None,
     jsonl_out: Path | str | None = None,
+    approve_writes: bool = False,
+    isolate: bool = True,
+    tier_escalation: bool = False,
+    tiers: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -80,6 +91,10 @@ def run_lab_task(
             "outcome": "inconclusive:workspace_missing",
             "detail": "task directory does not exist", "turns": 0, "session": [],
         }
+
+    # Keep the caller's task identity in the report.  `task_path` becomes an
+    # ephemeral isolated copy below, and must never escape as a dangling path.
+    reported_task_path = task_path
 
     harness_preview = Runtime.compose(pack_name, episode_id="lab-episode-1")
     if not tape and model_port == "mock":
@@ -93,16 +108,49 @@ def run_lab_task(
         tape = coding_tape(verbs=harness_preview.verbs,
                            attempts=max(int(max_attempts), 1))
 
+    # Every run gets its own copy. Running in place would let one run inherit
+    # the previous run's edits -- the second arm would then be scored on work
+    # the first arm did, which is the quietest way to fake a result.
+    cleanup_roots: list[Path] = []
+    if isolate:
+        staging = Path(tempfile.mkdtemp(prefix="vg-lab-ws-"))
+        cleanup_roots.append(staging)
+        task_path = Path(shutil.copytree(task_path, staging / task_path.name))
+
     try:
-        selected = select_model(model_port, model_name=model_name, tape=tape)
+        selected = select_model(
+            model_port,
+            model_name=model_name or (tiers[0] if tier_escalation and tiers else None),
+            tape=tape,
+        )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
-        return {
-            "harness": pack_name, "taskDir": str(task_path),
+        result = {
+            "harness": pack_name, "taskDir": str(reported_task_path),
             "outcome": classify_instrument_error(unavailable.reason),
             "modelPort": unavailable.port,
             "detail": unavailable.reason, "turns": 0, "session": [],
         }
+        for root in reversed(cleanup_roots):
+            shutil.rmtree(root, ignore_errors=True)
+        return result
+
+    # `--approve-writes` is a **labelled lab departure**, never a default.
+    # BENCHMARK denies privileged verbs with no human (`K-17`), so a repair can
+    # only be measured with an approver in the loop. Recording that in
+    # `labDepartures` is what stops an assisted run being read as an
+    # unattended one.
+    departures: list[str] = []
+    approver = None
+    approval_key = None
+    if approve_writes:
+        from .governance.approvals import OperatorSigner
+
+        signer = OperatorSigner(b"vanguard-lab-operator-key")
+        approver = lambda challenge: signer.approve(challenge, reviewer="lab-operator")
+        approval_key = signer.public_bytes
+        interactive = True
+        departures.append("auto_approved_writes")
 
     harness = harness_preview
     store = SqliteEventStore(":memory:")
@@ -120,16 +168,30 @@ def run_lab_task(
         episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
-            environment=_environment_for(task_path),
-            clock=SystemClock(), store=store, interactive=interactive)
+            environment=_environment_for(task_path, cleanup_roots),
+            clock=SystemClock(), store=store,
+            index=FileRepoIndex() if harness.index_component is not None else None,
+            interactive=interactive,
+            approver=approver, approval_key=approval_key)
         task = TaskContext(
             brief=brief, repo_path=task_path,
             run_id="lab-run", episode_id=episode_id, max_turns=max_turns)
         return HarnessSession(harness, ports, task).run()
 
+    # The oracle runs the task's **own** declared command, after the episode,
+    # through the same sandbox. Reading the agent's `proc.exec` receipts
+    # instead would let a model exit 0 on any trivial command and score green.
+    verify_argv = verify_argv_from_task(task_path)
+    environment_for_oracle = _environment_for(task_path, cleanup_roots)
+
+    def declared_oracle(_result: Any) -> bool:
+        if verify_argv is None:
+            return False
+        return _verify(environment_for_oracle, verify_argv)
+
     outcome = drive_until_green(
         run_once,
-        oracle=oracle or _verdict_is_green,
+        oracle=oracle or (declared_oracle if verify_argv else _verdict_is_green),
         max_attempts=max_attempts,
     )
 
@@ -155,9 +217,9 @@ def run_lab_task(
         # Exported by run, so every attempt's episode is in the one file.
         _write_jsonl(Path(jsonl_out), store, "lab-run")
 
-    return {
+    result = {
         "harness": harness.harness,
-        "taskDir": str(task_path),
+        "taskDir": str(reported_task_path),
         "outcome": stop_reason,
         "attempts": outcome.attempts,
         "turns": outcome.telemetry.turns,
@@ -168,10 +230,36 @@ def run_lab_task(
         "deadEnds": [dict(entry) for entry in log.dead_end_details],
         "cacheMissAttribution": [dict(e) for e in log.cache_miss_attribution()],
         "detail": detail,
+        "verifyArgv": verify_argv,
+        "labDepartures": departures,
         # `C-01`: a refusal that produced no turn is still on the ledger.
         "terminalRefusal": log.terminal_refusal,
         **selected.to_dict(),
     }
+    # A benchmark may launch hundreds of sessions.  The isolated workspace and
+    # sealed worker bundle are per-run state, never evidence, so retaining them
+    # after the ledger has been exported is both a disk leak and a needless
+    # exposure window.  `ignore_errors` keeps an already-complete measurement
+    # from being rewritten as a cleanup failure.
+    for root in reversed(cleanup_roots):
+        shutil.rmtree(root, ignore_errors=True)
+    return result
+
+
+def _verify(environment: Any, argv: Sequence[str]) -> bool:
+    """Run the declared command in the sandbox and read its exit code.
+
+    Exterior to the episode: the model cannot choose it, cannot see it, and
+    cannot make it pass by running something else.
+    """
+    from ..ports.environment import EffectRequest as EnvironmentRequest
+
+    result = environment.apply(EnvironmentRequest(
+        verb="proc.exec", action="exec", args={"argv": list(argv)},
+        command=list(argv)))
+    if not result.ok or result.value is None:
+        return False
+    return getattr(result.value, "outcome", "") == "ok"
 
 
 def _verdict_is_green(result: Any) -> bool:
@@ -180,10 +268,34 @@ def _verdict_is_green(result: Any) -> bool:
     return bool(verdict is not None and getattr(verdict, "passed", False))
 
 
-def _environment_for(task_path: Path) -> Any:
-    from ..adapters.environment.git import GitEnvironmentAdapter
+def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -> Any:
+    """The sandboxed environment, exactly as `execute_harness` composes it.
 
-    return GitEnvironmentAdapter(str(task_path))
+    This used to return `GitEnvironmentAdapter`, which runs `proc.exec` through
+    `subprocess.run` **on the host**. Every lab run was therefore executing the
+    task's test command uncontained, and a benchmark whose commands escape the
+    sandbox is measuring the host, not the harness (`N-06`). It is also the
+    first anti-cheat condition: host `pytest` is not the oracle.
+
+    The bubblewrap worker also reports `outcome="failed"` on a non-zero exit,
+    which is what makes a ledger-derived oracle possible at all.
+    """
+    from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
+    from ..adapters.sandbox.rootless import RootlessSandboxRunner
+    from ..adapters.sandbox.worker import WorkerProtocol
+    from .root import _bwrap_path
+
+    repo = task_path.resolve()
+    sealed_dir = Path(tempfile.mkdtemp(prefix="vg-lab-sealed-"))
+    if cleanup_roots is not None:
+        cleanup_roots.append(sealed_dir)
+    sealed_bundle = sealed_dir / "bundle"
+    sealed_bundle.write_bytes(
+        b"sealed evaluator mount is intentionally unavailable to worker\n")
+    worker = WorkerProtocol(RootlessSandboxRunner(
+        repo, evaluator_bundle=sealed_bundle, runtime=_bwrap_path()))
+    return SandboxedEnvironmentAdapter(
+        worker, repo, environment_id=f"workspace:{repo}")
 
 
 def _write_jsonl(target: Path, store: Any, run_id: str) -> int:
@@ -210,7 +322,7 @@ def main() -> int:
     parser.add_argument("--pack", required=True)
     parser.add_argument("--task-dir", required=True)
     parser.add_argument("--model", default="mock",
-                        choices=("mock", "ollama", "openrouter", "deepseek"))
+                        choices=("mock", "ollama", "openrouter", "deepseek", "router"))
     parser.add_argument("--model-name", default=None)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--interactive", action="store_true")
@@ -219,6 +331,10 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=4)
     parser.add_argument("--jsonl-out", default=None)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--tier-escalation", action="store_true",
+                        help="Select the initial tier; outcome-driven escalation is coordinated externally")
+    parser.add_argument("--tiers", nargs="+", default=None,
+                        help="Ordered list of models for tier escalation")
 
     args = parser.parse_args()
     result = run_lab_task(
@@ -226,6 +342,7 @@ def main() -> int:
         model_port=args.model, model_name=args.model_name,
         interactive=args.interactive, max_turns=args.max_turns,
         max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
+        tier_escalation=args.tier_escalation, tiers=args.tiers,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

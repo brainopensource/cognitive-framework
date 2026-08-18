@@ -23,6 +23,19 @@ export type CliOptions = {
   socketPath?: string;
   demo?: boolean;
   demoScenario?: string;
+  /** Product coding surface (S33). Absent on legacy `vg run`. */
+  plannerModel?: string;
+  executorBand?: string;
+  recoveryModel?: string;
+  maxTurns?: number;
+  maxEpisodes?: number;
+  maxReplans?: number;
+  budgetUsdMicros?: number;
+  interactive?: boolean;
+  dryPlan?: boolean;
+  json?: boolean;
+  jsonlOut?: string;
+  question?: string;
 };
 
 export type HeadlessRunOptions = CliOptions;

@@ -368,7 +368,20 @@ class _EnvironmentEffect:
             detail = json.dumps(value.files)
         elif hasattr(value, "output") and value.output is not None:
             detail = str(value.output)
-        return AdapterOutcome("ok", Occurrence.OCCURRED, {"usd_micros": 1},
+        # `result.ok` means the *port call* succeeded, not that the command
+        # did. An `EffectReceipt` reports `outcome="failed"` on a non-zero
+        # exit, and collapsing that to `ok` made a failing test suite
+        # indistinguishable from a passing one on the ledger -- which makes an
+        # exterior oracle impossible to derive and every run unmeasurable.
+        receipt_outcome = getattr(value, "outcome", None)
+        status = "ok"
+        if isinstance(receipt_outcome, str) and receipt_outcome not in {"", "ok"}:
+            status = "error"
+        exit_code = getattr(value, "exit_code", None)
+        if isinstance(exit_code, int) and not isinstance(exit_code, bool):
+            # Carried so a reader can tell *why* it failed without re-running.
+            detail = f"[exit {exit_code}] {detail}" if detail else f"[exit {exit_code}]"
+        return AdapterOutcome(status, Occurrence.OCCURRED, {"usd_micros": 1},
                               result_digest=digest, detail=detail)
 
 
@@ -730,7 +743,28 @@ class HarnessSession:
         discovery = WorkspaceDiscovery(repo)
         discovered_env = discovery.render_environment_text()
         base_env = _environment_map(ports.environment, harness)
-        env_text = f"{base_env}\n\n{discovered_env}" if discovered_env else base_env
+        env_parts = [base_env]
+        if discovered_env:
+            env_parts.append(discovered_env)
+        if self.index is not None:
+            files_res = self.index.files()
+            if files_res.ok and files_res.value is not None:
+                symbols_res = self.index.symbols()
+                slist = list(symbols_res.value) if symbols_res.ok and symbols_res.value is not None else []
+                sym_by_file: dict[str, list[str]] = {}
+                for s in slist:
+                    sym_by_file.setdefault(s.path, []).append(f"{s.kind} {s.name}:{s.line}")
+                lines = ["=== Workspace Repository Map ==="]
+                if not files_res.value:
+                    lines.append("- state: empty greenfield workspace")
+                for f in files_res.value:
+                    syms = sym_by_file.get(f, [])
+                    if syms:
+                        lines.append(f"- {f} ({', '.join(syms)})")
+                    else:
+                        lines.append(f"- {f}")
+                env_parts.append("\n".join(lines))
+        env_text = "\n\n".join(part for part in env_parts if part)
         compiler = ContextCompiler(
             system_core=harness.system_core,
             tool_schemas=harness.tool_schemas,
@@ -1001,7 +1035,7 @@ class Runtime:
                 contents[manifest.budget_policy], manifest.budget_policy),
             index_component=next(
                 (path for role, paths in manifest.components
-                 if role in {"index_policy", "repo_index"} for path in paths),
+                 if role in {"repo_index", "index_component"} for path in paths),
                 None),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},

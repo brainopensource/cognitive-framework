@@ -1,6 +1,10 @@
 import type { CliOptions } from "@vanguard/client-core";
+import { parseBudgetUsdToMicros } from "@vanguard/client-core";
 
-export type ParsedCli = CliOptions & { promptExplicit: boolean };
+export type ParsedCli = CliOptions & {
+  promptExplicit: boolean;
+  budgetError?: string;
+};
 
 export const USAGE =
   "Usage:\n" +
@@ -8,17 +12,47 @@ export const USAGE =
   "  vg run [repo] [--headless] [--prompt <text>] [--brief <text>] [--model <id>] [--manifest <path>]\n" +
   "          [--run-id <id>] [--resume <id>] [--checkpoint-every <n>] [--socket-path <path>]\n" +
   "          [--demo [scenario]] [--replay <file.jsonl>] [--scenario] [--feed] [--yes|-y]\n" +
+  "  vg code PATH [--brief TASK.md] [--planner MODEL] [--executor-band free|medium|high]\n" +
+  "          [--recovery-model MODEL] [--max-turns N] [--max-episodes N] [--max-replans N]\n" +
+  "          [--budget-usd DOLLARS] [--interactive|--benchmark] [--dry-plan] [--resume RUN_ID]\n" +
+  "          [--jsonl-out PATH] [--json] [--headless]\n" +
+  "  vg explain PATH --question TEXT [--headless] [--json]\n" +
   "  vg approve <run-id> --decision approve|reject\n" +
   "  vg resume <run-id> [--headless]\n" +
   "  vg trace <run-id> [--headless] [--replay <file.jsonl>] [--demo [scenario]]\n" +
   "  vg why <artifact> [--headless] [--replay <file.jsonl>] [--demo [scenario]]\n" +
   "Flags: --headless --feed --scenario --demo --replay --run-id --resume --checkpoint-every\n" +
-  "       --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y --help";
+  "       --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y\n" +
+  "       --planner --executor-band --recovery-model --max-turns --max-episodes --max-replans\n" +
+  "       --budget-usd --interactive --benchmark --dry-plan --jsonl-out --json --question --help";
 
 export function usage(): never {
   console.error(USAGE);
   process.exit(2);
 }
+
+const VALUE_FLAGS = new Set([
+  "--replay",
+  "--run-id",
+  "--resume",
+  "--checkpoint-every",
+  "--repo",
+  "--prompt",
+  "--brief",
+  "--model",
+  "--manifest",
+  "--decision",
+  "--socket-path",
+  "--planner",
+  "--executor-band",
+  "--recovery-model",
+  "--max-turns",
+  "--max-episodes",
+  "--max-replans",
+  "--budget-usd",
+  "--jsonl-out",
+  "--question",
+]);
 
 export function parseCliOptions(args: string[]): ParsedCli {
   const value = (name: string) => {
@@ -26,20 +60,6 @@ export function parseCliOptions(args: string[]): ParsedCli {
     return index >= 0 && index + 1 < args.length ? args[index + 1] : undefined;
   };
   const flag = (name: string) => args.includes(name);
-
-  const flagNamesWithVal = new Set([
-    "--replay",
-    "--run-id",
-    "--resume",
-    "--checkpoint-every",
-    "--repo",
-    "--prompt",
-    "--brief",
-    "--model",
-    "--manifest",
-    "--decision",
-    "--socket-path",
-  ]);
 
   const positional: string[] = [];
   let demo = false;
@@ -56,7 +76,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
       continue;
     }
     if (arg.startsWith("--") || arg.startsWith("-")) {
-      if (flagNamesWithVal.has(arg)) i++;
+      if (VALUE_FLAGS.has(arg)) i++;
       continue;
     }
     positional.push(arg);
@@ -71,11 +91,13 @@ export function parseCliOptions(args: string[]): ParsedCli {
 
   if (positional.length > 0) {
     if (!prompt && !repo) {
-      if (positional[0]!.startsWith(".") || positional[0]!.includes("/")) {
+      if (positional[0]!.startsWith(".") || positional[0]!.includes("/") || positional[0] === ".") {
         repo = positional[0];
         if (positional.length > 1) prompt = positional.slice(1).join(" ");
       } else {
-        prompt = positional.join(" ");
+        // First positional for `code`/`explain` is always the workspace path.
+        repo = positional[0];
+        if (positional.length > 1) prompt = positional.slice(1).join(" ");
       }
     } else if (!prompt && repo) {
       prompt = positional.join(" ");
@@ -85,13 +107,27 @@ export function parseCliOptions(args: string[]): ParsedCli {
   }
 
   const promptExplicit = Boolean(prompt);
+  const budgetRaw = value("--budget-usd");
+  let budgetUsdMicros: number | undefined;
+  let budgetError: string | undefined;
+  if (budgetRaw !== undefined) {
+    const parsedBudget = parseBudgetUsdToMicros(budgetRaw);
+    if (parsedBudget.ok) budgetUsdMicros = parsedBudget.micros;
+    else budgetError = parsedBudget.error.message;
+  }
+
+  const intOr = (raw: string | undefined, fallback: number) => {
+    if (raw === undefined) return fallback;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : fallback;
+  };
 
   return {
     headless: flag("--headless"),
     feed: flag("--feed"),
     scenario: flag("--scenario"),
     prompt: prompt ?? "Execute default coding task",
-    brief: prompt ?? "Execute default coding task",
+    brief: value("--brief") ?? prompt ?? "Execute default coding task",
     repo: repo ?? ".",
     runId: value("--run-id") ?? (positional[0] && !prompt ? positional[0] : undefined),
     resumeFrom: value("--resume"),
@@ -105,5 +141,18 @@ export function parseCliOptions(args: string[]): ParsedCli {
     demo,
     demoScenario,
     promptExplicit,
+    plannerModel: value("--planner") ?? "deepseek/deepseek-v4-flash",
+    executorBand: value("--executor-band") ?? "free",
+    recoveryModel: value("--recovery-model") ?? "deepseek/deepseek-v4-flash",
+    maxTurns: intOr(value("--max-turns"), 40),
+    maxEpisodes: intOr(value("--max-episodes"), 12),
+    maxReplans: intOr(value("--max-replans"), 2),
+    budgetUsdMicros,
+    interactive: flag("--interactive"),
+    dryPlan: flag("--dry-plan"),
+    json: flag("--json"),
+    jsonlOut: value("--jsonl-out"),
+    question: value("--question"),
+    budgetError,
   };
 }

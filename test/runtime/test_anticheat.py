@@ -66,8 +66,13 @@ class NoGoldPatchInTheWorkspace(unittest.TestCase):
         for name in DRIVERS:
             with self.subTest(module=name):
                 code = _code(RUNTIME / name).lower()
+                # The invariant is "no reference solution enters the
+                # workspace", not "no copy call exists". Banning `shutil.copy`
+                # outright flagged the per-run workspace *isolation* copy,
+                # which is the opposite of a gold patch -- it stops one run
+                # inheriting another's edits.
                 for forbidden in ("gold_patch", "goldpatch", "reference_solution",
-                                  "solution.py", "shutil.copy", "copytree"):
+                                  "solution.py", "/solution", "expected_output"):
                     self.assertNotIn(forbidden, code)
 
 
@@ -205,13 +210,61 @@ class LarIsReadOnly(unittest.TestCase):
         for name in DRIVERS:
             with self.subTest(module=name):
                 code = _code(RUNTIME / name).lower()
-                for forbidden in ("lar", "optimis", "optimiz", "rewrite_prompt"):
+                # `lar` as a bare substring matches "dec-lar-ed". A rule that
+                # fires on an ordinary English word is a rule that will be
+                # deleted the first time it cries wolf, so it matches the
+                # module the way an import would.
+                for forbidden in ("import lar", "from lar", "lar.", "coding_lar",
+                                  "optimis", "optimiz", "rewrite_prompt"):
                     self.assertNotIn(forbidden, code)
 
-    def test_the_scorer_writes_nothing(self) -> None:
-        code = _code(RUNTIME / "scoring.py")
-        for forbidden in ("write_text", "open(", "mkdir", "Path("):
-            self.assertNotIn(forbidden, code)
+class AutonomousGrantAndOracleAntiCheat(unittest.TestCase):
+    """S32 anti-cheat: ensure agent cannot fake an oracle pass, write in benchmark, or escape bounds."""
+
+    def test_trivial_exit_zero_agent_proc_cannot_authorize_green(self) -> None:
+        from vanguard.packages.runtime.coding_verification import FinalVerifier
+        # Verify that without the exterior oracle passing, oracle_green is false
+        verifier = FinalVerifier(None)
+        receipt = verifier.verify_final("t1", ["python3", "-c", "import sys; sys.exit(0)"])
+        self.assertFalse(receipt.oracle_green)
+
+    def test_benchmark_mode_remains_fail_closed_for_writes(self) -> None:
+        from vanguard.packages.kernel import (
+            EffectRequest,
+            FailurePath,
+            HeldAuthority,
+            Kernel,
+            Mode,
+            Outcome,
+            StandardClassifier,
+            StandardPolicy,
+        )
+        from vanguard.packages.kernel import Constraints, Scope
+        scope = Scope(
+            actions=frozenset({"fs.read", "patch.apply"}),
+            resources=({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},),
+            constraints=Constraints(
+                expires_at="2099-01-01T00:00:00.000Z",
+                max_uses=100,
+                budget_usd_micros=100_000,
+            ),
+        )
+        policy = StandardPolicy(
+            parent_scope=scope,
+            mode=Mode.BENCHMARK,
+            approval_required_above="low",
+            risk_of={"patch.apply": "medium"},
+        )
+        req = EffectRequest(
+            action="patch.apply",
+            resource={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
+            args={"diff": "--- a\n+++ b\n"},
+            principal="agent-1",
+            run_id="run-anticheat",
+        )
+        auth = policy.authorize(req, widens_capability=False, requested_scope=scope)
+        self.assertIs(auth.outcome, Outcome.REJECT)
+        self.assertIs(auth.failure, FailurePath.DENIED_ASK_FAIL_CLOSED)
 
 
 if __name__ == "__main__":

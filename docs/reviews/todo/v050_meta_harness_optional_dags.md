@@ -1,5 +1,7 @@
 # Vanguard Code Quality & Architecture Deep-Dive Evaluation
 
+**Audit 2026-08-17 (first headless coding CLI):** `[DONE]` observed in tree. `[TODO]` still open. `[LATER]` v0.5 / not the first CLI. First delivery stays on the free episode loop (`lab_driver` → `HarnessSession`). Optional DAGs belong in a playbook after that loop actually writes in-place.
+
 After reading the architecture docs, the full S28–S34 development guide, the roadmap, and the actual code in `vanguard/packages/`, here is a comprehensive evaluation.
 
 ---
@@ -8,7 +10,7 @@ After reading the architecture docs, the full S28–S34 development guide, the r
 
 **No — the S28–S34 plan will produce well-tested but architecturally compromised code.** The plan is internally consistent and the tests will pass, but it doubles down on the architectural contradiction I identified earlier. Here's why:
 
-### The Contradiction Is Being Codified, Not Resolved
+### The Contradiction Is Being Codified, Not Resolved — `[DONE]` as diagnosis; first CLI does **not** ship this DAG
 
 The S28–S34 development guide explicitly mandates:
 
@@ -37,15 +39,15 @@ This is exactly what the architecture doc's playbook system (§11) was designed 
 
 ## 2. Real Code Quality Issues Found
 
-### 2.1 Dead / Redundant Code
+### 2.1 Dead / Redundant Code — `[TODO]` tidy (not first CLI)
 
 | File | Issue |
 |---|---|
-| `runtime/repair.py` | `drive_until_green` is a simpler repair loop. `coding_coordinator.py` implements a more complex one. Both exist. Which one is authoritative? |
-| `runtime/tier_escalation.py` | `TierLadder`, `TierAttempt`, `EscalationOutcome`, `run_with_escalation` — a complete tier-escalation system. `coding_coordinator.py` has its own `_route()` method. `coding_progress.py` has `ProgressAnalyzer.decide_escalation()`. **Three escalation mechanisms exist.** |
-| `runtime/model_selection.py` | `select_model()` with `_probe_http()`, `_ollama_tags()`, `_resolve_tag()`, `_free_band()`. `tier_escalation.py` has `RoleAwareRouter.choose()`. `coding_coordinator.py` has `_route()`. **Three model selection mechanisms.** |
-| `runtime/lab_driver.py` | Has its own `_verify()`, `_verdict_is_green()`, `_environment_for()`. `coding_verification.py` has `StepVerifier` and `FinalVerifier`. **Two verification paths.** |
-| `runtime/coding_entrypoint.py` | Has `_fake_backend()` with `greenfield_adaptive`, `budget_exhausted`, `unavailable`, `non_green` — fake backends for CLI testing. Also has `_scripted_adaptive_plan()` and `_coordinator_dry_plan()`. This is test infrastructure living in production code. |
+| `runtime/repair.py` | `[TODO]` `drive_until_green` is the **first-CLI** loop. `coding_coordinator.py` is a more complex DAG. Authoritative for this cut: `lab_driver` + `drive_until_green`. |
+| `runtime/tier_escalation.py` | `[TODO]` tidy later. Three escalation mechanisms exist (`tier_escalation`, coordinator `_route()`, `coding_progress`). First CLI: do not add a fourth. |
+| `runtime/model_selection.py` | `[DONE]` `select_model()` is what `lab_driver` uses. `[TODO]` consolidate RoleAwareRouter / coordinator `_route()` — `[LATER]` v0.5. |
+| `runtime/lab_driver.py` | `[DONE]` `_verify()` / declared `verify.sh` is the first-CLI oracle. `[TODO]` do not merge coordinator verifiers into this cut. |
+| `runtime/coding_entrypoint.py` | `[DONE]` as CLI bridge; `[TODO]` `_fake_backend()` still in production — `--live` refused until `HarnessSession` binder. |
 
 ### 2.2 Coupling Issues
 
@@ -68,44 +70,39 @@ This is the composition root, so some coupling is expected. But `HarnessSession.
 
 ### 2.3 Protocol / Design Issues
 
-**The `EpisodeRunner` type alias is `Callable[[ModelRole, str, str, str], Any]`.** Four positional string arguments with no type safety. The coordinator calls `self._run_episode(role, model, episode_id, brief)` — if the argument order changes, nothing catches it.
+**The `EpisodeRunner` type alias is `Callable[[ModelRole, str, str, str], Any]`.** `[TODO]` type-safety (not first CLI). Four positional string arguments. The coordinator calls `self._run_episode(role, model, episode_id, brief)` — if the argument order changes, nothing catches it.
 
-**`CodingRunCoordinator` takes `planner: PlanFactory` as a callback but also calls `self._run(ModelRole.ARCHITECT, ...)` before calling the planner.** The architect episode runs, then the planner callback is called on the same brief. This means the model is invoked twice for planning — once through the episode engine and once through the callback. The callback's result (`self._planner(self.config.brief)`) is what's actually used. The architect episode's output is discarded.
+**The `CodingRunCoordinator` takes `planner: PlanFactory` as a callback but also calls `self._run(ModelRole.ARCHITECT, ...)` before calling the planner.** `[TODO]` the architect episode is discarded; the callback plan is used. Do not ship this as the first CLI.
 
 **`coding_entrypoint.py` has `_fake_backend()` which is 100+ lines of test doubles in a production module.** It's imported at module level and selected by a string `kind` parameter. This is test infrastructure that should be in `test/`.
 
-**`session_log.py` has a stray comment block at line 58-59:**
-```python
-│that differs between domains is a file. So the manifest supplies the system
-│    def flush() -> None:
-```
-This appears to be a copy-paste artifact from `root.py`'s docstring that got embedded in the middle of `session_log.py`.
+**`session_log.py` stray comment block:** `[DONE]` (fixed). `terminal_refusal` lives at the dataclass; the copy-paste from `root.py` is gone.
 
 ### 2.4 Missing Abstractions
 
-**No harness can define its own execution strategy.** The `CodingRunCoordinator` hardcodes `DISCOVER → PLAN → EXECUTE → VERIFY → DIAGNOSE → REPLAN → REVIEW → FINAL_VERIFY`. A harness manifest has no field for "execution strategy" or "workflow type."
+**No harness can define its own execution strategy.** `[LATER]` v0.5. First CLI: the strategy **is** the episode loop. The coordinator DAG must not become the only workflow.
 
-**The playbook system (§11) is designed but not implemented.** The architecture doc describes `advisory`, `guided`, and `strict` rigidity levels with tool masking, context injection, and gate evaluation. None of this exists in code. The coordinator implements a single hardcoded workflow that roughly corresponds to `strict` mode.
+**The playbook system (§11) is designed but not implemented.** `[LATER]` `advisory` → `guided` → `strict`. Do not implement playbooks to ship the first CLI.
 
-**No operator registry exists.** The architecture says operators are "versioned, addressable, content-hashed entries in the competence graph." The code has no competence graph, no operator registry, and no mechanism for the system to improve its own operators.
+**No operator registry exists.** `[LATER]` competence graph / operator registry.
 
 ### 2.5 Performance / Workflow Issues
 
-**Single effect per turn is a constraint, not a feature.** The translator refuses `multi_action_proposal`. This is documented and intentional, but it means the agent cannot read a file and edit it in the same turn. Claude Code and Cline can. This is a significant latency penalty for multi-step tasks.
+**Single effect per turn is a constraint, not a feature.** `[DONE]` keep it. Translator refuses `multi_action_proposal`. Do not loosen for the first CLI.
 
-**No parallel execution.** The architecture doc §8 describes structured concurrency with independence groups, but the code has no implementation. `EpisodeEngine` is strictly sequential.
+**No parallel execution.** `[LATER]`.
 
-**No prompt caching.** The architecture doc §10.2 describes cache boundaries and prefix stability as "the largest single cost lever." The context compiler (`agency/context/compiler.py`) exists but there's no evidence of actual prompt caching integration with providers.
+**No prompt caching.** `[LATER]`. Compiler prefix exists; provider cache integration does not.
 
-**No streaming.** The model adapter interface is request-response. There's no mechanism for streaming tool calls or real-time output to the user.
+**No streaming.** `[LATER]`. Request-response only.
 
 ### 2.6 Unused / Underused Capabilities
 
-**`EpisodeEngine.spawn()` exists and works** (with the S8-B-01 fix for attenuated children). But the coding coordinator never uses it. Sub-agent delegation is designed, implemented, tested, and unreachable from any harness.
+**`EpisodeEngine.spawn()` exists and works** `[DONE]` (S8-B-01 + ADR-0067). `[TODO]` coding pack does not expose it. `[LATER]` coordinator using spawn.
 
-**Structured consolidation** (`agency/context/compaction.py` with `StructuredRecord` and `deadEnds`) is implemented. The coding coordinator doesn't use it — it has its own simpler compaction via `context_policy`.
+**Structured consolidation** `[DONE]` in `agency/context/compaction.py`. `[TODO]` coding coordinator does not use it — first CLI uses pack `context_policy` instead.
 
-**`CompetencePriorRecorder`** exists in `agency/context/` and is wired in `_LayeredOperator`. But there's no competence graph to record into, so priors are recorded but never used for operator selection.
+**`CompetencePriorRecorder`** `[DONE]` wired in `_LayeredOperator`. `[LATER]` no competence graph to consume priors.
 
 ---
 
@@ -143,19 +140,14 @@ This appears to be a copy-paste artifact from `root.py`'s docstring that got emb
 
 **The runtime layer will require refactoring.** The current pattern of adding new `coding_*.py` files for each concern is unsustainable. At S34, the runtime package will have ~20 files all prefixed `coding_` — a sign that "coding" should be a harness, not a package.
 
-**The specific refactoring needed (v0.5 or v0.6):**
+**The specific refactoring needed (v0.5 `[LATER]`, not first CLI):**
 
-1. **Extract the coordinator's state machine into a playbook interpreter.** The playbook system (§11) already has the right abstraction. The coordinator should read a playbook that says "at rigidity `guided`, enforce phases in order but let the agent loop freely within each phase." The current hardcoded phases become a `strict` playbook.
-
-2. **Move `coding_plan.py` to `domain/` or `agency/`.** Plans are a general concept, not coding-specific. A TableWorld task also needs a plan.
-
-3. **Consolidate the three model selection mechanisms** into one `ModelRouter` that serves both the lab driver and the coordinator.
-
-4. **Consolidate the two verification mechanisms** into one `ExteriorVerifier` that serves both focused step checks and final oracle checks.
-
-5. **Move test infrastructure out of production code.** `coding_entrypoint.py`'s `_fake_backend()` belongs in `test/`.
-
-6. **Make execution strategy a harness configuration field.** A harness manifest should be able to declare `"execution_strategy": "agentic_loop"` vs `"execution_strategy": "plan_guided"` vs `"execution_strategy": "playbook_strict"`.
+1. **Extract the coordinator's state machine into a playbook interpreter.** `[LATER]`
+2. **Move `coding_plan.py` to `domain/` or `agency/`.** `[LATER]`
+3. **Consolidate the three model selection mechanisms.** `[LATER]`
+4. **Consolidate the two verification mechanisms.** `[LATER]` — first CLI keeps `lab_driver` `_verify`.
+5. **Move `_fake_backend()` out of production.** `[TODO]` after HarnessSession binder.
+6. **Execution strategy as harness field.** `[LATER]` — first CLI is `agentic_loop` only.
 
 ---
 

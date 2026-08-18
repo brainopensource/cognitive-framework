@@ -1,6 +1,10 @@
 # v0.4.3 — Harvest tutorial: OpenCode / Claude Code atoms on Vanguard
 
 **Status:** working note for the product slice (one coding CLI). Not a second roadmap.
+**Audit 2026-08-17 (first headless coding CLI = `lab_driver`, not TUI):** `[DONE]` in tree on the real episode path. `[TODO]` still required for that cut. `[LATER]` not this CLI.
+
+**Good to have (coded, not the last delivery list):** `AutonomousGrant` (`runtime/autonomous_grant.py`) — signed workspace/verb/command/expiry/budget, better than a blanket approve. Explicit empty-workspace IndexPort map. `coding_progress` fingerprints as honest stop. Bind `format_skill_index` into the compiler prefix.
+
 **Boards stay:** `docs/scrum/roadmap_backend.md`, `docs/scrum/roadmap_frontend.md`.
 **Normative:** `docs/main_v4/`. Pack authoring: `docs/scrum/development_guides/02_manifest_and_pack_authoring.md`.
 **Harvest ruling (010):** do not rewrite Vanguard; do not import a competitor catalogue; evolve in place.
@@ -109,7 +113,7 @@ Same pattern for grep (ACI-2), empty bash (ACI-3), lint-on-edit (ACI-4), `AGENTS
 
 ---
 
-## 4. Backend we already have (OpenCode-class, no TUI claim)
+## 4. Backend we already have (OpenCode-class, no TUI claim) — `[DONE]` unless noted
 
 These are **in the runtime / packs / adapters**, not “we shipped OpenCode.”
 
@@ -120,22 +124,22 @@ These are **in the runtime / packs / adapters**, not “we shipped OpenCode.”
 | Tool name skins | aliases | `aliases.json` |
 | System prompt as config | `system-prompt.txt` | per pack |
 | `AGENTS.md` / `CLAUDE.md` | workspace discovery → L3 | `agency/manifests/discovery.py` |
-| Permissions | `approval_policy` + kernel authorize | S8-B-04; live TUI `vg approve` |
-| Sandbox | rootless bubblewrap adapter | `adapters/sandbox/` |
-| Provider-agnostic model | `ModelPort` (OpenRouter, Ollama, OpenAI, DeepSeek, MOCK) | `adapters/models/` |
-| Subagents | fail-closed `spawn` + attenuation | S8-B-01 (`8f5f16d`) |
+| Permissions | `approval_policy` + kernel authorize — `[DONE]` policy; `[TODO]` operator signer on CLI; `[LATER]` TUI `vg approve` | S8-B-04 |
+| Sandbox | rootless bubblewrap adapter — `[DONE]` | `adapters/sandbox/` |
+| Provider-agnostic model | `ModelPort` (OpenRouter, Ollama, OpenAI, DeepSeek, MOCK) — `[DONE]` adapters; `[TODO]` live writes | `adapters/models/` |
+| Subagents | fail-closed `spawn` + attenuation — `[DONE]` engine; `[TODO]` not in coding pack | S8-B-01 (`8f5f16d`) |
 | Compaction | `CompactionStrategy` registry + `structured_consolidate` / `deadEnds` | S8-B-02, S10-B-03 |
 | Re-ground / brief | immutable brief; `regroundPolicy` as granted effect | VG-03; S10-B-04 |
 | Turn budget | `maxTurns` from `budget_policy` | S8-B-10 |
 | Model routing | `ModelRouter` from `routing_policy` | S8-B-03 |
-| Session resume | ledger suspend/resume | S8-A-02 |
+| Session resume | ledger suspend/resume — `[DONE]` ledger; `[TODO]` operator `--resume` on `lab_driver` | S8-A-02 |
 | Events / receipts | kernel ledger, `vg trace` / `vg why` | CLI + runtime |
 | ACI quality | paginated read, succinct search, empty exec ack, lint receipt | S8-B-06…B-09 |
 | Packs as plugins | `compose()` freeze; reconstructions differ on ≥3 DNA dims | S9-B-01 |
-| Headless CLI | `vg run --headless --manifest … --prompt …` | `clients/cli` |
-| Second domain (not coding) | TableWorld | S10-B-01 (proves the compiler, not the coding CLI) |
+| Headless CLI | `[DONE]` shim → `lab_driver` (`python3 lab/run.py` or `-m vanguard.packages.runtime.lab_driver`). `[TODO]` `vg run --headless` is still the TUI/daemon path, not this cut. | `lab/run.py` + `runtime/lab_driver.py` |
+| Second domain (not coding) | TableWorld | S10-B-01 (proves the compiler, not the coding CLI) — `[DONE]` as proof, `[LATER]` for coding CLI |
 
-**Honest gaps vs a daily OpenCode:** live LLM dogfood not run; `lab/run.py` still a one-shot stub while `HarnessSession.run` already loops; daemon/TUI ignored for this product cut; no LSP; no MCP; playbooks deferred. Session measurement projector exists (`tools/export_coding_session.py`); skill prefix formatter exists (`format_skill_index`) but is not yet bound in the compiler or pack.
+**Honest gaps vs a daily OpenCode:** `[TODO]` live LLM dogfood / Q2; `[DONE]` `lab/run.py` is a stdlib shim (no longer a fabricating stub); `[LATER]` daemon/TUI, LSP, MCP, playbooks. `[DONE]` session projector `tools/export_coding_session.py`. `[TODO]` `format_skill_index` exists but is **not bound** in `agency/context/compiler.py`. `[TODO]` `--in-place` and `--approve-writes` not on `lab_driver` argparse (`approve_writes` exists only as a Python kwarg). `[TODO]` live greenfield still often 0 verbs / `multi_action_proposal`.
 
 ---
 
@@ -145,38 +149,38 @@ Order is the point. Each row is one harvest cycle (§2). Stop when `DOGFOOD-01..
 
 ### P0 — make the existing CLI actually code
 
-| ID | Feature | Harvest | Land in |
-|---|---|---|---|
-| P0-1 | One **product-default** pack | OpenCode + Claude public prompts (style only); Pi’s *length* (keep cold start tiny) | promote `vg-code-opencode-shaped` or `vg-code-claude-shaped` to `product-default` in `registry.json` |
-| P0-2 | Live `ModelPort` on `vg run` | OpenCode provider list; our adapters already exist | env: Ollama or OpenRouter **free**; MOCK stays the test brain |
-| P0-3 | Sandbox + workspace root on real repos | Codex: sandbox knob ≠ approval knob | `adapters/sandbox/rootless.py` + capability selectors |
-| P0-4 | Interactive approve in the Ink TUI | OpenCode / Cline permission copy | client only; kernel still decides |
-| P0-5 | Execute `DOGFOOD-01..03` | ourselves | protocol already at `docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md` |
+| ID | Status | Feature | Harvest | Land in |
+|---|---|---|---|---|
+| P0-1 | `[DONE]` | One **product-default** pack | OpenCode + Claude public prompts (style only); Pi’s *length* (keep cold start tiny) | `vg-code-default` is `product-default` in `registry.json` |
+| P0-2 | `[DONE]` via `lab_driver --model ollama\|openrouter`; `[TODO]` live verb rate | Live `ModelPort` | OpenCode provider list; our adapters already exist | env: Ollama or OpenRouter **free**; MOCK stays the test brain |
+| P0-3 | `[DONE]` isolate-copy; `[TODO]` `--in-place` on a WSL checkout | Sandbox + workspace root on real repos | Codex: sandbox knob ≠ approval knob | `adapters/sandbox/rootless.py` + capability selectors |
+| P0-4 | `[LATER]` TUI out of this cut; `[TODO]` CLI `--approve-writes` / `AutonomousGrant` | Interactive approve | OpenCode / Cline permission copy | kernel still decides; lab signer is labelled `auto_approved_writes` |
+| P0-5 | `[TODO]` Q2; MOCK ≠ live | Execute `DOGFOOD-01..03` live | ourselves | protocol already at `docs/scrum/sprints/sprint09/evidence/s9-j-01-dogfood-protocol.md` |
 
 ### P1 — atoms that move SWE scores (adapter / pack, not engine)
 
-| ID | Feature | Harvest | Land in |
-|---|---|---|---|
-| P1-1 | Thicken tool schemas (offset, glob, uniqueness) | mini-SWE-agent ACI + Claude tool JSON *shapes* | `*-tool.json` + adapters; **same verbs** |
-| P1-2 | `write` vs `edit` if models dump whole files | Pi four primitives; still `patch.apply` or a second capability row | pack capability + adapter; no new kernel verb unless forced |
-| P1-3 | Repo map / symbols as observations | Aider repo map; sagiha `find_symbols` | `IndexPort` (S10-A-03) bound in the manifest |
-| P1-4 | Skills index in the frozen prefix | Reasonix ≤4k names+descriptions | `skill` artifacts (kind already in `kinds.json`); bodies via `fs.read` |
-| P1-5 | Bind or delete `proc.test` | our own orphan | S10-A-02 |
-| P1-6 | Domain strings out of `invocation.py` | C-01 | S10-A-01 — competitor names live in aliases, not Python |
+| ID | Status | Feature | Harvest | Land in |
+|---|---|---|---|---|
+| P1-1 | `[DONE]` | Thicken tool schemas (offset, glob, uniqueness) | mini-SWE-agent ACI + Claude tool JSON *shapes* | `*-tool.json` + adapters; **same verbs** |
+| P1-2 | `[TODO]` only if live models dump whole files | `write` vs `edit` if models dump whole files | Pi four primitives; still `patch.apply` or a second capability row | pack capability + adapter; no new kernel verb unless forced |
+| P1-3 | `[DONE]` port + `lab_driver` bind when pack has `index_component`; `[TODO]` explicit empty-workspace map text | Repo map / symbols as observations | Aider repo map; sagiha `find_symbols` | `IndexPort` (S10-A-03) bound in the manifest |
+| P1-4 | `[DONE]` pack genes + `format_skill_index`; `[TODO]` bind into compiler prefix | Skills index in the frozen prefix | Reasonix ≤4k names+descriptions | `skill` artifacts (kind already in `kinds.json`); bodies via `fs.read` |
+| P1-5 | `[DONE]` | Bind or delete `proc.test` | our own orphan | S10-A-02 deleted; tests = allowlisted `proc.exec` |
+| P1-6 | `[DONE]` | Domain strings out of `invocation.py` | C-01 | S10-A-01 — competitor names live in aliases, not Python |
 
 ### P2 — memory and loop *control* (already designed, not productized)
 
-| ID | Feature | Harvest | Land in |
-|---|---|---|---|
-| P2-1 | Short-term = episode dialogue + receipts | Pi JSONL DAG *idea*; our ledger is the store | do not add a second session DB |
-| P2-2 | Long-term = files (`AGENTS.md`, notes) the model `fs.read`s | OpenCode project memory | workspace files + discovery; never mutate L1–L3 mid-turn |
-| P2-3 | Chat → brief | VG-03 immutable brief, compaction-exempt | prompt compiler; keep the brief out of compact |
-| P2-4 | Retries / stuck detection | Claude compact-on-overflow; our `deadEnds` | context policy gene, not a new loop |
-| P2-5 | Subagent for “explore in isolation” | Claude Task / OpenCode subagent | spawn + narrowed `Scope`; prove with real Kernel tests, not mocks |
+| ID | Status | Feature | Harvest | Land in |
+|---|---|---|---|---|
+| P2-1 | `[DONE]` | Short-term = episode dialogue + receipts | Pi JSONL DAG *idea*; our ledger is the store | do not add a second session DB |
+| P2-2 | `[DONE]` | Long-term = files (`AGENTS.md`, notes) the model `fs.read`s | OpenCode project memory | workspace files + discovery; never mutate L1–L3 mid-turn |
+| P2-3 | `[DONE]` `brief_exempt` | Chat → brief | VG-03 immutable brief, compaction-exempt | prompt compiler; keep the brief out of compact |
+| P2-4 | `[DONE]` `deadEnds` / session_log; `[TODO]` wire `coding_progress` fingerprints into `lab_driver` stop | Retries / stuck detection | Claude compact-on-overflow; our `deadEnds` | context policy gene, not a new loop |
+| P2-5 | `[DONE]` engine `spawn` + ADR-0067; `[TODO]` expose from coding pack | Subagent for “explore in isolation” | Claude Task / OpenCode subagent | spawn + narrowed `Scope`; prove with real Kernel tests, not mocks |
 
-### P3 — explicitly later (do not sneak into v0.4.3)
+### P3 — explicitly later (do not sneak into v0.4.3) — `[LATER]`
 
-MCP, playbooks / operator registry, G_C promotion, browser, parallel TUI sessions, LSP-as-IDE, paid model lifts, kernel sealed-flag (`ADR-0067` / attenuation.py) until an ADR lands.
+MCP, playbooks / operator registry, G_C promotion, browser, parallel TUI sessions, LSP-as-IDE, paid model lifts. Kernel sealed-flag (`ADR-0067`) is `[DONE]` — do not relitigate. Playbook rigidity dial (`advisory` → `guided` → `strict`) stays `[LATER]` v0.5.
 
 ---
 
@@ -196,14 +200,18 @@ For each harvested atom, the PR body cites: competitor doc URL, Vanguard slot (p
 
 ## 7. The one command that means it works
 
+`[TODO]` operator path (in-place + labelled writes). `[DONE]` module and shim exist. Real command for this cut:
+
 ```bash
-vg run --headless \
-  --manifest vg-code-opencode-shaped \
-  --repo /path/to/hard/task \
-  --prompt "Fix DOGFOOD-01. Do not stop until tests pass."
+python3 -m vanguard.packages.runtime.lab_driver \
+  --pack vg-code-default \
+  --task-dir /home/rocha/Coding/YOUR_REPO \
+  --model ollama --model-name llama3.2:3b \
+  --interactive \
+  --jsonl-out /tmp/vg-run.jsonl
 ```
 
-When that returns a ledger of patches + passing `proc.exec` tests **with no human mid-run edit**, the framework is a coding harness. Measure it with:
+Stale `vg run --headless --manifest …` is `[LATER]` / TUI. When the command above returns a ledger of patches + passing `proc.exec` tests **on the WSL tree**, the framework is a coding harness. Measure it with:
 
 ```bash
 python3 tools/export_coding_session.py --jsonl path/to/episode.jsonl

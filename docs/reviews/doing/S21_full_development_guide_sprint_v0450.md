@@ -6,7 +6,15 @@ Owning requirement: `REQ-TRUST-001`
 Tracking board: `docs/scrum/roadmap_backend.md`, S28–S34  
 Product target: a Vanguard-native, headless agentic coding CLI capable of explaining repositories, planning work, implementing simple and multi-file tasks, testing, recovering, reviewing, and completing greenfield projects.
 
+**Audit 2026-08-17 — first CLI cut vs this guide.** This file is the *ambitious* S28–S34 product. The first shippable backend is narrower: `python3 -m vanguard.packages.runtime.lab_driver` on a WSL path, pack `vg-code-default`, one effect per turn, ledger JSONL. `[DONE]` / `[TODO]` / `[LATER]` below mark that cut, not “all of S34.” `CodingRunCoordinator` exists as unhooked application workflow (`--live` refused until a `HarnessSession` binder); do not treat `vg code` fake backends as a coding win.
+
+**First CLI `[TODO]` (operator path):** `--in-place`; CLI grant (`AutonomousGrant` already in `runtime/autonomous_grant.py`); live one `patch.apply`; bind `format_skill_index` into the compiler; honest `lab_driver` exit codes; wire `coding_progress` fingerprints as stop signals.
+
+**Already coded, good to have, was easy to skip:** signed bounded grant (workspace + verbs + commands + expiry + budget, not a blanket approve); explicit empty-workspace IndexPort map; objective workspace/test fingerprints before any paid escalate.
+
 ## 1. Executive verdict
+
+`[DONE]` substrate. `[TODO]` operator in-place writes + live one verb. `[LATER]` S34 `oracle_green` campaign.
 
 Vanguard already has the trustworthy substrate of a coding agent:
 
@@ -30,7 +38,7 @@ The product claim is therefore:
 
 The completed CLI must support four increasing capability classes through the same runtime path.
 
-### 2.1 Explain
+### 2.1 Explain — `[TODO]` real `lab_driver` / binder; `[DONE]` IndexPort + discovery exist
 
 Given a large existing repository, the agent can:
 
@@ -40,7 +48,7 @@ Given a large existing repository, the agent can:
 - explain architecture, dependency direction, important entrypoints, and risks;
 - cite observed files and symbols rather than inventing structure.
 
-### 2.2 Repair
+### 2.2 Repair — `[DONE]` path (`lab_driver` + dogfood tasks); `[TODO]` live Q2 + writes landing on a real checkout
 
 Given a focused failing task, the agent can:
 
@@ -50,7 +58,7 @@ Given a focused failing task, the agent can:
 - interpret real exit codes and test failures;
 - iterate until the exterior verifier passes or a named stop condition fires.
 
-### 2.3 Build
+### 2.3 Build — `[TODO]` live multi-file; `[DONE]` greenfield TASK.md turn-1 = `app/server.py` only; `[LATER]` coordinator plan DAG as the product
 
 Given an empty directory and a product brief, the agent can:
 
@@ -60,7 +68,7 @@ Given an empty directory and a product brief, the agent can:
 - maintain task state without falsely marking work complete;
 - start and behaviorally verify the resulting application.
 
-### 2.4 Deliver complex work
+### 2.4 Deliver complex work — `[LATER]` (not first CLI)
 
 Given a multi-module feature or greenfield system, the agent can:
 
@@ -73,7 +81,7 @@ Given a multi-module feature or greenfield system, the agent can:
 - resume safely from the ledger after interruption;
 - terminate only with a truthful result and complete evidence.
 
-## 3. Non-negotiable design constraints
+## 3. Non-negotiable design constraints — `[DONE]` as rules; keep them
 
 1. `HarnessSession` and `EpisodeEngine` remain the only model-to-effect execution path.
 2. The coordinator may schedule episodes but may never dispatch model-requested effects itself.
@@ -87,6 +95,8 @@ Given a multi-module feature or greenfield system, the agent can:
 10. No second agent loop, model-as-judge success path, silent tool-batch splitting, hidden host execution, or parallel session database is introduced.
 
 ## 4. Target architecture
+
+`[LATER]` as the product DAG. `[DONE]` modules exist unhooked. **First CLI:** skip `CodingRunCoordinator`; `lab_driver` → `HarnessSession` → `EpisodeEngine` is the path.
 
 ```text
 vg code <workspace> <brief/options>
@@ -125,7 +135,7 @@ all steps verified -> REVIEW -> FINAL_VERIFY -> COMPLETE
                                       `-- failed -> recover or named stop
 ```
 
-## 5. Core domain and application types
+## 5. Core domain and application types — `[DONE]` dataclasses in `coding_coordinator.py`; `[TODO]` binder
 
 Create `vanguard/packages/runtime/coding_coordinator.py` without moving effect semantics out of the existing engine.
 
@@ -188,7 +198,7 @@ class CodingRunState:
     terminal_reason: str | None
 ```
 
-## 6. Structured planning
+## 6. Structured planning — `[DONE]` `vg.coding-plan.v1` + tests; `[LATER]` as the live product brain
 
 Use a machine-validated plan rather than treating a Markdown checklist as authoritative.
 
@@ -243,7 +253,7 @@ The model may claim `implemented`; only an exterior check may produce `verified`
 
 If adding a new ledger event kind is outside the frozen contract, the architect writes exactly one `.vanguard/plan.json` through `patch.apply`. The coordinator parses it, validates it, records its digest, and derives later status from receipts. The mutable file is not trusted as the sole history.
 
-## 7. Architect, executor, diagnostic, and reviewer roles
+## 7. Architect, executor, diagnostic, and reviewer roles — `[LATER]` live roles; first CLI is one model per run via `--model`
 
 ### Architect
 
@@ -281,7 +291,7 @@ Default: DeepSeek V4 Flash after objective blocking signals. It receives compact
 
 The reviewer checks requirements, diff coverage, unresolved plan items, and suspicious shortcuts. It cannot override the exterior verifier. Start with a cheap capable model; use DeepSeek Flash only when the review is structurally complex.
 
-## 8. Coordinator pseudocode
+## 8. Coordinator pseudocode — `[LATER]` as product; `[DONE]` similar FSM in `coding_coordinator.py` without `HarnessSession`
 
 ```python
 def run_coding_task(config: CodingRunConfig) -> CodingRunResult:
@@ -376,7 +386,7 @@ def run_coding_task(config: CodingRunConfig) -> CodingRunResult:
     )
 ```
 
-## 9. Repository discovery and large-codebase explanation
+## 9. Repository discovery and large-codebase explanation — `[DONE]` `FileRepoIndex` bound in `lab_driver` when pack has `index_component`; `[TODO]` explicit empty-workspace map text ("files: 0")
 
 The real composition root must bind `IndexPort`; a test that manually supplies an index is insufficient proof.
 
@@ -417,7 +427,7 @@ Workspace repository map:
 
 Explanation mode uses the same observation and effect path but grants no write verbs unless requested.
 
-## 10. Objective progress detection
+## 10. Objective progress detection — `[DONE]` `coding_progress.py` + tests; `[TODO]` wire fingerprints into `lab_driver` stop (good to have for the first CLI)
 
 Escalation must be based on observable evidence, not model confidence.
 
@@ -457,7 +467,7 @@ fingerprint = sha256(canonical_json({
 
 A prose response, a real tool action, a changed workspace, a different failure, an improved test count, and a green test are distinct states. Do not collapse them into a single `completed` flag.
 
-## 11. Escalation, provider rotation, and descent
+## 11. Escalation, provider rotation, and descent — `[DONE]` `coding_progress` / health tests; `[TODO]` on `lab_driver`; `[LATER]` paid DeepSeek until spend + live verb
 
 Recommended model roles:
 
@@ -500,7 +510,7 @@ After every successful diagnosis or replan, descend to a free executor. The expe
 
 Do not silently catch router failures and reuse the original model. Emit a named routing failure with requested model, tier, and cause.
 
-## 12. Provider health
+## 12. Provider health — `[DONE]` module + tests; `[TODO]` bind
 
 ```python
 @dataclass(slots=True)
@@ -515,7 +525,7 @@ class ProviderHealth:
 
 Select free executors using observed health, while preserving deterministic tie-breaking for replay and experiments. Do not permanently rank a model from a single run; campaign-level promotion belongs outside the live loop.
 
-## 13. Budget controller
+## 13. Budget controller — `[DONE]` `coding_budget.py` + tests; `[TODO]` bind on paid `lab_driver` calls; `[LATER]` paid spend until `S9-J-03`
 
 Use integer microdollars. Reserve worst-case cost before every paid call, then reconcile actual provider usage.
 
@@ -548,7 +558,7 @@ Rules:
 - budget exhaustion is distinct from turn or attempt exhaustion;
 - initial live campaign ceiling is `$0.05`; the wider authorized envelope is `$0.50` only after review.
 
-## 14. Verification hierarchy
+## 14. Verification hierarchy — `[DONE]` `lab_driver` declared `verify.sh` / `_verify`; `[DONE]` unit tests for step/final verifiers; `[TODO]` live `oracle_green`
 
 Three verification layers have different authority.
 
@@ -570,7 +580,7 @@ The final greenfield web-app oracle should check behavior, not a gold source lay
 - no effect escaped the workspace;
 - the original fixture remains unchanged.
 
-## 15. Approvals and autonomy
+## 15. Approvals and autonomy — `[DONE]` `runtime/autonomous_grant.py` + `test_autonomous_coding_grant.py`; `[TODO]` expose on `lab_driver` CLI (prefer this over naked `--approve-writes`)
 
 Strict BENCHMARK cannot build software because it correctly denies `patch.apply` and privileged `proc.exec`. Greenfield building uses INTERACTIVE policy with a signed, bounded run grant:
 
@@ -589,7 +599,7 @@ Strict BENCHMARK cannot build software because it correctly denies `patch.apply`
 
 This is recorded as an autonomous lab departure. It is not a blanket approval, does not grant network access, and cannot widen itself.
 
-## 16. Context management and resume
+## 16. Context management and resume — `[DONE]` compact `brief_exempt` / evict results; `[TODO]` `lab_driver --resume RUN_ID` from ledger
 
 Prompt context has three layers:
 
@@ -616,7 +626,7 @@ def resume_run(run_id):
 
 A file existing after a crash does not prove its step completed; the focused verifier runs again.
 
-## 17. CLI product surface
+## 17. CLI product surface — `[DONE]` `vg code` flags + `coding_entrypoint` (fake backends); `[TODO]` first CLI is `lab_driver`, not Ink. `[TODO]` `lab_driver` exit codes (today `0` only on `oracle_green`). `[LATER]` `vg explain` / `--dry-plan` / `--resume` as product.
 
 The product entrypoint should be the shipped `vg` CLI, backed by the same Python runtime driver rather than a TypeScript agent loop.
 
@@ -663,7 +673,7 @@ Human receipts:
 
 Headless JSON and JSONL contain no terminal escapes. JSONL remains the ledger export; UI receipts are projections.
 
-## 18. Greenfield proof campaign
+## 18. Greenfield proof campaign — `[TODO]` live; `[DONE]` task `lab/tasks/greenfield-v0450-webapp`; `[LATER]` claim until adaptive `oracle_green`
 
 Start with a dependency-free Python and browser application so the first experiment measures agent behavior rather than package registry availability.
 
@@ -692,7 +702,7 @@ Run three fixed trials per initial arm under an aggregate `$0.05` ceiling. Expan
 
 Primary metric: `oracle_green` rate. Secondary metrics include cost per green, turns per green, time to first valid file, time to first passing focused test, replans, provider failures, translator refusals, repeated failure fingerprints, and workspace escapes.
 
-## 19. Test plan
+## 19. Test plan — `[DONE]` many unit tests under `test/runtime/test_coding_*`; `[TODO]` live HarnessSession campaign
 
 Coordinator:
 
@@ -737,32 +747,32 @@ Greenfield:
 
 ## 20. Implementation sequence
 
-### S28 — Finish honest routing and composition
+### S28 — Finish honest routing and composition — `[TODO]`
 
-- expose the router through the real CLI;
-- remove silent model fallback;
-- bind and refresh the repo index in the actual driver;
-- consolidate tier policy into one implementation;
-- record route identity and reason;
-- add outcome-driven routing tests.
+- expose the router through the real CLI; `[TODO]`
+- remove silent model fallback; `[TODO]`
+- bind and refresh the repo index in the actual driver; `[DONE]` `FileRepoIndex` in `lab_driver` if pack has index; `[TODO]` refresh changed paths
+- consolidate tier policy into one implementation; `[LATER]`
+- record route identity and reason; `[TODO]`
+- add outcome-driven routing tests; `[TODO]`
 
-### S29 — Structured plan and task state
+### S29 — Structured plan and task state — `[DONE]` schema/tests; `[TODO]` live architect episode; `[LATER]` as product brain
 
-- implement `vg.coding-plan.v1`;
-- validate IDs, DAG, paths, commands, and checks;
-- add architect and revision prompts;
-- make verification status runtime-owned;
-- persist plan and revision digests.
+- implement `vg.coding-plan.v1`; `[DONE]`
+- validate IDs, DAG, paths, commands, and checks; `[DONE]`
+- add architect and revision prompts; `[TODO]`
+- make verification status runtime-owned; `[DONE]` in plan module
+- persist plan and revision digests; `[TODO]`
 
-### S30 — Coding coordinator
+### S30 — Coding coordinator — `[DONE]` module exists; `[TODO]` HarnessSession binder; **first CLI: do not make this the product**
 
-- add the finite-state coordinator;
-- reuse `HarnessSession` for every episode;
-- preserve one workspace and run ID across distinct episode IDs;
-- support explain, repair, and greenfield modes through the same path;
-- reconstruct state from the ledger.
+- add the finite-state coordinator; `[DONE]` file; `[TODO]` not bound
+- reuse `HarnessSession` for every episode; `[TODO]` binder (`--live` refused)
+- preserve one workspace and run ID across distinct episode IDs; `[DONE]` in `lab_driver` attempts
+- support explain, repair, and greenfield modes through the same path; `[DONE]` same `lab_driver` path; `[TODO]` explain mode
+- reconstruct state from the ledger; `[TODO]`
 
-### S31 — Progress, escalation, and descent
+### S31 — Progress, escalation, and descent — `[DONE]` modules + tests; `[TODO]` wire into `lab_driver`
 
 - workspace, action, patch, and test fingerprints;
 - free-provider health and rotation;
@@ -771,21 +781,21 @@ Greenfield:
 - post-recovery descent to free execution;
 - explicit frontier authorization.
 
-### S32 — Budget, verification, and autonomy
+### S32 — Budget, verification, and autonomy — `[DONE]` modules + tests; `[TODO]` CLI grant on `lab_driver`
 
 - pre-call budget reservation and post-call reconciliation;
 - focused step verification and sealed final oracle;
 - signed bounded autonomous run grants;
 - honest stop taxonomy and cost/session projection.
 
-### S33 — Product CLI and receipts
+### S33 — Product CLI and receipts — `[DONE]` `vg code` surface with fakes; `[TODO]` first CLI = `lab_driver` in-place + grant + honest exit codes; `[LATER]` TUI receipts
 
 - `vg code`, `--dry-plan`, `--resume`, and `vg explain`;
 - real-time receipts plus clean JSON/headless output;
 - one backend path from TypeScript CLI to Python runtime;
 - crash recovery and context compaction.
 
-### S34 — Greenfield proof
+### S34 — Greenfield proof — `[TODO]` live; `[DONE]` sealed task fixture; do not claim before `oracle_green`
 
 - sealed empty-workspace web-app challenge;
 - control, planned, adaptive, and cheap arms;
@@ -793,7 +803,7 @@ Greenfield:
 - archived ledger, plan, routes, diffs, tests, oracle, tokens, and costs;
 - no competitor-grade claim before at least one adaptive `oracle_green`.
 
-## 21. Definition of done
+## 21. Definition of done — `[TODO]` this file's S34 bar; **first CLI DoD** is: in-place WSL write + labelled grant + ledger names `patch.apply` + JSONL export. Presence of `vg code` fake backends is not evidence.
 
 The v0.4.5.0 autonomous coding harness is complete only when an archived run proves:
 

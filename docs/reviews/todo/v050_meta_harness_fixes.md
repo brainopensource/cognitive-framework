@@ -1,5 +1,7 @@
 # Vanguard Evaluation: Framework for Building Agentic Coding CLI Tools
 
+**Audit 2026-08-17 (first headless coding CLI):** `[DONE]` exists on the episode/`lab_driver` path. `[TODO]` still required for that cut. `[LATER]` competitor-parity or v0.5 playbooks — not the first CLI. The recommended first delivery is **`HarnessSession` + `vg-code-default` + `lab_driver`**, not making `CodingRunCoordinator` the product.
+
 ## Executive Summary
 
 Vanguard has an **exceptionally well-designed architecture** at the specification level, but the current implementation has a **critical architectural contradiction** that prevents it from being a competitive coding harness CLI. The framework is well-positioned to grow modularly, but the current coding harness implementation is architectural debt that must be resolved before it can compete with Claude Code, Cline, or Codex.
@@ -26,7 +28,7 @@ Vanguard has an **exceptionally well-designed architecture** at the specificatio
 
 ## 2. The Critical Architectural Contradiction
 
-### The Problem: Two Competing Execution Models
+### The Problem: Two Competing Execution Models — `[DONE]` as diagnosis; first CLI uses the engine, not the DAG
 
 The architecture document §2 explicitly **rejects** the static DAG workflow model:
 
@@ -47,7 +49,7 @@ class CodingPhase(str, Enum):
     FINAL_VERIFY = "final_verify"
 ```
 
-The coordinator runs a plan DAG with dependency-ordered steps, per-step verification gates, and a bounded replan loop. This is the **prototype architecture** that the spec document says was rejected because "the agent was a leaf of the workflow rather than its substrate."
+The coordinator runs a plan DAG with dependency-ordered steps, per-step verification gates, and a bounded replan loop. `[DONE]` this file exists. `[TODO]` HarnessSession binder. `[LATER]` playbook. **First CLI: ignore this DAG.**
 
 Meanwhile, `agency/episode/engine.py` implements the **correct** loop — the one the architecture says should be the only execution primitive. But the coding coordinator wraps it, constrains it, and prevents it from being the primary agentic surface.
 
@@ -66,26 +68,28 @@ The coding harnesses (`vg-code-default`, `vg-code-claude-shaped`) are thin promp
 
 ### Missing Capabilities (Gap Analysis)
 
-| Capability | Claude Code | Cline | Codex | Vanguard Status |
+First CLI uses the **episode loop** (`lab_driver`), not the coordinator DAG. Keep one-effect-per-turn. Do not chase this table as a backlog.
+
+| Capability | Claude Code | Cline | Codex | First CLI |
 |---|---|---|---|---|
-| **True agentic loop** (agent decides what to do each turn) | ✅ | ✅ | ✅ | ❌ Coordinator uses static plan DAG |
-| **Tool-use streaming** (real-time output) | ✅ | ✅ | ✅ | ❌ Request-response only |
-| **MCP server integration** | ✅ | ✅ | ✅ | ❌ No MCP bridge |
-| **Diff preview & approval UI** | ✅ | ✅ | ✅ | ⚠️ Crypto flow exists, TUI minimal |
-| **Sub-agent delegation** (spawn/parallel) | ✅ | ✅ | ⚠️ | ⚠️ Engine supports `spawn`, not exposed in harness |
-| **LSP integration** (go-to-def, references, diagnostics) | ✅ | ❌ | ✅ | ❌ |
-| **Session resume** (conversation continuity) | ✅ | ✅ | ✅ | ⚠️ Ledger exists, no UX |
-| **Parallel tool execution** | ✅ | ⚠️ | ✅ | ❌ Designed (§8), not implemented |
-| **Real-time cost tracking** | ✅ | ✅ | ✅ | ⚠️ Telemetry collected, not surfaced |
-| **Checkpoint/rollback** | ✅ | ✅ | ✅ | ⚠️ Compensation designed, not wired |
-| **Multi-file edit transactions** | ✅ | ✅ | ✅ | ❌ Single `patch.apply` per turn |
-| **Prompt caching** (cost optimization) | ✅ | ✅ | ✅ | ❌ Designed (§10.2), not implemented |
-| **Filesystem watching** | ✅ | ✅ | ✅ | ❌ Snapshot at episode start only |
-| **AST-aware editing** | ✅ | ❌ | ✅ | ❌ |
-| **Image/multimodal input** | ✅ | ✅ | ✅ | ❌ |
-| **Web search / RAG** | ✅ | ❌ | ✅ | ❌ Designed as registry entry, not built |
-| **Custom tool authoring** | ✅ | ✅ | ✅ | ⚠️ Manifest entries, no dynamic registration |
-| **Multi-model routing** | ✅ | ✅ | ✅ | ⚠️ Tier escalation router exists |
+| **True agentic loop** (agent decides what to do each turn) | ✅ | ✅ | ✅ | `[DONE]` engine; `[TODO]` do not ship coordinator DAG as the product |
+| **Tool-use streaming** (real-time output) | ✅ | ✅ | ✅ | `[LATER]` |
+| **MCP server integration** | ✅ | ✅ | ✅ | `[LATER]` ADR-0066 rules only |
+| **Diff preview & approval UI** | ✅ | ✅ | ✅ | `[LATER]` TUI; `[TODO]` labelled CLI grant |
+| **Sub-agent delegation** (spawn/parallel) | ✅ | ✅ | ⚠️ | `[DONE]` engine; `[TODO]` pack expose |
+| **LSP integration** | ✅ | ❌ | ✅ | `[LATER]` |
+| **Session resume** | ✅ | ✅ | ✅ | `[DONE]` ledger; `[TODO]` `lab_driver --resume` |
+| **Parallel tool execution** | ✅ | ⚠️ | ✅ | `[LATER]` (one effect/turn is the cut) |
+| **Real-time cost tracking** | ✅ | ✅ | ✅ | `[DONE]` telemetry; `[TODO]` operator JSON |
+| **Checkpoint/rollback** | ✅ | ✅ | ✅ | `[LATER]` |
+| **Multi-file edit transactions** | ✅ | ✅ | ✅ | `[LATER]` keep single `patch.apply` |
+| **Prompt caching** | ✅ | ✅ | ✅ | `[LATER]` |
+| **Filesystem watching** | ✅ | ✅ | ✅ | `[LATER]` |
+| **AST-aware editing** | ✅ | ❌ | ✅ | `[LATER]` |
+| **Image/multimodal input** | ✅ | ✅ | ✅ | `[LATER]` |
+| **Web search / RAG** | ✅ | ❌ | ✅ | `[LATER]` |
+| **Custom tool authoring** | ✅ | ✅ | ✅ | `[DONE]` pack JSON; `[LATER]` dynamic |
+| **Multi-model routing** | ✅ | ✅ | ✅ | `[DONE]` modules; `[TODO]` one router on `lab_driver` |
 
 ### The Core Gap
 
@@ -149,6 +153,8 @@ The agent is demoted from "entity that decides what to do" to "entity that execu
 
 ### The Path Forward
 
-The single highest-leverage change is to **delete the coding coordinator's static DAG and make the episode engine the primary coding execution surface.** The playbook system (§11) with its rigidity dial (`advisory` → `guided` → `strict`) already provides the mechanism: at `strict`, a playbook IS a graph, recovered as a parameter rather than as architecture. The coding coordinator's plan→step→verify→replan workflow should be a `strict` playbook, not a hardcoded coordinator.
+**First CLI `[TODO]`:** ship `lab_driver` as the agentic surface (`--in-place`, labelled writes / `AutonomousGrant`, live one `patch.apply`). Do not make `CodingRunCoordinator` the product.
 
-After that, the missing features (streaming, MCP, LSP, parallel execution, sub-agents, diff preview) become harness capabilities rather than framework changes — which is the whole point of the architecture.
+**v0.5 `[LATER]`:** turn the coordinator DAG into a playbook (`advisory` → `guided` → `strict`). At `strict`, a playbook IS a graph, recovered as a parameter rather than as architecture.
+
+After the first CLI writes in-place, streaming / MCP / LSP / parallel / TUI remain harness capabilities — not this cut.

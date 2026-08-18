@@ -62,6 +62,11 @@ _STALE_TOKEN = re.compile(
 
 _ROOT_SENTINELS_LIVE = (
     Path("tools") / "repo_paths.py",
+    Path("docs") / "01_specs",
+    Path(".github") / "workflows" / "ci.yml",
+)
+_ROOT_SENTINELS_ALT = (
+    Path("tools") / "repo_paths.py",
     Path("docs") / "main_v4",
     Path(".github") / "workflows" / "ci.yml",
 )
@@ -92,6 +97,8 @@ def repo_root(start: Path | None = None) -> Path:
         seen.add(candidate)
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LIVE):
             return candidate
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_ALT):
+            return candidate
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LEGACY):
             return candidate
     raise FileNotFoundError(
@@ -105,6 +112,8 @@ def repo_path(*parts: str | os.PathLike[str]) -> Path:
 
 def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
+    if (root / "docs" / "01_specs" / "backend").exists():
+        return root.joinpath("docs", "01_specs", "backend", *parts)
     base = CANONICAL["docs_main_v4"] if (root / CANONICAL["docs_main_v4"]).exists() else "docs/v4"
     return root.joinpath(base, *parts)
 

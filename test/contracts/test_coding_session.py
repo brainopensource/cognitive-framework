@@ -34,6 +34,8 @@ def _envelope(seq: str, kind: str, fields: dict[str, Any], event_id: str) -> Any
         "retentionClass": "standard",
         "trainability": "prohibited",
         "redactionStatus": "none",
+        "traceId": "trace-test-01",
+        "spanId": "span-test-01",
         "payload": {"kind": kind, **fields},
     }
     return parse_event_envelope(raw)

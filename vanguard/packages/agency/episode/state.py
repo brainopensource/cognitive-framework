@@ -58,6 +58,7 @@ class SpawnResult:
     terminal: RunTermination = RunTermination.COMPLETED
     detail: str = ""
     turns: int = 0
+    return_spans: tuple[Any, ...] = ()
 
 
 class ProposalKind(str, Enum):

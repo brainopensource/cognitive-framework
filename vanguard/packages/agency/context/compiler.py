@@ -35,6 +35,7 @@ import json
 import math
 from typing import Any, Mapping, Sequence
 
+from ...domain.artifacts.skill_index import SkillCard, format_skill_index
 from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
 from .layers import (
@@ -82,6 +83,8 @@ class ContextCompiler:
         system_core: str,
         tool_schemas: Sequence[Mapping[str, Any]] = (),
         environment: str = "",
+        skill_cards: Sequence[SkillCard] = (),
+        skill_index_ceiling: int = 4000,
         token_ceiling: int = 64_000,
         breakpoint_ceiling: int = 4,
         source: str = "manifest",
@@ -92,7 +95,12 @@ class ContextCompiler:
             raise ValueError("token_ceiling must be positive")
         self._token_ceiling = token_ceiling
         self._breakpoint_ceiling = breakpoint_ceiling
-        self._prefix = self._render_prefix(system_core, tool_schemas, environment, source)
+        # `W12-B`: the skill index is stable within a task, so it rides `L3`
+        # with the environment map -- named/described only, ceiling-bounded
+        # (`≤4k` names+descriptions); bodies stay on disk behind `fs.read`.
+        skill_text = format_skill_index(skill_cards, ceiling=skill_index_ceiling) if skill_cards else ""
+        env_with_skills = "\n\n".join(part for part in (environment, skill_text) if part)
+        self._prefix = self._render_prefix(system_core, tool_schemas, env_with_skills, source)
         self._prefix_tokens = sum(block.token_estimate for block in self._prefix)
 
         if compaction_strategy is not None:

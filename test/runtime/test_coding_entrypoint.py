@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import unittest
 from pathlib import Path
 
@@ -73,6 +74,32 @@ class RequestValidation(unittest.TestCase):
 
 
 class FakeBackends(unittest.TestCase):
+    """`S050-C-01`: the scripted backends are test-only. `run_entrypoint`
+    reaches them only behind an explicit `VANGUARD_ALLOW_FAKE=1` opt-in."""
+
+    def setUp(self) -> None:
+        self._had = os.environ.get("VANGUARD_ALLOW_FAKE")
+        os.environ["VANGUARD_ALLOW_FAKE"] = "1"
+        self.addCleanup(self._restore)
+
+    def _restore(self) -> None:
+        if self._had is None:
+            os.environ.pop("VANGUARD_ALLOW_FAKE", None)
+        else:
+            os.environ["VANGUARD_ALLOW_FAKE"] = self._had
+
+    def test_fake_backend_is_refused_without_the_opt_in(self) -> None:
+        os.environ.pop("VANGUARD_ALLOW_FAKE", None)
+        try:
+            code, _, result = self._run({
+                "command": "code", "workspace": ".", "fakeBackend": "non-green",
+                "executorBand": "free", "budgetUsdMicros": 0,
+            })
+            self.assertEqual(code, EXIT_INVALID)
+            self.assertIn("VANGUARD_ALLOW_FAKE", result["detail"])
+        finally:
+            os.environ["VANGUARD_ALLOW_FAKE"] = "1"
+
     def _run(self, request: dict) -> tuple[int, list[dict], dict]:
         buf = io.StringIO()
         code = run_entrypoint(request, writer=buf)

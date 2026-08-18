@@ -51,9 +51,11 @@ from vanguard.packages.runtime.root import (
     RunResult,
     Runtime,
     TaskContext,
+    _admit_turn_result,
     _environment_effector,
     _sandbox_effector,
 )
+from vanguard.packages.kernel import Trust
 
 OPERATOR_SIGNER = OperatorSigner(b"test-operator-held-approval-key")
 OPERATOR_KEY = OPERATOR_SIGNER.public_bytes
@@ -204,6 +206,32 @@ class _Failed:
         self.error = type("E", (), {"kind": "instrument_error", "message": message})()
 
 
+class AdmitTurnResult(unittest.TestCase):
+    """`S050-A-01`: tool results must re-enter as a justifying span, not a
+    silent context note, so a later widening request can be denied by them
+    (`K-30`, `K-31`, `K-33`)."""
+
+    def test_a_suspension_is_not_admitted(self) -> None:
+        notes: list[str] = []
+        operator = type("Op", (), {"note": lambda self, **kw: notes.append(kw["text"])})()
+
+        span = _admit_turn_result(operator, 1, type("R", (), {"outcome": None})())
+
+        self.assertIsNone(span)
+        self.assertEqual(notes, [])
+
+    def test_a_real_outcome_returns_an_untrusted_external_span(self) -> None:
+        operator = type("Op", (), {"note": lambda self, **kw: None})()
+        outcome = type("Outcome", (), {"result_digest": "sha256:abc", "detail": ""})()
+        result = type("R", (), {"outcome": outcome, "detail": ""})()
+
+        span = _admit_turn_result(operator, 3, result)
+
+        self.assertIsNotNone(span)
+        self.assertEqual(span.trust, Trust.UNTRUSTED_EXTERNAL)
+        self.assertNotEqual(span.trust, Trust.OPERATOR)
+
+
 class Composition(unittest.TestCase):
     """Claim 1: the root composes from data, and refuses to guess."""
 
@@ -220,6 +248,20 @@ class Composition(unittest.TestCase):
     def test_composition_is_deterministic_for_one_episode(self) -> None:
         self.assertEqual(Runtime.compose(CODE_DEFAULT, episode_id="e-1").composition_digest,
                          Runtime.compose(CODE_DEFAULT, episode_id="e-1").composition_digest)
+
+    def test_a_pack_that_declares_skills_is_parsed_into_skill_cards(self) -> None:
+        """`S050-A-08`/`W12-B`: skill cards are parsed at composition and
+        handed to `ContextCompiler`, which calls `format_skill_index`
+        (`test.agency.test_context_compiler` covers the render itself)."""
+        code = Runtime.compose(CODE_DEFAULT)
+
+        self.assertTrue(code.skill_cards)
+        self.assertIn("pytest-green", [card.skill_id for card in code.skill_cards])
+
+    def test_a_pack_with_no_skills_gets_no_skill_cards(self) -> None:
+        shell = Runtime.compose(SHELL_ONLY)
+
+        self.assertEqual(shell.skill_cards, ())
 
     def test_sink_classes_come_from_the_manifest_not_from_root(self) -> None:
         """`ADR-0057` binds human approval to the privileged sink. If `root.py`

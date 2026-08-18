@@ -16,8 +16,8 @@ class TestModelRouting(unittest.TestCase):
     def test_deepseek_v4_flash(self):
         route = resolve_route("deepseek/deepseek-v4-flash")
         self.assertEqual(route.requested_model, "deepseek/deepseek-v4-flash")
-        self.assertFalse(route.pricing_known)
-        self.assertEqual(route.pricing_source, "unknown")
+        self.assertTrue(route.pricing_known)
+        self.assertEqual(route.pricing_source, "hardcoded")
 
     def test_known_model(self):
         route = resolve_route("openai/gpt-4o-mini")

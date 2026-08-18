@@ -95,6 +95,36 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         # Returns structured payload, never a mutable handle
         self.assertIsInstance(result, SpawnResult)
 
+    def test_spawn_return_enters_as_untrusted_derived_at_minimum(self) -> None:
+        """`K-33`: a child's return value re-enters the parent's accumulation
+        as `untrusted_derived` at minimum, whatever the child believed."""
+        from vanguard.packages.kernel import Trust
+
+        child_scope = Scope(
+            actions=frozenset({"fs.read"}),
+            resources=({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},),
+            constraints=Constraints(
+                expires_at="2026-08-16T12:00:00Z",
+                max_uses=5,
+                budget_usd_micros=50_000,
+                max_depth=3,
+            ),
+            depth=1,
+        )
+        result = self.parent_engine.spawn(
+            child_scope=child_scope,
+            brief="subtask exploration",
+            episode_id="ep-child-2",
+            run_id="run-1",
+            principal="child-agent",
+            parent_episode_id="ep-parent-1",
+        )
+        self.assertTrue(result.ok)
+        self.assertTrue(result.return_spans)
+        for span in result.return_spans:
+            self.assertTrue(span.trust.is_untrusted)
+            self.assertGreaterEqual(span.trust.rank, Trust.UNTRUSTED_DERIVED.rank)
+
     def test_spawn_widening_denied_returns_typed_result(self) -> None:
         """Widening action is denied and returns typed SpawnResult without throwing (K-26)."""
         widened_scope = Scope(

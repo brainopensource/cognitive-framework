@@ -141,6 +141,12 @@ def run_lab_task(
     # `labDepartures` is what stops an assisted run being read as an
     # unattended one.
     departures: list[str] = []
+    if not isolate:
+        # `S050-C-02`: mutating the caller's own workspace is a labelled lab
+        # departure for the same reason `--approve-writes` is one -- a run
+        # that silently wrote outside its own sandbox copy is not the
+        # measurement the isolated default exists to produce.
+        departures.append("in_place")
     approver = None
     approval_key = None
     if approve_writes:
@@ -331,6 +337,9 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=4)
     parser.add_argument("--jsonl-out", default=None)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--in-place", action="store_true",
+                        help="Mutate --task-dir directly instead of an isolated copy "
+                             "(labelled lab departure, recorded in labDepartures)")
     parser.add_argument("--tier-escalation", action="store_true",
                         help="Select the initial tier; outcome-driven escalation is coordinated externally")
     parser.add_argument("--tiers", nargs="+", default=None,
@@ -343,6 +352,7 @@ def main() -> int:
         interactive=args.interactive, max_turns=args.max_turns,
         max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
         tier_escalation=args.tier_escalation, tiers=args.tiers,
+        isolate=not args.in_place,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

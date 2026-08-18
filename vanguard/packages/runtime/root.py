@@ -76,6 +76,7 @@ from ..agency.context import (
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.manifests.loader import ManifestLoader, ManifestLoadError
 from ..domain.artifacts.graph import ArtifactFile, LogicalEdit, Workspace
+from ..domain.artifacts.skill_index import SkillCard, SkillIndexError, parse_skill_card
 from ..domain.artifacts.manifest import (
     FrozenHarness,
     ManifestError,
@@ -296,6 +297,10 @@ class Harness:
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
     gene_digests: Mapping[str, str] = field(default_factory=dict)
+    #: `W12-B`. Parsed skill cards, or `()` if the pack declared no
+    #: `skill`/`skills` component. Rendered into `L3` by `ContextCompiler`
+    #: itself (`format_skill_index`), not pre-rendered here.
+    skill_cards: tuple[SkillCard, ...] = ()
 
     @property
     def composition_digest(self) -> str:
@@ -769,6 +774,7 @@ class HarnessSession:
             system_core=harness.system_core,
             tool_schemas=harness.tool_schemas,
             environment=env_text,
+            skill_cards=harness.skill_cards,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
         self.operator = _LayeredOperator(
@@ -1022,6 +1028,12 @@ class Runtime:
                 aliases_file.read_bytes()
             ).hexdigest()
 
+        skill_raw = pack.components_data.get("skill") or pack.components_data.get("skills") or ()
+        try:
+            skill_cards = tuple(parse_skill_card(card) for card in skill_raw if isinstance(card, Mapping))
+        except SkillIndexError as exc:
+            raise CompositionError(f"{manifest.harness}: bad skill card: {exc}") from exc
+
         return Harness(
             harness=manifest.harness,
             frozen=frozen,
@@ -1041,6 +1053,7 @@ class Runtime:
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,
             gene_digests=gene_digests,
+            skill_cards=skill_cards,
         )
 
 
@@ -1224,12 +1237,17 @@ def _environment_map(environment: Any, harness: Harness) -> str:
             f"capabilities={','.join(sorted(harness.verbs))}")
 
 
-def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> None:
+def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Span | None:
     """Admit the just-produced tool result before the next model turn.
 
     EpisodeEngine invokes this callback immediately after every dispatch. The
     result is therefore available to the next proposal in the same episode,
     rather than waiting until an approval suspension or terminal boundary.
+
+    The returned `Span` (`K-33`) enters the episode's accumulated justifying
+    spans at `Trust.UNTRUSTED_EXTERNAL`: a tool result is content that may
+    inform the next proposal, but per `K-30`/`K-31` it may never itself
+    justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
     if outcome is None:
@@ -1242,7 +1260,11 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> No
     if detail:
         text += f"\n{detail}"
     operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
-    return None
+    return Span(
+        span_id=f"tool-result-{turn}",
+        trust=Trust.UNTRUSTED_EXTERNAL,
+        source_class="tool_result",
+    )
 
 
 def _record(receipts: list[Receipt], operator: _LayeredOperator,

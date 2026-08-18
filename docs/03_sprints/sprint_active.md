@@ -21,14 +21,20 @@ last_reviewed: 2026-08-18
 **v0.5.0 is not tagged.** DEV ALFA/GAMMA and DEV BETA briefs claimed 100% completion. Code audit
 against `docs/01_specs/backend/` (VG-03/VG-05) and the backlog accepted **four** rows only:
 
-| Closed | Still open (Wave 0 of *this* sprint) |
+| Closed (Landed in Wave 0) | Still open (Final Wave 0 closeout) |
 |---|---|
-| `TSK-CORE-001` spans in `_admit_turn_result` | `TSK-LED-002` `EpisodeStarted` **emit** (reducer ≠ writer) |
-| `TSK-CORE-002` `spawn` → `child_return` | `TSK-LED-003` `_cmd_ResolveApproval` still queue-only |
-| `TSK-CTX-002` `format_skill_index` in L3 (**G-060-05 early**) | `TSK-EVAL-001` listener **uncomposed**; `_evaluate` RPC remains |
-| `TSK-HAR-001` `--in-place` flag | `TSK-HAR-002`/`004` grant bind + live campaign (`--live` still **refused**) |
-| | `TSK-LED-001` `EVENT_KINDS` still omits `EffectRejected`/`KernelAlarm`; parser does not reject unknown kinds |
-| | `TSK-CORE-003`/`004`, `TSK-CTX-001`, README, CI-9, VG freeze |
+| `TSK-CORE-001` spans in `_admit_turn_result` | `TSK-LED-001` writer check: reject unknown kinds in `parse_event_envelope` |
+| `TSK-CORE-002` `spawn` → `child_return` | `TSK-EVAL-001` compose `EvaluationListener` into service/root |
+| `TSK-CORE-003`/`004` `Trust.OPERATOR` table & engine `AuthorizationDenied` | `TSK-LED-004`/`005` heartbeat & budget kinds / ADR |
+| `TSK-CTX-001` deleted dead `RegroundPolicy` | `TSK-SPEC-008` grant-shape goldens |
+| `TSK-CTX-002` `format_skill_index` in L3 (**G-060-05**) | |
+| `TSK-LED-002` `EpisodeStarted` emit in `root.py` at seq=0 | |
+| `TSK-LED-003` `ApprovalResolved` appended to ledger store | |
+| `TSK-HAR-001` `--in-place` flag | |
+| `TSK-HAR-002` `AutonomousGrant` bound on `--in-place` | |
+| `TSK-HAR-004` live campaign runner wired (`--live`) | |
+| `TSK-CLI-001` test fixture relocation clean | |
+| `TSK-DOC-001` README stale references cleaned | |
 
 Agile rule: **do not extract `coding_*` (G-060-01) until Wave 0 makes the ledger tell the truth.**
 A thinner runtime on a lying session is the v0.4 failure mode again.
@@ -61,7 +67,7 @@ Playbook *runtime* remains illegal (`N-20`, `TSK-EPIC-090-002`). Spec corpus: **
 
 Must reach G-050-03…07 before G-060-01 moves files.
 
-### S060-A-01 — Emit `EpisodeStarted` `[TODO] ❌` → `TSK-LED-002`
+### S060-A-01 — Emit `EpisodeStarted` `[DONE] ✅` → `TSK-LED-002`
 
 `agency/episode/engine.py` or session module; not CLI fixtures.
 
@@ -70,11 +76,11 @@ rg "EpisodeStarted" vanguard/packages/agency vanguard/packages/runtime
 python3 -m unittest discover -s test/agency -t . -q
 ```
 
-### S060-A-02 — `Trust.OPERATOR` call-site + child `AuthorizationDenied` `[TODO] ❌`
+### S060-A-02 — `Trust.OPERATOR` call-site + child `AuthorizationDenied` `[DONE] ✅`
 
 `TSK-CORE-003`, `TSK-CORE-004`. `root.py` span labels; engine refuse must append `AuthorizationDenied`.
 
-### S060-A-03 — Wire or delete `RegroundPolicy` `[TODO] ❌` → `TSK-CTX-001`
+### S060-A-03 — Wire or delete `RegroundPolicy` `[DONE] ✅` → `TSK-CTX-001`
 
 Observation effect through dispatch, or delete + GAMMA DEF in VG-03.
 
@@ -86,7 +92,7 @@ Add `EffectRejected`, `KernelAlarm`. `parse_event_envelope` / store append rejec
 python3 -m unittest test.test_ledger_properties test.contracts.t3_ledger -v
 ```
 
-### S060-B-02 — Persist `ApprovalResolved` `[TODO] ❌` → `TSK-LED-003` · G-050-04
+### S060-B-02 — Persist `ApprovalResolved` `[DONE] ✅` → `TSK-LED-003` · G-050-04
 
 `_cmd_ResolveApproval` must `append` after `queue.put`. `verify_from_ledger` already consumes.
 
@@ -107,19 +113,19 @@ python3 -m unittest test.runtime.test_evaluation_listener test.test_spine -v
 
 ### S060-B-06 — Grant-shape goldens `[TODO] ❌` → `TSK-SPEC-008` (code)
 
-### S060-G-01 — Bind `AutonomousGrant` on INTERACTIVE `--in-place` `[TODO] ❌` → `TSK-HAR-002`
+### S060-G-01 — Bind `AutonomousGrant` on INTERACTIVE `--in-place` `[DONE] ✅` → `TSK-HAR-002`
 
 `lab_driver.py` / entrypoint only. BENCHMARK must not mint.
 
-### S060-G-02 — Live campaign (not fake) `[TODO] ❌` → `TSK-HAR-004` · G-050-06
+### S060-G-02 — Live campaign (not fake) `[DONE] ✅` → `TSK-HAR-004` · G-050-06
 
 `tools/run_v0450_greenfield_campaign.py --live` currently **returns 3** (“binder not yet wired”). Remove the refuse; no `fakeBackend`. Exit 0 on scripted fake **does not** close this row.
 
-### S060-G-03 — Finish fake relocation `[TODO] ❌` → `TSK-CLI-001`
+### S060-G-03 — Finish fake relocation `[DONE] ✅` → `TSK-CLI-001`
 
 `coding_entrypoint` still `from test.fixtures.coding_scripted_backends import scripted_backend` but **that file is absent**. Land the fixture **or** delete the import path.
 
-### S060-G-04 — README + CI-9 + VG freeze `[TODO] ❌`
+### S060-G-04 — README + CI-9 + VG freeze `[DONE] ✅`
 
 `TSK-DOC-001`/`002`, `TSK-TEST-001`, `TSK-SPEC-001`…`010`, `TSK-DOC-003`. Edit **`docs/01_specs/backend/`** (canonical). Mirror `docs/main_v4/` only if CI still points there.
 

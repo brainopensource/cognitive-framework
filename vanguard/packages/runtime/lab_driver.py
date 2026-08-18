@@ -47,6 +47,7 @@ from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.repo_index import FileRepoIndex
+from ..ports.event_store import Result as PortResult
 from .mock_coding_tape import (
     brief_from_task_dir,
     coding_tape,
@@ -164,6 +165,8 @@ def run_lab_task(
             max_attempts=max_attempts,
             seed_key=grant_signer_key,
         )
+        max_turns = min(max_turns, grant.max_turns)
+        max_attempts = min(max_attempts, grant.max_attempts)
         signer = OperatorSigner(grant_signer_key)
         approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
         approval_key = signer.public_bytes
@@ -192,7 +195,7 @@ def run_lab_task(
         episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
-            environment=_environment_for(task_path, cleanup_roots),
+            environment=_bind_grant(_environment_for(task_path, cleanup_roots), grant),
             clock=SystemClock(), store=store,
             index=FileRepoIndex() if harness.index_component is not None else None,
             interactive=interactive,
@@ -206,7 +209,8 @@ def run_lab_task(
     # through the same sandbox. Reading the agent's `proc.exec` receipts
     # instead would let a model exit 0 on any trivial command and score green.
     verify_argv = verify_argv_from_task(task_path)
-    environment_for_oracle = _environment_for(task_path, cleanup_roots)
+    environment_for_oracle = _bind_grant(
+        _environment_for(task_path, cleanup_roots), grant)
 
     def declared_oracle(_result: Any) -> bool:
         if verify_argv is None:
@@ -291,6 +295,83 @@ def _verdict_is_green(result: Any) -> bool:
     """The oracle is the run's own exterior verdict, never a suite run here."""
     verdict = getattr(result, "verdict", None)
     return bool(verdict is not None and getattr(verdict, "passed", False))
+
+
+class _GrantBoundEnvironment:
+    """Enforces `AutonomousGrant` at the environment port (`TSK-HAR-002`)."""
+
+    def __init__(self, inner: Any, grant: Any) -> None:
+        self._inner = inner
+        self._grant = grant
+
+    def profile(self) -> Any:
+        return self._inner.profile()
+
+    def snapshot(self) -> Any:
+        return self._inner.snapshot()
+
+    def observe(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny(getattr(req, "action", "fs.read"), getattr(req, "path", None), None)
+        if denied is not None:
+            return denied
+        return self._inner.observe(req, grant)
+
+    def preview(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny_effect(req)
+        if denied is not None:
+            return denied
+        return self._inner.preview(req, grant)
+
+    def apply(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny_effect(req)
+        if denied is not None:
+            return denied
+        return self._inner.apply(req, grant)
+
+    def reconcile(self, receipt: Any, grant: Any = None) -> Any:
+        return self._inner.reconcile(receipt, grant)
+
+    def compensate(self, receipt: Any, grant: Any = None) -> Any:
+        return self._inner.compensate(receipt, grant)
+
+    def dispose(self) -> Any:
+        return self._inner.dispose()
+
+    def _deny_effect(self, req: Any) -> Any:
+        args = getattr(req, "args", {}) or {}
+        path = args.get("path") if isinstance(args, dict) else None
+        command = getattr(req, "command", None)
+        if command is None and isinstance(args, dict):
+            command = args.get("argv") or args.get("command")
+        verb = getattr(req, "verb", None) or getattr(req, "action", "")
+        return self._deny(str(verb), path, command)
+
+    def _deny(self, verb: str, path: Any, command: Any) -> Any:
+        from .autonomous_grant import validate_grant_request
+
+        mapped = verb
+        if "." not in verb:
+            mapped = {
+                "read": "fs.read",
+                "search": "fs.search",
+                "list": "fs.read",
+                "stat": "fs.read",
+                "write": "fs.write",
+                "patch": "patch.apply",
+                "exec": "proc.exec",
+            }.get(verb, verb)
+        argv = tuple(command) if command else None
+        ok, reason = validate_grant_request(
+            self._grant, verb=mapped, target_path=path, command_argv=argv)
+        if ok:
+            return None
+        return PortResult.fail("denied", reason)
+
+
+def _bind_grant(environment: Any, grant: Any) -> Any:
+    if grant is None:
+        return environment
+    return _GrantBoundEnvironment(environment, grant)
 
 
 def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -> Any:

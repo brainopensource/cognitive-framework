@@ -88,6 +88,7 @@ EVENT_KINDS = frozenset({
     # Human
     "ApprovalRequested",
     "ApprovalResolved",
+    "CorrectionRecorded",
     # Liveness and recovery
     "Heartbeat",
     "RunRecovered",

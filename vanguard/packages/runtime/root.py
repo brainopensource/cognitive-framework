@@ -690,11 +690,19 @@ class HarnessSession:
         harness: Harness,
         ports: SessionPorts,
         task: TaskContext,
+        *,
+        on_terminal: Callable[["HarnessSession"], Any] | None = None,
     ) -> None:
         self.harness = harness
         self.ports = ports
         self.task = task
         self.calls: list[tuple[EffectRequest, Any]] = []
+        # `S060-B-04` / `TSK-EVAL-001` handoff: the compose-time seam BETA's
+        # `EvaluationListener` (or any future `EvaluationScheduler`) binds
+        # through, without ever editing this file. `None` preserves today's
+        # in-process `_evaluate()` RPC; a caller that supplies a callback
+        # replaces the evaluation *authority* wholesale, not just its result.
+        self._on_terminal = on_terminal
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -899,7 +907,7 @@ class HarnessSession:
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
-        verdict = self._evaluate()
+        verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
         ports.environment.dispose()
         return RunResult(
             harness=harness.harness,
@@ -1093,6 +1101,7 @@ class Runtime:
         clock: Any = None,
         bindings: Mapping[str, EffectBinding] | None = None,
         approval_key: bytes | None = None,
+        on_terminal: Callable[["HarnessSession"], Any] | None = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -1132,7 +1141,7 @@ class Runtime:
             approval_key=approval_key,
             interactive=interactive,
         )
-        return HarnessSession(harness, ports, task_context).run()
+        return HarnessSession(harness, ports, task_context, on_terminal=on_terminal).run()
 
     # -- composition internals -------------------------------------------
 

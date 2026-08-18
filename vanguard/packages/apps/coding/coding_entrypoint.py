@@ -294,6 +294,61 @@ def _coordinator_dry_plan(config: CodingRunConfig) -> tuple[CodingRunResult, lis
     return dry, projections
 
 
+def _live_lab_session(
+    request: Mapping[str, Any], config: CodingRunConfig
+) -> tuple[CodingRunResult, list[dict[str, Any]]]:
+    """`TSK-HAR-004`: bind a real `HarnessSession` via the lab driver.
+
+    No `fakeBackend`. Missing keys / unpaid models fail closed as unavailable.
+    """
+    from .lab_driver import run_lab_task
+
+    model_port = str(request.get("modelPort") or request.get("model") or "openrouter")
+    isolate = not bool(request.get("inPlace") or request.get("in_place"))
+    lab = run_lab_task(
+        "vg-code-default",
+        config.workspace,
+        model_port=model_port,
+        model_name=config.planner_model,
+        interactive=True,
+        max_turns=config.max_turns_per_episode,
+        isolate=isolate,
+    )
+    raw_outcome = str(lab.get("outcome") or "verification_failed")
+    if raw_outcome in {"oracle_green", "completed"}:
+        mapped = "oracle_green"
+    elif raw_outcome.startswith("instrument_error") or "unavailable" in raw_outcome:
+        mapped = "unavailable"
+    elif "budget" in raw_outcome:
+        mapped = "budget_exhausted"
+    elif raw_outcome.startswith("inconclusive"):
+        mapped = "unavailable"
+    else:
+        mapped = "verification_failed"
+
+    result = CodingRunResult(
+        run_id=config.run_id,
+        outcome=mapped,
+        phase="execute",
+        attempts=int(lab.get("attempts") or 1),
+        turns=int(lab.get("turns") or 0),
+        plan_digest=None,
+        active_step_id=None,
+        verified_step_ids=(),
+        model_routes=(),
+        prompt_tokens=lab.get("promptTokens"),
+        completion_tokens=lab.get("completionTokens"),
+        spent_usd_micros=0,
+        detail=str(lab.get("detail") or raw_outcome),
+    )
+    projections = [
+        {"kind": "complete", "outcome": mapped, "turns": result.turns,
+         "spentUsdMicros": 0, "grantId": lab.get("grantId"),
+         "live": True, "fakeBackend": None},
+    ]
+    return result, projections
+
+
 def run_entrypoint(
     request: Mapping[str, Any],
     *,
@@ -333,11 +388,13 @@ def run_entrypoint(
                     "resume requires a ledger-derived snapshot from the product "
                     "persistence adapter; use fakeBackend in tests"
                 )
+            elif bool(request.get("live")):
+                assert isinstance(config, CodingRunConfig)
+                result, projections = _live_lab_session(request, config)
             else:
                 raise ValueError(
-                    "live coding composition is not bound in this bridge yet; "
-                    "pass fakeBackend for product tests or wait for the ALFA "
-                    "HarnessSession binder"
+                    "live coding composition requires request.live=true; "
+                    "pass fakeBackend (VANGUARD_ALLOW_FAKE=1) for product tests"
                 )
 
         for projection in projections:

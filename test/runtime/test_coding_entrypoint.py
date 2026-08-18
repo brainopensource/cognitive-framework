@@ -188,5 +188,45 @@ class FakeBackends(unittest.TestCase):
             self.assertNotIn(banned, text)
 
 
+class LiveBinder(unittest.TestCase):
+    """`TSK-HAR-004`: `--live` composes HarnessSession; it does not hard-refuse."""
+
+    def test_live_without_fake_backend_reaches_lab_driver(self) -> None:
+        from unittest.mock import patch
+
+        fake_lab = {
+            "outcome": "instrument_error:openrouter_unavailable",
+            "attempts": 1,
+            "turns": 0,
+            "detail": "OPENROUTER_API_KEY is not set",
+            "grantId": None,
+            "promptTokens": None,
+            "completionTokens": None,
+        }
+
+        with patch(
+            "vanguard.packages.runtime.lab_driver.run_lab_task",
+            return_value=fake_lab,
+        ) as mocked:
+            buf = io.StringIO()
+            code = run_entrypoint({
+                "command": "code",
+                "workspace": ".",
+                "brief": "TASK.md",
+                "live": True,
+                "executorBand": "free",
+                "budgetUsdMicros": 0,
+                "plannerModel": "cohere/north-mini-code:free",
+            }, writer=buf)
+        self.assertTrue(mocked.called)
+        self.assertEqual(code, EXIT_UNAVAILABLE)
+        result = next(
+            json.loads(line)["result"]
+            for line in buf.getvalue().splitlines()
+            if line.strip() and json.loads(line).get("type") == "result"
+        )
+        self.assertEqual(result["outcome"], "unavailable")
+
+
 if __name__ == "__main__":
     unittest.main()

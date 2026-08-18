@@ -13,8 +13,8 @@ import time
 from dataclasses import dataclass
 from typing import Any, Sequence
 
-from ..ports.environment import EffectRequest as EnvironmentRequest
-from ..ports.event_store import Result
+from ...ports.environment import EffectRequest as EnvironmentRequest
+from ...ports.event_store import Result
 
 __all__ = [
     "FinalVerificationReceipt",

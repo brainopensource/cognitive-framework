@@ -19,7 +19,7 @@ from repo_paths import repo_root
 
 SOURCE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}
 IGNORED_PARTS = {".git", ".venv", "node_modules", "__pycache__", "dist", "build"}
-PACKAGE_NAMES = {"domain", "ports", "kernel", "agency", "runtime", "adapters"}
+PACKAGE_NAMES = {"domain", "ports", "kernel", "agency", "runtime", "adapters", "apps"}
 ALLOWED = {
     "domain": set(),
     "ports": {"domain"},
@@ -34,6 +34,13 @@ ALLOWED = {
     # VG-03 5.4: no model dependency in governance. A compliance path that
     # calls an LLM is not a compliance path, so this row stays narrow.
     "governance": {"domain", "ports", "kernel"},
+    # `TSK-EPIC-060-001` / `G-060-01`: the coding cell is the first *client* of
+    # the runtime, not its ontology (VG-02 §1.2). `apps/` schedules episodes
+    # against the composition root the same way `runtime/` itself does, so it
+    # gets the same reach -- but nothing in `domain/ports/kernel/agency/
+    # adapters/runtime` may import `apps` back (absent from every other row),
+    # which is what keeps the coding cell a client and not a second ontology.
+    "apps": {"domain", "ports", "kernel", "agency", "adapters", "runtime", "governance"},
     "client": {"domain", "runtime"},
 }
 

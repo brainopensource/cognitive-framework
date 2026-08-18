@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--budget-usd-micros", type=int, default=50_000,
                         help="Aggregate paid ceiling for the campaign (default $0.05)")
     parser.add_argument("--live", action="store_true",
-                        help="Reserved for live provider calls; refused until binder is ready")
+                        help="Call a real ModelPort through HarnessSession; no fakeBackend")
     parser.add_argument("--evidence-root",
                         default="docs/scrum/sprints/sprint34/evidence")
     args = parser.parse_args(argv)
@@ -102,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
                 "brief": "TASK.md",
                 "runId": run_id,
                 "plannerModel": arm["plannerModel"],
-                "executorBand": "free" if arm_name != "cheap" else "free",
+                "executorBand": "free",
                 "recoveryModels": arm["recoveryModels"],
                 "budgetUsdMicros": max(0, args.budget_usd_micros - spent),
                 "interactive": True,
@@ -110,9 +110,15 @@ def main(argv: list[str] | None = None) -> int:
                 "live": args.live,
                 "json": True,
                 "headless": True,
+                "inPlace": False,
+                "modelPort": "openrouter",
             }
-            # Force free executors in the dry campaign so we never authorize frontier.
-            request["executorModels"] = list(load_band_models("free"))
+            if args.live:
+                request["plannerModel"] = list(load_band_models("free"))[0]
+                request["executorModels"] = list(load_band_models("free"))
+                request["fakeBackend"] = None
+            else:
+                request["executorModels"] = list(load_band_models("free"))
             buf_lines: list[str] = []
 
             class _Writer:
@@ -124,6 +130,9 @@ def main(argv: list[str] | None = None) -> int:
                     return None
 
             code = run_entrypoint(request, writer=_Writer())
+            if args.live and code == 3:
+                print("live campaign fail-closed: model port unavailable", file=sys.stderr)
+                return 3
             result = None
             for line in buf_lines:
                 payload = json.loads(line)

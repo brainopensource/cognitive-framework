@@ -444,6 +444,25 @@ class DogfoodGate(unittest.TestCase):
         self.assertTrue(result.verdict.claims[0]["holds"])
         self.assertEqual(len(self.verifier.calls), 1)
 
+    def test_on_terminal_replaces_the_evaluation_authority_wholesale(self) -> None:
+        """`S060-B-04` handoff: a supplied `on_terminal` seam is the compose
+        point `EvaluationListener` binds through, without editing `root.py`
+        again. Absent, the in-process RPC runs unchanged (proven by the
+        default-path tests above)."""
+        calls: list[Any] = []
+
+        def on_terminal(session: Any) -> Any:
+            calls.append(session)
+            return "replaced-verdict"
+
+        result = self.execute(on_terminal=on_terminal)
+
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(result.verdict, "replaced-verdict")
+        # The seam replaces the RPC outright: the real verifier the session
+        # was composed with was never consulted.
+        self.assertEqual(len(self.verifier.calls), 0)
+
     def test_unconfigured_evaluator_is_inconclusive_not_success(self) -> None:
         """Wrong UID / unverified image is a real outcome, not a missing verdict
         and not a fake pass (`REQ-EVAL-001`, `M5`)."""

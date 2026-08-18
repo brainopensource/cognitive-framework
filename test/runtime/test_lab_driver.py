@@ -58,6 +58,45 @@ class InPlaceWrites(unittest.TestCase):
         source = inspect.getsource(lab_run.main)
         self.assertIn("--in-place", source)
 
+    def test_benchmark_in_place_does_not_mint_a_grant(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "task"
+            import shutil as _shutil
+            _shutil.copytree(TASK, workspace)
+            result = lab_run.run_lab_task(
+                "vg-code-default", workspace, max_attempts=1,
+                isolate=False, interactive=False)
+            self.assertIsNone(result.get("grantId"))
+
+    def test_interactive_in_place_reports_grant_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "task"
+            import shutil as _shutil
+            _shutil.copytree(TASK, workspace)
+            result = lab_run.run_lab_task(
+                "vg-code-default", workspace, max_attempts=1,
+                isolate=False, interactive=True)
+            self.assertIsNotNone(result.get("grantId"))
+
+    def test_interactive_in_place_mints_and_enforces_workspace(self) -> None:
+        from vanguard.packages.ports.environment import EffectRequest
+        from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
+
+        with tempfile.TemporaryDirectory() as tmp:
+            workspace = Path(tmp) / "task"
+            workspace.mkdir()
+            grant = create_autonomous_grant(workspace, allowed_verbs=("patch.apply",))
+            class _Inner:
+                def apply(self, req, grant=None):
+                    raise AssertionError("escaped apply")
+            env = lab_run._GrantBoundEnvironment(_Inner(), grant)
+            escaped = EffectRequest(
+                verb="patch.apply", action="write",
+                args={"path": str(Path(tmp) / "outside.txt")})
+            result = env.apply(escaped)
+            self.assertFalse(result.ok)
+            self.assertEqual(result.error.kind, "denied")
+
 
 if __name__ == "__main__":
     unittest.main()

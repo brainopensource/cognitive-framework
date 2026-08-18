@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from .coding_plan import CodingPlan, CodingPlanError, StepStatus, ready_steps, transition_step
-from .tier_escalation import ModelRole, RouteDecision, RoleAwareRouter
+from ...runtime.tier_escalation import ModelRole, RouteDecision, RoleAwareRouter
 
 __all__ = [
     "CodingPhase", "CodingRunConfig", "CodingRunCoordinator", "CodingRunResult",

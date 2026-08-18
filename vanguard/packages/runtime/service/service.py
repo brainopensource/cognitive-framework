@@ -262,7 +262,6 @@ class RuntimeService:
         if ctx is None:
             raise ValueError(f"no active run for {run_id}")
 
-        ctx.approval_response_queue.put(decision)
         now = _utc_now()
         self.publish_event(
             run_id,
@@ -287,6 +286,7 @@ class RuntimeService:
                 },
             },
         )
+        ctx.approval_response_queue.put(decision)
         return {"runId": run_id, "approvalId": decision.approval_id, "status": "submitted"}
 
     def _cmd_Cancel(

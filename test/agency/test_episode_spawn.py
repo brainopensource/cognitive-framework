@@ -95,6 +95,36 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         # Returns structured payload, never a mutable handle
         self.assertIsInstance(result, SpawnResult)
 
+    def test_spawn_return_enters_as_untrusted_derived_at_minimum(self) -> None:
+        """`K-33`: a child's return value re-enters the parent's accumulation
+        as `untrusted_derived` at minimum, whatever the child believed."""
+        from vanguard.packages.kernel import Trust
+
+        child_scope = Scope(
+            actions=frozenset({"fs.read"}),
+            resources=({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},),
+            constraints=Constraints(
+                expires_at="2026-08-16T12:00:00Z",
+                max_uses=5,
+                budget_usd_micros=50_000,
+                max_depth=3,
+            ),
+            depth=1,
+        )
+        result = self.parent_engine.spawn(
+            child_scope=child_scope,
+            brief="subtask exploration",
+            episode_id="ep-child-2",
+            run_id="run-1",
+            principal="child-agent",
+            parent_episode_id="ep-parent-1",
+        )
+        self.assertTrue(result.ok)
+        self.assertTrue(result.return_spans)
+        for span in result.return_spans:
+            self.assertTrue(span.trust.is_untrusted)
+            self.assertGreaterEqual(span.trust.rank, Trust.UNTRUSTED_DERIVED.rank)
+
     def test_spawn_widening_denied_returns_typed_result(self) -> None:
         """Widening action is denied and returns typed SpawnResult without throwing (K-26)."""
         widened_scope = Scope(
@@ -480,6 +510,59 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
             brief="test narrowed child authorization",
         )
         self.assertEqual(outcome.terminal, RunTermination.COMPLETED)
+
+    def test_scope_escalation_refuse_writes_authorization_denied(self) -> None:
+        """`TSK-CORE-004`: the engine-side sealed-scope refuse never reaches
+        `Kernel.dispatch`, so it is the only writer for this denial -- append
+        `AuthorizationDenied` so it is durable on the ledger, not only a
+        local `Turn` (`A-07`)."""
+        from vanguard.packages.ports.event_store import Result
+
+        class ChildAttemptingUnauthorizedActionModel:
+            def __init__(self) -> None:
+                self.parent_turns = 0
+                self.child_turns = 0
+
+            def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+                if "child" in str(view.get("episodeId", "")):
+                    self.child_turns += 1
+                    if self.child_turns == 1:
+                        return Result.success({
+                            "kind": "effect", "action": "patch.apply",
+                            "resource": {"kind": "fs", "path": "/workspace/main.py"},
+                            "args": {"patch": "diff"}, "note": "attempt unauthorized patch",
+                        })
+                    return Result.success({"kind": "finish", "note": "child finished after denial"})
+                self.parent_turns += 1
+                if self.parent_turns == 1:
+                    return Result.success({
+                        "kind": "spawn",
+                        "args": {"brief": "read-only child", "scope": {"actions": ["fs.read"]}},
+                        "note": "spawning read-only helper",
+                    })
+                return Result.success({"kind": "finish", "note": "parent finished"})
+
+        engine = EpisodeEngine(
+            kernel=self.kernel,
+            model=ChildAttemptingUnauthorizedActionModel(),
+            clock=self.clock,
+            events=self.events,
+            scope=self.parent_scope,
+        )
+        engine.run(
+            episode_id="ep-parent-authz-denied",
+            run_id="run-1",
+            principal="parent-agent",
+            brief="test scope escalation is durable",
+        )
+
+        # The child's dispatch mock must never have been asked to authorize
+        # the unauthorized verb: the engine refused before dispatch.
+        self.kernel.dispatch.assert_not_called()
+        denials = [e for e in self.events.events if e.kind == "AuthorizationDenied"]
+        self.assertEqual(len(denials), 1)
+        self.assertEqual(denials[0].reason, "scope_escalation")
+        self.assertEqual(denials[0].payload["action"], "patch.apply")
 
 
 class NarrowedChildCannotEscalate(unittest.TestCase):

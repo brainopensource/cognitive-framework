@@ -67,15 +67,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--budget-usd-micros", type=int, default=50_000,
                         help="Aggregate paid ceiling for the campaign (default $0.05)")
     parser.add_argument("--live", action="store_true",
-                        help="Reserved for live provider calls; refused until binder is ready")
+                        help="Call a real ModelPort through HarnessSession; no fakeBackend")
     parser.add_argument("--evidence-root",
                         default="docs/scrum/sprints/sprint34/evidence")
     args = parser.parse_args(argv)
 
-    if args.live:
-        print("live campaign refused: product HarnessSession binder not yet wired "
-              "through coding_entrypoint; use fake validation first", file=sys.stderr)
-        return 3
     if args.trials < 1 or args.trials > 3:
         print("initial campaign is fixed at 1..3 trials; expand only after review",
               file=sys.stderr)
@@ -106,16 +102,23 @@ def main(argv: list[str] | None = None) -> int:
                 "brief": "TASK.md",
                 "runId": run_id,
                 "plannerModel": arm["plannerModel"],
-                "executorBand": "free" if arm_name != "cheap" else "free",
+                "executorBand": "free",
                 "recoveryModels": arm["recoveryModels"],
                 "budgetUsdMicros": max(0, args.budget_usd_micros - spent),
                 "interactive": True,
-                "fakeBackend": arm["fakeBackend"],
+                "fakeBackend": None if args.live else arm["fakeBackend"],
+                "live": args.live,
                 "json": True,
                 "headless": True,
+                "inPlace": False,
+                "modelPort": "openrouter",
             }
-            # Force free executors in the dry campaign so we never authorize frontier.
-            request["executorModels"] = list(load_band_models("free"))
+            if args.live:
+                request["plannerModel"] = list(load_band_models("free"))[0]
+                request["executorModels"] = list(load_band_models("free"))
+                request["fakeBackend"] = None
+            else:
+                request["executorModels"] = list(load_band_models("free"))
             buf_lines: list[str] = []
 
             class _Writer:
@@ -127,6 +130,9 @@ def main(argv: list[str] | None = None) -> int:
                     return None
 
             code = run_entrypoint(request, writer=_Writer())
+            if args.live and code == 3:
+                print("live campaign fail-closed: model port unavailable", file=sys.stderr)
+                return 3
             result = None
             for line in buf_lines:
                 payload = json.loads(line)
@@ -170,8 +176,8 @@ def main(argv: list[str] | None = None) -> int:
                     f"- outcome: {result.get('outcome')}\n"
                     f"- exit: {code} (mapped {exit_code_for(str(result.get('outcome')))})\n"
                     f"- spentUsdMicros: {cost}\n"
-                    f"- fake: {arm['fakeBackend']}\n"
-                    f"- live: false\n"
+                    f"- fake: {None if args.live else arm['fakeBackend']}\n"
+                    f"- live: {args.live}\n"
                     f"- timestamp: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n"
                 ),
             })
@@ -186,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps({
         "campaign": "v0450-greenfield",
-        "live": False,
+        "live": args.live,
         "ceilingUsdMicros": args.budget_usd_micros,
         "aggregateSpentUsdMicros": spent,
         "denominator": len(rows),

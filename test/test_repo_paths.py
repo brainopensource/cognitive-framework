@@ -20,7 +20,7 @@ import repo_paths  # noqa: E402
 class RepoPathsTests(unittest.TestCase):
     def test_repo_root_from_this_file(self) -> None:
         root = repo_paths.repo_root()
-        self.assertTrue((root / "docs" / "main_v4").is_dir())
+        self.assertTrue((root / "docs" / "01_specs").is_dir() or (root / "docs" / "main_v4").is_dir())
         self.assertFalse((root / "docs" / "v4").exists())
         self.assertTrue((root / "docs" / "scrum").is_dir())
         self.assertFalse((root / "docs" / "agile").exists())

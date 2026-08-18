@@ -13,9 +13,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
+from ...domain.ledger.events import EventEnvelope
 from ...domain.primitives.primitives import uuidv7
 from ...domain.evidence.claim import Claim, ClaimError, parse_claim
 from ...domain.wire.contracts import parse_wire
+from ...ports.event_store import EventRange, Result
+from ..evaluation_listener import EvaluationListener
 from ..explain import explain_artifact
 from ..governance.approvals import (
     ApprovalAuthority,
@@ -90,6 +93,9 @@ class RuntimeService:
         self._harness_runner = harness_runner
         self._active_runs: dict[str, ActiveRunContext] = {}
         self._lock = threading.Lock()
+        # Port only: never import IsolatedEvaluator here (AT-12).
+        self._evaluation_store = _InboxEventStore(self.store)
+        self._evaluation_listener = EvaluationListener(self._evaluation_store)
 
     def execute_command(self, frame: Mapping[str, Any]) -> dict[str, Any]:
         """Execute a validated command frame and return a response frame."""
@@ -191,6 +197,19 @@ class RuntimeService:
             self._active_runs[run_id] = ctx
 
         self.store.set_run_state(run_id, manifest_path, repo_path, "running", now=_utc_now())
+        now = _utc_now()
+        # T-08 HMAC authenticity is deferred; this is a liveness producer only.
+        self.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": actor,
+                "runId": run_id,
+                "payload": {"kind": "Heartbeat", "producer": "RuntimeService"},
+            },
+        )
 
         # Spawn execution thread if runner provided
         if self._harness_runner is not None:
@@ -243,6 +262,30 @@ class RuntimeService:
         if ctx is None:
             raise ValueError(f"no active run for {run_id}")
 
+        now = _utc_now()
+        self.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": actor,
+                "runId": run_id,
+                "payload": {
+                    "kind": "ApprovalResolved",
+                    "decision": {
+                        "approvalId": decision.approval_id,
+                        "resolution": decision.resolution,
+                        "reviewer": decision.reviewer,
+                        "argsDigest": decision.args_digest,
+                        "descriptorDigest": decision.descriptor_digest,
+                        "expiresAt": decision.expires_at,
+                        "signature": decision.signature,
+                        "keyId": decision.key_id,
+                    },
+                },
+            },
+        )
         ctx.approval_response_queue.put(decision)
         return {"runId": run_id, "approvalId": decision.approval_id, "status": "submitted"}
 
@@ -390,6 +433,12 @@ class RuntimeService:
             if ctx is not None:
                 for sub in list(ctx.event_subscribers):
                     sub.put(evt_copy)
+
+        payload = event_envelope.get("payload")
+        kind = payload.get("kind") if isinstance(payload, Mapping) else None
+        if kind == "EpisodeCompleted":
+            envelope = _envelope_from_service_event(run_id, evt_copy)
+            self._evaluation_listener.process_envelope(envelope)
         return seq
 
     # -- Internal Execution --------------------------------------------------
@@ -428,3 +477,55 @@ class RuntimeService:
             "frameId": frame_id,
             "error": {"code": code, "message": message},
         }
+
+
+class _InboxEventStore:
+    """EventStorePort over the service inbox. No evaluator adapter import."""
+
+    def __init__(self, inbox: ServiceInboxStore) -> None:
+        self._inbox = inbox
+
+    def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
+        now = _utc_now()
+        for envelope in events:
+            run_id = envelope.run_id or ""
+            self._inbox.append_event(run_id, envelope.to_dict(), now=now)
+        return Result.success(None)
+
+    def read(self, range_query: EventRange | None = None) -> Result[Sequence[EventEnvelope]]:
+        return Result.success(())
+
+    def digest(self, run_id: str | None = None) -> Result[str]:
+        return Result.success("")
+
+    def count(self, run_id: str | None = None) -> int:
+        return 0
+
+
+def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> EventEnvelope:
+    payload = event.get("payload")
+    if not isinstance(payload, Mapping):
+        payload = {}
+    now = str(event.get("occurredAt") or _utc_now())
+    episode_id = event.get("episodeId")
+    return EventEnvelope(
+        schema_version=str(event.get("schemaVersion", "4.0.0")),
+        event_id=str(event.get("eventId") or uuidv7()),
+        scope=str(event.get("scope") or "episode"),
+        seq=str(event.get("seq") or "0"),
+        occurred_at=now,
+        recorded_at=str(event.get("recordedAt") or now),
+        principal=str(event.get("principal") or "runtime"),
+        principal_role=str(event.get("principalRole") or "episode"),
+        tenant_id=str(event.get("tenantId") or "tenant-default"),
+        owner_id=str(event.get("ownerId") or "owner-platform"),
+        confidentiality=str(event.get("confidentiality") or "internal"),
+        retention_class=str(event.get("retentionClass") or "standard"),
+        trainability=str(event.get("trainability") or "prohibited"),
+        redaction_status=str(event.get("redactionStatus") or "none"),
+        payload=dict(payload),
+        run_id=str(event.get("runId") or run_id),
+        episode_id=episode_id if isinstance(episode_id, str) else None,
+        trace_id=str(event.get("traceId") or "trace-service"),
+        span_id=str(event.get("spanId") or "span-service"),
+    )

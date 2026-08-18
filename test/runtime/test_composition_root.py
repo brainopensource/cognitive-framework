@@ -51,9 +51,13 @@ from vanguard.packages.runtime.root import (
     RunResult,
     Runtime,
     TaskContext,
+    _admit_turn_result,
     _environment_effector,
+    _operator_span,
     _sandbox_effector,
+    _span_for,
 )
+from vanguard.packages.kernel import Trust
 
 OPERATOR_SIGNER = OperatorSigner(b"test-operator-held-approval-key")
 OPERATOR_KEY = OPERATOR_SIGNER.public_bytes
@@ -204,6 +208,64 @@ class _Failed:
         self.error = type("E", (), {"kind": "instrument_error", "message": message})()
 
 
+class AdmitTurnResult(unittest.TestCase):
+    """`S050-A-01`: tool results must re-enter as a justifying span, not a
+    silent context note, so a later widening request can be denied by them
+    (`K-30`, `K-31`, `K-33`)."""
+
+    def test_a_suspension_is_not_admitted(self) -> None:
+        notes: list[str] = []
+        operator = type("Op", (), {"note": lambda self, **kw: notes.append(kw["text"])})()
+
+        span = _admit_turn_result(operator, 1, type("R", (), {"outcome": None})())
+
+        self.assertIsNone(span)
+        self.assertEqual(notes, [])
+
+    def test_a_real_outcome_returns_an_untrusted_external_span(self) -> None:
+        operator = type("Op", (), {"note": lambda self, **kw: None})()
+        outcome = type("Outcome", (), {"result_digest": "sha256:abc", "detail": ""})()
+        result = type("R", (), {"outcome": outcome, "detail": ""})()
+
+        span = _admit_turn_result(operator, 3, result)
+
+        self.assertIsNotNone(span)
+        self.assertEqual(span.trust, Trust.UNTRUSTED_EXTERNAL)
+        self.assertNotEqual(span.trust, Trust.OPERATOR)
+
+
+class SourceClassTrust(unittest.TestCase):
+    """`TSK-CORE-003`/`K-31`: trust is declared per source class, not minted
+    at the call site. `_span_for` is the one place that constructs a `Span`,
+    and `Trust.OPERATOR` appears in this module only inside its table."""
+
+    def test_operator_span_is_operator_trust_by_declared_source_class(self) -> None:
+        span = _operator_span()
+
+        self.assertEqual(span.source_class, "operator_brief")
+        self.assertEqual(span.trust, Trust.OPERATOR)
+
+    def test_no_call_site_literal_mints_operator_trust(self) -> None:
+        import inspect
+
+        import vanguard.packages.runtime.root as root_module
+
+        source = inspect.getsource(root_module)
+        # The only live (non-comment) source line naming `Trust.OPERATOR` is
+        # the source-class table's own declaration; every call site goes
+        # through `_span_for` by source-class string instead.
+        occurrences = [
+            line for line in source.splitlines()
+            if "Trust.OPERATOR" in line and not line.lstrip().startswith("#")
+        ]
+        self.assertEqual(len(occurrences), 1, occurrences)
+        self.assertIn("_SOURCE_CLASS_TRUST", source)
+
+    def test_an_unknown_source_class_is_refused_not_silently_operator(self) -> None:
+        with self.assertRaises(KeyError):
+            _span_for("x", "not_a_declared_source_class")
+
+
 class Composition(unittest.TestCase):
     """Claim 1: the root composes from data, and refuses to guess."""
 
@@ -220,6 +282,20 @@ class Composition(unittest.TestCase):
     def test_composition_is_deterministic_for_one_episode(self) -> None:
         self.assertEqual(Runtime.compose(CODE_DEFAULT, episode_id="e-1").composition_digest,
                          Runtime.compose(CODE_DEFAULT, episode_id="e-1").composition_digest)
+
+    def test_a_pack_that_declares_skills_is_parsed_into_skill_cards(self) -> None:
+        """`S050-A-08`/`W12-B`: skill cards are parsed at composition and
+        handed to `ContextCompiler`, which calls `format_skill_index`
+        (`test.agency.test_context_compiler` covers the render itself)."""
+        code = Runtime.compose(CODE_DEFAULT)
+
+        self.assertTrue(code.skill_cards)
+        self.assertIn("pytest-green", [card.skill_id for card in code.skill_cards])
+
+    def test_a_pack_with_no_skills_gets_no_skill_cards(self) -> None:
+        shell = Runtime.compose(SHELL_ONLY)
+
+        self.assertEqual(shell.skill_cards, ())
 
     def test_sink_classes_come_from_the_manifest_not_from_root(self) -> None:
         """`ADR-0057` binds human approval to the privileged sink. If `root.py`
@@ -368,6 +444,25 @@ class DogfoodGate(unittest.TestCase):
         self.assertTrue(result.verdict.claims[0]["holds"])
         self.assertEqual(len(self.verifier.calls), 1)
 
+    def test_on_terminal_replaces_the_evaluation_authority_wholesale(self) -> None:
+        """`S060-B-04` handoff: a supplied `on_terminal` seam is the compose
+        point `EvaluationListener` binds through, without editing `root.py`
+        again. Absent, the in-process RPC runs unchanged (proven by the
+        default-path tests above)."""
+        calls: list[Any] = []
+
+        def on_terminal(session: Any) -> Any:
+            calls.append(session)
+            return "replaced-verdict"
+
+        result = self.execute(on_terminal=on_terminal)
+
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(result.verdict, "replaced-verdict")
+        # The seam replaces the RPC outright: the real verifier the session
+        # was composed with was never consulted.
+        self.assertEqual(len(self.verifier.calls), 0)
+
     def test_unconfigured_evaluator_is_inconclusive_not_success(self) -> None:
         """Wrong UID / unverified image is a real outcome, not a missing verdict
         and not a fake pass (`REQ-EVAL-001`, `M5`)."""
@@ -383,13 +478,21 @@ class DogfoodGate(unittest.TestCase):
 
     # -- claim 6: it is all on the ledger, prior first ------------------
 
-    def test_the_competence_prior_is_the_first_event_on_the_ledger(self) -> None:
-        """`S5-SA-002`: *pre-action*. A prior emitted after the first proposal
-        is conditioned on evidence it claims not to have seen."""
+    def test_the_ledger_begins_with_episode_started(self) -> None:
+        """`TSK-LED-002`/`G-050-03`: the durable beginning of a run is written
+        from packages, before anything else lands on the ledger."""
         result = self.execute()
 
         kinds = [event.kind for event in result.events]
-        self.assertEqual(kinds[0], "CompetencePriorRecorded")
+        self.assertEqual(kinds[0], "EpisodeStarted")
+
+    def test_the_competence_prior_precedes_the_first_proposal(self) -> None:
+        """`S5-SA-002`: *pre-action*. A prior emitted after the first proposal
+        is conditioned on evidence it claims not to have seen. `EpisodeStarted`
+        legitimately precedes it (`G-050-03`); no proposal may."""
+        result = self.execute()
+
+        kinds = [event.kind for event in result.events]
         self.assertLess(kinds.index("CompetencePriorRecorded"),
                         kinds.index("ProposalProduced"))
 

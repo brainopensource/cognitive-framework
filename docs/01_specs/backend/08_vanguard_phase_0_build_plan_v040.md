@@ -58,6 +58,8 @@ Phase 0 is an experiment before it is a build. Each hypothesis names what falsif
 
 **Increment C — Generality Witness.** Adds TableWorld **through registries, configuration and adapters only**. Must resolve: a constrained reconciliation; a derived transformation; an inconsistency detection ending in abstention; and a local compensation.
 
+> **Sprint v0.6 GAMMA (`TSK-HAR-007`).** `vg-table-default` remains on disk and loadable by `ManifestLoader`, but it is **not** in `registry.json` until `Runtime.compose` binds `table.read` / `table.patch` (`DEFAULT_BINDINGS`, ALFA / `TSK-EPIC-060-004`). Registering a pack that `compose` KeyErrors is an orphan with a registry row. H0 is unwitnessed.
+
 > If Increment C requires touching the episode engine, the capability algebra or the event envelope, **H0 is falsified** — early, cheaply, and therefore usefully. That is why TableWorld ships in Phase 0 rather than Phase 2.
 
 ---

@@ -31,6 +31,7 @@ from typing import Any, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
 from ...kernel import (
+    Accumulation,
     Constraints,
     EffectRequest,
     Event,
@@ -39,6 +40,7 @@ from ...kernel import (
     Scope,
     SinkClass,
     Span,
+    Trust,
     attenuate,
 )
 from .state import (
@@ -292,6 +294,8 @@ class EpisodeEngine:
                     parent_episode_id=episode.episode_id,
                     parent_lease=self._parent_lease,
                 )
+                if spawn_res.return_spans:
+                    accumulated = Accumulation(accumulated).extend(spawn_res.return_spans).spans
                 turn = Turn(
                     index=episode.turn_count,
                     state_digest=episode.state_digest(),
@@ -334,6 +338,13 @@ class EpisodeEngine:
             # Generic over the action set: no verb is named, so `ADR-0060`
             # holds and adding a domain is still zero lines in this file.
             if self._attenuated and proposal.action not in self._scope.actions:
+                # `TSK-CORE-004`: this refuse has no kernel dispatch behind
+                # it (`self._kernel.dispatch` is never called), so unlike the
+                # F-09/F-10 denials the kernel records for its own path,
+                # nothing durable existed for this one -- only the local
+                # `Turn`. Append `AuthorizationDenied` so the ledger carries
+                # it too, not only in-memory episode state (`A-07`).
+                self._emit_scope_escalation_denied(episode, proposal)
                 turn = Turn(
                     index=episode.turn_count,
                     state_digest=episode.state_digest(),
@@ -438,6 +449,33 @@ class EpisodeEngine:
             },
         ))
 
+    def _emit_scope_escalation_denied(self, episode: Episode, proposal: Proposal) -> None:
+        """`AuthorizationDenied` for the engine-side sealed-scope refuse.
+
+        Distinct writer from the kernel's own `F-09`/`F-10` denials -- this
+        fires before `Kernel.dispatch` is ever called, so it is the only
+        durable record a scope-escalating child proposal gets (`TSK-CORE-004`,
+        `A-07`).
+        """
+        event = Event(
+            kind="AuthorizationDenied",
+            reason="scope_escalation",
+            at=self._clock.now(),
+            run_id=episode.run_id,
+            principal=episode.principal,
+            payload={
+                "episodeId": episode.episode_id,
+                "turn": episode.turn_count,
+                "action": proposal.action,
+                "proposalDescriptor": proposal.descriptor,
+            },
+        )
+        try:
+            self._events.emit(event)
+        except Exception:
+            # `F-25`: emission failure never fails the work it describes.
+            pass
+
     def _emit_proposal(self, episode: Episode, proposal: Proposal) -> None:
         """`ProposalProduced` — the one event the loop appends itself.
 
@@ -467,9 +505,12 @@ class EpisodeEngine:
     def _to_effect_request(self, episode: Episode, proposal: Proposal,
                            spans: Sequence[Span]) -> EffectRequest:
         assert proposal.action is not None  # guaranteed by parse_proposal
+        resource = dict(proposal.resource)
+        if not resource and self._scope.resources:
+            resource = dict(self._scope.resources[0])
         return EffectRequest(
             action=proposal.action,
-            resource=dict(proposal.resource),
+            resource=resource,
             args=dict(proposal.args),
             principal=episode.principal,
             run_id=episode.run_id,
@@ -592,12 +633,19 @@ class EpisodeEngine:
             is_ok = child_outcome.terminal in (RunTermination.COMPLETED, RunTermination.ABSTAINED)
             # Child return payload is value-only text / note
             payload = child_outcome.episode.detail or child_outcome.episode.brief
+            # `K-33`: the child's return value re-enters the parent's
+            # accumulation as untrusted-derived at minimum, whatever trust the
+            # child itself believed it held (`Accumulation.child_return`).
+            return_spans = Accumulation().child_return(
+                (Span(f"{episode_id}.return", Trust.AGENT_DERIVED, "spawn_return"),)
+            ).spans
             return SpawnResult(
                 ok=is_ok,
                 payload=payload,
                 terminal=child_outcome.terminal,
                 detail=child_outcome.episode.detail,
                 turns=child_outcome.episode.turn_count,
+                return_spans=return_spans,
             )
         except Exception as exc:
             return SpawnResult(

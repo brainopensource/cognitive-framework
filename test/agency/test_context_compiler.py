@@ -37,6 +37,8 @@ from vanguard.packages.agency.context import (
     estimate_tokens,
 )
 
+from vanguard.packages.domain.artifacts.skill_index import SkillCard
+
 from test.kernel import fakes
 
 SYSTEM_CORE = "Act on the repository task using typed tools."
@@ -102,6 +104,48 @@ class LayerOrder(unittest.TestCase):
             self.assertEqual(block.token_estimate, estimate_tokens(block.text))
         for message in compiled.messages():
             self.assertTrue(message["provenance"])
+
+
+class SkillIndex(unittest.TestCase):
+    """`S050-A-08`/`W12-B`: `format_skill_index` is invoked at composition,
+    not an unused export, and it rides `L3` alongside the environment map."""
+
+    CARD = SkillCard(
+        skill_id="pytest-green", name="Keep pytest green",
+        description="Run the suite before and after a patch.",
+        body_path="skills/pytest-green.md",
+    )
+
+    def test_no_cards_means_no_layer_three_addition(self) -> None:
+        compiled = build(environment="", skill_cards=()).compile(brief="fix the parser")
+
+        self.assertNotIn("L3", [message["layer"] for message in compiled.messages()])
+
+    def test_cards_render_into_layer_three(self) -> None:
+        compiled = build(environment="", skill_cards=(self.CARD,)).compile(brief="fix the parser")
+
+        layer_three = next(m for m in compiled.messages() if m["layer"] == "L3")
+        self.assertIn("pytest-green", layer_three["content"])
+        self.assertIn("Keep pytest green", layer_three["content"])
+
+    def test_cards_join_the_environment_map_rather_than_replacing_it(self) -> None:
+        compiled = build(skill_cards=(self.CARD,)).compile(brief="fix the parser")
+
+        layer_three = next(m for m in compiled.messages() if m["layer"] == "L3")
+        self.assertIn(ENVIRONMENT, layer_three["content"])
+        self.assertIn("pytest-green", layer_three["content"])
+
+    def test_the_index_honours_its_own_ceiling(self) -> None:
+        many_cards = tuple(
+            SkillCard(skill_id=f"skill-{i}", name=f"Skill {i}",
+                      description="x" * 200, body_path=f"skills/{i}.md")
+            for i in range(50)
+        )
+        compiled = build(environment="", skill_cards=many_cards,
+                         skill_index_ceiling=500).compile(brief="fix the parser")
+
+        layer_three = next(m for m in compiled.messages() if m["layer"] == "L3")
+        self.assertLessEqual(len(layer_three["content"]), 500)
 
 
 class PrefixStability(unittest.TestCase):

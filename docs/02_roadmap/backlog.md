@@ -6,10 +6,10 @@ version: 1.0.0
 status: AUTHORITATIVE-TASK-POOL
 owners: [Project Lead, Tech Lead]
 last_reviewed: 2026-08-18
-baseline: "v0.4.5-beta as-built; milestones ROAD-MILE-01; drifts D-01…D-48"
+baseline: "v0.4.5-beta as-built; v0.5.0 sprint partial close (audit below)"
 corpus_note: >
-  docs/01_specs/ is not present in this workspace. Backend VG corpus is docs/main_v4/;
-  frontend short files are docs/front_v4/ plus docs/scrum/roadmap_frontend.md.
+  Canonical VG corpus: docs/01_specs/backend/ (and docs/main_v4/ duplicate).
+  Frontend: docs/front_v4/ plus docs/scrum/roadmap_frontend.md.
 ---
 
 # Technical backlog (SSOT)
@@ -31,17 +31,25 @@ DoD already covers it. Library-without-call-site is `[TODO] ❌`.
 
 | Bucket | TODO | DONE |
 |---|---|---|
-| Kernel / provenance / dispatch honesty | 6 | 5 |
+| Kernel / provenance / dispatch honesty | 4 | 7 |
 | Ledger / events / recovery | 8 | 3 |
 | Evaluation trigger | 1 | 1 |
 | Spec freeze (OPTIMIZATION → VG text) | 10 | 0 |
-| Product / live coding cell | 6 | 2 |
-| Context / skills / hygiene | 4 | 2 |
+| Product / live coding cell | 5 | 3 |
+| Context / skills / hygiene | 3 | 3 |
 | Perimeter / AT / ADR | 4 | 2 |
 | Tests / IDs / docs | 5 | 2 |
 | Frontend FE-2 / FE-3 / J-seams | 8 | 6 |
 | v0.6.0+ epics | 18 | 0 |
-| **Total** | **70** | **23** |
+| **Total** | **66** | **27** |
+
+### v0.5.0 close audit (2026-08-18)
+
+DEV ALFA/GAMMA and DEV BETA briefs claimed 100% sprint completion. **Code audit rejects that claim.** Mixed TSK ids in the briefs (e.g. skill-index ≠ `TSK-CTX-001`; campaign ≠ `TSK-HAR-005`; reducer support ≠ emitting `EpisodeStarted`). Only rows below flipped to `[DONE] ✅` have production call sites.
+
+**Accepted this increment:** `TSK-CORE-001`, `TSK-CORE-002`, `TSK-CTX-002`, `TSK-HAR-001`.
+
+**Still open (do not start v0.6 extraction until Wave 0 of the next sprint closes G-050 holes):** `TSK-LED-001`…`005`, `TSK-EVAL-001` (listener module exists, **not** composed — `HarnessSession._evaluate` still RPC), `TSK-HAR-002`/`004` (campaign `--live` still refused; no `create_autonomous_grant` in `lab_driver`), `TSK-CLI-001` (`test/fixtures/coding_scripted_backends.py` missing), `TSK-CTX-001`, `TSK-CORE-003`/`004`, spec freeze, README, CI-9.
 
 ---
 
@@ -69,9 +77,9 @@ DoD already covers it. Library-without-call-site is `[TODO] ❌`.
 | Path | `vanguard/packages/runtime/root.py` (`_admit_turn_result`) |
 | Milestone | v0.5.0 |
 | REQ | `[REQ-TRUST-001]` · `K-33` · `S1(e)` |
-| Status | `[TODO] ❌` |
+| Status | `[DONE] ✅` |
 | Drift | D-05 |
-| Description | Today `_admit_turn_result` notes text and **returns `None`**, so `EpisodeEngine` never accumulates tool-result spans (`engine.py` only adds a label if the callback returns one). Return an `UNTRUSTED_EXTERNAL` `Span` (or equivalent) so F-09 / authority widening is reachable in **composed** `HarnessSession`, not only kernel fixtures. |
+| Description | `_admit_turn_result` returns `Span(..., Trust.UNTRUSTED_EXTERNAL, source_class="tool_result")` after a real outcome; approval suspension still returns `None`. Wired at `root.py` `receipt_labeller`. |
 | Proof | `python3 -m unittest test.runtime.test_composition_root test.kernel.test_provenance -v` plus a new composed must-fail: privileged widen from a tool-result span is denied. `MF-KRN-002` against `HarnessSession` (not a bare `Kernel`). |
 
 ### TSK-CORE-002 — `spawn()` must call `Accumulation.child_return`
@@ -81,9 +89,9 @@ DoD already covers it. Library-without-call-site is `[TODO] ❌`.
 | Path | `vanguard/packages/agency/episode/engine.py` (`spawn`) |
 | Milestone | v0.5.0 |
 | REQ | `[REQ-TRUST-001]` · `K-33` |
-| Status | `[TODO] ❌` |
+| Status | `[DONE] ✅` |
 | Drift | D-06 |
-| Description | `child_return` exists on `kernel/provenance.py` and has **zero** call sites in `engine.py`. Child `run()` must receive untrusted-derived spans from the parent return value. |
+| Description | `spawn()` builds `Accumulation().child_return(...)` and the parent loop `extend`s `spawn_res.return_spans`. Residual: return span is a synthetic `AGENT_DERIVED` spawn_return, not the child's full accumulation — acceptable for G-050-02 call-site; tighten in v0.6 if F-09 tests demand it. |
 | Proof | `python3 -m unittest test.agency.test_spawn -v` (extend): child accumulation includes parent tool spans; kill-parent mid-child does not invent success. |
 
 ### TSK-CORE-003 — Stop hard-coding `_operator_span` as `Trust.OPERATOR`
@@ -295,7 +303,7 @@ DoD already covers it. Library-without-call-site is `[TODO] ❌`.
 | REQ | VG-05 `Principal::EvidencePlane` · ADR-0061 |
 | Status | `[TODO] ❌` |
 | Drift | D-02 |
-| Description | `EvaluationRequested` is declared and **never emitted**. `_evaluate()` RPC after episode return is the trigger. Introduce a ledger listener (same UID 10002 evaluator) that emits `EvaluationRequested` on terminal episode events. Worker must not be the sole authority to start evaluation. Keep evaluator **outside** worker bwrap (D-32). |
+| Description | `runtime/evaluation_listener.py` + `test/runtime/test_evaluation_listener.py` exist. **Not composed:** `HarnessSession._evaluate` is still a synchronous RPC; no production import of `EvaluationListener`. G-050-05 remains open until the listener is the trigger. |
 | Proof | Grep: `EvaluationRequested` emitted from `vanguard/packages/`. Test: episode cannot import evaluator (`test_spine`); killing session still schedules eval **or** compensating ADR named in the test docstring. |
 
 ### TSK-EVAL-002 — Isolated evaluator + unreadability probe
@@ -448,10 +456,10 @@ All `[TODO] ❌` until the VG markdown in `docs/main_v4/` (canonical; `docs/01_s
 | Path | `vanguard/packages/runtime/lab_driver.py`; CLI product entry |
 | Milestone | v0.5.0 |
 | REQ | `[REQ-HAR-001]` · G-050-06 |
-| Status | `[TODO] ❌` |
-| Drift | Board Q2; `lab_driver` copies workspace when `isolate` |
-| Description | Product path must mutate the operator workspace under sandbox + grant. Lab isolation remains default for measurement (comment at `lab_driver.py:111`). Add an explicit `--in-place` that is labelled in `labDepartures` / session log. MOCK/`live: false` does not close this task. |
-| Proof | Live run: file appears on disk in the given repo; `oracle_green` on `lab/tasks/greenfield-*` with `live: true`. |
+| Status | `[DONE] ✅` |
+| Drift | Board Q2; isolate remains default |
+| Description | `--in-place` / `isolate=False` mutates `--task-dir` and appends `labDepartures=["in_place"]`. Isolated copy remains default. Live `oracle_green` is `TSK-HAR-004`, not this row. |
+| Proof | `python3 -m unittest test.runtime.test_lab_driver -v` |
 
 ### TSK-HAR-002 — Bind `AutonomousGrant` on INTERACTIVE CLI / lab
 
@@ -566,8 +574,8 @@ All `[TODO] ❌` until the VG markdown in `docs/main_v4/` (canonical; `docs/01_s
 | Path | `vanguard/packages/agency/context/compiler.py`; `domain/artifacts/skill_index.py` |
 | Milestone | v0.5.0 |
 | REQ | `[REQ-CTX-001]` · W12-J |
-| Status | `[TODO] ❌` |
-| Description | Function exists and is tested via `test/contracts/test_coding_session.py`. Compiler does not call it. Prefix must hold ≤4k names+descriptions per pack DNA. |
+| Status | `[DONE] ✅` |
+| Description | `ContextCompiler.__init__` binds `format_skill_index(skill_cards, ceiling=...)` into the cached L3 environment region. Also satisfies milestone **G-060-05** early. |
 | Proof | `rg format_skill_index vanguard/packages/agency/context` ; compiler unit test with ceiling. |
 
 ### TSK-CTX-003 — L1–L5 compiler + compaction strategies
@@ -1149,7 +1157,7 @@ FE-2-8/2-9 already DONE; FE-3-3…3-7 and J4 parallel, not blocking G-050.
 ## 11. ID index (grep)
 
 ```
-TSK-CORE-001 TODO  TSK-CORE-002 TODO  TSK-CORE-003 TODO  TSK-CORE-004 TODO
+TSK-CORE-001 DONE  TSK-CORE-002 DONE  TSK-CORE-003 TODO  TSK-CORE-004 TODO
 TSK-CORE-005 DONE  TSK-CORE-006 DONE  TSK-CORE-007 DONE  TSK-CORE-008 DONE
 TSK-CORE-009 DONE  TSK-CORE-010 DONE  TSK-CORE-011 DONE
 TSK-LED-001 TODO   TSK-LED-002 TODO   TSK-LED-003 TODO   TSK-LED-004 TODO
@@ -1157,10 +1165,10 @@ TSK-LED-005 TODO   TSK-LED-006 DONE   TSK-LED-007 DONE   TSK-LED-008 DONE
 TSK-LED-009 TODO
 TSK-EVAL-001 TODO  TSK-EVAL-002 DONE
 TSK-SPEC-001..010 TODO  TSK-SPEC-011 DONE
-TSK-HAR-001 TODO   TSK-HAR-002 TODO   TSK-HAR-003 DONE   TSK-HAR-004 TODO
+TSK-HAR-001 DONE   TSK-HAR-002 TODO   TSK-HAR-003 DONE   TSK-HAR-004 TODO
 TSK-HAR-005 TODO   TSK-HAR-006 DONE   TSK-HAR-007 TODO
 TSK-CLI-001 TODO   TSK-CLI-002 DONE
-TSK-CTX-001 TODO   TSK-CTX-002 TODO   TSK-CTX-003 DONE   TSK-CTX-004 DONE
+TSK-CTX-001 TODO   TSK-CTX-002 DONE   TSK-CTX-003 DONE   TSK-CTX-004 DONE
 TSK-DOC-001 TODO   TSK-DOC-002 TODO   TSK-DOC-003 TODO
 TSK-TEST-001 TODO  TSK-TEST-002 DONE  TSK-TEST-003 DONE
 TSK-SEC-001 TODO   TSK-SEC-002 TODO   TSK-SEC-003 DONE   TSK-SEC-004 DONE
@@ -1173,4 +1181,4 @@ TSK-EPIC-060-* … TSK-EPIC-100-* all TODO
 
 ---
 
-*End of ROAD-BACK-01. Next execution unit: TSK-CORE-001 (production spans), not a new ontology.*
+*End of ROAD-BACK-01. Next execution unit: v0.6.0 sprint (`docs/03_sprints/sprint_active.md`) with Wave 0 = remaining G-050 holes.*

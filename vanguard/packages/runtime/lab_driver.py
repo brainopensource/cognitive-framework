@@ -47,6 +47,7 @@ from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.repo_index import FileRepoIndex
+from ..ports.event_store import Result as PortResult
 from .mock_coding_tape import (
     brief_from_task_dir,
     coding_tape,
@@ -141,9 +142,35 @@ def run_lab_task(
     # `labDepartures` is what stops an assisted run being read as an
     # unattended one.
     departures: list[str] = []
+    grant = None
+    if not isolate:
+        # `S050-C-02`: mutating the caller's own workspace is a labelled lab
+        # departure for the same reason `--approve-writes` is one -- a run
+        # that silently wrote outside its own sandbox copy is not the
+        # measurement the isolated default exists to produce.
+        departures.append("in_place")
     approver = None
     approval_key = None
-    if approve_writes:
+    if interactive and not isolate:
+        # `S060-G-01` / `TSK-HAR-002`: INTERACTIVE `--in-place` mints a bounded
+        # AutonomousGrant for the task workspace. BENCHMARK mode must not mint.
+        from .autonomous_grant import create_autonomous_grant
+        from .governance.approvals import OperatorSigner
+
+        grant_signer_key = b"vanguard-autonomous-operator-seed-key"
+        grant = create_autonomous_grant(
+            task_path,
+            allowed_verbs=tuple(harness_preview.verbs),
+            max_turns=max_turns,
+            max_attempts=max_attempts,
+            seed_key=grant_signer_key,
+        )
+        max_turns = min(max_turns, grant.max_turns)
+        max_attempts = min(max_attempts, grant.max_attempts)
+        signer = OperatorSigner(grant_signer_key)
+        approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
+        approval_key = signer.public_bytes
+    elif approve_writes:
         from .governance.approvals import OperatorSigner
 
         signer = OperatorSigner(b"vanguard-lab-operator-key")
@@ -168,7 +195,7 @@ def run_lab_task(
         episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
-            environment=_environment_for(task_path, cleanup_roots),
+            environment=_bind_grant(_environment_for(task_path, cleanup_roots), grant),
             clock=SystemClock(), store=store,
             index=FileRepoIndex() if harness.index_component is not None else None,
             interactive=interactive,
@@ -182,7 +209,8 @@ def run_lab_task(
     # through the same sandbox. Reading the agent's `proc.exec` receipts
     # instead would let a model exit 0 on any trivial command and score green.
     verify_argv = verify_argv_from_task(task_path)
-    environment_for_oracle = _environment_for(task_path, cleanup_roots)
+    environment_for_oracle = _bind_grant(
+        _environment_for(task_path, cleanup_roots), grant)
 
     def declared_oracle(_result: Any) -> bool:
         if verify_argv is None:
@@ -234,6 +262,7 @@ def run_lab_task(
         "labDepartures": departures,
         # `C-01`: a refusal that produced no turn is still on the ledger.
         "terminalRefusal": log.terminal_refusal,
+        "grantId": grant.grant_id if grant is not None else None,
         **selected.to_dict(),
     }
     # A benchmark may launch hundreds of sessions.  The isolated workspace and
@@ -266,6 +295,83 @@ def _verdict_is_green(result: Any) -> bool:
     """The oracle is the run's own exterior verdict, never a suite run here."""
     verdict = getattr(result, "verdict", None)
     return bool(verdict is not None and getattr(verdict, "passed", False))
+
+
+class _GrantBoundEnvironment:
+    """Enforces `AutonomousGrant` at the environment port (`TSK-HAR-002`)."""
+
+    def __init__(self, inner: Any, grant: Any) -> None:
+        self._inner = inner
+        self._grant = grant
+
+    def profile(self) -> Any:
+        return self._inner.profile()
+
+    def snapshot(self) -> Any:
+        return self._inner.snapshot()
+
+    def observe(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny(getattr(req, "action", "fs.read"), getattr(req, "path", None), None)
+        if denied is not None:
+            return denied
+        return self._inner.observe(req, grant)
+
+    def preview(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny_effect(req)
+        if denied is not None:
+            return denied
+        return self._inner.preview(req, grant)
+
+    def apply(self, req: Any, grant: Any = None) -> Any:
+        denied = self._deny_effect(req)
+        if denied is not None:
+            return denied
+        return self._inner.apply(req, grant)
+
+    def reconcile(self, receipt: Any, grant: Any = None) -> Any:
+        return self._inner.reconcile(receipt, grant)
+
+    def compensate(self, receipt: Any, grant: Any = None) -> Any:
+        return self._inner.compensate(receipt, grant)
+
+    def dispose(self) -> Any:
+        return self._inner.dispose()
+
+    def _deny_effect(self, req: Any) -> Any:
+        args = getattr(req, "args", {}) or {}
+        path = args.get("path") if isinstance(args, dict) else None
+        command = getattr(req, "command", None)
+        if command is None and isinstance(args, dict):
+            command = args.get("argv") or args.get("command")
+        verb = getattr(req, "verb", None) or getattr(req, "action", "")
+        return self._deny(str(verb), path, command)
+
+    def _deny(self, verb: str, path: Any, command: Any) -> Any:
+        from .autonomous_grant import validate_grant_request
+
+        mapped = verb
+        if "." not in verb:
+            mapped = {
+                "read": "fs.read",
+                "search": "fs.search",
+                "list": "fs.read",
+                "stat": "fs.read",
+                "write": "fs.write",
+                "patch": "patch.apply",
+                "exec": "proc.exec",
+            }.get(verb, verb)
+        argv = tuple(command) if command else None
+        ok, reason = validate_grant_request(
+            self._grant, verb=mapped, target_path=path, command_argv=argv)
+        if ok:
+            return None
+        return PortResult.fail("denied", reason)
+
+
+def _bind_grant(environment: Any, grant: Any) -> Any:
+    if grant is None:
+        return environment
+    return _GrantBoundEnvironment(environment, grant)
 
 
 def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -> Any:
@@ -331,6 +437,9 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=4)
     parser.add_argument("--jsonl-out", default=None)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--in-place", action="store_true",
+                        help="Mutate --task-dir directly instead of an isolated copy "
+                             "(labelled lab departure, recorded in labDepartures)")
     parser.add_argument("--tier-escalation", action="store_true",
                         help="Select the initial tier; outcome-driven escalation is coordinated externally")
     parser.add_argument("--tiers", nargs="+", default=None,
@@ -343,6 +452,7 @@ def main() -> int:
         interactive=args.interactive, max_turns=args.max_turns,
         max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
         tier_escalation=args.tier_escalation, tiers=args.tiers,
+        isolate=not args.in_place,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

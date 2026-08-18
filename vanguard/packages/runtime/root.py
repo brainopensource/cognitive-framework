@@ -76,6 +76,7 @@ from ..agency.context import (
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.manifests.loader import ManifestLoader, ManifestLoadError
 from ..domain.artifacts.graph import ArtifactFile, LogicalEdit, Workspace
+from ..domain.artifacts.skill_index import SkillCard, SkillIndexError, parse_skill_card
 from ..domain.artifacts.manifest import (
     FrozenHarness,
     ManifestError,
@@ -296,6 +297,10 @@ class Harness:
     bindings: Mapping[str, EffectBinding]
     translator: Any = None
     gene_digests: Mapping[str, str] = field(default_factory=dict)
+    #: `W12-B`. Parsed skill cards, or `()` if the pack declared no
+    #: `skill`/`skills` component. Rendered into `L3` by `ContextCompiler`
+    #: itself (`format_skill_index`), not pre-rendered here.
+    skill_cards: tuple[SkillCard, ...] = ()
 
     @property
     def composition_digest(self) -> str:
@@ -685,11 +690,19 @@ class HarnessSession:
         harness: Harness,
         ports: SessionPorts,
         task: TaskContext,
+        *,
+        on_terminal: Callable[["HarnessSession"], Any] | None = None,
     ) -> None:
         self.harness = harness
         self.ports = ports
         self.task = task
         self.calls: list[tuple[EffectRequest, Any]] = []
+        # `S060-B-04` / `TSK-EVAL-001` handoff: the compose-time seam BETA's
+        # `EvaluationListener` (or any future `EvaluationScheduler`) binds
+        # through, without ever editing this file. `None` preserves today's
+        # in-process `_evaluate()` RPC; a caller that supplies a callback
+        # replaces the evaluation *authority* wholesale, not just its result.
+        self._on_terminal = on_terminal
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -769,6 +782,7 @@ class HarnessSession:
             system_core=harness.system_core,
             tool_schemas=harness.tool_schemas,
             environment=env_text,
+            skill_cards=harness.skill_cards,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
         self.operator = _LayeredOperator(
@@ -830,6 +844,26 @@ class HarnessSession:
         terminal = RunTermination.ABANDONED
         detail = ""
 
+        # `TSK-LED-002` / `G-050-03`: the ledger's first durable event is
+        # written from packages, not a CLI fixture. Guarded on ledger status
+        # rather than a local flag: a process-restart resume constructs a
+        # fresh `HarnessSession` (fresh `LedgerBridge`) for the same
+        # `episode_id`, and the guard must survive that reconstruction too,
+        # or resume would double-append the beginning of the run.
+        if self.ledger_state().episode.status == "pending":
+            self.ledger.emit(Event(
+                kind="EpisodeStarted",
+                reason="composed",
+                at=ports.clock.now(),
+                run_id=task.run_id,
+                principal=task.principal,
+                payload={
+                    "episodeId": task.episode_id,
+                    "harness": harness.harness,
+                    "compositionDigest": harness.composition_digest,
+                },
+            ))
+
         # `S8-A-02`. This used to be a bounded segment loop building a fresh
         # `Episode` each pass with a fresh `max_turns` -- so the real bound was
         # the product of the two limits (8x8=64), nothing stated it, and an
@@ -873,7 +907,7 @@ class HarnessSession:
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
-        verdict = self._evaluate()
+        verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
         ports.environment.dispose()
         return RunResult(
             harness=harness.harness,
@@ -1022,6 +1056,12 @@ class Runtime:
                 aliases_file.read_bytes()
             ).hexdigest()
 
+        skill_raw = pack.components_data.get("skill") or pack.components_data.get("skills") or ()
+        try:
+            skill_cards = tuple(parse_skill_card(card) for card in skill_raw if isinstance(card, Mapping))
+        except SkillIndexError as exc:
+            raise CompositionError(f"{manifest.harness}: bad skill card: {exc}") from exc
+
         return Harness(
             harness=manifest.harness,
             frozen=frozen,
@@ -1041,6 +1081,7 @@ class Runtime:
             bindings={verb: table[verb] for verb in verbs},
             translator=translator,
             gene_digests=gene_digests,
+            skill_cards=skill_cards,
         )
 
 
@@ -1060,6 +1101,7 @@ class Runtime:
         clock: Any = None,
         bindings: Mapping[str, EffectBinding] | None = None,
         approval_key: bytes | None = None,
+        on_terminal: Callable[["HarnessSession"], Any] | None = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -1099,7 +1141,7 @@ class Runtime:
             approval_key=approval_key,
             interactive=interactive,
         )
-        return HarnessSession(harness, ports, task_context).run()
+        return HarnessSession(harness, ports, task_context, on_terminal=on_terminal).run()
 
     # -- composition internals -------------------------------------------
 
@@ -1207,10 +1249,25 @@ def _scope_for(harness: Harness, repo: Path) -> Scope:
     )
 
 
+#: `TSK-CORE-003` / `K-31`: the declaration a span's trust comes from, made
+#: once here rather than as a literal at each call site. `_span_for` is the
+#: only place in this module that constructs a `Span`, so no call site can
+#: independently judge -- and no call site can mint `Trust.OPERATOR` by
+#: writing the enum member itself.
+_SOURCE_CLASS_TRUST: Mapping[str, Trust] = {
+    "operator_brief": Trust.OPERATOR,
+    "tool_result": Trust.UNTRUSTED_EXTERNAL,
+}
+
+
+def _span_for(span_id: str, source_class: str) -> Span:
+    return Span(span_id, _SOURCE_CLASS_TRUST[source_class], source_class)
+
+
 def _operator_span() -> Span:
     """The brief is operator-authored, so it may justify capability widening
     (`M4`, `F-09`). Trust is set by source class at construction (`K-30`)."""
-    return Span("brief-1", Trust.OPERATOR, "operator_brief")
+    return _span_for("brief-1", "operator_brief")
 
 
 def _environment_map(environment: Any, harness: Harness) -> str:
@@ -1224,12 +1281,17 @@ def _environment_map(environment: Any, harness: Harness) -> str:
             f"capabilities={','.join(sorted(harness.verbs))}")
 
 
-def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> None:
+def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Span | None:
     """Admit the just-produced tool result before the next model turn.
 
     EpisodeEngine invokes this callback immediately after every dispatch. The
     result is therefore available to the next proposal in the same episode,
     rather than waiting until an approval suspension or terminal boundary.
+
+    The returned `Span` (`K-33`) enters the episode's accumulated justifying
+    spans at `Trust.UNTRUSTED_EXTERNAL`: a tool result is content that may
+    inform the next proposal, but per `K-30`/`K-31` it may never itself
+    justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
     if outcome is None:
@@ -1242,7 +1304,7 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> No
     if detail:
         text += f"\n{detail}"
     operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
-    return None
+    return _span_for(f"tool-result-{turn}", "tool_result")
 
 
 def _record(receipts: list[Receipt], operator: _LayeredOperator,

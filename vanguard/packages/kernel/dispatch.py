@@ -325,7 +325,10 @@ class Kernel:
         if intent is not None:
             emitted.append(intent)
             self._publish(intent)
-        return self._finish(request, emitted, failure, descriptor, outcome, detail, settlement)
+        return self._finish(
+            request, emitted, failure, descriptor, outcome, detail, settlement,
+            grant=grant, lease=lease,
+        )
 
     def _finish(
         self,
@@ -336,8 +339,19 @@ class Kernel:
         outcome: AdapterOutcome | None,
         detail: str,
         settlement: Mapping[str, int],
+        *,
+        grant: Grant | None = None,
+        lease: Lease | None = None,
     ) -> DispatchResult:
         """S12 EMIT. The lease is already released on every path reaching here."""
+        if failure is FailurePath.OK and grant is not None:
+            self._emit(emitted, request, "CapabilityGranted", "issued",
+                       dict(grant.payload()))
+        if failure is FailurePath.OK and lease is not None:
+            self._emit(emitted, request, "BudgetReserved", "reserved",
+                       {"leaseId": lease.lease_id, "reserved": dict(lease.reserved)})
+            self._emit(emitted, request, "BudgetCommitted", "committed",
+                       {"leaseId": lease.lease_id, "settlement": dict(settlement)})
         if failure is FailurePath.INTENT_APPEND_FAILED:
             self._emit(emitted, request, "KernelAlarm", "intent_append_failed",
                        {"descriptorDigest": descriptor, "detail": detail}, alertable=True)

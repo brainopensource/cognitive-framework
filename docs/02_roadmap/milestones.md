@@ -10,6 +10,7 @@ authority_scope: >
 owners: [Project Lead, Tech Lead]
 last_reviewed: 2026-08-18
 baseline_asbuilt: "v0.4.5-beta (feat/harness-cli-v045)"
+v050_status: PARTIAL — G-050-01/02 and G-060-05 (skill index) landed; G-050-03…07, 10–12 still open. See backlog audit.
 ---
 
 # Vanguard / GTS Technical Milestones — v0.5.0 → v1.0.0
@@ -28,9 +29,10 @@ sovereign v1.0.0 product. It is written against four facts that the 2026-08-18 a
    and CI cite `A-*`, `K-*`, `REQ-*`, and `D-*` identifiers — never “Tier 07 cell.”
 
 **Corpus (read in this order on conflict):** living sprint boards → this file’s *exit criteria* →
-`docs/main_v4/` (VG-00…VG-12, GTS-13C) → `SYSTEM_SPEC_THEORY.md` → `SYSTEM_SPEC_DRIFTS.md` →
-`SYSTEM_SPEC_ASBUILT.md` (photograph of v0.4.5). Frontend law: `docs/scrum/roadmap_frontend.md` and
-`docs/front_v4/` short files. Interaction surfaces are **not** a backend gate before v1.0.0 (`A-09`).
+`docs/01_specs/backend/` (VG-00…VG-12, GTS-13C; `docs/main_v4/` is the duplicate) →
+`SYSTEM_SPEC_THEORY.md` → `SYSTEM_SPEC_DRIFTS.md` → `SYSTEM_SPEC_ASBUILT.md`. Frontend law:
+`docs/scrum/roadmap_frontend.md` and `docs/front_v4/`. Interaction surfaces are **not** a backend
+gate before v1.0.0 (`A-09`).
 
 ---
 
@@ -283,6 +285,23 @@ seccomp-unless-reviewable, kernel rewrite, TUI/GUI as backend gates, moving `lab
 not shown gold patches, the evaluator image is pinned, and the verdict is signed. MOCK/`live: false`
 **does not** satisfy G-050-06. A scripted `_fake_backend` **does not** satisfy G-050-06.
 
+### 3.7 v0.5.0 empirical status (2026-08-18 code audit)
+
+| Gate | Status | Evidence |
+|---|---|---|
+| G-050-01 spans | **partial green** | `_admit_turn_result` returns `UNTRUSTED_EXTERNAL` (`TSK-CORE-001`) |
+| G-050-02 child provenance | **partial green** | `spawn` → `child_return` + parent `extend` (`TSK-CORE-002`) |
+| G-050-03 EpisodeStarted | **open** | reducer only; no package emitter (`TSK-LED-002`) |
+| G-050-04 ApprovalResolved | **open** | `verify_from_ledger` reads; `_cmd_ResolveApproval` still queue-only (`TSK-LED-003`) |
+| G-050-05 EvaluationRequested | **open** | `EvaluationListener` uncomposed; `_evaluate` RPC remains (`TSK-EVAL-001`) |
+| G-050-06 live in-place greenfield | **open** | `--in-place` exists (`TSK-HAR-001`); campaign `--live` still **refused** (`TSK-HAR-004`) |
+| G-050-07 grant bound | **open** | library only (`TSK-HAR-003`); `lab_driver` does not mint (`TSK-HAR-002`) |
+| G-050-08/09 TCB + lattice | keep | tripwires unchanged |
+| G-050-10…12 | **open** | CI-9, VG freeze in `docs/01_specs/backend/`, grant-shape goldens |
+| G-060-05 skill index | **green early** | `format_skill_index` in `ContextCompiler` (`TSK-CTX-002`) |
+
+v0.5.0 is **not** tagged. Next sprint is **v0.6.0 Molecular Lattice** with a mandatory Wave 0 closeout of the open G-050 rows (`docs/03_sprints/sprint_active.md`).
+
 ### 3.6 Security invariants added
 
 - F-21a (`INTENT_APPEND_FAILED`) remains a `KernelAlarm` (keep `D-18`).
@@ -352,7 +371,7 @@ Plugin languages (ADR-0059): Tree-sitter, browsers, etc. attach **across the wir
 | **G-060-02** | Second environment: registered pack + adapter tests + one measured episode; **or** pack deleted and Increment C struck from Phase 0 |
 | **G-060-03** | New environment = new adapter + manifest **without** kernel/agency patch (`C-03` language-swap still later) |
 | **G-060-04** | Single `ModelRouter`; duplicate heuristics gone; tests show role → model map is configuration |
-| **G-060-05** | `format_skill_index` is called from `ContextCompiler` (or equivalent L-layer), not only exported |
+| **G-060-05** | `format_skill_index` is called from `ContextCompiler` (or equivalent L-layer), not only exported — **already true** (`TSK-CTX-002`) |
 | **G-060-06** | `RegroundPolicy` invoked from the engine **or** module deleted and VG-03 §6.4 deferred explicitly |
 | **G-060-07** | TCB still ≤ 1438; boundaries PASS; no `OperatorRunner` fake-as-layers (`D-35`) |
 | **G-060-08** | `root.py` split: composition vs session vs evaluator transport as distinct modules (LOC not a vanity metric; **no new god-object**) |

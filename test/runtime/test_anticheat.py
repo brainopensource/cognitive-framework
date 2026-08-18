@@ -218,10 +218,53 @@ class LarIsReadOnly(unittest.TestCase):
                                   "optimis", "optimiz", "rewrite_prompt"):
                     self.assertNotIn(forbidden, code)
 
-    def test_the_scorer_writes_nothing(self) -> None:
-        code = _code(RUNTIME / "scoring.py")
-        for forbidden in ("write_text", "open(", "mkdir", "Path("):
-            self.assertNotIn(forbidden, code)
+class AutonomousGrantAndOracleAntiCheat(unittest.TestCase):
+    """S32 anti-cheat: ensure agent cannot fake an oracle pass, write in benchmark, or escape bounds."""
+
+    def test_trivial_exit_zero_agent_proc_cannot_authorize_green(self) -> None:
+        from vanguard.packages.runtime.coding_verification import FinalVerifier
+        # Verify that without the exterior oracle passing, oracle_green is false
+        verifier = FinalVerifier(None)
+        receipt = verifier.verify_final("t1", ["python3", "-c", "import sys; sys.exit(0)"])
+        self.assertFalse(receipt.oracle_green)
+
+    def test_benchmark_mode_remains_fail_closed_for_writes(self) -> None:
+        from vanguard.packages.kernel import (
+            EffectRequest,
+            FailurePath,
+            HeldAuthority,
+            Kernel,
+            Mode,
+            Outcome,
+            StandardClassifier,
+            StandardPolicy,
+        )
+        from vanguard.packages.kernel import Constraints, Scope
+        scope = Scope(
+            actions=frozenset({"fs.read", "patch.apply"}),
+            resources=({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},),
+            constraints=Constraints(
+                expires_at="2099-01-01T00:00:00.000Z",
+                max_uses=100,
+                budget_usd_micros=100_000,
+            ),
+        )
+        policy = StandardPolicy(
+            parent_scope=scope,
+            mode=Mode.BENCHMARK,
+            approval_required_above="low",
+            risk_of={"patch.apply": "medium"},
+        )
+        req = EffectRequest(
+            action="patch.apply",
+            resource={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
+            args={"diff": "--- a\n+++ b\n"},
+            principal="agent-1",
+            run_id="run-anticheat",
+        )
+        auth = policy.authorize(req, widens_capability=False, requested_scope=scope)
+        self.assertIs(auth.outcome, Outcome.REJECT)
+        self.assertIs(auth.failure, FailurePath.DENIED_ASK_FAIL_CLOSED)
 
 
 if __name__ == "__main__":

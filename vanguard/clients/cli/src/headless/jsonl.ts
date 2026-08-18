@@ -1,3 +1,6 @@
-export function jsonLine(value: unknown): string {
-  return JSON.stringify(value);
-}
+export { jsonLine } from "@vanguard/client-core";
+export {
+  formatHumanReceipt,
+  renderProjectionLines,
+  assertNoAnsi,
+} from "@vanguard/client-core";

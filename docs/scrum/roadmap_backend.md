@@ -131,6 +131,84 @@ Goal: `vg-code-default` is a Claude/OpenCode-shaped **pack** that actually loops
 | B-26-01..03 | `[DONE] ✅` | BETA | S26: Harvest 5 atoms from siblings to Vanguard slots (write-first, pagination, inspect-before-edit, empty ack, permission modes); rejected MCP/loops |
 | B-27-01..03 | `[DONE] ✅` | BETA | S27: Sequenced scaffold skill for live 14b runs without fixture tampering; Q2 remains `[TODO]` for live human dogfooding |
 
+### Sprints 28–34 — Vanguard Autonomous Coding CLI v0.4.5.0
+
+Implementation guide and acceptance contract: `S21_full_development_guide_sprint_v0450.md`. These rows extend the existing Vanguard harness; they do not authorize a second effect loop, model-as-judge scoring, silent batch splitting, host execution, or unbounded provider spend.
+
+#### S28 — Honest model routing and real composition
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S28-A-01 | `[TODO] ❌` | ALFA | Make `router` selectable through the actual driver and `vg` surface; one model registry and one routing policy |
+| S28-A-02 | `[TODO] ❌` | ALFA | Replace attempt-index rotation and silent fallback with outcome-driven named routing decisions; configuration failures stop closed |
+| S28-A-03 | `[TODO] ❌` | ALFA | Bind `IndexPort` in real `lab_driver` composition and refresh changed paths; explicit empty-workspace observation |
+| S28-A-04 | `[TODO] ❌` | ALFA | Record requested/resolved model, role, band, route reason, and provider failure for every episode |
+| S28-A-05 | `[TODO] ❌` | ALFA | Validate router, repo-map, boundary, TCB, and full runtime suite; manual index injection alone is not acceptance |
+
+#### S29 — Structured architect plan and runtime-owned task state
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S29-A-01 | `[DONE] ✅` | ALFA | Validated `vg.coding-plan.v1`: unique IDs, acyclic dependencies, workspace-relative paths, allowlisted commands, checks (`test_coding_plan`) |
+| S29-A-02 | `[TODO] ❌` | ALFA | DeepSeek V4 Flash architect episode produces one bounded plan artifact; no multi-file implementation batch |
+| S29-A-03 | `[DONE] ✅` | ALFA | Runtime-owned step transitions; `verified` requires exterior authority (`test_coding_plan`) |
+| S29-A-04 | `[TODO] ❌` | ALFA | Persist plan and revision digests in run evidence and reconstruct state from the ledger |
+| S29-A-05 | `[DONE] ✅` | ALFA | `test_coding_plan` proves invalid DAG/path/command/status plans fail closed and non-exterior verification cannot mark done |
+
+#### S30 — Canonical coding-run coordinator
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S30-A-01 | `[TODO] ❌` | ALFA | Add finite-state `CodingRunCoordinator`; it schedules episodes but dispatches no model-requested effect |
+| S30-A-02 | `[TODO] ❌` | ALFA | One stable run ID, distinct episode IDs, persistent isolated workspace, one canonical `HarnessSession` effect path |
+| S30-A-03 | `[TODO] ❌` | ALFA | Executor receives exactly one ready plan step and one-effect-per-turn conditioning |
+| S30-A-04 | `[TODO] ❌` | ALFA | Explain, repair, and empty-workspace build use the same coordinator with mode-specific grants |
+| S30-A-05 | `[TODO] ❌` | ALFA | Resume reconstructs active step, workspace identity, budget, and verification state from the ledger |
+
+#### S31 — Objective progress, escalation, recovery, and descent
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S31-A-01 | `[DONE] ✅` | BETA | Compute workspace, action, patch, and normalized test-failure fingerprints (`test_coding_progress`) |
+| S31-A-02 | `[DONE] ✅` | BETA | Track provider health; retry then rotate free provider for malformed/timeout failures before paid escalation (`test_provider_health`) |
+| S31-A-03 | `[DONE] ✅` | BETA | Escalate on repeated identical test failure, repeated action without delta, or bounded no-progress count (`test_coding_progress`) |
+| S31-A-04 | `[DONE] ✅` | BETA | Diagnostic/replan evidence consumed deterministically; revised plan passes validation (`coding_progress`) |
+| S31-A-05 | `[DONE] ✅` | BETA | Descend to free executor immediately after successful recovery; frontier requires explicit authorization (`test_coding_progress`) |
+| S31-A-06 | `[DONE] ✅` | BETA | Tests prove one failure does not escalate, missing key/unknown price does not climb, and routing is replay-attributable (`test_coding_progress`) |
+
+#### S32 — Budget, exterior verification, and bounded autonomy
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S32-A-01 | `[DONE] ✅` | BETA | Reserve integer-microdollar worst-case cost before paid calls; reconcile provider usage afterward (`test_coding_budget`) |
+| S32-A-02 | `[DONE] ✅` | BETA | Unknown price/usage remains named and fail-closed; budget, attempts, and turns are separate stop conditions (`test_coding_budget`) |
+| S32-A-03 | `[DONE] ✅` | BETA | Step verifier runs declared focused checks exterior to episodes; only it marks steps verified (`test_coding_verification`) |
+| S32-A-04 | `[DONE] ✅` | BETA | Final sealed behavioral oracle is the only `oracle_green` authority (`test_coding_verification`) |
+| S32-A-05 | `[DONE] ✅` | BETA | Signed autonomous lab grant is scoped to workspace, verbs, commands, expiry, and budget; BENCHMARK remains no-write (`test_autonomous_coding_grant`, `test_anticheat`) |
+| S32-A-06 | `[DONE] ✅` | BETA | Anti-cheat tests: agent test cannot score green, oracle cannot be selected/read, no host subprocess, no workspace escape (`test_anticheat`) |
+
+#### S33 — Product CLI, receipts, compaction, and resume
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S33-A-01 | `[DONE] ✅` | GAMMA / CLI | Ship `vg code PATH`, `--dry-plan`, `--resume`, planner/executor/recovery and hard-budget flags |
+| S33-A-02 | `[DONE] ✅` | GAMMA / CLI | Ship `vg explain PATH` grounded in repository observations and citations |
+| S33-A-03 | `[DONE] ✅` | GAMMA / CLI | Human receipts for plan/step/read/write/test/escalate/diagnose/resume/oracle/cost; clean JSON/headless output |
+| S33-A-04 | `[TODO] ❌` | ALFA / CLI | Compact completed history but retain active step, failure fingerprint, approval, workspace digest, route, and budget — **blocked on ALFA binder + ledger snapshot persistence for resume** |
+| S33-A-05 | `[DONE] ✅` | GAMMA / CLI | TypeScript client invokes the one Python runtime backend; no client-side agent or effect loop |
+| S33-A-06 | `[DONE] ✅` | GAMMA / CLI | Runtime, CLI tests, `npm test`, and strict typecheck pass |
+
+#### S34 — Empty-workspace adaptive greenfield proof
+
+| ID | Status | Lane | Task / proof |
+|---|---|---|---|
+| S34-A-01 | `[DONE] ✅` | BETA | Seal a dependency-free Python + browser task-app challenge with behavioral HTTP/test oracle; no gold source layout in prompt (`test_greenfield_v0450_oracle`, `lab/tasks/greenfield-v0450-webapp`) |
+| S34-A-02 | `[TODO] ❌` | GAMMA | Run control, DeepSeek-planned, adaptive free+DeepSeek recovery, and cheap arms from fresh isolated workspaces — **dry/fake campaign runner landed; `--live` refused until HarnessSession binder** |
+| S34-A-03 | `[TODO] ❌` | GAMMA / human | Initial three-trial campaign stays under aggregate `$0.05`; inspect before authorizing expansion toward 10–20 trials / `$0.50` |
+| S34-A-04 | `[TODO] ❌` | GAMMA | Archive CLI, task manifest, plan/revisions, model routes, ledger JSONL, session projection, diff, tests, oracle, tokens, and cost — **archive helper + evidence layout ready; live artifacts not yet** |
+| S34-A-05 | `[TODO] ❌` | GAMMA | At least one adaptive run proves DeepSeek plan → free execution → objective block → DeepSeek recovery → free descent → `oracle_green` — **mock adaptive path exists; not claimable** |
+| S34-A-06 | `[TODO] ❌` | GAMMA | Competitor-shaped claim permitted only after S34-A-05 and full security/contract/boundary/TCB gates; otherwise report exact failure rate |
+
 ### Parity matrix (OpenCode / Claude atoms → Vanguard) · S21-G-01
 
 Not a second board. Slot = pack gene, adapter, or port. **Reject** = their loop / MCP / LLM-judge.

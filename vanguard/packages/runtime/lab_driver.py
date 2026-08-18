@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.repo_index import FileRepoIndex
 from .mock_coding_tape import (
     brief_from_task_dir,
     coding_tape,
@@ -117,7 +118,11 @@ def run_lab_task(
         task_path = Path(shutil.copytree(task_path, staging / task_path.name))
 
     try:
-        selected = select_model(model_port, model_name=model_name, tape=tape)
+        selected = select_model(
+            model_port,
+            model_name=model_name or (tiers[0] if tier_escalation and tiers else None),
+            tape=tape,
+        )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
         result = {
@@ -161,22 +166,12 @@ def run_lab_task(
         # from the workspace as it stands, so it is a new episode; the run id
         # is what groups them.
         episode_id = f"lab-episode-{attempt}"
-        current_model = selected.model
-        if tier_escalation and tiers:
-            tier_model_name = tiers[min(max(0, attempt - 1), len(tiers) - 1)]
-            try:
-                esc_selected = select_model(
-                    model_port if model_port != "mock" else "openrouter",
-                    model_name=tier_model_name,
-                    tape=tape,
-                )
-                current_model = esc_selected.model
-            except Exception:
-                current_model = selected.model
         ports = SessionPorts(
-            model=current_model,
+            model=selected.model,
             environment=_environment_for(task_path, cleanup_roots),
-            clock=SystemClock(), store=store, interactive=interactive,
+            clock=SystemClock(), store=store,
+            index=FileRepoIndex() if harness.index_component is not None else None,
+            interactive=interactive,
             approver=approver, approval_key=approval_key)
         task = TaskContext(
             brief=brief, repo_path=task_path,
@@ -327,7 +322,7 @@ def main() -> int:
     parser.add_argument("--pack", required=True)
     parser.add_argument("--task-dir", required=True)
     parser.add_argument("--model", default="mock",
-                        choices=("mock", "ollama", "openrouter", "deepseek"))
+                        choices=("mock", "ollama", "openrouter", "deepseek", "router"))
     parser.add_argument("--model-name", default=None)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--interactive", action="store_true")
@@ -337,7 +332,7 @@ def main() -> int:
     parser.add_argument("--jsonl-out", default=None)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--tier-escalation", action="store_true",
-                        help="Escalate model tier on subsequent attempts")
+                        help="Select the initial tier; outcome-driven escalation is coordinated externally")
     parser.add_argument("--tiers", nargs="+", default=None,
                         help="Ordered list of models for tier escalation")
 

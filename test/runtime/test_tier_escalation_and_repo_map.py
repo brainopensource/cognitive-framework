@@ -19,6 +19,7 @@ from vanguard.packages.ports.environment import EnvironmentProfile
 from vanguard.packages.ports.event_store import Result
 from vanguard.packages.runtime.determinism import SystemClock
 from vanguard.packages.runtime.model_selection import select_model
+from vanguard.packages.runtime.tier_escalation import ModelRole, RoleAwareRouter
 from vanguard.packages.runtime.root import (
     HarnessSession,
     Runtime,
@@ -84,6 +85,18 @@ class TestTierEscalationAndRepoMap(unittest.TestCase):
         selected = select_model("router", env={"OPENROUTER_API_KEY": "test-key"})
         self.assertEqual(selected.port, "router")
         self.assertTrue(selected.label.startswith("router:"))
+
+    def test_role_router_records_reason_and_refuses_unapproved_paid_model(self) -> None:
+        router = RoleAwareRouter(bands={"free": ("openrouter/free",),
+                                        "medium": ("deepseek/deepseek-v4-flash",)})
+        executor = router.choose(ModelRole.EXECUTOR, episode_id="ep-1",
+                                 reason="ready_step")
+        self.assertEqual(executor.band, "free")
+        self.assertEqual(executor.reason, "ready_step")
+        self.assertTrue(executor.pricing_known)
+        with self.assertRaises(ValueError):
+            router.choose(ModelRole.ARCHITECT, episode_id="ep-2",
+                          reason="initial_plan", allow_paid=False)
 
 
 if __name__ == "__main__":

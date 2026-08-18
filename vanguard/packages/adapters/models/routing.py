@@ -60,19 +60,6 @@ def resolve_route(model: str) -> ModelRoute:
             capabilities=(),
         )
 
-    if model == "deepseek/deepseek-v4-flash":
-        return ModelRoute(
-            requested_model=model,
-            resolved_model=model,
-            pricing_known=False,
-            prompt_micros_per_1m=0,
-            completion_micros_per_1m=0,
-            cached_micros_per_1m=0,
-            pricing_source="unknown",
-            pricing_as_of="static",
-            capabilities=(),
-        )
-
     if model in MODEL_PRICING_MICROS:
         prompt, completion, cached = MODEL_PRICING_MICROS[model]
         return ModelRoute(
@@ -165,4 +152,3 @@ def resolve_model_router(policy: Any) -> Any:
         model = policy.get("model") or policy.get("primary") or "openrouter/free"
         return SingleModelRouter(model)
     return SingleModelRouter()
-

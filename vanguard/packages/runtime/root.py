@@ -755,6 +755,8 @@ class HarnessSession:
                 for s in slist:
                     sym_by_file.setdefault(s.path, []).append(f"{s.kind} {s.name}:{s.line}")
                 lines = ["=== Workspace Repository Map ==="]
+                if not files_res.value:
+                    lines.append("- state: empty greenfield workspace")
                 for f in files_res.value:
                     syms = sym_by_file.get(f, [])
                     if syms:
@@ -1033,7 +1035,7 @@ class Runtime:
                 contents[manifest.budget_policy], manifest.budget_policy),
             index_component=next(
                 (path for role, paths in manifest.components
-                 if role in {"index_policy", "repo_index"} for path in paths),
+                 if role in {"repo_index", "index_component"} for path in paths),
                 None),
             evaluators=manifest.evaluators,
             bindings={verb: table[verb] for verb in verbs},

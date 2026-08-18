@@ -152,7 +152,11 @@ def select_model(
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
         allowed = list(free_models() if free_models is not None else _free_band())
-        name = model_name or (allowed[0] if allowed else "openrouter/free")
+        if not allowed:
+            raise ModelUnavailable(choice, "no free-band models are registered")
+        name = model_name or allowed[0]
+        if name not in allowed:
+            raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
         return SelectedModel(port="router", model=OpenRouterModel(model=name),
                              label=f"router:{name}")
 

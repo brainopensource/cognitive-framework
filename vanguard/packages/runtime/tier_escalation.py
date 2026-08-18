@@ -25,12 +25,93 @@ is a sequence of runs, and the caller decides what that sequence means.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Mapping, Sequence
 
 from .repair import StopReason
 
-__all__ = ["EscalationOutcome", "TierLadder", "run_with_escalation"]
+__all__ = [
+    "EscalationOutcome", "ModelRole", "RouteDecision", "RoleAwareRouter",
+    "TierLadder", "run_with_escalation",
+]
+
+
+class ModelRole(str, Enum):
+    """A workflow role, never an additional model/effect loop."""
+
+    ARCHITECT = "architect"
+    EXECUTOR = "executor"
+    DIAGNOSTIC = "diagnostic"
+    REVIEWER = "reviewer"
+
+
+@dataclass(frozen=True, slots=True)
+class RouteDecision:
+    """Attributable route selection made before an episode starts."""
+
+    requested_model: str
+    resolved_model: str
+    role: ModelRole
+    band: str
+    reason: str
+    episode_id: str
+    pricing_known: bool
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "requestedModel": self.requested_model,
+            "resolvedModel": self.resolved_model,
+            "role": self.role.value,
+            "band": self.band,
+            "reason": self.reason,
+            "episodeId": self.episode_id,
+            "pricingKnown": self.pricing_known,
+        }
+
+
+class RoleAwareRouter:
+    """Choose a configured model by role without executing or retrying it.
+
+    This is intentionally a pure policy.  Provider health and paid-budget
+    authorization are supplied by callers; a missing or forbidden model raises
+    rather than silently selecting the preceding attempt's model.
+    """
+
+    def __init__(self, *, bands: Mapping[str, Sequence[str]],
+                 planner_model: str = "deepseek/deepseek-v4-flash",
+                 recovery_model: str = "deepseek/deepseek-v4-flash",
+                 reviewer_model: str | None = None) -> None:
+        self._bands = {name: tuple(models) for name, models in bands.items()}
+        self._planner = planner_model
+        self._recovery = recovery_model
+        self._reviewer = reviewer_model
+
+    def choose(self, role: ModelRole, *, episode_id: str, reason: str,
+               healthy_free_models: Sequence[str] = (),
+               allow_paid: bool = False) -> RouteDecision:
+        if role is ModelRole.EXECUTOR:
+            candidates = tuple(healthy_free_models) or self._bands.get("free", ())
+            if not candidates:
+                raise ValueError("no healthy free executor model is registered")
+            model, band = candidates[0], "free"
+        elif role is ModelRole.ARCHITECT:
+            model, band = self._planner, "medium"
+        elif role is ModelRole.DIAGNOSTIC:
+            model, band = self._recovery, "medium"
+        else:
+            candidates = ((self._reviewer,) if self._reviewer else ()) or self._bands.get("free", ())
+            if not candidates:
+                raise ValueError("no reviewer model is registered")
+            model, band = candidates[0], "free" if candidates[0] in self._bands.get("free", ()) else "medium"
+        if band != "free" and not allow_paid:
+            raise ValueError(f"paid model {model!r} is not authorized for {role.value}")
+        from ..adapters.models.routing import resolve_route
+        route = resolve_route(model)
+        if band != "free" and not route.pricing_known:
+            raise ValueError(f"pricing is unknown for paid model {model!r}")
+        return RouteDecision(model, route.resolved_model, role, band, reason,
+                             episode_id, route.pricing_known)
 
 #: Stop reasons that mean "this tier could not drive the loop", worth trying
 #: the next tier for. Reasons *not* here (workspace_missing, paid_model_refused,

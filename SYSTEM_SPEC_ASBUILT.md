@@ -1,8 +1,9 @@
 # Vanguard / GTS — System Specification As-Built
 
 Forensic map of the **production Python backend** at `vanguard/packages/` (`domain/`, `ports/`, `kernel/`,
-`agency/`, `runtime/`, `adapters/`) as it exists on branch `feat/harness-cli-v045`, commit lineage ending
-`d2aef8e feat(S-special): Version 0.4.5`. Corroborating evidence: root `README.md`, `test/`,
+`agency/`, `runtime/`, `adapters/`) as it exists on branch `feat/harness-cli-v045` at HEAD `6f2f8b2` (three docs-tidy commits after
+`d2aef8e feat(S-special): Version 0.4.5`; `vanguard/packages/` is unchanged from that version tag).
+Corroborating evidence: root `README.md`, `test/`,
 `tools/check_boundaries.py`, `tools/check_tcb_budget.py`, `tools/rule_test_map.py`, `test/broken/manifest.json`,
 `docs/scrum/roadmap_backend.md`.
 
@@ -44,7 +45,7 @@ The closest mechanised counterparts live in `tools/`, not in the backend:
 `vanguard/packages/runtime/coordination.py`, `vanguard/packages/adapters/stores/sqlite_event.py` and
 `vanguard/packages/adapters/stores/fs_blob.py`, none of which exist. The real files are
 `adapters/stores/event_store.py` (`SqliteEventStore` at line 121) and `adapters/stores/blob_store.py`.
-`README.md:236` also names `runtime/coordination.py` as a live component; `runtime/session_log.py:1-8`
+`README.md:58` also names `runtime/coordination.py` as a live component; `runtime/session_log.py:1-8`
 records that `runtime/coordination.py` was **deleted** in `S7-A-05`.
 
 ### 0.2 The document set and status classes
@@ -55,9 +56,10 @@ carries an "Alignment Matrix" asserting **"Fully Aligned"** for `00`, `01`, `02`
 
 ### 0.3 Word budget ledger
 
-`tools/wordcount_v4.sh` is **not present** in `tools/` (the directory holds 24 `*.py` plus `__init__.py`,
-`repo_paths.py` and subdirectories; no `wordcount_v4.sh`). `BR-1` therefore has no in-repo enforcer under the
-name the spec gives it. No backend module references word budgets.
+`tools/wordcount_v4.sh` **is present** and is the spec's `CI-5` counter (shebang + "authoritative v4 word
+count" header). CI invokes it (`.github/workflows/ci.yml`). `tools/` holds 25 top-level `*.py` files
+(including `__init__.py` and `repo_paths.py`) plus this shell script and subdirectories. No backend module
+in `vanguard/packages/` references word budgets — enforcement is a docs/CI concern, not a runtime one.
 
 ### 0.4 Identifier namespaces (global, permanent, never reassigned)
 
@@ -69,7 +71,7 @@ Identifier families actually appearing in `vanguard/packages/**/*.py`:
 | Family | Present in code? | Evidence |
 |---|---|---|
 | `K-nn` | Yes, as comments/docstrings: `K-04`…`K-08`, `K-13`…`K-21`, `K-23`…`K-33`, `K-42`, `K-44`, `K-46`…`K-49` | `grep -roh 'K-[0-9]\{2\}' vanguard/packages` |
-| `F-nn` | Yes, and **as a live enum**: `FailurePath` in `vanguard/packages/kernel/model.py:117-147` carries `F-01`…`F-25` **plus `F-21a`** as its string values | `kernel/model.py:119-147` |
+| `F-nn` | Yes, and **as a live enum**: `FailurePath` in `vanguard/packages/kernel/model.py:121-154` carries `F-01`…`F-25` **plus `F-21a`** as its string values | `kernel/model.py:121-154` |
 | `CT-nn` | Comments only (`CT-03`, `CT-06`…`CT-09`, `CT-16`, `CT-33`, `CT-40`…`CT-43`, `CT-51`, `CT-52`, `CT-53`) | scattered |
 | `ADR-nnnn` | Comments only: `ADR-0039`, `0047`, `0048`, `0054`, `0057`, `0058`, `0060`, `0062`, `0067` | `grep -rn 'ADR-00'` |
 | `AT-nn` | Comments only: `AT-01`, `AT-09` | `kernel/dispatch.py:37,98`; `kernel/__init__.py:5` |
@@ -111,7 +113,7 @@ not an implementation coverage count. See §9.6.
 | Spec gate | Implementation | Status |
 |---|---|---|
 | `CI-1`…`CI-4`, `CI-7` | `tools/audit_v4.py` | present |
-| `CI-5` | `tools/wordcount_v4.sh` | **absent** |
+| `CI-5` | `tools/wordcount_v4.sh` | **present**; invoked from `.github/workflows/ci.yml` |
 | `CI-6` | `.github/workflows/ci.yml` schema job over `schemas/v4/*.schema.json` | present; 38 schema artefacts in `schemas/v4/` |
 | `CI-8` | grep in CI | present |
 | `CI-9` | `tools/rule_test_map.py` | present; **RED by construction**, exits 0 and reports `gaps=133` (it does not fail the build) |
@@ -219,7 +221,7 @@ or references the nine levels.
 | `C-08` | `kernel/dispatch.py` is the single path; `test/kernel/test_dispatch.py:70-127` asserts no adapter executes without passing S2/S5/S8 |
 | `C-09` | Not measurable; no artifact to carry across a model change |
 | `C-10` | TableWorld exists (`adapters/environment/tableworld.py`, 138 lines) but is a bespoke in-memory table type, **not** an `EnvironmentAdapter` implementation — it exposes `handle_read`/`handle_patch`/`get_table_state`, not `profile/snapshot/observe/preview/apply/reconcile/compensate/dispose`. It is not bound in `runtime/root.py`'s binding table |
-| `C-11` | **Implemented.** `Occurrence.UNDETERMINABLE` (`kernel/model.py:100-105`), `FailurePath.UNDETERMINABLE = "F-22"`, preserved in `kernel/dispatch.py:353-357`; recovery controller at `runtime/ledger/recovery.py:124 RecoveryScanner` |
+| `C-11` | **Implemented.** `Occurrence.UNDETERMINABLE` (`kernel/model.py:102-107`), `FailurePath.UNDETERMINABLE = "F-22"` (`model.py:151`), preserved in `kernel/dispatch.py` (`F-22` path); recovery controller at `runtime/ledger/recovery.py:124 RecoveryScanner` |
 | `C-12` | `INV-2` is enforced at parse for claims and artifacts (`domain/evidence/claim.py:235-270`, `domain/wire/contracts.py:113-124`). No automatic checker *runs* the conditions; `InvalidationCheckRecord` has a schema (`schemas/v4/invalidation-check-record.schema.json`) but no producer in `vanguard/packages/` |
 
 ### 1.6 Design axioms (`A-01` … `A-12`)
@@ -243,7 +245,7 @@ or references the nine levels.
 
 | # | As-built |
 |---|---|
-| `N-01` | Held structurally: model proposes (`agency/episode/engine.py:227`), kernel authorises (`kernel/dispatch.py:177`), adapter executes (`:296`), evaluator evidences (`runtime/root.py:934 _evaluate`) |
+| `N-01` | Held structurally: model proposes (`agency/episode/engine.py:227`), kernel authorises (`kernel/dispatch.py:177`), adapter executes (`:296`), evaluator evidences (`runtime/root.py:935 _evaluate`) |
 | `N-02` | Reflected in comments; the enforcing artefact is `adapters/sandbox/rootless.py` probes |
 | `N-03` | **Partially held.** `kernel/grants.py:62 Grant` carries `principal`, `scope` (actions+resources+constraints), `expires_at`, `purpose_digest`. It has no `action`/`purpose` *string*; purpose is a digest only, and `issue()` refuses an empty `purpose_digest` (`grants.py:164-166`) |
 | `N-04` | Held: `kernel/attenuation.py:131 attenuate()` returns `AttenuationDenied` recording `requested` and `grantable`; never intersects |
@@ -278,15 +280,15 @@ or references the nine levels.
 
 ### 1.9 Strategic frame and generality constraint
 
-The 80/20 dual-track is **not** the in-tree ratio. Coding-specific code in `runtime/` totals roughly 1,900 LOC
-across `coding_budget.py` (243), `coding_coordinator.py` (270), `coding_entrypoint.py` (514),
+The 80/20 dual-track is **not** the in-tree ratio. Coding-specific code totals **2,088** physical LOC
+across `coding_budget.py` (243), `coding_coordinator.py` (271), `coding_entrypoint.py` (514),
 `coding_plan.py` (223), `coding_progress.py` (365), `coding_verification.py` (243), plus
 `mock_coding_tape.py` (126) and `domain/ledger/coding_session.py` (103). The non-coding environment
 (`adapters/environment/tableworld.py`) is 138 LOC.
 
 The generality constraint is **mechanised** by `tools/check_core_changes.py` (tested by
 `test/tools/test_check_core_changes.py`), which is the `ADR-0060` invariant: adding a domain must change zero
-lines in `kernel/` or `agency/episode/`. `agency/episode/engine.py:319-333` carries an explicit comment that
+lines in `kernel/` or `agency/episode/`. `agency/episode/engine.py:334-335` carries an explicit comment that
 its scope check names no verb, "so `ADR-0060` holds and adding a domain is still zero lines in this file."
 
 However, coding-shaped concepts do reach `domain/`: `domain/ledger/coding_session.py:42
@@ -298,7 +300,7 @@ project_coding_session` is a domain-layer projection named for one environment.
 |---|---|---|
 | Control plane | Python (`ADR-0063`) | **Matches.** 125 stdlib-first Python modules |
 | Interaction client | TypeScript strict on Node | Present at `vanguard/clients/cli/` (out of scope here) |
-| Wire contracts | JSON Schema 2020-12 normative | 38 artefacts in `schemas/v4/`; Python reader profile in `domain/wire/contracts.py`; a parallel TS source is referenced by `README.md:212` (`contracts.ts`) |
+| Wire contracts | JSON Schema 2020-12 normative | 38 artefacts in `schemas/v4/`; Python reader profile in `domain/wire/contracts.py`; a parallel TS source lives at `vanguard/packages/domain/contracts.ts` (README cites the pair at `:222` under a stale `domain/wire/` path) |
 | Validation | TS validator as implementation | Second-language *reader* exists in the CLI workspace |
 | Canonicalisation | RFC 8785 / JCS | **Implemented in-tree:** `domain/canonicalisation/jcs.py` (226 lines), `digest.py` (24 lines) |
 | Durable store | Embedded transactional, WAL, single writer | **Implemented:** `adapters/stores/event_store.py:121 SqliteEventStore`, `PRAGMA journal_mode = WAL` (line 139), `synchronous="FULL"` default (line 124), monotonic-`seq` enforcement per run (lines 182-196) |
@@ -336,7 +338,7 @@ Directly corroborated in code and roadmap rather than contradicted. `docs/scrum/
 
 `observe → propose → authorise → effect → receipt` is implemented as one loop in
 `agency/episode/engine.py:185-395`. `evaluate` is **not** in that loop — it is invoked one layer up by
-`runtime/root.py:934 HarnessSession._evaluate()` after `EpisodeEngine.run()` returns.
+`runtime/root.py:935 HarnessSession._evaluate()` after `EpisodeEngine.run()` returns.
 
 | Step | Spec owner | As-built symbol |
 |---|---|---|
@@ -344,7 +346,7 @@ Directly corroborated in code and roadmap rather than contradicted. `docs/scrum/
 | propose | Cognitive operator | `self._model.propose(view, tools, sampling)` (`engine.py:227`), wrapped by `runtime/root.py:483 _LayeredOperator.propose` which compiles L1–L5 first |
 | authorise | Broker | `Kernel.dispatch` → `StandardPolicy.authorize` (`kernel/policy.py:72`) |
 | effect | Environment adapter in the perimeter | `adapter.execute(request)` at `kernel/dispatch.py:296`, bridged by `runtime/root.py:321 _EnvironmentEffect` |
-| receipt | Environment adapter | `AdapterOutcome` (`kernel/model.py:107`) in-kernel; `ports/environment.py:116 EffectReceipt` at the port |
+| receipt | Environment adapter | `AdapterOutcome` (`kernel/model.py:111`) in-kernel; `ports/environment.py:116 EffectReceipt` at the port |
 | evaluate | Evaluator, separate identity | `adapters/evaluators/isolated.py:31 IsolatedEvaluator`, reached via `adapters/evaluators/client.py` over the daemon socket |
 
 **Name divergence:** the spec's "broker" has no module, class or port of that name. The implementation calls
@@ -374,17 +376,17 @@ Only two planes are enforced by OS identity; the rest are module boundaries.
 
 | Plane | As-built |
 |---|---|
-| **Interaction** | `runtime/service/server.py` (Unix domain socket, 177 lines) + `runtime/service/service.py:74 RuntimeService`. The TS CLI is the client (out of scope) |
+| **Interaction** | `runtime/service/server.py` (Unix domain socket, 178 lines) + `runtime/service/service.py:74 RuntimeService`. The TS CLI is the client (out of scope) |
 | **Cognition** | `agency/` — `episode/`, `context/`, `manifests/`. Co-located in the controller process |
 | **Control** | `kernel/` + `runtime/governance/`. Co-located with Cognition |
 | **Workload** | `adapters/sandbox/rootless.py` + `adapters/sandbox/worker.py`; UID 10001 per `containers/worker.Dockerfile` |
 | **Evidence** | `adapters/evaluators/daemon.py`, UID 10002, SO_PEERCRED, image digest at handshake |
-| **Evolution** | **No runtime component**, matching the Phase 0 expectation. `CandidateBuilt`, `CandidateAttested`, `CanaryPromoted`, `RollbackTriggered` are declared event kinds (`domain/ledger/events.py:98-102`) with **zero emitters** |
+| **Evolution** | **No runtime component**, matching the Phase 0 expectation. `CandidateBuilt`, `CandidateAttested`, `CanaryPromoted`, `RollbackTriggered` are declared event kinds (`domain/ledger/events.py:94-97`) with **zero emitters** |
 
 **Divergence — the evaluation trigger.** The spec assigns the Evidence plane ownership of the trigger: it
 observes episode termination in the ledger and emits `EvaluationRequested`; "no episode can request its own
-evaluation." As built, `runtime/root.py:934 HarnessSession._evaluate()` is called by the *runtime* immediately
-after the episode returns, and it calls `bound.evaluate(RunRef(...), EvaluationProtocol(...))` directly. There
+evaluation." As built, `runtime/root.py:935 HarnessSession._evaluate()` is called by the *runtime* immediately
+after `EpisodeEngine.run()` returns, and it calls `bound.evaluate(RunRef(...), EvaluationProtocol(...))` directly. There
 is **no ledger observer**, and `EvaluationRequested` — a declared event kind at `domain/ledger/events.py:80` —
 is **never emitted anywhere in `vanguard/packages/`**. What the daemon does enforce is that the *verdict* is
 produced under a separate identity and that the caller cannot forge it (`adapters/evaluators/signing.py`,
@@ -469,7 +471,7 @@ Registry freezing is real: `domain/artifacts/manifest.py:143 compose()` → `Fro
 | `stateAssembler.materialize` | `EpisodeEngine._view()` (`engine.py:398`) — returns a plain mapping; the real assembly is `ContextCompiler.compile()` (`agency/context/compiler.py:135`) invoked by `_LayeredOperator.propose` |
 | `operatorPolicy.select` | **No counterpart.** There is exactly one model, bound at composition |
 | `operatorRunner.invoke` | **No counterpart.** `self._model.propose(...)` is called directly |
-| `eventStore.append(ProposalProduced)` | `EpisodeEngine._emit_proposal` (`engine.py:441`) |
+| `eventStore.append(ProposalProduced)` | `EpisodeEngine._emit_proposal` (`engine.py:441-465`) |
 | `broker.authorize` | `self._kernel.dispatch(...)` (`engine.py:358`) — authorisation is *inside* dispatch, not a separate call |
 | `effectExecutor.execute` | Inside `Kernel._guarded` (`kernel/dispatch.py:296`) |
 | `regroundPolicy.shouldRun` | `agency/context/regrounding.py:19 RegroundPolicy.should_reground` **exists but is never called** — the only references outside the module are in `test/agency/test_regrounding.py`. The engine loop contains no re-grounding branch |
@@ -818,7 +820,7 @@ the branded identifier kinds; convenience parsers exist for `Digest`, `Timestamp
 |---|---|
 | `CT-14` | Held: `_UUIDV7` regex (`primitives.py:75-78`) and a generator `uuidv7(timestamp_ms)` (line 249). `seq` carries causal order as an `IntString` on the envelope (`events.py`, `contracts.py:212`) |
 | `CT-15` | **Inverted at the descriptor.** `grants.py:56-58 descriptor_of` explicitly *excludes* `toolCallId`, `callId`, `requestId` — correct for `D-3`. There is no code path that stores or echoes a provider-assigned `ToolCallId` verbatim, so the "never regenerated" half has no counterpart |
-| `CT-16` | Held: `EventEnvelope` requires `principal`, `tenantId`, `ownerId` from the first version (`contracts.py:205-211`); `dispatch.py:415` rejects a missing principal as `"principal is required (CT-16)"` |
+| `CT-16` | Held: `EventEnvelope` requires `principal`, `tenantId`, `ownerId` from the first version (`contracts.py:205-211`); `dispatch.py:417` rejects a missing principal as `"principal is required (CT-16)"` |
 
 **Emergent, undocumented in theory:** `principalRole` is a **required** envelope field with a six-value enum
 `{user, operator, episode, process, evaluator, release}` (`events.py:50 VALID_PRINCIPAL_ROLES`;
@@ -1050,7 +1052,7 @@ there produces a named `instrument_error`, never a skipped test reporting succes
 `TERMINAL_FOR_KIND` (`state.py`) maps non-effect kinds directly to terminals.
 
 Step-level attribution — "which operator produced which proposal" — is **not recorded**: the
-`ProposalProduced` payload (`engine.py:441-466`) carries the descriptor and action but no operator identity,
+`ProposalProduced` payload (`engine.py:448-459`) carries the descriptor and action but no operator identity,
 because no operator identity exists.
 
 "An operator receives no effect capabilities by default" is realised at the episode level:
@@ -1093,7 +1095,10 @@ Absent VG-04 fields: `artifactVersion`, `body: BlobRef`, `interfaceSchema`, `cre
 substrateProfile, taskDistribution, uncertainty, validity{domains[]}, invalidationConditions`.
 Domain: `domain/evidence/claim.py:159 Claim` with `InvalidationCondition` (line 85), `Evaluator` (line 108),
 `Uncertainty` (line 122), `Validity` (line 145), parsed by `parse_claim` (line 322).
-Missing from both: `evidenceRefs`, `derivedFrom`, `contradicts`, `expiresAt`.
+Domain `Claim` **does** carry optional graph/hedge fields: `evidence_refs`, `derived_from`, `contradicts`,
+`expires_at` (lines 174-177) plus `support_count`, `last_corroborated_at`, `protection_class` (lines 179-182).
+`to_wire` emits the first four only when non-empty (`claim.py:219-225`). Wire `_parse_claim` does **not
+require** them (`contracts.py:254`) — they are optional / unknown-field-preserved, not absent from the domain type.
 
 `ADR-0068` hedge fields (`supportCount`, `lastCorroboratedAt`, `protectionClass`) are carried by the writer
 schema (`schemas/v4/evidence-claim.schema.json`, golden vector `hedge-fields.json` per
@@ -1166,44 +1171,50 @@ the training projection have no code.
 
 #### 3.13.2 The minimum event set
 
-`EVENT_KINDS` (`domain/ledger/events.py:53-101`) contains **all 33** spec event kinds and no others.
+`EVENT_KINDS` (`domain/ledger/events.py:53-98`) contains **34** kinds — the same 34 named in THEORY §3.13.2
+(the earlier "33" count was a miscount of that table). The frozenset is not closed against extras: see
+`EffectRejected` / `KernelAlarm` below.
 
-**But the emitted set is far smaller.** Counting emitters in `vanguard/packages/` (excluding
+**The emitted set is far smaller.** Counting emitters in `vanguard/packages/` (excluding
 `events.py`'s declaration and the reducer/projection *consumers*):
 
 | Group | Emitted in production code? |
 |---|---|
-| `EpisodeStarted`, `EpisodeCompleted` | Yes — `engine.py:412 _emit_terminal`, `runtime/root.py` |
+| `EpisodeStarted` | **No emitter** in `vanguard/packages/`. Declared, reduced (`reducer.py:93`), projected (`projections.py:76`). CLI fixtures invent the kind; the backend never writes it |
+| `EpisodeCompleted` | Yes — `engine.py:427 _emit_terminal` |
 | `EpisodeStateChanged` | **No emitter** (reduced at `reducer.py:104`, projected at `projections.py:79`) |
 | `ObservationRequested`, `ObservationProduced` | **No emitter** |
 | `OperatorSelected`, `OperatorInvoked` | **No emitter** (no operators exist) |
-| `ProposalProduced` | Yes — `engine.py:441` |
+| `ProposalProduced` | Yes — `engine.py:448` |
 | `AuthorizationRequested` | **No emitter** |
 | `CapabilityGranted` | **No emitter** — the kernel issues a grant at S6 but emits no event for it |
-| `AuthorizationDenied` | Yes — `dispatch.py:195` |
+| `AuthorizationDenied` | Yes — `dispatch.py:196` |
 | `CapabilityRevoked` | **No emitter.** `GrantIssuer.revoke` (`grants.py:225`) returns the revoked ids "so the caller can emit one `CapabilityRevoked` per grant"; **no caller exists** |
 | `BudgetReserved`, `BudgetCommitted` | **No emitter** |
-| `BudgetReleased` | Yes — `dispatch.py:231` (denial path only) |
+| `BudgetReleased` | Yes — `dispatch.py:230` (denial path only) |
 | `EffectPreviewed` | **No emitter** |
-| `EffectStarted` | Yes — S8a intent, `dispatch.py:279` |
-| `EffectCompleted` | Yes — `dispatch.py:361` |
-| `EffectReconciled` | Yes — `dispatch.py:354` (`F-22` path) |
+| `EffectStarted` | Yes — S8a intent, `dispatch.py:281` |
+| `EffectCompleted` | Yes — `dispatch.py:355` |
+| `EffectReconciled` | Yes — `dispatch.py:351` (`F-22` path); also `domain/ledger/reconciliation.py:74-77` |
 | `ConflictDetected` | **No emitter** |
 | `EvaluationRequested` | **No emitter** |
 | `EvidenceClaimProduced` | **No emitter** |
-| `ArtifactCreated`, `ActivationChanged`, `CompetencePriorRecorded` | `CompetencePriorRecorded` yes — `agency/context/compiler.py:209 CompetencePriorRecorder.record` (line 228). The other two: **no emitter** |
+| `ArtifactCreated`, `ActivationChanged` | **No emitter** |
+| `CompetencePriorRecorded` | Yes — `agency/context/compiler.py:253-254` |
 | `ApprovalRequested` | Yes — `dispatch.py:189` |
-| `ApprovalResolved` | Emitted through the governance/approval flow (`runtime/governance/approvals.py:296 ApprovalFlow`) |
-| `Heartbeat`, `RunRecovered`, `RunAborted` | `RunRecovered`/`RunAborted` yes — `runtime/ledger/recovery.py`; `Heartbeat` is consumed, produced by the run owner |
+| `ApprovalResolved` | **No emitter.** `ApprovalFlow` (`approvals.py:296`) creates challenges and verifies decisions; `RuntimeService._cmd_ResolveApproval` (`service.py:222`) puts an `ApprovalDecision` on an in-process queue. Governance `ProcessEngine` **consumes** the kind (`engine.py:59`) but nothing in `vanguard/packages/` writes it |
+| `Heartbeat` | **No emitter.** Consumed by `recovery.py:158`. CLI fixtures invent it. No HMAC/MAC (T-08 unmet) |
+| `RunRecovered`, `RunAborted` | Yes — `runtime/ledger/recovery.py:175-208` |
 | `CandidateBuilt`, `CandidateAttested`, `CanaryPromoted`, `RollbackTriggered` | **No emitter** — the Evolution plane has no runtime component |
 
+Net: **11** `EVENT_KINDS` members are produced in `vanguard/packages/`; **23** are declared-only.
+
 `AuthorizationDenied` carries reason, `requested`, `grantable` and `untrustedSpans`, and is flagged
-`alertable` for `F-10`/`F-17` (`dispatch.py:195-203`) — held.
-`CompetencePriorRecorded` carries a pre-action prior and the digest of the exact context vector
-(`compiler.py:228-...`), recorded before turn 1 reaches the provider (`root.py:513-519`) — held.
+`alertable` for members of `ALERTABLE` (`dispatch.py:196-202`) — held.
+`CompetencePriorRecorded` is recorded before turn 1 reaches the provider (`root.py:513-519`) — held.
 
 **Emergent, undocumented in theory — two event kinds the kernel emits that are not in `EVENT_KINDS`:**
-`"EffectRejected"` (`dispatch.py:172, 348, 372`) and `"KernelAlarm"` (`dispatch.py:319, 344`). These reach the
+`"EffectRejected"` (`dispatch.py:171, 345, 368`) and `"KernelAlarm"` (`dispatch.py:320, 342`). These reach the
 store as `payload.kind` strings; `_parse_event` only requires `payload.kind` to be a *string*
 (`contracts.py:229-230`), so nothing rejects them. `EVENT_KINDS` is imported by `domain/__init__.py` and used
 only by `test/contracts/t3_ledger.py:22` — **the frozenset is not enforced anywhere in production code.**
@@ -1221,10 +1232,11 @@ only by `test/contracts/t3_ledger.py:22` — **the frozenset is not enforced any
 
 #### 3.13.4 Recovery events
 
-`Heartbeat`, `RunRecovered`, `RunAborted` are declared, reduced and produced by
-`runtime/ledger/recovery.py:124 RecoveryScanner`. `EffectReconciled` carries
-`{"occurrence": "undeterminable"}` on the `F-22` path (`dispatch.py:354-357`) — the preserved-uncertainty
-state, held.
+`Heartbeat`, `RunRecovered` and `RunAborted` are declared and reduced. **Only** `RunRecovered` /
+`RunAborted` are produced, by `runtime/ledger/recovery.py:175-208 RecoveryScanner`. `Heartbeat` has **no
+producer** in `vanguard/packages/` (consumed at `recovery.py:158`). `EffectReconciled` carries
+`{"occurrence": "undeterminable"}` on the `F-22` path (`dispatch.py:351`) — the preserved-uncertainty
+state, held. Heartbeats are **not** authenticated (T-08 unmet; HMAC exists for grants only).
 
 ### 3.14 Port interfaces (VG-04 §13)
 
@@ -1274,8 +1286,8 @@ Manifest schemas: `schemas/v4/harness-manifest.schema.json` + reader. Six packs 
 
 ### 3.16 Cross-language contract
 
-Two implementations exist: Python (`domain/wire/contracts.py`) and TypeScript (`domain/wire/contracts.ts`,
-referenced by `README.md:212`; the TS tree is out of scope). Vectors are data in `schemas/v4/vectors/`,
+Two implementations exist: Python (`domain/wire/contracts.py`) and TypeScript (`vanguard/packages/domain/contracts.ts`;
+README cites a stale `domain/wire/` pair at `:222`; the TS tree is otherwise out of scope). Vectors are data in `schemas/v4/vectors/`,
 exercised by `test/contracts/` (121 test methods) including `t1_wire_contracts.py`, `test_t1.py`,
 `schema_subset.py` and a `readers/` subpackage.
 

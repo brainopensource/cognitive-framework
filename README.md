@@ -83,29 +83,224 @@ Evolution    ──▶ Distillation · Attestation · Promotion Pointers (O-01)
 
 ## 4. Repository Structure & Package Lattice
 
+Below is the project directory tree illustrating the main modules, submodules, clients, benchmark tools, and execution environments down to an actionable navigation depth.
+
 ```text
 Aether-D-System/
-├── .github/workflows/ci.yml         # Boundary, TCB, secret scan, & test CI gates
-├── benchmarkings/                   # Empirical benchmark suites & live zero-hint runners
-├── containers/                      # OCI build files & manifest.json digests
-│   ├── worker.Dockerfile            # Bubblewrap worker container (UID 10001)
-│   ├── evaluator.Dockerfile         # Signed evaluator daemon container (UID 10002)
-│   └── manifest.json                # Immutable release build SHA-256 digests
-├── docs/
-│   ├── main_v4/                     # Normative Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
-│   ├── reviews/done/                # S7–S10 Master Architectural Roadmap
-│   └── agile/sprint6B/              # Gate R0–R10 release evidence & dogfood log
-├── tools/                           # Boundary check, TCB budget, secret scan, & dogfood tools
-└── vanguard/packages/               # Physical package boundaries (enforced in CI)
-    ├── domain/                      # Pure values, wire contracts, state reducers (Order 0)
-    ├── ports/                       # Abstract interfaces & in-memory fakes (Order 1)
-    ├── kernel/                      # Attenuation kernel, budget leases, dispatch (Order 2)
-    ├── agency/                      # Context compiler, proposal translator, episode engine (Order 3)
-    │   └── manifests/               # Data-only harness configurations (Order 4)
-    ├── runtime/                     # Composition root & daemon lifecycle
-    │   └── governance/              # Ed25519 approval flow & release signoff
-    └── adapters/                    # Concrete adapters (Model, Sandbox, Evaluator) (Order 1/2/5)
+├── .github/                      # CI workflows and repository configuration
+│   └── workflows/ci.yml          # Boundary checks, TCB budget, secret scans, & test CI gates
+├── benchmarkings/                # Empirical benchmark suites & zero-hint execution runners
+│   ├── zero_hint_v1/             # Phase 1 zero-hint benchmark task set
+│   ├── tasks_phase2/             # Phase 2 multi-turn repository coding task set
+│   ├── tasks_phase3/             # Phase 3 task set (TableWorld & non-coding structured reasoning)
+│   ├── swe_pro_tiers/            # Tiered SWE-bench coding evaluation suites
+│   └── frontier_tier5_datalog_engine/ # Frontier-tier logic & datalog evaluation engine
+├── containers/                   # OCI container specs & build digests
+│   ├── worker.Dockerfile         # Unprivileged rootless Bubblewrap worker container (UID 10001)
+│   ├── evaluator.Dockerfile      # Out-of-process signed evaluator daemon container (UID 10002)
+│   └── manifest.json             # Immutable release build SHA-256 digests
+├── docs/                         # Normative specifications, architectural roadmaps, & sprint logs
+│   ├── main_v4/                  # Core Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
+│   ├── agile/                    # Sprint evidence, dogfood run logs, and release gates
+│   └── reviews/done/             # Sprint review summaries & architectural decisions
+├── lab/                          # Paired Measurement Laboratory framework
+│   ├── bench.py                  # Lab harness bench runner for A/A control & McNemar tests
+│   ├── build.py                  # Environment setup & container preparation for lab tasks
+│   ├── diff.py                   # Automated git diff generation and evaluation packaging
+│   └── tasks/                    # Standardized evaluation benchmark tasks
+├── test/                         # Comprehensive Python test suite (unit, integration, security)
+│   ├── adapters/                 # Tests for sandbox, model, and verifier adapters
+│   ├── agency/                   # Tests for context compaction, compiler, and episode recursion
+│   ├── benchmarks/               # Tests for benchmark runners and evaluation harnesses
+│   ├── contracts/                # Contract compliance tests for wire schemas and value objects
+│   ├── governance/               # Tests for Ed25519 approval policies and permission gates
+│   ├── integration/              # End-to-end multi-turn recursion and integration tests
+│   ├── kernel/                   # Tests for attenuation kernel, budget leases, and action dispatch
+│   ├── lab/                      # Tests for lab bench execution and patch diffing
+│   ├── runtime/                  # Tests for composition root and task coordinators
+│   ├── security/                 # Sandbox isolation and privilege escalation security tests
+│   ├── support/                  # Test helpers, mock fixtures, and synthetic state builders
+│   └── trust/                    # Cryptographic signature, hash chain, and claim verifiers
+├── tools/                        # Repository validation, security, and developer utilities
+│   ├── 001_LLM_API_ROUTER/       # Local proxy router for routing and mocking LLM calls
+│   ├── 002_LLM_API_MOCK/         # Deterministic mock server for model API integration tests
+│   ├── check_boundaries.py       # Enforces unidirectional package import lattice rules
+│   ├── check_tcb_budget.py       # Enforces Kernel Trusted Computing Base (TCB) LOC limit (<= 1438)
+│   ├── scan_secrets.py           # Scans repository for unencrypted keys, tokens, or credentials
+│   ├── run_dogfood_r9.py         # Executes production dogfood release verification suite
+│   └── run_active_contract_tests.py # Runs active contract suite across package boundaries
+└── vanguard/                     # Physical Vanguard system code
+    ├── clients/                  # User-facing client applications and client core libraries
+    │   ├── cli/                  # TypeScript CLI application with interactive Ink/React TUI
+    │   │   ├── src/adapters/     # Client-side RPC adapters & IPC communication channels
+    │   │   ├── src/application/  # State management, episode controls, and command parsing
+    │   │   ├── src/headless/     # Non-interactive CLI runner for automated pipelines
+    │   │   └── src/tui/          # Terminal UI components built with Ink & React
+    │   └── client-core/          # Shared TypeScript type definitions, contracts, and utilities
+    └── packages/                 # Core Python backend packages (hexagonal lattice)
+        ├── domain/               # Pure value objects, wire contracts, and state reducers (Order 0)
+        │   ├── primitives/       # Core domain types (hashes, capabilities, leases, Ed25519 keys)
+        │   ├── wire/             # Canonical wire contracts, JSON schemas, & language bindings
+        │   ├── ledger/           # Turn event schemas, immutable reducers, & cryptographic log chains
+        │   ├── artifacts/        # Task execution output schemas, file diffs, & patch payloads
+        │   ├── evidence/         # Verifier proof tokens, probe claims, & signed evaluation verdicts
+        │   ├── selectors/        # Pure state queries and telemetry filtering functions
+        │   └── canonicalisation/ # Deterministic byte-sorting & JSON normalization utilities
+        ├── ports/                # Abstract interfaces for external capabilities (Order 1)
+        │   ├── model.py          # Abstract LLM inference port (`ModelPort`)
+        │   ├── sandbox.py        # Abstract execution sandbox port (`SandboxPort`)
+        │   ├── evaluator.py      # Abstract sealed evaluator port (`EvaluatorPort`)
+        │   ├── event_store.py    # Abstract event ledger storage interface (`EventStorePort`)
+        │   ├── blob_store.py     # Abstract binary artifact storage interface (`BlobStorePort`)
+        │   ├── kernel.py         # Abstract capability kernel interface
+        │   ├── environment.py   # Abstract workspace environment configuration interface
+        │   └── determinism.py    # Deterministic clock, seed, and execution control contract
+        ├── kernel/               # Capability attenuation & turn dispatch engine (Order 2)
+        │   ├── dispatch.py       # Universal turn lifecycle engine (observe->propose->auth->effect->receipt->eval)
+        │   ├── attenuation.py    # Capability attenuation kernel (`T2`) enforcing dynamic scope reduction
+        │   ├── budget.py         # Micro-budget USD leases, token trackers, and execution limits
+        │   ├── grants.py         # Capability grant issuance, attenuation tree, and scope validation
+        │   ├── classifier.py     # Security action risk classification and approval tiering
+        │   ├── policy.py         # Security policy rules and capability permission maps
+        │   ├── provenance.py     # Cryptographic lineage and action authorization origin tracking
+        │   └── model.py          # Internal kernel model representation and capability boundary definitions
+        ├── agency/               # Context compaction, proposal translation, and multi-turn loops (Order 3)
+        │   ├── context/          # L1–L5 Context Compactor and byte-stable prompt compiler
+        │   │   ├── compaction.py # Content compression, history pruning, and token sliding-window logic
+        │   │   ├── compiler.py   # Assembles system prompts, capabilities, and dynamic AGENTS.md rules
+        │   │   ├── layers.py     # L1–L5 context layer definitions (System -> Workspace -> Ephemeral)
+        │   │   └── regrounding.py# Context regrounding logic following error states or phase transitions
+        │   ├── episode/          # Multi-turn execution loop driver (`EpisodeEngine`)
+        │   │   ├── engine.py     # Depth-1 multi-turn recursion loop driving agent proposal cycles
+        │   │   └── state.py      # Episode state machine, trajectory history, and state transitions
+        │   └── manifests/        # Declarative, data-only harness manifest definitions (Order 4)
+        │       ├── loader.py     # Manifest parser, schema validator, and configuration inflator
+        │       ├── discovery.py  # Workspace manifest detection (AGENTS.md / CLAUDE.md / aliases.json)
+        │       └── vg-*/         # Manifest configs (e.g. `vg-code-claude-shaped`, `vg-shell-only`)
+        ├── runtime/              # Composition root, daemon lifecycle, & task orchestration
+        │   ├── root.py           # Primary composition root linking concrete adapters to abstract ports
+        │   ├── coding_coordinator.py # Autonomous coding coordinator for repository task resolution
+        │   ├── coding_entrypoint.py  # Entrypoint for spawning autonomous solving sessions
+        │   ├── coding_plan.py    # Dynamic task breakdown, step planning, and strategy tracking
+        │   ├── coding_progress.py# Progress monitoring, failure recovery, and step completion tracking
+        │   ├── coding_verification.py# Automated local test verification before submitting solutions
+        │   ├── governance/       # Ed25519 human approval flows, security checks, and gate releases
+        │   ├── lab_driver.py     # Execution driver for lab benchmark evaluation suites
+        │   ├── tier_escalation.py# Dynamic model escalation logic (Free -> Cheap -> Frontier)
+        │   ├── model_selection.py# Model routing policy based on task difficulty and budget
+        │   ├── session_log.py    # Execution session recorder (`lam.sqlite` SQLite database)
+        │   └── service/          # Vanguard daemon RPC server and API handlers
+        └── adapters/             # Concrete implementations of external ports (Order 1/2/5)
+            ├── models/           # Concrete LLM integrations (OpenRouter, Ollama, DeepSeek, cassettes)
+            │   ├── openrouter.py # OpenRouter API provider implementation
+            │   ├── ollama.py     # Local Ollama model provider implementation
+            │   ├── invocation.py # Standardized prompt formatting and API payload serialization
+            │   ├── cassette.py   # VCR-style request/response recording for offline testing
+            │   └── routing.py    # API key loading and multi-provider endpoint routing
+            ├── sandbox/          # Concrete execution environments
+            │   ├── rootless.py   # Linux Bubblewrap rootless container isolation backend
+            │   ├── worker.py     # Sandboxed execution worker process manager
+            │   └── fake.py       # In-memory mock sandbox for unit testing
+            ├── evaluators/       # Sealed evaluation backends
+            │   ├── daemon.py     # Signed verifier daemon running as unprivileged UID 10002
+            │   ├── client.py     # RPC client for communicating with evaluator daemons
+            │   ├── isolated.py   # Isolated process test runner for local evaluations
+            │   └── signing.py    # Ed25519 payload signing and cryptographic verifier attestations
+            ├── stores/           # Storage implementation backends
+            │   ├── sqlite_event.py # SQLite-backed event store for persistent episode logs
+            │   └── fs_blob.py    # Filesystem-backed binary artifact store
+            └── environment/      # Concrete host environment hooks and workspace initialization
 ```
+
+### High-Level Module & Submodule Architecture Breakdown
+
+#### 1. Backend Core (`vanguard/packages/`)
+The Python backend enforces hexagonal architecture and unidirectional dependency layers (enforced by `check_boundaries.py` in CI):
+
+- **`domain/` (Order 0 — Lowest Level)**: Pure, zero-dependency data models, contracts, and reducers.
+  - `primitives/`: Core domain primitives including cryptographic hashes, capability tokens, USD micro-budget leases, and Ed25519 keys.
+  - `wire/`: Canonical JSON wire formats (`contracts.py`, `contracts.ts`) defining exact schemas exchanged across process boundaries.
+  - `ledger/`: Append-only turn event definitions and pure state reducers driving deterministic execution history.
+  - `artifacts/`: Structures representing execution output payloads, code diffs, and patch artifacts.
+  - `evidence/`: Verifier proof tokens, probe claims, and signed evaluation verdicts.
+  - `selectors/`: Pure query functions used to extract state metrics and telemetry from event streams.
+  - `canonicalisation/`: Byte-stable sorting and JSON canonicalization utilities for hash generation.
+
+- **`ports/` (Order 1)**: Abstract interfaces (Python ABCs) isolating internal logic from external infrastructure.
+  - `model.py` (`ModelPort`): Interface for model completion, prompt formatting, and token generation.
+  - `sandbox.py` (`SandboxPort`): Interface for isolated process execution and workspace filesystem access.
+  - `evaluator.py` (`EvaluatorPort`): Interface for sealed, out-of-process task evaluation.
+  - `event_store.py` / `blob_store.py`: Interfaces for event persistence and binary output storage.
+  - `kernel.py`, `environment.py`, `determinism.py`: Contracts for attenuation kernels, workspace sandboxes, and deterministic hardware clocks/seeds.
+
+- **`kernel/` (Order 2)**: Central capability control, security attenuation, and turn dispatch logic.
+  - `dispatch.py`: Universal turn engine driving the 6-stage turn cycle (`observe -> propose -> authorize -> effect -> receipt -> evaluate`).
+  - `attenuation.py` (`T2`): Dynamically narrows capability scope so an agent cannot escalate privileges during execution.
+  - `budget.py`: Tracks token expenditures and USD micro-budget leases.
+  - `grants.py`: Issues, manages, and validates capability token trees.
+  - `classifier.py` & `policy.py`: Evaluates proposed actions against security policies and assigns action risk tiers.
+  - `provenance.py`: Verifies cryptographic origin and authorization lineage for every requested action.
+
+- **`agency/` (Order 3)**: High-level cognitive assembly, prompt context compression, and multi-turn loops.
+  - `context/`: L1–L5 Context Compactor & Compiler. `compiler.py` builds byte-stable system prompts incorporating `AGENTS.md` rules; `compaction.py` compresses long turn histories; `layers.py` structures layers from system to ephemeral memory; `regrounding.py` re-orients the agent after errors.
+  - `episode/`: `engine.py` (`EpisodeEngine`) runs depth-1 multi-turn recursion loops driving agent proposal cycles, supported by `state.py` trajectory tracking.
+  - `manifests/`: Declarative, data-only harness manifests (`loader.py`, `discovery.py`) defining agent behavioral profiles (`vg-code-claude-shaped`, `vg-shell-only`, etc.).
+
+- **`runtime/` — Composition Root & Daemon Lifecycle**:
+  - `root.py`: Main composition root injecting concrete adapters into abstract ports.
+  - `coding_coordinator.py` & `coding_entrypoint.py`: High-level orchestrators managing autonomous coding problem-solving sessions end-to-end.
+  - `coding_plan.py`, `coding_progress.py`, `coding_verification.py`: Generate step-by-step resolution plans, monitor execution progress, and verify solutions via local test suites.
+  - `tier_escalation.py` & `model_selection.py`: Route prompts to appropriate model tiers, escalating from local/free models to paid frontier models upon failures.
+  - `governance/`: Handles Ed25519 human approval signatures and sprint release signoff verification.
+  - `session_log.py` & `telemetry.py`: Logs full turn trajectories to local `lam.sqlite` databases.
+  - `service/`: Exposes Vanguard runtime via IPC/RPC daemon endpoints.
+
+- **`adapters/` (Order 1/2/5 — External Boundary)**: Concrete drivers implementing abstract ports.
+  - `models/`: Integrations for OpenRouter (`openrouter.py`), local Ollama (`ollama.py`), prompt formatting (`invocation.py`), cassette VCR recording (`cassette.py`), and key routing (`routing.py`).
+  - `sandbox/`: Linux Bubblewrap rootless container sandbox (`rootless.py`), worker process isolation (`worker.py`), and mock sandboxes (`fake.py`).
+  - `evaluators/`: Sealed evaluation backends including signed verifier daemon running under UID 10002 (`daemon.py`), client RPCs (`client.py`), and Ed25519 verdict signers (`signing.py`).
+  - `stores/`: SQLite event storage and filesystem blob storage implementations.
+
+---
+
+#### 2. User Interfaces & CLI (`vanguard/clients/`)
+- **`cli/`**: TypeScript application providing interactive terminal interfaces.
+  - `src/tui/`: Terminal User Interface built with React and Ink, providing visual turn progress, live budget trackers, and diff views.
+  - `src/headless/`: Non-interactive CLI mode for automated benchmark runs and headless server integration.
+  - `src/application/` & `src/adapters/`: Client state management and RPC connectors to the Vanguard Python runtime.
+- **`client-core/`**: Shared TypeScript contracts, wire interfaces, and client utilities.
+
+---
+
+#### 3. Measurement & Benchmarks (`lab/` & `benchmarkings/`)
+- **`lab/`**: Paired Measurement Laboratory framework (`bench.py`, `build.py`, `diff.py`) running paired A/A and A/B benchmark controls with McNemar statistical hypothesis testing to measure agent improvements.
+- **`benchmarkings/`**: Benchmark datasets (`zero_hint_v1`, `tasks_phase2`, `tasks_phase3`, `swe_pro_tiers`, `frontier_tier5_datalog_engine`) containing zero-hint coding, structured data, and logic tasks.
+
+---
+
+#### 4. Containerization & Security Isolation (`containers/`)
+- `worker.Dockerfile`: Unprivileged Bubblewrap worker sandbox (UID 10001) for isolated tool execution.
+- `evaluator.Dockerfile`: Out-of-process signed verifier daemon container (UID 10002) unreachable from the agent environment.
+- `manifest.json`: Cryptographic SHA-256 build digests ensuring reproducible environment builds.
+
+---
+
+#### 5. Tools & Integrity Verification (`tools/`)
+- Structural enforcement scripts (`check_boundaries.py` enforcing unidirectional imports, `check_tcb_budget.py` enforcing kernel LOC <= 1438).
+- Security scripts (`scan_secrets.py` to prevent credential exposure).
+- Gate release and contract test suites (`run_dogfood_r9.py`, `run_active_contract_tests.py`).
+- Mock LLM routers (`001_LLM_API_ROUTER`, `002_LLM_API_MOCK`) for offline test execution.
+
+---
+
+#### 6. Test Suite (`test/`)
+- Comprehensive test suite organized by subsystem matching the backend package lattice: `kernel/`, `agency/`, `runtime/`, `adapters/`, `contracts/`, `governance/`, `security/`, `trust/`, `lab/`, and `benchmarks/`.
+
+---
+
+#### 7. Specifications & Documentation (`docs/`)
+- `main_v4/`: Vanguard v4 Specification Corpus (`VG-00` through `VG-12`, `GTS-13C`).
+- `agile/` & `reviews/done/`: Sprint planning docs, dogfood logs, and architectural decision reviews.
 
 ### CI Architectural Boundary Lattice
 
@@ -220,27 +415,3 @@ python3 -m unittest discover -s test -t .
 | [`05_vanguard_kernel_capabilities_and_security_v040.md`](docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) | Capability attenuation, budget leases, & kernel security | **Fully Aligned** |
 | [`09_vanguard_decision_register_v040.md`](docs/main_v4/09_vanguard_decision_register_v040.md) | Architectural Decision Records (ADRs) | **Fully Aligned** |
 | [`13_C_gts_mvp_program_and_engineering_plan.md`](docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md) | GTS MVP program plan, sprint definitions, & Ch.10 gate questions | **Fully Aligned** |
-
-
-
-
-
-Subatômico (Prótons, Nêutrons e Elétrons): Os tijolos de energia e carga elétrica pura. Sozinhos, não têm química.
-
-Átomos (Carbono, Hidrogênio, Oxigênio...): Quando os prótons e elétrons se juntam, emergem os elementos da tabela periódica. Eles ganham propriedades como "afinidade" ou "repulsão" por outros átomos.
-
-Moléculas (Aminoácidos, Água, Glicose): Átomos se ligam. Um átomo de carbono sozinho não faz nada, mas quando se junta com hidrogênio, nitrogênio e oxigênio na ordem certa, emerge um aminoácido (a célula da sua linha de montagem).
-
-Polímeros - Linear: As moléculas pequenas (monômeros) se ligam em uma fita única e contínua. Aqui emerge a propriedade do dobramento e da forma tridimensional.
-
-Polimero - Proteinas e Enzimas: O polímero se dobra e ganha uma função mecânica ou química. Agora ele é uma ferramenta ativa (a tesoura, o motor, a chave).
-
-Polimero - Genes (DNA / RNA): São polímeros de outro tipo (ácidos nucleicos) que guardam a informação e a ordem exata para a fábrica de proteínas funcionar. O DNA é o "manual de instruções" da fábrica.
-
-Organelas (Mitocôndrias, Ribossomos): São formadas quando membranas de gordura (lipídios) encapsulam grupos de proteínas funcionais para trabalharem juntas. A mitocôndria vira a usina de energia; o ribossomo vira a linha de montagem.
-
-Células: A primeira unidade que consideramos "viva". É o fechamento da fábrica. Uma célula é uma cidade fechada onde bilhões de proteínas (polímeros dobrados) trabalham sem parar, seguindo as ordens do DNA, para manter a estrutura funcionando e se duplicando.
-
-Órgãos (Músculo, Coração): Bilhões de células trabalhando juntas de forma coordenada.
-
-Entity: Um sistema consciente feito de trilhões de nanomáquinas que sequer sabem que você existe, mas que trabalham em perfeita harmonia.

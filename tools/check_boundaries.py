@@ -42,7 +42,21 @@ ALLOWED = {
     # which is what keeps the coding cell a client and not a second ontology.
     "apps": {"domain", "ports", "kernel", "agency", "adapters", "runtime", "governance"},
     "client": {"domain", "runtime"},
+    # MHF Layer-0 lattice (SPEC §1): events ← kernel ← spi ← registry ← scheduler ← compose
+    # Kernel may import generated SPI types (A-4). Plugins (M2+) import spi+events only.
+    "layer0_events": {"layer0_spi"},
+    "layer0_kernel": {"layer0_events", "layer0_spi"},
+    "layer0_spi": set(),
+    "layer0_registry": {"layer0_spi", "layer0_events"},
+    "layer0_scheduler": {"layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry"},
+    "layer0_compose": {
+        "layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry", "layer0_scheduler",
+    },
 }
+
+LAYER0_PACKAGES = (
+    "events", "kernel", "spi", "registry", "scheduler", "compose",
+)
 
 # S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
 # language. Process creation belongs to adapters/sandbox/ alone; this rule is
@@ -84,6 +98,7 @@ def source_files(root: Path) -> list[Path]:
     starts = [
         root / "vanguard" / "packages",
         root / "vanguard" / "clients",
+        root / "layer0",
         root / "benchmarkings",
         root / "spike",
         root / "slice",
@@ -102,6 +117,8 @@ def source_files(root: Path) -> list[Path]:
 def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
     rel = path.resolve().relative_to(root.resolve())
     parts = rel.parts
+    if len(parts) >= 2 and parts[0] == "layer0" and parts[1] in LAYER0_PACKAGES:
+        return f"layer0_{parts[1]}", None
     if parts and parts[0] in {"spike", "slice", "lab", "benchmarkings"}:
         return parts[0], None
     if len(parts) >= 3 and parts[:2] == ("vanguard", "packages"):
@@ -163,6 +180,11 @@ def resolve_relative(source: Path, spec: str) -> Path | None:
 
 
 def area_from_spec(spec: str) -> tuple[str | None, str | None]:
+    if spec == "layer0" or spec.startswith("layer0."):
+        bits = spec.split(".")
+        if len(bits) >= 2 and bits[1] in LAYER0_PACKAGES:
+            return f"layer0_{bits[1]}", None
+        return "layer0", None
     normal = spec.replace("@vanguard/", "vanguard/packages/").replace(".", "/")
     parts = tuple(part for part in normal.split("/") if part)
     for disposable in ("spike", "slice", "lab"):
@@ -229,6 +251,18 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 f"unknown core {kind} {child.name!r}; ICD permits exactly: "
                 + ", ".join(sorted(PACKAGE_NAMES))
             )
+    layer0_root = root / "layer0"
+    if layer0_root.is_dir():
+        for child in sorted(layer0_root.iterdir()):
+            if child.name in LAYER0_PACKAGES or child.name in IGNORED_PARTS:
+                continue
+            if child.name in {"__init__.py", "py.typed"}:
+                continue
+            if child.is_dir():
+                errors.append(
+                    f"unknown layer0 package {child.name!r}; SPEC §1 permits exactly: "
+                    + ", ".join(LAYER0_PACKAGES)
+                )
     files = source_files(root)
     graph: dict[Path, set[Path]] = defaultdict(set)
     for source in files:

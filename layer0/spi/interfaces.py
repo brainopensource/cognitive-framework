@@ -1,0 +1,118 @@
+"""Frozen SPI protocols (SPEC §2.2, ADR-M0-03). Import generated types only."""
+
+from __future__ import annotations
+
+from typing import ClassVar, Mapping, Protocol, Sequence, runtime_checkable
+
+from .result import Result
+from .types_gen import (
+    ClaimRef,
+    CompactionReport,
+    ConsolidationReport,
+    ContextBundle,
+    EffectContext,
+    EffectFailure,
+    EffectRequest,
+    EpisodeOutcome,
+    EpisodeView,
+    EvaluationRequestId,
+    EvaluationSubject,
+    GateDecision,
+    Health,
+    MemoryHit,
+    MemoryId,
+    MemoryQuery,
+    MemoryRecord,
+    OracleSpec,
+    PreregistrationId,
+    Proposal,
+    Receipt,
+    Reflection,
+    Reservation,
+    SignedVerdict,
+    ToolSchema,
+    TrajectoryRef,
+)
+
+__all__ = [
+    "IContextManager",
+    "IEvaluationGate",
+    "IMemoryEngine",
+    "IPlanner",
+    "IToolkit",
+]
+
+
+@runtime_checkable
+class IPlanner(Protocol):
+    """Turn-level cognition. Inner planners emit Proposals."""
+
+    spi_version: ClassVar[str]
+
+    def plan(self, view: EpisodeView, budget: Reservation) -> Result[Proposal]: ...
+
+    def observe(self, receipts: Sequence[Receipt], view: EpisodeView) -> None: ...
+
+    def reflect(
+        self, outcome: EpisodeOutcome, trajectory: TrajectoryRef,
+    ) -> Result[Reflection | None]: ...
+
+
+@runtime_checkable
+class IContextManager(Protocol):
+    """Prefix-stable prompt assembly. L1–L3 frozen at composition."""
+
+    spi_version: ClassVar[str]
+
+    def compile(self, view: EpisodeView, budget_tokens: int) -> Result[ContextBundle]: ...
+
+    def ingest(self, receipts: Sequence[Receipt]) -> None: ...
+
+    def compact(self, pressure: float) -> Result[CompactionReport]: ...
+
+    def reground(self, error: EffectFailure) -> Result[ContextBundle]: ...
+
+
+@runtime_checkable
+class IToolkit(Protocol):
+    """Effect adapters. Toolkits never see grants — only verified, leased work."""
+
+    spi_version: ClassVar[str]
+
+    def verbs(self) -> Mapping[str, ToolSchema]: ...
+
+    def execute(self, request: EffectRequest, ctx: EffectContext) -> Result[Receipt]: ...
+
+    def compensate(self, receipt: Receipt) -> Result[Receipt]: ...
+
+    def health(self) -> Health: ...
+
+
+@runtime_checkable
+class IMemoryEngine(Protocol):
+    """Episodic and semantic memory. Graph is a negotiated capability, not a sixth SPI."""
+
+    spi_version: ClassVar[str]
+
+    def write(self, record: MemoryRecord) -> Result[MemoryId]: ...
+
+    def recall(self, query: MemoryQuery, budget_tokens: int) -> Result[tuple[MemoryHit, ...]]: ...
+
+    def consolidate(self, since: int) -> Result[ConsolidationReport]: ...
+
+    def invalidate(self, claim: ClaimRef, reason: str) -> Result[None]: ...
+
+    def capabilities(self) -> frozenset[str]: ...
+
+
+@runtime_checkable
+class IEvaluationGate(Protocol):
+    """Agent-side evidence plane. Requests judgment; never renders it."""
+
+    spi_version: ClassVar[str]
+
+    def request(self, subject: EvaluationSubject) -> Result[EvaluationRequestId]: ...
+
+    def gate(self, verdicts: Sequence[SignedVerdict]) -> GateDecision: ...
+
+    def preregister(self, oracle: OracleSpec) -> Result[PreregistrationId]: ...

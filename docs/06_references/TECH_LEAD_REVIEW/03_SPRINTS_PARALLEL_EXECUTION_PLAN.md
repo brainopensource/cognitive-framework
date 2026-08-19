@@ -25,7 +25,7 @@ Zero merge conflicts is achieved **structurally**, not by coordination effort:
 | `test/layer0/{events,kernel,scheduler,replay}/**` | **A** | |
 | `test/layer0/{spi,registry,compose}/**`, `test/plugins/**` | **B** | |
 | `.github/workflows/**`, `tools/check_*`, `tools/telemetry/**`, `lab/**` | **A** | |
-| `docs/adr/**`, `docs/annex/**`, `docs/SPEC.md` | **A** (M0), then joint-`handoff` | |
+| `docs/05_adr/**`, `docs/04_annex/**`, `docs/SPEC.md` | **A** (M0), then joint-`handoff` | |
 | `docs/03_sprints/sprint_active.md` | joint | edited at sprint boundaries only |
 | deletions/history rewrite (M0) | **A** executes; B signs the manifest | one force-push window |
 
@@ -39,8 +39,8 @@ Dev B does not idle on deletion work: B front-loads M2 design (schemas review, S
 
 | ID | Task | Acceptance criterion (command / proof) |
 |---|---|---|
-| S-M0-A-01 | Land `docs/adr/` : migrate VG-09 + VG-10 corpus, mint ADR-M0-01…13 per migration matrix | files exist; append-only CI rule active; each ADR names a reversal condition (or explicit "none") |
-| S-M0-A-02 | Land `docs/annex/KERNEL.md` (VG-05 + K-40/F-21a/SA-strike amendments) and `annex/MEASUREMENT.md` (VG-07 §5) | matrix rows 1.8/1.10 checklist signed by B |
+| S-M0-A-01 | Land `docs/05_adr/` : migrate VG-09 + VG-10 corpus, mint ADR-M0-01…13 per migration matrix | files exist; append-only CI rule active; each ADR names a reversal condition (or explicit "none") |
+| S-M0-A-02 | Land `docs/04_annex/KERNEL.md` (VG-05 + K-40/F-21a/SA-strike amendments) and `annex/MEASUREMENT.md` (VG-07 §5) | matrix rows 1.8/1.10 checklist signed by B |
 | S-M0-A-03 | Apply MERGE rows into `docs/SPEC.md` (matrix §§1.4–1.7, 1.9–1.10) | reviewer sign-off per row; RFC-2119 grep gate green |
 | S-M0-A-04 | Delete: `docs/01_specs/{backend,frontend}`, `docs/00_executive`, root THEORY/ASBUILT, generated rule files, `docs/scrum/**` (evidence → blob store manifest) | `find docs -name '*.md' \| wc -l` ≤ 30; `check_markdown_links.py` green |
 | S-M0-A-05 | **History rewrite** (single `git filter-repo` pass): SEC-01 `.env` blob, `lam.sqlite`, `tools/001_*/outputs/`, `runs/**`, sprint-evidence JSONL, `vanguard-gui/`, `vanguard-ide/`, `benchmark_results.json` | `python3 tools/scan_secrets.py --all-refs` PASS; `git count-objects -vH` ≤ 3 MB pack; purge manifest committed and co-signed by B |
@@ -130,7 +130,7 @@ file: docs/03_sprints/sprint_active.md
 title: "Active sprint — v0.5.0 MHF M0: Excise & Sanitize"
 status: ACTIVE
 milestone: M0 (of M0–M6, SPEC §8)
-predecessor: v0.4.5-beta board (v0.6.0 'Molecular Lattice' — SUPERSEDED, see docs/adr/ + 02_ROADMAP §1)
+predecessor: v0.4.5-beta board (v0.6.0 'Molecular Lattice' — SUPERSEDED, see docs/05_adr/ + 02_ROADMAP §1)
 timebox: 8 working days
 branch: feat/mhf-m0-excise
 spec: docs/SPEC.md            # the ONLY normative document
@@ -153,7 +153,7 @@ Legacy TSK rows are closed only with `superseded_by:` pointers (02_ROADMAP §4).
 
 | Lane | Owner | Writes | Does not touch |
 |---|---|---|---|
-| **A — Docs, Purge & CI** | Dev A | docs/adr/** · docs/annex/** · docs/SPEC.md · docs/02_roadmap/** · deletions & history rewrite · .github/workflows/** · tools/check_* | layer0/** · plugins/** · packs/** · schemas/mhf/** |
+| **A — Docs, Purge & CI** | Dev A | docs/05_adr/** · docs/04_annex/** · docs/SPEC.md · docs/02_roadmap/** · deletions & history rewrite · .github/workflows/** · tools/check_* | layer0/** · plugins/** · packs/** · schemas/mhf/** |
 | **B — Skeleton, Schemas & SPI RFC** | Dev B | layer0/** (stubs) · plugins/ · packs/ · schemas/mhf/** · test/layer0/** · pytest migration | docs/** (review only) · CI workflows · anything deleted by A |
 
 **Handoffs:** A's force-push window is day 6, announced 24h ahead; B rebases the skeleton branch

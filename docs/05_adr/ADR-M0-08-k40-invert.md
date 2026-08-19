@@ -6,7 +6,7 @@ status: accepted
 
 # ADR-M0-08: K-40 inverted: evaluator outside the worker perimeter
 
-**Decision.** `docs/annex/KERNEL.md` §6 (perimeter) is amended: the evaluator runs as a
+**Decision.** `docs/04_annex/KERNEL.md` §6 (perimeter) is amended: the evaluator runs as a
 **separate identity (UID 10002) outside** the worker's sandbox perimeter, not co-located inside it
 as `K-40` originally specified. The as-built is stronger than the spec as written.
 

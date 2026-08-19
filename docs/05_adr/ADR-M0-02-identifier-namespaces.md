@@ -7,7 +7,7 @@ status: accepted
 # ADR-M0-02: Identifier namespaces
 
 **Decision.** MHF keeps exactly three identifier namespaces, each with a single owner:
-`I-*` (invariants, owned by `docs/SPEC.md`), `ADR-*` (decisions, owned by `docs/adr/`), and
+`I-*` (invariants, owned by `docs/SPEC.md`), `ADR-*` (decisions, owned by `docs/05_adr/`), and
 `S-M*-{A,B}-*` (sprint tasks, owned by `docs/03_sprints/`). No fourth namespace opens without an ADR.
 
 **Context.** `docs/01_specs/backend/00_vanguard_registry_v040.md` §5 ran a document-precedence

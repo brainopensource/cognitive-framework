@@ -1,7 +1,7 @@
 # SPEC — Vanguard Meta-Harness Framework (MHF v1)
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language
-(MUST/SHALL/SHOULD) is binding here and in `docs/annex/*` only — nowhere else in `docs/`.
+(MUST/SHALL/SHOULD) is binding here and in `docs/04_annex/*` only — nowhere else in `docs/`.
 **Version anchor:** v0.5.0 Foundation Lock (concept lock), `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`.
 **Supersedes:** `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`, README's old biological/tier taxonomy,
 `docs/01_specs/backend/**` (archived, evidence not law, at `docs/archive/v045/`).
@@ -11,7 +11,7 @@ the direct ancestor of this document), `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION
 merge disposition).
 **Design lineage preserved:** S0–S12 dispatch kernel, JCS canonicalisation + golden vectors, exterior
 signed evaluator, harness-as-data manifests, measurement lab.
-**Authority on conflict:** this document, then `docs/adr/` (a newer ADR wins by citation, never by
+**Authority on conflict:** this document, then `docs/05_adr/` (a newer ADR wins by citation, never by
 silent edit), then `docs/02_roadmap/milestones.md` (cannot contradict this document), then
 `docs/03_sprints/sprint_active.md` (execution board only), then `docs/archive/v045/` (evidence, not law
 — no ticket may cite it as a requirement).
@@ -89,7 +89,7 @@ plugins import `spi` + `events` only; Layer 0 never imports a plugin. This is `l
 lattice for M1+; the **current, as-built lattice is seven packages** — `domain, ports, kernel, agency,
 runtime, adapters, apps` (`apps/` was added alongside the original six per `S060-A-10`, registered in
 `tools/check_boundaries.py` with the same reach as `runtime`). Any description of "the hexagon" in this
-document or `docs/annex/` reflects the current seven-package lattice, not the original six-package
+document or `docs/04_annex/` reflects the current seven-package lattice, not the original six-package
 diagram — `layer0/` above is the M1 destination, not the current tree.
 
 ### 1.1 The turn state machine
@@ -105,10 +105,10 @@ observe → propose → authorize → effect → receipt → evaluate → (refle
 registered `IPlanner` may be offered the terminal receipt set. State transitions are pure reducers over
 the ledger (`state = fold(events)`); the engine holds no state a replay cannot reconstruct. *(Handbook
 M1 "the episode is the program" — no workflow engine — is this section's ancestor and is reinforced by
-the REJ on playbook runtimes, `docs/adr/DEFERRED_REJECTED.md` `REJ-01`. VG-03 §2's loop-over-DAG
+the REJ on playbook runtimes, `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`. VG-03 §2's loop-over-DAG
 inversion — "strictly less expressive than a loop that can invoke a loop, at roughly ten times the
 machinery, proof by construction" — is the argument for this shape and is carried here by citation
-rather than restated; see also `docs/adr/DEFERRED_REJECTED.md` `REJ-01`.)*
+rather than restated; see also `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`.)*
 
 **I-11 (new, Foundation Lock).** Phase-1 scheduler is **sequential**. Concurrency (independence groups,
 §1.4) is a later scheduler property, gated on a measurement, never a v0.5.0 feature (honours drift D-38:
@@ -210,7 +210,7 @@ rule).**
 
 The evaluator remains its own identity (UID 10002 daemon) — it is *not* a plugin an agent-side manifest
 can replace; `IEvaluationGate` plugins run agent-side and merely *request* judgment; verdict signing keys
-never enter any plugin cell. See `docs/annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
+never enter any plugin cell. See `docs/04_annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
 
 ### 2.2 SPI definitions (Layer-0 `spi/` package — typed, frozen, versioned)
 
@@ -313,7 +313,7 @@ registry.
 superseded: MHF has exactly **five** frozen SPIs above (`IPlanner`, `IMemoryEngine`, `IToolkit`,
 `IContextManager`, `IEvaluationGate`) plus the first-party `IModelProvider`/`ISandbox`/store ports, which
 are not user-pluggable extension points in the same sense. **A sixth SPI requires a design review, not
-a PR** — see `docs/adr/ADR-M0-03-five-spis.md`.
+a PR** — see `docs/05_adr/ADR-M0-03-five-spis.md`.
 
 ### 2.3 Harness manifest (the compile target)
 
@@ -402,7 +402,7 @@ repair rounds bounded by manifest config. Verification is `IEvaluationGate` agai
 oracles — the agent never grades itself.
 
 **Phase-1 acceptance gate:** the compiled `code-default` harness passes the existing `lab/` dogfood
-triple + `zero_hint_v1` at ≥ the v0.4.5 baseline pass rate under paired McNemar (`docs/annex/MEASUREMENT.md`),
+triple + `zero_hint_v1` at ≥ the v0.4.5 baseline pass rate under paired McNemar (`docs/04_annex/MEASUREMENT.md`),
 with `replay-parity` green and E-COV = 100%.
 
 ---
@@ -522,11 +522,11 @@ section's rationale, merged per matrix §1.10.)
 
 **Standing CI gates from day M1:** `check_boundaries` (extended to plugin imports), `replay-parity`,
 `E-COV`, control-call-site proof (AP-5 rule), secret scan, JCS vector conformance — replacing the
-TCB-LOC and test-count badges (see `docs/adr/ADR-M0-01-control-coverage-discipline.md`).
+TCB-LOC and test-count badges (see `docs/05_adr/ADR-M0-01-control-coverage-discipline.md`).
 
 **This wave's own gates (M0-docs, run now):** `python3 -m unittest test.test_repo_paths`;
 `python3 tools/check_schema_archaeology.py`; `python3 tools/check_stale_paths.py`;
-`python3 tools/check_markdown_links.py`; zero RFC-2119 keywords outside `docs/SPEC.md`/`docs/annex/`;
+`python3 tools/check_markdown_links.py`; zero RFC-2119 keywords outside `docs/SPEC.md`/`docs/04_annex/`;
 `python3 tools/check_boundaries.py`; `python3 tools/check_tcb_budget.py`.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
@@ -582,11 +582,11 @@ See §9 below — restated once, not duplicated.
 ## 9. What This Specification Refuses To Build
 
 Consistent with the audited codebase's own honoured deferrals (merged from the charter's §3 non-claims
-and VG-10's `DEF-*`/`REJ-*` registers, now `docs/adr/DEFERRED_REJECTED.md`):
+and VG-10's `DEF-*`/`REJ-*` registers, now `docs/05_adr/DEFERRED_REJECTED.md`):
 
-- **No self-updating release pipeline** (`SA-1`…`SA-6` stay out — `docs/annex/KERNEL.md` §7, amended by
+- **No self-updating release pipeline** (`SA-1`…`SA-6` stay out — `docs/04_annex/KERNEL.md` §7, amended by
   **ADR-M0-10**'s companion, D-34).
-- **No competence-graph pretence** before the memory plugin ships (D-39; `docs/adr/DEFERRED_REJECTED.md`
+- **No competence-graph pretence** before the memory plugin ships (D-39; `docs/05_adr/DEFERRED_REJECTED.md`
   `DEF-02`).
 - **No parallel fan-out** before independence-group events can be emitted and measured (D-38, Invariant
   I-11).
@@ -605,7 +605,7 @@ and VG-10's `DEF-*`/`REJ-*` registers, now `docs/adr/DEFERRED_REJECTED.md`):
   (`REJ-12`).
 
 Every future capability enters through a plugin manifest, a new event kind with an emitter, and a paired
-measurement (`docs/annex/MEASUREMENT.md`) — or it does not enter.
+measurement (`docs/04_annex/MEASUREMENT.md`) — or it does not enter.
 
 ---
 
@@ -637,6 +637,6 @@ later scheduler property with a measurement gate (honours D-38).
 
 ---
 
-*This specification word count is held near the ≤9k-word target by cross-referencing `docs/annex/` and
-`docs/adr/` rather than restating their content — if a section here starts to restate a schema, that
+*This specification word count is held near the ≤9k-word target by cross-referencing `docs/04_annex/` and
+`docs/05_adr/` rather than restating their content — if a section here starts to restate a schema, that
 content belongs in `docs/reference/` (generated, M1+) instead, not in this file.*

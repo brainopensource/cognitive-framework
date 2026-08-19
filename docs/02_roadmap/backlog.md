@@ -18,10 +18,10 @@ and ports with the kernel.
 | **EPIC-M0-PURGE** — history rewrite: secrets + artifacts + frontend trees | `SEC-01`; `TSK-DOC-003` (`cryptography` in TCB list → ADR) | open — staged in `docs/03_sprints/plans/m0-code-and-purge.md`, **not started** |
 | **EPIC-M1-EVENTS** — taxonomy, emitters, E-COV, envelope `branch_id` | `TSK-LED-001…005, 008` (superseded per governing decision above), `TSK-LED-006/007` (keep: WAL store, inbox port verbatim), `TSK-EVAL-001` (evaluation trigger → ledger listener, closes D-02), `M-18` | open |
 | **EPIC-M1-KERNEL** — verbatim port + provenance carried + six-dim Reservation + one EffectRequest | `TSK-CORE-001…009` (001–004 done/carried — re-verified `docs/SPEC.md` §8.2 2026-08-18; 005–008 become invariant tests; 009 → metric triple), `TSK-EPIC-060-005` | open |
-| **EPIC-M1-CI** — replay-parity, mutation gate, boundaries v2, control-call-site coverage, retargeted rule map | `TSK-TEST-001/002/003` (bijection discipline, `docs/adr/ADR-M0-01-control-coverage-discipline.md`) | open |
+| **EPIC-M1-CI** — replay-parity, mutation gate, boundaries v2, control-call-site coverage, retargeted rule map | `TSK-TEST-001/002/003` (bijection discipline, `docs/05_adr/ADR-M0-01-control-coverage-discipline.md`) | open |
 | **EPIC-M2-REGISTRY** — plugin.yaml schema, resolver, lifecycle FSM, hot-swap | `H-1` | open |
 | **EPIC-M2-ISOLATION** — broker: in_process lint, subprocess RPC + rlimits + seccomp | `TSK-SEC-001` (AT-12 or ADR-defer w/ compensating control — decide in M2), `TSK-SEC-002` (seccomp lands here, not deferred), `TSK-SEC-003/004` (probes: keep) | open |
-| **EPIC-M2-SPI** — five protocols (`docs/adr/ADR-M0-03-five-spis.md`) + `IModelProvider`/`ISandbox`/stores; codegen; 4-protocol wire normalization; walking skeleton (`docs/adr/ADR-M0-13-walking-skeleton.md`); `mhf.model.local-adapter` | `002_doing_advanced-plugin.md` (archived, `docs/archive/v045/reviews/doing/`) | open |
+| **EPIC-M2-SPI** — five protocols (`docs/05_adr/ADR-M0-03-five-spis.md`) + `IModelProvider`/`ISandbox`/stores; codegen; 4-protocol wire normalization; walking skeleton (`docs/05_adr/ADR-M0-13-walking-skeleton.md`); `mhf.model.local-adapter` | `002_doing_advanced-plugin.md` (archived, `docs/archive/v045/reviews/doing/`) | open |
 | **EPIC-M3-PACK** — coding re-extraction (`apps/coding/` → `packs/`), ast-patch, repo-map, terminal, single router, ctx-policy wiring, live greenfield gate | `TSK-EPIC-060-001/002/003`, `TSK-EPIC-070-001`, `TSK-HAR-001…006` (001/002/004 done-carried; 003 grant library keeps; 005 spend auth keeps; 006 schema-driven translator → absorbed by typed SPI), `TSK-CTX-003/004` (keep: compiler + FrozenHarness port), `H-2`, `RT-01`, S28–S34 salvage | open |
 | **EPIC-M4-PARITY** — five packs, TableWorld | `TSK-HAR-007`, `TSK-EPIC-060-004` | open |
 | **EPIC-P2/P3** (named, not planned) — meta-reflector, genome+lab, folding, streaming, LSP, playbook-advisory, memory graph, market allocator | `TSK-EPIC-060-006`, `070-002`, `C-3`, `REC-01` (policy half), deferred rows from review triage | deferred |
@@ -37,7 +37,7 @@ Full disposition — 14 ACCEPTED (Phase 1), 9 DEFERRED (each with a named plugin
 `docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §2), 4 REJECTED/KILLED, 3 CLOSED-carried
 — is preserved verbatim in `docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §2 (that
 document is stamped `SUPERSEDED-BY-SPEC` but kept as the review packet that produced this backlog).
-Every DEFERRED entry lands in `docs/adr/DEFERRED_REJECTED.md` with a reversal condition.
+Every DEFERRED entry lands in `docs/05_adr/DEFERRED_REJECTED.md` with a reversal condition.
 
 `docs/archive/v045/reviews/todo/deepseek_v050_review_and_v060_plan.md` carries mismatched terminology
 (different ALFA/BETA lane phrasing, "ArtifactNode/Edge Merkle-DAG", "Semantic Vector Index" not used

@@ -1,7 +1,7 @@
 # Deferred & Rejected Register (migrated from VG-10)
 
 > Migrated verbatim from `docs/01_specs/backend/10_vanguard_deferred_and_rejected_register_v040.md`
-> per `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.13. Append-only, same as `docs/adr/`.
+> per `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.13. Append-only, same as `docs/05_adr/`.
 > Entries whose subject was killed with the v4 docs corpus (Foundation Lock, M0) are annotated
 > `[MOOT — subject archived M0]` rather than removed.
 

@@ -98,7 +98,7 @@ The only spec whose truth is partially machine-checked (schemas + golden vectors
 - §8 model interface, §9 task/plan/proposal — KILL prose; the shapes are exactly what M1 codegen emits (`spi/types.py`); duplicating them in prose recreates D-29.
 Everything else (naming conventions, wire rules): folded into the codegen tool's docstring.
 
-### 1.8 `05_vanguard_kernel_capabilities_and_security_v040.md` (400 ln) — **KEEP VERBATIM** → `docs/annex/KERNEL.md`
+### 1.8 `05_vanguard_kernel_capabilities_and_security_v040.md` (400 ln) — **KEEP VERBATIM** → `docs/04_annex/KERNEL.md`
 The crown jewel. §2 dispatch sequence + §2.2 ordering rules + §2.3 failure-path table + §2.4 idempotence/replay + §3 grants + §4 attenuation + §5 authority predicate (including §5.2's "two operands, both of which have failed silently") + §6 perimeter ("containment is reported, never asserted") + §8 architecture tests + §9 threat model all survive intact — this is the normative twin of `kernel/dispatch.py`, which M1 ports verbatim.
 **Three amendments only (each an ADR, per audit findings):**
 1. **K-40 inverted** (ADR-M0-08): evaluator at a *separate identity outside* the worker perimeter is the binding text (audit D-32: as-built is stronger than spec; also closes `TSK-SPEC-003`).
@@ -112,7 +112,7 @@ Split along the live/dormant line the audit drew (D-39: types only; SPEC §9 gat
 - **DORMANT, EXTRACT:** §2 four stores, §3 claim pipeline + contradiction, §5 promotion/activation/demotion + anti-ossification, §6 outer loop, §7 substrate invariance → `plugins/mhf.memory.graph/DESIGN.md` (Phase 3, SPEC §6.1) and `plugins/mhf.planner.meta-reflector/DESIGN.md` (Phase 2, SPEC §5). These are *design inputs to plugins*, carrying no normative force until the plugin's activation bundle lands (I-3).
 - §1 governing asymmetry → one paragraph in SPEC §6.1. File deleted.
 
-### 1.10 `07_vanguard_loop_engineering_and_measurement_v040.md` (284 ln) — **REFACTOR & MERGE** → `docs/annex/MEASUREMENT.md`
+### 1.10 `07_vanguard_loop_engineering_and_measurement_v040.md` (284 ln) — **REFACTOR & MERGE** → `docs/04_annex/MEASUREMENT.md`
 §5 measurement doctrine is the lab's constitution and survives nearly whole: paired designs, McNemar's exact test, multiple-comparison policy, the A/A noise floor, arm design, the instrument tuple (§5.6 — which review item M-18 says is still unwired; wiring is task S-M1-A-07), splits & contamination (§5.7). This annex is what makes Phase-2 promotion (SPEC §5.2, gate M5) statistically honest, and it is the direct answer to the audit's antithesis about statistical power — the doctrine already forbids selecting on noise; what's missing is task count, which deliverable 02 schedules.
 - §4 distillation & promotion → MERGE into SPEC §7 (DPO harvest) as rationale.
 - §1 three closure conditions, §2 loop levels, §10 search/process-rewards prep → EXTRACT to Phase-2 plugin design docs.
@@ -124,10 +124,10 @@ A build plan for a phase that shipped (and partially didn't — see the drift re
 - §7 early warnings → folded into ADR-M0-05 risk register.
 `TK-*` ticket namespace retired (also closes `TSK-TEST-003`'s complaint about minting `TK-*` in code).
 
-### 1.12 `09_vanguard_decision_register_v040.md` (203 ln) — **KEEP VERBATIM** → `docs/adr/`
-Append-only ADRs with **reversal conditions** — the document's own header calls this "the single practice most worth carrying forward," and the audit agrees. Migration is mechanical: each entry becomes `docs/adr/00NN-slug.md` preserving original ADR-numbers in front-matter; the append-only/supersede-by-citation rule becomes the `adr/` directory contract. Entries adjudicating between the two pre-v4 lineages (§3) are kept as history. New M0 decisions (ADR-M0-01…09 minted by this matrix) append to the same log.
+### 1.12 `09_vanguard_decision_register_v040.md` (203 ln) — **KEEP VERBATIM** → `docs/05_adr/`
+Append-only ADRs with **reversal conditions** — the document's own header calls this "the single practice most worth carrying forward," and the audit agrees. Migration is mechanical: each entry becomes `docs/05_adr/00NN-slug.md` preserving original ADR-numbers in front-matter; the append-only/supersede-by-citation rule becomes the `adr/` directory contract. Entries adjudicating between the two pre-v4 lineages (§3) are kept as history. New M0 decisions (ADR-M0-01…09 minted by this matrix) append to the same log.
 
-### 1.13 `10_vanguard_deferred_and_rejected_register_v040.md` (67 ln) — **KEEP VERBATIM** → `docs/adr/DEFERRED_REJECTED.md`
+### 1.13 `10_vanguard_deferred_and_rejected_register_v040.md` (67 ln) — **KEEP VERBATIM** → `docs/05_adr/DEFERRED_REJECTED.md`
 The DEF/REJ discipline (every deferral names its reversal condition) is retained wholesale and is load-bearing for triage in deliverable 02: DEF-01 (authoring canvas), DEF-02 (semantic memory), REJ-10 (biological hierarchy in README — already a tracked task, `TSK-DOC-001`) are cited there. One structural change: entries whose subject was killed with the v4 corpus are annotated `[MOOT — subject deleted M0]` rather than removed (append-only holds).
 
 ### 1.14 `11_vanguard_design_convergence_evidence_v040.md` (85 ln) — **KILL**
@@ -149,15 +149,15 @@ T6's "coding harness is the first, **disposable**, point design" is vindicated b
 ## 2. Migration mechanics & acceptance
 
 **Order of operations (inside sprint M0, Dev-A lane — see deliverable 03):**
-1. Mint `docs/adr/` and land ADR-M0-01…13 + migrated VG-09/VG-10 corpus (pure adds — zero conflict surface).
-2. Land `docs/annex/KERNEL.md` (VG-05 + three amendments) and `docs/annex/MEASUREMENT.md` (VG-07 §5).
+1. Mint `docs/05_adr/` and land ADR-M0-01…13 + migrated VG-09/VG-10 corpus (pure adds — zero conflict surface).
+2. Land `docs/04_annex/KERNEL.md` (VG-05 + three amendments) and `docs/04_annex/MEASUREMENT.md` (VG-07 §5).
 3. Apply the SPEC merges (§§1.4–1.7, 1.9–1.10 rows marked MERGE) as one PR against `docs/SPEC.md`.
 4. Delete: `01_specs/` (both trees), `00_executive/`, root THEORY/ASBUILT, `13_C`, generated rule files. Freeze DRIFTS under `adr/`.
 5. Run the history rewrite (couples with SEC-01 secret purge and AP-7 artifact purge — one `git filter-repo` pass, one force-push window, one team re-clone).
 
 **Acceptance (gate G-M0-DOCS):**
 - `find docs -name '*.md' | wc -l` ≤ 30 (from ~120+).
-- Zero RFC-2119 normative keywords outside `docs/SPEC.md` and `docs/annex/*` (grep gate).
+- Zero RFC-2119 normative keywords outside `docs/SPEC.md` and `docs/04_annex/*` (grep gate).
 - `check_markdown_links.py` green; no link into a deleted tree.
 - Every MERGE row above resolves to a named SPEC/annex/ADR section (this matrix is the checklist; reviewer signs each row).
-- ADR log is append-only from this commit forward (CI: `git diff` on `docs/adr/` permits additions and `superseded_by` front-matter edits only).
+- ADR log is append-only from this commit forward (CI: `git diff` on `docs/05_adr/` permits additions and `superseded_by` front-matter edits only).

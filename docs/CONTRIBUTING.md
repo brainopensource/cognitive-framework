@@ -1,7 +1,7 @@
 # Contributing to Vanguard
 
 **Non-normative.** This is onboarding, not law. The normative documents are `docs/SPEC.md`,
-`docs/annex/*`, and `docs/adr/*`. If anything here disagrees with those, they win and this file is
+`docs/04_annex/*`, and `docs/05_adr/*`. If anything here disagrees with those, they win and this file is
 wrong — open a PR fixing this file, don't cite it as a requirement.
 
 Extracted from the archived engineering handbook (`docs/archive/v045/01_specs/backend/01_vanguard_engineering_handbook_v040.md`,
@@ -17,11 +17,11 @@ itself; they are not carried forward.
   `docs/SPEC.md` §1.1 (loop-over-DAG inversion) rejects.
 - **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
   effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
-  logical mediator in the host language is not containment — see `docs/annex/KERNEL.md` §6 before
+  logical mediator in the host language is not containment — see `docs/04_annex/KERNEL.md` §6 before
   writing anything near this.
 - **Content informs, never authorises.** Untrusted content may inform work; it must never authorise a
   capability-widening effect. This has failed silently twice in this project's history (see
-  `docs/annex/KERNEL.md` §5.2) — read that section before touching provenance code.
+  `docs/04_annex/KERNEL.md` §5.2) — read that section before touching provenance code.
 - **The verifier is outside everything.** No cognition or adapter module may import the evaluator gate
   or reason about its internals. If your change needs the evaluator's logic to be visible from agent
   code, the design is wrong, not the import lint.
@@ -49,7 +49,7 @@ Three kinds, and the distinction matters when you're deciding what a new test sh
 
 **Satisfiability check:** before writing a test asserting a property, ask whether the property is
 actually reachable given the test's own setup. A test that can only ever pass (or can only ever be
-vacuously satisfied) is not testing anything — this is how `docs/adr/0028-*.md`'s span-reset defect
+vacuously satisfied) is not testing anything — this is how `docs/05_adr/0028-*.md`'s span-reset defect
 shipped with a green suite.
 
 ## Where things live
@@ -57,5 +57,5 @@ shipped with a green suite.
 Read `docs/SPEC.md` §1 for the target Layer-0 lattice and the current (as-built) seven-package lattice
 (`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/check_boundaries.py`.
 Manifest authoring (harness.yaml, plugin.yaml) is specified in `docs/SPEC.md` §2. Measurement rules
-(paired designs, McNemar, the A/A floor) are in `docs/annex/MEASUREMENT.md` — read it before proposing
+(paired designs, McNemar, the A/A floor) are in `docs/04_annex/MEASUREMENT.md` — read it before proposing
 any A/B claim.

@@ -77,7 +77,7 @@ Frontend wave (**TSK-FE-008/009/030–037/J1–J4**) — **KILLED wholesale** pe
 | `001_doing.md` v0.4.5 harness guide (S28–S34 rows: structured plan, coordinator, progress fingerprints, provider health, resume, CLI receipts, greenfield proof) | **SUPERSEDED — salvage mapped** | Plan/progress/verification → Pack #1 modules (M3); progress fingerprints → `no-progress detection` in planner (M3); provider health → `IModelProvider.health()` (M2 SPI, M3 impl); `--resume RUN_ID` → M1 replay/branch semantics; greenfield proof → Phase-1 acceptance gate (M3, un-mocked `oracle_green` carried from G-050-06); CLI receipts → killed (frontend). |
 | `002_doing_advanced-plugin.md` local-model middleware (MultiActionUnpacker, think-tag stripper, budget middleware, heuristic pre-search) | **ACCEPTED — Phase 1 (M2 design / M3 impl)** | Becomes `mhf.model.local-adapter` — the **first third-party-shaped plugin** and the M2 lifecycle demo payload. Multi-action unpacking = provider-side decomposition into sequential single-effect proposals (preserves one-effect-per-turn at the kernel; the queue lives in the adapter). Think-tag stripping + budget middleware = adapter middleware chain. Heuristic pre-search → merged into repo-map (M3), not duplicated. |
 
-**Triage totals:** 14 ACCEPTED (Phase 1), 9 DEFERRED (each with a named plugin target), 4 REJECTED/KILLED, 3 CLOSED-carried. Every DEFERRED entry lands in `docs/adr/DEFERRED_REJECTED.md` with a reversal condition.
+**Triage totals:** 14 ACCEPTED (Phase 1), 9 DEFERRED (each with a named plugin target), 4 REJECTED/KILLED, 3 CLOSED-carried. Every DEFERRED entry lands in `docs/05_adr/DEFERRED_REJECTED.md` with a reversal condition.
 
 ---
 

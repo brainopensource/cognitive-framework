@@ -21,5 +21,5 @@ every contributor and creating false layering intuitions the actual import latti
 (audit AP-1). Quarantine is not a stable equilibrium for narrative; deletion is. README's taxonomy
 is removed in this same wave (Step 8).
 
-**Reversal condition.** None. The register entry (`REJ-10` in `docs/adr/DEFERRED_REJECTED.md`)
+**Reversal condition.** None. The register entry (`REJ-10` in `docs/05_adr/DEFERRED_REJECTED.md`)
 states plainly that nothing reopens it.

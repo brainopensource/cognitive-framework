@@ -301,7 +301,7 @@ def _live_lab_session(
 
     No `fakeBackend`. Missing keys / unpaid models fail closed as unavailable.
     """
-    from .lab_driver import run_lab_task
+    from ...runtime.lab_driver import run_lab_task
 
     model_port = str(request.get("modelPort") or request.get("model") or "openrouter")
     isolate = not bool(request.get("inPlace") or request.get("in_place"))

@@ -7,7 +7,7 @@ from typing import Any
 
 from vanguard.packages.ports.environment import EnvironmentProfile
 from vanguard.packages.ports.event_store import Result
-from vanguard.packages.runtime.coding_verification import (
+from vanguard.packages.apps.coding.coding_verification import (
     FinalVerifier,
     StepVerifier,
 )

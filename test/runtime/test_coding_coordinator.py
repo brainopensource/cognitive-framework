@@ -4,8 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from vanguard.packages.runtime.coding_coordinator import CodingRunConfig, run_coding_task
-from vanguard.packages.runtime.coding_plan import parse_coding_plan, validate_plan
+from vanguard.packages.apps.coding.coding_coordinator import CodingRunConfig, run_coding_task
+from vanguard.packages.apps.coding.coding_plan import parse_coding_plan, validate_plan
 
 
 def _plan(_brief: str):

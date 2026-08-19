@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from vanguard.packages.runtime.coding_plan import (
+from vanguard.packages.apps.coding.coding_plan import (
     CodingPlanError, StepStatus, parse_coding_plan, ready_steps, transition_step,
     validate_plan,
 )

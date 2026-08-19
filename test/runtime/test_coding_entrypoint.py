@@ -12,7 +12,7 @@ import os
 import unittest
 from pathlib import Path
 
-from vanguard.packages.runtime.coding_entrypoint import (
+from vanguard.packages.apps.coding.coding_entrypoint import (
     EXIT_BUDGET,
     EXIT_INVALID,
     EXIT_NON_GREEN,
@@ -23,7 +23,7 @@ from vanguard.packages.runtime.coding_entrypoint import (
     request_to_config,
     run_entrypoint,
 )
-from vanguard.packages.runtime.coding_coordinator import CodingRunConfig
+from vanguard.packages.apps.coding.coding_coordinator import CodingRunConfig
 
 
 class ExitCodes(unittest.TestCase):
@@ -176,7 +176,10 @@ class FakeBackends(unittest.TestCase):
         self.assertEqual(result["outcome"], "invalid_request")
 
     def test_no_model_routing_loop_in_entrypoint_source(self) -> None:
-        source = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime" / "coding_entrypoint.py"
+        root = Path(__file__).resolve().parents[2] / "vanguard" / "packages"
+        source = root / "apps" / "coding" / "coding_entrypoint.py"
+        if not source.is_file():
+            source = root / "runtime" / "coding_entrypoint.py"
         text = source.read_text(encoding="utf-8")
         for banned in (
             "OpenRouterModel(",

@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import Any, Callable, Mapping
 
-from vanguard.packages.runtime.coding_coordinator import (
+from vanguard.packages.apps.coding.coding_coordinator import (
     CodingRunConfig,
     CodingRunResult,
 )
-from vanguard.packages.runtime.coding_entrypoint import (
+from vanguard.packages.apps.coding.coding_entrypoint import (
     _scripted_adaptive_plan,
     request_to_config,
 )
@@ -30,7 +30,7 @@ def scripted_backend(kind: str) -> Callable[[Mapping[str, Any]], tuple[CodingRun
     """Deterministic backends for CLI/product tests. Not a live spend path."""
 
     def greenfield_adaptive(request: Mapping[str, Any]) -> tuple[CodingRunResult, list[dict[str, Any]]]:
-        from vanguard.packages.runtime.coding_entrypoint import load_band_models
+        from vanguard.packages.apps.coding.coding_entrypoint import load_band_models
 
         config = request_to_config(request)
         assert isinstance(config, CodingRunConfig)

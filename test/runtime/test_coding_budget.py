@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from vanguard.packages.runtime.coding_budget import (
+from vanguard.packages.apps.coding.coding_budget import (
     BudgetController,
     ReservationResult,
 )

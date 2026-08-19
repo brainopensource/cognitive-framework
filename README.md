@@ -2,10 +2,10 @@
 
 > **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
 
-[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.4.5--beta-blue.svg)](docs/scrum/sprints/wave20/evidence/s20-g-03-release-claims.md)
-[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal_plane_separated-green.svg)](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md)
-[![Verification](https://img.shields.io/badge/Tests-488_passed-success.svg)](tools/run_active_contract_tests.py)
-[![TCB Budget](https://img.shields.io/badge/TCB_LOC-1315%2F1438-brightgreen.svg)](tools/check_tcb_budget.py)
+[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.5.0--foundation--lock-blue.svg)](docs/SPEC.md)
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal_seven_package_lattice-green.svg)](docs/SPEC.md#1-layer-0--the-microkernel)
+[![Verification](https://img.shields.io/badge/Tests-tools%2Frun__active__contract__tests.py-success.svg)](tools/run_active_contract_tests.py)
+[![TCB Budget](https://img.shields.io/badge/TCB-tools%2Fcheck__tcb__budget.py-brightgreen.svg)](tools/check_tcb_budget.py)
 
 ---
 
@@ -22,48 +22,25 @@ observe ──▶ propose ──▶ authorize ──▶ effect ──▶ receipt
 
 ---
 
-## 2. Orders of Abstraction & Biological Framework Dictionary
+## 2. Architecture pointer
 
-Vanguard conceptualizes software architecture using a **Biological Hierarchy of Emergent Competence**.
+**Removed (ADR-M0-10, `docs/adr/ADR-M0-10-no-metaphysics.md`).** This section previously described a
+14-tier biological/cosmological taxonomy (LEVEL 0–9, "Protons = Identity, Neutrons = Ledger"). It carried
+zero operational semantics — no invariant, test, or schema referenced a tier — while creating false
+layering intuitions the actual import lattice contradicted. It is deleted, not archived-and-linked: see
+`docs/adr/ADR-M0-10-no-metaphysics.md` for why, and `docs/archive/v045/00_executive/vision.md` if you
+want the historical artifact.
 
-> [!IMPORTANT]
-> **Architectural Invariant (GTS-13C §3.6):** The biological vocabulary is **NOT an OOP class hierarchy** (we do *not* write `class Cell(Polymer)`). It is a conceptual taxonomy and an **emergent telemetry depth** logged in `lam.sqlite`. Build one recursive coordinator, and the biological hierarchy becomes an empirical finding in the ledger.
+The real architecture is `docs/SPEC.md` §0–§2 (design axioms, the Layer-0 microkernel, the plugin/SPI
+model) plus `docs/annex/KERNEL.md` for the dispatch sequence and security model. Start there.
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│ LEVEL 9: ENTITY / AGI SWARM       ──▶ Autonomous Multi-Agent Orchestration & Swarm Topology │
-│ LEVEL 8: ORGANS & SYSTEMS         ──▶ Paired Measurement Lab (`lab harness bench`)          │
-│ LEVEL 7: CELLS                    ──▶ Sandboxed Autonomous Agent Workspace & Lifecycle      │
-│ LEVEL 6: ORGANELLES               ──▶ Exterior Signed Evaluator (UID 10002) & Double Probes │
-│ LEVEL 5: GENES (DNA / RNA)        ──▶ Declarative Manifest Packs (`vg-code-*`, `AGENTS.md`)  │
-│ LEVEL 4: PROTEINS & ENZYMES       ──▶ Context Compactor (L1–L5) & `ProposalTranslator`      │
-│ LEVEL 3: LINEAR POLYMERS          ──▶ `EpisodeEngine` Depth-1 Multi-Turn Recursion Loop     │
-│ LEVEL 2: MOLECULES                ──▶ Attenuation Kernel & Rootless Bubblewrap Sandbox       │
-│ LEVEL 1: ATOMS                    ──▶ Abstract Ports (`ModelPort`) & Single Verbs (`fs.read`)│
-│ LEVEL 0: SUB-ATOMIC PRIMITIVES    ──▶ Canonical Wire Value Objects, Hashes & Ed25519 Keys   │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-```
 
-### Biological Dictionary: From Primitives to Emergent AGI
+## 3. Separation of concerns (historical six-plane mapping; retired as living taxonomy)
 
-| Biological Tier | Biological Analogy | Vanguard Code Component & Realization | Emergent Competence |
-|---|---|---|---|
-| **0. Sub-Atomic** | Protons, Neutrons, Electrons (Pure energy/charge, no chemistry alone) | `domain/wire/contracts.py`: Canonical Value Objects, SHA-256 digests, Ed25519 asymmetric keys, JsonSchema contracts. | **Byte-Level Determinism** |
-| **1. Atoms** | Carbon, Hydrogen, Oxygen (Periodic table elements with valency & affinity) | `ports/`: `ModelPort`, `LedgerPort`, `EvaluatorPort`; Single Verbs (`fs.read`, `fs.search`, `fs.write`, `patch.apply`, `proc.exec`). | **Capability Valency** |
-| **2. Molecules** | Water, Glucose, Amino Acid Monomers (Atoms bound into functional units) | `kernel/dispatch.py`, `adapters/sandbox/rootless.py`: Attenuation Kernel, USD micro-budget leases, rootless Bubblewrap containerization. | **Sandboxed Isolation** |
-| **3. Linear Polymers** | Unfolded Peptide Chains (Sequential monomers linked in series) | `agency/episode/engine.py`: `EpisodeEngine` depth-1 sequential multi-turn recursion (`observe → propose → authorize → effect → receipt → evaluate`). | **Multi-Turn Traceability** |
-| **4. Functional Proteins** | Folded Enzymes & Molecular Motors (Folded polymers with active chemical catalytic function) | `agency/context/compiler.py`, `adapters/models/invocation.py`: L1–L5 Context Compactor, byte-stable system prompts, `ProposalTranslator`. | **Cognitive Pruning & Efficiency** |
-| **5. Genes (DNA / RNA)** | Nucleic Acid Sequence Manuals (Instructions dictating protein assembly) | `agency/manifests/`: Pure-data JSON Manifests (`vg-code-claude-shaped`, `vg-code-opencode-shaped`), `AGENTS.md` / `CLAUDE.md` context discovery. | **Declarative Harness Alignment** |
-| **6. Organelles** | Mitochondria, Ribosomes (Membrane-bound functional cellular machinery) | `adapters/evaluators/daemon.py`: Out-of-process signed Evaluator Daemon (UID `10002`) running sealed double probes. | **Un-gameable Verification** |
-| **7. Cells** | Single-cell Organisms (Self-contained, bounded factory operating continuously under DNA instructions) | `runtime/root.py`, `runtime/coding_coordinator.py`: Autonomous Agent Workspace runtime executing episodes end-to-end. | **Autonomous Problem Solving** |
-| **8. Organs & Systems** | Tissues, Muscular & Nervous Systems (Coordinated specialized cell groups) | `lab/`: Paired Measurement Laboratory (`lab harness bench`), McNemar A/A floor tracking against undeletable `vg-shell-only`. | **Empirical Benchmark Laboratory** |
-| **9. Entity / AGI Swarm** | Conscious Macro-Organism (Harmonious coordination of trillions of specialized nanomachines) | `runtime/governance/`: Multi-Agent Competence Distillation (`O-01`), Cross-Agent Delegation, and Heterogeneous Swarm Orchestration. | **Emergent Machine AGI** |
-
----
-
-## 3. Six-Plane Architectural Blueprint
-
-Vanguard isolates responsibilities into six decoupled planes ([`03_vanguard_architecture_planes_and_execution_model_v040.md`](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md)):
+The six-plane vocabulary below is retired as living architecture — `docs/SPEC.md` speaks Layer-0 / SPI /
+plugin / pack instead (see `docs/adr/ADR-M0-06-plane-mapping-archaeology.md` for the mapping). It is
+kept here only because the separations it named are still real; read `docs/SPEC.md` §0–§2 for the
+current model:
 
 ```text
 Interaction  ──▶ CLI · TUI · Inspector · Web Surface
@@ -100,9 +77,12 @@ Aether-D-System/
 │   ├── evaluator.Dockerfile      # Out-of-process signed evaluator daemon container (UID 10002)
 │   └── manifest.json             # Immutable release build SHA-256 digests
 ├── docs/                         # Normative specifications, architectural roadmaps, & sprint logs
-│   ├── main_v4/                  # Core Vanguard v4 Specification Corpus (VG-00..12, GTS-13C)
-│   ├── agile/                    # Sprint evidence, dogfood run logs, and release gates
-│   └── reviews/done/             # Sprint review summaries & architectural decisions
+│   ├── SPEC.md                   # The ONLY living normative specification (MHF v1 + concept-lock deltas)
+│   ├── annex/                    # KERNEL.md, MEASUREMENT.md — normative, same RFC-2119 force as SPEC.md
+│   ├── adr/                      # Decision log with reversal conditions (append-only)
+│   ├── 02_roadmap/                # milestones.md, backlog.md — version gates, cannot contradict SPEC.md
+│   ├── 03_sprints/                # sprint_active.md (execution board) + plans/ (staged, not active)
+│   └── archive/v045/              # Evidence, not law — pre-lock VG-00..13C corpus, THEORY/ASBUILT/DRIFTS
 ├── lab/                          # Paired Measurement Laboratory framework
 │   ├── bench.py                  # Lab harness bench runner for A/A control & McNemar tests
 │   ├── build.py                  # Environment setup & container preparation for lab tasks
@@ -208,7 +188,7 @@ Aether-D-System/
             │   └── signing.py    # Ed25519 payload signing and cryptographic verifier attestations
             ├── stores/           # Storage implementation backends
             │   ├── event_store.py  # SQLite-backed event store for persistent episode logs
-            │   └── fs_blob.py    # Filesystem-backed binary artifact store
+            │   └── blob_store.py # Filesystem-backed binary artifact store (was fs_blob.py, D-47)
             └── environment/      # Concrete host environment hooks and workspace initialization
 ```
 
@@ -299,8 +279,10 @@ The Python backend enforces hexagonal architecture and unidirectional dependency
 ---
 
 #### 7. Specifications & Documentation (`docs/`)
-- `main_v4/`: Vanguard v4 Specification Corpus (`VG-00` through `VG-12`, `GTS-13C`).
-- `agile/` & `reviews/done/`: Sprint planning docs, dogfood logs, and architectural decision reviews.
+- `SPEC.md`, `annex/`, `adr/`: the living normative documentation set — see §8 below.
+- `02_roadmap/`, `03_sprints/`: version gates and the execution board.
+- `archive/v045/`: the pre-lock VG-00…13C spec corpus, THEORY/ASBUILT/DRIFTS, and old review triage —
+  evidence, not law.
 
 ### CI Architectural Boundary Lattice
 
@@ -398,20 +380,24 @@ python3 tools/scan_secrets.py
 # 5. Run Sprint 6B Gate R9 Production Dogfood (3/3 PASS)
 python3 tools/run_dogfood_r9.py
 
-# 6. Execute Complete Unit Test Suite (488/488 Tests Green)
+# 6. Execute Complete Unit Test Suite
 python3 -m unittest discover -s test -t .
 ```
 
 ---
 
-## 8. Alignment Matrix with `docs/main_v4`
+## 8. Normative documentation
 
-| Specification File | Purpose in Vanguard | Alignment Status |
+**`docs/main_v4/` never existed on this tree and this alignment matrix against it is retired** (it
+described `docs/01_specs/backend/`, since renamed and, as of the v0.5.0 Foundation Lock, archived to
+`docs/archive/v045/01_specs/backend/`). The normative documentation set is now:
+
+| Document | Purpose | Status |
 |---|---|---|
-| [`00_vanguard_registry_v040.md`](docs/main_v4/00_vanguard_registry_v040.md) | Document index, precedence rules (`PR-3`), & terminology | **Fully Aligned** |
-| [`01_vanguard_engineering_handbook_v040.md`](docs/main_v4/01_vanguard_engineering_handbook_v040.md) | Engineering guidelines & architecture standards | **Fully Aligned** |
-| [`02_vanguard_charter_claims_and_non_claims_v040.md`](docs/main_v4/02_vanguard_charter_claims_and_non_claims_v040.md) | Non-claims, separability thesis, & negative result validity | **Fully Aligned** |
-| [`03_vanguard_architecture_planes_and_execution_model_v040.md`](docs/main_v4/03_vanguard_architecture_planes_and_execution_model_v040.md) | Six-plane separation & universal turn lifecycle | **Fully Aligned** |
-| [`05_vanguard_kernel_capabilities_and_security_v040.md`](docs/main_v4/05_vanguard_kernel_capabilities_and_security_v040.md) | Capability attenuation, budget leases, & kernel security | **Fully Aligned** |
-| [`09_vanguard_decision_register_v040.md`](docs/main_v4/09_vanguard_decision_register_v040.md) | Architectural Decision Records (ADRs) | **Fully Aligned** |
-| [`13_C_gts_mvp_program_and_engineering_plan.md`](docs/main_v4/13_C_gts_mvp_program_and_engineering_plan.md) | GTS MVP program plan, sprint definitions, & Ch.10 gate questions | **Fully Aligned** |
+| [`docs/SPEC.md`](docs/SPEC.md) | The **only** living normative specification — design axioms, Layer-0 microkernel, SPI/plugin model, invariants I-1…I-11 | **NORMATIVE** |
+| [`docs/annex/KERNEL.md`](docs/annex/KERNEL.md) | Dispatch sequence, grants, attenuation, provenance, perimeter, threat model | **NORMATIVE** |
+| [`docs/annex/MEASUREMENT.md`](docs/annex/MEASUREMENT.md) | Paired designs, McNemar, A/A floor, instrument tuple | **NORMATIVE** |
+| [`docs/adr/`](docs/adr/) | Decision log with reversal conditions (append-only) | reference |
+| [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md), [`docs/02_roadmap/backlog.md`](docs/02_roadmap/backlog.md) | Version gates and epic map — cannot contradict `docs/SPEC.md` | reference |
+| [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | Execution board only | reference |
+| [`docs/archive/v045/`](docs/archive/v045/) | Evidence, not law — the pre-lock VG-00…13C corpus, THEORY/ASBUILT/DRIFTS | historical |

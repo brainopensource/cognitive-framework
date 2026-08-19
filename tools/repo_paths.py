@@ -124,6 +124,10 @@ def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
     if (root / "docs" / "01_specs" / "backend").exists():
         return root.joinpath("docs", "01_specs", "backend", *parts)
+    # Foundation Lock (v0.5.0 concept lock): docs/01_specs/backend is archived to
+    # docs/archive/v045/01_specs/backend once docs/SPEC.md lands.
+    if (root / "docs" / "archive" / "v045" / "01_specs" / "backend").exists():
+        return root.joinpath("docs", "archive", "v045", "01_specs", "backend", *parts)
     base = CANONICAL["docs_main_v4"] if (root / CANONICAL["docs_main_v4"]).exists() else "docs/v4"
     return root.joinpath(base, *parts)
 

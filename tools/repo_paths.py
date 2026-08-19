@@ -75,6 +75,14 @@ _ROOT_SENTINELS_LEGACY = (
     Path("docs") / "v4",
     Path(".github") / "workflows" / "ci.yml",
 )
+# Foundation Lock (v0.5.0 concept lock): docs/01_specs is archived under
+# docs/archive/v045/ once docs/SPEC.md lands. This sentinel keeps repo_root()
+# resolving after that move without touching the pre-lock sentinels above.
+_ROOT_SENTINELS_SPEC = (
+    Path("tools") / "repo_paths.py",
+    Path("docs") / "SPEC.md",
+    Path(".github") / "workflows" / "ci.yml",
+)
 
 
 def repo_root(start: Path | None = None) -> Path:
@@ -101,6 +109,8 @@ def repo_root(start: Path | None = None) -> Path:
             return candidate
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LEGACY):
             return candidate
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_SPEC):
+            return candidate
     raise FileNotFoundError(
         "cannot locate repository root: expected docs/main_v4 or docs/v4 plus tools/repo_paths.py"
     )
@@ -114,6 +124,10 @@ def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
     if (root / "docs" / "01_specs" / "backend").exists():
         return root.joinpath("docs", "01_specs", "backend", *parts)
+    # Foundation Lock (v0.5.0 concept lock): docs/01_specs/backend is archived to
+    # docs/archive/v045/01_specs/backend once docs/SPEC.md lands.
+    if (root / "docs" / "archive" / "v045" / "01_specs" / "backend").exists():
+        return root.joinpath("docs", "archive", "v045", "01_specs", "backend", *parts)
     base = CANONICAL["docs_main_v4"] if (root / CANONICAL["docs_main_v4"]).exists() else "docs/v4"
     return root.joinpath(base, *parts)
 

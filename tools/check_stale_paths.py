@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -20,14 +21,24 @@ SCAN_GLOBS = (
     "docs/README.md",
     "docs/agile/sprint0/active-mvp-contract.json",
     "docs/agile/sprint0/baseline-manifest.json",
+    "docs/**/*.md",
     "test/test_repo_paths.py",
     "test/contracts/__init__.py",
 )
 
 SKIP_SUFFIXES = {".pyc", ".png", ".jpg", ".svg", ".woff", ".woff2"}
 SKIP_PARTS = {".git", "__pycache__", "node_modules", ".venv"}
+# docs/archive/v045/** is evidence, not law (docs/archive/v045/README.md) — its
+# pre-lock prose still cites the doc-move-era paths this gate exists to reject
+# in *living* docs. Excluding it keeps the gate meaningful without editing history.
+SKIP_DOCS_DIRS = {"archive"}
 # The registry and its unit tests must name obsolete prefixes in order to reject them.
 SKIP_NAMES = {"repo_paths.py", "test_repo_paths.py"}
+# docs/adr/00NN-*.md are the VG-09 decision register migrated verbatim (append-only,
+# docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md §1.12) — some entries quote
+# doc-move-era paths inside historical "Evidence"/"Links" fields. That is archaeology,
+# not a live citation; the ADR-M0-* namespace (new decisions) is not exempted.
+_LEGACY_ADR_NAME = re.compile(r"^\d{4}-")
 
 
 def iter_scan_files(root: Path) -> list[Path]:
@@ -40,7 +51,11 @@ def iter_scan_files(root: Path) -> list[Path]:
                 continue
             if set(path.parts) & SKIP_PARTS:
                 continue
+            if set(path.parts) & SKIP_DOCS_DIRS:
+                continue
             if path.name in SKIP_NAMES:
+                continue
+            if "adr" in path.parts and _LEGACY_ADR_NAME.match(path.name):
                 continue
             files.add(path)
     return sorted(files)

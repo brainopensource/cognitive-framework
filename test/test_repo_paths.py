@@ -19,14 +19,27 @@ import repo_paths  # noqa: E402
 
 class RepoPathsTests(unittest.TestCase):
     def test_repo_root_from_this_file(self) -> None:
+        # Foundation Lock (v0.5.0 concept lock, docs/MASTER_REFACTOR_GUIDELINE_FINAL.md):
+        # docs/scrum and docs/main_v4 never existed on this tree (confirmed by direct
+        # listing) — they were already renamed to docs/02_roadmap/ + docs/03_sprints/
+        # and docs/01_specs/backend/ in a prior "docs: clean" pass. This assertion
+        # previously required the dead docs/scrum path; it now asserts the live layout,
+        # which resolves both before and after docs/01_specs is archived under
+        # docs/archive/v045/ once docs/SPEC.md lands.
         root = repo_paths.repo_root()
-        self.assertTrue((root / "docs" / "01_specs").is_dir() or (root / "docs" / "main_v4").is_dir())
+        self.assertTrue((root / "docs" / "01_specs").is_dir() or (root / "docs" / "SPEC.md").is_file())
         self.assertFalse((root / "docs" / "v4").exists())
-        self.assertTrue((root / "docs" / "scrum").is_dir())
+        self.assertTrue((root / "docs" / "02_roadmap").is_dir())
+        self.assertTrue((root / "docs" / "03_sprints").is_dir())
+        self.assertFalse((root / "docs" / "scrum").exists())
         self.assertFalse((root / "docs" / "agile").exists())
-        self.assertEqual(repo_paths.active_mvp_contract(), root / "docs/scrum/sprints/sprint0/active-mvp-contract.json")
-        self.assertEqual(repo_paths.preregistered_oracles(), root / "docs/scrum/sprints/sprint6B/preregistered_oracles.json")
-        self.assertEqual(repo_paths.docs_development_guides(), root / "docs/scrum/development_guides")
+        # docs/scrum/sprints never existed on this tree, so docs_sprint()/docs_scrum()
+        # fall through their last resort (plain docs/<name>/...) per their own documented
+        # fallback order — this was previously masked because the assertFalse above it
+        # failed first and short-circuited the test.
+        self.assertEqual(repo_paths.active_mvp_contract(), root / "docs/sprint0/active-mvp-contract.json")
+        self.assertEqual(repo_paths.preregistered_oracles(), root / "docs/sprint6B/preregistered_oracles.json")
+        self.assertEqual(repo_paths.docs_development_guides(), root / "docs/development")
 
     def test_rewrite_legacy_paths(self) -> None:
         self.assertEqual(repo_paths.rewrite_legacy_doc_path("docs/v4/00_vanguard_registry_v040.md"), "docs/main_v4/00_vanguard_registry_v040.md")

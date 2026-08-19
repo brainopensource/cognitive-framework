@@ -27,9 +27,11 @@ python3 tools/run_dogfood_r9.py                      # release/dogfood gate
 python3 tools/check_backend_artifacts.py --release   # backend/OCI artifact check
 ```
 
-Note: as of the last full run, the suite is not fully green (failures/errors present, including a known
-stale-path bug in `test/test_repo_paths.py` vs. `docs/agile/sprint0/`) — don't assume a red run is
-necessarily caused by your change; check against a clean baseline first.
+Note: as of the last full run, the suite is not fully green — check against a clean baseline first before
+assuming a red run is caused by your change. The `test/test_repo_paths.py` vs. `docs/agile/sprint0/`
+stale-path bug referenced in earlier revisions of this file was fixed at the v0.5.0 Foundation Lock
+(`docs/MASTER_REFACTOR_GUIDELINE_FINAL.md` Step 0): `tools/repo_paths.py` no longer resolves against the
+dead `docs/scrum`/`docs/main_v4` paths.
 
 ### TypeScript / CLI client (`vanguard/clients/cli`)
 
@@ -79,10 +81,16 @@ Evaluator daemon entry point: `vanguard.packages.adapters.evaluators.daemon:main
 Model access is abstracted behind `ModelPort`, with adapters for OpenRouter (`OPENROUTER_API_KEY`),
 DeepSeek, OpenAI, and local Ollama.
 
-Normative architecture spec corpus lives in `docs/main_v4/` (files `00`–`13_C`, referenced as VG-00..12 /
-GTS-13C in commit messages and docs) — read the relevant `0N_...md` there before making architectural
-decisions, not just the README. Sprint/process docs are under `docs/scrum/`; roadmap/review docs under
-`docs/reviews/{doing,done}/`.
+**Normative documentation (v0.5.0 Foundation Lock, `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`):**
+`docs/SPEC.md` is the **only** living normative specification, with `docs/annex/KERNEL.md` and
+`docs/annex/MEASUREMENT.md` carrying the same RFC-2119 force for the dispatch/security and measurement
+domains respectively. `docs/adr/` holds the decision log (append-only, reversal conditions). Read
+`docs/SPEC.md` before making architectural decisions, not just the README. `docs/02_roadmap/` holds
+version gates and the epic map; `docs/03_sprints/sprint_active.md` is the execution board. The pre-lock
+VG-00…13C corpus (previously referenced here as `docs/main_v4/`, which never actually existed on this
+tree — it was `docs/01_specs/backend/`) is archived, evidence-not-law, at `docs/archive/v045/`; commit
+messages and older docs citing VG-00..12 / GTS-13C refer to files now under
+`docs/archive/v045/01_specs/backend/`.
 
 ## CI gates
 

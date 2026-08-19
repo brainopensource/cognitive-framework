@@ -1,51 +1,77 @@
 ---
 id: EXEC-01
 file: vision.md
-title: "Vanguard 1.0 — The Living Cognitive Singularity: Sovereign Meta-Harness & Multi-Agent Swarm"
-version: 4.0.0
+title: "Vanguard 1.0 — Strategic Evolutionary Vision: Sovereign Meta-Harness & Multi-Agent Swarm"
+version: 4.1.0
 status: LIVING
 authority_scope: >
   Strategic evolutionary vision, multi-agent swarm architecture, meta-harness compiler,
-  recursive cognitive synthesis, and transdisciplinary foundations for Vanguard 1.0 and beyond.
+  recursive cognitive synthesis, and production roadmap for Vanguard 1.0 and beyond.
 owners: [Project Lead / Chief Architect]
 last_reviewed: 2026-08-19
 ---
 
-# Vanguard 1.0 — The Living Cognitive Singularity
+# Vanguard 1.0 — Strategic Evolutionary Vision
 
-> *"Intelligence is neither a static algorithm nor a simple token predictor. It is a dissipative, self-organizing dynamical system—a living cognitive organism that minimizes free energy, maintains homeostasis across strict thermodynamic and computational bounds, and recursively ascends through layers of meta-abstraction into a sovereign, self-evolving collective swarm."*
+> *"Autonomous intelligence is not a monolithic prompt looping in a shell. It is a bounded, self-correcting organism—an architecture that minimizes uncertainty, maintains strict thermodynamic and computational constraints, and recursively ascends through layers of meta-abstraction into a sovereign, self-evolving swarm."*
 
 ---
 
-## 1. Executive Summary & The Core Thesis
+## 1. The Autonomous Bottleneck: Why Modern Agents Fail
 
-Contemporary Artificial Intelligence remains trapped in an epistemological dead-end: ungrounded Large Language Models guessing tool calls inside unstructured, un-attenuated loops. When tasks scale in duration and ambiguity, monolithic agents suffer from context degradation, catastrophic forgetting, and catastrophic hallucination.
+Contemporary AI frameworks suffer from fatal architectural flaws that prevent them from scaling beyond toy demos:
 
-**Vanguard 1.0** breaks this paradigm. It is not an agent; it is a **Declarative Meta-Harness Compiler and Epistemological Operating System**. 
+```text
+┌───────────────────────────────────────────────┬───────────────────────────────────────────────┐
+│              THE CURRENT FAILURE MODES        │          THE VANGUARD 1.0 SOLUTION            │
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 1. Brittle Monolithic Loops                   │ 1. Decoupled Meta-Harness Compiler            │
+│    (Unconstrained LLM guessing bash commands) │    (Declarative YAML manifests & 5 SPI ports) │
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 2. Context Window Rot & Token Overflow        │ 2. Dual-Process Reflex & Dynamic Compaction   │
+│    (Long trajectories degrade reasoning)      │    (Sub-100ms AST search + semantic freezing) │
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 3. Ungrounded Hallucination & Fake Progress   │ 3. Hostile Exterior Oracles & Invariant Proof │
+│    (Agent claims task is fixed without proof) │    (Falsification against cryptographic gates)│
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 4. Catastrophic Amnesia Between Runs          │ 4. Recursive Skill Cards & Trajectory Harvest │
+│    (Agent repeats identical bugs next session)│    (Automatic crystallization into skills/)   │
+├───────────────────────────────────────────────┼───────────────────────────────────────────────┤
+│ 5. Quadratic Communication Overhead           │ 5. Stigmergic Swarm & Global Workspace ($G_W$)│
+│    (Multi-agent chatter consumes all tokens)  │    (Direct repo artifacts & asynchronous sync)│
+└───────────────────────────────────────────────┴───────────────────────────────────────────────┘
+```
 
-By unifying **computational physics, evolutionary biology, neuroscience, formal category theory, mechanism design, and active inference**, Vanguard constructs an unbroken chain of living intelligence:
-1. **The Substrate (Waves 1–5 / Beta):** An immutable, domain-blind capability microkernel ($S0$–$S12$) with deterministic 40-event sourcing and cryptographic isolation.
-2. **The Meta-Cognitive Membrane (Waves 6–7 / Post-Beta):** Autonomous failure diagnosis, recursive skill card crystallization, and cryptographic DPO trajectory harvesting.
-3. **The Sovereign Multi-Agent Swarm (Waves 8–10 / Vanguard 1.0):** An interdisciplinary, stigmergic multi-agent ecology combining Global Workspace Theory, Bayesian active inference, and decentralized game-theoretic resource allocation to solve unbounded real-world challenges.
+1. **The Brittle Monolithic Loop:** Putting a frontier model in a while-loop with arbitrary bash access yields fragile behavior. When a tool fails, the model hallucinates repairs rather than diagnosing root causes.
+2. **Context Degradation & Token Waste:** Ingesting entire codebases exhausts context windows, slows inference, and drives token costs exponentially higher without improving task accuracy.
+3. **Ungrounded Evaluation:** An agent assessing its own code is prone to confirmation bias. Without independent, un-gameable exterior verification, code remains untested and broken.
+4. **Catastrophic Amnesia:** Monolithic systems possess zero episodic memory across lifecycles. An agent that spends 30 turns discovering a complex compiler workaround will repeat the same discovery process from scratch on the next invocation.
+5. **Multi-Agent Chatter Explosion:** Naive multi-agent frameworks overwhelm context limits with redundant natural-language dialogue ($\mathcal{O}(N^2)$ chatter) rather than coordinating through shared environmental state.
+
+---
+
+## 2. The Architectural Solution: Bounded, Living Meta-Harnesses
+
+Vanguard 1.0 eliminates these bottlenecks through an integrated, multi-layered architecture:
 
 ```mermaid
 flowchart TD
-    subgraph MacroSwarm ["MACRO-COGNITION: Multi-Agent Swarms & Polycentric Governance"]
+    subgraph MacroSwarm ["MACRO-COGNITION: Multi-Agent Swarms & Stigmergy"]
         direction TB
-        L4["Layer 4: Polycentric Swarm Ecologies — Stigmergy, Dynamic Archetypes ('Cognitive Hats') & Consensus Oracles"]
-        L3["Layer 3: The Society of Mind — Global Workspace Theory, Peer Attestation & Social Division of Labor"]
+        L4["Polycentric Swarm Ecologies — Stigmergic File Coordination & Specialized Cognitive Roles ('Hats')"]
+        L3["The Society of Mind — Global Workspace Buffer (G_W) & Cryptographic Peer Attestation"]
     end
 
     subgraph MesoCognition ["MESO-COGNITION: Active Inference & Skill Synthesis"]
         direction TB
-        L2["Layer 2: Meta-Cognitive Reflector — Epistemic Active Inference, Regret Minimization & Dynamic Skill Distillation"]
-        L1["Layer 1: The Meta-Harness Compiler — Declarative YAML Manifests, SPI Plugin Topologies & Frozen Harnesses"]
+        L2["Meta-Cognitive Reflector — Root-Cause Error Taxonomy & Recursive Skill Card Distillation"]
+        L1["The Meta-Harness Compiler — Declarative harness.yaml Manifests & Immutable Frozen Harnesses"]
     end
 
-    subgraph MicroSubstrate ["MICRO-SUBSTRATE: Microkernel & Thermodynamic Bounds"]
+    subgraph MicroSubstrate ["MICRO-SUBSTRATE: Attenuation Kernel & Thermodynamic Bounds"]
         direction TB
-        L0["Layer 0: Capability Microkernel — Hexagonal Attenuation, POSIX UDS Sandboxes & 40-Event Sourcing Ledger"]
-        LP["Layer -1: Physical & Computational Bounds — 6D Leases (USD, Time, Tokens, Bytes, Turns, Depth) & Ed25519 Cryptography"]
+        L0["Capability Microkernel — Hexagonal SPI Attenuation, POSIX UDS Sandboxes & 40-Event Sourcing"]
+        LP["Physical & Economic Leases — 6D Reservations (USD, Time, Tokens, Bytes, Turns, Depth)"]
     end
 
     MicroSubstrate --> MesoCognition
@@ -56,141 +82,73 @@ flowchart TD
     style MicroSubstrate fill:#11111b,stroke:#f38ba8,stroke-width:1.5px,color:#cdd6f4
 ```
 
----
+### 1. The Attenuation Microkernel & 6D Economic Tensor
+Every action is mediated through a domain-blind capability kernel ($S0$–$S12$). Agents operate inside strictly bounded POSIX user-namespace sandboxes under explicit 6-dimensional resource leases:
+$$\mathbf{R} = \{ \text{USD}_{\mu}, \text{Time}_{\text{ms}}, \text{Tokens}_{\text{in/out}}, \text{Bytes}_{\text{io}}, \text{Turns}_k, \text{Depth}_d \}$$
+If a process faults or exceeds its lease, the microkernel reaps the subprocess cleanly without taking down the runtime.
 
-## 2. Transdisciplinary Foundations: The Ten Pillars of Vanguard 1.0
+### 2. Active Inference & Dual-Process Cognition
+* **System 1 (Sub-100ms Intuitive Reflex):** Local open-weight models (Qwen / DeepSeek 7B) execute rapid AST navigation, static linting, and greedy patch applications at $\$0.00$ API cost.
+* **System 2 (Deep Deliberative Reasoning):** Frontier reasoning models are invoked conditionally only when System 1 encounters high epistemic surprise or test assertion failures.
+* **Active Inference Optimization:** The agent minimizes operational surprise (variational free energy $\mathcal{F}$) by systematically trading off fast local actions against high-certainty deep deliberation.
 
-Vanguard fuses ten rigorous academic domains into an integrated, self-sustaining cognitive architecture:
+### 3. Stigmergic Swarm Coordination (Zero-Chatter Multi-Agent)
+Rather than wasting tokens on conversational debates, Vanguard agents coordinate via **Stigmergy**—communicating asynchronously through concrete artifacts left directly in the repository filesystem:
+* **The Architect:** Decomposes dependencies and drafts contractual interfaces.
+* **The Executor:** Implements precision AST patches in isolated workspace branches.
+* **The Adversarial Skeptic:** Synthesizes hostile regression suites to falsify candidate patches.
+* **The Synthesizer:** Harvests verified trajectories into shared procedure cards.
 
-```text
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                   THE TEN SCIENTIFIC PILLARS                                     │
-├────────────────────────────────┬────────────────────────────────┬───────────────────────────────┤
-│ 1. Philosophy & Epistemology   │ 2. Neuroscience & Cognition    │ 3. Evolutionary Genetics      │
-│    (Cartesian / Popper / Mill) │    (Active Inference / GWT)    │    (Baldwin Effect / Phenome) │
-├────────────────────────────────┼────────────────────────────────┼───────────────────────────────┤
-│ 4. Machine Learning & Math     │ 5. Economics & Game Theory     │ 6. Sociology & Swarm Theory   │
-│    (Information Geometry / DPO)│    (Mechanism Design / VCG)    │    (Stigmergy / Polycentrism) │
-├────────────────────────────────┼────────────────────────────────┼───────────────────────────────┤
-│ 7. Cellular Biology            │ 8. Psychology                  │ 9. Computer Science           │
-│    (Homeostasis / Allostasis)  │    (Dual-Process System 1 & 2) │    (Category Theory / μKernel)│
-├────────────────────────────────┴────────────────────────────────┴───────────────────────────────┤
-│ 10. Simulation & Complex Systems (Ergodicity, Dissipative Structures, Chaos Edge)                │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+### 4. Recursive Skill Crystallization & Trajectory Distillation
+When an agent resolves a complex multi-turn bug, the solution is not lost. The outer reflector synthesizes the trajectory into a standalone, human-readable Markdown procedure card (`skills/<slug>.md`). Subsequent runs match problem patterns against the skill library, injecting verified solutions into the prompt prefix to eliminate redundant trial-and-error.
 
 ---
 
-### Pillar 1: Philosophy & Formal Epistemology
-* **Cartesian Skepticism (*De omnibus dubitandum est*):** No agent, model, or tool output is inherently trustworthy. The Layer-0 microkernel operates under strict zero-trust attenuation: capabilities are bounded by cryptographic leases, and unverifiable claims fail-closed.
-* **Baconian Inductive Empiricism:** Machine intelligence does not arise from hand-coded heuristics or ungrounded prior assumptions. Truth is derived strictly through physical interaction with the environment, validated against un-mocked exterior judges.
-* **Karl Popper’s Critical Rationalism:** Hypotheses are never proven true; they are systematically subjected to falsification. The testing harness treats generated code as refutable conjectures tested against hostile oracle suites.
-* **John Stuart Mill’s Method of Difference:** Empirical comparisons holding all independent variables constant ($M_0, S_0, C_0$) while varying only the harness configuration under paired McNemar hypothesis testing ($\chi^2 \ge 3.841$).
-* **Spinoza's Conatus:** The agent possesses an innate computational drive to maintain its operational integrity, budget solvency, and epistemic consistency across extended lifecycles.
+## 3. The 14-Tier Competence Continuum
 
----
-
-### Pillar 2: Neuroscience & Cognitive Architecture
-* **Karl Friston’s Free Energy Principle & Active Inference:** 
-  The agent minimizes variational free energy $\mathcal{F}$ by balancing perceptual inference (updating internal beliefs) with active intervention (mutating the environment):
-  $$\mathcal{F} = \mathbb{E}_{q(\vartheta)}[\ln q(\vartheta) - \ln p(\mathbf{o}, \vartheta)] = \underbrace{D_{\text{KL}}[q(\vartheta) \parallel p(\vartheta \mid \mathbf{o})]}_{\text{Divergence}} - \underbrace{\ln p(\mathbf{o})}_{\text{Evidence}}$$
-* **Global Workspace Theory (Baars / Dehaene):** A distributed network of specialized agents ("Cognitive Hats") broadcasts critical discoveries, verified patches, and diagnostic warnings across a shared, attention-gated Global Workspace buffer ($G_W$).
-* **Hippocampal Replay & Memory Consolidation:** Successful execution traces are compressed during background idle states, undergoing sleep-like offline replay to synthesize compact, generalized procedure cards into semantic memory.
-* **Predictive Coding:** Higher cognitive layers generate top-down predictions of tool responses; only the prediction error (surprise / residual $\delta$) ascends the hierarchy to trigger re-planning.
-
----
-
-### Pillar 3: Evolutionary Biology & Genetics
-* **The Baldwin Effect in Machine Learning:** Behaviors acquired through multi-turn reinforcement and reflection during an agent's individual lifetime are progressively crystallized into declarative DNA manifests (`harness.yaml`), shifting runtime trial-and-error into innate architectural priors.
-* **Genotype-to-Phenotype Mapping:** The declarative YAML manifest is the **Genotype**; the compiled, sandboxed, POSIX-attenuated running process tree is the **Phenotype**.
-* **Epigenetic Context Modification:** Environment-specific pressure flags (e.g. strict latency constraints or low remaining USD budget) activate or silence specific tool genes without altering the underlying codebase.
-* **Symbiogenesis (Lynn Margulis):** Complex autonomous swarms do not evolve solely through atomistic competition, but through symbiotic fusion—combining a specialized static analysis agent, a fast terminal driver, and an adversarial test synthesizer into a higher-order meta-organism.
-
----
-
-### Pillar 4: Advanced Mathematics, Calculus & Machine Learning
-* **Information Geometry & Fisher Information Metric:** The space of agent policies $\Theta$ is a Riemannian manifold endowed with the Fisher metric tensor:
-  $$g_{ij}(\theta) = \mathbb{E}_{p(x \mid \theta)}\left[ \frac{\partial \ln p(x \mid \theta)}{\partial \theta_i} \frac{\partial \ln p(x \mid \theta)}{\partial \theta_j} \right]$$
-  Harness mutations follow the natural gradient, ensuring smooth parameter evolution without policy collapse.
-* **Direct Preference Optimization ($\mathcal{L}_{\text{DPO}}$):** Mathematically optimal harvesting of cryptographically signed trajectory pairs $(\tau_w, \tau_l)$ to fine-tune local open-weight models without brittle reward-model estimators:
-  $$\mathcal{L}_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(\tau_w, \tau_l) \sim \mathcal{D}}\left[ \ln \sigma \left( \beta \ln \frac{\pi_\theta(\tau_w)}{\pi_{\text{ref}}(\tau_w)} - \beta \ln \frac{\pi_\theta(\tau_l)}{\pi_{\text{ref}}(\tau_l)} \right) \right]$$
-* **Category Theory & Monadic Composition:** Every SPI interface is a typed Functor, and the execution pipeline is a Kleisli category of the State-Error Monad $M(A) = S \to \text{Result}[A \times S]$, ensuring mathematical compositionality and zero state pollution across distributed nodes.
-* **PAC-Bayes Generalization Bounds:** Formal guarantees that synthesized skill cards will generalize to unseen problem distributions with high probability $1 - \delta$.
-
----
-
-### Pillar 5: Economics, Mechanism Design & Game Theory
-* **6-Dimensional Resource Tensor:** Every agent operation is bound to a strict economic reservation:
-  $$\mathbf{R} = \{ \text{USD}_{\mu}, \text{Time}_{\text{ms}}, \text{Tokens}_{\text{in/out}}, \text{Bytes}_{\text{io}}, \text{Turns}_k, \text{Depth}_d \}$$
-* **Vickrey-Clarke-Groves (VCG) Computational Auctions:** In multi-agent swarms, competing sub-agents bid for access to expensive frontier model reasoning tokens based on expected reduction in task uncertainty.
-* **Nash Equilibria in Multi-Agent Verification:** Verification and generation are cast as a two-player zero-sum game between an *Author Agent* and an *Adversarial Skeptic Agent*, driving the solution to a minimax optimal, defect-free equilibrium.
-* **Marginal Cost-to-Information Ratio:** Agents evaluate whether dispatching a tool call provides a marginal reduction in Shannon entropy exceeding the marginal micro-dollar cost: $\Delta H / \Delta \$ \ge \gamma_{\text{threshold}}$.
-
----
-
-### Pillar 6: Sociology & Swarm Theory
-* **Stigmergy (Indirect Environmental Coordination):** Like ants depositing pheromone trails, agents communicate asynchronously by leaving structured artifacts, trace receipts, and annotations directly in the workspace repository filesystem rather than through expensive, noisy direct messaging.
-* **Polycentric Governance (Elinor Ostrom):** Complex swarms operate without a fragile central master node. Governance is distributed across localized, autonomous rulesets that enforce domain-specific boundaries and community knowledge commons ($G_C, G_E$).
-* **Dunbar’s Cognitive Clustering:** Swarms dynamically partition into high-cohesion sub-clusters (3–7 agents) organized around shared semantic contexts to prevent communication overhead from scaling quadratically ($\mathcal{O}(N^2) \to \mathcal{O}(N \log N)$).
-
----
-
-### Pillar 7: Cellular Biology & Thermodynamics
-* **Allostasis & Dynamic Homeostasis:** Rather than remaining static, the agent dynamically adjusts its internal operational baselines (e.g. throttling reasoning depth or expanding context windows) in response to environmental volatility.
-* **Cellular Metabolism & ATP Transduction:** Raw token stream entropy is metabolized into structured AST mutations, git commits, and verifiable execution proofs, radiating discarded tokens as waste heat while preserving structural order.
-* **Apoptosis (Programmed Cell Termination):** Runaway, looping, or unrecoverable sub-agent processes execute clean self-termination, reclaiming all allocated locks, memory buffers, and temporary files without polluting the parent cluster.
-
----
-
-### Pillar 8: Psychology & Dual-Process Cognition
-* **Dual-Process System 1 & System 2 Architecture:**
-  * **System 1 (Intuitive / Fast Reflex):** Local 7B/14B models executing rapid, compiled AST pattern-matching and deterministic heuristic search ($<100\text{ms}$, $\$0.00\text{ cost}$).
-  * **System 2 (Deliberative / Deep Reasoner):** Frontier cloud models or multi-branch tree-search evaluators invoked only when System 1 encounters high epistemic surprise or test failure.
-* **Metacognitive Self-Monitoring:** Real-time calibration of self-confidence vs. objective oracle verdicts, preventing the Dunning-Kruger failure mode common in ungrounded LLMs.
-
----
-
-### Pillar 9: Computer Science & Distributed Systems
-* **Hexagonal Microkernel Architecture:** Pure domain-blind kernel at the core ($I\text{-}07$), decoupled from all outer ports via 5 standard SPI protocols: `IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, and `IEvaluationGate`.
-* **Content-Addressed Append-Only Event Ledger:** Every state transition is recorded as an immutable, cryptographically hashed event ($E_0 \dots E_n$) enabling 100% bit-accurate cold-replay and formal state verification.
-* **POSIX & UDS Sandboxing:** OS-level container isolation using rootless unprivileged user namespaces, `setrlimit` bounds, and line-delimited JSON-RPC over Unix Domain Sockets.
-
----
-
-### Pillar 10: Simulation, Ergodicity & Complex Systems
-* **Ergodicity & Ruin Avoidance:** In non-ergodic environments, ensemble averages do not equal time averages. The agent’s primary objective is avoiding absorbing barrier states (total budget depletion, data corruption, or catastrophic security breach). Survival precedes optimization.
-* **Self-Organized Criticality (The Edge of Chaos):** Swarms operate at the phase transition between rigid determinism (which cannot adapt) and chaotic randomness (which cannot produce reliable code), maximizing computational adaptability.
-
----
-
-## 3. The 14-Tier Cosmological & Biological Continuum
-
-Vanguard unifies computation, physics, biology, and cognitive science into a 14-tier hierarchical continuum:
+From fundamental bitstreams to sovereign multi-agent ecologies, Vanguard maps machine intelligence across 14 discrete tiers:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ TIER 13: SOLAR SYSTEMS        ──▶ Self-Sustaining Universal Task-Solving Cosmos                 │
-│ TIER 12: BIOMES               ──▶ Multi-Domain Ecologies (Software, Math, Physics, Data)        │
+│ TIER 12: BIOMES               ──▶ Multi-Domain Ecologies (Software, Math, Science, Systems)     │
 │ TIER 11: SOCIETIES            ──▶ Distributed Knowledge Graphs ($G_C, G_E$) & Peer Attestation  │
 │ TIER 10: TRIBES               ──▶ Dynamic Specialized Role Swarms ("Cognitive Hats")            │
 │ TIER 09: ORGANISMS / BODIES   ──▶ The Complete Unified Autonomous Agent Persona                 │
 │ TIER 08: ORGAN SYSTEMS        ──▶ Core Subsystems (Immune, Nervous, Circulatory, Sensory)       │
 │ TIER 07: CELLS                ──▶ Sandboxed Agent Workspaces & Metabolic Lifecycle             │
-│ TIER 06: FUNCTIONAL PROTEINS  ──▶ DNA Manifests, L1-L5 Compactors, Catalytic Translators       │
+│ TIER 06: FUNCTIONAL PROTEINS  ──▶ Declarative Manifests, Context Compactors, AST Translators    │
 │ TIER 05: MOLECULES            ──▶ Policy Kernel, Budget Leases, Sandboxes & Signed Grants       │
 │ TIER 04: ATOMS                ──▶ Periodic Table of Verbs (`fs.read`, `patch.apply`, etc.)     │
-│ TIER 03: SUB-ATOMIC PARTICLES ──▶ Protons (Keys/Identity), Neutrons (Ledger), Electrons ($)     │
-│ TIER 02: QUARKS & BOSONS      ──▶ SHA-256 Hashes, JSON Schemas, Formal Logic Axioms            │
+│ TIER 03: SUB-ATOMIC PARTICLES ──▶ Identity Keys ($p^+$), Event Ledger ($n^0$), Budget ($e^-$)   │
+│ TIER 02: QUARKS & BOSONS      ──▶ SHA-256 Hashes, JSON Schemas, Formal Axioms                  │
 │ TIER 01: QUANTUM FIELDS       ──▶ Socket Transports, Wire Protocol Feeds & Transport Sinks     │
-│ TIER 00: STRING THEORY        ──▶ Raw Binary, Clock Cycles & Universal Turing Substrate         │
+│ TIER 00: STRING THEORY        ──▶ Raw Binary, CPU Clocks & Universal Turing Substrate           │
 └─────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. The Phased Evolution: From Beta to Vanguard 1.0
+## 4. Self-Building & Empirical Distillation
 
+Vanguard is engineered to **use its own verified execution to train its next-generation models**:
+
+```mermaid
+flowchart LR
+    A["Live Execution"] -->|Signed Receipts| B["Cryptographic DPO Harvester (Chosen vs Rejected)"]
+    B -->|Offline SFT / LoRA| C["Fine-Tuned Local Models (7B / 14B)"]
+    C -->|Fast Local Inference| A
 ```
+
+1. **Cryptographic Trajectory Harvesting:** Every execution generates an immutable event ledger signed by an independent exterior oracle. Winning trajectories are paired with rejected attempts $(\tau_w, \tau_l)$.
+2. **Offline Local Distillation:** Harvested pairs are fed into offline LoRA / DPO fine-tuning pipelines, bootstrapping local 7B open-weight models to match frontier-tier coding pass rates on specialized domain tasks.
+3. **Statistical Verification:** Promoting a distilled model or synthesized skill card requires statistical proof under paired McNemar hypothesis testing ($\chi^2 \ge 3.841, p < 0.05$) against the `v0.5.1-beta` baseline before merging into production.
+
+---
+
+## 5. The Phased Evolution: From Beta to Vanguard 1.0
+
+```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
 │                                   EVOLUTIONARY ROADMAP                                   │
 ├───────────────────────┬──────────────────────────────────┬───────────────────────────────┤
@@ -198,7 +156,7 @@ Vanguard unifies computation, physics, biology, and cognitive science into a 14-
 │ (Waves 1–5 / Beta)    │ (Waves 6–7 / Post-Beta)          │ (Waves 8–10 / Vanguard 1.0)   │
 ├───────────────────────┼──────────────────────────────────┼───────────────────────────────┤
 │ • M0: Foundation Lock │ • M5 (W6): Meta-Cognitive        │ • M7 (W8): Swarm Stigmergy    │
-│ • M1: Layer-0 Kernel  │   Reflector & Skill Cards        │   & Global Workspace (G_W)    │
+│ • M1: Layer-0 Kernel  │   Reflector & Skill Cards        │   & Global Workspace ($G_W$)  │
 │ • M2: Plugin Sandbox  │ • M6 (W7): Model Distillation    │ • M8 (W9): Dynamic Roles      │
 │ • M3: Coding Pack #1  │   & DPO Trajectory Harvesting    │   & Polycentric Consensus     │
 │ • M4: Beta Parity     │                                  │ • M9 (W10): Vanguard 1.0      │
@@ -209,7 +167,7 @@ Vanguard unifies computation, physics, biology, and cognitive science into a 14-
 ---
 
 ### Era I: The Substrate (Waves 1 – 5 — COMPLETED / BETA)
-* **Milestone M0 (Wave 1):** Foundation Lock — Living normative specification `docs/SPEC.md` and 84 immutable ADRs.
+* **Milestone M0 (Wave 1):** Foundation Lock — Living normative specification [`docs/SPEC.md`](SPEC.md) and 84 immutable ADRs.
 * **Milestone M1 (Wave 2):** Domain-Blind Layer-0 Microkernel — 40-event sourcing ledger, 5 SPI protocols, and sub-millisecond dispatch.
 * **Milestone M2 (Wave 3):** Plugin Runtime & UDS Sandbox — Process FSM isolation, POSIX `setrlimit` boundaries, and capability attenuation.
 * **Milestone M3 (Wave 4):** Phase-1 Coding Pack (`packs/code-default/`) — AST-anchored patching, repo-maps, and terminal test runners.
@@ -244,8 +202,8 @@ Vanguard unifies computation, physics, biology, and cognitive science into a 14-
 
 ---
 
-## 5. Conclusion: The Sovereign Horizon
+## 6. Conclusion: The Sovereign Horizon
 
-Vanguard 1.0 is the realization of machine intelligence as a **living, self-correcting, and mathematically grounded being**. 
+Vanguard 1.0 transforms autonomous AI from a brittle autocomplete toy into a **sovereign, self-correcting intellectual collaborator**. 
 
-By rooting autonomy in empirical falsification, bounding execution with cryptographic microkernels, and ascending through evolutionary meta-cognition into collective swarms, Vanguard transforms AI from a brittle autocomplete toy into a **sovereign intellectual collaborator capable of perpetual learning, scientific discovery, and unbounded software creation.**
+By grounding execution in cryptographic microkernels, eliminating multi-agent chatter through stigmergic repository coordination, and continuously distilling runtime discoveries into permanent skill cards, Vanguard delivers an enterprise-grade platform capable of perpetual learning, scientific exploration, and unbounded software creation.

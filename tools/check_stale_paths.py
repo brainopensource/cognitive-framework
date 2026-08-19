@@ -20,12 +20,17 @@ SCAN_GLOBS = (
     "docs/README.md",
     "docs/agile/sprint0/active-mvp-contract.json",
     "docs/agile/sprint0/baseline-manifest.json",
+    "docs/**/*.md",
     "test/test_repo_paths.py",
     "test/contracts/__init__.py",
 )
 
 SKIP_SUFFIXES = {".pyc", ".png", ".jpg", ".svg", ".woff", ".woff2"}
 SKIP_PARTS = {".git", "__pycache__", "node_modules", ".venv"}
+# docs/archive/v045/** is evidence, not law (docs/archive/v045/README.md) — its
+# pre-lock prose still cites the doc-move-era paths this gate exists to reject
+# in *living* docs. Excluding it keeps the gate meaningful without editing history.
+SKIP_DOCS_DIRS = {"archive"}
 # The registry and its unit tests must name obsolete prefixes in order to reject them.
 SKIP_NAMES = {"repo_paths.py", "test_repo_paths.py"}
 
@@ -39,6 +44,8 @@ def iter_scan_files(root: Path) -> list[Path]:
             if path.suffix.lower() in SKIP_SUFFIXES:
                 continue
             if set(path.parts) & SKIP_PARTS:
+                continue
+            if set(path.parts) & SKIP_DOCS_DIRS:
                 continue
             if path.name in SKIP_NAMES:
                 continue

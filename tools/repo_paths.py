@@ -75,6 +75,14 @@ _ROOT_SENTINELS_LEGACY = (
     Path("docs") / "v4",
     Path(".github") / "workflows" / "ci.yml",
 )
+# Foundation Lock (v0.5.0 concept lock): docs/01_specs is archived under
+# docs/archive/v045/ once docs/SPEC.md lands. This sentinel keeps repo_root()
+# resolving after that move without touching the pre-lock sentinels above.
+_ROOT_SENTINELS_SPEC = (
+    Path("tools") / "repo_paths.py",
+    Path("docs") / "SPEC.md",
+    Path(".github") / "workflows" / "ci.yml",
+)
 
 
 def repo_root(start: Path | None = None) -> Path:
@@ -100,6 +108,8 @@ def repo_root(start: Path | None = None) -> Path:
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_ALT):
             return candidate
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_LEGACY):
+            return candidate
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_SPEC):
             return candidate
     raise FileNotFoundError(
         "cannot locate repository root: expected docs/main_v4 or docs/v4 plus tools/repo_paths.py"

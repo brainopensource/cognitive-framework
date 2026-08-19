@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-from dataclasses import dataclass
 
 from layer0.events.canonical import digest_of
 from layer0.events.emitter import LedgerEmitter
@@ -35,11 +34,6 @@ class TurnClock:
     def tick(self) -> int:
         self.turn += 1
         return self.turn
-
-
-@dataclass(frozen=True, slots=True)
-class _Cancel:
-    cancelled: bool = False
 
 
 class SequentialTurnDriver:

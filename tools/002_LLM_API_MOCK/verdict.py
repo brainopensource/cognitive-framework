@@ -22,6 +22,15 @@ def load_provider_secret(root: Path) -> tuple[str | None, str]:
     return None, "missing"
 
 
+def ollama_model(**kwargs: Any) -> Any:
+    """Construct the native Ollama chat port behind the lab-only seam."""
+    from vanguard.packages.adapters.models.ollama import OllamaModel
+
+    kwargs.setdefault("endpoint", "http://127.0.0.1:11434/api/chat")
+    kwargs.setdefault("timeout_seconds", 300.0)
+    return OllamaModel(**kwargs)
+
+
 def openrouter_model(**kwargs: Any) -> Any:
     """Construct the provider port behind the lab-only measurement seam."""
     from vanguard.packages.adapters.models.openrouter import OpenRouterModel

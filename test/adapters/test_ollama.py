@@ -37,6 +37,29 @@ class OllamaModelContract(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertTrue(result.error.retryable)
 
+    def test_native_chat_options_include_num_ctx(self) -> None:
+        captured: dict[str, object] = {}
+
+        def transport(endpoint: str, body: bytes) -> tuple[int, bytes]:
+            captured["endpoint"] = endpoint
+            captured["body"] = json.loads(body.decode("utf-8"))
+            payload = {
+                "model": "qwen2.5-coder:7b",
+                "message": {"content": "", "tool_calls": []},
+            }
+            return 200, json.dumps(payload).encode()
+
+        model = OllamaModel(
+            model="qwen2.5-coder:7b",
+            endpoint="http://127.0.0.1:11434/api/chat",
+            transport=transport,
+        )
+        model.propose(CONTEXT, TOOLS, {"maxTokens": 2048})
+        self.assertEqual(captured["endpoint"], "http://127.0.0.1:11434/api/chat")
+        options = captured["body"]["options"]
+        self.assertEqual(options["num_ctx"], 4096)
+        self.assertEqual(options["num_predict"], 2048)
+
 
 if __name__ == "__main__":
     unittest.main()

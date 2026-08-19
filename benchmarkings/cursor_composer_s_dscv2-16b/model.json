@@ -1,0 +1,7 @@
+{
+  "label": "cursor_composer_s_dscv2-16b",
+  "provider": "ollama",
+  "model": "deepseek-coder-v2:16b",
+  "sampling": {"temperature": 0.0, "maxTokens": 2048},
+  "treatment": "model_route"
+}

@@ -159,7 +159,7 @@ class ScriptedOperator:
     def propose(self, context, tools, sampling):
         self.contexts.append(dict(context))
         turn, self._turn = self._turn, self._turn + 1
-        resource = {"kind": "fs", "root": str(self.repo), "paths": [str(self.repo)]}
+        resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
         script = [
             {"kind": "effect", "action": "fs.read", "resource": resource,
              "args": {"path": "calc.py"},

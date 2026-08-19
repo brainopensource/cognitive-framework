@@ -65,7 +65,9 @@ class ProposalTranslator:
             return Result.fail(checked.error.kind, checked.error.message)
 
         text = proposal.get("text", "")
-        calls = proposal.get("toolCalls", [])
+        calls = list(proposal.get("toolCalls", []) or [])
+        if not calls:
+            calls = _lift_text_tool_calls(text)
         if not calls:
             return Result.success({"kind": "finish", "note": text or "Task completed."})
         if len(calls) != 1:
@@ -143,15 +145,10 @@ class ProposalTranslator:
                 f"{name!r} is an alias; no manifest was supplied to resolve it")
 
         raw_args = call.get("arguments", {})
-        if isinstance(raw_args, str):
-            try:
-                args = json.loads(raw_args)
-            except json.JSONDecodeError:
-                return Result.fail("instrument_error", "malformed JSON arguments")
-        else:
-            args = raw_args
-        if not isinstance(args, Mapping):
-            return Result.fail("instrument_error", "tool arguments must be an object")
+        args = _coerce_tool_arguments(raw_args)
+        if args is None:
+            kind = type(raw_args).__name__
+            return Result.fail("instrument_error", f"tool arguments must be an object, got {kind}")
         args = dict(args)
 
         try:
@@ -286,8 +283,87 @@ def _workspace_relative(path: str, root: str) -> Result[str]:
 _CANONICAL_VERB = re.compile(r"^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$")
 
 
+def _coerce_tool_arguments(raw: Any) -> Mapping[str, Any] | None:
+    """Accept objects or JSON strings; unwrap double-encoded JSON once or twice."""
+    value: Any = {} if raw is None else raw
+    for _ in range(3):
+        if isinstance(value, Mapping):
+            return value
+        if not isinstance(value, str):
+            return None
+        text = value.strip()
+        if not text:
+            return {}
+        try:
+            value = json.loads(text)
+        except json.JSONDecodeError:
+            return None
+    return value if isinstance(value, Mapping) else None
+
+
 def _is_canonical_verb(name: str) -> bool:
     return bool(_CANONICAL_VERB.match(name))
+
+
+def _lift_text_tool_calls(text: str) -> list[dict[str, Any]]:
+    """Recover a single tool call from model text when `toolCalls` is empty.
+
+    Local models often emit Markdown/JSON tool blocks instead of provider
+    function-calling. The kernel still admits only one effect per turn.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return []
+    found: list[dict[str, Any]] = []
+    for match in re.finditer(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL):
+        parsed = _tool_object_from_json(match.group(1))
+        if parsed is not None:
+            found.append(parsed)
+    if not found:
+        decoder = json.JSONDecoder()
+        idx = 0
+        while idx < len(text):
+            start = text.find("{", idx)
+            if start < 0:
+                break
+            try:
+                obj, end = decoder.raw_decode(text, start)
+            except json.JSONDecodeError:
+                idx = start + 1
+                continue
+            idx = end
+            parsed = _tool_object_from_mapping(obj) if isinstance(obj, Mapping) else None
+            if parsed is not None:
+                found.append(parsed)
+    return found[:1]
+
+
+def _tool_object_from_json(raw: str) -> dict[str, Any] | None:
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    return _tool_object_from_mapping(obj) if isinstance(obj, Mapping) else None
+
+
+def _tool_object_from_mapping(obj: Mapping[str, Any]) -> dict[str, Any] | None:
+    name = obj.get("name") or obj.get("verb")
+    if not isinstance(name, str) or not name:
+        return None
+    # Plain JSON in a finish note is not a tool unless it names a verb or
+    # carries tool-call arguments. This keeps F-09's translator conservative.
+    has_call_shape = "arguments" in obj or "args" in obj or "verb" in obj
+    if not has_call_shape and not _is_canonical_verb(name):
+        return None
+    if "arguments" in obj:
+        arguments = obj.get("arguments")
+    elif "args" in obj:
+        arguments = obj.get("args")
+    else:
+        arguments = {key: value for key, value in obj.items()
+                     if key not in {"name", "verb", "id", "arguments", "args"}}
+    if arguments is None:
+        arguments = {}
+    return {"name": name, "arguments": arguments}
 
 
 def _declared_properties(args_schema: Any) -> frozenset[str]:
@@ -358,12 +434,14 @@ def _bind_resource(selector: Any, args: MutableMapping[str, Any],
         if not path.ok:
             return path
         args["path"] = path.value
-        bound["path"] = path.value
+        relative = path.value
+        # Selector algebra admits only kind/root/paths. Extra keys (path,
+        # pattern) make the request unparsable, which the classifier treats
+        # as widening — and F-09 then denies after any untrusted receipt.
+        bound["paths"] = [root if relative in {".", ""} else f"{root.rstrip('/')}/{relative}"]
         pattern = args.get("pattern")
-        if isinstance(pattern, str):
-            if "\x00" in pattern:
-                return Result.fail("instrument_error", "pattern contains NUL")
-            bound["pattern"] = pattern
+        if isinstance(pattern, str) and "\x00" in pattern:
+            return Result.fail("instrument_error", "pattern contains NUL")
         return Result.success(bound)
 
     argv = args.get("argv")

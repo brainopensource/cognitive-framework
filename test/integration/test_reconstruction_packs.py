@@ -173,7 +173,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         )
 
     def test_vg_code_default_cassette(self) -> None:
-        resource = {"kind": "fs", "root": str(self.repo), "paths": [str(self.repo)]}
+        resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
         script = [
             {
                 "kind": "effect",
@@ -197,7 +197,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
 
     def test_vg_code_claude_shaped_cassette(self) -> None:
         # Uses Claude Code dialect: Read, Edit, Bash
-        resource = {"kind": "fs", "root": str(self.repo), "paths": [str(self.repo)]}
+        resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
         script = [
             {
                 "kind": "effect",
@@ -221,7 +221,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
 
     def test_vg_code_opencode_shaped_cassette(self) -> None:
         # Uses OpenCode dialect: view_file, edit_file, run_command
-        resource = {"kind": "fs", "root": str(self.repo), "paths": [str(self.repo)]}
+        resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
         script = [
             {
                 "kind": "effect",
@@ -245,7 +245,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
 
     def test_vg_code_swe_mini_cassette(self) -> None:
         # Uses SWE mini dialect: read_file, edit_file, bash
-        resource = {"kind": "fs", "root": str(self.repo), "paths": [str(self.repo)]}
+        resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
         script = [
             {
                 "kind": "effect",

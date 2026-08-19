@@ -1,4 +1,4 @@
-# Vanguard General Task Solver (GTS)
+# AETHER PROJECT - SUBSTRATE UPDATE General Task Solver (GTS)
 
 > **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
 

@@ -17,7 +17,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from vanguard.packages.adapters.stores.ledger_jsonl import import_jsonl
-from vanguard.packages.domain.ledger.coding_session import project_coding_session
+from vanguard.packages.apps.coding.coding_session import project_coding_session
 
 
 def main() -> int:

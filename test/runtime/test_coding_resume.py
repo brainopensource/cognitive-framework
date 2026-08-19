@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from vanguard.packages.runtime.coding_coordinator import (
+from vanguard.packages.apps.coding.coding_coordinator import (
     CodingRunConfig, CodingRunCoordinator, resume_coding_task,
 )
 from test.runtime.test_coding_coordinator import _Result, _plan

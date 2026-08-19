@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from vanguard.packages.runtime.coding_progress import (
+from vanguard.packages.apps.coding.coding_progress import (
     EscalationAction,
     ProgressAnalyzer,
     ProgressSignals,

@@ -21,7 +21,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from tools.project_v0450_coding_run import archive_run
-from vanguard.packages.runtime.coding_entrypoint import (
+from vanguard.packages.apps.coding.coding_entrypoint import (
     exit_code_for,
     load_band_models,
     run_entrypoint,

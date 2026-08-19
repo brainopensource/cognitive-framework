@@ -140,13 +140,16 @@ python3 tools/rule_test_map.py; echo $?
 
 ### Lane ALFA
 
-#### S060-A-10 — Move `coding_*` out of `runtime/` `[TODO] ❌` → `TSK-EPIC-060-001` · G-060-01
+#### S060-A-10 — Move `coding_*` out of `runtime/` `[DONE] ✅` → `TSK-EPIC-060-001` · G-060-01
 
-Target: `vanguard/packages/apps/coding/` (new). `domain/ledger/coding_session.py` moves up with it. Coordinator remains an **episode scheduler**, not a dispatcher.
+Target: `vanguard/packages/apps/coding/` (new). `domain/ledger/coding_session.py` moved up with it. Coordinator remains an **episode scheduler**, not a dispatcher.
+
+`apps` registered as a 7th ICD package in `tools/check_boundaries.py` (`ALLOWED["apps"]` mirrors `runtime`'s reach; nothing else may import `apps` back). Moved: `coding_budget.py`, `coding_coordinator.py`, `coding_entrypoint.py`, `coding_plan.py`, `coding_progress.py`, `coding_verification.py`, `domain/ledger/coding_session.py`. `domain/ledger/__init__.py` no longer exports `project_coding_session` (M11: domain stays coding-agnostic). All `test/runtime/test_coding_*.py`, `test/contracts/test_coding_session.py`, `test/fixtures/coding_scripted_backends.py`, `tools/run_v0450_greenfield_campaign.py`, `tools/export_coding_session.py` re-pointed at the new module paths. New `test/apps/coding/test_apps_coding_location.py` proof.
 
 ```bash
-rg "coding_" vanguard/packages/runtime --glob '*.py'
-python3 tools/check_boundaries.py
+rg "coding_" vanguard/packages/runtime --glob '*.py'   # only mock_coding_tape.py (test scaffolding, not moved)
+python3 tools/check_boundaries.py                       # BOUNDARY PASS: 247 source files checked
+python3 -m unittest discover -s test -t .                # 1044 tests, OK
 ```
 
 **Blocked on Wave 0.**

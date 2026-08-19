@@ -12,7 +12,7 @@ from vanguard.packages.domain.artifacts.skill_index import (
     format_skill_index,
     parse_skill_card,
 )
-from vanguard.packages.domain.ledger.coding_session import project_coding_session
+from vanguard.packages.apps.coding.coding_session import project_coding_session
 from vanguard.packages.domain.ledger.events import parse_event_envelope
 
 

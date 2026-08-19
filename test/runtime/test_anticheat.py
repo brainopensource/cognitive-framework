@@ -222,7 +222,7 @@ class AutonomousGrantAndOracleAntiCheat(unittest.TestCase):
     """S32 anti-cheat: ensure agent cannot fake an oracle pass, write in benchmark, or escape bounds."""
 
     def test_trivial_exit_zero_agent_proc_cannot_authorize_green(self) -> None:
-        from vanguard.packages.runtime.coding_verification import FinalVerifier
+        from vanguard.packages.apps.coding.coding_verification import FinalVerifier
         # Verify that without the exterior oracle passing, oracle_green is false
         verifier = FinalVerifier(None)
         receipt = verifier.verify_final("t1", ["python3", "-c", "import sys; sys.exit(0)"])

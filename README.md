@@ -400,4 +400,3 @@ described `docs/01_specs/backend/`, since renamed and, as of the v0.5.0 Foundati
 | [`docs/adr/`](docs/adr/) | Decision log with reversal conditions (append-only) | reference |
 | [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md), [`docs/02_roadmap/backlog.md`](docs/02_roadmap/backlog.md) | Version gates and epic map — cannot contradict `docs/SPEC.md` | reference |
 | [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | Execution board only | reference |
-| [`docs/archive/v045/`](docs/archive/v045/) | Evidence, not law — the pre-lock VG-00…13C corpus, THEORY/ASBUILT/DRIFTS | historical |

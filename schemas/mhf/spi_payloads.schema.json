@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/spi_payloads.schema.json",
+  "$comment": "Typed SPI payload values. No Mapping[str, Any] in layer0/spi (AP-3).",
+  "title": "SpiPayloads",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "EpisodeView": {
+      "title": "EpisodeView",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "episode_id", "turn", "goal"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "episode_id": { "type": "string" },
+        "turn": { "type": "integer", "minimum": 0 },
+        "goal": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "EpisodeOutcome": {
+      "title": "EpisodeOutcome",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["completed", "aborted", "budget_exhausted", "denied"]
+        },
+        "detail": { "type": "string" }
+      }
+    },
+    "TrajectoryRef": {
+      "title": "TrajectoryRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest"],
+      "properties": {
+        "digest": { "type": "string" },
+        "schema": { "type": "string", "const": "mhf.trajectory/1" }
+      }
+    },
+    "Reflection": {
+      "title": "Reflection",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" }
+      }
+    },
+    "MemoryId": {
+      "title": "MemoryId",
+      "type": "string",
+      "minLength": 1
+    },
+    "MemoryRecord": {
+      "title": "MemoryRecord",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "text"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["episodic", "semantic"] },
+        "text": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "MemoryQuery": {
+      "title": "MemoryQuery",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" },
+        "kind": { "type": ["string", "null"] },
+        "limit": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "MemoryHit": {
+      "title": "MemoryHit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text", "score"],
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "score": { "type": "number" }
+      }
+    },
+    "ConsolidationReport": {
+      "title": "ConsolidationReport",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["merged", "dropped"],
+      "properties": {
+        "merged": { "type": "integer", "minimum": 0 },
+        "dropped": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "ClaimRef": {
+      "title": "ClaimRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_id"],
+      "properties": {
+        "claim_id": { "type": "string" }
+      }
+    },
+    "ToolSchema": {
+      "title": "ToolSchema",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verb", "schema"],
+      "properties": {
+        "verb": { "type": "string" },
+        "schema": { "type": "object" }
+      }
+    },
+    "Health": {
+      "title": "Health",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "detail": { "type": "string" }
+      }
+    },
+    "ContextBundle": {
+      "title": "ContextBundle",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prefix", "suffix"],
+      "properties": {
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" },
+        "token_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "CompactionReport": {
+      "title": "CompactionReport",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["removed_tokens"],
+      "properties": {
+        "removed_tokens": { "type": "integer", "minimum": 0 },
+        "strategy": { "type": "string" }
+      }
+    },
+    "EffectFailure": {
+      "title": "EffectFailure",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verb", "detail"],
+      "properties": {
+        "verb": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+    "EvaluationSubject": {
+      "title": "EvaluationSubject",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "episode_id"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "episode_id": { "type": "string" },
+        "artifact_digest": { "type": ["string", "null"] }
+      }
+    },
+    "EvaluationRequestId": {
+      "title": "EvaluationRequestId",
+      "type": "string",
+      "minLength": 1
+    },
+    "SignedVerdict": {
+      "title": "SignedVerdict",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "signature"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["pass", "fail", "inconclusive"] },
+        "signature": { "type": "string" },
+        "subject_digest": { "type": "string" }
+      }
+    },
+    "GateDecision": {
+      "title": "GateDecision",
+      "type": "string",
+      "enum": ["PASS", "RETRY", "ESCALATE", "ABANDON"]
+    },
+    "OracleSpec": {
+      "title": "OracleSpec",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "digest": { "type": "string" }
+      }
+    },
+    "PreregistrationId": {
+      "title": "PreregistrationId",
+      "type": "string",
+      "minLength": 1
+    },
+    "EffectContext": {
+      "title": "EffectContext",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["principal", "run_id"],
+      "properties": {
+        "principal": { "type": "string" },
+        "run_id": { "type": "string" },
+        "episode_id": { "type": "string" },
+        "depth": { "type": "integer", "minimum": 0 },
+        "parent_lease": { "type": ["string", "null"] },
+        "idempotency_key": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

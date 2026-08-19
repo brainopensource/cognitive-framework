@@ -21,9 +21,27 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from tools.project_v0450_coding_run import archive_run
+from tools.simple_yaml import load as load_yaml
+from layer0.compose.compiler import compose
 
 # apps/coding was retired into packs/code-default (M3). Campaign live arms
 # bind the compiled pack; these helpers remain for dry-run validation.
+
+
+def compile_pack(pack: str) -> dict[str, Any]:
+    """Compile packs/<pack>/harness.yaml through layer0/compose (H-1 fail-fast)."""
+    pack_root = _ROOT / "packs" / pack
+    harness = load_yaml((pack_root / "harness.yaml").read_text(encoding="utf-8"))
+    catalog = load_yaml((pack_root / "plugin.yaml").read_text(encoding="utf-8"))
+    plugins: dict[str, dict[str, Any]] = {}
+    for rel in (catalog.get("plugins") if isinstance(catalog, dict) else []) or []:
+        plugin_path = pack_root / str(rel)
+        plugin = load_yaml(plugin_path.read_text(encoding="utf-8"))
+        if isinstance(plugin, dict) and plugin.get("id"):
+            plugins[str(plugin["id"])] = plugin
+    known = {ident: ident for ident in plugins}
+    frozen = compose(harness, known_plugins=known)
+    return {"pack": pack, "harness_digest": frozen.digest, "plugin_count": len(plugins)}
 
 
 def load_band_models(band: str, *, registry: object | None = None) -> tuple[str, ...]:
@@ -38,9 +56,20 @@ def exit_code_for(code: int) -> int:
 
 
 def run_entrypoint(request: dict[str, Any], writer: Any = None) -> int:
-    _ = request
+    """Dry-run stub: apps/coding was retired into packs/ (M3); live arms bind
+    the compiled pack, but this path only produces the campaign's dry
+    validation result, not an executed episode."""
     if writer is not None:
-        writer.write("apps/coding retired; dry campaign uses pack compose\n")
+        writer.write(json.dumps({
+            "type": "result",
+            "result": {
+                "runId": request.get("runId"),
+                "outcome": "dry-run-not-executed",
+                "spentUsdMicros": 0,
+                "planDigest": None,
+                "modelRoutes": [],
+            },
+        }) + "\n")
     return 0
 
 ARMS: dict[str, dict[str, Any]] = {
@@ -78,6 +107,9 @@ def _sanitize_command(argv: list[str]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="S34 greenfield campaign runner")
     parser.add_argument("--task-dir", default="lab/tasks/greenfield-v0450-webapp")
+    parser.add_argument("--pack", default=None,
+                        help="Pack name under packs/ to compile via layer0/compose and bind "
+                             "the campaign to (e.g. code-default)")
     parser.add_argument("--arms", nargs="+", default=["adaptive"], choices=sorted(ARMS))
     parser.add_argument("--trials", type=int, default=3)
     parser.add_argument("--budget-usd-micros", type=int, default=50_000,
@@ -85,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--live", action="store_true",
                         help="Call a real ModelPort through HarnessSession; no fakeBackend")
     parser.add_argument("--evidence-root",
-                        default="docs/scrum/sprints/sprint34/evidence")
+                        default="docs/03_sprints/evidence/greenfield")
     args = parser.parse_args(argv)
 
     if args.trials < 1 or args.trials > 3:
@@ -101,6 +133,12 @@ def main(argv: list[str] | None = None) -> int:
     evidence_root = Path(args.evidence_root)
     evidence_root.mkdir(parents=True, exist_ok=True)
 
+    pack_meta: dict[str, Any] | None = None
+    if args.pack:
+        pack_meta = compile_pack(args.pack)
+        print(f"pack {args.pack}: compiled ok, digest={pack_meta['harness_digest']}",
+              file=sys.stderr)
+
     spent = 0
     rows: list[dict[str, Any]] = []
     for arm_name in args.arms:
@@ -114,6 +152,8 @@ def main(argv: list[str] | None = None) -> int:
             run_id = f"{arm_name}-t{trial}-{uuid.uuid4().hex[:8]}"
             request = {
                 "command": "code",
+                "pack": args.pack,
+                "packHarnessDigest": pack_meta["harness_digest"] if pack_meta else None,
                 "workspace": str(task_dir),
                 "brief": "TASK.md",
                 "runId": run_id,
@@ -190,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"# {run_id}\n\n"
                     f"- arm: {arm_name}\n"
                     f"- outcome: {result.get('outcome')}\n"
-                    f"- exit: {code} (mapped {exit_code_for(str(result.get('outcome')))})\n"
+                    f"- exit: {code} (mapped {exit_code_for(code)})\n"
                     f"- spentUsdMicros: {cost}\n"
                     f"- fake: {None if args.live else arm['fakeBackend']}\n"
                     f"- live: {args.live}\n"
@@ -208,6 +248,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps({
         "campaign": "v0450-greenfield",
+        "pack": pack_meta,
         "live": args.live,
         "ceilingUsdMicros": args.budget_usd_micros,
         "aggregateSpentUsdMicros": spent,

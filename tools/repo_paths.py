@@ -181,6 +181,10 @@ def schema_archaeology_traces() -> Path:
 
 
 def preregistered_oracles() -> Path:
+    root = repo_root()
+    canonical = root / "docs" / "03_sprints" / "evidence" / "preregistered_oracles.json"
+    if canonical.exists():
+        return canonical
     return docs_sprint("sprint6B", "preregistered_oracles.json")
 
 

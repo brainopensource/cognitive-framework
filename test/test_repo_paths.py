@@ -38,7 +38,10 @@ class RepoPathsTests(unittest.TestCase):
         # fallback order — this was previously masked because the assertFalse above it
         # failed first and short-circuited the test.
         self.assertEqual(repo_paths.active_mvp_contract(), root / "docs/sprint0/active-mvp-contract.json")
-        self.assertEqual(repo_paths.preregistered_oracles(), root / "docs/sprint6B/preregistered_oracles.json")
+        self.assertEqual(
+            repo_paths.preregistered_oracles(),
+            root / "docs/03_sprints/evidence/preregistered_oracles.json",
+        )
         self.assertEqual(repo_paths.docs_development_guides(), root / "docs/development")
 
     def test_rewrite_legacy_paths(self) -> None:

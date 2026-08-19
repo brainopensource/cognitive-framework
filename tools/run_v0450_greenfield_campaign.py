@@ -21,11 +21,27 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from tools.project_v0450_coding_run import archive_run
-from vanguard.packages.apps.coding.coding_entrypoint import (
-    exit_code_for,
-    load_band_models,
-    run_entrypoint,
-)
+
+# apps/coding was retired into packs/code-default (M3). Campaign live arms
+# bind the compiled pack; these helpers remain for dry-run validation.
+
+
+def load_band_models(band: str, *, registry: object | None = None) -> tuple[str, ...]:
+    _ = registry
+    if band == "high":
+        return ("openrouter/frontier",)
+    return ("mock:free",)
+
+
+def exit_code_for(code: int) -> int:
+    return int(code)
+
+
+def run_entrypoint(request: dict[str, Any], writer: Any = None) -> int:
+    _ = request
+    if writer is not None:
+        writer.write("apps/coding retired; dry campaign uses pack compose\n")
+    return 0
 
 ARMS: dict[str, dict[str, Any]] = {
     "control": {

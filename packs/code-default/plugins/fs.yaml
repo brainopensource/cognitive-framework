@@ -1,0 +1,18 @@
+api: mhf.plugin/1
+id: mhf.toolkit.fs
+version: 1.0.0
+provides:
+  - spi: IToolkit
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: subprocess
+capabilities:
+  - verb: fs.read
+    selector:
+      kind: fs
+      root: /workspace
+  - verb: fs.search
+    selector:
+      kind: fs
+      root: /workspace
+entry: toolkits/fs_toolkit.py:FsToolkit

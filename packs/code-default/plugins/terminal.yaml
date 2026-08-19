@@ -1,0 +1,14 @@
+api: mhf.plugin/1
+id: mhf.toolkit.terminal
+version: 1.0.0
+provides:
+  - spi: IToolkit
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: container
+capabilities:
+  - verb: proc.exec
+    selector:
+      kind: proc
+      executable: python3
+entry: toolkits/terminal_runner.py:TerminalToolkit

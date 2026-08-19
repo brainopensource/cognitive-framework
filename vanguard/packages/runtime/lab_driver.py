@@ -31,8 +31,7 @@ CLI:
       [--interactive | --benchmark] [--max-turns N] [--max-attempts N]
       [--jsonl-out FILE] [--json]
 
-The JSONL is the ledger export; project it with
-  python3 tools/export_coding_session.py --jsonl FILE
+The JSONL is the ledger export; project it with the session JSONL exporter.
 """
 
 from __future__ import annotations
@@ -48,9 +47,9 @@ from typing import Any, Sequence
 from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..ports.event_store import Result as PortResult
-from .mock_coding_tape import (
+from .mock_episode_tape import (
     brief_from_task_dir,
-    coding_tape,
+    episode_tape,
     verify_argv_from_task,
 )
 from .determinism import SystemClock
@@ -106,7 +105,7 @@ def run_lab_task(
         # One pass per attempt, or attempt 2 exhausts the tape and reports
         # `tape_exhausted` -- a true statement about the fake, and a
         # useless one about the loop.
-        tape = coding_tape(verbs=harness_preview.verbs,
+        tape = episode_tape(verbs=harness_preview.verbs,
                            attempts=max(int(max_attempts), 1))
 
     # Every run gets its own copy. Running in place would let one run inherit
@@ -409,7 +408,7 @@ def _write_jsonl(target: Path, store: Any, run_id: str) -> int:
 
     `RunResult.events` are kernel `Event` objects; the store holds `vg.4`
     `EventEnvelope`s. Writing the former produced a file
-    `tools/export_coding_session.py` refused with
+    the session JSONL exporter refused with
     `must be 'vg.4', got None` -- correctly, because it was not a ledger
     export. The store is the ledger, so the export reads the store.
     """

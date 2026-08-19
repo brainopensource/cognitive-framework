@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "test005_named_amounts",
+  "title": "Parse named amounts across two modules",
+  "runId": "20260819T042638Z",
+  "status": "FAIL",
+  "guard": {
+    "verdict": "inconclusive:no_verdict",
+    "scoreable": false,
+    "numerator": 0,
+    "denominator": 1,
+    "publication_blocked": false
+  },
+  "evidence_label": "lab-execute-harness",
+  "public_overfit": false,
+  "agentic": true,
+  "lamReplay": false,
+  "singleShotGenerate": false,
+  "labDepartures": [
+    "auto_approve_privileged_diff",
+    "oracle_after_episode_not_isolated_evaluator",
+    "maxTokens_2048",
+    "first_tool_call_only_wire_filter",
+    "http_timeout_180s"
+  ],
+  "model": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+    "secretSource": "dotenv",
+    "calls": 8,
+    "proposalKinds": [
+      "effect",
+      "effect",
+      "effect",
+      "effect",
+      "effect",
+      "effect",
+      "effect",
+      "effect"
+    ],
+    "actions": [
+      "fs.read",
+      "patch.apply",
+      "patch.apply",
+      "patch.apply",
+      "patch.apply",
+      "patch.apply",
+      "patch.apply",
+      "patch.apply"
+    ],
+    "promptTokens": 11800,
+    "completionTokens": 838,
+    "usdMicros": 1540,
+    "providerErrors": []
+  },
+  "bwrapPresent": true,
+  "terminal": "abandoned",
+  "detail": "turn bound 8 reached",
+  "elapsedMs": 20592,
+  "receipts": [
+    {
+      "verb": "fs.read",
+      "outcome": "ok",
+      "detail_tail": "\"\"\"Turn text rows into named amounts.\"\"\"\n\n\ndef parse_rows(lines):\n    rows = []\n    for line in lines:\n        name, raw = line.split(\":\")\n        rows.append((name, int(raw)))\n    return rows\n"
+    }
+  ],
+  "events": [
+    {
+      "kind": "EpisodeStarted",
+      "reason": "composed",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "fs.read"
+    },
+    {
+      "kind": "EffectStarted",
+      "reason": "intent",
+      "action": null
+    },
+    {
+      "kind": "BudgetReserved",
+      "reason": "reserved",
+      "action": null
+    },
+    {
+      "kind": "BudgetCommitted",
+      "reason": "committed",
+      "action": null
+    },
+    {
+      "kind": "EffectCompleted",
+      "reason": "ok",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    },
+    {
+      "kind": "ProposalProduced",
+      "reason": "effect",
+      "action": "patch.apply"
+    },
+    {
+      "kind": "AuthorizationDenied",
+      "reason": "denied_untrusted_justifying",
+      "action": null
+    }
+  ],
+  "changedPaths": [],
+  "publicTestsBefore": {
+    "passed": false,
+    "returncode": 1
+  },
+  "publicTestsAfter": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests"
+    ],
+    "returncode": 1,
+    "passed": false,
+    "stdout_tail": "",
+    "stderr_tail": "E\n======================================================================\nERROR: test_two_named_amounts (test_ledger.NamedAmountTests.test_two_named_amounts)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/workspace/tests/test_ledger.py\", line 11, in test_two_named_amounts\n    rows = parse_rows([\"alice,10\", \"bob,20\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/workspace/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+  },
+  "oracleAfter": {
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "oracle",
+      "-p",
+      "test_*.py"
+    ],
+    "returncode": 1,
+    "passed": false,
+    "stdout_tail": "",
+    "stderr_tail": "EE\n======================================================================\nERROR: test_blank_lines_and_whitespace (test_ledger_oracle.NamedAmountOracle.test_blank_lines_and_whitespace)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/eval/oracle/test_ledger_oracle.py\", line 11, in test_blank_lines_and_whitespace\n    rows = parse_rows([\"  alice, 10 \", \"\", \"bob,5\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/eval/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n======================================================================\nERROR: test_duplicate_names_accumulate (test_ledger_oracle.NamedAmountOracle.test_duplicate_names_accumulate)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/eval/oracle/test_ledger_oracle.py\", line 15, in test_duplicate_names_accumulate\n    rows = parse_rows([\"a,1\", \"a,2\", \"b,3\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/vg-zero-test005_named_amounts-9yie8qt9/eval/pkg/parser.py\", line 7, in parse_rows\n    name, raw = line.split(\":\")\n    ^^^^^^^^^\nValueError: not enough values to unpack (expected 2, got 1)\n\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nFAILED (errors=2)\n"
+  },
+  "hashes": {
+    "finalDiff": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "manifest": "vg-code-claude-shaped",
+  "gene_digests": {
+    "vg-code-claude-shaped/approval-policy.json": "sha256:d497661f37408a91fbdd11a7f2777ea4ddbb88ecf6ed58f9c61d15bae458a0e5",
+    "vg-code-claude-shaped/context-policy.json": "sha256:4c9b83e56761bd08339048374bcfdd67c9ec5969cf15c37fba908376eb24927f",
+    "vg-code-claude-shaped/routing-policy.json": "sha256:92b702945c0f7af5ccd521e0363d3dee8e2be9fc66851dfca758935dea063126",
+    "vg-code-claude-shaped/system-prompt.txt": "sha256:56651e041d7f8afc20578ee0864f491475e6370f0939d8c1bb57982d1c585bfe",
+    "vg-code-default/read-tool.json": "sha256:3f9713f056242ea16885f2910982ab276731072056930d9c7b110166bc397ad6",
+    "vg-code-default/search-tool.json": "sha256:3d52a88d7044a0307b0f7bc228431f375d1e91099c5f07d63cb4ac806f1528d7",
+    "vg-code-default/patch-tool.json": "sha256:0c6aecc175638f31efbd7a16ce094a703d00bf96ed24ce01c8a4f22c6ae359c2",
+    "vg-code-default/test-tool.json": "sha256:6732170822ef47acfa100c197dc2b1aa5ac3e64930db743ccc1dfc4005bc6a2b",
+    "vg-code-default/budget-policy.json": "sha256:c8f4355e8aa2211c7acf787207bfabcda682de587ef80ead3402fa0c9a41fe60",
+    "aliases.json": "sha256:8b5c7d7ecd8d4bdde54b9e41a30993cf295175698c4e3278994c107562ef6faf"
+  },
+  "treatment": {
+    "manifest": "vg-code-claude-shaped"
+  }
+}

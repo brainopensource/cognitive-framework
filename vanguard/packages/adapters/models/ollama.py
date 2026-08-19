@@ -64,13 +64,19 @@ class OllamaModel:
     ) -> Result[Proposal]:
         if not self.model:
             return Result.fail("instrument_error", "Ollama model is required")
-        body = {
+        options = dict(sampling)
+        if "num_ctx" not in options:
+            options["num_ctx"] = 4096
+        if "maxTokens" in options and "num_predict" not in options:
+            options["num_predict"] = options.pop("maxTokens")
+        body: dict[str, Any] = {
             "model": self.model,
             "messages": _messages(context),
-            "tools": [_tool_payload(tool) for tool in tools],
             "stream": False,
-            "options": dict(sampling),
+            "options": options,
         }
+        if tools:
+            body["tools"] = [_tool_payload(tool) for tool in tools]
         try:
             status, raw = self._transport(self.endpoint, json.dumps(body, separators=(",", ":")).encode("utf-8"))
         except Exception as exc:
@@ -114,11 +120,29 @@ class OllamaModel:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, str]]:
-    if isinstance(context, Mapping) and isinstance(context.get("messages"), Sequence):
-        return [
-            {"role": str(item.get("role", "user")), "content": str(item.get("content", ""))}
-            for item in context["messages"] if isinstance(item, Mapping)
-        ]
+    if isinstance(context, Mapping):
+        if isinstance(context.get("messages"), Sequence):
+            return [
+                {"role": str(item.get("role", "user")), "content": str(item.get("content", ""))}
+                for item in context["messages"] if isinstance(item, Mapping)
+            ]
+        if isinstance(context.get("blocks"), Sequence):
+            sys_parts = []
+            usr_parts = []
+            for b in context["blocks"]:
+                if isinstance(b, Mapping):
+                    lbl = str(b.get("label", ""))
+                    cnt = str(b.get("content", ""))
+                    if lbl in {"L0", "L1", "system"}:
+                        sys_parts.append(cnt)
+                    else:
+                        usr_parts.append(cnt)
+            res = []
+            if sys_parts:
+                res.append({"role": "system", "content": "\n\n".join(sys_parts)})
+            if usr_parts:
+                res.append({"role": "user", "content": "\n\n".join(usr_parts)})
+            return res or [{"role": "user", "content": str(context)}]
     return [{"role": "user", "content": str(context)}]
 
 

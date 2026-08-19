@@ -1,0 +1,102 @@
+[
+  {
+    "kind": "EpisodeStarted",
+    "reason": "composed",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "EffectStarted",
+    "reason": "intent",
+    "action": null
+  },
+  {
+    "kind": "BudgetReserved",
+    "reason": "reserved",
+    "action": null
+  },
+  {
+    "kind": "BudgetCommitted",
+    "reason": "committed",
+    "action": null
+  },
+  {
+    "kind": "EffectCompleted",
+    "reason": "ok",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  },
+  {
+    "kind": "ProposalProduced",
+    "reason": "effect",
+    "action": "fs.read"
+  },
+  {
+    "kind": "AuthorizationDenied",
+    "reason": "denied_untrusted_justifying",
+    "action": null
+  }
+]

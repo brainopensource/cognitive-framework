@@ -26,7 +26,7 @@ the irreversible steps below (force-push window, `git filter-repo` pass).
 | S-M0-B-01 | Scaffold `layer0/{events,kernel,spi,registry,scheduler,compose}/`, `plugins/`, `packs/`, `test/layer0/` with `__init__` stubs + lane ownership file | `check_lane_ownership.py` recognises all paths; empty-package import test green |
 | S-M0-B-02 | Author `schemas/mhf/plugin.schema.json` + 6 golden vectors | vectors validate; invalid vectors fail with expected error paths |
 | S-M0-B-03 | Author `schemas/mhf/harness.schema.json` + port `vg-code-default` to a draft `packs/code-default/harness.yaml` (non-executing) | schema-validates; digest computed via existing JCS |
-| S-M0-B-04 | **SPI RFC** — freeze method sets for the five SPIs (`docs/adr/ADR-M0-03-five-spis.md`) + first-party ports | reviewed + signed; becomes the IF-1 checklist for M1 |
+| S-M0-B-04 | **SPI RFC** — freeze method sets for the five SPIs (`docs/05_adr/ADR-M0-03-five-spis.md`) + first-party ports | reviewed + signed; becomes the IF-1 checklist for M1 |
 | S-M0-B-05 | Migrate `unittest discover` → `pytest` config for the retained suite | `pytest -q` green on retained set; port-map committed |
 | S-M0-B-06 | Blob-store evidence relocation tool for purged sprint evidence | round-trip: `fetch(digest)` returns byte-identical artifact for 3 samples |
 

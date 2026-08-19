@@ -25,7 +25,9 @@ ALLOWED = {
     "ports": {"domain"},
     "kernel": {"domain", "ports"},
     "agency": {"domain", "ports", "kernel"},
-    "adapters": {"domain", "ports"},
+    # First-party SPI adapters (M2) implement layer0.spi protocols; they still
+    # must not import kernel/agency/registry (plugin cells stay untrusted).
+    "adapters": {"domain", "ports", "layer0_spi"},
     # VG-03 LT-6: runtime/ may import everything, and it is the only module
     # that may -- it is the composition root. Omitting "governance" made the
     # declared approval process unreachable from any composition, which is a

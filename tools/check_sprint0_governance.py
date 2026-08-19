@@ -14,8 +14,26 @@ from repo_paths import docs_main_v4, repo_path, repo_root
 
 
 def _checks() -> dict[Path, list[str]]:
+    v4_path = docs_main_v4("09_vanguard_decision_register_v040.md")
+    if not v4_path.is_file():
+        adr_dir = repo_path("docs", "05_adr") if repo_path("docs", "05_adr").exists() else repo_path("docs", "adr")
+        if (adr_dir / "0000-adrs-are-append-only-numbered-and-each-states.md").is_file():
+            return {
+                adr_dir / "0000-adrs-are-append-only-numbered-and-each-states.md": [
+                    "append-only",
+                    "reversal condition",
+                ],
+                adr_dir / "0046-gts-13c-is-the-sole-active-programme-plan.md": [
+                    "GTS-13C is the sole active programme plan",
+                ],
+                repo_path(".github", "pull_request_template.md"): [
+                    "No production code imports `spike/` or `slice/`",
+                    "Controlled bootstrap",
+                ],
+            }
+        v4_path = repo_path("docs", "SPEC.md")
     return {
-        docs_main_v4("09_vanguard_decision_register_v040.md"): [
+        v4_path: [
             "Append-only",
             "reversal condition",
             "GTS-13C is the sole active programme plan",

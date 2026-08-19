@@ -1,0 +1,11 @@
+{
+  "schema": "mhf.oracle-registry/1",
+  "status": "preregistered-not-run",
+  "oracles": [
+    {
+      "id": "coding-oracle@3",
+      "digest": "sha256:pending",
+      "argv": ["python3", "-m", "unittest", "discover"]
+    }
+  ]
+}

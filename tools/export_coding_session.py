@@ -17,7 +17,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from vanguard.packages.adapters.stores.ledger_jsonl import import_jsonl
-from vanguard.packages.apps.coding.coding_session import project_coding_session
+from vanguard.packages.domain.ledger.session_projection import project_session
 
 
 def main() -> int:
@@ -27,7 +27,7 @@ def main() -> int:
     path = Path(args.jsonl)
     with path.open(encoding="utf-8") as reader:
         envelopes = import_jsonl(reader)
-    print(json.dumps(project_coding_session(envelopes), indent=2, sort_keys=True))
+    print(json.dumps(project_session(envelopes), indent=2, sort_keys=True))
     return 0
 
 

@@ -19,9 +19,9 @@ import unittest
 from pathlib import Path
 
 from vanguard.packages.runtime.lab_driver import run_lab_task
-from vanguard.packages.runtime.mock_coding_tape import (
+from vanguard.packages.runtime.mock_episode_tape import (
     brief_from_task_dir,
-    coding_tape,
+    episode_tape,
 )
 from vanguard.packages.runtime.repair import StopReason
 from vanguard.packages.runtime.task_sets import (
@@ -97,14 +97,14 @@ class TheMockTakesRealTurns(unittest.TestCase):
     def test_the_tape_contains_no_working_diff(self) -> None:
         import inspect
 
-        import vanguard.packages.runtime.mock_coding_tape as module
+        import vanguard.packages.runtime.mock_episode_tape as module
 
         source = inspect.getsource(module)
         for forbidden in ("return a / b", "except ZeroDivisionError", "def divide"):
             self.assertNotIn(forbidden, source)
 
     def test_the_tape_only_proposes_granted_verbs(self) -> None:
-        tape = coding_tape(verbs=("fs.read",))
+        tape = episode_tape(verbs=("fs.read",))
         actions = {item.get("action") for item in tape if "action" in item}
         self.assertEqual(actions, {"fs.read"})
 

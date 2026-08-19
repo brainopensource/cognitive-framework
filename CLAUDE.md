@@ -82,9 +82,9 @@ Model access is abstracted behind `ModelPort`, with adapters for OpenRouter (`OP
 DeepSeek, OpenAI, and local Ollama.
 
 **Normative documentation (v0.5.0 Foundation Lock, `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`):**
-`docs/SPEC.md` is the **only** living normative specification, with `docs/annex/KERNEL.md` and
-`docs/annex/MEASUREMENT.md` carrying the same RFC-2119 force for the dispatch/security and measurement
-domains respectively. `docs/adr/` holds the decision log (append-only, reversal conditions). Read
+`docs/SPEC.md` is the **only** living normative specification, with `docs/04_annex/KERNEL.md` and
+`docs/04_annex/MEASUREMENT.md` carrying the same RFC-2119 force for the dispatch/security and measurement
+domains respectively. `docs/05_adr/` holds the decision log (append-only, reversal conditions). Read
 `docs/SPEC.md` before making architectural decisions, not just the README. `docs/02_roadmap/` holds
 version gates and the epic map; `docs/03_sprints/sprint_active.md` is the execution board. The pre-lock
 VG-00…13C corpus (previously referenced here as `docs/main_v4/`, which never actually existed on this

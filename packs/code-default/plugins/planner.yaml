@@ -1,0 +1,11 @@
+api: mhf.plugin/1
+id: mhf.planner.drive-until-green
+version: 1.0.0
+provides:
+  - spi: IPlanner
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: in_process
+capabilities: []
+entry: planners/single_planner.py:DriveUntilGreenPlanner
+config_schema: ./config.schema.json

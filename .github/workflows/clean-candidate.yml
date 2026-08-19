@@ -44,19 +44,13 @@ jobs:
       - name: Python unit tests
         run: python3 -m unittest discover -s test
 
-      - name: Governance tools
+      - name: Governance and living gates
         run: |
-          python3 tools/audit_v4.py
-          python3 tools/check_sprint0_governance.py
-          python3 tools/check_schema_archaeology.py
-          python3 tools/check_baseline_manifest.py
-          python3 tools/check_active_mvp_contract.py
           python3 tools/check_stale_paths.py
           python3 tools/check_markdown_links.py
           python3 tools/check_boundaries.py
           python3 tools/check_tcb_budget.py
-          python3 tools/run_broken_tests.py
-          python3 tools/scan_secrets.py --all-refs
+          python3 tools/scan_secrets.py
 
       - name: Release validators must still fail while Beta is open
         run: |

@@ -1,4 +1,4 @@
-# Vanguard General Task Solver (GTS)
+# AETHER PROJECT - SUBSTRATE UPDATE General Task Solver (GTS) Version 0.5.1 (WAVES 1, 2 and 3 DONE)
 
 > **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
 
@@ -24,21 +24,21 @@ observe ──▶ propose ──▶ authorize ──▶ effect ──▶ receipt
 
 ## 2. Architecture pointer
 
-**Removed (ADR-M0-10, `docs/adr/ADR-M0-10-no-metaphysics.md`).** This section previously described a
+**Removed (ADR-M0-10, `docs/05_adr/ADR-M0-10-no-metaphysics.md`).** This section previously described a
 14-tier biological/cosmological taxonomy (LEVEL 0–9, "Protons = Identity, Neutrons = Ledger"). It carried
 zero operational semantics — no invariant, test, or schema referenced a tier — while creating false
 layering intuitions the actual import lattice contradicted. It is deleted, not archived-and-linked: see
-`docs/adr/ADR-M0-10-no-metaphysics.md` for why, and `docs/archive/v045/00_executive/vision.md` if you
+`docs/05_adr/ADR-M0-10-no-metaphysics.md` for why, and `docs/archive/v045/00_executive/vision.md` if you
 want the historical artifact.
 
 The real architecture is `docs/SPEC.md` §0–§2 (design axioms, the Layer-0 microkernel, the plugin/SPI
-model) plus `docs/annex/KERNEL.md` for the dispatch sequence and security model. Start there.
+model) plus `docs/04_annex/KERNEL.md` for the dispatch sequence and security model. Start there.
 
 
 ## 3. Separation of concerns (historical six-plane mapping; retired as living taxonomy)
 
 The six-plane vocabulary below is retired as living architecture — `docs/SPEC.md` speaks Layer-0 / SPI /
-plugin / pack instead (see `docs/adr/ADR-M0-06-plane-mapping-archaeology.md` for the mapping). It is
+plugin / pack instead (see `docs/05_adr/ADR-M0-06-plane-mapping-archaeology.md` for the mapping). It is
 kept here only because the separations it named are still real; read `docs/SPEC.md` §0–§2 for the
 current model:
 
@@ -395,8 +395,8 @@ described `docs/01_specs/backend/`, since renamed and, as of the v0.5.0 Foundati
 | Document | Purpose | Status |
 |---|---|---|
 | [`docs/SPEC.md`](docs/SPEC.md) | The **only** living normative specification — design axioms, Layer-0 microkernel, SPI/plugin model, invariants I-1…I-11 | **NORMATIVE** |
-| [`docs/annex/KERNEL.md`](docs/annex/KERNEL.md) | Dispatch sequence, grants, attenuation, provenance, perimeter, threat model | **NORMATIVE** |
-| [`docs/annex/MEASUREMENT.md`](docs/annex/MEASUREMENT.md) | Paired designs, McNemar, A/A floor, instrument tuple | **NORMATIVE** |
-| [`docs/adr/`](docs/adr/) | Decision log with reversal conditions (append-only) | reference |
+| [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) | Dispatch sequence, grants, attenuation, provenance, perimeter, threat model | **NORMATIVE** |
+| [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) | Paired designs, McNemar, A/A floor, instrument tuple | **NORMATIVE** |
+| [`docs/05_adr/`](docs/05_adr/) | Decision log with reversal conditions (append-only) | reference |
 | [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md), [`docs/02_roadmap/backlog.md`](docs/02_roadmap/backlog.md) | Version gates and epic map — cannot contradict `docs/SPEC.md` | reference |
 | [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | Execution board only | reference |

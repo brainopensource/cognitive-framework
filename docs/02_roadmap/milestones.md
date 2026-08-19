@@ -15,7 +15,7 @@ messages citing "v0.6.0" refer to what this ladder now calls M3.
 
 **Standing rule** (from the roadmap triage §0): an item enters v0.5.0 only if it lands in **Layer 0**,
 the **plugin runtime**, or the **Phase-1 Coding Pack**. Everything else is a Phase-2/3 plugin (named
-target below) or dead (`docs/adr/DEFERRED_REJECTED.md`).
+target below) or dead (`docs/05_adr/DEFERRED_REJECTED.md`).
 
 | Milestone | Duration | Outcome | Exit gate (proof command) |
 |---|---|---|---|
@@ -31,9 +31,9 @@ target below) or dead (`docs/adr/DEFERRED_REJECTED.md`).
 
 Dispatch-only effect path, one-effect-per-turn at the kernel, fail-closed evaluation, boundary lattice —
 restated in `docs/SPEC.md` (I-1…I-11). TCB LOC tripwire stays the *living* gate until M1's metric triple
-(mutation score, control-call-site coverage, E-COV) lands — see `docs/annex/KERNEL.md` §1.1's amendment
+(mutation score, control-call-site coverage, E-COV) lands — see `docs/04_annex/KERNEL.md` §1.1's amendment
 note.
 
 ## Killed as a living claim
 
-The vision-tier mapping (LEVEL 0–9 / cosmology) is deleted, not carried forward — `docs/adr/ADR-M0-10-no-metaphysics.md`.
+The vision-tier mapping (LEVEL 0–9 / cosmology) is deleted, not carried forward — `docs/05_adr/ADR-M0-10-no-metaphysics.md`.

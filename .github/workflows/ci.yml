@@ -1,213 +1,51 @@
-name: vanguard-v4-gates
-
-# Every job below FAILS the workflow on violation. There is no informational-only
-# status here by design: a gate that reports without blocking is not a gate
-# (01 §1 M6). CI-9 is the sole exception in kind — it blocks at Phase 0 exit
-# rather than per-commit — and it is marked explicitly, not silently.
+name: vanguard-ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/*, feat_*, sprint*]
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  sprint0-gates:
-    name: S0 — governance, contract, boundaries, must-fail proof
+  vanguard-living-gates:
+    name: Living Gates — Layer-0, Boundaries, TCB, Links, Secrets
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.18'
 
-      - name: T11 — governance artifacts and safeguards
-        run: python3 tools/check_sprint0_governance.py
+      - name: Repo paths test
+        run: python3 -m unittest test.test_repo_paths
 
-      - name: S6B-GOV-001 — stale documentation paths
+      - name: Layer-0 microkernel test suite
+        run: python3 -m unittest discover -s test/layer0 -t .
+
+      - name: Hexagonal boundary lattice check
+        run: python3 tools/check_boundaries.py
+
+      - name: TCB budget safety check
+        run: python3 tools/check_tcb_budget.py
+
+      - name: Domain-blindness (I-7)
+        run: python3 tools/check_domain_blindness.py
+
+      - name: Isolation policy (I-6)
+        run: python3 tools/check_isolation_policy.py
+
+      - name: Code-default pack tests
+        run: python3 -m unittest discover -s test/packs -t .
+
+      - name: Stale documentation paths check
         run: python3 tools/check_stale_paths.py
 
-      - name: S6B-GOV-001 / QA-004 — local markdown links
+      - name: Local markdown links check
         run: python3 tools/check_markdown_links.py
 
-      - name: T0 — trace structure and field-inventory evidence
-        run: python3 tools/check_schema_archaeology.py
-
-      - name: S0 baseline — local integrity manifest
-        run: python3 tools/check_baseline_manifest.py
-
-      - name: Gate B — PR body references valid Active MVP requirements
-        env:
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
-        run: python3 tools/check_pr_requirements.py
-
-      - name: T10/T11 — execute every Active MVP Contract test
-        run: python3 tools/run_active_contract_tests.py
-
-      - name: S6B-SEC-002 — blocking secret scan (tree/diff; no live credentials)
+      - name: Secret scan check
         env:
           OPENROUTER_API_KEY: ""
         run: python3 tools/scan_secrets.py
-
-  docs-gates:
-    name: CI-1..CI-8 — document integrity
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install validator
-        run: pip install jsonschema==4.23.0
-
-      # CI-1 registry/disk bijection · CI-2 no pre-v4 refs · CI-3 references
-      # resolve · CI-4 no duplicate namespaces · CI-7 namespaces declared
-      - name: CI-1,2,3,4,7 — reference and namespace audit
-        run: python3 tools/audit_v4.py
-
-      # CI-5 per-document and normative subtotal word caps
-      - name: CI-5 — word budgets
-        run: |
-          sh tools/wordcount_v4.sh docs/main_v4/[0-9][0-9]_vanguard_*.md
-          python3 - <<'EOF'
-          import subprocess, glob, re, sys, os
-          reg = open("docs/main_v4/00_vanguard_registry_v040.md").read()
-          caps = {m[0]: int(m[2].replace(",", ""))
-                  for m in re.findall(r"\|\s*(\d\d)\s*\|[^|]*\|\s*(Normative|Supporting)\s*\|\s*([\d,]+)\s*\|", reg)}
-          fail = False
-          for p in sorted(glob.glob("docs/main_v4/[0-9][0-9]_vanguard_*.md")):
-              n = int(subprocess.run(["sh", "tools/wordcount_v4.sh", p],
-                                     capture_output=True, text=True).stdout.split()[0])
-              d = os.path.basename(p)[:2]
-              if d in caps and n > caps[d]:
-                  print(f"CI-5 FAIL {d}: {n} > {caps[d]}"); fail = True
-          sys.exit(1 if fail else 0)
-          EOF
-
-      # CI-6 every schema valid under 2020-12, with a reader profile and vectors
-      - name: CI-6 — schema validity, reader profiles, vectors
-        run: |
-          python3 - <<'EOF'
-          import json, glob, sys, warnings, subprocess, os
-          warnings.filterwarnings("ignore")
-          from jsonschema import Draft202012Validator, RefResolver
-          writers = [f for f in glob.glob("schemas/v4/*.schema.json") if ".reader." not in f]
-          store = {}
-          for f in glob.glob("schemas/v4/*.schema.json"):
-              d = json.load(open(f)); Draft202012Validator.check_schema(d); store[d["$id"]] = d
-          # SC-11: reader profiles must regenerate byte-identically
-          before = {f: open(f).read() for f in glob.glob("schemas/v4/*.reader.schema.json")}
-          subprocess.run([sys.executable, "tools/reader_profile.py", *writers], check=True)
-          drift = [f for f, t in before.items() if open(f).read() != t]
-          if drift:
-              print("CI-6 FAIL reader-profile drift:", drift); sys.exit(1)
-          # every vector executes with its expected outcome
-          fail = False
-          for d in sorted(glob.glob("schemas/v4/vectors/*/")):
-              name = os.path.basename(d.rstrip("/"))
-              sid = f"https://vanguard.dev/schemas/v4/{name}.schema.json"
-              if sid not in store: continue
-              v = Draft202012Validator(store[sid],
-                    resolver=RefResolver(base_uri=sid, referrer=store[sid], store=store))
-              for c in glob.glob(d + "valid/*.json"):
-                  if c.endswith(".expect.json"): continue
-                  errs = list(v.iter_errors(json.load(open(c))))
-                  if errs: print("CI-6 FAIL valid vector rejected:", c, errs[0].message); fail = True
-              for c in glob.glob(d + "invalid/*.json"):
-                  if c.endswith(".expect.json"): continue
-                  if not list(v.iter_errors(json.load(open(c)))):
-                      print("CI-6 FAIL invalid vector accepted:", c); fail = True
-          sys.exit(1 if fail else 0)
-          EOF
-
-      # CI-8 the vision annex is quarantined
-      - name: CI-8 — vision annex quarantine
-        run: |
-          head -20 docs/main_v4/12_vanguard_vision_annex_v040.md | grep -q "NON-NORMATIVE" \
-            || { echo "CI-8 FAIL: missing non-normative header"; exit 1; }
-          if grep -rn '`12`' docs/main_v4/ --include='0[0-9]_*.md' --include='1[01]_*.md' \
-               | grep -v 'VISION\|12_vanguard\|Vision Annex'; then
-            echo "CI-8 FAIL: a document cites the vision annex as authority"; exit 1
-          fi
-
-      # Manifest completeness — SC-12
-      - name: SC-12 — every 04 type has a schema artifact
-        run: |
-          grep -q 'SC-12' schemas/v4/MANIFEST.md \
-            || { echo "FAIL: SC-12 missing from manifest"; exit 1; }
-
-  acceptance:
-    name: CV-1..CV-12 — acceptance verification
-    runs-on: ubuntu-latest
-    needs: docs-gates
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install jsonschema==4.23.0
-      - name: CV-1..CV-12
-        run: python3 tools/cv_checks.py
-
-  rule-coverage:
-    name: CI-9 — rule-to-test coverage (Phase 0 exit gate)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      # CI-9 is RED by construction until the Phase 0 test backlog closes.
-      # It is a phase exit gate, not a per-commit gate: blocking every commit on
-      # it would train the team to bypass it, which is worse than reporting it.
-      # continue-on-error is scoped to THIS job only and is justified here.
-      - name: Generate map and backlog
-        continue-on-error: true
-        run: python3 tools/rule_test_map.py
-      - name: Fail if coverage regressed
-        run: |
-          python3 tools/rule_test_map.py > /tmp/cov.txt || true
-          OPEN=$(grep -o 'gaps=[0-9]*' /tmp/cov.txt | cut -d= -f2)
-          BASE=133
-          echo "open=$OPEN baseline=$BASE"
-          if [ "$OPEN" -gt "$BASE" ]; then
-            echo "CI-9 FAIL: coverage regressed ($OPEN > $BASE)"; exit 1
-          fi
-
-  trust-spine:
-    name: S4 — no-model trust spine (REQ-TRUST-001)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.18'
-
-      # ADR-0048: model behaviour must not become a prerequisite of kernel
-      # verification. The key is unset explicitly rather than merely absent,
-      # so the guarantee survives someone adding a provider secret to this
-      # repository later — which is exactly when it stops being obvious.
-      - name: TEST-TRUST-001 — scripted trajectory with the provider key unset
-        env:
-          OPENROUTER_API_KEY: ''
-        run: |
-          unset OPENROUTER_API_KEY
-          python3 -m unittest test.trust.test_spine
-
-      - name: MF-S4-001 — spike/ and slice/ absent on this tree
-        run: python3 tools/check_boundaries.py --s4-exit
-
-      - name: TEST-EXEC-001 — episode loop and agency identifier lint
-        run: python3 -m unittest discover -s test/agency

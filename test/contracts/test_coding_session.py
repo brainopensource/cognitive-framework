@@ -12,7 +12,7 @@ from vanguard.packages.domain.artifacts.skill_index import (
     format_skill_index,
     parse_skill_card,
 )
-from vanguard.packages.apps.coding.coding_session import project_coding_session
+from vanguard.packages.domain.ledger.session_projection import project_session
 from vanguard.packages.domain.ledger.events import parse_event_envelope
 
 
@@ -72,8 +72,8 @@ class TestCodingSessionProjection(unittest.TestCase):
             ),
             _envelope("4", "EpisodeCompleted", {"outcome": "abandoned"}, "018f1111-1111-7000-8000-000000000005"),
         ]
-        session = project_coding_session(events)
-        self.assertEqual(session["schema"], "vg.coding-session.v1")
+        session = project_session(events)
+        self.assertEqual(session["schema"], "mhf.session-projection/1")
         self.assertEqual(session["turnCount"], 2)
         self.assertEqual(session["turns"][0]["verbs"], ["fs.read"])
         self.assertEqual(session["turns"][1]["verbs"], ["patch.apply"])
@@ -91,7 +91,7 @@ class TestCodingSessionProjection(unittest.TestCase):
         buf = io.StringIO()
         export_jsonl(events, buf)
         buf.seek(0)
-        session = project_coding_session(import_jsonl(buf))
+        session = project_session(import_jsonl(buf))
         self.assertEqual(session["turnCount"], 0)
         self.assertEqual(session["cacheMissCount"], 0)
         self.assertEqual(session["compactCount"], 0)

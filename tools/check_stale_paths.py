@@ -34,7 +34,7 @@ SKIP_PARTS = {".git", "__pycache__", "node_modules", ".venv"}
 SKIP_DOCS_DIRS = {"archive"}
 # The registry and its unit tests must name obsolete prefixes in order to reject them.
 SKIP_NAMES = {"repo_paths.py", "test_repo_paths.py"}
-# docs/adr/00NN-*.md are the VG-09 decision register migrated verbatim (append-only,
+# docs/05_adr/00NN-*.md are the VG-09 decision register migrated verbatim (append-only,
 # docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md §1.12) — some entries quote
 # doc-move-era paths inside historical "Evidence"/"Links" fields. That is archaeology,
 # not a live citation; the ADR-M0-* namespace (new decisions) is not exempted.
@@ -55,7 +55,7 @@ def iter_scan_files(root: Path) -> list[Path]:
                 continue
             if path.name in SKIP_NAMES:
                 continue
-            if "adr" in path.parts and _LEGACY_ADR_NAME.match(path.name):
+            if ("adr" in path.parts or "05_adr" in path.parts) and _LEGACY_ADR_NAME.match(path.name):
                 continue
             files.add(path)
     return sorted(files)

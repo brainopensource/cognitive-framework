@@ -53,7 +53,10 @@ class OllamaModel:
     ) -> None:
         self.model = model
         self.endpoint = endpoint
-        self._transport = transport or _http_transport
+        self._transport = transport or (
+            lambda endpoint, body, _timeout=timeout_seconds: _http_transport(
+                endpoint, body, timeout=_timeout)
+        )
         self.timeout_seconds = timeout_seconds
 
     def propose(
@@ -150,12 +153,12 @@ def _integer(value: Any) -> int:
     return value if type(value) is int and value >= 0 else 0
 
 
-def _http_transport(endpoint: str, body: bytes) -> tuple[int, bytes]:
+def _http_transport(endpoint: str, body: bytes, timeout: float = 60.0) -> tuple[int, bytes]:
     request = urllib.request.Request(
         endpoint,
         data=body,
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=60.0) as response:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         return int(response.status), response.read(16 * 1024 * 1024 + 1)

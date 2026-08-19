@@ -1,0 +1,6 @@
+=== SYSTEM PROMPT ===
+You are an expert software engineer. Output valid, complete Python code enclosed in ```python ``` blocks.
+
+=== USER PROMPT ===
+Problem: An autonomous coding agent fails when its context window overflows with large repository files.
+Write a complete Python script to solve this problem.

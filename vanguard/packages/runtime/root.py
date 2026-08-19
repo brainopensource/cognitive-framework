@@ -526,6 +526,16 @@ class _LayeredOperator:
         # The provider contract is `messages` / digests / layers. The engine's
         # flat view is compiled into L5; it is not a second wire dialect.
         bundle = dict(compiled.bundle())
+        digest = view.get("lastReceiptDigest")
+        if digest:
+            token = (
+                f"justifying_receipt={digest} "
+                f"progress={view.get('lastProgressSignal') or ''}"
+            )
+            messages = list(bundle.get("messages") or ())
+            messages.append({"role": "user", "content": token})
+            bundle["messages"] = tuple(messages)
+            bundle["lastReceiptDigest"] = digest
         self.contexts.append(bundle)
         return self._model.propose(bundle, tools, sampling)
 
@@ -1226,7 +1236,10 @@ class Runtime:
 
 
 def _resource_for(repo: Path) -> Mapping[str, Any]:
-    return {"kind": "fs", "root": str(repo), "paths": [str(repo)]}
+    # Grant selectors are pack-logical (`/workspace`). The host `repo` is the
+    # sandbox mount, not a second root the classifier can disagree with.
+    del repo
+    return {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
 
 
 def _scope_for(harness: Harness, repo: Path) -> Scope:

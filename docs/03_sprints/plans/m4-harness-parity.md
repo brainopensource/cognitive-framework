@@ -60,9 +60,9 @@ recompilation, TableWorld pack, CLI client).
 ### Lane A — measurement, latency, freeze enforcement
 
 - [ ] **S-M4-A-01** — **Layer-0 freeze gate**: CI job asserting `git diff --stat layer0/` is empty for
-      every commit on the M4 branch relative to the `v0.5.0-m3` tag; a `handoff`-labelled exception
+      every commit on the M4 branch relative to the `v0.5.1-baseline` tag; a `handoff`-labelled exception
       requires an ADR with a reversal condition.
-      *Verify:* `test -z "$(git diff --stat v0.5.0-m3..HEAD -- layer0/)"`
+      *Verify:* `test -z "$(git diff --stat v0.5.1-baseline..HEAD -- layer0/)"`
 
 - [ ] **S-M4-A-02** — **Zero-hint parity**: `benchmarkings/zero_hint_v1` run as a 2×2 paired matrix,
       compiled packs vs. the v0.4.5 baseline, preregistered before execution; pass condition is
@@ -75,7 +75,7 @@ recompilation, TableWorld pack, CLI client).
       is the frontier-difficulty witness. Leak lint stays armed — `datalog_solution` MUST NOT be reachable
       from the agent's workspace view (`tools/002_LLM_API_MOCK/verdict.py` `_LEAK_NAMES` semantics ported
       into the pack's anti-cheat lint).
-      *Verify:* `python3 lab/bench.py --task frontier_tier5_datalog_engine --pack code-default --paired --against v0.4.5-baseline`
+      *Verify:* `python3 lab/bench.py --pack-a v0.5.1-baseline --pack-b code-default --db lam.sqlite`
 
 - [ ] **S-M4-A-04** — **Sub-second latency verification** (`docs/SPEC.md` §4.3): instrument the terminal
       toolkit's first-structured-failure path and assert the mandate as a *measured percentile*, not an
@@ -86,8 +86,11 @@ recompilation, TableWorld pack, CLI client).
 
 - [ ] **S-M4-A-05** — Per-harness attribution report: prefix-hit rate, escalation count, USD/episode and
       pass rate broken out **per harness digest** across the five packs — the artifact that makes "which
-      shape wins" answerable and feeds M6 distillation.
-      *Verify:* `python3 lab/diff.py --by harness_digest --packs all`
+      shape wins" answerable and feeds M6 distillation. `lab/diff.py` renders a single pairwise trace
+      diff (`--trace-a`/`--trace-b`), not an N-way aggregate; this report is a new script/flag (not yet
+      built) or a loop over `lab/bench.py --pack-a`/`--pack-b` pairs, one call per harness pair.
+      *Verify:* `python3 lab/bench.py --pack-a code-default --pack-b code-claude-shaped --db lam.sqlite --json`
+      (repeat pairwise across all five packs; no single "by harness_digest --packs all" command exists yet)
 
 - [ ] **S-M4-A-06** — Disposition of every parity gap: each pack that lands below baseline gets an ADR row
       (cause, reversal condition) rather than a core patch. Zero gaps left undispositioned at gate.
@@ -132,8 +135,8 @@ recompilation, TableWorld pack, CLI client).
 
 ```bash
 # The M4 acceptance condition: Layer 0 received zero diffs all sprint (I-7 / SPEC §6.4)
-test -z "$(git diff --stat v0.5.0-m3..HEAD -- layer0/)"
-grep -rE "coding|pytest|ast" layer0/ ; test $? -eq 1
+test -z "$(git diff --stat v0.5.1-baseline..HEAD -- layer0/)"
+python3 tools/check_domain_blindness.py
 
 # Five packs + TableWorld compile and run
 python3 -m unittest discover -s test/packs -t .
@@ -148,8 +151,8 @@ python3 -m unittest test.layer0.replay.test_parity    # replay-parity
 # Parity measurement (preregister BEFORE running — docs/04_annex/MEASUREMENT.md)
 bash benchmarkings/zero_hint_v1/run_matrix_2x2.sh
 python3 benchmarkings/zero_hint_v1/summarize_matrix.py
-python3 lab/bench.py --task frontier_tier5_datalog_engine --pack code-default --paired --against v0.4.5-baseline
-python3 lab/diff.py --by harness_digest --packs all
+python3 lab/bench.py --pack-a v0.5.1-baseline --pack-b code-default --db lam.sqlite
+python3 lab/diff.py --trace-a <id> --trace-b <id> --db lam.sqlite   # per-pair; see S-M4-A-05
 
 # Sub-second first-failure mandate (SPEC §4.3), measured as p95
 python3 -m unittest test.packs.code_default.test_terminal_latency
@@ -164,7 +167,7 @@ python3 tools/check_markdown_links.py
 python3 tools/check_stale_paths.py
 ```
 
-Tag on green: `v0.5.0-m4` — this closes **v0.5.0 = MHF v1**. Next: M5/M6 are v0.6.x and gated on the
+Tag on green: `v0.5.1-beta` — this establishes the canonical v0.5.1 baseline for all future McNemar/A-B comparisons (pre-v0.5.1 tags, including `v0.4.5-baseline` and `v0.5.0-m3`, are deprecated prototypes). Next: M5/M6 are v0.6.x and gated on the
 200-task statistical-power suite (`docs/02_roadmap/milestones.md`); they do not start on this board.
 
 ## 3. Explicitly not this sprint

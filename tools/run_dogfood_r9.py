@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tools import repo_paths
 from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.adapters.models.lam import LamModelAdapter
 from vanguard.packages.runtime.governance.approvals import OperatorSigner
@@ -35,7 +36,7 @@ from vanguard.packages.agency import RunTermination
 
 
 MANIFEST = ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
-ORACLE_MANIFEST = ROOT / "docs/agile/sprint6B/preregistered_oracles.json"
+ORACLE_MANIFEST = repo_paths.preregistered_oracles()
 SUITE_ROOT = ROOT / "vanguard/packages/adapters/evaluators/suites"
 
 
@@ -268,10 +269,11 @@ def _load_release_image() -> tuple[str, str]:
 
 
 def _write_log(results: list[dict[str, object]]) -> None:
-    path = ROOT / "docs/agile/sprint6B/dogfood-log.md"
+    path = ROOT / "docs/03_sprints/evidence/dogfood-log.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
     now = datetime.now(timezone.utc).isoformat()
     lines = [
-        "# Sprint 6B Gate R9 — Q2 Dogfood Execution Log",
+        "# Gate R9 — Q2 Dogfood Execution Log",
         "",
         f"**Execution Timestamp:** `{now}`  ",
         "**Harness:** `Runtime.execute_harness` + LAM + Bubblewrap worker  ",
@@ -305,7 +307,7 @@ def _write_log(results: list[dict[str, object]]) -> None:
 def main() -> int:
     image, digest = _load_release_image()
     results: list[dict[str, object]] = []
-    print("=== Sprint 6B Gate R9: production dogfood ===")
+    print("=== Gate R9: production dogfood ===")
     for task in TASKS:
         print(f"Running {task.task_id}...")
         try:

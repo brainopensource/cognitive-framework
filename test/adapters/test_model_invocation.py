@@ -53,6 +53,15 @@ class TestModelInvocation(unittest.TestCase):
         res = ProposalTranslator.translate(proposal)
         self.assertFalse(res.ok)
 
+    def test_translate_json_string_arguments(self):
+        proposal = {
+            "text": "",
+            "toolCalls": [{"name": "fs.read", "arguments": json.dumps({"path": "pkg/parser.py"})}],
+        }
+        res = ProposalTranslator.translate(proposal)
+        self.assertTrue(res.ok)
+        self.assertEqual(res.value["args"]["path"], "pkg/parser.py")
+
     def test_translate_multiple_actions_fails(self):
         proposal = {
             "text": "",
@@ -137,7 +146,7 @@ class TestModelInvocation(unittest.TestCase):
         )
         self.assertTrue(result.ok)
         self.assertEqual(result.value["args"]["path"], "pkg/parser.py")
-        self.assertEqual(result.value["resource"]["path"], "pkg/parser.py")
+        self.assertEqual(result.value["resource"]["paths"], ["/workspace/pkg/parser.py"])
 
         result = ProposalTranslator.translate(
             {"text": "", "toolCalls": [{"name": "read", "arguments": {"path": "/workspace/pkg/parser.py"}}]},
@@ -145,7 +154,7 @@ class TestModelInvocation(unittest.TestCase):
         )
         self.assertTrue(result.ok)
         self.assertEqual(result.value["args"]["path"], "pkg/parser.py")
-        self.assertEqual(result.value["resource"]["path"], "pkg/parser.py")
+        self.assertEqual(result.value["resource"]["paths"], ["/workspace/pkg/parser.py"])
 
     def test_aliases_mapping_resolves_and_normalizes_arguments(self):
         aliases = {
@@ -189,4 +198,52 @@ class TestModelInvocation(unittest.TestCase):
         )
         self.assertFalse(res.ok)
         self.assertEqual(res.error.kind, "instrument_error")
+
+    def test_text_json_tool_block_becomes_an_effect(self) -> None:
+        schemas = ({"name": "read", "verb": "fs.read",
+                    "schema": {"type": "object", "properties": {"path": {"type": "string"}},
+                               "required": ["path"]}},)
+        res = ProposalTranslator.translate(
+            {"text": '```json\n{"verb": "fs.read", "path": "pkg/parser.py"}\n```',
+             "toolCalls": []},
+            tool_schemas=schemas,
+        )
+        self.assertTrue(res.ok)
+        self.assertEqual(res.value["kind"], "effect")
+        self.assertEqual(res.value["action"], "fs.read")
+        self.assertEqual(res.value["args"]["path"], "pkg/parser.py")
+
+    def test_text_named_json_objects_take_first_call_only(self) -> None:
+        schemas = (
+            {"name": "search", "verb": "fs.search",
+             "schema": {"type": "object",
+                        "properties": {"path": {"type": "string"}, "pattern": {"type": "string"}},
+                        "required": ["path", "pattern"]}},
+            {"name": "read", "verb": "fs.read",
+             "schema": {"type": "object", "properties": {"path": {"type": "string"}},
+                        "required": ["path"]}},
+        )
+        text = (
+            '{"name": "search", "arguments": {"path": "pkg/parser.py", "pattern": "def "}}\n'
+            '{"name": "read", "arguments": {"path": "pkg/totals.py"}}'
+        )
+        res = ProposalTranslator.translate({"text": text, "toolCalls": []}, tool_schemas=schemas)
+        self.assertTrue(res.ok)
+        self.assertEqual(res.value["action"], "fs.search")
+        self.assertEqual(res.value["args"]["path"], "pkg/parser.py")
+
+    def test_fs_resource_is_canonical_under_workspace(self) -> None:
+        res = ProposalTranslator.translate(
+            {"text": "", "toolCalls": [{"name": "fs.read", "arguments": {"path": "pkg/parser.py"}}]},
+        )
+        self.assertTrue(res.ok)
+        resource = res.value["resource"]
+        self.assertEqual(resource["kind"], "fs")
+        self.assertEqual(resource["root"], "/workspace")
+        self.assertEqual(resource["paths"], ["/workspace/pkg/parser.py"])
+        self.assertEqual(set(resource), {"kind", "root", "paths"})
+
+        from vanguard.packages.domain.selectors.resource_selector import decide
+        held = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+        self.assertTrue(decide(held, resource).included)
 

@@ -1,4 +1,4 @@
-# AETHER PROJECT - SUBSTRATE UPDATE General Task Solver (GTS) Version 0.5.1 (WAVES 1, 2 and 3 DONE)
+# AETHER PROJECT - SUBSTRATE UPDATE General Task Solver (GTS) Version 0.5.1 (WAVES 1-5 DONE)
 
 > **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
 

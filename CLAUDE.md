@@ -29,9 +29,8 @@ python3 tools/check_backend_artifacts.py --release   # backend/OCI artifact chec
 
 Note: as of the last full run, the suite is not fully green — check against a clean baseline first before
 assuming a red run is caused by your change. The `test/test_repo_paths.py` vs. `docs/agile/sprint0/`
-stale-path bug referenced in earlier revisions of this file was fixed at the v0.5.0 Foundation Lock
-(`docs/MASTER_REFACTOR_GUIDELINE_FINAL.md` Step 0): `tools/repo_paths.py` no longer resolves against the
-dead `docs/scrum`/`docs/main_v4` paths.
+stale-path bug referenced in earlier revisions of this file was fixed at the v0.5.0 Foundation Lock:
+`tools/repo_paths.py` no longer resolves against the dead `docs/scrum`/`docs/main_v4` paths.
 
 ### TypeScript / CLI client (`vanguard/clients/cli`)
 
@@ -81,7 +80,7 @@ Evaluator daemon entry point: `vanguard.packages.adapters.evaluators.daemon:main
 Model access is abstracted behind `ModelPort`, with adapters for OpenRouter (`OPENROUTER_API_KEY`),
 DeepSeek, OpenAI, and local Ollama.
 
-**Normative documentation (v0.5.0 Foundation Lock, `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`):**
+**Normative documentation (v0.5.0 Foundation Lock, `docs/SPEC.md` §8):**
 `docs/SPEC.md` is the **only** living normative specification, with `docs/04_annex/KERNEL.md` and
 `docs/04_annex/MEASUREMENT.md` carrying the same RFC-2119 force for the dispatch/security and measurement
 domains respectively. `docs/05_adr/` holds the decision log (append-only, reversal conditions). Read
@@ -94,8 +93,9 @@ messages and older docs citing VG-00..12 / GTS-13C refer to files now under
 
 ## CI gates
 
-`.github/workflows/ci.yml` (`vanguard-v4-gates`) runs two jobs — `sprint0-gates` and `docs-gates` — chaining
-many `tools/*.py` scripts (governance checks, stale-path checks, markdown link checks, schema archaeology,
-baseline manifest, PR requirements, active contract tests, secret scan, word-budget checks, JSON Schema
-2020-12 validation for `schemas/v4/*.schema.json`). These are hard-fail gates by design — a gate that reports
-without blocking is treated as a bug, not a feature.
+`.github/workflows/ci.yml` (workflow `vanguard-ci`) runs a single job, `vanguard-living-gates`, chaining:
+`test.test_repo_paths`, the Layer-0 microkernel suite (`test/layer0`), `tools/check_boundaries.py`,
+`tools/check_tcb_budget.py`, `tools/check_domain_blindness.py` (I-7), `tools/check_isolation_policy.py`
+(I-6), the code-default pack suite (`test/packs`), `tools/check_stale_paths.py`,
+`tools/check_markdown_links.py`, and `tools/scan_secrets.py`. These are hard-fail gates by design — a gate
+that reports without blocking is treated as a bug, not a feature.

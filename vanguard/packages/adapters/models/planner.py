@@ -20,6 +20,15 @@ from vanguard.packages.ports.model import ModelPort
 
 __all__ = ["DefaultPlannerAdapter"]
 
+# Same shapes the coding pack / vg-code-default already grant (ADR-0076 §2).
+_PROC_PATTERN = "proc://exec/allow/git,pytest,ruff,python3"
+
+
+def _selector_for(verb: str, root: str) -> dict[str, Any]:
+    if verb == "proc.exec":
+        return {"kind": "generic", "uriPattern": _PROC_PATTERN}
+    return {"kind": "fs", "root": root, "paths": [root]}
+
 
 class DefaultPlannerAdapter:
     spi_version: ClassVar[str] = "1.0"
@@ -60,7 +69,7 @@ class DefaultPlannerAdapter:
                 EffectRequest(
                     verb=verb,
                     args=dict(raw_args),
-                    selector={"kind": "fs", "root": self._resource_root},
+                    selector=_selector_for(verb, self._resource_root),
                     sink=SinkClass.OBSERVATION,
                     reservation=budget,
                 )

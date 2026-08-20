@@ -38,6 +38,10 @@ class SinglePlannerTests(unittest.TestCase):
         planned = self.planner.plan(self.view, self.budget)
         self.assertIsInstance(planned, Ok)
         self.assertEqual(planned.value.requests[0].verb, "patch.apply")
+        self.assertEqual(
+            planned.value.requests[0].selector,
+            {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
+        )
         self.assertEqual(self.planner.last_model, "mock:free")
 
     def test_verdict_fail_escalates_tier(self) -> None:

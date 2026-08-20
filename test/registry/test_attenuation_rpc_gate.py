@@ -9,9 +9,13 @@ from layer0.registry.broker import PluginIsolationBroker
 from layer0.registry.sandbox import SandboxLimits
 from layer0.spi.types_gen import EventKind, SinkClass
 
+_FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+_FS_CHILD = {"kind": "fs", "root": "/workspace", "paths": ["/workspace/README.md"]}
+_FS_ETC = {"kind": "fs", "root": "/etc", "paths": ["/etc"]}
+_PROC_DENIED = {"kind": "generic", "uriPattern": "proc://exec/allow/id"}
 _CEILING = (
-    {"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}},
-    {"verb": "fs.read", "selector": {"kind": "fs", "root": "/workspace"}},
+    {"verb": "echo", "selector": _FS},
+    {"verb": "fs.read", "selector": _FS},
 )
 _LIMITS = SandboxLimits(
     cpu_seconds=2,
@@ -46,7 +50,7 @@ class AttenuationRpcGateTests(unittest.TestCase):
             {
                 "verb": "echo",
                 "args": {"text": "ok"},
-                "selector": {"kind": "fs", "root": "/workspace"},
+                "selector": _FS,
                 "sink": SinkClass.OBSERVATION.value,
             },
         )
@@ -62,7 +66,7 @@ class AttenuationRpcGateTests(unittest.TestCase):
             {
                 "verb": "proc.exec",
                 "args": {"command": ["id"]},
-                "selector": {"kind": "proc", "executable": "/bin/id"},
+                "selector": _PROC_DENIED,
                 "sink": SinkClass.PRIVILEGED.value,
             },
         )
@@ -78,7 +82,7 @@ class AttenuationRpcGateTests(unittest.TestCase):
             {
                 "verb": "fs.read",
                 "args": {"path": "/etc/passwd"},
-                "selector": {"kind": "fs", "root": "/etc"},
+                "selector": _FS_ETC,
                 "sink": SinkClass.OBSERVATION.value,
             },
         )
@@ -91,7 +95,7 @@ class AttenuationRpcGateTests(unittest.TestCase):
         response = self.broker.call(
             self.cell,
             "host.grant",
-            {"verb": "proc.exec", "selector": {"kind": "proc", "executable": "/bin/sh"}},
+            {"verb": "proc.exec", "selector": _PROC_DENIED},
         )
         self.assertFalse(response.ok)
         self.assertEqual(response.error["code"], "attenuation_denied")
@@ -105,7 +109,7 @@ class AttenuationRpcGateTests(unittest.TestCase):
             {
                 "verb": "fs.read",
                 "args": {"path": "/workspace/README.md"},
-                "selector": {"kind": "fs", "root": "/workspace", "path": "README.md"},
+                "selector": _FS_CHILD,
                 "sink": SinkClass.OBSERVATION.value,
             },
         )

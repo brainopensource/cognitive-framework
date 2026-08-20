@@ -34,7 +34,7 @@ class AstPatchTests(unittest.TestCase):
         return self._req(
             verb="patch.apply",
             args=args,
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=self._sink.PRIVILEGED,
             reservation=self._res(0, 0, 0, 0, 1, 1),
         )

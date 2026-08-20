@@ -46,7 +46,7 @@ class TerminalLatencyTests(unittest.TestCase):
                 verb="proc.exec",
                 args={"argv": ["python3", "-u", "-c",
                                 "import sys; print('FAILED', flush=True); sys.exit(1)"]},
-                selector={"kind": "proc", "executable": "python3"},
+                selector={"kind": "generic", "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"},
                 sink=self._sink.PRIVILEGED,
                 reservation=self._res(0, 8000, 0, 0, 1, 1),
             )

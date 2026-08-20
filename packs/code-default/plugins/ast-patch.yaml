@@ -13,4 +13,6 @@ capabilities:
     selector:
       kind: fs
       root: /workspace
+      paths:
+        - /workspace
 entry: toolkits/ast_patch.py:AstPatchToolkit

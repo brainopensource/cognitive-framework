@@ -11,4 +11,6 @@ capabilities:
     selector:
       kind: fs
       root: /workspace
+      paths:
+        - /workspace
 entry: toolkits/repo_map.py:IndexToolkit

@@ -42,8 +42,11 @@ jobs:
       - name: Replay parity (F-02, cold fold from disk)
         run: python3 -m unittest test.runtime.test_ledger_truth.ColdReplayParity
 
-      - name: Adapters package tests
-        run: python3 -m unittest discover -s test/adapters -t .
+      # Plugin isolation / registry (2.1-D conformance). Not optional: this is
+      # the suite that caught the non-canonical pack dialect after ceiling
+      # delegation. Deletion (2.2-B) stays blocked until this stays green.
+      - name: Registry and plugin-cell isolation
+        run: python3 -m unittest discover -s test/registry -t .
 
       - name: Security package tests
         run: python3 -m unittest discover -s test/security -t .

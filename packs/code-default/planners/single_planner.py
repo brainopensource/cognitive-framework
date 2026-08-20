@@ -74,7 +74,7 @@ class DriveUntilGreenPlanner:
         request = EffectRequest(
             verb="patch.apply",
             args={"path": "src/app.py", "content": "# repair\n"},
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=SinkClass.PRIVILEGED,
             reservation=reserved,
         )

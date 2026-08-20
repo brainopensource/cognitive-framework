@@ -182,7 +182,7 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
             EffectRequest(
                 verb="proc.exec",
                 args={"command": ["id"]},
-                selector={"kind": "proc", "executable": "/bin/id"},
+                selector={"kind": "generic", "uriPattern": "proc://exec/allow/id"},
                 sink=SinkClass.PRIVILEGED,
                 reservation=_BUDGET,
             ),

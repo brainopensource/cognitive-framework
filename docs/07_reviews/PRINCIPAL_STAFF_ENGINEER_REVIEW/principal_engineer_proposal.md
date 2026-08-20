@@ -1,10 +1,10 @@
-Abaixo está a consolidação em formato de relatório técnico, incorporando a revisão dos documentos, as correções discutidas e a tese ampliada de AGI por composição de primitivas, sem tratar AGI como uma capacidade já demonstrada.
+> Abaixo está a consolidação em formato de relatório técnico, incorporando a revisão dos documentos, as correções discutidas e a tese ampliada de AGI por composição de primitivas, sem tratar AGI como uma capacidade já demonstrada.
 
-AETHER/Vanguard — Substrate Recursivo para Inteligência Agêntica, Meta-Harness e Self-Improvement
+# AETHER/Vanguard — Substrate Recursivo para Inteligência Agêntica, Meta-Harness e Self-Improvement
 
-Relatório técnico de arquitetura e tese de pesquisa para Substrate v0.6.0
+### Relatório técnico de arquitetura e tese de pesquisa para Substrate v0.6.0
 
-Resumo
+## Resumo
 
 Este relatório consolida a revisão arquitetural dos documentos "Vanguard-substrate-060-full-refactor-v3-1.md", "vanguard-substrate-060-execution-plan.md" e da "SPEC.md", juntamente com a evolução conceitual desenvolvida durante a discussão sobre agentes, subagentes, swarms, plugins, event sourcing, Meta-Harness, self-improvement, cognição avançada e uma possível trajetória de pesquisa em direção a sistemas de inteligência artificial geral.
 
@@ -19,17 +19,17 @@ O Vanguard/AETHER deixa, portanto, de ser concebido apenas como um coding agent 
 
 Nesse substrato:
 
-[
+$$
 Agent = Principal + HarnessInstance
-]
+$$
 
-[
+$$
 SubAgent = ChildPrincipal + HarnessInstance
-]
+$$
 
-[
+$$
 MetaAgent = Principal + HarnessInstance + MetaCapabilities
-]
+$$
 
 e nenhum desses elementos exige uma nova engine.
 
@@ -56,7 +56,7 @@ A "SPEC.md" atual já aponta nessa direção ao definir Layer 0 como uma combina
 
 ---
 
-1. Status epistemológico: isto é uma hipótese de AGI, não uma alegação de AGI
+## 1. Status epistemológico: isto é uma hipótese de AGI, não uma alegação de AGI
 
 É importante separar objetivo de pesquisa de conclusão científica.
 
@@ -94,7 +94,7 @@ A própria SPEC já contém uma forma forte desse princípio através do requisi
 
 ---
 
-2. Avaliação geral do Substrate v0.6.0
+## 2. Avaliação geral do Substrate v0.6.0
 
 Os dois documentos de Substrate v0.6.0 constituem uma evolução substancial em relação aos roadmaps anteriores.
 
@@ -121,9 +121,9 @@ Entretanto, alguns conflitos precisam ser eliminados antes da execução.
 
 ---
 
-3. Correções bloqueantes antes da implementação
+## 3. Correções bloqueantes antes da implementação
 
-3.1 Python versus Rust
+### 3.1 Python versus Rust
 
 Existe uma contradição direta.
 
@@ -156,7 +156,7 @@ O objetivo da v0.6 deve ser reduzir multiplicidade arquitetural, não introduzir
 
 Microkernels são particularmente valiosos quando mantêm pequena a quantidade de código que precisa compartilhar o domínio de confiança; a literatura clássica de microkernels também mostra que a fronteira mínima pode coexistir com desempenho elevado quando o mecanismo básico é cuidadosamente projetado.
 
-Decisão
+#### Decisão
 
 Python-first.
 
@@ -174,7 +174,7 @@ e não uma reescrita integral.
 
 ---
 
-4. Autoridade: orchestrator decide, ledger prova
+## 4. Autoridade: orchestrator decide, ledger prova
 
 Outro conflito conceitual importante está no uso do termo:
 
@@ -184,7 +184,7 @@ Isso deve ser refinado.
 
 A arquitetura correta possui duas autoridades diferentes.
 
-Autoridade de decisão
+### Autoridade de decisão
 
 scheduler
 orchestrator
@@ -198,7 +198,7 @@ decidem:
 - qual budget recebe;
 - quais capabilities são autorizadas.
 
-Autoridade de estado
+### Autoridade de estado
 
 ledger + reducers
 
@@ -208,7 +208,7 @@ determinam:
 
 Logo:
 
-[
+$$
 Decision
 \rightarrow
 DurableEvent
@@ -216,15 +216,15 @@ DurableEvent
 Reducer
 \rightarrow
 EffectiveState
-]
+$$
 
 e não:
 
-[
+$$
 Decision
 \rightarrow
 MutableOrchestratorState
-]
+$$
 
 O orchestrator pode dizer:
 
@@ -246,7 +246,7 @@ Essa distinção preserva a propriedade fundamental da SPEC de que grants, budge
 
 ---
 
-5. O princípio mais importante: uma única máquina recursiva
+## 5. O princípio mais importante: uma única máquina recursiva
 
 O maior avanço conceitual desta revisão não está em um componente específico.
 
@@ -255,6 +255,8 @@ Está em eliminar a necessidade de diferentes engines para diferentes níveis de
 O modelo fundamental pode ser reduzido a:
 
 Project
+```text
+```text
  └── Principal
       └── HarnessInstance
            └── Episode
@@ -265,69 +267,75 @@ Project
                 ├── Event
                 ├── Evaluation
                 └── spawn(...)
+```
+```
 
 Formalmente, um harness em execução pode ser descrito como:
 
-[
+$$
 H_i =
 (M_i,P_i,C_i,B_i,S_i)
-]
+$$
 
 onde:
 
-[
+$$
 M_i = manifest
-]
+$$
 
-[
+$$
 P_i = plugin\ composition
-]
+$$
 
-[
+$$
 C_i = capabilities
-]
+$$
 
-[
+$$
 B_i = resource\ budget
-]
+$$
 
-[
+$$
 S_i = event-derived\ state
-]
+$$
 
 Um agente passa a ser:
 
-[
+$$
 A_i = (Principal_i,H_i)
-]
+$$
 
 Quando um agente delega:
 
-[
+$$
 A_c =
 spawn(A_p,H_c,C_c,B_c)
-]
+$$
 
 com invariantes:
 
-[
+$$
 C_c \subseteq C_p
-]
+$$
 
 e:
 
-[
+$$
 B_c \preceq B_p^{remaining}
-]
+$$
 
 Portanto:
 
 Architect
+```text
+```text
  ├── Researcher
  ├── Programmer
  │    ├── Test Agent
  │    └── Debug Agent
  └── Reviewer
+```
+```
 
 não corresponde a cinco arquiteturas.
 
@@ -339,7 +347,7 @@ Frameworks modernos como AutoGen também demonstram a utilidade de agentes confi
 
 ---
 
-6. O que é um agente
+## 6. O que é um agente
 
 Não deveria existir uma classe conceitualmente privilegiada denominada:
 
@@ -381,7 +389,7 @@ Essa separação é extremamente importante.
 
 ---
 
-7. Subagentes como recursão, não feature
+## 7. Subagentes como recursão, não feature
 
 Um subagente não deveria ser uma feature especial.
 
@@ -396,6 +404,8 @@ child = spawn(
 
 Uma interface aproximada poderia ser:
 
+```python
+```python
 @dataclass(frozen=True, slots=True)
 class SpawnRequest:
     harness_ref: HarnessRef
@@ -403,8 +413,12 @@ class SpawnRequest:
     capabilities: CapabilitySet
     reservation: Reservation
     acceptance_ref: EvaluationSpecRef
+```
+```
 
 
+```python
+```python
 def spawn(
     parent: Principal,
     request: SpawnRequest,
@@ -439,6 +453,8 @@ def spawn(
     )
 
     return ChildHandle(principal.id)
+```
+```
 
 O ponto importante não é a sintaxe.
 
@@ -448,23 +464,23 @@ O ponto importante não é a sintaxe.
 
 ---
 
-8. Swarm não é uma arquitetura diferente
+## 8. Swarm não é uma arquitetura diferente
 
 Um swarm é apenas um conjunto maior de relações entre principals.
 
 Formalmente:
 
-[
+$$
 \mathcal{A}
 
 {A_1,A_2,\ldots,A_n}
-]
+$$
 
 mais uma política:
 
-[
+$$
 \pi_{coord}
-]
+$$
 
 que determina:
 
@@ -479,33 +495,37 @@ que determina:
 
 Portanto:
 
-[
+$$
 Swarm =
 Agents + CoordinationPolicy
-]
+$$
 
 e não:
 
-[
+$$
 Swarm = NewEngine
-]
+$$
 
 Diferentes formas de swarm podem então existir como plugins.
 
-Hierarchical delegation
+#### Hierarchical delegation
 
 Parent
+```text
+```text
  ├── Specialist A
  ├── Specialist B
  └── Specialist C
+```
+```
 
-Competitive search
+#### Competitive search
 
 proposal A ─┐
 proposal B ─┼→ evaluator/selector
 proposal C ─┘
 
-Critic pattern
+#### Critic pattern
 
 worker
    ↓
@@ -513,11 +533,15 @@ critic
    ↓
 revision
 
-Debate
+#### Debate
 
+```text
+```text
 A ↔ B ↔ C
       ↓
  decision
+```
+```
 
 Experimentos com multi-agent debate mostram que múltiplos agentes podem melhorar certos tipos de raciocínio, mas isso não implica que mais agentes sempre sejam melhores.
 
@@ -525,7 +549,7 @@ Há também evidência de que aumentar agentes e rounds pode elevar fortemente c
 
 ---
 
-9. Stigmergy e colaboração através do ambiente
+## 9. Stigmergy e colaboração através do ambiente
 
 Uma forma particularmente interessante de colaboração não exige conversas permanentes entre agentes.
 
@@ -555,7 +579,7 @@ Ou seja:
 
 ---
 
-10. Graphs: propriedade emergente, não workflow imposto
+## 10. Graphs: propriedade emergente, não workflow imposto
 
 A estrutura natural do sistema já é relacional.
 
@@ -572,9 +596,9 @@ invalidated_by
 
 Logo o sistema naturalmente induz um grafo:
 
-[
+$$
 G_t=(V_t,E_t)
-]
+$$
 
 em que os vértices podem incluir:
 
@@ -591,15 +615,15 @@ e as arestas são derivadas dos eventos.
 
 Idealmente:
 
-[
+$$
 G_t =
 \Pi_G(L_{\le t})
-]
+$$
 
 onde:
 
-- L é o ledger;
-- \Pi_G é uma projeção.
+- $L$ é o ledger;
+- $\Pi_G$ é uma projeção.
 
 Portanto:
 
@@ -633,7 +657,7 @@ Lamport mostrou que sistemas concorrentes possuem naturalmente relações de pre
 
 ---
 
-11. O ledger como coração epistemológico do sistema
+## 11. O ledger como coração epistemológico do sistema
 
 A frase:
 
@@ -659,20 +683,20 @@ Telemetry    = representação analítica
 
 Consequentemente:
 
-[
+$$
 State_t =
 fold(E_1,\ldots,E_t)
-]
+$$
 
 e:
 
-[
+$$
 Projection_t = f(L_{\le t})
-]
+$$
 
-[
+$$
 Cache_t = g(L_{\le t},CAS)
-]
+$$
 
 Um cache pode desaparecer.
 
@@ -688,12 +712,14 @@ Ele não deve redefinir a verdade factual.
 
 ---
 
-12. Event sourcing híbrido é a decisão mais adequada
+## 12. Event sourcing híbrido é a decisão mais adequada
 
 Event sourcing puro não significa reconstruir milhões de eventos em todo read.
 
 A arquitetura recomendada é híbrida:
 
+```text
+```text
                   ┌─────────────┐
 commands ────────▶│   Kernel    │
                   └──────┬──────┘
@@ -712,18 +738,20 @@ commands ────────▶│   Kernel    │
                          │
                          ▼
                        Cache
+```
+```
 
 Replay pode partir de:
 
-[
+$$
 Snapshot_k + Events_{k+1:n}
-]
+$$
 
 em vez de:
 
-[
+$$
 Events_{1:n}
-]
+$$
 
 em todas as consultas.
 
@@ -731,7 +759,7 @@ Isso mantém a propriedade epistemológica do event sourcing sem sacrificar hot-
 
 ---
 
-13. “Tudo é evento” não significa “todo byte é evento”
+## 13. “Tudo é evento” não significa “todo byte é evento”
 
 A regra deveria ser:
 
@@ -770,7 +798,7 @@ Isso permite logs pequenos e conteúdo grande.
 
 ---
 
-14. Execução concorrente versus ordenação do ledger
+## 14. Execução concorrente versus ordenação do ledger
 
 O Full Refactor apresenta a cadeia hash total como um limitador importante de paralelismo.
 
@@ -784,10 +812,10 @@ Agent C ─────────── effect ─────────┘
 
 O que precisa ser medido é:
 
-[
+$$
 s =
 \frac{T_{serial}}{T_{total}}
-]
+$$
 
 e não presumido.
 
@@ -822,15 +850,15 @@ Isso já fornece uma poderosa reconstrução causal.
 
 ---
 
-15. Replay não é re-execution
+## 15. Replay não é re-execution
 
 Outra distinção essencial:
 
 State replay
 
-[
+$$
 fold(L) = S
-]
+$$
 
 Deve ser determinístico.
 
@@ -838,11 +866,11 @@ Schedule replay
 
 Com todos os inputs não determinísticos gravados:
 
-[
+$$
 Replay(schedule,cassettes)
 \rightarrow
 same\ trajectory
-]
+$$
 
 pode ser exigido.
 
@@ -868,13 +896,13 @@ Byte identity é adequado somente para fixtures completamente controladas.
 
 ---
 
-16. Identidade precisa de três níveis
+## 16. Identidade precisa de três níveis
 
 Um único "harness_digest" não deveria responder todas as perguntas experimentais.
 
-16.1 Harness identity
+### 16.1 Harness identity
 
-[
+$$
 D_H =
 H(
 Manifest_{resolved}
@@ -885,15 +913,15 @@ Assets
 \parallel
 Policies
 )
-]
+$$
 
 Responde:
 
 «Qual composição lógica foi criada?»
 
-16.2 Execution identity
+### 16.2 Execution identity
 
-[
+$$
 D_R =
 H(
 D_H
@@ -906,15 +934,15 @@ ModelIdentity
 \parallel
 OracleIdentity
 )
-]
+$$
 
 Responde:
 
 «O que realmente executou?»
 
-16.3 Experiment cell identity
+### 16.3 Experiment cell identity
 
-[
+$$
 D_X =
 H(
 D_R
@@ -923,7 +951,7 @@ Dataset
 \parallel
 Protocol
 )
-]
+$$
 
 Responde:
 
@@ -933,7 +961,7 @@ Assim o mesmo harness usando duas versões diferentes de um provider deixa de pa
 
 ---
 
-17. Plugin-first, não “tudo é plugin”
+## 17. Plugin-first, não “tudo é plugin”
 
 Existe uma nuance importante.
 
@@ -962,7 +990,7 @@ Uma regra útil:
 
 ---
 
-18. Plugin como unidade universal de especialização
+## 18. Plugin como unidade universal de especialização
 
 A proposta multi-agent torna a arquitetura de plugins ainda mais importante.
 
@@ -998,7 +1026,7 @@ A diferença é composição.
 
 ---
 
-19. Memória é plugin
+## 19. Memória é plugin
 
 Memória cognitiva não deve ser confundida com ledger.
 
@@ -1027,13 +1055,15 @@ Reflexion demonstrou um caso em que feedback textual armazenado em memória epis
 
 ---
 
-20. Skills são artifacts executáveis ou advisory
+## 20. Skills são artifacts executáveis ou advisory
 
 Skills não deveriam ser strings magicamente adicionadas ao prompt.
 
 Uma skill robusta deveria possuir algo próximo de:
 
 SkillManifest
+```text
+```text
  ├── id
  ├── version
  ├── input schema
@@ -1043,6 +1073,8 @@ SkillManifest
  ├── provenance
  ├── validation evidence
  └── applicability metadata
+```
+```
 
 Skills podem ser:
 
@@ -1062,7 +1094,7 @@ reversible
 
 ---
 
-21. Tools e scripts são capabilities, não intelligence
+## 21. Tools e scripts são capabilities, não intelligence
 
 Uma ferramenta AST, shell, indexer ou browser não torna um agente intrinsecamente mais inteligente.
 
@@ -1070,15 +1102,15 @@ Ela altera seu espaço de ação.
 
 Formalmente, dado um agente com política:
 
-[
+$$
 \pi(a|s)
-]
+$$
 
 um toolkit modifica:
 
-[
+$$
 \mathcal{A}
-]
+$$
 
 o conjunto de ações disponíveis.
 
@@ -1092,7 +1124,7 @@ Essa distinção é central para a tese AETHER:
 
 ---
 
-22. Context compression é plugin, nunca alteração da evidência
+## 22. Context compression é plugin, nunca alteração da evidência
 
 Compressão deve operar sobre uma projeção do estado.
 
@@ -1127,13 +1159,13 @@ pode ser substituída sem alterar a história.
 
 ---
 
-23. Cache é plugin/projeção e deve ser provenance-aware
+## 23. Cache é plugin/projeção e deve ser provenance-aware
 
 Como o projeto pretende utilizar cache agressivamente, a chave de cache precisa carregar identidade suficiente.
 
 Uma forma conceitual:
 
-[
+$$
 K =
 H(
 operation
@@ -1148,7 +1180,7 @@ environment
 \parallel
 authority_scope
 )
-]
+$$
 
 O último elemento é particularmente importante.
 
@@ -1168,7 +1200,7 @@ Nunca autoridade.
 
 ---
 
-24. AST, indexing e heurísticas encaixam naturalmente
+## 24. AST, indexing e heurísticas encaixam naturalmente
 
 AST processing, repo mapping, heuristics, retrieval, rankers e indexers são excelentes exemplos de plugins porque:
 
@@ -1194,7 +1226,7 @@ Essa é exatamente a propriedade desejada.
 
 ---
 
-25. Metaprogramação futura
+## 25. Metaprogramação futura
 
 O verdadeiro ganho da arquitetura de manifests aparece quando o próprio sistema começa a gerar composições.
 
@@ -1230,7 +1262,7 @@ Ele gera dados que o kernel já sabe interpretar.
 
 ---
 
-26. Definição recomendada de Meta-Harness
+## 26. Definição recomendada de Meta-Harness
 
 Não deveria existir:
 
@@ -1264,14 +1296,14 @@ Promotion decision
 
 Formalmente:
 
-[
+$$
 H_{t+1}
 
 Promote(
 Evaluate(
 Mutate(H_t)
 ))
-]
+$$
 
 Não há self-modification in-place.
 
@@ -1279,13 +1311,13 @@ Há evolução versionada.
 
 ---
 
-27. Self-improvement deve possuir níveis
+## 27. Self-improvement deve possuir níveis
 
 Nem todo self-improvement possui o mesmo risco.
 
 Uma taxonomia útil seria:
 
-Nível 0 — Runtime adaptation
+### Nível 0 — Runtime adaptation
 
 Sem persistência entre runs.
 
@@ -1293,7 +1325,7 @@ retry
 rerouting
 context adjustment
 
-Nível 1 — Memory adaptation
+### Nível 1 — Memory adaptation
 
 Persiste conhecimento ou skills.
 
@@ -1301,7 +1333,7 @@ memory
 skill library
 heuristics
 
-Nível 2 — Composition adaptation
+### Nível 2 — Composition adaptation
 
 Modifica:
 
@@ -1311,18 +1343,18 @@ model routes
 retrieval policies
 compression strategies
 
-Nível 3 — Program synthesis
+### Nível 3 — Program synthesis
 
 Gera novos plugins ou versões de plugins.
 
-Nível 4 — Model adaptation
+### Nível 4 — Model adaptation
 
 SFT
 DPO
 LoRA
 distillation
 
-Nível 5 — Core architecture modification
+### Nível 5 — Core architecture modification
 
 Modifica as próprias primitives.
 
@@ -1332,7 +1364,7 @@ A SPEC atual rejeita explicitamente um self-updating release pipeline.
 
 ---
 
-28. O Learning Plane nunca promove
+## 28. O Learning Plane nunca promove
 
 A arquitetura deve possuir:
 
@@ -1355,9 +1387,9 @@ PromotionDecision
 
 Portanto:
 
-[
+$$
 Learning \neq Authority
-]
+$$
 
 Learning propõe.
 
@@ -1371,17 +1403,17 @@ Essa separação impede que o mecanismo que quer provar sua melhoria controle a 
 
 ---
 
-29. O evaluator é autoridade, não verdade absoluta
+## 29. O evaluator é autoridade, não verdade absoluta
 
 A exterioridade do judge continua sendo uma das decisões mais importantes do projeto.
 
 Mas:
 
-[
+$$
 SignedVerdict
 \not\Rightarrow
 CorrectVerdict
-]
+$$
 
 Assinatura prova:
 
@@ -1406,19 +1438,19 @@ replaceable through governance
 
 A separação fundamental permanece:
 
-[
+$$
 Agent \not\rightarrow Judge
-]
+$$
 
 mas o judge também é submetido à ciência.
 
 ---
 
-30. Inteligência como propriedade sistêmica
+## 30. Inteligência como propriedade sistêmica
 
 A competência observada de um agente pode ser modelada conceitualmente como:
 
-[
+$$
 Y =
 F(
 M,
@@ -1433,21 +1465,21 @@ Eval,
 B,
 Env
 )
-]
+$$
 
 onde:
 
-- M: modelo;
-- P: planner;
-- Mem: memória;
-- Ctx: context management;
-- Tools: ferramentas;
-- Skills: skills;
-- Search: estratégia de busca;
-- Coord: coordenação multi-agent;
-- Eval: feedback/evaluation;
-- B: orçamento;
-- Env: ambiente.
+- $M$: modelo;
+- $P$: planner;
+- $Mem$: memória;
+- $Ctx$: context management;
+- $Tools$: ferramentas;
+- $Skills$: skills;
+- $Search$: estratégia de busca;
+- $Coord$: coordenação multi-agent;
+- $Eval$: feedback/evaluation;
+- $B$: orçamento;
+- $Env$: ambiente.
 
 Assim:
 
@@ -1457,17 +1489,17 @@ Pode significar melhorar qualquer elemento da composição.
 
 ---
 
-31. Uma consequência científica: medir contribuição marginal
+## 31. Uma consequência científica: medir contribuição marginal
 
 Uma vez que cada composição possui identidade, torna-se possível medir:
 
-[
+$$
 \Delta_C
 
 E[Y|do(C=C_1)]
 
 E[Y|do(C=C_0)]
-]
+$$
 
 mantendo as demais variáveis controladas.
 
@@ -1489,7 +1521,7 @@ Isso transforma plugins em unidades experimentais.
 
 ---
 
-32. Cognição avançada deve emergir da composição
+## 32. Cognição avançada deve emergir da composição
 
 Não deveria existir:
 
@@ -1516,7 +1548,7 @@ Ele apenas executa primitives.
 
 ---
 
-33. Metacognição como funções observáveis
+## 33. Metacognição como funções observáveis
 
 Metacognição pode ser decomposta em capacidades verificáveis.
 
@@ -1555,9 +1587,9 @@ Calibration
 
 Comparar:
 
-[
+$$
 P(success)
-]
+$$
 
 previsto com resultado real.
 
@@ -1567,7 +1599,7 @@ Reflexion é um exemplo de como feedback reflexivo pode alterar comportamento at
 
 ---
 
-34. Neuroscience como fonte de hipóteses, não blueprint
+## 34. Neuroscience como fonte de hipóteses, não blueprint
 
 Neurociência pode inspirar plugins e mecanismos experimentais.
 
@@ -1595,19 +1627,19 @@ Não nomes decorativos.
 
 ---
 
-35. Active inference: usar apenas se realmente implementado
+## 35. Active inference: usar apenas se realmente implementado
 
 A Free Energy Principle e active inference descrevem uma família formal de modelos que envolve inferência probabilística e minimização de quantidades relacionadas a surprise/free energy.
 
 Portanto uma política simples:
 
-[
+$$
 score(a)
 
 ExpectedGain(a)
 
 \lambda Cost(a)
-]
+$$
 
 não deveria ser denominada automaticamente “active inference”.
 
@@ -1625,7 +1657,7 @@ A terminologia precisa ser mais conservadora que a ambição.
 
 ---
 
-36. Psicologia e bounded rationality
+## 36. Psicologia e bounded rationality
 
 Agentes possuem:
 
@@ -1655,7 +1687,7 @@ Esse é um modo mais realista de pensar cognição computacional:
 
 ---
 
-37. Evolução e genética como analogia experimental
+## 37. Evolução e genética como analogia experimental
 
 A analogia genética pode ser útil desde que permaneça fora da ontologia normativa, em conformidade com a SPEC, que rejeita metáforas como arquitetura.
 
@@ -1684,7 +1716,7 @@ A computação evolucionária historicamente explora seleção, mutação e reco
 
 ---
 
-38. Meta-learning
+## 38. Meta-learning
 
 Meta-learning oferece outra perspectiva.
 
@@ -1697,7 +1729,7 @@ but system composition
 
 Isto é:
 
-[
+$$
 MetaLearningSpace
 
 {
@@ -1709,13 +1741,13 @@ tools,
 policies,
 weights
 }
-]
+$$
 
 O Meta-Harness torna a própria configuração do sistema parte do espaço adaptativo.
 
 ---
 
-39. DPO e model distillation
+## 39. DPO e model distillation
 
 Quando corpus confiável existir, trajetórias podem alimentar model adaptation.
 
@@ -1742,7 +1774,7 @@ A trajetória deve possuir provenance suficiente desde a geração.
 
 ---
 
-40. LoRA e adaptação eficiente
+## 40. LoRA e adaptação eficiente
 
 Para modelos locais, LoRA é particularmente interessante porque permite adaptação treinando uma fração muito menor de parâmetros do que full fine-tuning e reduz substancialmente requisitos de memória de treinamento em seus experimentos originais.
 
@@ -1770,7 +1802,7 @@ Novamente:
 
 ---
 
-41. Gödel Machine versus Vanguard
+## 41. Gödel Machine versus Vanguard
 
 A Gödel Machine de Schmidhuber é uma proposta teórica de um sistema capaz de modificar o próprio código quando encontra uma prova de que a mudança melhora sua utility.
 
@@ -1794,7 +1826,7 @@ A diferença essencial deveria continuar sendo a governança explícita.
 
 ---
 
-42. Resource efficiency: a arquitetura é leve, swarms não são automaticamente leves
+## 42. Resource efficiency: a arquitetura é leve, swarms não são automaticamente leves
 
 É importante corrigir uma possível interpretação.
 
@@ -1804,7 +1836,7 @@ Ela não elimina custo computacional de múltiplos modelos.
 
 Se cada agente abrir seu próprio processo de modelo:
 
-[
+$$
 M_{naive}
 \approx
 N(
@@ -1814,13 +1846,13 @@ M_{runtime}
 +
 M_{context}
 )
-]
+$$
 
 O resultado pode ser extremamente caro.
 
 A arquitetura desejada é:
 
-[
+$$
 M_{shared}
 \approx
 M_{model\ server}
@@ -1831,13 +1863,13 @@ M_{core}
 M_{context_i}
 +
 K M_{worker}
-]
+$$
 
 com:
 
-[
+$$
 K \ll N_{logical\ agents}
-]
+$$
 
 Ou seja:
 
@@ -1845,7 +1877,7 @@ Ou seja:
 
 ---
 
-43. Logical agent versus execution worker
+## 43. Logical agent versus execution worker
 
 Essa distinção deve existir desde cedo.
 
@@ -1880,17 +1912,21 @@ Esse modelo é uma das principais condições para um swarm eficiente.
 
 ---
 
-44. Compartilhamento de modelos
+## 44. Compartilhamento de modelos
 
 Não se deveria carregar um modelo para cada agente.
 
 A arquitetura ideal possui:
 
+```text
+```text
               ┌───────────────┐
 Agent A ─────▶│               │
 Agent B ─────▶│ Model Broker  │──▶ shared model runtime
 Agent C ─────▶│               │
               └───────────────┘
+```
+```
 
 Cada agente pode possuir:
 
@@ -1909,7 +1945,7 @@ Isso não prova nada diretamente sobre multi-agent orchestration, mas fornece um
 
 ---
 
-45. Sparse agency
+## 45. Sparse agency
 
 O princípio poderia ser chamado informalmente de:
 
@@ -1930,21 +1966,21 @@ frontier model?
 
 Idealmente:
 
-[
+$$
 N_{active}
 
 policy(task,state,budget,uncertainty)
-]
+$$
 
 Portanto a inteligência sistêmica pode aumentar sem que o custo cresça linearmente com o número máximo de agentes disponíveis.
 
 ---
 
-46. Budget como vetor
+## 46. Budget como vetor
 
 O vetor:
 
-[
+$$
 B=
 (
 usd,
@@ -1954,25 +1990,25 @@ bytes,
 turns,
 depth
 )
-]
+$$
 
 é superior a um único scalar budget porque diferentes recursos não possuem taxa de conversão universal.
 
 Spawn precisa preservar:
 
-[
+$$
 B_{child}
 \preceq
 B_{parent}^{remaining}
-]
+$$
 
 e siblings:
 
-[
+$$
 \sum_i B_{child_i}
 \preceq
 B_{parent}^{reserved}
-]
+$$
 
 componente a componente.
 
@@ -1980,7 +2016,7 @@ Isso permite admission control real.
 
 ---
 
-47. Scheduler como mecanismo, estratégia como plugin/policy
+## 47. Scheduler como mecanismo, estratégia como plugin/policy
 
 O scheduler deve compreender:
 
@@ -2007,7 +2043,7 @@ Assim o scheduler permanece pequeno.
 
 ---
 
-48. Concorrência: projetar agora, ligar depois
+## 48. Concorrência: projetar agora, ligar depois
 
 A decisão correta é:
 
@@ -2038,31 +2074,31 @@ Esse é exatamente o tipo de antecipação que evita retrabalho.
 
 ---
 
-49. Independência precisa ser real
+## 49. Independência precisa ser real
 
-Para executar duas operações i e j em paralelo, com read/write sets:
+Para executar duas operações $i$ e $j$ em paralelo, com read/write sets:
 
-[
+$$
 R_i,W_i
-]
+$$
 
-[
+$$
 R_j,W_j
-]
+$$
 
 uma condição clássica mínima de independência é:
 
-[
+$$
 W_i\cap R_j=\varnothing
-]
+$$
 
-[
+$$
 R_i\cap W_j=\varnothing
-]
+$$
 
-[
+$$
 W_i\cap W_j=\varnothing
-]
+$$
 
 Não se deveria confiar simplesmente no planner dizendo:
 
@@ -2082,7 +2118,7 @@ são opções.
 
 ---
 
-50. Revogação realista
+## 50. Revogação realista
 
 A semântica correta não é:
 
@@ -2092,11 +2128,11 @@ Para efeitos externos isso pode ser impossível.
 
 A propriedade implementável é:
 
-[
+$$
 Revoke
 \Rightarrow
 NoNewPrivilegedDispatch
-]
+$$
 
 Depois:
 
@@ -2116,7 +2152,7 @@ Essa semântica precisa estar escrita antes de multi-agent concurrency.
 
 ---
 
-51. Segurança: o que precisa existir desde o começo
+## 51. Segurança: o que precisa existir desde o começo
 
 A visão holística não exige implementar toda a segurança agora.
 
@@ -2138,7 +2174,7 @@ Não features.
 
 ---
 
-52. Segurança que pode ser adiada
+## 52. Segurança que pode ser adiada
 
 Pode ser implementado progressivamente:
 
@@ -2168,7 +2204,7 @@ model-generated/untrusted code
 
 ---
 
-53. Layers devem ser fronteiras conceituais, não necessariamente processos
+## 53. Layers devem ser fronteiras conceituais, não necessariamente processos
 
 Cinco “planes” não precisam significar cinco serviços.
 
@@ -2202,10 +2238,12 @@ latency
 
 ---
 
-54. Um desenho de runtime minimalista
+## 54. Um desenho de runtime minimalista
 
 Uma implementação inicial poderia ser:
 
+```text
+```text
 ┌───────────────────────────────────┐
 │ Python Process                    │
 │                                   │
@@ -2232,6 +2270,8 @@ Uma implementação inicial poderia ser:
        ┌────────────────┐
        │ External Judge │
        └────────────────┘
+```
+```
 
 Nada de Kubernetes.
 
@@ -2247,7 +2287,7 @@ Primeiro se prova a semântica.
 
 ---
 
-55. Contratos polyglot
+## 55. Contratos polyglot
 
 A SPEC atual determina:
 
@@ -2285,7 +2325,7 @@ Mas não como uma segunda identidade normativa.
 
 ---
 
-56. Contract lock deve seguir observação
+## 56. Contract lock deve seguir observação
 
 Um dos melhores princípios dos documentos é:
 
@@ -2308,7 +2348,7 @@ Um contrato derivado apenas do happy path provavelmente omite estados importante
 
 ---
 
-57. ProjectManifest não deveria congelar cedo
+## 57. ProjectManifest não deveria congelar cedo
 
 "ProjectManifest" só ganha semântica verdadeira quando um projeto multi-agent real existe.
 
@@ -2333,7 +2373,7 @@ Isso evita congelar ficção.
 
 ---
 
-58. Goodhart como problema de arquitetura e ciência
+## 58. Goodhart como problema de arquitetura e ciência
 
 O achado mais importante do Full Refactor talvez não seja técnico, mas epistemológico.
 
@@ -2360,15 +2400,15 @@ podem legitimamente usar static analysis.
 
 ---
 
-59. Mutation testing
+## 59. Mutation testing
 
 Mutation score é útil.
 
 Mas:
 
-[
+$$
 score \ge 80%
-]
+$$
 
 não deve tornar-se nova definição de qualidade.
 
@@ -2390,7 +2430,7 @@ Se ele passar, o gate mede o proxy errado.
 
 ---
 
-60. Experiment Plane antes de Distributed Plane
+## 60. Experiment Plane antes de Distributed Plane
 
 Essa é uma mudança importante no roadmap.
 
@@ -2416,7 +2456,7 @@ Para um projeto de pesquisa, aumentar conhecimento deveria vir primeiro.
 
 ---
 
-61. Generality smoke test precoce
+## 61. Generality smoke test precoce
 
 Não se deveria esperar o fim do roadmap para descobrir que o core ficou coding-specific.
 
@@ -2436,7 +2476,7 @@ Se falhar, a abstração deve ser corrigida antes de adicionar mais complexidade
 
 ---
 
-62. O Coding Agent é instrumento científico
+## 62. O Coding Agent é instrumento científico
 
 Coding é um excelente primeiro domínio porque fornece:
 
@@ -2457,7 +2497,7 @@ A SPEC exige exatamente essa separação.
 
 ---
 
-63. Agentic Coding → General Task Solver
+## 63. Agentic Coding → General Task Solver
 
 A progressão pode ser:
 
@@ -2481,27 +2521,27 @@ Ocorre tornando cada passo uma composição sobre a máquina anterior.
 
 ---
 
-64. O próximo nível depois do Meta-Harness
+## 64. O próximo nível depois do Meta-Harness
 
 Uma possível sequência conceitual:
 
-Stage 1 — Agentic Coding
+### Stage 1 — Agentic Coding
 
 Um harness resolve tarefas de código.
 
-Stage 2 — Harness Framework
+### Stage 2 — Harness Framework
 
 Usuários compõem agentes diferentes.
 
-Stage 3 — Meta-Harness
+### Stage 3 — Meta-Harness
 
 O sistema gera e avalia novas composições.
 
-Stage 4 — Experiment/Evolution Layer
+### Stage 4 — Experiment/Evolution Layer
 
 O framework aprende quais composições funcionam em quais situações.
 
-Stage 5 — Cognitive Architecture
+### Stage 5 — Cognitive Architecture
 
 Mecanismos de:
 
@@ -2515,7 +2555,7 @@ strategy selection
 
 são combinados dinamicamente.
 
-Stage 6 — Self-Improving Ecosystem
+### Stage 6 — Self-Improving Ecosystem
 
 Harnesses geram:
 
@@ -2527,7 +2567,7 @@ model adapters
 
 que entram no mesmo pipeline experimental.
 
-Stage 7 — General Task Solver
+### Stage 7 — General Task Solver
 
 Novos domínios são incorporados sem modificar as primitives fundamentais.
 
@@ -2537,7 +2577,7 @@ Não uma prova de AGI, mas um substrate adequado para pesquisá-la.
 
 ---
 
-65. A tese emergente sobre inteligência
+## 65. A tese emergente sobre inteligência
 
 A hipótese mais interessante deixa de ser:
 
@@ -2562,7 +2602,7 @@ Isso aproxima o projeto de várias linhas científicas sem copiar nenhuma litera
 
 ---
 
-66. Separar capacidade potencial de capacidade ativa
+## 66. Separar capacidade potencial de capacidade ativa
 
 Um framework pode possuir:
 
@@ -2575,9 +2615,9 @@ sem ativá-los simultaneamente.
 
 O scheduler pode selecionar somente:
 
-[
+$$
 Subset(Task,State,Budget)
-]
+$$
 
 Essa é uma propriedade extremamente importante.
 
@@ -2589,7 +2629,7 @@ Essa lógica é compatível conceitualmente com conditional computation e sparse
 
 ---
 
-67. Harness immutable, Instance mutable
+## 67. Harness immutable, Instance mutable
 
 Outra distinção útil:
 
@@ -2619,15 +2659,19 @@ Isso reduz RAM e torna attribution simples.
 
 ---
 
-68. Copy-on-write para workspaces
+## 68. Copy-on-write para workspaces
 
 No coding domain:
 
 base repo
    │
+```text
+```text
    ├── overlay Agent A
    ├── overlay Agent B
    └── overlay Agent C
+```
+```
 
 é preferível a três cópias completas.
 
@@ -2645,11 +2689,11 @@ Duplicar somente deltas.
 
 ---
 
-69. Um modelo simplificado de custo
+## 69. Um modelo simplificado de custo
 
 Para um swarm:
 
-[
+$$
 C_{total}
 
 C_{model}
@@ -2661,39 +2705,39 @@ C_{coordination}
 C_{storage}
 +
 C_{scheduler}
-]
+$$
 
 O objetivo não deveria ser minimizar apenas:
 
-[
+$$
 C_{model}
-]
+$$
 
 mas:
 
-[
+$$
 \min E[C_{total}]
-]
+$$
 
 sujeito a:
 
-[
+$$
 P(success)\ge q
-]
+$$
 
-[
+$$
 Risk\le r
-]
+$$
 
-[
+$$
 Latency\le d
-]
+$$
 
 Isso produz uma formulação muito mais útil para resource-aware intelligence.
 
 ---
 
-70. Não transformar economia em arquitetura prematuramente
+## 70. Não transformar economia em arquitetura prematuramente
 
 O roadmap anterior sugeria Vickrey auctions para budget allocation.
 
@@ -2713,7 +2757,7 @@ Não como kernel feature.
 
 ---
 
-71. Science Plane como parte do moat
+## 71. Science Plane como parte do moat
 
 A parte mais defensável do projeto pode acabar não sendo o planner.
 
@@ -2743,7 +2787,7 @@ Promotion / Rejection
 
 ---
 
-72. Pré-registro: corrigindo C-5
+## 72. Pré-registro: corrigindo C-5
 
 A regra:
 
@@ -2771,13 +2815,13 @@ Portanto:
 
 ---
 
-73. Promotion metrics devem ser multidimensionais
+## 73. Promotion metrics devem ser multidimensionais
 
 Não existe razão para reduzir tudo a:
 
-[
+$$
 Reward = scalar
-]
+$$
 
 A SPEC já rejeita scalar reward como única base de promoção.
 
@@ -2796,16 +2840,16 @@ calibration
 
 Candidate A domina Candidate B se:
 
-[
+$$
 Quality_A\ge Quality_B
-]
+$$
 
 e:
 
-[
+$$
 Cost_{A,k}\le Cost_{B,k}
 \quad\forall k
-]
+$$
 
 com ao menos uma desigualdade estrita.
 
@@ -2813,7 +2857,7 @@ Isso produz uma Pareto frontier.
 
 ---
 
-74. Poder estatístico
+## 74. Poder estatístico
 
 Um número fixo como:
 
@@ -2837,7 +2881,7 @@ Não o contrário.
 
 ---
 
-75. Learning corpus admission
+## 75. Learning corpus admission
 
 Não se deveria excluir corpus apenas pela idade.
 
@@ -2867,31 +2911,31 @@ Não o timestamp.
 
 ---
 
-76. Self-improvement como search sobre espaço de sistemas
+## 76. Self-improvement como search sobre espaço de sistemas
 
 O Meta-Harness pode transformar:
 
-[
+$$
 \mathcal{H}
-]
+$$
 
 no espaço de harnesses possíveis.
 
 Um candidate generator produz:
 
-[
+$$
 H' \sim Q(H'|H,D)
-]
+$$
 
-onde D representa evidência anterior.
+onde $D$ representa evidência anterior.
 
 Um experimentador mede:
 
-[
+$$
 Y(H',T)
-]
+$$
 
-em tasks T.
+em tasks $T$.
 
 Um Promotion Controller seleciona candidatos de acordo com regras predefinidas.
 
@@ -2899,7 +2943,7 @@ A própria engenharia do sistema torna-se um problema de search.
 
 ---
 
-77. Algoritmos de self-improvement podem ser plugins
+## 77. Algoritmos de self-improvement podem ser plugins
 
 Exemplos:
 
@@ -2931,7 +2975,7 @@ sem alterar infraestrutura experimental.
 
 ---
 
-78. Não criar uma SPI para toda nova ideia
+## 78. Não criar uma SPI para toda nova ideia
 
 Existe outro extremo perigoso:
 
@@ -2962,7 +3006,7 @@ O número de SPIs deveria crescer somente quando aparecer uma fronteira semantic
 
 ---
 
-79. Proposta mínima de primitivas
+## 79. Proposta mínima de primitivas
 
 Eu tentaria manter o vocabulary fundamental próximo de:
 
@@ -2994,10 +3038,12 @@ Isso mantém o core conceitualmente pequeno.
 
 ---
 
-80. Modelo de dados sugerido
+## 80. Modelo de dados sugerido
 
 Um envelope futuro poderia assumir aproximadamente:
 
+```python
+```python
 @dataclass(frozen=True, slots=True)
 class EventEnvelope:
     project_id: ProjectId
@@ -3022,15 +3068,19 @@ class EventEnvelope:
 
     previous_digest: Digest | None
     digest: Digest
+```
+```
 
 Nem todos esses campos precisam necessariamente aparecer exatamente assim na versão inicial, mas a semântica correspondente deve existir.
 
 ---
 
-81. Graph como projection
+## 81. Graph como projection
 
 Nenhum graph database é necessário inicialmente.
 
+```python
+```python
 def build_execution_graph(
     events: Iterable[EventEnvelope],
 ) -> ExecutionGraph:
@@ -3054,6 +3104,8 @@ def build_execution_graph(
             )
 
     return graph
+```
+```
 
 Hoje pode ser:
 
@@ -3069,10 +3121,12 @@ sem mudar o ledger.
 
 ---
 
-82. Cache derivado
+## 82. Cache derivado
 
 Uma interface conceitual:
 
+```python
+```python
 @dataclass(frozen=True)
 class CacheIdentity:
     operation_digest: Digest
@@ -3080,6 +3134,8 @@ class CacheIdentity:
     harness_digest: Digest
     execution_env_digest: Digest
     authority_scope_digest: Digest
+```
+```
 
 O cache escreve:
 
@@ -3091,10 +3147,12 @@ Mas o valor cached não se torna authoritative state.
 
 ---
 
-83. Plugin manifest enriquecido
+## 83. Plugin manifest enriquecido
 
 Uma extensão futura, não necessariamente v0.6 inicial:
 
+```yaml
+```yaml
 api: mhf.plugin/1
 
 id: mhf.index.symbol-hybrid
@@ -3118,6 +3176,8 @@ resources:
   warmable: true
 
 entry: indexer.plugin:Plugin
+```
+```
 
 "resources" são hints.
 
@@ -3127,10 +3187,12 @@ O scheduler decide.
 
 ---
 
-84. Harness como programa declarativo
+## 84. Harness como programa declarativo
 
 Um harness continua podendo ser:
 
+```yaml
+```yaml
 api: mhf.harness/1
 
 id: code-default
@@ -3152,6 +3214,8 @@ plugins:
 
   evaluation:
     ref: eval.external-gate@1
+```
+```
 
 Trocar indexer, compressão ou memória deveria ser uma alteração localizada.
 
@@ -3159,7 +3223,7 @@ Essa é a propriedade central da metaprogramação futura.
 
 ---
 
-85. Literatura de agentes e onde Vanguard diverge
+## 85. Literatura de agentes e onde Vanguard diverge
 
 ReAct demonstra o valor de combinar reasoning e acting.
 
@@ -3181,10 +3245,12 @@ Particularmente, a adoção rígida de SOP/DAG no core iria contra a decisão Va
 
 ---
 
-86. Uma arquitetura cognitiva possível
+## 86. Uma arquitetura cognitiva possível
 
 No futuro, um harness sofisticado poderia possuir:
 
+```text
+```text
                   ┌──────────────┐
                   │ Task / Goal  │
                   └──────┬───────┘
@@ -3215,42 +3281,44 @@ No futuro, um harness sofisticado poderia possuir:
                          │
                          ▼
                      Reflection
+```
+```
 
 O importante é que nenhuma caixa precisa tornar-se parte do kernel.
 
 ---
 
-87. Um Cognitive Framework verdadeiramente evolutivo
+## 87. Um Cognitive Framework verdadeiramente evolutivo
 
 O sistema passa a possuir dois espaços:
 
 Runtime space
 
-[
+$$
 S
-]
+$$
 
 estado da tarefa.
 
 Architecture space
 
-[
+$$
 \mathcal{H}
-]
+$$
 
 espaço das possíveis composições de harness.
 
-O agente resolve problemas navegando S.
+O agente resolve problemas navegando $S$.
 
-O Meta-Harness melhora agentes navegando \mathcal{H}.
+O Meta-Harness melhora agentes navegando $\mathcal{H}$.
 
 Essa separação é particularmente poderosa.
 
 ---
 
-88. Meta-meta evolução
+## 88. Meta-meta evolução
 
-Posteriormente até o método de search sobre \mathcal H pode tornar-se objeto de experimento.
+Posteriormente até o método de search sobre $\mathcal H$ pode tornar-se objeto de experimento.
 
 Ou seja:
 
@@ -3262,9 +3330,9 @@ competem por produzir melhores harness candidates.
 
 Nesse ponto:
 
-[
+$$
 Optimizer \in \mathcal{H}
-]
+$$
 
 também.
 
@@ -3276,7 +3344,7 @@ Essa é uma direção teoricamente interessante para self-improvement.
 
 ---
 
-89. Onde interromper a recursão
+## 89. Onde interromper a recursão
 
 Recursão ilimitada não é desejável operacionalmente.
 
@@ -3290,11 +3358,11 @@ money
 
 Logo:
 
-[
+$$
 Depth_{child}
 <
 Depth_{parent}^{remaining}
-]
+$$
 
 A arquitetura permite recursão.
 
@@ -3302,25 +3370,25 @@ O governor limita explosão.
 
 ---
 
-90. Segurança da recursão
+## 90. Segurança da recursão
 
 A propriedade central é monotonicidade de autoridade:
 
-[
+$$
 Authority(child)
 \subseteq
 Authority(parent)
-]
+$$
 
 Nunca:
 
-[
+$$
 Authority(child)
 
 «»
 
 Authority(parent)
-]
+$$
 
 A mesma propriedade deve valer para budget reservado.
 
@@ -3330,7 +3398,7 @@ Ele apenas particiona aquela concedida à raiz.
 
 ---
 
-91. AGI por primitives: hipótese operacional
+## 91. AGI por primitives: hipótese operacional
 
 Uma formulação possível para a tese de doutorado seria:
 
@@ -3342,7 +3410,7 @@ Seria investigada pela capacidade de o mesmo substrate suportar novos comportame
 
 ---
 
-92. Primitivas candidatas da tese
+## 92. Primitivas candidatas da tese
 
 Podemos agrupar os fundamentos em cinco famílias.
 
@@ -3384,7 +3452,7 @@ Quase todo o resto pode ser composição.
 
 ---
 
-93. Intelligence invariance test
+## 93. Intelligence invariance test
 
 Uma pergunta deveria acompanhar toda nova feature:
 
@@ -3392,67 +3460,67 @@ Uma pergunta deveria acompanhar toda nova feature:
 
 Se a resposta for sim, perguntar:
 
-1. A nova capacidade realmente introduz uma nova categoria ontológica?
-2. Ou nossa composição atual é insuficiente?
-3. Existe maneira de expressá-la como plugin?
-4. Existe maneira de expressar seu estado como evento/artifact?
-5. Existe maneira de medi-la através das interfaces existentes?
+## 1. A nova capacidade realmente introduz uma nova categoria ontológica?
+## 2. Ou nossa composição atual é insuficiente?
+## 3. Existe maneira de expressá-la como plugin?
+## 4. Existe maneira de expressar seu estado como evento/artifact?
+## 5. Existe maneira de medi-la através das interfaces existentes?
 
 Somente depois disso um novo core primitive deveria ser considerado.
 
 ---
 
-94. Hipóteses de doutorado falsificáveis
+## 94. Hipóteses de doutorado falsificáveis
 
-H1 — Compositional Generality
+### H1 — Compositional Generality
 
 Adicionar um novo domínio não exige core diff.
 
-[
+$$
 \Delta Core(NewDomain)=0
-]
+$$
 
-H2 — Recursive Agency
+### H2 — Recursive Agency
 
 Um subagente pode ser implementado usando exatamente as mesmas primitives que o agente raiz.
 
-[
+$$
 PrimitiveSet(parent)
 
 PrimitiveSet(child)
-]
+$$
 
-H3 — Reconstructible State
+### H3 — Reconstructible State
 
 Todo estado operacional relevante é reconstruível de eventos.
 
-[
+$$
 fold(L)=S
-]
+$$
 
-H4 — Sparse Scaling
+### H4 — Sparse Scaling
 
 O número de agentes lógicos pode crescer mais rapidamente que o número de workers pesados sem perda significativa de competência.
 
-[
+$$
 N_{workers}
 \ll
 N_{agents}
-]
+$$
 
-H5 — Compositional Intelligence
+### H5 — Compositional Intelligence
 
 Ao menos parte significativa da melhoria de performance pode ser obtida mantendo o modelo fixo e alterando composição.
 
-[
+$$
 \Delta Y|_{M=fixed}>0
-]
+$$
 
-H6 — Governed Self-Improvement
+### H6 — Governed Self-Improvement
 
 Um processo automático de candidate generation + experimentação produz harnesses melhores que baseline sem aumentar regressões além de um limite pré-definido.
 
-H7 — Cross-domain Transfer
+### H7 — Cross-domain Transfer
 
 Plugins ou skills aprendidos em um domínio aumentam desempenho em outro sem mudanças no core.
 
@@ -3462,9 +3530,9 @@ Essas são teses muito mais cientificamente interessantes que:
 
 ---
 
-95. Experimentos fundamentais
+## 95. Experimentos fundamentais
 
-E1 — Fixed-model ablation
+### E1 — Fixed-model ablation
 
 Mesmo modelo.
 
@@ -3478,7 +3546,7 @@ context compression
 
 Medir contribuição sistêmica.
 
-E2 — Single versus multi-agent sob compute igual
+### E2 — Single versus multi-agent sob compute igual
 
 Comparar:
 
@@ -3490,7 +3558,7 @@ N agents × total budget B
 
 Se swarm só ganha consumindo muito mais compute, a causa precisa ser explicitada.
 
-E3 — Recursive depth
+### E3 — Recursive depth
 
 Variar:
 
@@ -3501,17 +3569,17 @@ depth 3
 
 e medir competência versus custo.
 
-E4 — Plugin substitution
+### E4 — Plugin substitution
 
 Trocar uma única caixa e provar attribution.
 
-E5 — Domain falsification
+### E5 — Domain falsification
 
 Adicionar domínio novo com:
 
 core diff == 0
 
-E6 — Self-improvement
+### E6 — Self-improvement
 
 Candidate generator oculto do holdout.
 
@@ -3519,13 +3587,13 @@ Promover somente candidatos confirmados.
 
 ---
 
-96. Medida de “intelligence amplification”
+## 96. Medida de “intelligence amplification”
 
 Uma métrica útil não seria apenas performance absoluta.
 
 Poderíamos estudar:
 
-[
+$$
 IA =
 \frac{
 Performance(System)
@@ -3534,7 +3602,7 @@ Performance(BaseModel)
 }{
 AdditionalCompute
 }
-]
+$$
 
 ou uma versão multidimensional.
 
@@ -3546,24 +3614,24 @@ Assim evita-se concluir que o sistema ficou “mais inteligente” quando apenas
 
 ---
 
-97. Swarm efficiency
+## 97. Swarm efficiency
 
 Uma métrica adicional:
 
-[
+$$
 SE =
 \frac{
 Quality_{swarm}-Quality_{single}
 }{
 Cost_{swarm}-Cost_{single}
 }
-]
+$$
 
 Se:
 
-[
+$$
 SE \le 0
-]
+$$
 
 para uma classe de tarefas, o swarm não deveria ser usado nela.
 
@@ -3571,19 +3639,19 @@ O scheduler futuro pode aprender exatamente isso.
 
 ---
 
-98. Dynamic routing
+## 98. Dynamic routing
 
 Com dados suficientes:
 
-[
+$$
 P(success|task,harness)
-]
+$$
 
 pode ser estimado.
 
 O sistema então escolhe:
 
-[
+$$
 h^*
 
 \arg\max_h
@@ -3592,7 +3660,7 @@ E(Q_h)
 
 \lambda E(C_h)
 \right]
-]
+$$
 
 ou uma decisão Pareto-aware equivalente.
 
@@ -3608,7 +3676,7 @@ A economia de execução passa a ser parte da inteligência.
 
 ---
 
-99. Generalização para hardware e modelos heterogêneos
+## 99. Generalização para hardware e modelos heterogêneos
 
 Nada no modelo precisa assumir:
 
@@ -3629,11 +3697,11 @@ Isso amplia o conceito de “agent”.
 
 ---
 
-100. Roadmap revisado recomendado
+## 100. Roadmap revisado recomendado
 
 A sequência consolidada seria:
 
-Phase 0 — Architectural lock mínimo
+### Phase 0 — Architectural lock mínimo
 
 Resolver:
 
@@ -3647,7 +3715,7 @@ Não transformar a fase em limpeza documental extensa.
 
 ---
 
-Phase 1 — Vertical slices verdadeiras
+### Phase 1 — Vertical slices verdadeiras
 
 Executar:
 
@@ -3663,7 +3731,7 @@ antes de contract lock.
 
 ---
 
-Phase 2 — Core contract
+### Phase 2 — Core contract
 
 Congelar somente:
 
@@ -3680,7 +3748,7 @@ Não "ProjectManifest" completo.
 
 ---
 
-Phase 3 — Durable State Substrate
+### Phase 3 — Durable State Substrate
 
 Implementar:
 
@@ -3693,13 +3761,13 @@ recovery
 
 e provar:
 
-[
+$$
 state=fold(events)
-]
+$$
 
 ---
 
-Phase 4 — Generic Plugin Runtime
+### Phase 4 — Generic Plugin Runtime
 
 Implementar primeiro:
 
@@ -3717,7 +3785,7 @@ Depois plugins reais.
 
 ---
 
-Phase 5 — Harness Compiler
+### Phase 5 — Harness Compiler
 
 Manifest
 ↓
@@ -3731,7 +3799,7 @@ FrozenHarness
 
 ---
 
-Phase 6 — Coding Agent
+### Phase 6 — Coding Agent
 
 Primeiro produto real.
 
@@ -3739,7 +3807,7 @@ External evaluator realmente determina resultado.
 
 ---
 
-Phase 6.5 — Generality Smoke Test
+### Phase 6.5 — Generality Smoke Test
 
 Segundo domínio pequeno.
 
@@ -3749,7 +3817,7 @@ layer0 diff = 0
 
 ---
 
-Phase 7 — Safe Concurrency
+### Phase 7 — Safe Concurrency
 
 Somente depois:
 
@@ -3763,7 +3831,7 @@ estarem provados.
 
 ---
 
-Phase 8 — Multi-agent Vertical Slice
+### Phase 8 — Multi-agent Vertical Slice
 
 Dois ou mais principals reais.
 
@@ -3773,7 +3841,7 @@ ProjectManifest v1
 
 ---
 
-Phase 9 — Experiment Plane
+### Phase 9 — Experiment Plane
 
 Antes de distribuição.
 
@@ -3789,7 +3857,7 @@ Pareto metrics
 
 ---
 
-Phase 10 — Rust Decision Gate
+### Phase 10 — Rust Decision Gate
 
 Profiling decide.
 
@@ -3797,19 +3865,19 @@ Não estética arquitetural.
 
 ---
 
-Phase 11 — Distribution if justified
+### Phase 11 — Distribution if justified
 
 Somente se aparecer necessidade mensurável.
 
 ---
 
-Phase 12 — Governed Meta-Harness
+### Phase 12 — Governed Meta-Harness
 
 Primeira mutação automática promovida e revertida.
 
 ---
 
-Phase 13 — Generality Falsification
+### Phase 13 — Generality Falsification
 
 Adicionar domínio substancialmente diferente.
 
@@ -3819,7 +3887,7 @@ core diff = 0
 
 ---
 
-101. O que retirar da critical path
+## 101. O que retirar da critical path
 
 Eu retiraria inicialmente:
 
@@ -3838,7 +3906,7 @@ Mas preservaria interfaces compatíveis com futura introdução.
 
 ---
 
-102. O que não pode ser adiado
+## 102. O que não pode ser adiado
 
 Não adiaria:
 
@@ -3857,7 +3925,7 @@ Porque esses dados não podem ser reconstruídos retroativamente com fidelidade.
 
 ---
 
-103. Segurança e complexidade
+## 103. Segurança e complexidade
 
 Portanto a resposta à questão original sobre segurança/layers é:
 
@@ -3885,17 +3953,21 @@ Essa distinção mantém o sistema simples sem criar dívida arquitetural.
 
 ---
 
-104. Core final conceitual
+## 104. Core final conceitual
 
 O Layer 0 poderia continuar extremamente pequeno:
 
 layer0/
+```text
+```text
 ├── events/
 ├── kernel/
 ├── registry/
 ├── scheduler/
 ├── spi/
 └── compose/
+```
+```
 
 A SPEC já propõe essencialmente essa fronteira.
 
@@ -3913,8 +3985,10 @@ no kernel.
 
 ---
 
-105. Arquitetura global recomendada
+## 105. Arquitetura global recomendada
 
+```text
+```text
                          ┌──────────────────────┐
                          │ Promotion Authority  │
                          └──────────┬───────────┘
@@ -3940,6 +4014,8 @@ no kernel.
 │ Plugins     │   │ Oracles       │    │ Candidates  │
 │ Workers     │   │ Verdicts      │    │ Training    │
 └─────────────┘   └───────────────┘    └─────────────┘
+```
+```
 
 Esses são planes conceituais.
 
@@ -3947,11 +4023,11 @@ Não precisam ser serviços separados inicialmente.
 
 ---
 
-106. A arquitetura vista como loops aninhados
+## 106. A arquitetura vista como loops aninhados
 
-Loop operacional
+### Loop operacional
 
-[
+$$
 Observe
 \rightarrow
 Plan
@@ -3959,41 +4035,41 @@ Plan
 Act
 \rightarrow
 Evaluate
-]
+$$
 
-Loop reflexivo
+### Loop reflexivo
 
-[
+$$
 Trajectory
 \rightarrow
 Reflect
 \rightarrow
 Memory/Strategy
-]
+$$
 
-Loop multi-agent
+### Loop multi-agent
 
-[
+$$
 Decompose
 \rightarrow
 Delegate
 \rightarrow
 Integrate
-]
+$$
 
-Loop evolutivo
+### Loop evolutivo
 
-[
+$$
 Candidate
 \rightarrow
 Experiment
 \rightarrow
 Promote
-]
+$$
 
-Loop de model learning
+### Loop de model learning
 
-[
+$$
 Corpus
 \rightarrow
 Train
@@ -4001,7 +4077,7 @@ Train
 CandidateModel
 \rightarrow
 Experiment
-]
+$$
 
 Todos rodam sobre as mesmas primitives.
 
@@ -4009,7 +4085,7 @@ Essa é provavelmente a formulação mais poderosa da arquitetura.
 
 ---
 
-107. O que “intelligence emerges from primitives” significa tecnicamente
+## 107. O que “intelligence emerges from primitives” significa tecnicamente
 
 Não significa emergência mágica.
 
@@ -4017,7 +4093,7 @@ Significa que capacidades de ordem superior são compostosições.
 
 Por exemplo:
 
-[
+$$
 Metacognition
 
 Monitoring
@@ -4029,9 +4105,9 @@ Uncertainty
 Reflection
 +
 StrategySelection
-]
+$$
 
-[
+$$
 SwarmIntelligence
 
 Agents
@@ -4043,9 +4119,9 @@ Specialization
 Coordination
 +
 Selection
-]
+$$
 
-[
+$$
 SelfImprovement
 
 Observation
@@ -4055,7 +4131,7 @@ CandidateGeneration
 Experiment
 +
 Promotion
-]
+$$
 
 Nenhuma dessas equações pretende ser uma teoria psicológica.
 
@@ -4063,7 +4139,7 @@ São decomposições arquiteturais.
 
 ---
 
-108. Onde a inteligência pode realmente emergir
+## 108. Onde a inteligência pode realmente emergir
 
 A propriedade interessante aparece quando essas composições produzem comportamentos não explicitamente codificados como workflow.
 
@@ -4091,7 +4167,7 @@ A competência emerge da interação.
 
 ---
 
-109. Filosofia científica do sistema
+## 109. Filosofia científica do sistema
 
 AETHER deveria assumir uma epistemologia fortemente falibilista.
 
@@ -4113,19 +4189,19 @@ Até o benchmark pode estar errado.
 
 Isso impede a arquitetura de confundir:
 
-[
+$$
 confidence
-]
+$$
 
 com:
 
-[
+$$
 truth
-]
+$$
 
 ---
 
-110. O que seria evidência de sucesso científico
+## 110. O que seria evidência de sucesso científico
 
 Não seria:
 
@@ -4175,51 +4251,51 @@ Capacidades novas aparecem sem modificação do kernel.
 
 ---
 
-111. Principais provocações arquiteturais
+## 111. Principais provocações arquiteturais
 
-Provocação 1
+### Provocação 1
 
 Se uma nova capacidade cognitiva exige alteração no Layer 0, por quê?
 
-Provocação 2
+### Provocação 2
 
 Se um subagente exige outro engine, a abstração recursiva falhou.
 
-Provocação 3
+### Provocação 3
 
 Se adicionar 20 agentes não melhora resultados sob budget total constante, o swarm talvez seja teatro arquitetural.
 
-Provocação 4
+### Provocação 4
 
 Se um plugin não pode ser substituído isoladamente, o contrato não é realmente modular.
 
-Provocação 5
+### Provocação 5
 
 Se uma melhoria não pode ser atribuída a uma mudança identificável, o sistema não possui ciência suficiente para self-improvement.
 
-Provocação 6
+### Provocação 6
 
 Se memória vira fonte de verdade, o ledger perdeu sua função epistemológica.
 
-Provocação 7
+### Provocação 7
 
 Se o graph determina rigidamente a execução, construiu-se novamente um workflow engine.
 
-Provocação 8
+### Provocação 8
 
 Se toda melhoria exige um modelo maior, o framework está contribuindo pouco para inteligência sistêmica.
 
-Provocação 9
+### Provocação 9
 
 Se Learning pode promover suas próprias alterações, o experimento deixou de ser independente.
 
-Provocação 10
+### Provocação 10
 
 Se um segundo domínio exige alterar o core, a tese de generalidade foi falsificada — e isso deve ser tratado como descoberta científica, não escondido.
 
 ---
 
-112. O verdadeiro moat
+## 112. O verdadeiro moat
 
 A vantagem competitiva provavelmente não estará isoladamente em:
 
@@ -4258,7 +4334,7 @@ Esse é o pré-requisito real para self-improvement confiável.
 
 ---
 
-113. Relação com a literatura
+## 113. Relação com a literatura
 
 A arquitetura sugerida combina ideias que aparecem separadamente em diferentes campos.
 
@@ -4292,33 +4368,33 @@ Global Workspace, predictive processing e active inference oferecem hipóteses �
 
 ---
 
-114. Decisão final sobre os documentos v0.6
+## 114. Decisão final sobre os documentos v0.6
 
 Os documentos devem ser preservados como base, mas consolidados.
 
 Antes da implementação eu resolveria obrigatoriamente:
 
-1. Python-first versus Rust rewrite.
-2. "layer0/" como runtime target inequívoco.
-3. ledger como autoridade de estado e orchestrator como autoridade de decisão.
-4. preservação explícita da invariante de concorrência desabilitada até gate real.
-5. replay versus re-execution.
-6. adiamento do "ProjectManifest" completo até multi-agent vertical slice.
-7. correção de S-13 para distinguir propriedades lexicais de semânticas.
-8. redução da Wave 0.
-9. JSON Schema/JCS como identity, transporte substituível.
-10. corpus admission baseado em provenance.
-11. Experiment Plane antes do Distributed Plane.
-12. generality smoke test precoce.
-13. semantics reais de revogação.
-14. mutation testing sem Goodhart.
-15. Learning Plane sem autoridade de promoção.
+## 1. Python-first versus Rust rewrite.
+## 2. "layer0/" como runtime target inequívoco.
+## 3. ledger como autoridade de estado e orchestrator como autoridade de decisão.
+## 4. preservação explícita da invariante de concorrência desabilitada até gate real.
+## 5. replay versus re-execution.
+## 6. adiamento do "ProjectManifest" completo até multi-agent vertical slice.
+## 7. correção de S-13 para distinguir propriedades lexicais de semânticas.
+## 8. redução da Wave 0.
+## 9. JSON Schema/JCS como identity, transporte substituível.
+## 10. corpus admission baseado em provenance.
+## 11. Experiment Plane antes do Distributed Plane.
+## 12. generality smoke test precoce.
+## 13. semantics reais de revogação.
+## 14. mutation testing sem Goodhart.
+## 15. Learning Plane sem autoridade de promoção.
 
 O Full Refactor e o Execution Plan ainda refletem parcialmente arquiteturas diferentes — particularmente Rust versus Python — e precisam convergir para um único documento normativo/executável antes das Waves seguintes.
 
 ---
 
-115. Tese arquitetural final
+## 115. Tese arquitetural final
 
 A formulação que melhor resume o trabalho é:
 
@@ -4330,27 +4406,27 @@ A hipótese de pesquisa associada é:
 
 E a propriedade de falsificação é igualmente simples:
 
-[
+$$
 Capability_{new}
 \Rightarrow
 Plugin/Composition
-]
+$$
 
 deve continuar verdadeiro.
 
 Quando repetidamente se tornar:
 
-[
+$$
 Capability_{new}
 \Rightarrow
 CorePrimitive_{new}
-]
+$$
 
 a arquitetura deixou de ser suficientemente geral.
 
 ---
 
-116. Princípio operacional final
+## 116. Princípio operacional final
 
 O projeto deveria manter uma assimetria deliberada:
 

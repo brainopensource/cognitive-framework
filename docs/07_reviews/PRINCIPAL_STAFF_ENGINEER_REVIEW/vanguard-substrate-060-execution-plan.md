@@ -1,3 +1,6 @@
+> **Non-normative.** Advisory evidence only. Law is `docs/SPEC.md` + `docs/05_adr/0069`–`0074` + annexes.
+> Operational sequence: `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`. Do not cite this file as a requirement.
+
 # Vanguard Substrate 0.6.0 — Plano Final de Execução
 
 **Documento:** `vanguard-substrate-060-execution-plan.md`

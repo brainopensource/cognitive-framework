@@ -1,3 +1,7 @@
+> **SUPERSEDED as status.** Process history only. Surviving law is `docs/SPEC.md` + ADRs `0069`–`0074`.
+> Lock plan: `001_V060_concept_phase_GAMMA.md`. Roadmap / gap register:
+> `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`. Production coding was not started.
+
 The phase is **Concept Lock**, not implementation. Forensic discovery is written; ADRs `0069`–`0073` exist; SPEC v0.6 is **partially** rewritten. Hygiene and the SPEC self-review are **not** done. No runtime, CI, or dual-tree code was changed, and nothing was committed.
 
 ---

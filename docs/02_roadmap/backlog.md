@@ -1,3 +1,7 @@
+> **Historical.** This epic map is **not** the AETHER v0.6 work register. “M1 rebuilds emission under
+> E-COV=100% and ports into `layer0/`” is reversed. Living register:
+> `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+
 # Backlog — Epic map (M0–M6)
 
 **Rewritten** at the v0.5.0 Foundation Lock, replacing the TSK-* wave-structured backlog. Source:

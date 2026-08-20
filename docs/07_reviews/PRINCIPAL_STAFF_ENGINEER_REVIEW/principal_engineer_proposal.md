@@ -1,3 +1,6 @@
+> **Non-normative.** Advisory evidence only. Law is `docs/SPEC.md` + `docs/05_adr/0069`–`0074` + annexes.
+> Operational sequence: `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`. Do not cite this file as a requirement.
+
 > Abaixo está a consolidação em formato de relatório técnico, incorporando a revisão dos documentos, as correções discutidas e a tese ampliada de AGI por composição de primitivas, sem tratar AGI como uma capacidade já demonstrada.
 
 # AETHER/Vanguard — Substrate Recursivo para Inteligência Agêntica, Meta-Harness e Self-Improvement

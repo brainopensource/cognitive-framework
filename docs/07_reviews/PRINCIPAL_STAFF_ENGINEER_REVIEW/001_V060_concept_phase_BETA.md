@@ -23,6 +23,10 @@ todos:
 isProject: false
 ---
 
+> **Procedure history.** Executed. Surviving law is `docs/SPEC.md` + ADRs `0069`–`0074`. GAMMA is the
+> lock plan; `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` is the living roadmap. This file must
+> not be cited as a requirement.
+
 # Vanguard v0.6 Forensic Discovery + Concept Lock
 
 > **For agentic workers:** This is a **docs-and-evidence** engagement. Do not migrate runtimes, rewrite `layer0/` or `vanguard/packages/`, add Rust, or change CI behavior except as explicitly listed under hygiene. Do not commit unless the user asks.

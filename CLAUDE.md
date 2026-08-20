@@ -4,12 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Vanguard General Task Solver (GTS) — a verifiable, modular meta-harness runtime built around a strict
+Vanguard / AETHER — a verifiable, modular recursive-agency substrate built around a strict
 `observe → propose → authorize → effect → receipt → evaluate` turn lifecycle, where the exterior judge
-that evaluates a run is architecturally unreachable from the agent it judges. Currently `v0.4.5-beta`.
+that evaluates a run is architecturally unreachable from the agent it judges.
+
+**Concept Lock:** v0.6.0 (`docs/SPEC.md`, ADRs `0069`–`0074`). **Shipped package version** remains
+`0.4.5b1` in `pyproject.toml` until a later release cut.
 
 This is a polyglot monorepo: a stdlib-only Python core (`vanguard-runtime`) plus a TypeScript/Ink CLI/TUI
 client (`@vanguard/cli`), managed as an npm workspace.
+
+**Pre-development hold.** Concept Lock is complete and awaiting Engineering Director / Chief Engineer
+approval. Do **not** start production coding, CI rewiring, runtime convergence, plugin implementation,
+or `layer0/` deletion until
+`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`
+authorizes Wave 0.
 
 ## Commands
 
@@ -27,10 +36,11 @@ python3 tools/run_dogfood_r9.py                      # release/dogfood gate
 python3 tools/check_backend_artifacts.py --release   # backend/OCI artifact check
 ```
 
-Note: as of the last full run, the suite is not fully green — check against a clean baseline first before
-assuming a red run is caused by your change. The `test/test_repo_paths.py` vs. `docs/agile/sprint0/`
-stale-path bug referenced in earlier revisions of this file was fixed at the v0.5.0 Foundation Lock:
-`tools/repo_paths.py` no longer resolves against the dead `docs/scrum`/`docs/main_v4` paths.
+Note: the full Python suite is not fully green. Check against a clean baseline before assuming a red
+run is caused by your change. Living CI currently gates `test/layer0` plus packs and lexical tools —
+that is **false confidence** relative to v0.6 law (packages are the subject of record; Wave 0 will
+rewire CI **after** director approval). `test/test_repo_paths.py` / `check_stale_paths` may still fail
+on an archive citation (`docs/sprint6B`); that is Wave 0 hygiene, not architecture.
 
 ### TypeScript / CLI client (`vanguard/clients/cli`)
 
@@ -80,22 +90,22 @@ Evaluator daemon entry point: `vanguard.packages.adapters.evaluators.daemon:main
 Model access is abstracted behind `ModelPort`, with adapters for OpenRouter (`OPENROUTER_API_KEY`),
 DeepSeek, OpenAI, and local Ollama.
 
-**Normative documentation (v0.5.0 Foundation Lock, `docs/SPEC.md` §8):**
+**Normative documentation (v0.6.0 Concept Lock, `docs/SPEC.md`):**
 `docs/SPEC.md` is the **only** living normative specification, with `docs/04_annex/KERNEL.md` and
 `docs/04_annex/MEASUREMENT.md` carrying the same RFC-2119 force for the dispatch/security and measurement
-domains respectively. `docs/05_adr/` holds the decision log (append-only, reversal conditions). Read
-`docs/SPEC.md` before making architectural decisions, not just the README. `docs/02_roadmap/` holds
-version gates and the epic map; `docs/03_sprints/sprint_active.md` is the execution board. The pre-lock
-VG-00…13C corpus (previously referenced here as `docs/main_v4/`, which never actually existed on this
-tree — it was `docs/01_specs/backend/`) is archived, evidence-not-law, at `docs/archive/v045/`; commit
-messages and older docs citing VG-00..12 / GTS-13C refer to files now under
-`docs/archive/v045/01_specs/backend/`.
+domains respectively. ADRs `0069`–`0074` outrank the v0.5.0 “M1 destination = `layer0/`” story.
+`docs/05_adr/` holds the decision log (append-only). Read `docs/SPEC.md` before making architectural
+decisions. The living foundation roadmap and gap register is
+`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+`docs/02_roadmap/` and `docs/03_sprints/sprint_active.md` are historical unless that register says
+otherwise. The pre-lock VG-00…13C corpus is archived, evidence-not-law, at `docs/archive/v045/`.
 
-## CI gates
+**Runtime identity:** production lattice is `vanguard/packages/`. `layer0/` is a copy-fork to absorb,
+not a destination rewrite. Do not add a third tree.
 
-`.github/workflows/ci.yml` (workflow `vanguard-ci`) runs a single job, `vanguard-living-gates`, chaining:
-`test.test_repo_paths`, the Layer-0 microkernel suite (`test/layer0`), `tools/check_boundaries.py`,
-`tools/check_tcb_budget.py`, `tools/check_domain_blindness.py` (I-7), `tools/check_isolation_policy.py`
-(I-6), the code-default pack suite (`test/packs`), `tools/check_stale_paths.py`,
-`tools/check_markdown_links.py`, and `tools/scan_secrets.py`. These are hard-fail gates by design — a gate
-that reports without blocking is treated as a bug, not a feature.
+**Living CI (as-built, not yet Wave 0):** `.github/workflows/ci.yml` (workflow `vanguard-ci`) currently
+runs `test.test_repo_paths`, `test/layer0`, `tools/check_boundaries.py`, `tools/check_tcb_budget.py`,
+`tools/check_domain_blindness.py` (I-7), `tools/check_isolation_policy.py` (I-6), `test/packs`,
+`tools/check_stale_paths.py`, `tools/check_markdown_links.py`, and `tools/scan_secrets.py`. That set
+does **not** yet include `test/kernel` or packages runtime/agency/adapters — a known Concept Lock
+gap. Do not rewire it until Wave 0 is authorized.

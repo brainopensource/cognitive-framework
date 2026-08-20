@@ -209,6 +209,18 @@ in the Evidence column conceptually: kernel owns grants/budgets/effects; evaluat
 | Health | `Heartbeat` (HMAC-authenticated, fixes D-14), `CheckpointCreated` | scheduler |
 | Delegation | `ChildSpawned`, `ChildReturned` (carries provenance spans, fixes D-06) | scheduler |
 
+**Writer authority (`ADR-0074`).** The Emitter column is the *legal originator*. Untrusted
+coordination (orchestrator, plugins, Protocol clients) MAY request; they MUST NOT generic-append
+privileged kinds. Owning authorities:
+
+| Kind class | Legal writer |
+|---|---|
+| Grants / budgets / `EffectStarted` and terminals | kernel |
+| `VerdictRecorded` | evaluator gateway (signature-valid, request-bound) |
+| Plugin lifecycle | registry |
+| Run / episode lifecycle | scheduler |
+| `ApprovalResolved` | approval service |
+
 Envelope: JCS-canonical JSON, SHA-256 content digest, `prev_digest` hash chain per **Project**
 (`project_id`), monotonic `seq` within that unit, `causation_id`/`correlation_id`, idempotency key on
 all command-derived events, `branch_id`, and the lineage fields of §1.0. Store: SQLite WAL + `FULL`
@@ -236,10 +248,11 @@ with a divergent `branch_id`. Crash recovery = scan for `EffectStarted` without 
 Replaces the sequential `EpisodeEngine` outer shell (engine's dispatch discipline is preserved inside).
 Adds: independence groups (proposals declare read/write resource selectors; non-intersecting selectors
 *may* run concurrently once I-11's gate is met — this unlocks D-38 without touching the kernel, but does
-not enable it in v0.5.0), cooperative cancellation tokens, turn/depth ceilings as first-class
-`Reservation` dimensions (resolves D-09/D-24 per **ADR-M0-07**: the budget vector becomes six-dimensional,
-`{usd_micros, millis, tokens, bytes, turns, depth}`, allowed only because the scheduler is the named
-consumer), and heartbeat emission.
+not enable it in v0.6), cooperative cancellation tokens, turn/depth ceilings as first-class
+`Reservation` dimensions (resolves D-09/D-24 per **ADR-M0-07**, algebra corrected by **ADR-0074**):
+the six named fields remain `{usd_micros, millis, tokens, bytes, turns, depth}`, but they are **not**
+one additive vector — additive conserved `{usd_micros, tokens, bytes, charged millis}` versus
+structural ceilings `{depth, turns}`. Sibling depths are not summed. Heartbeat emission stays.
 
 ---
 
@@ -302,7 +315,11 @@ never enter any plugin cell. The scheduler MUST **read** a signed verdict; emitt
 `VerdictRecorded {verdict: "pass"}` without a signature is defect F1, not a plugin strategy
 (`ADR-0072`). See `docs/04_annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
 
-### 2.2 SPI definitions (Layer-0 `spi/` package — typed, frozen, versioned)
+### 2.2 SPI definitions (typed, frozen, versioned)
+
+The SPI *texts* currently live under `layer0/spi/` as the fork to absorb (`ADR-0069`). Production
+implementations MUST converge onto `vanguard/packages/`. Python `Protocol` remains a client of the
+JSON-RPC wire.
 
 All payload types are frozen dataclasses **generated** from `schemas/mhf/*.json` (A-4; resolves
 D-21/D-29 — exactly one `EffectRequest`). Signatures below are normative.
@@ -315,7 +332,7 @@ class EffectRequest:          # THE one and only
     args: JsonObject          # JCS-canonicalised for descriptor digest
     selector: ResourceSelector
     sink: SinkClass           # OBSERVATION | ADVISORY | PRIVILEGED
-    reservation: Reservation  # {usd_micros, millis, tokens, bytes, turns, depth}
+    reservation: Reservation  # six named fields; typed algebras per ADR-0074
 
 @dataclass(frozen=True, slots=True)
 class Proposal:
@@ -331,6 +348,8 @@ class Receipt:
     stdout_ref: BlobRef | None
     artifacts: tuple[ArtifactRef, ...]
     cost: Reservation
+    lease_id: str
+    grant_digest: Digest
 ```
 
 ```python
@@ -604,7 +623,7 @@ promotion remain deferred (`ADR-0073`). The schema MUST exist and MUST be emitte
 }
 ```
 
-**DPO harvest pipeline (offline, `lab/`-adjacent):** pair trajectories on identical `(task_digest,
+**DPO harvest pipeline (deferred blueprint, not foundation):** pair trajectories on identical `(task_digest,
 harness_digest, turn-prefix context_digest)` with divergent verdicts → (chosen, rejected) pairs at the
 *turn* granularity (the prefix-attribution telemetry already computes the divergence point); filter by
 verdict signature validity + anti-cheat lint (existing `test_anticheat.py` semantics); emit JSONL
@@ -617,16 +636,18 @@ section's rationale, merged per matrix §1.10.)
 
 ---
 
-## 8. Migration Plan & CI Gates (v0.6 Concept Lock; `ADR-0069`, `ADR-0073`)
+## 8. Migration Plan & CI Gates (v0.6 Concept Lock; `ADR-0069`, `ADR-0073`, `ADR-0074`)
 
 **Direction (inverted from v0.5.0).** Recover mature `vanguard/packages/` semantics (kernel, JCS, WAL
 ledger, exterior evaluator, sandbox, stores, models, episode engine). Promote `layer0/` SPI contracts,
 JSON-RPC/UDS broker, lifecycle FSM, and compose digest shape. Do **not** rebuild WAL, evaluator, or
 sandbox inside `layer0/`. Do **not** create a third runtime. Do **not** rewrite the TCB in Rust.
 
-The M0–M6 table below remains a *historical* Foundation Lock sketch. It is **not** the next roadmap
-(roadmap is a later phase). Where it said "port kernel into `layer0/`", read: **converge onto
-packages; absorb layer0 contracts**.
+The M0–M6 table below remains a *historical* Foundation Lock sketch. It is **not** the next
+roadmap. The living engineering sequence is
+`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+Where the table said "port kernel into `layer0/`", read: **converge onto packages; absorb layer0
+contracts**.
 
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
@@ -728,7 +749,7 @@ emitter, and a paired measurement (`docs/04_annex/MEASUREMENT.md`) — or it doe
 ## Invariants I-1 … I-11
 
 I-1 through I-10 are carried from `docs/TECH_LEAD_REVIEW/CRITICAL_GAP_ANALYSIS_AND_AUDIT.md` §6
-("Ten Non-Negotiable Invariants for v-next") verbatim:
+("Ten Non-Negotiable Invariants for v-next"), **amended** by this Concept Lock (`ADR-0074`):
 
 1. **One `EffectRequest`.** A single frozen dataclass, generated from one JSON Schema, used at S0, on
    the wire, and in adapters.

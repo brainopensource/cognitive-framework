@@ -6,36 +6,37 @@ todos:
     content: Adjudicate Tech Lead / Architect / AI Specialist / Systems-Eng reviews into this GAMMA lock
     status: completed
   - id: G1-spec-self-review
-    content: Finish SPEC v0.6 self-review so no sentence still contradicts ADR-0069–0073
-    status: pending
+    content: Finish SPEC v0.6 self-review so no sentence still contradicts ADR-0069–0074
+    status: completed
   - id: G2-kernel-amendment
     content: Amend KERNEL.md front-matter destination sentence to cite ADR-0069; do not rewrite S0–S12
-    status: pending
+    status: completed
   - id: G3-hygiene
     content: CLAUDE.md v0.6.0 pointer; sprint_active superseded note; non-normative banners on review corpus
-    status: pending
+    status: completed
   - id: G4-exit-gate
     content: Recite Concept Lock exit gate against files; no commit unless C-level asks
-    status: pending
+    status: completed
   - id: G5-gap-class
-    content: NEXT PHASE after approval — as-built gap/migration classification (not this file’s execution)
-    status: pending
+    content: Gap/migration classification absorbed into 002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
+    status: completed
   - id: G6-wave0-ci
-    content: FIRST CODE WAVE after gap class — CI subject-of-record + named falsifiers (not this wave)
+    content: FIRST CODE WAVE after director approval — CI subject-of-record + named falsifiers (not this wave)
     status: pending
 isProject: false
 ---
 
 # Vanguard / AETHER v0.6 — Concept Lock GAMMA
 
-**Classification:** Final Principal Staff Engineer lock for CTO / CIO / CEO review.  
-**Status:** Decision document. After C-level selection, BETA / DELTA / advisory reviews may be archived; this file plus `docs/SPEC.md` plus ADRs `0069`–`0073` are the intended surviving law.  
+**Classification:** Final Principal Staff Engineer lock for CTO / CIO / CEO / Engineering Director review.  
+**Status:** Concept Lock **complete**. Pre-development foundation ready for Director review. Production coding **not started**.  
 **Date:** 2026-08-20  
 **Author role:** Principal Staff Engineer / Tech Lead / Architect  
 **Relationship:** Successor of [BETA](001_V060_concept_phase_BETA.md) (procedure) and [DELTA](001_V060_concept_phase_DELTA.md) (status). Incorporates only independently validated conclusions from four advisory lanes.  
-**Normative after C-level accept:** `docs/SPEC.md` + `docs/05_adr/0069`–`0073` + `docs/04_annex/{KERNEL,MEASUREMENT}.md`. This file is the **lock plan**, not a second SPEC.
+**Normative after Director accept:** `docs/SPEC.md` + `docs/05_adr/0069`–`0074` + `docs/04_annex/{KERNEL,MEASUREMENT}.md`. This file is the **lock plan**, not a second SPEC.  
+**Operational register:** [002 Foundation Roadmap and Gap Register](002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md).
 
-> **For agentic workers:** Finish G1–G4 (docs hygiene) only. Do not migrate runtimes, rewire CI, delete `layer0/`, add Rust, write sprints with dates, or commit unless the user asks. G5–G6 are the *next* authorized programme after this exit gate.
+> **For agentic workers:** G1–G5 are done. Do not migrate runtimes, rewire CI, delete `layer0/`, add Rust, or commit unless the user asks. G6 (Wave 0) is the *next* authorized programme **after Director approval**.
 
 **Goal:** One engineering authority so a billion-scale product can grow from a verified substrate instead of from competing runtimes and false gates.
 
@@ -58,7 +59,7 @@ Approve **GAMMA** as the v0.6 Concept Lock. That means:
 3. `Project` is locked with a one-sentence definition (consistency unit), not as an undefined mandatory field.
 4. `ChildPrincipal` is **not** a second type — it is `Principal` with `parent_id`.
 5. Skill, Swarm, Orchestrator-as-engine, Experiment, Promotion, Meta-Harness, Cache, Task are **refused as substrate primitives**.
-6. The next engineering programme is **gap classification → Wave 0 CI truth + falsifiers → converge → one real coding-agent path**. No Rust rewrite. No third tree. No sprint dates in this lock.
+6. The next engineering programme is **this register (002) → Director approve → Wave 0 CI truth + falsifiers → converge → one real coding-agent path**. No Rust rewrite. No third tree. No sprint dates in this lock.
 
 **Reject** if you want a new `vanguard/substrate/` tree, a Rust core, `layer0/` as destination, evaluator-as-plugin, or mid-run harness hot-swap. Those are already adjudicated **no**.
 
@@ -68,7 +69,7 @@ Approve **GAMMA** as the v0.6 Concept Lock. That means:
 
 | Rank | Source | Role |
 |---|---|---|
-| 1 | This GAMMA lock + ADRs `0069`–`0073` + `docs/SPEC.md` | Law after C-level accept |
+| 1 | This GAMMA lock + ADRs `0069`–`0074` + `docs/SPEC.md` | Law after Director accept |
 | 2 | `docs/04_annex/KERNEL.md`, `MEASUREMENT.md` | Normative annexes (S0–S12 not silently rewritten) |
 | 3 | Active ADRs `0000`–`0068`, `ADR-M0-01`…`13` | Law unless a newer ADR cites reversal |
 | 4 | `principal_engineer_proposal.md` | Conceptual north star; **non-normative**; body/abstract conflict on runtime target already resolved toward packages |
@@ -468,23 +469,26 @@ Re-run for forensic/DELTA; not inherited from parecer `99d1e0b`. Advisory lanes 
 | Forensic report (25 sections) | **DONE** — `docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md` |
 | Concept-lock prompt | **DONE** — `docs/07_reviews/PROMPT_ARCHITECTURE_CONCEPT_LOCK_V060.md` |
 | ADR-0069…0073 | **DONE** |
-| ADR INDEX + M0 rows | **DONE**; `0067` remains a hole |
-| SPEC v0.6 partial rewrite | **IN_PROGRESS** — header/§1/hot-swap/§8 inverted; residue remains (§8.2 “M1”, I-2 lexical, I-4 implied wired, §9 bans, `D_H` completeness, budget algebra, writer matrix) |
-| KERNEL.md destination amendment | **TODO** |
-| CLAUDE.md / sprint_active / review banners | **TODO** |
+| ADR-0074 (proof, typed budget, writer, complete `D_H`, Project, trajectory) | **DONE** |
+| ADR INDEX + M0 rows | **DONE**; `0067` remains a documented hole |
+| SPEC v0.6 self-review vs `0069`–`0074` | **DONE** |
+| KERNEL.md destination amendment + MEASUREMENT deferred note | **DONE** |
+| CLAUDE.md / AGENTS.md / sprint_active / review banners / roadmap banners | **DONE** |
+| Foundation roadmap + gap register | **DONE** — `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` |
 | Runtime / CI code | **NOT STARTED** (correct) |
-| Commit | **DEFERRED** until C-level asks |
+| Commit | **DEFERRED** until Director / user asks |
 
-**Concept Lock is not green until G1–G4 complete.** ADRs exist; SPEC still contains sentences a hostile reader can quote against them.
+**Concept Lock docs wave is green.** Remaining work is Director approval, then Wave 0 — not more architecture.
 
 ---
 
-## 11. Remaining docs work (G1–G4) — still this phase
+## 11. Remaining docs work (G1–G4) — **complete**
 
-1. SPEC self-review: demote E-COV; retitle §8.2; mark §4–§6 as deferred blueprint; add §9 bans; put complete `D_H`, typed budget, writer matrix, Project definition, trajectory schema requirement into law.
-2. KERNEL.md: one amendment line citing ADR-0069 (packages is production; layer0 is not M1 destination). Do not rewrite S0–S12.
-3. Hygiene: CLAUDE.md `v0.6.0 Concept Lock` pointer (package version stays `0.4.5b1`); `sprint_active.md` superseded note **without** new sprint dates; banners on Principal-review files = non-normative.
-4. Exit-gate recitation against files.
+1. SPEC self-review: demote E-COV; retitle §8.2; mark §4–§7 as deferred/Wave-4; add §9 bans; put complete `D_H`, typed budget, writer matrix, Project definition, trajectory schema, Receipt fields into law. **Done.**
+2. KERNEL.md: destination amendment citing ADR-0069/0074; S0–S12 body unchanged. MEASUREMENT.md deferred-blueprint note. **Done.**
+3. Hygiene: CLAUDE.md / AGENTS.md v0.6.0 pointers; `sprint_active.md` superseded; banners on Principal-review files and historical roadmap. **Done.**
+4. Exit-gate recitation against files. **Done** (this section + §14.1).
+5. Gap register absorbed into `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` (G5). **Done.**
 
 No CI YAML. No F1 code fix. No `root.py` split.
 
@@ -492,7 +496,7 @@ No CI YAML. No F1 code fix. No `root.py` split.
 
 ## 12. Post-lock engineering sequence (planned, not currently executing)
 
-C-level visibility. **Not authorized until Concept Lock exit gate is green** and a separate gap-classification note exists. No calendar dates in this lock (dates in a lock become fake certainty).
+Director visibility. **Not authorized until Director approval of GAMMA + 002.** No calendar dates in this lock (dates in a lock become fake certainty). The living copy of this sequence is `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
 
 ```text
 G1–G4 docs hygiene
@@ -572,20 +576,22 @@ real model · real authorized tool/effect · real filesystem change · real sand
 
 ## 14. Exit gates
 
-### 14.1 Concept Lock (this file’s job)
+### 14.1 Concept Lock (this file’s job) — **RECITED 2026-08-20**
 
-1. Forensic report exists with labeled live evidence.
-2. ADRs `0069`–`0073` exist; INDEX lists them and `ADR-M0-*`.
-3. SPEC v0.6 does not call `layer0/` the M1 destination; does not authorize hot-swap; cites P0s including complete `D_H`, typed budget, writer matrix, Project definition, trajectory schema.
-4. KERNEL annex destination sentence amended or explicitly superseded by ADR citation.
-5. Hygiene notes in CLAUDE.md + sprint_active.
-6. Advisory reviews remain non-normative.
-7. No runtime/CI implementation of Waves 0–4 in the lock commit set.
-8. C-level can delete BETA/DELTA/advisory files later without losing a locked sentence — those sentences live in SPEC/ADRs.
+| # | Gate | Evidence |
+|---|---|---|
+| 1 | Forensic report exists with labeled live evidence | `docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md` |
+| 2 | ADRs `0069`–`0074` exist; INDEX lists them and `ADR-M0-*` | `docs/05_adr/` + INDEX (`0067` hole documented) |
+| 3 | SPEC v0.6 does not call `layer0/` the M1 destination; does not authorize hot-swap; cites P0s including complete `D_H`, typed budget, writer matrix, Project definition, trajectory schema | `docs/SPEC.md` header, §1.0, §1.2, A-5, §8, §9, I-1…I-11 |
+| 4 | KERNEL annex destination sentence amended | `docs/04_annex/KERNEL.md` front-matter + lead; MEASUREMENT deferred note |
+| 5 | Hygiene notes in CLAUDE.md + AGENTS.md + sprint_active | those files; historical roadmap banners |
+| 6 | Advisory reviews remain non-normative | banners on Principal-review corpus |
+| 7 | No runtime/CI implementation of Waves 0–4 in this lock wave | no edits to `.github/workflows/`, `vanguard/packages/`, `layer0/` for this purpose |
+| 8 | Director can delete BETA/DELTA/advisory files later without losing a locked sentence | those sentences live in SPEC/ADRs; sequence lives in 002 |
 
 ### 14.2 Foundation (Wave 4) — later
 
-The E2E list in §12. Not this engagement.
+The E2E list in §12 / 002. Not this engagement.
 
 ---
 
@@ -605,12 +611,14 @@ The E2E list in §12. Not this engagement.
 
 ## 16. Document map (what to keep after C-level review)
 
-**Keep as law:** `docs/SPEC.md`, `docs/05_adr/0069`–`0073` (and prior ADRs), annexes, this GAMMA until its content is fully absorbed into SPEC.
+**Keep as law:** `docs/SPEC.md`, `docs/05_adr/0069`–`0074` (and prior ADRs), annexes, this GAMMA until archived after Director accept.
+
+**Keep as the operational register:** `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
 
 **Keep as evidence:** forensic discovery, the four advisory reviews, BETA/DELTA (process history).
 
-**Do not keep as competing plans:** Full Refactor v3.1, Execution Plan as destination, Aether wave roadmap, parecer’s `core/` tree.
+**Do not keep as competing plans:** Full Refactor v3.1, Execution Plan as destination, Aether wave roadmap, parecer’s `core/` tree, historical M0–M6 as next work.
 
 ---
 
-**GAMMA bottom line.** The architecture is the recursive Python substrate with packages as production truth. The independent reviews did not change that. They changed what it means to *lock*: a lock is a set of falsifiers, a typed resource algebra, a writer-scoped ledger, and an identity/trajectory scheme that future intelligence can actually use. Finish the SPEC so it cannot be quoted against those sentences. Then restore CI truth. Then make one coding agent path real. Then grow.
+**GAMMA bottom line.** The architecture is the recursive Python substrate with packages as production truth. The independent reviews did not change that. They changed what it means to *lock*: a lock is a set of falsifiers, a typed resource algebra, a writer-scoped ledger, and an identity/trajectory scheme that future intelligence can actually use. SPEC can no longer be quoted against those sentences. The Director packet is GAMMA + 002. Restore CI truth only after approval. Then make one coding-agent path real. Then grow.

@@ -1,3 +1,7 @@
+> **Historical.** This M0–M6 ladder is **not** the AETHER v0.6 foundation roadmap. Destination
+> `layer0/` rewrite, mid-run hot-swap, and E-COV=100% as I-2 are reversed by ADRs `0069`–`0074`.
+> Living sequence: `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+
 # Milestones — v0.5.0 = MHF v1 = M0–M6
 
 **Rewritten** at the v0.5.0 Foundation Lock (`docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`), replacing the

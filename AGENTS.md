@@ -2,7 +2,9 @@
 
 ## Project Structure & Module Organization
 
-Vanguard is a Python-first agent runtime with a TypeScript CLI. Core packages live under `vanguard/packages/`, organized by dependency direction: `domain` (pure contracts), `ports`, `kernel`, `agency`, `runtime`, and concrete `adapters`. The CLI is under `vanguard/clients/cli/`. Python tests are in `test/`, grouped by subsystem; TypeScript tests are in `vanguard/clients/cli/test/`. Repository checks and provider utilities are in `tools/`; benchmark harnesses are in `benchmarkings/` and `lab/`; schemas, containers, and normative documentation are in `schemas/`, `containers/`, and `docs/`.
+Vanguard / AETHER is a Python-first recursive-agency runtime with a TypeScript CLI. **v0.6.0 Concept Lock** law is `docs/SPEC.md` plus ADRs `0069`–`0074`. The living foundation roadmap is `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`. Production lattice is `vanguard/packages/`, organized by dependency direction: `domain` (pure contracts), `ports`, `kernel`, `agency`, `runtime`, and concrete `adapters`. `layer0/` is a copy-fork to absorb, not a destination rewrite. The CLI is under `vanguard/clients/cli/`. Python tests are in `test/`, grouped by subsystem; TypeScript tests are in `vanguard/clients/cli/test/`. Repository checks and provider utilities are in `tools/`; benchmark harnesses are in `benchmarkings/` and `lab/`; schemas, containers, and normative documentation are in `schemas/`, `containers/`, and `docs/`.
+
+Do not start Wave 0 CI rewiring or runtime refactor until the Director packet is approved.
 
 ## Build, Test, and Development Commands
 

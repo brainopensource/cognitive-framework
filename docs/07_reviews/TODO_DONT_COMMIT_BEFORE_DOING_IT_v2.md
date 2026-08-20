@@ -1,3 +1,9 @@
+> **CLOSED as investigation.** Forensic discovery is complete
+> (`docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md`). Concept Lock is complete (`docs/SPEC.md`,
+> ADRs `0069`–`0074`, GAMMA). Remaining engineering work lives in **one** register:
+> `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+> Do not treat this file as a competing TODO or as authorization to start production coding.
+
 # VANGUARD / AETHER v0.6 — FORENSIC DISCOVERY BEFORE ARCHITECTURE LOCK
 
 ## SYSTEM DIRECTIVE

@@ -10,13 +10,15 @@ source: docs/archive/v045/01_specs/backend/07_vanguard_loop_engineering_and_meas
 > `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.10 — paired designs, McNemar's exact test,
 > multiple-comparison policy, the A/A noise floor, arm design, the instrument tuple, splits and
 > contamination discipline. This is what makes Phase-2 promotion (`docs/SPEC.md` §5.2, gate M5)
-> **v0.6 note (`ADR-0073`).** This annex remains the measurement constitution. Phase-2 promotion
-> (SPEC §5.2) is a **deferred blueprint**, not foundation scope. Foundation identity (`D_H`/`D_R`/`D_X`)
-> MUST be complete before any promotion statistics are treated as attributable (`ADR-0074`).
+> statistically honest. RFC-2119 language is normative here, same as `docs/SPEC.md`.
+>
+> **v0.6 note (`ADR-0073`, `ADR-0074`).** This annex remains the measurement constitution.
+> Phase-2 promotion is a **deferred blueprint**, not foundation scope. Foundation identity
+> (`D_H`/`D_R`/`D_X`) MUST be complete before any promotion statistics are treated as attributable.
 >
 > **Status note.** §5.6's instrument tuple is still unwired in the shipped `tools/telemetry/` —
-> wiring it is M1 task S-M1-A-07 (M-18 in the roadmap epic map). The doctrine below is not
-> retroactively true of the current code; it is the contract M1 wires against.
+> wiring it is deferred with SPEC §7. The doctrine below is not retroactively true of the current
+> code; it is the contract a later measurement wave wires against.
 
 ## 5. The measurement doctrine
 

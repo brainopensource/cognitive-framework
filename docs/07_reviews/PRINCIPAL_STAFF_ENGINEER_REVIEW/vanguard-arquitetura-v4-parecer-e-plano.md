@@ -1,3 +1,7 @@
+> **Non-normative.** Advisory evidence only. Law is `docs/SPEC.md` + `docs/05_adr/0069`–`0074` + annexes.
+> Operational sequence: `002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`. Do not cite this file as a requirement.
+> The `core/` tree proposed here is **rejected** (ADR-0069).
+
 # Vanguard — Parecer de Arquitetura e Plano de Construção (v4)
 
 **Documento:** `vanguard-arquitetura-v4-parecer-e-plano.md`

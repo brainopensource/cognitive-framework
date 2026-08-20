@@ -1,73 +1,58 @@
 ---
 id: SPRINT-M0-DOCS-ACTIVE
 file: docs/03_sprints/sprint_active.md
-title: "Active sprint — v0.5.0 MHF M0: Docs Lock"
-status: ACTIVE
-milestone: M0 (of M0–M6, docs/SPEC.md §8)
-predecessor: v0.6.0 "Molecular Lattice" board (SUPERSEDED — see docs/05_adr/ + docs/02_roadmap/backlog.md §1)
+title: "Active sprint — SUPERSEDED by v0.6.0 Concept Lock"
+status: SUPERSEDED
+milestone: historical M0 (of M0–M6); next work is Wave 0 after director approval
+predecessor: v0.6.0 "Molecular Lattice" board (SUPERSEDED)
 branch: feat/substrate_upgrade
-spec: docs/SPEC.md            # the ONLY normative document
-plan: docs/03_sprints/plans/m1-m2-lanes.md
-last_reviewed: 2026-08-18
+spec: docs/SPEC.md
+plan: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
+last_reviewed: 2026-08-20
 ---
 
-# Sprint board — M0: Docs Lock (Foundation Lock, v0.5.0 concept lock)
+# Sprint board — SUPERSEDED (v0.6.0 Concept Lock)
 
-**Sentence this sprint makes true:**
+**This M0 Docs Lock board is closed as a *next-work* document.**
 
-> One normative spec + ADR log remain; the legacy spec/vision/review corpus is archived, not deleted;
-> the roadmap and sprint board tell the same story as `docs/SPEC.md`; the repo-paths stale-doc bug is
-> fixed — so M0-code and M1 can start on a documentation tree that agrees with itself.
+The v0.5.0 Foundation Lock docs wave (SPEC collapse, ADR-M0-*, annexes, archive) remains historical
+fact. It is **not** the authorization to start M1 “port the kernel into `layer0/`”.
 
-This is **single-owner editorial work**, not the two-engineer M0 from
-`docs/TECH_LEAD_REVIEW/03_SPRINTS_PARALLEL_EXECUTION_PLAN.md` §1 — that model is sized for parallel code
-work (skeleton scaffolding, schema authoring) which this wave explicitly does not do. See
-`docs/03_sprints/plans/m1-m2-lanes.md` for the full two-lane plan, staged for when M1 actually starts.
+**Current authority**
 
-## 0. Law
+| Rank | File |
+|---|---|
+| Law | `docs/SPEC.md`, ADRs `0069`–`0074`, `docs/04_annex/{KERNEL,MEASUREMENT}.md` |
+| Lock plan | `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md` |
+| Roadmap / gap register | `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` |
 
-Invariants I-1…I-11 (`docs/SPEC.md` preamble + §1.1). No runtime code changes this sprint — this is a
-**docs-only** wave. Legacy `TSK-*` rows are closed only with `superseded_by:` pointers
-(`docs/02_roadmap/backlog.md`).
+**Next authorized phase:** Engineering Director / Chief Engineer review of GAMMA + 002.  
+**After approval:** Wave 0 (CI subject-of-record + named falsifiers).  
+**Not authorized:** production coding, CI rewire, runtime convergence, plugin implementation, new sprint dates, or a replacement of this file with an M1 layer0 rewrite board.
 
-## 1. Board
+The checklist below is the closed v0.5.0 docs-lock record. Do not reopen it as current work.
 
-- [x] Step 0 — Ground-truth verification: `tools/repo_paths.py` dead `docs/scrum`/`docs/main_v4`
-      sentinels fixed; `test/test_repo_paths.py` assertion corrected; `tools/check_stale_paths.py`
-      widened to `docs/**/*.md`; `tools/check_schema_archaeology.py` retires gracefully on
-      pre-purged evidence; D-05/D-06/D-07/D-08/D-42 re-verified live (not `[DONE]`-tag-trusted)
-- [x] Step 1 — `docs/SPEC.md` authored from `NEXT_GEN_META_HARNESS_SPECIFICATION.md` + concept-lock
-      deltas
-- [x] Step 2 — `docs/05_adr/` minted: VG-09 split into 68 files, VG-10 copied to `DEFERRED_REJECTED.md`,
-      ADR-M0-01…13 landed
-- [x] Step 3 — `docs/04_annex/KERNEL.md` + `docs/04_annex/MEASUREMENT.md` landed with amendments
-- [x] Step 4 — MERGE rows applied into `docs/SPEC.md` (folded into the Step 1 authoring pass)
-- [x] Step 5 — Legacy corpus archived (`git mv`) to `docs/archive/v045/`; `docs/CONTRIBUTING.md` landed
-- [x] Step 6 — `docs/02_roadmap/{milestones,backlog}.md` rewritten
-- [x] Step 7 — This board rewritten; `docs/03_sprints/plans/{m0-code-and-purge,m1-m2-lanes}.md` staged
-- [ ] Step 8 — Hygiene: README taxonomy removed, `CLAUDE.md`/`AGENTS.md` pointers updated
-- [ ] Step 9 — `docs/SPEC.md` self-review for TBD/TODO/contradictions
+## 0. Law (historical)
 
-## 2. Verification (this sprint's own gate)
+Invariants I-1…I-11 (`docs/SPEC.md`). The v0.5.0 wave was docs-only.
 
-```bash
-python3 -m unittest test.test_repo_paths
-python3 tools/check_schema_archaeology.py
-python3 tools/check_stale_paths.py
-python3 tools/check_markdown_links.py
-grep -rnE "\b(MUST|SHALL|REQUIRED)\b" docs/ | grep -v "docs/SPEC.md" | grep -v "docs/04_annex/" | grep -v "docs/archive/"
-python3 tools/check_boundaries.py
-python3 tools/check_tcb_budget.py
-```
+## 1. Board (closed record)
 
-## 3. Explicitly not this sprint
+- [x] Step 0 — Ground-truth verification (v0.5.0)
+- [x] Step 1 — `docs/SPEC.md` authored (later rewritten at v0.6.0 Concept Lock)
+- [x] Step 2 — `docs/05_adr/` minted (plus later `0069`–`0074`)
+- [x] Step 3 — annexes landed (KERNEL destination amended at v0.6.0)
+- [x] Step 4 — MERGE rows applied
+- [x] Step 5 — Legacy corpus archived
+- [x] Step 6 — `docs/02_roadmap/` rewritten (now historical; see 002)
+- [x] Step 7 — This board rewritten (now superseded)
+- [x] Step 8 — Hygiene: `CLAUDE.md` / `AGENTS.md` v0.6.0 pointers (Concept Lock)
+- [x] Step 9 — `docs/SPEC.md` self-review against ADRs `0069`–`0074` (Concept Lock)
 
-Kernel changes · event taxonomy · SPI implementations · any plugin code · `layer0/` scaffolding ·
-`schemas/mhf/` · pytest migration · `coding_*` re-extraction into `packs/` (M3) · history rewrite /
-secret purge / frontend deletion (staged in `docs/03_sprints/plans/m0-code-and-purge.md`, separately
-authorised) · anything on the Phase-2/3 deferred list (`docs/05_adr/DEFERRED_REJECTED.md`).
+## 2. Explicitly not next
+
+Kernel changes · event taxonomy · SPI implementations · plugin code · `layer0/` scaffolding as destination · pytest migration · Wave 0 CI YAML until director approval.
 
 ---
 
-*Next board: M0-code-and-purge (staged, `docs/03_sprints/plans/m0-code-and-purge.md`), then M1 Sprint 2
-(`docs/03_sprints/plans/m1-m2-lanes.md` §2).*
+*Next board: none until director approval. Then Wave 0 as defined in 002, not `docs/03_sprints/plans/m1-m2-lanes.md` as written.*

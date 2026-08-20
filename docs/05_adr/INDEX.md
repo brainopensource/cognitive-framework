@@ -82,6 +82,7 @@
 | `0074` | [0074-gamma-lock-amendments-proof-budget-writer-identity.md](0074-gamma-lock-amendments-proof-budget-writer-identity.md) | v0.6 Concept Lock GAMMA | accepted |
 
 `0067` is a documented numbering hole (no file). Do not fill it.
+`ADR-M0-07` (six named reservation fields) remains accepted; additive vs structural typing is `ADR-0074`.
 
 ## ADR-M0 namespace (Foundation Lock, cannot collide with 0000+)
 

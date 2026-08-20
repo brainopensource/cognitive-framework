@@ -11,7 +11,7 @@ This file provides high-density guidance to Claude Code (claude.ai/code) when op
 observe → propose → authorize → effect → receipt → evaluate
 ```
 
-- **Concept Lock Law**: v0.6.0 (`docs/SPEC.md`, ADRs `0069`–`0074`, `docs/04_annex/KERNEL.md`).
+- **Concept Lock Law**: v0.6.0 (`docs/SPEC.md`, ADRs `0069`–`0075`, `docs/04_annex/KERNEL.md`). Director-approved per `ADR-0075`.
 - **Shipped Package**: `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (CI runs Python 3.12).
 - **Core Security Thesis**: What solved a task must be separable from the agent, and the judge that evaluates the agent must be physically and cryptographically unreachable from the agent it evaluates (Worker UID `10001` in rootless bubblewrap sandbox vs Evaluator UID `10002`).
 - **Human / Director Navigation**: Refer to [`README.md`](README.md) for full context and reading order.
@@ -21,9 +21,9 @@ observe → propose → authorize → effect → receipt → evaluate
 ## 2. Pre-Development Hold Status
 
 > [!IMPORTANT]
-> The repository is under **pre-development hold**. Concept Lock documentation is complete and awaiting Engineering Director / Chief Engineer **APPROVED**.
+> The Engineering Director review returned **APPROVED** (`docs/05_adr/0075`, [`003_V060_DIRECTOR_REVIEW.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md)). **Wave 0 is the only authorized next code change** — CI subject-of-record rewire plus the named falsifiers F-01…F-21 in `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
 >
-> Do **not** initiate production coding, CI rewiring, runtime convergence, plugin implementation, F1 fixes, or `layer0/` deletion until `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` authorizes Wave 0.
+> Do **not** initiate runtime convergence, plugin implementation, `layer0/` deletion, concurrency, or any Wave 1+ work before the Wave 0 exit gate is green. No Wave 0 code has been written yet.
 
 ### As-Built Reality vs Target Lock (Do Not Conflate)
 
@@ -147,5 +147,5 @@ When resolving architectural questions or ambiguous requirements, follow this st
 2. **Lock ADRs ([`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md))** — Append-only architectural decisions.
 3. **Annexes ([`04_annex/KERNEL.md`](docs/04_annex/KERNEL.md), [`04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md))** — Security and measurement constitutions.
 4. **Execution Roadmap ([`002 Gap Register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md))** — Sequence of foundation waves.
-5. **Lock Plans ([`GAMMA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md), [`BETA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_BETA.md), [`DELTA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_DELTA.md))** — Planning documents.
+5. **Lock Plan ([`GAMMA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md)) and Director Review ([`003`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md))** — Planning and review documents (BETA/DELTA phases consolidated to git history per `ADR-0075`).
 6. **Forensic Evidence ([`docs/07_reviews/`](docs/07_reviews/), [`docs/03_sprints/`](docs/03_sprints/))** — Advisory evidence and history; cannot be cited as binding requirements.

@@ -1,13 +1,13 @@
 ---
 title: "Measurement"
 status: NORMATIVE
-source: docs/archive/v045/01_specs/backend/07_vanguard_loop_engineering_and_measurement_v040.md (VG-07) §5
+source: 01_specs/backend/07_vanguard_loop_engineering_and_measurement_v040.md (VG-07) §5 (git history, 4f9f8b1)
 ---
 
 # Annex: Measurement
 
-> The lab's constitution, kept nearly whole from VG-07 §5 per
-> `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.10 — paired designs, McNemar's exact test,
+> The lab's constitution, kept nearly whole from VG-07 §5 per the archived
+> `01_SPECS_MIGRATION_MATRIX.md` §1.10 (git history, `4f9f8b1`) — paired designs, McNemar's exact test,
 > multiple-comparison policy, the A/A noise floor, arm design, the instrument tuple, splits and
 > contamination discipline. This is what makes Phase-2 promotion (`docs/SPEC.md` §5.2, gate M5)
 > statistically honest. RFC-2119 language is normative here, same as `docs/SPEC.md`.

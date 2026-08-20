@@ -32,7 +32,7 @@ isProject: false
 **Status:** Concept Lock **complete**. Pre-development foundation ready for Director review. Production coding **not started**.  
 **Date:** 2026-08-20  
 **Author role:** Principal Staff Engineer / Tech Lead / Architect  
-**Relationship:** Successor of [BETA](001_V060_concept_phase_BETA.md) (procedure) and [DELTA](001_V060_concept_phase_DELTA.md) (status). Incorporates only independently validated conclusions from four advisory lanes.  
+**Relationship:** Successor of the BETA (procedure) and DELTA (status) phase documents (removed at Director consolidation, `ADR-0075`; git history `4f9f8b1`). Incorporates only independently validated conclusions from four advisory lanes.  
 **Normative after Director accept:** `docs/SPEC.md` + `docs/05_adr/0069`–`0074` + `docs/04_annex/{KERNEL,MEASUREMENT}.md`. This file is the **lock plan**, not a second SPEC.  
 **Operational register:** [002 Foundation Roadmap and Gap Register](002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md).
 

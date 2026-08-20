@@ -2,16 +2,18 @@
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language
 (MUST/SHALL/SHOULD) is binding here and in `docs/04_annex/*` only — nowhere else in `docs/`.
-**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0074`). The as-built Python package
+**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0074`; Director-approved by
+`docs/05_adr/0075`). The as-built Python package
 version remains `0.4.5b1` in `pyproject.toml` until a later release cut.
 **Supersedes:** v0.5.0 Foundation Lock destination story (`layer0/` as M1 rewrite target) and
 mid-run plugin hot-swap as a v0.6 feature; `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`,
-README's old biological/tier taxonomy, `docs/01_specs/backend/**` (archived, evidence not law, at
-`docs/archive/v045/`).
-**Consumes:** `docs/TECH_LEAD_REVIEW/CRITICAL_GAP_ANALYSIS_AND_AUDIT.md` (Kill/Keep/Refactor register,
-invariants I-1…I-10), `docs/TECH_LEAD_REVIEW/NEXT_GEN_META_HARNESS_SPECIFICATION.md` (MHF v1 blueprint,
-the direct ancestor of this document), `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` (per-file
-merge disposition). Forensic report
+README's old biological/tier taxonomy, `docs/01_specs/backend/**` (archived, evidence not law; the
+pre-lock corpus is retained only in git history, anchor commit `4f9f8b1` — no `docs/archive/` tree
+exists on disk, `ADR-0075`).
+**Consumes:** the archived Tech Lead review corpus — `CRITICAL_GAP_ANALYSIS_AND_AUDIT.md`
+(Kill/Keep/Refactor register, invariants I-1…I-10), `NEXT_GEN_META_HARNESS_SPECIFICATION.md` (MHF v1
+blueprint, the direct ancestor of this document), `01_SPECS_MIGRATION_MATRIX.md` (per-file merge
+disposition) — all in git history at `4f9f8b1` (`docs/07_reviews/ARCHIVE.md`). Forensic report
 `docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md` is investigation, not law.
 **Design lineage preserved:** S0–S12 dispatch kernel, JCS canonicalisation + golden vectors, exterior
 signed evaluator, harness-as-data manifests, measurement lab, SQLite WAL ledger.
@@ -21,8 +23,9 @@ silent edit — **`0069`–`0074` outrank the v0.5.0 M1-destination paragraph th
 second SPEC), then `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`
 (post-lock engineering register; cannot contradict this document), then
 `docs/02_roadmap/milestones.md` (historical; cannot contradict this document; rewrite is a later phase),
-then `docs/03_sprints/sprint_active.md` (execution board only), then `docs/archive/v045/` and
-`docs/07_reviews/` (evidence and proposals, not law — no ticket may cite them as a requirement).
+then `docs/03_sprints/sprint_active.md` (execution board only), then the git-history archive
+(pre-v0.6 corpus at `4f9f8b1`) and `docs/07_reviews/` (evidence and proposals, not law — no ticket
+may cite them as a requirement).
 
 ---
 
@@ -665,7 +668,8 @@ Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as 
 
 **This lock wave's own gates (docs):** ADRs `0069`–`0074` cited; SPEC does not name `layer0/` as M1
 destination; KERNEL annex destination amended; GAMMA + gap register present. Living-CI green is
-**not** claimed: `test_repo_paths` / stale `docs/sprint6B` remain a Wave-0 hygiene item.
+**not** claimed: `test_repo_paths` and the stale sprint-6B archive citation remain a Wave-0
+hygiene item (P1-15 / F-20 in the `002` register).
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -748,7 +752,8 @@ emitter, and a paired measurement (`docs/04_annex/MEASUREMENT.md`) — or it doe
 
 ## Invariants I-1 … I-11
 
-I-1 through I-10 are carried from `docs/TECH_LEAD_REVIEW/CRITICAL_GAP_ANALYSIS_AND_AUDIT.md` §6
+I-1 through I-10 are carried from the archived Tech Lead audit `CRITICAL_GAP_ANALYSIS_AND_AUDIT.md` §6
+(git history, `4f9f8b1`)
 ("Ten Non-Negotiable Invariants for v-next"), **amended** by this Concept Lock (`ADR-0074`):
 
 1. **One `EffectRequest`.** A single frozen dataclass, generated from one JSON Schema, used at S0, on

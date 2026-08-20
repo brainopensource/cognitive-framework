@@ -5,10 +5,12 @@
 **Date:** 2026-08-20  
 **Author role:** Principal Staff Engineer  
 **Companion lock:** [GAMMA](001_V060_concept_phase_GAMMA.md)  
-**Production coding:** **not started and not authorized** until this packet is approved.
+**Director review:** **APPROVED** 2026-08-20 (`ADR-0075`, [003](003_V060_DIRECTOR_REVIEW.md)) — **Wave 0 is authorized** and adds falsifiers F-18…F-21 below.  
+**Production coding:** not started; the first authorized code change is Wave 0.
 
 > This file is the one foundation roadmap and the one remaining-work register for AETHER Version 6.
-> Forensic TODO (`docs/07_reviews/TODO_DONT_COMMIT_BEFORE_DOING_IT_v2.md`) is closed as investigation.
+> The forensic TODO is closed as investigation and was removed at Director consolidation
+> (`ADR-0075`; git history `4f9f8b1`).
 > Historical M0–M6 tables in `docs/02_roadmap/` are superseded as *next* work; they remain evidence.
 
 ---
@@ -87,11 +89,11 @@ Package version on disk remains `0.4.5b1` until a later release cut. Concept Loc
 ## 3. Foundation roadmap (no calendar dates)
 
 ```text
-Concept Lock (G1–G4) + this register     DONE this wave
+Concept Lock (G1–G4) + this register     DONE
         ↓
-Director / Chief Engineer approval       CURRENT GATE
+Director / Chief Engineer approval       PASSED 2026-08-20 (ADR-0075)
         ↓
-Wave 0   CI subject-of-record + named falsifiers
+Wave 0   CI subject-of-record + named falsifiers   ← CURRENT (authorized, not started)
 Wave 1   Irreversible substrate on the packages path
 Wave 2   Converge in place (absorb; parity; then delete dupes)
 Wave 3   Walking skeleton; pack extraction begins
@@ -112,7 +114,7 @@ Exit gate:
 - `generate_types.py --check` is a hard gate.
 - Named falsifiers in §4 exist as tests (they MAY be red; red is honest).
 - `tools/check_duplication.py` exists (threshold later; detector now).
-- Archive citation `docs/sprint6B` no longer fails living CI's first step.
+- The stale sprint-6B archive citation no longer fails living CI's first step (F-20).
 - A green `test/layer0` suite alone is **not** success.
 
 ### Wave 1 — Irreversible substrate (canonical path)
@@ -211,6 +213,10 @@ Statuses: `DONE` (this docs wave) · `TODO` (authorized after director approval)
 | F-15 | Budget lineage | `test_child_budget_debits_parent_remaining` | Independent child wallets | 1 |
 | F-16 | No duplicate kernel | `tools/check_duplication.py` | Second selector algebra | 0/2 |
 | F-17 | CI subject | living workflow runs `test/kernel` + packages suites | `test/layer0` as sole behavioural gate | 0 |
+| F-18 | I-7 enforcement scope (`ADR-0075`) | `check_domain_blindness.py` scans `layer0/` **and** `vanguard/packages/{domain,kernel}/` | Linter narrower than the invariant it certifies | 0 |
+| F-19 | Tests are collected (`ADR-0075`) | discovery collects `test/integration/` + `test/governance/` (add `__init__.py`) or retires them with a recorded reason | Silently uncollected test modules counted as green | 0 |
+| F-20 | Oracle registry artifact (`ADR-0075`) | `preregistered_oracles.json` exists at a canonical path and `repo_paths` resolves it | Registry file deleted with the sprint-6B docs; tests error on a ghost path | 0 |
+| F-21 | Translator lifting (`ADR-0075`) | `ProposalTranslator` lifts the `parameters` call spelling and fenced payloads per `test_model_invocation`, or the contract is re-scoped with P1-17 | Tool calls silently degrade to prose (`kind: "finish"`) | 0/1 |
 
 ### 4.3 As-built vs law (thin G5 matrix)
 
@@ -226,7 +232,7 @@ Statuses: `DONE` (this docs wave) · `TODO` (authorized after director approval)
 | Codegen `--check` | Stale / unwired | I-1 / A-4 | Wave 0 |
 | `mhf.trajectory/1` | Missing / content-free digest | I-9 | Wave 1 |
 | Dual selector algebras | Forked | One algebra | Wave 1–2 |
-| `docs/sprint6B` stale path | Living CI first step red | Hygiene | Wave 0 |
+| Stale sprint-6B path | Living CI first step red | Hygiene (P1-15 / F-20) | Wave 0 |
 | Phase 2/3 SPEC §§5–7 | Blueprint text | Deferred | Do not implement |
 | Historical M0–M6 roadmap | layer0 destination, hot-swap, E-COV=100% | Superseded | Follow this file |
 
@@ -248,7 +254,7 @@ Statuses: `DONE` (this docs wave) · `TODO` (authorized after director approval)
 | P1-12 | `model.infer` as kernel verb | DEFERRED |
 | P1-13 | Plugin TS conformance / pytest runner | DEFERRED |
 | P1-14 | Concurrency enablement | DEFERRED |
-| P1-15 | Stale `docs/sprint6B` | Wave 0 hygiene |
+| P1-15 | Stale sprint-6B archive citation | Wave 0 hygiene (with F-20) |
 | P1-16 | Ollama unreachable vs `model_tag_absent` | DEFERRED (test isolation) |
 | P1-17 | Selector `process` vs `generic` | Wave 0/1 contract |
 
@@ -297,3 +303,6 @@ Do not begin until director approval **and** Wave 0 is the first code change:
 
 **Approve** → Engineering may start Wave 0.  
 **Reject** → name the P0 or wave to reopen; do not average with archived reviews.
+
+> **Outcome (2026-08-20): APPROVED** — `ADR-0075`, [003_V060_DIRECTOR_REVIEW.md](003_V060_DIRECTOR_REVIEW.md).
+> All checklist items verified against the live tree; F-18…F-21 added to §4.2; Wave 0 may begin.

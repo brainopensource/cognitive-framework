@@ -1,13 +1,14 @@
 ---
 title: "Kernel, Capabilities & Security"
 status: NORMATIVE
-source: docs/archive/v045/01_specs/backend/05_vanguard_kernel_capabilities_and_security_v040.md (VG-05)
+source: 01_specs/backend/05_vanguard_kernel_capabilities_and_security_v040.md (VG-05; git history, 4f9f8b1)
 amendments: [ADR-M0-08 (K-40 inverted), ADR-M0-09 (alarm set F-21a+F-24), "SA-1..SA-6 pipeline text struck (D-34, honoured non-build)", ADR-0069 (production lattice is vanguard/packages/; layer0/ is not an M1 destination rewrite), ADR-0074 (typed budget; writer authority; complete D_H)]
 ---
 
 # Annex: Kernel, Capabilities & Security
 
-> Kept nearly verbatim from VG-05 per `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.8 — this
+> Kept nearly verbatim from VG-05 per the archived `01_SPECS_MIGRATION_MATRIX.md` §1.8 (git history,
+> `4f9f8b1` — `docs/07_reviews/ARCHIVE.md`) — this
 > is the crown jewel, the normative twin of `vanguard/packages/kernel/dispatch.py`. RFC-2119
 > language (MUST/SHALL/SHOULD) is normative here, same as `docs/SPEC.md`. Amendments are ADRs only
 > (front-matter); S0–S12 body is unchanged. **v0.6 (`ADR-0069`):** the production implementation of

@@ -1,8 +1,9 @@
 # ADR Index (migrated from VG-09 `09_vanguard_decision_register_v040.md`)
 
 > Append-only. Original ADR numbers preserved in front-matter `adr:` field (no renumbering — the
-> `ADR-M0-*` namespace below is separate and cannot collide). Migrated mechanically per
-> `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` §1.12. Source: `docs/archive/v045/01_specs/backend/09_vanguard_decision_register_v040.md`.
+> `ADR-M0-*` namespace below is separate and cannot collide). Migrated mechanically per the archived
+> `01_SPECS_MIGRATION_MATRIX.md` §1.12. Source: `09_vanguard_decision_register_v040.md` (both in git
+> history, `4f9f8b1` — `docs/07_reviews/ARCHIVE.md`).
 
 | ADR | File | Section | Status |
 |---|---|---|---|
@@ -80,6 +81,7 @@
 | `0072` | [0072-plugin-boundary-wire-first-evaluator-exterior.md](0072-plugin-boundary-wire-first-evaluator-exterior.md) | v0.6 Concept Lock | accepted |
 | `0073` | [0073-v060-lock-vs-defer.md](0073-v060-lock-vs-defer.md) | v0.6 Concept Lock | accepted |
 | `0074` | [0074-gamma-lock-amendments-proof-budget-writer-identity.md](0074-gamma-lock-amendments-proof-budget-writer-identity.md) | v0.6 Concept Lock GAMMA | accepted |
+| `0075` | [0075-director-review-v060-approved-wave0-authorized.md](0075-director-review-v060-approved-wave0-authorized.md) | v0.6 Director Review | accepted |
 
 `0067` is a documented numbering hole (no file). Do not fill it.
 `ADR-M0-07` (six named reservation fields) remains accepted; additive vs structural typing is `ADR-0074`.

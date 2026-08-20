@@ -1,6 +1,6 @@
 # Vanguard / AETHER — Testing Subsystem Guide
 
-This directory contains the automated test suite for the Vanguard / AETHER runtime (**1,138 test cases** across 17 test categories in Python, plus the TypeScript CLI test suite).
+This directory contains the automated test suite for the Vanguard / AETHER runtime (**1,119 collected test cases** across the Python test tree — plus two directories discovery cannot collect, see §4 — and the TypeScript CLI test suite).
 
 ---
 
@@ -149,7 +149,11 @@ Contains deliberate architectural violations (cycles, illegal imports, domain le
 
 ## 4. Full Execution Results & Master Summary Table
 
-The complete test suite was executed across all Python surfaces. Overall, **1,118 of 1,138 tests (98.2%) pass cleanly**, with 100% pass rates across pure core security, contracts, agency, trust, security, domain packs, benchmarks, lab, and tools.
+**Baseline of record: 2026-08-20, main `4f9f8b1` (re-verified during the Director review, `ADR-0075`).**
+
+Root discovery (`python3 -m unittest discover -s test -t .`) collects **1,119 tests — 7 failures, 5 errors, 8 skipped**. The per-directory table below sums slightly higher because two directories are **silently excluded from discovery**: `test/integration/` (13 defined tests) and `test/governance/` are missing `__init__.py` and cannot be imported at all — they run in no configuration. This is falsifier **F-19** in the `002` gap register (Wave 0: make them importable or retire them with a recorded reason). Do not count them as green.
+
+**CI subject of record (ADR-0073):** the production-path suites are `test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, plus `test/security` and `test/trust`. A green `test/layer0` suite alone is **not** success — the layer0 driver fabricates its own `"pass"` verdict (defect F1), so its suite certifies the defect. Living CI does not yet run the production suites; wiring it is Wave 0.
 
 ### Master Results Table
 
@@ -165,15 +169,16 @@ The complete test suite was executed across all Python surfaces. Overall, **1,11
 | **Domain Packs** | `test/packs/` | 27 | 27 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Layer-0 Fork** | `test/layer0/` | 25 | 25 | 0 | 0 | 0 | **100.0%** | ✅ PASS (Note: F1 passes silently) |
 | **Registry** | `test/registry/` | 26 | 26 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
-| **Governance** | `test/governance/` | 1 | 1 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
+| **Governance** | `test/governance/` | — | — | — | — | — | — | ⛔ NOT COLLECTED (no `__init__.py`, F-19) |
+| **Integration** | `test/integration/` | — | — | — | — | — | — | ⛔ NOT COLLECTED (13 defined tests never run, F-19) |
 | **Apps Slot** | `test/apps/` | 4 | 4 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Benchmarks** | `test/benchmarks/` | 20 | 20 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Lab Measurement**| `test/lab/` | 54 | 54 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Tooling Tests** | `test/tools/` | 38 | 38 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Root Tests** | `test/test_*.py` | 29 | 27 | 2 | 0 | 0 | **93.1%** | ⚠️ Historical Sprint Path Assertions |
-| **TOTAL** | *Monorepo Suite* | **1,138** | **1,118** | **7** | **5** | **8** | **98.2%** | **Solid Core Foundation** |
+| **TOTAL (root discovery)** | *Monorepo Suite* | **1,119** | **1,099** | **7** | **5** | **8** | **98.2%** | **Solid Core Foundation** |
 
-*Verification*: $1118 + 7 + 5 + 8 = 1138$ total tests.
+*Verification*: $1099 + 7 + 5 + 8 = 1119$ collected tests. Uncollected directories (F-19) are excluded from every total by construction.
 
 ---
 
@@ -198,15 +203,15 @@ The complete test suite was executed across all Python surfaces. Overall, **1,11
   - 7 live LLM integration tests intentionally skip when live API keys (`OPENROUTER_API_KEY`, etc.) are unset in the local environment, ensuring that tests never make unbudgeted network calls.
 
 #### 2. `test/adapters` (2 Failures, 5 Errors, 1 Skipped)
-- **Root Cause (3 Errors)**: Legacy Output Shape in `test_model_invocation.py`.
-  - The tests look for dictionary fields `res.value["args"]` and `res.value["action"]` from pre-v0.6 model output lifting, whereas the current port returns structured `ToolCall` contract objects.
-- **Root Cause (2 Errors)**: Relocated Sprint Evidence Path in `test_oracle_registry.py`.
-  - The test queries `/docs/sprint6B/preregistered_oracles.json`, which was relocated to `docs/03_sprints/evidence/` during Concept Lock documentation consolidation.
-- **Root Cause (2 Failures)**: Selector Grammar Invariant in `test_model_invocation.py`.
-  - Tests check `'generic'` vs `'process'` selector categorization under the updated Dev1 grammar.
+- **Root Cause (3 Errors — real behavioral gaps, falsifier F-21)**: `ProposalTranslator` lifting in `test_model_invocation.py`.
+  - Verified by direct reproduction against `vanguard/packages/adapters/models/invocation.py`: a tool call spelled with the `parameters` key, and two fenced-payload forms (quoted info-string values; `payloadArgument` bodies), currently degrade to prose (`{"kind": "finish"}`) instead of lifting to an action. The tests encode intended contract behavior the translator does not implement. These are **not** stale tests; the earlier "legacy output shape / structured ToolCall" explanation recorded here was wrong. Fix or re-scope in Wave 0/1 together with P1-17.
+- **Root Cause (2 Errors — missing evidence artifact, falsifier F-20)**: `test_oracle_registry.py`.
+  - `repo_paths.preregistered_oracles()` resolves to `docs/sprint6B/preregistered_oracles.json`, which no longer exists **anywhere in the tree** — the file was deleted with `docs/sprint6B/`, not relocated (the previously recorded `docs/03_sprints/evidence/` destination does not exist). Wave 0 must restore the registry artifact at a canonical path or retire these tests with a recorded reason.
+- **Root Cause (2 Failures — open contract decision, P1-17)**: Selector Grammar in `test_model_invocation.py`.
+  - The tests expect `proc://exec/allow/...` `generic`-kind selectors; the current path yields `process`-kind. Which algebra wins is the P1-17 Wave 0/1 contract decision; the reds are honest until it is made.
 
 #### 3. `test/test_repo_paths.py` (2 Failures)
-- **Root Cause**: Two assertions verify stale paths referencing historical `docs/sprint6B/` instead of `docs/03_sprints/evidence/`.
+- **Root Cause**: Same stale `docs/sprint6B/` registry path as F-20 above (Wave 0 hygiene item P1-15).
 
 ---
 
@@ -218,7 +223,8 @@ Status of static architectural enforcement scripts in `tools/`:
 check_boundaries.py        ✅ PASS  (297 source files checked, 0 violations)
 check_tcb_budget.py        ✅ PASS  (1347 LOC vs 1438 LOC threshold, 131 lines safety margin)
 scan_secrets.py            ✅ PASS  (0 leaked secrets/tokens in scanned surfaces)
-check_domain_blindness.py  ✅ PASS  (Invariant I-7: 0 domain tokens in layer0/kernel)
+check_domain_blindness.py  ✅ PASS* (scans layer0/ ONLY — narrower than Invariant I-7, which also
+                                    covers vanguard/packages/{domain,kernel}/; falsifier F-18, Wave 0)
 check_isolation_policy.py  ✅ PASS  (Invariant I-6: proc.exec plugins declare container/subprocess)
 check_markdown_links.py    ✅ PASS  (All local markdown links resolve)
 check_stale_paths.py       ❌ FAIL  (RED on docs/sprint6B references — Wave 0 cleanup item)

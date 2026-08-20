@@ -10,19 +10,19 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Concept Lock** | v0.6.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **Documentation Lock Complete**. Production coding held pending Engineering Director / Chief Engineer approval. |
+| **Status** | **Concept Lock APPROVED** by the Engineering Director (`ADR-0075`). Wave 0 authorized; production coding not yet started. |
 | **Foundation Plan** | Wave 0 (CI truth + named falsifiers) through Wave 4 (first real coding-agent E2E) |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Concept Lock](https://img.shields.io/badge/AETHER-v0.6.0--concept--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Hold](https://img.shields.io/badge/Production_coding-held-orange.svg)](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md)
+[![Approved](https://img.shields.io/badge/Director_review-APPROVED_Wave_0-brightgreen.svg)](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md)
 
 ---
 
 ## 1. Executive Summary for Engineering Director & Chief Engineer
 
-This repository is under **final independent review** before Wave 0 implementation begins. You own the go/no-go decision.
+The final independent review is **complete**: **APPROVED** (`ADR-0075`, [`003_V060_DIRECTOR_REVIEW.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md)). Wave 0 may begin; the material below remains the reading order for the locked foundation.
 
 ### The Mission & Core Thesis
 Vanguard/AETHER provides a verifiable recursive-agency substrate:

@@ -4,7 +4,7 @@ The director Performed a full independent technical review and refactor plan of 
 
 ---
 
-# DOING
+# DONE
 
 Now he is doing waves 1-4 planning
 
@@ -149,7 +149,7 @@ The standard is that **the difficult foundational decisions are settled, the imp
 
 
 
-# DOING 
+# DONE 
 
 ### Developer A — Evidence / Signing → Wire / Contracts
 
@@ -228,6 +228,88 @@ Follow the canonical docs rather than inventing local architecture. Anything mar
 
 Your result is complete when your assigned Sprint 1.2 work is green, Sprint 1.3 integration is complete with Developer A, and Wave 2 converges the repository onto one canonical runtime without deleting `layer0` behavior before parity proves it is safe.  
 
+
+### Developer A — Close Wave 1 / Sprint 1.3
+
+Act as **Senior Developer A** and finish **Wave 1** together with Developer B.
+
+Re-read the latest:
+
+* `docs/03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md`
+* `docs/03_sprints/plans/wave1_trust_spine.md`
+* `docs/03_sprints/sprint_active.md`
+* `docs/02_roadmap/backlog.md`
+* `docs/02_roadmap/milestones.md`
+* `docs/SPEC.md`
+* ADR-0076 and relevant annexes
+
+Sprint 1.1 is your completed foundation; Developer B owns completion of 1.2. Once both lanes are green, **execute your ownership of Sprint 1.3 and close the shared integration seams required by the documented M-1 exit gate**.
+
+Use the live repository and canonical documents to determine the implementation details. Coordinate directly with Developer B on overlapping state/evidence/trajectory surfaces; do not independently implement the same mechanism.
+
+Maintain production-quality Senior/Staff standards: canonical contracts, minimal abstractions, DRY code, strong typing, deterministic behavior, explicit authority, fail-closed semantics, and no compatibility hacks or speculative architecture.
+
+Do not start Wave 2 early and do not weaken acceptance evidence to declare Wave 1 complete. Escalate decisions explicitly assigned to Tech Lead/Director.
+
+**Result:** Wave 1 is not finished when your code is finished; it is finished when **Sprint 1.3 is integrated with Developer B and the complete M-1 exit gate is demonstrably green**. Report remaining blockers if it is not.
+
+---
+
+### Developer B — Close Wave 1 / Sprint 1.2 + 1.3
+
+Act as **Senior Developer B** and drive your remaining work through **Wave 1 closure** together with Developer A.
+
+Re-read the latest:
+
+* `docs/03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md`
+* `docs/03_sprints/plans/wave1_trust_spine.md`
+* `docs/03_sprints/sprint_active.md`
+* `docs/02_roadmap/backlog.md`
+* `docs/02_roadmap/milestones.md`
+* `docs/SPEC.md`
+* ADR-0076 and relevant annexes
+
+First finish and verify any remaining **Sprint 1.2** acceptance evidence. Do not hide or work around honest failures.
+
+Once 1.1 and 1.2 are both green, **execute your ownership of Sprint 1.3 with Developer A and drive the combined implementation through the documented M-1 exit gate**.
+
+Use the plans and current code to determine what remains rather than relying on this prompt as an implementation specification. Coordinate shared surfaces with Developer A and preserve one canonical implementation for every architectural responsibility.
+
+Maintain production-quality Senior/Staff standards: simple modular code, DRY contracts, explicit ownership, deterministic state, strong failure semantics, maintainability, and no unnecessary abstractions or duplicate paths.
+
+Anything assigned to `TECH-LEAD` or `DIRECTOR` remains an escalation/review point rather than a developer-local architectural decision.
+
+**Result:** leave **Wave 1 / M-1 green and ready to authorize Wave 2**, or report the exact remaining blocker and evidence showing why Wave 2 must remain closed.
+
+
+### Tech Lead — Wave 1 Final Gate / M-1 Authorization
+
+Act as **Senior Tech Lead / Project Lead** for AETHER / Vanguard v0.6.
+
+Perform the **final Wave 1 / M-1 engineering gate review** using the current integrated repository, Developer A/B work, and the authoritative documents:
+
+* `docs/03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md`
+* `docs/03_sprints/plans/wave1_trust_spine.md`
+* `docs/03_sprints/sprint_active.md`
+* `docs/02_roadmap/backlog.md`
+* `docs/02_roadmap/milestones.md`
+* `docs/SPEC.md`
+* ADR-0076 and relevant annexes
+
+Do **not** redo the developers' work or redesign Wave 1. Review the integrated result and resolve only the remaining decisions that require Tech Lead authority.
+
+In particular, independently adjudicate the reported **F-08 ambiguity** from the actual contract, fixture, kernel behavior, and intended falsifier; determine whether it represents a real production defect, an incorrect/stale falsifier, or another contract mismatch. Do not modify evidence merely to obtain green.
+
+Also close the outstanding Tech Lead review points identified by the Wave 1 plan, including `1.2-C` and `1.3-C`, based on the architecture and live implementation.
+
+Verify the complete **M-1 exit gate**, not individual developer completion. Treat the canonical `vanguard/packages/` production path as the subject of record while preserving explicitly deferred `layer0` defects for Wave 2 where the plans require that sequencing.
+
+**Final result:** return exactly one engineering decision:
+
+* **M-1 GREEN — WAVE 2 AUTHORIZED**, with any minor follow-up recorded for its proper later wave; or
+* **M-1 BLOCKED**, identifying only the concrete blockers that must be corrected before Wave 2 begins.
+
+If green, update the appropriate planning/sprint status so both developers can immediately proceed into the documented Wave 2 lanes.
 
 
 # DOING

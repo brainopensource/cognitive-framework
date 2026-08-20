@@ -50,6 +50,9 @@ class Reservation:
     bytes_: int = 0
 
     def as_map(self) -> Mapping[str, int]:
+        # Additive conserved dimensions only (ADR-0074 §2). Structural
+        # ceilings (depth, turns) are not costs and MUST NOT appear here:
+        # sibling depths are never summed into remaining().
         return {"usd_micros": self.usd_micros, "millis": self.millis,
                 "tokens": self.tokens, "bytes": self.bytes_}
 

@@ -101,7 +101,10 @@ class LedgerEmitter:
         anchor: EventEnvelope | None = None,
     ) -> None:
         if not project_id:
-            raise ValueError("project_id is required (config-declared; 1.2-C TECH-LEAD)")
+            # 1.2-C: config-declared, never workspace-derived (see
+            # `TaskContext.project_id`). No default here -- an emitter that
+            # invented one would silently start a second chain.
+            raise ValueError("project_id is required (config-declared; 1.2-C)")
         if not harness_digest:
             raise ValueError("harness_digest is required on every emitted envelope")
         if role not in WRITER_ROLES:

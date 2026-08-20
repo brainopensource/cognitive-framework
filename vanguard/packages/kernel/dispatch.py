@@ -42,6 +42,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
+from ..domain.canonicalisation.digest import digest_of
 from ..domain.canonicalisation.jcs import CanonicalisationError
 from .attenuation import Scope
 from .budget import BudgetDenied, Governor, Lease, Reservation
@@ -282,6 +283,8 @@ class Kernel:
                     run_id=request.run_id, principal=request.principal,
                     payload={"descriptorDigest": descriptor,
                              "grantId": grant.grant_id if grant else None,
+                             "grantDigest": digest_of(grant.payload()) if grant else None,
+                             "leaseId": lease.lease_id,
                              "idempotencyKey": request.idempotency_key,
                              "sinkClass": self._sinks.sink_class(request.action).value})
                 try:

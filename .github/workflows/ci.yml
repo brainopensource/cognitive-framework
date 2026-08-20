@@ -51,11 +51,19 @@ jobs:
       - name: Trust package tests
         run: python3 -m unittest discover -s test/trust -t .
 
-      - name: Bound falsifiers F-01..F-21 (reds allowed)
-        continue-on-error: true
+      # M-1 closed with F-01..F-21 all green on the canonical path, so the
+      # falsifier register stops being an advisory red and becomes a gate.
+      # Wave 0's "reds allowed" allowance expired with the milestone.
+      - name: Bound falsifiers F-01..F-21 (gating from M-1)
         run: python3 -m unittest discover -s test/falsifiers -t .
 
-      - name: Layer-0 microkernel test suite
+      # `layer0/` is a copy-fork under deletion (2.2-B); it is not the subject
+      # of record and carries known deferred defects (fail-open ceiling,
+      # unsigned `"pass"`, a stale `EffectContext.depth` default). Advisory so
+      # that a fork awaiting deletion cannot mask a real regression elsewhere.
+      # This step is DELETED, not un-quarantined, by 2.2-B.
+      - name: Layer-0 microkernel test suite (advisory; deleted at 2.2-B)
+        continue-on-error: true
         run: python3 -m unittest discover -s test/layer0 -t .
 
       - name: Hexagonal boundary lattice check

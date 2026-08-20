@@ -65,23 +65,15 @@ class RunResultCarriesTheComposition(unittest.TestCase):
         self.assertEqual(dict(result.gene_digests),
                          dict(session.harness.gene_digests))
 
-    def test_the_composition_digest_is_present_and_episode_bound(self) -> None:
-        """FINDING (`S9-A-01`): `composition_digest` binds the `episode_id`.
-
-        It is stable for one episode and moves between episodes, so it
-        identifies *this run's* composition and cannot be the key that groups
-        runs of one pack. That role belongs to `gene_digests`, which is stable
-        across episodes and differs across packs -- asserted below. Recorded
-        rather than "fixed": changing what the digest covers is an `L-1`
-        corpus-format change, and every digest already recorded would move.
-        """
+    def test_the_composition_digest_is_dh_not_episode_bound(self) -> None:
+        """ADR-0076 §4: D_H is composition identity; episode_id is not in it."""
 
         first = _session([finish()], episode_id="ep-a").run()
         again = _session([finish()], episode_id="ep-a").run()
         other = _session([finish()], episode_id="ep-b").run()
         self.assertTrue(first.composition_digest)
         self.assertEqual(first.composition_digest, again.composition_digest)
-        self.assertNotEqual(first.composition_digest, other.composition_digest)
+        self.assertEqual(first.composition_digest, other.composition_digest)
 
     def test_gene_digests_are_the_cross_run_pack_identity(self) -> None:
         """What attribution actually groups on."""

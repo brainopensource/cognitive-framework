@@ -92,7 +92,11 @@ Tests the pure mathematical security core of Vanguard (`vanguard/packages/kernel
 - `test_budget.py` & `test_grant_budget_events.py`: Verifies turn count, token budget, and cost ceiling enforcement.
 - `test_grant_wire_shape.py`: Verifies capability grant serialization and deserialization.
 - `test_provenance.py`: Verifies cryptographic lineage and execution causal DAGs.
-- `test_replay_parity.py`: Verifies exact deterministic replay given identical event streams.
+
+Replay-parity (I-4, F-02) lives on the packages path in `test/runtime/test_ledger_truth.py`
+(`ColdReplayParity`); the layer0 replay contract lives in `test/layer0/replay/test_parity.py`.
+The former `test/kernel/test_replay_parity.py` imported the layer0 fold/driver despite its
+location and is removed (Wave 1, 1.3-B hygiene) — it tested nothing packages-scoped.
 
 ### `test/contracts/` — Hexagonal Port Contracts & Wire Invariants (121 tests)
 Enforces port behavior and wire schemas across both Python and TypeScript parity:

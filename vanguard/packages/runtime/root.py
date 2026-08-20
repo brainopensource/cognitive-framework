@@ -114,6 +114,7 @@ from ..ports.event_store import EventRange, EventStorePort
 from .determinism import SystemClock, SystemRandom
 from .evaluator_gateway import record_verdict
 from .ledger_emitter import LedgerBridge, LedgerEmitter
+from .trajectory import DelayedTerminalEmitter, assemble_trajectory
 from .telemetry import RunTelemetry
 from .governance.approvals import (
     ApprovalAuthority,
@@ -188,8 +189,14 @@ class TaskContext:
     #: (`S5-SA-002`). `None` records nothing rather than recording a guess.
     competence_prior: float | None = None
     max_turns: int = 8
-    # 1.2-C TECH-LEAD (config-declared, not workspace-derived). Escalate if
-    # identity must be a workspace fingerprint instead of this field.
+    #: 1.2-C, settled at the M-1 gate: `project_id` is **config-declared**,
+    #: never derived from workspace identity. A workspace fingerprint (path,
+    #: git remote, inode) would make the ledger's `prev_digest` chain a
+    #: function of *where the repo happens to sit*, so the same project would
+    #: fork into a new chain on every clone, move, or container mount, and
+    #: cold replay (F-02) could not reattach to a chain it did not itself
+    #: create. Identity of the subject under evaluation must be declared by
+    #: the caller and carried, like `run_id` and `episode_id` beside it.
     project_id: str = "project-default"
     parent_principal_id: str | None = None
     parent_episode_id: str | None = None
@@ -203,6 +210,8 @@ class Receipt:
     descriptor_digest: str
     outcome: str
     detail: str = ""
+    lease_id: str | None = None
+    grant_digest: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -233,6 +242,7 @@ class RunResult:
     instrument_error: str | None = None
     #: `S9-A-04`. The ledger reduction Lane C's paired runner pairs on.
     state_digest: str = ""
+    trajectory: Mapping[str, Any] | None = None
 
     #: Digests a benchmarked run must carry to be replayable (Phase 4 `V5-A`).
     #: `ClassVar` -- a constant, not a field.
@@ -295,6 +305,7 @@ class Harness:
     #: `skill`/`skills` component. Rendered into `L3` by `ContextCompiler`
     #: itself (`format_skill_index`), not pre-rendered here.
     skill_cards: tuple[SkillCard, ...] = ()
+    capability_ceiling: tuple[str, ...] = ()
 
     @property
     def composition_digest(self) -> str:
@@ -671,10 +682,10 @@ class HarnessSession:
                 "an IndexPort was supplied but the manifest declares no index "
                 "component; bind it in the pack or do not pass it")
 
-        self.scope = _scope_for(harness, repo)
+        self.scope = _scope_for(harness)
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
-                          (_resource_for(repo),), max_depth=4)])
+                          _ceiling_resources(harness), max_depth=4)])
         self.policy = _SwappablePolicy(StandardPolicy(
             parent_scope=self.scope,
             mode=Mode.INTERACTIVE if ports.interactive else Mode.BENCHMARK,
@@ -813,6 +824,7 @@ class HarnessSession:
         # agreeable reviewer bought the run another eight turns per approval.
         # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
         # not each segment of it, and an exhausted budget is terminal.
+        delayed = DelayedTerminalEmitter(self.ledger)
         while True:
             remaining = task.max_turns - self.turns_consumed()
             if remaining <= 0:
@@ -822,7 +834,7 @@ class HarnessSession:
             self.policy.bind(authorization)
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
-                events=self.ledger, scope=self.scope, tools=harness.tool_schemas,
+                events=delayed, scope=self.scope, tools=harness.tool_schemas,
                 max_turns=remaining)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
@@ -851,6 +863,37 @@ class HarnessSession:
             authorization = None
 
         verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
+        trajectory = assemble_trajectory(
+            task=task,
+            harness_digest=harness.composition_digest,
+            terminal=str(getattr(terminal, "value", terminal)),
+            receipts=receipts,
+            contexts=list(self.operator.contexts),
+            events=tuple(self.ledger.events),
+            verdict=verdict,
+        )
+        if delayed.pending is None:
+            terminal_name = str(getattr(terminal, "value", terminal))
+            delayed.pending = Event(
+                kind="EpisodeCompleted",
+                reason=terminal_name,
+                at=ports.clock.now(),
+                run_id=task.run_id,
+                principal=task.principal,
+                payload={
+                    "episodeId": task.episode_id,
+                    # `session_log.py` reads any `outcome` other than
+                    # `"resolved"` as a terminal refusal (`runtime/ledger/
+                    # projections.py`'s own default). A successful completion
+                    # synthesized here -- `engine.py` only emits its own
+                    # `EpisodeCompleted` on the no-turn-produced path -- must
+                    # not be mistaken for one.
+                    "outcome": ("resolved"
+                               if terminal in (RunTermination.COMPLETED, RunTermination.ABSTAINED)
+                               else terminal_name),
+                },
+            )
+        delayed.flush(trajectory)
         ports.environment.dispose()
         return RunResult(
             harness=harness.harness,
@@ -865,6 +908,7 @@ class HarnessSession:
             telemetry=self._telemetry(),
             instrument_error=self._instrument_error(),
             state_digest=self.state_digest(),
+            trajectory=trajectory,
         )
 
     # -- what the instrument reads ----------------------------------------
@@ -971,8 +1015,23 @@ class Runtime:
         artifacts, contents = cls._artifacts(manifest, directory)
         workspace = Workspace.empty().apply(
             LogicalEdit(f"compose {manifest.harness}", artifacts))
+        components = dict(manifest.components)
+        system_core = "\n".join(contents[p] for p in components.get("system_prompt", ()))
+        approval_policy = "\n".join(
+            contents[p] for p in components.get("approval_policy", ()) if p in contents)
+        model_routes = tuple(
+            contents[p] for p in components.get("routing_policy", ()) if p in contents)
+        ceiling = tuple(capability.selector for capability in manifest.capabilities)
         try:
-            frozen = compose(manifest, workspace.graph, episode_id)
+            frozen = compose(
+                manifest, workspace.graph, episode_id,
+                identity={
+                    "systemPrompt": system_core,
+                    "ceiling": ceiling,
+                    "approvalPolicy": approval_policy,
+                    "modelRoutes": model_routes,
+                },
+            )
         except ManifestError as exc:
             raise CompositionError(str(exc)) from exc
 
@@ -992,8 +1051,6 @@ class Runtime:
                     f"{manifest.harness}: {capability.verb} declares "
                     f"{capability.sink!r}: {exc}") from exc
 
-        components = dict(manifest.components)
-        system_core = "\n".join(contents[p] for p in components.get("system_prompt", ()))
         schemas = []
         for tool_path in components.get("tools", ()):
             try:
@@ -1038,6 +1095,7 @@ class Runtime:
             translator=translator,
             gene_digests=gene_digests,
             skill_cards=skill_cards,
+            capability_ceiling=ceiling,
         )
 
 
@@ -1181,20 +1239,47 @@ class Runtime:
 # ---------------------------------------------------------------------------
 
 
-def _resource_for(repo: Path) -> Mapping[str, Any]:
-    # Grant selectors are pack-logical (`/workspace`). The host `repo` is the
-    # sandbox mount, not a second root the classifier can disagree with.
-    del repo
-    return {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+def _ceiling_resources(harness: Harness) -> tuple[Mapping[str, Any], ...]:
+    """The capability ceiling, as held resources (ADR-0074 §4 / 1.3-B).
+
+    One resource per declared capability's *own* selector -- the manifest is
+    the only ceiling this Wave has to intersect against (a separate plugin
+    ceiling arrives with the registry in Wave 3; until then `intersect_ceilings`
+    over `[harness]` is the identity). A verb that widens beyond its own
+    declared selector -- `proc.exec`'s `generic` `proc://...` pattern, say --
+    must not be silently covered by a blanket filesystem grant, or the
+    classifier's `decide()` check (`domain/selectors/`) is comparing the
+    request against authority the manifest never declared.
+    """
+    seen: dict[str, Mapping[str, Any]] = {}
+    for selector_text in harness.capability_ceiling:
+        seen.setdefault(selector_text, json.loads(selector_text))
+    return tuple(seen.values())
 
 
-def _scope_for(harness: Harness, repo: Path) -> Scope:
-    """The authority surface, entirely from the manifest and the repo root."""
+def _scope_for(harness: Harness) -> Scope:
+    """The authority surface, entirely from the manifest's declared ceiling."""
+    if not harness.capability_ceiling:
+        # F-07: empty ceiling authorizes nothing.
+        return Scope(
+            actions=frozenset(),
+            resources=(),
+            constraints=Constraints(
+                expires_at=_FAR_FUTURE,
+                max_uses=0,
+                budget_usd_micros=0,
+                max_bytes=0,
+                risk_ceiling="low",
+                max_depth=0,
+                network_policy="deny",
+            ),
+            depth=0,
+        )
     risks = tuple(harness.risk_of.values())
     ceiling = "critical" if "critical" in risks else ("high" if "high" in risks else "medium")
     return Scope(
         actions=frozenset(harness.verbs),
-        resources=(_resource_for(repo),),
+        resources=_ceiling_resources(harness),
         constraints=Constraints(
             expires_at=_FAR_FUTURE,
             max_uses=64,
@@ -1266,6 +1351,15 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     return _span_for(f"tool-result-{turn}", "tool_result")
 
 
+def _payload_field(result: Any, key: str) -> str | None:
+    for event in getattr(result, "events", ()) or ():
+        payload = getattr(event, "payload", None) or {}
+        value = payload.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return None
+
+
 def _record(receipts: list[Receipt], operator: _LayeredOperator,
             calls: list[tuple[EffectRequest, Any]], *,
             admit_context: bool = False) -> None:
@@ -1284,6 +1378,8 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
             descriptor_digest=result.descriptor_digest or "",
             outcome=result.outcome.status,
             detail=outcome_detail,
+            lease_id=_payload_field(result, "leaseId"),
+            grant_digest=_payload_field(result, "grantDigest"),
         ))
         text = f"{request.action} -> {result.outcome.status} ({result.outcome.result_digest})"
         if outcome_detail:

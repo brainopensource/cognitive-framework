@@ -1,113 +1,151 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with this repository.
+This file provides high-density guidance to Claude Code (claude.ai/code) when operating in this repository.
 
-## Project
+---
 
-Vanguard / AETHER — a verifiable, modular recursive-agency substrate built around
-`observe → propose → authorize → effect → receipt → evaluate`. The exterior judge is supposed to be
-unreachable from the agent it grades.
+## 1. Project Overview & Core Mission
 
-**Concept Lock:** v0.6.0 (`docs/SPEC.md`, ADRs `0069`–`0074`). **Shipped package:** `vanguard-runtime`
-`0.4.5b1` (`pyproject.toml`); `requires-python = ">=3.10"`.
+**Vanguard / AETHER** is a verifiable, capability-attenuated recursive-agency substrate built around the loop:
+```text
+observe → propose → authorize → effect → receipt → evaluate
+```
 
-**Human / Director navigation:** [`README.md`](README.md) (reading order, as-built vs planned, what is
-held). This file is for agents working in the tree.
+- **Concept Lock Law**: v0.6.0 (`docs/SPEC.md`, ADRs `0069`–`0074`, `docs/04_annex/KERNEL.md`).
+- **Shipped Package**: `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (CI runs Python 3.12).
+- **Core Security Thesis**: What solved a task must be separable from the agent, and the judge that evaluates the agent must be physically and cryptographically unreachable from the agent it evaluates (Worker UID `10001` in rootless bubblewrap sandbox vs Evaluator UID `10002`).
+- **Human / Director Navigation**: Refer to [`README.md`](README.md) for full context and reading order.
 
-Polyglot monorepo: stdlib-oriented Python core plus TypeScript/Ink CLI (`@vanguard/cli`), npm workspace
-at repo root.
+---
 
-**Pre-development hold.** Concept Lock docs are complete and awaiting Engineering Director / Chief
-Engineer **APPROVED**. Do **not** start production coding, CI rewiring, runtime convergence, plugin
-implementation, F1 fixes, or `layer0/` deletion until
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`
-authorizes Wave 0.
+## 2. Pre-Development Hold Status
 
-**As-built vs planned (do not conflate):**
+> [!IMPORTANT]
+> The repository is under **pre-development hold**. Concept Lock documentation is complete and awaiting Engineering Director / Chief Engineer **APPROVED**.
+>
+> Do **not** initiate production coding, CI rewiring, runtime convergence, plugin implementation, F1 fixes, or `layer0/` deletion until `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` authorizes Wave 0.
 
-| Locked / planned (SPEC + `002`) | On disk today |
+### As-Built Reality vs Target Lock (Do Not Conflate)
+
+| Target Lock (SPEC + ADRs + `002`) | As-Built State on Disk Today |
 |---|---|
-| Packages = sole CI subject of record | Living CI gates `test/layer0` + packs + lexical tools |
-| Fail-closed ceilings; signed verdicts only | `layer0/spi/ceiling.py` fail-open; F1 unsigned `"pass"` in `layer0/scheduler/driver.py` |
-| Complete `D_H`; `mhf.trajectory/1` | `FrozenHarness` exists; trajectory schema file **missing** |
-| Wire-first plugins on packages path | JSON-RPC lives under `layer0/spi/jsonrpc.py` (packages toolkit already imports it) |
-| One coding-agent E2E (Wave 4) | `packs/code-default` + `agency/manifests/vg-*` + `vg` CLI — not that E2E yet |
+| `vanguard/packages/` = Sole CI subject of record | Living CI currently gates `test/layer0` + `test/packs` + static linters |
+| Fail-closed ceilings; signed evaluator verdicts only | `layer0/spi/ceiling.py` is fail-open; F1 unsigned `"pass"` in `layer0/scheduler/driver.py` |
+| Complete `D_H` harness compile; `mhf.trajectory/1` | `FrozenHarness` exists in domain; trajectory schema file pending (Wave 1) |
+| Wire-first plugins on canonical packages path | JSON-RPC 2.0 lives in `layer0/spi/jsonrpc.py` (packages toolkit imports it) |
+| One verified coding-agent E2E (Wave 4) | `packs/code-default` + `agency/manifests/vg-*` + `vg` CLI — not that E2E yet |
 
-## Commands
+---
 
-### Python (repo root)
+## 3. As-Built Codebase Inventory
 
-```bash
-python3 -m unittest discover -s test -t .          # full suite — not fully green
-python3 -m unittest test.kernel.test_dispatch      # single module
-python3 -m unittest discover -s test/kernel -t .   # production kernel — not in living CI
-python3 -m unittest discover -s test/layer0 -t .   # fork suite — currently CI-gated
-python3 -m unittest discover -s test/packs -t .    # code-default pack — currently CI-gated
-python3 tools/run_active_contract_tests.py         # exists; not a living-CI step
-python3 tools/check_boundaries.py
-python3 tools/check_tcb_budget.py
-python3 tools/scan_secrets.py
-python3 tools/run_dogfood_r9.py
-python3 tools/check_backend_artifacts.py --release
+```text
+Aether-D-System/
+├── vanguard/packages/                # PRODUCTION LATTICE
+│   ├── domain/                       # Pure stdlib Python: contracts, events, reducers, primitives, JCS
+│   ├── ports/                        # Hexagonal ports: kernel, model, sandbox, evaluator, stores, env
+│   ├── kernel/                       # Pure TCB core: S0–S12 dispatch, attenuation, budget, grants, policy
+│   ├── agency/                       # Turn loop: EpisodeEngine, subagent spawn(), context compaction
+│   ├── runtime/                      # Composition root (root.py), governance (Ed25519), SQLite WAL ledger
+│   ├── adapters/                     # Adapters: models (OpenRouter, Ollama), evaluator daemon, bwrap
+│   └── apps/                         # Reserved client lattice slot
+├── layer0/                           # Copy-fork to absorb (SPI, jsonrpc, broker, scheduler driver)
+├── packs/code-default/               # First domain pack (MHF harness, ast-patch, repo-map, terminal)
+├── vanguard/clients/cli/             # TypeScript/React/Ink interactive terminal UI (`vg`)
+├── test/                             # 900+ test suite across 17 directories (see test/README.md)
+├── tools/                            # Boundaries, TCB budget, secrets scan, domain blindness, codegen
+├── schemas/                          # v4 wire schemas and MHF plugin/harness schemas
+├── containers/                       # Worker UID 10001 and Evaluator UID 10002 container definitions
+├── lab/ & benchmarkings/             # Lab measurement harness (promotion deferred)
+└── docs/                             # Normative specs, ADRs, annexes, gap register, and evidence
 ```
 
-Living CI (`.github/workflows/ci.yml`, Python 3.12) currently runs: `test.test_repo_paths`,
-`test/layer0`, `check_boundaries.py`, `check_tcb_budget.py`, `check_domain_blindness.py` (I-7),
-`check_isolation_policy.py` (I-6), `test/packs`, `check_stale_paths.py`, `check_markdown_links.py`,
-`scan_secrets.py`. It does **not** run `test/kernel` or packages runtime/agency/adapters. That is
-false confidence relative to v0.6 law. `test_repo_paths` / `check_stale_paths` may fail on an archive
-citation (`docs/sprint6B`) — Wave 0 hygiene, not architecture. Do not rewire CI until Wave 0 is
-authorized.
+---
 
-### TypeScript / CLI (`vanguard/clients/cli`)
+## 4. Architectural Rules & Hexagonal Boundaries
 
-From repo root (`package.json` workspaces) or the CLI directory:
+Enforced on every change by `tools/check_boundaries.py`:
 
-```bash
-npm run typecheck    # tsc --noEmit
-npm test             # tsc, then node --test on dist/test/*.test.js
-npm run vg           # tsx src/main.tsx
-```
-
-Node's built-in test runner (not Jest/Vitest); sources in `vanguard/clients/cli/test/*.test.ts`.
-
-### Cleanup
-
-`make clean` (py/js/build/test/cache); review `make clean-all` before using it (`node_modules`).
-
-## Architecture
-
-Hexagonal lattice, CI-enforced (`tools/check_boundaries.py`).
-`PACKAGE_NAMES = {domain, ports, kernel, agency, runtime, adapters, apps}`:
-
-```
+```text
 domain ← ports ← kernel ← agency ← runtime → adapters
 ```
 
-- `domain/` — pure value objects and wire contracts; **stdlib-only Python**, plus a small parallel
-  TypeScript set (`contracts.ts`, JCS helpers). Imports nothing else in the tree.
-- `ports/` — `environment.py`, `evaluator.py`, `event_store.py`, `blob_store.py`, `kernel.py`,
-  `model.py`, `sandbox.py`, `determinism.py`, `index.py`.
-- `kernel/` — attenuation, budget, classifier, dispatch, grants, policy, provenance, `model.py`
-  (kernel types, not an LLM adapter).
-- `agency/` — `episode/engine.py` (`EpisodeEngine`, `spawn()`), `context/` (compiler/compaction),
-  `manifests/vg-*` (as-built harness configs).
-- `runtime/` — `root.py` (composition root), `governance/`, `ledger/`, `service/`. There is **no**
-  `coordination.py` or `loops/` package. Coding-adjacent leftovers (`tier_escalation.py`,
-  `skill_index.py`, …) still live here; extraction is Wave 3–4.
-- `adapters/` — `models/` (OpenRouter, Ollama, cassette, fake), `evaluators/`, `sandbox/` (rootless
-  bwrap), `stores/` (SQLite WAL), `environment/`. **Must not** import `kernel` or `agency`.
-- `apps/` — lattice slot; only `__init__.py` today.
+- **`domain/`**: Pure stdlib Python value objects. Imports nothing else in the repository.
+- **`ports/`**: Abstract interfaces. Imports only from `domain/`.
+- **`kernel/`**: Pure Trusted Computing Base (LOC `<= 1438`). Imports only from `domain/` and `ports/`. Must remain domain-blind (no coding/tooling tokens).
+- **`agency/`**: Recursive turn engine. Imports from `domain/`, `ports/`, and `kernel/`.
+- **`runtime/`**: Composition root and system services. Imports from `domain/`, `ports/`, `kernel/`, and `agency/`.
+- **`adapters/`**: Concrete external integrations. Imports from `domain/` and `ports/`. **Must never import `kernel/` or `agency/`**.
+- **`apps/`**: Client boundary slot consuming `runtime/`.
 
-`layer0/` is a copy-fork (spi, registry, scheduler, kernel, events, compose). Absorb contracts; do
-not rewrite production into it.
+---
 
-CLI entry: `vanguard/clients/cli/src/main.tsx` (`vg`).  
-Evaluator: `vanguard.packages.adapters.evaluators.daemon:main` (`vanguard-evaluator`).
+## 5. Development & Testing Commands
 
-**Normative documentation:** `docs/SPEC.md` (only living spec) + `docs/04_annex/KERNEL.md` +
-`docs/04_annex/MEASUREMENT.md`. ADRs `0069`–`0074` outrank the v0.5.0 “M1 destination = layer0”
-story. Roadmap/gap register:
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
-`docs/02_roadmap/` and `docs/03_sprints/sprint_active.md` are historical as *next* work.
-`docs/archive/v045/` is evidence, not law.
+### Python Environment (Repo Root)
+```bash
+# Full test suite (expect some environment-sensitive failures in offline mode)
+python3 -m unittest discover -s test -t .
+
+# Production kernel suite (TCB core — 95 tests)
+python3 -m unittest discover -s test/kernel -t .
+
+# Hexagonal contract suite (121 tests)
+python3 -m unittest discover -s test/contracts -t .
+
+# Agency turn execution suite (107 tests)
+python3 -m unittest discover -s test/agency -t .
+
+# Domain pack suite (27 tests)
+python3 -m unittest discover -s test/packs -t .
+
+# Layer-0 copy-fork suite (25 tests)
+python3 -m unittest discover -s test/layer0 -t .
+
+# Single test module or method
+python3 -m unittest test.kernel.test_dispatch -v
+python3 -m unittest test.kernel.test_dispatch.TestDispatchPipeline.test_s0_observe_produces_receipt -v
+```
+
+### Static Architecture & Security Linters
+```bash
+python3 tools/check_boundaries.py         # Hexagonal boundary enforcement
+python3 tools/check_tcb_budget.py         # Kernel TCB LOC limit check
+python3 tools/scan_secrets.py             # Secret leak detection
+python3 tools/check_domain_blindness.py   # Invariant I-7 (no domain tokens in kernel)
+python3 tools/check_isolation_policy.py   # Invariant I-6 (container/subprocess execution)
+python3 tools/check_markdown_links.py     # Markdown link validation
+python3 tools/check_stale_paths.py        # Stale documentation path check
+```
+
+### TypeScript CLI (`vanguard/clients/cli`)
+```bash
+npm run typecheck    # TypeScript compiler check (tsc --noEmit)
+npm test             # Node built-in test runner on dist/test/*.test.js
+npm run vg           # Launch interactive TUI
+```
+
+### Cleanup
+```bash
+make clean           # Removes py/js caches, test artifacts, build outputs
+```
+
+---
+
+## 6. Known Environmental & Test Behaviors
+
+1. **Local Ollama Daemon**: If Ollama is not running locally on port 11434, 3 tests in `test/runtime` (`test_s20_live_turn_freeze.py`, `test_s21_named_causes.py`, `test_w16_task_sets_and_live_smoke.py`) will report `provider_unreachable` instead of `model_tag_absent`. This is expected in offline dev environments.
+2. **API Keys**: Keep `OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, and `OPENAI_API_KEY` unset during automated testing to enforce offline determinism against fakes and cassettes.
+3. **Negative Lint Fixtures**: `test/broken/fixtures/` contains intentional architectural violations used by tools in `tools/` to test that linters fail-closed.
+
+---
+
+## 7. Documentation Hierarchy & Authority
+
+When resolving architectural questions or ambiguous requirements, follow this strict precedence:
+1. **[`docs/SPEC.md`](docs/SPEC.md)** — Sole living normative specification (RFC-2119).
+2. **Lock ADRs ([`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md))** — Append-only architectural decisions.
+3. **Annexes ([`04_annex/KERNEL.md`](docs/04_annex/KERNEL.md), [`04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md))** — Security and measurement constitutions.
+4. **Execution Roadmap ([`002 Gap Register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md))** — Sequence of foundation waves.
+5. **Lock Plans ([`GAMMA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md), [`BETA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_BETA.md), [`DELTA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_DELTA.md))** — Planning documents.
+6. **Forensic Evidence ([`docs/07_reviews/`](docs/07_reviews/), [`docs/03_sprints/`](docs/03_sprints/))** — Advisory evidence and history; cannot be cited as binding requirements.

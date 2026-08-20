@@ -1,22 +1,18 @@
-# AETHER / Vanguard — Version 6 (Concept Lock)
+# AETHER / Vanguard — Version 6 (Concept Lock v0.6.0)
 
-A verifiable recursive-agency substrate: **planned** — harnesses compile from manifests and
-plugins into a `FrozenHarness`; **as-built** — a `FrozenHarness` compose path already exists in
-`vanguard/packages/domain/artifacts/manifest.py`, but complete `D_H` (prompt, ceiling, policy,
-routes), wire-first plugins on the packages path, and `mhf.trajectory/1` are **locked, not fully
-implemented**. Effects pass an attenuation kernel; the judge that grades a run is supposed to be
-unreachable from the agent it grades (defect **F1** in `layer0/` currently violates that).
+A verifiable, capability-attenuated recursive-agency substrate.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
 ```
 
-| | |
+| Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.0 — `docs/SPEC.md` + ADRs `0069`–`0074` |
-| **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (living CI uses 3.12) |
-| **Status** | Documentation lock complete. **Production coding held** until Engineering Director / Chief Engineer approval. |
-| **Next authorized code** | Wave 0 (CI subject-of-record + named falsifiers) — only after **APPROVED** |
+| **Concept Lock** | v0.6.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md) |
+| **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Status** | **Documentation Lock Complete**. Production coding held pending Engineering Director / Chief Engineer approval. |
+| **Foundation Plan** | Wave 0 (CI truth + named falsifiers) through Wave 4 (first real coding-agent E2E) |
+| **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Concept Lock](https://img.shields.io/badge/AETHER-v0.6.0--concept--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
@@ -24,212 +20,227 @@ observe → propose → authorize → effect → receipt → evaluate
 
 ---
 
-## Director / Chief Engineer — start here
+## 1. Executive Summary for Engineering Director & Chief Engineer
 
-This repository is under **final independent review** before Wave 0. You own the go/no-go. Law is
-SPEC + ADRs + annexes; GAMMA and the gap register are the lock plan and the operational sequence;
-`docs/07_reviews/` is evidence, not a second spec.
+This repository is under **final independent review** before Wave 0 implementation begins. You own the go/no-go decision.
 
-### Suggested path (whole-project, not GAMMA-only)
+### The Mission & Core Thesis
+Vanguard/AETHER provides a verifiable recursive-agency substrate:
+1. **Separability**: The solution and its execution traces must be strictly separable from the agent itself.
+2. **Evaluator Isolation**: The judge that evaluates and grades an agent's run is physically and cryptographically unreachable from the agent it grades (Worker UID `10001` vs Evaluator UID `10002`).
+3. **Pluggable Agency**: Harnesses are compiled from declarative manifests and plugins into an immutable `FrozenHarness`. Coding is **Domain Pack #1** (`packs/code-default/`), not the hardcoded ontology of the substrate.
 
-1. **This file** — what exists, what is held, where to look.
-2. **Law:** [`docs/SPEC.md`](docs/SPEC.md) · [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) (especially [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md)) · [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) · [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md)
-3. **Lock + execution register:** [`GAMMA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) · [`002 foundation roadmap / gap register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md)
-4. **Live code (minimum):** `vanguard/packages/` (production lattice) · `layer0/` (fork to absorb) · `packs/code-default/` · `vanguard/clients/cli/` · `.github/workflows/ci.yml`
-5. **Advisory evidence** (do not treat as competing plans):
-   - [`docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/`](docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/) — `00_tech_lead_*`, `00_arch_lead_*`, `00_AI-Specialist_*`, `00_SYTEMS-ENG_*` suggestion files
-   - [`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/) — principal proposal, parecer v4, full-refactor, execution plan, Aether waves (non-normative)
-6. **Forensics / process history:** [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) · [BETA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_BETA.md) · [DELTA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_DELTA.md)
+### Decision Requested
+- **`APPROVED`**: Concept Lock v0.6.0 foundation and specifications are accepted; Wave 0 implementation may proceed.
+- **`BLOCKED`**: Architectural issues identified that require specification/ADR amendments prior to code execution.
 
-Agent/contributor pointers: [`AGENTS.md`](AGENTS.md) · [`CLAUDE.md`](CLAUDE.md).
-
-### Decision we need from you
-
-**APPROVED** — v0.6 foundation and docs are finalized; Wave 0 may begin.  
-**BLOCKED** — remaining issues that cannot be closed on paper, before any production implementation.
-
-You may correct SPEC/ADR/annex/roadmap/docs as part of review (ADRs are **append-only**: add a new
-ADR rather than silently editing `0069`–`0074`). Do **not** start production coding (CI rewire, F1
-fix, runtime merge, plugin implementation, `layer0/` deletion) as part of the review.
-
----
-
-## What this system is
-
-Vanguard/AETHER compiles **harnesses** (manifest + plugins → `FrozenHarness`) and runs **agents**
-(`Agent = Principal + HarnessInstance`) through one effect machine. That is the **locked** v0.6
-shape. Coding is Domain Pack #1, not the ontology.
-
-**Today:** the production loop is `EpisodeEngine` in packages; coding harnesses exist both as
-`packs/code-default/` (MHF-shaped `harness.yaml`) and as older `vanguard/packages/agency/manifests/vg-*`
-trees. The CLI (`vg`) is a client of the runtime. The first *honest* coding-agent product is
-**Wave 4**, after the trust spine and one runtime authority are real — not a second framework.
-
-Thesis: *what solved it must be separable, and the judge must be unreachable from the judged.*
+### Director Review Reading Order
+1. **This Document** — Complete repository inventory, as-built state, and operational roadmap.
+2. **Normative Law**:
+   - [`docs/SPEC.md`](docs/SPEC.md) — The sole normative specification (RFC-2119).
+   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (especially Lock ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md)).
+   - [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) — Dispatch, capability grants, and security model.
+   - [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) — Measurement doctrine (Phase-2 promotion deferred).
+3. **Foundation Roadmap & Execution Register**:
+   - [`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) — The active Wave 0→4 gap register.
+   - [`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) — Concept Lock Plan.
+4. **Live Codebases**:
+   - `vanguard/packages/` — Canonical production lattice.
+   - `layer0/` — Copy-fork to absorb (SPI, JSON-RPC, lifecycle).
+   - `packs/code-default/` — First MHF-shaped domain pack.
+   - `vanguard/clients/cli/` — TypeScript/Ink interactive TUI (`vg`).
+   - `test/` — Comprehensive test suite ([`test/README.md`](test/README.md)).
 
 ---
 
-## What exists in this tree (as-built)
+## 2. What Exists in This Repository (As-Built Inventory)
 
-Two runtimes are on disk. **Packages is production truth.** `layer0/` is a copy-fork whose SPI /
-JSON-RPC / lifecycle contracts are to be absorbed — not a destination rewrite, and not a third tree.
+The codebase is organized into well-defined subsystems, separating production truth from temporary copy-forks, domain packs, tooling, and test infrastructure:
 
-| Surface | Path | Role today |
+```text
+Aether-D-System/
+├── vanguard/
+│   ├── packages/                     # CANONICAL PRODUCTION LATTICE (Python)
+│   │   ├── domain/                   # Pure value objects, wire contracts, JCS canonicalization
+│   │   ├── ports/                    # Port interfaces (kernel, model, sandbox, evaluator, stores)
+│   │   ├── kernel/                   # Pure security & attenuation core (TCB: S0–S12 dispatch)
+│   │   ├── agency/                   # Recursive turn machine (EpisodeEngine, context, compaction)
+│   │   ├── runtime/                  # Composition root, governance, WAL ledger, RPC service
+│   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
+│   │   └── apps/                     # Reserved client lattice slot
+│   └── clients/cli/                  # TypeScript/React/Ink interactive terminal UI (`vg`)
+├── layer0/                           # Copy-fork to absorb into packages (SPI, JSON-RPC, registry)
+├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
+├── test/                             # Automated test suite (900+ tests across 17 categories)
+├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
+├── schemas/                          # v4 wire schemas and MHF plugin/harness schemas
+├── containers/                       # Bubblewrap & OCI isolation images (UID 10001 worker, 10002 judge)
+├── lab/ & benchmarkings/             # Lab measurement harness & latency benchmarks (promotion deferred)
+└── docs/                             # Normative specs (SPEC.md, ADRs, annexes) and forensic evidence
+```
+
+### Detailed Subsystem Inventory
+
+| Subsystem | Path | Description & As-Built Capabilities |
 |---|---|---|
-| Production lattice | `vanguard/packages/` | Kernel (S0–S12 in `kernel/dispatch.py`), `EpisodeEngine.spawn()`, SQLite WAL store, exterior evaluator, bwrap sandbox, OpenRouter/Ollama adapters, composition root `runtime/root.py` |
-| Convergence fork | `layer0/` | SPI + JSON-RPC/UDS + broker/lifecycle + sequential driver — **also** `MemoryLedger`, fail-open ceilings, fabricated verdict **F1** (`layer0/scheduler/driver.py`) |
-| First domain pack | `packs/code-default/` | MHF `harness.yaml` + plugin yaml: planner, fs, ast-patch, repo-map, terminal, evaluation gate (pack tests exist; not the Wave-4 E2E yet) |
-| Older manifests | `vanguard/packages/agency/manifests/vg-*` | As-built harness configs (`vg-code-default`, `vg-code-claude-shaped`, `vg-shell-only`, …) |
-| `apps/` | `vanguard/packages/apps/` | Lattice slot only (`__init__.py`). Not a coding package today |
-| CLI / TUI | `vanguard/clients/cli/` | `vg` (Ink/React). Workspace scripts: `npm run vg` from repo root |
-| Tests | `test/` | Full suite exists; **not fully green**. `test/kernel` is **not** in living CI |
-| Living CI | `.github/workflows/ci.yml` | `test_repo_paths`, `test/layer0`, boundaries, TCB, I-7, I-6, `test/packs`, stale paths, markdown links, secrets — **not** kernel/runtime/agency/adapters |
-| Schemas | `schemas/v4/`, `schemas/mhf/` | v4 JCS vectors as-built; MHF subset present; **`mhf.trajectory/1` not on disk** (Wave 1) |
-| Isolation images | `containers/` | Worker UID 10001, evaluator UID 10002 |
-| Lab / benches | `lab/`, `benchmarkings/` | Measurement and task sets; Phase-2 promotion is **deferred** |
-
-**Held until APPROVED:** Wave 0 CI rewire, F1 fix, ceiling fail-closed, dual-tree convergence, `root.py`
-split, plugin walking skeleton, extra packs, concurrency, Meta-Harness, Rust.
+| **Domain** | `vanguard/packages/domain/` | Pure stdlib Python. Implements primitives (`primitives/primitives.py`), wire contracts (`wire/contracts.py`), ledger reducers and events (`ledger/`), evidence models (`evidence/claim.py`), selectors (`selectors/resource_selector.py`), JCS canonicalization (`canonicalisation/jcs.py`), and manifest compiler (`artifacts/manifest.py`). |
+| **Ports** | `vanguard/packages/ports/` | Hexagonal abstract interfaces: `KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`. |
+| **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), token & cost budgets (`budget.py`), capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). |
+| **Agency** | `vanguard/packages/agency/` | Recursive turn engine. Implements `EpisodeEngine` (`episode/engine.py`) with budget enforcement and child subagent `spawn()`; context compiler & structured token compactor (`context/`); older as-built manifests (`manifests/vg-*`). |
+| **Runtime** | `vanguard/packages/runtime/` | System composition root (`root.py` `VanguardCompositionRoot`), governance & Ed25519 approvals (`governance/`), SQLite WAL event store & stream reducers (`ledger/`), and runtime RPC service (`service/`). Residual coding-specific services (`tier_escalation.py`, `skill_index.py`) scheduled for pack extraction in Waves 3–4. |
+| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `client.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). |
+| **Apps** | `vanguard/packages/apps/` | Reserved boundary slot in hexagonal lattice; empty today. |
+| **Layer-0 Fork** | `layer0/` | Temporary copy-fork providing SPI protocols (`spi/`), JSON-RPC 2.0 transport over UDS/stdio (`spi/jsonrpc.py`), and plugin registry/broker (`registry/`). **Known Defect F1**: Sequential scheduler driver (`scheduler/driver.py`) currently fabricates unsigned `"pass"` verdict rather than calling the exterior evaluator; to be absorbed and fixed in Waves 1–2. |
+| **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
+| **CLI / TUI** | `vanguard/clients/cli/` | Interactive terminal UI (`vg`) written in TypeScript using React and Ink. Features session management, streaming event views, human approval prompts, and cryptographic Ed25519 signing. Workspace scripts: `npm run vg`. |
+| **Test Suite** | `test/` | Comprehensive test suite covering all layers (`test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, `test/security`, `test/trust`, `test/packs`, `test/layer0`, `test/tools`, etc.). Full details in [`test/README.md`](test/README.md). |
+| **Tooling** | `tools/` | Static architecture linters: `check_boundaries.py` (hexagonal lattice), `check_tcb_budget.py` (kernel LOC), `scan_secrets.py` (secret detector), `check_domain_blindness.py` (I-7), `check_isolation_policy.py` (I-6), `check_stale_paths.py`, `check_markdown_links.py`, and type codegen (`tools/codegen/generate_types.py`). |
+| **Containers** | `containers/` | Container isolation images establishing process identity: Worker UID `10001` (`worker.Dockerfile`) vs Evaluator UID `10002` (`evaluator.Dockerfile`). |
 
 ---
 
-## Architecture (production lattice)
+## 3. Architecture & Hexagonal Boundary Lattice
 
-Hexagonal, CI-enforced (`tools/check_boundaries.py`):
+The architecture strictly enforces a hexagonal boundary lattice verified on every commit by `tools/check_boundaries.py`:
 
 ```text
 domain ← ports ← kernel ← agency ← runtime → adapters
          (apps/ is a client of runtime, not a second ontology)
 ```
 
-- **`domain/`** — pure value objects and wire contracts; stdlib-only Python, plus a small parallel TypeScript set.
-- **`ports/`** — `environment`, `evaluator`, `event_store`, `blob_store`, `kernel`, `model`, `sandbox`, `determinism`, `index`.
-- **`kernel/`** — attenuation, budget, grants, dispatch, policy, provenance, classifier (`kernel/model.py` is kernel types, not an LLM).
-- **`agency/`** — `EpisodeEngine` (turn loop + `spawn()`), context compiler, `manifests/vg-*`.
-- **`runtime/`** — `root.py`, `governance/`, `ledger/`, `service/` (no `coordination.py` / `loops/` on disk).
-- **`adapters/`** — models, sandbox, evaluators, stores, environment. **Must not** import `kernel` or `agency`.
-- **`apps/`** — reserved client slot in `check_boundaries.py`; empty of coding modules today.
-
-Dispatch/security constitution: [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md).  
-Measurement constitution (promotion **deferred**): [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md).
-
-The retired 14-tier biological taxonomy is gone on purpose ([ADR-M0-10](docs/05_adr/ADR-M0-10-no-metaphysics.md)).
+### Invariant Rules
+1. **`domain/`** imports nothing from the repository (pure Python stdlib).
+2. **`ports/`** imports only from `domain/`.
+3. **`kernel/`** (Trusted Computing Base) imports only from `domain/` and `ports/`. It is strictly domain-blind (no coding/tool semantics).
+4. **`agency/`** imports from `domain/`, `ports/`, and `kernel/`.
+5. **`runtime/`** wires the components together and imports from `domain/`, `ports/`, `kernel/`, and `agency/`.
+6. **`adapters/`** implement the interfaces in `ports/`. Adapters **must never** import directly from `kernel/` or `agency/`.
+7. **`apps/`** consumes services from `runtime/`.
 
 ---
 
-## Repository map
+## 4. Trust, Attenuation, & Security Model
+
+Vanguard enforces security at multiple distinct barriers:
 
 ```text
-Aether-D-System/
-├── .github/workflows/ci.yml          # living CI (layer0-centric today — Wave 0 will change this)
-├── layer0/                           # copy-fork to absorb (not the v0.6 destination)
-│   ├── spi/                          # Protocols + jsonrpc — promote into packages
-│   ├── registry/                     # plugin lifecycle / broker — promote
-│   ├── scheduler/                    # sequential driver; F1 lives here
-│   ├── kernel/ · events/ · compose/  # diverging ports — packages remains semantic oracle
-├── vanguard/
-│   ├── packages/                     # PRODUCTION lattice
-│   │   ├── domain/ ports/ kernel/ agency/ runtime/ adapters/
-│   │   └── apps/                     # lattice slot; empty of coding modules today
-│   └── clients/cli/                  # TypeScript Ink TUI (`vg`)
-├── packs/code-default/               # MHF-shaped first domain pack
-├── test/                             # Python suite by subsystem (kernel, runtime, layer0, packs, …)
-├── tools/                            # boundaries, TCB, secrets, dogfood; codegen at tools/codegen/
-├── schemas/v4/ · schemas/mhf/ · containers/ · lab/ · benchmarkings/
-└── docs/                             # see Documentation map below
+               ┌────────────────────────────────────────────────────────┐
+               │                     EpisodeEngine                      │
+               │  observe → propose → authorize → effect → evaluate     │
+               └──────────────────────────┬─────────────────────────────┘
+                                          │
+                         13-Stage Kernel Dispatch (S0–S12)
+        ┌─────────────────────────────────┴─────────────────────────────────┐
+        ▼                                                                   ▼
+┌───────────────────────────────┐                       ┌───────────────────────────────┐
+│     Worker Sandbox (Bwrap)    │                       │    Exterior Evaluator Judge   │
+│         UID: 10001            │                       │         UID: 10002            │
+│  - Filesystem namespace isol. │                       │  - Independent process/host   │
+│  - Ephemeral tmpfs workspace  │                       │  - Signed Ed25519 verdicts    │
+│  - Monotonic capability grant │                       │  - Cryptographic receipt tree │
+└───────────────────────────────┘                       └───────────────────────────────┘
 ```
 
-CLI entry: `vanguard/clients/cli/src/main.tsx` (`npm run vg`).  
-Evaluator entry: `vanguard.packages.adapters.evaluators.daemon:main` (`vanguard-evaluator`).
+1. **Monotonic Attenuation**: Child agents spawned via `spawn()` can only receive a subset of the parent's capability grants. Privileges strictly narrow down the execution tree.
+2. **Pre/Post Receipts**: Every side effect generates a pre-effect receipt and post-effect receipt recorded in the append-only SQLite WAL ledger.
+3. **Physical & Network Isolation**: Worker execution happens in a rootless bubblewrap container (UID `10001`). The evaluator runs in an isolated environment (UID `10002`) and communicates only through signed verdicts.
+4. **Fail-Closed Governance**: Dangerous actions (terminal execution outside sandbox, destructive filesystem operations) require cryptographic Ed25519 human approval.
 
 ---
 
-## Documentation map (what is law)
+## 5. Documentation Map (Normative Law vs Evidence)
 
-| Document | Role |
-|---|---|
-| [`docs/SPEC.md`](docs/SPEC.md) | **Only** living normative spec (RFC-2119 here and in annexes only) |
-| [`docs/05_adr/`](docs/05_adr/) | Append-only decisions. `0069`–`0074` are the v0.6 lock. `0067` is a numbering hole |
-| [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) | Dispatch / capabilities / security |
-| [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) | Lab measurement doctrine (v0.6: identity locked; promotion deferred) |
-| [GAMMA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | Concept Lock plan (not a second SPEC) |
-| [`002` roadmap / gap register](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | Living foundation sequence (Wave 0→4) |
-| [`docs/02_roadmap/`](docs/02_roadmap/), [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | **Historical** M0–M6 / sprint board — superseded as *next* work |
-| [`docs/07_reviews/`](docs/07_reviews/) | Forensic + advisory corpus — evidence. Director may later archive bloat |
-| [`docs/archive/v045/`](docs/archive/v045/) | Pre-lock VG-00…13C — evidence, not law |
+| Document | Authority Level | Role & Scope |
+|---|---|---|
+| [`docs/SPEC.md`](docs/SPEC.md) | **Sole Normative Law** | The single living specification. All RFC-2119 keywords (`MUST`, `SHALL`, `SHOULD`) are authoritative here. |
+| [`docs/05_adr/INDEX.md`](docs/05_adr/) | **Normative Law** | Append-only Architecture Decision Records. ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md) define the v0.6 Concept Lock. |
+| [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) | **Normative Law** | Security constitution, capability dispatch rules, and S0–S12 invariants. |
+| [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) | **Normative Law** | Lab measurement doctrine (v0.6: identity locked; promotion deferred). |
+| [`002 Gap Register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | **Operational Sequence** | The active Wave 0→4 roadmap and gap register. |
+| [`GAMMA Lock Plan`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | **Lock Plan** | Concept Lock execution plan and convergence mapping. |
+| [`docs/07_reviews/`](docs/07_reviews/) | **Evidence Corpus** | Forensic discoveries, gap analyses, and reviews. Non-normative. |
+| [`docs/02_roadmap/`](docs/02_roadmap/), [`docs/03_sprints/`](docs/03_sprints/) | **Historical Evidence** | Pre-v0.6 milestone and sprint records (superseded as active plans). |
 
-**Authority on conflict:** SPEC, then a newer ADR, then GAMMA (plan), then `002` (register). Review
-files and old roadmaps cannot be cited as requirements.
+---
 
-Foundation sequence after APPROVED (no calendar dates):
+## 6. Foundation Roadmap (Waves 0 to 4)
+
+Upon Director **APPROVAL**, execution proceeds through five focused waves:
 
 ```text
-Wave 0  CI truth + named falsifiers
-Wave 1  Fail-closed trust spine (F1, ceilings, lineage, D_H, trajectory, writers)
-Wave 2  Converge in place (absorb layer0 contracts; then delete dupes)
-Wave 3  Walking skeleton — framework that compiles harnesses
-Wave 4  One real coding-agent E2E  ← foundation stop
-        then extra packs, concurrency, multi-agent policy, Meta-Harness
+Wave 0: CI Truth & Named Falsifiers
+        Rewire CI to gate vanguard/packages; activate boundary & codegen checkers.
+         │
+Wave 1: Fail-Closed Trust Spine
+        Fix F1 (signed evaluator verdicts); enforce fail-closed ceilings; land mhf.trajectory/1.
+         │
+Wave 2: In-Place Lattice Convergence
+        Absorb layer0 SPI, JSON-RPC, and registry into vanguard/packages; delete layer0/ fork.
+         │
+Wave 3: Walking Skeleton
+        End-to-end framework compiling declarative manifests and plugins into FrozenHarness.
+         │
+Wave 4: First Real Coding-Agent E2E (Foundation Stop)
+        Deliver production coding agent using packs/code-default/.
 ```
 
 ---
 
-## Commands
+## 7. Developer & Reviewer Commands
 
-Python (repo root). The full suite is **not** fully green; living CI does **not** yet run `test/kernel`.
-
+### Python Environment (Python 3.10+)
 ```bash
-python3 -m pip install -e '.[dev]'   # Python 3.10+
-python3 -m unittest discover -s test -t .            # full suite (expect some FAIL/ERROR)
-python3 -m unittest discover -s test/kernel -t .     # production kernel (not in living CI)
-python3 -m unittest discover -s test/layer0 -t .     # fork suite (currently CI-gated)
-python3 -m unittest discover -s test/packs -t .      # code-default pack (currently CI-gated)
-python3 tools/check_boundaries.py
-python3 tools/check_tcb_budget.py
-python3 tools/scan_secrets.py
-python3 tools/run_active_contract_tests.py           # exists; not a living-CI step today
-# Wave 0 (after APPROVED): python3 tools/codegen/generate_types.py --check
+# Install editable package with dev dependencies
+python3 -m pip install -e '.[dev]'
+
+# Run focused production kernel tests
+python3 -m unittest discover -s test/kernel -t .
+
+# Run contract tests
+python3 -m unittest discover -s test/contracts -t .
+
+# Run agency turn engine tests
+python3 -m unittest discover -s test/agency -t .
+
+# Run domain pack tests
+python3 -m unittest discover -s test/packs -t .
+
+# Run static architectural linters
+python3 tools/check_boundaries.py       # Hexagonal lattice enforcement
+python3 tools/check_tcb_budget.py       # TCB kernel LOC budget check
+python3 tools/scan_secrets.py           # Secret & credential leak scanner
+python3 tools/check_domain_blindness.py # Kernel domain blindness (I-7)
+python3 tools/check_isolation_policy.py # Sandbox isolation policy (I-6)
+python3 tools/check_markdown_links.py   # Documentation link integrity
+python3 tools/check_stale_paths.py      # Stale path reference checker
 ```
 
-CLI (npm workspace at repo root, or `cd vanguard/clients/cli`):
-
+### TypeScript CLI Environment (Node.js 20+)
 ```bash
+# Install dependencies
 npm ci
+
+# Typecheck and run CLI test suite
 npm run typecheck
 npm test
+
+# Run interactive CLI
 npm run vg
 ```
 
-`make clean` removes caches; review `make clean-all` before using it (`node_modules`).
+---
+
+## 8. Model Access & Adapter Architecture
+
+Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/ports/model.py`):
+- **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), Ollama (`adapters/models/ollama.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
+- **Provider Routing**: DeepSeek, OpenAI, Anthropic, and open-weights models are addressed via route configurations and environment keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`), not separate vendor files.
+- **Deterministic Testing**: Keep API keys unset during local test runs to ensure hermetic, deterministic execution against cassettes and fakes.
 
 ---
 
-## Model access
+## 9. Contributor & Agent References
 
-Abstracted behind `ModelPort`. Adapter **modules** on disk: OpenRouter, Ollama, cassette, fake.
-DeepSeek / OpenAI appear as **routes and env keys** (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`,
-`OPENAI_API_KEY`), not as separate adapter files. Keep keys unset for deterministic / trust-spine tests.
-
-| Provider | Notes |
-|---|---|
-| OpenRouter | `vanguard/packages/adapters/models/openrouter.py` |
-| Ollama | `.../ollama.py`; some `test/runtime` cases are env-sensitive |
-| Cassette / fake | offline / unit |
-
----
-
-## As-built module notes (packages)
-
-Useful inventory; file names drift — treat SPEC/ADRs as law if this list disagrees.
-
-- **`domain/`** — primitives, wire contracts, ledger events/reducers, evidence, selectors, JCS canonicalisation.
-- **`kernel/`** — `dispatch.py`, `attenuation.py`, `budget.py`, `grants.py`, `classifier.py`, `policy.py`, `provenance.py`.
-- **`agency/episode/engine.py`** — production `EpisodeEngine` / `spawn()` (canonical recursive machine).
-- **`agency/context/`** — prompt/context compiler and compaction.
-- **`agency/manifests/`** — as-built `vg-code-default`, `vg-code-claude-shaped`, `vg-shell-only`, `vg-table-default`, …
-- **`runtime/root.py`** — composition root (large; split **in place** is Wave 2, not a new tree). Also: `governance/`, `ledger/`, `service/`, plus coding-adjacent leftovers (`tier_escalation.py`, `skill_index.py`, …) still in runtime — pack extraction is Wave 3–4.
-- **`adapters/evaluators/`** — exterior signed judge (UID 10002). The **layer0** scheduler currently fabricates `"pass"` (F1); packages must **read** signed verdicts.
-- **`adapters/sandbox/`** — rootless bubblewrap for untrusted exec.
-- **`adapters/stores/`** — SQLite WAL event store (packages). Layer0 uses `MemoryLedger` (`layer0/events/store.py`).
-
-Import rule: `domain ← ports ← kernel ← agency ← runtime → adapters`. Adapters never import kernel/agency.
+- **Contributor & Agent Procedure**: [`AGENTS.md`](AGENTS.md)
+- **Claude Guidance**: [`CLAUDE.md`](CLAUDE.md)
+- **Testing Architecture & Guide**: [`test/README.md`](test/README.md)

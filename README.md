@@ -1,425 +1,235 @@
-# AETHER PROJECT - SUBSTRATE UPDATE General Task Solver (GTS) Version 0.5.1 (WAVES 1-5 DONE)
+# AETHER / Vanguard — Version 6 (Concept Lock)
 
-> **A SOTA verifiable, modular meta-harness runtime that accumulates machine competence under an exterior judge it cannot game.**
-
-[![Vanguard Core Integrity](https://img.shields.io/badge/Vanguard-v0.5.0--foundation--lock-blue.svg)](docs/SPEC.md)
-[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal_seven_package_lattice-green.svg)](docs/SPEC.md#1-layer-0--the-microkernel)
-[![Verification](https://img.shields.io/badge/Tests-tools%2Frun__active__contract__tests.py-success.svg)](tools/run_active_contract_tests.py)
-[![TCB Budget](https://img.shields.io/badge/TCB-tools%2Fcheck__tcb__budget.py-brightgreen.svg)](tools/check_tcb_budget.py)
-
----
-
-## 1. Executive Summary & Core Thesis
-
-Vanguard is an agentic coding and general task solver framework built on a fundamental security and architectural thesis (`VG-02`):
-
-> **When an agent solves a task, what solved it — model, scaffold, prompt, tools, context policy, retry — must be separable, and the judge must be unreachable from the judged.**
-
-Vanguard enforces an invariant, deterministic turn lifecycle across all domains:
-```text
-observe ──▶ propose ──▶ authorize ──▶ effect ──▶ receipt ──▶ evaluate
-```
-
----
-
-## 2. Architecture pointer
-
-**Removed (ADR-M0-10, `docs/05_adr/ADR-M0-10-no-metaphysics.md`).** This section previously described a
-14-tier biological/cosmological taxonomy (LEVEL 0–9, "Protons = Identity, Neutrons = Ledger"). It carried
-zero operational semantics — no invariant, test, or schema referenced a tier — while creating false
-layering intuitions the actual import lattice contradicted. It is deleted, not archived-and-linked: see
-`docs/05_adr/ADR-M0-10-no-metaphysics.md` for why, and `docs/archive/v045/00_executive/vision.md` if you
-want the historical artifact.
-
-The real architecture is `docs/SPEC.md` §0–§2 (design axioms, the Layer-0 microkernel, the plugin/SPI
-model) plus `docs/04_annex/KERNEL.md` for the dispatch sequence and security model. Start there.
-
-
-## 3. Separation of concerns (historical six-plane mapping; retired as living taxonomy)
-
-The six-plane vocabulary below is retired as living architecture — `docs/SPEC.md` speaks Layer-0 / SPI /
-plugin / pack instead (see `docs/05_adr/ADR-M0-06-plane-mapping-archaeology.md` for the mapping). It is
-kept here only because the separations it named are still real; read `docs/SPEC.md` §0–§2 for the
-current model:
+A verifiable recursive-agency substrate: **planned** — harnesses compile from manifests and
+plugins into a `FrozenHarness`; **as-built** — a `FrozenHarness` compose path already exists in
+`vanguard/packages/domain/artifacts/manifest.py`, but complete `D_H` (prompt, ceiling, policy,
+routes), wire-first plugins on the packages path, and `mhf.trajectory/1` are **locked, not fully
+implemented**. Effects pass an attenuation kernel; the judge that grades a run is supposed to be
+unreachable from the agent it grades (defect **F1** in `layer0/` currently violates that).
 
 ```text
-Interaction  ──▶ CLI · TUI · Inspector · Web Surface
-                     │ (authenticated RPC requests)
-Cognition    ──▶ Episodes · Operators · Context Compaction (L1–L5)
-                     │ (proposals)
-Control      ──▶ Broker · Attenuation Kernel · Leases · Ed25519 Approvals
-                     │ (scoped capability grants)
-Workload     ──▶ Sandboxed Environment Adapters (Git, FS, Shell, LSP)
-                     │ (execution receipts)
-Evidence     ──▶ Exterior Evaluators (UID 10002) · Claims · Oracle Probes
-                     │ (unreachable signed verdicts)
-Evolution    ──▶ Distillation · Attestation · Promotion Pointers (O-01)
+observe → propose → authorize → effect → receipt → evaluate
 ```
+
+| | |
+|---|---|
+| **Concept Lock** | v0.6.0 — `docs/SPEC.md` + ADRs `0069`–`0074` |
+| **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (living CI uses 3.12) |
+| **Status** | Documentation lock complete. **Production coding held** until Engineering Director / Chief Engineer approval. |
+| **Next authorized code** | Wave 0 (CI subject-of-record + named falsifiers) — only after **APPROVED** |
+
+[![Concept Lock](https://img.shields.io/badge/AETHER-v0.6.0--concept--lock-blue.svg)](docs/SPEC.md)
+[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
+[![Hold](https://img.shields.io/badge/Production_coding-held-orange.svg)](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md)
 
 ---
 
-## 4. Repository Structure & Package Lattice
+## Director / Chief Engineer — start here
 
-Below is the project directory tree illustrating the main modules, submodules, clients, benchmark tools, and execution environments down to an actionable navigation depth.
+This repository is under **final independent review** before Wave 0. You own the go/no-go. Law is
+SPEC + ADRs + annexes; GAMMA and the gap register are the lock plan and the operational sequence;
+`docs/07_reviews/` is evidence, not a second spec.
+
+### Suggested path (whole-project, not GAMMA-only)
+
+1. **This file** — what exists, what is held, where to look.
+2. **Law:** [`docs/SPEC.md`](docs/SPEC.md) · [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) (especially [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md)) · [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) · [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md)
+3. **Lock + execution register:** [`GAMMA`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) · [`002 foundation roadmap / gap register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md)
+4. **Live code (minimum):** `vanguard/packages/` (production lattice) · `layer0/` (fork to absorb) · `packs/code-default/` · `vanguard/clients/cli/` · `.github/workflows/ci.yml`
+5. **Advisory evidence** (do not treat as competing plans):
+   - [`docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/`](docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/) — `00_tech_lead_*`, `00_arch_lead_*`, `00_AI-Specialist_*`, `00_SYTEMS-ENG_*` suggestion files
+   - [`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/) — principal proposal, parecer v4, full-refactor, execution plan, Aether waves (non-normative)
+6. **Forensics / process history:** [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) · [BETA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_BETA.md) · [DELTA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_DELTA.md)
+
+Agent/contributor pointers: [`AGENTS.md`](AGENTS.md) · [`CLAUDE.md`](CLAUDE.md).
+
+### Decision we need from you
+
+**APPROVED** — v0.6 foundation and docs are finalized; Wave 0 may begin.  
+**BLOCKED** — remaining issues that cannot be closed on paper, before any production implementation.
+
+You may correct SPEC/ADR/annex/roadmap/docs as part of review (ADRs are **append-only**: add a new
+ADR rather than silently editing `0069`–`0074`). Do **not** start production coding (CI rewire, F1
+fix, runtime merge, plugin implementation, `layer0/` deletion) as part of the review.
+
+---
+
+## What this system is
+
+Vanguard/AETHER compiles **harnesses** (manifest + plugins → `FrozenHarness`) and runs **agents**
+(`Agent = Principal + HarnessInstance`) through one effect machine. That is the **locked** v0.6
+shape. Coding is Domain Pack #1, not the ontology.
+
+**Today:** the production loop is `EpisodeEngine` in packages; coding harnesses exist both as
+`packs/code-default/` (MHF-shaped `harness.yaml`) and as older `vanguard/packages/agency/manifests/vg-*`
+trees. The CLI (`vg`) is a client of the runtime. The first *honest* coding-agent product is
+**Wave 4**, after the trust spine and one runtime authority are real — not a second framework.
+
+Thesis: *what solved it must be separable, and the judge must be unreachable from the judged.*
+
+---
+
+## What exists in this tree (as-built)
+
+Two runtimes are on disk. **Packages is production truth.** `layer0/` is a copy-fork whose SPI /
+JSON-RPC / lifecycle contracts are to be absorbed — not a destination rewrite, and not a third tree.
+
+| Surface | Path | Role today |
+|---|---|---|
+| Production lattice | `vanguard/packages/` | Kernel (S0–S12 in `kernel/dispatch.py`), `EpisodeEngine.spawn()`, SQLite WAL store, exterior evaluator, bwrap sandbox, OpenRouter/Ollama adapters, composition root `runtime/root.py` |
+| Convergence fork | `layer0/` | SPI + JSON-RPC/UDS + broker/lifecycle + sequential driver — **also** `MemoryLedger`, fail-open ceilings, fabricated verdict **F1** (`layer0/scheduler/driver.py`) |
+| First domain pack | `packs/code-default/` | MHF `harness.yaml` + plugin yaml: planner, fs, ast-patch, repo-map, terminal, evaluation gate (pack tests exist; not the Wave-4 E2E yet) |
+| Older manifests | `vanguard/packages/agency/manifests/vg-*` | As-built harness configs (`vg-code-default`, `vg-code-claude-shaped`, `vg-shell-only`, …) |
+| `apps/` | `vanguard/packages/apps/` | Lattice slot only (`__init__.py`). Not a coding package today |
+| CLI / TUI | `vanguard/clients/cli/` | `vg` (Ink/React). Workspace scripts: `npm run vg` from repo root |
+| Tests | `test/` | Full suite exists; **not fully green**. `test/kernel` is **not** in living CI |
+| Living CI | `.github/workflows/ci.yml` | `test_repo_paths`, `test/layer0`, boundaries, TCB, I-7, I-6, `test/packs`, stale paths, markdown links, secrets — **not** kernel/runtime/agency/adapters |
+| Schemas | `schemas/v4/`, `schemas/mhf/` | v4 JCS vectors as-built; MHF subset present; **`mhf.trajectory/1` not on disk** (Wave 1) |
+| Isolation images | `containers/` | Worker UID 10001, evaluator UID 10002 |
+| Lab / benches | `lab/`, `benchmarkings/` | Measurement and task sets; Phase-2 promotion is **deferred** |
+
+**Held until APPROVED:** Wave 0 CI rewire, F1 fix, ceiling fail-closed, dual-tree convergence, `root.py`
+split, plugin walking skeleton, extra packs, concurrency, Meta-Harness, Rust.
+
+---
+
+## Architecture (production lattice)
+
+Hexagonal, CI-enforced (`tools/check_boundaries.py`):
+
+```text
+domain ← ports ← kernel ← agency ← runtime → adapters
+         (apps/ is a client of runtime, not a second ontology)
+```
+
+- **`domain/`** — pure value objects and wire contracts; stdlib-only Python, plus a small parallel TypeScript set.
+- **`ports/`** — `environment`, `evaluator`, `event_store`, `blob_store`, `kernel`, `model`, `sandbox`, `determinism`, `index`.
+- **`kernel/`** — attenuation, budget, grants, dispatch, policy, provenance, classifier (`kernel/model.py` is kernel types, not an LLM).
+- **`agency/`** — `EpisodeEngine` (turn loop + `spawn()`), context compiler, `manifests/vg-*`.
+- **`runtime/`** — `root.py`, `governance/`, `ledger/`, `service/` (no `coordination.py` / `loops/` on disk).
+- **`adapters/`** — models, sandbox, evaluators, stores, environment. **Must not** import `kernel` or `agency`.
+- **`apps/`** — reserved client slot in `check_boundaries.py`; empty of coding modules today.
+
+Dispatch/security constitution: [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md).  
+Measurement constitution (promotion **deferred**): [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md).
+
+The retired 14-tier biological taxonomy is gone on purpose ([ADR-M0-10](docs/05_adr/ADR-M0-10-no-metaphysics.md)).
+
+---
+
+## Repository map
 
 ```text
 Aether-D-System/
-├── .github/                      # CI workflows and repository configuration
-│   └── workflows/ci.yml          # Boundary checks, TCB budget, secret scans, & test CI gates
-├── benchmarkings/                # Empirical benchmark suites & zero-hint execution runners
-│   ├── zero_hint_v1/             # Phase 1 zero-hint benchmark task set
-│   ├── tasks_phase2/             # Phase 2 multi-turn repository coding task set
-│   ├── tasks_phase3/             # Phase 3 task set (TableWorld & non-coding structured reasoning)
-│   ├── swe_pro_tiers/            # Tiered SWE-bench coding evaluation suites
-│   └── frontier_tier5_datalog_engine/ # Frontier-tier logic & datalog evaluation engine
-├── containers/                   # OCI container specs & build digests
-│   ├── worker.Dockerfile         # Unprivileged rootless Bubblewrap worker container (UID 10001)
-│   ├── evaluator.Dockerfile      # Out-of-process signed evaluator daemon container (UID 10002)
-│   └── manifest.json             # Immutable release build SHA-256 digests
-├── docs/                         # Normative specifications, architectural roadmaps, & sprint logs
-│   ├── SPEC.md                   # The ONLY living normative specification (MHF v1 + concept-lock deltas)
-│   ├── annex/                    # KERNEL.md, MEASUREMENT.md — normative, same RFC-2119 force as SPEC.md
-│   ├── adr/                      # Decision log with reversal conditions (append-only)
-│   ├── 02_roadmap/                # milestones.md, backlog.md — version gates, cannot contradict SPEC.md
-│   ├── 03_sprints/                # sprint_active.md (execution board) + plans/ (staged, not active)
-│   └── archive/v045/              # Evidence, not law — pre-lock VG-00..13C corpus, THEORY/ASBUILT/DRIFTS
-├── lab/                          # Paired Measurement Laboratory framework
-│   ├── bench.py                  # Lab harness bench runner for A/A control & McNemar tests
-│   ├── build.py                  # Environment setup & container preparation for lab tasks
-│   ├── diff.py                   # Automated git diff generation and evaluation packaging
-│   └── tasks/                    # Standardized evaluation benchmark tasks
-├── test/                         # Comprehensive Python test suite (unit, integration, security)
-│   ├── adapters/                 # Tests for sandbox, model, and verifier adapters
-│   ├── agency/                   # Tests for context compaction, compiler, and episode recursion
-│   ├── benchmarks/               # Tests for benchmark runners and evaluation harnesses
-│   ├── contracts/                # Contract compliance tests for wire schemas and value objects
-│   ├── governance/               # Tests for Ed25519 approval policies and permission gates
-│   ├── integration/              # End-to-end multi-turn recursion and integration tests
-│   ├── kernel/                   # Tests for attenuation kernel, budget leases, and action dispatch
-│   ├── lab/                      # Tests for lab bench execution and patch diffing
-│   ├── runtime/                  # Tests for composition root and task coordinators
-│   ├── security/                 # Sandbox isolation and privilege escalation security tests
-│   ├── support/                  # Test helpers, mock fixtures, and synthetic state builders
-│   └── trust/                    # Cryptographic signature, hash chain, and claim verifiers
-├── tools/                        # Repository validation, security, and developer utilities
-│   ├── 001_LLM_API_ROUTER/       # Local proxy router for routing and mocking LLM calls
-│   ├── 002_LLM_API_MOCK/         # Deterministic mock server for model API integration tests
-│   ├── check_boundaries.py       # Enforces unidirectional package import lattice rules
-│   ├── check_tcb_budget.py       # Enforces Kernel Trusted Computing Base (TCB) LOC limit (<= 1438)
-│   ├── scan_secrets.py           # Scans repository for unencrypted keys, tokens, or credentials
-│   ├── run_dogfood_r9.py         # Executes production dogfood release verification suite
-│   └── run_active_contract_tests.py # Runs active contract suite across package boundaries
-└── vanguard/                     # Physical Vanguard system code
-    ├── clients/                  # User-facing client applications and client core libraries
-    │   ├── cli/                  # TypeScript CLI application with interactive Ink/React TUI
-    │   │   ├── src/adapters/     # Client-side RPC adapters & IPC communication channels
-    │   │   ├── src/application/  # State management, episode controls, and command parsing
-    │   │   ├── src/headless/     # Non-interactive CLI runner for automated pipelines
-    │   │   └── src/tui/          # Terminal UI components built with Ink & React
-    │   └── client-core/          # Shared TypeScript type definitions, contracts, and utilities
-    └── packages/                 # Core Python backend packages (hexagonal lattice)
-        ├── domain/               # Pure value objects, wire contracts, and state reducers (Order 0)
-        │   ├── primitives/       # Core domain types (hashes, capabilities, leases, Ed25519 keys)
-        │   ├── wire/             # Canonical wire contracts, JSON schemas, & language bindings
-        │   ├── ledger/           # Turn event schemas, immutable reducers, & cryptographic log chains
-        │   ├── artifacts/        # Task execution output schemas, file diffs, & patch payloads
-        │   ├── evidence/         # Verifier proof tokens, probe claims, & signed evaluation verdicts
-        │   ├── selectors/        # Pure state queries and telemetry filtering functions
-        │   └── canonicalisation/ # Deterministic byte-sorting & JSON normalization utilities
-        ├── ports/                # Abstract interfaces for external capabilities (Order 1)
-        │   ├── model.py          # Abstract LLM inference port (`ModelPort`)
-        │   ├── sandbox.py        # Abstract execution sandbox port (`SandboxPort`)
-        │   ├── evaluator.py      # Abstract sealed evaluator port (`EvaluatorPort`)
-        │   ├── event_store.py    # Abstract event ledger storage interface (`EventStorePort`)
-        │   ├── blob_store.py     # Abstract binary artifact storage interface (`BlobStorePort`)
-        │   ├── kernel.py         # Abstract capability kernel interface
-        │   ├── environment.py   # Abstract workspace environment configuration interface
-        │   └── determinism.py    # Deterministic clock, seed, and execution control contract
-        ├── kernel/               # Capability attenuation & turn dispatch engine (Order 2)
-        │   ├── dispatch.py       # Universal turn lifecycle engine (observe->propose->auth->effect->receipt->eval)
-        │   ├── attenuation.py    # Capability attenuation kernel (`T2`) enforcing dynamic scope reduction
-        │   ├── budget.py         # Micro-budget USD leases, token trackers, and execution limits
-        │   ├── grants.py         # Capability grant issuance, attenuation tree, and scope validation
-        │   ├── classifier.py     # Security action risk classification and approval tiering
-        │   ├── policy.py         # Security policy rules and capability permission maps
-        │   ├── provenance.py     # Cryptographic lineage and action authorization origin tracking
-        │   └── model.py          # Internal kernel model representation and capability boundary definitions
-        ├── agency/               # Context compaction, proposal translation, and multi-turn loops (Order 3)
-        │   ├── context/          # L1–L5 Context Compactor and byte-stable prompt compiler
-        │   │   ├── compaction.py # Content compression, history pruning, and token sliding-window logic
-        │   │   ├── compiler.py   # Assembles system prompts, capabilities, and dynamic AGENTS.md rules
-        │   │   ├── layers.py     # L1–L5 context layer definitions (System -> Workspace -> Ephemeral)
-        │   │   └── regrounding.py# Context regrounding logic following error states or phase transitions
-        │   ├── episode/          # Multi-turn execution loop driver (`EpisodeEngine`)
-        │   │   ├── engine.py     # Depth-1 multi-turn recursion loop driving agent proposal cycles
-        │   │   └── state.py      # Episode state machine, trajectory history, and state transitions
-        │   └── manifests/        # Declarative, data-only harness manifest definitions (Order 4)
-        │       ├── loader.py     # Manifest parser, schema validator, and configuration inflator
-        │       ├── discovery.py  # Workspace manifest detection (AGENTS.md / CLAUDE.md / aliases.json)
-        │       └── vg-*/         # Manifest configs (e.g. `vg-code-claude-shaped`, `vg-shell-only`)
-        ├── runtime/              # Composition root, daemon lifecycle, & task orchestration
-        │   ├── root.py           # Primary composition root linking concrete adapters to abstract ports
-        │   ├── coding_coordinator.py # Autonomous coding coordinator for repository task resolution
-        │   ├── coding_entrypoint.py  # Entrypoint for spawning autonomous solving sessions
-        │   ├── coding_plan.py    # Dynamic task breakdown, step planning, and strategy tracking
-        │   ├── coding_progress.py# Progress monitoring, failure recovery, and step completion tracking
-        │   ├── coding_verification.py# Automated local test verification before submitting solutions
-        │   ├── governance/       # Ed25519 human approval flows, security checks, and gate releases
-        │   ├── lab_driver.py     # Execution driver for lab benchmark evaluation suites
-        │   ├── tier_escalation.py# Dynamic model escalation logic (Free -> Cheap -> Frontier)
-        │   ├── model_selection.py# Model routing policy based on task difficulty and budget
-        │   ├── session_log.py    # Execution session recorder (`lam.sqlite` SQLite database)
-        │   └── service/          # Vanguard daemon RPC server and API handlers
-        └── adapters/             # Concrete implementations of external ports (Order 1/2/5)
-            ├── models/           # Concrete LLM integrations (OpenRouter, Ollama, DeepSeek, cassettes)
-            │   ├── openrouter.py # OpenRouter API provider implementation
-            │   ├── ollama.py     # Local Ollama model provider implementation
-            │   ├── invocation.py # Standardized prompt formatting and API payload serialization
-            │   ├── cassette.py   # VCR-style request/response recording for offline testing
-            │   └── routing.py    # API key loading and multi-provider endpoint routing
-            ├── sandbox/          # Concrete execution environments
-            │   ├── rootless.py   # Linux Bubblewrap rootless container isolation backend
-            │   ├── worker.py     # Sandboxed execution worker process manager
-            │   └── fake.py       # In-memory mock sandbox for unit testing
-            ├── evaluators/       # Sealed evaluation backends
-            │   ├── daemon.py     # Signed verifier daemon running as unprivileged UID 10002
-            │   ├── client.py     # RPC client for communicating with evaluator daemons
-            │   ├── isolated.py   # Isolated process test runner for local evaluations
-            │   └── signing.py    # Ed25519 payload signing and cryptographic verifier attestations
-            ├── stores/           # Storage implementation backends
-            │   ├── event_store.py  # SQLite-backed event store for persistent episode logs
-            │   └── blob_store.py # Filesystem-backed binary artifact store (was fs_blob.py, D-47)
-            └── environment/      # Concrete host environment hooks and workspace initialization
+├── .github/workflows/ci.yml          # living CI (layer0-centric today — Wave 0 will change this)
+├── layer0/                           # copy-fork to absorb (not the v0.6 destination)
+│   ├── spi/                          # Protocols + jsonrpc — promote into packages
+│   ├── registry/                     # plugin lifecycle / broker — promote
+│   ├── scheduler/                    # sequential driver; F1 lives here
+│   ├── kernel/ · events/ · compose/  # diverging ports — packages remains semantic oracle
+├── vanguard/
+│   ├── packages/                     # PRODUCTION lattice
+│   │   ├── domain/ ports/ kernel/ agency/ runtime/ adapters/
+│   │   └── apps/                     # lattice slot; empty of coding modules today
+│   └── clients/cli/                  # TypeScript Ink TUI (`vg`)
+├── packs/code-default/               # MHF-shaped first domain pack
+├── test/                             # Python suite by subsystem (kernel, runtime, layer0, packs, …)
+├── tools/                            # boundaries, TCB, secrets, dogfood; codegen at tools/codegen/
+├── schemas/v4/ · schemas/mhf/ · containers/ · lab/ · benchmarkings/
+└── docs/                             # see Documentation map below
 ```
 
-### High-Level Module & Submodule Architecture Breakdown
-
-#### 1. Backend Core (`vanguard/packages/`)
-The Python backend enforces hexagonal architecture and unidirectional dependency layers (enforced by `check_boundaries.py` in CI):
-
-- **`domain/` (Order 0 — Lowest Level)**: Pure, zero-dependency data models, contracts, and reducers.
-  - `primitives/`: Core domain primitives including cryptographic hashes, capability tokens, USD micro-budget leases, and Ed25519 keys.
-  - `wire/`: Canonical JSON wire formats (`contracts.py`, `contracts.ts`) defining exact schemas exchanged across process boundaries.
-  - `ledger/`: Append-only turn event definitions and pure state reducers driving deterministic execution history.
-  - `artifacts/`: Structures representing execution output payloads, code diffs, and patch artifacts.
-  - `evidence/`: Verifier proof tokens, probe claims, and signed evaluation verdicts.
-  - `selectors/`: Pure query functions used to extract state metrics and telemetry from event streams.
-  - `canonicalisation/`: Byte-stable sorting and JSON canonicalization utilities for hash generation.
-
-- **`ports/` (Order 1)**: Abstract interfaces (Python ABCs) isolating internal logic from external infrastructure.
-  - `model.py` (`ModelPort`): Interface for model completion, prompt formatting, and token generation.
-  - `sandbox.py` (`SandboxPort`): Interface for isolated process execution and workspace filesystem access.
-  - `evaluator.py` (`EvaluatorPort`): Interface for sealed, out-of-process task evaluation.
-  - `event_store.py` / `blob_store.py`: Interfaces for event persistence and binary output storage.
-  - `kernel.py`, `environment.py`, `determinism.py`: Contracts for attenuation kernels, workspace sandboxes, and deterministic hardware clocks/seeds.
-
-- **`kernel/` (Order 2)**: Central capability control, security attenuation, and turn dispatch logic.
-  - `dispatch.py`: Universal turn engine driving the 6-stage turn cycle (`observe -> propose -> authorize -> effect -> receipt -> evaluate`).
-  - `attenuation.py` (`T2`): Dynamically narrows capability scope so an agent cannot escalate privileges during execution.
-  - `budget.py`: Tracks token expenditures and USD micro-budget leases.
-  - `grants.py`: Issues, manages, and validates capability token trees.
-  - `classifier.py` & `policy.py`: Evaluates proposed actions against security policies and assigns action risk tiers.
-  - `provenance.py`: Verifies cryptographic origin and authorization lineage for every requested action.
-
-- **`agency/` (Order 3)**: High-level cognitive assembly, prompt context compression, and multi-turn loops.
-  - `context/`: L1–L5 Context Compactor & Compiler. `compiler.py` builds byte-stable system prompts incorporating `AGENTS.md` rules; `compaction.py` compresses long turn histories; `layers.py` structures layers from system to ephemeral memory; `regrounding.py` re-orients the agent after errors.
-  - `episode/`: `engine.py` (`EpisodeEngine`) runs depth-1 multi-turn recursion loops driving agent proposal cycles, supported by `state.py` trajectory tracking.
-  - `manifests/`: Declarative, data-only harness manifests (`loader.py`, `discovery.py`) defining agent behavioral profiles (`vg-code-claude-shaped`, `vg-shell-only`, etc.).
-
-- **`runtime/` — Composition Root & Daemon Lifecycle**:
-  - `root.py`: Main composition root injecting concrete adapters into abstract ports.
-  - `coding_coordinator.py` & `coding_entrypoint.py`: High-level orchestrators managing autonomous coding problem-solving sessions end-to-end.
-  - `coding_plan.py`, `coding_progress.py`, `coding_verification.py`: Generate step-by-step resolution plans, monitor execution progress, and verify solutions via local test suites.
-  - `tier_escalation.py` & `model_selection.py`: Route prompts to appropriate model tiers, escalating from local/free models to paid frontier models upon failures.
-  - `governance/`: Handles Ed25519 human approval signatures and sprint release signoff verification.
-  - `session_log.py` & `telemetry.py`: Logs full turn trajectories to local `lam.sqlite` databases.
-  - `service/`: Exposes Vanguard runtime via IPC/RPC daemon endpoints.
-
-- **`adapters/` (Order 1/2/5 — External Boundary)**: Concrete drivers implementing abstract ports.
-  - `models/`: Integrations for OpenRouter (`openrouter.py`), local Ollama (`ollama.py`), prompt formatting (`invocation.py`), cassette VCR recording (`cassette.py`), and key routing (`routing.py`).
-  - `sandbox/`: Linux Bubblewrap rootless container sandbox (`rootless.py`), worker process isolation (`worker.py`), and mock sandboxes (`fake.py`).
-  - `evaluators/`: Sealed evaluation backends including signed verifier daemon running under UID 10002 (`daemon.py`), client RPCs (`client.py`), and Ed25519 verdict signers (`signing.py`).
-  - `stores/`: SQLite event storage and filesystem blob storage implementations.
+CLI entry: `vanguard/clients/cli/src/main.tsx` (`npm run vg`).  
+Evaluator entry: `vanguard.packages.adapters.evaluators.daemon:main` (`vanguard-evaluator`).
 
 ---
 
-#### 2. User Interfaces & CLI (`vanguard/clients/`)
-- **`cli/`**: TypeScript application providing interactive terminal interfaces.
-  - `src/tui/`: Terminal User Interface built with React and Ink, providing visual turn progress, live budget trackers, and diff views.
-  - `src/headless/`: Non-interactive CLI mode for automated benchmark runs and headless server integration.
-  - `src/application/` & `src/adapters/`: Client state management and RPC connectors to the Vanguard Python runtime.
-- **`client-core/`**: Shared TypeScript contracts, wire interfaces, and client utilities.
+## Documentation map (what is law)
 
----
+| Document | Role |
+|---|---|
+| [`docs/SPEC.md`](docs/SPEC.md) | **Only** living normative spec (RFC-2119 here and in annexes only) |
+| [`docs/05_adr/`](docs/05_adr/) | Append-only decisions. `0069`–`0074` are the v0.6 lock. `0067` is a numbering hole |
+| [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) | Dispatch / capabilities / security |
+| [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) | Lab measurement doctrine (v0.6: identity locked; promotion deferred) |
+| [GAMMA](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | Concept Lock plan (not a second SPEC) |
+| [`002` roadmap / gap register](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | Living foundation sequence (Wave 0→4) |
+| [`docs/02_roadmap/`](docs/02_roadmap/), [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | **Historical** M0–M6 / sprint board — superseded as *next* work |
+| [`docs/07_reviews/`](docs/07_reviews/) | Forensic + advisory corpus — evidence. Director may later archive bloat |
+| [`docs/archive/v045/`](docs/archive/v045/) | Pre-lock VG-00…13C — evidence, not law |
 
-#### 3. Measurement & Benchmarks (`lab/` & `benchmarkings/`)
-- **`lab/`**: Paired Measurement Laboratory framework (`bench.py`, `build.py`, `diff.py`) running paired A/A and A/B benchmark controls with McNemar statistical hypothesis testing to measure agent improvements.
-- **`benchmarkings/`**: Benchmark datasets (`zero_hint_v1`, `tasks_phase2`, `tasks_phase3`, `swe_pro_tiers`, `frontier_tier5_datalog_engine`) containing zero-hint coding, structured data, and logic tasks.
+**Authority on conflict:** SPEC, then a newer ADR, then GAMMA (plan), then `002` (register). Review
+files and old roadmaps cannot be cited as requirements.
 
----
-
-#### 4. Containerization & Security Isolation (`containers/`)
-- `worker.Dockerfile`: Unprivileged Bubblewrap worker sandbox (UID 10001) for isolated tool execution.
-- `evaluator.Dockerfile`: Out-of-process signed verifier daemon container (UID 10002) unreachable from the agent environment.
-- `manifest.json`: Cryptographic SHA-256 build digests ensuring reproducible environment builds.
-
----
-
-#### 5. Tools & Integrity Verification (`tools/`)
-- Structural enforcement scripts (`check_boundaries.py` enforcing unidirectional imports, `check_tcb_budget.py` enforcing kernel LOC <= 1438).
-- Security scripts (`scan_secrets.py` to prevent credential exposure).
-- Gate release and contract test suites (`run_dogfood_r9.py`, `run_active_contract_tests.py`).
-- Mock LLM routers (`001_LLM_API_ROUTER`, `002_LLM_API_MOCK`) for offline test execution.
-
----
-
-#### 6. Test Suite (`test/`)
-- Comprehensive test suite organized by subsystem matching the backend package lattice: `kernel/`, `agency/`, `runtime/`, `adapters/`, `contracts/`, `governance/`, `security/`, `trust/`, `lab/`, and `benchmarks/`.
-
----
-
-#### 7. Specifications & Documentation (`docs/`)
-- `SPEC.md`, `annex/`, `adr/`: the living normative documentation set — see §8 below.
-- `02_roadmap/`, `03_sprints/`: version gates and the execution board.
-- `archive/v045/`: the pre-lock VG-00…13C spec corpus, THEORY/ASBUILT/DRIFTS, and old review triage —
-  evidence, not law.
-
-### CI Architectural Boundary Lattice
-
-Import direction is strictly unidirectional (`tools/check_boundaries.py`):
-
-$$\text{domain} \longleftarrow \text{ports} \longleftarrow \text{kernel} \longleftarrow \text{agency} \longleftarrow \text{runtime} \longrightarrow \text{adapters}$$
-
-- **`domain`**: Standard library only. Imports nothing else in the repository.
-- **`ports`**: Imports `domain` only.
-- **`kernel`**: Imports `domain` and `ports`.
-- **`agency`**: Imports `domain`, `ports`, and `kernel`.
-- **`adapters`**: Imports `domain` and `ports`. Zero direct imports of `kernel` or `agency`.
-- **`runtime`**: Composition root injecting concrete adapters into abstract ports.
-
----
-
-## 5. Master Roadmap & Sprint Overview
+Foundation sequence after APPROVED (no calendar dates):
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 1 & 2: FOUNDATION, KERNEL & BETA RELEASE (Sprint 0 – Sprint 6B) [COMPLETE]      │
-│ • Sprint 0–1: Governance, ICD, CI boundaries, wire contracts (T1)                   │
-│ • Sprint 2–5:  Ledger store, attenuation kernel (T2), Episode recursion (T4), UID 10002 │
-│ • Sprint 6A-B: Rootless Bubblewrap worker, Ed25519 approval, Gate R9 Dogfood 3/3 PASS│
-│                👉 DELIVERS: Vanguard MVP Beta v0.4.1-beta Release Candidate           │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ PHASE 3: HARNESS RECONSTRUCTIONS, MEASUREMENT & RELEASE (Sprint 7 – Sprint 10)       │
-│ • Sprint 7: Pure-data manifests (`vg-code-claude-shaped`, `vg-code-opencode-shaped`),  │
-│             aliases.json translation, dynamic `AGENTS.md` context discovery          │
-│ • Sprint 8: Laboratory bench (`lab harness bench`), paired A/A control against       │
-│             `vg-shell-only`, verifier-deployment gap measurement                     │
-│ • Sprint 9: TableWorld non-coding structured-data witness with zero kernel changes   │
-│ • Sprint 10: Non-authoritative memory recall (L5), offline distillation (O-01),     │
-│              and Phase 3 release gate dossier                                        │
-└──────────────────────────────────────────────────────────────────────────────────────┘
+Wave 0  CI truth + named falsifiers
+Wave 1  Fail-closed trust spine (F1, ceilings, lineage, D_H, trajectory, writers)
+Wave 2  Converge in place (absorb layer0 contracts; then delete dupes)
+Wave 3  Walking skeleton — framework that compiles harnesses
+Wave 4  One real coding-agent E2E  ← foundation stop
+        then extra packs, concurrency, multi-agent policy, Meta-Harness
 ```
 
 ---
 
-## 6. Model Escalation & Routing Hierarchy
+## Commands
 
-Vanguard abstracts models behind `ModelPort`. Local GPU models ($0) handle routine syntactic tasks, while cloud models (OpenRouter/OpenAI/Anthropic) handle high-tier refactoring:
-
-# Openrouter Guidelines
-
-    OpenRouter:
-        base_url: https://openrouter.ai/api/v1
-        api_key_env: "OPENROUTER_API_KEY" on ModelRoute (the engine reads the env var)
-        
-        Free Models:
-            openrouter/free
-            z-ai/glm-5.2:free
-            inclusionai/ling-3.0-tiny:free
-            poolside/laguna-s-2.1:free
-            cohere/north-mini-code:free
-            google/gemma-4-26b-a4b-it:free
-            nvidia/nemotron-3-super-120b-a12b:free
-            openai/gpt-oss-20b:free
-
-        Verified Low-Cost Paid Models:
-            deepseek/deepseek-v4-flash
-            openai/gpt-5.6-luna
-            xiaomi/mimo-v2.5
-            minimax/minimax-m3
-            tencent/hy3-preview
-            upstage/solar-pro4
-            google/gemini-3.7-flash
-            moonshotai/kimi-k2.7-code
-            
-        Great Paid Models:
-            deepseek/deepseek-v4-pro
-            moonshotai/kimi-k3
-            z-ai/glm-5.3
-            qwen/qwen3.8-max
-            meta/muse-spark-1.2
-        
-        Elite Top Models:
-            openai/gpt-5.6-sol
-            x-ai/grok-4.6
-            anthropic/claude-opus-5
-
-    DeepSeek API:
-        base_url: https://api.deepseek.com/v1
-        model: deepseek-reasoner or deepseek-coder on ModelRoute
-        api_key_env: "DEEPSEEK_API_KEY"
-    OpenAI:
-        base_url: https://api.openai.com/v1
-        model: gpt-4o on ModelRoute
-        api_key_env: "OPENAI_API_KEY"
-
-Ollama Guidelines
-
-    Tier 1 models:
-        llama3.2:3b
-        qwen2.5:1.5b
-    Tier 2 models: 3. qwen3.6:27b 4. deepseek-r1:14b
-
-
----
-
-## 7. Verification & Release Verification Commands
-
-Verify repository integrity, boundaries, TCB budget, and test suite locally:
+Python (repo root). The full suite is **not** fully green; living CI does **not** yet run `test/kernel`.
 
 ```bash
-# 1. Verify Backend Artifacts & OCI Image Manifests (--release)
-python3 tools/check_backend_artifacts.py --release
-
-# 2. Check Package Import Boundaries (115 source files)
+python3 -m pip install -e '.[dev]'   # Python 3.10+
+python3 -m unittest discover -s test -t .            # full suite (expect some FAIL/ERROR)
+python3 -m unittest discover -s test/kernel -t .     # production kernel (not in living CI)
+python3 -m unittest discover -s test/layer0 -t .     # fork suite (currently CI-gated)
+python3 -m unittest discover -s test/packs -t .      # code-default pack (currently CI-gated)
 python3 tools/check_boundaries.py
-
-# 3. Check Kernel Trusted Computing Base (TCB) LOC Budget (Limit <= 1438 LOC)
 python3 tools/check_tcb_budget.py
-
-# 4. Check Secret Patterns Across Repository
 python3 tools/scan_secrets.py
-
-# 5. Run Sprint 6B Gate R9 Production Dogfood (3/3 PASS)
-python3 tools/run_dogfood_r9.py
-
-# 6. Execute Complete Unit Test Suite
-python3 -m unittest discover -s test -t .
+python3 tools/run_active_contract_tests.py           # exists; not a living-CI step today
+# Wave 0 (after APPROVED): python3 tools/codegen/generate_types.py --check
 ```
+
+CLI (npm workspace at repo root, or `cd vanguard/clients/cli`):
+
+```bash
+npm ci
+npm run typecheck
+npm test
+npm run vg
+```
+
+`make clean` removes caches; review `make clean-all` before using it (`node_modules`).
 
 ---
 
-## 8. Normative documentation
+## Model access
 
-**`docs/main_v4/` never existed on this tree and this alignment matrix against it is retired** (it
-described `docs/01_specs/backend/`, since renamed and, as of the v0.5.0 Foundation Lock, archived to
-`docs/archive/v045/01_specs/backend/`). The normative documentation set is now:
+Abstracted behind `ModelPort`. Adapter **modules** on disk: OpenRouter, Ollama, cassette, fake.
+DeepSeek / OpenAI appear as **routes and env keys** (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`,
+`OPENAI_API_KEY`), not as separate adapter files. Keep keys unset for deterministic / trust-spine tests.
 
-| Document | Purpose | Status |
-|---|---|---|
-| [`docs/SPEC.md`](docs/SPEC.md) | The **only** living normative specification — design axioms, Layer-0 microkernel, SPI/plugin model, invariants I-1…I-11 | **NORMATIVE** |
-| [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) | Dispatch sequence, grants, attenuation, provenance, perimeter, threat model | **NORMATIVE** |
-| [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) | Paired designs, McNemar, A/A floor, instrument tuple | **NORMATIVE** |
-| [`docs/05_adr/`](docs/05_adr/) | Decision log with reversal conditions (append-only) | reference |
-| [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md), [`docs/02_roadmap/backlog.md`](docs/02_roadmap/backlog.md) | Version gates and epic map — cannot contradict `docs/SPEC.md` | reference |
-| [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | Execution board only | reference |
+| Provider | Notes |
+|---|---|
+| OpenRouter | `vanguard/packages/adapters/models/openrouter.py` |
+| Ollama | `.../ollama.py`; some `test/runtime` cases are env-sensitive |
+| Cassette / fake | offline / unit |
+
+---
+
+## As-built module notes (packages)
+
+Useful inventory; file names drift — treat SPEC/ADRs as law if this list disagrees.
+
+- **`domain/`** — primitives, wire contracts, ledger events/reducers, evidence, selectors, JCS canonicalisation.
+- **`kernel/`** — `dispatch.py`, `attenuation.py`, `budget.py`, `grants.py`, `classifier.py`, `policy.py`, `provenance.py`.
+- **`agency/episode/engine.py`** — production `EpisodeEngine` / `spawn()` (canonical recursive machine).
+- **`agency/context/`** — prompt/context compiler and compaction.
+- **`agency/manifests/`** — as-built `vg-code-default`, `vg-code-claude-shaped`, `vg-shell-only`, `vg-table-default`, …
+- **`runtime/root.py`** — composition root (large; split **in place** is Wave 2, not a new tree). Also: `governance/`, `ledger/`, `service/`, plus coding-adjacent leftovers (`tier_escalation.py`, `skill_index.py`, …) still in runtime — pack extraction is Wave 3–4.
+- **`adapters/evaluators/`** — exterior signed judge (UID 10002). The **layer0** scheduler currently fabricates `"pass"` (F1); packages must **read** signed verdicts.
+- **`adapters/sandbox/`** — rootless bubblewrap for untrusted exec.
+- **`adapters/stores/`** — SQLite WAL event store (packages). Layer0 uses `MemoryLedger` (`layer0/events/store.py`).
+
+Import rule: `domain ← ports ← kernel ← agency ← runtime → adapters`. Adapters never import kernel/agency.

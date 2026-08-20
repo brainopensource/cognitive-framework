@@ -1,6 +1,3 @@
-
-Pensou por 2m 38s
-
 Abaixo está a consolidação em formato de relatório técnico, incorporando a revisão dos documentos, as correções discutidas e a tese ampliada de AGI por composição de primitivas, sem tratar AGI como uma capacidade já demonstrada.
 
 AETHER/Vanguard — Substrate Recursivo para Inteligência Agêntica, Meta-Harness e Self-Improvement
@@ -10,6 +7,9 @@ Relatório técnico de arquitetura e tese de pesquisa para Substrate v0.6.0
 Resumo
 
 Este relatório consolida a revisão arquitetural dos documentos "Vanguard-substrate-060-full-refactor-v3-1.md", "vanguard-substrate-060-execution-plan.md" e da "SPEC.md", juntamente com a evolução conceitual desenvolvida durante a discussão sobre agentes, subagentes, swarms, plugins, event sourcing, Meta-Harness, self-improvement, cognição avançada e uma possível trajetória de pesquisa em direção a sistemas de inteligência artificial geral.
+
+**Precisamos de uma versão híbrida — e eu a trataria como o plano definitivo da v0.6.** O `principal_engineer_proposal.md` continua sendo, na minha avaliação, **a melhor arquitetura-alvo**: uma única máquina recursiva (`Agent = Principal + HarnessInstance`), subagentes pela mesma primitive `spawn`, swarm como política e não engine, ledger autoritativo, plugins componíveis, agentes lógicos baratos/ workers limitados, semântica multi-agent projetada agora e concorrência ativada depois; porém o **parecer v4 trouxe evidência nova que muda a estratégia de refatoração**: não devemos reconstruir o core no `layer0`, mas **convergir os dois forks e recuperar do `vanguard/packages/` tudo que já é maduro — ledger WAL, evaluator exterior, sandbox, kernel, stores, models — usando do `layer0` principalmente os contratos/SPI, schemas e broker JSON-RPC**, concentrando construção nova no que realmente falta: **plugin boundary wire-first, quebra do `root.py` e orchestrator multi-harness real**.   Portanto eu seguiria esta hierarquia: **SPEC = lei até ser formalmente atualizada; `principal_engineer_proposal` = arquitetura conceitual de longo prazo; parecer v4 = estratégia factual de migração/refatoração; novo Execution Plan híbrido = único documento operacional**. Não seguiria nem o Full Refactor nem o Execution Plan atual isoladamente. A essência é: **convergir primeiro → plugin runtime real → coding agent → generality smoke test → orchestrator + agentes recursivos single-node → concorrência → experimentação → distribuição só se necessária → Meta-Harness/self-improvement**. Isso preserva a visão multi-agent/AGI por primitivas sem desperdiçar o runtime que já funciona e sem criar um terceiro sistema.  
+
 
 A tese central proposta é:
 

@@ -2,27 +2,36 @@
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language
 (MUST/SHALL/SHOULD) is binding here and in `docs/04_annex/*` only — nowhere else in `docs/`.
-**Version anchor:** v0.5.0 Foundation Lock (concept lock), `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`.
-**Supersedes:** `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`, README's old biological/tier taxonomy,
-`docs/01_specs/backend/**` (archived, evidence not law, at `docs/archive/v045/`).
+**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0073`). The as-built Python package
+version remains `0.4.5b1` in `pyproject.toml` until a later release cut.
+**Supersedes:** v0.5.0 Foundation Lock destination story (`layer0/` as M1 rewrite target) and
+mid-run plugin hot-swap as a v0.6 feature; `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`,
+README's old biological/tier taxonomy, `docs/01_specs/backend/**` (archived, evidence not law, at
+`docs/archive/v045/`).
 **Consumes:** `docs/TECH_LEAD_REVIEW/CRITICAL_GAP_ANALYSIS_AND_AUDIT.md` (Kill/Keep/Refactor register,
 invariants I-1…I-10), `docs/TECH_LEAD_REVIEW/NEXT_GEN_META_HARNESS_SPECIFICATION.md` (MHF v1 blueprint,
 the direct ancestor of this document), `docs/TECH_LEAD_REVIEW/01_SPECS_MIGRATION_MATRIX.md` (per-file
-merge disposition).
+merge disposition). Forensic report
+`docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md` is investigation, not law.
 **Design lineage preserved:** S0–S12 dispatch kernel, JCS canonicalisation + golden vectors, exterior
-signed evaluator, harness-as-data manifests, measurement lab.
+signed evaluator, harness-as-data manifests, measurement lab, SQLite WAL ledger.
 **Authority on conflict:** this document, then `docs/05_adr/` (a newer ADR wins by citation, never by
-silent edit), then `docs/02_roadmap/milestones.md` (cannot contradict this document), then
-`docs/03_sprints/sprint_active.md` (execution board only), then `docs/archive/v045/` (evidence, not law
-— no ticket may cite it as a requirement).
+silent edit — **`0069`–`0073` outrank the v0.5.0 M1-destination paragraph they reverse**), then
+`docs/02_roadmap/milestones.md` (cannot contradict this document; roadmap rewrite is a later phase),
+then `docs/03_sprints/sprint_active.md` (execution board only), then `docs/archive/v045/` and
+`docs/07_reviews/` (evidence and proposals, not law — no ticket may cite them as a requirement).
 
 ---
 
 ## Preamble
 
-**Vanguard is a meta-harness compiler.** Declarative manifests plus versioned plugins compile into
-specialised coding-agent harnesses. The attenuation kernel, the exterior judge, and the measurement lab
-are the moat. Self-improvement and meta-cognition are Phase-2 plugins, not Layer-0 features.
+**Vanguard is a recursive agency substrate that compiles harnesses.** The first *domain pack* is
+coding; coding is not the architecture. One execution machine
+(`Agent = Principal + HarnessInstance`, `ADR-0070`) runs every agent, subagent, and (later) swarm
+participant. Declarative manifests plus versioned plugins compile into specialised harnesses. The
+attenuation kernel, the exterior judge, and the measurement lab are the moat. Self-improvement and
+meta-cognition are Phase-2 plugins, not Layer-0 features, and they are **not implemented in v0.6**
+(`ADR-0073`).
 
 **What solved it must be separable, and the judge must be unreachable from the judged** (the
 separability thesis, carried from `docs/01_specs/backend/02_vanguard_charter_claims_and_non_claims_v040.md`
@@ -63,9 +72,11 @@ is the runtime language; TypeScript clients consume generated readers only, no h
 logic, per `ADR-0063`).
 
 **A-5. Harness = f(manifest, plugins).** A harness is compiled at composition time from a declarative
-manifest resolving plugin references; the compile output (`FrozenHarness`) is content-addressed. Two
-identical manifests + plugin digests ⇒ byte-identical harness digest ⇒ attributable A/B measurement (the
-separability thesis, kept, operationalised).
+manifest resolving plugin references; the compile output (`FrozenHarness`) is content-addressed. That
+digest is harness identity **`D_H` only** (`ADR-0071`). Execution identity `D_R` and experiment-cell
+identity `D_X` MUST NOT be collapsed into `D_H`. Two identical manifests + plugin digests ⇒
+byte-identical `D_H` ⇒ attributable A/B measurement of *composition* (the separability thesis, kept,
+operationalised).
 
 **A-6. Asymmetric evolution.** Phase 2 and 3 capabilities land as new plugins and new event kinds —
 never as Layer-0 modifications. Layer 0 exposes *extension points*, not features.
@@ -74,23 +85,68 @@ never as Layer-0 modifications. Layer 0 exposes *extension points*, not features
 
 ## 1. Layer 0 — The Microkernel
 
+Layer 0 is a *concern set*, not a mandate to rewrite the runtime into a second tree.
+
+**Production lattice (as-built and canonical, `ADR-0069`).** `vanguard/packages/`:
+
 ```text
-layer0/
-├── events/        # Event taxonomy, JCS envelope, hash chain, reducers   (from domain/ledger, domain/canonicalisation)
-├── kernel/        # S0–S12 dispatch, attenuation, grants, budget, policy (KEEP verbatim, +provenance wiring)
-├── registry/      # Plugin manifest schema, resolver, lifecycle FSM, isolation broker   (NEW)
-├── scheduler/     # Turn scheduler, independence groups, cancellation, heartbeats       (NEW)
-├── spi/           # Frozen SPI protocols + generated types                              (replaces ports/)
-└── compose/       # Composition: manifest → FrozenHarness (content-addressed)           (from runtime/root, rewritten)
+domain → ports → kernel → agency → runtime → adapters
+         (apps/ is a client of runtime, not a second ontology)
 ```
 
-Boundary lattice (CI-enforced, closed roster): `events ← kernel ← spi ← registry ← scheduler ← compose`;
-plugins import `spi` + `events` only; Layer 0 never imports a plugin. This is `layer0/`'s *target*
-lattice for M1+; the **current, as-built lattice is seven packages** — `domain, ports, kernel, agency,
-runtime, adapters, apps` (`apps/` was added alongside the original six per `S060-A-10`, registered in
-`tools/check_boundaries.py` with the same reach as `runtime`). Any description of "the hexagon" in this
-document or `docs/04_annex/` reflects the current seven-package lattice, not the original six-package
-diagram — `layer0/` above is the M1 destination, not the current tree.
+Composition root remains `vanguard/packages/runtime/root.py`. This lattice is the **CI subject of
+record** (`ADR-0073`): living CI MUST eventually run the packages kernel/runtime/agency/adapters
+suites. A green `test/layer0` suite alone does not satisfy I-2 or I-4.
+
+**Convergence fork (not the destination).** `layer0/` is a copy-fork that holds SPI protocols,
+JSON-RPC/UDS codec, plugin-cell broker, lifecycle FSM, and a sequential driver. Useful contracts
+are absorbed into the production lattice. Duplicate kernels, schedulers, mocks, and synthetic
+verdict paths MUST NOT be deleted until a behavioral parity gate. A third tree (`core/`,
+`aether-rust/`) is forbidden.
+
+```text
+layer0/          # fork under convergence — contracts to absorb, not a destination rewrite
+├── events/      # taxonomy / envelope / fold — converge with domain/ledger
+├── kernel/      # diverging S0–S12 port — packages kernel remains the semantic oracle
+├── registry/    # lifecycle FSM + isolation broker — promote
+├── scheduler/   # sequential driver; MUST NOT fabricate VerdictRecorded (defect F1)
+├── spi/         # Protocols + jsonrpc + generated types — promote; Protocol is a client
+└── compose/     # Manifest → FrozenHarness digest — converge with domain compose
+```
+
+Boundary lattice (CI-enforced, closed roster) for the production hexagon:
+`domain ← ports ← kernel ← agency ← runtime → adapters`; adapters MUST NOT import `kernel` or
+`agency`. Plugins import SPI + events only; Layer 0 never imports a plugin. The `layer0/` internal
+order `events ← kernel ← spi ← registry ← scheduler ← compose` is the fork's own checker rows, not
+a replacement identity.
+
+### 1.0 Recursive machine, authority, and identity (`ADR-0070`, `ADR-0071`)
+
+```text
+Agent    = Principal + HarnessInstance
+SubAgent = ChildPrincipal + HarnessInstance   # via spawn, same machine
+```
+
+`spawn(parent, harness, capabilities, budget)` is the only delegation primitive. MUST hold:
+
+- `Capabilities(child) ⊆ Capabilities(parent)`
+- `Budget(child) ≼ remaining(parent)` component-wise on `{usd_micros, millis, tokens, bytes, turns, depth}`
+  (`ADR-M0-07`)
+
+Swarm participation is a coordination **policy** over agents, not a swarm engine. Causal relations
+(`spawned_by`, `caused_by`, `produced`, `evaluated_by`) are **projections of events** (`ADR-0003`).
+
+**Decision plane** (scheduler / orchestrator / kernel) decides who/when/lease/budget/capability.
+**State plane** (ledger + pure reducers) decides what happened:
+`Decision → DurableEvent → fold → EffectiveState`. Orchestrator memory is never source of truth.
+
+Every new event kind MUST carry: `project_id`, `principal_id`, optional `parent_principal_id`,
+`episode_id`, optional `parent_episode_id`, `harness_digest` (`D_H`), `causation_id`,
+`correlation_id`.
+
+Identity trinity (`ADR-0071`): `D_H` harness composition; `D_R` execution
+(`D_H` + runtime + environment + model + oracle); `D_X` experiment cell (`D_R` + dataset + protocol).
+FrozenHarness digest is `D_H` only.
 
 ### 1.1 The turn state machine
 
@@ -142,11 +198,18 @@ ordered, closing D-19 (event never references an undurable blob).
 ### 1.3 Determinism & replay contract
 
 `ClockPort`, `RandomPort`, and model cassettes remain injected; replay mode substitutes recorded values
-keyed by `(run_id, seq)`. **CI job `replay-parity`:** execute a live fixture run, fold its ledger cold,
-structurally diff reconstructed vs live terminal state — grants tree, budget vector, approval log,
-episode FSM included. Time-travel debugging = fold to `seq=N` + resume with a divergent `branch_id`.
-Crash recovery = scan for `EffectStarted` without terminal effect event ⇒ mark *undeterminable* ⇒ run
-`EffectReconciled` probe (existing semantics, kept).
+keyed by `(run_id, seq)`. **Replay taxonomy (`ADR-0071`) — these MUST NOT be conflated:** state replay
+(deterministic reconstruction of grants, budgets, approvals, episode FSM); schedule replay (needs
+recorded nondeterminism); real-world re-execution (not required to match); byte-identical fixtures
+(only fully controlled inputs). Concurrent executions are not required to produce byte-identical
+ledgers. Consistency unit is `project_id`.
+
+**CI job `replay-parity` (requirement; not currently wired in `.github/workflows/ci.yml`):** execute a
+live fixture run against the **production** ledger, fold its ledger cold, structurally diff
+reconstructed vs live terminal state — grants tree, budget vector, approval log, episode FSM included.
+Folding the same in-memory list twice is not this job. Time-travel debugging = fold to `seq=N` + resume
+with a divergent `branch_id`. Crash recovery = scan for `EffectStarted` without terminal effect event
+⇒ mark *undeterminable* ⇒ run `EffectReconciled` probe (existing semantics, kept).
 
 ### 1.4 Scheduler
 
@@ -194,10 +257,15 @@ signature: ed25519:...         # optional publisher signature; policy may requir
 version negotiation) → VERIFIED (schema + signature + capability-ceiling policy check) → ACTIVATED
 (isolation broker starts the cell) → QUIESCING (drain in-flight calls) → RETIRED`, with `FAULTED`
 reachable from any active state (crash-loop backoff, automatic fallback to a declared substitute plugin
-if the manifest names one). Hot-swap = activate new version → route new turns → quiesce old → retire; the
-ledger records the exact turn at which routing flipped, preserving attribution. **A trivial echo-plugin
+if the manifest names one). **v0.6 forbids mid-run FrozenHarness hot-swap (`ADR-0005`, `ADR-0072`).**
+Quiesce exists for fault and restart, not for flipping composition under a live `D_H`. A restart MAY
+activate a newly composed FrozenHarness as a *new* run with a new `D_H`. **A trivial echo-plugin
 MUST traverse this full lifecycle before any real plugin is written (ADR-M0-13, the walking-skeleton
-rule).**
+rule), on the canonical production path.**
+
+The SPI **contract** is JSON-RPC 2.0, line-delimited, over Unix domain sockets (`ADR-0002`,
+`ADR-0059`, `ADR-0072`). Python `typing.Protocol` is a client convenience. `in_process` is an
+isolation privilege that still speaks the same wire (loopback), not a second SPI.
 
 **Isolation tiers (A-2):**
 
@@ -210,7 +278,9 @@ rule).**
 
 The evaluator remains its own identity (UID 10002 daemon) — it is *not* a plugin an agent-side manifest
 can replace; `IEvaluationGate` plugins run agent-side and merely *request* judgment; verdict signing keys
-never enter any plugin cell. See `docs/04_annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
+never enter any plugin cell. The scheduler MUST **read** a signed verdict; emitting
+`VerdictRecorded {verdict: "pass"}` without a signature is defect F1, not a plugin strategy
+(`ADR-0072`). See `docs/04_annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
 
 ### 2.2 SPI definitions (Layer-0 `spi/` package — typed, frozen, versioned)
 
@@ -338,13 +408,15 @@ approval_policy: ./approval-policy.json
 undeletable: false
 ```
 
-`compose()` resolves plugin refs, verifies capability ceilings (plugin ceiling ∩ harness grant set),
-freezes L1–L3, and emits a `FrozenHarness` whose digest = JCS(manifest + resolved plugin digests). The
-existing `vg-code-claude-shaped` / `vg-code-opencode-shaped` packs port mechanically — this is the
-Meta-Harness compiler: *specialised harnesses (Claude-Code-shaped, OpenHands-shaped, SWE-mini-shaped)
-are compiled artifacts of one engine.* Registries freeze at composition; unknown names fail at
-composition, not runtime (handbook M5.3 "operators-as-data + registries freeze at composition" — merged
-here; "operator" vocabulary is retired in favour of plugin refs, per matrix §1.6).
+`compose()` resolves plugin refs, verifies capability ceilings (plugin ceiling ∩ harness grant set;
+**fail-closed**, empty ceilings authorize nothing, intersection stored on `FrozenHarness` —
+`ADR-0072`), freezes L1–L3, and emits a `FrozenHarness` whose digest = JCS(manifest + resolved plugin
+digests) = `D_H`. The existing `vg-code-claude-shaped` / `vg-code-opencode-shaped` packs port
+mechanically — this is the Meta-Harness compiler: *specialised harnesses (Claude-Code-shaped,
+OpenHands-shaped, SWE-mini-shaped) are compiled artifacts of one engine.* Registries freeze at
+composition; unknown names fail at composition, not runtime (handbook M5.3 "operators-as-data +
+registries freeze at composition" — merged here; "operator" vocabulary is retired in favour of plugin
+refs, per matrix §1.6). Mid-run composition change is forbidden in v0.6 (`ADR-0005`, `ADR-0072`).
 
 ---
 
@@ -508,17 +580,24 @@ section's rationale, merged per matrix §1.10.)
 
 ---
 
-## 8. Migration Plan & CI Gates (from `b79093c`, the Foundation Lock commit)
+## 8. Migration Plan & CI Gates (v0.6 Concept Lock; `ADR-0069`, `ADR-0073`)
+
+**Direction (inverted from v0.5.0).** Recover mature `vanguard/packages/` semantics (kernel, JCS, WAL
+ledger, exterior evaluator, sandbox, stores, models, episode engine). Promote `layer0/` SPI contracts,
+JSON-RPC/UDS broker, lifecycle FSM, and compose digest shape. Do **not** rebuild WAL, evaluator, or
+sandbox inside `layer0/`. Do **not** create a third runtime. Do **not** rewrite the TCB in Rust.
+
+The M0–M6 table below remains a *historical* Foundation Lock sketch. It is **not** the next roadmap
+(roadmap is a later phase). Where it said "port kernel into `layer0/`", read: **converge onto
+packages; absorb layer0 contracts**.
 
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
-| **M0 — Excise & Sanitize** (docs done in this wave; purge deferred) | Docs collapsed per migration matrix (this document); artifact/secret purge and frontend removal are a **separately authorised, staged** plan (`docs/03_sprints/plans/m0-code-and-purge.md`), not part of the Foundation Lock | `G-M0-DOCS`: docs gates below all green; `find docs -name '*.md' \| wc -l` trending down |
-| **M1 — Layer 0** (2 sprints) | Port kernel + events + canonicalisation verbatim; implement full event taxonomy + emitters; generate types from schemas (one `EffectRequest`); scheduler v1 (sequential, I-11) | `replay-parity` green; E-COV 100%; mutation score ≥ 80% on kernel+reducers |
-| **M2 — Plugin runtime** (2 sprints) | Registry, lifecycle FSM, isolation broker (in_process + subprocess tiers), SPI v1, `compose()` v2 | third-party demo plugin loads/faults/hot-swaps with full ledger trail (ADR-M0-13 walking skeleton β) |
-| **M3 — Coding Pack** (2–3 sprints) | Port `apps/coding` (already extracted from `domain/`, see §Deteriorations below) + adapters into plugins; ast-patch, repo-map, terminal toolkits; container tier + seccomp | Phase-1 acceptance gate (§4) |
-| **M4 — Harness parity** | Recompile `vg-code-claude-shaped` / `opencode-shaped` / `swe-mini` / `pi-shaped` / TableWorld as manifests | 5 packs, zero Layer-0 diffs |
-| **M5 — Phase 2 plugins** | Meta-reflector, genome mutation + lab selection, calibrated escalation, skill harvest; prerequisite: 200-task suite (statistical-power gate) | one promoted mutation beating baseline at p<0.05 (McNemar) |
-| **M6 — Distillation loop** | Trajectory schema live; DPO harvest; first fine-tuned tier-1 model behind cassette regression | fine-tuned local model ≥ baseline free-tier pass rate at lower USD/episode |
+| **M0 — Excise & Sanitize** (docs done in v0.5; v0.6 Concept Lock is this document + ADRs 0069–0073) | Docs collapsed; v0.6 destination reversed | `G-M0-DOCS` plus ADRs 0069–0073 cited |
+| **Next code phase — CI subject of record** | Wire living CI to packages kernel/runtime/agency/adapters; negative tests for F1 and ceilings | production suites in CI; forged verdict cannot become accepted `VerdictRecorded` |
+| **Convergence** | Absorb SPI/jsonrpc; kill synthetic scheduler verdicts on the canonical path; parity then delete duplicates | behavioral parity, then deletion |
+| **Plugin walking skeleton** | Manifest → Resolve → Verify → Freeze → FrozenHarness; echo plugin on the wire | ADR-M0-13 on the packages path |
+| **Foundation E2E** | One real coding-agent path: model, authorized effect, filesystem, sandbox, signed eval, WAL, replay, trajectory | see exit gate below; **not** this Concept Lock wave |
 
 **Standing CI gates from day M1:** `check_boundaries` (extended to plugin imports), `replay-parity`,
 `E-COV`, control-call-site proof (AP-5 rule), secret scan, JCS vector conformance — replacing the

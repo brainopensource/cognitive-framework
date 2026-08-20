@@ -74,3 +74,28 @@
 | `0065` | [0065-adopt-d-01-d-15-from-the-lam.md](0065-adopt-d-01-d-15-from-the-lam.md) | 12. Phase 3 authorization, language ratification and gate status | accepted |
 | `0066` | [0066-mcp-is-configuration-and-an-adapter-after-v0.md](0066-mcp-is-configuration-and-an-adapter-after-v0.md) | 12. Phase 3 authorization, language ratification and gate status | accepted |
 | `0068` | [0068-evidenceclaim-optional-hedge-fields-supportcount-lastcorroboratedat-protectionclass-writer.md](0068-evidenceclaim-optional-hedge-fields-supportcount-lastcorroboratedat-protectionclass-writer.md) | 12. Phase 3 authorization, language ratification and gate status | accepted |
+| `0069` | [0069-runtime-convergence-python-first-packages-canonical.md](0069-runtime-convergence-python-first-packages-canonical.md) | v0.6 Concept Lock | accepted |
+| `0070` | [0070-recursive-substrate-agent-spawn-swarm-as-policy.md](0070-recursive-substrate-agent-spawn-swarm-as-policy.md) | v0.6 Concept Lock | accepted |
+| `0071` | [0071-authority-state-ledger-identity-trinity.md](0071-authority-state-ledger-identity-trinity.md) | v0.6 Concept Lock | accepted |
+| `0072` | [0072-plugin-boundary-wire-first-evaluator-exterior.md](0072-plugin-boundary-wire-first-evaluator-exterior.md) | v0.6 Concept Lock | accepted |
+| `0073` | [0073-v060-lock-vs-defer.md](0073-v060-lock-vs-defer.md) | v0.6 Concept Lock | accepted |
+
+`0067` is a documented numbering hole (no file). Do not fill it.
+
+## ADR-M0 namespace (Foundation Lock, cannot collide with 0000+)
+
+| ADR | File | Section | Status |
+|---|---|---|---|
+| `M0-01` | [ADR-M0-01-control-coverage-discipline.md](ADR-M0-01-control-coverage-discipline.md) | M0 control coverage | accepted |
+| `M0-02` | [ADR-M0-02-identifier-namespaces.md](ADR-M0-02-identifier-namespaces.md) | M0 identifier namespaces | accepted |
+| `M0-03` | [ADR-M0-03-five-spis.md](ADR-M0-03-five-spis.md) | M0 five SPIs | accepted |
+| `M0-04` | [ADR-M0-04-approved-stack.md](ADR-M0-04-approved-stack.md) | M0 approved stack | accepted |
+| `M0-05` | [ADR-M0-05-risk-register.md](ADR-M0-05-risk-register.md) | M0 risk register | accepted |
+| `M0-06` | [ADR-M0-06-plane-mapping-archaeology.md](ADR-M0-06-plane-mapping-archaeology.md) | M0 plane mapping | accepted |
+| `M0-07` | [ADR-M0-07-six-dimension-reservation.md](ADR-M0-07-six-dimension-reservation.md) | M0 six-dimension reservation | accepted |
+| `M0-08` | [ADR-M0-08-k40-invert.md](ADR-M0-08-k40-invert.md) | M0 K-40 invert | accepted |
+| `M0-09` | [ADR-M0-09-f21a-alarm.md](ADR-M0-09-f21a-alarm.md) | M0 alarm set | accepted |
+| `M0-10` | [ADR-M0-10-no-metaphysics.md](ADR-M0-10-no-metaphysics.md) | M0 no metaphysics | accepted |
+| `M0-11` | [ADR-M0-11-sink-class-mediation.md](ADR-M0-11-sink-class-mediation.md) | M0 sink-class mediation | accepted |
+| `M0-12` | [ADR-M0-12-tool-not-episode.md](ADR-M0-12-tool-not-episode.md) | M0 tool ≠ episode | accepted |
+| `M0-13` | [ADR-M0-13-walking-skeleton.md](ADR-M0-13-walking-skeleton.md) | M0 walking skeleton | accepted |

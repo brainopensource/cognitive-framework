@@ -1,54 +1,83 @@
-> **Historical.** This epic map is **not** the AETHER v0.6 work register. “M1 rebuilds emission under
-> E-COV=100% and ports into `layer0/`” is reversed. Living register:
-> `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+# Backlog — v0.6 Foundation execution register
 
-# Backlog — Epic map (M0–M6)
+**Status:** Living. Task-level register under [`milestones.md`](milestones.md); sprint detail in
+[`../03_sprints/plans/`](../03_sprints/plans/). Authority: `002` gap register + ADRs `0069`–`0076`.
+Replaces the historical EPIC-M* map (removed; git history `4f9f8b1`).
 
-**Rewritten** at the v0.5.0 Foundation Lock, replacing the TSK-* wave-structured backlog. Source:
-`docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §4. Field schema (owner, status,
-`superseded_by:` pointer) is kept from the legacy backlog; waves are replaced by M-epics.
+**Readiness legend**
+- **READY** — contract, owner boundary, and acceptance evidence are settled; implement directly.
+- **SCAFFOLDED** — leadership landed the contract (schema/decision); complete the implementation against it.
+- **TECH-LEAD** — needs a Tech Lead decision or diff review before assignment.
+- **DEV-LOCAL** — intentionally left to the implementing developer's design.
+- **DIRECTOR** — do not decide locally; escalate.
 
-**Governing decision** (roadmap triage §1): the old `sprint_active.md` v0.6.0 board's "close remaining
-G-050 rows on the v0.4.x codebase before extraction" sequencing is **inverted and the per-row patches
-cancelled**. M1 rebuilds the emission layer wholesale under E-COV=100% and `replay-parity` — patching
-`EVENT_KINDS` enforcement, heartbeats, and grant/budget kinds into the old writer and then porting it is
-double implementation. `replay-parity` is a strictly stronger gate than the union of the open rows.
-**Exception:** work already landed (verified in `docs/SPEC.md` §8.2, not just claimed) closes in place
-and ports with the kernel.
+## Wave 0 (in flight — separate team; listed for dependency visibility only)
 
-| Epic | Absorbs (legacy TSK) | Status |
+| ID | Task | Readiness |
 |---|---|---|
-| **EPIC-M0-DOCS** — spec collapse per matrix | `TSK-DOC-001` (done, extended to vision.md), `TSK-DOC-002` (done), `TSK-SPEC-001…011` (spec-amendment rows become ADR-M0-* entries or SPEC text — no separate patches to an archived corpus) | **closed** — `docs/SPEC.md` landed this wave |
-| **EPIC-M0-PURGE** — history rewrite: secrets + artifacts + frontend trees | `SEC-01`; `TSK-DOC-003` (`cryptography` in TCB list → ADR) | open — staged in `docs/03_sprints/plans/m0-code-and-purge.md`, **not started** |
-| **EPIC-M1-EVENTS** — taxonomy, emitters, E-COV, envelope `branch_id` | `TSK-LED-001…005, 008` (superseded per governing decision above), `TSK-LED-006/007` (keep: WAL store, inbox port verbatim), `TSK-EVAL-001` (evaluation trigger → ledger listener, closes D-02), `M-18` | open |
-| **EPIC-M1-KERNEL** — verbatim port + provenance carried + six-dim Reservation + one EffectRequest | `TSK-CORE-001…009` (001–004 done/carried — re-verified `docs/SPEC.md` §8.2 2026-08-18; 005–008 become invariant tests; 009 → metric triple), `TSK-EPIC-060-005` | open |
-| **EPIC-M1-CI** — replay-parity, mutation gate, boundaries v2, control-call-site coverage, retargeted rule map | `TSK-TEST-001/002/003` (bijection discipline, `docs/05_adr/ADR-M0-01-control-coverage-discipline.md`) | open |
-| **EPIC-M2-REGISTRY** — plugin.yaml schema, resolver, lifecycle FSM, hot-swap | `H-1` | open |
-| **EPIC-M2-ISOLATION** — broker: in_process lint, subprocess RPC + rlimits + seccomp | `TSK-SEC-001` (AT-12 or ADR-defer w/ compensating control — decide in M2), `TSK-SEC-002` (seccomp lands here, not deferred), `TSK-SEC-003/004` (probes: keep) | open |
-| **EPIC-M2-SPI** — five protocols (`docs/05_adr/ADR-M0-03-five-spis.md`) + `IModelProvider`/`ISandbox`/stores; codegen; 4-protocol wire normalization; walking skeleton (`docs/05_adr/ADR-M0-13-walking-skeleton.md`); `mhf.model.local-adapter` | `002_doing_advanced-plugin.md` (archived, `docs/archive/v045/reviews/doing/`) | open |
-| **EPIC-M3-PACK** — coding re-extraction (`apps/coding/` → `packs/`), ast-patch, repo-map, terminal, single router, ctx-policy wiring, live greenfield gate | `TSK-EPIC-060-001/002/003`, `TSK-EPIC-070-001`, `TSK-HAR-001…006` (001/002/004 done-carried; 003 grant library keeps; 005 spend auth keeps; 006 schema-driven translator → absorbed by typed SPI), `TSK-CTX-003/004` (keep: compiler + FrozenHarness port), `H-2`, `RT-01`, S28–S34 salvage | open |
-| **EPIC-M4-PARITY** — five packs, TableWorld | `TSK-HAR-007`, `TSK-EPIC-060-004` | open |
-| **EPIC-P2/P3** (named, not planned) — meta-reflector, genome+lab, folding, streaming, LSP, playbook-advisory, memory graph, market allocator | `TSK-EPIC-060-006`, `070-002`, `C-3`, `REC-01` (policy half), deferred rows from review triage | deferred |
-| **HONOUR TABLE** (standing refusals) | `TSK-CORE-010` (measurement stays outside `vanguard/packages/`), `TSK-CORE-011` (no `MetaLoopEngine`) + `docs/SPEC.md` §9 items | permanent |
-| **KILLED** | `TSK-FE-*` (all 14) — frontend backend-gate work, per scope mandate | closed-kill |
+| W0-CI | CI subject-of-record rewire; quarantine Ollama env-sensitive cases | (theirs) |
+| W0-FALS | Falsifiers F-01…F-21 as tests (red allowed) | (theirs) |
+| W0-HYG | F-19 `__init__.py` for `test/integration`+`test/governance`; F-20 oracle artifact or retirement; stale-path residue | (theirs) |
 
-Every accepted legacy row is closed with `superseded_by: <new-epic-id>` in this commit — the audit trail
-survives even though the old board doesn't.
+## Wave 1 — Trust spine (`plans/wave1_trust_spine.md`)
 
-## Review triage (from `docs/archive/v045/reviews/`)
+| ID | Task | Falsifier | Readiness |
+|---|---|---|---|
+| 1.1-A | Regenerate types; fix generator | F-13 | READY |
+| 1.1-B | JCS verdict bytes in `signing.py` | F-04 | SCAFFOLDED |
+| 1.1-C | Daemon binds verdicts (request/subject/oracle/nonce) | F-04 | SCAFFOLDED |
+| 1.1-D | Evaluator gateway = sole `VerdictRecorded` writer | F-03 | READY |
+| 1.1-E | Gate reads ledgered verdicts; delete verify-and-discard | F-03/F-08 | READY |
+| 1.1-F | Flip binding fields required; regenerate | F-04 | READY |
+| 1.1-G | Translator lifting + selector conformance | F-21/P1-17 | READY |
+| 1.2-A | `LedgerEmitter` from `LedgerBridge`; `mhf.event/1` envelopes | F-01 | READY |
+| 1.2-B | Role-scoped writer facades | F-05 | READY |
+| 1.2-C | `project_id` source + per-project chains | F-01 | TECH-LEAD |
+| 1.2-D | Cold `replay-parity` CI job from disk | F-02 | READY |
+| 1.2-E | Durable-intent crash test | F-14 | READY |
+| 1.2-F | Listener uses the emitter | F-01 | READY |
+| 1.3-A | Complete `D_H` at compose | F-11 | READY |
+| 1.3-B | Fail-closed ceiling intersection on canonical path | F-06/F-07 | READY |
+| 1.3-C | Typed budget algebra; `None` fails closed (kernel diff) | F-09/F-10/F-15 | TECH-LEAD |
+| 1.3-D | Trajectory assembly + emission at `EpisodeCompleted` | F-12 | SCAFFOLDED |
+| 1.3-E | Receipt carries `lease_id`/`grant_digest` | P1-9 | READY |
 
-Full disposition — 14 ACCEPTED (Phase 1), 9 DEFERRED (each with a named plugin target in
-`docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §2), 4 REJECTED/KILLED, 3 CLOSED-carried
-— is preserved verbatim in `docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §2 (that
-document is stamped `SUPERSEDED-BY-SPEC` but kept as the review packet that produced this backlog).
-Every DEFERRED entry lands in `docs/05_adr/DEFERRED_REJECTED.md` with a reversal condition.
+## Wave 2 — Convergence (`plans/wave2_convergence.md`)
 
-`docs/archive/v045/reviews/todo/deepseek_v050_review_and_v060_plan.md` carries mismatched terminology
-(different ALFA/BETA lane phrasing, "ArtifactNode/Edge Merkle-DAG", "Semantic Vector Index" not used
-elsewhere in this corpus) — low-confidence source, disposition **REJECTED/CLOSED**: nothing in it names
-a concrete change not already covered by an epic above.
+| ID | Task | Readiness |
+|---|---|---|
+| 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | READY |
+| 2.1-B | types_gen target moves to packages; shim | READY |
+| 2.1-C | Five SPI Protocols → `ports/spi.py` | READY |
+| 2.1-D | Ceiling delegates to domain algebra; fail-closed | READY |
+| 2.1-E | Duplication detector heuristics | DEV-LOCAL |
+| 2.2-A | Parity assertion triage layer0→contracts | TECH-LEAD |
+| 2.2-B | Delete layer0 kernel/scheduler/MemoryLedger/absorbed dirs; retire v4 write path | READY (after 2.2-A) |
+| 2.2-C | `root.py` split in place (compose/session/emitter/wiring) | READY |
+| 2.2-D | Widen I-7 linter (if Wave 0 didn't); boundary rows | READY |
 
-## Standing rule
+## Wave 3 — Extensibility (`plans/wave3_extensibility.md`)
 
-An item enters v0.5.0 (M0–M4) only if it lands in Layer 0, the plugin runtime, or the Phase-1 Coding
-Pack. Everything else is Phase-2/3 (named target above) or permanently refused (honour table).
+| ID | Task | Readiness |
+|---|---|---|
+| 3.1-A | Registry FSM on packages; ledgered transitions | READY |
+| 3.1-B | Compose v2 ↔ registry; freeze-at-compose negatives | READY |
+| 3.1-C | Echo plugin lifecycle + fault injection (ADR-M0-13) | READY |
+| 3.1-D | Isolation broker rlimits scope | TECH-LEAD |
+| 3.2-A | code-default toolkits through the lifecycle | READY |
+| 3.2-B | Coding-token sweep; widened I-7 green | READY |
+| 3.2-C | One manifest parser | DEV-LOCAL |
+
+## Wave 4 — Foundation E2E (`plans/wave4_foundation_e2e.md`)
+
+| ID | Task | Readiness |
+|---|---|---|
+| 4.1-A | Fixture repo + preregistered oracle (closes F-20 at its canonical home) | READY |
+| 4.1-B | Nine-row E2E integration test | READY |
+| 4.1-C | Cassette of the green run for per-PR CI | READY |
+| 4.1-D | Evidence bundle report | DEV-LOCAL |
+
+## DIRECTOR-only (escalate; do not pick up)
+
+New event kinds · sixth SPI · kernel LOC ceiling change · second digest/canonicalisation ·
+concurrency enablement · version/release cut after M-4 · anything on SPEC §9's refusal list.

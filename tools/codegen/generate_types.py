@@ -67,13 +67,23 @@ def _collect_defs(schemas: list[dict]) -> dict[str, dict]:
     return defs
 
 
-def _ref_name(ref: str) -> str:
-    return ref.rsplit("/", 1)[-1]
+def _ref_name(ref: str, *, root_title: str | None = None) -> str:
+    if ref in ("#", "#/"):
+        return root_title or "object"
+    tail = ref.rsplit("/", 1)[-1]
+    if tail == "#":
+        return root_title or "object"
+    return tail
 
 
-def _py_type(node: dict, defs: dict[str, dict]) -> str:
+def _py_type(
+    node: dict,
+    defs: dict[str, dict],
+    *,
+    root_title: str | None = None,
+) -> str:
     if "$ref" in node:
-        name = _ref_name(node["$ref"])
+        name = _ref_name(node["$ref"], root_title=root_title)
         if name in SKIP_DEFS:
             return {
                 "JsonObject": "JsonObject",
@@ -92,7 +102,7 @@ def _py_type(node: dict, defs: dict[str, dict]) -> str:
             return "str"
         return name
     if "anyOf" in node:
-        parts = [_py_type(option, defs) for option in node["anyOf"]]
+        parts = [_py_type(option, defs, root_title=root_title) for option in node["anyOf"]]
         return " | ".join(parts)
     types = node.get("type")
     if isinstance(types, list):
@@ -101,7 +111,7 @@ def _py_type(node: dict, defs: dict[str, dict]) -> str:
             if item == "null":
                 mapped.append("None")
             else:
-                mapped.append(_py_type({**node, "type": item}, defs))
+                mapped.append(_py_type({**node, "type": item}, defs, root_title=root_title))
         return " | ".join(mapped)
     if types == "string":
         if node.get("enum"):
@@ -116,7 +126,7 @@ def _py_type(node: dict, defs: dict[str, dict]) -> str:
     if types == "object":
         return "JsonObject"
     if types == "array":
-        inner = _py_type(node.get("items", {"type": "object"}), defs)
+        inner = _py_type(node.get("items", {"type": "object"}), defs, root_title=root_title)
         return f"tuple[{inner}, ...]"
     return "object"
 
@@ -156,7 +166,13 @@ def _snake_member(value: str) -> str:
     return "".join(chars).replace("-", "_")
 
 
-def _dataclass_block(name: str, node: dict, defs: dict[str, dict]) -> str:
+def _dataclass_block(
+    name: str,
+    node: dict,
+    defs: dict[str, dict],
+    *,
+    root_title: str | None = None,
+) -> str:
     required = list(node.get("required", []))
     properties: dict[str, dict] = dict(node.get("properties", {}))
     ordered = [key for key in required if key in properties]
@@ -167,7 +183,7 @@ def _dataclass_block(name: str, node: dict, defs: dict[str, dict]) -> str:
         return "\n".join(lines) + "\n"
     for key in ordered:
         prop = properties[key]
-        annotation = _py_type(prop, defs)
+        annotation = _py_type(prop, defs, root_title=root_title)
         if key in required and "default" not in prop:
             lines.append(f"    {key}: {annotation}")
             continue
@@ -215,7 +231,7 @@ def _topo(defs: dict[str, dict]) -> list[str]:
     while remaining:
         progress = False
         for name in sorted(remaining):
-            deps = _object_deps(defs[name], defs)
+            deps = _object_deps(defs[name], defs, root_title=root_title)
             if deps <= (set(ordered) | set(enums) | SKIP_DEFS):
                 ordered.append(name)
                 remaining.remove(name)
@@ -226,12 +242,17 @@ def _topo(defs: dict[str, dict]) -> list[str]:
     return enums + ordered
 
 
-def _object_deps(node: dict, defs: dict[str, dict]) -> set[str]:
+def _object_deps(
+    node: dict,
+    defs: dict[str, dict],
+    *,
+    root_title: str | None = None,
+) -> set[str]:
     deps: set[str] = set()
 
     def walk(item: dict) -> None:
         if "$ref" in item:
-            deps.add(_ref_name(item["$ref"]))
+            deps.add(_ref_name(item["$ref"], root_title=root_title))
             return
         if "anyOf" in item:
             for option in item["anyOf"]:
@@ -248,6 +269,10 @@ def _object_deps(node: dict, defs: dict[str, dict]) -> set[str]:
 def render(schema_dir: Path) -> str:
     schemas = _load_schemas(schema_dir)
     defs = _collect_defs(schemas)
+    root_title = next(
+        (schema.get("title") for schema in schemas if schema.get("title")),
+        "object",
+    )
     chunks = [HEADER]
     exported: list[str] = [
         "JsonObject", "ResourceSelector", "Digest", "MemoryId",
@@ -259,7 +284,7 @@ def render(schema_dir: Path) -> str:
             chunks.append(_enum_block(name, node))
             exported.append(name)
         elif _is_object(node):
-            chunks.append(_dataclass_block(name, node, defs))
+            chunks.append(_dataclass_block(name, node, defs, root_title=root_title))
             exported.append(name)
     chunks.append("__all__ = [")
     for name in exported:

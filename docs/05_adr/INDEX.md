@@ -82,6 +82,7 @@
 | `0073` | [0073-v060-lock-vs-defer.md](0073-v060-lock-vs-defer.md) | v0.6 Concept Lock | accepted |
 | `0074` | [0074-gamma-lock-amendments-proof-budget-writer-identity.md](0074-gamma-lock-amendments-proof-budget-writer-identity.md) | v0.6 Concept Lock GAMMA | accepted |
 | `0075` | [0075-director-review-v060-approved-wave0-authorized.md](0075-director-review-v060-approved-wave0-authorized.md) | v0.6 Director Review | accepted |
+| `0076` | [0076-foundation-execution-decisions-canonical-artifacts.md](0076-foundation-execution-decisions-canonical-artifacts.md) | v0.6 Foundation preparation | accepted |
 
 `0067` is a documented numbering hole (no file). Do not fill it.
 `ADR-M0-07` (six named reservation fields) remains accepted; additive vs structural typing is `ADR-0074`.

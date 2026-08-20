@@ -177,13 +177,19 @@
     },
     "SignedVerdict": {
       "title": "SignedVerdict",
+      "$comment": "ADR-0074 §8 binding contract (falsifier F-04). The signature is Ed25519 over the RFC 8785 JCS bytes of every field EXCEPT `signature` (domain/canonicalisation/jcs.py is the ONLY byte source — never json.dumps). `nonce` is single-use per evaluation request; a replayed or unbound signature MUST be rejected. Wave 1 (Sprint 1.1) flips the binding fields to required and regenerates types; until then they are optional so the additive change does not break the pre-Wave-1 tree. A VerdictRecorded ledger event MUST embed this object and MAY be appended only by the evaluator gateway (ADR-0074 §3).",
       "type": "object",
       "additionalProperties": false,
       "required": ["verdict", "signature"],
       "properties": {
         "verdict": { "type": "string", "enum": ["pass", "fail", "inconclusive"] },
         "signature": { "type": "string" },
-        "subject_digest": { "type": "string" }
+        "subject_digest": { "type": "string" },
+        "evaluation_request_id": { "type": "string", "minLength": 1 },
+        "oracle_id": { "type": "string", "minLength": 1 },
+        "nonce": { "type": "string", "minLength": 16 },
+        "key_id": { "type": "string", "minLength": 1 },
+        "signed_at": { "type": "string" }
       }
     },
     "GateDecision": {

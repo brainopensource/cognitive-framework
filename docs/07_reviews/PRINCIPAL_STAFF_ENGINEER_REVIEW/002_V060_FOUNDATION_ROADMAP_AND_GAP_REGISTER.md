@@ -104,6 +104,11 @@ Only then: extra packs, controlled concurrency, multi-agent policy, lab, Meta-Ha
 
 Do not plan every task. Each wave has an **exit gate**. A wave that is green by lexical grep is not done.
 
+> **Execution decomposition (2026-08-20, post-approval):** milestone/sprint/task planning under
+> these waves now lives in `docs/02_roadmap/{milestones,backlog}.md` and `docs/03_sprints/plans/`
+> (canonical-artifact decisions: `ADR-0076`). This register remains the authority on outcomes,
+> falsifiers, and the deferred/refused lists; the roadmap files may not contradict it.
+
 ### Wave 0 — Restore engineering truth
 
 **Goal.** Living CI measures the production lattice and the bound falsifiers, not a self-signing fork.

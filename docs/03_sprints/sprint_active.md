@@ -1,58 +1,60 @@
 ---
-id: SPRINT-M0-DOCS-ACTIVE
+id: SPRINT-V060-FOUNDATION-BOARD
 file: docs/03_sprints/sprint_active.md
-title: "Active sprint — SUPERSEDED by v0.6.0 Concept Lock"
-status: SUPERSEDED
-milestone: historical M0 (of M0–M6); next work is Wave 0 after director approval
-predecessor: v0.6.0 "Molecular Lattice" board (SUPERSEDED)
-branch: feat/substrate_upgrade
+title: "Active board — v0.6 Foundation (Wave 0 in flight → Wave 1 queued)"
+status: ACTIVE
+milestone: M-0 (Wave 0, separate team) → M-1 (Wave 1, queued)
 spec: docs/SPEC.md
-plan: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
+law: ADRs 0069–0076 + docs/04_annex/
+register: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
+plans: docs/03_sprints/plans/
 last_reviewed: 2026-08-20
 ---
 
-# Sprint board — SUPERSEDED (v0.6.0 Concept Lock)
+# Active board — v0.6 Foundation
 
-**This M0 Docs Lock board is closed as a *next-work* document.**
+**Start here if you are new:** read
+[`plans/000_CANONICAL_EXECUTION_PATH.md`](plans/000_CANONICAL_EXECUTION_PATH.md) first — it names
+production truth, the one flow, and the decisions you must not re-make. Then your wave plan.
 
-The v0.5.0 Foundation Lock docs wave (SPEC collapse, ADR-M0-*, annexes, archive) remains historical
-fact. It is **not** the authorization to start M1 “port the kernel into `layer0/`”.
+## Now
 
-**Current authority**
+| Lane | State | Who |
+|---|---|---|
+| **Wave 0 — CI truth + falsifiers** | IN FLIGHT | Wave-0 team (separate); exit gate in `002` §3 |
+| **Wave 1 — Trust spine** | **QUEUED — entry: Wave 0 exit gate green** | Next assignment; plan: [`plans/wave1_trust_spine.md`](plans/wave1_trust_spine.md) |
 
-| Rank | File |
-|---|---|
-| Law | `docs/SPEC.md`, ADRs `0069`–`0074`, `docs/04_annex/{KERNEL,MEASUREMENT}.md` |
-| Lock plan | `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md` |
-| Roadmap / gap register | `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md` |
+### Wave 1 assignment slices (parallelizable)
 
-**Next authorized phase:** Engineering Director / Chief Engineer review of GAMMA + 002.  
-**After approval:** Wave 0 (CI subject-of-record + named falsifiers).  
-**Not authorized:** production coding, CI rewire, runtime convergence, plugin implementation, new sprint dates, or a replacement of this file with an M1 layer0 rewrite board.
+- **Slice A (evidence):** Sprint 1.1 tasks 1.1-A…G — signed-verdict loop + translator. One developer.
+- **Slice B (state):** Sprint 1.2 tasks 1.2-A…F — LedgerEmitter, lineage, cold replay. One developer. Runs parallel to A.
+- **Slice C (identity):** Sprint 1.3 — starts when B lands the emitter; 1.3-C (kernel budget diff) needs Tech Lead review before merge.
 
-The checklist below is the closed v0.5.0 docs-lock record. Do not reopen it as current work.
+### Blocked / decision queue
 
-## 0. Law (historical)
+| Item | Needs | Owner |
+|---|---|---|
+| 1.2-C `project_id` source | Pick config-declared vs workspace-derived id | Tech Lead |
+| 1.3-C kernel diff | Pre-merge review (TCB surface) | Tech Lead |
+| 2.2-A parity triage | Keep/kill list for layer0 assertions | Tech Lead (at Wave 2 entry) |
+| Release/version cut after M-4 | Decision | Director |
 
-Invariants I-1…I-11 (`docs/SPEC.md`). The v0.5.0 wave was docs-only.
+## Already settled — do not reopen on this board
 
-## 1. Board (closed record)
+Canonical envelope, one selector algebra, JCS-only bytes, `D_H` definition, verdict binding fields,
+single writer (ADR-0076). Scope refusals: SPEC §9. Verdicts on "should we…" questions those cover:
+no.
 
-- [x] Step 0 — Ground-truth verification (v0.5.0)
-- [x] Step 1 — `docs/SPEC.md` authored (later rewritten at v0.6.0 Concept Lock)
-- [x] Step 2 — `docs/05_adr/` minted (plus later `0069`–`0074`)
-- [x] Step 3 — annexes landed (KERNEL destination amended at v0.6.0)
-- [x] Step 4 — MERGE rows applied
-- [x] Step 5 — Legacy corpus archived
-- [x] Step 6 — `docs/02_roadmap/` rewritten (now historical; see 002)
-- [x] Step 7 — This board rewritten (now superseded)
-- [x] Step 8 — Hygiene: `CLAUDE.md` / `AGENTS.md` v0.6.0 pointers (Concept Lock)
-- [x] Step 9 — `docs/SPEC.md` self-review against ADRs `0069`–`0074` (Concept Lock)
+## Scaffolds waiting for completion
 
-## 2. Explicitly not next
+| Scaffold | Landed | Completes in |
+|---|---|---|
+| `schemas/mhf/trajectory.schema.json` (mhf.trajectory/1) | Director prep | 1.3-D |
+| `SignedVerdict` binding fields (`schemas/mhf/spi_payloads.schema.json`) | Director prep | 1.1-B/C/F |
+| Envelope lineage fields (`schemas/mhf/event_envelope.schema.json`) | Director prep | 1.2-A |
 
-Kernel changes · event taxonomy · SPI implementations · plugin code · `layer0/` scaffolding as destination · pytest migration · Wave 0 CI YAML until director approval.
+## Definition of done (every task)
 
----
-
-*Next board: none until director approval. Then Wave 0 as defined in 002, not `docs/03_sprints/plans/m1-m2-lanes.md` as written.*
+Falsifier/acceptance evidence named in the wave plan passes on the canonical path · suites of
+record stay green · boundary/TCB/duplication linters green · no new `layer0` imports · trajectory,
+envelope, verdict shapes validate against `schemas/mhf/`.

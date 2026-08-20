@@ -1,43 +1,40 @@
-> **Historical.** This M0–M6 ladder is **not** the AETHER v0.6 foundation roadmap. Destination
-> `layer0/` rewrite, mid-run hot-swap, and E-COV=100% as I-2 are reversed by ADRs `0069`–`0074`.
-> Living sequence: `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+# Milestones — v0.6 Foundation (Wave 0 → Wave 4)
 
-# Milestones — v0.5.0 = MHF v1 = M0–M6
+**Status:** Living execution ladder under the authority of
+[`002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md)
+(outcomes + falsifiers) and ADRs `0069`–`0076`. This file adds the execution decomposition:
+milestones → sprints → dependencies. Sprint detail: [`../03_sprints/plans/`](../03_sprints/plans/).
+Replaces the historical M0–M6 ladder (removed; git history `4f9f8b1`), whose gates contradicted the
+lock (mid-run hot-swap, E-COV=100%, layer0 destination).
 
-**Rewritten** at the v0.5.0 Foundation Lock (`docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`), replacing the
-former v0.5.0→v1.0.0 ladder (v0.6 "Molecular Lattice", v0.7 benchmarking, v0.8 memory graphs, v0.9 meta).
-Source: `docs/TECH_LEAD_REVIEW/02_ROADMAP_BACKLOG_AND_REVIEW_TRIAGE.md` §3.
+**No calendar dates.** A milestone is complete when its falsifiers pass on the canonical path —
+never when its code merges.
 
-**Renumbering note.** The merged PR `feature_v050_meta-harness` and the sprint board it produced
-(`docs/03_sprints/sprint_active.md` at commit `b79093c`, "v0.6.0 Molecular Lattice") used the *old*
-numbering scheme. Under this scheme: old "v0.5.0 Empirical Baseline" work is absorbed into this M0's
-docs lane plus the ground-truth verification already done in `docs/SPEC.md` §8.2; old "v0.6.0 Molecular
-Lattice" (`coding_*` extraction, single router, root.py split) maps onto **M3** below, not a separate
-version; former v0.8 `(G_C, G_E)` graphs map onto **M5/Phase-2** (§6.1 in `docs/SPEC.md`); former v0.9
-operators/playbooks map onto the honour table (permanent refusal, `docs/SPEC.md` §9). Old PR/commit
-messages citing "v0.6.0" refer to what this ladder now calls M3.
+| Milestone | Wave | Outcome | Exit gate (objective evidence) | Depends on |
+|---|---|---|---|---|
+| **M-0 Engineering truth** | 0 *(in flight, separate team)* | Living CI measures `vanguard/packages/` and the named falsifiers | `002` §3 Wave-0 gate: production suites in CI; F-01…F-21 exist as tests (red allowed); codegen `--check` wired; F-19/F-20 hygiene closed | Director approval (done, ADR-0075) |
+| **M-1 Trust spine** | 1 | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green; suites of record green; TCB ≤ 1438 | M-0 |
+| **M-2 One runtime** | 2 | `layer0/` absorbed and deleted; one wire, one algebra, one writer; `root.py` split in place | F-16 green; zero `layer0` imports; `layer0/` removed after parity; no behavior change in `test/runtime` | M-1 |
+| **M-3 Extensibility** | 3 | Plugin lifecycle real on the canonical path; pack loads through it; kernel domain-blind everywhere | ADR-M0-13 echo-plugin gate; F-18-extended I-7 linter green; freeze-at-compose negatives | M-2 |
+| **M-4 Foundation E2E — STOP** | 4 | One real coding-agent run through the whole substrate with trustworthy state + evidence | The nine-row table in [`wave4_foundation_e2e.md`](../03_sprints/plans/wave4_foundation_e2e.md) on one run | M-1, M-2, M-3 |
 
-**Standing rule** (from the roadmap triage §0): an item enters v0.5.0 only if it lands in **Layer 0**,
-the **plugin runtime**, or the **Phase-1 Coding Pack**. Everything else is a Phase-2/3 plugin (named
-target below) or dead (`docs/05_adr/DEFERRED_REJECTED.md`).
+## Sprint map
 
-| Milestone | Duration | Outcome | Exit gate (proof command) |
-|---|---|---|---|
-| **M0 — Docs & Excise** | 1 sprint (docs lane: this wave, done; code/purge lane: staged, not started) | Docs collapsed per migration matrix (`docs/SPEC.md` landed); code-side excise (artifact/secret purge, frontend removal, repo-size ≤ 3MB) is a separately authorised follow-on — see `docs/03_sprints/plans/m0-code-and-purge.md` | `G-M0-DOCS`: docs gates in `docs/SPEC.md` §8 all green. `G-M0-PURGE` (not this wave): `scan_secrets.py --all-refs` PASS; repo ≤ 3 MB |
-| **M1 — Layer 0** | 2 sprints | Kernel + events + JCS ported verbatim; full event taxonomy emitted; one generated `EffectRequest`; scheduler v1 (sequential, I-11); six-dim `Reservation`; trajectory record | `G-M1`: E-COV = 100% · `replay-parity` green (grants, budgets, approvals, lifecycle reconstructed) · mutation score ≥ 80% on kernel+reducers · `pytest test/layer0` green |
-| **M2 — Plugin Runtime** | 2 sprints | Registry, lifecycle FSM, isolation broker (`in_process`+`subprocess` w/ rlimits+seccomp), SPI v1, `compose()` v2, walking-skeleton echo plugin, `mhf.model.local-adapter` demo | `G-M2`: echo plugin traverses DISCOVERED→RETIRED with full ledger trail · fault injection → `PluginFaulted` + fallback · hot-swap mid-run with attribution · `compose()` rejects unknown ref/alias · grant-ceiling ∩ enforced |
-| **M3 — Coding Pack #1** | 2–3 sprints | `apps/coding/` (already extracted from `domain/`, `docs/SPEC.md` §8.2) + adapters re-extracted into plugins; ast-patch, repo-map, terminal (structured first-failure), fs/index toolkits; single router; container tier | `G-M3` (Phase-1 acceptance): compiled `code-default` ≥ v0.4.5 baseline on lab dogfood + `zero_hint_v1` under paired McNemar · un-mocked `oracle_green` on ≥1 greenfield task, live model, signed verdict · `grep -rE "coding|pytest|ast" layer0/` empty (I-7) |
-| **M4 — Harness Parity** | 1 sprint | `code-claude-shaped`, `code-opencode-shaped`, `code-swe-mini`, `code-pi-shaped`, `table-default` recompiled as manifests | `G-M4`: 5 packs compile+run · `git diff --stat layer0/` = 0 across M4 · TableWorld registered (closes D-27) |
-| **M5 — Phase-2 Plugins** *(v0.6.x)* | — | meta-reflector, genome mutation + lab selection, calibrated escalation, skill harvest; **prerequisite: 200-task suite** (statistical-power gate) | `G-M5`: one promoted mutation beats baseline, McNemar p<0.05, A/A floor respected, preregistered |
-| **M6 — Distillation Loop** *(v0.6.x)* | — | Trajectory→DPO harvest; first fine-tuned tier-1 model behind cassette regression | `G-M6`: fine-tuned local model ≥ free-tier baseline pass rate at lower USD/episode |
+```text
+M-0  (Wave-0 team)                      M-1                                M-2                      M-3                    M-4
+ CI + falsifiers ──────┬─▶ 1.1 signed-verdict loop ──┐
+                       ├─▶ 1.2 ledger truth ─────────┼─▶ 1.3 identity+budget+trajectory ─▶ 2.1 absorb wire ─▶ 2.2 parity+delete+split ─▶ 3.1 walking skeleton ─▶ 3.2 pack on wire ─▶ 4.1 one real run
+                       └────────(1.1 ∥ 1.2)──────────┘
+```
 
-## Preserved invariants (all versions)
+## Standing constraints (from the lock; not renegotiable per-sprint)
 
-Dispatch-only effect path, one-effect-per-turn at the kernel, fail-closed evaluation, boundary lattice —
-restated in `docs/SPEC.md` (I-1…I-11). TCB LOC tripwire stays the *living* gate until M1's metric triple
-(mutation score, control-call-site coverage, E-COV) lands — see `docs/04_annex/KERNEL.md` §1.1's amendment
-note.
+Sequential scheduler (I-11) · TCB LOC ceiling · no third tree · no hot-swap · evaluator exterior ·
+domain-blind kernel (I-7) · one generated type source (A-4/I-1) · measurement stays outside
+`vanguard/packages/` · everything in SPEC §9's refusal list.
 
-## Killed as a living claim
+## Post-foundation (not planned here, deliberately)
 
-The vision-tier mapping (LEVEL 0–9 / cosmology) is deleted, not carried forward — `docs/05_adr/ADR-M0-10-no-metaphysics.md`.
+Extra packs · controlled concurrency (measurement-gated) · multi-agent policy · lab promotion ·
+Meta-Harness/DPO — see `002` §2 deferred table. Anything here entering a Wave 1–4 sprint is a
+scope defect.

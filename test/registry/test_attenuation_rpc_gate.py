@@ -7,7 +7,7 @@ import unittest
 from layer0.events.store import MemoryLedger
 from layer0.registry.broker import PluginIsolationBroker
 from layer0.registry.sandbox import SandboxLimits
-from layer0.spi.types_gen import EventKind, SinkClass
+from vanguard.packages.domain.wire.types_gen import EventKind, SinkClass
 
 _FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
 _FS_CHILD = {"kind": "fs", "root": "/workspace", "paths": ["/workspace/README.md"]}

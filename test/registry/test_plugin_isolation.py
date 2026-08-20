@@ -13,7 +13,7 @@ from pathlib import Path
 from layer0.events.store import MemoryLedger
 from layer0.registry.broker import CellState, IllegalCellTransition, PluginIsolationBroker
 from layer0.registry.sandbox import SandboxLimits
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 _LIMITS = SandboxLimits(
     cpu_seconds=2,

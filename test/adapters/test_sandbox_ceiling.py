@@ -35,15 +35,14 @@ class PluginCeilingTests(unittest.TestCase):
             "execute", {"verb": "proc.exec", "selector": _FS}, _CAPS))
 
     def test_no_private_subset_walk(self) -> None:
+        # 2.2-B: `layer0/spi/ceiling.py` (the absorb shim this test used to
+        # check too) is deleted -- `adapters/sandbox/ceiling.py` is the only
+        # copy left to check.
         import inspect
         from vanguard.packages.adapters.sandbox import ceiling as mod
 
         self.assertFalse(hasattr(mod, "_selector_subset"))
         self.assertNotIn("_selector_subset", inspect.getsource(mod))
-        import layer0.spi.ceiling as shim
-
-        self.assertFalse(hasattr(shim, "_selector_subset"))
-        self.assertNotIn("def _selector_subset", inspect.getsource(shim))
 
 
 if __name__ == "__main__":

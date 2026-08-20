@@ -25,9 +25,10 @@ ALLOWED = {
     "ports": {"domain"},
     "kernel": {"domain", "ports"},
     "agency": {"domain", "ports", "kernel"},
-    # First-party SPI adapters (M2) implement layer0.spi protocols; they still
-    # must not import kernel/agency/registry (plugin cells stay untrusted).
-    "adapters": {"domain", "ports", "layer0_spi"},
+    # First-party SPI adapters (M2) implement the `ports/spi.py` protocols
+    # (2.1-C); they still must not import kernel/agency/registry (plugin
+    # cells stay untrusted).
+    "adapters": {"domain", "ports"},
     # VG-03 LT-6: runtime/ may import everything, and it is the only module
     # that may -- it is the composition root. Omitting "governance" made the
     # declared approval process unreachable from any composition, which is a
@@ -44,20 +45,20 @@ ALLOWED = {
     # which is what keeps the coding cell a client and not a second ontology.
     "apps": {"domain", "ports", "kernel", "agency", "adapters", "runtime", "governance"},
     "client": {"domain", "runtime"},
-    # MHF Layer-0 lattice (SPEC §1): events ← kernel ← spi ← registry ← scheduler ← compose
-    # Kernel may import generated SPI types (A-4). Plugins (M2+) import spi+events only.
-    "layer0_events": {"layer0_spi"},
-    "layer0_kernel": {"layer0_events", "layer0_spi"},
-    "layer0_spi": set(),
-    "layer0_registry": {"layer0_spi", "layer0_events"},
-    "layer0_scheduler": {"layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry"},
-    "layer0_compose": {
-        "layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry", "layer0_scheduler",
-    },
+    # MHF Layer-0 lattice (SPEC §1), post-2.2-B: `kernel/`, `scheduler/` and
+    # `spi/` are deleted (absorbed into the canonical packages path); the
+    # surviving `events/`, `registry/`, `compose/` (Wave-3 material, per the
+    # 2.2-A triage) import the canonical generated types and SPI Result ADT
+    # directly from `domain/wire/` -- there is no `layer0/spi/` left to
+    # re-export them. `registry/` additionally imports the canonical ceiling
+    # delegate from `adapters/sandbox/` (2.1-D).
+    "layer0_events": {"domain"},
+    "layer0_registry": {"layer0_events", "domain", "adapters"},
+    "layer0_compose": {"layer0_registry", "domain"},
 }
 
 LAYER0_PACKAGES = (
-    "events", "kernel", "spi", "registry", "scheduler", "compose",
+    "events", "registry", "compose",
 )
 
 # S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
@@ -97,25 +98,14 @@ EVALUATOR_BINDING_SITES = frozenset({
     "vanguard/packages/runtime/wiring.py",
 })
 
-# Wave 2 absorb shims: layer0 re-exports packages truth until 2.2-B deletes
-# the fork. One named file, not a lattice widening of layer0_spi.
-ABSORB_SHIMS: dict[str, frozenset[str]] = {
-    "layer0/spi/ceiling.py": frozenset({"adapters", "domain"}),
-    # 2.1-B: generated types now live at domain/wire/types_gen.py; this file
-    # is a pure re-export so layer0/ keeps importing unmodified.
-    "layer0/spi/types_gen.py": frozenset({"domain"}),
-    # 2.1-A: the SPI Result ADT now lives at domain/wire/result.py; same
-    # re-export treatment, and for the same reason -- an `isinstance(x, Ok)`
-    # here and one against a packages adapter's return value must be the same
-    # class, not two structurally-identical strangers.
-    "layer0/spi/result.py": frozenset({"domain"}),
-    # 2.2-A: `layer0/spi/jsonrpc.py` was still a full second copy of the codec
-    # 2.1-A moved to domain/wire/ -- the duplication detector does not check
-    # the wire surface, so it was invisible. Same re-export treatment, same
-    # reason: a `JsonRpcError` raised across a plugin-cell UDS and one caught
-    # by a packages adapter must be the same class.
-    "layer0/spi/jsonrpc.py": frozenset({"domain"}),
-}
+# Wave-2 absorb shims. `layer0/spi/{ceiling,types_gen,result,jsonrpc}.py`
+# were re-export shims during 2.1; 2.2-B rewrote every importer onto the
+# canonical `domain/wire/` and `adapters/sandbox/` modules directly and
+# deleted `layer0/spi/` entirely, so there is nothing left to name here.
+# Kept as an empty, named mechanism (not removed) because 3.1's absorption of
+# `layer0/registry/` and `layer0/compose/` is expected to need it again for
+# specific files, the same way this one did.
+ABSORB_SHIMS: dict[str, frozenset[str]] = {}
 
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"

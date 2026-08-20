@@ -15,7 +15,7 @@ class TerminalRunnerTests(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.insert(0, str(PACK))
         from load import load_declared_entry
-        from layer0.spi.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
+        from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
 
         self.tmpdir = tempfile.TemporaryDirectory()
         Toolkit = load_declared_entry("mhf.toolkit.terminal")

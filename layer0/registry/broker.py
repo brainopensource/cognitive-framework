@@ -17,9 +17,9 @@ from typing import Any, Mapping, Sequence
 
 from layer0.events.emitter import LedgerEmitter
 from layer0.registry.sandbox import SandboxLimits, apply_rlimits, open_log_sink
-from layer0.spi import jsonrpc
-from layer0.spi.ceiling import ceiling_allows
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.adapters.sandbox.ceiling import ceiling_allows
+from vanguard.packages.domain.wire import jsonrpc
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 __all__ = [
     "CellState",

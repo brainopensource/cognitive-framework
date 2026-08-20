@@ -185,7 +185,10 @@ class NothingReachesTheGlobalSourcesUnannounced(unittest.TestCase):
     def test_the_episode_trajectory_does_not_call_uuidv7_directly(self) -> None:
         """`root.py`'s ledger writes event ids through the ports now."""
 
-        source = (PACKAGES / "runtime" / "root.py").read_text(encoding="utf-8")
+        source = "\n".join(
+            (PACKAGES / "runtime" / name).read_text(encoding="utf-8")
+            for name in ("root.py", "compose.py", "session.py", "wiring.py", "ledger_emitter.py")
+        )
         self.assertNotIn("event_id=uuidv7()", source)
 
 

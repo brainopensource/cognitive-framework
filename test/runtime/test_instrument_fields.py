@@ -217,7 +217,8 @@ class NoVerbLacksABinding(unittest.TestCase):
         from pathlib import Path
 
         packages = Path(__file__).resolve().parents[2] / "vanguard" / "packages"
-        for module in ("runtime/root.py", "adapters/sandbox/worker.py",
+        for module in ("runtime/root.py", "runtime/compose.py", "runtime/session.py",
+                       "runtime/wiring.py", "adapters/sandbox/worker.py",
                        "adapters/environment/sandboxed.py",
                        "adapters/models/invocation.py"):
             source = (packages / module).read_text(encoding="utf-8")

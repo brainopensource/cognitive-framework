@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Mapping
 
-from layer0.spi.types_gen import EventEnvelope, EventKind, JsonObject
-from .canonical import chain_digest, digest_of
+from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.wire.types_gen import EventEnvelope, EventKind, JsonObject
 
 __all__ = ["EnvelopeClock", "EnvelopeFactory"]
 
@@ -70,7 +70,11 @@ class EnvelopeFactory:
             "idempotency_key": idempotency_key,
             "alertable": alertable,
         }
-        digest = chain_digest(self._prev, unsigned)
+        # `chain_digest` (layer0/events/canonical.py, KILL at 2.2-B): the same
+        # `digest(JCS({prev, envelope}))` formula, inlined -- the packages
+        # emitter chains differently (`prev_digest` inside the envelope,
+        # digest over the envelope alone), so this is not a call to that.
+        digest = digest_of({"prev_digest": self._prev, "envelope": unsigned})
         envelope = EventEnvelope(
             schema_version="mhf.event/1",
             event_id=ident,
@@ -91,7 +95,6 @@ class EnvelopeFactory:
         )
         self._prev = digest
         self._seq += 1
-        _ = digest_of
         return envelope
 
     @property

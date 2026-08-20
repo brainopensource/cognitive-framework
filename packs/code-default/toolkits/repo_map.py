@@ -8,8 +8,8 @@ import re
 from pathlib import Path
 from typing import ClassVar, Mapping, Sequence
 
-from layer0.spi.result import Ok, Result
-from layer0.spi.types_gen import (
+from vanguard.packages.domain.wire.result import Ok, Result
+from vanguard.packages.domain.wire.types_gen import (
     CompactionReport,
     ContextBundle,
     EffectContext,

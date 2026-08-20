@@ -23,7 +23,7 @@ class OracleSuiteTests(unittest.TestCase):
         import sys
         sys.path.insert(0, str(PACK / "oracles"))
         from gate import PackOracleGate
-        from layer0.spi.types_gen import GateDecision, SignedVerdict
+        from vanguard.packages.domain.wire.types_gen import GateDecision, SignedVerdict
 
         gate = PackOracleGate()
         decision = gate.gate((SignedVerdict(
@@ -36,8 +36,8 @@ class OracleSuiteTests(unittest.TestCase):
         import sys
         sys.path.insert(0, str(PACK / "oracles"))
         from gate import PackOracleGate, sign_verdict
-        from layer0.spi.result import Ok
-        from layer0.spi.types_gen import GateDecision, OracleSpec, SignedVerdict
+        from vanguard.packages.domain.wire.result import Ok
+        from vanguard.packages.domain.wire.types_gen import GateDecision, OracleSpec, SignedVerdict
 
         private = Ed25519PrivateKey.generate()
         priv_bytes = private.private_bytes(

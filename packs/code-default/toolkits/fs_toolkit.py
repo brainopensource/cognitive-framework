@@ -6,8 +6,8 @@ import hashlib
 from pathlib import Path
 from typing import ClassVar, Mapping
 
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import EffectContext, EffectRequest, Health, Receipt, Reservation, ToolSchema
+from vanguard.packages.domain.wire.result import Err, Ok, Result
+from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Health, Receipt, Reservation, ToolSchema
 
 __all__ = ["FsToolkit"]
 

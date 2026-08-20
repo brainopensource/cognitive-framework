@@ -4,7 +4,7 @@ import unittest
 
 from layer0.events.store import MemoryLedger
 from layer0.registry.lifecycle import PluginLifecycle, PluginState
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 
 class RegistryLifecycleTests(unittest.TestCase):

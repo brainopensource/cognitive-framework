@@ -15,9 +15,9 @@ class WalkingSkeletonTests(unittest.TestCase):
     def test_compose_then_one_turn_via_manifest_entries(self) -> None:
         sys.path.insert(0, str(PACK))
         from load import compile_pack, load_declared_entry
-        from layer0.kernel.budget import Governor
-        from layer0.spi.result import Ok
-        from layer0.spi.types_gen import EffectContext, EpisodeView, Reservation
+        from vanguard.packages.domain.wire.result import Ok
+        from vanguard.packages.domain.wire.types_gen import EffectContext, EpisodeView, Reservation
+        from vanguard.packages.kernel.budget import Governor
 
         frozen = compile_pack()
         self.assertEqual(frozen.id, "code-default")
@@ -48,7 +48,7 @@ class WalkingSkeletonTests(unittest.TestCase):
             )
             self.assertIsInstance(receipt, Ok)
             planner.observe((receipt.value,), EpisodeView("run-w", "ep-w", 1, "fix"))
-            from layer0.spi.types_gen import EvaluationSubject
+            from vanguard.packages.domain.wire.types_gen import EvaluationSubject
 
             asked = gate.request(EvaluationSubject(run_id="run-w", episode_id="ep-w"))
             self.assertIsInstance(asked, Ok)

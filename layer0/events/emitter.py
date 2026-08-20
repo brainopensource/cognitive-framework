@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Mapping, Protocol
 
-from layer0.spi.types_gen import EventEnvelope, EventKind
+from vanguard.packages.domain.wire.types_gen import EventEnvelope, EventKind
 from .envelope import EnvelopeFactory
 from .taxonomy import EVENT_KINDS
 

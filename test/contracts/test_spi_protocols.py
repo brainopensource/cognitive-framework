@@ -33,15 +33,21 @@ class SpiProtocolIdentityTests(unittest.TestCase):
             {"IPlanner", "IContextManager", "IToolkit", "IMemoryEngine", "IEvaluationGate"},
         )
 
-    def test_layer0_result_is_the_same_object_not_a_second_result(self) -> None:
-        """2.1-A: `layer0/spi/result.py` is a re-export, so an `Ok` a real
-        adapter returns and an `Ok` checked against via the old import path
-        are one class -- not two structurally-identical strangers.
+    def test_ok_err_come_from_one_module_not_two(self) -> None:
+        """2.1-A / 2.2-B: `layer0/spi/result.py` was a re-export shim, deleted
+        once every importer moved to the canonical `domain/wire/result.py`
+        (this module included). There is exactly one `Ok`/`Err` class in the
+        tree now, not two structurally-identical strangers.
         """
-        from layer0.spi.result import Ok as LegacyOk
-        from vanguard.packages.domain.wire.result import Ok as CanonicalOk
+        import importlib.util
 
-        self.assertIs(LegacyOk, CanonicalOk)
+        try:
+            spec = importlib.util.find_spec("layer0.spi.result")
+        except ModuleNotFoundError:
+            spec = None
+        self.assertIsNone(
+            spec, "layer0/spi/result.py should be deleted at 2.2-B, not merely unused",
+        )
 
 
 class RealAdapterConformanceTests(unittest.TestCase):

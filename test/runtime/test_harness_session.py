@@ -32,7 +32,7 @@ from vanguard.packages.runtime.root import (
     TaskContext,
 )
 
-ROOT_PY = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime" / "root.py"
+RUNTIME = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime"
 
 
 class FakeClock:
@@ -152,9 +152,9 @@ class SessionConstructsWithoutIO(unittest.TestCase):
 
 class ExactlyOneKernelPerRun(unittest.TestCase):
     def test_root_constructs_a_single_kernel(self) -> None:
-        """DoD: `grep -c "Kernel(" root.py` -> 1."""
+        """DoD: exactly one `Kernel(` construction in the session."""
 
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = (RUNTIME / "session.py").read_text(encoding="utf-8")
         constructions = [
             line for line in source.splitlines() if re.search(r"\bKernel\(", line)
         ]
@@ -164,7 +164,7 @@ class ExactlyOneKernelPerRun(unittest.TestCase):
         self.assertEqual(len(constructions), 1, constructions)
 
     def test_witness_kernel_is_gone(self) -> None:
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = (RUNTIME / "session.py").read_text(encoding="utf-8")
         self.assertNotIn("_WitnessKernel", source)
 
     def test_the_session_holds_the_pending_request_itself(self) -> None:

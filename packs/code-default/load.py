@@ -15,7 +15,7 @@ if str(_TOOLS) not in sys.path:
 from simple_yaml import load as load_yaml  # noqa: E402
 
 from layer0.compose.compiler import compose
-from layer0.spi.types_gen import FrozenHarness
+from vanguard.packages.domain.wire.types_gen import FrozenHarness
 
 __all__ = [
     "PACK_ROOT",

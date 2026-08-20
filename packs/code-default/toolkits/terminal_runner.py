@@ -9,8 +9,8 @@ import time
 from pathlib import Path
 from typing import ClassVar, Mapping
 
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import EffectContext, EffectRequest, Health, Receipt, ToolSchema
+from vanguard.packages.domain.wire.result import Err, Ok, Result
+from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Health, Receipt, ToolSchema
 
 __all__ = ["TerminalToolkit"]
 

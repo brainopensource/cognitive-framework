@@ -228,7 +228,7 @@ class AutonomousGrantAndOracleAntiCheat(unittest.TestCase):
         pack = Path(__file__).resolve().parents[2] / "packs" / "code-default" / "oracles"
         sys.path.insert(0, str(pack))
         from gate import PackOracleGate
-        from layer0.spi.types_gen import GateDecision, SignedVerdict
+        from vanguard.packages.domain.wire.types_gen import GateDecision, SignedVerdict
 
         gate = PackOracleGate()
         decision = gate.gate((SignedVerdict(

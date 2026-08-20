@@ -1,4 +1,4 @@
-# AETHER / Vanguard — Version 6 (Concept Lock v0.6.0)
+# AETHER / Vanguard Substrate Upgrade — Version 6 (Concept Lock v0.6.0)
 
 A verifiable, capability-attenuated recursive-agency substrate.
 

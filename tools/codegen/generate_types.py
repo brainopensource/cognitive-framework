@@ -223,7 +223,7 @@ def _dataclass_block(
     return "\n".join(lines) + "\n"
 
 
-def _topo(defs: dict[str, dict]) -> list[str]:
+def _topo(defs: dict[str, dict], *, root_title: str | None = None) -> list[str]:
     enums = [name for name, node in defs.items() if _is_enum(node)]
     objects = [name for name, node in defs.items() if _is_object(node)]
     remaining = set(objects)
@@ -278,7 +278,7 @@ def render(schema_dir: Path) -> str:
         "JsonObject", "ResourceSelector", "Digest", "MemoryId",
         "EvaluationRequestId", "PreregistrationId",
     ]
-    for name in _topo(defs):
+    for name in _topo(defs, root_title=root_title):
         node = defs[name]
         if _is_enum(node):
             chunks.append(_enum_block(name, node))

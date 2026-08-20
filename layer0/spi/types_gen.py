@@ -21,7 +21,6 @@ class SinkClass(str, Enum):
     ADVISORY = "advisory"
     PRIVILEGED = "privileged"
 
-
 class EventKind(str, Enum):
     RUN_STARTED = "RunStarted"
     EPISODE_STARTED = "EpisodeStarted"
@@ -64,13 +63,149 @@ class EventKind(str, Enum):
     CHILD_SPAWNED = "ChildSpawned"
     CHILD_RETURNED = "ChildReturned"
 
-
 class GateDecision(str, Enum):
     PASS = "PASS"
     RETRY = "RETRY"
     ESCALATE = "ESCALATE"
     ABANDON = "ABANDON"
 
+@dataclass(frozen=True, slots=True)
+class ArtifactRef:
+    digest: Digest
+    kind: str
+
+@dataclass(frozen=True, slots=True)
+class BlobRef:
+    digest: Digest
+    media_type: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class ClaimRef:
+    claim_id: str
+
+@dataclass(frozen=True, slots=True)
+class CompactionReport:
+    removed_tokens: int
+    strategy: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class ConsolidationReport:
+    merged: int
+    dropped: int
+
+@dataclass(frozen=True, slots=True)
+class ContextBundle:
+    prefix: str
+    suffix: str
+    token_count: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class CostVector:
+    usd_micros: int
+    tokens: int
+    bytes: int
+    millis: int
+
+@dataclass(frozen=True, slots=True)
+class EffectContext:
+    principal: str
+    run_id: str
+    episode_id: str | None = None
+    depth: int | None = None
+    parent_lease: str | None = None
+    idempotency_key: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class EffectFailure:
+    verb: str
+    detail: str
+
+@dataclass(frozen=True, slots=True)
+class EpisodeOutcome:
+    status: str
+    detail: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class EpisodeView:
+    run_id: str
+    episode_id: str
+    turn: int
+    goal: str
+    notes: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class EvaluationSubject:
+    run_id: str
+    episode_id: str
+    artifact_digest: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class EventEnvelope:
+    schema_version: str
+    event_id: str
+    kind: EventKind
+    seq: int
+    occurred_at: str
+    run_id: str
+    principal: str
+    payload: JsonObject
+    digest: str
+    episode_id: str | None = None
+    parent_episode_id: str | None = None
+    project_id: str | None = None
+    principal_id: str | None = None
+    parent_principal_id: str | None = None
+    harness_digest: str | None = None
+    branch_id: str = 'main'
+    prev_digest: str | None = None
+    causation_id: str | None = None
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
+    alertable: bool = False
+
+@dataclass(frozen=True, slots=True)
+class Health:
+    ok: bool
+    detail: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class MemoryHit:
+    id: str
+    text: str
+    score: float
+
+@dataclass(frozen=True, slots=True)
+class MemoryQuery:
+    text: str
+    kind: str | None = None
+    limit: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class MemoryRecord:
+    kind: str
+    text: str
+    metadata: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class ModelRoute:
+    tier: int
+    provider: str
+    model: str
+    escalate_on: tuple[str, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class OracleSpec:
+    id: str
+    digest: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class PluginRef:
+    ref: str
+    config: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class Reflection:
+    text: str
 
 @dataclass(frozen=True, slots=True)
 class Reservation:
@@ -86,18 +221,35 @@ class Reservation:
                 "tokens": self.tokens, "bytes": self.bytes,
                 "turns": self.turns, "depth": self.depth}
 
+@dataclass(frozen=True, slots=True)
+class SignedVerdict:
+    verdict: str
+    signature: str
+    subject_digest: str | None = None
+    evaluation_request_id: str | None = None
+    oracle_id: str | None = None
+    nonce: str | None = None
+    key_id: str | None = None
+    signed_at: str | None = None
 
 @dataclass(frozen=True, slots=True)
-class BlobRef:
-    digest: Digest
-    media_type: str | None = None
-
+class ToolSchema:
+    verb: str
+    schema: JsonObject
 
 @dataclass(frozen=True, slots=True)
-class ArtifactRef:
-    digest: Digest
-    kind: str
+class TrajectoryRef:
+    digest: str
+    schema: str | None = None
 
+@dataclass(frozen=True, slots=True)
+class TrajectoryTurn:
+    turn: int
+    context_digest: str
+    proposal: JsonObject
+    receipts: tuple[JsonObject, ...]
+    cost: CostVector
+    context_ref: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class EffectRequest:
@@ -106,68 +258,6 @@ class EffectRequest:
     selector: ResourceSelector
     sink: SinkClass
     reservation: Reservation
-
-
-@dataclass(frozen=True, slots=True)
-class Proposal:
-    requests: tuple[EffectRequest, ...]
-    thought: str | None = None
-    independence_groups: tuple[tuple[int, ...], ...] = field(default_factory=tuple)
-    confidence: float | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class Receipt:
-    request_digest: Digest
-    outcome: str
-    cost: Reservation
-    stdout_ref: BlobRef | None = None
-    artifacts: tuple[ArtifactRef, ...] = field(default_factory=tuple)
-
-
-@dataclass(frozen=True, slots=True)
-class EventEnvelope:
-    schema_version: str
-    event_id: str
-    kind: EventKind
-    seq: int
-    occurred_at: str
-    run_id: str
-    principal: str
-    payload: JsonObject
-    digest: str
-    episode_id: str | None = None
-    branch_id: str = "main"
-    prev_digest: str | None = None
-    causation_id: str | None = None
-    correlation_id: str | None = None
-    idempotency_key: str | None = None
-    alertable: bool = False
-
-
-@dataclass(frozen=True, slots=True)
-class PluginRef:
-    ref: str
-    config: JsonObject = field(default_factory=dict)
-
-
-@dataclass(frozen=True, slots=True)
-class ModelRoute:
-    tier: int
-    provider: str
-    model: str
-    escalate_on: tuple[str, ...] = field(default_factory=tuple)
-
-
-@dataclass(frozen=True, slots=True)
-class PluginBindings:
-    planner: PluginRef | None = None
-    context: PluginRef | None = None
-    memory: PluginRef | None = None
-    toolkits: tuple[PluginRef, ...] = field(default_factory=tuple)
-    evaluation: PluginRef | None = None
-    model_routes: tuple[ModelRoute, ...] = field(default_factory=tuple)
-
 
 @dataclass(frozen=True, slots=True)
 class FrozenHarness:
@@ -179,6 +269,47 @@ class FrozenHarness:
     capability_ceiling: tuple[JsonObject, ...] = field(default_factory=tuple)
     undeletable: bool | None = None
 
+@dataclass(frozen=True, slots=True)
+class PluginBindings:
+    planner: PluginRef | None = None
+    context: PluginRef | None = None
+    memory: PluginRef | None = None
+    toolkits: tuple[PluginRef, ...] = field(default_factory=tuple)
+    evaluation: PluginRef | None = None
+    model_routes: tuple[ModelRoute, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class Proposal:
+    requests: tuple[EffectRequest, ...]
+    thought: str | None = None
+    independence_groups: tuple[tuple[int, ...], ...] = field(default_factory=tuple)
+    confidence: float | None = None
+
+@dataclass(frozen=True, slots=True)
+class Receipt:
+    request_digest: Digest
+    outcome: str
+    cost: Reservation
+    stdout_ref: BlobRef | object | None = None
+    artifacts: tuple[ArtifactRef, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class Trajectory:
+    schema: str
+    project_id: str
+    run_id: str
+    episode_id: str
+    principal_id: str
+    harness_digest: str
+    turns: tuple[TrajectoryTurn, ...]
+    verdict: JsonObject | None
+    cost: CostVector
+    parent_episode_id: str | None = None
+    execution_digest: str | None = None
+    manifest_genome: JsonObject = field(default_factory=dict)
+    model_routes_used: tuple[JsonObject, ...] = field(default_factory=tuple)
+    attribution: JsonObject = field(default_factory=dict)
+    outcome: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class HarnessManifest:
@@ -191,126 +322,6 @@ class HarnessManifest:
     approval_policy: str | None = None
     undeletable: bool = False
 
-
-@dataclass(frozen=True, slots=True)
-class EpisodeView:
-    run_id: str
-    episode_id: str
-    turn: int
-    goal: str
-    notes: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class EpisodeOutcome:
-    status: str
-    detail: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class TrajectoryRef:
-    digest: str
-    schema: str = "mhf.trajectory/1"
-
-
-@dataclass(frozen=True, slots=True)
-class Reflection:
-    text: str
-
-
-@dataclass(frozen=True, slots=True)
-class MemoryRecord:
-    kind: str
-    text: str
-    metadata: JsonObject = field(default_factory=dict)
-
-
-@dataclass(frozen=True, slots=True)
-class MemoryQuery:
-    text: str
-    kind: str | None = None
-    limit: int | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class MemoryHit:
-    id: str
-    text: str
-    score: float
-
-
-@dataclass(frozen=True, slots=True)
-class ConsolidationReport:
-    merged: int
-    dropped: int
-
-
-@dataclass(frozen=True, slots=True)
-class ClaimRef:
-    claim_id: str
-
-
-@dataclass(frozen=True, slots=True)
-class ToolSchema:
-    verb: str
-    schema: JsonObject
-
-
-@dataclass(frozen=True, slots=True)
-class Health:
-    ok: bool
-    detail: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class ContextBundle:
-    prefix: str
-    suffix: str
-    token_count: int | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class CompactionReport:
-    removed_tokens: int
-    strategy: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class EffectFailure:
-    verb: str
-    detail: str
-
-
-@dataclass(frozen=True, slots=True)
-class EvaluationSubject:
-    run_id: str
-    episode_id: str
-    artifact_digest: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class SignedVerdict:
-    verdict: str
-    signature: str
-    subject_digest: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class OracleSpec:
-    id: str
-    digest: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class EffectContext:
-    principal: str
-    run_id: str
-    episode_id: str | None = None
-    depth: int = 0
-    parent_lease: str | None = None
-    idempotency_key: str | None = None
-
-
 __all__ = [
     "JsonObject",
     "ResourceSelector",
@@ -321,34 +332,37 @@ __all__ = [
     "SinkClass",
     "EventKind",
     "GateDecision",
-    "Reservation",
-    "BlobRef",
     "ArtifactRef",
+    "BlobRef",
+    "ClaimRef",
+    "CompactionReport",
+    "ConsolidationReport",
+    "ContextBundle",
+    "CostVector",
+    "EffectContext",
+    "EffectFailure",
+    "EpisodeOutcome",
+    "EpisodeView",
+    "EvaluationSubject",
+    "EventEnvelope",
+    "Health",
+    "MemoryHit",
+    "MemoryQuery",
+    "MemoryRecord",
+    "ModelRoute",
+    "OracleSpec",
+    "PluginRef",
+    "Reflection",
+    "Reservation",
+    "SignedVerdict",
+    "ToolSchema",
+    "TrajectoryRef",
+    "TrajectoryTurn",
     "EffectRequest",
+    "FrozenHarness",
+    "PluginBindings",
     "Proposal",
     "Receipt",
-    "EventEnvelope",
-    "PluginRef",
-    "ModelRoute",
-    "PluginBindings",
-    "FrozenHarness",
+    "Trajectory",
     "HarnessManifest",
-    "EpisodeView",
-    "EpisodeOutcome",
-    "TrajectoryRef",
-    "Reflection",
-    "MemoryRecord",
-    "MemoryQuery",
-    "MemoryHit",
-    "ConsolidationReport",
-    "ClaimRef",
-    "ToolSchema",
-    "Health",
-    "ContextBundle",
-    "CompactionReport",
-    "EffectFailure",
-    "EvaluationSubject",
-    "SignedVerdict",
-    "OracleSpec",
-    "EffectContext",
 ]

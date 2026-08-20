@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   vanguard-living-gates:
-    name: Living Gates — Layer-0, Boundaries, TCB, Links, Secrets
+    name: Living Gates — Packages Lattice, Boundaries, TCB, Links, Secrets
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +18,39 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Repo paths test
+      - name: Repo paths test (F-20)
         run: python3 -m unittest test.test_repo_paths
+
+      - name: Generated types check (F-13)
+        run: python3 tools/codegen/generate_types.py --check
+
+      - name: Duplication detector (F-16)
+        run: python3 tools/check_duplication.py
+
+      - name: Kernel package tests
+        run: python3 -m unittest discover -s test/kernel -t .
+
+      - name: Agency package tests
+        run: python3 -m unittest discover -s test/agency -t .
+
+      - name: Contracts package tests
+        run: python3 -m unittest discover -s test/contracts -t .
+
+      - name: Runtime package tests (Ollama quarantined via skipUnless)
+        run: python3 -m unittest discover -s test/runtime -t .
+
+      - name: Adapters package tests
+        run: python3 -m unittest discover -s test/adapters -t .
+
+      - name: Security package tests
+        run: python3 -m unittest discover -s test/security -t .
+
+      - name: Trust package tests
+        run: python3 -m unittest discover -s test/trust -t .
+
+      - name: Bound falsifiers F-01..F-21 (reds allowed)
+        continue-on-error: true
+        run: python3 -m unittest discover -s test/falsifiers -t .
 
       - name: Layer-0 microkernel test suite
         run: python3 -m unittest discover -s test/layer0 -t .
@@ -30,7 +61,7 @@ jobs:
       - name: TCB budget safety check
         run: python3 tools/check_tcb_budget.py
 
-      - name: Domain-blindness (I-7)
+      - name: Domain-blindness (I-7, F-18)
         run: python3 tools/check_domain_blindness.py
 
       - name: Isolation policy (I-6)

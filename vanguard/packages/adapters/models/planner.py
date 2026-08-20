@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Mapping, Sequence
 
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import (
+from vanguard.packages.domain.wire.result import Err, Ok, Result
+from vanguard.packages.domain.wire.types_gen import (
     EffectRequest,
     EpisodeOutcome,
     EpisodeView,

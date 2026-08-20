@@ -1,58 +1,22 @@
-"""Line-delimited JSON-RPC 2.0 codec for plugin-cell UDS (SPEC §2.1)."""
+# Wave-2 (2.1-A) compatibility shim: the canonical line-delimited JSON-RPC 2.0
+# codec lives at vanguard/packages/domain/wire/jsonrpc.py. This re-export keeps
+# layer0/registry/ importing unmodified -- and, critically, means a
+# `JsonRpcError` raised across the plugin-cell UDS here and one caught by a
+# packages adapter are the *same* class -- until layer0/ is deleted entirely.
+"""Re-export of the canonical JSON-RPC codec.
+
+See vanguard/packages/domain/wire/jsonrpc.py -- the only place this codec is
+implemented (SPEC §2.1, ADR-0069).
+"""
 
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass
-from typing import Any, Mapping
+from vanguard.packages.domain.wire.jsonrpc import (
+    JsonRpcError,
+    dumps_error,
+    dumps_request,
+    dumps_result,
+    loads,
+)
 
 __all__ = ["JsonRpcError", "dumps_error", "dumps_request", "dumps_result", "loads"]
-
-
-class JsonRpcError(ValueError):
-    def __init__(self, code: str | int, message: str) -> None:
-        super().__init__(message)
-        self.code = code
-        self.message = message
-
-
-def dumps_request(rpc_id: int | str, method: str, params: Mapping[str, Any] | None = None) -> bytes:
-    payload: dict[str, Any] = {"jsonrpc": "2.0", "id": rpc_id, "method": method}
-    if params is not None:
-        payload["params"] = dict(params)
-    return _line(payload)
-
-
-def dumps_result(rpc_id: int | str, result: Any) -> bytes:
-    return _line({"jsonrpc": "2.0", "id": rpc_id, "result": result})
-
-
-def dumps_error(rpc_id: int | str | None, code: str | int, message: str) -> bytes:
-    return _line(
-        {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "error": {"code": code, "message": message},
-        }
-    )
-
-
-def loads(line: str | bytes) -> dict[str, Any]:
-    if isinstance(line, bytes):
-        text = line.decode("utf-8")
-    else:
-        text = line
-    text = text.strip()
-    if not text:
-        raise JsonRpcError("parse_error", "empty frame")
-    try:
-        value = json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise JsonRpcError("parse_error", str(exc)) from exc
-    if not isinstance(value, dict) or value.get("jsonrpc") != "2.0":
-        raise JsonRpcError("invalid_request", "not JSON-RPC 2.0")
-    return value
-
-
-def _line(payload: Mapping[str, Any]) -> bytes:
-    return json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8") + b"\n"

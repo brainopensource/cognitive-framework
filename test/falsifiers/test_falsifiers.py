@@ -317,6 +317,26 @@ class TestF10DepthAlgebra(unittest.TestCase):
         self.assertEqual((first.granted.depth, second.granted.depth), (1, 1))
         self.assertNotIn("depth", Reservation(usd_micros=1).as_map())
 
+    def test_the_governor_refuses_a_reservation_carrying_structural_dimensions(self) -> None:
+        """2.2-A: `Governor.reserve` is duck-typed on `as_map()`, and the
+        generated wire `Reservation` (`domain/wire/types_gen.py`) is
+        structurally interchangeable with the kernel's while carrying `depth`
+        and `turns`. Repointing a caller from the layer0 governor to this one
+        must not silently restore sibling-depth summing, so the governor names
+        its own conserved dimensions and refuses anything else.
+        """
+        from vanguard.packages.domain.wire.types_gen import Reservation as WireReservation
+        from vanguard.packages.kernel.budget import ADDITIVE_DIMENSIONS, BudgetDenied, Governor
+
+        self.assertNotIn("depth", ADDITIVE_DIMENSIONS)
+        self.assertNotIn("turns", ADDITIVE_DIMENSIONS)
+        gov = Governor({"usd_micros": 1000, "depth": 2, "turns": 4})
+        wire = WireReservation(usd_micros=1, millis=0, tokens=0, bytes=0, turns=1, depth=1)
+        with self.assertRaises(BudgetDenied) as caught:
+            gov.reserve("run", wire)
+        self.assertEqual(caught.exception.reason, "not_a_conserved_dimension")
+        self.assertEqual(gov.remaining("depth"), 2, "no structural ceiling was consumed")
+
 
 class TestF11DHCompleteness(unittest.TestCase):
     def test_prompt_or_ceiling_change_changes_digest(self) -> None:

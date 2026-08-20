@@ -54,11 +54,45 @@ very duplication Wave 2 exists to remove.
 | **1.3-C kernel diff** | **Accepted.** `_exceeds` is called only on additive dimensions (`max_bytes`, `max_effects`); `max_depth` is compared directly, since depth is a structural ceiling and absent from `Reservation.as_map()`. The changed branch can only turn allow→deny. Net TCB delta 0; gate at 1359/1438. |
 | **`test/kernel/test_replay_parity.py` deletion** | **Correct.** It folded a same-list of in-memory envelopes — exactly the mechanism I-4 / ADR-0071 forbid as replay evidence. Replaced by `ColdReplayParity` in `test/runtime/test_ledger_truth.py`, folding from a real WAL file in a fresh process, and wired as its own CI job. |
 
+### 2.2-A parity triage — **BLOCKED** (Tech Lead, at Wave 2 entry)
+
+Keep/kill is settled (below). Deletion is **not** authorized: one blocker must clear first.
+
+**BLOCKER — the plugin capability dialect was never conformant to the domain selector algebra.**
+2.1-D correctly deleted `layer0/spi/ceiling.py`'s ad-hoc `_selector_subset` and its fail-open
+`if not capabilities: return True`, and delegated to `domain/selectors/`. That delegation exposed
+the fact that the pack's capability declarations are not canonical selectors:
+`packs/code-default/plugins/*.yaml` declare `{kind: fs, root: /workspace}` with **no `paths`**, and
+`terminal.yaml` / `harness.yaml` declare `kind: proc`, which is not in `SELECTOR_KINDS`
+(`fs, network, secret, git, table, browser, generic`). `parse_selector` rejects both, `decide()`
+returns `unparsable`, and the cell gate denies **every** plugin capability in the shipped pack.
+
+The old fail-open walk was masking this. It fails *closed*, so it is not a security hole — but the
+plugin cell is inert, and Wave 3 builds directly on it.
+
+- **Detected by:** `test/registry` — 5 failures (`test_attenuation_rpc_gate`,
+  `test_plugin_isolation`). Bisected to the 2.1 working tree, **not** to Wave 1 or to the 2.2-A
+  absorptions. Green at `f949dc6`.
+- **Why it was missed:** `test/registry` is not a CI step. Add it — this is the suite that guards
+  the plugin isolation boundary Wave 3 depends on.
+- **Both sides must be canonical**, not just the manifests: a canonical ceiling still denies a
+  root-only *request* selector, so every call site constructing a request selector migrates too.
+  `vg-code-default/manifest.json` already shows the target form — `paths: ["/workspace"]`, and
+  `proc` expressed as `{kind: generic, uriPattern: "proc://exec/allow/..."}` (matching
+  `adapters/models/invocation.py:517`, which already refuses `kind: process` for this reason).
+- **Owner:** Developer B, closing out 2.1-D. Not a repair of `layer0/` — the fix is in the pack
+  declarations and the packages call sites.
+
+**Do not** resolve this by restoring a permissive branch in `adapters/sandbox/ceiling.py`, and do
+not re-point the gate at a second subset walk. One algebra (ADR-0069); the declarations conform to
+it, not the reverse.
+
 ### Decision queue
 
 | Item | Needs | Owner |
 |---|---|---|
-| 2.2-A parity triage | Keep/kill list for layer0 assertions — **due now, at Wave 2 entry** | Tech Lead |
+| Selector conformance of the plugin dialect | **Blocks 2.2-B/C** — see above | Developer B |
+| `test/registry` added as a CI step | Wire it with the fix | Developer B |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board

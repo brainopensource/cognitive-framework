@@ -101,6 +101,44 @@ class BothBlobStoresSatisfyThePort(unittest.TestCase):
         digest = FileBlobStore(root).put(b"persisted").value
         self.assertEqual(FileBlobStore(root).get(digest).value, b"persisted")
 
+    def test_a_failed_write_leaves_no_blob_at_the_address(self) -> None:
+        """Absorbed at 2.2-A from `layer0/events/blob.py`'s fsync ordering.
+
+        A content address is a promise that the bytes at that name hash to it.
+        A torn write straight to the final path breaks the promise silently:
+        `has()` says yes and `get()` returns something that is not what was
+        stored. The write is staged and renamed, so a failure mid-write is
+        visible as absence, which callers already handle.
+        """
+        import os as _os
+
+        root = Path(self._tmp.name) / "torn"
+        store = FileBlobStore(root)
+        payload = b"x" * 4096
+        import hashlib
+        digest = "sha256:" + hashlib.sha256(payload).hexdigest()
+
+        real_replace = _os.replace
+
+        def failing_replace(src, dst):
+            raise OSError("no space left on device")
+
+        _os.replace = failing_replace
+        try:
+            result = store.put(payload)
+        finally:
+            _os.replace = real_replace
+
+        self.assertFalse(result.ok, "a failed write must not report success")
+        self.assertFalse(store.has(digest), "a torn write left a blob at its address")
+        self.assertFalse(store.get(digest).ok)
+        self.assertEqual(
+            sorted(p.name for p in root.rglob("*") if p.is_file()), [],
+            "the staging file must not survive a failed write")
+        # And the store still works afterwards.
+        self.assertTrue(store.put(payload).ok)
+        self.assertEqual(store.get(digest).value, payload)
+
 
 class BothIndexesSatisfyThePort(unittest.TestCase):
     def setUp(self) -> None:

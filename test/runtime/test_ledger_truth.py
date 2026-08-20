@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 from test.agency.doubles import ScriptedModel, finish
@@ -120,6 +121,44 @@ class ColdReplayParity(unittest.TestCase):
             self.assertEqual(live_state.episode.status, cold_state.episode.status)
             self.assertEqual(dict(live_state.grants), dict(cold_state.grants))
             self.assertEqual(live_digest, cold_state.digest())
+
+
+class BranchResume(unittest.TestCase):
+    """SPEC §1.3: "fold to `seq=N` + resume with a divergent `branch_id`".
+
+    Absorbed at 2.2-A from `test/layer0/events/test_fold.py`, which held the
+    only executable evidence for this law. KEEP, not KILL: the envelope
+    already carried `branch_id`, but the reducer dropped it, so a fold of the
+    trunk and a fold of a divergent branch reduced to the same state and the
+    same digest — the one thing time-travel debugging must be able to tell
+    apart.
+    """
+
+    def _envelope(self, emitter, kind, branch):
+        envelope = emitter.emit_kind(kind, run_id="run-b", principal="agent-1",
+                                     payload={"kind": kind})
+        return replace(envelope, mhf_branch_id=branch)
+
+    def test_a_resumed_branch_is_distinguishable_from_the_trunk(self) -> None:
+        emitter = _emitter(episode_id="ep-branch")
+        prefix = [self._envelope(emitter, "EpisodeStarted", "main"),
+                  self._envelope(emitter, "TurnStarted", "main")]
+        trunk = reconstruct_state(prefix + [self._envelope(emitter, "TurnStarted", "main")])
+        forked = reconstruct_state(prefix + [self._envelope(emitter, "TurnStarted", "alt")])
+
+        self.assertEqual(trunk.branch_id, "main")
+        self.assertEqual(forked.branch_id, "alt")
+        self.assertEqual(trunk.event_count, forked.event_count)
+        self.assertNotEqual(
+            trunk.digest(), forked.digest(),
+            "a divergent branch that folds to the trunk's digest is untraceable")
+
+    def test_folding_to_seq_n_is_a_prefix_of_the_whole(self) -> None:
+        emitter = _emitter(episode_id="ep-seq")
+        events = [self._envelope(emitter, "TurnStarted", "main") for _ in range(4)]
+        self.assertEqual(reconstruct_state(events[:2]).event_count, 2)
+        self.assertEqual(reconstruct_state(events).event_count, 4)
+        self.assertEqual(reconstruct_state(events[:2]).last_seq, events[1].seq)
 
 
 class DurableIntent(unittest.TestCase):

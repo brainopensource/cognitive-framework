@@ -5,9 +5,10 @@ from __future__ import annotations
 import socket
 from typing import Any, ClassVar, Sequence
 
-from layer0.spi import jsonrpc
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import (
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
+from vanguard.packages.domain.wire import jsonrpc
+from vanguard.packages.domain.wire.result import Err, Ok, Result
+from vanguard.packages.domain.wire.types_gen import (
     EvaluationRequestId,
     EvaluationSubject,
     GateDecision,
@@ -15,7 +16,6 @@ from layer0.spi.types_gen import (
     PreregistrationId,
     SignedVerdict,
 )
-from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 
 __all__ = ["ExteriorJudgeAdapter"]
 

@@ -88,7 +88,34 @@ SUBPROCESS_ALLOWLIST = {
 # evaluator adapters, save the composition root's explicit binding table.
 EVALUATOR_FAMILY = "evaluators"
 EVALUATOR_IMPORT_SOURCES = {"agency", "runtime", "governance"}
-EVALUATOR_BINDING_SITE = "vanguard/packages/runtime/root.py"
+EVALUATOR_BINDING_SITES = frozenset({
+    "vanguard/packages/runtime/root.py",
+    # 2.2-C: composition/session/wiring may bind the exterior judge; root stays
+    # the public facade. Extra rows are inert until those modules exist.
+    "vanguard/packages/runtime/compose.py",
+    "vanguard/packages/runtime/session.py",
+    "vanguard/packages/runtime/wiring.py",
+})
+
+# Wave 2 absorb shims: layer0 re-exports packages truth until 2.2-B deletes
+# the fork. One named file, not a lattice widening of layer0_spi.
+ABSORB_SHIMS: dict[str, frozenset[str]] = {
+    "layer0/spi/ceiling.py": frozenset({"adapters", "domain"}),
+    # 2.1-B: generated types now live at domain/wire/types_gen.py; this file
+    # is a pure re-export so layer0/ keeps importing unmodified.
+    "layer0/spi/types_gen.py": frozenset({"domain"}),
+    # 2.1-A: the SPI Result ADT now lives at domain/wire/result.py; same
+    # re-export treatment, and for the same reason -- an `isinstance(x, Ok)`
+    # here and one against a packages adapter's return value must be the same
+    # class, not two structurally-identical strangers.
+    "layer0/spi/result.py": frozenset({"domain"}),
+    # 2.2-A: `layer0/spi/jsonrpc.py` was still a full second copy of the codec
+    # 2.1-A moved to domain/wire/ -- the duplication detector does not check
+    # the wire surface, so it was invisible. Same re-export treatment, same
+    # reason: a `JsonRpcError` raised across a plugin-cell UDS and one caught
+    # by a packages adapter must be the same class.
+    "layer0/spi/jsonrpc.py": frozenset({"domain"}),
+}
 
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
@@ -312,13 +339,13 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 source_area in EVALUATOR_IMPORT_SOURCES
                 and target_area == "adapters"
                 and target_family == EVALUATOR_FAMILY
-                and rel_source != EVALUATOR_BINDING_SITE
+                and rel_source not in EVALUATOR_BINDING_SITES
             ):
                 errors.append(
                     f"{rel_source}:{line}: {source_area} may not reach adapters/evaluators "
                     f"({spec!r}); A-05/LT-4 -- a component that can construct its own evaluator "
-                    f"is a second judge. Only {EVALUATOR_BINDING_SITE}'s EVALUATOR_BINDINGS "
-                    f"may name one"
+                    f"is a second judge. Only the composition-root binding table "
+                    f"({sorted(EVALUATOR_BINDING_SITES)}) may name one"
                 )
                 continue
             lowered_spec = spec.lower().replace("_", "-")
@@ -357,7 +384,12 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             if source_area in {"spike", "slice"}:
                 continue
             if source_area in ALLOWED and target_area not in ALLOWED[source_area]:
-                errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
+                shim_ok = (
+                    rel_source in ABSORB_SHIMS
+                    and target_area in ABSORB_SHIMS[rel_source]
+                )
+                if not shim_ok:
+                    errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
 
     for cycle in find_cycles(graph):
         rendered = " -> ".join(str(path.relative_to(root)) for path in cycle)

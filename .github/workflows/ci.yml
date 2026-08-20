@@ -25,7 +25,7 @@ jobs:
         run: python3 tools/codegen/generate_types.py --check
 
       - name: Duplication detector (F-16)
-        run: python3 tools/check_duplication.py
+        run: python3 tools/check_duplication.py --enforce
 
       - name: Kernel package tests
         run: python3 -m unittest discover -s test/kernel -t .

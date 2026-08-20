@@ -1,25 +1,16 @@
-"""Typed failure/success envelope. `instrument_error` is a first-class flag (SPI RFC)."""
+# Wave-2 (2.1-A) compatibility shim: the canonical `Ok`/`Err`/`Result` ADT
+# lives at vanguard/packages/domain/wire/result.py. This re-export keeps
+# layer0/ and packs/ importing unmodified -- and, critically, means an
+# `isinstance(x, Ok)` check here and one against a packages adapter's return
+# value are checking the *same* class -- until 2.2-B deletes layer0/ entirely.
+"""Re-export of the canonical SPI Result ADT.
+
+See vanguard/packages/domain/wire/result.py -- the only place `Ok`/`Err`/
+`Result` are defined.
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Generic, TypeVar, Union
-
-T = TypeVar("T")
+from vanguard.packages.domain.wire.result import Err, Ok, Result
 
 __all__ = ["Err", "Ok", "Result"]
-
-
-@dataclass(frozen=True, slots=True)
-class Ok(Generic[T]):
-    value: T
-
-
-@dataclass(frozen=True, slots=True)
-class Err:
-    code: str
-    message: str
-    instrument_error: bool = False
-
-
-Result = Union[Ok[T], Err]

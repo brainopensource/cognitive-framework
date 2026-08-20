@@ -157,12 +157,12 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
         self.cell = self.broker.bind(
             "mhf.toolkit.echo",
             limits=_LIMITS,
-            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}},),
+            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},),
         )
         self.broker.start(self.cell)
         self.toolkit = SubprocessToolkitAdapter(
             self.cell.socket_path,
-            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}},),
+            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},),
         )
 
     def tearDown(self) -> None:
@@ -172,7 +172,7 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
         request = EffectRequest(
             verb="echo",
             args={"text": "via-adapter"},
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=SinkClass.OBSERVATION,
             reservation=_BUDGET,
         )

@@ -7,8 +7,8 @@ import sqlite3
 from pathlib import Path
 from typing import ClassVar
 
-from layer0.spi.result import Ok, Result
-from layer0.spi.types_gen import (
+from ...domain.wire.result import Ok, Result
+from ...domain.wire.types_gen import (
     ClaimRef,
     ConsolidationReport,
     MemoryHit,

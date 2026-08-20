@@ -98,13 +98,17 @@ Replay-parity (I-4, F-02) lives on the packages path in `test/runtime/test_ledge
 The former `test/kernel/test_replay_parity.py` imported the layer0 fold/driver despite its
 location and is removed (Wave 1, 1.3-B hygiene) — it tested nothing packages-scoped.
 
-### `test/contracts/` — Hexagonal Port Contracts & Wire Invariants (121 tests)
+### `test/contracts/` — Hexagonal Port Contracts & Wire Invariants (128 tests)
 Enforces port behavior and wire schemas across both Python and TypeScript parity:
 - `t1_dev1_canonicalisation.py`: Verifies RFC-8785 JSON Canonicalization Scheme (JCS) determinism.
 - `t1_dev1_primitives.py` & `t1_dev1_selectors.py`: Verifies URI and resource selector parsing (`file://`, `proc://`, `net://`).
 - `t1_wire_contracts.py`: Validates wire-level contracts for models, tools, and events.
 - `t3_ledger.py` & `t7_artifact_graph.py`: Validates event stream append-only rules and artifact DAG constraints.
 - `test_*_port.py`: Verifies abstract port contracts (`ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `EnvironmentPort`).
+- `test_spi_protocols.py`: Wave-2 2.1-C — the five SPI Protocols (`IPlanner`, `IContextManager`,
+  `IToolkit`, `IMemoryEngine`, `IEvaluationGate`) now live at `ports/spi.py`; real first-party
+  adapters are checked against them by `isinstance` (not fakes), and `layer0/spi/result.py` is
+  proven to be the same `Ok`/`Err` class as the canonical `domain/wire/result.py`, not a second one.
 
 ### `test/agency/` — Recursive Agency & Turn Engine (107 tests)
 Tests the recursive turn execution and context machinery (`vanguard/packages/agency`):

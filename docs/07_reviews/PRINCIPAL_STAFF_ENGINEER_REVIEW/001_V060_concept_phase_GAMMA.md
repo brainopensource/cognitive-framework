@@ -452,7 +452,7 @@ Re-run for forensic/DELTA; not inherited from parecer `99d1e0b`. Advisory lanes 
 | `test/runtime` | 400 ran, 3 FAIL (Ollama label) | Env-sensitive |
 | Full `test/` | 1119 ran, 7 FAIL, 5 ERROR, 8 skip | Not green |
 | Living CI | `test/layer0` + packs + lexical tools | Wrong subject |
-| `check_stale_paths` / `test_repo_paths` | FAIL `docs/sprint6B` on this tree | CI would be red |
+| `check_stale_paths` / `test_repo_paths` | FAIL (stale `sprint6B` ref) — **resolved at Wave 0** (ADR-0075 F-20; oracle at `test/fixtures/`) | CI passes after Wave 0 |
 | E-COV | “40 kinds, 100%” | False confidence |
 | `root.py` | 1418 LOC | God-object, outside TCB glob |
 | F1 | `driver.py:138-139` | Self-signing judge |
@@ -516,7 +516,7 @@ G1–G4 docs hygiene
 
 - Living CI runs `test/kernel` (already 95 OK), plus runtime/agency/adapters (quarantine env-sensitive Ollama tests).
 - Wire `generate_types.py --check`, duplication detector, and the §4 falsifiers that can be expressed as tests.
-- Fix stale `docs/sprint6B` path so living CI’s first step is not red for an archive citation.
+- Fix stale sprint-6B path so living CI's first step is not red for an archive citation. **[Wave 0 DONE — oracle restored to `test/fixtures/preregistered_oracles.json`, ADR-0075 F-20]**
 - Do **not** treat a green layer0 suite as success.
 
 ### Wave 1 — Irreversible substrate on the canonical path
@@ -568,7 +568,7 @@ real model · real authorized tool/effect · real filesystem change · real sand
 | P1-12 | `model.infer` as kernel verb | DEFER (P1+, not Wave 0) |
 | P1-13 | Plugin TS conformance / pytest runner | DEFER |
 | P1-14 | Concurrency enablement | DEFER (I-11 measurement) |
-| P1-15 | Stale `docs/sprint6B` | Wave 0 hygiene, not architecture |
+| P1-15 | Stale sprint-6B oracle path | **Wave 0 DONE** — oracle at `test/fixtures/preregistered_oracles.json` (ADR-0075 F-20) |
 | P1-16 | Ollama unreachable vs `model_tag_absent` | DEFER (test isolation) |
 | P1-17 | Selector `process` vs `generic` | Wave 0/1 contract bug |
 

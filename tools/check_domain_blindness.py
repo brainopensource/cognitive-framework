@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""I-7: Layer-0 is domain-blind. Whole-word coding|pytest|ast are forbidden."""
+"""I-7: Domain-blind kernel. Whole-word coding|pytest|ast are forbidden.
+
+Scans three trees (F-18, ADR-0075):
+  - layer0/                            (original scope)
+  - vanguard/packages/domain/          (I-7 also covers packages domain)
+  - vanguard/packages/kernel/          (I-7 also covers packages kernel)
+
+Wave 0 extension: the linter previously scanned only layer0/, which is narrower
+than Invariant I-7 as stated in SPEC. This change makes the enforcement scope
+match the invariant's stated coverage.
+"""
 
 from __future__ import annotations
 
@@ -51,19 +61,40 @@ def main() -> int:
     )
     args = parser.parse_args()
     repo = args.root.resolve() if args.root is not None else repo_root()
-    layer0 = repo / "layer0"
-    hits = scan(layer0)
+
+    # F-18 (ADR-0075): scan all three I-7 scopes, not just layer0/.
+    scan_targets = [
+        ("layer0/", repo / "layer0"),
+        ("vanguard/packages/domain/", repo / "vanguard" / "packages" / "domain"),
+        ("vanguard/packages/kernel/", repo / "vanguard" / "packages" / "kernel"),
+    ]
+
+    all_hits: list[str] = []
+    missing: list[str] = []
+    for label, target in scan_targets:
+        if not target.is_dir():
+            missing.append(label)
+            continue
+        all_hits.extend(scan(target))
+
     if args.expect_fail:
-        if hits:
-            print(f"DOMAIN-BLINDNESS FIXTURE FAIL-CLOSED: {len(hits)} planted hit(s)")
+        if all_hits:
+            print(f"DOMAIN-BLINDNESS FIXTURE FAIL-CLOSED: {len(all_hits)} planted hit(s)")
             return 0
         print("DOMAIN-BLINDNESS FIXTURE MISS: expected a leak, found none")
         return 1
-    if hits:
-        for hit in hits:
+
+    if missing:
+        for m in missing:
+            print(f"DOMAIN-BLINDNESS WARN: scan target missing (not an error): {m}")
+
+    if all_hits:
+        for hit in all_hits:
             print(f"DOMAIN-BLINDNESS FAIL: {hit}")
         return 1
-    print("DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in layer0/")
+
+    scanned = ", ".join(label for label, t in scan_targets if t.is_dir())
+    print(f"DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in {scanned}")
     return 0
 
 

@@ -181,11 +181,25 @@ def schema_archaeology_traces() -> Path:
 
 
 def preregistered_oracles() -> Path:
+    """Return the canonical path to the preregistered oracle registry.
+
+    Wave 0 (ADR-0075 F-20): restored to test/fixtures/ as the stable,
+    test-suite-owned location. Fallback to docs/03_sprints/evidence/ for
+    historical compatibility. The sprint6B fallback is retired — that path
+    no longer exists in the tree.
+    """
     root = repo_root()
-    canonical = root / "docs" / "03_sprints" / "evidence" / "preregistered_oracles.json"
-    if canonical.exists():
-        return canonical
-    return docs_sprint("sprint6B", "preregistered_oracles.json")
+    # Primary canonical: test-suite-owned (Wave 0 restoration, ADR-0075 F-20).
+    test_fixtures = root / "test" / "fixtures" / "preregistered_oracles.json"
+    if test_fixtures.exists():
+        return test_fixtures
+    # Legacy docs location (v0.5.1 baseline, deleted at commit caaa7af).
+    docs_evidence = root / "docs" / "03_sprints" / "evidence" / "preregistered_oracles.json"
+    if docs_evidence.exists():
+        return docs_evidence
+    # Return canonical test/fixtures path even if missing so callers get a
+    # deterministic error rather than a ghost sprint6B path.
+    return test_fixtures
 
 
 def kernel_tcb_budget() -> Path:

@@ -177,10 +177,10 @@ Implication: YAML isolation field check on packs/**/*.yaml, not runtime confinem
 ```
 
 ```text
-[FACT]
+[FACT — pre-Wave-0 baseline; resolved at Wave 0 (ADR-0075 F-20)]
 Command: python3 tools/check_stale_paths.py
-Result: STALE PATH FAIL: docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/00_tech_lead_concept_lock_plan_suggestion.md
-        stale path(s) docs/sprint6B
+Result: STALE PATH FAIL: docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/...
+        stale path(s) sprint6B (in archived review file, now deleted)
         exit 1
 Implication: living CI job would fail on this tree. Archive review cites a dead path.
 ```
@@ -201,13 +201,14 @@ Implication: FALSE CONFIDENCE. The checker greps string literals in declared dir
 ```
 
 ```text
-[FACT]
+[FACT — pre-Wave-0 baseline; resolved at Wave 0 (ADR-0075 F-20)]
 Command: python3 -m unittest test.test_repo_paths
 Result: Ran 5 tests, FAILED (failures=2)  exit 1
-        test_audit_and_governance_from_foreign_cwd — stale docs/sprint6B
-        test_repo_root_from_this_file — expected docs/sprint6B/preregistered_oracles.json,
+        test_audit_and_governance_from_foreign_cwd — stale sprint6B ref
+        test_repo_root_from_this_file — expected sprint6B/preregistered_oracles.json,
           actual docs/03_sprints/evidence/preregistered_oracles.json
 Implication: living CI first step (test.test_repo_paths) is red on this tree.
+Wave 0 resolution: oracle restored to test/fixtures/preregistered_oracles.json
 ```
 
 ```text
@@ -227,14 +228,14 @@ Implication: environment-sensitive; not a dispatch-kernel break.
 ```
 
 ```text
-[FACT]
+[FACT — pre-Wave-0 baseline; resolved at Wave 0 (ADR-0075 F-20, F-21)]
 Command: python3 -m unittest discover -s test -t .
 Result: Ran 1119 tests in 36.800s  FAILED (failures=7, errors=5, skipped=8)  exit 1
 Failures: 2 model-invocation selector kind (process vs generic);
           3 Ollama tag/unreachable;
           2 test_repo_paths (sprint6B).
 Errors: 3 model-invocation KeyError args/action;
-        2 test_oracle_registry FileNotFoundError docs/sprint6B/preregistered_oracles.json
+        2 test_oracle_registry FileNotFoundError (sprint6B path — ghost)
 Implication: CLAUDE.md warning that the suite is not fully green is confirmed.
 ```
 
@@ -249,7 +250,7 @@ Result: 1418 / 232 / 392 / 442
 
 `[FACT]` `.github/workflows/ci.yml` job `vanguard-living-gates` runs:
 
-1. `test.test_repo_paths` — **would fail** (stale `docs/sprint6B`)
+1. `test.test_repo_paths` — **would fail** (stale sprint-6B ref) **[Wave 0 DONE: oracle at `test/fixtures/`, ADR-0075 F-20]**
 2. `test/layer0`
 3. `check_boundaries.py`
 4. `check_tcb_budget.py`
@@ -655,7 +656,7 @@ Laziest incorrect implementation that still passes living CI today: keep fabrica
 5. Capability ceiling fail-open + compose ignoring intersection result.
 6. Envelope identity incomplete (`project_id`, parent ids, `harness_digest` not mandatory).
 7. E-COV lexical; replay-parity self-fold; missing CI job named in SPEC.
-8. Living CI red on stale `docs/sprint6B` in an archive review + oracle path drift.
+8. Living CI red on stale sprint-6B ref in archive review + oracle path drift. **[Wave 0 DONE: ADR-0075 F-20]**
 9. Full suite red (selector `process` vs `generic`; Ollama label; sprint6B).
 10. INDEX omits all `ADR-M0-*`; hole at `0067`.
 11. `types_gen.py` vs `schemas/mhf/` drift risk (four schemas only).
@@ -757,7 +758,7 @@ stated; alternatives are recorded so the lock is explicit, not silent.
 | P1-6 | One generated `EffectRequest` (I-1) | **LOCK NOW** as invariant; codegen is implementation |
 | P1-7 | Walking-skeleton echo plugin before product plugins | **LOCK NOW** (ADR-M0-13 already); prove on canonical path in code phase |
 | P1-8 | `in_process` loopback still uses JSON-RPC | **LOCK NOW** as rule; impl later |
-| P1-9 | Stale `docs/sprint6B` CI red | **DEFER DELIBERATELY** as docs-hygiene in code/docs wave (not architecture) |
+| P1-9 | Stale sprint-6B CI red | **Wave 0 DONE** — oracle restored to `test/fixtures/preregistered_oracles.json` (ADR-0075 F-20) |
 | P1-10 | Ollama unreachable vs `model_tag_absent` | **DEFER** — test isolation, not architecture |
 | P1-11 | Selector kind `process` vs `generic` | **DEFER** — contract bug in code phase |
 | P1-12 | Fill INDEX `ADR-M0-*` and hole `0067` | **LOCK NOW** (index hygiene is part of Concept Lock) |
@@ -841,7 +842,7 @@ stated; alternatives are recorded so the lock is explicit, not silent.
 6. `[FACT]` `docs/SPEC.md` still names `layer0/` as M1 destination and describes mid-run
    hot-swap; ADR-0005 forbids the latter. Law disagrees with itself.
 7. `[FACT]` Full unittest suite is red (1119 ran, 7 fail, 5 error) including a living-gate
-   stale path `docs/sprint6B`.
+   stale path (sprint6B oracle, deleted). **[Wave 0 resolved — oracle at `test/fixtures/preregistered_oracles.json`, ADR-0075 F-20]**
 8. `[INFERENCE]` Rebuilding Layer 0 from scratch, introducing Rust, or creating `core/` would
    discard working TCB-adjacent code and create a third identity.
 9. `[PROPOSAL]` Concept Lock must make packages the production lattice, absorb layer0 contracts,

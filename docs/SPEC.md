@@ -2,7 +2,7 @@
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language
 (MUST/SHALL/SHOULD) is binding here and in `docs/04_annex/*` only — nowhere else in `docs/`.
-**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0073`). The as-built Python package
+**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0074`). The as-built Python package
 version remains `0.4.5b1` in `pyproject.toml` until a later release cut.
 **Supersedes:** v0.5.0 Foundation Lock destination story (`layer0/` as M1 rewrite target) and
 mid-run plugin hot-swap as a v0.6 feature; `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`,
@@ -16,8 +16,11 @@ merge disposition). Forensic report
 **Design lineage preserved:** S0–S12 dispatch kernel, JCS canonicalisation + golden vectors, exterior
 signed evaluator, harness-as-data manifests, measurement lab, SQLite WAL ledger.
 **Authority on conflict:** this document, then `docs/05_adr/` (a newer ADR wins by citation, never by
-silent edit — **`0069`–`0073` outrank the v0.5.0 M1-destination paragraph they reverse**), then
-`docs/02_roadmap/milestones.md` (cannot contradict this document; roadmap rewrite is a later phase),
+silent edit — **`0069`–`0074` outrank the v0.5.0 M1-destination paragraph they reverse**), then
+`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md` (lock plan, not a
+second SPEC), then `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`
+(post-lock engineering register; cannot contradict this document), then
+`docs/02_roadmap/milestones.md` (historical; cannot contradict this document; rewrite is a later phase),
 then `docs/03_sprints/sprint_active.md` (execution board only), then `docs/archive/v045/` and
 `docs/07_reviews/` (evidence and proposals, not law — no ticket may cite them as a requirement).
 
@@ -63,8 +66,9 @@ capability grants constrain what the *agent* may do (existing kernel); isolation
 sandbox contains" is this axiom's ancestor.)*
 
 **A-3. Everything is an event or it didn't happen.** Grants, budgets, approvals, plugin activation,
-evaluation requests, spawns — all ledger events. Replay is a CI-enforced property (Invariant I-4), not
-a slogan.
+evaluation requests, spawns — all ledger events. Replay is a *required* CI-enforced property
+(Invariant I-4, `ADR-0071`, `ADR-0074`), not a slogan. Folding the same in-memory list twice is not
+I-4. The production `replay-parity` job is not currently wired.
 
 **A-4. One schema, many languages.** JSON Schema + JCS + golden vectors are the sole source of truth.
 Python dataclasses and TS readers are *generated*. Hand-written mirrors are banned (closes AP-6 — Python
@@ -73,10 +77,11 @@ logic, per `ADR-0063`).
 
 **A-5. Harness = f(manifest, plugins).** A harness is compiled at composition time from a declarative
 manifest resolving plugin references; the compile output (`FrozenHarness`) is content-addressed. That
-digest is harness identity **`D_H` only** (`ADR-0071`). Execution identity `D_R` and experiment-cell
-identity `D_X` MUST NOT be collapsed into `D_H`. Two identical manifests + plugin digests ⇒
-byte-identical `D_H` ⇒ attributable A/B measurement of *composition* (the separability thesis, kept,
-operationalised).
+digest is harness identity **`D_H` only** (`ADR-0071`, `ADR-0074`). Execution identity `D_R` and
+experiment-cell identity `D_X` MUST NOT be collapsed into `D_H`. `D_H` MUST include every
+behavior-affecting input: resolved plugin refs and digests, system prompt, capability ceiling,
+approval policy, and model routes. Two identical full compositions ⇒ byte-identical `D_H`. Two
+harnesses that differ only in system prompt MUST NOT share `D_H`.
 
 **A-6. Asymmetric evolution.** Phase 2 and 3 capabilities land as new plugins and new event kinds —
 never as Layer-0 modifications. Layer 0 exposes *extension points*, not features.
@@ -120,33 +125,45 @@ Boundary lattice (CI-enforced, closed roster) for the production hexagon:
 order `events ← kernel ← spi ← registry ← scheduler ← compose` is the fork's own checker rows, not
 a replacement identity.
 
-### 1.0 Recursive machine, authority, and identity (`ADR-0070`, `ADR-0071`)
+### 1.0 Recursive machine, authority, and identity (`ADR-0070`, `ADR-0071`, `ADR-0074`)
 
 ```text
 Agent    = Principal + HarnessInstance
-SubAgent = ChildPrincipal + HarnessInstance   # via spawn, same machine
+SubAgent = Principal(parent_id set) + HarnessInstance   # same Principal type; not a second class
 ```
 
-`spawn(parent, harness, capabilities, budget)` is the only delegation primitive. MUST hold:
+`Principal` is a typed value `(id, parent_id?, depth)`, not a bare string. `ChildPrincipal` is not a
+distinct type. `spawn(parent, harness, capabilities, budget)` is the only delegation primitive.
 
-- `Capabilities(child) ⊆ Capabilities(parent)`
-- `Budget(child) ≼ remaining(parent)` component-wise on `{usd_micros, millis, tokens, bytes, turns, depth}`
-  (`ADR-M0-07`)
+**Project.** A Project is a durable named scope that owns one ledger stream, one capability ceiling,
+and one root budget. Every Episode, Principal, and Artifact belongs to exactly one Project.
+`project_id` is the consistency unit: total order holds inside a Project, not across Projects.
+
+MUST hold:
+
+- `Capabilities(child) ⊆ Capabilities(parent)` under one selector partial order. Unknown relation =
+  deny. Unbounded child under bounded parent = deny.
+- **Typed budget (`ADR-0074`).** Additive conserved: `usd_micros`, `tokens`, `bytes`, charged
+  `millis` (compute time) — `child ≼ remaining(parent)` component-wise. Structural ceilings:
+  `depth` (`child.depth = parent.depth + 1 ≤ root.max_depth`; sibling depths are not summed) and
+  `turns`.
 
 Swarm participation is a coordination **policy** over agents, not a swarm engine. Causal relations
 (`spawned_by`, `caused_by`, `produced`, `evaluated_by`) are **projections of events** (`ADR-0003`).
 
-**Decision plane** (scheduler / orchestrator / kernel) decides who/when/lease/budget/capability.
+**Decision plane** (scheduler / kernel / grant issuer / governor) decides who/when/lease/budget/capability.
 **State plane** (ledger + pure reducers) decides what happened:
 `Decision → DurableEvent → fold → EffectiveState`. Orchestrator memory is never source of truth.
+Privileged event kinds MAY be originated only by their owning authority (`ADR-0074`). Hash-chain
+integrity does not imply semantic truth.
 
 Every new event kind MUST carry: `project_id`, `principal_id`, optional `parent_principal_id`,
 `episode_id`, optional `parent_episode_id`, `harness_digest` (`D_H`), `causation_id`,
 `correlation_id`.
 
-Identity trinity (`ADR-0071`): `D_H` harness composition; `D_R` execution
-(`D_H` + runtime + environment + model + oracle); `D_X` experiment cell (`D_R` + dataset + protocol).
-FrozenHarness digest is `D_H` only.
+Identity trinity: `D_H` complete composition (A-5); `D_R` execution
+(`D_H` + runtime + environment + model identity + oracle identity); `D_X` experiment cell
+(`D_R` + dataset + protocol). FrozenHarness digest is `D_H` only.
 
 ### 1.1 The turn state machine
 
@@ -166,15 +183,18 @@ inversion — "strictly less expressive than a loop that can invoke a loop, at r
 machinery, proof by construction" — is the argument for this shape and is carried here by citation
 rather than restated; see also `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`.)*
 
-**I-11 (new, Foundation Lock).** Phase-1 scheduler is **sequential**. Concurrency (independence groups,
-§1.4) is a later scheduler property, gated on a measurement, never a v0.5.0 feature (honours drift D-38:
-"do not add fan-out in v0.5.0 until CC-6 can emit"). This is Invariant I-11, added at the concept lock
-alongside I-1…I-10 below.
+**I-11 (v0.6).** The scheduler is **sequential**. Concurrency (independence groups, §1.4) is a later
+scheduler property, gated on a measurement. Unknown selector footprint means conflict, not
+independence (`ADR-0073`, `ADR-0074`). This is Invariant I-11.
 
 ### 1.2 Event taxonomy (emission is mandatory)
 
-Full kind set, grouped; every kind lists its single production emitter. CI rule `E-COV`: declared kinds
-without a reachable emitter fail the build (fixes 11/39 emission, D-11…D-15).
+Full kind set, grouped; every kind lists its single production *owner*. Lexical CI rule `E-COV`
+(string presence in a named directory) is a **weak proxy**, not I-2 (`ADR-0074`). I-2 requires a
+reachable production emitter *and* that forged/synthetic payloads (including
+`VerdictRecorded {verdict: "pass"}`) cannot become accepted history. Writer authority per kind is
+in the Evidence column conceptually: kernel owns grants/budgets/effects; evaluator gateway owns
+`VerdictRecorded`; registry owns plugin lifecycle; scheduler owns run/episode lifecycle.
 
 | Group | Kinds | Emitter |
 |---|---|---|
@@ -189,11 +209,11 @@ without a reachable emitter fail the build (fixes 11/39 emission, D-11…D-15).
 | Health | `Heartbeat` (HMAC-authenticated, fixes D-14), `CheckpointCreated` | scheduler |
 | Delegation | `ChildSpawned`, `ChildReturned` (carries provenance spans, fixes D-06) | scheduler |
 
-Envelope: JCS-canonical JSON, SHA-256 content digest, `prev_digest` hash chain per run, monotonic `seq`,
-`causation_id`/`correlation_id`, idempotency key on all command-derived events, and a `branch_id` field
-(M1: makes fold-to-seq-N + divergent branch resume a first-class envelope property, not a convention).
-Store: SQLite WAL + `FULL` sync (keep, D-16) with JSONL export; blob writes are `write→fsync→emit(digest)`
-ordered, closing D-19 (event never references an undurable blob).
+Envelope: JCS-canonical JSON, SHA-256 content digest, `prev_digest` hash chain per **Project**
+(`project_id`), monotonic `seq` within that unit, `causation_id`/`correlation_id`, idempotency key on
+all command-derived events, `branch_id`, and the lineage fields of §1.0. Store: SQLite WAL + `FULL`
+sync (keep, D-16) with JSONL export; blob writes are `write→fsync→emit(digest)` ordered, closing D-19
+(event never references an undurable blob).
 
 ### 1.3 Determinism & replay contract
 
@@ -410,13 +430,12 @@ undeletable: false
 
 `compose()` resolves plugin refs, verifies capability ceilings (plugin ceiling ∩ harness grant set;
 **fail-closed**, empty ceilings authorize nothing, intersection stored on `FrozenHarness` —
-`ADR-0072`), freezes L1–L3, and emits a `FrozenHarness` whose digest = JCS(manifest + resolved plugin
-digests) = `D_H`. The existing `vg-code-claude-shaped` / `vg-code-opencode-shaped` packs port
-mechanically — this is the Meta-Harness compiler: *specialised harnesses (Claude-Code-shaped,
-OpenHands-shaped, SWE-mini-shaped) are compiled artifacts of one engine.* Registries freeze at
-composition; unknown names fail at composition, not runtime (handbook M5.3 "operators-as-data +
-registries freeze at composition" — merged here; "operator" vocabulary is retired in favour of plugin
-refs, per matrix §1.6). Mid-run composition change is forbidden in v0.6 (`ADR-0005`, `ADR-0072`).
+`ADR-0072`), freezes L1–L3, and emits a `FrozenHarness` whose digest `D_H` = JCS of the **full**
+behavior-affecting composition: resolved plugin refs and digests, system prompt, capability ceiling,
+approval policy, model routes (`ADR-0074`). The existing `vg-code-claude-shaped` /
+`vg-code-opencode-shaped` packs port mechanically — specialised harnesses are compiled artifacts of
+one engine. Registries freeze at composition; unknown names fail at composition, not runtime.
+Mid-run composition change is forbidden in v0.6 (`ADR-0005`, `ADR-0072`).
 
 ---
 
@@ -442,10 +461,15 @@ cause. Zero-data-loss claim now holds because §1.2 makes every state-bearing fa
 
 ---
 
-## 4. Phase 1 — Coding Domain Pack (immediate)
+## 4. Coding Domain Pack (first domain; foundation E2E, not this lock wave)
 
-Everything below is plugins + one domain pack; Layer-0 diff = zero (Invariant I-7: `grep -rE
-"coding|pytest|ast" layer0/` MUST return nothing).
+**v0.6 status:** this section is the *shape* of Domain Pack #1. It is not authorized as the next
+commit. Foundation coding-agent E2E is Wave 4 of
+`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+
+Everything below is plugins + one domain pack; Layer-0 / production-core diff for a new pack MUST be
+zero (Invariant I-7: domain tokens `coding|pytest|ast` MUST NOT appear under `layer0/` **or**
+`vanguard/packages/{domain,kernel}/`).
 
 **4.1 AST patch engine (`mhf.toolkit.ast-patch`).** Tree-sitter parse per file (incremental re-parse on
 edit, sub-ms for typical files); patches expressed as **anchored edits** — `(node_kind, qualified_name,
@@ -473,13 +497,17 @@ contract tests.
 repair rounds bounded by manifest config. Verification is `IEvaluationGate` against preregistered
 oracles — the agent never grades itself.
 
-**Phase-1 acceptance gate:** the compiled `code-default` harness passes the existing `lab/` dogfood
-triple + `zero_hint_v1` at ≥ the v0.4.5 baseline pass rate under paired McNemar (`docs/04_annex/MEASUREMENT.md`),
-with `replay-parity` green and E-COV = 100%.
+**Pack acceptance (Wave 4, not this lock):** the compiled `code-default` harness exercises real model,
+authorized effect, filesystem, sandbox, signed eval, WAL, cold replay, and a schema-valid
+`mhf.trajectory/1`. Lexical E-COV = 100% is **not** that gate.
 
 ---
 
 ## 5. Evolution Blueprint — Phase 2 (autonomous & meta-cognitive)
+
+**v0.6 status: deferred blueprint (`ADR-0073`).** Not foundation scope. Trajectory *schema and
+emission* are locked now so this phase does not require a corpus migration; promotion, mutation, and
+skill harvest are not.
 
 All Phase-2 features are plugins consuming Phase-1 extension points.
 
@@ -520,6 +548,10 @@ rejected outright, not deferred.
 
 ## 6. Evolution Blueprint — Phase 3 (General Task Solver)
 
+**v0.6 status: deferred blueprint (`ADR-0073`).** Recursive `spawn` semantics are locked now so this
+phase does not require a second engine. Market allocators, memory graphs, and heterogeneous swarms
+are not foundation scope.
+
 **6.1 Neuro-symbolic memory graph.** `IMemoryEngine` implementation advertising the `graph` capability:
 typed nodes (Claim, Artifact, Skill, Task, Entity), signed-evidence edges (supports/contradicts/derives),
 embedding index over node text. The dormant v4 types (`Claim` graph fields, D-23; `Artifact.compensatesFor`)
@@ -546,12 +578,17 @@ remains singular and exterior across the whole swarm — one economy, one court.
 selector vocabulary}. TableWorld (currently orphaned, D-27) becomes Pack #2 as the generality witness; a
 `math` or `data-analysis` pack is Pack #3. The decomposition planner (`mhf.planner.decompose`) is
 domain-blind: it operates on verbs, selectors, oracles, and cost vectors — the domain lives entirely in
-the pack. **Acceptance: adding Pack #N requires zero diffs under `layer0/` (Invariant I-7, CI-greppable)**
+the pack. **Acceptance: adding Pack #N requires zero diffs under `layer0/` and under
+`vanguard/packages/{domain,kernel}/` (Invariant I-7).**
 — this is the handbook's M11 "Generality Falsification Invariant," merged here per matrix §1.4.
 
 ---
 
 ## 7. Telemetry, Self-Tuning & Model Distillation
+
+**v0.6 foundation locks the trajectory record (I-9, `ADR-0074`).** DPO harvest, fine-tune, and
+promotion remain deferred (`ADR-0073`). The schema MUST exist and MUST be emitted at
+`EpisodeCompleted`; consumers of the dataset are not this version's kernel.
 
 **Trajectory record (emitted at every `EpisodeCompleted`, no transformation step):**
 
@@ -593,20 +630,21 @@ packages; absorb layer0 contracts**.
 
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
-| **M0 — Excise & Sanitize** (docs done in v0.5; v0.6 Concept Lock is this document + ADRs 0069–0073) | Docs collapsed; v0.6 destination reversed | `G-M0-DOCS` plus ADRs 0069–0073 cited |
+| **M0 — Excise & Sanitize** (docs done in v0.5; v0.6 Concept Lock is this document + ADRs 0069–0074) | Docs collapsed; v0.6 destination reversed; GAMMA amendments | `G-M0-DOCS` plus ADRs 0069–0074 cited |
 | **Next code phase — CI subject of record** | Wire living CI to packages kernel/runtime/agency/adapters; negative tests for F1 and ceilings | production suites in CI; forged verdict cannot become accepted `VerdictRecorded` |
 | **Convergence** | Absorb SPI/jsonrpc; kill synthetic scheduler verdicts on the canonical path; parity then delete duplicates | behavioral parity, then deletion |
 | **Plugin walking skeleton** | Manifest → Resolve → Verify → Freeze → FrozenHarness; echo plugin on the wire | ADR-M0-13 on the packages path |
 | **Foundation E2E** | One real coding-agent path: model, authorized effect, filesystem, sandbox, signed eval, WAL, replay, trajectory | see exit gate below; **not** this Concept Lock wave |
 
-**Standing CI gates from day M1:** `check_boundaries` (extended to plugin imports), `replay-parity`,
-`E-COV`, control-call-site proof (AP-5 rule), secret scan, JCS vector conformance — replacing the
-TCB-LOC and test-count badges (see `docs/05_adr/ADR-M0-01-control-coverage-discipline.md`).
+**Standing CI gates for the code programme (Wave 0+, `ADR-0073`, `ADR-0074`):** production
+kernel/runtime/agency/adapters suites as subject of record; `replay-parity` against disk (not
+same-list fold); negative tests for forged verdict, empty ceiling, writer forgery, spawn widening;
+`generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
+Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**This wave's own gates (M0-docs, run now):** `python3 -m unittest test.test_repo_paths`;
-`python3 tools/check_schema_archaeology.py`; `python3 tools/check_stale_paths.py`;
-`python3 tools/check_markdown_links.py`; zero RFC-2119 keywords outside `docs/SPEC.md`/`docs/04_annex/`;
-`python3 tools/check_boundaries.py`; `python3 tools/check_tcb_budget.py`.
+**This lock wave's own gates (docs):** ADRs `0069`–`0074` cited; SPEC does not name `layer0/` as M1
+destination; KERNEL annex destination amended; GAMMA + gap register present. Living-CI green is
+**not** claimed: `test_repo_paths` / stale `docs/sprint6B` remain a Wave-0 hygiene item.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -627,30 +665,18 @@ the code is kept:
 - **`MetaLoopEngine` stays deleted** — the outer loop is a plugin at a scheduler slot (§5.1), never an
   engine — `ADR-0041`/D-41 + **ADR-M0-12**, also `TSK-CORE-011`.
 
-### 8.2 As-built DETERIORATIONs M1 must close (verified against the ground-truth table, not claimed)
+### 8.2 As-built DETERIORATIONs the code programme must close
 
-Re-verified 2026-08-18 per `docs/MASTER_REFACTOR_GUIDELINE_FINAL.md` Step 0 (commands actually run, not
-assumed from `[DONE] ✅` tags):
+Re-verified 2026-08-18 and again at Concept Lock (2026-08-20). These are **Wave 0–2** work, not a
+`layer0/` destination rewrite:
 
-- **Provenance on the production path** (D-05/D-06): `rg "child_return" vanguard/packages/agency
-  vanguard/packages/kernel` shows `agency/episode/engine.py` and `kernel/provenance.py` both call it —
-  **confirmed landed**, not open. `rg "Trust.OPERATOR"` shows three call sites including `root.py` —
-  **confirmed landed**. These port with the kernel as ported facts, not new M1 work.
-- **`EpisodeStarted` emission** (D-12): `rg "EpisodeStarted" vanguard/packages/agency
-  vanguard/packages/runtime` shows emitters in `runtime/root.py` and `runtime/ledger/projections.py` —
-  **confirmed landed**.
-- **`ApprovalResolved` ledgered** (D-13): `rg "ApprovalResolved"` shows it in
-  `domain/ledger/{reducer,events}.py`, `runtime/governance/{approvals,engine}.py`,
-  `runtime/service/service.py`, `runtime/ledger/{recovery,projections}.py` — **confirmed landed**, but
-  claimed `[DONE]` status is re-proven under E-COV in M1, not just trusted.
-- **E-COV 100%** — still open. `EVENT_KINDS` writer enforcement (D-11) is not yet closed at the writer.
-- **One `EffectRequest`** (D-21) — still open; three types remain until M1 codegen.
-- **`domain/ledger/coding_session.py` out of `domain/`** (D-42): confirmed — `vanguard/packages/apps/coding/`
-  exists with 7 modules including `coding_session.py`; `apps` is registered as a 7th boundary-lattice
-  package in `tools/check_boundaries.py` (`PACKAGE_NAMES = {"domain", "ports", "kernel", "agency",
-  "runtime", "adapters", "apps"}`). **Do not list D-42 as open** — it is already resolved. M3's "extract
-  coding pack" is a **re-extraction** from `apps/coding/` into `packs/`, not a first extraction from
-  `domain/`.
+- **Provenance / `EpisodeStarted` / `ApprovalResolved`:** landed on the packages path (keep).
+- **Lexical E-COV 100%:** insufficient. Writer enforcement and F1 (unsigned pass) are the real I-2 gap.
+- **One `EffectRequest` (D-21 / I-1):** still open; codegen must become the source (`ADR-0074`).
+- **D-42 coding_session out of `domain/`:** already in `apps/coding/`; pack re-extraction is Wave 3–4,
+  not a first extraction from `domain/`.
+- **Fail-open ceilings, tautological replay, kernel-not-in-CI, content-free trajectory:** see
+  gap register.
 
 ### 8.3 Honour table (SPEC §9, do not reopen)
 
@@ -682,9 +708,20 @@ and VG-10's `DEF-*`/`REJ-*` registers, now `docs/05_adr/DEFERRED_REJECTED.md`):
 - **Scalar reward for promotion** — promotion stays a partial order over a frontier (`ADR-0015`, `REJ-11`).
 - **An always-on full-content training capture** — capture is by policy; the corpus is separately opt-in
   (`REJ-12`).
+- **No third runtime tree** — no `core/`, no `aether-rust/`, no `vanguard/substrate/` destination
+  (`ADR-0069`).
+- **No swarm engine, workflow DAG engine, or graph database** — policy and projections only
+  (`ADR-0070`).
+- **No byte-identical concurrent ledger as a general requirement** (`ADR-0071`).
+- **No mid-run FrozenHarness hot-swap** (`ADR-0005`, `ADR-0072`).
+- **No evaluator as a product plugin** (`ADR-0004`, `ADR-0072`).
+- **No Rust TCB rewrite, WASM-default isolation, or multi-host distribution in v0.6** (`ADR-0073`).
+- **No Meta-Harness / self-updating release pipeline implementation in v0.6** (`ADR-0073`).
+- **No Skill / Task / Orchestrator-as-engine / Experiment / Promotion as substrate primitives**
+  (`ADR-0074`).
 
-Every future capability enters through a plugin manifest, a new event kind with an emitter, and a paired
-measurement (`docs/04_annex/MEASUREMENT.md`) — or it does not enter.
+Every future capability enters through a plugin manifest, a new event kind with a legal writer and an
+emitter, and a paired measurement (`docs/04_annex/MEASUREMENT.md`) — or it does not enter.
 
 ---
 
@@ -695,24 +732,28 @@ I-1 through I-10 are carried from `docs/TECH_LEAD_REVIEW/CRITICAL_GAP_ANALYSIS_A
 
 1. **One `EffectRequest`.** A single frozen dataclass, generated from one JSON Schema, used at S0, on
    the wire, and in adapters.
-2. **Emitted = declared.** CI computes event-kind emission coverage against production call sites; a
-   declared kind without an emitter fails the build.
+2. **Emitted = declared, and forged is not accepted.** A declared kind without a production emitter
+   fails the build. Lexical string coverage is not this invariant. A synthetic
+   `VerdictRecorded {verdict: "pass"}` MUST fail the behavioural gate (`ADR-0074`).
 3. **A control merges with its call site** (activation-bundle rule enforced, not aspirational).
-4. **State = fold(events), proven** by a replay test that reconstructs grants, budgets, approvals, and
-   episode lifecycle from the ledger alone and diffs against live state every CI run.
+4. **State = fold(events), proven** by a **cold** replay from durable storage that reconstructs
+   grants, budgets, approvals, and episode lifecycle and diffs against live state. Same-list fold is
+   not this invariant. The job is required and not currently wired (`ADR-0071`).
 5. **The judge stays exterior** — separate identity, signed verdicts, unreachable from agent and from
    plugins.
 6. **Plugins are untrusted by default.** Isolation tier declared in the plugin manifest; in-process
    execution is a privilege granted by policy, not the default.
-7. **The core is domain-blind.** `grep -r "coding\|ast\|pytest" layer0/` returns nothing.
+7. **The core is domain-blind.** `coding|ast|pytest` MUST NOT appear under `layer0/` or
+   `vanguard/packages/{domain,kernel}/`. Domain packs live in `packs/` and `apps/` as clients.
 8. **Specs are generated or normative — never both.** One normative document (this one); schema
    references generated; drift is a CI failure, not a register.
-9. **Telemetry is a dataset.** Every episode terminates in a trajectory record that is, without
-   transformation, a valid row in the DPO harvest schema.
+9. **Telemetry is a dataset.** Every episode terminates in a schema-valid `mhf.trajectory/1` record
+   that is, without transformation, a valid harvest row. A digest over `{ids, n}` is not this
+   invariant (`ADR-0074`). DPO training itself is deferred.
 10. **Metaphors ship as comments, not architecture.**
 
-**I-11 (added at the Foundation Lock, §1.1 above).** Phase-1 scheduler is sequential; concurrency is a
-later scheduler property with a measurement gate (honours D-38).
+**I-11 (v0.6 Concept Lock).** The scheduler is sequential; concurrency is a later scheduler property
+with a measurement gate (honours D-38). Unknown selector footprint means conflict, not independence.
 
 ---
 

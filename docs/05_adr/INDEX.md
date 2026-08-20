@@ -79,6 +79,7 @@
 | `0071` | [0071-authority-state-ledger-identity-trinity.md](0071-authority-state-ledger-identity-trinity.md) | v0.6 Concept Lock | accepted |
 | `0072` | [0072-plugin-boundary-wire-first-evaluator-exterior.md](0072-plugin-boundary-wire-first-evaluator-exterior.md) | v0.6 Concept Lock | accepted |
 | `0073` | [0073-v060-lock-vs-defer.md](0073-v060-lock-vs-defer.md) | v0.6 Concept Lock | accepted |
+| `0074` | [0074-gamma-lock-amendments-proof-budget-writer-identity.md](0074-gamma-lock-amendments-proof-budget-writer-identity.md) | v0.6 Concept Lock GAMMA | accepted |
 
 `0067` is a documented numbering hole (no file). Do not fill it.
 

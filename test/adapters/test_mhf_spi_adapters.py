@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import socket
@@ -256,8 +257,9 @@ class ExteriorJudgeAdapterTests(unittest.TestCase):
 
         self.assertEqual(gate.gate((signed("pass"),)), GateDecision.PASS)
         self.assertEqual(gate.gate((signed("fail"),)), GateDecision.RETRY)
+        tampered = dataclasses.replace(signed("pass"), signature="not-a-real-signature")
         self.assertEqual(
-            gate.gate((SignedVerdict(verdict="pass", signature="not-a-real-signature"),)),
+            gate.gate((tampered,)),
             GateDecision.ABANDON,
             "an unverifiable signature must not pass the gate",
         )

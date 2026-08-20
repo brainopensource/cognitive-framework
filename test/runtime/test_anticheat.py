@@ -231,7 +231,10 @@ class AutonomousGrantAndOracleAntiCheat(unittest.TestCase):
         from layer0.spi.types_gen import GateDecision, SignedVerdict
 
         gate = PackOracleGate()
-        decision = gate.gate((SignedVerdict(verdict="pass", signature="unsigned"),))
+        decision = gate.gate((SignedVerdict(
+            verdict="pass", signature="unsigned", subject_digest="sha256:" + "0" * 64,
+            evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+            key_id="key-1", signed_at="2026-08-20T00:00:00Z"),))
         self.assertEqual(decision, GateDecision.ABANDON)
 
     def test_benchmark_mode_remains_fail_closed_for_writes(self) -> None:

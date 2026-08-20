@@ -225,12 +225,12 @@ class Reservation:
 class SignedVerdict:
     verdict: str
     signature: str
-    subject_digest: str | None = None
-    evaluation_request_id: str | None = None
-    oracle_id: str | None = None
-    nonce: str | None = None
-    key_id: str | None = None
-    signed_at: str | None = None
+    subject_digest: str
+    evaluation_request_id: str
+    oracle_id: str
+    nonce: str
+    key_id: str
+    signed_at: str
 
 @dataclass(frozen=True, slots=True)
 class ToolSchema:

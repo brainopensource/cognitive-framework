@@ -45,7 +45,10 @@ class SinglePlannerTests(unittest.TestCase):
 
         self.planner.plan(self.view, self.budget)
         self.planner.consume_verdicts(
-            (self.SignedVerdict(verdict="fail", signature="unsigned"),),
+            (self.SignedVerdict(
+                verdict="fail", signature="unsigned", subject_digest="sha256:" + "0" * 64,
+                evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+                key_id="key-1", signed_at="2026-08-20T00:00:00Z"),),
             self.GateDecision.RETRY,
         )
         planned = self.planner.plan(self.view, self.budget)

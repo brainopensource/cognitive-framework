@@ -26,7 +26,10 @@ class OracleSuiteTests(unittest.TestCase):
         from layer0.spi.types_gen import GateDecision, SignedVerdict
 
         gate = PackOracleGate()
-        decision = gate.gate((SignedVerdict(verdict="pass", signature="unsigned"),))
+        decision = gate.gate((SignedVerdict(
+            verdict="pass", signature="unsigned", subject_digest="sha256:" + "0" * 64,
+            evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+            key_id="key-1", signed_at="2026-08-20T00:00:00Z"),))
         self.assertEqual(decision, GateDecision.ABANDON)
 
     def test_signed_pass_is_accepted(self) -> None:
@@ -49,7 +52,10 @@ class OracleSuiteTests(unittest.TestCase):
         signature = sign_verdict({"outcome": "pass"}, priv_bytes)
         gate = PackOracleGate(public_key=pub_bytes)
         self.assertEqual(
-            gate.gate((SignedVerdict(verdict="pass", signature=signature),)),
+            gate.gate((SignedVerdict(
+                verdict="pass", signature=signature, subject_digest="sha256:" + "0" * 64,
+                evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+                key_id="key-1", signed_at="2026-08-20T00:00:00Z"),)),
             GateDecision.PASS,
         )
         self.assertIsInstance(gate.preregister(OracleSpec(id="coding-oracle@3")), Ok)

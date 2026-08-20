@@ -69,6 +69,13 @@ class ProposalTranslator:
         if not calls:
             calls = _lift_text_tool_calls(text)
         if not calls:
+            truncated = _unclosed_fence(text, tool_schemas)
+            if truncated is not None:
+                return Result.fail(
+                    "instrument_error",
+                    f"the '{truncated}' block was opened but never closed — the reply "
+                    "was cut off before the closing fence. Send the action again with "
+                    "a shorter payload.")
             return Result.success({"kind": "finish", "note": text or "Task completed."})
         if len(calls) != 1:
             return Result.fail("instrument_error", "multiple actions in one proposal are unsupported")
@@ -303,6 +310,102 @@ def _coerce_tool_arguments(raw: Any) -> Mapping[str, Any] | None:
 
 def _is_canonical_verb(name: str) -> bool:
     return bool(_CANONICAL_VERB.match(name))
+
+
+#: ```<tool> key=value key="value with spaces"
+#: <payload lines>
+#: ```
+_FENCE = re.compile(r"^[ \t]*```[ \t]*(\S+)([^\n]*)\n(.*?)^[ \t]*```[ \t]*$",
+                    re.DOTALL | re.MULTILINE)
+_KV = re.compile(r'(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|(\S+))')
+
+
+def _payload_arguments(tool_schemas: Sequence[Mapping[str, Any]]) -> dict[str, tuple[str, str]]:
+    """`tool name -> (payload argument, canonical verb)` for schemas that declare one.
+
+    A tool schema opts in with `"payloadArgument": "<property>"`. Nothing here
+    knows which verb or which domain that is: the pack says which of its own
+    declared properties is too big or too quote-heavy to survive a JSON string,
+    and this reader believes it (`C-01` — the translator carries no builtin
+    vocabulary).
+    """
+    payloads: dict[str, tuple[str, str]] = {}
+    for schema in tool_schemas:
+        if not isinstance(schema, Mapping):
+            continue
+        argument = schema.get("payloadArgument")
+        name, verb = schema.get("name"), schema.get("verb")
+        if isinstance(argument, str) and argument and isinstance(name, str):
+            payloads[name] = (argument, verb if isinstance(verb, str) else name)
+    return payloads
+
+
+def _lift_fenced_tool_calls(
+    text: str, tool_schemas: Sequence[Mapping[str, Any]] = (),
+) -> list[dict[str, Any]]:
+    """Recover a tool call whose bulk argument rode *outside* the JSON.
+
+    Asking a model to place source code inside a JSON string value is asking it
+    to escape every quote, backslash and newline in a program while it is also
+    writing the program. Models that solve the task correctly still lose the
+    edit to a single unescaped quote, and the failure is silent -- the call
+    parses as prose. Observed across three local models and two families: all
+    three produced correct algorithms, none produced valid JSON.
+
+    So the payload travels as a fenced block and only the small, structural
+    arguments travel as `key=value`:
+
+        ```patch path=pkg/stats.py
+        def mean(values):
+            if not values:
+                raise ValueError("empty")      <- no escaping, ever
+        ```
+
+    This is the Aider lesson in `docs/SPEC.md` §4.1 -- match the edit format to
+    model competence -- expressed as pack data rather than a code path: the
+    fence is only consulted for a tool whose own schema names a
+    `payloadArgument`, so a pack that does not want this behaviour never gets
+    it, and adding a pack that does requires no change here.
+    """
+    payloads = _payload_arguments(tool_schemas)
+    if not payloads or not isinstance(text, str) or not text.strip():
+        return []
+    for match in _FENCE.finditer(text):
+        head, rest, body = match.group(1), match.group(2) or "", match.group(3)
+        if head not in payloads:
+            # A plain ```python block is a code fence, not a call. Only a fence
+            # whose info string opens with a declared tool name is an action.
+            continue
+        argument, _verb = payloads[head]
+        arguments: dict[str, Any] = {}
+        for key, dq, sq, bare in _KV.findall(rest):
+            arguments[key] = dq or sq or bare
+        # The body is the payload verbatim, minus the trailing newline the
+        # closing fence sits on. Nothing is stripped from inside it.
+        arguments[argument] = body[:-1] if body.endswith("\n") else body
+        return [{"name": head, "arguments": arguments}]
+    return []
+
+
+def _unclosed_fence(text: str, tool_schemas: Sequence[Mapping[str, Any]]) -> str | None:
+    """Name the tool whose fence was opened and never closed.
+
+    A response cut off by the completion-token ceiling ends mid-payload, so the
+    closing fence never arrives and the whole action degrades to prose — the
+    model is told nothing, and the turn is spent. Reporting the truncation is
+    the difference between a model that shortens its next reply and one that
+    repeats the same over-long one. The partial payload is deliberately *not*
+    used: writing half a file is worse than writing none.
+    """
+    payloads = _payload_arguments(tool_schemas)
+    if not payloads or not isinstance(text, str):
+        return None
+    if _FENCE.search(text):
+        return None
+    for match in re.finditer(r"^[ \t]*```[ \t]*(\S+)", text, re.MULTILINE):
+        if match.group(1) in payloads:
+            return match.group(1)
+    return None
 
 
 def _lift_text_tool_calls(text: str) -> list[dict[str, Any]]:

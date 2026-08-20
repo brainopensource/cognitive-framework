@@ -1,0 +1,1 @@
+{"label": "minimax-m3", "provider": "openrouter", "model": "minimax/minimax-m3", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "pricing": {"promptPerMillionUsd": 0.3, "completionPerMillionUsd": 1.2}, "treatment": "model_route"}

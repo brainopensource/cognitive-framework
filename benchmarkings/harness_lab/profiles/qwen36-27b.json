@@ -1,0 +1,1 @@
+{"label": "qwen3.6-27b", "provider": "ollama", "model": "qwen3.6:27b", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "treatment": "model_route"}

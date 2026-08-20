@@ -1,0 +1,1 @@
+{"read":"fs.read","patch":"patch.apply","test":"proc.exec","Read":"fs.read","Edit":"patch.apply","Write":"patch.apply","Bash":"proc.exec","edit_file":"patch.apply","view_file":"fs.read","run":"proc.exec"}

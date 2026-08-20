@@ -1,0 +1,16 @@
+Create the file `solution.py` in the workspace root. It must define two functions.
+
+`encode(text)` compresses runs of the same character:
+- A run of 3 or more identical characters becomes the count followed by the character.
+- A run of 1 or 2 characters is copied through unchanged.
+- Example shape: a run of five 'x' becomes "5x"; a run of two 'x' stays "xx".
+
+`decode(text)` is the exact inverse of `encode` for every input `encode` can produce.
+- A digit sequence immediately followed by a character means that character repeated
+  that many times.
+- Digits may be multi-character, so a count of 12 is possible.
+
+Both functions take a string and return a string. Empty input returns empty output.
+`encode` must raise `ValueError` if the input contains a digit.
+
+The tests in `tests/` cover the basics. Make them pass.

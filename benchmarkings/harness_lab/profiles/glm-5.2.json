@@ -1,0 +1,1 @@
+{"label": "glm-5.2", "provider": "openrouter", "model": "z-ai/glm-5.2", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "pricing": {"promptPerMillionUsd": 0.966, "completionPerMillionUsd": 3.036}, "treatment": "model_route"}

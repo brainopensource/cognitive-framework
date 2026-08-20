@@ -1,0 +1,1 @@
+{"name":"read","verb":"fs.read","description":"Read a workspace file. Info string carries path=<file>.","schema":{"type":"object","properties":{"path":{"type":"string","description":"Workspace-relative path"}},"required":["path"],"additionalProperties":false}}

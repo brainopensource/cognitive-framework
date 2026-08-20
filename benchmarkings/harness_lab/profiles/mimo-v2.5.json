@@ -1,0 +1,1 @@
+{"label": "mimo-v2.5", "provider": "openrouter", "model": "xiaomi/mimo-v2.5", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "pricing": {"promptPerMillionUsd": 0.14, "completionPerMillionUsd": 0.28}, "treatment": "model_route"}

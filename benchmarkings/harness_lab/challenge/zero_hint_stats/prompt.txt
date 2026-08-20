@@ -1,0 +1,10 @@
+The file `pkg/stats.py` provides two functions over a list of numbers.
+
+Required behaviour:
+
+- `mean(values)` returns the arithmetic mean as a float.
+- `median(values)` returns the middle value of the sorted values; for an even
+  number of values it returns the average of the two middle values, as a float.
+- Both raise `ValueError` on an empty list.
+
+Change only `pkg/stats.py` so the tests in `tests/` pass.

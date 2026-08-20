@@ -331,16 +331,39 @@ Vanguard abstracts models behind `ModelPort`. Local GPU models ($0) handle routi
     OpenRouter:
         base_url: https://openrouter.ai/api/v1
         api_key_env: "OPENROUTER_API_KEY" on ModelRoute (the engine reads the env var)
-        Verified Free Models:
+        
+        Free Models:
             openrouter/free
+            z-ai/glm-5.2:free
             inclusionai/ling-3.0-tiny:free
             poolside/laguna-s-2.1:free
             cohere/north-mini-code:free
             google/gemma-4-26b-a4b-it:free
             nvidia/nemotron-3-super-120b-a12b:free
             openai/gpt-oss-20b:free
-        Verified Low-Cost Paid Models: 8. deepseek/deepseek-v4-flash 9. xiaomi/mimo-v2.5
-        Frontier Cloud Models: z-ai/glm-5.2, openai/gpt-5.6-luna, deepseek/deepseek-v4-pro, minimax/minimax-m3
+
+        Verified Low-Cost Paid Models:
+            deepseek/deepseek-v4-flash
+            openai/gpt-5.6-luna
+            xiaomi/mimo-v2.5
+            minimax/minimax-m3
+            tencent/hy3-preview
+            upstage/solar-pro4
+            google/gemini-3.7-flash
+            moonshotai/kimi-k2.7-code
+            
+        Great Paid Models:
+            deepseek/deepseek-v4-pro
+            moonshotai/kimi-k3
+            z-ai/glm-5.3
+            qwen/qwen3.8-max
+            meta/muse-spark-1.2
+        
+        Elite Top Models:
+            openai/gpt-5.6-sol
+            x-ai/grok-4.6
+            anthropic/claude-opus-5
+
     DeepSeek API:
         base_url: https://api.deepseek.com/v1
         model: deepseek-reasoner or deepseek-coder on ModelRoute

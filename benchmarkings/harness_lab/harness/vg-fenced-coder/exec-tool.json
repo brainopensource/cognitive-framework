@@ -1,0 +1,1 @@
+{"name":"exec","verb":"proc.exec","description":"Run an allowed program (python3, pytest, ruff, git). Info string carries argv=<command>.","schema":{"type":"object","properties":{"argv":{"type":"array","items":{"type":"string"},"description":"Argument vector; argv[0] is the executable"}},"required":["argv"],"additionalProperties":false}}

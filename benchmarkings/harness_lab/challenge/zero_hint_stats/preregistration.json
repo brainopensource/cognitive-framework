@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "taskId": "zero_hint_stats",
+  "title": "Correct mean and median in one module",
+  "status": "preregistered",
+  "taskShape": "single-file numeric defect; truncating division and unsorted/even-length median",
+  "zeroHint": true,
+  "oracleVisibleToModel": false,
+  "stratum": "easy",
+  "harness": "vg-mini-coder",
+  "workspace": {
+    "initialFixture": "fixture/initial",
+    "allowedTools": ["fs.read", "patch.apply", "proc.exec"],
+    "allowedChangedPaths": ["pkg/stats.py"],
+    "publicTestCommand": ["python3", "-m", "unittest", "discover", "-s", "tests"],
+    "oracleTestCommand": ["python3", "-m", "unittest", "discover", "-s", "oracle", "-p", "test_*.py"]
+  },
+  "limits": {"maxTurns": 10, "maxModelCalls": 10, "maxCompletionTokens": 2048},
+  "evaluation": {"oraclePath": "oracle", "oracleVisibleToModel": false, "humanSourceEditsAllowed": 0}
+}

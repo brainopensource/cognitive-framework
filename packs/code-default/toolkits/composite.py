@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import ClassVar, Mapping, Sequence
 
-from layer0.spi.result import Err, Result
-from layer0.spi.types_gen import EffectContext, EffectRequest, Health, Receipt, ToolSchema
+from vanguard.packages.domain.wire.result import Err, Result
+from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Health, Receipt, ToolSchema
 
 __all__ = ["CompositeToolkit"]
 

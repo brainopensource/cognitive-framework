@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import ClassVar, Sequence
 
-from layer0.kernel.budget import BudgetDenied, Governor
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import (
+from vanguard.packages.domain.wire.result import Err, Ok, Result
+from vanguard.packages.domain.wire.types_gen import (
     EffectRequest,
     EpisodeOutcome,
     EpisodeView,
@@ -19,6 +18,8 @@ from layer0.spi.types_gen import (
     SinkClass,
     TrajectoryRef,
 )
+from vanguard.packages.kernel.budget import BudgetDenied, Governor
+from vanguard.packages.kernel.budget import Reservation as _GovernorReservation
 
 import sys
 from pathlib import Path
@@ -66,7 +67,15 @@ class DriveUntilGreenPlanner:
                 turns=1,
                 depth=1,
             )
-            self._governor.reserve(view.run_id, reserved)
+            # `Governor.reserve()` (`vanguard/packages/kernel/budget.py`)
+            # refuses any dimension outside its additive set -- `turns`/
+            # `depth` are structural ceilings, not conserved costs (ADR-0074
+            # §2, 2.2-A), and `reserved` above is the wire `Reservation`
+            # shape `EffectRequest.reservation` needs, turns/depth included.
+            # The governor gets only the four it actually accounts for.
+            self._governor.reserve(view.run_id, _GovernorReservation(
+                usd_micros=reserved.usd_micros, millis=reserved.millis,
+                tokens=reserved.tokens, bytes_=reserved.bytes))
         except BudgetDenied as exc:
             return Err("budget_exhausted", str(exc))
         self._round += 1
@@ -74,7 +83,7 @@ class DriveUntilGreenPlanner:
         request = EffectRequest(
             verb="patch.apply",
             args={"path": "src/app.py", "content": "# repair\n"},
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=SinkClass.PRIVILEGED,
             reservation=reserved,
         )

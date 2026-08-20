@@ -45,18 +45,24 @@ capabilities:
     selector:
       kind: fs
       root: /workspace
+      paths:
+        - /workspace
   - verb: fs.search
     selector:
       kind: fs
       root: /workspace
+      paths:
+        - /workspace
   - verb: patch.apply
     selector:
       kind: fs
       root: /workspace
+      paths:
+        - /workspace
   - verb: proc.exec
     selector:
-      kind: proc
-      executable: python3
+      kind: generic
+      uriPattern: proc://exec/allow/git,pytest,ruff,python3
 budget:
   usd_micros: 250000
   millis: 1800000

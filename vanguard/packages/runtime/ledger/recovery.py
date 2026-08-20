@@ -17,8 +17,8 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Sequence
 
 from ...domain.ledger.events import EventEnvelope
-from ...domain.primitives.primitives import uuidv7
 from ...ports.event_store import EventRange, EventStorePort
+from ..ledger_emitter import LedgerEmitter
 
 __all__ = [
     "LedgerReplayState",
@@ -172,10 +172,18 @@ class RecoveryScanner:
         if current_ms - last_ms < lease_timeout_ms:
             return None
 
+        emitter = LedgerEmitter(
+            store,
+            episode_id=last_event.episode_id or "recovery",
+            project_id=last_event.project_id or "project-default",
+            principal_id=self.controller_principal,
+            harness_digest=last_event.harness_digest or "sha256:" + ("0" * 64),
+            parent_principal_id=last_event.parent_principal_id,
+            parent_episode_id=last_event.parent_episode_id,
+            role="recovery",
+            anchor=last_event,
+        )
         terminal_event_kind = "RunRecovered" if action == "recovered" else "RunAborted"
-        terminal_seq_str = str(last_seq_int + 1)
-        terminal_event_id = uuidv7()
-
         payload = {
             "kind": terminal_event_kind,
             "runId": run_id,
@@ -183,39 +191,88 @@ class RecoveryScanner:
             "recoveredBy" if action == "recovered" else "abortedBy": self.controller_principal,
             "priorState": "active",
         }
-
-        envelope = EventEnvelope(
-            schema_version="vg.4",
-            event_id=terminal_event_id,
-            scope="recovery",
+        envelope = emitter.scheduler().emit_kind(
+            terminal_event_kind,
             run_id=run_id,
-            seq=terminal_seq_str,
-            occurred_at=current_time_iso,
-            recorded_at=current_time_iso,
             principal=self.controller_principal,
-            principal_role="process",
-            trace_id=f"recovery-{run_id}",
-            span_id=f"terminal-{terminal_seq_str}",
-            tenant_id=tenant_id,
-            owner_id=owner_id,
-            confidentiality="internal",
-            retention_class="standard",
-            trainability="prohibited",
-            redaction_status="none",
             payload=payload,
+            episode_id=last_event.episode_id,
         )
-
-        append_res = store.append([envelope])
-        if not append_res.ok:
-            raise RuntimeError(
-                f"Recovery controller failed to append terminal event: {append_res.error}"
-            )
 
         return RecoveryRecord(
             run_id=run_id,
             action=action,
             reason=reason,
             controller_principal=self.controller_principal,
-            terminal_event_id=terminal_event_id,
-            terminal_seq=terminal_seq_str,
+            terminal_event_id=envelope.event_id,
+            terminal_seq=str(envelope.seq),
         )
+
+    def reconcile_open_intents(
+        self,
+        store: EventStorePort,
+        *,
+        occurred_at: str,
+    ) -> Sequence[EventEnvelope]:
+        """K-47 / F-14: EffectStarted without a terminal effect → undeterminable."""
+        read = store.read(EventRange())
+        if not read.ok or not read.value:
+            return []
+        events = list(read.value)
+        open_intents: list[EventEnvelope] = []
+        closed: set[str] = set()
+        for ev in events:
+            kind = ev.payload.get("kind") or ev.mhf_kind
+            key = ev.payload.get("idempotencyKey") or ev.event_id
+            if kind == "EffectStarted":
+                open_intents.append(ev)
+            elif kind in ("EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled"):
+                closed.add(ev.payload.get("idempotencyKey") or "")
+                if ev.causation_id:
+                    closed.add(ev.causation_id)
+        reconciled: list[EventEnvelope] = []
+        for intent in open_intents:
+            intent_key = intent.payload.get("idempotencyKey") or intent.event_id
+            if intent_key in closed or intent.event_id in closed:
+                continue
+            has_terminal = False
+            started = False
+            for ev in events:
+                kind = ev.payload.get("kind") or ev.mhf_kind
+                if ev.event_id == intent.event_id:
+                    started = True
+                    continue
+                if started and kind in (
+                    "EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled",
+                ):
+                    has_terminal = True
+                    break
+            if has_terminal:
+                continue
+            emitter = LedgerEmitter(
+                store,
+                episode_id=intent.episode_id or "recovery",
+                project_id=intent.project_id or "project-default",
+                principal_id=self.controller_principal,
+                harness_digest=intent.harness_digest or "sha256:" + ("0" * 64),
+                parent_principal_id=intent.parent_principal_id,
+                parent_episode_id=intent.parent_episode_id,
+                role="recovery",
+                anchor=intent,
+            )
+            out = emitter.recovery().emit_kind(
+                "EffectReconciled",
+                run_id=intent.run_id or "",
+                principal=self.controller_principal,
+                payload={
+                    "kind": "EffectReconciled",
+                    "status": "undeterminable",
+                    "occurrence": "undeterminable",
+                    "reason": "process death between S8a and S9",
+                },
+                episode_id=intent.episode_id,
+                occurred_at=occurred_at,
+                causation_id=intent.event_id,
+            )
+            reconciled.append(out)
+        return reconciled

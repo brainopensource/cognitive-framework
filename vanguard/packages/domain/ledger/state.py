@@ -111,6 +111,13 @@ class LedgerState:
     run_id: Optional[str] = None
     episode_id: Optional[str] = None
     last_seq: Optional[str] = None
+    #: SPEC §1.3: time-travel debugging is "fold to `seq=N` + resume with a
+    #: divergent `branch_id`". The branch the fold most recently observed, so
+    #: a resumed branch is distinguishable from the trunk in reduced state and
+    #: in the state digest -- without it two folds of genuinely different
+    #: histories collide. Absorbed at 2.2-A from `layer0/events/fold.py`,
+    #: which was the only implementation of this law.
+    branch_id: str = "main"
     event_count: int = 0
     state_version: int = 0
     episode: EpisodeState = field(default_factory=EpisodeState)
@@ -136,6 +143,7 @@ class LedgerState:
             "runId": self.run_id,
             "episodeId": self.episode_id,
             "lastSeq": self.last_seq,
+            "branchId": self.branch_id,
             "eventCount": self.event_count,
             "stateVersion": self.state_version,
             "episode": {

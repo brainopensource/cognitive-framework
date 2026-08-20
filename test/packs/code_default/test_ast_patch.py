@@ -16,7 +16,7 @@ class AstPatchTests(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.insert(0, str(PACK))
         from load import load_declared_entry
-        from layer0.spi.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
+        from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
 
         self.tmpdir = tempfile.TemporaryDirectory()
         self.workspace = Path(self.tmpdir.name)
@@ -34,7 +34,7 @@ class AstPatchTests(unittest.TestCase):
         return self._req(
             verb="patch.apply",
             args=args,
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=self._sink.PRIVILEGED,
             reservation=self._res(0, 0, 0, 0, 1, 1),
         )
@@ -58,7 +58,7 @@ class AstPatchTests(unittest.TestCase):
             ),
             self.ctx,
         )
-        from layer0.spi.result import Ok
+        from vanguard.packages.domain.wire.result import Ok
         self.assertIsInstance(result, Ok)
         self.assertEqual(result.value.outcome, "completed")
         self.assertIn("return 2", target.read_text(encoding="utf-8"))

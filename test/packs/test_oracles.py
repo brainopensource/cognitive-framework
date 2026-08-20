@@ -23,18 +23,21 @@ class OracleSuiteTests(unittest.TestCase):
         import sys
         sys.path.insert(0, str(PACK / "oracles"))
         from gate import PackOracleGate
-        from layer0.spi.types_gen import GateDecision, SignedVerdict
+        from vanguard.packages.domain.wire.types_gen import GateDecision, SignedVerdict
 
         gate = PackOracleGate()
-        decision = gate.gate((SignedVerdict(verdict="pass", signature="unsigned"),))
+        decision = gate.gate((SignedVerdict(
+            verdict="pass", signature="unsigned", subject_digest="sha256:" + "0" * 64,
+            evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+            key_id="key-1", signed_at="2026-08-20T00:00:00Z"),))
         self.assertEqual(decision, GateDecision.ABANDON)
 
     def test_signed_pass_is_accepted(self) -> None:
         import sys
         sys.path.insert(0, str(PACK / "oracles"))
         from gate import PackOracleGate, sign_verdict
-        from layer0.spi.result import Ok
-        from layer0.spi.types_gen import GateDecision, OracleSpec, SignedVerdict
+        from vanguard.packages.domain.wire.result import Ok
+        from vanguard.packages.domain.wire.types_gen import GateDecision, OracleSpec, SignedVerdict
 
         private = Ed25519PrivateKey.generate()
         priv_bytes = private.private_bytes(
@@ -49,7 +52,10 @@ class OracleSuiteTests(unittest.TestCase):
         signature = sign_verdict({"outcome": "pass"}, priv_bytes)
         gate = PackOracleGate(public_key=pub_bytes)
         self.assertEqual(
-            gate.gate((SignedVerdict(verdict="pass", signature=signature),)),
+            gate.gate((SignedVerdict(
+                verdict="pass", signature=signature, subject_digest="sha256:" + "0" * 64,
+                evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+                key_id="key-1", signed_at="2026-08-20T00:00:00Z"),)),
             GateDecision.PASS,
         )
         self.assertIsInstance(gate.preregister(OracleSpec(id="coding-oracle@3")), Ok)

@@ -436,6 +436,10 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         run_id=run_id,
         episode_id=episode_id,
         last_seq=envelope.seq,
+        # SPEC §1.3 branch resume: the last branch observed wins, so folding a
+        # prefix and then a divergent continuation reports the divergence
+        # rather than the trunk it forked from.
+        branch_id=envelope.mhf_branch_id or state.branch_id,
         event_count=state.event_count + 1,
         state_version=state.state_version + 1,
         episode=episode,

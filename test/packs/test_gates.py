@@ -53,15 +53,24 @@ class IsolationPolicyGateTests(unittest.TestCase):
 class ReservationGovernorTests(unittest.TestCase):
     def test_worst_case_goes_through_governor(self) -> None:
         sys.path.insert(0, str(ROOT / "packs" / "code-default"))
-        from layer0.kernel.budget import BudgetDenied, Governor
+        from vanguard.packages.kernel.budget import BudgetDenied, Governor
+        from vanguard.packages.kernel.budget import Reservation as GovernorReservation
         from reservation import worst_case_reservation
 
+        # `worst_case_reservation` returns the wire `Reservation` shape
+        # (turns/depth included, for `EffectRequest.reservation`); the
+        # governor is additive-only (2.2-A) and only ever sees the four
+        # conserved dimensions.
+        def _additive(r: object) -> GovernorReservation:
+            return GovernorReservation(
+                usd_micros=r.usd_micros, millis=r.millis,
+                tokens=r.tokens, bytes_=r.bytes)
+
         governor = Governor({
-            "usd_micros": 5000, "millis": 10**9, "tokens": 10**6,
-            "bytes": 0, "turns": 10, "depth": 2,
+            "usd_micros": 5000, "millis": 10**9, "tokens": 10**6, "bytes": 0,
         })
         free = worst_case_reservation(model="mock:free", pricing=None)
-        lease = governor.reserve("run", free)
+        lease = governor.reserve("run", _additive(free))
         self.assertEqual(lease.reserved.get("usd_micros", 0), 0)
         paid = worst_case_reservation(
             model="deepseek/deepseek-v4-flash",
@@ -70,7 +79,7 @@ class ReservationGovernorTests(unittest.TestCase):
             max_completion_tokens=5_000,
         )
         self.assertEqual(paid.usd_micros, 2800)
-        governor.reserve("run", paid)
+        governor.reserve("run", _additive(paid))
         with self.assertRaises(BudgetDenied):
             worst_case_reservation(model="vendor/unpriced", pricing=None)
 

@@ -37,7 +37,7 @@ from vanguard.packages.runtime.root import (
     TaskContext,
 )
 
-ROOT_PY = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime" / "root.py"
+RUNTIME = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime"
 
 OPERATOR_SIGNER = OperatorSigner(b"test-operator-held-approval-key")
 OPERATOR_KEY = OPERATOR_SIGNER.public_bytes
@@ -89,11 +89,17 @@ class TheSegmentLoopIsGone(unittest.TestCase):
     def test_max_segments_does_not_appear_in_root(self) -> None:
         """DoD: `grep -c max_segments root.py` -> 0."""
 
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = "\n".join(
+            (RUNTIME / name).read_text(encoding="utf-8")
+            for name in ("root.py", "compose.py", "session.py", "wiring.py")
+        )
         self.assertNotIn("max_segments", source)
 
     def test_no_fresh_episode_is_built_per_segment(self) -> None:
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = "\n".join(
+            (RUNTIME / name).read_text(encoding="utf-8")
+            for name in ("root.py", "compose.py", "session.py", "wiring.py")
+        )
         self.assertNotIn("for _ in range(", source)
 
 

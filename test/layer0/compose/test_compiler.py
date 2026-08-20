@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from layer0.compose.compiler import ComposeError, compose
-from layer0.spi.types_gen import HarnessManifest, PluginBindings, PluginRef, Reservation
+from vanguard.packages.domain.wire.types_gen import HarnessManifest, PluginBindings, PluginRef, Reservation
 
 
 class ComposeTests(unittest.TestCase):

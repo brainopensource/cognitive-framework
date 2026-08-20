@@ -69,7 +69,7 @@ class ManifestTests(unittest.TestCase):
             "provides": [{"spi": "IToolkit", "spi_version": ">=1.0,<2"}],
             "requires": [],
             "isolation": "subprocess",
-            "capabilities": [{"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}}],
+            "capabilities": [{"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}}],
             "entry": "layer0.registry.worker:EchoToolkit",
             "tools": {
                 "echo": {

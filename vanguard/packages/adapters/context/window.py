@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import ClassVar, Sequence
 
-from layer0.spi.result import Ok, Result
-from layer0.spi.types_gen import (
+from ...domain.wire.result import Ok, Result
+from ...domain.wire.types_gen import (
     CompactionReport,
     ContextBundle,
     EffectFailure,

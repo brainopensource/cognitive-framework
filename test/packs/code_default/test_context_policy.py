@@ -23,7 +23,7 @@ class ContextPolicyTests(unittest.TestCase):
     def test_prefix_freeze_survives_compaction(self) -> None:
         sys.path.insert(0, str(PACK / "toolkits"))
         from repo_map import IndexToolkit, RepoMapContext
-        from layer0.spi.types_gen import EpisodeView, Receipt, Reservation
+        from vanguard.packages.domain.wire.types_gen import EpisodeView, Receipt, Reservation
 
         index = IndexToolkit("/tmp")
         context = RepoMapContext(system_prefix="FROZEN-PREFIX\n", index=index, token_budget=32)

@@ -46,24 +46,24 @@ CODE_DEFAULT = (
 
 class TestF01EnvelopeLineage(unittest.TestCase):
     def test_every_emitted_envelope_carries_full_lineage(self) -> None:
-        from layer0.events.emitter import InMemorySink, LedgerEmitter
-        from layer0.events.envelope import EnvelopeFactory
-        from layer0.spi.types_gen import EventKind
+        """Subject of record is `vanguard/packages/` (ADR-0075 §3, Wave 1
+        entry). `layer0.events.emitter` is a copy-fork awaiting absorption in
+        Wave 2; measuring lineage there would gate M-1 on a deferred defect.
+        """
+        from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+        from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
 
-        factory = EnvelopeFactory()
-        emitter = LedgerEmitter(factory, InMemorySink())
-        envelope = emitter.emit_kind(
-            EventKind.TURN_STARTED,
-            run_id="run-1",
-            principal="agent",
-            episode_id="ep-1",
-            causation_id="cause-1",
-            correlation_id="corr-1",
-            payload={"turn": 1},
-        )
-        self.assertEqual(envelope.episode_id, "ep-1")
-        self.assertEqual(envelope.causation_id, "cause-1")
-        self.assertEqual(envelope.correlation_id, "corr-1")
+        emitter = LedgerEmitter(
+            InMemoryEventStore(), episode_id="ep-1", project_id="proj-f01",
+            principal_id="agent-1", harness_digest="sha256:" + "a" * 64, role="session")
+        wire = emitter.emit_kind(
+            "TurnStarted", run_id="run-1", principal="agent-1",
+            payload={"turn": 1}).to_mhf_dict()
+        self.assertEqual(wire["schema_version"], "mhf.event/1")
+        for field in ("project_id", "principal_id", "parent_principal_id",
+                      "parent_episode_id", "harness_digest", "episode_id"):
+            self.assertIn(field, wire)
+        self.assertEqual(wire["episode_id"], "ep-1")
 
 
 class TestF02StateFold(unittest.TestCase):
@@ -79,6 +79,7 @@ class TestF02StateFold(unittest.TestCase):
             path = Path(tmp) / "ledger.sqlite"
             store = SqliteEventStore(path)
             envelope = EventEnvelope(
+                schema_version="mhf.event/1",
                 event_id="e1",
                 scope="episode",
                 seq="0",
@@ -86,6 +87,12 @@ class TestF02StateFold(unittest.TestCase):
                 recorded_at="1970-01-01T00:00:00.000Z",
                 principal="agent",
                 principal_role="episode",
+                tenant_id="tenant-default",
+                owner_id="owner-platform",
+                confidentiality="internal",
+                retention_class="standard",
+                trainability="prohibited",
+                redaction_status="none",
                 run_id="run-1",
                 episode_id="ep-1",
                 trace_id="run-1",
@@ -105,14 +112,38 @@ class TestF02StateFold(unittest.TestCase):
 
 
 class TestF03EvaluatorExteriority(unittest.TestCase):
-    def test_scheduler_cannot_produce_a_verdict_without_a_signature(self) -> None:
-        driver_path = ROOT / "layer0" / "scheduler" / "driver.py"
-        text = driver_path.read_text(encoding="utf-8")
-        self.assertNotIn(
-            'payload={"verdict": "pass"}',
-            text,
-            "layer0 driver fabricates VERDICT_RECORDED without exterior signature (F1)",
+    def test_only_the_evaluator_gateway_can_ledger_a_verdict(self) -> None:
+        """F-03 on the subject of record: no writer role but
+        `evaluator_gateway` can append `VerdictRecorded`, and the gateway
+        itself has nothing to fabricate a pass *from* -- it ledgers the
+        daemon's own signed bytes or returns `None` (ADR-0076 §5/§6).
+
+        The residual `layer0/scheduler/driver.py` unsigned-pass fabrication is
+        a deliberately deferred Wave-2 absorption defect (`wave2_convergence.md`),
+        not an M-1 gate: `layer0/` is not the production path.
+        """
+        from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+        from vanguard.packages.ports.evaluator import Verdict
+        from vanguard.packages.runtime.evaluator_gateway import record_verdict
+        from vanguard.packages.runtime.ledger_emitter import (
+            LedgerEmitter,
+            WriterAuthorityError,
         )
+
+        emitter = LedgerEmitter(
+            InMemoryEventStore(), episode_id="ep-1", project_id="proj-f03",
+            principal_id="agent-1", harness_digest="sha256:" + "b" * 64, role="session")
+        for facade in (emitter, emitter.scheduler(), emitter.orchestrator(),
+                       emitter.kernel(), emitter.registry(), emitter.approval()):
+            with self.assertRaises(WriterAuthorityError):
+                facade.emit_kind(
+                    "VerdictRecorded", run_id="run-1", principal="agent-1",
+                    payload={"signedVerdict": {"outcome": "pass"}})
+        # An unsigned/unbound verdict has no signed body to ledger.
+        self.assertIsNone(record_verdict(
+            emitter, run_id="run-1", principal="agent-1", episode_id="ep-1",
+            verdict=Verdict(outcome="claims", claims=(), reason="")))
+        self.assertEqual(emitter.store.count(), 0)
 
 
 class TestF04VerdictBinding(unittest.TestCase):
@@ -128,26 +159,25 @@ class TestF04VerdictBinding(unittest.TestCase):
 
 class TestF05WriterAuthority(unittest.TestCase):
     def test_orchestrator_cannot_append_privileged_kinds(self) -> None:
+        """ADR-0076 §6: writer authority is enforced at the one construction
+        point (`LedgerEmitter`'s role-scoped facades), not by the store —
+        `EventStorePort.append()` is a dumb persistence sink and was never the
+        gate. A generic `append(any envelope)` bypassing the emitter is the
+        wrong implementation F-05 exists to catch.
+        """
         from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
-        from vanguard.packages.domain.ledger.events import EventEnvelope
+        from vanguard.packages.runtime.ledger_emitter import LedgerEmitter, WriterAuthorityError
 
-        store = InMemoryEventStore()
-        envelope = EventEnvelope(
-            event_id="priv-1",
-            scope="episode",
-            seq="0",
-            occurred_at="1970-01-01T00:00:00.000Z",
-            recorded_at="1970-01-01T00:00:00.000Z",
-            principal="orchestrator",
-            principal_role="orchestrator",
-            run_id="run-1",
-            episode_id="ep-1",
-            trace_id="run-1",
-            span_id="s1",
-            payload={"kind": "CapabilityGranted"},
-        )
-        result = store.append([envelope])
-        self.assertFalse(result.ok, "privileged kinds must be writer-scoped, not open append")
+        emitter = LedgerEmitter(
+            InMemoryEventStore(), episode_id="ep-1", project_id="proj-f05",
+            principal_id="agent-1", harness_digest="sha256:" + "a" * 64, role="session")
+        orchestrator = emitter.orchestrator()
+        with self.assertRaises(WriterAuthorityError):
+            orchestrator.emit_kind(
+                "CapabilityGranted", run_id="run-1", principal="orchestrator",
+                payload={"kind": "CapabilityGranted"})
+        self.assertEqual(emitter.store.count(), 0,
+                         "privileged kinds must be writer-scoped, not open append")
 
 
 class TestF06CapabilityCeiling(unittest.TestCase):
@@ -160,13 +190,32 @@ class TestF06CapabilityCeiling(unittest.TestCase):
 
 class TestF07FailClosedAuthority(unittest.TestCase):
     def test_empty_ceiling_denies_everything(self) -> None:
-        from layer0.spi.ceiling import ceiling_allows
+        """`layer0/spi/ceiling.py` is fail-open and stays that way until its
+        Wave-2 absorption; the canonical algebra lives in `domain/selectors/`.
+        """
+        from vanguard.packages.domain.selectors.resource_selector import ceiling_allows
 
-        self.assertFalse(ceiling_allows("execute", {"verb": "fs.read", "selector": {}}, []))
+        decision = ceiling_allows((), {"kind": "fs", "root": "/workspace",
+                                       "paths": ["/workspace/a.py"]})
+        self.assertFalse(decision.included)
+        self.assertEqual(decision.reason, "empty_ceiling")
 
 
 class TestF08GrantPath(unittest.TestCase):
-    def test_privileged_verb_requires_a_bound_grant(self) -> None:
+    """F-08: *a privileged verb requires a bound grant.*
+
+    The pre-gate form of this test dispatched a fully authorized `fs.write`
+    -- held authority, covering scope, sufficient reservation -- and then
+    asserted `failure is not OK`: it asserted that the grant path must fail on
+    its own happy path. Adjudicated at the M-1 gate as an inverted falsifier,
+    not a production defect. `dispatch()` S6 issues through
+    `SinkRegistry.requires_grant`, S8 re-verifies the grant against the
+    descriptor digest at the point of effect (`K-05`), and S8a records
+    `grantId`/`grantDigest` in the durable intent. The law is restated below
+    in both directions.
+    """
+
+    def test_privileged_verb_is_bound_to_a_grant(self) -> None:
         from test.kernel import fakes
 
         harness = fakes.build()
@@ -175,39 +224,118 @@ class TestF08GrantPath(unittest.TestCase):
             requested_scope=fakes.child_scope(actions=frozenset({"fs.write"})),
             reservation=fakes.reservation(),
         )
-        self.assertIsNot(result.failure, FailurePath.OK)
+        self.assertIs(result.failure, FailurePath.OK)
+        intent = next(e for e in result.events if e.kind == "EffectStarted")
+        self.assertTrue(intent.payload["grantId"], "privileged verb dispatched ungranted")
+        self.assertTrue(intent.payload["grantDigest"], "grant is not bound to the effect")
+        self.assertEqual(intent.payload["descriptorDigest"], result.descriptor_digest)
+
+    def test_ungrantable_privileged_verb_never_reaches_durable_intent(self) -> None:
+        """The other direction: when no grant can be issued, nothing runs.
+
+        Three independent ways to reach ungrantable, because any single one
+        could be satisfied by a check sitting in the wrong stage: a *sealed*
+        scope that excludes the verb (`ADR-0067` — a sealed grant may not
+        widen even on operator justification, which is precisely what
+        separates it from the unsealed case above), a scope that escalates
+        past the parent, and a widening justified only by an
+        untrusted-external span (`K-30`/`F-09`).
+
+        Note what is deliberately *not* asserted here: an unsealed narrower
+        scope widening under an **operator** span is allowed, and holding no
+        prior `fs.write` authority does not by itself deny — the authority
+        predicate denies on the *provenance* of the justification, not on
+        prior possession. Asserting otherwise is the F-08 inversion.
+        """
+        from test.kernel import fakes
+
+        for label, harness, scope, request in (
+            ("sealed scope",
+             fakes.build(),
+             fakes.child_scope(actions=frozenset({"fs.read"}), sealed=True),
+             fakes.request(action="fs.write")),
+            ("scope escalation past the parent",
+             fakes.build(),
+             fakes.child_scope(constraints=fakes.constraints(max_uses=4096)),
+             fakes.request(action="fs.write")),
+            ("widening on an untrusted-external span",
+             fakes.build(held_actions=frozenset({"fs.read"})),
+             fakes.child_scope(actions=frozenset({"fs.write"})),
+             fakes.request(action="fs.write",
+                           justifying_spans=(fakes.untrusted_result_span(),))),
+        ):
+            with self.subTest(label):
+                result = harness.kernel.dispatch(
+                    request,
+                    requested_scope=scope,
+                    reservation=fakes.reservation(),
+                )
+                self.assertIsNot(result.failure, FailurePath.OK)
+                self.assertFalse(
+                    [e for e in result.events if e.kind == "EffectStarted"],
+                    "an ungrantable privileged verb must not reach durable intent")
+                self.assertFalse(harness.adapter.calls, "the effect must not have run")
 
 
 class TestF09SpawnAttenuation(unittest.TestCase):
     def test_child_grant_wider_than_parent_is_denied_whole(self) -> None:
-        from layer0.kernel.attenuation import Scope, attenuate
-        from test.kernel.fakes import constraints
+        from vanguard.packages.kernel.attenuation import Constraints, Scope, attenuate
 
-        parent = Scope(
-            actions=frozenset({"fs.read"}),
-            resources=(),
-            constraints=constraints(),
-            depth=0,
-        )
-        child = Scope(
-            actions=frozenset({"fs.read", "fs.write"}),
-            resources=(),
-            constraints=constraints(),
-            depth=1,
-        )
-        self.assertFalse(attenuate(parent, child).ok)
+        base = dict(expires_at="2099-01-01T00:00:00.000Z", max_uses=4,
+                    budget_usd_micros=1000, max_depth=3)
+        resources = ({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},)
+        parent = Scope(actions=frozenset({"fs.read"}), resources=resources,
+                       constraints=Constraints(max_bytes=100, **base), depth=0)
+        # Wider on the verb set...
+        wider = Scope(actions=frozenset({"fs.read", "fs.write"}), resources=resources,
+                      constraints=Constraints(max_bytes=100, **base), depth=1)
+        self.assertFalse(attenuate(parent, wider).ok)
+        # ...and 1.3-C: an unbounded child under a bounded parent is a widening.
+        unbounded = Scope(actions=frozenset({"fs.read"}), resources=resources,
+                          constraints=Constraints(max_bytes=None, **base), depth=1)
+        self.assertFalse(attenuate(parent, unbounded).ok)
 
 
 class TestF10DepthAlgebra(unittest.TestCase):
     def test_sibling_depths_are_not_summed(self) -> None:
-        from layer0.spi.types_gen import Reservation
+        """Depth is a structural ceiling, never an additive cost: it is absent
+        from `Reservation.as_map()`, so two siblings at depth 1 under a parent
+        bounded at depth 2 both stand (ADR-0074 §2).
+        """
+        from vanguard.packages.kernel.attenuation import Constraints, Scope, attenuate
+        from vanguard.packages.kernel.budget import Reservation
 
-        parent = Reservation(usd_micros=0, millis=0, tokens=0, bytes=0, turns=0, depth=2)
-        first = Reservation(usd_micros=0, millis=0, tokens=0, bytes=0, turns=0, depth=1)
-        second = Reservation(usd_micros=0, millis=0, tokens=0, bytes=0, turns=0, depth=1)
-        self.assertLessEqual(first.depth, parent.depth)
-        self.assertLessEqual(second.depth, parent.depth)
-        self.assertLessEqual(first.depth + second.depth, parent.depth)
+        resources = ({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},)
+        constraints = Constraints(expires_at="2099-01-01T00:00:00.000Z", max_uses=8,
+                                  budget_usd_micros=10_000, max_depth=2)
+        parent = Scope(actions=frozenset({"fs.read"}), resources=resources,
+                       constraints=constraints, depth=0)
+        sibling = Scope(actions=frozenset({"fs.read"}), resources=resources,
+                        constraints=constraints, depth=1)
+        first, second = attenuate(parent, sibling), attenuate(parent, sibling)
+        self.assertTrue(first.ok and second.ok)
+        self.assertEqual((first.granted.depth, second.granted.depth), (1, 1))
+        self.assertNotIn("depth", Reservation(usd_micros=1).as_map())
+
+    def test_the_governor_refuses_a_reservation_carrying_structural_dimensions(self) -> None:
+        """2.2-A: `Governor.reserve` is duck-typed on `as_map()`, and the
+        generated wire `Reservation` (`domain/wire/types_gen.py`) is
+        structurally interchangeable with the kernel's while carrying `depth`
+        and `turns`. Repointing a caller from the layer0 governor to this one
+        must not silently restore sibling-depth summing, so the governor names
+        its own conserved dimensions and refuses anything else.
+        """
+        from vanguard.packages.domain.wire.types_gen import Reservation as WireReservation
+        from vanguard.packages.kernel.budget import ADDITIVE_DIMENSIONS, BudgetDenied, Governor
+
+        self.assertNotIn("depth", ADDITIVE_DIMENSIONS)
+        self.assertNotIn("turns", ADDITIVE_DIMENSIONS)
+        gov = Governor({"usd_micros": 1000, "depth": 2, "turns": 4})
+        wire = WireReservation(usd_micros=1, millis=0, tokens=0, bytes=0, turns=1, depth=1)
+        with self.assertRaises(BudgetDenied) as caught:
+            gov.reserve("run", wire)
+        self.assertEqual(caught.exception.reason, "not_a_conserved_dimension")
+        self.assertEqual(gov.remaining("depth"), 2, "no structural ceiling was consumed")
 
 
 class TestF11DHCompleteness(unittest.TestCase):
@@ -228,8 +356,27 @@ class TestF11DHCompleteness(unittest.TestCase):
 
 class TestF12Trajectory(unittest.TestCase):
     def test_episode_completed_emits_schema_valid_mhf_trajectory_1(self) -> None:
-        trajectory_path = ROOT / "schemas" / "mhf" / "trajectory.schema.json"
-        self.assertTrue(trajectory_path.is_file(), "mhf.trajectory/1 schema must exist on disk")
+        """The schema existing on disk is not evidence that anything emits it.
+        The end-to-end proof over a live episode is in
+        `test/runtime/test_ledger_truth.py`; this pins the assembler's own
+        contract against the schema's required set, including the aborted
+        case, where a trajectory is still owed and `verdict` is `null`.
+        """
+        from vanguard.packages.runtime.root import TaskContext
+        from vanguard.packages.runtime.trajectory import assemble_trajectory
+
+        schema = json.loads(
+            (ROOT / "schemas" / "mhf" / "trajectory.schema.json").read_text(encoding="utf-8"))
+        trajectory = assemble_trajectory(
+            task=TaskContext(brief="b", repo_path=ROOT, run_id="run-1", episode_id="ep-1"),
+            harness_digest="sha256:" + "d" * 64,
+            terminal="abandoned",
+            receipts=(), contexts=(), events=(), verdict=None,
+        )
+        self.assertEqual(trajectory["schema"], "mhf.trajectory/1")
+        self.assertIsNone(trajectory["verdict"], "an aborted episode still owes a trajectory")
+        for field in schema.get("required", ()):
+            self.assertIn(field, trajectory)
 
 
 class TestF13GeneratedTypes(unittest.TestCase):
@@ -251,9 +398,12 @@ class TestF14DurableIntent(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "ledger.sqlite"
             store = SqliteEventStore(path)
-            bridge = LedgerBridge(store, episode_id="ep-1")
+            bridge = LedgerBridge(
+                store, episode_id="ep-1", project_id="proj-f14",
+                principal_id="agent", harness_digest="sha256:" + "c" * 64, role="kernel")
             intent = Event(
                 kind="EffectStarted",
+                reason="s8a",
                 at="1970-01-01T00:00:00.000Z",
                 principal="agent",
                 run_id="run-1",
@@ -271,10 +421,11 @@ class TestF15BudgetLineage(unittest.TestCase):
         from test.kernel import fakes
 
         harness = fakes.build(ceilings={"usd_micros": 100})
-        parent = harness.governor.reserve("run-1", fakes.reservation(usd_micros=50))
+        parent = harness.governor.reserve(
+            "run-1", fakes.reservation(usd_micros=50, millis=0))
         harness.governor.reserve(
             "run-1",
-            fakes.reservation(usd_micros=30),
+            fakes.reservation(usd_micros=30, millis=0),
             parent_lease_id=parent.lease_id,
         )
         self.assertLessEqual(harness.governor.remaining("usd_micros"), 20)

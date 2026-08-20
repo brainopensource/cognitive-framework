@@ -3,17 +3,26 @@
 from __future__ import annotations
 
 import base64
-import json
 from typing import Any, Mapping
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from ...domain.canonicalisation.jcs import canonical_bytes
+
 __all__ = ["VerdictSigner", "canonical_verdict_bytes"]
 
 
 def canonical_verdict_bytes(verdict: Mapping[str, Any]) -> bytes:
-    return json.dumps(dict(verdict), sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    """RFC 8785 JCS bytes of the verdict body (ADR-0076 §3, F-04).
+
+    The domain JCS reader is the only canonicalisation/signing byte source in
+    the system. `json.dumps(sort_keys=True)` agrees with it on ASCII but
+    drifts on object-key order between a BMP code point above U+DFFF and any
+    non-BMP (surrogate-pair) code point — JCS sorts by UTF-16 code unit, not
+    by Python's codepoint order.
+    """
+    return canonical_bytes(dict(verdict))
 
 
 class VerdictSigner:

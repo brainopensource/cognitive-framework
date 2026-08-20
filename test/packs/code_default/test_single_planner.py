@@ -14,8 +14,8 @@ class SinglePlannerTests(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.insert(0, str(PACK))
         from load import load_declared_entry
-        from layer0.kernel.budget import Governor
-        from layer0.spi.types_gen import EpisodeView, GateDecision, Reservation, SignedVerdict
+        from vanguard.packages.domain.wire.types_gen import EpisodeView, GateDecision, Reservation, SignedVerdict
+        from vanguard.packages.kernel.budget import Governor
 
         Planner = load_declared_entry("mhf.planner.drive-until-green")
         self.governor = Governor({
@@ -33,19 +33,26 @@ class SinglePlannerTests(unittest.TestCase):
         self.SignedVerdict = SignedVerdict
 
     def test_plan_emits_patch_apply(self) -> None:
-        from layer0.spi.result import Ok
+        from vanguard.packages.domain.wire.result import Ok
 
         planned = self.planner.plan(self.view, self.budget)
         self.assertIsInstance(planned, Ok)
         self.assertEqual(planned.value.requests[0].verb, "patch.apply")
+        self.assertEqual(
+            planned.value.requests[0].selector,
+            {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
+        )
         self.assertEqual(self.planner.last_model, "mock:free")
 
     def test_verdict_fail_escalates_tier(self) -> None:
-        from layer0.spi.result import Ok
+        from vanguard.packages.domain.wire.result import Ok
 
         self.planner.plan(self.view, self.budget)
         self.planner.consume_verdicts(
-            (self.SignedVerdict(verdict="fail", signature="unsigned"),),
+            (self.SignedVerdict(
+                verdict="fail", signature="unsigned", subject_digest="sha256:" + "0" * 64,
+                evaluation_request_id="eval-1", oracle_id="oracle-1", nonce="n" * 16,
+                key_id="key-1", signed_at="2026-08-20T00:00:00Z"),),
             self.GateDecision.RETRY,
         )
         planned = self.planner.plan(self.view, self.budget)
@@ -53,7 +60,7 @@ class SinglePlannerTests(unittest.TestCase):
         self.assertEqual(self.planner.last_model, "mock:cheap")
 
     def test_repair_rounds_come_from_config_not_a_hidden_constant(self) -> None:
-        from layer0.spi.result import Err
+        from vanguard.packages.domain.wire.result import Err
 
         self.planner._max_repair_rounds = 1
         self.planner.plan(self.view, self.budget)

@@ -5,10 +5,10 @@ from __future__ import annotations
 import socket
 from typing import Any, ClassVar, Mapping, Sequence
 
-from layer0.spi import jsonrpc
-from layer0.spi.ceiling import ceiling_allows
-from layer0.spi.result import Err, Ok, Result
-from layer0.spi.types_gen import (
+from ...domain.wire import jsonrpc
+from ...domain.wire.result import Err, Ok, Result
+from .ceiling import ceiling_allows
+from ...domain.wire.types_gen import (
     EffectContext,
     EffectRequest,
     Health,

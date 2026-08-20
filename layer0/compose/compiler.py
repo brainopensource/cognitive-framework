@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Mapping
 
-from layer0.events.canonical import digest_of
 from layer0.registry.grants import intersect_ceilings
-from layer0.spi.types_gen import (
+from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.wire.types_gen import (
     FrozenHarness,
     HarnessManifest,
     PluginBindings,

@@ -34,7 +34,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
-from ..canonicalisation.jcs import canonicalise, utf16_sort_key
+from ..canonicalisation.jcs import CanonicalisationError, canonicalise, parse_json_text, utf16_sort_key
 
 __all__ = [
     "SelectorError",
@@ -44,6 +44,8 @@ __all__ = [
     "canonicalise_selector",
     "decide",
     "includes",
+    "ceiling_allows",
+    "intersect_ceilings",
 ]
 
 SELECTOR_KINDS = ("fs", "network", "secret", "git", "table", "browser", "generic")
@@ -448,3 +450,52 @@ def decide(parent: Any, child: Any) -> Decision:
 def includes(parent: Any, child: Any) -> bool:
     """`child ⊆ parent`. False on every undefined pair (`CT-52`)."""
     return decide(parent, child).included
+
+
+def _as_selector(value: Any) -> Any:
+    """A ceiling item as `decide()` can read it.
+
+    `CapabilityRequirement.selector` (`domain/artifacts/manifest.py`) stores
+    the JCS-canonical *text* of a selector, not the parsed object -- that
+    text is what a declared capability ceiling is actually made of. Passing
+    it straight to `decide()` would parse-fail every comparison as
+    `unparsable` (`parse_selector` requires a `dict`), which reads as "denied"
+    for the right reason and the wrong one at once. Parsing it back through
+    the domain's own canonical-JSON reader, rather than a second `json.loads`
+    path, keeps this the one canonicalisation (ADR-0076 §3).
+    """
+    if not isinstance(value, str):
+        return value
+    try:
+        return parse_json_text(value)
+    except CanonicalisationError:
+        # Fed straight to `parse_selector` below, which rejects a non-dict
+        # with `SelectorError` -- `decide()` already turns that into a
+        # `Decision(False, "unparsable")` (`CT-52`). One failure path, not two.
+        return value
+
+
+def ceiling_allows(ceiling: Iterable[Any], requested: Any) -> Decision:
+    """Fail-closed capability ceiling (F-06/F-07). Empty ceiling authorizes nothing."""
+    items = tuple(ceiling)
+    if not items:
+        return Decision(False, "empty_ceiling")
+    for bound in items:
+        if decide(_as_selector(bound), requested).included:
+            return Decision(True, "included")
+    return Decision(False, "not_included")
+
+
+def intersect_ceilings(harness: Iterable[Any], plugin: Iterable[Any]) -> tuple[Any, ...]:
+    """plugin ∩ harness via the domain algebra. Empty either side → empty."""
+    left = tuple(harness)
+    right = tuple(plugin)
+    if not left or not right:
+        return ()
+    kept = []
+    for h in left:
+        parsed_h = _as_selector(h)
+        if any(decide(_as_selector(p), parsed_h).included
+               or decide(parsed_h, _as_selector(p)).included for p in right):
+            kept.append(h)
+    return tuple(kept)

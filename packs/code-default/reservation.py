@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import math
 
-from layer0.kernel.budget import BudgetDenied, Governor
-from layer0.spi.types_gen import Reservation
+from vanguard.packages.domain.wire.types_gen import Reservation
+from vanguard.packages.kernel.budget import BudgetDenied, Governor
 
 __all__ = ["BudgetDenied", "Governor", "is_free_model", "worst_case_reservation"]
 

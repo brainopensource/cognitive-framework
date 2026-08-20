@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 __all__ = ["EMITTER_SITES", "EVENT_KINDS"]
 

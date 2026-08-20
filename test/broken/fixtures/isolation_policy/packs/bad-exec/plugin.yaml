@@ -9,6 +9,6 @@ isolation: in_process
 capabilities:
   - verb: proc.exec
     selector:
-      kind: proc
-      executable: python3
+      kind: generic
+      uriPattern: proc://exec/allow/git,pytest,ruff,python3
 entry: nowhere.py:Bad

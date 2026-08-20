@@ -29,10 +29,10 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Target Lock (SPEC + ADRs + `002`) | As-Built State on Disk Today |
 |---|---|
-| `vanguard/packages/` = Sole CI subject of record | Living CI currently gates `test/layer0` + `test/packs` + static linters |
-| Fail-closed ceilings; signed evaluator verdicts only | `layer0/spi/ceiling.py` is fail-open; F1 unsigned `"pass"` in `layer0/scheduler/driver.py` |
-| Complete `D_H` harness compile; `mhf.trajectory/1` | `FrozenHarness` exists in domain; trajectory schema file pending (Wave 1) |
-| Wire-first plugins on canonical packages path | JSON-RPC 2.0 lives in `layer0/spi/jsonrpc.py` (packages toolkit imports it) |
+| `vanguard/packages/` = Sole CI subject of record | **Done (M-0/M-1).** Living CI gates `vanguard/packages/` suites + falsifiers; `test/layer0` is advisory only |
+| Fail-closed ceilings; signed evaluator verdicts only | **Done (M-1/2.1-D).** `adapters/sandbox/ceiling.py` is fail-closed; `layer0/kernel/`, `layer0/scheduler/` (incl. the F1 unsigned `"pass"`) deleted at 2.2-B |
+| Complete `D_H` harness compile; `mhf.trajectory/1` | **Done (M-1).** `FrozenHarness`/`D_H` in `domain/artifacts/manifest.py`; `mhf.trajectory/1` emitted at `EpisodeCompleted` |
+| Wire-first plugins on canonical packages path | JSON-RPC 2.0 lives in `domain/wire/jsonrpc.py` (2.1-A); `layer0/spi/` deleted at 2.2-B. Plugin lifecycle (`layer0/registry/`, `layer0/compose/`) still Wave-3 material |
 | One verified coding-agent E2E (Wave 4) | `packs/code-default` + `agency/manifests/vg-*` + `vg` CLI — not that E2E yet |
 
 ---

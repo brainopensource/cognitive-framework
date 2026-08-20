@@ -15,7 +15,7 @@ class TerminalRunnerTests(unittest.TestCase):
     def setUp(self) -> None:
         sys.path.insert(0, str(PACK))
         from load import load_declared_entry
-        from layer0.spi.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
+        from vanguard.packages.domain.wire.types_gen import EffectContext, EffectRequest, Reservation, SinkClass
 
         self.tmpdir = tempfile.TemporaryDirectory()
         Toolkit = load_declared_entry("mhf.toolkit.terminal")
@@ -32,7 +32,7 @@ class TerminalRunnerTests(unittest.TestCase):
         request = self._req(
             verb="proc.exec",
             args={"argv": ["python3", "-u", "-c", "import time,sys; print('FAILED', flush=True); time.sleep(1.5)"]},
-            selector={"kind": "proc", "executable": "python3"},
+            selector={"kind": "generic", "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"},
             sink=self._sink.PRIVILEGED,
             reservation=self._res(0, 8000, 0, 0, 1, 1),
         )
@@ -45,7 +45,7 @@ class TerminalRunnerTests(unittest.TestCase):
         request = self._req(
             verb="proc.exec",
             args={"argv": ["python3", "-c", "print('ok')"]},
-            selector={"kind": "proc", "executable": "python3"},
+            selector={"kind": "generic", "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"},
             sink=self._sink.PRIVILEGED,
             reservation=self._res(0, 8000, 0, 0, 1, 1),
         )

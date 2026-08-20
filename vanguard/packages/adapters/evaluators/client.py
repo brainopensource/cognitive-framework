@@ -11,6 +11,7 @@ import json
 import socket
 import struct
 import base64
+from typing import Any, Mapping
 
 from vanguard.packages.ports.evaluator import EvaluationProtocol, EvaluatorPort, RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
@@ -105,20 +106,28 @@ class EvaluatorClient(EvaluatorPort):
                 if "error" in resp:
                     return self._inconclusive("instrument_error")
 
+                # `v_data` is the exact JCS-signed body (ADR-0076 §5): the
+                # bound `verdict` string plus binding fields, never the raw
+                # `outcome`/`claims` evidence directly. Verifying it here is
+                # verifying the same bytes the daemon signed.
                 v_data = resp.get("verdict", {})
                 signature = resp.get("signature")
                 key_id = resp.get("keyId")
+                binding: Mapping[str, Any] | None = None
                 if self._expected_verdict_public_key is not None:
                     if key_id != self._expected_verdict_key_id or not isinstance(signature, str):
                         return self._inconclusive("evaluator_verdict_unverified")
                     if not VerdictSigner.verify(v_data, signature, self._expected_verdict_public_key):
                         return self._inconclusive("evaluator_verdict_unverified")
+                    binding = v_data
+                claims = tuple(resp.get("claims", ()))
                 verdict = Verdict(
-                    outcome=v_data.get("outcome", "inconclusive"),
-                    claims=tuple(v_data.get("claims", ())),
-                    reason=v_data.get("reason", ""),
+                    outcome="claims" if claims else "inconclusive",
+                    claims=claims,
+                    reason=resp.get("reason", ""),
                     signature=signature,
                     signer_key_id=key_id,
+                    binding=binding,
                 )
                 return Result.success(verdict)
 

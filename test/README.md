@@ -70,7 +70,7 @@ test/
 ├── trust/             # Trust spine end-to-end receipt chains and cryptographic signature verification
 ├── governance/        # Ed25519 signature validation and human-in-the-loop approval policies
 ├── packs/             # Domain Pack #1 (packs/code-default) plugin tests (ast-patch, repo-map, planner, terminal)
-├── layer0/            # Copy-fork microkernel suite (SPI, JSON-RPC, sequential driver, registry)
+├── layer0/            # Copy-fork remainder (registry, compose; Wave-3 material) -- kernel/scheduler/spi absorbed and deleted at 2.2-B
 ├── registry/          # Plugin registry lifecycle, RPC gate attenuation, validator tests
 ├── benchmarks/        # Latency benchmarks, telemetry provenance, instrument tuple verification
 ├── lab/               # Lab measurement harness, AA runners, statistical splits (promotion deferred)
@@ -92,15 +92,25 @@ Tests the pure mathematical security core of Vanguard (`vanguard/packages/kernel
 - `test_budget.py` & `test_grant_budget_events.py`: Verifies turn count, token budget, and cost ceiling enforcement.
 - `test_grant_wire_shape.py`: Verifies capability grant serialization and deserialization.
 - `test_provenance.py`: Verifies cryptographic lineage and execution causal DAGs.
-- `test_replay_parity.py`: Verifies exact deterministic replay given identical event streams.
 
-### `test/contracts/` — Hexagonal Port Contracts & Wire Invariants (121 tests)
+Replay-parity (I-4, F-02) lives on the packages path in `test/runtime/test_ledger_truth.py`
+(`ColdReplayParity`), folding from a real WAL file in a fresh process. The former
+`test/kernel/test_replay_parity.py` imported the layer0 fold/driver despite its location and is
+removed (Wave 1, 1.3-B hygiene) — it tested nothing packages-scoped. `layer0/events/fold.py` and
+its `test/layer0/replay/test_parity.py` twin are themselves deleted at 2.2-B (KILL: strict subset
+of `domain/ledger/reducer.py`).
+
+### `test/contracts/` — Hexagonal Port Contracts & Wire Invariants (128 tests)
 Enforces port behavior and wire schemas across both Python and TypeScript parity:
 - `t1_dev1_canonicalisation.py`: Verifies RFC-8785 JSON Canonicalization Scheme (JCS) determinism.
 - `t1_dev1_primitives.py` & `t1_dev1_selectors.py`: Verifies URI and resource selector parsing (`file://`, `proc://`, `net://`).
 - `t1_wire_contracts.py`: Validates wire-level contracts for models, tools, and events.
 - `t3_ledger.py` & `t7_artifact_graph.py`: Validates event stream append-only rules and artifact DAG constraints.
 - `test_*_port.py`: Verifies abstract port contracts (`ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `EnvironmentPort`).
+- `test_spi_protocols.py`: Wave-2 2.1-C — the five SPI Protocols (`IPlanner`, `IContextManager`,
+  `IToolkit`, `IMemoryEngine`, `IEvaluationGate`) now live at `ports/spi.py`; real first-party
+  adapters are checked against them by `isinstance` (not fakes). Also proves `layer0/spi/result.py`
+  (the 2.1-A re-export shim) is gone entirely as of 2.2-B, not merely unused.
 
 ### `test/agency/` — Recursive Agency & Turn Engine (107 tests)
 Tests the recursive turn execution and context machinery (`vanguard/packages/agency`):
@@ -136,11 +146,19 @@ Tests domain-specific packs (`packs/code-default/`):
 - `test_terminal_runner.py`: Verifies safe terminal command execution within the sandbox.
 - `test_walking_skeleton.py`: Verifies the end-to-end flow of compiling `harness.yaml` into a runnable coding agent.
 
-### `test/layer0/` — Copy-Fork Microkernel (25 tests)
-Tests the copy-fork components (`layer0/`) destined for absorption into `vanguard/packages/` during Wave 2:
-- `test_interfaces.py`: Verifies SPI contracts.
-- `test_driver.py`: Verifies sequential scheduling. **Note**: Defect F1 currently *passes* in CI because the driver itself fabricates `"pass"` verdicts; fixing F1 in Wave 1 requires wiring real signed exterior evaluator checks.
-- `test_canonical.py` & `test_fold.py`: Verifies event store and memory ledger operations.
+### `test/layer0/` — Copy-Fork Remainder (4 tests)
+2.2-B deleted `layer0/kernel/`, `layer0/scheduler/` (defect F1's fabricated `"pass"` verdict died with
+the driver -- F-03 was repointed onto `runtime/evaluator_gateway.py` at M-1 and never lived here) and
+`layer0/spi/` (`interfaces.py`/`fakes.py`, and the `jsonrpc`/`result`/`types_gen`/`ceiling` re-export
+shims once every importer moved to `domain/wire/` and `adapters/sandbox/`). What remains is Wave-3
+material only, kept because it has no packages equivalent yet (2.2-A triage):
+- `compose/test_compiler.py`: Verifies the plugin-slot harness compiler (`layer0/compose/`).
+- `registry/test_lifecycle.py`: Verifies the plugin lifecycle FSM (`layer0/registry/`).
+
+Packages-side twins for the deleted surfaces already exist: replay-parity is
+`test/runtime/test_ledger_truth.py::ColdReplayParity` (cold fold from a real WAL file, not the
+same-list-twice mechanism `layer0/events/fold.py` used); the SPI Protocols are
+`test/contracts/test_spi_protocols.py`, checked against real adapters via `ports/spi.py`.
 
 ### `test/broken/fixtures/` — Negative Architectural Fixtures
 Contains deliberate architectural violations (cycles, illegal imports, domain leakages, secret patterns, TCB budget breaches). These fixtures are executed by tools in `tools/` (e.g. `check_boundaries.py`, `check_domain_blindness.py`, `check_isolation_policy.py`, `scan_secrets.py`) to prove that our linters **fail-closed** when violations occur.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import socket
@@ -12,8 +13,8 @@ from typing import Any, Mapping, Sequence
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from layer0.spi.result import Err, Ok
-from layer0.spi.types_gen import (
+from vanguard.packages.domain.wire.result import Err, Ok
+from vanguard.packages.domain.wire.types_gen import (
     ClaimRef,
     EffectContext,
     EffectFailure,
@@ -156,12 +157,12 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
         self.cell = self.broker.bind(
             "mhf.toolkit.echo",
             limits=_LIMITS,
-            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}},),
+            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},),
         )
         self.broker.start(self.cell)
         self.toolkit = SubprocessToolkitAdapter(
             self.cell.socket_path,
-            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace"}},),
+            capabilities=({"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},),
         )
 
     def tearDown(self) -> None:
@@ -171,7 +172,7 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
         request = EffectRequest(
             verb="echo",
             args={"text": "via-adapter"},
-            selector={"kind": "fs", "root": "/workspace"},
+            selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
             sink=SinkClass.OBSERVATION,
             reservation=_BUDGET,
         )
@@ -181,7 +182,7 @@ class SubprocessToolkitAdapterTests(unittest.TestCase):
             EffectRequest(
                 verb="proc.exec",
                 args={"command": ["id"]},
-                selector={"kind": "proc", "executable": "/bin/id"},
+                selector={"kind": "generic", "uriPattern": "proc://exec/allow/id"},
                 sink=SinkClass.PRIVILEGED,
                 reservation=_BUDGET,
             ),
@@ -244,14 +245,25 @@ class ExteriorJudgeAdapterTests(unittest.TestCase):
         )
         requested = gate.request(EvaluationSubject(run_id="r1", episode_id="e1"))
         self.assertIsInstance(requested, Ok)
+
+        # `gate()` re-verifies on read (ADR-0076 §5, F-03/F-08): a verdict
+        # bearing a signature this evaluator's key did not produce is not
+        # evidence, no matter what its `verdict` field claims.
+        def signed(outcome: str) -> SignedVerdict:
+            body = {"verdict": outcome, "subject_digest": "sha256:" + "0" * 64,
+                    "evaluation_request_id": "eval-1", "oracle_id": "oracle-1",
+                    "nonce": "n" * 16, "key_id": "eval-test", "signed_at": "2026-08-20T00:00:00Z"}
+            return SignedVerdict(signature=signer.sign(body), **body)
+
+        self.assertEqual(gate.gate((signed("pass"),)), GateDecision.PASS)
+        self.assertEqual(gate.gate((signed("fail"),)), GateDecision.RETRY)
+        tampered = dataclasses.replace(signed("pass"), signature="not-a-real-signature")
         self.assertEqual(
-            gate.gate((SignedVerdict(verdict="pass", signature="ok"),)),
-            GateDecision.PASS,
+            gate.gate((tampered,)),
+            GateDecision.ABANDON,
+            "an unverifiable signature must not pass the gate",
         )
-        self.assertEqual(
-            gate.gate((SignedVerdict(verdict="fail", signature="ok"),)),
-            GateDecision.RETRY,
-        )
+
         prereg = gate.preregister(OracleSpec(id="oracle-1"))
         self.assertIsInstance(prereg, Ok)
         thread.join(timeout=2)

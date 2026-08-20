@@ -36,7 +36,7 @@ class RepoMapTests(unittest.TestCase):
         self.assertTrue(any(item["name"] == "hello" for item in self.index._symbols))
 
     def test_receipt_marks_dirty_subtree(self) -> None:
-        from layer0.spi.types_gen import ArtifactRef, Receipt, Reservation
+        from vanguard.packages.domain.wire.types_gen import ArtifactRef, Receipt, Reservation
 
         self.index.scan()
         receipt = Receipt(
@@ -49,8 +49,8 @@ class RepoMapTests(unittest.TestCase):
         self.assertIn("src/app.py", self.index._dirty)
 
     def test_context_compile_respects_token_budget(self) -> None:
-        from layer0.spi.result import Ok
-        from layer0.spi.types_gen import EpisodeView
+        from vanguard.packages.domain.wire.result import Ok
+        from vanguard.packages.domain.wire.types_gen import EpisodeView
 
         compiled = self.context.compile(EpisodeView("r", "e", 1, "goal"), budget_tokens=16)
         self.assertIsInstance(compiled, Ok)

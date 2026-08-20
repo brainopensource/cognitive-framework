@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Emit frozen dataclasses from schemas/mhf/*.schema.json into layer0/spi/types_gen.py."""
+"""Emit frozen dataclasses from schemas/mhf/*.schema.json into
+vanguard/packages/domain/wire/types_gen.py -- the sole canonical target
+(Wave-2 2.1-B). `layer0/spi/types_gen.py` was a re-export shim for `layer0/`
+consumers; 2.2-B rewrote every one of them onto this module directly and
+deleted the shim, so this generator no longer writes a second file."""
 
 from __future__ import annotations
 
@@ -300,12 +304,12 @@ def main() -> int:
     args = parser.parse_args()
     root = repo_root()
     schema_dir = root / "schemas" / "mhf"
-    out_path = root / "layer0" / "spi" / "types_gen.py"
+    out_path = root / "vanguard" / "packages" / "domain" / "wire" / "types_gen.py"
     text = render(schema_dir)
     if args.check:
         current = out_path.read_text(encoding="utf-8") if out_path.exists() else ""
         if current != text:
-            print("CODEGEN FAIL: layer0/spi/types_gen.py is stale; run tools/codegen/generate_types.py")
+            print(f"CODEGEN FAIL: {out_path.relative_to(root)} stale; run tools/codegen/generate_types.py")
             return 1
         print("CODEGEN PASS: types_gen.py matches schemas/mhf")
         return 0

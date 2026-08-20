@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from layer0.spi.types_gen import EventEnvelope
+from vanguard.packages.domain.wire.types_gen import EventEnvelope
 from .emitter import InMemorySink, LedgerEmitter
 from .envelope import EnvelopeFactory
 

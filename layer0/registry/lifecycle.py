@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 
 from layer0.events.emitter import LedgerEmitter
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 __all__ = ["PluginLifecycle", "PluginState"]
 

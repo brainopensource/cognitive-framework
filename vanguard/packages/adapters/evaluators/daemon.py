@@ -15,14 +15,32 @@ import struct
 import argparse
 import base64
 import sys
+import time
 from dataclasses import dataclass
 from typing import Mapping
 
 from vanguard.packages.adapters.evaluators.isolated import IsolatedEvaluator
 from vanguard.packages.adapters.evaluators.signing import VerdictSigner
-from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef
+from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
 
 __all__ = ["DaemonConfig", "EvaluatorDaemon", "main"]
+
+
+def _reduce_outcome(verdict: Verdict) -> str:
+    """Fold the evidence-plane `Verdict` (raw claims, M5) to the bound
+    `SignedVerdict.verdict` enum (ADR-0076 §5): `pass` | `fail` |
+    `inconclusive`. Anything short of an explicit passing claim is not a
+    pass — fail-closed, per the exterior-judge thesis (I-5).
+    """
+    if verdict.outcome != "claims" or not verdict.claims:
+        return "inconclusive"
+    status = verdict.claims[0].get("status")
+    if status == "passed":
+        return "pass"
+    if status == "failed":
+        return "fail"
+    return "inconclusive"
 
 
 @dataclass(frozen=True)
@@ -135,16 +153,39 @@ class EvaluatorDaemon:
                 return
 
             verdict = result.value
-            verdict_data = {
-                "outcome": verdict.outcome,
-                "claims": verdict.claims,
-                "reason": verdict.reason,
-            }
+            claims = verdict.claims
+            reason = verdict.reason
             if self._signer is None:
-                verdict_data = {"outcome": "inconclusive", "claims": [], "reason": "evaluator_signer_unavailable"}
-            signature = self._signer.sign(verdict_data) if self._signer else ""
-            resp = {"verdict": verdict_data, "signature": signature,
-                    "keyId": self._signer.key_id if self._signer else ""}
+                claims = ()
+                reason = "evaluator_signer_unavailable"
+
+            # ADR-0076 §5 binding contract (F-04): the signed body carries
+            # `verdict` plus every binding field, all under one JCS signature.
+            # `subject_digest` binds this run/episode identity because the
+            # wire protocol here carries no separate artifact digest; `nonce`
+            # is the same fresh, single-use handshake nonce the client already
+            # echoed back, so a captured signature cannot be replayed against
+            # a later connection.
+            signed_body: dict = {
+                "verdict": _reduce_outcome(verdict) if self._signer is not None else "inconclusive",
+                "subject_digest": digest_of({"run_id": run_ref.run_id, "episode_id": run_ref.episode_id}),
+                "evaluation_request_id": f"eval-{nonce}",
+                "oracle_id": protocol.name or digest_of(dict(self._config.oracle_digests)),
+                "nonce": nonce,
+                "key_id": self._signer.key_id if self._signer else "",
+                "signed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            }
+            signature = self._signer.sign(signed_body) if self._signer else ""
+            resp = {
+                "verdict": signed_body,
+                "signature": signature,
+                "keyId": self._signer.key_id if self._signer else "",
+                # Legacy evidence fields for `EvaluatorClient`/`Verdict`
+                # (ports/evaluator.py) callers not yet migrated to the bound
+                # `SignedVerdict` reader (1.1-D/E).
+                "claims": claims,
+                "reason": reason,
+            }
             conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
         except Exception:
             print("evaluator request failed", file=sys.stderr)

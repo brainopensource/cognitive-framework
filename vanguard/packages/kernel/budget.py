@@ -40,6 +40,14 @@ class BudgetDenied(Exception):
         self.reason = reason
 
 
+#: The conserved dimensions, and the whole of them (ADR-0074 §2). The
+#: governor holds and sums exactly these. `depth` and `turns` are structural
+#: ceilings enforced by attenuation (`Constraints.max_depth`) and by the
+#: episode loop (`task.max_turns`) respectively -- summing either across
+#: siblings is the `F-10` defect.
+ADDITIVE_DIMENSIONS = frozenset({"usd_micros", "millis", "tokens", "bytes"})
+
+
 @dataclass(frozen=True, slots=True)
 class Reservation:
     """What a request asks to hold. Every dimension is an integer."""
@@ -50,6 +58,9 @@ class Reservation:
     bytes_: int = 0
 
     def as_map(self) -> Mapping[str, int]:
+        # Additive conserved dimensions only (ADR-0074 §2). Structural
+        # ceilings (depth, turns) are not costs and MUST NOT appear here:
+        # sibling depths are never summed into remaining().
         return {"usd_micros": self.usd_micros, "millis": self.millis,
                 "tokens": self.tokens, "bytes": self.bytes_}
 
@@ -113,7 +124,20 @@ class Governor:
             if parent is None or parent.state is not LeaseState.OPEN:
                 # `F-13`: a closed parent cannot fund a child.
                 raise BudgetDenied("parent_lease", 0, 0, "parent_closed")
-        wanted = {key: value for key, value in reservation.as_map().items() if value}
+        # `F-10`, 2.2-A: the governor names its own dimensions rather than
+        # trusting whatever `as_map()` hands it. `Reservation` is duck-typed
+        # here, and the generated wire `Reservation` (`domain/wire/types_gen`)
+        # is structurally interchangeable with this one while carrying `depth`
+        # and `turns` -- holding those would sum sibling depths into
+        # `remaining()`, which is exactly the defect the layer0 governor had.
+        # Silently ignoring them would deny nothing but also enforce nothing;
+        # refusing is the only reading that cannot hide a lost ceiling.
+        offered = reservation.as_map()
+        structural = sorted(set(offered) - ADDITIVE_DIMENSIONS)
+        if structural:
+            raise BudgetDenied(structural[0], offered[structural[0]], 0,
+                               "not_a_conserved_dimension")
+        wanted = {key: value for key, value in offered.items() if value}
         for dimension, amount in wanted.items():
             if amount > self.remaining(dimension):
                 raise BudgetDenied(dimension, amount, self.remaining(dimension), "denied")

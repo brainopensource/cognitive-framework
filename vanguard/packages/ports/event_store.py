@@ -59,6 +59,7 @@ class EventRange:
     scope: Optional[str] = None
     after_seq: Optional[str] = None
     limit: Optional[int] = None
+    project_id: Optional[str] = None
 
 
 class EventStorePort(Protocol):

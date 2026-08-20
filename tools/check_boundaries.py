@@ -25,9 +25,10 @@ ALLOWED = {
     "ports": {"domain"},
     "kernel": {"domain", "ports"},
     "agency": {"domain", "ports", "kernel"},
-    # First-party SPI adapters (M2) implement layer0.spi protocols; they still
-    # must not import kernel/agency/registry (plugin cells stay untrusted).
-    "adapters": {"domain", "ports", "layer0_spi"},
+    # First-party SPI adapters (M2) implement the `ports/spi.py` protocols
+    # (2.1-C); they still must not import kernel/agency/registry (plugin
+    # cells stay untrusted).
+    "adapters": {"domain", "ports"},
     # VG-03 LT-6: runtime/ may import everything, and it is the only module
     # that may -- it is the composition root. Omitting "governance" made the
     # declared approval process unreachable from any composition, which is a
@@ -44,20 +45,20 @@ ALLOWED = {
     # which is what keeps the coding cell a client and not a second ontology.
     "apps": {"domain", "ports", "kernel", "agency", "adapters", "runtime", "governance"},
     "client": {"domain", "runtime"},
-    # MHF Layer-0 lattice (SPEC §1): events ← kernel ← spi ← registry ← scheduler ← compose
-    # Kernel may import generated SPI types (A-4). Plugins (M2+) import spi+events only.
-    "layer0_events": {"layer0_spi"},
-    "layer0_kernel": {"layer0_events", "layer0_spi"},
-    "layer0_spi": set(),
-    "layer0_registry": {"layer0_spi", "layer0_events"},
-    "layer0_scheduler": {"layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry"},
-    "layer0_compose": {
-        "layer0_spi", "layer0_events", "layer0_kernel", "layer0_registry", "layer0_scheduler",
-    },
+    # MHF Layer-0 lattice (SPEC §1), post-2.2-B: `kernel/`, `scheduler/` and
+    # `spi/` are deleted (absorbed into the canonical packages path); the
+    # surviving `events/`, `registry/`, `compose/` (Wave-3 material, per the
+    # 2.2-A triage) import the canonical generated types and SPI Result ADT
+    # directly from `domain/wire/` -- there is no `layer0/spi/` left to
+    # re-export them. `registry/` additionally imports the canonical ceiling
+    # delegate from `adapters/sandbox/` (2.1-D).
+    "layer0_events": {"domain"},
+    "layer0_registry": {"layer0_events", "domain", "adapters"},
+    "layer0_compose": {"layer0_registry", "domain"},
 }
 
 LAYER0_PACKAGES = (
-    "events", "kernel", "spi", "registry", "scheduler", "compose",
+    "events", "registry", "compose",
 )
 
 # S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
@@ -88,7 +89,23 @@ SUBPROCESS_ALLOWLIST = {
 # evaluator adapters, save the composition root's explicit binding table.
 EVALUATOR_FAMILY = "evaluators"
 EVALUATOR_IMPORT_SOURCES = {"agency", "runtime", "governance"}
-EVALUATOR_BINDING_SITE = "vanguard/packages/runtime/root.py"
+EVALUATOR_BINDING_SITES = frozenset({
+    "vanguard/packages/runtime/root.py",
+    # 2.2-C: composition/session/wiring may bind the exterior judge; root stays
+    # the public facade. Extra rows are inert until those modules exist.
+    "vanguard/packages/runtime/compose.py",
+    "vanguard/packages/runtime/session.py",
+    "vanguard/packages/runtime/wiring.py",
+})
+
+# Wave-2 absorb shims. `layer0/spi/{ceiling,types_gen,result,jsonrpc}.py`
+# were re-export shims during 2.1; 2.2-B rewrote every importer onto the
+# canonical `domain/wire/` and `adapters/sandbox/` modules directly and
+# deleted `layer0/spi/` entirely, so there is nothing left to name here.
+# Kept as an empty, named mechanism (not removed) because 3.1's absorption of
+# `layer0/registry/` and `layer0/compose/` is expected to need it again for
+# specific files, the same way this one did.
+ABSORB_SHIMS: dict[str, frozenset[str]] = {}
 
 JS_IMPORT = re.compile(
     r"(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\brequire\s*\(|\bimport\s*\()"
@@ -312,13 +329,13 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 source_area in EVALUATOR_IMPORT_SOURCES
                 and target_area == "adapters"
                 and target_family == EVALUATOR_FAMILY
-                and rel_source != EVALUATOR_BINDING_SITE
+                and rel_source not in EVALUATOR_BINDING_SITES
             ):
                 errors.append(
                     f"{rel_source}:{line}: {source_area} may not reach adapters/evaluators "
                     f"({spec!r}); A-05/LT-4 -- a component that can construct its own evaluator "
-                    f"is a second judge. Only {EVALUATOR_BINDING_SITE}'s EVALUATOR_BINDINGS "
-                    f"may name one"
+                    f"is a second judge. Only the composition-root binding table "
+                    f"({sorted(EVALUATOR_BINDING_SITES)}) may name one"
                 )
                 continue
             lowered_spec = spec.lower().replace("_", "-")
@@ -357,7 +374,12 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             if source_area in {"spike", "slice"}:
                 continue
             if source_area in ALLOWED and target_area not in ALLOWED[source_area]:
-                errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
+                shim_ok = (
+                    rel_source in ABSORB_SHIMS
+                    and target_area in ABSORB_SHIMS[rel_source]
+                )
+                if not shim_ok:
+                    errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
 
     for cycle in find_cycles(graph):
         rendered = " -> ".join(str(path.relative_to(root)) for path in cycle)

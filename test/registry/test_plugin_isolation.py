@@ -13,7 +13,7 @@ from pathlib import Path
 from layer0.events.store import MemoryLedger
 from layer0.registry.broker import CellState, IllegalCellTransition, PluginIsolationBroker
 from layer0.registry.sandbox import SandboxLimits
-from layer0.spi.types_gen import EventKind
+from vanguard.packages.domain.wire.types_gen import EventKind
 
 _LIMITS = SandboxLimits(
     cpu_seconds=2,
@@ -21,6 +21,12 @@ _LIMITS = SandboxLimits(
     max_open_files=32,
     max_processes=64,
 )
+_FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+_ECHO_CAPS = ({"verb": "echo", "selector": _FS},)
+
+
+def _echo_params(text: str) -> dict:
+    return {"verb": "echo", "args": {"text": text}, "selector": _FS}
 
 
 def _wait_until(predicate, timeout: float = 3.0) -> bool:
@@ -45,7 +51,7 @@ class PluginIsolationTests(unittest.TestCase):
         self.broker.shutdown()
 
     def test_fsm_bind_start_terminate(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.assertEqual(cell.state, CellState.BOUND)
         self.broker.start(cell)
         self.assertEqual(cell.state, CellState.RUNNING)
@@ -61,24 +67,24 @@ class PluginIsolationTests(unittest.TestCase):
             self.broker.start(cell)
 
     def test_jsonrpc_echo_roundtrip(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
-        response = self.broker.call(cell, "execute", {"verb": "echo", "args": {"text": "ping"}})
+        response = self.broker.call(cell, "execute", _echo_params("ping"))
         self.assertTrue(response.ok)
         self.assertEqual(response.result["echo"], "ping")
 
     def test_child_stdout_does_not_pollute_parent(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
-            self.broker.call(cell, "execute", {"verb": "echo", "args": {"text": "LEAK-MARKER"}})
+            self.broker.call(cell, "execute", _echo_params("LEAK-MARKER"))
         self.assertNotIn("LEAK-MARKER", buf.getvalue())
         log_text = Path(cell.stdout_log).read_text(encoding="utf-8")
         self.assertIn("LEAK-MARKER", log_text)
 
     def test_sigkill_emits_plugin_failed_and_cleans_socket(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         socket_path = cell.socket_path
         os.kill(cell.pid, signal.SIGKILL)
@@ -91,22 +97,22 @@ class PluginIsolationTests(unittest.TestCase):
         self.assertEqual(payload.get("status"), "PluginFailed")
 
     def test_sigsegv_does_not_crash_broker(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         os.kill(cell.pid, signal.SIGSEGV)
-        response = self.broker.call(cell, "execute", {"verb": "echo", "args": {"text": "x"}})
+        response = self.broker.call(cell, "execute", _echo_params("x"))
         self.assertFalse(response.ok)
         self.assertEqual(cell.state, CellState.TERMINATED)
         self.assertEqual(self.ledger.envelopes[-1].kind, EventKind.PLUGIN_FAULTED)
         # Broker remains usable for a new cell.
-        other = self.broker.bind("mhf.toolkit.echo-2", limits=_LIMITS)
+        other = self.broker.bind("mhf.toolkit.echo-2", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(other)
         ok = self.broker.call(other, "health", {})
         self.assertTrue(ok.ok)
         self.broker.terminate(other)
 
     def test_child_reports_enforced_rlimits(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         health = self.broker.call(cell, "health", {})
         self.assertTrue(health.ok)
@@ -117,7 +123,7 @@ class PluginIsolationTests(unittest.TestCase):
         self.assertEqual(int(rlimits["nproc"][0]), _LIMITS.max_processes)
 
     def test_reap_is_idempotent_after_clean_terminate(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         self.broker.terminate(cell)
         self.broker.reap(cell, timeout=1.0)
@@ -126,7 +132,7 @@ class PluginIsolationTests(unittest.TestCase):
         self.assertEqual(faulted, [])
 
     def test_wait_helper_sees_running_pid(self) -> None:
-        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS)
+        cell = self.broker.bind("mhf.toolkit.echo", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(cell)
         self.assertTrue(_wait_until(lambda: cell.pid is not None and os.path.exists(cell.socket_path)))
         self.broker.terminate(cell)

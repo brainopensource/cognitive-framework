@@ -9,6 +9,6 @@ isolation: container
 capabilities:
   - verb: proc.exec
     selector:
-      kind: proc
-      executable: python3
+      kind: generic
+      uriPattern: proc://exec/allow/git,pytest,ruff,python3
 entry: toolkits/terminal_runner.py:TerminalToolkit

@@ -82,10 +82,21 @@ class Constraints:
 
 
 def _exceeds(child: int | None, parent: int | None) -> bool:
-    """`None` on a parent means unbounded; `None` on a child means it inherits
-    the parent's bound, which is never a widening."""
+    """Additive bound check. `None` is unbounded.
+
+    An unbounded child under a bounded parent is a widening (1.3-C / F-09):
+    fail closed. An unbounded parent cannot be exceeded.
+
+    Reviewed and accepted at the M-1 gate as the whole of the TCB-touching
+    Wave-1 kernel diff. Two properties make it safe to take: it is called
+    only on the *additive* dimensions (`max_bytes`, `max_effects`) --
+    `max_depth` is compared directly above, because depth is a structural
+    ceiling and not a cost -- and the changed branch can only ever turn an
+    `allow` into a `deny`, never the reverse, so no previously-denied
+    attenuation becomes reachable. Net LOC delta is zero.
+    """
     if child is None:
-        return False
+        return parent is not None
     if parent is None:
         return False
     return child > parent

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any, Mapping
 from ..canonicalisation.digest import digest_of
 from ..selectors.resource_selector import canonicalise_selector, parse_selector
 from .graph import ArtifactGraph
@@ -77,16 +78,22 @@ class FrozenHarness:
     evaluators: tuple[str, ...]
     budget_policy: str
     graph_digest: str
+    identity: Mapping[str, Any] = field(default_factory=dict)
     composition_digest: str = field(init=False)
 
     def __post_init__(self) -> None:
+        # D_H (ADR-0076 §4): episode_id is instance identity, not composition
+        # identity. Extra identity keys (prompt, ceiling, approval, routes)
+        # are supplied by Runtime.compose.
         object.__setattr__(self, "composition_digest", digest_of({
-            "harness": self.harness, "episodeId": self.episode_id,
+            "harness": self.harness,
             "components": self.components,
             "capabilities": tuple((item.verb, item.sink, item.selector, item.risk)
                                   for item in self.capabilities),
-            "evaluators": self.evaluators, "budgetPolicy": self.budget_policy,
+            "evaluators": self.evaluators,
+            "budgetPolicy": self.budget_policy,
             "graphDigest": self.graph_digest,
+            **dict(self.identity),
         }))
 
     def capability(self, verb: str) -> CapabilityRequirement:
@@ -140,7 +147,8 @@ def parse_manifest(raw: object) -> HarnessManifest:
                            raw.get("undeletable") is True)
 
 
-def compose(manifest: HarnessManifest, graph: ArtifactGraph, episode_id: str) -> FrozenHarness:
+def compose(manifest: HarnessManifest, graph: ArtifactGraph, episode_id: str,
+            identity: Mapping[str, Any] | None = None) -> FrozenHarness:
     if not episode_id:
         raise ManifestError("composition requires an episode id")
     files = graph.by_path()
@@ -160,4 +168,5 @@ def compose(manifest: HarnessManifest, graph: ArtifactGraph, episode_id: str) ->
                                 for artifact in closure])
     return FrozenHarness(manifest.harness, episode_id, tuple(resolved),
                          manifest.capabilities, manifest.evaluators,
-                         files[manifest.budget_policy].digest, closure_digest)
+                         files[manifest.budget_policy].digest, closure_digest,
+                         dict(identity or {}))

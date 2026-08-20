@@ -248,9 +248,9 @@ class SourceClassTrust(unittest.TestCase):
     def test_no_call_site_literal_mints_operator_trust(self) -> None:
         import inspect
 
-        import vanguard.packages.runtime.root as root_module
+        import vanguard.packages.runtime.wiring as wiring_module
 
-        source = inspect.getsource(root_module)
+        source = inspect.getsource(wiring_module)
         # The only live (non-comment) source line naming `Trust.OPERATOR` is
         # the source-class table's own declaration; every call site goes
         # through `_span_for` by source-class string instead.

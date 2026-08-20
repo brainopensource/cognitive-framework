@@ -113,12 +113,19 @@ class ShellBaselineContract(unittest.TestCase):
         self.assertEqual(len(self.manifest.capabilities), 1)
         self.assertEqual(self.manifest.capabilities[0].sink, "privileged")
 
-    def test_composition_freezes_digests_per_episode(self) -> None:
+    def test_composition_digest_is_episode_independent(self) -> None:
+        """ADR-0076 §4 / 1.3-A (F-11): `D_H` is the composition's identity, not
+        the run's. `episode_id` is an instance id carried on the frozen
+        harness -- it must differ across two runs of the same composition --
+        but it is not part of `composition_digest`'s input, so two runs of one
+        composition collide byte-identically on that digest.
+        """
         frozen = compose(self.manifest, self.workspace.graph, "episode-1")
         again = compose(self.manifest, self.workspace.graph, "episode-1")
         other = compose(self.manifest, self.workspace.graph, "episode-2")
         self.assertEqual(frozen.composition_digest, again.composition_digest)
-        self.assertNotEqual(frozen.composition_digest, other.composition_digest)
+        self.assertEqual(frozen.composition_digest, other.composition_digest)
+        self.assertNotEqual(frozen.episode_id, other.episode_id)
         self.assertEqual(frozen.capability("proc.exec").risk, "high")
 
     def test_unreferenced_artifact_does_not_change_composed_identity(self) -> None:
@@ -194,12 +201,17 @@ class CodeDefaultHarnessContract(unittest.TestCase):
         self.assertEqual(sinks["patch.apply"], "privileged")
         self.assertEqual(sinks["proc.exec"], "privileged")
 
-    def test_composition_freezes_digests_per_episode(self) -> None:
+    def test_composition_digest_is_episode_independent(self) -> None:
+        """ADR-0076 §4 / 1.3-A (F-11): see the sibling test on
+        `ShellBaselineContract` -- `episode_id` is instance identity, not
+        composition identity.
+        """
         frozen = compose(self.manifest, self.workspace.graph, "episode-1")
         again = compose(self.manifest, self.workspace.graph, "episode-1")
         other = compose(self.manifest, self.workspace.graph, "episode-2")
         self.assertEqual(frozen.composition_digest, again.composition_digest)
-        self.assertNotEqual(frozen.composition_digest, other.composition_digest)
+        self.assertEqual(frozen.composition_digest, other.composition_digest)
+        self.assertNotEqual(frozen.episode_id, other.episode_id)
 
     def test_registry_contains_both_manifests_and_protects_undeletable_control(self) -> None:
         registry = ManifestRegistry.parse(json.loads((MANIFESTS / "registry.json").read_text()))

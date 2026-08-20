@@ -26,7 +26,14 @@ from vanguard.packages.runtime.root import (
     _reservation_for,
 )
 
-ROOT_PY = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime" / "root.py"
+RUNTIME = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime"
+
+
+def _runtime_source() -> str:
+    return "\n".join(
+        (RUNTIME / name).read_text(encoding="utf-8")
+        for name in ("root.py", "compose.py", "session.py", "wiring.py")
+    )
 
 
 class BwrapIsProbedNotAssumed(unittest.TestCase):
@@ -61,7 +68,7 @@ class BwrapIsProbedNotAssumed(unittest.TestCase):
         self.assertIn("bubblewrap", message.lower())
 
     def test_no_absolute_bwrap_literal_remains_in_the_composition_root(self) -> None:
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = _runtime_source()
         self.assertNotIn("/usr/bin/bwrap", source)
 
 
@@ -106,7 +113,7 @@ class ReservationComesFromTheBudgetPolicy(unittest.TestCase):
         self.assertEqual(Runtime._effect_budget("{}", "policy.json"), 1)
 
     def test_no_literal_reservation_remains_in_the_composition_root(self) -> None:
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = _runtime_source()
         self.assertNotIn("Reservation(usd_micros=100, millis=1000)", source)
 
 
@@ -114,14 +121,14 @@ class ApprovalThresholdIsMarkedForHandoff(unittest.TestCase):
     def test_approval_literal_carries_a_pointer_to_its_replacement(self) -> None:
         """S7-A-06 step 4: mark, do not implement. S8-B-04 owns the change."""
 
-        source = ROOT_PY.read_text(encoding="utf-8")
+        source = (RUNTIME / "session.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         line = None
         for node in ast.walk(tree):
             if isinstance(node, ast.keyword) and node.arg == "approval_required_above":
                 line = node.value.lineno
                 break
-        self.assertIsNotNone(line, "approval_required_above not found in root.py")
+        self.assertIsNotNone(line, "approval_required_above not found in session.py")
 
         lines = source.splitlines()
         window = "\n".join(lines[max(0, line - 12) : line])

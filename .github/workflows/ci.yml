@@ -39,6 +39,9 @@ jobs:
       - name: Runtime package tests (Ollama quarantined via skipUnless)
         run: python3 -m unittest discover -s test/runtime -t .
 
+      - name: Replay parity (F-02, cold fold from disk)
+        run: python3 -m unittest test.runtime.test_ledger_truth.ColdReplayParity
+
       - name: Adapters package tests
         run: python3 -m unittest discover -s test/adapters -t .
 

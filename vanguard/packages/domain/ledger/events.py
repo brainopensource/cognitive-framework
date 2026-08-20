@@ -132,6 +132,19 @@ class EventEnvelope:
     span_id: Optional[str] = None
     encryption_key_ref: Optional[str] = None
     environment_snapshot: Optional[str] = None
+    project_id: Optional[str] = None
+    principal_id: Optional[str] = None
+    parent_principal_id: Optional[str] = None
+    parent_episode_id: Optional[str] = None
+    harness_digest: Optional[str] = None
+    prev_digest: Optional[str] = None
+    content_digest: Optional[str] = None
+    causation_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+    idempotency_key: Optional[str] = None
+    alertable: bool = False
+    mhf_kind: Optional[str] = None
+    mhf_branch_id: Optional[str] = None
     unknown_fields: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -181,20 +194,59 @@ class EventEnvelope:
 
     def digest(self) -> str:
         """Compute sha256 digest of canonical representation."""
+        if self.schema_version == "mhf.event/1":
+            if self.content_digest:
+                return self.content_digest
+            return digest_of(self.to_mhf_dict(include_digest=False))
         return digest_of(self.to_dict())
+
+    def to_mhf_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        """`mhf.event/1` wire object (snake_case). Lineage keys are always present."""
+        kind = self.mhf_kind or self.payload.get("kind") or "Heartbeat"
+        payload = dict(self.payload)
+        unsigned: dict[str, Any] = {
+            "schema_version": "mhf.event/1",
+            "event_id": self.event_id,
+            "kind": kind,
+            "seq": int(self.seq),
+            "occurred_at": self.occurred_at,
+            "run_id": self.run_id or "",
+            "principal": self.principal,
+            "payload": payload,
+            "episode_id": self.episode_id,
+            "parent_episode_id": self.parent_episode_id,
+            "project_id": self.project_id,
+            "principal_id": self.principal_id,
+            "parent_principal_id": self.parent_principal_id,
+            "harness_digest": self.harness_digest,
+            "branch_id": self.mhf_branch_id or "main",
+            "prev_digest": self.prev_digest,
+            "causation_id": self.causation_id,
+            "correlation_id": self.correlation_id or self.trace_id,
+            "idempotency_key": self.idempotency_key,
+            "alertable": bool(self.alertable),
+        }
+        if include_digest:
+            unsigned["digest"] = self.content_digest or digest_of(
+                {k: v for k, v in unsigned.items()}
+            )
+        return unsigned
+
+    def wire_dict(self) -> dict[str, Any]:
+        """Store/write shape: mhf.event/1 from the Wave-1 writer, else v4 camelCase."""
+        if self.schema_version == "mhf.event/1":
+            return self.to_mhf_dict()
+        return self.to_dict()
 
 
 def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
-    """Parse and validate an EventEnvelope from raw mapping according to VG-04 §12.1.
-    
-    Raises:
-        ParseError on any schema or semantic rule violation.
-    """
+    """Parse v4 camelCase or `mhf.event/1` snake_case (ADR-0076 read-path dual)."""
     if not isinstance(raw, Mapping):
         raise ParseError("EventEnvelope", "type", f"expected mapping, got {type(raw).__name__}")
 
-    # schemaVersion
-    schema_version = raw.get("schemaVersion")
+    schema_version = raw.get("schema_version") or raw.get("schemaVersion")
+    if schema_version == "mhf.event/1" and "event_id" in raw:
+        return _parse_mhf_event_envelope(raw)
     if schema_version != "vg.4":
         raise ParseError("EventEnvelope", "schemaVersion", f"must be 'vg.4', got {schema_version!r}")
 
@@ -346,4 +398,82 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         environment_snapshot=environment_snapshot,
         payload=payload,
         unknown_fields=unknown_fields,
+    )
+
+
+def _parse_mhf_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
+    """Read-path adapter: `mhf.event/1` → the v4 dataclass plus lineage fields."""
+    event_id = raw.get("event_id")
+    if not isinstance(event_id, str) or not event_id:
+        raise ParseError("EventEnvelope", "event_id", "mhf.event/1 requires event_id")
+    kind = raw.get("kind")
+    if not isinstance(kind, str) or not kind:
+        raise ParseError("EventEnvelope", "kind", "mhf.event/1 requires kind")
+    seq = raw.get("seq")
+    if isinstance(seq, int):
+        seq_str = str(seq)
+    elif isinstance(seq, str):
+        seq_str = seq
+    else:
+        raise ParseError("EventEnvelope", "seq", "mhf.event/1 seq must be an integer")
+    occurred_at = raw.get("occurred_at")
+    if not isinstance(occurred_at, str) or not occurred_at:
+        raise ParseError("EventEnvelope", "occurred_at", "missing occurred_at")
+    run_id = raw.get("run_id")
+    if not isinstance(run_id, str) or not run_id:
+        raise ParseError("EventEnvelope", "run_id", "mhf.event/1 requires run_id")
+    principal = raw.get("principal")
+    if not isinstance(principal, str) or not principal:
+        raise ParseError("EventEnvelope", "principal", "missing principal")
+    payload = raw.get("payload")
+    if not isinstance(payload, Mapping):
+        raise ParseError("EventEnvelope", "payload", "payload must be a mapping")
+    payload_dict = dict(payload)
+    if "kind" not in payload_dict:
+        payload_dict["kind"] = kind
+    digest = raw.get("digest")
+    if digest is not None and not isinstance(digest, str):
+        raise ParseError("EventEnvelope", "digest", "digest must be a string")
+    correlation = raw.get("correlation_id")
+    return EventEnvelope(
+        schema_version="mhf.event/1",
+        event_id=event_id,
+        scope="episode",
+        seq=seq_str,
+        occurred_at=occurred_at,
+        recorded_at=occurred_at,
+        principal=principal,
+        principal_role="episode",
+        tenant_id="tenant-default",
+        owner_id="owner-platform",
+        confidentiality="internal",
+        retention_class="extended",
+        trainability="prohibited",
+        redaction_status="none",
+        payload=payload_dict,
+        run_id=run_id,
+        episode_id=raw.get("episode_id") if isinstance(raw.get("episode_id"), str) else None,
+        trace_id=correlation if isinstance(correlation, str) and correlation else run_id,
+        span_id=event_id,
+        project_id=raw.get("project_id") if isinstance(raw.get("project_id"), str) else None,
+        principal_id=raw.get("principal_id") if isinstance(raw.get("principal_id"), str) else None,
+        parent_principal_id=(
+            raw.get("parent_principal_id")
+            if isinstance(raw.get("parent_principal_id"), str) else None
+        ),
+        parent_episode_id=(
+            raw.get("parent_episode_id")
+            if isinstance(raw.get("parent_episode_id"), str) else None
+        ),
+        harness_digest=raw.get("harness_digest") if isinstance(raw.get("harness_digest"), str) else None,
+        prev_digest=raw.get("prev_digest") if isinstance(raw.get("prev_digest"), str) else None,
+        content_digest=digest if isinstance(digest, str) else None,
+        causation_id=raw.get("causation_id") if isinstance(raw.get("causation_id"), str) else None,
+        correlation_id=correlation if isinstance(correlation, str) else None,
+        idempotency_key=(
+            raw.get("idempotency_key") if isinstance(raw.get("idempotency_key"), str) else None
+        ),
+        alertable=bool(raw.get("alertable", False)),
+        mhf_kind=kind,
+        mhf_branch_id=raw.get("branch_id") if isinstance(raw.get("branch_id"), str) else "main",
     )

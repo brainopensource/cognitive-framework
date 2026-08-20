@@ -83,7 +83,6 @@ from ..domain.artifacts.manifest import (
     compose,
     parse_manifest,
 )
-from ..domain.ledger.events import EventEnvelope
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel import (
@@ -109,10 +108,12 @@ from ..kernel import (
 from ..ports.environment import EffectRequest as EnvironmentRequest
 from ..ports.environment import ObservationRequest
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
-from ..ports.determinism import ClockPort, RandomPort
+from ..ports.determinism import RandomPort
 from ..ports.index import IndexPort
 from ..ports.event_store import EventRange, EventStorePort
-from .determinism import SystemClock, SystemRandom, event_id
+from .determinism import SystemClock, SystemRandom
+from .evaluator_gateway import record_verdict
+from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .telemetry import RunTelemetry
 from .governance.approvals import (
     ApprovalAuthority,
@@ -129,6 +130,7 @@ __all__ = [
     "EffectBinding",
     "Harness",
     "LedgerBridge",
+    "LedgerEmitter",
     "Receipt",
     "RunResult",
     "Runtime",
@@ -161,19 +163,6 @@ BUDGET_DIMENSION: Mapping[str, str] = {
     "bytes": "bytes",
 }
 
-#: Classification for a Phase 0 single-tenant run (`VG-04 §12.1`). Explicit
-#: rather than absent: an unlabelled event is not a cheaper event, it is one no
-#: retention or trainability rule can be applied to.
-CLASSIFICATION: Mapping[str, str] = {
-    "schema_version": "vg.4",
-    "tenant_id": "tenant-default",
-    "owner_id": "owner-platform",
-    "confidentiality": "internal",
-    "retention_class": "extended",
-    "trainability": "prohibited",
-    "redaction_status": "none",
-}
-
 _FAR_FUTURE = "2099-01-01T00:00:00.000Z"
 
 
@@ -199,6 +188,11 @@ class TaskContext:
     #: (`S5-SA-002`). `None` records nothing rather than recording a guess.
     competence_prior: float | None = None
     max_turns: int = 8
+    # 1.2-C TECH-LEAD (config-declared, not workspace-derived). Escalate if
+    # identity must be a workspace fingerprint instead of this field.
+    project_id: str = "project-default"
+    parent_principal_id: str | None = None
+    parent_episode_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -413,76 +407,6 @@ def _effect_of(request: Any) -> EnvironmentRequest:
         command=tuple(argv) if argv else None,
         idempotency_key=getattr(request, "idempotency_key", None),
     )
-
-
-class LedgerBridge:
-    """`Ledger` + `EventSink` for the kernel, one `EventStorePort` underneath.
-
-    Two roles, one store. A second store is how a trajectory ends up with two
-    irreconcilable accounts of the same run. The failure contracts of both
-    roles are preserved because the kernel's exits are built on them:
-    `append_intent` durably persists or raises (`F-21a` depends on the
-    difference), and `emit` never raises (`F-25` is log-not-fail, and the lease
-    is already released by the time anything is emitted — `K-06`).
-    """
-
-    def __init__(self, store: EventStorePort, *, episode_id: str,
-                 clock: ClockPort | None = None,
-                 random: RandomPort | None = None) -> None:
-        # `S8-A-03`: event ids come from the injected pair, never from the
-        # process-global RNG and wall clock. A recorded run replays to the
-        # same bytes only if the ids do.
-        self._clock = clock or SystemClock()
-        self._random = random or SystemRandom()
-        self.store = store
-        self.events: list[Event] = []
-        self._episode_id = episode_id
-        self._seq = 0
-
-    def append_intent(self, event: Event) -> None:
-        self._remember(event)
-        self._write(event, role="intent")
-
-    def emit(self, event: Event) -> None:
-        self._remember(event)
-        try:
-            self._write(event, role="emitted")
-        except Exception:
-            pass
-
-    def _remember(self, event: Event) -> None:
-        """`K-47` writes the intent durably and `S12` publishes the *same*
-        object afterwards. Both reach the store — durability and publication
-        are different records — but the in-process trace counts the event
-        once, or every caller has to know that one kind is doubled.
-        """
-        if self.events and self.events[-1] is event:
-            return
-        self.events.append(event)
-
-    def _write(self, event: Event, *, role: str) -> None:
-        self._seq += 1
-        envelope = EventEnvelope(
-            event_id=event_id(clock=self._clock, random=self._random),
-            scope="episode",
-            seq=str(self._seq),
-            occurred_at=event.at,
-            recorded_at=event.at,
-            principal=event.principal,
-            principal_role="episode",
-            run_id=event.run_id,
-            episode_id=self._episode_id,
-            # `VG-04 §12.1` requires correlation identifiers on read. A run
-            # whose events cannot be correlated is a log, not a ledger.
-            trace_id=event.run_id or self._episode_id,
-            span_id=f"{role}-{self._seq}",
-            payload={"kind": event.kind, "reason": event.reason,
-                     "alertable": bool(event.alertable), **dict(event.payload)},
-            **CLASSIFICATION,
-        )
-        result = self.store.append([envelope])
-        if not result.ok:
-            raise OSError(result.error.message if result.error else "append rejected")
 
 
 class _LayeredOperator:
@@ -716,9 +640,18 @@ class HarnessSession:
 
         repo = Path(task.repo_path)
         self.repo = repo
-        self.ledger = LedgerBridge(
-            ports.store, episode_id=task.episode_id,
-            clock=ports.clock, random=ports.random)
+        self.ledger = LedgerEmitter(
+            ports.store,
+            episode_id=task.episode_id,
+            project_id=task.project_id,
+            principal_id=task.principal,
+            harness_digest=harness.composition_digest,
+            parent_principal_id=task.parent_principal_id,
+            parent_episode_id=task.parent_episode_id,
+            clock=ports.clock,
+            random=ports.random,
+            role="session",
+        )
 
         self.adapters = {
             verb: harness.bindings[verb].factory(
@@ -977,7 +910,15 @@ class HarnessSession:
         return None
 
     def _evaluate(self) -> Any:
-        """`ICD 3` / `M5`: the verdict comes from outside the episode."""
+        """`ICD 3` / `M5`: the verdict comes from outside the episode.
+
+        `ADR-0076 §5`: a verdict the daemon actually signed and bound is also
+        ledgered here as `VerdictRecorded{SignedVerdict}`, through the one
+        role-scoped facade that may originate that kind (`evaluator_gateway`,
+        1.1-D). An unsigned or unbound result -- no evaluator reachable, a
+        legacy response -- has nothing to ledger, by construction: there is no
+        code path here that fabricates the missing fields.
+        """
         bound = self.ports.verifier
         if bound is None:
             bound = _evaluator_from_manifest(self.harness, self.repo)
@@ -987,7 +928,12 @@ class HarnessSession:
             RunRef(run_id=self.task.run_id, episode_id=self.task.episode_id),
             EvaluationProtocol(
                 name=self.harness.evaluators[0] if self.harness.evaluators else "unnamed"))
-        return evaluation.value if evaluation.ok else None
+        verdict = evaluation.value if evaluation.ok else None
+        if isinstance(verdict, Verdict):
+            record_verdict(
+                self.ledger, run_id=self.task.run_id, principal=self.task.principal,
+                episode_id=self.task.episode_id, verdict=verdict)
+        return verdict
 
 
 class Runtime:

@@ -47,6 +47,14 @@ class Verdict:
     reason: str = ""
     signature: str | None = None
     signer_key_id: str | None = None
+    #: The exact JCS-signed body the daemon produced (ADR-0076 §5): `verdict`
+    #: plus `subject_digest` / `evaluation_request_id` / `oracle_id` / `nonce`
+    #: / `key_id` / `signed_at`. `None` when no verdict was ever signed (no
+    #: evaluator bound, or a legacy/unsigned response) -- the evaluator
+    #: gateway (`runtime/evaluator_gateway.py`) refuses to ledger a
+    #: `VerdictRecorded` without it, so an unsigned/unbound verdict can never
+    #: reach the ledger as a pass.
+    binding: Mapping[str, Any] | None = None
 
 
 class EvaluatorPort(Protocol):

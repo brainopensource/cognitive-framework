@@ -153,16 +153,16 @@ class TheJsonlIsALedgerExport(unittest.TestCase):
 
     TASK = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
 
-    def test_the_export_is_vg4_envelopes(self) -> None:
+    def test_the_export_is_mhf_event_envelopes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "episode.jsonl"
             run_lab_task("vg-code-default", self.TASK, max_attempts=1,
                          jsonl_out=target)
             lines = [json.loads(line) for line in
                      target.read_text().splitlines() if line.strip()]
-        self.assertTrue(lines)
-        for envelope in lines:
-            self.assertEqual(envelope["schemaVersion"], "vg.4")
+            self.assertTrue(lines)
+            for envelope in lines:
+                self.assertEqual(envelope["schema_version"], "mhf.event/1")
 
     def test_the_projection_reads_it(self) -> None:
         from vanguard.packages.adapters.stores.ledger_jsonl import import_jsonl

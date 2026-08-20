@@ -45,6 +45,9 @@ class FakeClock:
         self.reads += 1
         return "2026-08-16T00:00:00.000Z"
 
+    def now_ms(self) -> int:
+        return 1_755_302_400_000
+
 
 class FakeEnvironment:
     """An EnvironmentAdapter that touches no filesystem and no sandbox."""

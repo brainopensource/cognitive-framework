@@ -34,6 +34,7 @@ class InMemoryEventStore(EventStorePort):
         self._lock = threading.RLock()
         self._events: list[EventEnvelope] = []
         self._by_run: dict[str, list[EventEnvelope]] = {}
+        self._by_project: dict[str, list[EventEnvelope]] = {}
 
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
         """Atomically append an ordered sequence of event envelopes."""
@@ -47,22 +48,39 @@ class InMemoryEventStore(EventStorePort):
             for r_id, r_events in self._by_run.items():
                 if r_events:
                     run_last_seqs[r_id] = int(r_events[-1].seq)
+            project_last_seqs: dict[str, int] = {}
+            for p_id, p_events in self._by_project.items():
+                if p_events:
+                    project_last_seqs[p_id] = int(p_events[-1].seq)
 
-            # Check incoming batch for internal and external monotonicity
             current_batch_run_seqs = dict(run_last_seqs)
+            current_batch_project_seqs = dict(project_last_seqs)
             for idx, event in enumerate(events):
                 seq_int = int(event.seq)
-                r_id = event.run_id or "__global__"
-                prior_seq = current_batch_run_seqs.get(r_id, -1)
-                if seq_int <= prior_seq:
-                    return Result.fail(
-                        kind="conflict",
-                        message=(
-                            f"Non-monotonic sequence in run {r_id!r}: event {event.event_id} has "
-                            f"seq {event.seq} ({seq_int}) <= prior seq {prior_seq}"
-                        ),
-                    )
-                current_batch_run_seqs[r_id] = seq_int
+                if event.project_id:
+                    prior_seq = current_batch_project_seqs.get(event.project_id, -1)
+                    if seq_int <= prior_seq:
+                        return Result.fail(
+                            kind="conflict",
+                            message=(
+                                f"Non-monotonic sequence in project {event.project_id!r}: "
+                                f"event {event.event_id} has seq {event.seq} ({seq_int}) "
+                                f"<= prior seq {prior_seq}"
+                            ),
+                        )
+                    current_batch_project_seqs[event.project_id] = seq_int
+                else:
+                    r_id = event.run_id or "__global__"
+                    prior_seq = current_batch_run_seqs.get(r_id, -1)
+                    if seq_int <= prior_seq:
+                        return Result.fail(
+                            kind="conflict",
+                            message=(
+                                f"Non-monotonic sequence in run {r_id!r}: event {event.event_id} has "
+                                f"seq {event.seq} ({seq_int}) <= prior seq {prior_seq}"
+                            ),
+                        )
+                    current_batch_run_seqs[r_id] = seq_int
 
             # All validated: atomic commit
             for event in events:
@@ -71,6 +89,8 @@ class InMemoryEventStore(EventStorePort):
                 if r_id not in self._by_run:
                     self._by_run[r_id] = []
                 self._by_run[r_id].append(event)
+                if event.project_id:
+                    self._by_project.setdefault(event.project_id, []).append(event)
 
             return Result.success(None)
 
@@ -83,12 +103,16 @@ class InMemoryEventStore(EventStorePort):
             source = self._events
             if range_query.run_id is not None:
                 source = self._by_run.get(range_query.run_id, [])
+            if range_query.project_id is not None:
+                source = self._by_project.get(range_query.project_id, [])
 
             filtered: list[EventEnvelope] = []
             after_seq_int = int(range_query.after_seq) if range_query.after_seq is not None else -1
 
             for event in source:
                 if range_query.run_id is not None and event.run_id != range_query.run_id:
+                    continue
+                if range_query.project_id is not None and event.project_id != range_query.project_id:
                     continue
                 if range_query.episode_id is not None and event.episode_id != range_query.episode_id:
                     continue
@@ -147,6 +171,7 @@ class SqliteEventStore(EventStorePort):
                     seq_str TEXT NOT NULL,
                     run_id TEXT,
                     episode_id TEXT,
+                    project_id TEXT,
                     scope TEXT NOT NULL,
                     occurred_at TEXT NOT NULL,
                     recorded_at TEXT NOT NULL,
@@ -161,9 +186,13 @@ class SqliteEventStore(EventStorePort):
                     envelope_digest TEXT NOT NULL
                 );
             """)
+            columns = {row[1] for row in cur.execute("PRAGMA table_info(events);").fetchall()}
+            if "project_id" not in columns:
+                cur.execute("ALTER TABLE events ADD COLUMN project_id TEXT;")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_run_seq ON events(run_id, seq);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_scope ON events(scope);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_episode ON events(episode_id);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_events_project_seq ON events(project_id, seq);")
 
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
         """Atomically append an ordered sequence of event envelopes within a transaction."""
@@ -177,43 +206,59 @@ class SqliteEventStore(EventStorePort):
 
                 for event in events:
                     seq_int = int(event.seq)
-                    r_id = event.run_id or "__global__"
-
-                    # Verify sequence monotonicity within the run in the database
-                    cur.execute(
-                        "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
-                        (event.run_id, r_id),
-                    )
-                    row = cur.fetchone()
-                    if row is not None and seq_int <= row[0]:
-                        cur.execute("ROLLBACK;")
-                        return Result.fail(
-                            kind="conflict",
-                            message=(
-                                f"Non-monotonic sequence in run {event.run_id!r}: event {event.event_id} has "
-                                f"seq {event.seq} ({seq_int}) <= prior seq {row[0]}"
-                            ),
+                    if event.project_id:
+                        cur.execute(
+                            "SELECT seq FROM events WHERE project_id = ? ORDER BY seq DESC LIMIT 1;",
+                            (event.project_id,),
                         )
+                        row = cur.fetchone()
+                        if row is not None and seq_int <= row[0]:
+                            cur.execute("ROLLBACK;")
+                            return Result.fail(
+                                kind="conflict",
+                                message=(
+                                    f"Non-monotonic sequence in project {event.project_id!r}: "
+                                    f"event {event.event_id} has seq {event.seq} ({seq_int}) "
+                                    f"<= prior seq {row[0]}"
+                                ),
+                            )
+                    else:
+                        r_id = event.run_id or "__global__"
+                        cur.execute(
+                            "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
+                            (event.run_id, r_id),
+                        )
+                        row = cur.fetchone()
+                        if row is not None and seq_int <= row[0]:
+                            cur.execute("ROLLBACK;")
+                            return Result.fail(
+                                kind="conflict",
+                                message=(
+                                    f"Non-monotonic sequence in run {event.run_id!r}: event {event.event_id} has "
+                                    f"seq {event.seq} ({seq_int}) <= prior seq {row[0]}"
+                                ),
+                            )
 
-                    envelope_dict = event.to_dict()
+                    envelope_dict = event.wire_dict()
                     envelope_json = json.dumps(envelope_dict, separators=(",", ":"), ensure_ascii=False)
                     envelope_digest = event.digest()
 
                     cur.execute(
                         """
                         INSERT INTO events (
-                            event_id, seq, seq_str, run_id, episode_id, scope,
+                            event_id, seq, seq_str, run_id, episode_id, project_id, scope,
                             occurred_at, recorded_at, principal, tenant_id, owner_id,
                             confidentiality, retention_class, trainability, redaction_status,
                             envelope_json, envelope_digest
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                         """,
                         (
                             event.event_id,
                             seq_int,
-                            event.seq,
+                            str(event.seq),
                             event.run_id,
                             event.episode_id,
+                            event.project_id,
                             event.scope,
                             event.occurred_at,
                             event.recorded_at,
@@ -256,6 +301,9 @@ class SqliteEventStore(EventStorePort):
                 if range_query.scope is not None:
                     query += " AND scope = ?"
                     params.append(range_query.scope)
+                if range_query.project_id is not None:
+                    query += " AND project_id = ?"
+                    params.append(range_query.project_id)
                 if range_query.after_seq is not None:
                     query += " AND seq > ?"
                     params.append(int(range_query.after_seq))
@@ -299,4 +347,8 @@ class SqliteEventStore(EventStorePort):
     def close(self) -> None:
         """Close SQLite connection."""
         with self._lock:
+            try:
+                self._conn.execute("PRAGMA wal_checkpoint(FULL);")
+            except sqlite3.Error:
+                pass
             self._conn.close()

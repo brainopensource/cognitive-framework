@@ -67,6 +67,8 @@ class ProposalTranslator:
         text = proposal.get("text", "")
         calls = list(proposal.get("toolCalls", []) or [])
         if not calls:
+            calls = _lift_fenced_tool_calls(text, tool_schemas)
+        if not calls:
             calls = _lift_text_tool_calls(text)
         if not calls:
             truncated = _unclosed_fence(text, tool_schemas)
@@ -454,16 +456,21 @@ def _tool_object_from_mapping(obj: Mapping[str, Any]) -> dict[str, Any] | None:
         return None
     # Plain JSON in a finish note is not a tool unless it names a verb or
     # carries tool-call arguments. This keeps F-09's translator conservative.
-    has_call_shape = "arguments" in obj or "args" in obj or "verb" in obj
+    # `parameters` is the third call spelling small models emit (F-21): it is
+    # the key OpenAI's tool *schema* uses for the argument object, and
+    # instruction-tuned models copy it into the call itself.
+    has_call_shape = "arguments" in obj or "args" in obj or "parameters" in obj or "verb" in obj
     if not has_call_shape and not _is_canonical_verb(name):
         return None
     if "arguments" in obj:
         arguments = obj.get("arguments")
     elif "args" in obj:
         arguments = obj.get("args")
+    elif "parameters" in obj:
+        arguments = obj.get("parameters")
     else:
         arguments = {key: value for key, value in obj.items()
-                     if key not in {"name", "verb", "id", "arguments", "args"}}
+                     if key not in {"name", "verb", "id", "arguments", "args", "parameters"}}
     if arguments is None:
         arguments = {}
     return {"name": name, "arguments": arguments}
@@ -507,7 +514,10 @@ def _selector_from_schema(properties: frozenset[str]) -> Mapping[str, Any] | Non
     A manifest that supplies a real selector always wins.
     """
     if "argv" in properties:
-        return {"kind": "process", "uriPattern": ""}
+        # `kind: process` is not in the domain selector algebra (ADR-0076 §2,
+        # P1-17). An argv-based call binds `generic`, the same as any other
+        # undeclared-selector verb.
+        return {"kind": "generic", "uriPattern": ""}
     if "path" in properties or "pattern" in properties:
         return {"kind": "fs"}
     return {"kind": "generic"}
@@ -530,7 +540,6 @@ def _bind_resource(selector: Any, args: MutableMapping[str, Any],
                            "manifest declares no selector for this verb")
 
     kind = str(selector.get("kind") or "generic")
-    bound: dict[str, Any] = {"kind": kind, "root": root}
 
     if kind == "fs":
         path = _workspace_relative(str(args.get("path", ".")), root)
@@ -541,7 +550,8 @@ def _bind_resource(selector: Any, args: MutableMapping[str, Any],
         # Selector algebra admits only kind/root/paths. Extra keys (path,
         # pattern) make the request unparsable, which the classifier treats
         # as widening — and F-09 then denies after any untrusted receipt.
-        bound["paths"] = [root if relative in {".", ""} else f"{root.rstrip('/')}/{relative}"]
+        bound: dict[str, Any] = {"kind": "fs", "root": root,
+                                 "paths": [root if relative in {".", ""} else f"{root.rstrip('/')}/{relative}"]}
         pattern = args.get("pattern")
         if isinstance(pattern, str) and "\x00" in pattern:
             return Result.fail("instrument_error", "pattern contains NUL")
@@ -553,12 +563,14 @@ def _bind_resource(selector: Any, args: MutableMapping[str, Any],
             return Result.fail("instrument_error", "action requires a non-empty argv array")
         if any("\x00" in item for item in argv):
             return Result.fail("instrument_error", "argv contains NUL")
-        # A selector naming an executable pattern binds the head of argv, which
-        # is what the sandbox allowlist is checked against.
-        bound["kind"] = "process" if selector.get("uriPattern") else kind
-        bound["executable"] = argv[0]
-        return Result.success(bound)
+        # There is no `process` selector kind in the domain algebra (ADR-0076
+        # §2, P1-17): an argv-based call binds `generic`, carrying only the
+        # declared `uriPattern` the manifest granted — never a `root` or
+        # `executable` field the algebra's `generic` branch cannot parse
+        # (`parse_selector` admits kind/uriPattern only).
+        return Result.success({"kind": "generic", "uriPattern": str(selector.get("uriPattern", ""))})
 
+    bound = {"kind": kind}
     for key in ("uriPattern", "paths"):
         if key in selector:
             bound[key] = selector[key]

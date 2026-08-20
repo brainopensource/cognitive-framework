@@ -244,14 +244,24 @@ class ExteriorJudgeAdapterTests(unittest.TestCase):
         )
         requested = gate.request(EvaluationSubject(run_id="r1", episode_id="e1"))
         self.assertIsInstance(requested, Ok)
+
+        # `gate()` re-verifies on read (ADR-0076 §5, F-03/F-08): a verdict
+        # bearing a signature this evaluator's key did not produce is not
+        # evidence, no matter what its `verdict` field claims.
+        def signed(outcome: str) -> SignedVerdict:
+            body = {"verdict": outcome, "subject_digest": "sha256:" + "0" * 64,
+                    "evaluation_request_id": "eval-1", "oracle_id": "oracle-1",
+                    "nonce": "n" * 16, "key_id": "eval-test", "signed_at": "2026-08-20T00:00:00Z"}
+            return SignedVerdict(signature=signer.sign(body), **body)
+
+        self.assertEqual(gate.gate((signed("pass"),)), GateDecision.PASS)
+        self.assertEqual(gate.gate((signed("fail"),)), GateDecision.RETRY)
         self.assertEqual(
-            gate.gate((SignedVerdict(verdict="pass", signature="ok"),)),
-            GateDecision.PASS,
+            gate.gate((SignedVerdict(verdict="pass", signature="not-a-real-signature"),)),
+            GateDecision.ABANDON,
+            "an unverifiable signature must not pass the gate",
         )
-        self.assertEqual(
-            gate.gate((SignedVerdict(verdict="fail", signature="ok"),)),
-            GateDecision.RETRY,
-        )
+
         prereg = gate.preregister(OracleSpec(id="oracle-1"))
         self.assertIsInstance(prereg, Ok)
         thread.join(timeout=2)

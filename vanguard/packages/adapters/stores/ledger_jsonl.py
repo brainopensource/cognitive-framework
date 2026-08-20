@@ -141,7 +141,7 @@ def export_jsonl(
     pol = policy or RedactionPolicy()
     for event in events:
         target = redact_envelope(event, pol) if redact else event
-        line = json.dumps(target.to_dict(), separators=(",", ":"), ensure_ascii=False)
+        line = json.dumps(target.wire_dict(), separators=(",", ":"), ensure_ascii=False)
         writer.write(line + "\n")
         count += 1
     return count

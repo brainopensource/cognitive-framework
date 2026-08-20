@@ -48,6 +48,9 @@ jobs:
       - name: Registry and plugin-cell isolation
         run: python3 -m unittest discover -s test/registry -t .
 
+      - name: Adapters package tests
+        run: python3 -m unittest discover -s test/adapters -t .
+
       - name: Security package tests
         run: python3 -m unittest discover -s test/security -t .
 
@@ -60,12 +63,14 @@ jobs:
       - name: Bound falsifiers F-01..F-21 (gating from M-1)
         run: python3 -m unittest discover -s test/falsifiers -t .
 
-      # `layer0/` is a copy-fork under deletion (2.2-B); it is not the subject
-      # of record and carries known deferred defects (fail-open ceiling,
-      # unsigned `"pass"`, a stale `EffectContext.depth` default). Advisory so
-      # that a fork awaiting deletion cannot mask a real regression elsewhere.
-      # This step is DELETED, not un-quarantined, by 2.2-B.
-      - name: Layer-0 microkernel test suite (advisory; deleted at 2.2-B)
+      # `layer0/` is a copy-fork under deletion; it is not the subject of
+      # record and carries known deferred defects (unsigned `"pass"`, a stale
+      # `EffectContext.depth` default). Advisory so that a fork awaiting
+      # deletion cannot mask a real regression elsewhere. 2.2-B removes the
+      # kernel/scheduler/selector/fold assertions; per the 2.2-A triage the
+      # registry, compose and emitter halves survive to 3.1, so this step
+      # SHRINKS at 2.2-B and is DELETED at 3.1 -- never un-quarantined.
+      - name: Layer-0 microkernel test suite (advisory; shrinks 2.2-B, deleted 3.1)
         continue-on-error: true
         run: python3 -m unittest discover -s test/layer0 -t .
 

@@ -54,11 +54,34 @@ very duplication Wave 2 exists to remove.
 | **1.3-C kernel diff** | **Accepted.** `_exceeds` is called only on additive dimensions (`max_bytes`, `max_effects`); `max_depth` is compared directly, since depth is a structural ceiling and absent from `Reservation.as_map()`. The changed branch can only turn allow→deny. Net TCB delta 0; gate at 1359/1438. |
 | **`test/kernel/test_replay_parity.py` deletion** | **Correct.** It folded a same-list of in-memory envelopes — exactly the mechanism I-4 / ADR-0071 forbid as replay evidence. Replaced by `ColdReplayParity` in `test/runtime/test_ledger_truth.py`, folding from a real WAL file in a fresh process, and wired as its own CI job. |
 
-### 2.2-A parity triage — **BLOCKED** (Tech Lead, at Wave 2 entry)
+### 2.2-A parity triage — **GREEN. 2.2-B/C AUTHORIZED** (Tech Lead)
 
-Keep/kill is settled (below). Deletion is **not** authorized: one blocker must clear first.
+Keep/kill settled in [`plans/wave2_convergence.md`](plans/wave2_convergence.md). The one blocker is
+closed; deletion may proceed against the scope named there.
 
-**BLOCKER — the plugin capability dialect was never conformant to the domain selector algebra.**
+**Blocker closed — selector conformance (Developer B).** Verified: the correction is entirely in
+*declarations and call sites*. `domain/selectors/resource_selector.py`, `adapters/sandbox/ceiling.py`,
+`domain/wire/` and `vanguard/packages/kernel/` are **byte-unchanged** — no relaxation, no second
+dialect, no normalisation shim. The pack now declares `paths: ["/workspace"]` and expresses
+`proc.exec` as `{kind: generic, uriPattern: "proc://exec/allow/git,pytest,ruff,python3"}`, matching
+`vg-code-default/manifest.json`; `DefaultPlannerAdapter` and `DriveUntilGreenPlanner` emit the same
+canonical shapes. `test/registry` 26 green, `test/packs` 27 green, new
+`test/packs/code_default/test_capability_selectors.py` pins parse, inclusion, `/etc` denial, empty
+ceiling, legacy-`proc` rejection, and host-gate/domain agreement. `SELECTOR_KINDS` still excludes
+`proc`; empty ceiling still returns `empty_ceiling`; `{kind: proc}` still raises.
+
+Two items found during this review and fixed here: the `test/adapters` CI step had been dropped
+while adding `test/registry` (caught by F-17, restored), and the layer0 CI step's comment claimed
+deletion at 2.2-B — per the triage it **shrinks** at 2.2-B and is deleted at 3.1.
+
+Follow-up, not blocking: `_PROC_PATTERN` is a literal in `adapters/models/planner.py` that repeats
+the manifest's ceiling. It should be read from the compiled harness ceiling rather than restated —
+carry into 3.1, where the registry supplies the plugin ceiling as a real operand.
+
+<details>
+<summary>Original blocker (closed) — kept for the record</summary>
+
+**The plugin capability dialect was never conformant to the domain selector algebra.**
 2.1-D correctly deleted `layer0/spi/ceiling.py`'s ad-hoc `_selector_subset` and its fail-open
 `if not capabilities: return True`, and delegated to `domain/selectors/`. That delegation exposed
 the fact that the pack's capability declarations are not canonical selectors:
@@ -87,12 +110,26 @@ plugin cell is inert, and Wave 3 builds directly on it.
 not re-point the gate at a second subset walk. One algebra (ADR-0069); the declarations conform to
 it, not the reverse.
 
+</details>
+
+### Wave 2 lanes — now open
+
+- **Developer A:** 2.2-B deletion, against the scope in the triage: `layer0/kernel/`,
+  `layer0/scheduler/`, `layer0/events/{selectors,canonical,fold,blob}.py`,
+  `layer0/spi/{interfaces,fakes}.py`, then the `layer0/spi/` shims once importers are rewritten.
+  **Retained until 3.1:** `layer0/registry/`, `layer0/compose/`,
+  `layer0/events/{emitter,envelope,store,taxonomy}.py`. Shrink the advisory layer0 CI step as its
+  subjects go; do not un-quarantine it.
+- **Developer B:** 2.2-C — split `root.py` in place along the named seams (`compose.py`,
+  `session.py`, `wiring.py`; `ledger_emitter.py` already landed in 1.2), then 2.2-D linter rows.
+  No behavior change: `test/runtime` green unmodified.
+- Independent lanes; 2.2-C touches no file 2.2-B deletes.
+
 ### Decision queue
 
 | Item | Needs | Owner |
 |---|---|---|
-| Selector conformance of the plugin dialect | **Blocks 2.2-B/C** — see above | Developer B |
-| `test/registry` added as a CI step | Wire it with the fix | Developer B |
+| M-2 exit re-gate | Tech Lead sign-off once 2.2-B/C land | Tech Lead |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board

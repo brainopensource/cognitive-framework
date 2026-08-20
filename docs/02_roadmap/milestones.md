@@ -14,8 +14,8 @@ never when its code merges.
 |---|---|---|---|---|
 | **M-0 Engineering truth** | 0 — **COMPLETE** | Living CI measures `vanguard/packages/` and the named falsifiers | `002` §3 Wave-0 gate: production suites in CI; F-01…F-21 exist as tests (red allowed); codegen `--check` wired; F-19/F-20 hygiene closed | Director approval (done, ADR-0075) |
 | **M-1 Trust spine** | 1 — **COMPLETE (GREEN)** | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green **on the canonical path**; suites of record green; TCB 1359 ≤ 1438 | M-0 |
-| **M-2 One runtime** | 2 — **OPEN** | `layer0/` absorbed and deleted; one wire, one algebra, one writer; `root.py` split in place | F-16 green; zero `layer0` imports; `layer0/` removed after parity; no behavior change in `test/runtime` | M-1 |
-| **M-3 Extensibility** | 3 — QUEUED (entry: M-2) | Plugin lifecycle real on the canonical path; pack loads through it; kernel domain-blind everywhere | ADR-M0-13 echo-plugin gate; F-18-extended I-7 linter green; freeze-at-compose negatives | M-2 |
+| **M-2 One runtime** | 2 — **OPEN (2.1 done; 2.2-A green, 2.2-B/C authorized)** | `layer0/`'s duplicated halves absorbed and deleted; one wire, one algebra, one writer; `root.py` split in place | F-16 green; zero `layer0` imports under `vanguard/`; every 2.2-A KILL surface removed; no behavior change in `test/runtime`. **Amended at 2.2-A:** full `layer0/` removal is an M-3 gate, not M-2 — `registry/` and `compose/` have no packages twin and are Wave-3 material | M-1 |
+| **M-3 Extensibility** | 3 — QUEUED (entry: M-2) | Plugin lifecycle real on the canonical path; pack loads through it; kernel domain-blind everywhere | ADR-M0-13 echo-plugin gate; F-18-extended I-7 linter green; freeze-at-compose negatives; **`layer0/` fully deleted** (registry, compose, emitter — carried from 2.2-A) | M-2 |
 | **M-4 Foundation E2E — STOP** | 4 | One real coding-agent run through the whole substrate with trustworthy state + evidence | The nine-row table in [`wave4_foundation_e2e.md`](../03_sprints/plans/wave4_foundation_e2e.md) on one run | M-1, M-2, M-3 |
 
 ## Sprint map

@@ -5,8 +5,12 @@ lifecycle FSM, compose digest **shape**) live on the packages path; the duplicat
 kernel/scheduler/mocks are deleted after a behavioral parity gate; `root.py` is split in place.
 **Entry:** Wave 1 exit green (the trust spine must be real before the fork that fakes it is deleted,
 or the deletion "fixes" F1 by hiding it instead of by proof).
-**Exit (M-2):** F-16 duplication detector green; `layer0/` contains nothing the packages path does
-not provide; zero imports of `layer0.*` anywhere under `vanguard/`; suites of record green.
+**Exit (M-2):** F-16 duplication detector green; zero imports of `layer0.*` anywhere under
+`vanguard/`; suites of record green; every surface the 2.2-A triage marked KILL is gone.
+**Amended at 2.2-A:** "`layer0/` contains nothing the packages path does not provide" is *not* an
+M-2 gate. `layer0/registry/` and `layer0/compose/` have no packages equivalent and are Wave-3
+material (M-3's exit gate is the plugin lifecycle walk they implement), so `layer0/` survives Wave 2
+in reduced form and is deleted at the 3.1 exit.
 
 **Direction (ADR-0069, ADR-0076):** absorb *into* packages. Never "fix" a layer0 module in place —
 if it is worth fixing, it is worth moving; if not worth moving, it is deleted at parity.
@@ -27,7 +31,7 @@ if it is worth fixing, it is worth moving; if not worth moving, it is deleted at
 
 | # | Task | Where | Acceptance evidence | Readiness |
 |---|---|---|---|---|
-| 2.2-A | Parity gate: for events/fold and compose-digest shape, run the layer0 suite's behavioral assertions against the packages implementations (adapter tests, not a port of the layer0 code) | `test/layer0/` assertions → `test/contracts/` | Every layer0 behavior worth keeping has a packages twin test; a written parity note in the PR | **DONE — triage below; deletion blocked, see `sprint_active.md`** |
+| 2.2-A | Parity gate: for events/fold and compose-digest shape, run the layer0 suite's behavioral assertions against the packages implementations (adapter tests, not a port of the layer0 code) | `test/layer0/` assertions → `test/contracts/` | Every layer0 behavior worth keeping has a packages twin test; a written parity note in the PR | **DONE — triage below; 2.2-A GREEN, deletion authorized** |
 
 ### 2.2-A keep/kill (Tech Lead, settled)
 

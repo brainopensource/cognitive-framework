@@ -54,14 +54,14 @@ canonical path, so M-1 is not gated on defects the plans defer to Wave 2. Full r
 
 | ID | Task | Readiness |
 |---|---|---|
-| 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | READY |
-| 2.1-B | types_gen target moves to packages; shim | READY |
-| 2.1-C | Five SPI Protocols → `ports/spi.py` | READY |
-| 2.1-D | Ceiling delegates to domain algebra; fail-closed | READY |
-| 2.1-E | Duplication detector heuristics | DEV-LOCAL |
-| 2.2-A | Parity assertion triage layer0→contracts | TECH-LEAD |
-| 2.2-B | Delete layer0 kernel/scheduler/MemoryLedger/absorbed dirs; retire v4 write path | READY (after 2.2-A) |
-| 2.2-C | `root.py` split in place (compose/session/emitter/wiring) | READY |
+| 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | DONE — layer0 copy reduced to a shim at 2.2-A |
+| 2.1-B | types_gen target moves to packages; shim | DONE |
+| 2.1-C | Five SPI Protocols → `ports/spi.py` | DONE |
+| 2.1-D | Ceiling delegates to domain algebra; fail-closed | DONE — incl. pack/call-site selector conformance (the 2.2-A blocker) |
+| 2.1-E | Duplication detector heuristics | DONE — `--enforce` wired in CI |
+| 2.2-A | Parity assertion triage layer0→contracts | **DONE — GREEN.** Keep/kill in `plans/wave2_convergence.md`; 3 absorptions landed (branch resume, blob durability, governor dimension guard) |
+| 2.2-B | Delete the 2.2-A KILL surfaces; retire v4 write path. **Scope narrowed:** `registry/`, `compose/`, `events/{emitter,envelope,store,taxonomy}.py` retained to 3.1 | **AUTHORIZED** — Developer A |
+| 2.2-C | `root.py` split in place (compose/session/emitter/wiring) | **AUTHORIZED** — Developer B |
 | 2.2-D | Widen I-7 linter (if Wave 0 didn't); boundary rows | READY |
 
 ## Wave 3 — Extensibility (`plans/wave3_extensibility.md`)

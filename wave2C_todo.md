@@ -1,23 +1,29 @@
 # Wave 2C — From ALFA Decision to an Implementable Tier S+ Foundation
 
-## Director-gated work packet for evidence integrity, cold continuation, graph convergence, and the path to VAOH
+## Director-authorized transient staging packet for evidence integrity and cold continuation
 
-**Document class:** proposed execution briefing; source for the next board update, not a second board  
-**Status:** **PROPOSED — NOT AUTHORIZED UNTIL THE ENGINEERING DIRECTOR ADJUDICATES THE ALFA DECISION**  
+**Document class:** Director-authorized transient staging document; not law and not a second board
+**Status:** **ACTIVE FOR M-2 STAGING ONLY — ARCHIVE AT M-2 EXIT**
 **Prepared:** 2026-08-21  
 **As-built snapshot:** Git `a9f4747`; clean working tree at inspection  
 **Selected decision:** [`001_alfa_review_full_decision.md`](001_alfa_review_full_decision.md)  
 **Architectural baseline:** [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md)  
-**Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0076`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)  
+**Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0085`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)
 **Current execution authority:** [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md)
 
-> This document tells the Director, Tech Lead, and developers exactly how to turn the selected proposal into law, red tests, implementation, and evidence. It does not itself accept ADRs, reopen M-2, start M-3, or authorize post-M-4 work. When this packet conflicts with accepted law or the active board, law and the board win until they are deliberately amended.
+> This staging packet is archived at M-2 exit only after every durable requirement has migrated into
+> accepted ADRs, `docs/SPEC.md`, the `002` gap register, and `sprint_active.md`. It never becomes an
+> eighth authority tier. It does not start M-3 or authorize post-M-2 work; accepted law and the
+> active board always win.
 
 ---
 
 ## 0. The next action, in plain language
 
-**Do not start by adding more agent features.** First have the Director ratify the ALFA disposition and the six-ADR map; widen the documentation-link gate; put the new requirements onto the one active board; write the trajectory and cold-continuation falsifiers red; then repair the evidence path and prove true fresh-process continuation. Only after that re-gate M-2 and open M-3 for the Named Component Graph, plugin lifecycle, and final `layer0/` deletion.
+**Do not start by adding more agent features.** The Director has ratified the eight-ADR catalog.
+Complete the bounded governance-hardening pass, then write RF-23 and RF-25 red; repair the evidence
+path and prove true fresh-process continuation. Only after that re-gate M-2 and consider opening
+M-3 for the Named Component Graph, plugin lifecycle, and final `layer0/` deletion.
 
 The shortest safe route is:
 
@@ -88,18 +94,21 @@ The selected source order is:
 
 Do **not** create a new SPEC, contracts manual, kernel manual, second backlog, or parallel roadmap. If the Director requests a publication-grade ALFA master, create it after ADR adjudication as a navigational synthesis linking accepted decisions—not as a fourth authority layer.
 
-### 2.2 Director checkpoint D-ALFA-1
+### 2.2 Director checkpoint D-ALFA-1 — ratified catalog
 
-Before any Wave 2C production change, the Engineering Director must record one disposition for each item below. The final accepted numbering must be unique. This packet follows the six-ADR map selected in `001`; do not file eight conflicting ADRs unless the Director explicitly chooses to split subjects and publishes the replacement map first.
+The Engineering Director ratified the following unique map on 2026-08-21. It supersedes the stale
+six-ADR proposal map previously carried by this packet.
 
-| Draft | Decision | Immediate implementation horizon | Required bound falsifier |
+| ADR | Decision | Immediate implementation horizon | Required bound falsifier |
 |---|---|---|---|
 | **ADR-0077** | Named Component Graph and `mhf.manifest/2`. | Contract at M-3, never in Wave 2C production. | Six graph fixtures compile with stable `D_H`; unknown/unconsumed binding is rejected. |
-| **ADR-0078** | Required / declared-absent / forged guardrail trichotomy. | Content rules may land with NOVA-1; pack enforcement at M-3/M-5. | Required-without-valid-exterior-evidence fails; declared absence is frozen before execution; forged never degrades to absence. |
-| **ADR-0079** | Plugin lifecycle parity, composition absorption, and Layer-0 retirement. | M-3. | Seven-state lifecycle is fully evented/reduced; NOVA-4 proves no Layer-0 surface remains. |
-| **ADR-0080** | Universal turn mechanism; typed obligations; deferred capability-mediated delegation. | Mechanism claim now; spawn only M-6; obligation claims only M-7. | A topology may change without an engine branch; ungranted spawn is denied through S0–S12. |
-| **ADR-0081** | Evidence-complete trajectory and true cold continuation. | **Wave 2C / M-2 correction.** | Rich `/1` trajectory survives a fresh-process resume with no repeated effect and exact lineage. |
-| **ADR-0082** | Pareto policy, T0–T3 compounding, and promotion protocol. | Design now; T0 M-5; routing M-7; statistical promotion M-10. | No candidate promotes unless safety-feasible, exterior-signed, paired, exact-test green, and human-approved. |
+| **ADR-0078** | Trajectory un-hollowing and cost accounting (NOVA-1). | **Wave 2C / M-2 correction.** | RF-23 proves invoked-turn attribution, explicit measurement, conservation, and identity separation. |
+| **ADR-0079** | Absent-vs-forged guardrails and derived promotability. | M-3–M-5. | Required-without-valid exterior evidence fails; declared absence is frozen; forged never degrades to absence. |
+| **ADR-0080** | Capability-mediated `agent.spawn` design freeze. | Design now; implementation only M-6. | RF-26 pins current sealed membership; RF-55–RF-59 gate future mediation. |
+| **ADR-0081** | Plugin lifecycle parity, runtime absorption, and Layer-0 deletion. | M-3. | Seven-state lifecycle is fully evented/reduced; NOVA-4 proves no Layer-0 surface remains. |
+| **ADR-0082** | Universal turn-loop mechanism and M-10 compatibility contract. | RF-25 now; compatibility gates M-3–M-10. | Fresh-process continuation succeeds; future topologies require no second engine. |
+| **ADR-0083** | Dynamic Pareto controller and alpha–delta profile matrix. | Schema M-3; activation M-7. | Profiles enter `D_H`; routing cannot widen authority or self-renew reservations. |
+| **ADR-0084** | Compounding macro-tool registry and Active Inference. | T0 M-5; macro lab M-9; learning M-10. | Only attributable, least-privilege, exterior-verified artifacts can compound or promote. |
 
 Each accepted ADR must be concise and contain: context, decision, scope/milestone, invariants narrowed or extended, owner boundary, one primary falsifier, negative cases, reversal condition, and links to the selected baseline. The proposal's long-form explanations remain in 006; do not copy 2,000 lines into the ADR register.
 
@@ -108,7 +117,7 @@ Each accepted ADR must be concise and contain: context, decision, scope/mileston
 Perform this cascade as its own governance PR before production implementation:
 
 1. **W2C-H1 — Widen link truth first.** Update [`tools/linters/check_markdown_links.py`](tools/linters/check_markdown_links.py) so default CI checks living root briefings, `docs/**/*.md`, schema/package READMEs, and sprint documents. Preserve explicit archive exclusions. Add a planted broken-link fixture test. Run `--all` once and adjudicate existing failures rather than hiding them with new exclusions.
-2. **W2C-A1 — File accepted ADRs.** Add only the Director-approved 0077–0082 mapping under [`docs/05_adr/`](docs/05_adr/) and update [`INDEX.md`](docs/05_adr/INDEX.md). If any item is rejected or deferred, record that disposition; do not silently edit the proposal into apparent consensus.
+2. **W2C-A1 — Maintain accepted ADRs.** The Director-approved 0077–0084 mapping is filed under [`docs/05_adr/`](docs/05_adr/) and indexed in [`INDEX.md`](docs/05_adr/INDEX.md). Amendments are dated and explicit; proposal text is never silently edited into apparent consensus.
 3. **W2C-A2 — Apply the minimal immediate SPEC delta.** Update only the sections required for authorized Wave 2C behavior:
    - §1.3: true cold continuation is reconstruction **and legal continuation** from durable SQLite WAL in a fresh process;
    - §7: `mhf.trajectory/1` populated content, explicit missingness, `D_H/D_R/D_X`, per-turn identity/cost, conservation, and derived legacy exclusion;
@@ -134,7 +143,7 @@ Wave 2C is a narrow correction lane between the current M-2 re-gate submission a
 **Entry:**
 
 - Director checkpoint D-ALFA-1 recorded;
-- ADR-0081 accepted with the non-breaking `mhf.trajectory/1` amendment;
+- ADR-0078 accepted with the non-breaking `mhf.trajectory/1` amendment;
 - RF identifiers reserved;
 - active board explicitly authorizes Wave 2C;
 - current M-2 fold, writer, boundary, TCB, and duplication gates remain green.
@@ -313,7 +322,7 @@ M-3 starts only after the M-2 signature. This is where the graph schema, plugin 
 
 ### 4.1 Sprint 3.0 — Contract and failing graph tests
 
-Land the accepted ADR-0077/0079 SPEC deltas and [`schemas/mhf/manifest_v2.schema.json`](schemas/mhf/) in the same change as red contract tests—not weeks earlier as an unused speculative schema.
+Land the accepted ADR-0077/0081 SPEC deltas and [`schemas/mhf/manifest_v2.schema.json`](schemas/mhf/) in the same change as red contract tests—not weeks earlier as an unused speculative schema.
 
 Required tests:
 
@@ -602,7 +611,7 @@ Stop and escalate if any change proposes to:
 
 | Order | Assignment | Owner | Expected result |
 |---:|---|---|---|
-| 1 | D-ALFA-1: approve/narrow/reject six ADR decisions and the `/1` trajectory amendment. | Engineering Director | One signed decision map. |
+| 1 | D-ALFA-1: retain the ratified eight-ADR map and `/1` trajectory amendment. | Engineering Director | One signed decision map. |
 | 2 | Widen link and RF-ID linters; fix living plan links. | Tooling owner | Documentation gates measure the documents developers will cite. |
 | 3 | File accepted ADRs, minimal SPEC delta, and Wave 2C board tickets. | Architect + Tech Lead | One legal, executable work queue. |
 | 4 | Write RF-23/RF-24/RF-27 red. | Developer A | Evidence defects reproduced without production edits. |

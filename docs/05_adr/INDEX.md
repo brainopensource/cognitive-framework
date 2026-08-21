@@ -1,7 +1,7 @@
 # ADR Index — Architecture Decision Records
 
 > **Status:** Living Master Index of Architecture Decision Records for Vanguard / AETHER.  
-> **Rule:** Append-only numbering. ADRs outrank general documentation; newer ADRs supersede older ones by explicit citation (e.g., ADR-0069 reverses ADR-0001; ADR-0076 canonicalizes execution artifacts; ADR-0077–0084 ratify the Tier S+ evolution contract).  
+> **Rule:** Append-only numbering. ADRs outrank general documentation; newer ADRs supersede older ones by explicit citation (e.g., ADR-0069 reverses ADR-0001; ADR-0076 canonicalizes execution artifacts; ADR-0077–0084 ratify the Tier S+ evolution contract; ADR-0085 governs reservation discipline).
 > **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_sprints/sprint_active.md).
 
 ---
@@ -9,7 +9,7 @@
 ## Quick Navigation
 
 - 🚀 [v0.6.0 Concept Lock & Foundation Execution (`0069`–`0076`)](#v060-concept-lock--foundation-execution-canonical-law) — **Start here for active production law**
-- 🧭 [Tier S+ Evolution Contract (`0077`–`0084`)](#tier-s-evolution-contract-00770084) — **Ratified v0.6.1→v1.0 design and phased implementation law**
+- 🧭 [Tier S+ Evolution Contract (`0077`–`0085`)](#tier-s-evolution-contract-00770085) — **Ratified v0.6.1→v1.0 design and reservation law**
 - 🛡️ [ADR-M0 Namespace (`M0-01`–`M0-13`)](#adr-m0-namespace-foundation-lock) — M0 Foundation Lock decisions
 - 📜 [Pre-v0.6 Historical Decisions (`0000`–`0068`)](#pre-v06-historical-decisions-00000068) — Lineage and historical evolution
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -33,7 +33,7 @@ These ADRs form the binding architectural constitution approved by Engineering L
 
 ---
 
-## Tier S+ Evolution Contract (`0077`–`0084`)
+## Tier S+ Evolution Contract (`0077`–`0085`)
 
 The Engineering Director ratified this catalog on **2026-08-21**. These ADRs are binding design
 law, but their implementation remains limited by the milestone named in each record. In
@@ -42,7 +42,7 @@ table is the canonical numbering map and supersedes conflicting maps in advisory
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
-| `0077` | [`0077-named-component-graph-manifest.md`](0077-named-component-graph-manifest.md) | **Named Component Graph:** `mhf.manifest/2`, typed bindings, one semantic compiler, complete graph identity in $D_H$; implementation at M-3. | accepted | 2026-08-21 |
+| `0077` | [`0077-named-component-graph-manifest.md`](0077-named-component-graph-manifest.md) | **Named Component Graph:** `mhf.manifest/2`, typed bindings, one semantic compiler, complete graph identity in $D_H$; dated amendment reserves profiles and selector-shaped spawn authorization without activating them. | accepted; amended 2026-08-21 | 2026-08-21 |
 | `0078` | [`0078-trajectory-un-hollowing-cost-accounting.md`](0078-trajectory-un-hollowing-cost-accounting.md) | **NOVA-1:** non-breaking `mhf.trajectory/1` content strengthening, explicit missingness, conserved cost, $D_R/D_X$, derived legacy exclusion; immediate RF-23 M-2 gate. | accepted | 2026-08-21 |
 | `0079` | [`0079-absent-vs-forged-derived-promotability.md`](0079-absent-vs-forged-derived-promotability.md) | **Absent vs Forged:** three evidence states; declared absence enters $D_H$; promotability is derived and never author-writable. | accepted | 2026-08-21 |
 | `0080` | [`0080-capability-mediated-agent-spawn-design-freeze.md`](0080-capability-mediated-agent-spawn-design-freeze.md) | **Mediated `agent.spawn`:** design frozen now; S0–S12 implementation deferred to M-6 after M-4/M-5. | accepted; implementation deferred | 2026-08-21 |
@@ -50,6 +50,12 @@ table is the canonical numbering map and supersedes conflicting maps in advisory
 | `0082` | [`0082-universal-turn-loop-m10-compatibility-contract.md`](0082-universal-turn-loop-m10-compatibility-contract.md) | **Universal mechanism and M-10 compatibility:** RF-25 cold continuation plus twelve stable substrate seams for graph, authority, state, evidence, identity, data, ports, schemas, and promotion. | accepted | 2026-08-21 |
 | `0083` | [`0083-dynamic-pareto-controller-profile-matrix.md`](0083-dynamic-pareto-controller-profile-matrix.md) | **Dynamic Pareto profiles:** alpha/beta/gamma/delta as composition policy; feasibility first; schema M-3, controller activation M-7. | accepted; activation deferred | 2026-08-21 |
 | `0084` | [`0084-compounding-macro-tools-active-inference.md`](0084-compounding-macro-tools-active-inference.md) | **Compounding and Active Inference:** T0 witness memo at M-5; least-privilege macro lab M-9; VFE/EFE, DPO, exact paired promotion M-10. | accepted; phased implementation | 2026-08-21 |
+| `0085` | [`0085-reversibility-radius-decide-shape-defer-implementation.md`](0085-reversibility-radius-decide-shape-defer-implementation.md) | **Reservation discipline:** classify reversibility radius; reserve R0/R1 identity shape through parse/digest/refuse/falsify; defer implementation; RF-73–RF-75. | accepted; amended 2026-08-21 | 2026-08-21 |
+
+**Amendment record.** The Director chose a dated in-place amendment to ADR-0077 rather than filing
+ADR-0086. ADR-0085 carries the matching dated correction so its original boolean spawn example
+cannot conflict with the canonical selector algebra. ADR-0080 records RF-26, and ADR-0082 names
+RF-76/RF-77 without advancing their implementation milestones.
 
 **Immediate authorization boundary.** For M-2/v0.6.1, the newly active implementation gates are
 only ADR-0078/RF-23 and ADR-0082/RF-25. The other accepted ADRs constrain future design and do not

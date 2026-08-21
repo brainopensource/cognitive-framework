@@ -1,4 +1,4 @@
-"""Kernel-side scope membership (`ADR-0067`).
+"""Kernel-side scope membership (`ADR-0067`, `RF-26`).
 
 A sealed scope (set by `attenuate()` when a parent withholds verbs) denies
 `request.action ∉ requested_scope.actions` before the approval gate. An
@@ -54,7 +54,7 @@ class ActionMembershipIsEnforced(unittest.TestCase):
     PARENT = _scope({"fs.read", "patch.apply"})
 
     def test_an_action_outside_the_requested_scope_is_denied(self) -> None:
-        """A sealed child grant cannot execute a verb the parent withheld."""
+        """RF-26: policy denies even with no episode-engine pre-filter."""
         decision = _policy(self.PARENT).authorize(
             _request("patch.apply"),
             widens_capability=False,

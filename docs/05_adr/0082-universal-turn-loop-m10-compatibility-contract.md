@@ -3,6 +3,7 @@ adr: 0082
 title: "Universal Turn Loop mechanism and M-10 compatibility contract"
 status: accepted
 accepted_date: 2026-08-21
+amended_date: 2026-08-21
 source_section: "ALFA Tier S+ Director Ratification"
 implementation_milestone: "M-2 mechanism proof; M-5 through M-10 compatibility gates"
 ---
@@ -88,3 +89,20 @@ independent implementations; or evidence that the compatibility contract forces 
 change than it prevents. Reversal requires a newer ADR and migration/falsifier plan.
 
 **Owner · status.** Engineering Director / Principal Systems Architect · accepted · 2026-08-21
+
+---
+
+## Amendment — 2026-08-21: name deferred compatibility fitness tests
+
+Naming these tests closes their contracts without implementing their future capabilities:
+
+- **RF-76 — compatibility-reader fidelity (M-3):**
+  `test.runtime.test_compatibility_readers.CompatibilityReaderFidelity.test_supported_old_wal_rows_rebuild_equivalent_state`
+  proves explicitly supported old WAL rows remain readable through versioned readers and reduce to
+  equivalent state, lineage, and artifact identities without invented defaults.
+- **RF-77 — rebuildable indices (M-9):**
+  `test.contracts.test_index_port_rebuild.IndexRebuildabilityFalsifier.test_deleting_index_and_rebuilding_from_immutable_artifacts_preserves_results_and_citations`
+  proves an index can be deleted and reconstructed solely from immutable artifact references while
+  preserving retrieval results and source-digest citations.
+
+No executable RF-76 or RF-77 test is added before its named milestone opens.

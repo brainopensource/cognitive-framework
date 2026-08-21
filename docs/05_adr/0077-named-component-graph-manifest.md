@@ -3,6 +3,7 @@ adr: 0077
 title: "Named Component Graph Manifest: mhf.manifest/2 with typed bindings"
 status: accepted
 accepted_date: 2026-08-21
+amended_date: 2026-08-21
 source_section: "ALFA Tier S+ Director Ratification"
 implementation_milestone: "M-3 / v0.6.2"
 ---
@@ -60,3 +61,26 @@ resolution materially damages run latency. Preference or migration inconvenience
 
 **Owner · status.** Principal Systems Architect / Tech Lead · accepted by Engineering Director ·
 2026-08-21
+
+---
+
+## Amendment — 2026-08-21: reserve profiles and spawn authorization shape
+
+This same-day, pre-implementation amendment is recorded in place under ADR-0000; it is not a
+silent rewrite and authorizes no M-3, M-6, or M-7 implementation.
+
+1. `mhf.manifest/2` reserves `profiles` as versioned composition policy. The complete profile
+   declaration enters `D_H` even while execution remains sequential and the M-7 router is absent.
+2. Spawn authorization reuses the existing capability declaration and selector algebra. A
+   component may declare verb `agent.spawn` with a generic selector of the form
+   `agent://spawn/harness/<D_H>`. There is no permissive `spawn_grant: true` field. An absent
+   `agent.spawn` declaration means deny.
+3. At M-3, each reservation discharges as **parse -> digest -> refuse -> falsify**: the compiler
+   parses and includes it in `D_H`, then refuses an `agent.spawn` declaration with the named reason
+   `agent.spawn not implemented before M-6`; profile activation beyond sequential execution is
+   likewise refused until M-7. The inert-state tests are owned by RF-73 and RF-74.
+4. Activating either reservation later changes behavior but not the identity pre-image. This
+   prevents M-6/M-7 from retroactively re-attributing trajectories emitted after M-3.
+
+Clauses 3 and 9 remain controlling: the graph is not a workflow engine, and this reservation does
+not authorize graph, spawn, router, or concurrency implementation in M-2.

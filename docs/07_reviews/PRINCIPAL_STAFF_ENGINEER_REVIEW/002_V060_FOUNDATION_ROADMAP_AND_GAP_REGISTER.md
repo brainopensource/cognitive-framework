@@ -223,6 +223,40 @@ Statuses: `DONE` (this docs wave) · `TODO` (authorized after director approval)
 | F-20 | Oracle registry artifact (`ADR-0075`) | `preregistered_oracles.json` exists at a canonical path and `repo_paths` resolves it | Registry file deleted with the sprint-6B docs; tests error on a ghost path | 0 |
 | F-21 | Translator lifting (`ADR-0075`) | `ProposalTranslator` lifts the `parameters` call spelling and fenced payloads per `test_model_invocation`, or the contract is re-scoped with P1-17 | Tool calls silently degrade to prose (`kind: "finish"`) | 0/1 |
 
+#### 4.2.1 Ratified `RF-*` namespace and historical alias
+
+`F-*` remains the historical kernel-control namespace. Existing `F-*` identifiers are never
+renamed or reassigned, and no new proposal requirement may allocate one. Ratified roadmap
+falsifiers use `RF-*`.
+
+| Historical control | Ratified requirement | Relationship |
+|---|---|---|
+| `F-12` | `RF-23` | `F-12` retains the structural `mhf.trajectory/1` schema/emission check. `RF-23` strengthens it with invoked-turn attribution, explicit measurement status, conserved cost, and identity content. This is an alias/lineage edge, not a rename; both tests remain. |
+
+| RF allocation | Owner | Locked subject / milestone |
+|---|---|---|
+| `RF-23`, `RF-24`, `RF-27` | ADR-0078 | NOVA-1 trajectory content, writer authority, and identity separation / M-2 |
+| `RF-25` | ADR-0082 | NOVA-2 true fresh-process cold continuation / M-2 |
+| `RF-26` | ADR-0080 + ADR-0067 | Sealed action membership remains denied when the engine pre-filter is bypassed / current behavior |
+| `RF-28`–`RF-33` | ADR-0077 | Named Component Graph compilation and identity / M-3 |
+| `RF-34`–`RF-37` | ADR-0079 | Absent-vs-forged and derived promotability / M-3–M-5 |
+| `RF-38`–`RF-45` | ADR-0081 | Plugin lifecycle parity and NOVA-4 Layer-0 retirement / M-3 |
+| `RF-46`–`RF-48` | ADR-0083 | Pareto profile identity, authority, and reservation / M-3 and M-7 |
+| `RF-52`–`RF-53` | ADR-0084 | Attributable witness memo / M-5 |
+| `RF-55`–`RF-59` | ADR-0080 | Capability-mediated `agent.spawn` / M-6 |
+| `RF-65`–`RF-66` | ADR-0082 | Advanced topology fitness and the universal-loop challenge / M-8 |
+| `RF-67`–`RF-70` | ADR-0084 | Macro least privilege, dispatch, and exact promotion / M-9–M-10 |
+| `RF-72` | ADR-0082 | Identifier uniqueness linter and this one-time historical alias table / governance |
+| `RF-73`–`RF-75` | ADR-0085 | Reservation identity, inert refusal, and ADR reversal-condition lint / staged milestones |
+| `RF-76` | ADR-0082 | Compatibility-reader fidelity for supported old WAL rows / M-3 |
+| `RF-77` | ADR-0082 | Index deletion and rebuild from immutable artifacts / M-9 |
+
+RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
+conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter
+must expand inclusive ranges, permit repeated citations of the same allocation, and validate the
+single `F-12` -> `RF-23` lineage row above. Unlisted IDs remain unallocated; adjacency grants no
+meaning.
+
 ### 4.3 As-built vs law (thin G5 matrix)
 
 | Surface | As-built | Law | Action |

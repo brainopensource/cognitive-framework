@@ -3,6 +3,7 @@ adr: 0080
 title: "Capability-mediated agent.spawn design freeze"
 status: accepted
 accepted_date: 2026-08-21
+amended_date: 2026-08-21
 source_section: "ALFA Tier S+ Director Ratification"
 implementation_milestone: "M-6 / v0.8.0"
 implementation_status: deferred
@@ -62,3 +63,16 @@ different mechanism while preserving attenuation, durable intent, and evidence.
 
 **Owner · status.** Principal Systems Architect / Kernel Owner · design accepted by Engineering
 Director · implementation deferred to M-6 · 2026-08-21
+
+---
+
+## Amendment — 2026-08-21: RF-26 records the already-closed membership gap
+
+ADR-0067 already made sealed action membership a kernel policy check. RF-26 therefore pins current
+behavior rather than authorizing new spawn machinery:
+
+`test.kernel.test_scope_membership.ActionMembershipIsEnforced.test_an_action_outside_the_requested_scope_is_denied`
+must reject an out-of-scope action at policy authorization when the episode engine's defensive
+pre-filter is absent or bypassed. The denial must remain `DENIED_SCOPE_ESCALATION`. Correcting the
+stale `EpisodeEngine.spawn()` explanation is comment-only, has coupling cost `kappa = 0`, changes
+no TCB line, and does not relax clause 1's M-6 implementation gate.

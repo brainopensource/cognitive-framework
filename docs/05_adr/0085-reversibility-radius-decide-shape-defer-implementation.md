@@ -2,6 +2,8 @@
 adr: 0085
 title: "Reversibility radius: decide shape now, defer implementation, reserve the field"
 status: accepted
+accepted_date: 2026-08-21
+amended_date: 2026-08-21
 supersedes: none
 extends: ADR-0000, ADR-0005, ADR-0023, ADR-0071, ADR-0074, ADR-M0-05, ADR-M0-13
 ---
@@ -387,5 +389,23 @@ misclassification is an estimation error and is corrected in place; two is a def
 and reopens §1. Additionally, if the reserved-field count in §5 exceeds twenty without a
 corresponding activation, the option premium has stopped being `O(1)` and §5's closure must be
 re-adjudicated.
+
+---
+
+## Amendment — 2026-08-21: ratified-catalog and selector correction
+
+The numbering note above is historical: ADRs 0077–0084 were filed and ratified on 2026-08-21.
+ADR-0077's same-day amendment narrows §3.2–§3.4 and the §5.1 `spawn_grant` example as follows:
+
+- the reservation is an `agent.spawn` capability declaration using the canonical generic selector
+  `agent://spawn/harness/<D_H>`, not a boolean;
+- absence means deny;
+- before M-6, presence is parsed, included in `D_H`, and refused at compose with the named reason
+  `agent.spawn not implemented before M-6`;
+- RF-73 and RF-74 apply to this selector-shaped reservation.
+
+Every occurrence of `spawn_grant: true` in the original explanatory text is therefore superseded
+by this narrower selector form. This correction changes no implementation milestone and authorizes
+no graph or spawn code.
 
 **Owner · status.** Principal Systems Architect · accepted

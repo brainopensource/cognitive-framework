@@ -83,7 +83,7 @@ very duplication Wave 2 exists to remove.
 
 ### 2.2-A parity triage — **GREEN. 2.2-B/C AUTHORIZED** (Tech Lead)
 
-Keep/kill settled in [`plans/wave2_convergence.md`](plans/wave2_convergence.md). The one blocker is
+Keep/kill settled in [`done/wave2_convergence.md`](done/wave2_convergence.md). The one blocker is
 closed; deletion may proceed against the scope named there.
 
 **Blocker closed — selector conformance (Developer B).** Verified: the correction is entirely in

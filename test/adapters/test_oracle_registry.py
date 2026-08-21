@@ -9,8 +9,10 @@ import unittest
 from pathlib import Path
 
 _TOOLS = str(Path(__file__).resolve().parents[2] / "tools")
-if _TOOLS not in sys.path:
-    sys.path.insert(0, _TOOLS)
+_COMMON = str(Path(__file__).resolve().parents[2] / "tools" / "common")
+for _p in (_COMMON, _TOOLS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import repo_paths  # noqa: E402
 

@@ -11,8 +11,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 _TOOLS = str(ROOT / "tools")
-if _TOOLS not in sys.path:
-    sys.path.insert(0, _TOOLS)
+_COMMON = str(ROOT / "tools" / "common")
+for _p in (_COMMON, _TOOLS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import repo_paths  # noqa: E402
 

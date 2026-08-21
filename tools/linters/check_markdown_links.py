@@ -10,8 +10,10 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 _TOOLS = Path(__file__).resolve().parent
-if str(_TOOLS) not in sys.path:
-    sys.path.insert(0, str(_TOOLS))
+_COMMON = _TOOLS.parent / "common"
+for _p in (_COMMON, _TOOLS):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 from repo_paths import repo_root
 

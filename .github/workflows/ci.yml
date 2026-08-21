@@ -25,7 +25,7 @@ jobs:
         run: python3 tools/codegen/generate_types.py --check
 
       - name: Duplication detector (F-16)
-        run: python3 tools/check_duplication.py --enforce
+        run: python3 tools/linters/check_duplication.py --enforce
 
       - name: Kernel package tests
         run: python3 -m unittest discover -s test/kernel -t .
@@ -77,30 +77,30 @@ jobs:
         run: python3 -m unittest discover -s test/layer0 -t .
 
       - name: Hexagonal boundary lattice check
-        run: python3 tools/check_boundaries.py
+        run: python3 tools/linters/check_boundaries.py
 
       - name: TCB budget safety check
-        run: python3 tools/check_tcb_budget.py
+        run: python3 tools/linters/check_tcb_budget.py
 
       - name: Domain-blindness (I-7, F-18)
-        run: python3 tools/check_domain_blindness.py
+        run: python3 tools/linters/check_domain_blindness.py
 
       - name: Isolation policy (I-6)
-        run: python3 tools/check_isolation_policy.py
+        run: python3 tools/linters/check_isolation_policy.py
 
       - name: Event coverage (E-COV, SPEC §1.2, ADR-0076 §6)
-        run: python3 tools/check_event_coverage.py
+        run: python3 tools/linters/check_event_coverage.py
 
       - name: Code-default pack tests
         run: python3 -m unittest discover -s test/packs -t .
 
       - name: Stale documentation paths check
-        run: python3 tools/check_stale_paths.py
+        run: python3 tools/linters/check_stale_paths.py
 
       - name: Local markdown links check
-        run: python3 tools/check_markdown_links.py
+        run: python3 tools/linters/check_markdown_links.py
 
       - name: Secret scan check
         env:
           OPENROUTER_API_KEY: ""
-        run: python3 tools/scan_secrets.py
+        run: python3 tools/linters/scan_secrets.py

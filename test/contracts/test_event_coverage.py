@@ -21,8 +21,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 _TOOLS = str(ROOT / "tools")
-if _TOOLS not in sys.path:
-    sys.path.insert(0, _TOOLS)
+_LINTERS = str(ROOT / "tools" / "linters")
+for _p in (_LINTERS, _TOOLS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from check_event_coverage import production_emittable_kinds  # noqa: E402
 
@@ -100,7 +102,7 @@ class ProductionEmittableKindsAreCatalogued(unittest.TestCase):
 
     def test_check_event_coverage_tool_passes(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_event_coverage.py")],
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_event_coverage.py")],
             cwd=ROOT, text=True, capture_output=True, check=False,
             env={**os.environ},
         )

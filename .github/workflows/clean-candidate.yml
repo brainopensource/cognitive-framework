@@ -39,23 +39,23 @@ jobs:
         run: |
           test ! -e .env
           test ! -d node_modules
-          python3 tools/scan_secrets.py
+          python3 tools/linters/scan_secrets.py
 
       - name: Python unit tests
         run: python3 -m unittest discover -s test
 
       - name: Governance and living gates
         run: |
-          python3 tools/check_stale_paths.py
-          python3 tools/check_markdown_links.py
-          python3 tools/check_boundaries.py
-          python3 tools/check_tcb_budget.py
-          python3 tools/scan_secrets.py
+          python3 tools/linters/check_stale_paths.py
+          python3 tools/linters/check_markdown_links.py
+          python3 tools/linters/check_boundaries.py
+          python3 tools/linters/check_tcb_budget.py
+          python3 tools/linters/scan_secrets.py
 
       - name: Release validators must still fail while Beta is open
         run: |
-          python3 tools/check_baseline_manifest.py --release && { echo "expected --release to fail"; exit 1; }
-          python3 tools/check_active_mvp_contract.py --release && { echo "expected contract --release to fail"; exit 1; }
+          python3 tools/linters/check_baseline_manifest.py --release && { echo "expected --release to fail"; exit 1; }
+          python3 tools/linters/check_active_mvp_contract.py --release && { echo "expected contract --release to fail"; exit 1; }
           true
 
       - name: Mandatory skip is fatal

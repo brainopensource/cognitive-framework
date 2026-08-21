@@ -36,7 +36,15 @@ import ast
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+_TOOLS = Path(__file__).resolve().parent.parent
+_COMMON = _TOOLS / "common"
+for _p in (_COMMON, _TOOLS):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+from repo_paths import repo_root
+
+ROOT = repo_root()
 PACKAGES = ROOT / "vanguard" / "packages"
 
 SCAN_ROOTS = (

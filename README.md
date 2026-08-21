@@ -182,13 +182,13 @@ python3 -m unittest discover -s test/agency -t .
 python3 -m unittest discover -s test/packs -t .
 
 # Run static architectural linters
-python3 tools/check_boundaries.py       # Hexagonal lattice enforcement
-python3 tools/check_tcb_budget.py       # TCB kernel LOC budget check
-python3 tools/scan_secrets.py           # Secret & credential leak scanner
-python3 tools/check_domain_blindness.py # Kernel domain blindness (I-7)
-python3 tools/check_isolation_policy.py # Sandbox isolation policy (I-6)
-python3 tools/check_markdown_links.py   # Documentation link integrity
-python3 tools/check_stale_paths.py      # Stale path reference checker
+python3 tools/linters/check_boundaries.py       # Hexagonal lattice enforcement
+python3 tools/linters/check_tcb_budget.py       # TCB kernel LOC budget check
+python3 tools/linters/scan_secrets.py           # Secret & credential leak scanner
+python3 tools/linters/check_domain_blindness.py # Kernel domain blindness (I-7)
+python3 tools/linters/check_isolation_policy.py # Sandbox isolation policy (I-6)
+python3 tools/linters/check_markdown_links.py   # Documentation link integrity
+python3 tools/linters/check_stale_paths.py      # Stale path reference checker
 ```
 
 ### TypeScript CLI Environment (Node.js 20+)

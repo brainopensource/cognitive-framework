@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from tools.check_core_changes import count_core_changes
+from tools.linters.check_core_changes import count_core_changes
 
 
 class TestCheckCoreChanges(unittest.TestCase):

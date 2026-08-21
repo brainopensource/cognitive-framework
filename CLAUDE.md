@@ -109,13 +109,13 @@ python3 -m unittest test.kernel.test_dispatch.TestDispatchPipeline.test_s0_obser
 
 ### Static Architecture & Security Linters
 ```bash
-python3 tools/check_boundaries.py         # Hexagonal boundary enforcement
-python3 tools/check_tcb_budget.py         # Kernel TCB LOC limit check
-python3 tools/scan_secrets.py             # Secret leak detection
-python3 tools/check_domain_blindness.py   # Invariant I-7 (no domain tokens in kernel)
-python3 tools/check_isolation_policy.py   # Invariant I-6 (container/subprocess execution)
-python3 tools/check_markdown_links.py     # Markdown link validation
-python3 tools/check_stale_paths.py        # Stale documentation path check
+python3 tools/linters/check_boundaries.py         # Hexagonal boundary enforcement
+python3 tools/linters/check_tcb_budget.py         # Kernel TCB LOC limit check
+python3 tools/linters/scan_secrets.py             # Secret leak detection
+python3 tools/linters/check_domain_blindness.py   # Invariant I-7 (no domain tokens in kernel)
+python3 tools/linters/check_isolation_policy.py   # Invariant I-6 (container/subprocess execution)
+python3 tools/linters/check_markdown_links.py     # Markdown link validation
+python3 tools/linters/check_stale_paths.py        # Stale documentation path check
 ```
 
 ### TypeScript CLI (`vanguard/clients/cli`)

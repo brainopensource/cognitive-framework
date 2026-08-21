@@ -41,13 +41,13 @@
       "test_id": "MF-S7-C-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/benchmarking_valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/benchmarking_adapter_import"
       ],
@@ -57,13 +57,13 @@
       "test_id": "MF-S0-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/forbidden_direction"
       ],
@@ -73,13 +73,13 @@
       "test_id": "MF-S0-002",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/disposable_import"
       ],
@@ -89,13 +89,13 @@
       "test_id": "MF-S0-003",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/cycle"
       ],
@@ -105,13 +105,13 @@
       "test_id": "MF-S0-004",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/governance_model"
       ],
@@ -121,13 +121,13 @@
       "test_id": "MF-S0-005",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/agency_evaluator"
       ],
@@ -137,13 +137,13 @@
       "test_id": "MF-S0-006",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/adapter_sibling"
       ],
@@ -153,13 +153,13 @@
       "test_id": "MF-S0-007",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/lab_import"
       ],
@@ -169,13 +169,13 @@
       "test_id": "MF-S0-008",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/python_direction"
       ],
@@ -185,13 +185,13 @@
       "test_id": "MF-S0-009",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/unknown_package"
       ],
@@ -201,13 +201,13 @@
       "test_id": "MF-S7-A-01-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/rogue_module"
       ],
@@ -217,13 +217,13 @@
       "test_id": "MF-S7-A-02-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/sandbox_subprocess_valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/agency_subprocess"
       ],
@@ -233,13 +233,13 @@
       "test_id": "MF-S7-A-03-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/runtime_evaluator_valid"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/runtime_evaluator_import"
       ],
@@ -409,11 +409,11 @@
       "test_id": "MF-KRN-011",
       "control": [
         "python3",
-        "tools/check_tcb_budget.py"
+        "tools/linters/check_tcb_budget.py"
       ],
       "broken": [
         "python3",
-        "tools/check_tcb_budget.py",
+        "tools/linters/check_tcb_budget.py",
         "--root",
         "test/broken/fixtures/tcb_growth",
         "--budget",
@@ -425,14 +425,14 @@
       "test_id": "MF-S4-001",
       "control": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/valid",
         "--s4-exit"
       ],
       "broken": [
         "python3",
-        "tools/check_boundaries.py",
+        "tools/linters/check_boundaries.py",
         "--root",
         "test/broken/fixtures/s4_disposables_present",
         "--s4-exit"
@@ -523,11 +523,11 @@
       "test_id": "MF-GOV-PATH-001",
       "control": [
         "python3",
-        "tools/check_stale_paths.py"
+        "tools/linters/check_stale_paths.py"
       ],
       "broken": [
         "python3",
-        "tools/check_stale_paths.py",
+        "tools/linters/check_stale_paths.py",
         "--root",
         "test/broken/fixtures/stale_paths"
       ],
@@ -537,13 +537,13 @@
       "test_id": "MF-SEC-SCAN-001",
       "control": [
         "python3",
-        "tools/scan_secrets.py",
+        "tools/linters/scan_secrets.py",
         "--root",
         "test/broken/fixtures/valid"
       ],
       "broken": [
         "python3",
-        "tools/scan_secrets.py",
+        "tools/linters/scan_secrets.py",
         "--root",
         "test/broken/fixtures/secret_leak"
       ],

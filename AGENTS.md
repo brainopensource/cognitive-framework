@@ -87,20 +87,20 @@ python3 -m unittest discover -s test -t .
 ### Architecture, TCB, & Security Linters
 ```bash
 # Enforce hexagonal boundaries
-python3 tools/check_boundaries.py
+python3 tools/linters/check_boundaries.py
 
 # Verify Trusted Computing Base budget (threshold <= 1438 LOC)
-python3 tools/check_tcb_budget.py
+python3 tools/linters/check_tcb_budget.py
 
 # Scan workspace for leaked secrets and API keys
-python3 tools/scan_secrets.py
+python3 tools/linters/scan_secrets.py
 
 # Invariant checks
-python3 tools/check_domain_blindness.py   # Invariant I-7
-python3 tools/check_isolation_policy.py   # Invariant I-6
-python3 tools/check_duplication.py --enforce # Duplication detector
-python3 tools/check_markdown_links.py     # Relative link verification
-python3 tools/check_stale_paths.py        # Stale documentation path check
+python3 tools/linters/check_domain_blindness.py   # Invariant I-7
+python3 tools/linters/check_isolation_policy.py   # Invariant I-6
+python3 tools/linters/check_duplication.py --enforce # Duplication detector
+python3 tools/linters/check_markdown_links.py     # Relative link verification
+python3 tools/linters/check_stale_paths.py        # Stale documentation path check
 ```
 
 ---

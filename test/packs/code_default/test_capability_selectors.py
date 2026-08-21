@@ -7,7 +7,11 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT / "tools"))
+_TOOLS = ROOT / "tools"
+_COMMON = _TOOLS / "common"
+for _p in (_COMMON, _TOOLS):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 from simple_yaml import load  # noqa: E402
 

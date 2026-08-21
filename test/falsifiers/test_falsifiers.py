@@ -19,8 +19,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 _TOOLS = str(ROOT / "tools")
-if _TOOLS not in sys.path:
-    sys.path.insert(0, _TOOLS)
+_COMMON = str(ROOT / "tools" / "common")
+for _p in (_COMMON, _TOOLS):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import repo_paths  # noqa: E402
 
@@ -29,13 +31,16 @@ from vanguard.packages.kernel.dispatch import FailurePath  # noqa: E402
 
 
 def _run_tool(script: str, *args: str) -> subprocess.CompletedProcess[str]:
+    candidate = ROOT / "tools" / script
+    if not candidate.exists():
+        candidate = ROOT / "tools" / "linters" / script
     return subprocess.run(
-        [sys.executable, str(ROOT / "tools" / script), *args],
+        [sys.executable, str(candidate), *args],
         cwd=ROOT,
         text=True,
         capture_output=True,
         check=False,
-        env={**os.environ, "PYTHONPATH": _TOOLS},
+        env={**os.environ, "PYTHONPATH": f"{_TOOLS}:{_COMMON}"},
     )
 
 
@@ -452,7 +457,7 @@ class TestF17CISubject(unittest.TestCase):
 
 class TestF18DomainBlindnessScope(unittest.TestCase):
     def test_check_domain_blindness_scans_packages_domain_and_kernel(self) -> None:
-        source = (ROOT / "tools" / "check_domain_blindness.py").read_text(encoding="utf-8")
+        source = (ROOT / "tools" / "linters" / "check_domain_blindness.py").read_text(encoding="utf-8")
         self.assertIn("vanguard/packages/domain", source)
         self.assertIn("vanguard/packages/kernel", source)
         result = _run_tool("check_domain_blindness.py")

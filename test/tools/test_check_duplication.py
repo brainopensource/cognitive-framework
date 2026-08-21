@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 class DuplicationGateTests(unittest.TestCase):
     def test_production_tree_has_no_second_algebra(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_duplication.py"), "--enforce"],
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_duplication.py"), "--enforce"],
             cwd=ROOT,
             check=False,
         )
@@ -22,7 +22,7 @@ class DuplicationGateTests(unittest.TestCase):
     def test_planted_fork_fails_closed(self) -> None:
         fixture = ROOT / "test" / "broken" / "fixtures" / "duplicate_algebra"
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_duplication.py"),
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_duplication.py"),
              "--root", str(fixture), "--expect-fail"],
             cwd=ROOT,
             check=False,

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 class DomainBlindnessGateTests(unittest.TestCase):
     def test_layer0_is_clean(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_domain_blindness.py")],
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_domain_blindness.py")],
             cwd=ROOT,
             check=False,
         )
@@ -22,7 +22,7 @@ class DomainBlindnessGateTests(unittest.TestCase):
     def test_planted_leak_fails_closed(self) -> None:
         fixture = ROOT / "test" / "broken" / "fixtures" / "domain_blindness"
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_domain_blindness.py"),
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_domain_blindness.py"),
              "--root", str(fixture), "--expect-fail"],
             cwd=ROOT,
             check=False,
@@ -33,7 +33,7 @@ class DomainBlindnessGateTests(unittest.TestCase):
 class IsolationPolicyGateTests(unittest.TestCase):
     def test_pack_terminal_is_container(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_isolation_policy.py")],
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_isolation_policy.py")],
             cwd=ROOT,
             check=False,
         )
@@ -42,7 +42,7 @@ class IsolationPolicyGateTests(unittest.TestCase):
     def test_in_process_proc_exec_fails(self) -> None:
         fixture = ROOT / "test" / "broken" / "fixtures" / "isolation_policy"
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_isolation_policy.py"),
+            [sys.executable, str(ROOT / "tools" / "linters" / "check_isolation_policy.py"),
              "--root", str(fixture), "--expect-fail"],
             cwd=ROOT,
             check=False,

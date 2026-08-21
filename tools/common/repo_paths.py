@@ -61,25 +61,19 @@ _STALE_TOKEN = re.compile(
 )
 
 _ROOT_SENTINELS_LIVE = (
-    Path("tools") / "repo_paths.py",
-    Path("docs") / "01_specs",
+    Path("tools") / "common" / "repo_paths.py",
+    Path("docs") / "SPEC.md",
     Path(".github") / "workflows" / "ci.yml",
 )
 _ROOT_SENTINELS_ALT = (
-    Path("tools") / "repo_paths.py",
-    Path("docs") / "main_v4",
+    Path("pyproject.toml"),
     Path(".github") / "workflows" / "ci.yml",
 )
 _ROOT_SENTINELS_LEGACY = (
-    Path("tools") / "repo_paths.py",
-    Path("docs") / "v4",
+    Path("vanguard") / "packages",
     Path(".github") / "workflows" / "ci.yml",
 )
-# Foundation Lock (v0.5.0 concept lock): docs/01_specs is archived under
-# docs/archive/v045/ once docs/SPEC.md lands. This sentinel keeps repo_root()
-# resolving after that move without touching the pre-lock sentinels above.
 _ROOT_SENTINELS_SPEC = (
-    Path("tools") / "repo_paths.py",
     Path("docs") / "SPEC.md",
     Path(".github") / "workflows" / "ci.yml",
 )
@@ -89,8 +83,9 @@ def repo_root(start: Path | None = None) -> Path:
     """Return the repository root even when invoked from a foreign cwd."""
 
     search: list[Path] = []
-    here = Path(__file__).resolve().parent.parent
+    here = Path(__file__).resolve().parent.parent.parent
     search.append(here)
+    search.append(here.parent)
     cwd = (start or Path.cwd()).resolve()
     search.append(cwd)
     search.extend(cwd.parents)
@@ -112,7 +107,7 @@ def repo_root(start: Path | None = None) -> Path:
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_SPEC):
             return candidate
     raise FileNotFoundError(
-        "cannot locate repository root: expected docs/main_v4 or docs/v4 plus tools/repo_paths.py"
+        "cannot locate repository root: expected pyproject.toml or docs/SPEC.md"
     )
 
 
@@ -203,6 +198,9 @@ def preregistered_oracles() -> Path:
 
 
 def kernel_tcb_budget() -> Path:
+    p = repo_path("tools", "linters", "kernel-tcb-budget.json")
+    if p.exists():
+        return p
     p = repo_path("tools", "kernel-tcb-budget.json")
     if p.exists():
         return p

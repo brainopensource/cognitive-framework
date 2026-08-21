@@ -9,8 +9,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 _TOOLS = Path(__file__).resolve().parents[2] / "tools"
-if str(_TOOLS) not in sys.path:
-    sys.path.insert(0, str(_TOOLS))
+_COMMON = _TOOLS / "common"
+for _p in (_COMMON, _TOOLS):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 from simple_yaml import load as load_yaml  # noqa: E402
 

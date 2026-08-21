@@ -169,9 +169,9 @@ Wave 2C is a narrow correction lane between the current M-2 re-gate submission a
 | **W2C-H1** | Tooling owner | Widen Markdown coverage after triaging existing `--all` debt. | link linter + fixture | **DELEGATED HYGIENE; not a production blocker** |
 | **W2C-A1** | Director + Architect | Ratify/index decisions and lock immediate SPEC behavior. | `docs/05_adr/`, `docs/SPEC.md` | **COMPLETE** |
 | **W2C-A2** | Tech Lead | Establish the two-lane board and M-2 outcome gate. | active board + milestones | **COMPLETE** |
-| **W2C-A3 / RF-72** | Tooling owner | Lint RF allocations and preserve the F-12 lineage. | RF linter + unit fixture + CI | **FILED; RUN PENDING** |
-| **W2C-R23** | Developer A | Invoked-turn population, accounting, missingness, and identity falsifier. | `test/falsifiers/test_rf23_trajectory_content.py` | **FILED; RED CONFIRMATION PENDING** |
-| **W2C-R25** | Developer B | Hard-death, file-WAL, fresh-interpreter continuation falsifier. | `test/falsifiers/test_rf25_cold_continuation.py` | **FILED; RED CONFIRMATION PENDING** |
+| **W2C-A3 / RF-72** | Tooling owner | Lint RF allocations and preserve the F-12 lineage. | RF linter + unit fixture + CI | **PARSER CORRECTED; RERUN PENDING** |
+| **W2C-R23** | Developer A | Invoked-turn population, accounting, missingness, and identity falsifier. | `test/falsifiers/test_rf23_trajectory_content.py` | **RED CONFIRMED — CORRECT CAUSE** |
+| **W2C-R25** | Developer B | Hard-death, file-WAL, fresh-interpreter continuation falsifier. | `test/falsifiers/test_rf25_cold_continuation.py` | **RED CONFIRMED — CORRECT CAUSE** |
 
 Production behavior is untouched in this launch packet. RF-24 and RF-27 remain supporting
 assertions inside Developer A's RF-23 lane rather than extra scheduling lanes. A test that
@@ -624,8 +624,8 @@ Stop and escalate if any change proposes to:
 |---:|---|---|---|
 | 1 | Ratified ADR map, immediate SPEC lock, RF registry, active board, and M-2→M-10 ladder. | Director + Architect | **COMPLETE** |
 | 2 | RF-72 allocation linter, duplicate fixture, and CI binding. | Tooling owner | **FILED; operator execution pending** |
-| 3 | RF-23 with RF-24/RF-27 accounting and identity assertions. | Developer A | **FILED; confirm expected red** |
-| 4 | RF-25 hard-death/fresh-interpreter continuation. | Developer B | **FILED; confirm expected red** |
+| 3 | RF-23 with RF-24/RF-27 accounting and identity assertions. | Developer A | **RED CONFIRMED** |
+| 4 | RF-25 hard-death/fresh-interpreter continuation. | Developer B | **RED CONFIRMED** |
 | 5 | Implement NOVA-1 and NOVA-2 in parallel under the shared-file protocol. | Developers A/B | Start after both diagnosed red causes are confirmed. |
 | 6 | Integrate, run the complete M-2 gate, and adjudicate every red. | Tech Lead | Director-ready M-2 evidence bundle. |
 | 7 | Sign M-2 or return one bounded blocker. | Engineering Director | M-3 opens or remains closed unambiguously. |

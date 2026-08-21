@@ -15,8 +15,7 @@ _CITATION_FILES = (
     _ROOT / "docs/03_sprints/sprint_active.md",
     *sorted((_ROOT / "docs/05_adr").glob("[0-9][0-9][0-9][0-9]-*.md")),
 )
-_TOKEN = re.compile(r"RF-(\d+)(?:\s*[–-]\s*(?:RF-)?(\d+))?")
-_ROW = re.compile(r"^\|\s*`([^`]*RF-[^`]*)`\s*\|\s*([^|]+)\|\s*([^|]+)\|", re.MULTILINE)
+_TOKEN = re.compile(r"RF-(\d+)(?:`?\s*[–-]\s*`?(?:RF-)?(\d+))?")
 
 
 def expand_ids(text: str) -> tuple[int, ...]:
@@ -35,10 +34,18 @@ def allocations(register_text: str) -> tuple[dict[int, tuple[str, str]], list[st
     """Return canonical allocations and conflicting-row errors."""
     found: dict[int, tuple[str, str]] = {}
     errors: list[str] = []
-    for match in _ROW.finditer(register_text):
-        label, owner, subject = (part.strip() for part in match.groups())
+    for line in register_text.splitlines():
+        if not line.lstrip().startswith("|"):
+            continue
+        columns = [part.strip() for part in line.strip().strip("|").split("|")]
+        if len(columns) < 3 or "RF-" not in columns[0]:
+            continue
+        label, owner, subject = columns[:3]
         identity = (owner, subject)
-        for number in expand_ids(label):
+        numbers = expand_ids(label)
+        if not numbers:
+            continue
+        for number in numbers:
             prior = found.get(number)
             if prior is not None and prior != identity:
                 errors.append(

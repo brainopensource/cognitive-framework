@@ -40,8 +40,8 @@ opens **Wave 2C** and binds M-2/v0.6.1 closure to exactly two primary falsifiers
 
 | Gate | Decision | Required red-to-green proof | Owner | State |
 |---|---|---|---|---|
-| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **RED TEST FILED — OPERATOR RUN PENDING** |
-| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **RED TEST FILED — OPERATOR RUN PENDING** |
+| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **RED CONFIRMED — CORRECT DIAGNOSIS** |
+| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **RED CONFIRMED — CORRECT DIAGNOSIS** |
 
 RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23;
 they do not create additional M-2 scheduling lanes. Production changes begin only after the named
@@ -423,8 +423,8 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 2.2-B | Delete 2.2-A KILL surfaces; retire v4 write path | DONE |
 | 2.2-C | `root.py` split in place (compose, session, wiring) | DONE |
 | 2.2-D | Widen I-7 domain-blindness linter & boundary rows | READY |
-| 2C-R23 | RF-23 filed at `test/falsifiers/test_rf23_trajectory_content.py`; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **RED EXECUTION CONFIRMATION PENDING — PRIMARY M-2 GATE** |
-| 2C-R25 | RF-25 filed at `test/falsifiers/test_rf25_cold_continuation.py`; prove hard-death continuation from file-backed SQLite WAL | **RED EXECUTION CONFIRMATION PENDING — PRIMARY M-2 GATE** |
+| 2C-R23 | RF-23 filed at `test/falsifiers/test_rf23_trajectory_content.py`; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **RED CONFIRMED — READY AFTER RF-72 GREEN** |
+| 2C-R25 | RF-25 filed at `test/falsifiers/test_rf25_cold_continuation.py`; prove hard-death continuation from file-backed SQLite WAL | **RED CONFIRMED — READY AFTER RF-72 GREEN** |
 | 2C-REGATE | Integrate Round-4 evidence + RF-23/RF-25; run full M-2 gate and obtain Tech Lead signature | BLOCKED on RF-23/RF-25 |
 
 ### Wave 3 — Extensibility (QUEUED — Entry: signed M-2 including RF-23/RF-25)

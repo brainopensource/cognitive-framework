@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 850" width="100%" height="100%" style="background:#0d1117; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff" />
+    </marker>
+    <marker id="arrowPurple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#bc8cff" />
+    </marker>
+  </defs>
+
+  <!-- Title Header -->
+  <text x="640" y="45" fill="#f0f6fc" font-size="24" font-weight="700" text-anchor="middle" letter-spacing="0.5">SUBSTRATE EVOLUTION: v0.6.0 GROUND TRUTH vs. v0.6.1 SUBSTRATE GENERALITY</text>
+  <text x="640" y="70" fill="#8b949e" font-size="14" text-anchor="middle">Comparative architectural analysis bridging foundational single-agent loop to recursive mediated delegation</text>
+
+  <!-- LEFT: v0.6.0 GROUND TRUTH -->
+  <g transform="translate(40, 95)" filter="url(#shadow)">
+    <rect width="570" height="715" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+    <rect width="570" height="46" rx="12" fill="#1f6feb" fill-opacity="0.15"/>
+    <text x="285" y="30" fill="#58a6ff" font-size="16" font-weight="700" text-anchor="middle">v0.6.0 CONCEPT LOCK (FOUNDATION LAW)</text>
+
+    <!-- Structural Characteristics -->
+    <g transform="translate(25, 65)">
+      <!-- Manifest -->
+      <rect width="520" height="110" rx="8" fill="#21262d" stroke="#30363d"/>
+      <text x="20" y="30" fill="#58a6ff" font-size="14" font-weight="600">1. Fixed Harness Manifest (harness.yaml)</text>
+      <text x="20" y="55" fill="#f0f6fc" font-size="12">• Dedicated pack structure (packs/code-default/)</text>
+      <text x="20" y="75" fill="#8b949e" font-size="11">• Flat plugins: [fs, ast-patch, repo-map, terminal, evaluation-gate]</text>
+      <text x="20" y="95" fill="#8b949e" font-size="11">• Inflexible guardrails: Sandbox &amp; Evaluator mandatory across all runs</text>
+
+      <!-- Episode Engine -->
+      <rect y="125" width="520" height="155" rx="8" fill="#21262d" stroke="#30363d"/>
+      <text x="20" y="155" fill="#f0f6fc" font-size="14" font-weight="600">2. EpisodeEngine (Linear Turn Loop)</text>
+      <text x="20" y="180" fill="#8b949e" font-size="12">• Sequential dispatch: TurnStarted → Effect → TurnComplete</text>
+      <text x="20" y="200" fill="#8b949e" font-size="12">• Single logical agent driving tool executions sequentially</text>
+      <text x="20" y="220" fill="#8b949e" font-size="12">• spawn() capability is defined as runtime-managed subprocess</text>
+      <text x="20" y="240" fill="#8b949e" font-size="12">• Direct single-track budget debiting</text>
+      <text x="20" y="260" fill="#3fb950" font-size="11" font-weight="600">Stop Condition (Wave 4): 1 real verified coding run against oracle</text>
+
+      <!-- Replay & Evaluator -->
+      <rect y="295" width="520" height="110" rx="8" fill="#21262d" stroke="#30363d"/>
+      <text x="20" y="325" fill="#f0f6fc" font-size="14" font-weight="600">3. Rigid Exterior Verification</text>
+      <text x="20" y="350" fill="#8b949e" font-size="12">• Exterior daemon (UID 10002) mandatory for all runs</text>
+      <text x="20" y="370" fill="#8b949e" font-size="12">• All runs must produce signed verdict or fail</text>
+      <text x="20" y="390" fill="#8b949e" font-size="11">• Evaluator exteriority strictly preserved (ADR-0072)</text>
+
+      <!-- Target Milestone Scope -->
+      <rect y="420" width="520" height="205" rx="8" fill="#0d1117" stroke="#388bfd"/>
+      <text x="20" y="450" fill="#58a6ff" font-size="14" font-weight="700">Foundation Scope (Waves 0 – 4):</text>
+      <text x="20" y="475" fill="#f0f6fc" font-size="12">• Wave 0: CI Truth &amp; Named Falsifiers</text>
+      <text x="20" y="495" fill="#f0f6fc" font-size="12">• Wave 1: Fail-Closed Trust Spine (F-01..F-15)</text>
+      <text x="20" y="515" fill="#f0f6fc" font-size="12">• Wave 2: One Runtime &amp; Parity (F-16 green, layer0 absorption)</text>
+      <text x="20" y="535" fill="#f0f6fc" font-size="12">• Wave 3: Extensibility Walking Skeleton (Registry FSM, Echo Plugin)</text>
+      <text x="20" y="555" fill="#f0f6fc" font-size="12">• Wave 4: First Real Coding Run (STOP CONDITION)</text>
+      <text x="20" y="585" fill="#e3b341" font-size="11" font-weight="600">Constraint: Zero kernel LOC expansion beyond 1438 budget.</text>
+      <text x="20" y="605" fill="#e3b341" font-size="11" font-weight="600">No premature multi-agent or concurrency in foundation waves.</text>
+    </g>
+  </g>
+
+  <!-- RIGHT: v0.6.1 GENERALITY & BEYOND -->
+  <g transform="translate(670, 95)" filter="url(#shadow)">
+    <rect width="570" height="715" rx="12" fill="#161b22" stroke="#8957e5" stroke-width="1.5"/>
+    <rect width="570" height="46" rx="12" fill="#8957e5" fill-opacity="0.15"/>
+    <text x="285" y="30" fill="#d2a8ff" font-size="16" font-weight="700" text-anchor="middle">v0.6.1 SUBSTRATE GENERALITY (POST-FOUNDATION)</text>
+
+    <g transform="translate(25, 65)">
+      <!-- Component Graph -->
+      <rect width="520" height="110" rx="8" fill="#21262d" stroke="#8957e5"/>
+      <text x="20" y="30" fill="#d2a8ff" font-size="14" font-weight="600">1. Component Graph Manifest Architecture</text>
+      <text x="20" y="55" fill="#f0f6fc" font-size="12">• Declarative DAG of components, ports, and selectors</text>
+      <text x="20" y="75" fill="#8b949e" font-size="11">• Multi-pack portability: Math Pack, Data Pack, Security Pack</text>
+      <text x="20" y="95" fill="#8b949e" font-size="11">• Canonical D_H covers arbitrary component compositions</text>
+
+      <!-- Guardrail Flexibility -->
+      <rect y="125" width="520" height="120" rx="8" fill="#21262d" stroke="#30363d"/>
+      <text x="20" y="155" fill="#f0f6fc" font-size="14" font-weight="600">2. Absent vs. Forged Guardrail Flexibility</text>
+      <text x="20" y="180" fill="#8b949e" font-size="12">• Declarable: evaluation = none / sandbox = none (safe offline tests)</text>
+      <text x="20" y="200" fill="#8b949e" font-size="12">• Unforgeable rule: Present but unsigned = Unconditional Deny</text>
+      <text x="20" y="220" fill="#3fb950" font-size="11" font-weight="600">Absent = Flagged non-attributable; Forged = Fail-closed</text>
+
+      <!-- Mediated agent.spawn -->
+      <rect y="260" width="520" height="145" rx="8" fill="#21262d" stroke="#388bfd"/>
+      <text x="20" y="290" fill="#58a6ff" font-size="14" font-weight="600">3. Capability-Mediated agent.spawn (M-6)</text>
+      <text x="20" y="315" fill="#8b949e" font-size="12">• agent.spawn dispatched as a standard kernel verb</text>
+      <text x="20" y="335" fill="#8b949e" font-size="12">• Child agent gets strictly attenuated capability grant</text>
+      <text x="20" y="355" fill="#8b949e" font-size="12">• Parent leases sub-budget; child returns cryptographic receipt</text>
+      <text x="20" y="375" fill="#8b949e" font-size="11" font-style="italic">Tree Search (MCTS), Debate, &amp; Hierarchical Swarms as policy</text>
+
+      <!-- Emergence Horizons -->
+      <rect y="420" width="520" height="205" rx="8" fill="#0d1117" stroke="#8957e5"/>
+      <text x="20" y="450" fill="#d2a8ff" font-size="14" font-weight="700">Emergence Roadmap (M-5 through M-10):</text>
+      <text x="20" y="475" fill="#f0f6fc" font-size="12">• M-5: Post-Foundation Consolidation &amp; Pack #2 Generality Proof</text>
+      <text x="20" y="495" fill="#f0f6fc" font-size="12">• M-6: Mediated Delegation (agent.spawn implementation)</text>
+      <text x="20" y="515" fill="#f0f6fc" font-size="12">• M-7: Controlled Concurrency (K &lt;&lt; N worker isolation)</text>
+      <text x="20" y="535" fill="#f0f6fc" font-size="12">• M-8: Framework Builder Abstraction &amp; Dynamic Swarms</text>
+      <text x="20" y="555" fill="#f0f6fc" font-size="12">• M-9: High Performance &amp; Scaled Orchestration</text>
+      <text x="20" y="575" fill="#f0f6fc" font-size="12">• M-10: Meta-Cognitive Self-Improvement Singularity</text>
+      <text x="20" y="605" fill="#3fb950" font-size="11" font-weight="600">Evolution occurs strictly on top of the verified foundation.</text>
+    </g>
+  </g>
+</svg>

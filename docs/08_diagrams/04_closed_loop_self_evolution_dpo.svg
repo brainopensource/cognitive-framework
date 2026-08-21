@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%" style="background:#0d1117; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff" />
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#3fb950" />
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f85149" />
+    </marker>
+  </defs>
+
+  <!-- Title Header -->
+  <text x="600" y="45" fill="#f0f6fc" font-size="24" font-weight="700" text-anchor="middle" letter-spacing="0.5">CLOSED-LOOP EMPIRICAL DISTILLATION &amp; SELF-EVOLUTION</text>
+  <text x="600" y="70" fill="#8b949e" font-size="14" text-anchor="middle">How AETHER transforms verified execution history into unforgeable training signals and procedural memory</text>
+
+  <!-- Step 1: Live Run -->
+  <g transform="translate(60, 110)" filter="url(#shadow)">
+    <rect width="240" height="280" rx="10" fill="#161b22" stroke="#1f6feb" stroke-width="1.5"/>
+    <text x="120" y="32" fill="#58a6ff" font-size="15" font-weight="700" text-anchor="middle">1. LIVE EXECUTION</text>
+    <text x="20" y="65" fill="#f0f6fc" font-size="12" font-weight="600">Runtime Episode</text>
+    <text x="20" y="85" fill="#8b949e" font-size="11">• Model proposes turns</text>
+    <text x="20" y="105" fill="#8b949e" font-size="11">• Kernel mediates actions</text>
+    <text x="20" y="125" fill="#8b949e" font-size="11">• SQLite WAL records events</text>
+    <text x="20" y="145" fill="#8b949e" font-size="11">• Subprocess sandbox executes</text>
+
+    <rect x="15" y="175" width="210" height="85" rx="6" fill="#21262d" stroke="#30363d"/>
+    <text x="25" y="198" fill="#e3b341" font-size="12" font-weight="600">Emitted Trajectory (τ)</text>
+    <text x="25" y="218" fill="#8b949e" font-size="10">• Turn actions &amp; diffs</text>
+    <text x="25" y="233" fill="#8b949e" font-size="10">• Token &amp; USD spend</text>
+    <text x="25" y="248" fill="#8b949e" font-size="10">• Model fingerprints</text>
+  </g>
+
+  <!-- Step 2: Exterior Oracle Sign -->
+  <g transform="translate(360, 110)" filter="url(#shadow)">
+    <rect width="240" height="280" rx="10" fill="#161b22" stroke="#da3633" stroke-width="1.5"/>
+    <text x="120" y="32" fill="#f85149" font-size="15" font-weight="700" text-anchor="middle">2. EXTERIOR ORACLE</text>
+    <text x="20" y="65" fill="#f0f6fc" font-size="12" font-weight="600">Independent Verdict</text>
+    <text x="20" y="85" fill="#8b949e" font-size="11">• UID 10002 Evaluator</text>
+    <text x="20" y="105" fill="#8b949e" font-size="11">• Run pre-registered tests</text>
+    <text x="20" y="125" fill="#8b949e" font-size="11">• Ed25519 Signed Verdict</text>
+    
+    <rect x="15" y="155" width="210" height="105" rx="6" fill="#21262d" stroke="#30363d"/>
+    <text x="25" y="180" fill="#3fb950" font-size="12" font-weight="700">Y(τ) = 1 (PASS)</text>
+    <text x="25" y="198" fill="#8b949e" font-size="10">Classified as Winning Trajectory (τ_w)</text>
+    <text x="25" y="220" fill="#f85149" font-size="12" font-weight="700">Y(τ) = 0 (FAIL)</text>
+    <text x="25" y="238" fill="#8b949e" font-size="10">Classified as Rejected Trajectory (τ_l)</text>
+  </g>
+
+  <!-- Step 3: DPO & Skill Harvester -->
+  <g transform="translate(660, 110)" filter="url(#shadow)">
+    <rect width="240" height="280" rx="10" fill="#161b22" stroke="#8957e5" stroke-width="1.5"/>
+    <text x="120" y="32" fill="#d2a8ff" font-size="15" font-weight="700" text-anchor="middle">3. HARVESTING ENGINE</text>
+    
+    <rect x="15" y="55" width="210" height="95" rx="6" fill="#21262d" stroke="#388bfd"/>
+    <text x="25" y="78" fill="#58a6ff" font-size="12" font-weight="600">DPO Preference Pairs</text>
+    <text x="25" y="98" fill="#8b949e" font-size="10">Pairs winning patch with failed attempts</text>
+    <text x="25" y="113" fill="#8b949e" font-size="10">under identical prompt D_H</text>
+    <text x="25" y="133" fill="#3fb950" font-size="11" font-weight="700">(τ_chosen, τ_rejected)</text>
+
+    <rect x="15" y="160" width="210" height="100" rx="6" fill="#21262d" stroke="#238636"/>
+    <text x="25" y="183" fill="#3fb950" font-size="12" font-weight="600">Skill Card Synthesis</text>
+    <text x="25" y="203" fill="#8b949e" font-size="10">Extracts root-cause error &amp; procedure</text>
+    <text x="25" y="220" fill="#8b949e" font-size="10">Serializes to skills/*.md</text>
+    <text x="25" y="240" fill="#e3b341" font-size="10">Elo Initial: 1200 with time decay</text>
+  </g>
+
+  <!-- Step 4: Model Distillation & Gate -->
+  <g transform="translate(960, 110)" filter="url(#shadow)">
+    <rect width="200" height="280" rx="10" fill="#161b22" stroke="#238636" stroke-width="1.5"/>
+    <text x="100" y="32" fill="#3fb950" font-size="15" font-weight="700" text-anchor="middle">4. DISTILLATION</text>
+    <text x="15" y="65" fill="#f0f6fc" font-size="12" font-weight="600">Offline LoRA / SFT</text>
+    <text x="15" y="85" fill="#8b949e" font-size="11">• Train local 7B/14B</text>
+    <text x="15" y="105" fill="#8b949e" font-size="11">• Bootstraps local reflex</text>
+    <text x="15" y="125" fill="#8b949e" font-size="11">• Replaces frontier calls</text>
+
+    <rect x="10" y="155" width="180" height="105" rx="6" fill="#21262d" stroke="#da3633"/>
+    <text x="20" y="180" fill="#f85149" font-size="11" font-weight="700">McNemar Gate (N=50)</text>
+    <text x="20" y="200" fill="#8b949e" font-size="10">χ² ≥ 3.841 (p &lt; 0.05)</text>
+    <text x="20" y="218" fill="#8b949e" font-size="10">Proves causal lift over baseline</text>
+    <text x="20" y="240" fill="#3fb950" font-size="10" font-weight="700">Safe Promotion Rule</text>
+  </g>
+
+  <!-- Connectors Step 1 -> 2 -> 3 -> 4 -->
+  <path d="M 300 250 L 360 250" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 600 250 L 660 250" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 900 250 L 960 250" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Lower Feedback Loop: Distillation & Skills feed back into Live Run -->
+  <g transform="translate(60, 440)" filter="url(#shadow)">
+    <rect width="1100" height="300" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+    <text x="550" y="35" fill="#f0f6fc" font-size="16" font-weight="700" text-anchor="middle">THE RECURSIVE REINFORCEMENT &amp; ACCELERATION LOOP</text>
+    
+    <!-- Left feedback branch: Procedural Memory -->
+    <rect x="40" y="60" width="480" height="200" rx="8" fill="#21262d" stroke="#238636"/>
+    <text x="60" y="90" fill="#3fb950" font-size="14" font-weight="700">A. Procedural Memory Injection (Zero Retraining Delay)</text>
+    <text x="60" y="115" fill="#f0f6fc" font-size="12">• Incoming task signature matches embedding in skills/ directory</text>
+    <text x="60" y="135" fill="#8b949e" font-size="11">• Verified procedure card injected directly into System 1/2 prompt prefix</text>
+    <text x="60" y="155" fill="#8b949e" font-size="11">• Agent skips exploratory trial-and-error; solves bug in 1 turn</text>
+    <text x="60" y="175" fill="#8b949e" font-size="11">• Elo utility updated: +K on success, -K on failure; continuous time decay</text>
+    <text x="60" y="200" fill="#3fb950" font-size="12" font-weight="600">Immediate Knowledge Reuse across Distributed Agents</text>
+
+    <!-- Right feedback branch: Distilled Reflex -->
+    <rect x="580" y="60" width="480" height="200" rx="8" fill="#21262d" stroke="#388bfd"/>
+    <text x="600" y="90" fill="#58a6ff" font-size="14" font-weight="700">B. Distilled Model Reflex (Cost &amp; Latency Collapse)</text>
+    <text x="600" y="115" fill="#f0f6fc" font-size="12">• Promoted fine-tuned 7B/14B model replaces frontier LLM on routine tasks</text>
+    <text x="600" y="135" fill="#8b949e" font-size="11">• Inference cost drops from $0.05/turn to $0.00/turn (local GPU)</text>
+    <text x="600" y="155" fill="#8b949e" font-size="11">• Latency drops from 3000ms to 90ms (sub-100ms AST reflex)</text>
+    <text x="600" y="175" fill="#8b949e" font-size="11">• Frontier model engaged only when epistemic surprise is high</text>
+    <text x="600" y="200" fill="#58a6ff" font-size="12" font-weight="600">Active Inference Thermodynamic Optimization</text>
+  </g>
+
+  <!-- Big Feedback Arrow connecting lower box back to Step 1 -->
+  <path d="M 1060 410 L 1060 440" stroke="#3fb950" stroke-width="2"/>
+  <path d="M 60 590 L 30 590 L 30 250 L 60 250" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="15" y="420" fill="#3fb950" font-size="11" font-weight="700" transform="rotate(-90 15 420)">FEEDBACK ACCELERATION</text>
+</svg>

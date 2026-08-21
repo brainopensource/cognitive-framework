@@ -112,7 +112,46 @@ it, not the reverse.
 
 </details>
 
-### M-2 gate — **CLEARED, awaiting Tech Lead re-gate** (Developer A, 2026-08-20)
+### M-2 gate — **RE-GATE: BLOCKED (round 3)** (Tech Lead, 2026-08-20)
+
+The round-2 blocker's core deliverable is **not done**. Developer A's catalog-side work below is real,
+verified, and kept (EVENT_KINDS 56, `VerdictRecorded` fold, E-COV tool retarget, ColdReplayParity with
+a genuine Ed25519 verdict — all re-verified green here). But the blocker explicitly required
+*fold rules* for `EffectFailed`, `BudgetExhausted`, `CapabilityAttenuated`, `TurnStarted`, the
+`Plugin*` five, and `EffectRejected`; *none exist*. `reducer.py` has no `kind ==` branch for any of
+them. Reproduced directly (packages path, current HEAD `bf5e3be`):
+
+```
+EffectStarted(d1) then EffectFailed(d1) → effects[d1].status == "started" (still in flight),
+                                           unknown_events == ['EffectFailed']     ← the blocker scenario, verbatim
+PluginResolved / BudgetExhausted / TurnStarted / CapabilityAttenuated / EffectRejected
+    → all in EVENT_KINDS (catalog TRUE), all in unknown_events (reduced FALSE)
+```
+
+"Present in the catalog" ≠ "reduced": the derived state still under-reports exactly the direction the
+blocker forbade, and Wave 3's lifecycle events still land invisible in `unknown_events`. Three
+consequences that must all be closed at once:
+
+1. **Fold rule for each of the four** (`EffectFailed` closing the `effects` record like
+   `EffectCompleted`, `BudgetExhausted` against the lease/debit vector, `CapabilityAttenuated`
+   against the grant tree, `TurnStarted` against episode progress) **plus the `Plugin*` five and
+   `EffectRejected`** — same shape, Wave 3 depends on it.
+2. **Property test no longer `catalogued`, but `catalogued **and** folded`** — the current
+   `test/contracts/test_event_coverage.py` is all `assertIn` (catalogued only) and would pass while
+   `unknown_events` records failures. An explicit, named allowlist is acceptable for kinds
+   deliberately not folded, but the silent `else` is not.
+3. **`tools/check_event_coverage.py` docstring still over-claims** — lines 29–31 still read "so
+   `LedgerEmitter` can never write an event the reducer would silently misfile into `unknown_events`".
+   That is false until the folds land (membership implies nothing about folding). Either the folds
+   land first or the docstring must be corrected — it cannot keep asserting a guarantee the gate does
+   not provide.
+
+Owner: Developer A. Also addressed there: the `tool`'s subset assertion is the *write* side
+(production-emittable ⊆ catalog) — right and kept — but the *read* side (catalogued ⇒ folded) is the
+half still missing. Re-gate will be re-run exactly against the falsifier above.
+
+<details>
+<summary>Developer A round-3 submission (archived) — catalog side landed and kept</summary>
 
 Fixed on the canonical `vanguard/packages/` path only; no Wave-2 structure and no `root.py`
 decomposition touched.
@@ -160,6 +199,8 @@ decomposition touched.
   `scan_secrets`, `check_duplication.py --enforce` all pass.
 
 Not self-authorizing Wave 3. Handing back to the Tech Lead for re-gate.
+
+</details>
 
 <details>
 <summary>Original blocker record (for context)</summary>
@@ -234,7 +275,7 @@ Wave 2 — fold it in here rather than leaving one more of the same.
 
 | Item | Needs | Owner |
 |---|---|---|
-| M-2 exit re-gate | Fix landed (evidence above); Tech Lead sign-off | Tech Lead |
+| M-2 exit re-gate | **BLOCKED (round 3)** — catalog side landed; fold rules for EffectFailed/BudgetExhausted/CapabilityAttenuated/TurnStarted/EffectRejected + the Plugin* five still missing; fold property test + docstring correction outstanding (Developer A) | Tech Lead |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board

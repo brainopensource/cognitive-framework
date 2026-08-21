@@ -7,3 +7,4 @@ dist/
 .env.local
 delete_me_later_dont_commit.md
 DELETE.md
+docs/03_sprints/_delete_guidelines.md

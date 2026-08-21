@@ -118,10 +118,9 @@ def source_files(root: Path) -> list[Path]:
         root / "vanguard" / "packages",
         root / "vanguard" / "clients",
         root / "layer0",
-        root / "benchmarkings",
+        root / "benchmarks",
         root / "spike",
         root / "slice",
-        root / "lab",
     ]
     files: list[Path] = []
     for start in starts:
@@ -138,7 +137,7 @@ def area_for(path: Path, root: Path) -> tuple[str | None, str | None]:
     parts = rel.parts
     if len(parts) >= 2 and parts[0] == "layer0" and parts[1] in LAYER0_PACKAGES:
         return f"layer0_{parts[1]}", None
-    if parts and parts[0] in {"spike", "slice", "lab", "benchmarkings"}:
+    if parts and parts[0] in {"spike", "slice", "benchmarks"}:
         return parts[0], None
     if len(parts) >= 3 and parts[:2] == ("vanguard", "packages"):
         package = parts[2]
@@ -301,16 +300,16 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 continue
             resolved = resolve_relative(source, spec)
             if resolved and resolved in files:
-                # benchmarkings is a client boundary, not part of the core
+                # benchmarks is a client boundary, not part of the core
                 # package-cycle graph; its import allowlist is checked below.
-                if source_area != "benchmarkings":
+                if source_area != "benchmarks":
                     graph[source].add(resolved)
                 target_area, target_family = area_for(resolved, root)
             else:
                 target_area, target_family = area_from_spec(spec)
             rel_parts = source.relative_to(root).parts
             rel_source = source.relative_to(root).as_posix()
-            # Scoped to the core packages. benchmarkings/ is a measurement
+            # Scoped to the core packages. benchmarks/ is a measurement
             # client governed by its own allowlist row above, not by N-06.
             if (
                 spec in SUBPROCESS_MODULES
@@ -339,20 +338,20 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 )
                 continue
             lowered_spec = spec.lower().replace("_", "-")
-            if source_area == "benchmarkings":
-                # Benchmarks are measurement clients, never model adapters.  The
+            if source_area == "benchmarks":
+                # Benchmarks are measurement clients, never model adapters. The
                 # composition root is the sole permitted runtime entrypoint.
                 if target_area == "runtime" and not (
                     spec == "vanguard.packages.runtime.root"
                     or spec.startswith("vanguard.packages.runtime.root.")
                 ):
                     errors.append(
-                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                        f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"
                     )
                     continue
-                if target_area is not None and target_area not in {"benchmarkings", "runtime", "ports"}:
+                if target_area is not None and target_area not in {"benchmarks", "runtime", "ports"}:
                     errors.append(
-                        f"{source.relative_to(root)}:{line}: benchmarkings may import only runtime.root + ports ({spec!r})"
+                        f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"
                     )
                     continue
             if source_area == "governance" and "model" in lowered_spec:

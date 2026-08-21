@@ -1,1 +1,0 @@
-{"label": "deepseek-v4-flash", "provider": "openrouter", "model": "deepseek/deepseek-v4-flash", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "pricing": {"promptPerMillionUsd": 0.083, "completionPerMillionUsd": 0.165}, "treatment": "model_route"}

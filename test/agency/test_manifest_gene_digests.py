@@ -72,37 +72,6 @@ class PackAliases(unittest.TestCase):
         self.assertEqual(result.error.kind, "instrument_error")
 
 
-class HonestMultiFileFixture(unittest.TestCase):
-    def test_test005_is_zero_hint(self) -> None:
-        import sys
-
-        lam = ROOT / "tools" / "002_LLM_API_MOCK"
-        if str(lam) not in sys.path:
-            sys.path.insert(0, str(lam))
-        from verdict import leak_paths
-
-        from benchmarkings.zero_hint_v1.run_live_agent import load_task
-
-        task = load_task("test005_named_amounts")
-        self.assertEqual(task.allowed_sources, ("pkg/parser.py", "pkg/stats.py"))
-        self.assertEqual(leak_paths(task.fixture), [])
-        prompt = task.prompt.lower()
-        self.assertNotIn("duplicate", prompt)
-        self.assertNotIn("blank", prompt)
-        self.assertNotIn("whitespace", prompt)
-
-
-class ManifestFlag(unittest.TestCase):
-    def test_pack_names_resolve(self) -> None:
-        from benchmarkings.zero_hint_v1.run_live_agent import build_parser, resolve_manifest_path
-
-        parser = build_parser()
-        args = parser.parse_args(["--manifest", "vg-shell-only", "--check-fixtures"])
-        self.assertEqual(args.manifest, "vg-shell-only")
-        path = resolve_manifest_path("vg-shell-only")
-        self.assertTrue(path.is_file())
-        self.assertEqual(path.parent.name, "vg-shell-only")
-
-
 if __name__ == "__main__":
     unittest.main()
+

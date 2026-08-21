@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from benchmarkings.guard import GuardRefusal, validate_run
+from benchmarks.guard import GuardRefusal, validate_run
 
 RUNS = {
     "precondition": {"pre_passed": True},

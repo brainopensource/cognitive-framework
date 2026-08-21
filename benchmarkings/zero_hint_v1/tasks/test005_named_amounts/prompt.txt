@@ -1,9 +1,0 @@
-The repository stores named integer amounts in two modules: `pkg/parser.py` and `pkg/stats.py`.
-
-Behaviour required by the public tests:
-
-- `parse_rows(lines)` turns text rows into `(name, amount)` pairs.
-- `totals_by_name(rows)` and `grand_total(rows)` summarise those pairs.
-- Amounts are integers.
-
-Inspect the workspace, change only `pkg/parser.py` and `pkg/stats.py`, and make the public tests pass. Use the read, search, patch, and test tools. Patch arguments are a workspace-relative `path` and a unified diff in `diff`. Test arguments are an `argv` array, for example `["python3", "-m", "unittest", "discover", "-s", "tests"]`.

@@ -1,5 +1,0 @@
-{"_note":"Not profiles. Ollama models probed on this host that cannot run this harness, and why. Kept so the negative result is not re-discovered.",
- "deepseek-coder-v2:16b":"HTTP 400 — 'does not support tools'",
- "codestral:latest":"HTTP 400 — 'does not support tools'",
- "deepseek-r1:14b":"no native tool_calls; text-only (would exercise the text lifter)",
- "granite4.1:30b":"llama-server OOM on this host"}

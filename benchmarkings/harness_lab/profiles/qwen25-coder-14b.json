@@ -1,1 +1,0 @@
-{"label": "qwen2.5-coder-14b", "provider": "ollama", "model": "qwen2.5-coder:14b", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "treatment": "model_route"}

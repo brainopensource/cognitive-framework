@@ -51,7 +51,7 @@
         "--root",
         "test/broken/fixtures/benchmarking_adapter_import"
       ],
-      "expected_failure": "benchmarkings may import only runtime.root + ports"
+      "expected_failure": "benchmarks may import only runtime.root + ports"
     },
     {
       "test_id": "MF-S0-001",

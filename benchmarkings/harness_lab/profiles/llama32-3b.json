@@ -1,1 +1,0 @@
-{"label": "llama3.2-3b", "provider": "ollama", "model": "llama3.2:3b", "sampling": {"temperature": 0.0, "maxTokens": 4096}, "treatment": "model_route"}

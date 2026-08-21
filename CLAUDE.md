@@ -56,7 +56,7 @@ Aether-D-System/
 ├── tools/                            # Boundaries, TCB budget, secrets scan, domain blindness, codegen
 ├── schemas/                          # v4 wire schemas and MHF plugin/harness schemas
 ├── containers/                       # Worker UID 10001 and Evaluator UID 10002 container definitions
-├── lab/ & benchmarkings/             # Lab measurement harness (promotion deferred)
+├── benchmarks/                       # Unified benchmarks (SWE, greenfield, datalog)
 └── docs/                             # Normative specs, ADRs, annexes, gap register, and evidence
 ```
 

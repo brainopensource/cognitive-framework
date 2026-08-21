@@ -191,7 +191,7 @@ Read the master briefing in `docs/00_overview/SYSTEM_OVERVIEW.md`. It provides t
 
 ## Strict Output Constraint: Single Comprehensive Document
 
-> **MANDATORY INSTRUCTION:** Do **NOT** edit any existing specification files, ADRs, or codebase source files. Instead, produce **ONE SINGLE COMPREHENSIVE REPORT** in the repository root called `005_epsilon_review_full_dsv4-proposal.md`.
+> **MANDATORY INSTRUCTION:** Do **NOT** edit any existing specification files, ADRs, or codebase source files. Instead, produce **ONE SINGLE COMPREHENSIVE REPORT** in the repository root called `007_zeta_review_full_opus_proposal.md`.
 
 ──────
 

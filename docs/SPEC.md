@@ -425,7 +425,8 @@ registry.
 superseded: MHF has exactly **five** frozen SPIs above (`IPlanner`, `IMemoryEngine`, `IToolkit`,
 `IContextManager`, `IEvaluationGate`) plus the first-party `IModelProvider`/`ISandbox`/store ports, which
 are not user-pluggable extension points in the same sense. **A sixth SPI requires a design review, not
-a PR** — see `docs/05_adr/ADR-M0-03-five-spis.md`.
+a PR** — see [`ADR-0072`](05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md) and the
+[consolidated M0 lineage](05_adr/INDEX.md#consolidated-historical-lineage).
 
 ### 2.3 Harness manifest (the compile target)
 

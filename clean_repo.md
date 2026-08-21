@@ -84,9 +84,9 @@ Keep the Clean Triad and archive the rest:
 ## 5. Protected files—never delete as ordinary cleanup
 
 - `docs/SPEC.md` and `docs/04_annex/`;
-- active accepted ADR files and `docs/05_adr/INDEX.md`; fully superseded historical ADR bodies may
-  be proposed for removal from the working tree only after their disposition and recovery commit
-  are preserved in a compact lineage index and the operator explicitly approves the exact paths;
+- active accepted ADR files 0069–0086 and `docs/05_adr/INDEX.md`; ADR-0086 records the
+  Director-authorized consolidation of earlier bodies, their permanent identifiers, and recovery
+  commit;
 - signed evidence bundles, canonical schemas, JCS vectors, and migration fixtures;
 - completed sprint evidence while referenced by an active gate or ADR;
 - tests that uniquely enforce a security, identity, accounting, or compatibility invariant;

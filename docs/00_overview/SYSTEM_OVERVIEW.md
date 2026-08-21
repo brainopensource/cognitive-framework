@@ -93,7 +93,7 @@
 
 Your instrument for making a decision binding is a **new append-only ADR numbered `0077`+**. ADRs
 `0069`–`0076` are append-only and may not be silently edited; a new ADR that narrows an old one must
-name it and give evidence ([`ADR-0000`](docs/05_adr/0000-adrs-are-append-only-numbered-and-each-states.md)).
+name it and give evidence ([`ADR-0086`](../05_adr/0086-historical-adr-working-tree-consolidation.md)).
 
 ### 1.2 What is already settled and should NOT be relitigated here
 
@@ -770,7 +770,8 @@ from three documents, not seven.
 
 ### 5.9 T-9 · The five-SPI freeze
 
-[`ADR-M0-03`](docs/05_adr/ADR-M0-03-five-spis.md) freezes exactly five SPIs and requires *"a design
+The [consolidated M0-03 lineage](../05_adr/INDEX.md#consolidated-historical-lineage), retained by
+ADR-0086, freezes exactly five SPIs and requires *"a design
 review, not a PR"* for a sixth. `005` §8 records the one caveat worth your attention: the freeze *"is
 defended more strongly than its evidence supports."* The guard is correct; what must not happen is
 `"a sixth SPI requires a design review"` hardening into `"there are five SPIs forever."` Scheduled

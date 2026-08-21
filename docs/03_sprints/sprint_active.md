@@ -5,7 +5,7 @@ title: "Active board — v0.6.1 Foundation (M-2 evidence integrity in flight)"
 status: ACTIVE
 milestone: M-2 / v0.6.1 — RF-23 NOVA-1 + RF-25 NOVA-2 in flight
 spec: docs/SPEC.md
-law: ADRs 0069–0085 + docs/04_annex/
+law: ADRs 0069–0086 + docs/04_annex/
 register: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
 plan: wave2C_todo.md
 last_reviewed: 2026-08-21

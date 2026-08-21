@@ -8,7 +8,7 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0085`](docs/05_adr/0085-reversibility-radius-decide-shape-defer-implementation.md) |
+| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0086`](docs/05_adr/0086-historical-adr-working-tree-consolidation.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Status** | **M-2 / v0.6.1 Wave 2C active.** RF-23 (NOVA-1) and RF-25 (NOVA-2) tests are filed; red execution confirmation precedes the two parallel implementation lanes. |
 | **Foundation Plan** | M-0–M-4 trusted foundation, then gated M-5–M-10 generality, delegation, concurrency, framework building, retrieval/macros, and governed meta-cognition |
@@ -53,7 +53,7 @@ All documentation in this repository is strictly organized into three distinct a
    - [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) — Dispatch, capability grants, and security model.
    - [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) — Measurement doctrine.
 3. **The Decision Records**:
-   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (current foundation and Tier S+ lock: ADR-0069–0085).
+   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (current foundation, Tier S+, and repository-governance lock: ADR-0069–0086).
 4. **The Active Execution Board**:
    - [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) — Single living execution board, active wave lanes, and task register.
    - [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) — Authoritative Macro Milestones (M-0 through M-10).

@@ -28,7 +28,7 @@ All documentation is strictly partitioned into three distinct authority tiers:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0076`](docs/05_adr/0076-foundation-execution-decisions-canonical-artifacts.md).
+- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0086`](docs/05_adr/0086-historical-adr-working-tree-consolidation.md).
 - **The Decisions**: [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md).
 - **The Execution**: [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) & [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md).
 
@@ -159,4 +159,3 @@ Execution sequence:
 > 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) (and [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) for macro gates).
 > 
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.
-

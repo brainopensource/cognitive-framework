@@ -8,7 +8,7 @@
 **Baseline recovery commit:** Git `84a62bcd6c8d`; approved cleanup and M-2 launch changes are in the working tree
 **Selected decision:** [`001_alfa_review_full_decision.md`](docs/07_reviews/archive/proposals/001_alfa_review_full_decision.md)
 **Architectural baseline:** [`006_fi_review_full_gptsol_proposal.md`](docs/07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md)
-**Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0085`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)
+**Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0086`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)
 **Current execution authority:** [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md)
 
 > This staging packet is archived at M-2 exit only after every durable requirement has migrated into

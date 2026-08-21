@@ -2,7 +2,7 @@
 
 > **Frozen at this commit.** This is a verbatim copy of the root `SYSTEM_SPEC_DRIFTS.md` as it stood
 > at the v0.5.0 Foundation Lock (`docs/MASTER_REFACTOR_GUIDELINE_FINAL.md`). D-01…D-48 and X-01…X-15
-> IDs remain stable and are cited by `docs/SPEC.md` and `docs/05_adr/ADR-M0-*.md`. **This file is not
+> IDs remain stable in the [consolidated ADR lineage](INDEX.md#consolidated-historical-lineage) and are cited by `docs/SPEC.md`. **This file is not
 > amended going forward** — new decisions are new ADRs that may supersede a D-/X- row by citation, but
 > this register itself is historical evidence, not a living diff. The original now lives archived at
 > `docs/archive/v045/SYSTEM_SPEC_DRIFTS.md` alongside its THEORY/ASBUILT siblings.

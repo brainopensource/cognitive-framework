@@ -49,7 +49,7 @@ Three kinds, and the distinction matters when you're deciding what a new test sh
 
 **Satisfiability check:** before writing a test asserting a property, ask whether the property is
 actually reachable given the test's own setup. A test that can only ever pass (or can only ever be
-vacuously satisfied) is not testing anything — this is how `docs/05_adr/0028-*.md`'s span-reset defect
+vacuously satisfied) is not testing anything — this is how historical ADR-0028's span-reset defect
 shipped with a green suite.
 
 ## Where things live

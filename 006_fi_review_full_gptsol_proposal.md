@@ -1,21 +1,33 @@
-# 006 — Leadership 7 Full Architectural Mandate and Meta-Framework Proposal
+# 006 — AETHER Tier S+ Master Architecture
 
-**Document class:** comprehensive executive proposal<br>
+## Verified Adaptive Obligation Harness for General Task-Solving Swarms
+
+**Document class:** definitive synthesis of proposals 002–008; comprehensive executive architecture and implementation mandate<br>
 **Status:** **PROPOSED — NOT LAW — NO IMPLEMENTATION AUTHORITY**<br>
 **Review date:** 2026-08-21<br>
-**Evidence snapshot:** package/source evidence gathered on the unchanged code tree and final validation at Git `88bccb9`; working tree non-clean before this report was written<br>
+**Evidence snapshot:** package/source evidence revalidated at Git `67e1803`; working tree was non-clean before this synthesis and unrelated changes were preserved<br>
 **Decision horizon:** v0.6.1 → v1.0.0; milestones M-0 → M-10<br>
 **Authority boundary:** this document proposes append-only ADRs 0077–0082. Until the Engineering Director accepts them and the canonical artifacts are updated, `docs/SPEC.md`, accepted ADRs 0069–0076, and the active board remain controlling.
 
-> **Stop-line notice.** This proposal does not authorize implementation of `agent.spawn` as a mediated effect, concurrent episode execution, Pack #2, self-modification, DPO training, or M-5–M-10 work before the M-4 Foundation Stop Line is green. It authorizes nothing by itself. NOVA-1 and NOVA-2 are recommended corrections inside the already-authorized M-2 scope; the Director must still record their disposition in the canonical board.
+> **Stop-line notice.** This proposal does not authorize implementation of `agent.spawn` as a mediated effect, concurrent episode execution, Pack #2, adaptive routing, macro-tool promotion, self-modification, DPO training, or other M-5–M-10 work before the M-4 Foundation Stop Line is green. It authorizes nothing by itself. NOVA-1 and NOVA-2 are recommended corrections inside the already-authorized M-2 scope; the Director must still record their disposition in the canonical board.
 
 ---
 
 ## 0. Decision in one page
 
-The Leadership 7 reaches a unanimous architectural conclusion:
+The Leadership 7 reaches a unanimous Tier S+ architectural conclusion:
 
 **AETHER should become a general task-solving swarm meta-framework by preserving its universal trusted mechanism and replacing coding-shaped composition with a frozen Named Component Graph.** Domain behavior belongs in packs, named components, policies, adapters, and exterior evaluators. Authority remains in the S0–S12 kernel; durable coordination remains in the SQLite WAL State Plane; truth remains in the exterior Evidence Plane. A swarm is therefore a policy over independently attenuated episodes communicating through attributed state, not a new privileged runtime and not an all-to-all chat room.
+
+The final synthesis adds one coherent adaptive layer above that foundation:
+
+1. **Typed obligations are the unit of schedulable work.** An obligation declares a content-addressed goal, a preregistered witness type, a six-dimensional price ceiling, dependencies, and a parent lineage.
+2. **The obligation frontier is a stigmergic projection of the State Plane.** Workers pull lease-bound claims, publish immutable artifacts/witnesses, and never need a privileged peer-to-peer channel.
+3. **The Pareto harness is the exterior control policy.** It selects context, model route, refinement rule, swarm width, and verification strength from the admissible frontier. Capability and budget feasibility are checked before optimization; safety can never be traded for cost or speed.
+4. **Active inference supplies belief and action semantics.** VFE updates beliefs from ledger observations; EFE ranks feasible policies by pragmatic value, epistemic value, and declared resource prices. Neither can mint authority or truth.
+5. **The flywheel compounds in four stages:** exact witness memoization; verified trajectory-to-macro compilation; skill/routing adaptation; and signed DPO/harness evolution. Every learned or compiled artifact re-enters the ordinary registry, capability, sandbox, evaluator, and human promotion path.
+
+This architecture is called the **Verified Adaptive Obligation Harness (VAOH)**. It is not a second runtime. It is a set of exterior components and State-Plane projections compiled by `mhf.manifest/2` and executed by the one universal turn mechanism.
 
 The immediate priority is not “more agents.” It is trustworthy evidence. `vanguard/packages/runtime/trajectory.py` currently writes `_ZERO_COST` for every turn and episode, does not populate the model route/fingerprint, and can produce an empty turn list. Every such completion irreversibly weakens the future learning corpus. **NOVA-1 must close in M-2.** In the same milestone, **NOVA-2 must prove cold suspend/resume from SQLite WAL in a fresh process**; without it, `K ≪ N` is a slogan rather than a concurrency premise.
 
@@ -26,19 +38,19 @@ The second priority is composition generality. There are presently two manifest 
 
 This is not a simple YAML key rename. M-3 must converge both surfaces into `mhf.manifest/2`, compile a named typed graph to one immutable `FrozenHarness`, migrate the packs, absorb the remaining `layer0/registry` and `layer0/compose` behavior into `vanguard/packages/runtime/`, run NOVA-4, and delete all of `layer0/`—including its residual `events/` fork.
 
-The M-4 stop line remains exactly one uncheated real run satisfying nine evidence rows. Only after it is green may M-5 prove substrate generality with **Pack #2: Math & Formal Deductive Verification**, with zero changes under `vanguard/packages/domain/` and `vanguard/packages/kernel/`. Only after that may M-6 implement capability-mediated `agent.spawn`; M-7 may add controlled concurrency; M-8–M-10 may add framework construction, scale, and promotion-gated learning.
+The M-4 stop line remains exactly one uncheated real run satisfying nine evidence rows. Only after it is green may M-5 prove substrate generality with **Pack #2: Math & Formal Deductive Verification**, with zero changes under `vanguard/packages/domain/` and `vanguard/packages/kernel/`, and add the deterministic Tier-0 witness cache. Only after that may M-6 implement capability-mediated `agent.spawn`; M-7 may add the pull-based obligation frontier and controlled concurrency; M-8 may expose graph/profile construction; M-9 may compile and benchmark candidate macro-tools; and M-10 may perform promotion-gated Active Inference, DPO, and harness evolution.
 
 ### Leadership 7 mandates
 
 | Seat | Binding proposal | Stop condition |
 |---|---|---|
 | Engineering Director | Accept/reject ADRs 0077–0082 append-only; keep M-4 as the non-negotiable foundation gate. | No post-M-4 feature enters implementation early. |
-| CTO | Make the harness graph and verifiable evaluation the moat; treat model vendors as replaceable routes. | No strategy depends on a single model, provider, or coding domain. |
+| CTO | Make the content-addressed harness graph, Pareto policy, compiled macro registry, and verifiable evaluation corpus the moat; treat model vendors as replaceable routes. | No strategy depends on a single model, provider, coding domain, or unverifiable reward. |
 | CIO | Make every promotion input reconstructible from signed evidence, JCS digests, WAL lineage, and explicit missingness. | Missing evidence never becomes inferred success or fabricated zero. |
 | Principal Staff Engineer | Close G1/NOVA-1 now; make Pack #2 an executable I-7 falsifier; maintain the gap register as tests. | A claimed capability without a bound falsifier remains a thesis. |
-| Principal Systems Architect | Preserve `domain ← ports ← kernel ← agency ← runtime → adapters`, domain blindness, monotone attenuation, single-writer ownership, and the TCB ceiling. | Any required kernel growth must stay `<=1438` logical LOC or first remove equivalent complexity. |
-| Tech Lead | Deliver in M-0…M-10 dependency order with exact entry/exit gates and named tests. | No “mostly green,” manual evidence stitching, or hidden alternate runtime. |
-| PhD AI Specialist | Use active inference, graph credit assignment, retrieval, DPO, and statistical promotion only as exterior, evidence-bound policies. | No scalar “intelligence” objective, self-scoring, causal claim from chronology, or unpaired promotion. |
+| Principal Systems Architect | Preserve `domain ← ports ← kernel ← agency ← runtime → adapters`, domain blindness, monotone attenuation, single-writer ownership, the TCB ceiling, and one universal loop. | No obligation scheduler, Pareto optimizer, memory learner, or macro compiler enters the kernel. Any unavoidable kernel growth must remain `<=1438` logical LOC or first remove equivalent complexity. |
+| Tech Lead | Deliver in M-0…M-10 dependency order with exact entry/exit gates, named tests, and compatibility sunsets. | No “mostly green,” manual evidence stitching, hidden alternate runtime, or promoted macro without replay evidence. |
+| PhD AI Specialist | Use VFE/EFE, graph credit assignment, retrieval, macro synthesis, DPO, and statistical promotion only as exterior, evidence-bound policies. | No scalar “intelligence” objective, self-scoring, causal claim from chronology, unpaired promotion, or cost-collapse percentage without measurement. |
 
 ---
 
@@ -61,10 +73,22 @@ Research does not silently override law. Code does not silently repeal law. A co
 
 The review covered:
 
+- Every proposal artifact available in the requested 002–008 range: `002_beta_review_full_gem_proposal.md`, `004_delta_review_full_glm53_proposal.md`, `005_epsilon_review_full_dsv4-proposal.md`, this 006 baseline, `007_zeta_review_full_opus_proposal.md`, and `008_alfa_review_full_grok_proposal.md`. No `003*proposal*.md` exists on disk. The synthesis imports mechanisms, not conclusions by vote.
 - `README.md`, `docs/00_overview/SYSTEM_OVERVIEW.md`, all of `docs/SPEC.md`, ADRs 0069–0076, ADR-M0-01…13, the milestone/board/wave documents, and the backlog.
 - All six files under `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/`, with particular weight on reviews 002, 004, 005, and 006.
 - All twelve files under `docs/06_references/`. The two theoretical-synthesis files are byte-identical (`sha256:45bddc7483db62c90a49ba028d591954315aa1f4b0760b42e2ab4956fd7f24e3`). Useful claims were adopted only where compatible with the Clean Triad and current law.
 - The live `domain`, `ports`, `kernel`, `agency`, `runtime`, and `adapters` packages; both manifest schemas and representative packs; all remaining `layer0/` sources; related tests and architecture tools.
+
+Proposal synthesis ledger:
+
+| Source | Adopted contribution | Correction or refusal |
+|---|---|---|
+| 002 Beta | Adaptive Pareto profiles, informational bottleneck, exterior oracle, trajectory-to-macro flywheel. | Remove fixed performance promises, invalid “exact” statistics, fixed component enums, and unconditional complexity claims. Profiles become priors, not hard-coded latency/token guarantees. |
+| 004 Delta | Compact T-1…T-9 rulings, milestone discipline, and requirement-to-falsifier style. | Later implementation detail is subordinated to verified package paths and the stricter schema/causal/statistical rules here. |
+| 005 Epsilon | Corpus-first sequencing, Pack #2 choice, declared-absence guardrails, and practical zero-diff generality gate. | Replace closed component kinds and heuristic causal/statistical shortcuts with namespaced interfaces, intervention labels, and exact paired inference. |
+| 006 Fi | Correct VFE/EFE split, product-order economics, two-manifest forensic finding, typed graph with cycles, suspicion-not-causation, signed pair certificates, and exact two-sided McNemar. | Extended here with a native Pareto scheduler, obligation frontier, deterministic witness cache, and macro-tool compiler. |
+| 007 Zeta | Obligation Market transplants: memoized witnesses, price ceilings as objectives, lease-bound pull frontier; lifecycle and namespace forensic findings. | Do not replace the universal loop, total-order ledger, or exterior judge. Do not forbid composition cycles or claim unconditional `Theta(N)` scaling. |
+| 008 Alfa | Explicit stop-line discipline, path-bag-versus-graph correction, ghost-briefing hygiene, and the rule that ranking state is runtime state unless frozen into `D_H`. | Do not label a continuity-corrected chi-square test “exact,” and do not let review prose outrank source or accepted ADRs. |
 
 ### 1.3 External primary-source research
 
@@ -72,26 +96,31 @@ The SOTA label below means “relevant evidence available by the review date,”
 
 | Area | Primary source | What AETHER adopts | Bound or refusal |
 |---|---|---|---|
+| Automated harness evolution | 2026 [Agentic Harness Engineering](https://arxiv.org/abs/2604.25850) preprint | Component-, experience-, and decision-observability; harness edits as falsifiable contracts; frozen candidates evaluated across model families. | Reported benchmark gains are evidence for that system, not promised AETHER gains. AETHER requires signed exterior outcomes and immutable pairing cells. |
 | Multi-agent harnesses | Anthropic’s 2025 [multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system) | Explicit delegation contracts, isolated workers, parallel specialization, measured coordination cost. | Orchestrator/worker is one policy topology, not the engine. |
 | Agent scaling | ICML 2025 position paper on [asymptotic analysis with LLM primitives](https://proceedings.mlr.press/v267/meyerson25a.html) | Count model calls, token volume, critical path, and coordination edges—not just CPU complexity. | “Swarm scales” is invalid without an explicit cost model. |
 | Shared-state coordination | 2025 preprint on an [LLM multi-agent blackboard](https://arxiv.org/abs/2510.01285) | State-mediated work discovery can decouple workers and reduce required peer knowledge. | A blackboard is not automatically safe: AETHER requires typed writes, lineage, leases, and single-writer ownership. |
 | Verifiable trajectory learning | 2026 ASTRA preprint and [released implementation](https://arxiv.org/abs/2601.21558) | Tool-topology-grounded trajectories, executable environments, rule-verifiable rewards, SFT/RL separation. | ASTRA validates the value of executable evidence; it does not authorize synthetic evidence to replace real signed runs. |
+| Graph credit assignment | 2026 [GraphGPO](https://arxiv.org/abs/2605.26684) preprint | Aggregate comparable rollouts into a state-transition graph and estimate edge contribution to goal-distance reduction. | Graph advantage is a learned attribution signal, not causal proof and never an authoritative verdict. |
 | Decoupled agent RL | 2025 [Agent Lightning](https://arxiv.org/abs/2508.03680) | Separate agent execution from training and preserve transition-level credit data. | Training remains exterior and promotion-gated; it never becomes kernel logic. |
 | Turn credit | 2026 [TRACE](https://arxiv.org/abs/2607.13988) | Terminal outcome alone is inadequate for long-horizon credit assignment. | Learned credit is a hypothesis until corroborated by replay/intervention. |
 | Active inference | 2025 [Expected Free Energy-based Planning as Variational Inference](https://arxiv.org/abs/2504.14898) | Separate posterior inference (VFE) from action selection (EFE); retain epistemic value and bounded-resource complexity. | AETHER will not call an arbitrary weighted reward “free energy.” |
+| Skill synthesis | 2026 [SkillTTA](https://arxiv.org/abs/2605.16986), [Globalized Skill Evolution](https://arxiv.org/abs/2608.06153), and [MACRO](https://arxiv.org/abs/2603.05860) preprints | Retrieve evidence-relevant trajectories, consolidate related skills, discover recurring verified tool sequences, and replay-test candidates for generalization. | A prose skill is not a macro-tool; a macro is executable, least-privilege, content-addressed, replay-verified, and separately promoted. Domain-specific results do not establish universal cost collapse. |
+| Multi-turn preference optimization | 2024 [DMPO](https://arxiv.org/abs/2406.14868) | Multi-turn preferences require occupancy/length-aware treatment rather than naively applying single-turn DPO to entire transcripts. | DMPO remains an exterior training option. Evidence certificates and promotion evaluation are stricter than the training loss. |
 | Least privilege | 2025 [Progent](https://arxiv.org/abs/2504.11703) and 2025 [MiniScope](https://arxiv.org/abs/2512.11147) | Deterministic, fine-grained tool policy and permission hierarchies outside model discretion. | Natural-language safety prompts never substitute for kernel enforcement. |
 | Sandbox mechanism | Linux [Landlock documentation](https://www.kernel.org/doc/html/latest/userspace-api/landlock.html) and Bubblewrap’s [official security notes](https://github.com/containers/bubblewrap) | Layer namespaces, no-new-privileges, filesystem policy, network denial, seccomp/LSM where available, and explicit probes. | Bubblewrap states that policy arguments determine protection; “uses bwrap” alone is not a containment claim. Setuid mode is disallowed, especially in light of the 2026 [setuid advisory](https://github.com/containers/bubblewrap/security/advisories/GHSA-xq78-7hw4-5jvp). |
-| Provenance | W3C [PROV publications](https://www.w3.org/groups/wg/prov/publications/) and [in-toto/SLSA provenance](https://github.com/in-toto/attestation/blob/main/spec/predicates/provenance.md) | Represent entities, activities, agents, derivations, inputs, builders, and immutable subjects. | A hash chain proves integrity/order, not semantic truth; exterior verdicts remain necessary. |
+| Provenance | W3C [PROV publications](https://www.w3.org/groups/wg/prov/publications/) and [SLSA v1.2 provenance](https://slsa.dev/spec/v1.2/provenance) | Represent entities, activities, agents, derivations, inputs, builders, and immutable subjects. | A hash chain proves integrity/order, not semantic truth; exterior verdicts remain necessary. |
 | Evolutionary harness search | Google DeepMind’s 2025 [AlphaEvolve](https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/) and ICLR 2026 [Darwin Gödel Machine](https://openreview.net/pdf?id=pUpzQZTvGY) | Candidate populations plus objective evaluation can improve algorithms/harnesses. | No in-place self-rewrite; candidates pass AETHER’s external, paired release pipeline. |
 | Preference optimization | Original [DPO paper](https://arxiv.org/abs/2305.18290) | A precise pairwise objective can train a policy without an explicit learned reward model. | The pair label must be evidence-derived and unforgeable; DPO is not itself an evaluator. |
 | Schema dialect | Official [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12) | Strict dialect declaration, `$defs`, conditional validation, and closed objects. | Referential integrity and graph semantics still require a compiler; schema validation alone is insufficient. |
+| Canonical identity and durable state | [RFC 8785 JCS](https://www.ietf.org/rfc/rfc8785.html) and SQLite’s [WAL specification](https://www.sqlite.org/wal.html) | Deterministic signature/hash preimages and recoverable, concurrent-reader event persistence. | JCS gives canonical bytes, not truth. WAL gives persistence/concurrency properties, not application-level exactly-once effects. |
 
 ### 1.4 Forensic snapshot
 
 Verified facts, not roadmap claims:
 
 - `vanguard/packages/kernel/dispatch.py` implements S0–S12 with S2 before lease, S8 verification after reservation, durable S8a intent before S9, actual-cost S10 commit, S11 release before S12 emit.
-- The kernel architecture gate reports **1365 logical LOC across 9 files**, leaving 73 LOC beneath the `<=1438` limit. This is a hard warning against putting orchestration or learning in the TCB.
+- At Git `67e1803`, the kernel architecture gate reports **1365 logical LOC across 9 files**, leaving 73 LOC beneath the `<=1438` limit. This is a hard warning against putting orchestration or learning in the TCB.
 - The boundary tool checked **248 Python files** successfully. Boundary, TCB, secret, domain-blindness, isolation-policy, duplicate-symbol, event-coverage, Markdown-link, and stale-path tools passed in this workspace.
 - The SQLite event store uses WAL, `synchronous=FULL`, transactionally serialized append, per-project digest chains, and cold-replay support. `LedgerEmitter` is the canonical role-scoped writer.
 - The evaluator is exterior by port and UID/image/signature checks; the sandbox path excludes evaluator material and denies network in the rootless policy.
@@ -188,6 +217,243 @@ D_X = H(D_R \parallel \text{task} \parallel \text{seed} \parallel
 
 `harness_digest` carries $D_H$ only. A changed model fingerprint changes $D_R$; a changed benchmark item changes $D_X$. “Same harness” is not “same execution.”
 
+### 2.5 Tier S+ reference architecture — the Verified Adaptive Obligation Harness
+
+VAOH composes the strongest compatible ideas from the proposal set without moving a single policy into the TCB:
+
+```text
+ USER GOAL
+    │
+    ▼
+ admission: goal digest + witness contract + 6D ceiling + safety class
+    │
+    ▼
+┌──────────────────── DECISION PLANE — exterior, replaceable ────────────────────┐
+│ Context bottleneck Bφ │ VFE belief update │ Pareto/EFE router │ graph policy  │
+│ refinement quotes     │ model/tool choice │ swarm width       │ escalation    │
+└────────────────────────────────┬───────────────────────────────────────────────┘
+                                 │ typed proposal only
+                                 ▼
+┌──────────────────── AUTHORITY MECHANISM — fixed TCB ───────────────────────────┐
+│ universal turn loop → S0–S12 → attenuation → 6D lease → durable intent       │
+│ no planner, obligation market, optimizer, learner, domain, or macro compiler  │
+└────────────────────────────────┬───────────────────────────────────────────────┘
+                                 │ receipts / attributed observations
+                                 ▼
+┌──────────────────── STATE PLANE — authoritative order ─────────────────────────┐
+│ SQLite WAL envelopes │ obligation/claim projection │ BlobStore artifact refs  │
+│ provenance DAG       │ checkpoints                │ rebuildable search index │
+└────────────────────────────────┬───────────────────────────────────────────────┘
+                                 │ subject-bound evidence request
+                                 ▼
+┌──────────────────── EVIDENCE PLANE — exterior truth ───────────────────────────┐
+│ deterministic witness checkers │ UID 10002 │ signed verdict │ pair certificate │
+└────────────────────────────────┬───────────────────────────────────────────────┘
+                                 │ eligible corpus only
+                                 ▼
+┌──────────────────── COMPOUNDING PLANE — exterior/offline ──────────────────────┐
+│ T0 witness memo │ T1 macro compiler │ T2 skill/router │ T3 DPO/harness search │
+└────────────────────────────────────────────────────────────────────────────────┘
+```
+
+The “Compounding Plane” is a deployment view, not a fourth authority plane. Its services are ordinary runtime clients/plugins with narrower capabilities than the work they analyze. They consume signed projections and can publish candidates; they cannot write verdicts, grants, budget events, or default pointers.
+
+The architecture has four nested loops:
+
+| Loop | Frequency | Mutable state | Gate |
+|---|---|---|---|
+| **L0 — effect loop** | Every tool/effect | Episode state and receipts | S0–S12, current lease. |
+| **L1 — episode control loop** | Every turn | Belief, context projection, open obligations | Frozen harness, profile, and remaining budget. |
+| **L2 — experiment loop** | Across paired runs | Candidate harness/model/skill/macro statistics | Exterior verdicts, immutable trial plan. |
+| **L3 — promotion loop** | Rare release decision | Registry default pointer | Pareto safety gate, exact paired statistics, promotion authority/human. |
+
+No inner loop may perform an outer-loop transition. In particular, an episode cannot promote what it produced.
+
+### 2.6 Stigmergic State Plane as a typed obligation frontier
+
+Define the shared informational state as:
+
+\[
+\mathcal W_t=\langle \mathcal A_t,\mathcal O_t,\mathcal E_t,\mathcal M_t\rangle,
+\]
+
+where $\mathcal A$ is the content-addressed artifact set, $\mathcal O$ the obligation/claim projection, $\mathcal E$ the evidence and provenance projection, and $\mathcal M$ measured telemetry plus rebuildable memory indices. $\mathcal W$ is reduced from authoritative events and immutable blobs; it is not an unowned mutable Python dictionary and not a transcript.
+
+The schedulable unit is:
+
+\[
+o=\langle g,w,\mathbf R_{max},d,\mathcal D,p,\kappa\rangle,
+\]
+
+with goal specification $g$, witness contract $w$, six-dimensional ceiling $\mathbf R_{max}$, deadline $d$, dependency refs $\mathcal D$, parent $p$, and protection/capability class $\kappa$. Its identity is:
+
+\[
+D_O=H(\operatorname{JCS}(g,w,\mathbf R_{max},d,\mathcal D,p,\kappa)).
+\]
+
+A refinement rule $r$ can either produce a candidate witness or decompose the obligation:
+
+\[
+\operatorname{Refine}_r(o)\rightarrow
+\begin{cases}
+\widehat w(o), & \text{candidate discharge},\\
+\{o_1,\dots,o_m\},\Gamma, & \text{children plus a declared composition rule }\Gamma.
+\end{cases}
+\]
+
+The root is discharged only when every required witness verifies and $\Gamma$ is accepted by the pack’s exterior checker. For fuzzy domains, `adjudicated_by(panel)` or `signed_by(human)` is an explicit lower-assurance witness type; an LLM-rendered assertion never silently becomes a formal witness.
+
+Workers coordinate by a pull protocol:
+
+1. publisher records an obligation ref and required interface;
+2. a worker requests an exclusive claim with expected version and sublease;
+3. the runtime performs compare-and-swap on the reduced version and binds the lease to the claimant;
+4. the worker proposes effects only through its attenuated principal;
+5. it publishes immutable artifact/witness refs and returns the claim;
+6. expiry or crash releases the claim after intent reconciliation; it does not imply re-execution of an uncertain external effect.
+
+There is no correctness theorem that shared state makes coordination $O(N)$. The bounded claim is: if each of $N$ logical agents performs at most $c$ indexed state operations per scheduling round, coordination envelopes are $O(cN)$. The M-7/M-9 measurement must separately report model calls, coordination envelopes, bytes read/written, WAL lock time, hot-key contention, retries, and critical-path latency. Full-mesh chat is $O(N^2)$ only when every agent addresses every other agent.
+
+### 2.7 Pareto harness — feasibility first, optimization second
+
+For each open obligation $o$, candidate refinement $r$, model tier $m$, context policy $b$, and swarm width $k$, the controller obtains a quote:
+
+\[
+q=(o,r,m,b,k,\widehat{\mathbf c},\widehat p_{pass},\widehat I,\widehat q_{evidence}),
+\]
+
+where $\widehat{\mathbf c}$ is predicted 6D consumption, $\widehat p_{pass}$ calibrated success probability, $\widehat I$ expected information gain, and $\widehat q_{evidence}$ the assurance class of the proposed witness. Quotes are advisory. The kernel authorizes only concrete effects and commits measured cost.
+
+The controller applies a lexicographic gate:
+
+1. capability, selector, isolation, evidence, and hard-safety constraints;
+2. six-dimensional lease feasibility and dependency readiness;
+3. minimum witness/quality floor;
+4. nondominance on expected success, epistemic value, cost, tokens, latency, and risk;
+5. declared product preference among the remaining Pareto set.
+
+For a bounded scheduling epoch, the allocation problem is:
+
+\[
+\max_{x}\quad
+\left(
+\sum_qx_q\widehat p_{pass,q}V_q,
+\sum_qx_q\widehat I_q,
+-\sum_qx_q\widehat{\mathbf c}_{q}^{add},
+-\operatorname{critical\_path}(x)
+\right)
+\]
+
+subject to, for each additive dimension $j$,
+
+\[
+\sum_qx_q\widehat c_{q,j}\le R_{remaining,j},
+\quad x_q\in\{0,1\},
+\]
+
+plus worker count, dependency, exclusivity, turn, depth, protection, and quality constraints. The runtime may use a Lagrangian or bandit approximation to choose locally, but it must retain the original vector and constraint results in telemetry. A weighted score may rank feasible choices; it may not average away a failed invariant or decide release promotion.
+
+Operational profiles are versioned priors, not promises:
+
+| Profile | Prior | Initial topology | Escalation rule |
+|---|---|---|---|
+| `flash` | Minimize latency/cost under an ordinary witness floor. | Memo/macro first, then one small worker. | Escalate only on verifier failure, low calibrated confidence, or an explicit ambiguity trigger. |
+| `balanced` | Minimize expected cost-per-signed-pass. | Scout/context projection then one executor and oracle. | Add context, stronger model, or one critic according to marginal expected value. |
+| `certain` | Maximize assurance subject to the ceiling. | Multiple independent candidates and strengthened witness. | Spend on disagreement resolution, proof, or adversarial evaluation—not repetitive prose. |
+| `frontier` | Maximize information gain under an experiment budget. | Diverse refinement rules / controlled branches. | Stop at preregistered information or budget boundary; results cannot auto-promote. |
+| `adaptive` | Begin with the cheapest feasible policy and re-plan after evidence. | Dynamic. | Every escalation is a new authorized reservation; no self-estimated ROI can renew a lease implicitly. |
+
+Context selection is part of the same control problem. A bottleneck $\mathcal B_\phi(\mathcal W,o,k)$ projects attributed refs into at most $k$ tokens/bytes. It must disclose omissions, source digests, protection labels, and compaction lineage. Higher compression that hides a failing invariant is not an optimization.
+
+### 2.8 Active Inference binding
+
+VAOH does not use “Active Inference” as branding for a weighted reward. Its operational mapping is exact:
+
+| Active-Inference term | AETHER object |
+|---|---|
+| observation $o_t$ | Reduced ledger facts, receipts, artifact metadata, and signed evaluator evidence. |
+| latent state $s_t$ | Task progress, dependency validity, failure class, tool/model reliability, and unresolved uncertainty. |
+| action/policy $\pi$ | A refinement quote: component-graph path, model route, context projection, tool/macro, and optional child topology. |
+| preferences $p_C(o)$ | Preregistered witness success, invariant preservation, and economic bounds. |
+| VFE $\mathcal F$ | Belief-fit objective after observations. |
+| EFE $\mathcal G$ | Feasible next-policy objective combining pragmatic and epistemic value. |
+
+The controller records predicted distributions before execution and settled observations after execution. Calibration error is therefore measurable. A policy that systematically understates cost or overstates pass probability loses routing probability; it does not gain a larger authority ceiling.
+
+### 2.9 The compounding flywheel and macro-tool compilation
+
+The flywheel begins deterministically and becomes statistical only when sufficient evidence exists:
+
+| Tier | Mechanism | Earliest milestone | Promotion condition |
+|---|---|---|---|
+| **T0 — witness memo** | Reuse an already verified witness for an identical obligation cell. | M-5 | Exact cache-key and validity match; no learning or benchmark power required. |
+| **T1 — macro-tool compiler** | Anti-unify recurring verified effect subgraphs into a typed executable candidate. | Candidate pipeline M-8/M-9 | Replay equivalence, least privilege, adversarial negatives, paired cost/pass evidence. |
+| **T2 — skill and router adaptation** | Retrieve procedural cards and update calibrated quote/routing priors. | M-9 | Evidence-backed lift; rating affects retrieval only until separately promoted into $D_H$. |
+| **T3 — model/harness learning** | DPO/DMPO, graph credit, manifest mutation, evolutionary search. | M-10 | Signed pairs, held-out paired protocol, Pareto safety, exact statistics, human pointer promotion. |
+
+#### T0 — safe deterministic memoization
+
+The memo key is not merely natural-language goal text:
+
+\[
+K_{memo}=H(D_O\parallel D_{inputs}\parallel D_{environment}\parallel
+D_{witness\ checker}\parallel D_{toolchain}\parallel assurance\parallel policy\ version).
+\]
+
+A cache hit returns the original signed witness bundle by reference. It is invalid if any bound input, environment, checker, revocation epoch, expiry, protection class, or policy version is incompatible. Non-deterministic/freshness-sensitive obligations require an explicit TTL or replay check. Memoization never copies a verdict onto a different subject digest.
+
+#### T1 — verified macro-tool compiler
+
+A macro-tool is not a prompt snippet. It is a content-addressed, typed, least-privilege executable artifact that replaces a recurring multi-turn effect subgraph while preserving externally observed semantics.
+
+Compilation pipeline:
+
+```text
+eligible signed trajectories
+  → mine frequent causally connected effect subgraphs
+  → anti-unify values into typed parameters
+  → infer minimum interface and selector ceiling from receipts
+  → synthesize workflow IR or implementation candidates
+  → generate positive replay + adversarial/property tests
+  → run in ordinary worker sandbox through S0–S12
+  → evaluate with the original exterior witness checker
+  → compare macro vs expanded baseline on held-out paired obligations
+  → publish candidate plugin artifact
+  → human promotion changes registry/default pointer
+```
+
+Eligibility requires evidence-complete trajectories, signed pass, no alarm/tamper/instrument error, stable interfaces, explicit license/protection compatibility, and enough distinct task/input support to avoid memorizing a single fixture. Constants such as paths, secrets, task answers, tenant IDs, and evaluator-private values must not be captured during anti-unification.
+
+Capability inference is conservative:
+
+\[
+C_{macro}=\operatorname{hull}\left(\bigcup_{v\in subgraph}C_v\right)
+\cap C_{pack}\cap C_{publisher},
+\]
+
+where `hull` is the least representable selector set covering observed required effects—not `*`. The candidate is rejected if the selector algebra cannot express a narrow ceiling. Its execution cost includes dispatch, sandbox, verification, and fallback overhead; token collapse is measured, never assumed.
+
+The compiler may emit a portable workflow IR interpreted by an allowlisted runner or source/bytecode for a registered language runtime. Language is metadata. Authority is the same typed effect protocol. A Python, Rust, WASM, shell, or proof-tactic implementation receives no privilege from its format.
+
+#### T2/T3 — statistical compounding
+
+Skill cards and learned routers reduce search/context costs; DPO/DMPO distills evidence-selected choices into model policies; harness evolution mutates the named graph. These are separate treatments and must not be changed simultaneously in a pair unless a factorial protocol attributes them. The deterministic baseline and every rejected candidate remain reproducible.
+
+### 2.10 Tier S+ invariants
+
+The synthesis is accepted only if all of the following remain true:
+
+1. **One mechanism:** obligations, macros, critics, swarms, and learned policies reduce to ordinary turns/effects; no second driver.
+2. **Authority monotonicity:** state, price, posterior belief, skill rating, or cached success can never widen a capability.
+3. **Evidence exteriority:** only the bound exterior writer can mint promotion-eligible verdicts.
+4. **Identity completeness:** every composition, execution, experiment, obligation, witness, memo, and macro candidate is content-addressed over its semantic inputs.
+5. **Single writer:** projections and indices may be many; privileged event-kind ownership remains singular.
+6. **State-plane attribution:** every claim, result, and artifact has a principal, lease, lineage, and digest.
+7. **Pareto honesty:** raw vectors and hard constraints are preserved; no scalar hides a safety/evidence regression.
+8. **Causal humility:** graph credit ranks interventions; chronology or attention never establishes cause.
+9. **Compounding reversibility:** caches can invalidate, skills can archive, candidates can lose, and default pointers can roll back without deleting evidence.
+10. **TCB austerity:** optimizer, scheduler, learner, retriever, and compiler live outside `kernel/`; the `<=1438` gate remains binding.
+
 ---
 
 ## 3. Adjudication of architectural tensions T-1 through T-9
@@ -205,8 +471,9 @@ Required graph profiles used as compile fixtures:
 - `debate-two`: two isolated proponents → adjudicator.
 - `tree-search`: frontier controller → candidate workers → scorer → selector.
 - `stigmergic-swarm`: coordinator publishes work refs; workers claim/return through State Plane; aggregator reads attributed results.
+- `obligation-pareto`: obligation source → quote providers → Pareto selector → lease-bound refiners → witness composer.
 
-All five must compile without a diff to kernel or episode engine. If one requires a new engine branch, the graph is not general enough.
+All six must compile without a diff to kernel or episode engine. If one requires a new engine branch, the graph is not general enough.
 
 ### T-2 — Engine-owned spawn versus capability-mediated `agent.spawn`
 
@@ -617,7 +884,7 @@ Positive: topologies become pack data; attribution is per named node; graph muta
 
 #### One bound falsifier
 
-`test/contracts/test_manifest_v2_graph.py::ManifestV2GraphFalsifier.test_five_topologies_compile_without_kernel_or_engine_change` snapshots the kernel/episode public sources, compiles the five required profiles twice, asserts stable $D_H$, and fails on an unknown/unconsumed interface. Any source diff or profile-specific engine branch is red.
+`test/contracts/test_manifest_v2_graph.py::ManifestV2GraphFalsifier.test_six_topologies_compile_without_kernel_or_engine_change` snapshots the kernel/episode public sources, compiles the six required profiles twice, asserts stable $D_H$, and fails on an unknown/unconsumed interface. Any source diff or profile-specific engine branch is red.
 
 ---
 
@@ -780,12 +1047,12 @@ The copy-fork disappears and event authority becomes coherent. Two event kinds a
 
 ---
 
-### ADR-0080 — Universal Turn Mechanism and Deferred Capability-Mediated Delegation
+### ADR-0080 — Universal Turn Mechanism, Typed Obligations, and Deferred Capability-Mediated Delegation
 
 **Status:** Proposed  
 **Date:** 2026-08-21  
 **Deciders:** Engineering Director, Principal Systems Architect, PhD AI Specialist  
-**Requirements:** REQ-LOOP-001…006, REQ-SPAWN-001…010
+**Requirements:** REQ-LOOP-001…006, REQ-SPAWN-001…010, REQ-OBL-001…010
 
 #### Context
 
@@ -801,6 +1068,10 @@ The system needs a public substrate claim narrow enough to falsify. Recursive al
 6. Emit `ChildSpawned` only after durable intent and child creation; emit `ChildReturned` with causation/correlation and untrusted return provenance. Failure never upgrades trust.
 7. A parent cannot delegate authority or budget it does not currently hold. Unknown subset comparison denies.
 8. No child can access evaluator secrets, parent operator context, unreferenced workspace paths, or live parent handles.
+9. Implement typed obligations only after M-6, as an M-7 State-Plane projection over ordinary events, blobs, claims, leases, and child episodes—not as a second workflow runtime.
+10. An obligation binds goal digest, witness contract, 6D ceiling, dependencies, parent, deadline, and protection class. Worker return does not discharge it; only a bound accepted witness does.
+11. Claims are exclusive, compare-and-swap versioned, principal-bound, and lease-bound. Crash/expiry enters reconciliation before reuse; an uncertain effect is never repeated automatically.
+12. Refinement/decomposition is policy executed through the same turn loop and is bounded by depth, child count, price, and progress predicates.
 
 Normative spawn request outline:
 
@@ -824,7 +1095,7 @@ Normative spawn request outline:
 
 #### Consequences
 
-Recursive policy becomes expressible without an agency escape hatch. Implementation waits until evidence and generality are established, limiting TCB risk.
+Recursive policy and pull-based stigmergy become expressible without an agency escape hatch or trusted workflow scheduler. Implementation waits until evidence and generality are established, limiting TCB risk.
 
 #### Rejected alternatives
 
@@ -834,7 +1105,7 @@ Recursive policy becomes expressible without an agency escape hatch. Implementat
 
 #### One bound falsifier
 
-`test/trust/test_mediated_spawn.py::MediatedSpawnFalsifier.test_spawn_traverses_every_dispatch_invariant_and_never_widens` instruments stages, crashes each post-reservation path, and asserts intent-before-child, grant binding, sublease conservation, release, lineage, isolation, and untrusted return. Any direct child creation before S9 or authority widening is red.
+`test/trust/test_universal_mechanism.py::UniversalMechanismFalsifier.test_spawn_and_obligation_frontier_reduce_to_mediated_turns_without_widening` instruments stages and the obligation projection, crashes each post-reservation/claim path, and asserts intent-before-child, grant binding, sublease conservation, release, lineage, isolation, exclusive versioned claims, witness-before-discharge, and untrusted return. Any direct child creation before S9, stale-claim commit, worker-self-discharge, second driver, or authority widening is red.
 
 ---
 
@@ -903,17 +1174,17 @@ Future evidence is learnable and audit-ready; historical weakness remains honest
 
 ---
 
-### ADR-0082 — Foundation-to-Meta-Framework Promotion Protocol
+### ADR-0082 — Foundation-to-Meta-Framework Pareto, Compounding, and Promotion Protocol
 
 **Status:** Proposed  
 **Date:** 2026-08-21  
 **Deciders:** Leadership 7  
-**Requirements:** REQ-GEN-001…006, REQ-PROM-001…014  
+**Requirements:** REQ-GEN-001…006, REQ-MEMO-001…006, REQ-PARETO-001…010, REQ-MACRO-001…012, REQ-PROM-001…014
 **Program scope:** v0.6.1–v1.0.0
 
 #### Context
 
-A generality claim, skill-memory claim, model improvement, or self-improving harness is unsafe if selected by self-reported reward, unpaired benchmarks, mutable baselines, or a scalar that hides security/cost regressions. The M-4 foundation must precede generality and learning.
+A generality claim, witness reuse, macro-tool, skill-memory claim, model improvement, or self-improving harness is unsafe if selected by self-reported reward, incomplete cache identity, unpaired benchmarks, mutable baselines, or a scalar that hides security/cost regressions. The M-4 foundation must precede generality and adaptive learning.
 
 #### Decision
 
@@ -925,7 +1196,11 @@ A generality claim, skill-memory claim, model improvement, or self-improving har
 6. Skill retrieval/eviction and model/harness mutation remain reversible candidate operations. Default-pointer changes require a signed promotion event by the promotion authority.
 7. DPO training is exterior. The trained artifact is a new content-addressed model component subject to cassette regression, paired evaluation, and rollback.
 8. Self-modification means propose → isolate → evaluate → compare → approve/promote; never modify the live trusted runtime in place.
-9. M-5–M-10 proceed only in the dependency order in §6.
+9. The compounding ladder is ordered: T0 exact witness memoization; T1 verified macro compilation; T2 skill/router adaptation; T3 DPO/harness evolution. A higher tier may not be used to excuse a missing lower-tier identity or evidence control.
+10. A memo key binds obligation, inputs, environment, witness checker, toolchain, assurance, protection, and policy version. Cache reuse never transfers a verdict to a different subject.
+11. A macro-tool candidate is an ordinary untrusted artifact until replay, least-privilege, adversarial, held-out paired, and registry lifecycle gates pass. It executes through S0–S12 and cannot contain evaluator-private data or undeclared ambient authority.
+12. Pareto profiles are versioned policy inputs. Predictions and settled costs are both retained. Profiles may rank only feasible choices and cannot auto-renew leases or auto-promote candidates.
+13. M-5–M-10 proceed only in the dependency order in §6.
 
 #### Preference certificate
 
@@ -962,7 +1237,7 @@ Learning is slower than self-scoring but produces defensible evidence, reversibl
 
 #### One bound falsifier
 
-`test/runtime/test_promotion_protocol.py::PromotionProtocolFalsifier.test_only_paired_signed_pareto_safe_exactly_significant_candidate_promotes` feeds valid and adversarial pair sets; only the signed, comparable, safety-green set with exact McNemar significance may emit `PromotionApproved`. Flipped signatures, absent verdicts, incomparable cells, multiplicity failure, or any safety regression must deny.
+`test/runtime/test_meta_framework_promotion.py::MetaFrameworkPromotionFalsifier.test_only_bound_equivalent_paired_signed_pareto_safe_candidate_promotes` feeds valid and adversarial memo, macro, skill, model, and harness treatments. Only an exact memo cell may reuse; only a semantically equivalent least-privilege macro may enter comparison; and only the signed, comparable, safety-green treatment with exact McNemar significance may emit `PromotionApproved`. Changed memo bindings, tainted macro constants, widened ceilings, flipped signatures, absent verdicts, incomparable cells, multiplicity failure, or any safety regression must deny.
 
 ---
 
@@ -1222,6 +1497,53 @@ Promotion requires all of:
 
 There is no universal `N=50` guarantee. Power depends on discordance rate and target effect. Optional sequential testing requires an alpha-spending/e-value protocol selected before results are observed. The common chi-square approximation is not labeled “exact.”
 
+### 5.8 Formal acceptance rule for compiled macro-tools
+
+Let $g$ be an expanded effect subgraph and $m$ a candidate macro compiled from it. For held-out obligation cell $x$, let:
+
+- $V(x,a)\in\{pass,fail,inconclusive,instrument\_error\}$ be the exterior verdict for implementation $a$;
+- $Y(x,a)$ be the canonical observable output/artifact digest set;
+- $E(x,a)$ be the security/evidence invariant vector;
+- $\mathbf C(x,a)$ be settled 6D cost;
+- $T(a)$ be the declared typed interface and witness contract.
+
+The macro is semantically eligible only if:
+
+\[
+T(m)\preceq T(g),
+\qquad C_{cap}(m)\subseteq C_{cap}(g),
+\]
+
+and, on every mandatory equivalence/replay cell,
+
+\[
+V(x,m)=V(x,g)=pass,
+\quad Y(x,m)\equiv_{witness}Y(x,g),
+\quad E(x,m)\succeq E_{required}.
+\]
+
+`equiv_witness` is pack-defined and exterior: byte equality where required, semantic proof/test equivalence where appropriate, or a preregistered human/panel contract for fuzzy outputs. The macro generator cannot choose the equivalence relation after seeing results.
+
+Economic superiority is a separate statistical claim. Define paired deltas:
+
+\[
+\Delta\mathbf C_x=\mathbf C(x,m)-\mathbf C(x,g).
+\]
+
+The candidate must be nondominated under the preregistered economics and must pass the binary correctness promotion rule in §5.7. A lower median token count does not compensate for a new tail-latency, failure, capability, or evidence regression. Report median, quantiles, confidence intervals, and fallback rate for each additive dimension; do not publish an unqualified “cost collapse” percentage.
+
+Macro fallback is explicit. If invocation fails before an external effect and the profile permits fallback, the expanded rule may run under a new reservation and both attempts remain in settled cost. After an effect is `undeterminable`, automatic fallback is forbidden until reconciliation proves it safe. This preserves exactly-once effect semantics even when tool compilation is imperfect.
+
+The candidate’s provenance root binds:
+
+\[
+D_M=H(\operatorname{JCS}(
+T(m), implementation, runner, C_{cap}(m), source\ pattern,
+training\ trajectories, compiler, tests, checker, dependencies)).
+\]
+
+Any change to implementation, runner, interface, ceiling, dependency, compiler, or validation suite creates a new $D_M$ and restarts evaluation. A version label alone is never identity.
+
 ---
 
 ## 6. Milestone roadmap and version ladder
@@ -1234,9 +1556,9 @@ There is no universal `N=50` guarantee. Power depends on discordance rate and ta
 | v0.6.2 | **Extensibility Lock** | M-3 green: manifest/2 graph, canonical plugin FSM, NOVA-4, `layer0/` absent. |
 | v0.6.3 | **Foundation Release Candidate** | M-4 evidence candidate produced; no scope expansion. |
 | v0.7.0 | **Foundation MVP** | Director attests the same nine-row M-4 run; compatibility writers removed. |
-| v0.8.0 | **General Substrate & Delegation** | M-5 Pack #2 and M-6 mediated spawn green. |
-| v0.9.0 | **Controlled Swarm Framework** | M-7 concurrency, M-8 builder, M-9 scale/retrieval/SPI review green. |
-| v1.0.0 | **Promotion-Gated Meta-Framework** | M-10 self-improvement demonstration green with full evidence chain. |
+| v0.8.0 | **General Substrate & Delegation** | M-5 Pack #2 + safe witness memo and M-6 mediated spawn green. |
+| v0.9.0 | **Verified Adaptive Swarm Framework** | M-7 obligation/Pareto concurrency, M-8 builder/macro IR, M-9 scale/retrieval/macro laboratory/SPI review green. |
+| v1.0.0 | **Promotion-Gated Tier S+ Meta-Framework** | M-10 Active-Inference routing, macro/skill/model/harness promotion, and rollback demonstration green with full evidence chain. |
 
 v0.6.3 and v0.7.0 deliberately share the M-4 technical evidence: the former is the candidate artifact; the latter is the Director’s release promotion. No second “cleaner” run may be stitched from different row winners.
 
@@ -1247,14 +1569,14 @@ v0.6.3 and v0.7.0 deliberately share the M-4 technical evidence: the former is t
 | **M-0 — Engineering Truth** | Director Wave-0 authorization | Canonical packages subject-of-record; CI/test truth; risk/identifier/SPI/plane decisions; architecture checks. | Named falsifiers execute against packages; evidence recorded. **Current: complete.** | Runtime features. |
 | **M-1 — Fail-Closed Trust Spine** | M-0 green | Fix capability/budget/writer/identity gaps; canonical emitter; WAL cold replay primitives; sandbox ceiling; signed verdict binding. | Trust, kernel, contract, security gates green. **Current: complete.** | General graph, concurrency. |
 | **M-2 — One Runtime & Evidence Integrity** | M-1 green | Finish package runtime convergence; NOVA-1 trajectory/2; NOVA-2 fresh-process cold continuation; resolve `_PROC_PATTERN`; classify current runtime/adapter reds; preserve one `Runtime.compose/execute_harness`. | Package runtime is sole authority; rich measured trajectory survives restart; no unadjudicated blocking red; ADR-0081 accepted. | Component-graph runtime, public spawn, concurrency. |
-| **M-3 — Extensibility** | M-2 green; ADRs 0077–0079 accepted | Implement manifest/2 compiler/migration; five topology fixtures; canonical registry/FSM/broker; add lifecycle events/golden vectors; run NOVA-4; migrate code-default; delete all `layer0/`. | Unknown/unconsumed refs fail; ceiling applied; immutable $D_H$; full lifecycle on package path; no `layer0` import/file; walking skeleton through canonical runtime. | Real foundation claim, spawn implementation. |
+| **M-3 — Extensibility** | M-2 green; ADRs 0077–0079 accepted | Implement manifest/2 compiler/migration; six topology fixtures; canonical registry/FSM/broker; add lifecycle events/golden vectors; run NOVA-4; migrate code-default; delete all `layer0/`. | Unknown/unconsumed refs fail; ceiling applied; immutable $D_H$; full lifecycle on package path; no `layer0` import/file; walking skeleton through canonical runtime. | Real foundation claim, spawn implementation. |
 | **M-4 — Foundation E2E STOP** | M-3 green; real provider/evaluator environment explicitly configured | One real coding-agent run across all nine rows below; capture one evidence bundle and v0.6.3 RC. | Director verifies every row from the same `run_id`, $D_H/D_R/D_X$, WAL chain, and artifacts; cut v0.7.0. | Pack #2, public spawn, concurrency, learning, doc collapse before evidence. |
-| **M-5 — Generality & Consolidation** | M-4 Director attestation | Build Math & Formal Deductive Verification pack; prove zero domain/kernel diffs; run declared-absent compute profile and required-evaluator formal profile; collapse docs to Clean Triad; freeze evidence inventory. | Non-coding tasks pass exterior formal oracle through same loop; I-7 supported; docs/link/stale gates green. | New kernel verb for math; swarm concurrency. |
+| **M-5 — Generality & Consolidation** | M-4 Director attestation | Build Math & Formal Deductive Verification pack; prove zero domain/kernel diffs; run declared-absent compute profile and required-evaluator formal profile; implement T0 witness memo behind `IMemoryEngine`; collapse docs to Clean Triad; freeze evidence inventory. | Non-coding tasks pass exterior formal oracle through same loop; exact memo hit reuses only an identical valid witness cell; cache invalidation negatives green; I-7 supported; docs/link/stale gates green. | New kernel verb for math; approximate cache; swarm concurrency. |
 | **M-6 — Mediated Delegation** | M-5 green; ADR-0080 accepted; TCB headroom plan | Implement `agent.spawn` through S0–S12; subleases, attenuation, isolation, cancellation, child lineage; graph profiles use it where needed. | Every spawn falsifier green; no direct planner spawn; TCB `<=1438`; no evaluator/secret reachability. | Parallel scheduler. |
-| **M-7 — Controlled Concurrency** | M-5/M-6 green; NOVA-2 green; selector independence sound | Durable episode queue/claims; bounded (K) workers over (N) episodes; state-mediated coordination; deterministic conflict policy; charged compute timing. | Sequential/concurrent semantic equivalence on independent cells; conflict cases serialize/fail closed; crash recovery/no duplicate effect; measured speedup and cost. | Framework mutation. |
-| **M-8 — Framework Builder** | M-6/M-7 green | User-facing builder compiles graph presets and constraints to manifest/2; static diagnostics; experiment cell generation; immutable registry publication. | A user creates ReAct, debate, critic, tree, swarm variants without code/engine changes; invalid graphs explain exact path. | Automatic promotion/default changes. |
-| **M-9 — Scale, Retrieval, SPI Review** | M-8 green with representative corpus | 384d hybrid index profile; skill rating/cold/archive; high-scale WAL/blob/index measurements; routing economics; five-SPI evidence review; protocol conformance. | Registered throughput/latency/recovery targets met; no evidence loss; retrieval lift demonstrated in paired tests; SPI decision recorded append-only. | Live self-improvement. |
-| **M-10 — Meta-Cognitive Substrate** | M-8/M-9 green; ADR-0082 accepted; corpus eligibility threshold met | Exterior VFE/EFE policy selector; trajectory graph harvester; unforgeable pairs; DPO candidate training; paired exact promotion; evolutionary manifest/skill mutations; rollback. | System proposes, isolates, verifies, statistically promotes, and can roll back a better composition while $D_H/D_R/D_X$, signatures, and baseline remain reconstructible. | In-place TCB rewrite, self-issued truth. |
+| **M-7 — Controlled Concurrency & Pareto Frontier** | M-5/M-6 green; NOVA-2 green; selector independence sound | Durable obligation/claim projection; lease-bound pull scheduling; bounded (K) workers over (N) obligations; versioned Pareto profiles and quotes; deterministic conflict/admission policy; charged compute timing. | Sequential/concurrent semantic equivalence on independent cells; stale/double claims deny; conflict cases serialize/fail closed; crash recovery/no duplicate effect; predictions vs settled cost recorded; scaling claim measured. | Macro synthesis; framework mutation; auto-promotion. |
+| **M-8 — Framework Builder & Macro IR** | M-6/M-7 green | User-facing builder compiles graph presets, witness contracts, profiles, and constraints to manifest/2; define portable `mhf.macro-tool/1` candidate IR; static diagnostics; experiment cell generation; immutable registry publication. | A user creates ReAct, debate, critic, tree, obligation-swarm, and macro-expanded variants without kernel/engine changes; invalid graphs/macros explain exact path. | Automatic synthesis promotion/default changes. |
+| **M-9 — Scale, Retrieval & Macro Laboratory** | M-8 green with representative eligible corpus | 384d hybrid index profile; skill rating/cold/archive; mine and compile macro candidates; replay/property/adversarial macro suite; high-scale WAL/blob/index measurements; Pareto calibration; five-SPI evidence review; protocol conformance. | Registered throughput/latency/recovery targets met; no evidence loss; retrieval lift demonstrated in paired tests; at least one macro candidate is semantically equivalent and least-privilege on held-out cells; no default pointer changed; SPI decision recorded append-only. | Live self-improvement or automatic macro promotion. |
+| **M-10 — Meta-Cognitive Tier S+ Substrate** | M-8/M-9 green; ADR-0082 accepted; corpus eligibility threshold met | Exterior VFE/EFE policy selector; trajectory graph harvester; T1 macro promotion; T2 skill/router promotion; unforgeable pairs; DPO/DMPO candidate training; paired exact promotion; evolutionary manifest mutations; rollback. | System proposes, isolates, verifies, statistically promotes, and can roll back a superior macro/skill/model/harness candidate while $D_H/D_R/D_X/D_O/D_M$, signatures, raw Pareto vectors, and baseline remain reconstructible. | In-place TCB rewrite, self-issued truth, autonomous release pointer. |
 
 ### 6.3 M-4 nine-row single-run evidence table
 
@@ -1317,7 +1639,10 @@ This is a target map, not permission to edit now.
 | M-4 | dogfood/CLI invocation and evidence exporter if restored | One signed evidence manifest; no special E2E runtime. |
 | M-5 | `packs/math-formal/`, adapter/environment/evaluator implementations | Pack tests, oracle pin/signing, zero-domain/kernel-diff gate, docs collapse. |
 | M-6 | existing effect schema/registry, agency spawn adapter, kernel only if unavoidable | S0–S12 stage tests, TCB check, security/trust suite. |
-| M-7+ | runtime scheduler/claims, index/retrieval, lab/promotion services | No alternate store/writer/evaluator; registered measurement protocols. |
+| M-5 memo | runtime memory service behind existing `IMemoryEngine`; pack witness-key policy | Canonical memo key vectors, expiry/revocation/protection negatives, original witness refs retained. |
+| M-7 | runtime obligation/claim projection, scheduler/profile components, lab calibration | CAS/lease/recovery tests, raw quote-vs-settlement telemetry, no alternate store/writer/evaluator. |
+| M-8/M-9 macro | `schemas/mhf/macro_tool.schema.json`, exterior compiler/lab plugin, registry candidate artifacts | Workflow-IR vectors, taint/capability inference, replay/property/adversarial tests, held-out paired cells. |
+| M-9/M-10 learning | index/retrieval, graph harvester, lab/training/promotion services | Registered measurement protocols, signed pair certificates, immutable baselines, rollback. |
 
 ### 7.2 Manifest compiler pseudocode
 
@@ -1393,7 +1718,130 @@ WorkReleased(work_digest, reason)
 
 These event names are design placeholders until an ADR/schema assigns emitters; they must not be added ad hoc. Claim is compare-and-swap on the reduced work version. A worker that loses the claim cannot commit a privileged effect under that lease. Large artifacts live in BlobStore; IndexPort is a rebuildable projection. At-least-once delivery is acceptable only with effect intent/idempotency/reconciliation semantics; it must not become at-least-once external effects.
 
-### 7.5 Requirement-to-falsifier matrix
+The projection must expose `open`, `claimed`, `blocked`, `witness_pending`, `discharged`, `failed`, and `indeterminate` without inventing new authority. `discharged` means an accepted exterior witness is bound to the obligation subject; worker completion alone is `witness_pending`. Decomposition has an explicit maximum depth, child-count price, and progress predicate so obligation explosion stops at admission rather than exhausting the queue.
+
+### 7.5 Pareto controller and macro compiler implementation contract
+
+The Pareto controller is deterministic given frozen quotes, beliefs, profile, and tie-break seed:
+
+```python
+def select_refinement(obligation, quotes, belief, profile, remaining):
+    feasible = [
+        q for q in quotes
+        if capability_compatible(q, obligation)
+        and evidence_floor(q) >= obligation.evidence_floor
+        and predicted_cost(q).precedes_or_equals(remaining)
+        and safety_constraints_hold(q)
+        and dependencies_ready(q)
+    ]
+    if not feasible:
+        return typed_no_feasible_policy(obligation)
+
+    predicted = [estimate_vfe_efe(q, belief, profile) for q in feasible]
+    frontier = nondominated(predicted, preserve_raw_vectors=True)
+    choice = profile.lexicographic_select(frontier)
+    ledger.record_quote_set_and_choice(obligation.digest, predicted, choice)
+    return request_new_reservation(choice)  # kernel still decides
+```
+
+`nondominated` never receives an infeasible quote. The profile and calibration model identities enter $D_R$; a frozen profile promoted into the harness enters $D_H$. Settled cost is joined to the quote after completion so calibration cannot be silently rewritten.
+
+Proposed Draft 2020-12 contract for a macro candidate:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aether.local/schemas/mhf/macro-tool-1.schema.json",
+  "title": "mhf.macro-tool/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "id", "interfaces", "implementation", "capability_ceiling",
+    "source", "validation"
+  ],
+  "properties": {
+    "schema": {"const": "mhf.macro-tool/1"},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$"},
+    "interfaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input", "output", "witness"],
+      "properties": {
+        "input": {"type": "string", "format": "uri-reference"},
+        "output": {"type": "string", "format": "uri-reference"},
+        "witness": {"type": "string", "format": "uri-reference"}
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_ref", "digest", "media_type", "runner_ref"],
+      "properties": {
+        "artifact_ref": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "media_type": {"type": "string", "minLength": 1},
+        "runner_ref": {"type": "string", "minLength": 1},
+        "entrypoint": {"type": "string", "minLength": 1}
+      }
+    },
+    "capability_ceiling": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern_digest", "compiler_digest", "trajectory_digests"],
+      "properties": {
+        "pattern_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "compiler_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "trajectory_digests": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_digest", "checker_digest", "held_out_set_digest"],
+      "properties": {
+        "protocol_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "checker_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "held_out_set_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
+```
+
+The candidate compiler is outside the TCB:
+
+```python
+def compile_macro(eligible_trajectories, registry, lab_protocol):
+    rows = verify_eligibility_and_signatures(eligible_trajectories)
+    graphs = [project_effect_subgraph(row) for row in rows]
+    patterns = mine_frequent_connected_subgraphs(graphs)
+
+    for pattern in patterns:
+        params = anti_unify_without_tainted_constants(pattern)
+        ceiling = least_representable_selector_hull(pattern.receipts)
+        if ceiling is None or ceiling.is_wildcard:
+            reject(pattern, "capability_not_narrowly_expressible")
+            continue
+
+        for candidate in synthesize_portable_candidates(pattern, params, ceiling):
+            freeze_candidate_digest(candidate)
+            run_positive_replays(candidate, lab_protocol)
+            run_property_and_adversarial_negatives(candidate, lab_protocol)
+            run_held_out_paired_cells(candidate, expanded=pattern)
+            publish_as_untrusted_candidate(candidate)  # never default
+```
+
+After validation, the macro is packaged as an ordinary plugin manifest and enters the canonical plugin FSM. Compiler success does not skip discovery, verification, resolution, activation, sandbox, evaluation, or promotion. The compiler has no registry-default or verdict writer capability.
+
+### 7.6 Requirement-to-falsifier matrix
 
 Every row is one requirement and one executable test. Existing tests are marked **existing**; all others are exact proposed targets.
 
@@ -1403,7 +1851,7 @@ Every row is one requirement and one executable test. Existing tests are marked 
 | REQ-AUTH-002 intent durable before effect | `test.trust.test_spine.Atomicity.test_intent_is_durable_before_the_effect_begins` **existing** | all |
 | REQ-AUTH-003 denied effect never reaches adapter | `test.trust.test_spine.Denial.test_a_denied_effect_never_reaches_its_adapter` **existing** | all |
 | REQ-AUTH-004 child attenuation never widens | `test.agency.test_episode_spawn.TestEpisodeEngineSpawn.test_spawn_widening_denied_returns_typed_result` **existing** | M-6 |
-| REQ-MAN2-001 five topologies are data | `test.contracts.test_manifest_v2_graph.ManifestV2GraphFalsifier.test_five_topologies_compile_without_kernel_or_engine_change` | M-3 |
+| REQ-MAN2-001 six topologies are data | `test.contracts.test_manifest_v2_graph.ManifestV2GraphFalsifier.test_six_topologies_compile_without_kernel_or_engine_change` | M-3/M-7 |
 | REQ-MAN2-002 unknown ref fails at compose | `test.runtime.test_manifest_v2_negatives.ManifestV2NegativeTests.test_unknown_ref_fails_before_activation` | M-3/NOVA-4 |
 | REQ-MAN2-003 unknown interface fails | `test.runtime.test_manifest_v2_negatives.ManifestV2NegativeTests.test_unregistered_interface_names_json_pointer` | M-3 |
 | REQ-MAN2-004 unconsumed authority node fails | `test.runtime.test_manifest_v2_negatives.ManifestV2NegativeTests.test_unconsumed_authority_component_fails` | M-3 |
@@ -1436,17 +1884,33 @@ Every row is one requirement and one executable test. Existing tests are marked 
 | REQ-CONC-001 independent results equivalent | `test.runtime.test_controlled_concurrency.ConcurrencyTests.test_independent_cells_match_sequential_reduction` | M-7 |
 | REQ-CONC-002 unknown footprint conflicts | `test.runtime.test_controlled_concurrency.ConcurrencyTests.test_unknown_selector_serializes_or_denies` | M-7 |
 | REQ-CONC-003 crash does not duplicate effect | `test.runtime.test_controlled_concurrency.ConcurrencyTests.test_worker_crash_reclaims_claim_without_repeating_effect` | M-7 |
+| REQ-OBL-001 claim is exclusive and lease-bound | `test.runtime.test_obligation_frontier.ObligationFrontierTests.test_stale_or_second_claim_cannot_commit` | M-7 |
+| REQ-OBL-002 completion is not discharge | `test.runtime.test_obligation_frontier.ObligationFrontierTests.test_worker_return_waits_for_bound_exterior_witness` | M-7 |
+| REQ-OBL-003 decomposition cannot explode | `test.runtime.test_obligation_admission.ObligationAdmissionTests.test_depth_child_count_and_no_progress_decomposition_deny` | M-7 |
+| REQ-PARETO-001 infeasible quote never scores | `test.runtime.test_pareto_controller.ParetoControllerTests.test_safety_capability_and_budget_gate_precedes_ranking` | M-7 |
+| REQ-PARETO-002 raw vectors survive scalar ranking | `test.runtime.test_pareto_controller.ParetoControllerTests.test_profile_choice_records_full_frontier_and_raw_cost_vectors` | M-7 |
+| REQ-PARETO-003 quote reconciles to settlement | `test.runtime.test_pareto_calibration.ParetoCalibrationTests.test_prediction_and_settled_cost_are_immutable_joined_records` | M-7/M-9 |
+| REQ-PARETO-004 escalation requires new lease | `test.trust.test_pareto_escalation.ParetoEscalationTests.test_efe_or_roi_cannot_renew_or_widen_reservation` | M-7 |
 | REQ-GEN-001 Pack #2 needs no domain/kernel diff | `test.packs.math_formal.test_generality.MathGeneralityFalsifier.test_pack_runs_with_domain_and_kernel_tree_hash_unchanged` | M-5 |
 | REQ-GEN-002 proof comment cannot pass | `test.packs.math_formal.test_oracle.MathOracleTests.test_comment_or_string_without_proof_term_fails` | M-5 |
 | REQ-GEN-003 valid formal proof is exterior-signed | `test.packs.math_formal.test_oracle.MathOracleTests.test_valid_certificate_returns_bound_signed_verdict` | M-5 |
+| REQ-MEMO-001 exact cell reuses original witness | `test.runtime.test_witness_memo.WitnessMemoTests.test_identical_bound_cell_returns_original_signed_witness_ref` | M-5 |
+| REQ-MEMO-002 changed binding misses or invalidates | `test.runtime.test_witness_memo.WitnessMemoTests.test_input_checker_environment_revocation_or_policy_change_cannot_hit` | M-5 |
 | REQ-RETR-001 protection filter precedes similarity | `test.runtime.test_hybrid_skill_index.HybridIndexTests.test_high_similarity_wrong_protection_class_is_never_returned` | M-9 |
 | REQ-RETR-002 eviction archives evidence | `test.runtime.test_skill_eviction.SkillEvictionTests.test_cold_archive_preserves_card_ratings_and_trajectory_refs` | M-9 |
+| REQ-MACRO-001 schema and digest close all authority inputs | `test.contracts.test_macro_tool_contract.MacroToolContractTests.test_unknown_field_or_changed_runner_ceiling_dependency_changes_or_rejects_digest` | M-8 |
+| REQ-MACRO-002 synthesis captures no tainted constant | `test.lab.test_macro_compiler_negatives.MacroCompilerNegativeTests.test_secret_path_tenant_answer_and_oracle_private_values_never_compile` | M-9 |
+| REQ-MACRO-003 ceiling is least privilege | `test.lab.test_macro_capabilities.MacroCapabilityTests.test_candidate_ceiling_covers_required_receipts_without_wildcard_or_widening` | M-9 |
+| REQ-MACRO-004 held-out semantic equivalence | `test.lab.test_macro_equivalence.MacroEquivalenceFalsifier.test_macro_and_expanded_graph_match_exterior_witness_on_held_out_cells` | M-9 |
+| REQ-MACRO-005 uncertain effect forbids fallback | `test.trust.test_macro_fallback.MacroFallbackTests.test_undeterminable_effect_requires_reconciliation_before_expanded_fallback` | M-9 |
+| REQ-MACRO-006 compiler cannot publish default | `test.security.test_macro_compiler_authority.MacroCompilerAuthorityTests.test_compiler_can_publish_candidate_but_cannot_write_verdict_or_default_pointer` | M-9/M-10 |
+| REQ-MACRO-007 promoted macro is Pareto-safe | `test.runtime.test_macro_promotion.MacroPromotionTests.test_only_equivalent_least_privilege_paired_significant_candidate_promotes` | M-10 |
 | REQ-PROM-001 only valid signed pairs harvested | `test.runtime.test_preference_harvest.PreferenceHarvestTests.test_invalid_incomparable_or_self_scored_pairs_rejected` | M-10 |
 | REQ-PROM-002 exact McNemar implementation | `test.runtime.test_promotion_statistics.PromotionStatisticsTests.test_exact_p_matches_enumerated_binomial_cases` | M-10 |
 | REQ-PROM-003 safety regression cannot average out | `test.runtime.test_promotion_protocol.PromotionProtocolFalsifier.test_only_paired_signed_pareto_safe_exactly_significant_candidate_promotes` | M-10 |
 | REQ-PROM-004 rollback preserves baseline | `test.runtime.test_promotion_rollback.PromotionRollbackTests.test_default_pointer_rolls_back_without_deleting_candidate_or_baseline` | M-10 |
 
-### 7.6 Negative constraints and anti-pattern checklist
+### 7.7 Negative constraints and anti-pattern checklist
 
 The implementation is rejected if any answer is “yes”:
 
@@ -1467,6 +1931,15 @@ The implementation is rejected if any answer is “yes”:
 - Can graph config mutate after $D_H$, or can a semver ref resolve differently without changing $D_H$?
 - Is a runtime workflow DAG introduced beside the universal loop?
 - Does a swarm use unrestricted full-mesh chat, shared mutable memory, or unowned state writes?
+- Can an obligation be marked discharged by worker return rather than a subject-bound witness, or can a stale claim commit?
+- Can decomposition create unbounded children/depth or consume budget without a declared progress predicate?
+- Does the Pareto controller score a capability-, safety-, evidence-, or budget-infeasible quote?
+- Does a profile discard the original 6D vector, hide tail cost/fallback, or implicitly renew a lease from predicted ROI/EFE?
+- Can a witness memo hit after its input, environment, checker, toolchain, protection, revocation epoch, assurance, or policy binding changes?
+- Is a “macro-tool” merely prose, an untyped script, ambient shell authority, or a captured task/secret/oracle-private constant?
+- Can a compiled macro bypass S0–S12, ordinary plugin lifecycle, sandbox, exterior witness, held-out comparison, or human promotion?
+- Does macro fallback repeat an effect whose occurrence is unknown, or omit the failed attempt from settled cost?
+- Is a token/cost-collapse percentage claimed without a paired held-out protocol, uncertainty, tails, and failure/fallback accounting?
 - Does a causal label come from temporal adjacency without a recorded dependency and paired intervention?
 - Does DPO consume unpaired, unsigned, incomparable, contaminated, or train/eval-overlapping examples?
 - Does a scalar fitness allow safety/trust regression to be offset by task success or lower cost?
@@ -1492,13 +1965,13 @@ These edits occur only after the relevant ADR is accepted; the cleanup/collapse 
 Only after ADR acceptance:
 
 - **Header/status:** advance the concept version to v0.6.1 correction lock; link ADRs 0077–0082. Do not mark future milestones implemented.
-- **§1 boundary/planes:** add a short normative statement that swarm coordination uses State Plane refs/events and never gains authority from state. Preserve the one writer per privileged kind table; add `PluginDiscovered` and `PluginVerified` owned by registry.
-- **§2 composition:** replace fixed-slot/v4 manifest wording with `mhf.manifest/2`, Named Component Graph, semantic compiler passes, freeze point, compatibility-reader sunset, and $D_H$ definition.
+- **§1 boundary/planes:** add a short normative statement that swarm coordination uses State Plane refs/events and never gains authority from state. Define the obligation frontier as a projection, not a new store. Preserve the one writer per privileged kind table; add `PluginDiscovered` and `PluginVerified` owned by registry.
+- **§2 composition:** replace fixed-slot/v4 manifest wording with `mhf.manifest/2`, Named Component Graph, semantic compiler passes, freeze point, compatibility-reader sunset, $D_H$ definition, and the six topology fixtures including `obligation-pareto`.
 - **§3 authority:** add the future `agent.spawn` descriptor/attenuation requirements with `DEFERRED UNTIL M-6`; do not list it as live.
-- **§5 harness/pack:** formalize Separability Thesis as a bound claim and cite Pack #2 as its falsifier, not proof already obtained.
-- **§7 trajectory:** norm `/2` non-hollow turns, model fingerprint status, cost reconciliation, evidence state, $D_H/D_R/D_X$, legacy exclusion, and cold-continuation requirement.
+- **§5 harness/pack:** formalize Separability Thesis as a bound claim and cite Pack #2 as its falsifier, not proof already obtained. Define witness contracts and declared-assurance classes as pack data.
+- **§7 trajectory:** norm `/2` non-hollow turns, model fingerprint status, predicted quote plus settled-cost reconciliation, evidence state, $D_H/D_R/D_X/D_O$ and optional $D_M$, legacy exclusion, and cold-continuation requirement.
 - **§8 evaluator/guardrail:** define required/declared-absent/forged and promotion consequences.
-- **§9 learning:** add signed preference certificate, paired comparison, exact promotion, Pareto safety gate, and no in-place self-modification as deferred M-10 law.
+- **§9 learning:** add the T0–T3 compounding ladder, exact memo-key invalidation, `mhf.macro-tool/1`, signed preference certificate, paired comparison, exact promotion, Pareto safety gate, and no in-place self-modification as deferred law. Make explicit that macro/skill/model/harness candidates cannot change the default pointer without human promotion authority.
 - **Falsifier annex:** add the exact test IDs from §7.5 one-to-one. Remove no prior active falsifier unless an ADR explicitly supersedes it.
 
 ### 8.3 `docs/03_sprints/sprint_active.md` diff directive
@@ -1507,7 +1980,7 @@ Only after ADR acceptance:
 - Put NOVA-1 and NOVA-2 in M-2 as Director-disposition rows; remove any contradictory “Wave 4” timing for trajectory content. NOVA-5 at M-4 is confirmation of `/2` on the real run, not the first implementation.
 - List current adapter/runtime reds with named cause owner and closure/quarantine criteria; do not claim a green full suite.
 - Keep graph/registry/NOVA-4 in M-3, with ADR acceptance as entry dependencies.
-- Keep Pack #2, public spawn, concurrency, and M-8–M-10 visibly blocked by the M-4 stop line.
+- Keep Pack #2/memo, public spawn, obligation/Pareto concurrency, macro compilation, and M-8–M-10 visibly blocked by the M-4 stop line.
 - Correct stale links from nonexistent `plans/` targets to actual `doing/`/`done/` paths or reorganize once and let the link checker enforce it.
 
 ### 8.4 `docs/04_roadmap/milestones.md` diff directive
@@ -1518,16 +1991,17 @@ Only after ADR acceptance:
 - In M-4, reproduce the nine-row table verbatim and state “one run, one lineage, no stitching.”
 - In M-5, name **Math & Formal Deductive Verification**—not “math or data”—and the exact zero-diff generality criterion.
 - In M-6, bind public spawn to S0–S12 and TCB budget.
-- In M-7, make NOVA-2 and selector soundness entry gates.
+- In M-7, make NOVA-2 and selector soundness entry gates; specify the obligation projection, pull claims, versioned profiles, quote/settlement calibration, and conditional—not categorical—scaling metric.
+- In M-8/M-9, add the macro candidate IR and laboratory pipeline. Candidate synthesis is not registry promotion.
 - In M-9, make the five-SPI revisit evidence-based rather than an assumed expansion.
-- In M-10, require unforgeable pairs, exact paired statistics, safety Pareto gate, and rollback.
+- In M-10, require unforgeable pairs, exact paired statistics, safety Pareto gate, human pointer authority, and rollback for macro, skill, model, and harness treatments.
 
 ### 8.5 Wave-plan diff directive
 
 - **Wave 2 active plan:** add NOVA-1 telemetry-to-trajectory wiring and schema tests; add NOVA-2 fresh-process fixture; add explicit non-goals (no graph/spawn/concurrency). Re-gate only when current runtime/adapter failures are adjudicated.
-- **Wave 3 plan:** order work as manifest/2 law/schema → compiler semantic passes → registry/FSM events → capability intersection → five topology fixtures → code-default migration → NOVA-4 → delete all Layer-0 → walking skeleton. Do not delete first.
+- **Wave 3 plan:** order work as manifest/2 law/schema → compiler semantic passes → registry/FSM events → capability intersection → six topology fixtures → code-default migration → NOVA-4 → delete all Layer-0 → walking skeleton. Do not delete first.
 - **Wave 4 plan:** replace broad demo prose with the nine-row evidence table, exact artifact paths, same-run binding checks, anti-cheat rules, abort criteria, and Director sign-off block. A failed row leaves M-4 red even if the task output looks correct.
-- **Post-M-4 plan:** create M-5 only after the sign-off; put doc collapse and Pack #2 there. Create M-6+ packets just in time, not as active work.
+- **Post-M-4 plan:** create M-5 only after the sign-off; put doc collapse, Pack #2, and exact witness memoization there. Create M-6+ packets just in time. M-7 owns obligations/Pareto, M-8 owns builder/macro IR, M-9 owns macro lab, and M-10 owns promotion—none is active work early.
 
 ### 8.6 `README.md` and agent-guidance consistency
 
@@ -1545,6 +2019,11 @@ The repository currently contains stale pre-development-hold language in contrib
 | Layer-0 behavior copied fail-open | Medium / critical | discarded ceiling, dual emitter/store | NOVA-4 and deletion gate / Tech Lead |
 | Sandbox overclaim | Medium / critical | “bwrap present” without probes or setuid use | pinned unprivileged mode, probes, layered LSM/seccomp / CIO |
 | Swarm state corruption | Medium / high | mutable shared blobs, unowned writes, hot-key conflicts | content refs, CAS claims, writer roles, conflict tests / Systems Architect |
+| Obligation explosion | Medium / high | decomposition rate exceeds discharge; frontier grows without evidence | child/depth prices, progress predicate, admission/backpressure / Tech Lead |
+| Pareto theater | High / high | infeasible choices scored; raw vectors discarded; predictions replace settlement | lexicographic gates, quote/settlement join, calibration tests / CTO + AI Specialist |
+| Poisoned memo reuse | Medium / critical | witness reused after input/checker/policy/revocation change | complete memo key, TTL/revalidation, subject-bound original witness / CIO |
+| Macro authority smuggling | Medium / critical | wildcard ceiling, captured secret/oracle value, untyped runner | taint scan, least selector hull, ordinary plugin/S0–S12 path / Systems Architect |
+| Macro benchmark overfit | High / high | replay green but held-out failures/tail regression | held-out paired cells, adversarial properties, immutable baseline, exact promotion / AI Specialist |
 | Spawn bloats TCB | Medium / critical | kernel exceeds 1438 or knows task topology | reuse dispatch, remove equivalent LOC, M-6 gate / Director |
 | Generality theater | Medium / high | Pack #2 adds math logic to kernel/domain | zero-diff tree hash falsifier / Principal Staff Engineer |
 | Causal overclaim | High / medium | blame inferred from order/attention | provenance slice + paired intervention labels / AI Specialist |
@@ -1558,6 +2037,9 @@ Hard stops:
 - Any TCB over-budget result stops merge.
 - Any M-4 row missing stops v0.7.0 and all M-5+ implementation.
 - Any Pack #2 domain/kernel diff stops the generality claim and M-6.
+- Any memo that crosses a subject/environment/checker/protection binding stops M-5.
+- Any stale/double obligation claim, unbounded decomposition, or implicit lease renewal stops M-7.
+- Any macro with widened authority, captured tainted constants, uncertain-effect fallback, or no held-out exterior equivalence stops M-9/M-10.
 - Any safety invariant regression stops promotion regardless of task score or p-value.
 
 ---
@@ -1569,13 +2051,15 @@ The Engineering Director should record one explicit disposition for each item:
 1. Accept/reject ADR-0077 and authorize manifest/2 implementation at M-3.
 2. Accept/reject ADR-0078 and the required/declared-absent/forged trichotomy.
 3. Accept/reject ADR-0079, including the two lifecycle event kinds and full Layer-0 deletion gate.
-4. Accept/reject ADR-0080’s bounded loop claim and keep mediated spawn implementation at M-6.
+4. Accept/reject ADR-0080’s bounded loop claim, keep mediated spawn implementation at M-6, and schedule typed obligations/pull claims only at M-7.
 5. Accept/reject ADR-0081 and place NOVA-1/NOVA-2 in M-2 now.
-6. Accept/reject ADR-0082’s paired, signed, Pareto-safe promotion protocol.
+6. Accept/reject ADR-0082’s T0–T3 compounding ladder and paired, signed, Pareto-safe promotion protocol.
 7. Confirm v0.6.1/v0.6.2/v0.6.3/v0.7.0 mapping and M-4’s same-run nine-row stop.
 8. Confirm Pack #2 as Math & Formal Deductive Verification and its zero-domain/kernel-diff gate.
 9. Confirm documentation collapse at M-5, after—not before—M-4.
 10. Assign owners to the currently red adapter/runtime evidence before claiming a release-quality baseline.
+11. Accept/reject VAOH as the post-M-4 synthesis: obligation frontier at M-7, Pareto profiles as exterior policy, and no new trusted scheduler.
+12. Accept/reject the T0–T3 compounding ladder and `mhf.macro-tool/1` candidate contract, including human-only default-pointer promotion.
 
 ### Final Leadership 7 mandate
 
@@ -1585,10 +2069,13 @@ AETHER’s defensible moat is not the number of agents it can launch. It is the 
 \boxed{
 \text{one mechanism}
 +\text{named frozen graph}
-+\text{durable attributed state}
++\text{typed obligation frontier}
++\text{Pareto/EFE exterior control}
 +\text{exterior signed evidence}
-+\text{paired promotion}
++\text{memoized witnesses}
++\text{verified macro compilation}
++\text{paired human-gated promotion}
 }
 \]
 
-Close the corpus and continuation defects first. Converge composition and delete the fork second. Prove the nine-row foundation once, without cheating. Prove a non-coding formal domain next. Only then add mediated delegation, concurrency, framework construction, and learning. If any later feature requires weakening the Clean Triad, the feature is wrong for this substrate—not the invariant.
+Close the corpus and continuation defects first. Converge composition and delete the fork second. Prove the nine-row foundation once, without cheating. Prove a non-coding formal domain and exact witness reuse next. Only then add mediated delegation, a lease-bound obligation swarm, Pareto/Active-Inference routing, framework construction, macro compilation, and statistical learning. If any later feature requires weakening the Clean Triad, bypassing the universal loop, or allowing a candidate to certify itself, the feature is wrong for this substrate—not the invariant.

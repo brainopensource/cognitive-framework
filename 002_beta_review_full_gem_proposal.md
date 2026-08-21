@@ -1,12 +1,12 @@
 # Vanguard / AETHER — Executive Review & Phased Technical Proposal
 ## From Substrate to Meta-Framework: Harness & Loop Engineering for General Task-Solving Swarms
 
-**Document Identity:** `beta_review_full_proposal.md`  
-**Classification:** Executive Leadership Review, Architecture Mandate & Implementation Blueprint  
+**Document Identity:** `002_beta_review_full_gem_proposal.md`  
+**Classification:** Definitive Tier S+ SOTA Architectural Mandate, Meta-Framework Specification & Multi-Paradigm Synthesis  
 **Governing Body:** The Leadership 7 (Engineering Director, CTO, CIO, Principal Staff Engineer, Principal Systems Architect, Tech Lead, PhD AI Specialist)  
 **Date:** 2026-08-21  
-**Baseline Anchor:** `main` @ `afa8e2a`  
-**Authority Context:** Companion to [`docs/00_overview/SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md). Amends no existing file directly; serves as the authoritative blueprint for proposed append-only ADRs (`0077`–`0082`), milestone execution from **v0.6.1** through **v1.0.0**, and zero-guesswork developer specifications.
+**Baseline Anchor:** `main` @ `afa8e2a` (verified against live code tree)  
+**Authority Context:** Companion to [`docs/00_overview/SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md). Serves as the authoritative master blueprint for proposed append-only ADRs (`0077`–`0082`), milestone execution from **v0.6.1** through **v1.0.0**, and zero-guesswork developer specifications.
 
 ---
 
@@ -17,7 +17,7 @@
 3. [Adjudication of Open Architectural Tensions (T-1 through T-9)](#3-adjudication-of-open-architectural-tensions-t-1-through-t-9)
 4. [Proposed Append-Only ADR Catalog (ADRs 0077–0082)](#4-proposed-append-only-adr-catalog-adrs-00770082)
 5. [Phased Milestone Roadmap & Version Ladder (v0.6.1 → v1.0.0)](#5-phased-milestone-roadmap--version-ladder-v061--v100)
-6. [Active Inference, Trajectory Science & The Un-Gameable Learning Loop](#6-active-inference-trajectory-science--the-un-gameable-learning-loop)
+6. [Active Inference, Trajectory Science & The Compounding Flywheel](#6-active-inference-trajectory-science--the-compounding-flywheel)
 7. [Zero-Guesswork Developer Implementation Bridge](#7-zero-guesswork-developer-implementation-bridge)
 8. [Repository Hygiene, Stale Debt Pruning & Linter Hardening](#8-repository-hygiene-stale-debt-pruning--linter-hardening)
 9. [Document Update Cascade & Transition Plan](#9-document-update-cascade--transition-plan)
@@ -72,11 +72,28 @@ The **meta-framework destiny** dictates that AETHER does not ship a single hardc
 └────────────────────────────────┴───────────────────────────────────────┴─────────────────────────────────┘
 ```
 
-### 1.3 The Three Core Rulings
+### 1.3 The Twelve Binding Executive Rulings
 
-1. **The Substrate Thesis Stands:** AETHER's 3-Plane architecture (Decision, State, Evidence), S0–S12 Reference Monitor, and cryptographic identity trinity ($D_H \neq D_R \neq D_X$) constitute a defensible moat. No industry framework occupies the intersection of a flat declarative composition surface, a mathematically verified authority boundary, and unreachable exterior evaluation.
-2. **The Meta-Framework Evolution Is the Product:** AETHER is not merely optimizing a coding assistant; it is building the substrate that builds, runs, evaluates, and promotes agent families. Manifests must evolve from rigid 5-slot templates into **Named Component Graphs** ([`ADR-0077`](#adr-0077-named-component-graph-manifest-schema)).
-3. **Foundation Before Emergence:** The M-4 Foundation Stop Line is non-negotiable. No meta-cognitive, swarm, or self-improvement features begin until nine verified rows prove the foundation on one uninterrupted, real-world run.
+| # | Ruling | Owner | Strategic Disposition |
+|---|---|---|---|
+| **R-1** | **Swarm Destination via Substrate Path:** Swarms are spawn-topologies + policy over the State Plane—never a new engine, never $O(N^2)$ chatter. | CTO | Strategic |
+| **R-2** | **Sacred M-4 Foundation Stop Line:** No meta-cognition, swarm features, or kernel changes before 9 verified rows on one uncheated real run. | Engineering Director | Non-negotiable |
+| **R-3** | **Immediate NOVA-1 Trajectory Un-Hollowing:** Per-turn cost accounting, latency, and model fingerprinting execute in Wave 2. | Tech Lead + Principal Staff | Immediate |
+| **R-4** | **Named Component Graph Manifest (`mhf.manifest/2`):** Manifest evolves into a typed graph; slots degrade to pack convention. | Engineering Director | Wave 3 Implementation |
+| **R-5** | **Absent-vs-Forged Security Model:** You may declare guardrails off (`evaluation: none`); you can never forge a verdict. | CIO + Systems Architect | Law-Level |
+| **R-6** | **Capability-Mediated `agent.spawn`:** Designed now (`ADR-0080`), implemented in kernel at Milestone M-6 only. | Systems Architect | Strict Sequencing |
+| **R-7** | **Layer-0 Absorption & Deletion:** Registry FSM and Compose compiler absorbed into `runtime/`; `layer0/` deleted behind NOVA-4 suite. | Principal Staff | Wave 3 Exit Gate |
+| **R-8** | **Universal Turn Loop Claim Published:** Mechanism claim published with bound falsifier (`RF-082`); no metaphysics. | PhD AI Specialist | Law-Level |
+| **R-9** | **NOVA-2 Cold Replay Concurrency Proof:** Suspend/resume from SQLite WAL executed in Wave 2 to prove concurrency is a scheduler refactor. | Tech Lead | Immediate |
+| **R-10**| **Pack #2 Gate (Math & Deductive Systems):** Proves domain blindness (Invariant I-7) at M-5 with **zero diffs** under `domain/` and `kernel/`. | Principal Staff | Milestone M-5 Gate |
+| **R-11**| **Clean Documentation Triad Consolidation:** Collapse 7 governance tiers into the Clean Triad post-M-4. | Engineering Director | Post-M-4 |
+| **R-12**| **Corpus-First, McNemar-Gated Learning Layer:** Active Inference (VFE/EFE) and DPO skill harvesting operate exclusively on signed evidence. | PhD AI Specialist | Milestone M-10 |
+
+### 1.4 Three Critical Forensic Codebase Findings (Resolved)
+
+1. **Plugin Lifecycle FSM Event Parity:** `layer0/registry/lifecycle.py` currently maps only 5 of 7 states to events (`DISCOVERED` and `VERIFIED` emit nothing). This document formally authorizes adding `PluginDiscovered` and `PluginVerified` to the closed event catalog to make the M-3 exit gate mathematically satisfiable.
+2. **Manifest Dual-Dialect Convergence:** `domain/artifacts/manifest.py` already types `components` as a named component tuple `tuple[tuple[str, tuple[str, ...]], ...]`, while `schemas/mhf/harness_manifest.schema.json` freezes 5 slots. Evolving to `mhf.manifest/2` is a mechanical convergence of existing parsers, not an ungrounded rewrite.
+3. **Falsifier Identifier Namespace Disambiguation:** Resolves the identifier collision between kernel controls in `KERNEL.md` (`F-01`–`F-25`) and sprint register falsifiers by formally designating register falsifiers as `RF-01`–`RF-25`.
 
 ---
 
@@ -84,7 +101,7 @@ The **meta-framework destiny** dictates that AETHER does not ship a single hardc
 
 ### 2.1 2026 SOTA Competitive & Theoretical Landscape
 
-A comprehensive survey of frontier agentic engineering (AutoGen 0.4, LangGraph, DeepSeek Harness, SWE-agent, Aethelgard capability sandboxing, and ASTRA trajectory RL) confirms that AETHER's architectural foundations solve the primary failure modes of contemporary agent systems:
+A comprehensive survey of frontier agentic engineering confirms that AETHER's architectural foundations solve the primary failure modes of contemporary agent systems:
 
 ```text
 ┌───────────────────────────────────────────────────┬───────────────────────────────────────────────────┐
@@ -108,12 +125,13 @@ A comprehensive survey of frontier agentic engineering (AutoGen 0.4, LangGraph, 
 ```
 
 ### 2.2 The Swarm Paradigm: Stigmergy Over Conversational Chatter
+
 Most multi-agent frameworks fail when scaling beyond 4 agents because agents communicate via unconstrained natural-language messages ($\mathcal{O}(N^2)$ chatter), rapidly exhausting context windows with social coordination noise.
 
 AETHER implements **Stigmergic Coordination**:
 - Agents coordinate **indirectly** through modifications to the shared **State Plane** (the workspace filesystem and SQLite WAL ledger).
 - *Agent A (Architect/Decomposer)* creates a structured specification file or sub-task reservation.
-- *Agent B (Worker/Coder)* observes the state change via its context manager, acquires a capability-attenuated lease, and applies code modifications.
+- *Agent B (Worker/Coder)* observes the state change via its context manager, acquires a capability-attenuated lease, and applies modifications.
 - *Agent C (Critic/Auditor)* triggers an exterior signed evaluation against the modified workspace.
 - Communication overhead remains $\mathcal{O}(N)$, context windows remain pristine, and execution provenance is cryptographically recorded in the event ledger.
 
@@ -193,7 +211,7 @@ Each open tension from [`SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.m
 
 ## 4. Proposed Append-Only ADR Catalog (ADRs 0077–0082)
 
-### ADR-0077: Named Component Graph Manifest Schema
+### ADR-0077: Named Component Graph Manifest Schema (`mhf.manifest/2`)
 
 ```text
 Title:     Named Component Graph Manifest Schema
@@ -222,12 +240,12 @@ Decision:
        stigmergic_blackboard: <bool>
   2. D_H = JCS digest of the entire resolved component graph, model routes,
      prompt layers, and governance policies.
-  3. Slot names survive as pack conventions in packs/code-default/harness.yaml.
+  3. Converges existing tuple parser in domain/artifacts/manifest.py with schema.
 
 Falsifiers:
-  F-077-A: Multi-planner manifest (proposer + critic) compiles to valid FrozenHarness.
-  F-077-B: Any component name, config, or ceiling mutation produces distinct D_H.
-  F-077-C: code-default migrates mechanically with zero behavioral change.
+  RF-077-A: Multi-planner manifest (proposer + critic) compiles to valid FrozenHarness.
+  RF-077-B: Any component name, config, or ceiling mutation produces distinct D_H.
+  RF-077-C: code-default migrates mechanically with zero behavioral change.
 ```
 
 ### ADR-0078: Trajectory Un-Hollowing & Per-Turn Cost Accounting (NOVA-1)
@@ -249,8 +267,8 @@ Decision:
   3. verdict is explicit null with attributable: false when no exterior verdict exists.
 
 Falsifiers:
-  F-12 (Strengthened): Completed episode with >0 generated tokens MUST emit
-  trajectory with total_cost.tokens > 0 and populated model_fingerprint.
+  RF-078: Completed episode with >0 generated tokens MUST emit trajectory with
+  total_cost.tokens > 0 and populated model_fingerprint.
 ```
 
 ### ADR-0079: Absent-vs-Forged Guardrail Declarations
@@ -272,9 +290,9 @@ Decision:
   4. Seven permanent non-negotiables are the fixed substrate boundary.
 
 Falsifiers:
-  F-079-A: evaluation: none initializes without spawning UID 10002 daemon.
-  F-079-B: Synthetic VerdictRecorded injected into evaluation: none is rejected.
-  F-079-C: Trajectory from evaluation: none run carries attributable: false.
+  RF-079-A: evaluation: none initializes without spawning UID 10002 daemon.
+  RF-079-B: Synthetic VerdictRecorded injected into evaluation: none is rejected.
+  RF-079-C: Trajectory from evaluation: none run carries attributable: false.
 ```
 
 ### ADR-0080: Capability-Mediated `agent.spawn` Architecture
@@ -296,8 +314,8 @@ Decision:
   4. Implementation deferred to M-6; no kernel changes before Wave 4 closes.
 
 Falsifiers:
-  F-080-A: Planner without agent.spawn grant receives AuthorizationDenied at S5.
-  F-080-B: Child agent capabilities are verified as strict subset of parent grant.
+  RF-080-A: Planner without agent.spawn grant receives AuthorizationDenied at S5.
+  RF-080-B: Child agent capabilities are verified as strict subset of parent grant.
 ```
 
 ### ADR-0081: Layer-0 Final Absorption and Deletion Sequence
@@ -310,11 +328,13 @@ Extends:   ADR-0069, ADR-0076
 
 Decision:
   1. Port plugin lifecycle FSM and registry validation into runtime/registry/.
-  2. Implement NOVA-4 negative lifecycle test suite in test/contracts/.
-  3. Remove layer0/ completely at M-3 exit gate.
+  2. Add PluginDiscovered and PluginVerified events to closed event catalog.
+  3. Implement NOVA-4 negative lifecycle test suite in test/contracts/.
+  4. Remove layer0/ completely at M-3 exit gate.
 
 Falsifiers:
-  F-081-A: Zero occurrences of layer0 across codebase after Sprint 3.1.
+  RF-081-A: Zero occurrences of layer0 across codebase after Sprint 3.1.
+  RF-081-B: Plugin lifecycle FSM emits verified ledger events on all 7 transitions.
 ```
 
 ### ADR-0082: Universal Turn Loop as Mechanism (Published Falsifier)
@@ -329,18 +349,14 @@ Context:
   The meta-framework's expressiveness thesis is that ALL agentic algorithms are
   expressible as spawn-topology + planner-policy over a single turn loop
   (observe → propose → authorize → effect → receipt → evaluate → reflect*).
-  Competitors make the loop pluggable; AETHER does not. This must be stated
-  as a falsifiable claim, not an implicit assumption.
 
 Decision:
   1. The turn loop is mechanism, never plugin.
   2. The published falsifier: "Name an agentic algorithm that cannot be expressed
      as spawn-topology + planner policy over this loop."
-  3. Genuine counter-evidence constitutes ADR-0070 reversal evidence.
-  4. If no counter-evidence in 12 months, the claim is proven.
 
 Falsifiers:
-  F-082-A: At least 3 distinct agentic algorithms (ReAct, tree-search, critic-loop)
+  RF-082-A: At least 3 distinct agentic algorithms (ReAct, tree-search, critic-loop)
            demonstrated as spawn-topology + planner-policy, zero engine changes.
 ```
 
@@ -358,7 +374,7 @@ Falsifiers:
   2. Implement `test_cold_suspend_resume` in `test/contracts/` (NOVA-2).
   3. Verify clean split: `root.py` (126 LOC) → `compose.py`, `session.py`, `wiring.py`.
   4. Fix `_PROC_PATTERN` to read from compiled ceiling rather than literal string (NOVA-3).
-- **Exit Gate:** `check_boundaries.py` 100% green; TCB budget ≤ 1438 logical LOC; F-12 passes with non-zero cost vectors; zero `layer0` imports; NOVA-2 green.
+- **Exit Gate:** `check_boundaries.py` 100% green; TCB budget ≤ 1438 logical LOC; `RF-04` passes with non-zero cost vectors; zero `layer0` imports; NOVA-2 green.
 
 #### Release v0.6.2: Wave 3 Extensibility Lock & Component Graph
 - **Goals:** Absorb plugin lifecycle into `runtime/registry/`; implement Named Component Graph in `compose.py`; delete `layer0/`; verify echo plugin lifecycle over UDS.
@@ -379,8 +395,8 @@ Falsifiers:
   1. UID 10001 (worker) and UID 10002 (evaluator) process isolation verified.
   2. Ed25519 signature verification on all pre-registered evaluation suites.
   3. Deterministic cassette mocks for regression testing.
-  4. Universal turn loop falsifier (F-082-A) validated with 3 distinct topologies.
-- **Exit Gate:** 100% test pass rate across all ~1176 collected tests; all 15 linters green.
+  4. Universal turn loop falsifier (`RF-16`) validated with 3 distinct topologies.
+- **Exit Gate:** 100% test pass rate across all collected tests; all 15 linters green.
 
 #### Release v0.7.0: Milestone M-4 Foundation Stop Line ███
 - **Goals:** Execute the single real-world, uncheated, end-to-end autonomous coding run.
@@ -432,22 +448,27 @@ Falsifiers:
 - **Gate:** Sub-millisecond reference monitor overhead; bounded memory footprint.
 
 **Milestone M-10: Meta-Cognitive Substrate (FINAL)**
-- **Outcome:** Outer-loop reflective planner at the `outer` slot, capability-restricted to manifest-mutation, skill-write, and oracle-preregistration (never workspace). Harvests signed trajectories → distills skill cards + DPO pairs → paired McNemar vs. undeletable baseline → signed promotion pointer → cassette-replay regression → human promotion gate.
+- **Outcome:** Outer-loop reflective planner at the `outer` slot, capability-restricted to manifest-mutation, skill-write, and oracle-preregistration (never workspace). Harvests signed trajectories → compiles deterministic macro-tools + DPO pairs → paired McNemar vs. undeletable baseline → signed promotion pointer → cassette-replay regression → human promotion gate.
 - **Gate:** System proposes, tests, and promotes an improved version of its own composition with the entire chain attributable via $D_H / D_R / D_X$ and signed verdicts, on a corpus whose evidence was never forgeable.
 
 ---
 
-## 6. Active Inference, Trajectory Science & The Un-Gameable Learning Loop
+## 6. Active Inference, Trajectory Science & The Compounding Flywheel
 
-### 6.1 Mathematical Formulation of the Meta-Harness
+### 6.1 Mathematical Formulation of Active Inference
 
-Based on [`docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md`](docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md), AETHER models self-improvement as the minimization of **Variational Free Energy** $\mathcal{F}(\theta)$ bounded by the 6D economic reservation tensor $\mathbf{R}$:
+Based on [`docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md`](docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md), AETHER models self-improvement and dynamic policy routing using exact Free Energy Principles bounded by the 6D economic reservation tensor $\mathbf{R}$:
 
 $$\theta^* = \arg\min_{\theta \in \Theta} \mathcal{F}(\theta) \quad \text{subject to} \quad \text{Cost}(\theta) \le \mathbf{R}_{\max}$$
 
-$$\mathcal{F}(\theta) = \underbrace{D_{\text{KL}}\big[ q(\phi \mid \tau) \parallel p(\phi) \big]}_{\text{Epistemic Exploration (Information Gain)}} - \underbrace{\mathbb{E}_{q(\phi \mid \tau)}\big[ \ln p(Y = 1 \mid \tau, \theta) \big]}_{\text{Pragmatic Exploitation (Success Likelihood)}} + \lambda \sum_{d \in \{ \$, t, k \}} \frac{R_d(\theta)}{R_{\max, d}}$$
+#### 1. Variational Free Energy ($\mathcal{F}$ — Posterior State & Context Compression):
+$$\mathcal{F}(q, \mathcal{W}) = \mathbb{E}_q\left[\ln q(\mathbf{s}) - \ln p(\mathbf{s}, \mathbf{o})\right] = D_{\text{KL}}\big[ q(\mathbf{s}) \parallel p(\mathbf{s} \mid \mathbf{o}) \big] - \ln p(\mathbf{o})$$
+*Compresses global blackboard state $\mathcal{W}$ into minimal observation context $\mathbf{o}$ by minimizing epistemic surprise.*
 
-### 6.2 The Unforgeable Self-Improvement Architecture
+#### 2. Expected Free Energy ($\mathcal{G}$ — Policy & Swarm Action Selection):
+$$\mathcal{G}(\pi) = -\underbrace{\mathbb{E}_{\tilde{q}}\left[\ln p(\mathbf{o}_\tau \mid \text{Goal})\right]}_{\text{Extrinsic Value (Goal Utility / Pass Rate)}} - \underbrace{\mathbb{E}_{\tilde{q}}\left[\ln q(\mathbf{s}_\tau \mid \mathbf{o}_\tau, \pi) - \ln q(\mathbf{s}_\tau \mid \pi)\right]}_{\text{Epistemic Value (Information Gain / Uncertainty Reduction)}} + \lambda \sum_{d \in \{ \$, t, k \}} \frac{R_d(\pi)}{R_{\max, d}}$$
+
+### 6.2 The Immutable Macro-Skill Tool Registry (Token Collapse Engine)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
@@ -461,8 +482,8 @@ $$\mathcal{F}(\theta) = \underbrace{D_{\text{KL}}\big[ q(\phi \mid \tau) \parall
 │     (Offline)           (Chosen vs. Rejected conditioned strictly on Ed25519 verdict)    │
 │                                           │                                              │
 │                                           ▼                                              │
-│  3. SYNTHESIS           Skill Synthesizer creates AST procedure cards                    │
-│     (Agency)            (Hybrid dense 384d embedding + Elo-decayed utility dynamics)     │
+│  3. SYNTHESIS           Skill Synthesizer compiles AST deterministic macro-tools         │
+│     (Agency)            (Collapses 20-turn 50k token loops into 1-turn 500 token tools)  │
 │                                           │                                              │
 │                                           ▼                                              │
 │  4. LAB VALIDATION      Paired McNemar Exact Test vs. Non-Deletable Baseline             │
@@ -572,28 +593,28 @@ Why this self-improvement loop **cannot be gamed by construction**:
 
 Every architectural requirement maps 1-to-1 to an automated test:
 
-| Req ID | ADR | Target Module | Test Name | Assertion / Failure Condition |
-|---|---|---|---|---|
-| `REQ-GRAPH-001` | ADR-0077 | `runtime/compose.py` | `test_component_graph_compile` | Multi-planner manifest compiles cleanly to `FrozenHarness`. |
-| `REQ-GRAPH-002` | ADR-0077 | `domain/artifacts/manifest.py` | `test_component_graph_digest_unique` | Distinct component bindings produce distinct $D_H$ digests. |
-| `REQ-GRAPH-003` | ADR-0077 | `runtime/compose.py` | `test_code_default_mechanical_migration` | Migrated `code-default` manifest exhibits identical behavior. |
-| `REQ-COST-001` | ADR-0078 | `runtime/trajectory.py` | `test_trajectory_non_zero_cost` | Non-trivial turn execution MUST emit total tokens > 0. |
-| `REQ-COST-002` | ADR-0078 | `runtime/trajectory.py` | `test_trajectory_model_fingerprint` | Model fingerprint is present and matches provider digest. |
-| `REQ-COST-003` | ADR-0078 | `runtime/trajectory.py` | `test_trajectory_verdict_embedded` | Verdict is embedded or explicitly null with `attributable: false`. |
-| `REQ-GUARD-001` | ADR-0079 | `runtime/compose.py` | `test_absent_evaluator_compiles` | `evaluation: none` compiles without spawning UID 10002 daemon. |
-| `REQ-GUARD-002` | ADR-0079 | `runtime/evaluator_gateway.py` | `test_unsigned_verdict_rejected` | Forged or unsigned verdict is rejected by gateway. |
-| `REQ-GUARD-003` | ADR-0079 | `runtime/trajectory.py` | `test_absent_eval_unattributable` | `evaluation: none` tags trajectory as non-attributable for promotion. |
-| `REQ-LIFE-001` | ADR-0081 | `runtime/registry/` | `test_unknown_ref_fails_compose` | Unknown plugin ref fails at composition time, not at runtime. |
-| `REQ-LIFE-002` | ADR-0081 | `runtime/registry/` | `test_faulted_cell_killed` | Faulted cell is killed and cannot remain in `ACTIVATED` state. |
-| `REQ-LIFE-003` | ADR-0081 | `runtime/registry/` | `test_frozen_composition_immutable` | No code path exists to mutate a `FrozenHarness` post-freeze. |
-| `REQ-LIFE-004` | ADR-0081 | `runtime/registry/` | `test_empty_ceiling_denies` | Empty capability ceiling denies all privileged effects. |
-| `REQ-LIFE-005` | ADR-0081 | `runtime/registry/` | `test_in_process_requires_grant` | `in_process` execution requires explicit governance grant. |
-| `REQ-LIFE-006` | ADR-0081 | `runtime/registry/` | `test_registry_exclusive_plugin_write` | Only registry is authorized to emit `Plugin*` ledger events. |
-| `REQ-LOOP-001` | ADR-0082 | `test/falsifiers/` | `test_react_as_topology` | ReAct loop expressed as topology + policy over turn loop. |
-| `REQ-LOOP-002` | ADR-0082 | `test/falsifiers/` | `test_tree_search_as_topology` | Tree search expressed as topology + policy over turn loop. |
-| `REQ-LOOP-003` | ADR-0082 | `test/falsifiers/` | `test_critic_loop_as_topology` | Critic-reviser expressed as topology + policy over turn loop. |
-| `REQ-REPLAY-001` | ADR-0074 | `adapters/stores/event_store.py` | `test_cold_suspend_resume` | Mid-turn suspend cleanly reconstructs from cold WAL in fresh process. |
-| `REQ-SWARM-001` | ADR-0077 | `runtime/session.py` | `test_stigmergic_state_coordination` | Multiple agents coordinate via state plane without chat chatter. |
+| Req ID | Target Module | Test Name | Assertion / Failure Condition |
+|---|---|---|---|
+| `RF-01` | `runtime/compose.py` | `test_component_graph_compile` | Multi-planner manifest compiles cleanly to `FrozenHarness`. |
+| `RF-02` | `domain/artifacts/manifest.py` | `test_component_graph_digest_unique` | Distinct component bindings produce distinct $D_H$ digests. |
+| `RF-03` | `runtime/compose.py` | `test_code_default_mechanical_migration` | Migrated `code-default` manifest exhibits identical behavior. |
+| `RF-04` | `runtime/trajectory.py` | `test_trajectory_non_zero_cost` | Non-trivial turn execution MUST emit total tokens > 0. |
+| `RF-05` | `runtime/trajectory.py` | `test_trajectory_model_fingerprint` | Model fingerprint is present and matches provider digest. |
+| `RF-06` | `runtime/trajectory.py` | `test_trajectory_verdict_embedded` | Verdict is embedded or explicitly null with `attributable: false`. |
+| `RF-07` | `runtime/compose.py` | `test_absent_evaluator_compiles` | `evaluation: none` compiles without spawning UID 10002 daemon. |
+| `RF-08` | `runtime/evaluator_gateway.py` | `test_unsigned_verdict_rejected` | Forged or unsigned verdict is rejected by gateway. |
+| `RF-09` | `runtime/trajectory.py` | `test_absent_eval_unattributable` | `evaluation: none` tags trajectory as non-attributable for promotion. |
+| `RF-10` | `runtime/registry/` | `test_unknown_ref_fails_compose` | Unknown plugin ref fails at composition time, not at runtime. |
+| `RF-11` | `runtime/registry/` | `test_faulted_cell_killed` | Faulted cell is killed and cannot remain in `ACTIVATED` state. |
+| `RF-12` | `runtime/registry/` | `test_frozen_composition_immutable` | No code path exists to mutate a `FrozenHarness` post-freeze. |
+| `RF-13` | `runtime/registry/` | `test_empty_ceiling_denies` | Empty capability ceiling denies all privileged effects. |
+| `RF-14` | `runtime/registry/` | `test_in_process_requires_grant` | `in_process` execution requires explicit governance grant. |
+| `RF-15` | `runtime/registry/` | `test_registry_exclusive_plugin_write` | Only registry is authorized to emit `Plugin*` ledger events. |
+| `RF-16` | `test/falsifiers/` | `test_react_as_topology` | ReAct loop expressed as topology + policy over turn loop. |
+| `RF-17` | `test/falsifiers/` | `test_tree_search_as_topology` | Tree search expressed as topology + policy over turn loop. |
+| `RF-18` | `test/falsifiers/` | `test_critic_loop_as_topology` | Critic-reviser expressed as topology + policy over turn loop. |
+| `RF-19` | `adapters/stores/event_store.py` | `test_cold_suspend_resume` | Mid-turn suspend cleanly reconstructs from cold WAL in fresh process. |
+| `RF-20` | `runtime/session.py` | `test_stigmergic_state_coordination` | Multiple agents coordinate via state plane without chat chatter. |
 
 ---
 
@@ -648,7 +669,7 @@ Upon formal ratification, the following mechanical updates will be executed:
 
 The meta-framework earns the right to exist only when these four claims survive empirical falsification:
 
-- **P1 — "The corpus is learnable:"** NOVA-1 passes; F-12 content assertions green (costs > 0, populated turns, valid model fingerprint, signed verdict).
+- **P1 — "The corpus is learnable:"** NOVA-1 passes; `RF-04` content assertions green (costs > 0, populated turns, valid model fingerprint, signed verdict).
 - **P2 — "The substrate is domain-general:"** Milestone M-5 gate passes; Pack #2 (Math/Deductive Systems) ships with **zero diffs** under `domain/` and `kernel/`.
 - **P3 — "Concurrency is a scheduler refactor:"** NOVA-2 passes; cold suspend/resume from SQLite WAL succeeds deterministically in a fresh process.
 - **P4 — "Self-improvement is safe:"** Milestone M-10 gate passes; signed promotion frontier + McNemar exact test + $D_H \neq D_R \neq D_X$ identity trinity prevents reward gaming by construction.
@@ -728,15 +749,17 @@ $$\mathcal{W} = \langle \mathcal{A}, \mathcal{H}, \mathcal{E}, \mathcal{T} \rang
 *Key Invariant:* Agents never talk directly to each other ($O(1)$ communication overhead per step). They inspect slices of $\mathcal{W}$ and propose atomic state deltas $\Delta \mathcal{W}$.
 
 #### 2. The Dynamic Informational Bottleneck ($\mathcal{B}_\theta$)
-A parameterized projection function that compresses the global blackboard state $\mathcal{W}$ into an optimal context window for a given sub-task:
+A parameterized projection function grounded in Variational Free Energy that compresses the global blackboard state $\mathcal{W}$ into an optimal context window for a given sub-task:
 $$\mathcal{B}_\theta: \mathcal{W} \times \text{TaskProfile} \to \text{ContextWindow}_{\le k}$$
+$$\arg\min_{\mathbf{o}} \mathcal{F}(\mathbf{o}, \mathcal{W}) = D_{\text{KL}}\big[ q(\mathbf{s}) \parallel p(\mathbf{s} \mid \mathbf{o}) \big] - \ln p(\mathbf{o})$$
 - Eliminates context window dilution by projecting only relevant AST subtrees, recent tool execution diffs, and salient hypothesis branches.
 - Dynamically adjusts compression ratios ($k$-token budget) according to the active Pareto optimization profile.
 
-#### 3. Typed Action Leases ($\mathcal{L}$)
-Every execution step is granted an explicit, non-renewable lease bounded across multiple dimensions:
-$$\mathcal{L} = \langle \text{MaxTokens}, \text{MaxWallTime}, \text{AllowedTools}, \text{TargetSlice}, \text{BudgetCost} \rangle$$
-- If an ephemeral worker exceeds any threshold in $\mathcal{L}$, the harness immediately terminates execution, rolls back uncommitted state, and triggers an adaptive policy adjustment.
+#### 3. Dynamic Opportunity Leases ($\mathcal{L}$)
+Every execution step is granted an explicit, non-renewable lease bounded across multiple dimensions with dynamic ROI tracking:
+$$\mathcal{L} = \langle \text{MaxTokens}, \text{MaxWallTime}, \text{AllowedTools}, \text{TargetSlice}, \text{BudgetCost}, \text{EntropyCeiling} \rangle$$
+- If an ephemeral worker exceeds any threshold in $\mathcal{L}$ or generates repetitive high-entropy output without progress, the harness terminates execution and rolls back uncommitted state.
+- Workers demonstrating high Expected Free Energy reduction ($\Delta \mathcal{G}$) receive automatic, bounded lease renewals.
 
 #### 4. Decoupled Verification Oracles ($\mathcal{V}$)
 Independent evaluation harnesses that grade candidate mutations $\Delta \mathcal{W}$ against objective criteria:
@@ -850,7 +873,7 @@ A critical differentiator of this architecture is that every executed trajectory
 │                 │                                                                                      │
 │                 ▼                                                                                      │
 │   ┌───────────────────────────┐                                                                        │
-│   │ 2. Automated Skill Synth  │ ──► Distills multi-step token loops into deterministic macro-tools     │
+│   │ 2. Compiled Tool Registry │ ──► Distills multi-step token loops into deterministic macro-tools     │
 │   └─────────────┬─────────────┘     (Turns 50k tokens of agent reasoning into a 500-token tool call)   │
 │                 │                                                                                      │
 │                 ▼                                                                                      │
@@ -871,8 +894,8 @@ A critical differentiator of this architecture is that every executed trajectory
 ```
 
 1. **Step-Level Attribution & Cost Accounting:** Every action, tool invocation, and context projection is tagged with exact token and financial costs, paired with the subsequent oracle score $\Delta S$.
-2. **Automated Macro-Skill Synthesis:**
-   - When the flywheel identifies repeated multi-step patterns in successful trajectories (e.g., resolving a recurring dependency conflict or executing a specific AST migration), an offline synthesizer distills the sequence into a standalone, deterministic executable tool.
+2. **Compiled Deterministic Macro-Skill Tool Registry:**
+   - When the flywheel identifies repeated multi-step patterns in successful trajectories (e.g., resolving a recurring dependency conflict or executing a specific AST migration), an offline synthesizer distills the sequence into a standalone, deterministic executable tool with unit tests.
    - Future workflows invoke the new macro-tool directly, collapsing a 15-turn reasoning loop into a single tool dispatch (producing a $>90\%$ reduction in token expenditure).
 3. **Preference Pair Extraction & Distillation (DPO/RL):**
    - Branching explorations evaluated by $\mathcal{V}$ produce clean, unforgeable preference pairs: $\langle \text{Prompt}, \text{Winner Branch}, \text{Loser Branch} \rangle$.

@@ -29,6 +29,7 @@ from .state import (
     EpisodeState,
     EvidenceRecord,
     LedgerState,
+    VerdictRecord,
 )
 
 __all__ = [
@@ -47,6 +48,7 @@ __all__ = [
     "ArtifactRecord",
     "EvidenceRecord",
     "ApprovalRecord",
+    "VerdictRecord",
     "ReducerError",
     "initial_state",
     "reduce_event",

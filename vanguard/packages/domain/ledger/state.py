@@ -23,6 +23,7 @@ __all__ = [
     "ArtifactRecord",
     "EvidenceRecord",
     "ApprovalRecord",
+    "VerdictRecord",
 ]
 
 
@@ -105,6 +106,30 @@ class ApprovalRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class VerdictRecord:
+    """A signed, bound verdict as reduced from `VerdictRecorded` (ADR-0076 §5).
+
+    The ledgered `SignedVerdict` fields verbatim, keyed by
+    `evaluation_request_id` -- the same binding field a reader re-verifies on
+    read (`adapters/evaluators/gate.py`). The reducer does not re-verify the
+    signature (that is the reader's job) and cannot fabricate one: the only
+    writer of `VerdictRecorded` (`runtime/evaluator_gateway.py`) refuses to
+    ledger anything without a bound, signed body, so every record here came
+    from the daemon's own signed bytes.
+    """
+
+    evaluation_request_id: str
+    verdict: str  # "pass" | "fail" | "inconclusive"
+    signature: str
+    subject_digest: Optional[str] = None
+    oracle_id: Optional[str] = None
+    nonce: Optional[str] = None
+    key_id: Optional[str] = None
+    signed_at: Optional[str] = None
+    recorded_at: Optional[str] = None
+
+
+@dataclass(frozen=True, slots=True)
 class LedgerState:
     """The aggregate deterministic state reduced from the event log."""
 
@@ -135,6 +160,10 @@ class LedgerState:
     heartbeats: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
     conflicts: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
     terminal_recovery: Optional[Mapping[str, Any]] = None
+    #: `VerdictRecorded` reduced, keyed by `evaluation_request_id` (ADR-0076
+    #: §5). A ledgered verdict is evidence, not decoration: cold replay must
+    #: reconstruct it as state, not lose it to `unknown_events`.
+    verdicts: Mapping[str, "VerdictRecord"] = field(default_factory=dict)
     unknown_events: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
 
     def to_canonical_dict(self) -> dict[str, Any]:
@@ -222,6 +251,20 @@ class LedgerState:
             "heartbeats": {k: dict(v) for k, v in sorted(self.heartbeats.items())},
             "conflicts": [dict(c) for c in self.conflicts],
             "terminalRecovery": dict(self.terminal_recovery) if self.terminal_recovery else None,
+            "verdicts": {
+                k: {
+                    "evaluationRequestId": v.evaluation_request_id,
+                    "verdict": v.verdict,
+                    "signature": v.signature,
+                    "subjectDigest": v.subject_digest,
+                    "oracleId": v.oracle_id,
+                    "nonce": v.nonce,
+                    "keyId": v.key_id,
+                    "signedAt": v.signed_at,
+                    "recordedAt": v.recorded_at,
+                }
+                for k, v in sorted(self.verdicts.items())
+            },
             "unknownEventsCount": len(self.unknown_events),
         }
 

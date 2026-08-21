@@ -29,6 +29,7 @@ from ..primitives.primitives import (
     parse_principal_id,
     parse_timestamp,
 )
+from ..wire.types_gen import EventKind as _WireEventKind
 
 __all__ = [
     "EventEnvelope",
@@ -49,56 +50,47 @@ VALID_TRAINABILITIES = frozenset({"prohibited", "opt_in_required", "opt_in_grant
 VALID_REDACTION_STATUSES = frozenset({"none", "partial", "complete", "pending"})
 VALID_PRINCIPAL_ROLES = frozenset({"user", "operator", "episode", "process", "evaluator", "release"})
 
-# VG-04 §12.2 Minimum Event Set
-EVENT_KINDS = frozenset({
-    # Episode lifecycle
-    "EpisodeStarted",
-    "EpisodeStateChanged",
-    "EpisodeCompleted",
-    # Observation and cognition
-    "ObservationRequested",
-    "ObservationProduced",
-    "OperatorSelected",
-    "OperatorInvoked",
-    "ProposalProduced",
-    # Authorisation
-    "AuthorizationRequested",
-    "CapabilityGranted",
-    "AuthorizationDenied",
-    "CapabilityRevoked",
-    # Budget
-    "BudgetReserved",
-    "BudgetCommitted",
-    "BudgetReleased",
-    # Effects
-    "EffectPreviewed",
-    "EffectStarted",
-    "EffectCompleted",
-    "EffectRejected",
-    "EffectReconciled",
-    "ConflictDetected",
-    "KernelAlarm",
-    # Evidence
-    "EvaluationRequested",
-    "EvidenceClaimProduced",
-    # Competence
-    "ArtifactCreated",
+# M-2 blocker (2026-08-20, Tech Lead): this catalog was a hand-maintained
+# copy of "VG-04 §12.2 Minimum Event Set" that predates `mhf.event/1`
+# (ADR-0076 §1) and drifted from it -- `VerdictRecorded`, `EffectFailed`,
+# `BudgetExhausted`, `CapabilityAttenuated`, `TurnStarted` and 14 more kinds
+# `PRIVILEGED_KIND_OWNERS` (`runtime/ledger_emitter.py`) and the production
+# writers legally emit were simply absent, so `LedgerEmitter` could write an
+# event this catalog had no record of. `EventKind` (`domain/wire/types_gen.py`,
+# generated from `schemas/mhf/event_envelope.schema.json`, A-4/I-1) is the one
+# schema-driven source for the `mhf.event/1` kind vocabulary -- this is not a
+# second taxonomy alongside it, it is a derivation from it, plus the VG-04
+# kinds the wire schema never carried forward that packages still emits or
+# reduces (`CompetencePriorRecorded` is live; `ActivationChanged`,
+# `ArtifactCreated`, `ConflictDetected`, `EffectPreviewed`,
+# `EpisodeStateChanged`, `EvidenceClaimProduced`, `ObservationProduced` all
+# have real `reduce_event` handling below). The remainder
+# (`ObservationRequested`, `OperatorInvoked`, `OperatorSelected`,
+# `CorrectionRecorded`, `CandidateBuilt`, `CandidateAttested`,
+# `CanaryPromoted`, `RollbackTriggered`) are VG-04-normative and unimplemented
+# -- kept because nothing authorises deleting a locked kind, not because
+# anything emits them today. Wave-3's `Plugin*` lifecycle kinds are already
+# present via `_WireEventKind` -- see `test/contracts/test_event_coverage.py`.
+_V4_ONLY_KINDS = frozenset({
     "ActivationChanged",
-    "CompetencePriorRecorded",
-    # Human
-    "ApprovalRequested",
-    "ApprovalResolved",
-    "CorrectionRecorded",
-    # Liveness and recovery
-    "Heartbeat",
-    "RunRecovered",
-    "RunAborted",
-    # Evolution
-    "CandidateBuilt",
-    "CandidateAttested",
+    "ArtifactCreated",
     "CanaryPromoted",
+    "CandidateAttested",
+    "CandidateBuilt",
+    "CompetencePriorRecorded",
+    "ConflictDetected",
+    "CorrectionRecorded",
+    "EffectPreviewed",
+    "EpisodeStateChanged",
+    "EvidenceClaimProduced",
+    "ObservationProduced",
+    "ObservationRequested",
+    "OperatorInvoked",
+    "OperatorSelected",
     "RollbackTriggered",
 })
+
+EVENT_KINDS = frozenset(kind.value for kind in _WireEventKind) | _V4_ONLY_KINDS
 
 _UUIDV7_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"

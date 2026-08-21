@@ -88,6 +88,9 @@ jobs:
       - name: Isolation policy (I-6)
         run: python3 tools/check_isolation_policy.py
 
+      - name: Event coverage (E-COV, SPEC §1.2, ADR-0076 §6)
+        run: python3 tools/check_event_coverage.py
+
       - name: Code-default pack tests
         run: python3 -m unittest discover -s test/packs -t .
 

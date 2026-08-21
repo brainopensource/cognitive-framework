@@ -13,13 +13,15 @@ from pathlib import Path
 
 from test.agency.doubles import ScriptedModel, finish
 from test.runtime.test_harness_session import FakeClock, FakeEnvironment
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.adapters.stores.event_store import InMemoryEventStore, SqliteEventStore
 from vanguard.packages.domain.ledger.reducer import reconstruct_state
 from vanguard.packages.domain.selectors.resource_selector import ceiling_allows
 from vanguard.packages.kernel.attenuation import Constraints, Scope, attenuate
 from vanguard.packages.kernel.budget import Governor, Reservation
 from vanguard.packages.kernel.model import Event
-from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.ports.event_store import EventRange, Result
+from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from vanguard.packages.runtime.evaluation_listener import EvaluationListener
 from vanguard.packages.runtime.ledger.recovery import RecoveryScanner
 from vanguard.packages.runtime.ledger_emitter import LedgerEmitter, WriterAuthorityError
@@ -88,6 +90,37 @@ class ProjectChains(unittest.TestCase):
         self.assertEqual(a2.prev_digest, a1.content_digest)
 
 
+class _SignedVerifier:
+    """Fake `EvaluatorPort`: a genuinely Ed25519-signed, bound verdict.
+
+    Not a stand-in payload -- `runtime/evaluator_gateway.record_verdict`
+    refuses to ledger a `VerdictRecorded` without `verdict.binding` and
+    `verdict.signature` both set (ADR-0076 §5), so this is the only way to
+    get a real `VerdictRecorded` onto the WAL for the cold-replay fixture.
+    """
+
+    def __init__(self, evaluation_request_id: str) -> None:
+        self._signer = VerdictSigner(b"k" * 32, "eval-key-1")
+        self._evaluation_request_id = evaluation_request_id
+
+    def evaluate(self, run_ref: RunRef, protocol: EvaluationProtocol) -> Result[Verdict]:
+        binding = {
+            "verdict": "pass",
+            "subject_digest": "sha256:" + ("c" * 64),
+            "evaluation_request_id": self._evaluation_request_id,
+            "oracle_id": "oracle-replay",
+            "nonce": "n" * 16,
+            "key_id": self._signer.key_id,
+            "signed_at": "2026-08-20T00:00:00.000Z",
+        }
+        signature = self._signer.sign(binding)
+        verdict = Verdict(
+            outcome="claims", claims=(), reason="", signature=signature,
+            signer_key_id=self._signer.key_id, binding=binding,
+        )
+        return Result.success(verdict)
+
+
 class ColdReplayParity(unittest.TestCase):
     def test_cold_reader_reconstructs_live_state_from_disk(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -101,6 +134,7 @@ class ColdReplayParity(unittest.TestCase):
                     environment=FakeEnvironment(),
                     clock=FakeClock(),
                     store=live_store,
+                    verifier=_SignedVerifier("eval-replay-1"),
                     interactive=False,
                 ),
                 TaskContext(
@@ -113,6 +147,10 @@ class ColdReplayParity(unittest.TestCase):
             live_state = session.ledger_state()
             live_digest = session.state_digest()
             self.assertGreater(live_store.count(), 0)
+            # The verdict actually reduced into *live* state, not just
+            # ledgered -- otherwise a cold/live match would prove nothing.
+            self.assertIn("eval-replay-1", live_state.verdicts)
+            self.assertEqual(live_state.verdicts["eval-replay-1"].verdict, "pass")
             live_store.close()
             cold_store = SqliteEventStore(db)
             envelopes = list(cold_store.read(EventRange()).value or ())
@@ -120,6 +158,15 @@ class ColdReplayParity(unittest.TestCase):
             cold_store.close()
             self.assertEqual(live_state.episode.status, cold_state.episode.status)
             self.assertEqual(dict(live_state.grants), dict(cold_state.grants))
+            # I-4: the signed verdict is evidence, not decoration -- a fresh
+            # process folding the same WAL from disk must reconstruct it,
+            # not lose it to `unknown_events` (M-2).
+            self.assertIn("eval-replay-1", cold_state.verdicts)
+            self.assertEqual(
+                cold_state.verdicts["eval-replay-1"].signature,
+                live_state.verdicts["eval-replay-1"].signature,
+            )
+            self.assertEqual(cold_state.unknown_events, ())
             self.assertEqual(live_digest, cold_state.digest())
 
 

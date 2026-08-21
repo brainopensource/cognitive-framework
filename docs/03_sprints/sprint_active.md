@@ -112,24 +112,129 @@ it, not the reverse.
 
 </details>
 
-### Wave 2 lanes — now open
+### M-2 gate — **CLEARED, awaiting Tech Lead re-gate** (Developer A, 2026-08-20)
 
-- **Developer A:** 2.2-B deletion, against the scope in the triage: `layer0/kernel/`,
-  `layer0/scheduler/`, `layer0/events/{selectors,canonical,fold,blob}.py`,
-  `layer0/spi/{interfaces,fakes}.py`, then the `layer0/spi/` shims once importers are rewritten.
-  **Retained until 3.1:** `layer0/registry/`, `layer0/compose/`,
-  `layer0/events/{emitter,envelope,store,taxonomy}.py`. Shrink the advisory layer0 CI step as its
-  subjects go; do not un-quarantine it.
-- **Developer B:** 2.2-C — split `root.py` in place along the named seams (`compose.py`,
-  `session.py`, `wiring.py`; `ledger_emitter.py` already landed in 1.2), then 2.2-D linter rows.
-  No behavior change: `test/runtime` green unmodified.
-- Independent lanes; 2.2-C touches no file 2.2-B deletes.
+Fixed on the canonical `vanguard/packages/` path only; no Wave-2 structure and no `root.py`
+decomposition touched.
+
+- `domain/ledger/events.EVENT_KINDS` is now `frozenset(kind.value for kind in EventKind) |
+  _V4_ONLY_KINDS` — derived from the schema-generated `mhf.event/1` kind enum
+  (`domain/wire/types_gen.py`, A-4/I-1) plus an explicitly-named, documented set of VG-04 kinds the
+  wire schema never carried forward. One derivation, not a second taxonomy. 56 kinds total; all
+  five named kinds (`VerdictRecorded`, `EffectFailed`, `BudgetExhausted`, `CapabilityAttenuated`,
+  `TurnStarted`) and all five Wave-3 `Plugin*` lifecycle kinds present.
+  `test/kernel/test_event_kinds_writer.py`'s closed-catalog assertions (`RunFailed`,
+  `NotARealKind` excluded) still pass unmodified.
+- `reduce_event` gained a real `VerdictRecorded` case: reduces the ledgered `SignedVerdict` body
+  into a new `VerdictRecord`, keyed by `evaluation_request_id`, in a new `LedgerState.verdicts`
+  mapping (`domain/ledger/state.py`, included in `to_canonical_dict()`/the state digest). No
+  signature re-verification in the reducer — that stays the reader's job
+  (`adapters/evaluators/gate.py`) — and none is needed: the sole writer
+  (`runtime/evaluator_gateway.record_verdict`) refuses to ledger anything without a bound, signed
+  body.
+- `ColdReplayParity` (`test/runtime/test_ledger_truth.py`) now runs its scripted episode with a
+  fake `EvaluatorPort` (`_SignedVerifier`) that produces a genuinely Ed25519-signed, bound verdict
+  via `VerdictSigner`. Both live and cold-reconstructed state are asserted to carry the verdict —
+  same `evaluation_request_id`, same signature — and `cold_state.unknown_events == ()`. The WAL
+  round-trip proves I-4 for the vocabulary this blocker was about, not just for grants/budgets.
+- `tools/check_event_coverage.py` retargeted off the deleted `layer0.events.taxonomy` import.
+  "Production-emittable" is now computed as the union of `PRIVILEGED_KIND_OWNERS`
+  (`runtime/ledger_emitter.py` — the writer-authority table, i.e. what a role is *legally* permitted
+  to emit) and a static AST walk of `kernel/`, `agency/`, `runtime/` (excluding `runtime/service/`,
+  the separate CLI "vg.4" wire protocol) for `Event(kind=...)`, `.emit_kind(...)`, and the kernel's
+  `_emit(...)` call sites. Asserts the one direction that matters — production-emittable ⊆
+  `EVENT_KINDS` — never equality, so a locked-but-dormant kind (e.g. `TurnStarted` today) never
+  forces a false failure. Verified fail-closed: re-running against a catalog with the four kernel/
+  evaluator-privileged kinds stripped back out reports exactly those four as missing. Wired into
+  `.github/workflows/ci.yml` as a living gate (`Event coverage (E-COV, SPEC §1.2, ADR-0076 §6)`).
+- New durable contract test `test/contracts/test_event_coverage.py` (6 tests): asserts the same
+  subset property in-process, names the five M-2 kinds and five `Plugin*` kinds explicitly, asserts
+  `RunFailed` stays excluded, and shells out to the tool itself for CI parity. No brittle fixed
+  count anywhere in the fix.
+- Full sweep green: `test/kernel` (93), `test/contracts` (134, includes the 6 new), `test/agency`
+  (107), `test/packs` (31), `test/layer0` (4, advisory), `test/falsifiers` (23), full `test/`
+  discover (1176, 6 failures — 3 Ollama-daemon-absent per CLAUDE.md §6, 3 pre-existing
+  `test/integration` failures confirmed present on baseline `HEAD` via `git stash`, unrelated to
+  this change). `check_boundaries`, `check_tcb_budget`, `check_domain_blindness`,
+  `check_isolation_policy`, `check_event_coverage`, `check_stale_paths`, `check_markdown_links`,
+  `scan_secrets`, `check_duplication.py --enforce` all pass.
+
+Not self-authorizing Wave 3. Handing back to the Tech Lead for re-gate.
+
+<details>
+<summary>Original blocker record (for context)</summary>
+
+### M-2 gate — **BLOCKED (round 2)** (Tech Lead)
+
+The catalog correction is most of the way there. Four of the five named kinds were added to the
+catalog **without** reducer handling, so they still land in `unknown_events`.
+
+**Done and verified:** `EVENT_KINDS` 37 → 56, covering all five named kinds and the five Wave-3
+`Plugin*` kinds. `VerdictRecorded` reduces into a typed `VerdictRecord` keyed by
+`evaluation_request_id` and is inside `to_canonical_dict`, so the state digest moves when a verdict
+is present — and the reducer deliberately does *not* re-verify the signature, which is the right
+call (that is the reader's job, `adapters/evaluators/gate.py`). `test/contracts/test_event_coverage.py`
+is genuinely vocabulary-based — a subset assertion derived from `PRIVILEGED_KIND_OWNERS` plus a
+call-site scan, not a count. `ColdReplayParity` now drives a real Ed25519-signed, bound verdict
+through `HarnessSession` onto the SQLite WAL and asserts a fresh-process fold recovers it with
+`unknown_events == ()`. `check_event_coverage.py` reads the canonical catalog, holds no `layer0`
+authority, and is wired into CI.
+
+**BLOCKER — catalogued is not the same as reduced.**
+
+`reduce_event` dispatches on an if/elif chain whose `else` appends to `unknown_events` regardless of
+`EVENT_KINDS` membership. `EffectFailed`, `BudgetExhausted`, `CapabilityAttenuated` and
+`TurnStarted` are now in the catalog and still have no fold rule:
+
+```
+EffectStarted(d) then EffectFailed(d)  →  reconstruct_state
+    effects[d].status == "started"      outcome: None
+    unknown_events == ['EffectFailed']
+```
+
+An effect that started and then failed reduces to *still in flight*, forever. The raw event is
+retained (CT-44 is lossless), but the **derived** state contradicts the ledger, and it contradicts
+it in the direction that under-reports failure. In a substrate whose thesis is verifiable evidence,
+reduced state must not be more optimistic than the log it came from.
+
+Two things make this worth another round rather than a follow-up:
+
+1. **The tool now asserts a guarantee it does not provide.** `check_event_coverage.py`'s docstring
+   says the check means `LedgerEmitter` "can never write an event the reducer would silently misfile
+   into `unknown_events`". That is false as implemented — membership implies nothing about folding.
+   A gate tool making a false claim is worse than a known gap, because the next reviewer trusts it.
+2. **Wave 3 walks straight into it.** All five `Plugin*` kinds are catalogued and none are reduced.
+   3.1's exit gate is the DISCOVERED→…→RETIRED walk; every one of those events would land in
+   `unknown_events` and the lifecycle would be invisible in reduced state. Shipping now guarantees
+   this same defect resurfaces at M-3.
+
+**To clear** (Developer A, small): a fold rule for each of the four, consistent with the neighbours
+already there — `EffectFailed` closing the `effects` record the way `EffectCompleted` does,
+`BudgetExhausted` against the lease/debit vector, `CapabilityAttenuated` against the grant tree,
+`TurnStarted` against episode progress. Then extend the property test from *catalogued* to
+*catalogued **and** folded* (an allowlist is acceptable for kinds deliberately not folded, but it
+must be explicit and named, not the silent `else`), and correct the tool docstring. Do the `Plugin*`
+five at the same time so 3.1 does not re-open this. `EffectRejected` has the same shape and predates
+Wave 2 — fold it in here rather than leaving one more of the same.
+
+### Wave 2 lanes
+
+- **2.2-B — DONE, verified.** Deletion matches the authorized scope exactly: `layer0/kernel/`,
+  `layer0/scheduler/`, `layer0/spi/`, `layer0/events/{selectors,canonical,fold,blob}.py` gone;
+  `layer0/registry/`, `layer0/compose/`, `layer0/events/{emitter,envelope,store,taxonomy}.py`
+  retained. Zero `layer0` imports under `vanguard/` (only provenance comments). `packs/` repointed
+  onto `kernel.budget` with an explicit wire→additive conversion at the governor boundary.
+- **2.2-C — DONE, verified.** `root.py` is a 126-LOC facade; `Runtime.compose` and `HarnessSession`
+  each defined exactly once (`compose.py` 390, `session.py` 646, `wiring.py` 347). No parallel
+  composition path. `session.py` exceeds the plan's ~500-LOC guidance; it is one cohesive class and
+  splitting it further would invent seams — accepted, noted.
+- **Remaining in Wave 2:** M-2 re-gate (Tech Lead), then 2.2-D.
 
 ### Decision queue
 
 | Item | Needs | Owner |
 |---|---|---|
-| M-2 exit re-gate | Tech Lead sign-off once 2.2-B/C land | Tech Lead |
+| M-2 exit re-gate | Fix landed (evidence above); Tech Lead sign-off | Tech Lead |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board

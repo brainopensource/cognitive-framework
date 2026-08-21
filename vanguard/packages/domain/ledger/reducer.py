@@ -25,6 +25,7 @@ from .state import (
     EpisodeState,
     EvidenceRecord,
     LedgerState,
+    VerdictRecord,
 )
 
 __all__ = [
@@ -88,6 +89,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
     heartbeats = dict(state.heartbeats)
     conflicts = list(state.conflicts)
     terminal_recovery = state.terminal_recovery
+    verdicts = dict(state.verdicts)
     unknown_events = list(state.unknown_events)
 
     if kind == "EpisodeStarted":
@@ -423,6 +425,31 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             state_transitions=episode.state_transitions + ((episode.status, "aborted", "RunAborted"),),
         )
 
+    elif kind == "VerdictRecorded":
+        # ADR-0076 §5: the payload is the daemon's own signed `SignedVerdict`
+        # body, ledgered verbatim by `runtime/evaluator_gateway.py` -- the
+        # sole legal writer. Reduce it as evidence, keyed by
+        # `evaluation_request_id`, the same binding field a reader
+        # re-verifies against. No signature check here: that is the reader's
+        # job (`adapters/evaluators/gate.py`), not the state reducer's, and
+        # there is nothing to verify against a false claim -- an unsigned or
+        # unbound verdict never reaches this kind at all (the writer refuses
+        # to ledger one).
+        signed = payload.get("signedVerdict")
+        if isinstance(signed, Mapping):
+            request_id = signed.get("evaluation_request_id") or envelope.event_id
+            verdicts[str(request_id)] = VerdictRecord(
+                evaluation_request_id=str(request_id),
+                verdict=str(signed.get("verdict", "")),
+                signature=str(signed.get("signature", "")),
+                subject_digest=signed.get("subject_digest"),
+                oracle_id=signed.get("oracle_id"),
+                nonce=signed.get("nonce"),
+                key_id=signed.get("key_id"),
+                signed_at=signed.get("signed_at"),
+                recorded_at=envelope.occurred_at,
+            )
+
     else:
         # CT-44: unknown event kind preserved in state
         unknown_events.append({
@@ -457,6 +484,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         heartbeats=heartbeats,
         conflicts=tuple(conflicts),
         terminal_recovery=terminal_recovery,
+        verdicts=verdicts,
         unknown_events=tuple(unknown_events),
     )
 

@@ -29,6 +29,7 @@
 - [Appendix A · Forensic Verification Log (this pass)](#appendix-a--forensic-verification-log-this-pass)
 - [Appendix B · New Findings Not Present in Any Prior Review](#appendix-b--new-findings-not-present-in-any-prior-review)
 - [Appendix C · External Sources](#appendix-c--external-sources)
+- [§8 · Alternative Approach — *The Obligation Market* (independent chapter)](#8--alternative-approach--the-obligation-market)
 
 ---
 
@@ -2182,3 +2183,134 @@ Consulted during the mandated SOTA research pass (§1.2).
 ---
 
 *Prepared as an independent leadership review. This document is **advisory** and amends nothing. Law remains [`docs/SPEC.md`](docs/SPEC.md) → [`docs/05_adr/`](docs/05_adr/) → [`docs/04_annex/`](docs/04_annex/). Every ruling in §1–§2 becomes binding only through the corresponding append-only ADR in §3, committed with a Director signature and carrying its bound falsifier. No specification file, ADR, or source file was modified in producing this report.*
+
+---
+---
+
+## §8 · Alternative Approach — *The Obligation Market*
+
+> **Chapter status.** Added at the Director's request as an **independent third position**. It is written by an unbiased alternate architect who defends **neither** the as-built AETHER design **nor** the §1–§7 proposal above. It is a from-scratch architectural sketch, deliberately language-agnostic, and deliberately brief. It is **not** a recommendation to rebuild — §8.8 states what is worth taking from it regardless.
+
+### 8.0 The stance in one paragraph
+
+Both positions in this document accept the same primitive: **the turn**. An agent observes, proposes, is authorized, acts, receipts, is judged — and everything else (swarms, debate, tree search) is a *topology of turns*. The alternative rejects that primitive. It argues that the turn is an artifact of chat interfaces, not of task solving, and that the natural unit is the **typed obligation**: a piece of unfinished work that carries, in its own type, the definition of what would finish it. The system then has exactly one operation — **refinement** — and everything else is a strategy for choosing which obligation to refine next and at what price.
+
+### 8.1 Core primitives & information flow
+
+**One data type. One operation.**
+
+```
+Obligation  =  ( goal_spec , witness_type , price_ceiling , deadline , parent )
+
+Refine(o)   →   Witness(o)                              -- discharge directly
+            |   { o₁ … oₙ } + CompositionRule           -- decompose; the rule says how
+                                                           child witnesses compose into o's
+```
+
+- **`goal_spec`** is a content-addressed statement of what must become true. Its digest is the cache key for the entire system.
+- **`witness_type`** is the *acceptance evidence* required, declared **before** work starts: `tests_green(suite)`, `proof_checks(kernel)`, `schema_conforms(s)`, `replay_equivalent(baseline)`, `signed_by(human)`, `adjudicated_by(panel)`. A task without a declarable witness type is refused at admission, not discovered as a failure later.
+- **`price_ceiling`** is a vector — money, tokens, latency, and a quality floor — not a scalar.
+- Information flows **only** through the obligation graph. There is no message bus and no agent-to-agent channel. An actor reads open obligations and writes witnesses or sub-obligations. That is the whole protocol.
+
+**The inversion vs. both other designs:** verification stops being an *event that happens after* work and becomes a *type that constrains* it. There is no global judge rendering a verdict on an outcome; there are local witness checkers, and soundness is compositional — if every witness typechecks and every composition rule is sound, the root obligation is discharged by construction.
+
+### 8.2 Swarm & harness topology — coordination by scarcity, not by chatter
+
+The open-obligation frontier **is** the blackboard. Workers are homogeneous and stateless; they **pull** rather than being assigned.
+
+```
+        ┌──────────────── OBLIGATION GRAPH (the only shared state) ─────────────────┐
+        │   open frontier  ·  in-flight claims  ·  discharged witnesses (memoized)  │
+        └──────────────────────────────────────────────────────────────────────────┘
+             ▲ claim/refine        ▲ claim/refine        ▲ claim/refine
+          worker_1               worker_2      …       worker_K          K ≪ N
+             │                      │                      │
+             └─── no worker ever addresses another worker ──┘
+```
+
+- **Claiming is exclusive and lease-bound.** At most one worker holds an obligation at a time; an expired lease returns it to the frontier. This is the only synchronisation primitive.
+- Because coordination is *observation of shared state* rather than *broadcast*, messages per turn are `Θ(N)`, not `Θ(N²)` — the same stigmergic property §5.4.4 identifies, but arrived at structurally rather than as an emergent consequence of an event log.
+- **The harness is a projection**, not a runtime. "Claude-Code-shaped tactical execution" is one *worker profile* — a tight edit/run/read loop over a single obligation with a short deadline and a hot cache. A research profile is a different projection over the same graph. Profiles are data.
+
+### 8.3 Dynamic optimization matrix — Pareto as the scheduler's objective
+
+Because every obligation is priced before it is worked, the scheduler is literally a **portfolio allocator over the frontier**, not a queue:
+
+```
+maximise   Σ_o  x_o · P̂(discharge | o, rule, tier) · value(o)
+subject to Σ_o  x_o · ĉ_d(o, rule, tier)  ≤  Budget_d     for each d ∈ {money, tokens, latency}
+           quality(witness_type(o))       ≥  floor(o)
+           x_o ∈ {0,1}                                    (claim or don't)
+```
+
+A **task profile** is nothing more than a weighting of that objective:
+
+| Profile | What moves | Typical effect |
+|---|---|---|
+| `cheap` | latency slack ↑, tier ceiling ↓, decomposition depth ↓ | small models, memo-first, no debate |
+| `fast` | latency weight ↑↑, parallel claims ↑ | wide fan-out on the frontier, higher spend |
+| `certain` | quality floor ↑, witness type strengthened | debate or proof witnesses, more spend, slower |
+| `frontier` | price ceiling ↑↑ | escalate tier, allow speculative refinements |
+
+Strategy selection is not configuration — it is **bidding**. Debate, tree search, single-shot, and memo-lookup are competing *refinement rules* that each quote a price and a success probability for the same obligation. The cheapest rule that clears the quality floor wins. **Cost-per-pass is therefore a primary key of the system, not a telemetry field**, and an underperforming strategy is starved of work automatically rather than deprecated by a human.
+
+### 8.4 The compounding loop — three tiers, and the first one needs no ML
+
+```
+Tier 0 — MEMOIZATION      discharged witness cached by goal_spec digest
+                          → an identical obligation is discharged at ~zero cost, deterministically
+Tier 1 — RULE DISTILLATION recurring refinement shapes become NAMED refinement rules
+                          (the skill library), admitted only after beating the incumbent rule
+                          on price-per-discharge over a paired sample
+Tier 2 — POLICY LEARNING   the router learns P̂(discharge | rule, obligation_class, tier, price)
+                          from the ledger of quotes vs. actual outcomes; DPO/RL pairs fall out
+                          of competing refinements of the SAME obligation — a natural
+                          (chosen, rejected) pair with an identical context by construction
+```
+
+**The decisive property: Tier 0 compounds on day one and needs no corpus, no statistical power, and no training run.** Every solved sub-obligation permanently lowers the price of every future task that contains it. Tiers 1 and 2 are accelerants, not prerequisites — which means the flywheel begins turning before any learning machinery exists.
+
+### 8.5 Dual capability — coding and general from one primitive
+
+Nothing in §8.1–§8.4 mentions code. The domain lives **entirely** in the witness-type library and the refinement-rule library:
+
+| Domain | Witness types | Refinement rules |
+|---|---|---|
+| Coding | `tests_green`, `type_checks`, `diff_reviewed`, `builds` | patch-and-run, repo-map-then-edit, bisect |
+| Math / formal | `proof_checks`, `smt_unsat` | lemma decomposition, tactic search |
+| Research / analysis | `sources_cited`, `schema_conforms`, `adjudicated_by(panel)` | gather-then-synthesize, debate |
+| Ops / general | `signed_by(human)`, `invariant_holds`, `replay_equivalent` | plan-confirm-execute |
+
+Adding a domain adds a *dictionary*, never a mechanism.
+
+### 8.6 Why this is good — the four genuine differentiators
+
+1. **Pareto optimisation is native, not bolted on.** In a turn-based design, cost control is a policy layered onto a loop that does not intrinsically know what anything costs. Here every node carries a price before it is worked, so the trade-off surface is the scheduler's objective function. You get "cost-per-pass" for free because the architecture cannot operate without it.
+2. **The flywheel is deterministic before it is statistical.** Memoized witnesses keyed by goal-spec digest compound immediately. Most agent architectures — including both other positions here — defer *all* compounding to an ML pipeline that needs hundreds of paired samples before it says anything. This one delivers a monotonically decreasing cost curve from the first repeated sub-task.
+3. **Verification is local, parallel, and compositional.** No global judge, no single court, no serialization point on the evidence path. Checking scales with the graph rather than bottlenecking on one daemon — which matters precisely when `N` is large, i.e. exactly where swarms are supposed to pay off.
+4. **Resumability and concurrency are free.** The graph *is* the state. There is no live session object to reconstruct, so "suspend and resume in a fresh process" is not a falsifier to be written — it is the only mode the system has. Distribution is sharding the frontier.
+
+### 8.7 Where it is worse — the honest accounting
+
+An unbiased alternate that only lists advantages is advocacy. Four real weaknesses, the first of which is disqualifying for some domains:
+
+1. **Fuzzy goals have no crisp witness.** `tests_green` is checkable; *"write a good strategy memo"* is not. The fallback is an LLM-judge witness — which reintroduces exactly the forgeability problem an exterior signed judge exists to eliminate, and reintroduces it *inside* the type system where it looks sound. **This is the alternative's core unsolved problem**, and it is the strongest argument for keeping an exterior, unreachable judge as the backstop for any witness that is model-rendered.
+2. **Pricing is a control problem with two failure modes.** Underpriced dangerous capabilities are purchased casually; overpriced ones cause frontier paralysis. A boolean capability model can be mis-scoped but cannot be mis-tuned; a priced model can be both. Economic containment bounds *how much* damage, never *what kind* — a determined actor with a large purse is unconstrained in category.
+3. **Weaker forensics.** A DAG with a partial order answers *"what happened"* but not always *"in what order, exactly."* A totally-ordered hash-chained log is strictly stronger for incident reconstruction and for byte-level replay, and that strength is genuinely surrendered here.
+4. **Obligation explosion.** Refinement systems thrash: decomposition that outpaces discharge grows the frontier without progress. This needs an explicit admission controller and a decomposition-depth price, and it is a well-known hard failure mode rather than a hypothetical one.
+
+### 8.8 What is worth taking regardless — three transplants, no rewrite
+
+The alternative's value to this programme is **not** that it should be built. It is that three of its ideas transplant cleanly into the existing lattice with no architectural conflict:
+
+| # | Transplant | Where it lands | Why it fits |
+|---|---|---|---|
+| **T-A** | **Memoized witnesses keyed by a goal-spec digest** — a deterministic Tier-0 flywheel | An `IMemoryEngine` capability; **M-5**, alongside Pack #2 | Needs no corpus, no statistical power, and no core change. It is the cheapest compounding mechanism available and it is currently absent from every milestone in §4 |
+| **T-B** | **Price ceilings per sub-task, making the 6D tensor an *objective* and not only a *constraint*** | The M-7 scheduler and `ADR-0080`'s `agent.spawn` reservation | The tensor already exists and is already conserved. Today it only ever says *no*; this makes it also say *which*, turning cost control into strategy selection |
+| **T-C** | **A pull-based frontier with lease-bound exclusive claims** | The M-7 independence-group scheduler shape | Delivers `K ≪ N` and the `Θ(N)` messaging property by construction rather than by measurement, and it composes with a total-order ledger rather than replacing it |
+
+**Conversely, the one thing this alternative should take from the incumbent design:** an **exterior, unreachable, signed judge as the backstop for every model-rendered witness.** Without it, §8.7's first weakness silently corrupts the entire type system — and a corrupted type system is worse than no type system, because it looks like a proof.
+
+---
+
+*§8 is an independent architectural sketch contributed at the Director's request. It carries no ADR, no falsifier, and no authority. It is offered as a genuine third option and as a source of transplantable ideas (§8.8), not as a proposal to rebuild.*

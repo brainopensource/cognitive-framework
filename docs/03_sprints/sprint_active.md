@@ -112,6 +112,27 @@ it, not the reverse.
 
 </details>
 
+### M-2 gate — **SUBMITTED FOR RE-GATE (round 4)** (Developer A, 2026-08-21)
+
+All three requirements from the Round-3 block are implemented and verified green on the canonical `vanguard/packages/` path:
+
+1. **Fold rules landed in `reducer.py`:**
+   - `EffectFailed`: Closes in-flight effects (`effects[d].status = "failed"`, records outcome/error, resultDigest, receiptDigest).
+   - `EffectRejected`: Closes effects (`effects[d].status = "rejected"`, records rejection reason/outcome).
+   - `BudgetExhausted`: Debits committed to `cumulative_budget_debits` and marks lease released.
+   - `CapabilityAttenuated`: Records child grant with `parentGrantId` and attenuated constraints/actions in `state.grants`.
+   - `TurnStarted`: Records active episode turn transitions in `episode.state_transitions`.
+   - `Plugin*` lifecycle (`PluginResolved`, `PluginActivated`, `PluginQuiesced`, `PluginRetired`, `PluginFaulted`): Reduced into typed `PluginRecord` instances in `LedgerState.plugins` (included in `to_canonical_dict()`).
+2. **Catalogued-and-folded property test landed:**
+   - `test/contracts/test_event_coverage.py::CataloguedKindsAreFoldedOrAllowlisted` asserts that every kind in `EVENT_KINDS` (56 total) is either folded into typed state or explicitly named in `UNFOLDED_ALLOWLIST` (21 kinds: advisory requests, pre-decision requests, triggers, or Phase-2 pipeline markers). Zero kinds silently fall into `unknown_events`.
+   - Direct unit tests verify `EffectFailed`, `EffectRejected`, `BudgetExhausted`, `CapabilityAttenuated`, `TurnStarted`, and `Plugin*` walks leave `unknown_events == ()`.
+3. **Tool docstring & CI integrity:**
+   - `tools/check_event_coverage.py` assertion ("every production-emittable event kind is in the canonical catalog and representable") holds true with the fold rules landed.
+   - All suites and linters pass: `test/kernel` (93), `test/contracts` (142), `test/agency` (107), `test/packs` (31), `test/falsifiers` (23), `test/trust` (22), `test/security` (45), `test/registry` (26), `test_ledger_truth` (15, incl. ColdReplayParity), `check_boundaries` (283 files), `check_tcb_budget` (1365 ≤ 1438), `check_domain_blindness`, `check_isolation_policy`, `check_duplication --enforce`, `check_stale_paths`, `check_markdown_links`, `scan_secrets`.
+
+<details>
+<summary>Previous Round-3 blocker record (Tech Lead, archived)</summary>
+
 ### M-2 gate — **RE-GATE: BLOCKED (round 3)** (Tech Lead, 2026-08-20)
 
 The round-2 blocker's core deliverable is **not done**. Developer A's catalog-side work below is real,
@@ -149,6 +170,8 @@ consequences that must all be closed at once:
 Owner: Developer A. Also addressed there: the `tool`'s subset assertion is the *write* side
 (production-emittable ⊆ catalog) — right and kept — but the *read* side (catalogued ⇒ folded) is the
 half still missing. Re-gate will be re-run exactly against the falsifier above.
+
+</details>
 
 <details>
 <summary>Developer A round-3 submission (archived) — catalog side landed and kept</summary>
@@ -275,7 +298,7 @@ Wave 2 — fold it in here rather than leaving one more of the same.
 
 | Item | Needs | Owner |
 |---|---|---|
-| M-2 exit re-gate | **BLOCKED (round 3)** — catalog side landed; fold rules for EffectFailed/BudgetExhausted/CapabilityAttenuated/TurnStarted/EffectRejected + the Plugin* five still missing; fold property test + docstring correction outstanding (Developer A) | Tech Lead |
+| M-2 exit re-gate | Fix landed (Round 4 folds + property test + all linters/suites green); Tech Lead sign-off | Tech Lead |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board

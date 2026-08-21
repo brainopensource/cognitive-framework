@@ -25,6 +25,7 @@ from .state import (
     EpisodeState,
     EvidenceRecord,
     LedgerState,
+    PluginRecord,
     VerdictRecord,
 )
 
@@ -90,6 +91,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
     conflicts = list(state.conflicts)
     terminal_recovery = state.terminal_recovery
     verdicts = dict(state.verdicts)
+    plugins = dict(state.plugins)
     unknown_events = list(state.unknown_events)
 
     if kind == "EpisodeStarted":
@@ -133,6 +135,20 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             state_transitions=episode.state_transitions + ((episode.status, "completed", outcome),),
         )
 
+    elif kind == "TurnStarted":
+        turn_val = payload.get("turn") or payload.get("turnNumber") or payload.get("turn_index") or envelope.seq
+        episode = EpisodeState(
+            run_id=episode.run_id or envelope.run_id,
+            episode_id=episode.episode_id or envelope.episode_id,
+            status="active",
+            outcome=episode.outcome,
+            started_at=episode.started_at or envelope.occurred_at,
+            completed_at=episode.completed_at,
+            task_spec=episode.task_spec,
+            environment_snapshot=episode.environment_snapshot,
+            state_transitions=episode.state_transitions + ((episode.status, "active", f"TurnStarted:{turn_val}"),),
+        )
+
     elif kind == "ObservationProduced":
         observations.append({
             "seq": envelope.seq,
@@ -163,6 +179,21 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 "constraints": payload.get("constraints", {}),
                 "purposeDigest": payload.get("purposeDigest"),
                 "parentGrantId": payload.get("parentGrantId"),
+                "grantedAt": envelope.occurred_at,
+            }
+
+    elif kind == "CapabilityAttenuated":
+        grant_id = payload.get("grantId") or payload.get("id") or payload.get("childGrantId")
+        if grant_id:
+            grants[grant_id] = {
+                "id": grant_id,
+                "principal": payload.get("principal", envelope.principal),
+                "descriptorDigest": payload.get("descriptorDigest"),
+                "actions": payload.get("actions", []),
+                "resources": payload.get("resources", []),
+                "constraints": payload.get("constraints", {}),
+                "purposeDigest": payload.get("purposeDigest"),
+                "parentGrantId": payload.get("parentGrantId") or payload.get("parentId"),
                 "grantedAt": envelope.occurred_at,
             }
 
@@ -219,7 +250,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 cumulative_debits[dim] = cumulative_debits.get(dim, 0) + int(amt)
 
     elif kind == "BudgetReleased":
-        lease_id = payload.get("leaseId")
+        lease_id = payload.get("leaseId") or payload.get("lease_id")
         unused = payload.get("unused", {})
         if lease_id and lease_id in leases:
             current_lease = leases[lease_id]
@@ -231,6 +262,27 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 released_unused=unused,
                 is_released=True,
             )
+
+    elif kind == "BudgetExhausted":
+        lease_id = payload.get("leaseId") or payload.get("lease_id")
+        debits = payload.get("debits", {})
+        if lease_id and lease_id in leases:
+            current_lease = leases[lease_id]
+            updated_debits = dict(current_lease.committed_debits)
+            for dim, amt in debits.items():
+                updated_debits[dim] = updated_debits.get(dim, 0) + int(amt)
+                cumulative_debits[dim] = cumulative_debits.get(dim, 0) + int(amt)
+            leases[lease_id] = BudgetLeaseState(
+                lease_id=lease_id,
+                dimensions=current_lease.dimensions,
+                limits=current_lease.limits,
+                committed_debits=updated_debits,
+                released_unused=current_lease.released_unused,
+                is_released=True,
+            )
+        else:
+            for dim, amt in debits.items():
+                cumulative_debits[dim] = cumulative_debits.get(dim, 0) + int(amt)
 
     elif kind == "EffectPreviewed":
         desc_digest = payload.get("descriptorDigest")
@@ -269,7 +321,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             )
 
     elif kind == "EffectCompleted":
-        desc_digest = payload.get("descriptorDigest")
+        desc_digest = payload.get("descriptorDigest") or payload.get("descriptor_digest")
         if desc_digest:
             prev = effects.get(desc_digest)
             effects[desc_digest] = EffectRecord(
@@ -278,12 +330,48 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 grant_id=prev.grant_id if prev else None,
                 preview_summary=prev.preview_summary if prev else None,
                 status="completed",
-                receipt_digest=payload.get("receiptDigest"),
+                receipt_digest=payload.get("receiptDigest") or payload.get("receipt_digest"),
                 outcome=payload.get("outcome", "ok"),
-                result_digest=payload.get("resultDigest"),
+                result_digest=payload.get("resultDigest") or payload.get("result_digest"),
                 idempotency_key=prev.idempotency_key if prev else None,
                 reconciliation_status=prev.reconciliation_status if prev else None,
                 uncertainty=prev.uncertainty if prev else None,
+            )
+
+    elif kind == "EffectFailed":
+        desc_digest = payload.get("descriptorDigest") or payload.get("descriptor_digest")
+        if desc_digest:
+            prev = effects.get(desc_digest)
+            effects[desc_digest] = EffectRecord(
+                descriptor_digest=desc_digest,
+                sink_class=prev.sink_class if prev else payload.get("sinkClass"),
+                grant_id=prev.grant_id if prev else payload.get("grantId"),
+                preview_summary=prev.preview_summary if prev else None,
+                status="failed",
+                receipt_digest=payload.get("receiptDigest") or payload.get("receipt_digest") or (prev.receipt_digest if prev else None),
+                outcome=payload.get("error") or payload.get("outcome") or payload.get("reason") or "failed",
+                result_digest=payload.get("resultDigest") or payload.get("result_digest") or (prev.result_digest if prev else None),
+                idempotency_key=prev.idempotency_key if prev else payload.get("idempotencyKey"),
+                reconciliation_status=prev.reconciliation_status if prev else None,
+                uncertainty=prev.uncertainty if prev else payload.get("uncertainty"),
+            )
+
+    elif kind == "EffectRejected":
+        desc_digest = payload.get("descriptorDigest") or payload.get("descriptor_digest")
+        if desc_digest:
+            prev = effects.get(desc_digest)
+            effects[desc_digest] = EffectRecord(
+                descriptor_digest=desc_digest,
+                sink_class=prev.sink_class if prev else payload.get("sinkClass"),
+                grant_id=prev.grant_id if prev else payload.get("grantId"),
+                preview_summary=prev.preview_summary if prev else None,
+                status="rejected",
+                receipt_digest=payload.get("receiptDigest") or payload.get("receipt_digest") or (prev.receipt_digest if prev else None),
+                outcome=payload.get("reason") or payload.get("outcome") or "rejected",
+                result_digest=payload.get("resultDigest") or payload.get("result_digest") or (prev.result_digest if prev else None),
+                idempotency_key=prev.idempotency_key if prev else payload.get("idempotencyKey"),
+                reconciliation_status=prev.reconciliation_status if prev else None,
+                uncertainty=prev.uncertainty if prev else payload.get("uncertainty"),
             )
 
     elif kind == "EffectReconciled":
@@ -450,6 +538,61 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 recorded_at=envelope.occurred_at,
             )
 
+    elif kind == "PluginResolved":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="resolved",
+                manifest_digest=payload.get("manifest_digest") or payload.get("manifestDigest"),
+                occurred_at=envelope.occurred_at,
+            )
+
+    elif kind == "PluginActivated":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            prev_plugin = plugins.get(str(plugin_id))
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="activated",
+                manifest_digest=prev_plugin.manifest_digest if prev_plugin else (payload.get("manifest_digest") or payload.get("manifestDigest")),
+                occurred_at=envelope.occurred_at,
+            )
+
+    elif kind == "PluginQuiesced":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            prev_plugin = plugins.get(str(plugin_id))
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="quiesced",
+                manifest_digest=prev_plugin.manifest_digest if prev_plugin else None,
+                occurred_at=envelope.occurred_at,
+            )
+
+    elif kind == "PluginRetired":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            prev_plugin = plugins.get(str(plugin_id))
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="retired",
+                manifest_digest=prev_plugin.manifest_digest if prev_plugin else None,
+                occurred_at=envelope.occurred_at,
+            )
+
+    elif kind == "PluginFaulted":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            prev_plugin = plugins.get(str(plugin_id))
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="faulted",
+                reason=payload.get("reason", "faulted"),
+                manifest_digest=prev_plugin.manifest_digest if prev_plugin else None,
+                occurred_at=envelope.occurred_at,
+            )
+
     else:
         # CT-44: unknown event kind preserved in state
         unknown_events.append({
@@ -485,6 +628,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         conflicts=tuple(conflicts),
         terminal_recovery=terminal_recovery,
         verdicts=verdicts,
+        plugins=plugins,
         unknown_events=tuple(unknown_events),
     )
 

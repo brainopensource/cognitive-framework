@@ -24,6 +24,7 @@ __all__ = [
     "EvidenceRecord",
     "ApprovalRecord",
     "VerdictRecord",
+    "PluginRecord",
 ]
 
 
@@ -130,6 +131,17 @@ class VerdictRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class PluginRecord:
+    """Plugin lifecycle state record (ADR-M0-13, Wave 3)."""
+
+    plugin_id: str
+    status: str  # "resolved", "activated", "quiesced", "retired", "faulted"
+    reason: Optional[str] = None
+    manifest_digest: Optional[str] = None
+    occurred_at: Optional[str] = None
+
+
+@dataclass(frozen=True, slots=True)
 class LedgerState:
     """The aggregate deterministic state reduced from the event log."""
 
@@ -164,6 +176,8 @@ class LedgerState:
     #: §5). A ledgered verdict is evidence, not decoration: cold replay must
     #: reconstruct it as state, not lose it to `unknown_events`.
     verdicts: Mapping[str, "VerdictRecord"] = field(default_factory=dict)
+    #: Plugin lifecycle state records (ADR-M0-13, Wave 3).
+    plugins: Mapping[str, "PluginRecord"] = field(default_factory=dict)
     unknown_events: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
 
     def to_canonical_dict(self) -> dict[str, Any]:
@@ -264,6 +278,16 @@ class LedgerState:
                     "recordedAt": v.recorded_at,
                 }
                 for k, v in sorted(self.verdicts.items())
+            },
+            "plugins": {
+                k: {
+                    "pluginId": v.plugin_id,
+                    "status": v.status,
+                    "reason": v.reason,
+                    "manifestDigest": v.manifest_digest,
+                    "occurredAt": v.occurred_at,
+                }
+                for k, v in sorted(self.plugins.items())
             },
             "unknownEventsCount": len(self.unknown_events),
         }

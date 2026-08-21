@@ -110,10 +110,13 @@ python3 tools/linters/check_stale_paths.py        # Stale documentation path che
 Execution sequence:
 1. **Wave 0 (COMPLETE)**: CI Truth & Named Falsifiers (`vanguard/packages` as sole subject of record).
 2. **Wave 1 (COMPLETE - GREEN)**: Fail-Closed Trust Spine (bound signed verdicts, single emitter, typed budgets, `mhf.trajectory/1`).
-3. **Wave 2 (IN FLIGHT)**: In-Place Lattice Convergence (absorb `layer0` contracts, split `root.py`, eliminate duplicate surfaces).
+3. **Wave 2 (IN FLIGHT)**: Convergence core is complete; M-2 now closes on RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation. These are the two authorized parallel development lanes.
 4. **Wave 3 (QUEUED)**: Extensibility & Plugin Walking Skeleton (named component graphs, registry lifecycle on wire).
 5. **Wave 4 (QUEUED - Foundation Stop)**: First Real Coding-Agent E2E (one real run with zero human cheating).
 6. **Waves 5–10 (Macro Roadmap)**: Generality proof (Pack #2), mediated `agent.spawn`, concurrency, and Meta-Cognition.
+
+Current status belongs only in [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md).
+Do not infer authorization from archived proposals, reviews, research, or completed sprint records.
 
 ---
 
@@ -144,6 +147,17 @@ Execution sequence:
 - Never commit credentials, private keys, or unreviewed model output dumps.
 - Model provider API keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`) are read exclusively from environment variables and must remain unset during automated test runs.
 - Model adapters are structured as OpenRouter, Ollama, Cassette, Fake — not individual vendor files.
+
+### Environment-sensitive behavior
+
+- Keep provider API keys unset during hermetic tests; live-provider checks must be explicitly selected.
+- A missing local Ollama daemon is an environment condition, not permission to weaken an assertion.
+- `test/broken/fixtures/` contains intentional violations used to prove linters fail closed.
+
+### TypeScript CLI
+
+From the repository root, use `npm run typecheck`, `npm test`, and `npm run vg`. The CLI is a
+client of the runtime and must not duplicate domain or authority logic.
 
 ---
 

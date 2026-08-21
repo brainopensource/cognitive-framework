@@ -2,8 +2,8 @@
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language
 (MUST/SHALL/SHOULD) is binding here and in `docs/04_annex/*` only — nowhere else in `docs/`.
-**Version anchor:** v0.6.0 Concept Lock (`docs/05_adr/0069`–`0074`; Director-approved by
-`docs/05_adr/0075`). The as-built Python package
+**Version anchor:** v0.6.1 Foundation Evolution Lock (accepted ADRs `0069`–`0086`; see
+[`docs/05_adr/INDEX.md`](05_adr/INDEX.md)). The as-built Python package
 version remains `0.4.5b1` in `pyproject.toml` until a later release cut.
 **Supersedes:** v0.5.0 Foundation Lock destination story (`layer0/` as M1 rewrite target) and
 mid-run plugin hot-swap as a v0.6 feature; `SYSTEM_SPEC_THEORY.md`, `SYSTEM_SPEC_ASBUILT.md`,
@@ -13,19 +13,15 @@ exists on disk, `ADR-0075`).
 **Consumes:** the archived Tech Lead review corpus — `CRITICAL_GAP_ANALYSIS_AND_AUDIT.md`
 (Kill/Keep/Refactor register, invariants I-1…I-10), `NEXT_GEN_META_HARNESS_SPECIFICATION.md` (MHF v1
 blueprint, the direct ancestor of this document), `01_SPECS_MIGRATION_MATRIX.md` (per-file merge
-disposition) — all in git history at `4f9f8b1` (`docs/07_reviews/ARCHIVE.md`). Forensic report
-`docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md` is investigation, not law.
+disposition) — all in git history at `4f9f8b1`. Forensic and proposal reports under
+`docs/07_reviews/` are investigation and provenance, not law.
 **Design lineage preserved:** S0–S12 dispatch kernel, JCS canonicalisation + golden vectors, exterior
 signed evaluator, harness-as-data manifests, measurement lab, SQLite WAL ledger.
-**Authority on conflict:** this document, then `docs/05_adr/` (a newer ADR wins by citation, never by
-silent edit — **`0069`–`0074` outrank the v0.5.0 M1-destination paragraph they reverse**), then
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md` (lock plan, not a
-second SPEC), then `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`
-(post-lock engineering register; cannot contradict this document), then
-`docs/02_roadmap/milestones.md` (historical; cannot contradict this document; rewrite is a later phase),
-then `docs/03_sprints/sprint_active.md` (execution board only), then the git-history archive
-(pre-v0.6 corpus at `4f9f8b1`) and `docs/07_reviews/` (evidence and proposals, not law — no ticket
-may cite them as a requirement).
+**Authority on conflict:** this specification and `docs/04_annex/` define normative behavior;
+accepted ADRs record why that law was narrowed or extended and MUST be reflected here before
+implementation; `docs/03_sprints/sprint_active.md` is the sole current execution authority; the
+milestone ladder is macro sequencing only. Reviews, proposals, research, completed boards, and git
+history are evidence, never implementation requirements.
 
 ---
 
@@ -57,11 +53,11 @@ Every non-claim below in §9 is a promise about what will *not* be asserted, not
 
 ## 0. Design Axioms
 
-**A-1. Microkernel, literally.** Layer 0 provides exactly four things: the event-sourced state machine,
-the effect-dispatch kernel, the plugin registry + lifecycle, and the scheduler. Everything else —
-planning, memory, tools, context, evaluation, models, sandboxes, domains — is a plugin behind a
-versioned SPI. Layer-0 LOC target: ≤ 4,500 (kernel 1,700 is already written). *(Handbook M9 "minimise
-what must be simultaneously correct" — merged here as this axiom's rationale, per matrix §1.4.)*
+**A-1. Microkernel, literally.** The trusted kernel is the S0–S12 effect reference monitor under
+`vanguard/packages/kernel/`, with an enforced logical-LOC ceiling of 1438. Event reduction, plugin
+lifecycle, scheduling, planning, memory, tools, context, evaluation, models, sandboxes, and domains
+remain outside that TCB behind typed boundaries. State, price, belief, rating, or cached success
+MUST NOT widen capability authority.
 
 **A-2. The kernel governs effects; the loader governs plugins.** Two independent authority systems:
 capability grants constrain what the *agent* may do (existing kernel); isolation tiers constrain what
@@ -71,7 +67,7 @@ sandbox contains" is this axiom's ancestor.)*
 **A-3. Everything is an event or it didn't happen.** Grants, budgets, approvals, plugin activation,
 evaluation requests, spawns — all ledger events. Replay is a *required* CI-enforced property
 (Invariant I-4, `ADR-0071`, `ADR-0074`), not a slogan. Folding the same in-memory list twice is not
-I-4. The production `replay-parity` job is not currently wired.
+I-4. The production replay-parity gate MUST fold durable storage in a fresh process.
 
 **A-4. One schema, many languages.** JSON Schema + JCS + golden vectors are the sole source of truth.
 Python dataclasses and TS readers are *generated*. Hand-written mirrors are banned (closes AP-6 — Python
@@ -86,8 +82,9 @@ behavior-affecting input: resolved plugin refs and digests, system prompt, capab
 approval policy, and model routes. Two identical full compositions ⇒ byte-identical `D_H`. Two
 harnesses that differ only in system prompt MUST NOT share `D_H`.
 
-**A-6. Asymmetric evolution.** Phase 2 and 3 capabilities land as new plugins and new event kinds —
-never as Layer-0 modifications. Layer 0 exposes *extension points*, not features.
+**A-6. Asymmetric evolution.** Later capabilities land as packs, plugins, manifests, adapters,
+policies, or exterior/offline pipelines. The kernel changes only for a new irreducible authority verb
+with its bound falsifier and TCB-budget proof; `agent.spawn` is the sole planned M-6 case.
 
 ---
 
@@ -103,30 +100,26 @@ domain → ports → kernel → agency → runtime → adapters
 ```
 
 Composition root remains `vanguard/packages/runtime/root.py`. This lattice is the **CI subject of
-record** (`ADR-0073`): living CI MUST eventually run the packages kernel/runtime/agency/adapters
-suites. A green `test/layer0` suite alone does not satisfy I-2 or I-4.
+record** (`ADR-0073`): living CI runs the packages kernel/runtime/agency/adapters suites. A green
+residual `test/layer0` suite alone does not satisfy I-2 or I-4.
 
-**Convergence fork (not the destination).** `layer0/` is a copy-fork that holds SPI protocols,
-JSON-RPC/UDS codec, plugin-cell broker, lifecycle FSM, and a sequential driver. Useful contracts
-are absorbed into the production lattice. Duplicate kernels, schedulers, mocks, and synthetic
-verdict paths MUST NOT be deleted until a behavioral parity gate. A third tree (`core/`,
-`aether-rust/`) is forbidden.
+**Convergence fork (not the destination).** `layer0/` now retains only the composition, registry,
+and event surfaces required for M-3 parity. JSON-RPC, SPI contracts, kernel, and scheduler surfaces
+have converged or been removed. The remainder MUST be absorbed into the production lattice and
+deleted atomically with packaging, CI, and tests after NOVA-4 passes. A third runtime tree is
+forbidden.
 
 ```text
-layer0/          # fork under convergence — contracts to absorb, not a destination rewrite
-├── events/      # taxonomy / envelope / fold — converge with domain/ledger
-├── kernel/      # diverging S0–S12 port — packages kernel remains the semantic oracle
-├── registry/    # lifecycle FSM + isolation broker — promote
-├── scheduler/   # sequential driver; MUST NOT fabricate VerdictRecorded (defect F1)
-├── spi/         # Protocols + jsonrpc + generated types — promote; Protocol is a client
-└── compose/     # Manifest → FrozenHarness digest — converge with domain compose
+layer0/          # temporary M-3 parity source; never production authority
+├── events/      # residual event compatibility surface
+├── registry/    # lifecycle FSM + isolation broker to absorb
+└── compose/     # manifest compiler behavior to converge
 ```
 
 Boundary lattice (CI-enforced, closed roster) for the production hexagon:
 `domain ← ports ← kernel ← agency ← runtime → adapters`; adapters MUST NOT import `kernel` or
-`agency`. Plugins import SPI + events only; Layer 0 never imports a plugin. The `layer0/` internal
-order `events ← kernel ← spi ← registry ← scheduler ← compose` is the fork's own checker rows, not
-a replacement identity.
+`agency`. Plugins consume ports and wire contracts rather than importing the TCB. Residual
+`layer0/` code is migration input, never a replacement identity.
 
 ### 1.0 Recursive machine, authority, and identity (`ADR-0070`, `ADR-0071`, `ADR-0074`)
 
@@ -239,7 +232,7 @@ recorded nondeterminism); real-world re-execution (not required to match); byte-
 (only fully controlled inputs). Concurrent executions are not required to produce byte-identical
 ledgers. Consistency unit is `project_id`.
 
-**CI job `replay-parity` (requirement; not currently wired in `.github/workflows/ci.yml`):** execute a
+**CI replay-parity gate (wired as `ColdReplayParity` in `.github/workflows/ci.yml`):** execute a
 live fixture run against the **production** ledger, fold its ledger cold, structurally diff
 reconstructed vs live terminal state — grants tree, budget vector, approval log, episode FSM included.
 Folding the same in-memory list twice is not this job. Time-travel debugging = fold to `seq=N` + resume
@@ -320,9 +313,9 @@ never enter any plugin cell. The scheduler MUST **read** a signed verdict; emitt
 
 ### 2.2 SPI definitions (typed, frozen, versioned)
 
-The SPI *texts* currently live under `layer0/spi/` as the fork to absorb (`ADR-0069`). Production
-implementations MUST converge onto `vanguard/packages/`. Python `Protocol` remains a client of the
-JSON-RPC wire.
+The canonical SPI protocols live in `vanguard/packages/ports/spi.py`; JSON-RPC lives in
+`vanguard/packages/domain/wire/jsonrpc.py` (`ADR-0069`). Python `Protocol` remains a client of the
+JSON-RPC wire; no residual `layer0/` dialect is authoritative.
 
 All payload types are frozen dataclasses **generated** from `schemas/mhf/*.json` (A-4; resolves
 D-21/D-29 — exactly one `EffectRequest`). Signatures below are normative.
@@ -598,10 +591,10 @@ competing/cooperating under the §6.2 allocator. Delegation depth is a `Reservat
 remains singular and exterior across the whole swarm — one economy, one court.
 
 **6.4 Domain-agnostic decomposition.** A Domain Pack = {toolkit(s) + oracle suite + manifest defaults +
-selector vocabulary}. TableWorld (currently orphaned, D-27) becomes Pack #2 as the generality witness; a
-`math` or `data-analysis` pack is Pack #3. The decomposition planner (`mhf.planner.decompose`) is
+selector vocabulary}. Pack #2 is **Math & Formal Deductive Verification**, the M-5 generality
+witness. TableWorld may be a later pack but cannot satisfy that gate. The decomposition planner is
 domain-blind: it operates on verbs, selectors, oracles, and cost vectors — the domain lives entirely in
-the pack. **Acceptance: adding Pack #N requires zero diffs under `layer0/` and under
+the pack. **Acceptance: adding Pack #N requires zero diffs under
 `vanguard/packages/{domain,kernel}/` (Invariant I-7).**
 — this is the handbook's M11 "Generality Falsification Invariant," merged here per matrix §1.4.
 
@@ -640,26 +633,24 @@ section's rationale, merged per matrix §1.10.)
 
 ---
 
-## 8. Migration Plan & CI Gates (v0.6 Concept Lock; `ADR-0069`, `ADR-0073`, `ADR-0074`)
+## 8. Migration Plan & CI Gates (v0.6.1; accepted ADRs `0069`–`0086`)
 
 **Direction (inverted from v0.5.0).** Recover mature `vanguard/packages/` semantics (kernel, JCS, WAL
 ledger, exterior evaluator, sandbox, stores, models, episode engine). Promote `layer0/` SPI contracts,
 JSON-RPC/UDS broker, lifecycle FSM, and compose digest shape. Do **not** rebuild WAL, evaluator, or
 sandbox inside `layer0/`. Do **not** create a third runtime. Do **not** rewrite the TCB in Rust.
 
-The M0–M6 table below remains a *historical* Foundation Lock sketch. It is **not** the next
-roadmap. The living engineering sequence is
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
-Where the table said "port kernel into `layer0/`", read: **converge onto packages; absorb layer0
-contracts**.
+The living execution sequence is [`sprint_active.md`](03_sprints/sprint_active.md); macro gates are
+in [`milestones.md`](02_roadmap/milestones.md). The gap register allocates falsifier identifiers but
+does not authorize work.
 
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
-| **M0 — Excise & Sanitize** (docs done in v0.5; v0.6 Concept Lock is this document + ADRs 0069–0074) | Docs collapsed; v0.6 destination reversed; GAMMA amendments | `G-M0-DOCS` plus ADRs 0069–0074 cited |
-| **Next code phase — CI subject of record** | Wire living CI to packages kernel/runtime/agency/adapters; negative tests for F1 and ceilings | production suites in CI; forged verdict cannot become accepted `VerdictRecorded` |
-| **Convergence** | Absorb SPI/jsonrpc; kill synthetic scheduler verdicts on the canonical path; parity then delete duplicates | behavioral parity, then deletion |
-| **Plugin walking skeleton** | Manifest → Resolve → Verify → Freeze → FrozenHarness; echo plugin on the wire | ADR-M0-13 on the packages path |
-| **Foundation E2E** | One real coding-agent path: model, authorized effect, filesystem, sandbox, signed eval, WAL, replay, trajectory | see exit gate below; **not** this Concept Lock wave |
+| **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
+| **M-3 / v0.6.2** | Named Component Graph, complete plugin lifecycle, absent-vs-forged rules, atomic `layer0/` deletion | RF-28–RF-45 and NOVA-4 green |
+| **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | one run ID, populated trajectory, exterior signed evidence; Foundation Stop Line |
+| **M-5 / v0.7.0** | Math/formal Pack #2 and Clean-Triad collapse | zero `domain/` or `kernel/` diffs; trajectory parity |
+| **M-6–M-10** | Mediated spawn, measured concurrency, declarative swarms, retrieval/macros, governed learning | each milestone's named falsifiers; no work before M-4 is green |
 
 **Standing CI gates for the code programme (Wave 0+, `ADR-0073`, `ADR-0074`):** production
 kernel/runtime/agency/adapters suites as subject of record; `replay-parity` against disk (not
@@ -667,10 +658,9 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**This lock wave's own gates (docs):** ADRs `0069`–`0074` cited; SPEC does not name `layer0/` as M1
-destination; KERNEL annex destination amended; GAMMA + gap register present. Living-CI green is
-**not** claimed: `test_repo_paths` and the stale sprint-6B archive citation remain a Wave-0
-hygiene item (P1-15 / F-20 in the `002` register).
+**Current M-2 gate:** RF-72 identifier governance is green. RF-23 and RF-25 are intentionally red
+for their diagnosed production gaps and are the only active implementation lanes. M-3 remains
+closed until both are green and the retained M-2 suite passes.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -691,18 +681,13 @@ the code is kept:
 - **`MetaLoopEngine` stays deleted** — the outer loop is a plugin at a scheduler slot (§5.1), never an
   engine — `ADR-0041`/D-41 + **ADR-M0-12**, also `TSK-CORE-011`.
 
-### 8.2 As-built DETERIORATIONs the code programme must close
+### 8.2 Current foundation gaps
 
-Re-verified 2026-08-18 and again at Concept Lock (2026-08-20). These are **Wave 0–2** work, not a
-`layer0/` destination rewrite:
-
-- **Provenance / `EpisodeStarted` / `ApprovalResolved`:** landed on the packages path (keep).
-- **Lexical E-COV 100%:** insufficient. Writer enforcement and F1 (unsigned pass) are the real I-2 gap.
-- **One `EffectRequest` (D-21 / I-1):** still open; codegen must become the source (`ADR-0074`).
-- **D-42 coding_session out of `domain/`:** already in `apps/coding/`; pack re-extraction is Wave 3–4,
-  not a first extraction from `domain/`.
-- **Fail-open ceilings, tautological replay, kernel-not-in-CI, content-free trajectory:** see
-  gap register.
+The earlier provenance, event-writer, ceiling, CI-subject, generated-`EffectRequest`, and cold replay
+gaps are closed on the packages path. Two M-2 gaps remain: RF-23 rejects content-valid but
+economically hollow or unattributable trajectories; RF-25 rejects reconstruction that cannot legally
+continue after hard process death. M-3 then closes the residual composition/registry fork and plugin
+lifecycle parity. Current status is recorded only on the active board.
 
 ### 8.3 Honour table (SPEC §9, do not reopen)
 
@@ -765,7 +750,8 @@ I-1 through I-10 are carried from the archived Tech Lead audit `CRITICAL_GAP_ANA
 3. **A control merges with its call site** (activation-bundle rule enforced, not aspirational).
 4. **State = fold(events), proven** by a **cold** replay from durable storage that reconstructs
    grants, budgets, approvals, and episode lifecycle and diffs against live state. Same-list fold is
-   not this invariant. The job is required and not currently wired (`ADR-0071`).
+   not this invariant. `ColdReplayParity` is the standing CI gate (`ADR-0071`); RF-25 strengthens it
+   from reconstruction parity to legal continuation in a fresh interpreter.
 5. **The judge stays exterior** — separate identity, signed verdicts, unreachable from agent and from
    plugins.
 6. **Plugins are untrusted by default.** Isolation tier declared in the plugin manifest; in-process

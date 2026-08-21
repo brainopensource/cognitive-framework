@@ -7,7 +7,6 @@ milestone: M-2 / v0.6.1 — RF-23 NOVA-1 + RF-25 NOVA-2 in flight
 spec: docs/SPEC.md
 law: ADRs 0069–0086 + docs/04_annex/
 register: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
-plan: wave2C_todo.md
 last_reviewed: 2026-08-21
 ---
 
@@ -23,7 +22,7 @@ production truth, the one flow, and the canonical decisions.
 | **Wave 0 — CI truth + falsifiers** | CLOSED (M-0) | — |
 | **Wave 1 — Trust spine** | **CLOSED — M-1 GREEN** | Completed evidence; no active plan. |
 | **Wave 2 — Convergence core** | **DONE; Round-4 evidence retained** | Completed evidence; no active plan. |
-| **Wave 2C — Evidence integrity** | **OPEN — M-2/v0.6.1 active lane** | plan: [`wave2C_todo.md`](../../wave2C_todo.md) |
+| **Wave 2C — Evidence integrity** | **OPEN — M-2/v0.6.1 active lane** | This board is the sole execution authority. |
 | **Wave 3 — Extensibility** | QUEUED — entry: M-2 green, including RF-23/RF-25 | Draft only after M-2 evidence is review-ready. |
 | **Wave 4 — Foundation E2E** | QUEUED — entry: M-1 + M-2 + M-3 | Draft only after M-3 evidence is review-ready. |
 
@@ -40,8 +39,9 @@ opens **Wave 2C** and binds M-2/v0.6.1 closure to exactly two primary falsifiers
 
 | Gate | Decision | Required red-to-green proof | Owner | State |
 |---|---|---|---|---|
-| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **RED CONFIRMED — CORRECT DIAGNOSIS** |
-| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **RED CONFIRMED — CORRECT DIAGNOSIS** |
+| **RF-72 / identifier governance** | ADR-0085 | RF allocations are unique and every canonical citation is allocated. | Tooling | **GREEN — 4 unit tests + repository linter pass** |
+| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **RED CONFIRMED — AUTHORIZED IN PROGRESS** |
+| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **RED CONFIRMED — AUTHORIZED IN PROGRESS** |
 
 RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23;
 they do not create additional M-2 scheduling lanes. Production changes begin only after the named
@@ -57,10 +57,33 @@ trajectory call site. Neither branch edits `kernel/`, `agency/episode/`, graph/p
 a second session/reducer. Merge order is RF-72 governance lock, Developer B's resume seam, Developer
 A's accounting join, then the combined M-2 re-gate.
 
-**Operator launch confirmation (required before production edits):** RF-72 must pass; RF-23 and
-RF-25 must each fail for the diagnosis in their assertion message, not for import, fixture, syntax,
-environment, or database-lock errors. Record the three command outputs on this board before moving
-either developer lane to `IN PROGRESS`.
+**Operator launch confirmation — GREEN, 2026-08-21:** RF-72 passed its four unit tests and the
+repository allocation scan. RF-23 failed on the intended route, measurement, identity, event-range,
+state-digest, and verdict-absence gaps. RF-25 failed on the intended reconciliation,
+`RunRecovered`, and durable-undeterminable gaps. Both production lanes are authorized.
+
+### M-2 implementation contracts
+
+**Developer A — NOVA-1 / RF-23 (3–4 working days):** keep `mhf.trajectory/1`; remove fabricated
+`_ZERO_COST`; join measurements where they originate; represent measured, estimated, and
+unavailable values distinctly; attribute provider/model and fingerprint-or-bounded-absence per
+turn; conserve episode totals; bind final state/event range; compute `D_R` without changing `D_H`;
+and derive legacy/promotability status rather than accepting it from input. Preserve legal
+zero-turn aborted episodes with `model_not_invoked`. Primary files are the trajectory schema,
+`runtime/trajectory.py`, telemetry/model attribution, and the final `runtime/session.py` assembly
+call. Do not add a second accounting store or change `kernel/`.
+
+**Developer B — NOVA-2 / RF-25 (2–3 working days):** use the file-backed SQLite WAL as the only
+state source in a fresh interpreter; fold the durable prefix; classify open S8a intent as
+undeterminable unless an exterior reconciliation proves occurrence; ledger `RunRecovered` through
+the canonical emitter; restore budgets/digests/sequence state; and continue without repeating a
+settled effect or guessing an uncertain one. Primary files are `runtime/ledger/recovery.py`, the
+recovery-facing construction seam, and the filed RF-25 fixture. Do not transfer live Python
+objects, create a second reducer/session, or touch `kernel/`.
+
+**Integration order:** Developer B proposes the narrow resume seam first; Developer A rebases the
+trajectory call site; then run RF-23 and RF-25 together over one continuous lineage. M-2 closes only
+after both are green, all retained M-2 gates pass, and the Tech Lead records the evidence here.
 
 ### Wave 2 convergence assignment slices (completed history)
 
@@ -411,7 +434,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 1.3-D | Trajectory assembly + emission at `EpisodeCompleted` | F-12 | DONE |
 | 1.3-E | Receipt carries `lease_id`/`grant_digest` | P1-9 | DONE |
 
-### Wave 2 — Convergence + Evidence Integrity ([`wave2C_todo.md`](../../wave2C_todo.md)) (IN FLIGHT — M-2/v0.6.1)
+### Wave 2 — Convergence + Evidence Integrity (IN FLIGHT — M-2/v0.6.1)
 | ID | Task | Readiness |
 |---|---|---|
 | 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | DONE |
@@ -423,8 +446,8 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 2.2-B | Delete 2.2-A KILL surfaces; retire v4 write path | DONE |
 | 2.2-C | `root.py` split in place (compose, session, wiring) | DONE |
 | 2.2-D | Widen I-7 domain-blindness linter & boundary rows | READY |
-| 2C-R23 | RF-23 filed at `test/falsifiers/test_rf23_trajectory_content.py`; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **RED CONFIRMED — READY AFTER RF-72 GREEN** |
-| 2C-R25 | RF-25 filed at `test/falsifiers/test_rf25_cold_continuation.py`; prove hard-death continuation from file-backed SQLite WAL | **RED CONFIRMED — READY AFTER RF-72 GREEN** |
+| 2C-R23 | RF-23 filed at `test/falsifiers/test_rf23_trajectory_content.py`; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **RED CONFIRMED — IN PROGRESS** |
+| 2C-R25 | RF-25 filed at `test/falsifiers/test_rf25_cold_continuation.py`; prove hard-death continuation from file-backed SQLite WAL | **RED CONFIRMED — IN PROGRESS** |
 | 2C-REGATE | Integrate Round-4 evidence + RF-23/RF-25; run full M-2 gate and obtain Tech Lead signature | BLOCKED on RF-23/RF-25 |
 
 ### Wave 3 — Extensibility (QUEUED — Entry: signed M-2 including RF-23/RF-25)

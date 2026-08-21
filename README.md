@@ -10,11 +10,11 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0086`](docs/05_adr/0086-historical-adr-working-tree-consolidation.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-2 / v0.6.1 Wave 2C active.** RF-23 (NOVA-1) and RF-25 (NOVA-2) tests are filed; red execution confirmation precedes the two parallel implementation lanes. |
+| **Status** | **M-2 / v0.6.1 Wave 2C development active.** RF-72 is green; RF-23 (NOVA-1) and RF-25 (NOVA-2) are red for their intended causes and authorized as parallel implementation lanes. |
 | **Foundation Plan** | M-0–M-4 trusted foundation, then gated M-5–M-10 generality, delegation, concurrency, framework building, retrieval/macros, and governed meta-cognition |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
-[![Concept Lock](https://img.shields.io/badge/AETHER-v0.6.0--concept--lock-blue.svg)](docs/SPEC.md)
+[![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
 [![Approved](https://img.shields.io/badge/Director_review-M--2_Wave_2C-brightgreen.svg)](docs/03_sprints/sprint_active.md)
 
@@ -56,7 +56,9 @@ All documentation in this repository is strictly organized into three distinct a
    - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (current foundation, Tier S+, and repository-governance lock: ADR-0069–0086).
 4. **The Active Execution Board**:
    - [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) — Single living execution board, active wave lanes, and task register.
-   - [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) — Authoritative Macro Milestones (M-0 through M-10).
+   - [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) — Macro sequencing and gates (M-0 through M-10).
+5. **Current Overview**:
+   - [`docs/00_overview/SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md) — Concise as-built map; navigational, not authority.
 
 ---
 
@@ -76,7 +78,7 @@ Aether-D-System/
 │   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
 │   │   └── apps/                     # Reserved client lattice slot
 │   └── clients/cli/                  # TypeScript/React/Ink interactive terminal UI (`vg`)
-├── layer0/                           # Copy-fork under active convergence (SPI, JSON-RPC, registry)
+├── layer0/                           # Residual M-3 migration input (events, registry, compose)
 ├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
 ├── test/                             # Automated test suite (1100+ tests across 17 categories)
 ├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
@@ -95,7 +97,7 @@ Aether-D-System/
 | **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
 | **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). |
 | **Apps** | `vanguard/packages/apps/` | Reserved boundary slot in hexagonal lattice. |
-| **Layer-0 Fork** | `layer0/` | Temporary copy-fork being absorbed into `vanguard/packages/`. Duplicate kernel, scheduler, and fold modules removed; registry and compose compiler scheduled for complete absorption. |
+| **Layer-0 Fork** | `layer0/` | Temporary M-3 parity source. Kernel, scheduler, SPI, and JSON-RPC surfaces already converged or were removed; residual events, registry, and compose surfaces are deleted atomically after NOVA-4. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
 | **CLI / TUI** | `vanguard/clients/cli/` | Interactive terminal UI (`vg`) written in TypeScript using React and Ink. Workspace scripts: `npm run vg`. |
 | **Test Suite** | `test/` | Comprehensive test suite covering all layers (`test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, `test/security`, `test/trust`, `test/packs`, `test/falsifiers`, `test/registry`). Details in [`test/README.md`](test/README.md). |
@@ -145,7 +147,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ```
 
 1. **Monotonic Attenuation**: Child agents spawned via `spawn()` can only receive a subset of the parent's capability grants. Privileges strictly narrow down the execution tree.
-2. **Pre/Post Receipts**: Every side effect generates a pre-effect receipt and post-effect receipt recorded in the append-only SQLite WAL ledger.
+2. **Intent and Receipt**: Every privileged side effect records durable pre-effect intent before execution and a terminal receipt, failure, rejection, or explicit undeterminable reconciliation afterward.
 3. **Physical & Network Isolation**: Worker execution happens in a rootless bubblewrap container (UID `10001`). The evaluator runs in an isolated environment (UID `10002`) and communicates only through signed verdicts.
 4. **Fail-Closed Governance**: Dangerous actions require cryptographic Ed25519 human approval.
 
@@ -158,8 +160,8 @@ Execution status and macro milestones are tracked in:
 - **Active Execution Board**: [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md)
 
 ```text
-M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (In Flight) ──▶ M-3 (Queued) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Post-Foundation)
-[CI Truth/Falsif]   [Trust Spine]      [One Runtime]     [Extensibility]    [One Real Coding E2E]    [Generality & Self-Tuning]
+M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (In Flight) ──▶ M-3 (Queued) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Gated)
+[CI Truth/Falsif]   [Trust Spine]      [Corpus + Resume] [Extensibility]    [One Real Coding E2E]    [Generality → v1.0]
 ```
 
 ---
@@ -221,5 +223,8 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 ## 8. Contributor & Agent References
 
 - **Contributor & Agent Procedure**: [`AGENTS.md`](AGENTS.md)
-- **Claude Guidance**: [`CLAUDE.md`](CLAUDE.md)
 - **Testing Architecture & Guide**: [`test/README.md`](test/README.md)
+
+`AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
+model-specific instruction files; current execution state lives only in
+[`sprint_active.md`](docs/03_sprints/sprint_active.md).

@@ -1,17 +1,17 @@
 ---
 id: SPRINT-V060-FOUNDATION-BOARD
 file: docs/03_sprints/sprint_active.md
-title: "Active board — v0.6 Foundation (M-1 green → Wave 2 in flight)"
+title: "Active board — v0.6.1 Foundation (M-2 evidence integrity in flight)"
 status: ACTIVE
-milestone: M-1 GREEN (Wave 1 closed) → M-2 (Wave 2) in flight
+milestone: M-2 / v0.6.1 — RF-23 NOVA-1 + RF-25 NOVA-2 in flight
 spec: docs/SPEC.md
-law: ADRs 0069–0076 + docs/04_annex/
+law: ADRs 0069–0084 + docs/04_annex/
 register: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
-plans: docs/03_sprints/plans/
-last_reviewed: 2026-08-20
+plan: wave2C_todo.md
+last_reviewed: 2026-08-21
 ---
 
-# Active board — v0.6 Foundation
+# Active board — v0.6.1 Foundation
 
 **Start here if you are new:** read [`README.md`](../../README.md) and [`SPEC.md`](../SPEC.md) first — they name
 production truth, the one flow, and the canonical decisions.
@@ -21,14 +21,42 @@ production truth, the one flow, and the canonical decisions.
 | Lane | State | Who |
 |---|---|---|
 | **Wave 0 — CI truth + falsifiers** | CLOSED (M-0) | — |
-| **Wave 1 — Trust spine** | **CLOSED — M-1 GREEN** | plan: [`plans/wave1_trust_spine.md`](plans/wave1_trust_spine.md) |
-| **Wave 2 — Convergence** | **OPEN — entry satisfied, both developers** | plan: [`plans/wave2_convergence.md`](plans/wave2_convergence.md) |
-| **Wave 3 — Extensibility** | QUEUED — entry: M-2 green (unchanged) | plan: [`plans/wave3_extensibility.md`](plans/wave3_extensibility.md) |
-| **Wave 4 — Foundation E2E** | QUEUED — entry: M-1 + M-2 + M-3 | plan: [`plans/wave4_foundation_e2e.md`](plans/wave4_foundation_e2e.md) |
+| **Wave 1 — Trust spine** | **CLOSED — M-1 GREEN** | plan: [`done/wave1_trust_spine.md`](done/wave1_trust_spine.md) |
+| **Wave 2 — Convergence core** | **DONE; Round-4 evidence retained** | plan: [`done/wave2_convergence.md`](done/wave2_convergence.md) |
+| **Wave 2C — Evidence integrity** | **OPEN — M-2/v0.6.1 active lane** | plan: [`wave2C_todo.md`](../../wave2C_todo.md) |
+| **Wave 3 — Extensibility** | QUEUED — entry: M-2 green, including RF-23/RF-25 | plan: [`doing/wave3_extensibility.md`](doing/wave3_extensibility.md) |
+| **Wave 4 — Foundation E2E** | QUEUED — entry: M-1 + M-2 + M-3 | plan: [`doing/wave4_foundation_e2e.md`](doing/wave4_foundation_e2e.md) |
 
-### Wave 2 assignment slices (parallelizable)
+### Director ratification — 2026-08-21
 
-Sprint 2.1's tasks are independent moves; 2.2 depends on all of 2.1. Wave 3's entry is **not**
+ADRs [`0077`](../05_adr/0077-named-component-graph-manifest.md) through
+[`0084`](../05_adr/0084-compounding-macro-tools-active-inference.md) are accepted. Their canonical
+map is in the [`ADR index`](../05_adr/INDEX.md#tier-s-evolution-contract-00770084). Acceptance fixes
+the long-horizon design; it does not move deferred implementation before its milestone.
+
+The previous M-2 Round-4 submission remains valid evidence for the original convergence scope,
+but it does **not** close M-2 under the ratified content/continuation law. The Engineering Director
+opens **Wave 2C** and binds M-2/v0.6.1 closure to exactly two primary falsifiers:
+
+| Gate | Decision | Required red-to-green proof | Owner | State |
+|---|---|---|---|---|
+| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **READY — WRITE RED FIRST** |
+| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **READY — WRITE RED FIRST** |
+
+RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23;
+they do not create additional M-2 scheduling lanes. Production changes begin only after the named
+tests demonstrably fail for the diagnosed reasons. M-3 remains closed until both primary gates and
+all pre-existing M-2 gates are green and the Tech Lead signs the re-gate.
+
+**Immediate file ownership:** Developer A owns the trajectory schema/writer/session accounting
+surface. Developer B owns the fresh-process continuation test and recovery surface. If both need
+`runtime/session.py`, Developer B proposes the narrow resume interface first and Developer A lands
+or approves the shared seam; neither branch invents a second session engine.
+
+### Wave 2 convergence assignment slices (completed history)
+
+The assignments below record the completed convergence work; do not pick them up again. Sprint
+2.1's tasks were independent moves; 2.2 depended on all of 2.1. Wave 3's entry is **not**
 relaxed — 3.1 builds on the wire and lifecycle that 2.1 lands, so starting it early would fork the
 very duplication Wave 2 exists to remove.
 
@@ -111,7 +139,7 @@ it, not the reverse.
 
 </details>
 
-### M-2 gate — **SUBMITTED FOR RE-GATE (round 4)** (Developer A, 2026-08-21)
+### M-2 convergence evidence — **ROUND 4 SUBMISSION RETAINED; EXIT SCOPE EXTENDED BY ADR-0078/0082** (Developer A, 2026-08-21)
 
 All three requirements from the Round-3 block are implemented and verified green on the canonical `vanguard/packages/` path:
 
@@ -291,13 +319,17 @@ Wave 2 — fold it in here rather than leaving one more of the same.
   each defined exactly once (`compose.py` 390, `session.py` 646, `wiring.py` 347). No parallel
   composition path. `session.py` exceeds the plan's ~500-LOC guidance; it is one cohesive class and
   splitting it further would invent seams — accepted, noted.
-- **Remaining in Wave 2:** M-2 re-gate (Tech Lead), then 2.2-D.
+- **2.2-D — retained in M-2.** Complete the widened I-7/boundary check if its board assertion is
+  not yet evidenced by a landed task-specific falsifier.
+- **Wave 2C — OPEN by Director ratification.** RF-23 and RF-25 are the remaining primary M-2
+  gates. The Round-4 convergence submission is retained; it is not repeated.
 
 ### Decision queue
 
 | Item | Needs | Owner |
 |---|---|---|
-| M-2 exit re-gate | Fix landed (Round 4 folds + property test + all linters/suites green); Tech Lead sign-off | Tech Lead |
+| M-2 / v0.6.1 exit re-gate | Round-4 convergence evidence + RF-23 green + RF-25 green + all existing gates green | Tech Lead |
+| M-3 entry | Signed M-2 re-gate; ADR-0077/0079/0081 implementation remains queued until then | Director / Tech Lead |
 | Release/version cut after M-4 | Decision | Director |
 
 ## Already settled — do not reopen on this board
@@ -320,7 +352,7 @@ no.
 |---|---|
 | `layer0/scheduler/driver.py` fabricates an unsigned `"pass"`; `layer0/spi/ceiling.py` is fail-open | 2.2-B / 2.1-D — both die with the fork |
 | `test/layer0/kernel/test_dispatch.py` — 3 errors, `EffectContext.depth` is `None` against `layer0/kernel/dispatch.py:388`. Pre-existing at `b2ccecb`, not a Wave-1 regression (verified against a clean tree). The fork drifted from the regenerated types. **Do not patch the fork** — its CI step is now advisory and 2.2-B deletes both | 2.2-A (triage: this behavior needs a packages twin or an explicit kill) / 2.2-B |
-| `assemble_trajectory` reports a zero cost vector; real per-turn cost needs the governor's settled ledger | Wave 4 (`wave4_foundation_e2e.md` cost row) |
+| `assemble_trajectory` reports a zero cost vector; per-turn attribution and conserved cost must join ledger/adapter measurements without fabrication | **Wave 2C / RF-23 (NOVA-1)** — ADR-0078 supersedes the Wave-4 carry-out |
 | `intersect_ceilings` is the identity over a single harness ceiling until a plugin ceiling exists | 3.1 (registry lands the second operand) |
 
 ## Definition of done (every task)
@@ -348,7 +380,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | W0-FALS | Falsifiers F-01…F-21 registered as tests | DONE |
 | W0-HYG | F-19 `__init__.py` for integration/governance; F-20 oracle artifact; stale-path cleanup | DONE |
 
-### Wave 1 — Trust Spine (`plans/wave1_trust_spine.md`) (CLOSED — M-1 GREEN)
+### Wave 1 — Trust Spine (`done/wave1_trust_spine.md`) (CLOSED — M-1 GREEN)
 | ID | Task | Falsifier | Readiness |
 |---|---|---|---|
 | 1.1-A | Regenerate types; fix generator | F-13 | DONE |
@@ -370,7 +402,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 1.3-D | Trajectory assembly + emission at `EpisodeCompleted` | F-12 | DONE |
 | 1.3-E | Receipt carries `lease_id`/`grant_digest` | P1-9 | DONE |
 
-### Wave 2 — Convergence (`plans/wave2_convergence.md`) (IN FLIGHT — M-2)
+### Wave 2 — Convergence + Evidence Integrity (`done/wave2_convergence.md`, [`wave2C_todo.md`](../../wave2C_todo.md)) (IN FLIGHT — M-2/v0.6.1)
 | ID | Task | Readiness |
 |---|---|---|
 | 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | DONE |
@@ -382,8 +414,11 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 2.2-B | Delete 2.2-A KILL surfaces; retire v4 write path | DONE |
 | 2.2-C | `root.py` split in place (compose, session, wiring) | DONE |
 | 2.2-D | Widen I-7 domain-blindness linter & boundary rows | READY |
+| 2C-R23 | Write RF-23 red; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **READY — PRIMARY M-2 GATE** |
+| 2C-R25 | Write RF-25 red; prove fresh-interpreter continuation from file-backed SQLite WAL | **READY — PRIMARY M-2 GATE** |
+| 2C-REGATE | Integrate Round-4 evidence + RF-23/RF-25; run full M-2 gate and obtain Tech Lead signature | BLOCKED on RF-23/RF-25 |
 
-### Wave 3 — Extensibility (`plans/wave3_extensibility.md`) (QUEUED — Entry: M-2)
+### Wave 3 — Extensibility (`doing/wave3_extensibility.md`) (QUEUED — Entry: signed M-2 including RF-23/RF-25)
 | ID | Task | Readiness |
 |---|---|---|
 | 3.1-A | Registry FSM on packages; ledgered transitions | READY |
@@ -394,7 +429,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 3.2-B | Coding-token sweep; widened I-7 green | READY |
 | 3.2-C | One manifest parser | DEV-LOCAL |
 
-### Wave 4 — Foundation E2E (`plans/wave4_foundation_e2e.md`) (QUEUED — Entry: M-3)
+### Wave 4 — Foundation E2E (`doing/wave4_foundation_e2e.md`) (QUEUED — Entry: M-3)
 | ID | Task | Readiness |
 |---|---|---|
 | 4.1-A | Fixture repo + preregistered oracle | READY |
@@ -404,4 +439,3 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 
 ### Director-Only Escalations (Do Not Pick Up Locally)
 New event kinds · Sixth SPI · Kernel LOC ceiling change · Second digest/canonicalisation algorithm · Concurrency enablement · Version/release cut after M-4 · Any item on SPEC §9 refusal list.
-

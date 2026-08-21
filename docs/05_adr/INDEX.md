@@ -1,7 +1,7 @@
 # ADR Index — Architecture Decision Records
 
 > **Status:** Living Master Index of Architecture Decision Records for Vanguard / AETHER.  
-> **Rule:** Append-only numbering. ADRs outrank general documentation; newer ADRs supersede older ones by explicit citation (e.g., ADR-0069 reverses ADR-0001; ADR-0076 canonicalizes execution artifacts).  
+> **Rule:** Append-only numbering. ADRs outrank general documentation; newer ADRs supersede older ones by explicit citation (e.g., ADR-0069 reverses ADR-0001; ADR-0076 canonicalizes execution artifacts; ADR-0077–0084 ratify the Tier S+ evolution contract).  
 > **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_sprints/sprint_active.md).
 
 ---
@@ -9,6 +9,7 @@
 ## Quick Navigation
 
 - 🚀 [v0.6.0 Concept Lock & Foundation Execution (`0069`–`0076`)](#v060-concept-lock--foundation-execution-canonical-law) — **Start here for active production law**
+- 🧭 [Tier S+ Evolution Contract (`0077`–`0084`)](#tier-s-evolution-contract-00770084) — **Ratified v0.6.1→v1.0 design and phased implementation law**
 - 🛡️ [ADR-M0 Namespace (`M0-01`–`M0-13`)](#adr-m0-namespace-foundation-lock) — M0 Foundation Lock decisions
 - 📜 [Pre-v0.6 Historical Decisions (`0000`–`0068`)](#pre-v06-historical-decisions-00000068) — Lineage and historical evolution
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -29,6 +30,30 @@ These ADRs form the binding architectural constitution approved by Engineering L
 | `0074` | [`0074-gamma-lock-amendments-proof-budget-writer-identity.md`](0074-gamma-lock-amendments-proof-budget-writer-identity.md) | **GAMMA Lock Amendments:** Bound falsifier discipline (proof obligations); typed budget algebra (additive dimensions vs. structural ceilings); writer authority on privileged events; full $D_H$ definition. | accepted |
 | `0075` | [`0075-director-review-v060-approved-wave0-authorized.md`](0075-director-review-v060-approved-wave0-authorized.md) | **Director Review & Wave 0 Authorization:** Formal Director/Chief Engineer approval of Concept Lock GAMMA; adds falsifiers F-18…F-21; authorizes Wave 0. | accepted |
 | `0076` | [`0076-foundation-execution-decisions-canonical-artifacts.md`](0076-foundation-execution-decisions-canonical-artifacts.md) | **Canonical Artifacts for Execution:** Names definitive artifacts for envelope (`mhf.event/1`), selector algebra (`resource_selector.py`), bytes (JCS RFC 8785), $D_H$, signed verdicts (`SignedVerdict`), and single-writer `LedgerEmitter`. | accepted |
+
+---
+
+## Tier S+ Evolution Contract (`0077`–`0084`)
+
+The Engineering Director ratified this catalog on **2026-08-21**. These ADRs are binding design
+law, but their implementation remains limited by the milestone named in each record. In
+particular, acceptance does not authorize M-3–M-10 production work before its entry gate. This
+table is the canonical numbering map and supersedes conflicting maps in advisory proposal files.
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0077` | [`0077-named-component-graph-manifest.md`](0077-named-component-graph-manifest.md) | **Named Component Graph:** `mhf.manifest/2`, typed bindings, one semantic compiler, complete graph identity in $D_H$; implementation at M-3. | accepted | 2026-08-21 |
+| `0078` | [`0078-trajectory-un-hollowing-cost-accounting.md`](0078-trajectory-un-hollowing-cost-accounting.md) | **NOVA-1:** non-breaking `mhf.trajectory/1` content strengthening, explicit missingness, conserved cost, $D_R/D_X$, derived legacy exclusion; immediate RF-23 M-2 gate. | accepted | 2026-08-21 |
+| `0079` | [`0079-absent-vs-forged-derived-promotability.md`](0079-absent-vs-forged-derived-promotability.md) | **Absent vs Forged:** three evidence states; declared absence enters $D_H$; promotability is derived and never author-writable. | accepted | 2026-08-21 |
+| `0080` | [`0080-capability-mediated-agent-spawn-design-freeze.md`](0080-capability-mediated-agent-spawn-design-freeze.md) | **Mediated `agent.spawn`:** design frozen now; S0–S12 implementation deferred to M-6 after M-4/M-5. | accepted; implementation deferred | 2026-08-21 |
+| `0081` | [`0081-plugin-lifecycle-runtime-absorption-layer0-deletion.md`](0081-plugin-lifecycle-runtime-absorption-layer0-deletion.md) | **Lifecycle and convergence:** add `PluginDiscovered`/`PluginVerified`; absorb registry/compose; NOVA-4; atomic Layer-0/package/CI deletion at M-3. | accepted | 2026-08-21 |
+| `0082` | [`0082-universal-turn-loop-m10-compatibility-contract.md`](0082-universal-turn-loop-m10-compatibility-contract.md) | **Universal mechanism and M-10 compatibility:** RF-25 cold continuation plus twelve stable substrate seams for graph, authority, state, evidence, identity, data, ports, schemas, and promotion. | accepted | 2026-08-21 |
+| `0083` | [`0083-dynamic-pareto-controller-profile-matrix.md`](0083-dynamic-pareto-controller-profile-matrix.md) | **Dynamic Pareto profiles:** alpha/beta/gamma/delta as composition policy; feasibility first; schema M-3, controller activation M-7. | accepted; activation deferred | 2026-08-21 |
+| `0084` | [`0084-compounding-macro-tools-active-inference.md`](0084-compounding-macro-tools-active-inference.md) | **Compounding and Active Inference:** T0 witness memo at M-5; least-privilege macro lab M-9; VFE/EFE, DPO, exact paired promotion M-10. | accepted; phased implementation | 2026-08-21 |
+
+**Immediate authorization boundary.** For M-2/v0.6.1, the newly active implementation gates are
+only ADR-0078/RF-23 and ADR-0082/RF-25. The other accepted ADRs constrain future design and do not
+self-authorize their deferred code.
 
 ---
 
@@ -140,4 +165,3 @@ Historical decisions migrated from the Phase 0–3 registers.
 - [`SPEC.md`](../SPEC.md) — Living normative specification (Vanguard Meta-Harness Framework).
 - [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — Substrate generality analysis and v0.6.1 recommendations.
 - [`004_V061_ALIGNMENT_ROADMAP.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — v0.6.1 alignment and M-2 through M-10 execution roadmap.
-

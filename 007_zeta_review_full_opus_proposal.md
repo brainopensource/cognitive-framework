@@ -540,6 +540,8 @@ Note the shape of that table: **the component graph may make the sixth SPI unnec
 > **Status of this section.** Each block below is the **complete proposed text** of a new append-only ADR, ready to be written to the named path. They are **drafts** until committed with a Director signature. Per `ADR-0000`, every ADR states what it narrows or extends and names its reversal condition; per `ADR-0074`, **a concept without a bound falsifier is not locked**, so every ADR carries a 1-to-1 falsifier table.
 >
 > **Namespace note.** New falsifiers use the `RF-*` (Register Falsifier) prefix per §7.3, which resolves the verified collision between `docs/04_annex/KERNEL.md`'s `F-01…F-25` and the `002` register's `F-01…F-22`. Existing register falsifiers are aliased `RF-01 ≡ F-01 … RF-22 ≡ F-22`.
+>
+> ⚠ **Numbering precedence.** The `RF-nn` identifiers used narratively in §2 and §3 are *thematic groupings*. Because `RF-01…RF-22` are consumed by the aliased Wave-0/1 falsifiers, the **authoritative monotonic numbering starts at `RF-23` and is defined in [§6.3](#63-the-1-to-1-executable-falsifier-matrix)**. Where §2/§3 and §6.3 differ on a number, **§6.3 wins**; the test-function names are identical in both and are the stable key.
 
 ---
 
@@ -1942,3 +1944,241 @@ Every requirement in this document maps to exactly one named test function. **`R
 - [ ] **No metaphysical framing** in any document under `docs/` (`ADR-M0-10`, `REJ-10`).
 
 ---
+
+## §7 · Repository Hygiene & Document Update Cascade
+
+> **Sequencing rule that governs this whole section.** Hygiene that is **cheap, local, and reversible** executes in M-2. Hygiene that is **structural** (the collapse to the Clean Triad) is **forbidden before M-4 closes** (`ADR-0082` D3). Do not mix them.
+
+### 7.1 Stale artifacts — immediate, M-2, no ADR required
+
+| # | Artifact | Verified state | Directive | Owner |
+|---|---|---|---|---|
+| H-1 | `DELETE.md` (repo root) | **0 bytes** `[VERIFIED]` | **`git rm DELETE.md`.** A zero-byte file whose name is an instruction is a landmine for every future reader | Dev A |
+| H-2 | `docs/08_workflows/` | **Empty directory** `[VERIFIED]` | **Delete.** If workflow docs are wanted later, `docs/08_diagrams/` already exists and holds four SVGs | Dev A |
+| H-3 | `docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md` **and** `_B.md` | Near-duplicate pair, **both carrying `id: REF-06-M5`** and identical titles `[VERIFIED]` | **Keep `_B` (the successor); delete the original; strike the duplicate front-matter id.** Two documents claiming one id is the prose form of a duplicate primary key | Tech Lead |
+| H-4 | `docs/06_references/vanguard_body_detailed.md` | Built on biological / cosmological framing | **Director ruling: RETIRE from `docs/`.** `ADR-M0-10` / `REJ-10` forbid that framing in *any* document under `docs/`, and a standing refusal with a live exception is not a refusal. Preserve in git history; the ideas that survive re-enter as ADR-shaped proposals in plain language | **Director** |
+| H-5 | `docs/06_references/RESEARCH_Harness_Builder_Framework.md` | A greenfield PRD (Redis / NATS / ChromaDB / K8s / event bus) contradicting the locked hexagonal lattice | **Retain, with a mandatory banner:** *"REJECTED AS A COMPETING ARCHITECTURE (`ADR-0069`, `ADR-0070`). Mine for plugin/adapter ideas only. This design would re-create the dual-runtime failure."* Deleting it loses the catalog; leaving it unmarked invites a re-import | Tech Lead |
+| H-6 | `002_beta_…`, `004_delta_…`, `005_epsilon_…`, `006_fi_…`, **`007_zeta_…` (this file)** at repo root | Review artifacts outside the documentation tree; three are 0 bytes `[VERIFIED]` | **Move all non-empty ones to `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/`; delete the empty ones.** Root-level review files are outside the Clean Triad and outside every linter's scan path | Tech Lead |
+| H-7 | `workflow_visualizer.html` (repo root, 49 KB) | Unreferenced by any doc or tool `[VERIFIED]` | **Move to `tools/substrate_visualizer/`** (which already exists) or delete. Not a root artifact | Dev B |
+| H-8 | `docs/00_overview/SYSTEM_OVERVIEW.md` §1.4, §7.4 | References `DIRECTOR_TODO_LOCK_CONCEPTS.md` (V1) — **not present at that path** `[VERIFIED]` | Repoint or strike. `check_markdown_links.py` does not catch it — see H-9 | Tech Lead |
+| H-9 | `tools/linters/check_markdown_links.py` | `DOC_GLOBS = ("README.md", "docs/README.md", "docs/agile/sprint6B/*.md")` — the third glob **matches nothing** `[VERIFIED]` | **Widen to `docs/**/*.md` + repo-root `*.md`.** The gate currently reports `LINK PASS` while the entire `docs/` corpus, all 90 ADRs, and both Director briefings go unchecked. **This is the same defect class as `F-18`: a linter narrower than the invariant it certifies** — and it is why four broken ADR links survived CI | Dev B |
+| H-10 | `docs/03_sprints/plans/` referenced by `sprint_active.md`; wave plans actually live in `docs/03_sprints/doing/` and `done/` `[VERIFIED]` | Path drift between the board and the tree | Repoint `sprint_active.md`'s `plans:` front-matter key; add both directories to `check_stale_paths.py` | Dev A |
+
+> **H-9 is the highest-value item in this table** and is not cosmetic. A link checker that validates two files while reporting `LINK PASS` is a gate that **manufactures false confidence** — precisely the failure mode `F-18` was raised for and precisely the failure mode that let `SYSTEM_OVERVIEW` ship with four dead ADR links (`003` §7.4). Fix it in M-2, before the corpus grows by six ADRs.
+
+### 7.2 `docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_…GAP_REGISTER.md`
+
+**Authority:** authoritative on **outcomes**; cannot contradict `SPEC.md` or the ADRs. Retires at M-5 (`ADR-0082` D3).
+
+| § | Directive |
+|---|---|
+| **Header** | Add: *"Falsifier namespace renamed `F-*` → `RF-*` (`ADR-0082` D5) to resolve the verified collision with `docs/04_annex/KERNEL.md`'s kernel-control `F-01…F-25`. Alias table in §4.2a. Scheduled to retire as a standing authority at M-5."* |
+| **§4.2 header** | Rename column `ID` → `RF-ID`; add an `Authorising ADR` column |
+| **§4.2 `F-08` row** | **Restate as retired:** *"`RF-08` — **STALE, retired at Wave-1 exit.** The test dispatched a fully authorized `fs.write` and asserted the grant path must fail on its own happy path. The kernel is correct: S6 issues via `SinkRegistry.requires_grant`; S8 re-verifies against the descriptor digest at the point of effect (`K-05`); S8a records `grantId`/`grantDigest` in durable intent. Restated in both directions in `test/falsifiers/`. No kernel change."* This currently lives only in a sprint-board table and **must** be in the register |
+| **§4.2 `F-12` row** | **Replace with `RF-23`** and the eight content assertions of `ADR-0078`. Add: *"Schema validity is necessary and not sufficient — a content-free record satisfies a validity assertion while violating I-9."* |
+| **§4.2a (NEW)** | The alias table `RF-01 ≡ F-01 … RF-22 ≡ F-22` |
+| **§4.2b (NEW)** | Insert rows `RF-23` … `RF-58` verbatim from §6.3 of this document, in the same table format, each naming its authorising ADR and milestone |
+| **§3 Wave 2 exit gate** | Append: *"`RF-23` (populated trajectory) and `RF-25` (cold suspend/resume) are M-2 exit conditions. `RF-25` red blocks M-3 entry and re-scopes M-7 as a rewrite."* |
+| **§3 Wave 3 exit gate** | Replace with the seven-clause M-3 gate of §4.2 above, including **all seven** FSM transitions ledgered |
+| **§3 Wave 4** | Row 8 changes from *"Schema-valid `mhf.trajectory/1`"* to *"**Schema-valid AND populated** `mhf.trajectory/1` (`RF-23` + `RF-48`)"* |
+| **§2 deferred table** | Append: *"Automated environment/arena synthesis — **refused as a substrate feature** (§1.2.4). Preregistered oracles exist so the judged cannot author its own arena. May enter as pack data behind a preregistration event, never as a core capability."* |
+| **§4.4** | `P1-14` (concurrency) gains: *"gated on `RF-25`, then on `RF-56` (`Θ(N)` messaging) at M-7."* |
+
+### 7.3 `docs/05_adr/` — the ADR cascade
+
+| Action | Detail |
+|---|---|
+| **CREATE** `0077-named-component-graph-is-the-composition-surface.md` | Full text: §3.1 |
+| **CREATE** `0078-trajectory-content-contract-learnable-corpus.md` | Full text: §3.2 |
+| **CREATE** `0079-absent-vs-forged-declarable-guardrails.md` | Full text: §3.3 |
+| **CREATE** `0080-agent-spawn-as-capability-mediated-kernel-verb.md` | Full text: §3.4 |
+| **CREATE** `0081-layer0-terminal-absorption-nova4-plugin-event-kinds.md` | Full text: §3.5 |
+| **CREATE** `0082-loop-as-mechanism-cold-resume-and-scheduled-reviews.md` | Full text: §3.6 |
+| **UPDATE** `INDEX.md` | Six rows; note that `0077` extends `0071`/`0072`, `0078` narrows `F-12`, `0079` extends `0072`/`0074`, `0080` extends `0070`, `0081` extends `0069`/`M0-13`, `0082` extends `0070`/`0071`/`M0-02`/`M0-03` |
+| **DO NOT EDIT** `0069`–`0076`, `ADR-M0-*` | Append-only (`ADR-0000`). `ADR-0082` D5 **extends** `ADR-M0-02` by citation with evidence; it does not edit it |
+| **`DEFERRED_REJECTED.md`** | Add `REJ-13`: *"Automated environment/arena synthesis as a core capability"* (§1.2.4). Add `REJ-14`: *"CRDTs / eventual consistency / cache-coherence protocols for inter-agent state"* — `project_id` is the consistency unit with a total order; revisit only if `RF-56` at M-7 demands it (§1.2.2) |
+
+**The namespace ruling, stated once for implementers.** `F-01 … F-25` exist with different meanings in `KERNEL.md` (kernel controls, embedded in ~19 source and test files) and in the `002` register (bound falsifiers, embedded in docs and `test/falsifiers/`). The **register** side renames because its blast radius is smaller: `F-*` stays with the annex; `RF-*` becomes the register's. `RF-28` (`test_falsifier_ids_are_unique_across_annex_and_register`) is the linter that prevents recurrence, and it belongs in `tools/linters/`.
+
+### 7.4 `docs/SPEC.md` — section-by-section diff directives
+
+> **These are `v0.6.1`/`v0.6.2` edits to the version anchor and four sections. `SPEC.md` is law; every edit below cites its authorising ADR.**
+
+| § | Directive |
+|---|---|
+| **Header — Version anchor** | `v0.6.0 Concept Lock` → `v0.6.1 Substrate Correction Lock (ADRs 0069–0074, Director-approved by 0075; corrections 0077–0082)`. **Do not** cut `pyproject.toml` from `0.4.5b1` — that happens at M-4/v0.7.0 and is Director-only |
+| **§1.0** — Recursive machine | Append after the `spawn(...)` line: *"`spawn` is engine-owned in v0.6. `agent.spawn` as a capability-mediated kernel verb is **design-locked** by `ADR-0080` and implemented at M-6. Delegation targets are resources: a grant may permit spawning one `D_H` and deny another."* |
+| **§1.1** — Turn state machine | Insert the **Universal Turn Loop as Mechanism** claim verbatim from `ADR-0082` D1, with `RF-58` (the Standing Challenge) named inline and the M-8 adjudication date stated |
+| **§1.2** — Event taxonomy | Plugins row: `PluginResolved, PluginActivated, PluginQuiesced, PluginRetired, PluginFaulted` → **`PluginDiscovered, PluginResolved, PluginVerified, PluginActivated, PluginQuiesced, PluginRetired, PluginFaulted`** (`ADR-0081` D3). Writer-authority table: both new kinds → `registry`. Note the count change 56 → 58 |
+| **§1.4** — Scheduler | Add the **Stigmergic Coordination Property** with its complexity claim and `RF-56` as its bound falsifier (§5.4.4). Mark as a claim under measurement, activated at M-7, **not** a v0.6 property |
+| **§2.3** — Harness manifest | **The largest edit.** Replace the fixed-slot `harness.yaml` example with the `mhf.manifest/2` example of `ADR-0077`. State: components are a named map; `kind` does not imply cardinality one; slot names are pack convention; bindings are a closed relation roster and **not** a workflow DAG; `D_H` covers the graph including bindings; `mhf.harness/1` is frozen and readable through M-4, removed at M-5. Add the critic-loop example as the concrete demonstration of what `/1` cannot express |
+| **§2.3** — new subsection *Declared absence* | The absent-vs-forged rule from `ADR-0079`: what may be declared absent, that the declaration enters `D_H`, that `unattributable_for_promotion` is **derived not declared**, and that an unsigned verdict stays categorically illegal under every composition |
+| **§4** — Coding Domain Pack | Add: *"Pack #2 is **Math & Formal Deductive Verification** and is the **M-5 generality gate** — not an aspiration (§4.3). Acceptance: zero diffs under `packages/{domain,kernel}/` **and** trajectory parity with Pack #1."* Correct the orphaned-TableWorld note: TableWorld is demoted to **Pack #3** |
+| **§7** — Telemetry | Replace the trajectory example with a **populated** one. State the eight `RF-23` content assertions as normative. Define `D_R` constructively (`ADR-0078` D3). Add the required-now/required-later table (`ADR-0078` D4) so no field becomes a false green |
+| **§9** — Refusals | Append two: *"No automated environment/arena synthesis as a substrate feature"* and *"No CRDT / eventual-consistency / cache-coherence protocol for inter-agent state."* **Do not** duplicate the whole list into the ADRs — §9 is its single home once M-5's collapse lands |
+| **Invariants I-1…I-11** | **I-9 gains its teeth:** *"…a valid harvest row — meaning populated turns, non-zero per-turn cost and latency, a model fingerprint, `D_R` distinct from `D_H`, and a signed verdict or an explicitly-reasoned null. Schema validity is necessary and not sufficient (`ADR-0078`)."* **I-11 gains its precondition:** *"…gated on a measurement whose precondition is `RF-25` (cold suspend/resume) and whose gate is `RF-56` (`Θ(N)` messaging)."* |
+
+### 7.5 `docs/03_sprints/sprint_active.md`
+
+| Location | Directive |
+|---|---|
+| Front-matter | `milestone:` → `M-2 (Wave 2 + Substrate Correction) — v0.6.1`. Fix `plans:` to point at `docs/03_sprints/doing/` (H-10) |
+| **"Follow-ups carried out of Wave 1"** | **STRIKE** the row *"`assemble_trajectory` reports a zero cost vector; real per-turn cost needs the governor's settled ledger → Wave 4"*. **REPLACE** with: *"**NOVA-1 / `RF-23` — landed in M-2 per `ADR-0078`.** The board's premise was correct but insufficient: the governor's settled ledger already exists at `EpisodeCompleted` — `Receipt.cost`, `BudgetCommitted`/`BudgetReleased`, and the `events` sequence are already parameters of `assemble_trajectory` and were being discarded. Wave 4's remaining contribution is **NOVA-5 / `RF-48`** — confirmation on one real run."* **This closes discrepancy D-C in writing, which is what checklist item 1c required.** |
+| Wave 2 table | Add `NOVA-1` (`READY`), `NOVA-2` (`READY`), `NOVA-3` (`READY`), `2.6-A` ADR authoring (`DIRECTOR`), `2.6-B` namespace + linter (`READY`), `2.6-C` docstring correction + `RF-27` (`READY`) |
+| Wave 3 table | Rebalance to five sprints per §4.2's M-3 table. **Re-label `3.2-C` from `DEV-LOCAL` to `DIRECTOR`** and fold into 3.3 — *a `DEV-LOCAL` task must never be the vehicle for a decision that fixes `D_H`'s pre-image*. Add sprints 3.3, 3.4, 3.5 and 3.1-Z with their falsifier IDs |
+| Wave 4 table | Row 8 of the nine-row gate → *"schema-valid **and populated**"*; add `4.1-E` NOVA-5 |
+| **Decision queue** | Add: **(a)** ratify `ADR-0077`–`0082` — *Director*; **(b)** new event kinds `PluginDiscovered`/`PluginVerified` — *Director, escalated and ruled in `ADR-0081` D3*; **(c)** retire `vanguard_body_detailed.md` — *Director*; **(d)** `3.2-C` re-label — *Director* |
+| **Director-Only Escalations** | Append: *"Manifest schema version bump · falsifier namespace change · any change to the nine-row M-4 gate · any `agent.spawn` implementation before M-6."* |
+| **Definition of done** | Append: *"…**and** the trajectory emitted by any touched path satisfies `RF-23`."* |
+
+### 7.6 `docs/02_roadmap/milestones.md`
+
+| Location | Directive |
+|---|---|
+| M-2 row | Outcome gains *"+ Substrate Correction"*; exit gate gains `RF-23` and `RF-25`; add a **Version** column, value `v0.6.1` |
+| M-3 row | Exit gate gains: **all seven** FSM transitions ledgered · six reference topologies compile to distinct `D_H` · absent-vs-forged live · NOVA-4 green. Version `v0.6.2` |
+| M-4 row | Row 8 → *"populated trajectory"*; version `v0.6.3`; add *"Director acceptance of the evidence bundle is a separate act from producing it"* |
+| M-5 row | Name Pack #2 explicitly as **Math & Formal Deductive Verification**; add trajectory parity (`RF-50`) and the TCB-metric replacement triple. Version `v0.7.0`; note the `pyproject.toml` cut lands here |
+| M-6…M-10 rows | Add the **Version** column: `v0.8.0`, `v0.9.0`, `v0.9.0`, `v1.0.0`, `v1.0.0`. Add `RF-54` to M-6, `RF-55`/`RF-56` to M-7, `RF-57`/`RF-58` to M-8 |
+| Standing Architectural Constraints | Append: *"**Falsifier discipline** — a wave may shed breadth; it may never shed falsifiers."* |
+
+### 7.7 Wave plan files (`docs/03_sprints/doing/`)
+
+| File | Directive |
+|---|---|
+| `wave3_extensibility.md` | Add sprints **3.3** (component graph), **3.4** (absent-vs-forged), **3.5** (spawn design-only), **3.1-Z** (layer0 deletion, atomic with green NOVA-4). Extend 3.1's acceptance to **all seven** ledgered transitions incl. the two new kinds. Re-label `3.2-C` `DIRECTOR`. Add the NOVA-4 acceptance table with `RF-29`…`RF-35`. Restate *"Deliberately not in scope"* to keep WASM, mandatory signatures, and any second product plugin out |
+| `wave4_foundation_e2e.md` | Strike the "cost row" deferral; row 8 → populated; add `4.1-E` NOVA-5 / `RF-48`. Add the evidence-bundle contents: ledger digest · `D_H` · `D_R` · full trajectory · containment boolean · **the exact `RF-*` list green on the run** |
+| `wave2B_review.md` | This document supersedes it as the review artifact. Add a pointer banner and move to `docs/07_reviews/` with H-6 |
+| **NEW** `wave5_generality_proof.md` | **Do not create yet.** `004` §3 and the project's engineering posture are explicit: detailing unstarted future work is waste. M-5 exists as outcome + gate in `milestones.md`; the plan file is authored at M-4 exit |
+
+### 7.8 `CLAUDE.md` / `AGENTS.md` / `README.md`
+
+| File | Directive |
+|---|---|
+| `CLAUDE.md` §2 | **The "Pre-Development Hold" block is stale** — it reads *"Wave 0 is the only authorized next code change"* and *"No Wave 0 code has been written yet"*, while M-0 and M-1 are complete and M-2 is at re-gate round 4 `[VERIFIED contradiction]`. Replace with the current state: **M-0/M-1 green, M-2 in flight, Waves 3–4 authorized in sequence, M-5+ gated on the M-4 stop line.** A stale hold notice trains every future reader to ignore hold notices |
+| `CLAUDE.md` §3 | Add `packs/math-formal/` (M-5) to the inventory; correct `layer0/` to its verified remaining contents and mark it *"deleted at M-3"* |
+| `CLAUDE.md` §7 | Add ADRs `0077`–`0082` to the precedence list |
+| `AGENTS.md` | Mirror all of the above — the two files must not drift |
+| `README.md` | Update the reading order to the post-M-5 three-document path (`SPEC.md` → `docs/05_adr/INDEX.md` → `sprint_active.md`), marked as the *target* until M-5 lands it |
+
+### 7.9 Execution order for the cascade
+
+```text
+M-2, week 1   H-1 H-2 H-9 H-10        cheap, local, reversible; H-9 FIRST so the rest is checked
+M-2, week 1   2.6-A: write ADRs 0077–0082 → docs/05_adr/ ; update INDEX.md
+M-2, week 1   2.6-B: RF-* namespace + alias table + RF-28 linter
+M-2, week 2   SPEC.md §1.0 §1.1 §1.2 §7 + I-9/I-11    (§1.4 and §2.3 wait for M-3)
+M-2, week 2   002 register §4.2/§4.2a/§4.2b ; sprint_active.md ; milestones.md
+M-2, week 2   H-3 H-5 H-6 H-7 H-8 ; CLAUDE.md / AGENTS.md / README.md
+M-2, exit     H-4 (Director ruling on vanguard_body_detailed.md)
+M-3, entry    SPEC.md §2.3 rewrite (component graph + declared absence) — WITH the code, not before
+M-3, exit     wave3_extensibility.md final ; layer0/ deleted ; stale-path linter re-run
+M-4, exit     wave4 evidence bundle ; pyproject.toml version cut → 0.7.0    [DIRECTOR]
+M-5           THE COLLAPSE: SPEC + ADR log + one board ; retire GAMMA and 002   (ADR-0082 D3)
+```
+
+> **The one rule that governs the order:** documentation that describes **shipped** behaviour is written *with* the code. Documentation that describes **decided** behaviour is written *before* the code. Nothing describes **hoped-for** behaviour at all.
+
+---
+
+## Appendix A · Forensic Verification Log (this pass)
+
+Every row was re-executed against the working tree at `main` @ `733855b`.
+
+| # | Claim | Method | Result |
+|---|---|---|---|
+| A-1 | Kernel within TCB budget | `python3 tools/linters/check_tcb_budget.py` | ✅ `TCB PASS: 1365 logical lines across 9 files (alarm above 1438)` — 73 LOC headroom |
+| A-2 | Hollow trajectory | `cat -n vanguard/packages/runtime/trajectory.py` | ✅ **CONFIRMED LIVE** — `_ZERO_COST` at line 10, consumed at 53 (per-turn) and 75 (episode) |
+| A-3 | `execution_digest` (`D_R`) never computed | grep across `vanguard/packages/` | ✅ **CONFIRMED** — no assignment anywhere; `assemble_trajectory` omits the key entirely |
+| A-4 | `layer0/` remaining contents | `find layer0 -name '*.py'` | ✅ 16 files: `compose/` (2) · `events/` (5) · `registry/` (8) · `__init__` (1). `kernel/`, `scheduler/`, `spi/` **gone** |
+| A-5 | **Plugin FSM cannot ledger `VERIFIED`** | `sed -n '30,80p' layer0/registry/lifecycle.py` | ✅ **NEW FINDING** — `_EVENT` maps 5 of 7 states; `DISCOVERED`/`VERIFIED` → `None`; `_go()` guards `if kind is not None:` and emits nothing |
+| A-6 | Only five `PLUGIN_*` event kinds exist | grep `domain/wire/types_gen.py`, `domain/ledger/events.py` | ✅ `PLUGIN_{RESOLVED,ACTIVATED,QUIESCED,RETIRED,FAULTED}` — no `DISCOVERED`, no `VERIFIED` |
+| A-7 | **Two live manifest dialects** | read `schemas/mhf/harness_manifest.schema.json` + `domain/artifacts/manifest.py` + `agency/manifests/vg-code-default/manifest.json` | ✅ **NEW FINDING** — schema freezes 5 fixed slots; `domain/` already types `components` as a named map; `vg-code-default` ships 7 named components |
+| A-8 | Fixed-slot `harness.yaml` on disk | `cat packs/code-default/harness.yaml` | ✅ Exactly `planner · context · memory · evaluation · toolkits[4] · model_routes[3]` |
+| A-9 | Writer authority table live | `grep -A40 PRIVILEGED_KIND_OWNERS runtime/ledger_emitter.py` | ✅ 22 privileged kinds mapped; `VerdictRecorded → {evaluator_gateway}`; `Plugin*` → `{registry}`; orchestrator owns nothing |
+| A-10 | Sealed-membership check live in the kernel | `cat vanguard/packages/kernel/policy.py` | ✅ Step 1b present under `ADR-0067`; `attenuation.py:183` auto-seals when `request.actions < parent.actions` |
+| A-11 | **`spawn()` docstring is stale** | read `agency/episode/engine.py:531-572` | ✅ **NEW FINDING** — claims the `ADR-0054` kernel gap is open; `ADR-0067` closed it. Corrected by `ADR-0080` C3, pinned by `RF-27` |
+| A-12 | Classifier fails closed | `cat vanguard/packages/kernel/classifier.py` | ✅ Unknown principal ⇒ widens; unheld action ⇒ widens; depth overrun ⇒ widens; undecidable resource pair ⇒ widens (`K-48`) |
+| A-13 | Five frozen SPIs, no sixth | `cat vanguard/packages/ports/spi.py` | ✅ `IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, `IEvaluationGate` — exactly five |
+| A-14 | **`F-*` namespace collision** | `grep -o "F-[0-9]\+" docs/04_annex/KERNEL.md \| sort -u` vs `002` §4.2 | ✅ **NEW FINDING** — `F-01…F-25` in both, different meanings. `ADR-M0-02` names only `I-*`, `ADR-*`, `S-M*` |
+| A-15 | `CostVector` excludes structural dims | read `schemas/mhf/trajectory.schema.json` | ✅ `additionalProperties: false` over `{usd_micros, tokens, bytes, millis}` — the algebra is already schema-enforced |
+| A-16 | `check_markdown_links.py` scans two files | `grep DOC_GLOBS tools/linters/check_markdown_links.py` | ✅ Third glob (`docs/agile/sprint6B/*.md`) matches nothing |
+| A-17 | `DELETE.md` is 0 bytes; `docs/08_workflows/` empty | `ls -la` | ✅ Both confirmed |
+| A-18 | Duplicate research pair | front-matter comparison | ✅ `RESEARCH_THEORETICAL_SYNTHESIS.md` and `_B.md` both `id: REF-06-M5`, identical titles |
+| A-19 | `CLAUDE.md` hold notice is stale | read `CLAUDE.md` §2 vs `sprint_active.md` | ✅ Says *"No Wave 0 code has been written yet"*; M-0/M-1 are complete and M-2 is at re-gate round 4 |
+| A-20 | `CapabilityRevoked` has no emitter | grep `vanguard/packages/` | ✅ In the catalog; no production emitter; no falsifier. Registered `RF-55`, M-7 |
+
+**Not examined** (stated so the boundary of the finding is honest): the TypeScript client lattice (`vanguard/clients/`); the full test suite was not re-executed; `benchmarks/` and `lab/` were not exercised; no runtime or E2E execution was performed; `docs/04_annex/KERNEL.md` was read for the `F-*` namespace only, not audited rule-for-rule.
+
+---
+
+## Appendix B · New Findings Not Present in Any Prior Review
+
+| # | Finding | Severity | Disposition |
+|---|---|---|---|
+| **B-1** | **The plugin lifecycle FSM cannot ledger `DISCOVERED` or `VERIFIED`.** `_EVENT` maps 5 of 7 states; `_go()` emits nothing for the other two. `VERIFIED` is where the capability-ceiling policy check happens — the most security-relevant transition leaves no evidence. **The M-3 exit gate ("every transition ledgered") is unsatisfiable against the closed 56-kind catalog.** | **HIGH** — blocks M-3 as specified | `ADR-0081` D3 (Director escalation, ruled). `RF-35`. Two new event kinds; 56 → 58 |
+| **B-2** | **Two live manifest dialects, and the general one already exists in `domain/`.** `HarnessManifest.components` is already a named component map; `vg-code-default/manifest.json` already ships seven. T-1 is a **convergence**, not a build — materially cheaper than `005` §W1 assumed. Board task `3.2-C` ("one manifest parser") is the T-1 vehicle and is labelled `DEV-LOCAL`. | **HIGH** — a `DEV-LOCAL` task is the vehicle for a `D_H` pre-image decision | `ADR-0077` D6. Re-label `3.2-C` → `DIRECTOR`, fold into 3.3 |
+| **B-3** | **`F-*` falsifier namespace collision.** `F-01…F-25` exist with different meanings in `KERNEL.md` and the `002` register; `ADR-M0-02` does not list `F-*` at all. Undetected because no tool checks identifier uniqueness across authority tiers. | **MEDIUM** — a reviewer citing "F-07" means one of two different things | `ADR-0082` D5. `RF-*` for the register; `RF-28` linter |
+| **B-4** | **`D_R` (`execution_digest`) is never computed anywhere in the tree.** The identity trinity is *specified* three ways and *emitted* one way. A corpus with `D_H` but no `D_R` cannot distinguish "same harness, different model build" from "same run" — silently invalidating every router experiment. | **HIGH** — invalidates the M-10 measurement basis | `ADR-0078` D3 defines it constructively. `RF-23` clause 6 |
+| **B-5** | **The `spawn()` docstring reports a kernel gap that `ADR-0067` closed.** A stale comment inside the TCB's nearest neighbour mis-models the kernel for every reviewer who trusts it. | **MEDIUM** — correctness of understanding, not of code | `ADR-0080` C3; `RF-27` pins the behaviour with the engine-side refusal disabled |
+| **B-6** | **Evaluator reachability is ambient, not selector-gated.** `adapters/evaluators/client.py` is composition-wired. Under `agent.spawn`, a planner-authored child inherits reachability the parent never explicitly attenuated — violating the swarm-era Attenuated Reachability property (S-2). | **MEDIUM** — latent until M-6, structural then | `ADR-0080` D5; `RF-54` at M-6 |
+| **B-7** | **`CapabilityRevoked` is catalogued with no production emitter and no falsifier.** The 2026 execution-security literature names mid-lease revocation as a live threat class. Unreachable today under I-11; reachable the moment M-7 enables concurrency. | **LOW now / MEDIUM at M-7** | `RF-55` at M-7 |
+| **B-8** | **`check_markdown_links.py` validates two files while reporting `LINK PASS`.** Same defect class as `F-18`. It is why four dead ADR links survived CI. | **MEDIUM** — a gate manufacturing false confidence | H-9, fix in M-2 **before** six new ADRs land |
+| **B-9** | **`CLAUDE.md`'s Pre-Development Hold block is stale**, asserting no Wave-0 code exists while M-0/M-1 are complete. A stale hold notice trains readers to ignore hold notices. | **MEDIUM** — process integrity | §7.8, M-2 week 2 |
+| **B-10** | **The M-4 nine-row gate's row 8 accepts a hollow trajectory.** "Schema-valid `mhf.trajectory/1`" is satisfied by a content-free record — so **the stop line could be passed with an unusable corpus.** | **HIGH** — the stop line's own definition has the gap it exists to prevent | Row 8 → *"schema-valid **and populated**"*; `RF-23` + `RF-48` |
+
+---
+
+## Appendix C · External Sources
+
+Consulted during the mandated SOTA research pass (§1.2).
+
+**Harness engineering**
+- [Agent Harness Engineering: A Survey](https://picrew.github.io/LLM-Harness/main.pdf)
+- [Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses](https://arxiv.org/abs/2604.25850)
+- [Harness-Bench: Measuring Harness Effects across Models in Realistic Agent Workflows](https://arxiv.org/html/2605.27922v1)
+- [From Question Answering to Task Completion: A Survey on Agent System and Harness Design](https://arxiv.org/pdf/2606.20683)
+- [Harness as an Asset: Enforcing Determinism via the Convergent AI Agent Framework (CAAF)](https://arxiv.org/pdf/2604.17025)
+
+**Stigmergic / shared-state multi-agent coordination**
+- [CodeCRDT: Observation-Driven Coordination for Multi-Agent LLM Code Generation](https://arxiv.org/pdf/2510.18893)
+- [Beyond Text-Passing: Shared Cognitive Substrates for Multi-Agent LLM Coordination](https://openreview.net/forum?id=RRIw2L4Z1g)
+- [PatchBoard: Schema-Grounded State Mutation for Reliable and Auditable LLM Multi-Agent Collaboration](https://arxiv.org/pdf/2605.29313)
+- [Token Coherence: Adapting MESI Cache Protocols to Minimize Synchronization Overhead in Multi-Agent LLM Systems](https://arxiv.org/pdf/2603.15183)
+
+**Capability sandboxing, provenance, execution security**
+- [From Agent Traces to Trust: A Survey of Evidence Tracing and Execution Provenance in LLM Agents](https://arxiv.org/pdf/2606.04990)
+- [Lingering Authority: Revocable Resource-and-Effect Capabilities for Coding Agents](https://arxiv.org/pdf/2606.22504)
+- [The Balkanization of Execution-Security Research for AI Coding Agents: Isolation, Access Control, and TOCTOU Vulnerabilities](https://arxiv.org/pdf/2607.05743)
+
+**Active inference, credit assignment, trajectory RL**
+- [Expected Free Energy-based Planning as Variational Inference](https://arxiv.org/html/2606.20658)
+- [Active Inference as a Convex Markov Decision Process](https://arxiv.org/pdf/2607.20152)
+- [ASTRA: Automated Synthesis of agentic Trajectories and Reinforcement Arenas](https://arxiv.org/abs/2601.21558)
+- [Beyond Trajectory-Level Attribution: Graph-Based Credit Assignment for Agentic Reinforcement Learning](https://arxiv.org/abs/2605.26684)
+- [AstraFlow: Dataflow-Oriented Reinforcement Learning for Agentic LLMs](https://arxiv.org/html/2605.15565v1)
+
+**Declarative composition graphs**
+- [AgentFlow: Building Agent Dependency Graphs for Static Analysis of Agent Programs](https://arxiv.org/html/2607.01640)
+- [Graph-Based Agent Workflow Orchestration in Production: The 2026 Landscape](https://zylos.ai/research/2026-04-14-graph-based-agent-workflow-orchestration-production/)
+- [Declarative Data Services: Structured Agentic Discovery for Composing Data Systems](https://arxiv.org/abs/2605.20690)
+
+---
+
+## Closing Statement of the Leadership 7
+
+**What `v0.6.1` locks that `v0.6.0` did not.** `v0.6.0` locked the *primitives*: authority as a reference monitor, state as fold, evidence as an exterior signature, identity split three ways, recursion as one attenuated delegation. `v0.6.1` locks the *surfaces those primitives are reached through*: a composition algebra that can name more than one cognitive component (`ADR-0077`), a corpus rich enough to learn from (`ADR-0078`), guardrails that may be declared absent but never forged (`ADR-0079`), a delegation verb whose design is fixed before its implementation is permitted (`ADR-0080`), a plugin lifecycle whose every transition leaves evidence (`ADR-0081`), and two standing claims made refutable rather than assumed (`ADR-0082`). **`v0.6.0` made AETHER trustworthy. `v0.6.1` makes it general.**
+
+**Wave 4's stop condition is unchanged and non-negotiable.** Nine rows on one uninterrupted real run with zero human intervention. Row 8 is *strengthened*, not widened — a hollow trajectory could have passed the original wording, and the stop line must not contain the defect it exists to prevent. `agent.spawn`, concurrency, Pack #2, and all of M-5 through M-10 remain **out of implementation scope** until the gate is green. Any temptation to widen scope in order to make the run pass is escalated to the Director, not absorbed by the sprint.
+
+**M-5 through M-10 exist as outcomes and gates only.** No sprint-level detail is authorised beyond what §4.2 records. Detailing unstarted work is waste, and worse, it manufactures the appearance of a plan where only an intention exists. `wave5_generality_proof.md` is authored at M-4 exit and not before.
+
+**What a developer reads first, today:** `README.md` → `docs/SPEC.md` → `docs/05_adr/INDEX.md` (ADRs `0069`–`0082`) → `docs/03_sprints/sprint_active.md` → **this document, §6, for the implementation bridge.** After M-5's collapse, the first four become three and this document retires into git history along with the rest of the review corpus.
+
+**The single sentence this body would keep if it could keep only one:**
+
+> **Make the corpus learnable and the composition surface general — in that order, before the stop line — because everything after M-4 consumes one or the other, and neither can be repaired retroactively.**
+
+---
+
+*Prepared as an independent leadership review. This document is **advisory** and amends nothing. Law remains [`docs/SPEC.md`](docs/SPEC.md) → [`docs/05_adr/`](docs/05_adr/) → [`docs/04_annex/`](docs/04_annex/). Every ruling in §1–§2 becomes binding only through the corresponding append-only ADR in §3, committed with a Director signature and carrying its bound falsifier. No specification file, ADR, or source file was modified in producing this report.*

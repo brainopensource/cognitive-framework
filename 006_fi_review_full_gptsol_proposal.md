@@ -332,3 +332,634 @@ Research and completed reviews remain historical evidence, clearly bannered as s
 ### T-9 — Five-SPI freeze
 
 **Ruling: retain through M-4; measure and revisit at M-9.** The Named Component Graph should first express new behavior by composing current planner/context/memory/toolkit/evaluator interfaces. At M-9, inspect actual graph adapters and impedance: duplicated shims, leaky abstractions, unused ports, cross-language conformance cost, and performance. A new SPI requires at least two independent implementations, a stable wire contract, a boundary owner, and deletion of more complexity than it adds. “Useful component type” is not sufficient.
+
+---
+
+## 4. Proposed append-only ADR catalog
+
+The following are complete drafts. Their numbers are reserved proposals, not accepted records. If the Director chooses different decisions, the rejected drafts should not be silently edited into acceptance; record the final decision append-only.
+
+### ADR-0077 — Named Component Graph and `mhf.manifest/2`
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** Engineering Director, CTO, Principal Systems Architect  
+**Requirements:** REQ-MAN2-001…008  
+**Supersedes after migration:** `mhf.harness/1` fixed plugin binding surface and v4 hard-coded component-role surface; does not supersede frozen composition, ADR-0003, ADR-0069, or ADR-0072.
+
+#### Context
+
+The fixed pack surface cannot express debate, critic/reviser loops, tree search, or swarms without adding another privileged engine. The v4 manifest has an open map syntactically but only a closed consumer table semantically. Because (D_H) covers the manifest, delaying the correction until after the corpus grows makes migration and attribution substantially more expensive.
+
+#### Decision
+
+1. A harness is a named, typed **composition graph** compiled once into an immutable `FrozenHarness`.
+2. Nodes refer to data or executable components; edges bind provided to required namespaced interfaces. The schema does not prescribe a workflow schedule.
+3. Unknown refs, unregistered interfaces, missing required endpoints, endpoint type mismatch, duplicate bindings where cardinality is one, capability widening, unconsumed authority-bearing nodes, and mutable/unpinned resolved artifacts fail composition.
+4. Graph cycles are legal. Runtime termination is enforced by economic/structural budgets.
+5. Every ref resolves to a content digest. The JCS-normalized resolved graph—including configs, isolation, evidence mode, capability intersections, endpoints, and edges—defines (D_H).
+6. The runtime continues to expose one `Runtime.compose` and one execution authority. No alternate YAML runtime is created.
+7. `mhf.harness/1` and the current v4 format receive read-only migration adapters for one release. Writers emit only `mhf.manifest/2`; adapters are removed by v0.7.0.
+8. Namespaced interface strings, not a growing enum in kernel, provide extensibility. Interface implementations still resolve through registered ports and wire contracts.
+
+#### Normative Draft 2020-12 schema
+
+Target: `schemas/mhf/manifest_v2.schema.json`. YAML is permitted only as an input serialization; after safe parsing it must validate as this JSON data model. References to the existing selector schema are normative, not placeholders.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/manifest_v2.schema.json",
+  "title": "MHF Named Component Graph Manifest",
+  "description": "mhf.manifest/2; compiled and JCS-frozen before execution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "id", "components", "connections", "entrypoints",
+    "capabilities", "budget", "evidence", "undeletable"
+  ],
+  "properties": {
+    "schema": { "const": "mhf.manifest/2" },
+    "id": { "$ref": "#/$defs/Name" },
+    "description": { "type": "string", "maxLength": 4096 },
+    "components": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/Name" },
+      "additionalProperties": { "$ref": "#/$defs/Component" }
+    },
+    "connections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Connection" }
+    },
+    "entrypoints": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/Interface" },
+      "additionalProperties": { "$ref": "#/$defs/Endpoint" }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Capability" }
+    },
+    "budget": { "$ref": "#/$defs/Budget6D" },
+    "evidence": { "$ref": "#/$defs/EvidencePolicy" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "integer", "boolean", "null"]
+      }
+    },
+    "undeletable": { "type": "boolean" }
+  },
+  "$defs": {
+    "Name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"
+    },
+    "Interface": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+/[1-9][0-9]*$"
+    },
+    "Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "ComponentRef": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9._-]+@(?:[0-9]+(?:\\.[0-9]+){0,2}|sha256:[0-9a-f]{64}|[~^><=0-9., -]+)$"
+    },
+    "Interfaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provides", "requires"],
+      "properties": {
+        "provides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Interface" },
+          "uniqueItems": true
+        },
+        "requires": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Interface" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "Execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["data", "in_process", "subprocess", "exterior"]
+        },
+        "grant_ref": { "$ref": "#/$defs/Digest" },
+        "image_digest": { "$ref": "#/$defs/Digest" },
+        "uid": { "type": "integer", "minimum": 1 },
+        "protocol": { "$ref": "#/$defs/Interface" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "in_process" } } },
+          "then": { "required": ["grant_ref"] }
+        },
+        {
+          "if": {
+            "properties": { "mode": { "enum": ["subprocess", "exterior"] } }
+          },
+          "then": { "required": ["protocol"] }
+        }
+      ]
+    },
+    "Component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "interfaces", "execution", "capability_requests", "config"],
+      "properties": {
+        "ref": { "$ref": "#/$defs/ComponentRef" },
+        "expected_digest": { "$ref": "#/$defs/Digest" },
+        "interfaces": { "$ref": "#/$defs/Interfaces" },
+        "execution": { "$ref": "#/$defs/Execution" },
+        "capability_requests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Name" },
+          "uniqueItems": true
+        },
+        "config": { "type": "object" }
+      }
+    },
+    "Endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "interface"],
+      "properties": {
+        "component": { "$ref": "#/$defs/Name" },
+        "interface": { "$ref": "#/$defs/Interface" }
+      }
+    },
+    "Connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "delivery"],
+      "properties": {
+        "from": { "$ref": "#/$defs/Endpoint" },
+        "to": { "$ref": "#/$defs/Endpoint" },
+        "delivery": { "enum": ["call", "stream", "state_ref", "evidence_ref"] },
+        "cardinality": { "enum": ["one", "many"] },
+        "required": { "type": "boolean", "default": true }
+      }
+    },
+    "Capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "verb", "sink", "selector", "risk"],
+      "properties": {
+        "id": { "$ref": "#/$defs/Name" },
+        "verb": { "$ref": "#/$defs/Name" },
+        "sink": { "enum": ["pure", "observation", "privileged"] },
+        "selector": { "$ref": "../v4/resource-selector.schema.json" },
+        "risk": { "enum": ["low", "medium", "high", "critical"] }
+      }
+    },
+    "Budget6D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usd_micros", "tokens", "bytes", "millis", "turns", "depth"],
+      "properties": {
+        "usd_micros": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "millis": { "type": "integer", "minimum": 0 },
+        "turns": { "type": "integer", "minimum": 1 },
+        "depth": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "EvidencePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "evaluators", "assurance_class", "promotion_eligible"],
+      "properties": {
+        "mode": { "enum": ["required", "absent"] },
+        "evaluators": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Name" },
+          "uniqueItems": true
+        },
+        "assurance_class": {
+          "enum": ["verified", "exploratory", "diagnostic"]
+        },
+        "promotion_eligible": { "type": "boolean" },
+        "absence_reason": {
+          "type": "string",
+          "enum": [
+            "no_correctness_claim", "compute_only_exploration",
+            "observation_only", "diagnostic_run"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "required" } } },
+          "then": {
+            "properties": {
+              "evaluators": { "minItems": 1 },
+              "assurance_class": { "const": "verified" },
+              "promotion_eligible": { "const": true }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "absent" } } },
+          "then": {
+            "required": ["absence_reason"],
+            "properties": {
+              "evaluators": { "maxItems": 0 },
+              "assurance_class": { "enum": ["exploratory", "diagnostic"] },
+              "promotion_eligible": { "const": false }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Schema validation is followed by these mandatory semantic passes:
+
+```text
+P0 parse with no aliases/duplicate keys → P1 Draft-2020-12 validation
+→ P2 resolve each ref and verify expected digest
+→ P3 validate endpoint existence and provided/required interface compatibility
+→ P4 validate entrypoint cardinality and reject unconsumed authority-bearing nodes
+→ P5 intersect harness, component, principal and request capability ceilings
+→ P6 construct lifecycle cells and verify isolation/protocol/image/UID
+→ P7 JCS-freeze the fully resolved graph and derive D_H
+→ P8 activate only from that FrozenHarness
+```
+
+#### Consequences
+
+Positive: topologies become pack data; attribution is per named node; graph mutation is JCS-diffable; model routes and evaluators are ordinary components without becoming untrusted authority. Cost: one schema/digest migration, compiler work, pack rewrites, and explicit compatibility removal.
+
+#### Rejected alternatives
+
+- Keep fixed slots and add one slot per new algorithm: rejected as engine-by-enum.
+- Adopt a workflow DAG runtime: rejected by ADR-0003 and because cycles/search are policy, not trusted mechanism.
+- Permit runtime discovery/hot mutation: rejected; composition freezes before execution.
+
+#### One bound falsifier
+
+`test/contracts/test_manifest_v2_graph.py::ManifestV2GraphFalsifier.test_five_topologies_compile_without_kernel_or_engine_change` snapshots the kernel/episode public sources, compiles the five required profiles twice, asserts stable (D_H), and fails on an unknown/unconsumed interface. Any source diff or profile-specific engine branch is red.
+
+---
+
+### ADR-0078 — Evidence Guardrail States: Required, Declared Absent, or Forged
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** Engineering Director, CIO, Principal Staff Engineer  
+**Requirements:** REQ-EVID-001…007
+
+#### Context
+
+Requiring a coding oracle for every domain would make generality dishonest; allowing missing evaluation to masquerade as success would make evidence dishonest. “Optional evaluator” conflates intentional absence with broken or forged evidence.
+
+#### Decision
+
+1. The frozen manifest declares `evidence.mode` before execution.
+2. `required` demands at least one registered exterior evaluator and a signed verdict bound to (D_X), oracle/image identity, subject artifacts, and protocol.
+3. `absent` requires an enumerated reason and forces `promotion_eligible=false`. Operational completion remains distinct from evidence outcome.
+4. Claimed, required, or expected evidence that is missing, unsigned, self-issued, wrong-key, wrong-image, wrong-subject, wrong-protocol, unreachable, or tampered is **forged/broken**, never absent.
+5. Declared-absent runs cannot mint `passed`, license verdict-gated memory, supply chosen/rejected labels, enter promotion statistics, or change a default registry pointer.
+6. Sandboxing, capability checks, and budgets remain mandatory regardless of evidence mode.
+7. Absence/forgery state and reason are ledgered and carried into the trajectory.
+
+Normative outcome fragment:
+
+```json
+{
+  "$defs": {
+    "EvidenceOutcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "verdict"],
+          "properties": {
+            "state": { "const": "verified" },
+            "verdict": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "reason"],
+          "properties": {
+            "state": { "const": "declared_absent" },
+            "reason": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "reason"],
+          "properties": {
+            "state": { "const": "forged_or_broken" },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+#### Consequences
+
+Non-coding exploratory packs can be honest without inventing an oracle. Promotion remains evidence-backed. UI and reducers must show `not_evaluated` separately from pass/fail/inconclusive.
+
+#### Rejected alternatives
+
+- Mandatory evaluator for every pack: rejected as false generality.
+- Nullable verdict with no declaration: rejected because missingness is ambiguous and gameable.
+- Let the agent self-grade when exterior evaluation is absent: rejected as forgery.
+
+#### One bound falsifier
+
+`test/trust/test_evidence_guardrail_states.py::EvidenceGuardrailFalsifier.test_required_absent_and_forged_are_disjoint` runs three frozen fixtures and asserts respectively signed eligibility, explicit non-eligibility, and fail-closed instrument/tamper status. Any path that converts the latter two to `passed` is red.
+
+---
+
+### ADR-0079 — Canonical Plugin Lifecycle, Composition Absorption, and Layer-0 Retirement
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** Engineering Director, Principal Systems Architect, Tech Lead  
+**Requirements:** REQ-PLUG-001…010  
+**Retires on completion:** all of `layer0/`.
+
+#### Context
+
+Plugin lifecycle/broker and composition behavior remain in a copy-fork. The Layer-0 compiler discards the computed capability intersection. Its alternate event machinery conflicts with the canonical package writer. The current seven-state FSM also has no event for discovery or verification.
+
+#### Decision
+
+1. Port registry/compose semantics into `vanguard/packages/runtime/registry/` and the existing runtime composition root; shared pure values/contracts remain in domain/ports only where allowed by the lattice.
+2. Use the canonical `LedgerEmitter` and `EventStorePort`; no second store, envelope, taxonomy, or writer survives.
+3. Add `PluginDiscovered` and `PluginVerified` to the event schema/generated enum/reducer/writer table so every state entry is auditable. Registry is their sole writer.
+4. Apply capability intersections as immutable activation inputs. An empty intersection denies all effect execution.
+5. Activation is atomic with respect to health/isolation verification. A broker/process failure moves the cell to `FAULTED` before it can be observed as active.
+6. `FAULTED` has no recovery transition; retirement is required before rediscovery creates a new cell identity.
+7. Delete all `layer0/` only after package-path parity plus NOVA-4 is green.
+
+#### Complete lifecycle FSM
+
+| Current state | Operation | Target | Ledger event on entry | Required payload/evidence | Illegal alternatives |
+|---|---|---|---|---|---|
+| — | discover | `DISCOVERED` | `PluginDiscovered` | plugin/cell ID, manifest node, requested ref, (D_H) | Anonymous cell creation |
+| `DISCOVERED` | resolve | `RESOLVED` | `PluginResolved` | resolved content digest, version, source registry | Mutable/unpinned ref |
+| `DISCOVERED` | fault | `FAULTED` | `PluginFaulted` | from/to, reason code, stage | Remain discovered after fatal error |
+| `RESOLVED` | verify | `VERIFIED` | `PluginVerified` | signature/image/protocol/interface/ceiling verification digests | Self-asserted verification |
+| `RESOLVED` | fault | `FAULTED` | `PluginFaulted` | reason and failed proof | Activate anyway |
+| `VERIFIED` | activate | `ACTIVATED` | `PluginActivated` | effective ceiling digest, isolation identity, health receipt | Activation before freeze |
+| `VERIFIED` | fault | `FAULTED` | `PluginFaulted` | reason | Retry in same cell |
+| `ACTIVATED` | quiesce | `QUIESCING` | `PluginQuiesced` | outstanding leases, deadline, cause | New work admission |
+| `ACTIVATED` | fault | `FAULTED` | `PluginFaulted` | broker/health reason; revoke admission | Stay active |
+| `QUIESCING` | retire | `RETIRED` | `PluginRetired` | zero open leases/process stopped/final digest | Return to active |
+| `QUIESCING` | fault | `FAULTED` | `PluginFaulted` | shutdown failure | Silent disappearance |
+| `FAULTED` | retire | `RETIRED` | `PluginRetired` | cleanup outcome and prior fault event ID | Direct reactivation |
+| `RETIRED` | — | — | — | terminal | Any transition |
+
+Event payload schema shared by all transitions:
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plugin_id", "cell_id", "from_state", "to_state", "composition_digest"],
+  "properties": {
+    "plugin_id": { "type": "string", "minLength": 1 },
+    "cell_id": { "type": "string", "minLength": 1 },
+    "from_state": {
+      "type": ["string", "null"],
+      "enum": [null, "discovered", "resolved", "verified", "activated", "quiescing", "faulted"]
+    },
+    "to_state": {
+      "enum": ["discovered", "resolved", "verified", "activated", "quiescing", "retired", "faulted"]
+    },
+    "composition_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "component_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "effective_ceiling_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "reason_code": { "type": "string" },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}
+```
+
+#### Consequences
+
+The copy-fork disappears and event authority becomes coherent. Two event kinds and their schema/golden vectors are added, but no new writer role is created.
+
+#### Rejected alternatives
+
+- Keep Layer-0 as a compatibility subsystem: rejected as two production truths.
+- Copy the old event store into runtime: rejected as split State Plane.
+- Preserve silent discovered/verified transitions: rejected because activation provenance would be incomplete.
+
+#### One bound falsifier
+
+`test/runtime/registry/test_nova4_retirement.py::Layer0RetirementFalsifier.test_package_registry_owns_full_fsm_and_all_six_negatives` runs every legal/illegal transition and NOVA-4, then asserts `rg`-equivalent import/file checks find no `layer0` runtime dependency or directory. Any discarded ceiling or non-registry `Plugin*` write is red.
+
+---
+
+### ADR-0080 — Universal Turn Mechanism and Deferred Capability-Mediated Delegation
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** Engineering Director, Principal Systems Architect, PhD AI Specialist  
+**Requirements:** REQ-LOOP-001…006, REQ-SPAWN-001…010
+
+#### Context
+
+The system needs a public substrate claim narrow enough to falsify. Recursive algorithms also need a safe, caller-visible delegation mechanism, but putting spawn directly in planner APIs would create an authority bypass and expanding the kernel before the foundation proof would violate sequencing.
+
+#### Decision
+
+1. Publish the Universal Turn Loop only as the mechanism in T-6.
+2. All task/topology semantics remain components/policy; every effect remains an `EffectRequest` through S0–S12.
+3. Preserve engine-owned spawn as semantic reference through M-5.
+4. Implement `agent.spawn` in M-6 as a privileged, registered effect using the exact S0–S12 mapping in T-2.
+5. Bind objective, graph entrypoint, child authority, selectors, sublease, depth, workspace mode, and context refs into the descriptor/grant.
+6. Emit `ChildSpawned` only after durable intent and child creation; emit `ChildReturned` with causation/correlation and untrusted return provenance. Failure never upgrades trust.
+7. A parent cannot delegate authority or budget it does not currently hold. Unknown subset comparison denies.
+8. No child can access evaluator secrets, parent operator context, unreferenced workspace paths, or live parent handles.
+
+Normative spawn request outline:
+
+```json
+{
+  "schema": "mhf.effect-request/1",
+  "verb": "agent.spawn",
+  "args": {
+    "objective_digest": "sha256:…",
+    "entrypoint": "mhf.planner/1",
+    "context_refs": ["sha256:…"],
+    "requested_capability_ids": ["read-workspace"],
+    "budget": {
+      "usd_micros": 1000, "tokens": 2000, "bytes": 0,
+      "millis": 30000, "turns": 4, "depth": 1
+    },
+    "workspace_mode": "isolated_snapshot"
+  }
+}
+```
+
+#### Consequences
+
+Recursive policy becomes expressible without an agency escape hatch. Implementation waits until evidence and generality are established, limiting TCB risk.
+
+#### Rejected alternatives
+
+- Planner calls `spawn()` directly: rejected as unmediated authority.
+- New swarm kernel/scheduler: rejected as duplicated mechanism.
+- Implement in M-3/M-4: rejected by the Foundation Stop Line.
+
+#### One bound falsifier
+
+`test/trust/test_mediated_spawn.py::MediatedSpawnFalsifier.test_spawn_traverses_every_dispatch_invariant_and_never_widens` instruments stages, crashes each post-reservation path, and asserts intent-before-child, grant binding, sublease conservation, release, lineage, isolation, and untrusted return. Any direct child creation before S9 or authority widening is red.
+
+---
+
+### ADR-0081 — Evidence-Complete Trajectories and Cold Continuation
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** CIO, Principal Staff Engineer, Tech Lead  
+**Requirements:** REQ-TRAJ-001…012, REQ-RESUME-001…008
+
+#### Context
+
+`mhf.trajectory/1` exists, but the current writer emits fabricated zero vectors and omits identity fields needed for attribution. The WAL can replay state, yet process-independent continuation has not been proved end to end. Learning and concurrency both depend on these facts.
+
+#### Decision
+
+1. NOVA-1 and NOVA-2 close in M-2.
+2. Strengthen the writer and schema as `mhf.trajectory/2`; retain a reader for `/1`, marking it `legacy_incomplete` unless it meets `/2` semantics.
+3. Every actual model turn records provider, model, fingerprint (or explicit `unavailable` reason), prompt/completion/cache token breakdown, charged milliseconds, byte accounting, context digest/ref policy, proposal, receipts, and effect lineage.
+4. Episode totals are checked against turn plus overhead totals. Unknown price is not zero dollars; record price status separately.
+5. Require (D_H,D_R,D_X), resolved component/gene digests, terminal state, evidence outcome, and a pointer to the final WAL event range.
+6. A completed episode with a model invocation has at least one turn and each invoked turn has a non-zero measured cost vector. Aborted-before-model episodes may have no turns only with an enumerated termination reason.
+7. Suspend/resume reconstructs from ports and ledger reduction in a fresh process. A checkpoint is an optimization, not authority; replay from the authoritative chain must yield the same reduced state.
+8. No training/promotion consumer accepts legacy, forged, missing, or non-reconstructible rows.
+
+Required turn shape (abridged only to avoid duplicating proposal/receipt schemas already normative):
+
+```json
+{
+  "turn": 0,
+  "context_digest": "sha256:…",
+  "model": {
+    "route_tier": 1,
+    "provider": "openrouter",
+    "model": "provider/model",
+    "fingerprint": "sha256:…",
+    "fingerprint_status": "measured"
+  },
+  "usage": {
+    "prompt_tokens": 1,
+    "completion_tokens": 1,
+    "cache_read_tokens": 0,
+    "cache_write_tokens": 0,
+    "pricing_status": "known"
+  },
+  "cost": { "usd_micros": 1, "tokens": 2, "bytes": 100, "millis": 10 },
+  "proposal": {},
+  "receipts": [],
+  "event_range": { "first_seq": 1, "last_seq": 9 }
+}
+```
+
+#### Consequences
+
+Future evidence is learnable and audit-ready; historical weakness remains honestly visible. The runtime must connect existing telemetry to the assembler and derive route/fingerprint data at invocation time.
+
+#### Rejected alternatives
+
+- Backfill zeros: rejected as forged measurement.
+- Derive trajectories later from prose logs: rejected because raw, exact execution identity may be unrecoverable.
+- Enable concurrency based only on replay unit tests: rejected; cold continuation must cross a process boundary.
+
+#### One bound falsifier
+
+`test/runtime/test_nova1_nova2.py::EvidenceContinuationFalsifier.test_rich_trajectory_survives_cold_process_resume` performs a measured first turn, suspends, resumes in a spawned fresh interpreter from SQLite, finishes, and asserts continuous lineage, no repeated effect, exact cost sum, populated model fingerprint, (D_H/D_R/D_X), and signed/null evidence semantics. Any all-zero invoked turn or dependence on the original process is red.
+
+---
+
+### ADR-0082 — Foundation-to-Meta-Framework Promotion Protocol
+
+**Status:** Proposed  
+**Date:** 2026-08-21  
+**Deciders:** Leadership 7  
+**Requirements:** REQ-GEN-001…006, REQ-PROM-001…014  
+**Program scope:** v0.6.1–v1.0.0
+
+#### Context
+
+A generality claim, skill-memory claim, model improvement, or self-improving harness is unsafe if selected by self-reported reward, unpaired benchmarks, mutable baselines, or a scalar that hides security/cost regressions. The M-4 foundation must precede generality and learning.
+
+#### Decision
+
+1. M-4 is a nine-row gate on one real, uninterrupted, unstitched run.
+2. M-5 uses Math & Formal Deductive Verification as Pack #2. It passes only with zero domain/kernel diffs and the same runtime mechanism.
+3. Candidate versus baseline trials are preregistered and paired by (D_X), protocol, seed policy, environment, and oracle. Baselines are undeletable.
+4. Only exterior signed verdicts create preference labels. Declared-absent, inconclusive, instrument-error, legacy-incomplete, tampered, or incomparable trials cannot create a pair.
+5. Promotion uses Pareto safety/economics gates plus an exact paired statistical test; no scalar score can compensate for an invariant regression.
+6. Skill retrieval/eviction and model/harness mutation remain reversible candidate operations. Default-pointer changes require a signed promotion event by the promotion authority.
+7. DPO training is exterior. The trained artifact is a new content-addressed model component subject to cassette regression, paired evaluation, and rollback.
+8. Self-modification means propose → isolate → evaluate → compare → approve/promote; never modify the live trusted runtime in place.
+9. M-5–M-10 proceed only in the dependency order in §6.
+
+#### Preference certificate
+
+```json
+{
+  "schema": "mhf.preference-pair/1",
+  "pair_id": "sha256:…",
+  "task_digest": "sha256:…",
+  "prefix_context_digest": "sha256:…",
+  "protocol_digest": "sha256:…",
+  "environment_digest": "sha256:…",
+  "chosen_execution_digest": "sha256:…",
+  "rejected_execution_digest": "sha256:…",
+  "chosen_verdict_event": "event-id",
+  "rejected_verdict_event": "event-id",
+  "comparison_basis": ["correctness", "safety", "cost"],
+  "issuer": "promotion-service",
+  "signature": "base64url…"
+}
+```
+
+The certificate is JCS-signed. The issuer verifies both evaluator signatures and pair comparability but cannot rewrite either execution. Cross-harness comparison deliberately permits different (D_H); it requires identical pairing cells through (D_X)’s task/protocol/environment inputs.
+
+#### Consequences
+
+Learning is slower than self-scoring but produces defensible evidence, reversible promotion, and a compounding corpus moat. Inconclusive results remain in denominators where the registered protocol requires them.
+
+#### Rejected alternatives
+
+- Unpaired leaderboard promotion: rejected due task-mix variance.
+- Agent/critic preference without exterior evidence: rejected as forgeable.
+- Weighted sum of safety, correctness, and cost: rejected because catastrophic regression can be averaged away.
+- Live self-rewrite: rejected by ADR-0019 and the TCB boundary.
+
+#### One bound falsifier
+
+`test/runtime/test_promotion_protocol.py::PromotionProtocolFalsifier.test_only_paired_signed_pareto_safe_exactly_significant_candidate_promotes` feeds valid and adversarial pair sets; only the signed, comparable, safety-green set with exact McNemar significance may emit `PromotionApproved`. Flipped signatures, absent verdicts, incomparable cells, multiplicity failure, or any safety regression must deny.

@@ -36,7 +36,7 @@ from vanguard.packages.runtime.scoring import score_arm
 from vanguard.packages.runtime.session_log import session_log
 
 ROOT = Path(__file__).resolve().parents[2]
-DOGFOOD_01 = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
+DOGFOOD_01 = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
 
 class _Sink:

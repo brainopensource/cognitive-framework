@@ -213,7 +213,7 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
     def test_isolated_run_reclaims_its_workspace_and_sealed_bundles(self) -> None:
         """Repeated benchmark arms must not accumulate disposable sandboxes."""
 
-        task = (Path(__file__).resolve().parents[2] / "lab" / "tasks" /
+        task = (Path(__file__).resolve().parents[2] / "benchmarks" / "greenfield" /
                 "dogfood-01-multi-turn-file-rollback")
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

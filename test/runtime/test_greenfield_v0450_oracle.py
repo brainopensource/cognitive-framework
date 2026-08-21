@@ -13,7 +13,7 @@ from vanguard.packages.adapters.evaluators.suites.oracle_greenfield_webapp impor
 
 class TestGreenfieldOracleFixtureAndBehavior(unittest.TestCase):
     def test_public_fixture_is_solution_free(self) -> None:
-        fixture_dir = Path(__file__).resolve().parents[2] / "lab" / "tasks" / "greenfield-v0450-webapp"
+        fixture_dir = Path(__file__).resolve().parents[2] / "benchmarks" / "greenfield" / "greenfield-v0450-webapp"
         self.assertTrue(fixture_dir.is_dir(), "Public fixture directory missing")
 
         # Verify TASK.md exists

@@ -91,7 +91,7 @@ class TheEntrypointsAreFrozen(unittest.TestCase):
     def test_the_shim_delegates_to_the_module(self) -> None:
         from pathlib import Path
 
-        shim = (Path(__file__).resolve().parents[2] / "lab" / "run.py"
+        shim = (Path(__file__).resolve().parents[2] / "benchmarks" / "run.py"
                 ).read_text(encoding="utf-8")
         self.assertIn("vanguard.packages.runtime.lab_driver", shim)
         self.assertNotIn("HarnessSession", shim)

@@ -25,17 +25,17 @@ __all__ = ["DOGFOOD_SET", "GREENFIELD_SET", "resolve_task_set", "missing_tasks"]
 #: Corrected to BETA's paths (`2a793c4`).
 DOGFOOD_SET: tuple[Mapping[str, str], ...] = (
     {"id": "DOGFOOD-01",
-     "workspace": "lab/tasks/dogfood-01-multi-turn-file-rollback"},
+     "workspace": "benchmarks/greenfield/dogfood-01-multi-turn-file-rollback"},
     {"id": "DOGFOOD-02",
-     "workspace": "lab/tasks/dogfood-02-subprocess-timeout-censoring"},
+     "workspace": "benchmarks/greenfield/dogfood-02-subprocess-timeout-censoring"},
     {"id": "DOGFOOD-03",
-     "workspace": "lab/tasks/dogfood-03-manifest-alias-shadowing"},
+     "workspace": "benchmarks/greenfield/dogfood-03-manifest-alias-shadowing"},
 )
 
 #: One greenfield task: a Python HTTP API plus a static HTML page. No Svelte,
 #: no build step, no network. Starts red, by design.
 GREENFIELD_SET: tuple[Mapping[str, str], ...] = (
-    {"id": "GREENFIELD-API-HTML", "workspace": "lab/tasks/greenfield-api-html"},
+    {"id": "GREENFIELD-API-HTML", "workspace": "benchmarks/greenfield/greenfield-api-html"},
 )
 
 

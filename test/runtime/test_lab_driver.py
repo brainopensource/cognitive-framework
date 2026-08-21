@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 import vanguard.packages.runtime.lab_driver as lab_run
 
-TASK = (Path(__file__).resolve().parents[2] / "lab" / "tasks" /
+TASK = (Path(__file__).resolve().parents[2] / "benchmarks" / "greenfield" /
         "dogfood-01-multi-turn-file-rollback")
 
 

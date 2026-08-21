@@ -19,8 +19,8 @@ from vanguard.packages.runtime.repair import StopReason
 from vanguard.packages.runtime.scoring import score_arm
 
 ROOT = Path(__file__).resolve().parents[2]
-GREENFIELD = ROOT / "lab" / "tasks" / "greenfield-api-html"
-DOGFOOD_01 = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
+GREENFIELD = ROOT / "benchmarks" / "greenfield" / "greenfield-api-html"
+DOGFOOD_01 = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
 
 def _daemon() -> bool:

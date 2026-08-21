@@ -75,7 +75,7 @@ class TheDeclaredSetPointsAtBetasPaths(unittest.TestCase):
 class TheMockTakesRealTurns(unittest.TestCase):
     """S18-A-01. `turns: 0` is an instrument error, not a result."""
 
-    TASK = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
+    TASK = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
     def test_a_mock_run_produces_turns(self) -> None:
         result = run_lab_task("vg-code-default", self.TASK, max_attempts=1)
@@ -121,7 +121,7 @@ class TheMockTakesRealTurns(unittest.TestCase):
 class BothModesInARealRun(unittest.TestCase):
     """S15-A-01 / S18, end to end rather than at the policy alone."""
 
-    TASK = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
+    TASK = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
     def test_benchmark_denies_the_privileged_verbs(self) -> None:
         result = run_lab_task("vg-code-default", self.TASK, max_attempts=1,
@@ -151,7 +151,7 @@ class BothModesInARealRun(unittest.TestCase):
 class TheJsonlIsALedgerExport(unittest.TestCase):
     """S18-A-02. The exporter must accept what the driver writes."""
 
-    TASK = ROOT / "lab" / "tasks" / "dogfood-01-multi-turn-file-rollback"
+    TASK = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
     def test_the_export_is_mhf_event_envelopes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

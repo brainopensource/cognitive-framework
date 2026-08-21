@@ -13,9 +13,8 @@ last_reviewed: 2026-08-20
 
 # Active board — v0.6 Foundation
 
-**Start here if you are new:** read
-[`plans/000_CANONICAL_EXECUTION_PATH.md`](plans/000_CANONICAL_EXECUTION_PATH.md) first — it names
-production truth, the one flow, and the decisions you must not re-make. Then your wave plan.
+**Start here if you are new:** read [`README.md`](../../README.md) and [`SPEC.md`](../SPEC.md) first — they name
+production truth, the one flow, and the canonical decisions.
 
 ## Now
 
@@ -329,3 +328,80 @@ no.
 Falsifier/acceptance evidence named in the wave plan passes on the canonical path · suites of
 record stay green · boundary/TCB/duplication linters green · no new `layer0` imports · trajectory,
 envelope, verdict shapes validate against `schemas/mhf/`.
+
+---
+
+## Unified Task Backlog & Execution Register
+
+**Readiness Legend:**
+- **READY** — contract, owner boundary, and acceptance evidence are settled; implement directly.
+- **SCAFFOLDED** — leadership landed the contract (schema/decision); complete the implementation against it.
+- **TECH-LEAD** — needs a Tech Lead decision or diff review before assignment.
+- **DEV-LOCAL** — intentionally left to the implementing developer's design.
+- **DIRECTOR** — do not decide locally; escalate.
+- **DONE** — landed and its falsifier passes on the canonical path.
+
+### Wave 0 — CI Truth & Falsifiers (CLOSED — M-0)
+| ID | Task | Readiness |
+|---|---|---|
+| W0-CI | CI subject-of-record rewire; quarantine Ollama env-sensitive cases | DONE |
+| W0-FALS | Falsifiers F-01…F-21 registered as tests | DONE |
+| W0-HYG | F-19 `__init__.py` for integration/governance; F-20 oracle artifact; stale-path cleanup | DONE |
+
+### Wave 1 — Trust Spine (`plans/wave1_trust_spine.md`) (CLOSED — M-1 GREEN)
+| ID | Task | Falsifier | Readiness |
+|---|---|---|---|
+| 1.1-A | Regenerate types; fix generator | F-13 | DONE |
+| 1.1-B | JCS verdict bytes in `signing.py` | F-04 | DONE |
+| 1.1-C | Daemon binds verdicts (request/subject/oracle/nonce) | F-04 | DONE |
+| 1.1-D | Evaluator gateway = sole `VerdictRecorded` writer | F-03 | DONE |
+| 1.1-E | Gate reads ledgered verdicts; delete verify-and-discard | F-03/F-08 | DONE |
+| 1.1-F | Flip binding fields required; regenerate | F-04 | DONE |
+| 1.1-G | Translator lifting + selector conformance | F-21/P1-17 | DONE |
+| 1.2-A | `LedgerEmitter` from `LedgerBridge`; `mhf.event/1` envelopes | F-01 | DONE |
+| 1.2-B | Role-scoped writer facades | F-05 | DONE |
+| 1.2-C | `project_id` source + per-project chains | F-01 | DONE |
+| 1.2-D | Cold `replay-parity` CI job from disk | F-02 | DONE |
+| 1.2-E | Durable-intent crash test | F-14 | DONE |
+| 1.2-F | Listener uses the emitter | F-01 | DONE |
+| 1.3-A | Complete `D_H` at compose | F-11 | DONE |
+| 1.3-B | Fail-closed ceiling intersection on canonical path | F-06/F-07 | DONE |
+| 1.3-C | Typed budget algebra; `None` fails closed (kernel diff) | F-09/F-10/F-15 | DONE |
+| 1.3-D | Trajectory assembly + emission at `EpisodeCompleted` | F-12 | DONE |
+| 1.3-E | Receipt carries `lease_id`/`grant_digest` | P1-9 | DONE |
+
+### Wave 2 — Convergence (`plans/wave2_convergence.md`) (IN FLIGHT — M-2)
+| ID | Task | Readiness |
+|---|---|---|
+| 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | DONE |
+| 2.1-B | types_gen target moves to packages; shim | DONE |
+| 2.1-C | Five SPI Protocols → `ports/spi.py` | DONE |
+| 2.1-D | Ceiling delegates to domain algebra; fail-closed | DONE |
+| 2.1-E | Duplication detector heuristics (`--enforce` wired in CI) | DONE |
+| 2.2-A | Parity assertion triage layer0→contracts (Keep/kill settled) | DONE (GREEN) |
+| 2.2-B | Delete 2.2-A KILL surfaces; retire v4 write path | DONE |
+| 2.2-C | `root.py` split in place (compose, session, wiring) | DONE |
+| 2.2-D | Widen I-7 domain-blindness linter & boundary rows | READY |
+
+### Wave 3 — Extensibility (`plans/wave3_extensibility.md`) (QUEUED — Entry: M-2)
+| ID | Task | Readiness |
+|---|---|---|
+| 3.1-A | Registry FSM on packages; ledgered transitions | READY |
+| 3.1-B | Compose v2 ↔ registry; freeze-at-compose negatives | READY |
+| 3.1-C | Echo plugin lifecycle + fault injection (ADR-M0-13) | READY |
+| 3.1-D | Isolation broker rlimits scope | TECH-LEAD |
+| 3.2-A | code-default toolkits through the lifecycle | READY |
+| 3.2-B | Coding-token sweep; widened I-7 green | READY |
+| 3.2-C | One manifest parser | DEV-LOCAL |
+
+### Wave 4 — Foundation E2E (`plans/wave4_foundation_e2e.md`) (QUEUED — Entry: M-3)
+| ID | Task | Readiness |
+|---|---|---|
+| 4.1-A | Fixture repo + preregistered oracle | READY |
+| 4.1-B | Nine-row E2E integration test | READY |
+| 4.1-C | Cassette of the green run for per-PR CI | READY |
+| 4.1-D | Evidence bundle report | DEV-LOCAL |
+
+### Director-Only Escalations (Do Not Pick Up Locally)
+New event kinds · Sixth SPI · Kernel LOC ceiling change · Second digest/canonicalisation algorithm · Concurrency enablement · Version/release cut after M-4 · Any item on SPEC §9 refusal list.
+

@@ -28,7 +28,7 @@ is how dual runtimes and false gates survived.
 - Envelope identity, `D_H`/`D_R`/`D_X`, spawn subset invariants, wire-first plugins, exterior
   evaluator, WAL ledger (ADRs 0069–0072).
 
-### Deliberately deferred (not "forgotten")
+### Deliberately deferred (not "forgotten"; normative authority: [`SPEC.md` §9](../SPEC.md#9-what-this-specification-refuses-to-build))
 
 - Meta-Harness promotion loop, genome mutation, DPO harvest productionization, self-updating
   release pipeline (ADR-0019; SPEC §9 SA-1…SA-6)
@@ -43,7 +43,7 @@ is how dual runtimes and false gates survived.
 - Systems-language / Rust TCB rewrite (ADR-0006, DEF-05, ADR-0069)
 - Third control-plane language
 
-### Explicitly rejected as v0.6 architecture
+### Explicitly rejected as substrate architecture (normative authority: [`SPEC.md` §9](../SPEC.md#9-what-this-specification-refuses-to-build))
 
 - Third runtime tree
 - Swarm engine

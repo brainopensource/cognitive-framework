@@ -2,7 +2,7 @@
 
 > **Status:** Living Master Index of Architecture Decision Records for Vanguard / AETHER.  
 > **Rule:** Append-only numbering. ADRs outrank general documentation; newer ADRs supersede older ones by explicit citation (e.g., ADR-0069 reverses ADR-0001; ADR-0076 canonicalizes execution artifacts).  
-> **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`000_CANONICAL_EXECUTION_PATH.md`](../03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md).
+> **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_sprints/sprint_active.md).
 
 ---
 
@@ -138,7 +138,6 @@ Historical decisions migrated from the Phase 0–3 registers.
 - [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) — Comprehensive register of capabilities deferred to later phases or rejected with rationale.
 - [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) — Forensic register of historical drifts identified and resolved.
 - [`SPEC.md`](../SPEC.md) — Living normative specification (Vanguard Meta-Harness Framework).
-- [`000_CANONICAL_EXECUTION_PATH.md`](../03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md) — Developer mental model and canonical execution truth.
 - [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — Substrate generality analysis and v0.6.1 recommendations.
 - [`004_V061_ALIGNMENT_ROADMAP.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — v0.6.1 alignment and M-2 through M-10 execution roadmap.
 

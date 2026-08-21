@@ -1533,4 +1533,4 @@ Recorded because a synthesis that hides what it overrode is not a synthesis.
 
 ---
 
-*Prepared as a synthesis of six independent leadership passes. This document is **advisory** and amends nothing. Law remains [`docs/SPEC.md`](docs/SPEC.md) → [`docs/05_adr/`](docs/05_adr/) → [`docs/04_annex/`](docs/04_annex/). Every ruling in §1–§6 becomes binding only through the corresponding append-only ADR in §7, committed with a Director signature and carrying its bound falsifier. No specification file, ADR, schema, or source file was modified in producing this document.*
+*Prepared as a synthesis of six independent leadership passes. This document is **advisory** and amends nothing. Law remains [`docs/SPEC.md`](../../../../docs/SPEC.md) → [`docs/05_adr/`](../../../../docs/05_adr/) → [`docs/04_annex/`](../../../../docs/04_annex/). Every ruling in §1–§6 becomes binding only through the corresponding append-only ADR in §7, committed with a Director signature and carrying its bound falsifier. No specification file, ADR, schema, or source file was modified in producing this document.*

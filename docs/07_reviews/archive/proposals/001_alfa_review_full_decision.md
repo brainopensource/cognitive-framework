@@ -6,7 +6,7 @@
 **Status:** **SUBMITTED FOR DIRECTOR RATIFICATION — NOT NORMATIVE LAW**  
 **Decision date:** 2026-08-21  
 **Selected master baseline:** [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md)  
-**Controlling law until ratification:** [`docs/SPEC.md`](docs/SPEC.md), accepted ADRs [`0069–0076`](docs/05_adr/INDEX.md), and the [`active execution board`](docs/03_sprints/sprint_active.md)
+**Controlling law until ratification:** [`docs/SPEC.md`](../../../../docs/SPEC.md), accepted ADRs [`0069–0076`](../../../../docs/05_adr/INDEX.md), and the [`active execution board`](../../../../docs/03_sprints/sprint_active.md)
 
 > This briefing selects a direction; it does not itself authorize implementation, amend the specification, accept an ADR, move a milestone, or waive a stop line. Only an Engineering Director decision followed by the normal append-only ADR and documentation cascade can do that.
 
@@ -22,8 +22,8 @@ The other reports remain valuable **non-normative suggestion and review inputs**
 
 | Order | Artifact | Final role |
 |---:|---|---|
-| 1 | [`docs/SPEC.md`](docs/SPEC.md), [`docs/04_annex/`](docs/04_annex/), accepted [`ADRs`](docs/05_adr/INDEX.md) | Controlling law and invariants. |
-| 2 | [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) and [`milestones.md`](docs/02_roadmap/milestones.md) | Authorized execution scope and gates. |
+| 1 | [`docs/SPEC.md`](../../../../docs/SPEC.md), [`docs/04_annex/`](../../../../docs/04_annex/), accepted [`ADRs`](../../../../docs/05_adr/INDEX.md) | Controlling law and invariants. |
+| 2 | [`docs/03_sprints/sprint_active.md`](../../../../docs/03_sprints/sprint_active.md) and [`milestones.md`](../../../../docs/02_roadmap/milestones.md) | Authorized execution scope and gates. |
 | 3 | [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md) | **Selected Tier S+ design baseline**, pending Director ratification and ADR filing. |
 | 4 | Proposals [`002`](002_beta_review_full_gem_proposal.md), [`004`](004_delta_review_full_glm53_proposal.md), [`005`](005_epsilon_review_full_dsv4-proposal.md), [`007`](007_zeta_review_full_opus_proposal.md), and [`008`](008_alfa_review_full_grok_proposal.md) | Advisory source material only; no independent implementation authority. |
 | 5 | This briefing | Records the recommended final disposition and asks for the Director's decision. |
@@ -146,7 +146,7 @@ Before filing, the Director or ADR owner must verify that 0077 is still the next
 - [ ] Ratify [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md) as the Tier S+ master baseline, subject to the bounded amendments in this briefing.
 - [ ] Confirm that proposals 002, 004, 005, 007, and 008 are suggestion reports only and cannot independently direct implementation.
 - [ ] Accept, narrow, or reject each proposed ADR-0077–0082; assign one owner and one bound falsifier per accepted decision.
-- [ ] Place only currently authorized M-2/M-3 work onto the [`active board`](docs/03_sprints/sprint_active.md); retain the M-4 and M-5 gates unchanged.
+- [ ] Place only currently authorized M-2/M-3 work onto the [`active board`](../../../../docs/03_sprints/sprint_active.md); retain the M-4 and M-5 gates unchanged.
 - [ ] Confirm Pack #2 as **Math & Formal Deductive Verification**, not an orphaned existing adapter used as a substitute proof.
 - [ ] Confirm the M-4 row-8 strengthening: trajectory evidence is schema-valid **and populated**.
 - [ ] Decide whether a separate post-ratification **ALFA master document** is needed.

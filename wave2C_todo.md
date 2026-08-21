@@ -6,8 +6,8 @@
 **Status:** **ACTIVE FOR M-2 STAGING ONLY — ARCHIVE AT M-2 EXIT**
 **Prepared:** 2026-08-21  
 **As-built snapshot:** Git `a9f4747`; clean working tree at inspection  
-**Selected decision:** [`001_alfa_review_full_decision.md`](001_alfa_review_full_decision.md)  
-**Architectural baseline:** [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md)  
+**Selected decision:** [`001_alfa_review_full_decision.md`](docs/07_reviews/archive/proposals/001_alfa_review_full_decision.md)
+**Architectural baseline:** [`006_fi_review_full_gptsol_proposal.md`](docs/07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md)
 **Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0085`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)
 **Current execution authority:** [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md)
 
@@ -90,7 +90,7 @@ The selected source order is:
 4. the 006 Tier S+ baseline;
 5. other proposal reports as provenance and suggestion material only.
 
-[`001_alfa_review_full_decision.md`](001_alfa_review_full_decision.md) chooses the architecture but is explicitly not law. [`006_fi_review_full_gptsol_proposal.md`](006_fi_review_full_gptsol_proposal.md) supplies the full mechanisms, equations, schemas, and falsifier ideas but is also not law. Developers must not cite either as implementation authority after ADRs are filed; tickets cite an accepted ADR, SPEC requirement, schema, and named falsifier.
+[`001_alfa_review_full_decision.md`](docs/07_reviews/archive/proposals/001_alfa_review_full_decision.md) chooses the architecture but is explicitly not law. [`006_fi_review_full_gptsol_proposal.md`](docs/07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md) supplies the full mechanisms, equations, schemas, and falsifier ideas but is also not law. Developers must not cite either as implementation authority after ADRs are filed; tickets cite an accepted ADR, SPEC requirement, schema, and named falsifier.
 
 Do **not** create a new SPEC, contracts manual, kernel manual, second backlog, or parallel roadmap. If the Director requests a publication-grade ALFA master, create it after ADR adjudication as a navigational synthesis linking accepted decisions—not as a fourth authority layer.
 

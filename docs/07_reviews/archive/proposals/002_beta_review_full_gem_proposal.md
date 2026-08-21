@@ -6,7 +6,7 @@
 **Governing Body:** The Leadership 7 (Engineering Director, CTO, CIO, Principal Staff Engineer, Principal Systems Architect, Tech Lead, PhD AI Specialist)  
 **Date:** 2026-08-21  
 **Baseline Anchor:** `main` @ `afa8e2a` (verified against live code tree)  
-**Authority Context:** Companion to [`docs/00_overview/SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md). Serves as the authoritative master blueprint for proposed append-only ADRs (`0077`–`0082`), milestone execution from **v0.6.1** through **v1.0.0**, and zero-guesswork developer specifications.
+**Authority Context:** Companion to [`docs/00_overview/SYSTEM_OVERVIEW.md`](../../../../docs/00_overview/SYSTEM_OVERVIEW.md). Serves as the authoritative master blueprint for proposed append-only ADRs (`0077`–`0082`), milestone execution from **v0.6.1** through **v1.0.0**, and zero-guesswork developer specifications.
 
 ---
 
@@ -161,7 +161,7 @@ AETHER implements **Stigmergic Coordination**:
 
 ## 3. Adjudication of Open Architectural Tensions (T-1 through T-9)
 
-Each open tension from [`SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md) is resolved below with an executive determination, disposition label, and governing ADR reference:
+Each open tension from [`SYSTEM_OVERVIEW.md`](../../../../docs/00_overview/SYSTEM_OVERVIEW.md) is resolved below with an executive determination, disposition label, and governing ADR reference:
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -457,7 +457,7 @@ Falsifiers:
 
 ### 6.1 Mathematical Formulation of Active Inference
 
-Based on [`docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md`](docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md), AETHER models self-improvement and dynamic policy routing using exact Free Energy Principles bounded by the 6D economic reservation tensor $\mathbf{R}$:
+Based on [`docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md`](../../../../docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md), AETHER models self-improvement and dynamic policy routing using exact Free Energy Principles bounded by the 6D economic reservation tensor $\mathbf{R}$:
 
 $$\theta^* = \arg\min_{\theta \in \Theta} \mathcal{F}(\theta) \quad \text{subject to} \quad \text{Cost}(\theta) \le \mathbf{R}_{\max}$$
 
@@ -498,7 +498,7 @@ $$\mathcal{G}(\pi) = -\underbrace{\mathbb{E}_{\tilde{q}}\left[\ln p(\mathbf{o}_\
 Why this self-improvement loop **cannot be gamed by construction**:
 1. **Unreachable Ground Truth:** Verdicts are signed by the exterior daemon (UID 10002); an agent cannot generate synthetic rewards.
 2. **Uncollapsible Denominators:** $D_H \neq D_R \neq D_X$ ensures that prompt mutations or model route changes produce distinct measurement identities.
-3. **Statistically Honest Promotion:** Annex [`MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) enforces McNemar's exact test over discordant pairs with Holm-Bonferroni correction, rejecting underpowered claims.
+3. **Statistically Honest Promotion:** Annex [`MEASUREMENT.md`](../../../../docs/04_annex/MEASUREMENT.md) enforces McNemar's exact test over discordant pairs with Holm-Bonferroni correction, rejecting underpowered claims.
 4. **Pointer Immutability:** Promotion never mutates running code in place; it registers a new $D_H$ in the manifest registry.
 
 ---

@@ -97,6 +97,9 @@ jobs:
       - name: Stale documentation paths check
         run: python3 tools/linters/check_stale_paths.py
 
+      - name: Falsifier identifier allocation check (RF-72)
+        run: python3 tools/linters/check_falsifier_ids.py
+
       - name: Local markdown links check
         run: python3 tools/linters/check_markdown_links.py
 

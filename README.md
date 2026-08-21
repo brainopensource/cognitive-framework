@@ -8,15 +8,17 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0074`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md) |
+| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0085`](docs/05_adr/0085-reversibility-radius-decide-shape-defer-implementation.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **Concept Lock APPROVED** by the Engineering Director (`ADR-0075`). Wave 0 authorized; production coding not yet started. |
-| **Foundation Plan** | Wave 0 (CI truth + named falsifiers) through Wave 4 (first real coding-agent E2E) |
+| **Status** | **M-2 / v0.6.1 Wave 2C active.** RF-23 (NOVA-1) and RF-25 (NOVA-2) tests are filed; red execution confirmation precedes the two parallel implementation lanes. |
+| **Foundation Plan** | M-0–M-4 trusted foundation, then gated M-5–M-10 generality, delegation, concurrency, framework building, retrieval/macros, and governed meta-cognition |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Concept Lock](https://img.shields.io/badge/AETHER-v0.6.0--concept--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Director_review-APPROVED_Wave_0-brightgreen.svg)](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_D## 1. Executive Summary & Documentation Architecture
+[![Approved](https://img.shields.io/badge/Director_review-M--2_Wave_2C-brightgreen.svg)](docs/03_sprints/sprint_active.md)
+
+## 1. Executive Summary & Documentation Architecture
 
 Vanguard / AETHER provides a verifiable, capability-attenuated recursive-agency substrate:
 1. **The Separability Thesis**: The solution and its execution traces must be strictly separable from the agent itself.
@@ -51,7 +53,7 @@ All documentation in this repository is strictly organized into three distinct a
    - [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) — Dispatch, capability grants, and security model.
    - [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) — Measurement doctrine.
 3. **The Decision Records**:
-   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (especially Lock ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0076`](docs/05_adr/0076-foundation-execution-decisions-canonical-artifacts.md)).
+   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (current foundation and Tier S+ lock: ADR-0069–0085).
 4. **The Active Execution Board**:
    - [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) — Single living execution board, active wave lanes, and task register.
    - [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) — Authoritative Macro Milestones (M-0 through M-10).
@@ -97,7 +99,7 @@ Aether-D-System/
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
 | **CLI / TUI** | `vanguard/clients/cli/` | Interactive terminal UI (`vg`) written in TypeScript using React and Ink. Workspace scripts: `npm run vg`. |
 | **Test Suite** | `test/` | Comprehensive test suite covering all layers (`test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, `test/security`, `test/trust`, `test/packs`, `test/falsifiers`, `test/registry`). Details in [`test/README.md`](test/README.md). |
-| **Tooling** | `tools/` | Static architectural linters: `check_boundaries.py` (hexagonal lattice), `check_tcb_budget.py` (TCB LOC), `scan_secrets.py`, `check_domain_blindness.py` (I-7), `check_isolation_policy.py` (I-6), `check_event_coverage.py` (E-COV), `check_duplication.py --enforce`, `check_stale_paths.py`, `check_markdown_links.py`, and type codegen (`tools/codegen/generate_types.py`). |
+| **Tooling** | `tools/` | Static architectural linters: boundary lattice, TCB budget, secrets, domain blindness, isolation, event coverage, duplication, stale paths, Markdown links, RF-72 identifier allocation, and type codegen. |
 | **Containers** | `containers/` | Container isolation images establishing process identity: Worker UID `10001` (`worker.Dockerfile`) vs Evaluator UID `10002` (`evaluator.Dockerfile`). |
 
 ---
@@ -187,6 +189,7 @@ python3 tools/linters/check_tcb_budget.py       # TCB kernel LOC budget check
 python3 tools/linters/scan_secrets.py           # Secret & credential leak scanner
 python3 tools/linters/check_domain_blindness.py # Kernel domain blindness (I-7)
 python3 tools/linters/check_isolation_policy.py # Sandbox isolation policy (I-6)
+python3 tools/linters/check_falsifier_ids.py    # RF namespace and allocation integrity
 python3 tools/linters/check_markdown_links.py   # Documentation link integrity
 python3 tools/linters/check_stale_paths.py      # Stale path reference checker
 ```
@@ -220,4 +223,3 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 - **Contributor & Agent Procedure**: [`AGENTS.md`](AGENTS.md)
 - **Claude Guidance**: [`CLAUDE.md`](CLAUDE.md)
 - **Testing Architecture & Guide**: [`test/README.md`](test/README.md)
-

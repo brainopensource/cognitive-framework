@@ -8,13 +8,13 @@
 
 ## Foundation Phases (Waves 0 → 4)
 
-| Milestone | Wave | Outcome | Exit Gate (Objective Evidence) | Status | Depends on |
-|---|---|---|---|---|---|
-| **M-0 Engineering truth** | 0 | Living CI measures `vanguard/packages/` and named falsifiers | Production suites wired in CI; F-01…F-21 registered as tests; codegen `--check` wired | **COMPLETE** | Director approval (ADR-0075) |
-| **M-1 Trust spine** | 1 | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green on canonical path; suites of record green; TCB budget ≤ 1438 LOC | **COMPLETE (GREEN)** | M-0 |
-| **M-2 One runtime** | 2 | `layer0/` duplicated halves absorbed; single wire, single algebra, single writer; `root.py` split in place | F-16 green; zero `layer0` imports under `vanguard/`; duplicate kill surfaces deleted; reducer fold rules complete | **IN FLIGHT (Re-gate Round 4)** | M-1 |
-| **M-3 Extensibility** | 3 | Plugin lifecycle real on canonical path; named component graph manifest; kernel domain-blind | ADR-M0-13 echo-plugin lifecycle on wire; F-18 domain-blindness green; freeze-at-compose negatives; `layer0/` fully deleted | QUEUED | M-2 |
-| **M-4 Foundation E2E (STOP)** | 4 | One real coding-agent run through the complete substrate with trustworthy state & evidence | 9-row integration verification on `packs/code-default/` (model, effect, sandbox, signed eval, WAL, cold replay) with zero human intervention | QUEUED | M-1, M-2, M-3 |
+| Milestone | Version | Wave | Outcome | Exit Gate (Objective Evidence) | Status | Depends on |
+|---|---|---:|---|---|---|---|
+| **M-0 Engineering truth** | v0.6.0 | 0 | Living CI measures `vanguard/packages/` and named falsifiers | Production suites wired in CI; F-01…F-21 registered as tests; codegen `--check` wired | **COMPLETE** | Director approval (ADR-0075) |
+| **M-1 Trust spine** | v0.6.0 | 1 | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green on canonical path; suites of record green; TCB budget ≤ 1438 LOC | **COMPLETE (GREEN)** | M-0 |
+| **M-2 One runtime** | v0.6.1 | 2 | One canonical runtime plus economically truthful trajectories and restart-safe state | RF-23 populated/conserved `mhf.trajectory/1` green; RF-25 fresh-interpreter SQLite-WAL continuation green; retained convergence gates green | **IN FLIGHT (Wave 2C re-gate)** | M-1 |
+| **M-3 Extensibility** | v0.6.2 | 3 | Typed Named Component Graph and complete plugin lifecycle on the canonical path | RF-28…RF-45; echo lifecycle over wire; NOVA-4 negatives; `layer0/` source/package/CI surface atomically absent | QUEUED | M-2 |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | 4 | One honest coding-agent run through the complete substrate | Nine populated evidence rows, one uninterrupted `run_id`, zero human intervention or stitched/cassette substitution | QUEUED | M-1, M-2, M-3 |
 
 ---
 
@@ -22,14 +22,14 @@
 
 *These milestones define outcomes and gates only. Sprint-level detail is deferred until the preceding milestone is completed.*
 
-| Milestone | Wave | Focus & Outcome | Exit Gate (Objective Evidence) | Depends on |
-|---|---|---|---|---|
-| **M-5 Generality Proof & Consolidation** | 5 | Governance documentation consolidation; Pack #2 (non-coding domain: math/data) proving domain blindness | Zero diffs under `domain/` and `kernel/` for Pack #2 (Invariant I-7 verified); suspend/resume cold-reconstruction falsifier passed | M-4 |
-| **M-6 Mediated Delegation (`agent.spawn`)** | 6 | `agent.spawn` capability-mediated verb in S0–S12 dispatch enabling native tree search, MCTS, and hierarchical decomposition | Planners without spawn grant cannot delegate; child remains monotonically attenuated; spawn recorded as mediated effect | M-5 |
-| **M-7 Controlled Concurrency** | 7 | Independence groups activated for non-conflicting selectors; async scheduling & $K \ll N$ logical-to-worker separation | Measurement gate on selector disjointness & cold-resume scalability; zero event loss under backpressure | M-5, M-6 |
-| **M-8 Framework Builder Abstraction** | 8 | Arbitrary agentic topologies (Debate, Critic/Revisor, Evolutionary Search) composed declaratively via named component graphs | Reference validation suites running multi-pack without engine modifications | M-6, M-7 |
-| **M-9 Scaled High-Performance Orchestration** | 9 | Scaled multi-agent load with measured sub-millisecond IPC and bounded ledger pressure | Performance benchmarks satisfying strict latency and resource utilization limits | M-7, M-8 |
-| **M-10 Meta-Cognitive Substrate (Final)** | 10 | Continuous autonomous self-improvement: active inference, unforgeable DPO trajectory harvesting, dynamic skill synthesis | End-to-end self-tuning loop: system proposes, verifies, and promotes an optimized harness under empirical hypothesis testing | M-8, M-9 |
+| Milestone | Version | Wave | Focus & Outcome | Exit Gate (Objective Evidence) | Depends on |
+|---|---|---:|---|---|---|
+| **M-5 Generality Proof & Consolidation** | v0.7.0 | 5 | Pack #2 **Math & Formal Deductive Verification**, Clean-Triad collapse, and exact T0 witness memo | Zero diffs under `packages/{domain,kernel}/`; trajectory/evidence parity with Pack #1; memo key binds subject, inputs, environment, checker, toolchain, assurance, and policy version | M-4 |
+| **M-6 Mediated Delegation (`agent.spawn`)** | v0.8.0 | 6 | `agent.spawn` becomes one capability-mediated S0–S12 effect; recursion stays policy | RF-55…RF-59 and RF-26; no grant means deny; child authority/budget/depth monotonically attenuate; kernel remains ≤1438 LOC | M-5 |
+| **M-7 Controlled Concurrency & Pareto Routing** | v0.9.0 | 7 | Independence groups, bounded worker pool, WAL-backed claims/leases, and alpha↔delta controller activation | M-7 measurement ADR plus named falsifiers; no duplicate/unknown effect; measured calls, envelopes, bytes, WAL contention, retries, critical path, and cost per signed pass; I-11 lifted only by ADR | M-5, M-6 |
+| **M-8 Framework Builder Abstraction** | v0.9.0 | 8 | Debate, critic/reviser, bounded trees, and evolutionary search expressed as manifests plus SDK/CLI clients | RF-65 runs reference topologies with zero kernel/episode-engine diff; RF-66 universal-loop challenge adjudicated | M-6, M-7 |
+| **M-9 Retrieval, Skills & Macro Laboratory** | v1.0.0 candidate | 9 | Replaceable hybrid retrieval, evidence-ranked skills, scaled orchestration measurement, and least-privilege macro candidates | RF-77 index rebuild; source-digest citations; held-out retrieval lift; macro selector hull and adversarial replay; five-SPI review; published scale measurements | M-7, M-8 |
+| **M-10 Governed Meta-Cognition (1.0)** | v1.0.0 | 10 | VFE belief fitting, EFE policy selection, attributable DPO/trajectory credit, and reversible promotion | RF-67…RF-70; prediction recorded before observation; Pareto-safe exact paired McNemar with A/A floor, effect interval, exterior verdict, human pointer, and tested rollback | M-8, M-9 |
 
 ---
 

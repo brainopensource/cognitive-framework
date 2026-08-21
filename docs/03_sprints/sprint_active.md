@@ -5,7 +5,7 @@ title: "Active board — v0.6.1 Foundation (M-2 evidence integrity in flight)"
 status: ACTIVE
 milestone: M-2 / v0.6.1 — RF-23 NOVA-1 + RF-25 NOVA-2 in flight
 spec: docs/SPEC.md
-law: ADRs 0069–0084 + docs/04_annex/
+law: ADRs 0069–0085 + docs/04_annex/
 register: docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md
 plan: wave2C_todo.md
 last_reviewed: 2026-08-21
@@ -21,17 +21,17 @@ production truth, the one flow, and the canonical decisions.
 | Lane | State | Who |
 |---|---|---|
 | **Wave 0 — CI truth + falsifiers** | CLOSED (M-0) | — |
-| **Wave 1 — Trust spine** | **CLOSED — M-1 GREEN** | plan: [`done/wave1_trust_spine.md`](done/wave1_trust_spine.md) |
-| **Wave 2 — Convergence core** | **DONE; Round-4 evidence retained** | plan: [`done/wave2_convergence.md`](done/wave2_convergence.md) |
+| **Wave 1 — Trust spine** | **CLOSED — M-1 GREEN** | Completed evidence; no active plan. |
+| **Wave 2 — Convergence core** | **DONE; Round-4 evidence retained** | Completed evidence; no active plan. |
 | **Wave 2C — Evidence integrity** | **OPEN — M-2/v0.6.1 active lane** | plan: [`wave2C_todo.md`](../../wave2C_todo.md) |
-| **Wave 3 — Extensibility** | QUEUED — entry: M-2 green, including RF-23/RF-25 | plan: [`doing/wave3_extensibility.md`](doing/wave3_extensibility.md) |
-| **Wave 4 — Foundation E2E** | QUEUED — entry: M-1 + M-2 + M-3 | plan: [`doing/wave4_foundation_e2e.md`](doing/wave4_foundation_e2e.md) |
+| **Wave 3 — Extensibility** | QUEUED — entry: M-2 green, including RF-23/RF-25 | Draft only after M-2 evidence is review-ready. |
+| **Wave 4 — Foundation E2E** | QUEUED — entry: M-1 + M-2 + M-3 | Draft only after M-3 evidence is review-ready. |
 
 ### Director ratification — 2026-08-21
 
 ADRs [`0077`](../05_adr/0077-named-component-graph-manifest.md) through
 [`0084`](../05_adr/0084-compounding-macro-tools-active-inference.md) are accepted. Their canonical
-map is in the [`ADR index`](../05_adr/INDEX.md#tier-s-evolution-contract-00770084). Acceptance fixes
+map is in the [`ADR index`](../05_adr/INDEX.md#tier-s-evolution-contract-00770085). Acceptance fixes
 the long-horizon design; it does not move deferred implementation before its milestone.
 
 The previous M-2 Round-4 submission remains valid evidence for the original convergence scope,
@@ -40,18 +40,27 @@ opens **Wave 2C** and binds M-2/v0.6.1 closure to exactly two primary falsifiers
 
 | Gate | Decision | Required red-to-green proof | Owner | State |
 |---|---|---|---|---|
-| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **READY — WRITE RED FIRST** |
-| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **READY — WRITE RED FIRST** |
+| **RF-23 / NOVA-1** | ADR-0078 | A completed invoked episode emits a populated `mhf.trajectory/1`: attributable model route, explicit measurement status, conserved per-turn/episode cost, proper `D_H/D_R/D_X`, receipts/evidence, and derived eligibility. | Developer A | **RED TEST FILED — OPERATOR RUN PENDING** |
+| **RF-25 / NOVA-2** | ADR-0082 | A file-backed SQLite WAL run loses all live process state, reconstructs and legally continues in a fresh interpreter, preserves budgets/digests, and neither repeats settled effects nor guesses unresolved effects. | Developer B | **RED TEST FILED — OPERATOR RUN PENDING** |
 
 RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23;
 they do not create additional M-2 scheduling lanes. Production changes begin only after the named
 tests demonstrably fail for the diagnosed reasons. M-3 remains closed until both primary gates and
 all pre-existing M-2 gates are green and the Tech Lead signs the re-gate.
 
-**Immediate file ownership:** Developer A owns the trajectory schema/writer/session accounting
-surface. Developer B owns the fresh-process continuation test and recovery surface. If both need
-`runtime/session.py`, Developer B proposes the narrow resume interface first and Developer A lands
-or approves the shared seam; neither branch invents a second session engine.
+**Immediate file ownership:** Developer A owns `schemas/mhf/trajectory.schema.json`,
+`runtime/trajectory.py`, trajectory-facing telemetry/model attribution, and the final assembly call
+in `runtime/session.py`. Developer B owns `runtime/ledger/recovery.py`, the file-backed continuation
+path, and recovery-facing session construction. `runtime/session.py` is the sole shared hotspot:
+Developer B proposes the narrow resume interface first; Developer A rebases and owns only the
+trajectory call site. Neither branch edits `kernel/`, `agency/episode/`, graph/plugin code, or creates
+a second session/reducer. Merge order is RF-72 governance lock, Developer B's resume seam, Developer
+A's accounting join, then the combined M-2 re-gate.
+
+**Operator launch confirmation (required before production edits):** RF-72 must pass; RF-23 and
+RF-25 must each fail for the diagnosis in their assertion message, not for import, fixture, syntax,
+environment, or database-lock errors. Record the three command outputs on this board before moving
+either developer lane to `IN PROGRESS`.
 
 ### Wave 2 convergence assignment slices (completed history)
 
@@ -83,8 +92,8 @@ very duplication Wave 2 exists to remove.
 
 ### 2.2-A parity triage — **GREEN. 2.2-B/C AUTHORIZED** (Tech Lead)
 
-Keep/kill settled in [`done/wave2_convergence.md`](done/wave2_convergence.md). The one blocker is
-closed; deletion may proceed against the scope named there.
+The Wave 2 keep/kill decision is retained below as completed evidence. Its former narrative plan is
+not live authority; the one blocker is closed and only the active Wave 2C gates may change status.
 
 **Blocker closed — selector conformance (Developer B).** Verified: the correction is entirely in
 *declarations and call sites*. `domain/selectors/resource_selector.py`, `adapters/sandbox/ceiling.py`,
@@ -380,7 +389,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | W0-FALS | Falsifiers F-01…F-21 registered as tests | DONE |
 | W0-HYG | F-19 `__init__.py` for integration/governance; F-20 oracle artifact; stale-path cleanup | DONE |
 
-### Wave 1 — Trust Spine (`done/wave1_trust_spine.md`) (CLOSED — M-1 GREEN)
+### Wave 1 — Trust Spine (CLOSED — M-1 GREEN)
 | ID | Task | Falsifier | Readiness |
 |---|---|---|---|
 | 1.1-A | Regenerate types; fix generator | F-13 | DONE |
@@ -402,7 +411,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 1.3-D | Trajectory assembly + emission at `EpisodeCompleted` | F-12 | DONE |
 | 1.3-E | Receipt carries `lease_id`/`grant_digest` | P1-9 | DONE |
 
-### Wave 2 — Convergence + Evidence Integrity (`done/wave2_convergence.md`, [`wave2C_todo.md`](../../wave2C_todo.md)) (IN FLIGHT — M-2/v0.6.1)
+### Wave 2 — Convergence + Evidence Integrity ([`wave2C_todo.md`](../../wave2C_todo.md)) (IN FLIGHT — M-2/v0.6.1)
 | ID | Task | Readiness |
 |---|---|---|
 | 2.1-A | jsonrpc → `domain/wire/`; flip 6 imports | DONE |
@@ -414,11 +423,11 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 2.2-B | Delete 2.2-A KILL surfaces; retire v4 write path | DONE |
 | 2.2-C | `root.py` split in place (compose, session, wiring) | DONE |
 | 2.2-D | Widen I-7 domain-blindness linter & boundary rows | READY |
-| 2C-R23 | Write RF-23 red; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **READY — PRIMARY M-2 GATE** |
-| 2C-R25 | Write RF-25 red; prove fresh-interpreter continuation from file-backed SQLite WAL | **READY — PRIMARY M-2 GATE** |
+| 2C-R23 | RF-23 filed at `test/falsifiers/test_rf23_trajectory_content.py`; implement NOVA-1 populated `mhf.trajectory/1` and exact accounting | **RED EXECUTION CONFIRMATION PENDING — PRIMARY M-2 GATE** |
+| 2C-R25 | RF-25 filed at `test/falsifiers/test_rf25_cold_continuation.py`; prove hard-death continuation from file-backed SQLite WAL | **RED EXECUTION CONFIRMATION PENDING — PRIMARY M-2 GATE** |
 | 2C-REGATE | Integrate Round-4 evidence + RF-23/RF-25; run full M-2 gate and obtain Tech Lead signature | BLOCKED on RF-23/RF-25 |
 
-### Wave 3 — Extensibility (`doing/wave3_extensibility.md`) (QUEUED — Entry: signed M-2 including RF-23/RF-25)
+### Wave 3 — Extensibility (QUEUED — Entry: signed M-2 including RF-23/RF-25)
 | ID | Task | Readiness |
 |---|---|---|
 | 3.1-A | Registry FSM on packages; ledgered transitions | READY |
@@ -429,7 +438,7 @@ envelope, verdict shapes validate against `schemas/mhf/`.
 | 3.2-B | Coding-token sweep; widened I-7 green | READY |
 | 3.2-C | One manifest parser | DEV-LOCAL |
 
-### Wave 4 — Foundation E2E (`doing/wave4_foundation_e2e.md`) (QUEUED — Entry: M-3)
+### Wave 4 — Foundation E2E (QUEUED — Entry: M-3)
 | ID | Task | Readiness |
 |---|---|---|
 | 4.1-A | Fixture repo + preregistered oracle | READY |

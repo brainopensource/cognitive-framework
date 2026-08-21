@@ -774,8 +774,13 @@ I-1 through I-10 are carried from the archived Tech Lead audit `CRITICAL_GAP_ANA
 8. **Specs are generated or normative — never both.** One normative document (this one); schema
    references generated; drift is a CI failure, not a register.
 9. **Telemetry is a dataset.** Every episode terminates in a schema-valid `mhf.trajectory/1` record
-   that is, without transformation, a valid harvest row. A digest over `{ids, n}` is not this
-   invariant (`ADR-0074`). DPO training itself is deferred.
+   that is, without transformation, a valid harvest row. For every invoked turn the row MUST carry
+   attributable provider/model identity, fingerprint or an explicit unavailable reason, explicit
+   measurement status, conserved per-turn and episode cost, and distinct recomputable `D_H`, `D_R`,
+   and (when evaluated as an experiment) `D_X` subjects. Unknown cost MUST NOT be encoded as zero;
+   incomplete historical rows remain readable but are derived ineligible for learning or promotion
+   (`ADR-0078`). A digest over `{ids, n}` is not this invariant (`ADR-0074`). DPO training itself is
+   deferred.
 10. **Metaphors ship as comments, not architecture.**
 
 **I-11 (v0.6 Concept Lock).** The scheduler is sequential; concurrency is a later scheduler property

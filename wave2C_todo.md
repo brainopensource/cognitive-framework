@@ -4,8 +4,8 @@
 
 **Document class:** Director-authorized transient staging document; not law and not a second board
 **Status:** **ACTIVE FOR M-2 STAGING ONLY — ARCHIVE AT M-2 EXIT**
-**Prepared:** 2026-08-21  
-**As-built snapshot:** Git `a9f4747`; clean working tree at inspection  
+**Prepared:** 2026-08-21
+**Baseline recovery commit:** Git `84a62bcd6c8d`; approved cleanup and M-2 launch changes are in the working tree
 **Selected decision:** [`001_alfa_review_full_decision.md`](docs/07_reviews/archive/proposals/001_alfa_review_full_decision.md)
 **Architectural baseline:** [`006_fi_review_full_gptsol_proposal.md`](docs/07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md)
 **Controlling law:** [`docs/SPEC.md`](docs/SPEC.md), accepted [`ADRs 0069–0085`](docs/05_adr/INDEX.md), and [`docs/04_annex/`](docs/04_annex/)
@@ -21,7 +21,8 @@
 ## 0. The next action, in plain language
 
 **Do not start by adding more agent features.** The Director has ratified the eight-ADR catalog.
-Complete the bounded governance-hardening pass, then write RF-23 and RF-25 red; repair the evidence
+The bounded governance-hardening pass and RF-23/RF-25 test definitions are filed. Confirm both
+tests fail for their named reasons, then repair the evidence
 path and prove true fresh-process continuation. Only after that re-gate M-2 and consider opening
 M-3 for the Named Component Graph, plugin lifecycle, and final `layer0/` deletion.
 
@@ -30,7 +31,7 @@ The shortest safe route is:
 ```text
 Director decision
     -> accepted ADRs + minimal SPEC/board delta
-    -> RF-23/RF-24/RF-25/RF-27 RED
+    -> RF-23 (including RF-24/RF-27 assertions) + RF-25 RED
     -> NOVA-1 and NOVA-2 GREEN
     -> M-2 re-gate
     -> manifest/2 + lifecycle parity + NOVA-4
@@ -64,7 +65,7 @@ The following facts were rechecked against the live tree; they define the starti
 | Layer-0 | `layer0/registry/`, `layer0/compose/`, and supporting `layer0/events/` remain intentionally for M-3. [`pyproject.toml`](pyproject.toml) still packages `layer0*`; CI still runs the residual Layer-0 suite. | Delete these only after their packages-path twin passes. Deletion, packaging removal, CI removal, and NOVA-4 must be atomic. |
 | Documentation gate | [`check_markdown_links.py`](tools/linters/check_markdown_links.py) defaults to only three narrow globs. The active board still links to the old `plans/` location while plans now live under `done/` and `doing/`. | Widen the linter before relying on “LINK PASS”; fix living links without rewriting historical ADR evidence. |
 
-### Verification executed for this packet
+### Historical verification at the original packet snapshot
 
 The following passed at the snapshot above:
 
@@ -112,25 +113,28 @@ six-ADR proposal map previously carried by this packet.
 
 Each accepted ADR must be concise and contain: context, decision, scope/milestone, invariants narrowed or extended, owner boundary, one primary falsifier, negative cases, reversal condition, and links to the selected baseline. The proposal's long-form explanations remain in 006; do not copy 2,000 lines into the ADR register.
 
-### 2.3 Documentation cascade—exact order
+### 2.3 Documentation cascade—status and exact order
 
 Perform this cascade as its own governance PR before production implementation:
 
-1. **W2C-H1 — Widen link truth first.** Update [`tools/linters/check_markdown_links.py`](tools/linters/check_markdown_links.py) so default CI checks living root briefings, `docs/**/*.md`, schema/package READMEs, and sprint documents. Preserve explicit archive exclusions. Add a planted broken-link fixture test. Run `--all` once and adjudicate existing failures rather than hiding them with new exclusions.
-2. **W2C-A1 — Maintain accepted ADRs.** The Director-approved 0077–0084 mapping is filed under [`docs/05_adr/`](docs/05_adr/) and indexed in [`INDEX.md`](docs/05_adr/INDEX.md). Amendments are dated and explicit; proposal text is never silently edited into apparent consensus.
-3. **W2C-A2 — Apply the minimal immediate SPEC delta.** Update only the sections required for authorized Wave 2C behavior:
+1. **W2C-H1 — OPERATOR/TOOLING FOLLOW-UP.** Widen [`tools/linters/check_markdown_links.py`](tools/linters/check_markdown_links.py) after adjudicating the known `--all` debt; do not hide failures with exclusions. This is hygiene, not a production-code blocker once living links resolve.
+2. **W2C-A1 — COMPLETE.** ADRs 0077–0085 and their amendments are filed and indexed; proposal text remains advisory provenance.
+3. **W2C-A2 — COMPLETE FOR M-2.** The immediate SPEC lock covers cold continuation and rich, non-forged trajectory content. Future behavior remains phased:
    - §1.3: true cold continuation is reconstruction **and legal continuation** from durable SQLite WAL in a fresh process;
    - §7: `mhf.trajectory/1` populated content, explicit missingness, `D_H/D_R/D_X`, per-turn identity/cost, conservation, and derived legacy exclusion;
    - §8.2/§8.3: NOVA-1/NOVA-2 as M-2 corrections and the exact M-4 row-8 wording;
    - I-9: a schema-valid but hollow row fails the invariant;
    - I-11: sequential execution remains until the M-7 measurement decision.
-4. **W2C-A3 — Defer non-existent behavior in SPEC.** Do not norm the full Named Component Graph into §2.3 until ADR-0077 is accepted and M-3 opens. Do not norm VFE/EFE routing, macros, DPO, or swarm claims as shipped behavior; keep them explicitly phased in §5–§7. Law must distinguish current MUSTs from future blueprint.
-5. **W2C-A4 — Normalize the falsifier register.** In [`002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md), reserve one `RF-*` sequence or an explicit F→RF alias map. Preserve historical `F-*` meanings. Add a linter under `tools/linters/` and a planted duplicate-ID test under `test/tools/`.
-6. **W2C-A5 — Update the one board.** Add Wave 2C tickets, owners, entry/exit gates, and Director dependencies to [`sprint_active.md`](docs/03_sprints/sprint_active.md). Correct plan links to [`done/wave2_convergence.md`](docs/03_sprints/done/wave2_convergence.md), [`doing/wave3_extensibility.md`](docs/03_sprints/doing/wave3_extensibility.md), and [`doing/wave4_foundation_e2e.md`](docs/03_sprints/doing/wave4_foundation_e2e.md). Do not create a second live backlog.
-7. **W2C-A6 — Update the milestone ladder only at outcome level.** In [`milestones.md`](docs/02_roadmap/milestones.md), name NOVA-1/NOVA-2 as M-2 evidence gates, strengthen M-4 row 8, name Pack #2 precisely, and retain M-5–M-10 as outcomes—not detailed speculative tickets.
+4. **W2C-A3 — COMPLETE / STANDING STOP.** Graphs, routing, macros, DPO, swarms, and spawn are decision-compatible but not described as shipped behavior.
+5. **W2C-A4 — FILED; OPERATOR RUN PENDING.** RF allocations, the sole F-12→RF-23 lineage, `check_falsifier_ids.py`, its duplicate fixture, and CI binding exist.
+6. **W2C-A5 — COMPLETE.** The single active board names two owners, the shared-file protocol, merge order, gates, and deferred-wave stop lines. Missing historical plan files are no longer linked as live authority.
+7. **W2C-A6 — COMPLETE FOR M-2.** The milestone ladder names RF-23/RF-25 as the outcome gate and keeps M-5–M-10 at outcome resolution.
 8. **W2C-A7 — Update README/AGENTS last.** Change navigation/status only after the board and files actually move. Do not announce `layer0/` deletion, manifest/2, or a green milestone before the matching falsifier passes.
 
-No production implementation starts until steps 1–6 are merged or the Director explicitly authorizes an inseparable red-test PR with them.
+NOVA-1/NOVA-2 production implementation starts only after the filed RF-23/RF-25 tests are observed
+red for their named causes. W2C-H1 may proceed as an independent hygiene lane, but its known link
+debt must be adjudicated before the M-2 re-gate; it cannot block the two production owners by
+changing their contracts or files.
 
 ---
 
@@ -158,20 +162,33 @@ Wave 2C is a narrow correction lane between the current M-2 re-gate submission a
 - RF-23, RF-24, RF-25, RF-27 and all existing M-2 gates are green;
 - Tech Lead signs the M-2 re-gate; only then may M-3 start.
 
-### 3.2 Sprint 2C.0 — Decisions, hygiene, and red tests (2–3 working days)
+### 3.2 Sprint 2C.0 — Decisions, hygiene, and red tests (launch packet)
 
 | ID | Owner | Work | Files | Exit |
 |---|---|---|---|---|
-| **W2C-H1** | Tooling owner | Widen Markdown link coverage and add the broken-link fixture. | `tools/linters/check_markdown_links.py`, `test/tools/` | Default link check detects a broken link in a living sprint doc. |
-| **W2C-A1** | Director + Architect | File accepted ADRs and INDEX rows; apply the minimal SPEC delta. | `docs/05_adr/`, `docs/SPEC.md` | Every immediate requirement cites one accepted ADR and one future falsifier. |
-| **W2C-A2** | Tech Lead | Add the Wave 2C lane and correct live plan links. | `docs/03_sprints/sprint_active.md`, `docs/02_roadmap/milestones.md` | One board names owners, dependencies, and stop lines. |
-| **W2C-A3** | Tooling owner | Reserve/lint RF identifiers; preserve existing F aliases. | gap register, new `tools/linters/check_falsifier_ids.py`, `test/tools/` | Duplicate or reused RF identifier fails CI. |
-| **W2C-R23** | Developer A | Write invoked-turn population falsifier. | new `test/falsifiers/test_rf23_trajectory_content.py` | Red specifically because `_ZERO_COST`, route identity, and per-turn usage are missing. |
-| **W2C-R24** | Developer A | Write accounting/missingness falsifier. | new `test/falsifiers/test_rf24_trajectory_accounting.py` | Red because totals do not derive from turns/non-turn charges and unknown is not represented. |
-| **W2C-R27** | Developer A | Write execution/experiment digest falsifier. | new `test/falsifiers/test_rf27_execution_identity.py` | Red because the emitted row lacks `D_R`/`D_X`. |
-| **W2C-R25** | Developer B | Write true cold-continuation falsifier. | new `test/runtime/test_cold_continuation.py`, subprocess helper fixture | Red because no new process can legally continue the episode from WAL alone. |
+| **W2C-H1** | Tooling owner | Widen Markdown coverage after triaging existing `--all` debt. | link linter + fixture | **DELEGATED HYGIENE; not a production blocker** |
+| **W2C-A1** | Director + Architect | Ratify/index decisions and lock immediate SPEC behavior. | `docs/05_adr/`, `docs/SPEC.md` | **COMPLETE** |
+| **W2C-A2** | Tech Lead | Establish the two-lane board and M-2 outcome gate. | active board + milestones | **COMPLETE** |
+| **W2C-A3 / RF-72** | Tooling owner | Lint RF allocations and preserve the F-12 lineage. | RF linter + unit fixture + CI | **FILED; RUN PENDING** |
+| **W2C-R23** | Developer A | Invoked-turn population, accounting, missingness, and identity falsifier. | `test/falsifiers/test_rf23_trajectory_content.py` | **FILED; RED CONFIRMATION PENDING** |
+| **W2C-R25** | Developer B | Hard-death, file-WAL, fresh-interpreter continuation falsifier. | `test/falsifiers/test_rf25_cold_continuation.py` | **FILED; RED CONFIRMATION PENDING** |
 
-Production files are untouched in this sprint. A test that accidentally passes must be strengthened until it exercises the stated defect; do not weaken the requirement to manufacture red.
+Production behavior is untouched in this launch packet. RF-24 and RF-27 remain supporting
+assertions inside Developer A's RF-23 lane rather than extra scheduling lanes. A test that
+accidentally passes must be reviewed against its ADR and strengthened if it missed the diagnosed
+defect; do not weaken the requirement to manufacture red.
+
+Operator pre-development confirmation:
+
+```bash
+python3 tools/linters/check_falsifier_ids.py
+python3 -m unittest test.falsifiers.test_rf23_trajectory_content -v
+python3 -m unittest test.falsifiers.test_rf25_cold_continuation -v
+```
+
+Expected interpretation: RF-72 is green; RF-23 reports missing route/measurement/identity/event
+binding; RF-25 reports missing reconciliation/recovery without fixture or subprocess failure. Any
+different result returns to the Tech Lead for test correction before production code starts.
 
 ### 3.3 Exact red-test contracts
 
@@ -179,27 +196,16 @@ The names below are the handoff API between governance and code. The Director ma
 
 ```text
 test.falsifiers.test_rf23_trajectory_content
-  .TrajectoryContentIsPopulated
-  .test_completed_invoked_turn_is_attributable_and_measured
+  .RF23TrajectoryContent
+  .test_invoked_turn_is_attributable_measured_and_conserved
 
-test.falsifiers.test_rf24_trajectory_accounting
-  .TrajectoryAccountingConserves
-  .test_episode_cost_equals_turns_plus_declared_non_turn_charges
-
-test.falsifiers.test_rf24_trajectory_accounting
-  .TrajectoryAccountingConserves
-  .test_unknown_dimension_is_unavailable_with_reason_not_zero
-
-test.falsifiers.test_rf27_execution_identity
-  .ExecutionIdentityIsSeparated
-  .test_dh_dr_dx_are_computed_for_their_distinct_subjects
-
-test.runtime.test_cold_continuation
-  .ColdContinuationFromWal
-  .test_fresh_interpreter_resumes_without_repeating_settled_effect
+test.falsifiers.test_rf25_cold_continuation
+  .RF25ColdContinuation
+  .test_hard_death_folds_reconciles_and_continues_in_fresh_interpreter
 ```
 
-RF-23 drives a completed scripted episode with at least one real model invocation and proposal. It asserts:
+RF-23 drives a completed scripted episode with at least one invocation through the real model port
+and one ledgered proposal; the provider itself remains a hermetic scripted double. It asserts:
 
 - `len(turns)` equals the counted model/proposal turns and is greater than zero;
 - each turn carries `provider`, `model`, and fingerprint or a typed unavailability reason;
@@ -226,7 +232,12 @@ D_X = H(D_R || dataset || protocol)
 
 It changes one subject at a time and requires the appropriate digest to change while unrelated identities remain stable. Do not adopt a different `D_X` formula from a proposal without an ADR amendment.
 
-RF-25 must use a file-backed SQLite store and a spawned Python interpreter. Process A runs to a deterministic suspension/checkpoint after a known settled effect and exits. Process B receives only stable identifiers and the SQLite path, reconstructs the same harness/run/lease/turn/effect state, reconciles any open intent, continues legally, and finishes. The test fails on duplicate effect, skipped effect, re-query of an already-approved action, broken hash lineage, changed state digest for the same prefix, reset turn budget, or transfer of any live Python object.
+RF-25 must use a file-backed SQLite store and spawned Python interpreters. Process A durably records
+the prefix through S8a and dies with an open external-effect intent. Process B receives only stable
+identifiers and the SQLite path, reconstructs the same harness/run/lease/turn/effect state,
+reconciles the open intent without guessing occurrence, continues legally, and finishes. The test
+fails on duplicate effect, skipped reconciliation, broken hash lineage, reset budget, repeated
+episode start/termination, or transfer of any live Python object.
 
 ### 3.4 Sprint 2C.1 — NOVA-1 trajectory integrity (Developer A, 3–4 working days)
 
@@ -260,7 +271,7 @@ RF-25 must use a file-backed SQLite store and a spawned Python interpreter. Proc
 
 **Primary files:**
 
-- new `test/runtime/test_cold_continuation.py`
+- [`test/falsifiers/test_rf25_cold_continuation.py`](test/falsifiers/test_rf25_cold_continuation.py)
 - [`vanguard/packages/runtime/ledger/recovery.py`](vanguard/packages/runtime/ledger/recovery.py)
 - runtime session/service entrypoint only if a narrow resume command is required
 - existing SQLite event-store adapter and reducer; no second checkpoint database
@@ -607,18 +618,17 @@ Stop and escalate if any change proposes to:
 
 ## 10. Final assignment sheet
 
-### Start immediately after Director authorization
+### Current launch handoff
 
 | Order | Assignment | Owner | Expected result |
 |---:|---|---|---|
-| 1 | D-ALFA-1: retain the ratified eight-ADR map and `/1` trajectory amendment. | Engineering Director | One signed decision map. |
-| 2 | Widen link and RF-ID linters; fix living plan links. | Tooling owner | Documentation gates measure the documents developers will cite. |
-| 3 | File accepted ADRs, minimal SPEC delta, and Wave 2C board tickets. | Architect + Tech Lead | One legal, executable work queue. |
-| 4 | Write RF-23/RF-24/RF-27 red. | Developer A | Evidence defects reproduced without production edits. |
-| 5 | Write RF-25 red with file-backed SQLite and fresh interpreter. | Developer B | Continuation gap reproduced without production edits. |
-| 6 | Implement NOVA-1 and NOVA-2 in parallel under the file-conflict rule. | Developers A/B | Rich trajectory and true cold continuation green. |
-| 7 | Integrate, run the full M-2 gate, and adjudicate every red. | Tech Lead | Director-ready M-2 evidence bundle. |
-| 8 | Sign M-2 or return one bounded blocker. | Engineering Director | M-3 opens or remains closed unambiguously. |
+| 1 | Ratified ADR map, immediate SPEC lock, RF registry, active board, and M-2→M-10 ladder. | Director + Architect | **COMPLETE** |
+| 2 | RF-72 allocation linter, duplicate fixture, and CI binding. | Tooling owner | **FILED; operator execution pending** |
+| 3 | RF-23 with RF-24/RF-27 accounting and identity assertions. | Developer A | **FILED; confirm expected red** |
+| 4 | RF-25 hard-death/fresh-interpreter continuation. | Developer B | **FILED; confirm expected red** |
+| 5 | Implement NOVA-1 and NOVA-2 in parallel under the shared-file protocol. | Developers A/B | Start after both diagnosed red causes are confirmed. |
+| 6 | Integrate, run the complete M-2 gate, and adjudicate every red. | Tech Lead | Director-ready M-2 evidence bundle. |
+| 7 | Sign M-2 or return one bounded blocker. | Engineering Director | M-3 opens or remains closed unambiguously. |
 
 ### Then, and only then
 

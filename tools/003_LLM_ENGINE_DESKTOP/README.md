@@ -104,9 +104,13 @@ python3 tools/003_LLM_ENGINE_DESKTOP/matrix_execution/bench_matrix.py qwen2.5:1.
 
 ---
 
-## 5. Key Documentation Links
+## 5. Canonical Documentation Suite
 
-* 📄 [LED Desktop App Architecture Specification (`docs/system/led_desktop_app_architecture.md`)](file:///home/rocha/Coding/Aether-D-System/tools/003_LLM_ENGINE_DESKTOP/docs/system/led_desktop_app_architecture.md)
-* 📄 [System Overview & OFAT Empirical Findings (`docs/system/system_overview.md`)](file:///home/rocha/Coding/Aether-D-System/tools/003_LLM_ENGINE_DESKTOP/docs/system/system_overview.md)
-* 📄 [High-Order DoE, Meta-Dimensions & Surrogate ML (`docs/system/system_abstraction_v2.md`)](file:///home/rocha/Coding/Aether-D-System/tools/003_LLM_ENGINE_DESKTOP/docs/system/system_abstraction_v2.md)
-* 📄 [Canonical Challenge Prompt (`docs/prompts/fibo_challenge_finetune.md`)](file:///home/rocha/Coding/Aether-D-System/tools/003_LLM_ENGINE_DESKTOP/docs/prompts/fibo_challenge_finetune.md)
+| Document | File Link | Purpose & Authority |
+| :--- | :--- | :--- |
+| **Product Requirements (PRD)** | 📄 [`docs/PRD.md`](docs/PRD.md) | Vision, Personas, Functional (FR-1..6) & Non-Functional (NFR-1..8) Requirements. |
+| **Technical Specification (SPEC)** | 📄 [`docs/SPEC.md`](docs/SPEC.md) | RFC-2119 Normative Law, Tri-Language Architecture (Rust+Go+Python), Schemas. |
+| **Macro Roadmap & Milestones** | 📄 [`docs/ROADMAP.md`](docs/ROADMAP.md) | Macro Milestones M-0 to M-5, Sprint allocations (86 SP total), Exit Gates. |
+| **Sprint Backlog & Task Register** | 📄 [`docs/BACKLOG.md`](docs/BACKLOG.md) | Granular Engineering Tasks (LED-001 to LED-100) and Definition of Done. |
+| **Empirical Calibration Whitepaper** | 📄 [`docs/system/empirical_calibration_report_2026.md`](docs/system/empirical_calibration_report_2026.md) | Full empirical results across 70+ runs on RX 9060 16GB + Ryzen 5800X3D. |
+| **Architecture Specification** | 📄 [`docs/system/led_desktop_app_architecture.md`](docs/system/led_desktop_app_architecture.md) | Native Go/Wails UI + Rust Backend Engine design. |

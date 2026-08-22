@@ -75,8 +75,8 @@
 
 | Sprint | Milestone | Focus Area | Story Points | Duration | Status |
 | :---: | :---: | :--- | :---: | :---: | :---: |
-| **Sprint 0** | **M-0** | Python 16-Run DoE Matrix, AST Evaluator & Surrogate ML | **8 SP** | 1 Day | **Active** |
-| **Sprint 1** | **M-1** | Rust Axum Server, Process Lifecycle & llama-server FFI | **13 SP** | 1 Week | Queued |
+| **Sprint 0** | **M-0** | Python 16-Run DoE Matrix, AST Evaluator & Surrogate ML | **8 SP** | 1 Day | **COMPLETE (VERIFIED)** |
+| **Sprint 1** | **M-1** | Rust Axum Server, Process Lifecycle & llama-server FFI | **13 SP** | 1 Week | **ACTIVE (NEXT)** |
 | **Sprint 2** | **M-1** | Zero-GIL SSE Streaming & OpenAI `/v1` Route Adapter | **8 SP** | 1 Week | Queued |
 | **Sprint 3** | **M-2** | Go + Wails Desktop Application Scaffolding & System Tray | **13 SP** | 1 Week | Queued |
 | **Sprint 4** | **M-2** | Chat & Code Studio UI with Syntax Highlighting | **8 SP** | 1 Week | Queued |

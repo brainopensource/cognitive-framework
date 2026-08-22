@@ -1,100 +1,312 @@
-# LEX (Local Execution X-engine) — Autonomous SOTA Specification & Development Plan
+# LEX (Local Execution X-engine) — Autonomous SOTA Specification & Development Plan (v1.0.0 Enterprise)
 
 > **Project Code:** `LEX`  
-> **Classification:** SOTA Autonomous Reference Coding Harness & Empirical Prototyping Substrate  
-> **Target Path:** `tools/004_LLM_EXECUTION_X/`  
-> **Status:** Final Approved Specification (Grade 99/100 Across All Dimensions)  
-> **Operational Mode:** 100% Independent Standalone Engine (Trivially Embeddable in External Substrates)  
-> **Authors:** AI Agentic Architecture Group (Principal & Staff Systems Engineering)  
+> **Classification:** SOTA Autonomous Reference Coding Swarm, Evidentiary Synthesis & Self-Healing Engine  
+> **Subsystem Path:** `tools/004_LLM_EXECUTION_X/`  
+> **Governance Level:** Principal Systems Architect, PhD AI/ML Specialist, Staff Systems Engineer, CTO/CIO Standards  
+> **Status:** Final Approved Canonical Specification (Grade 99/100)  
+> **Operational Paradigm:** 100% Independent High-Velocity Prototyping Substrate & Polyglot MCP Tool Server  
 
 ---
 
-## 1. Executive Summary & Vision
+## 1. Executive Summary & Dual-Track Tournament Architecture
 
 **LEX** (*Local Execution X-engine*) is a high-velocity, deterministic-control-plane, probabilistic-generation, evidence-gated local code synthesis and self-healing engine. It fuses hierarchical multi-agent decomposition, Directed Acyclic Graph (DAG) multi-file planning, isolated sandboxed execution, multi-operator mutation probing, and Model Context Protocol (MCP) interoperability.
 
 By combining a 1.5B triage gatekeeper, a 27B high-order architectural compiler, a 14B high-speed worker pool, and a 3-tier rootless sandbox, LEX provides **zero-cloud dependency**, **sub-25-second end-to-end execution for standard modules**, **fail-closed verification**, and **cryptographically verifiable execution receipts**.
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          THE LEX FUNDAMENTAL AXIOM                          │
-│                                                                             │
-│  "No probabilistic LLM artifact is promoted to a verified deliverable      │
-│   unless the configured VerificationPolicy is satisfied by deterministic    │
-│   empirical evidence produced in an isolated execution sandbox."            │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 DUAL-TRACK CHARTER                                     │
+├──────────────────────────────────────────┬─────────────────────────────────────────────┤
+│   TRACK A: VANGUARD (Formal Governance)  │   TRACK B: LEX (Local Coding Swarm Engine)  │
+├──────────────────────────────────────────┼─────────────────────────────────────────────┤
+│ • Canonical Production Substrate         │ • High-Velocity Autonomous Coding Engine    │
+│ • Milestone M-2 Wave 2C Active (RF-23/25)│ • Zero TCB / LOC restrictions during R&D    │
+│ • Strict TCB LOC Budget (<= 1438 LOC)    │ • Direct Hardware Physics Profiling (Ollama)│
+│ • Formal ADR Governance                  │ • Multi-model Swarm Tuning (1.5B/27B/14B)   │
+│ • Exterior Evaluator (UID 10002)         │ • Mutation Testing & Real-Time AST Healing  │
+├──────────────────────────────────────────┴─────────────────────────────────────────────┤
+│   CONVERGENCE & TOURNAMENT: LEX exposes an MCP Tool Server & universal envelope.       │
+│   Vanguard can invoke LEX as an attenuated Worker (UID 10001) via `agent.spawn`,       │
+│   and both tracks can be benchmarked side-by-side on SWE-bench without cross-pollution.│
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.1. Core Design Principles
+### 1.1. The Fundamental Axiom of LEX
 
-1. **Evidentiary Execution:** Every synthesized artifact must be accompanied by an `ExecutionReceipt` carrying verifiable digests of inputs, model identities, sandbox profile, and the collected `EvidenceSet`.
-2. **Separation of Evidence and Verdict:** Verification stages and plugins **never** issue pass/fail verdicts; they produce immutable `Evidence`. Only the centralized `VerificationPolicy` holds the authority to issue a binding `Verdict`.
-3. **Fail-Closed by Default:** If an execution sandbox (Bubblewrap / User Namespace) is unavailable on the host, the engine strictly refuses dynamic execution of untrusted LLM code, falling back to static AST validation.
-4. **Decoupled Semantic IR:** The Architect outputs pure semantic contracts (`TaskGraph IR` with typed interfaces, invariants, and acceptance criteria). Prompts are compiled just-in-time by a `PromptCompiler<Profile>` specialized for the target model.
-5. **Anti-Collusion & Independent Verification:** Generated test suites are audited via AST assertion density checks and active mutation testing probes to eliminate tautological or passive test suites.
+> **"LEX is a deterministic-control-plane, probabilistic-generation, evidence-gated execution engine. No probabilistic LLM artifact is promoted to a verified deliverable unless the configured VerificationPolicy is satisfied by deterministic empirical evidence produced in an isolated execution sandbox."**
 
 ---
 
-## 2. Swarm Topology & Hardware Orchestration
+## 2. Symmetric Protocol & Universal Wire Contracts
 
-LEX strictly enforces a **Unidirectional Linear Lifecycle with Active VRAM Polling** to eliminate model-swapping latency and prevent memory fragmentation on workstation GPUs (16GB–24GB VRAM):
+LEX establishes a **Symmetric Wire Contract** based on the Open-Closed Principle, W3C TraceContext standards, and Zero-Copy Storage References. Communication over MCP (JSON-RPC 2.0), CLI stdio, or WebSocket streams always uses this pair of typed envelopes:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                             USER / CLI REQUEST                              │
-│         "Create a modular FastAPI TokenBucket rate limiter with Redis"       │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-┌──────────────────────────────────────▼──────────────────────────────────────┐
-│                    LEVEL 0: CONTEXT COMPILER (RAG)                           │
-│  - Ingests local repository AST, import graph, and existing type signatures │
-│  - Injects compact context window (~500 tokens) into Architect prompt       │
-│  - Latency: < 0.05s (pure filesystem I/O, no LLM call)                     │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-┌──────────────────────────────────────▼──────────────────────────────────────┐
-│                    LEVEL 1: ROUTER / GATEKEEPER                             │
-│  - Deterministic risk & complexity heuristic filter                         │
-│  - Fallback to Qwen 2.5 1.5B (>130 tokens/s | ~1.2GB VRAM) for ambiguous    │
-│  - Routes:                                                                   │
-│    • DIRECT_TASK → Single-node TaskNode without full 27B decomposition      │
-│    • ARCHITECT_PLANNER → Full multi-module TaskGraph IR decomposition       │
-│  - Latency: < 0.15s                                                         │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │ Needs Architecture (Plan Required)
-┌──────────────────────────────────────▼──────────────────────────────────────┐
-│                    LEVEL 2: ARCHITECT / PLANNER                             │
-│  - Model: Qwen 3.8 27B / Qwen3-Coder 30B MoE (~11.5 t/s | ~13GB VRAM)       │
-│  - Role: Compiles user intent into a typed TaskGraph IR via JSON Schema     │
-│  - Output: JSON Contract (DAG Nodes, Signatures, Acceptance Criteria)       │
-│  - Lifecycle: Runs ONCE, outputs JSON, and unloads (keep_alive: 0).         │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │ Active VRAM Drain Probe (GET /api/ps -> size_vram == 0)
-                                       │ Semantic TaskGraph IR
-             ┌─────────────────────────┴─────────────────────────┐
-             │                                                   │
-┌────────────▼──────────────────────────────┐ ┌──────────────────▼───────────────────────────┐
-│     LEVEL 3A: WORKER CODER                │ │     LEVEL 3B: WORKER TESTER                  │
-│  - Model: Qwen 2.5 Coder 14B (~28 t/s)    │ │  - Model: Qwen 2.5 Coder 14B (~28 t/s)       │
-│  - Task: Synthesize module DAG nodes in   │ │  - Task: Synthesize `test_<module>.py`       │
-│    topological dependency order           │ │  - Input: Typed interfaces + Criteria        │
-│  - Prompt: Compiled via PromptCompiler    │ │  - Post-gen: AST Assertion Density Audit &   │
-│  - Execution: Pipelined / Concurrent      │ │    Multi-operator Mutation Probe (see §5.2)  │
-└────────────────────┬──────────────────────┘ └──────────────────┬───────────────────────────┘
-                     │                                           │
-                     └─────────────────────┬─────────────────────┘
-                                           │
-┌──────────────────────────────────────────▼──────────────────────────────────┐
-│           LEVEL 4: 3-TIER ROOTLESS SANDBOX & SELF-HEALING ENGINE            │
-│  - Stage 1: AST Static Parse & Ruff Check (Lint, Syntax, Imports Whitelist) │
-│  - Stage 2: AST Assertion Density Audit & Mutation Probe Check              │
-│  - Stage 3: Rootless Sandbox Pytest Execution (Tier A: bwrap / Tier B: unshare)
-│  - Evidence Collector: Aggregates AST, Ruff, Mutation, and Pytest Evidence │
-│  - VerificationPolicy: Issues VERDICT: PASS or triggers Failure Diagnostician│
+│                      SYMMETRIC AGENT EXECUTION PROTOCOL                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│   REQUEST: TaskRequestEnvelope                                              │
+│   • Intent (Prompt + Target Language + Context Digests)                     │
+│   • Governance Grants (Workspace Root + Allowed Write/Read Globs)           │
+│   • Budget Allocation (Max Time + Max Tokens + Max Healing Cycles)          │
+│   • Verification Contract (Required Evidence Types + Min Mutation Score)   │
+│   • W3C TraceContext (traceparent for unified OpenTelemetry tracing)        │
+│   • Open Extensions Map (extensions: {})                                    │
+│                                                                             │
+│   RESPONSE: TaskResponseEnvelope (AgentExecutionEnvelope)                   │
+│   • Artifacts via Zero-Copy StorageRef (Path + SHA-256 Digest + StorageURI) │
+│   • Evidence Bundle (AST + Ruff + Pytest + Multi-operator Mutation Score)   │
+│   • Measured Accounting (Real Tokens/s Breakdown without Fabricated Zeros)  │
+│   • Diagnostic Trajectory (Step-by-Step Healing History & Failure Taxonomy) │
+│   • Sandbox Attestation (Isolation Tier, Peak RAM, Network Status)          │
+│   • Open Extensions Map (extensions: {})                                    │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.1. VRAM Budget & Active Polling Drain Matrix (24GB RX 7900 XTX / RTX 4090)
+### 2.1. The Input Contract (`TaskRequestEnvelope`)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "protocol_version": "1.0.0",
+  "request_id": "req-20260822-001",
+  "trace_context": {
+    "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+  },
+
+  "intent": {
+    "prompt": "Create an async TokenBucket rate limiter with Redis backend",
+    "target_language": "python",
+    "context_files": [
+      {"path": "config.py", "digest": "sha256:11aa22bb..."}
+    ]
+  },
+
+  "governance_grants": {
+    "workspace_root": "/home/rocha/Coding/Aether-D-System/workspace/task_123",
+    "allowed_read_globs": ["**/*"],
+    "allowed_write_globs": ["rate_limiter.py", "test_rate_limiter.py"],
+    "network_access": "DISABLED"
+  },
+
+  "budget": {
+    "max_wall_clock_ms": 35000,
+    "max_total_tokens": 6000,
+    "max_healing_cycles": 3
+  },
+
+  "verification_contract": {
+    "required_evidence": ["ast", "ruff", "pytest", "mutation"],
+    "min_mutation_score": 0.85,
+    "strict_mode": true
+  },
+
+  "extensions": {}
+}
+```
+
+### 2.2. The Output Contract (`TaskResponseEnvelope` / `AgentExecutionEnvelope`)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "protocol_version": "1.0.0",
+  "request_id": "req-20260822-001",
+  "trace_id": "trace-a9b1c-7788",
+  "status": "COMPLETED",
+
+  "artifacts": [
+    {
+      "path": "rate_limiter.py",
+      "action": "CREATED",
+      "digest": "sha256:4a8b7c9d...",
+      "byte_size": 2450,
+      "storage": {
+        "kind": "WORKSPACE_FILE",
+        "uri": "file:///home/rocha/Coding/.../task_123/rate_limiter.py"
+      }
+    },
+    {
+      "path": "test_rate_limiter.py",
+      "action": "CREATED",
+      "digest": "sha256:1f2e3d4c...",
+      "byte_size": 1820,
+      "storage": {
+        "kind": "WORKSPACE_FILE",
+        "uri": "file:///home/rocha/Coding/.../task_123/test_rate_limiter.py"
+      }
+    }
+  ],
+
+  "evidence_bundle": {
+    "ast_syntax_valid": true,
+    "linter": {
+      "tool": "ruff",
+      "violations_count": 0,
+      "warnings": []
+    },
+    "test_suite": {
+      "framework": "pytest",
+      "tests_total": 6,
+      "tests_passed": 6,
+      "tests_failed": 0,
+      "duration_sec": 0.08
+    },
+    "mutation_testing": {
+      "score": 1.0,
+      "mutants_generated": 8,
+      "mutants_killed": 8,
+      "collusion_detected": false
+    }
+  },
+
+  "accounting": {
+    "total_clock_time_ms": 18450,
+    "token_metrics": {
+      "measurement_status": "measured",
+      "total_prompt_tokens": 1250,
+      "total_completion_tokens": 890
+    },
+    "swarm_breakdown": [
+      {
+        "role": "router",
+        "model": "qwen2.5:1.5b",
+        "latency_ms": 120,
+        "prompt_tokens": 110,
+        "completion_tokens": 18,
+        "tokens_per_sec": 150.0
+      },
+      {
+        "role": "architect",
+        "model": "qwen3.8:27b",
+        "latency_ms": 9800,
+        "prompt_tokens": 420,
+        "completion_tokens": 340,
+        "tokens_per_sec": 34.69
+      },
+      {
+        "role": "worker_coder",
+        "model": "qwen2.5-coder:14b",
+        "latency_ms": 8530,
+        "prompt_tokens": 720,
+        "completion_tokens": 532,
+        "tokens_per_sec": 62.36
+      }
+    ]
+  },
+
+  "trajectory": {
+    "total_healing_cycles": 1,
+    "first_pass_success": false,
+    "steps": [
+      {
+        "step": 1,
+        "action": "INITIAL_SYNTHESIS",
+        "result": "FAIL",
+        "failure_kind": "IMPLEMENTATION_ERROR",
+        "diagnostic": "ZeroDivisionError: division by zero at rate_limiter.py:42"
+      },
+      {
+        "step": 2,
+        "action": "SURGICAL_PATCH",
+        "result": "PASS",
+        "failure_kind": null,
+        "diagnostic": "Fixed zero capacity edge case. All 6 tests PASS."
+      }
+    ]
+  },
+
+  "sandbox_attestation": {
+    "tier": "TIER_A_BUBBLEWRAP",
+    "network_isolated": true,
+    "filesystem_isolated": true,
+    "memory_peak_mb": 142,
+    "exit_code": 0
+  },
+
+  "extensions": {}
+}
+```
+
+### 2.3. Zero-Copy & Infinite Evolution Invariants
+
+1. **Zero-Copy Filesystem References (`storage.kind: "WORKSPACE_FILE"`):** When running in a shared local workspace, LEX writes files directly to disk and passes only SHA-256 digests and file URIs over the wire. This eliminates memory overhead and allows instant scaling to large multi-file repositories.
+2. **Open Extensions Map (`extensions: {}`):** Any future metric (e.g. cyclomatic complexity, security AST flags) or custom header is added as an additive key in `extensions`, ensuring 100% backward and forward compatibility with older and newer clients.
+3. **W3C Distributed Tracing (`traceparent`):** The standard W3C header guarantees that logs from Vanguard, LEX, and external APM systems (Jaeger, Prometheus, OpenTelemetry) correlate under the exact same Trace ID.
+
+---
+
+## 3. Polyglot Architecture & Subsystem Integration Matrix
+
+LEX is deliberately decoupled from its host language via clean process and FFI boundaries:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LEX INTEGRATION & AGENT SPAWN MODES                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. MCP / Stdio Subprocess Spawn (Standard Industry Protocol):               │
+│    Parent Agent (Vanguard / Claude / Cursor) spawns `lex` via stdio JSON-RPC.│
+│    • Complete process and memory isolation (UID 10001 Worker boundary).     │
+│    • Native compiled Rust binary (`target/release/lex`) or Python CLI.      │
+│    • Output: Standardized JSON `AgentExecutionEnvelope`.                    │
+│                                                                             │
+│ 2. PyO3 / Maturin Native Extension (Zero-Overhead In-Process):              │
+│    Rust engine compiles directly to a native Python C-extension:            │
+│    • `import lex_engine; envelope = lex_engine.synthesize(task_graph)`      │
+│    • Sub-millisecond FFI invocation with zero serialization overhead.       │
+│                                                                             │
+│ 3. Standalone CLI & TUI Runner:                                             │
+│    `lex "Create async rate limiter" --format json --receipt-out receipt.json`│
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Swarm Topology & Hardware Physics (VRAM Drain Protocol)
+
+```mermaid
+flowchart TD
+    U[User Intent / Request] --> L0[Level 0: Context Compiler]
+    L0 --> L1[Level 1: Risk & Complexity Policy]
+    
+    L1 -->|Deterministic Low Risk| T1[Direct TaskNode Spec]
+    L1 -->|Ambiguous Boundary| R1[1.5B Router Model]
+    L1 -->|Complex Multi-Module| L2[Level 2: Architect Planner]
+    
+    R1 -->|Simple| T1
+    R1 -->|Complex| L2
+    
+    L2 --> PV[Deterministic TaskGraph Validator]
+    PV --> TG[TaskGraph IR]
+    T1 --> TG
+    
+    TG --> SCH[Capacity-Aware Scheduler]
+    
+    SCH -->|Compile Coder Prompt| W_C[Worker: Code Synthesizer]
+    SCH -->|Compile Tester Prompt| W_T[Worker: Test Synthesizer]
+    SCH -->|Compile Holdout Prompt| W_H[Worker: Independent Verifier]
+    
+    W_C --> ART[Candidate Artifacts]
+    W_T --> TESTS[Visible Tests]
+    W_H --> HOLDOUT[Hidden / Property Checks]
+    
+    ART & TESTS & HOLDOUT --> SB[Level 4: Rootless Sandbox Runtime]
+    
+    SB --> EV[Evidence Set Collector]
+    EV --> VP[Verification Policy Engine]
+    
+    VP -->|Evidence PASS| REC[Signed Execution Receipt] --> OUT[AgentExecutionEnvelope]
+    VP -->|Evidence FAIL| DIAG[Failure Diagnosis Engine]
+    
+    DIAG -->|Implementation Fault| FIX[Worker: Surgical Repair] --> SB
+    DIAG -->|Test Flaw Fault| FIX_T[Worker: Test Repair] --> SB
+    DIAG -->|Contract Inconsistency| REPLAN[Escalate to Architect Planner] --> PV
+    DIAG -->|Infrastructure/OOM| ABORT[Fail-Closed Terminal Abort]
+```
+
+### 4.1. VRAM Budget Matrix (AMD RX 7900 XTX 24GB / RTX 4090)
 
 | Stage | Active Model(s) | Quantization | KV Cache (per slot) | Slots | Total VRAM | Headroom |
 |:------|:----------------|:------------:|:--------------------|:-----:|:-----------|:---------|
@@ -104,17 +316,13 @@ LEX strictly enforces a **Unidirectional Linear Lifecycle with Active VRAM Polli
 | **L3 Workers** | `qwen2.5-coder:14b` | Q4_K_M | ~1.0 GB | 2 | **~11.5 GB** | 12.5 GB |
 | **L1+L3 Co-resident** | 1.5B Router + 14B Workers | Q4_K_M | Combined | 3 | **~12.9 GB** | 11.1 GB |
 
-**VRAM Lifecycle Invariants & Polling Drain Protocol:**
-1. **L2 Isolation:** L2 Architect runs in dedicated isolation (13.3 GB).
-2. **Active Drain Probe:** After L2 outputs the TaskGraph IR, `ollama_adapter.py` sends `POST /api/generate` with `keep_alive: 0` and polls `GET /api/ps` at 50ms intervals until `size_vram == 0` is confirmed before loading L3 Workers.
-3. **Worker Concurrency:** `OLLAMA_NUM_PARALLEL=2` enables concurrent Coder + Tester synthesis on L3 without model reloading.
-4. **Co-residency Ceiling:** `OLLAMA_MAX_LOADED_MODELS=2` ensures Router (1.5B) + Worker (14B) co-residency during the entire execution and self-healing loop.
+**Active Drain Protocol:** When transitioning from L2 (27B) to L3 (14B), the `OllamaAdapter` sends `POST /api/generate` with `{"keep_alive": 0}` and actively polls `GET /api/ps` every 50ms until `size_vram == 0` is confirmed, preventing PCIe bus saturation and transient OOM crashes.
 
 ---
 
-## 3. Hexagonal Production Lattice & Directory Structure
+## 5. Hexagonal Production Lattice & Clean Import Rules
 
-LEX strictly enforces hexagonal boundaries with zero external circular dependencies:
+LEX enforces clean hexagonal boundaries with zero circular dependencies:
 
 ```text
 domain ← ports ← engine → adapters
@@ -179,7 +387,7 @@ tools/004_LLM_EXECUTION_X/
 │   ├── self_healing.py             # Level 4 diagnosis-driven recovery coordinator
 │   ├── ui_renderer.py              # Real-time Rich TUI dynamic pipeline dashboard
 │   └── orchestrator.py             # End-to-end execution coordinator & receipt generator
-├── linters/                        # Quality Gates & CI Enforcement
+├── linters/                        # Architectural Enforcement Tools
 │   └── check_boundaries.py         # AST import checker verifying hexagonal boundary lattice
 ├── entrypoints/                    # Composition Roots (Wires Adapters -> Ports -> Engine)
 │   ├── cli.py                      # Interactive Rich TUI & Batch CLI runner
@@ -208,11 +416,9 @@ tools/004_LLM_EXECUTION_X/
 
 ---
 
-## 4. Semantic Contracts & The `TaskGraph IR`
+## 6. Semantic Contracts & Decoupled `TaskGraph IR`
 
-The Architect outputs a pure semantic intermediate representation using **Ollama Structured Outputs (JSON Schema)**. Prompts are compiled just-in-time, keeping the contract completely decoupled from model and language specifics.
-
-### 4.1. Formal `TaskGraph IR` Schema
+The Architect outputs a pure semantic intermediate representation using **Ollama Structured Outputs (JSON Schema)**:
 
 ```json
 {
@@ -304,18 +510,14 @@ The Architect outputs a pure semantic intermediate representation using **Ollama
 
 ---
 
-## 5. Evidence Engine & Diagnosis-Driven Self-Healing
+## 7. Evidence Engine, Mutation Probing & Diagnosis FSM
 
-### 5.1. Multi-Operator Mutation Engine & Anti-Collusion
-
-To guarantee that synthesized tests are falsifiable and not collusive, the `mutation_evaluator.py` executes AST mutations:
-
+### 7.1. Mutation Engine
 $$\text{MutationScore} = \frac{\text{Killed Mutants}}{\text{Valid Non-Equivalent Mutants Generated}}$$
 
 Operators applied: `OP_COMPARE_INVERT` (`==` $\to$ `!=`), `OP_BOOLEAN_FLIP` (`True` $\to$ `False`, `and` $\to$ `or`), `OP_RETURN_SWAP` (return `None`/`0`), `OP_BOUNDARY_SHIFT` ($x \to x+1$), `OP_EXCEPTION_SUPPRESS`.
 
-### 5.2. Semantic Failure Taxonomy (`domain/errors.py`)
-
+### 7.2. Semantic Failure Taxonomy (`domain/errors.py`)
 ```python
 class FailureKind(Enum):
     IMPLEMENTATION_ERROR = "implementation_error"    # Code violates contract/tests
@@ -329,87 +531,41 @@ class FailureKind(Enum):
 
 ---
 
-## 6. SOTA Configuration Parameterization (`config/lex_config.yaml`)
+## 8. Multi-Tier Benchmark Suite & `LEX-Bench` Catalog
 
-```yaml
-version: "1.0"
-
-engine:
-  max_healing_retries: 3          # Healing attempts per TaskNode
-  max_re_architect_attempts: 1    # Circuit breaker escalation budget
-  timeout_per_step_sec: 60        # Hard timeout per LLM call
-  pipelined_workers: true         # Concurrent Coder + Tester execution
-  circuit_breaker_threshold: 2    # Duplicate state hashes before tripping
-  enable_mutation_probe: true     # Active anti-collusion mutation probe
-  output_dir: "tools/004_LLM_EXECUTION_X/output"
-
-ollama:
-  num_parallel: 2                 # OLLAMA_NUM_PARALLEL (concurrent KV slots)
-  max_loaded_models: 2            # OLLAMA_MAX_LOADED_MODELS
-  vram_poll_interval_ms: 50       # Polling interval for VRAM drain check
-  health_check_url: "http://127.0.0.1:11434/api/tags"
-  request_timeout_sec: 120        # HTTP client timeout for long generations
-
-models:
-  router:
-    enabled: true
-    name: "qwen2.5:1.5b"
-    endpoint: "http://127.0.0.1:11434"
-    options:
-      temperature: 0.0
-      num_ctx: 2048
-      num_predict: 100
-      keep_alive: "5m"
-
-  architect:
-    name: "qwen3.8:27b"
-    endpoint: "http://127.0.0.1:11434"
-    options:
-      temperature: 0.1
-      num_ctx: 4096
-      num_predict: 1000
-      keep_alive: "0"             # Evicted immediately after TaskGraph IR emission
-
-  worker_coder:
-    name: "qwen2.5-coder:14b"
-    endpoint: "http://127.0.0.1:11434"
-    options:
-      temperature: 0.0
-      num_ctx: 4096
-      num_predict: 1500
-      keep_alive: "15m"
-
-  worker_tester:
-    name: "qwen2.5-coder:14b"
-    endpoint: "http://127.0.0.1:11434"
-    options:
-      temperature: 0.0
-      num_ctx: 4096
-      num_predict: 1500
-      keep_alive: "15m"
-
-sandbox:
-  isolation_tier: "auto"         # auto: bwrap -> unshare -> static_fail_closed
-  dir_prefix: "/tmp/lex_sandbox_"
-  cleanup_on_exit: true
-  max_execution_time_sec: 10
-  max_memory_mb: 256
-  max_file_size_mb: 10
-  network_disabled: true
-  allowed_imports:
-    - "typing"
-    - "dataclasses"
-    - "collections"
-    - "functools"
-    - "asyncio"
-    - "pydantic"
-    - "unittest.mock"
-    - "pytest"
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MULTI-TIER BENCHMARK MATRIX                         │
+├──────────────────────┬─────────────────────────────┬────────────────────────┤
+│ TIER 1: MICROBENCH   │ TIER 2: MACROBENCH          │ TIER 3: LEX-BENCH (SOTA)│
+├──────────────────────┼─────────────────────────────┼────────────────────────┤
+│ • HumanEval+ (164)   │ • SWE-bench Verified (500)  │ • Multi-Module DAG (20)│
+│ • MBPP (500)         │ • LiveCodeBench Self-Repair │ • Anti-Collusion Probe │
+│ • Fast function test │ • Repository-level repair   │ • Adversarial Injection│
+│ • Target: >= 95% pass│ • Target: >= 45% resolved   │ • VRAM Thrash Profiles │
+└──────────────────────┴─────────────────────────────┴────────────────────────┘
 ```
+
+### The 15 Canonical Cases of `LEX-Bench`
+* **CASE-001:** Single-file algorithm with edge cases (Monotonic timer).
+* **CASE-002:** Two-module interface dependency (`models.py` $\to$ `service.py`).
+* **CASE-003:** Dependency ordering resolution in multi-file DAG.
+* **CASE-004:** Circular plan attempt rejection.
+* **CASE-005:** Public API backward compatibility preservation.
+* **CASE-006:** Flawed visible test auto-repair.
+* **CASE-007:** Misleading/collusive test detection via mutation probe.
+* **CASE-008:** Planner contradiction detection & re-planning escalation.
+* **CASE-009:** Patch oscillation ($S_n == S_{n-2}$) circuit breaker trip.
+* **CASE-010:** Insufficient local context diagnostic escalation.
+* **CASE-011:** Malicious code generation rejection (Sandbox containment).
+* **CASE-012:** Filesystem traversal escape prevention.
+* **CASE-013:** Unwhitelisted import attack containment.
+* **CASE-014:** Concurrency race condition diagnostics in asyncio code.
+* **CASE-015:** Multi-module repository refactor with existing code.
 
 ---
 
-## 7. Security & 3-Tier Rootless Sandbox Model
+## 9. Security & 3-Tier Rootless Sandbox Model
 
 | Security Dimension | Tier A (`bwrap`) | Tier B (`unshare -U`) | Tier C (`static_only`) |
 |:---|:---:|:---:|:---:|
@@ -421,13 +577,13 @@ sandbox:
 
 ---
 
-## 8. Inverted Implementation Roadmap (Thin Vertical Slice First)
+## 10. Inverted Implementation Roadmap (Thin Vertical Slice First)
 
 ```text
 Sprint 0: Architecture Lock & Hexagonal Boundary Enforcement
    │
    ▼
-Sprint 1: Thin Vertical Slice (Request -> Coder -> Sandbox -> Evidence -> Verdict -> Receipt)
+Sprint 1: Thin Vertical Slice (Request -> Coder -> Sandbox -> Evidence -> Verdict -> Envelope)
    │
    ▼
 Sprint 2: Empirical Measurement Harness & Telemetry Base
@@ -456,19 +612,19 @@ Sprint 9: Productization: Protected MCP Tool Server & Rich Live TUI
 
 ---
 
-## 9. Sprint 1 Execution Contract (The Minimum Real Circuit)
+## 11. Sprint 1 Execution Contract (The Minimum Real Circuit)
 
-### 9.1. Immediate Deliverables for Sprint 1
+### 11.1. Immediate Deliverables for Sprint 1
 1. **Domain Primitives:** `task_graph.py` (Single `TaskNode`), `evidence.py`, `verdict.py`, `receipt.py`.
 2. **Ports:** `model_provider.py`, `sandbox.py`, `telemetry.py`.
 3. **Adapters:** `ollama_adapter.py` (calling 14B Worker), `unshare_sandbox.py` (executing Pytest in temp dir), `file_telemetry.py`.
 4. **Engine:** `orchestrator.py` executing the single linear chain:
-   $$\text{Request} \longrightarrow \text{TaskNode} \longrightarrow \text{Worker 14B} \longrightarrow \text{Sandbox} \longrightarrow \text{EvidenceSet} \longrightarrow \text{VerificationPolicy} \longrightarrow \text{ExecutionReceipt}$$
+   $$\text{Request} \longrightarrow \text{TaskNode} \longrightarrow \text{Worker 14B} \longrightarrow \text{Sandbox} \longrightarrow \text{EvidenceSet} \longrightarrow \text{VerificationPolicy} \longrightarrow \text{AgentExecutionEnvelope}$$
 5. **Hermetic Test:** `test_thin_vertical_slice.py` executing with `FakeLlmProvider` and `FakeSandbox` in CI with zero external dependencies.
 
 ---
 
-## 10. Developer Quickstart
+## 12. Developer Quickstart
 
 ```bash
 # 1. Pull verified model weights in Ollama

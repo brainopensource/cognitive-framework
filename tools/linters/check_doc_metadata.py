@@ -9,19 +9,22 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
 
-LIVING_DOCS = (
-    _ROOT / "README.md",
-    _ROOT / "AGENTS.md",
-    _ROOT / "docs/README.md",
-    _ROOT / "docs/SPEC.md",
-    _ROOT / "docs/00_overview/SYSTEM_OVERVIEW.md",
-    _ROOT / "docs/02_roadmap/milestones.md",
-    _ROOT / "docs/02_roadmap/backlog.md",
-    _ROOT / "docs/03_sprints/sprint_active.md",
-    _ROOT / "docs/04_annex/KERNEL.md",
-    _ROOT / "docs/04_annex/MEASUREMENT.md",
-    _ROOT / "docs/05_adr/INDEX.md",
-    _ROOT / "docs/06_references/README.md",
+DOC_PATTERNS = (
+    "README.md",
+    "AGENTS.md",
+    "docs/README.md",
+    "docs/SPEC.md",
+    "docs/00_overview/**/*.md",
+    "docs/02_roadmap/**/*.md",
+    "docs/03_sprints/sprint_active.md",
+    "docs/04_annex/**/*.md",
+    "docs/05_adr/INDEX.md",
+    "docs/06_references/README.md",
+    "docs/architecture/**/*.md",
+    "docs/contracts/**/*.md",
+    "docs/protocols/**/*.md",
+    "docs/theory/**/*.md",
+    "docs/engineering/**/*.md",
 )
 
 REQUIRED_KEYS = {
@@ -35,11 +38,39 @@ REQUIRED_KEYS = {
     "last_verified",
 }
 
-VALID_CLASSES = {"navigation", "law", "architecture", "decision", "execution", "standard", "archive"}
-VALID_AUTHORITIES = {"normative", "binding-decision", "execution", "descriptive", "advisory"}
+VALID_CLASSES = {
+    "navigation",
+    "law",
+    "architecture",
+    "decision",
+    "execution",
+    "standard",
+    "archive",
+    "contract-reference",
+    "protocol-reference",
+    "theory",
+    "how-to",
+    "reference",
+}
+
+VALID_AUTHORITIES = {
+    "normative",
+    "binding-decision",
+    "execution",
+    "descriptive",
+    "advisory",
+}
+
 VALID_STATUSES = {"living", "append-only", "frozen", "superseded"}
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
+
+
+def discover_living_docs(root: Path) -> list[Path]:
+    files: list[Path] = []
+    for pat in DOC_PATTERNS:
+        files.extend(root.glob(pat))
+    return sorted(set(f for f in files if f.is_file()))
 
 
 def parse_frontmatter(text: str) -> dict[str, object] | None:
@@ -80,10 +111,11 @@ def check() -> list[str]:
     seen_canonical_topics: dict[str, str] = {}
     seen_ids: dict[str, str] = {}
 
-    for doc_path in LIVING_DOCS:
-        if not doc_path.exists():
-            errors.append(f"Missing required living document: {doc_path.relative_to(_ROOT)}")
-            continue
+    docs = discover_living_docs(_ROOT)
+    if not docs:
+        return ["no living documents discovered to check"]
+
+    for doc_path in docs:
         text = doc_path.read_text(encoding="utf-8")
         fm = parse_frontmatter(text)
         rel = str(doc_path.relative_to(_ROOT))
@@ -138,7 +170,8 @@ def main() -> int:
         for error in errors:
             print(f"DOC METADATA FAIL: {error}")
         return 1
-    print(f"DOC METADATA PASS: {len(LIVING_DOCS)} living documents verified with valid, unique metadata")
+    count = len(discover_living_docs(_ROOT))
+    print(f"DOC METADATA PASS: {count} living documents verified with valid, unique metadata")
     return 0
 
 

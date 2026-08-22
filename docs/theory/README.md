@@ -1,0 +1,38 @@
+---
+status: living
+id: theory-index
+class: theory
+authority: descriptive
+canonical_for:
+  - cognitive-and-mathematical-theory-index
+source_of_truth:
+  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md
+  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS_B.md
+derived_from:
+  - docs/06_references/
+applies_to:
+  - v0.6.1
+implementation_status: RESEARCH
+owner: cognitive-systems-researcher
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
+# Cognitive Systems & Mathematical Foundations Index
+
+> **Classification:** Theoretical Foundation & Cognitive Research.  
+> **Authority:** Non-normative. Research literature retained in [`docs/06_references/`](../06_references/).
+
+---
+
+## Theory Modules
+
+| Module | Mathematical Formulation & Focus | Maturity |
+|---|---|---|
+| [`active_inference.md`](active_inference.md) | Variational Free Energy ($\mathcal{F}$) & Expected Free Energy ($\mathcal{G}$) in turn loops | `RESEARCH` (Target: M-10) |
+| [`economic_resources.md`](economic_resources.md) | 6D Economic Resource Tensor $\mathbf{R}$ & Conservative Attenuation Algebra | `AS_BUILT` (M-1/M-2) |
+| [`trajectory_credit.md`](trajectory_credit.md) | Backward Fault Isolation & Attributable Credit Assignment over Trajectory Graphs | `RESEARCH` (Target: M-10) |
+| [`retrieval_and_skills.md`](retrieval_and_skills.md) | 384d Dense Hybrid Retrieval, Elo-Decayed Skill Cards & Eviction Dynamics | `RESEARCH` (Target: M-9) |
+| [`preference_and_promotion.md`](preference_and_promotion.md) | Pairwise DPO Harvesting, Exact McNemar Statistical Promotion Protocol | `AS_BUILT` Annex / M-10 |

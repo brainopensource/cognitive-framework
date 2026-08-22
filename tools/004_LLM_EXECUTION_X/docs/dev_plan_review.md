@@ -56,7 +56,7 @@ model provider
 execution state
 ```
 
-Isso significa que ele está recriando um pequeno AETHER/Vanguard dentro de `tools/004_LLM_EXECUTION_X/`.
+Isso significa que o LEX estava tentando construir um ecossistema monolítico acoplado em vez de se estruturar como um **Harness de Execução e Síntese de Código modular e independente**, cujas camadas internas (Domain, TaskGraph IR, Evidence Pipeline, Verification Authority) possam operar 100% autônomas hoje e, opcionalmente, plugar em qualquer meta-framework ou substrate maior no futuro.
 
 Eu mudaria para:
 
@@ -106,7 +106,7 @@ flowchart TB
 
 A consequência é importante:
 
-**LEX passa a validar o substrate em vez de competir com ele.**
+**LEX passa a operar como um Harness autônomo com separação de camadas limpa, pronto para ser executado de forma independente ou integrado a qualquer meta-framework.**
 
 Isso permite depois criar:
 
@@ -1542,7 +1542,7 @@ Porque as alterações eliminam **overclaims e false abstractions**.
 
 Faça uma revisão curta `LEX SPEC v1.1` com cinco mudanças não negociáveis:
 
-1. **LEX vira Harness/Profile sobre o substrate, não outro framework.**
+1. **LEX vira um Coding Harness independente com ontologia limpa, e não um monólito acoplado.**
 2. **`DAGPlanSchema` vira generic `ExecutionGraph/TaskSpec IR`; prompts saem do contrato.**
 3. **Validators produzem `Evidence`; apenas uma `VerificationPolicy` produz `Verdict`.**
 4. **Tier C deixa de executar código; fail-closed passa a ser verdadeiro.**

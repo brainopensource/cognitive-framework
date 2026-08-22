@@ -12,7 +12,7 @@ derived_from:
   - docs/04_annex/MEASUREMENT.md
 applies_to:
   - v0.6.1
-implementation_status: AS_BUILT
+implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
 last_verified: 2026-08-21
@@ -22,11 +22,13 @@ superseded_by: null
 
 # Pairwise Preference Harvesting & Statistical Promotion
 
-> **Status:** `AS_BUILT` Annex / Target: **M-10**.
+> **Maturity:**
+> - **DPO Preference Harvesting Pipeline**: `RESEARCH` · Target Milestone: **M-10** (Governed by ADR-0084).
+> - **Statistical McNemar Doctrine**: `AS_BUILT` · Governed by Normative Annex [`docs/04_annex/MEASUREMENT.md`](../04_annex/MEASUREMENT.md).
 
 ---
 
-## 1. Unforgeable DPO Preference Harvesting
+## 1. Unforgeable DPO Preference Harvesting (`RESEARCH` - M-10)
 
 Given paired execution runs $(y_w, y_l)$ where $y_w$ passed exterior signed evaluation and $y_l$ failed:
 
@@ -34,9 +36,9 @@ $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w,
 
 ---
 
-## 2. McNemar's Exact Paired Promotion Test
+## 2. McNemar's Exact Paired Promotion Test (`AS_BUILT`)
 
-Governed by [`docs/04_annex/MEASUREMENT.md`](../04_annex/MEASUREMENT.md):
+Governed by [`docs/04_annex/MEASUREMENT.md §2`](../04_annex/MEASUREMENT.md#2-statistical-doctrine):
 
 | | Model B Pass | Model B Fail |
 |---|---|---|

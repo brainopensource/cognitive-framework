@@ -24,7 +24,7 @@ superseded_by: null
 # Model Port Protocol (`ModelPort`)
 
 > **Source:** [`vanguard/packages/ports/model.py`](../../vanguard/packages/ports/model.py)  
-> **Status:** `AS_BUILT`.
+> **Status:** `AS_BUILT` · Owning contract: ICD §4 ModelProvider, REQ-PORT-002.
 
 ---
 
@@ -32,12 +32,15 @@ superseded_by: null
 
 ```python
 class ModelPort(Protocol):
-    def complete(
+    """Inference seam for model proposal generation."""
+
+    def propose(
         self,
-        messages: Sequence[Message],
-        route: ModelRouteConfig,
-    ) -> ModelCompletionResponse:
-        """Issue prompt completion and return text, tool calls, and measured tokens."""
+        context: ContextBundle,
+        tools: ToolSchemas,
+        sampling: Sampling,
+    ) -> Result[Proposal]:
+        """Return a proposal, or a typed instrument error."""
         ...
 ```
 

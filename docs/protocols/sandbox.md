@@ -20,29 +20,24 @@ supersedes: []
 superseded_by: null
 ---
 
-# Sandbox Port Protocol (`SandboxPort`)
+# Sandbox Port Protocol (`SandboxRunner`)
 
 > **Source:** [`vanguard/packages/ports/sandbox.py`](../../vanguard/packages/ports/sandbox.py)  
-> **Status:** `AS_BUILT` · Isolation Boundary (UID 10001).
+> **Status:** `AS_BUILT` · Owning contract: ICD §4 SandboxRunner, REQ-PORT-005.
 
 ---
 
 ## Interface Definition
 
 ```python
-class SandboxPort(Protocol):
-    def execute(
-        self,
-        command: Sequence[str],
-        cwd: Path,
-        grant: CapabilityGrant,
-        timeout_seconds: float,
-    ) -> SandboxExecutionResult:
-        """Execute command inside rootless Bubblewrap container under capability constraints."""
+class SandboxRunner(Protocol):
+    """Execute argv inside a perimeter and return receipt plus containment report."""
+
+    def execute(self, argv: Sequence[str]) -> Result[SandboxResult]:
         ...
 ```
 
-## Security Constraints
-- **Rootless bubblewrap**: Run as UID `10001` with unshared PID, network, and mount namespaces.
-- **Read-only root**: Host system files mounted strictly read-only.
-- **Ephemeral tmpfs**: Writes isolated to `/workspace` tmpfs mount.
+## Security Invariants & Probes
+- **Containment Probes**: `ContainmentReport` requires verified startup probes (`mount`, `egress`, `syscall`).
+- **Publication Gate**: `publication_decision(report)` refuses publication fail-closed if `report.verified` is false (K-44).
+- **Isolation Policy (Invariant I-6)**: Untrusted execution runs in rootless Bubblewrap (UID `10001`) with read-only root and tmpfs workspaces.

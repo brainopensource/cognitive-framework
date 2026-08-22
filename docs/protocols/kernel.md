@@ -20,32 +20,61 @@ supersedes: []
 superseded_by: null
 ---
 
-# Kernel Port Protocol (`KernelPort`)
+# Kernel Port Interfaces (`ports/kernel.py`) & Dispatch Entrypoint
 
-> **Source:** [`vanguard/packages/ports/kernel.py`](../../vanguard/packages/ports/kernel.py)  
-> **Status:** `AS_BUILT` · TCB Boundary Interface.
+> **Source:** [`vanguard/packages/ports/kernel.py`](../../vanguard/packages/ports/kernel.py) & [`vanguard/packages/kernel/dispatch.py`](../../vanguard/packages/kernel/dispatch.py)
+> **Status:** `AS_BUILT` · TCB Boundary Interfaces.
 
 ---
 
-## Interface Definition
+## 1. Ports the Kernel Depends On (`ports/kernel.py`)
+
+Per hexagonal dependency inversion, the kernel core depends on four narrow ports and implements none of them:
 
 ```python
-class KernelPort(Protocol):
-    def dispatch(
-        self,
-        intent: IntentRequest,
-        justification: JustificationContext,
-    ) -> DispatchReceipt:
-        """Execute the 13-stage dispatch pipeline (S0–S12) fail-closed."""
-        ...
-        
-    def attenuate(
-        self,
-        parent_grant: CapabilityGrant,
-        requested_subset: CapabilityDescriptor,
-    ) -> CapabilityGrant:
-        """Monotonically attenuate a capability grant."""
-        ...
+@runtime_checkable
+class Clock(Protocol):
+    """Injected monotone time (domain forbids system clocks)."""
+    def now(self) -> str: ...
+
+@runtime_checkable
+class EffectAdapter(Protocol):
+    """One typed effect adapter."""
+    name: str
+    def healthy(self) -> bool: ...
+    def execute(self, request: Any) -> Any: ...
+
+@runtime_checkable
+class EventSink(Protocol):
+    """Kernel event emission sink (F-25: failure never fails an effect)."""
+    def emit(self, event: Any) -> None: ...
+
+@runtime_checkable
+class Ledger(Protocol):
+    """Durable intent persistence (K-47), written before effect execution."""
+    def append_intent(self, event: Any) -> None: ...
+```
+
+---
+
+## 2. Kernel Dispatch Entrypoint (`kernel/dispatch.py`)
+
+The kernel trusted computing base exports the 13-stage dispatch pipeline:
+
+```python
+def dispatch(
+    intent: IntentRequest,
+    justification: JustificationContext,
+    *,
+    clock: Clock,
+    adapter: EffectAdapter,
+    ledger: Ledger,
+    sink: EventSink,
+    policy: PolicyEngine,
+    budget: BudgetEngine,
+) -> DispatchReceipt:
+    """Execute the 13-stage pipeline (S0–S12) fail-closed."""
+    ...
 ```
 
 ## Security Guarantees

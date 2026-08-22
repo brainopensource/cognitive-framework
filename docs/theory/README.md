@@ -7,7 +7,7 @@ canonical_for:
   - cognitive-and-mathematical-theory-index
 source_of_truth:
   - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md
-  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS_B.md
+  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md
 derived_from:
   - docs/06_references/
 applies_to:

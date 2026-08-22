@@ -692,7 +692,7 @@ the code is kept:
 - **`REQ-*`** as the PR-visible requirement namespace, not `TK-*` — `ADR-0045`/D-45, kept.
 - **Measurement apparatus stays outside `vanguard/packages/`** — `tools/telemetry/` and `lab/` remain
   siblings to the kernel tree, never imported by it — D-40, kept (also the "HONOUR TABLE" standing
-  refusal `TSK-CORE-010` in `docs/02_roadmap/backlog.md`).
+  refusal `TSK-CORE-010` in `docs/02_roadmap/milestones.md`).
 - **`MetaLoopEngine` stays deleted** — the outer loop is a plugin at a scheduler slot (§5.1), never an
   engine — `ADR-0041`/D-41 + **ADR-M0-12**, also `TSK-CORE-011`.
 

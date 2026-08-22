@@ -23,7 +23,7 @@ superseded_by: null
 # Event Store Port Protocol (`EventStorePort`)
 
 > **Source:** [`vanguard/packages/ports/event_store.py`](../../vanguard/packages/ports/event_store.py)  
-> **Status:** `AS_BUILT` · State Plane Storage Engine.
+> **Status:** `AS_BUILT` · Owning contract: VG-04 §13, ICD §4.
 
 ---
 
@@ -31,11 +31,21 @@ superseded_by: null
 
 ```python
 class EventStorePort(Protocol):
-    def append(self, event: EventEnvelope) -> int:
-        """Append envelope atomically to SQLite WAL stream; returns sequence index."""
+    """EventStore port interface for append-only causal event storage."""
+
+    def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
+        """Atomically append an ordered sequence of event envelopes."""
         ...
-        
-    def read_prefix(self, project_id: str, up_to_seq: int | None = None) -> Sequence[EventEnvelope]:
-        """Read durable event prefix from disk."""
+
+    def read(self, range_query: Optional[EventRange] = None) -> Result[Sequence[EventEnvelope]]:
+        """Read an ordered sequence of event envelopes matching query."""
+        ...
+
+    def digest(self, run_id: Optional[str] = None) -> Result[str]:
+        """Compute cumulative sha256 digest of stored events."""
+        ...
+
+    def count(self, run_id: Optional[str] = None) -> int:
+        """Return the number of stored events."""
         ...
 ```

@@ -1,8 +1,8 @@
-# High-Order Inference Abstraction: Full Factorial DoE, Pareto Optimization, and Hierarchical Multi-Agent Swarms
+# High-Order Inference Abstraction: Full & Fractional Factorial DoE, Surrogate ML Modeling, and Hierarchical Swarms
 
 **Document ID:** `LLM-DESKTOP-SYS-ABSTRACTION-V2`  
 **Classification:** Staff Principal AI Architecture & Mathematical Specification  
-**Subject:** High-Dimensional Design of Experiments ($2^k$ Factorial Matrix), Pareto Optimal Frontier, and Multi-Tier Hybrid Agent Orchestration  
+**Subject:** High-Dimensional Design of Experiments ($2^k$ and $2^{k-1}$ Matrices), Scikit-Learn Surrogate Regression Modeling, Pareto Optimal Frontier, and Multi-Tier Hybrid Agent Orchestration  
 **Target Environment:** Local LLM Substrate (`qwen3.8:27b` + `qwen2.5-coder:14b` + `qwen2.5:1.5b` on AMD Radeon 16GB VRAM & Ryzen 5800X3D).
 
 ---
@@ -37,18 +37,107 @@ $$\Omega = \prod_{i=1}^{k} D_i = \{0, 1\}^5 \implies |\Omega| = 2^5 = 32\text{ E
 └─────────────────┘ └────────────────┘ └───────────────┘ └────────────────┘ └────────────────┘
 ```
 
-### 1.3 Execution Feasibility & Time-to-Convergence
+---
 
-On the `qwen2.5-coder:14b` model with an average generation latency of $\bar{t} \approx 18.0\text{ s}$:
-$$\text{Total Grid Search Time} = 32 \times 18.0\text{ s} = 576\text{ s} \approx \mathbf{9.6\text{ minutes}}$$
+## 2. 16-Run Fractional Factorial Design ($2^{5-1}$) & Hypercube Sampling
 
-In under 10 minutes, the engine maps the entire hyperdimensional inference topology of the hardware.
+To cut benchmark time by 50% without sacrificing statistical power, we use a **Resolution V Fractional Factorial Design ($2^{5-1} = 16\text{ runs}$)**.
+
+### 2.1 Mathematical Basis of Half-Fraction Sampling
+
+By setting the 5th factor generator as the interaction of the first four:
+$$x_5 = x_1 \cdot x_2 \cdot x_3 \cdot x_4$$
+
+We construct an orthogonal 16-row design matrix where:
+1. Every individual parameter is active ($1$) in exactly 8 runs and inactive ($0$) in exactly 8 runs.
+2. All main effects ($\beta_1 \dots \beta_5$) are completely unconfounded by 2-factor interactions ($\gamma_{ij}$).
+3. **Execution Time:** $16 \text{ runs} \times 18.0\text{s} \approx \mathbf{4.8\text{ minutes}}$ on the `qwen2.5-coder:14b`.
+
+### 2.2 The 16-Run Orthogonal Design Matrix
+
+| Run ID | $x_1$ (Context) | $x_2$ (No Think) | $x_3$ (Greedy) | $x_4$ (8 Threads) | $x_5$ (Budget Cap) | Semantic Tag |
+| :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **01** | 0 | 0 | 0 | 0 | 1 | `exp_16_budget` |
+| **02** | 1 | 0 | 0 | 0 | 0 | `exp_16_ctx` |
+| **03** | 0 | 1 | 0 | 0 | 0 | `exp_16_nothink` |
+| **04** | 1 | 1 | 0 | 0 | 1 | `exp_16_ctx_nothink_budget` |
+| **05** | 0 | 0 | 1 | 0 | 0 | `exp_16_greedy` |
+| **06** | 1 | 0 | 1 | 0 | 1 | `exp_16_ctx_greedy_budget` |
+| **07** | 0 | 1 | 1 | 0 | 1 | `exp_16_nothink_greedy_budget` |
+| **08** | 1 | 1 | 1 | 0 | 0 | `exp_16_ctx_nothink_greedy` |
+| **09** | 0 | 0 | 0 | 1 | 0 | `exp_16_thread8` |
+| **10** | 1 | 0 | 0 | 1 | 1 | `exp_16_ctx_thread8_budget` |
+| **11** | 0 | 1 | 0 | 1 | 1 | `exp_16_nothink_thread8_budget` |
+| **12** | 1 | 1 | 0 | 1 | 0 | `exp_16_ctx_nothink_thread8` |
+| **13** | 0 | 0 | 1 | 1 | 1 | `exp_16_greedy_thread8_budget` |
+| **14** | 1 | 0 | 1 | 1 | 0 | `exp_16_ctx_greedy_thread8` |
+| **15** | 0 | 1 | 1 | 1 | 0 | `exp_16_nothink_greedy_thread8` |
+| **16** | 1 | 1 | 1 | 1 | 1 | `exp_16_all_enabled` |
 
 ---
 
-## 2. Mathematical Formalism: Pareto Optimal Inference Frontier
+## 3. Surrogate Machine Learning Modeling & Hyperdimensional Topology
 
-### 2.1 Multi-Objective Optimization Problem
+Once the 16 physical runs are executed, we do not need to physically run the remaining 16 combinations on the GPU. Instead, we train a **Surrogate Regressor** with Scikit-Learn.
+
+```text
+┌──────────────────────────────────────┐
+│  16 PHYSICAL GPU RUNS (CSV Dataset)  │
+└──────────────────┬───────────────────┘
+                   │ Features: [x1, x2, x3, x4, x5] -> Target: Latency / TPS
+┌──────────────────▼───────────────────┐
+│     SCIKIT-LEARN SURROGATE MODEL     │
+│   HistGradientBoostingRegressor()    │
+│  - Fits non-linear response surface  │
+│  - Quantifies Feature Importances    │
+└──────────────────┬───────────────────┘
+                   │ Sub-millisecond Inference
+┌──────────────────▼───────────────────┐
+│  HYPERDIMENSIONAL SWEET SPOT FINDER  │
+│  - Predicts all 32 combinations      │
+│  - Identifies Global Minimum Latency │
+│  - Parallel Coordinates Visualization│
+└──────────────────────────────────────┘
+```
+
+### 3.1 Python Surrogate Model Architecture
+
+```python
+import pandas as pd
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.inspection import permutation_importance
+
+def train_surrogate_model(csv_path: str):
+    df = pd.read_csv(csv_path)
+    
+    # Feature matrix (5 binary dimensions)
+    X = df[["flag_num_ctx", "flag_nothink", "flag_greedy", "flag_thread8", "flag_budget"]]
+    y_latency = df["wall_time_sec"]
+    y_tps = df["eval_tps"]
+    
+    # Fit Gradient Boosted Trees
+    reg_latency = HistGradientBoostingRegressor(max_iter=100, min_samples_leaf=2)
+    reg_latency.fit(X, y_latency)
+    
+    # Predict entire 32-combination space
+    all_32_combinations = ... # Full grid
+    predicted_latencies = reg_latency.predict(all_32_combinations)
+    
+    # Find theoretical global minimum
+    optimal_idx = predicted_latencies.argmin()
+    print(f"Optimal Configuration Predicted: {all_32_combinations[optimal_idx]}")
+```
+
+### 3.2 Hyperdimensional Visualizations
+
+1. **Parallel Coordinates Plot:** Plots each parameter dimension as a vertical axis, connecting runs with colored lines (gradient mapped to Tokens/s or Latency).
+2. **SHAP (SHapley Additive exPlanations):** Measures the exact contribution of each parameter to generation acceleration.
+
+---
+
+## 4. Mathematical Formalism: Pareto Optimal Inference Frontier
+
+### 4.1 Multi-Objective Optimization Problem
 
 We formulate inference tuning as a constrained multi-objective optimization problem over configuration space $\Omega$:
 
@@ -73,18 +162,11 @@ $$f_{\text{quality}}(\mathbf{x}) \ge 85.0 \quad (\text{Strict AST Syntax \& Func
                                 Latência Total (Segundos)
 ```
 
-### 2.2 Identification of the "Sweet Spot"
-
-A configuration $\mathbf{x}^* \in \Omega$ is **Pareto Optimal** if there does not exist another configuration $\mathbf{x}' \in \Omega$ such that:
-$$\mathbf{F}(\mathbf{x}') \ge \mathbf{F}(\mathbf{x}^*) \quad \text{and} \quad \mathbf{F}(\mathbf{x}') \neq \mathbf{F}(\mathbf{x}^*)$$
-
-The **Sweet Spot** is the Pareto-efficient vertex that minimizes wall latency while preserving a $100/100$ AST score.
-
 ---
 
-## 3. Hierarchical Multi-Agent Swarm Orchestrator (Planner-Worker Architecture)
+## 5. Hierarchical Multi-Agent Swarm Orchestrator (Planner-Worker Architecture)
 
-Instead of relying on a single monolithic model, the system introduces a **3-Tier Asymmetric Multi-Agent Swarm** that assigns tasks according to model parameter capacity, memory footprint, and generation velocity.
+Instead of relying on a single monolithic model, the system establishes a **3-Tier Asymmetric Multi-Agent Swarm** that assigns tasks according to model parameter capacity, memory footprint, and generation velocity.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -127,57 +209,7 @@ Instead of relying on a single monolithic model, the system introduces a **3-Tie
 
 ---
 
-## 4. Prompt Engineering Contracts for the Multi-Agent Swarm
-
-### 4.1 Tier 2: Architect / Planner Prompt Specification
-
-```markdown
-# Role
-Principal Software Architect and Systems Engineer.
-
-# Objective
-Decompose the user's high-level requirement into a strictly structured, machine-readable JSON specification. 
-Do NOT generate the implementation code. Generate only the execution plan and contracts.
-
-# Output Schema (JSON Only)
-{
-  "module_name": "string (e.g. fibonacci_fast.py)",
-  "algorithmic_strategy": "string (e.g. Matrix Exponentiation O(log n))",
-  "function_signatures": [
-    {
-      "name": "get_nth_fibonacci",
-      "args": [{"name": "n", "type": "int"}],
-      "returns": "int",
-      "docstring": "Calculates Nth Fibonacci number in O(log n)."
-    }
-  ],
-  "edge_cases": [
-    "Negative numbers must raise ValueError.",
-    "n=0 returns 0, n=1 returns 1."
-  ],
-  "worker_prompt": "Ultra-precise prompt instructing the 14B Coder to implement this exact contract."
-}
-```
-
-### 4.2 Tier 3: Worker Coder Prompt Specification
-
-```markdown
-# Role
-Strict Python Compiler and Implementation Engine.
-
-# Input Specification
-[Inject JSON Contract generated by Tier 2]
-
-# Instructions
-1. Implement the specified module strictly adhering to the signatures and edge cases.
-2. Include complete type annotations and docstrings.
-3. Emit pure, executable Python code only.
-4. Suppress all conversational text, introductory greetings, and thinking blocks.
-```
-
----
-
-## 5. Autonomous Self-Healing Feedback Loop
+## 6. Autonomous Self-Healing Feedback Loop
 
 When code generated by the Worker fails verification, the engine initiates an automated local correction loop without human intervention:
 
@@ -203,18 +235,3 @@ When code generated by the Worker fails verification, the engine initiates an au
                                               │
                                        (Repeats in <5s)
 ```
-
----
-
-## 6. Mathematical Model for Data Science Analysis (ANOVA & OLS Regression)
-
-With the $32$-run combinatorial dataset logged to `benchmark_results.csv`, we can fit an **Ordinary Least Squares (OLS)** linear model to quantify the exact contribution of each factor:
-
-$$\text{TPS} = \beta_0 + \sum_{i=1}^5 \beta_i x_i + \sum_{i < j} \gamma_{ij} (x_i \cdot x_j) + \epsilon$$
-
-Where:
-* $\beta_i$: Main effect of parameter $i$ on generation speed.
-* $\gamma_{ij}$: Non-linear interaction effect between parameters $i$ and $j$.
-* $\epsilon$: Residual variance / measurement noise.
-
-This converts local LLM inference tuning from intuition into **deterministic, mathematically proven empirical science**.

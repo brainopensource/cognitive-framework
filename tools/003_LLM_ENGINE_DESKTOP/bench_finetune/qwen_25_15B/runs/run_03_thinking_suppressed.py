@@ -1,0 +1,22 @@
+```python
+def get_nth_fibonacci(n: int) -> int:
+    """
+    Calculate the Nth Fibonacci number efficiently using matrix exponentiation.
+    """
+    if n < 0:
+        raise ValueError("Input must be a non-negative integer.")
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+
+    # Initialize base cases
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+
+    return b
+
+if __name__ == '__main__':
+    print(get_nth_fibonacci(50))
+```

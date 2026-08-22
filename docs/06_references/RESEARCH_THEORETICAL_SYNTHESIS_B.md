@@ -327,7 +327,7 @@ class MetaReflector:
 
 ## 4. Empirical A/B Benchmarking & Statistical Verification Protocol
 
-To adhere to John Stuart Mill’s Canon of Difference and [`docs/04_annex/MEASUREMENT.md`](MEASUREMENT.md), we mandate a strict paired McNemar protocol to prove statistically significant causal lift over the `v0.5.1-beta` baseline.
+To adhere to John Stuart Mill’s Canon of Difference and [`docs/04_annex/MEASUREMENT.md`](../04_annex/MEASUREMENT.md), we mandate a strict paired McNemar protocol to prove statistically significant causal lift over the `v0.5.1-beta` baseline.
 
 ```mermaid
 flowchart TD

@@ -1,5 +1,13 @@
 # Review-corpus archive note
 
+> **NON-NORMATIVE / FROZEN PROVENANCE**
+>
+> This material preserves research and decision history. It cannot authorize implementation.
+> Implementation work must cite current SPEC/annex law, an accepted ADR, the active execution
+> board, and a named executable falsifier. This banner covers everything under `docs/07_reviews/`
+> and `docs/07_reviews/archive/proposals/` (indexed below), and the research corpus under
+> `docs/06_references/` (indexed in [`SYSTEM_OVERVIEW.md` §4](../00_overview/SYSTEM_OVERVIEW.md#4-index-of-reviews--research-literature)).
+
 The v0.6 Concept Lock review corpus was consolidated during the Director review
 (`ADR-0075`, [`003_V060_DIRECTOR_REVIEW.md`](PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md)).
 Everything removed remains recoverable in git history at commit **`4f9f8b1`**.
@@ -18,7 +26,7 @@ Removed (durable conclusions absorbed into SPEC, ADRs `0069`–`0075`, annexes, 
   `vanguard-arquitetura-v4-parecer-e-plano.md`, `aether-v1-roadmap-waves.md` — advisory proposals,
   adjudicated (and where applicable rejected) by ADRs `0069`–`0074` and GAMMA §2.
 
-Kept: [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](VANGUARD_V060_FORENSIC_DISCOVERY.md) (evidence cited by the lock ADRs),
+Kept: [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](PRINCIPAL_STAFF_ENGINEER_REVIEW/VANGUARD_V060_FORENSIC_DISCOVERY.md) (evidence cited by the lock ADRs),
 [GAMMA](PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) (lock plan),
 [`002`](PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) (living register),
 [`003`](PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md) (Director review).

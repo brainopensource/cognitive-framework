@@ -10,10 +10,10 @@
 | **Date** | 2026-08-21 |
 | **Baseline** | `main` @ `afa8e2a` — verified on disk during this audit |
 | **Status** | Ready for Director review and determination |
-| **Relationship to V1** | Independent companion to [`DIRECTOR_TODO_LOCK_CONCEPTS.md`](DIRECTOR_TODO_LOCK_CONCEPTS.md). V1 is the executive summary; **V2 is the verified audit**. Where they disagree, V2 states the disk evidence. See [§7.4](#74-corrections-to-v1) for the specific corrections. |
+| **Relationship to V1** | Independent companion to `DIRECTOR_TODO_LOCK_CONCEPTS.md` (V1 — consolidated out of the working tree at the ADR-0075 review-corpus cleanup; recoverable at commit `b36481c`). V1 was the executive summary; **V2 is the verified audit that superseded it and is retained here**. See [§7.4](#74-corrections-to-v1) for the specific corrections V2 made to V1. |
 
 > **Authority note.** This document is **advisory**. It amends nothing. Law remains
-> [`docs/SPEC.md`](docs/SPEC.md) → [`docs/05_adr/`](docs/05_adr/) → [`docs/04_annex/`](docs/04_annex/).
+> [`docs/SPEC.md`](../SPEC.md) → [`docs/05_adr/`](../05_adr/) → [`docs/04_annex/`](../04_annex/).
 > Every claim below marked **[VERIFIED]** was re-executed against the working tree during this
 > audit; every claim marked **[CITED]** is reproduced from a document and not independently
 > re-tested.
@@ -54,9 +54,9 @@
 │  3. THE EXECUTION (HOW)   ──► docs/03_sprints/sprint_active.md & 02_roadmap   │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
-1. **Decision Plane (Volatile / Reconstructible):** S0–S12 Reference Monitor in [`kernel/`](vanguard/packages/kernel/). Monotonic capability attenuation and 6D typed leases.
-2. **State Plane (Immutable / Event-Sourced):** [`adapters/stores/event_store.py`](vanguard/packages/adapters/stores/event_store.py) (SQLite WAL `PRAGMA journal_mode = WAL`). `State = fold(events)` reconstructible cold from disk.
-3. **Evidence Plane (Exterior / Unreachable):** [`adapters/evaluators/daemon.py`](vanguard/packages/adapters/evaluators/daemon.py) (UID 10002). Ed25519-signed verdicts bound to request nonces.
+1. **Decision Plane (Volatile / Reconstructible):** S0–S12 Reference Monitor in [`kernel/`](../../vanguard/packages/kernel/). Monotonic capability attenuation and 6D typed leases.
+2. **State Plane (Immutable / Event-Sourced):** [`adapters/stores/event_store.py`](../../vanguard/packages/adapters/stores/event_store.py) (SQLite WAL `PRAGMA journal_mode = WAL`). `State = fold(events)` reconstructible cold from disk.
+3. **Evidence Plane (Exterior / Unreachable):** [`adapters/evaluators/daemon.py`](../../vanguard/packages/adapters/evaluators/daemon.py) (UID 10002). Ed25519-signed verdicts bound to request nonces.
 
 ### 0.3 The A-B-C-D Operating Foundation
 * **A — Authority (Kernel):** Descriptor-bound grants, monotonic attenuation, typed 6D budgets ($\le 1438$ LOC TCB). *Status: Solid & Generic (1,365 LOC).*
@@ -67,13 +67,13 @@
 ### 0.4 Fast Master Index of Key Files
 | Category | File Path | Role / Content |
 |---|---|---|
-| **The Law** | [`docs/SPEC.md`](docs/SPEC.md) | Pure RFC-2119 Normative Specification for MHF v1. |
-| **Decisions** | [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) | Immutable records (ADRs 0069–0076 lock the foundation). |
-| **Active Sprint** | [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) | Single living execution board and milestone ladder. |
-| **TCB Kernel** | [`vanguard/packages/kernel/`](vanguard/packages/kernel/) | 9 files, 1365 LOC logical (threshold $\le 1438$). 100% green. |
-| **Verified Gaps** | [`002 Gap Register`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | Falsifiers F-01 through F-21 and wave exit gates. |
-| **Generality Review** | [`005 Generality Review`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) | Component graph and mediated `agent.spawn` blueprint. |
-| **SOTA Research** | [`RESEARCH_k3_harness-suggestion.md`](docs/06_references/RESEARCH_k3_harness-suggestion.md) | SOTA Plan formulating the A-B-C-D operating model. |
+| **The Law** | [`docs/SPEC.md`](../SPEC.md) | Pure RFC-2119 Normative Specification for MHF v1. |
+| **Decisions** | [`docs/05_adr/INDEX.md`](../05_adr/INDEX.md) | Immutable records (ADRs 0069–0076 lock the foundation). |
+| **Active Sprint** | [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md) | Single living execution board and milestone ladder. |
+| **TCB Kernel** | [`vanguard/packages/kernel/`](../../vanguard/packages/kernel/) | 9 files, 1365 LOC logical (threshold $\le 1438$). 100% green. |
+| **Verified Gaps** | [`002 Gap Register`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | Falsifiers F-01 through F-21 and wave exit gates. |
+| **Generality Review** | [`005 Generality Review`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) | Component graph and mediated `agent.spawn` blueprint. |
+| **SOTA Research** | [`RESEARCH_k3_harness-suggestion.md`](../06_references/RESEARCH_k3_harness-suggestion.md) | SOTA Plan formulating the A-B-C-D operating model. |
 
 ---
 
@@ -85,7 +85,7 @@
 > **You hold 100% decision authority** over the architecture, scope, milestone sequence, and release
 > strategy for **v0.6.1**, **v0.6.2**, and **v0.7.0**.
 >
-> Everything under [`docs/07_reviews/`](docs/07_reviews/) and [`docs/06_references/`](docs/06_references/)
+> Everything under [`docs/07_reviews/`](../07_reviews/) and [`docs/06_references/`](../06_references/)
 > is **advisory input, option space, and historical evidence — not unquestioned law.** The reviews
 > themselves say so: `005` is stamped *"Advisory. Does not amend SPEC or any ADR"*, and SPEC's
 > authority-on-conflict clause explicitly ranks `docs/07_reviews/` last, adding that
@@ -97,10 +97,10 @@ name it and give evidence ([`ADR-0086`](../05_adr/0086-historical-adr-working-tr
 
 ### 1.2 What is already settled and should NOT be relitigated here
 
-These carry a Director signature already ([`ADR-0075`](docs/05_adr/0075-director-review-v060-approved-wave0-authorized.md)):
+These carry a Director signature already ([`ADR-0075`](../05_adr/0075-director-review-v060-approved-wave0-authorized.md)):
 the packages lattice as canonical, `spawn` as the sole delegation primitive, the three planes, the
 identity trinity, wire-first plugins, the exterior judge, sequential execution (I-11), and the
-refusal list in [`SPEC.md` §9](docs/SPEC.md). Reopening any of them requires **reversal evidence**,
+refusal list in [`SPEC.md` §9](../SPEC.md). Reopening any of them requires **reversal evidence**,
 which each ADR states in its own text — not preference.
 
 ### 1.3 What this document asks you to decide
@@ -114,12 +114,12 @@ after M-4**, not because they are blocked on engineering. They are laid out neut
 
 | If you want… | Read |
 |---|---|
-| The law, in one file | [`docs/SPEC.md`](docs/SPEC.md) |
-| Why each decision was made | [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) |
-| What is unfinished, with named falsifiers | [`002` gap register](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) §4 |
-| What is being worked on right now | [`sprint_active.md`](docs/03_sprints/sprint_active.md) |
-| The strongest independent critique | [`005` Substrate Generality Review](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) §3 |
-| The failure this whole programme exists to prevent | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) §1 |
+| The law, in one file | [`docs/SPEC.md`](../SPEC.md) |
+| Why each decision was made | [`docs/05_adr/INDEX.md`](../05_adr/INDEX.md) |
+| What is unfinished, with named falsifiers | [`002` gap register](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) §4 |
+| What is being worked on right now | [`sprint_active.md`](../03_sprints/sprint_active.md) |
+| The strongest independent critique | [`005` Substrate Generality Review](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) §3 |
+| The failure this whole programme exists to prevent | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) §1 |
 
 ---
 
@@ -209,10 +209,10 @@ Four load-bearing subsystems, each with its verified state as of this audit.
 
 | | Pillar | Mechanism | Owner on disk | State **[VERIFIED]** |
 |---|---|---|---|---|
-| **A** | **Authority** | Descriptor-bound grants, monotonic attenuation, typed 6D leases, S0–S12 reference monitor | [`kernel/`](vanguard/packages/kernel/) | **Solid & generic.** 1365 logical LOC against a 1438 ceiling. Implements KERNEL.md §2 rule-for-rule. |
-| **B** | **Bundle** | `manifest → compose() → FrozenHarness(D_H)` | [`runtime/compose.py`](vanguard/packages/runtime/compose.py), [`domain/artifacts/manifest.py`](vanguard/packages/domain/artifacts/manifest.py) | **Fixed-slot template.** Works; expresses one agent shape. The open tension — see [§5.1](#51-t-1--manifest-shape--fixed-slots-vs-named-component-graph). |
-| **C** | **Corpus** | `fold(events)` → SQLite WAL → `mhf.trajectory/1` at `EpisodeCompleted` | [`adapters/stores/event_store.py`](vanguard/packages/adapters/stores/event_store.py), [`runtime/trajectory.py`](vanguard/packages/runtime/trajectory.py) | **Ledger strong; trajectory hollow.** Cold replay is real. Trajectory emits a zero cost vector — see [§5.4](#54-t-4--trajectory-quality--the-born-hollow-corpus-g1--nova-1). |
-| **D** | **Digest** | Identity trinity `D_H` ≠ `D_R` ≠ `D_X`, all bytes via RFC 8785 JCS | [`domain/canonicalisation/jcs.py`](vanguard/packages/domain/canonicalisation/jcs.py) | **Locked & generic.** `D_H` covers prompt, ceiling, approval policy, and model routes — not just plugin refs. |
+| **A** | **Authority** | Descriptor-bound grants, monotonic attenuation, typed 6D leases, S0–S12 reference monitor | [`kernel/`](../../vanguard/packages/kernel/) | **Solid & generic.** 1365 logical LOC against a 1438 ceiling. Implements KERNEL.md §2 rule-for-rule. |
+| **B** | **Bundle** | `manifest → compose() → FrozenHarness(D_H)` | [`runtime/compose.py`](../../vanguard/packages/runtime/compose.py), [`domain/artifacts/manifest.py`](../../vanguard/packages/domain/artifacts/manifest.py) | **Fixed-slot template.** Works; expresses one agent shape. The open tension — see [§5.1](#51-t-1--manifest-shape--fixed-slots-vs-named-component-graph). |
+| **C** | **Corpus** | `fold(events)` → SQLite WAL → `mhf.trajectory/1` at `EpisodeCompleted` | [`adapters/stores/event_store.py`](../../vanguard/packages/adapters/stores/event_store.py), [`runtime/trajectory.py`](../../vanguard/packages/runtime/trajectory.py) | **Ledger strong; trajectory hollow.** Cold replay is real. Trajectory emits a zero cost vector — see [§5.4](#54-t-4--trajectory-quality--the-born-hollow-corpus-g1--nova-1). |
+| **D** | **Digest** | Identity trinity `D_H` ≠ `D_R` ≠ `D_X`, all bytes via RFC 8785 JCS | [`domain/canonicalisation/jcs.py`](../../vanguard/packages/domain/canonicalisation/jcs.py) | **Locked & generic.** `D_H` covers prompt, ceiling, approval policy, and model routes — not just plugin refs. |
 
 **Identity trinity, restated precisely** (this is the most commonly misunderstood piece):
 
@@ -352,54 +352,54 @@ Aether-D-System/
 
 | Module | LOC | Single responsibility |
 |---|---:|---|
-| [`canonicalisation/jcs.py`](vanguard/packages/domain/canonicalisation/jcs.py) | 226 | RFC 8785 JCS canonicaliser — **the sole byte source** for every digest and every signature |
-| [`canonicalisation/digest.py`](vanguard/packages/domain/canonicalisation/digest.py) | 24 | SHA-256 over canonical bytes |
-| [`ledger/events.py`](vanguard/packages/domain/ledger/events.py) | 471 | `EVENT_KINDS` — the closed catalog (56 kinds) + envelope types |
-| [`ledger/reducer.py`](vanguard/packages/domain/ledger/reducer.py) | 654 | Deterministic `fold(events) → LedgerState`. The `unknown_events` tail is the honesty channel |
-| [`ledger/state.py`](vanguard/packages/domain/ledger/state.py) | 297 | `LedgerState` + `to_canonical_dict()` (feeds the state digest) |
-| [`ledger/reconciliation.py`](vanguard/packages/domain/ledger/reconciliation.py) | 86 | Undeterminable-effect reconciliation (F-22) |
-| [`ledger/session_projection.py`](vanguard/packages/domain/ledger/session_projection.py) | 94 | Read-model projection for sessions |
-| [`selectors/resource_selector.py`](vanguard/packages/domain/selectors/resource_selector.py) | 501 | **The one selector algebra.** Total, fail-closed. Unknown pair ⇒ deny (K-48) |
-| [`primitives/primitives.py`](vanguard/packages/domain/primitives/primitives.py) | 257 | `Principal`, `Digest`, `Reservation`, `SinkClass`, core value types |
-| [`artifacts/manifest.py`](vanguard/packages/domain/artifacts/manifest.py) | 172 | `FrozenHarness` / `D_H` compile output |
-| [`artifacts/graph.py`](vanguard/packages/domain/artifacts/graph.py) | 212 | Provenance DAG projections |
-| [`artifacts/skill_index.py`](vanguard/packages/domain/artifacts/skill_index.py) | 76 | Skill-card index |
-| [`evidence/claim.py`](vanguard/packages/domain/evidence/claim.py) | 373 | `EvidenceClaim` + hedge fields (ADR-0068) |
-| [`wire/contracts.py`](vanguard/packages/domain/wire/contracts.py) | 362 | Wire contract types |
-| [`wire/types_gen.py`](vanguard/packages/domain/wire/types_gen.py) | 368 | **GENERATED** from `schemas/mhf/` — hand-editing fails CI (F-13) |
-| [`wire/jsonrpc.py`](vanguard/packages/domain/wire/jsonrpc.py) | 64 | JSON-RPC 2.0 line-delimited codec (absorbed from `layer0/` at 2.1-A) |
-| [`wire/result.py`](vanguard/packages/domain/wire/result.py) | 34 | `Result[T]` |
+| [`canonicalisation/jcs.py`](../../vanguard/packages/domain/canonicalisation/jcs.py) | 226 | RFC 8785 JCS canonicaliser — **the sole byte source** for every digest and every signature |
+| [`canonicalisation/digest.py`](../../vanguard/packages/domain/canonicalisation/digest.py) | 24 | SHA-256 over canonical bytes |
+| [`ledger/events.py`](../../vanguard/packages/domain/ledger/events.py) | 471 | `EVENT_KINDS` — the closed catalog (56 kinds) + envelope types |
+| [`ledger/reducer.py`](../../vanguard/packages/domain/ledger/reducer.py) | 654 | Deterministic `fold(events) → LedgerState`. The `unknown_events` tail is the honesty channel |
+| [`ledger/state.py`](../../vanguard/packages/domain/ledger/state.py) | 297 | `LedgerState` + `to_canonical_dict()` (feeds the state digest) |
+| [`ledger/reconciliation.py`](../../vanguard/packages/domain/ledger/reconciliation.py) | 86 | Undeterminable-effect reconciliation (F-22) |
+| [`ledger/session_projection.py`](../../vanguard/packages/domain/ledger/session_projection.py) | 94 | Read-model projection for sessions |
+| [`selectors/resource_selector.py`](../../vanguard/packages/domain/selectors/resource_selector.py) | 501 | **The one selector algebra.** Total, fail-closed. Unknown pair ⇒ deny (K-48) |
+| [`primitives/primitives.py`](../../vanguard/packages/domain/primitives/primitives.py) | 257 | `Principal`, `Digest`, `Reservation`, `SinkClass`, core value types |
+| [`artifacts/manifest.py`](../../vanguard/packages/domain/artifacts/manifest.py) | 172 | `FrozenHarness` / `D_H` compile output |
+| [`artifacts/graph.py`](../../vanguard/packages/domain/artifacts/graph.py) | 212 | Provenance DAG projections |
+| [`artifacts/skill_index.py`](../../vanguard/packages/domain/artifacts/skill_index.py) | 76 | Skill-card index |
+| [`evidence/claim.py`](../../vanguard/packages/domain/evidence/claim.py) | 373 | `EvidenceClaim` + hedge fields (ADR-0068) |
+| [`wire/contracts.py`](../../vanguard/packages/domain/wire/contracts.py) | 362 | Wire contract types |
+| [`wire/types_gen.py`](../../vanguard/packages/domain/wire/types_gen.py) | 368 | **GENERATED** from `schemas/mhf/` — hand-editing fails CI (F-13) |
+| [`wire/jsonrpc.py`](../../vanguard/packages/domain/wire/jsonrpc.py) | 64 | JSON-RPC 2.0 line-delimited codec (absorbed from `layer0/` at 2.1-A) |
+| [`wire/result.py`](../../vanguard/packages/domain/wire/result.py) | 34 | `Result[T]` |
 
 #### `ports/` — abstract interfaces, imports `domain/` only
 
 | Module | LOC | Single responsibility |
 |---|---:|---|
-| [`spi.py`](vanguard/packages/ports/spi.py) | 125 | **The five frozen SPIs** — `IPlanner`, `IMemoryEngine`, `IToolkit`, `IContextManager`, `IEvaluationGate` (ADR-M0-03; a sixth requires a design review) |
-| [`kernel.py`](vanguard/packages/ports/kernel.py) | 75 | `KernelPort` — the single dispatch entry |
-| [`environment.py`](vanguard/packages/ports/environment.py) | 173 | Workspace/environment port |
-| [`sandbox.py`](vanguard/packages/ports/sandbox.py) | 83 | `ISandbox` |
-| [`event_store.py`](vanguard/packages/ports/event_store.py) | 82 | `IEventStore` |
-| [`evaluator.py`](vanguard/packages/ports/evaluator.py) | 65 | `EvaluatorPort` — request only, never render |
-| [`determinism.py`](vanguard/packages/ports/determinism.py) | 50 | `ClockPort` / `RandomPort` (replay substitution) |
-| [`index.py`](vanguard/packages/ports/index.py) | 52 | Repo-index port |
-| [`model.py`](vanguard/packages/ports/model.py) | 44 | `ModelPort` / `IModelProvider` |
-| [`blob_store.py`](vanguard/packages/ports/blob_store.py) | 39 | `IBlobStore` — `write→fsync→emit(digest)` ordering (D-19) |
+| [`spi.py`](../../vanguard/packages/ports/spi.py) | 125 | **The five frozen SPIs** — `IPlanner`, `IMemoryEngine`, `IToolkit`, `IContextManager`, `IEvaluationGate` (ADR-M0-03; a sixth requires a design review) |
+| [`kernel.py`](../../vanguard/packages/ports/kernel.py) | 75 | `KernelPort` — the single dispatch entry |
+| [`environment.py`](../../vanguard/packages/ports/environment.py) | 173 | Workspace/environment port |
+| [`sandbox.py`](../../vanguard/packages/ports/sandbox.py) | 83 | `ISandbox` |
+| [`event_store.py`](../../vanguard/packages/ports/event_store.py) | 82 | `IEventStore` |
+| [`evaluator.py`](../../vanguard/packages/ports/evaluator.py) | 65 | `EvaluatorPort` — request only, never render |
+| [`determinism.py`](../../vanguard/packages/ports/determinism.py) | 50 | `ClockPort` / `RandomPort` (replay substitution) |
+| [`index.py`](../../vanguard/packages/ports/index.py) | 52 | Repo-index port |
+| [`model.py`](../../vanguard/packages/ports/model.py) | 44 | `ModelPort` / `IModelProvider` |
+| [`blob_store.py`](../../vanguard/packages/ports/blob_store.py) | 39 | `IBlobStore` — `write→fsync→emit(digest)` ordering (D-19) |
 
 #### `kernel/` — the Trusted Computing Base ⚠ **TCB BUDGET: 1365 / 1438 logical LOC**
 
 | Module | Logical LOC | Single responsibility |
 |---|---:|---|
-| [`dispatch.py`](vanguard/packages/kernel/dispatch.py) | **364** | The S0–S12 pipeline. **The only path from a model output to an effect** (AT-01). Enforces K-04 (resolve before lease), K-05 (verify at point of effect), K-06 (release before emit), K-07 (overruns debited), K-47/S8a (durable intent fsynced before dispatch) |
-| [`grants.py`](vanguard/packages/kernel/grants.py) | 201 | Descriptor-bound, single-use grants; MAC across process boundaries (K-18…K-22) |
-| [`attenuation.py`](vanguard/packages/kernel/attenuation.py) | 171 | Monotonic narrowing. **No silent intersection** (K-26); out-of-scope ⇒ alertable denial (K-27) |
-| [`budget.py`](vanguard/packages/kernel/budget.py) | 139 | Typed 6D algebra: additive `{usd_micros, tokens, bytes, millis}` vs structural `{depth, turns}`. **Sibling depths are not summed** |
-| [`model.py`](vanguard/packages/kernel/model.py) | 137 | Kernel-internal request/decision models |
-| [`provenance.py`](vanguard/packages/kernel/provenance.py) | 110 | The authority predicate. Justifying spans accumulate **monotonically** (K-33) — the control that was documented, tested, and inert in the prototype |
-| [`policy.py`](vanguard/packages/kernel/policy.py) | 106 | `policy.authorize(AuthorityRequest)` at S5 |
-| [`classifier.py`](vanguard/packages/kernel/classifier.py) | 96 | Capability-widening classifier at S4. **A call, never a constant** (K-08); raises ⇒ treated as widening (F-05) |
-| [`__init__.py`](vanguard/packages/kernel/__init__.py) | 41 | Public kernel surface |
+| [`dispatch.py`](../../vanguard/packages/kernel/dispatch.py) | **364** | The S0–S12 pipeline. **The only path from a model output to an effect** (AT-01). Enforces K-04 (resolve before lease), K-05 (verify at point of effect), K-06 (release before emit), K-07 (overruns debited), K-47/S8a (durable intent fsynced before dispatch) |
+| [`grants.py`](../../vanguard/packages/kernel/grants.py) | 201 | Descriptor-bound, single-use grants; MAC across process boundaries (K-18…K-22) |
+| [`attenuation.py`](../../vanguard/packages/kernel/attenuation.py) | 171 | Monotonic narrowing. **No silent intersection** (K-26); out-of-scope ⇒ alertable denial (K-27) |
+| [`budget.py`](../../vanguard/packages/kernel/budget.py) | 139 | Typed 6D algebra: additive `{usd_micros, tokens, bytes, millis}` vs structural `{depth, turns}`. **Sibling depths are not summed** |
+| [`model.py`](../../vanguard/packages/kernel/model.py) | 137 | Kernel-internal request/decision models |
+| [`provenance.py`](../../vanguard/packages/kernel/provenance.py) | 110 | The authority predicate. Justifying spans accumulate **monotonically** (K-33) — the control that was documented, tested, and inert in the prototype |
+| [`policy.py`](../../vanguard/packages/kernel/policy.py) | 106 | `policy.authorize(AuthorityRequest)` at S5 |
+| [`classifier.py`](../../vanguard/packages/kernel/classifier.py) | 96 | Capability-widening classifier at S4. **A call, never a constant** (K-08); raises ⇒ treated as widening (F-05) |
+| [`__init__.py`](../../vanguard/packages/kernel/__init__.py) | 41 | Public kernel surface |
 
-> **Why the ceiling matters and what it does not mean.** [`KERNEL.md` §1.1](docs/04_annex/KERNEL.md)
+> **Why the ceiling matters and what it does not mean.** [`KERNEL.md` §1.1](../04_annex/KERNEL.md)
 > is explicit: *"A ceiling on the policy kernel is a tripwire, not a guarantee."* The annex has
 > already **struck** the LOC number from its normative prose (AP-8: a LOC ceiling is a Goodharted
 > metric that rewards density in exactly the code that must be clearest) and names a replacement
@@ -412,79 +412,79 @@ Aether-D-System/
 
 | Module | LOC | Single responsibility |
 |---|---:|---|
-| [`episode/engine.py`](vanguard/packages/agency/episode/engine.py) | 693 | `EpisodeEngine` — the turn loop and `spawn()`. **Today `spawn` is engine-owned**; see [§5.2](#52-t-2--spawning--engine-owned-vs-capability-mediated-agentspawn) |
-| [`episode/state.py`](vanguard/packages/agency/episode/state.py) | 237 | Episode FSM state |
-| [`context/compiler.py`](vanguard/packages/agency/context/compiler.py) | 290 | Prefix-stable prompt assembly; L1–L3 frozen at composition |
-| [`context/compaction.py`](vanguard/packages/agency/context/compaction.py) | 256 | Structured compaction under token pressure |
-| [`context/layers.py`](vanguard/packages/agency/context/layers.py) | 235 | L1–L5 context layer model |
-| [`manifests/loader.py`](vanguard/packages/agency/manifests/loader.py) | 259 | YAML → harness parse (converges to one parser at 3.2-C) |
-| [`manifests/discovery.py`](vanguard/packages/agency/manifests/discovery.py) | 106 | Manifest discovery across scan paths |
+| [`episode/engine.py`](../../vanguard/packages/agency/episode/engine.py) | 693 | `EpisodeEngine` — the turn loop and `spawn()`. **Today `spawn` is engine-owned**; see [§5.2](#52-t-2--spawning--engine-owned-vs-capability-mediated-agentspawn) |
+| [`episode/state.py`](../../vanguard/packages/agency/episode/state.py) | 237 | Episode FSM state |
+| [`context/compiler.py`](../../vanguard/packages/agency/context/compiler.py) | 290 | Prefix-stable prompt assembly; L1–L3 frozen at composition |
+| [`context/compaction.py`](../../vanguard/packages/agency/context/compaction.py) | 256 | Structured compaction under token pressure |
+| [`context/layers.py`](../../vanguard/packages/agency/context/layers.py) | 235 | L1–L5 context layer model |
+| [`manifests/loader.py`](../../vanguard/packages/agency/manifests/loader.py) | 259 | YAML → harness parse (converges to one parser at 3.2-C) |
+| [`manifests/discovery.py`](../../vanguard/packages/agency/manifests/discovery.py) | 106 | Manifest discovery across scan paths |
 | `manifests/vg-*/` | — | 6 shipped manifests: `vg-code-default`, `vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`, `vg-shell-only`, `vg-table-default` |
 
 #### `runtime/` — composition root and system services
 
 | Module | LOC | Single responsibility |
 |---|---:|---|
-| [`root.py`](vanguard/packages/runtime/root.py) | **126** | Composition root. Was a ~1418-LOC god object; **split in place at 2.2-C** into the three below |
-| [`compose.py`](vanguard/packages/runtime/compose.py) | 390 | `Runtime.compose` — manifest → `FrozenHarness(D_H)`, ceiling intersection stored |
-| [`session.py`](vanguard/packages/runtime/session.py) | 646 | `HarnessSession` lifecycle. Exceeds the plan's ~500 guidance; accepted as one cohesive class |
-| [`wiring.py`](vanguard/packages/runtime/wiring.py) | 347 | Dependency wiring |
-| [`ledger_emitter.py`](vanguard/packages/runtime/ledger_emitter.py) | 331 | **The single authorized ledger writer.** Holds `PRIVILEGED_KIND_OWNERS` — the writer-authority table |
-| [`evaluator_gateway.py`](vanguard/packages/runtime/evaluator_gateway.py) | 58 | **Sole legal writer of `VerdictRecorded`.** Refuses anything without a bound, signed body |
-| [`evaluation_listener.py`](vanguard/packages/runtime/evaluation_listener.py) | 129 | Observes terminal events, requests judgment |
-| [`trajectory.py`](vanguard/packages/runtime/trajectory.py) | 113 | `mhf.trajectory/1` builder. ⚠ **Emits `_ZERO_COST` at lines 53 and 75** — [§5.4](#54-t-4--trajectory-quality--the-born-hollow-corpus-g1--nova-1) |
-| [`governance/approvals.py`](vanguard/packages/runtime/governance/approvals.py) | 565 | Ed25519 approval service; `ApprovalResolved` is ledgered (fixes D-13) |
-| [`governance/engine.py`](vanguard/packages/runtime/governance/engine.py) | 97 | Governance rule engine |
-| [`governance/definitions.py`](vanguard/packages/runtime/governance/definitions.py) | 93 | Governance definitions |
-| [`ledger/projections.py`](vanguard/packages/runtime/ledger/projections.py) | 339 | Read-model projections |
-| [`ledger/recovery.py`](vanguard/packages/runtime/ledger/recovery.py) | 278 | Crash recovery: scan `EffectStarted` without terminal ⇒ undeterminable ⇒ probe |
-| [`lab_driver.py`](vanguard/packages/runtime/lab_driver.py) | 461 | Lab measurement driver (promotion deferred) |
-| [`service/service.py`](vanguard/packages/runtime/service/service.py) | 531 | UDS RuntimeService daemon (ADR-0062) |
-| [`service/server.py`](vanguard/packages/runtime/service/server.py) | 177 | Socket server |
-| [`service/inbox.py`](vanguard/packages/runtime/service/inbox.py) | 202 | Inbox/outbox — idempotent commands (D-17) |
-| [`tier_escalation.py`](vanguard/packages/runtime/tier_escalation.py) | 236 | Free→Cheap→Frontier escalation on `verdict_fail` (the D-41 salvage) |
-| [`model_selection.py`](vanguard/packages/runtime/model_selection.py) | 224 | Route selection |
-| [`autonomous_grant.py`](vanguard/packages/runtime/autonomous_grant.py) | 162 | Autonomous-mode grant policy |
-| [`repair.py`](vanguard/packages/runtime/repair.py) | 144 | Repair rounds |
-| [`explain.py`](vanguard/packages/runtime/explain.py) | 134 | Decision explanation |
-| [`scoring.py`](vanguard/packages/runtime/scoring.py) | 128 | Outcome scoring |
-| [`provider_health.py`](vanguard/packages/runtime/provider_health.py) | 117 | Provider health probes |
-| [`determinism.py`](vanguard/packages/runtime/determinism.py) | 101 | Clock/random injection for replay |
-| [`session_log.py`](vanguard/packages/runtime/session_log.py) | 220 | Session log |
-| [`skill_index.py`](vanguard/packages/runtime/skill_index.py) | 94 | Skill index runtime |
-| [`outcome_labels.py`](vanguard/packages/runtime/outcome_labels.py) | 65 | Outcome labels |
-| [`task_sets.py`](vanguard/packages/runtime/task_sets.py) | 61 | Task set loading |
-| [`telemetry.py`](vanguard/packages/runtime/telemetry.py) | 50 | Telemetry emission |
+| [`root.py`](../../vanguard/packages/runtime/root.py) | **126** | Composition root. Was a ~1418-LOC god object; **split in place at 2.2-C** into the three below |
+| [`compose.py`](../../vanguard/packages/runtime/compose.py) | 390 | `Runtime.compose` — manifest → `FrozenHarness(D_H)`, ceiling intersection stored |
+| [`session.py`](../../vanguard/packages/runtime/session.py) | 646 | `HarnessSession` lifecycle. Exceeds the plan's ~500 guidance; accepted as one cohesive class |
+| [`wiring.py`](../../vanguard/packages/runtime/wiring.py) | 347 | Dependency wiring |
+| [`ledger_emitter.py`](../../vanguard/packages/runtime/ledger_emitter.py) | 331 | **The single authorized ledger writer.** Holds `PRIVILEGED_KIND_OWNERS` — the writer-authority table |
+| [`evaluator_gateway.py`](../../vanguard/packages/runtime/evaluator_gateway.py) | 58 | **Sole legal writer of `VerdictRecorded`.** Refuses anything without a bound, signed body |
+| [`evaluation_listener.py`](../../vanguard/packages/runtime/evaluation_listener.py) | 129 | Observes terminal events, requests judgment |
+| [`trajectory.py`](../../vanguard/packages/runtime/trajectory.py) | 113 | `mhf.trajectory/1` builder. ⚠ **Emits `_ZERO_COST` at lines 53 and 75** — [§5.4](#54-t-4--trajectory-quality--the-born-hollow-corpus-g1--nova-1) |
+| [`governance/approvals.py`](../../vanguard/packages/runtime/governance/approvals.py) | 565 | Ed25519 approval service; `ApprovalResolved` is ledgered (fixes D-13) |
+| [`governance/engine.py`](../../vanguard/packages/runtime/governance/engine.py) | 97 | Governance rule engine |
+| [`governance/definitions.py`](../../vanguard/packages/runtime/governance/definitions.py) | 93 | Governance definitions |
+| [`ledger/projections.py`](../../vanguard/packages/runtime/ledger/projections.py) | 339 | Read-model projections |
+| [`ledger/recovery.py`](../../vanguard/packages/runtime/ledger/recovery.py) | 278 | Crash recovery: scan `EffectStarted` without terminal ⇒ undeterminable ⇒ probe |
+| [`lab_driver.py`](../../vanguard/packages/runtime/lab_driver.py) | 461 | Lab measurement driver (promotion deferred) |
+| [`service/service.py`](../../vanguard/packages/runtime/service/service.py) | 531 | UDS RuntimeService daemon (ADR-0062) |
+| [`service/server.py`](../../vanguard/packages/runtime/service/server.py) | 177 | Socket server |
+| [`service/inbox.py`](../../vanguard/packages/runtime/service/inbox.py) | 202 | Inbox/outbox — idempotent commands (D-17) |
+| [`tier_escalation.py`](../../vanguard/packages/runtime/tier_escalation.py) | 236 | Free→Cheap→Frontier escalation on `verdict_fail` (the D-41 salvage) |
+| [`model_selection.py`](../../vanguard/packages/runtime/model_selection.py) | 224 | Route selection |
+| [`autonomous_grant.py`](../../vanguard/packages/runtime/autonomous_grant.py) | 162 | Autonomous-mode grant policy |
+| [`repair.py`](../../vanguard/packages/runtime/repair.py) | 144 | Repair rounds |
+| [`explain.py`](../../vanguard/packages/runtime/explain.py) | 134 | Decision explanation |
+| [`scoring.py`](../../vanguard/packages/runtime/scoring.py) | 128 | Outcome scoring |
+| [`provider_health.py`](../../vanguard/packages/runtime/provider_health.py) | 117 | Provider health probes |
+| [`determinism.py`](../../vanguard/packages/runtime/determinism.py) | 101 | Clock/random injection for replay |
+| [`session_log.py`](../../vanguard/packages/runtime/session_log.py) | 220 | Session log |
+| [`skill_index.py`](../../vanguard/packages/runtime/skill_index.py) | 94 | Skill index runtime |
+| [`outcome_labels.py`](../../vanguard/packages/runtime/outcome_labels.py) | 65 | Outcome labels |
+| [`task_sets.py`](../../vanguard/packages/runtime/task_sets.py) | 61 | Task set loading |
+| [`telemetry.py`](../../vanguard/packages/runtime/telemetry.py) | 50 | Telemetry emission |
 
 #### `adapters/` — concrete external integrations (imports `domain/` + `ports/` only)
 
 | Module | LOC | Single responsibility |
 |---|---:|---|
-| [`evaluators/daemon.py`](vanguard/packages/adapters/evaluators/daemon.py) | 261 | **UID 10002 exterior evaluator daemon.** Binds verdicts to request/subject/oracle/nonce |
-| [`evaluators/signing.py`](vanguard/packages/adapters/evaluators/signing.py) | 58 | `VerdictSigner` — Ed25519 over JCS bytes |
-| [`evaluators/isolated.py`](vanguard/packages/adapters/evaluators/isolated.py) | 298 | Isolated evaluation execution |
-| [`evaluators/gate.py`](vanguard/packages/adapters/evaluators/gate.py) | 132 | Reads ledgered verdicts; signature verification is **the reader's job**, not the reducer's |
-| [`evaluators/client.py`](vanguard/packages/adapters/evaluators/client.py) | 140 | UDS client to the daemon |
-| [`evaluators/suites/`](vanguard/packages/adapters/evaluators/suites/) | — | Preregistered oracles (bug-001/002/003, greenfield webapp, task 01–03) |
-| [`sandbox/worker.py`](vanguard/packages/adapters/sandbox/worker.py) | 242 | **UID 10001 worker.** `setrlimit` + no-new-privs in pre-exec |
-| [`sandbox/rootless.py`](vanguard/packages/adapters/sandbox/rootless.py) | — | Rootless bubblewrap perimeter (K-34…K-41) |
-| [`sandbox/ceiling.py`](vanguard/packages/adapters/sandbox/ceiling.py) | — | Plugin-cell capability gate. **Fail-closed since M-1**; delegates to `domain/selectors/` (2.1-D) |
-| [`sandbox/toolkit.py`](vanguard/packages/adapters/sandbox/toolkit.py) | — | Toolkit cell over the JSON-RPC wire |
-| [`stores/event_store.py`](vanguard/packages/adapters/stores/event_store.py) | 354 | **SQLite WAL + FULL sync** event store, per-Project hash chain |
-| [`stores/blob_store.py`](vanguard/packages/adapters/stores/blob_store.py) | 126 | Content-addressed blobs, `write→fsync→emit` |
-| [`stores/ledger_jsonl.py`](vanguard/packages/adapters/stores/ledger_jsonl.py) | 163 | JSONL export |
-| [`stores/repo_index.py`](vanguard/packages/adapters/stores/repo_index.py) | 124 | Merkle repo index |
-| [`stores/memory_engine.py`](vanguard/packages/adapters/stores/memory_engine.py) | 87 | KV memory engine |
-| [`models/invocation.py`](vanguard/packages/adapters/models/invocation.py) | 577 | `ProposalTranslator` — the schema-driven model→kernel waist (D-28) |
-| [`models/cassette.py`](vanguard/packages/adapters/models/cassette.py) | 190 | Deterministic replay cassettes |
-| [`models/ollama.py`](vanguard/packages/adapters/models/ollama.py) | 164 | Tier-1 local route |
-| [`models/lam.py`](vanguard/packages/adapters/models/lam.py) | 120 | LAM mock-server adapter |
-| [`models/env_loader.py`](vanguard/packages/adapters/models/env_loader.py) | 121 | Provider credential loading |
-| [`environment/git.py`](vanguard/packages/adapters/environment/git.py) | 847 | Git worktree environment (rollback fallback) |
-| [`environment/fake.py`](vanguard/packages/adapters/environment/fake.py) | 642 | Deterministic fake environment |
-| [`environment/sandboxed.py`](vanguard/packages/adapters/environment/sandboxed.py) | 265 | Sandboxed environment binding |
-| [`environment/tableworld.py`](vanguard/packages/adapters/environment/tableworld.py) | 138 | TableWorld — **the orphaned Pack #2 candidate** (D-27) |
-| [`context/window.py`](vanguard/packages/adapters/context/window.py) | 65 | Context-window accounting |
+| [`evaluators/daemon.py`](../../vanguard/packages/adapters/evaluators/daemon.py) | 261 | **UID 10002 exterior evaluator daemon.** Binds verdicts to request/subject/oracle/nonce |
+| [`evaluators/signing.py`](../../vanguard/packages/adapters/evaluators/signing.py) | 58 | `VerdictSigner` — Ed25519 over JCS bytes |
+| [`evaluators/isolated.py`](../../vanguard/packages/adapters/evaluators/isolated.py) | 298 | Isolated evaluation execution |
+| [`evaluators/gate.py`](../../vanguard/packages/adapters/evaluators/gate.py) | 132 | Reads ledgered verdicts; signature verification is **the reader's job**, not the reducer's |
+| [`evaluators/client.py`](../../vanguard/packages/adapters/evaluators/client.py) | 140 | UDS client to the daemon |
+| [`evaluators/suites/`](../../vanguard/packages/adapters/evaluators/suites/) | — | Preregistered oracles (bug-001/002/003, greenfield webapp, task 01–03) |
+| [`sandbox/worker.py`](../../vanguard/packages/adapters/sandbox/worker.py) | 242 | **UID 10001 worker.** `setrlimit` + no-new-privs in pre-exec |
+| [`sandbox/rootless.py`](../../vanguard/packages/adapters/sandbox/rootless.py) | — | Rootless bubblewrap perimeter (K-34…K-41) |
+| [`sandbox/ceiling.py`](../../vanguard/packages/adapters/sandbox/ceiling.py) | — | Plugin-cell capability gate. **Fail-closed since M-1**; delegates to `domain/selectors/` (2.1-D) |
+| [`sandbox/toolkit.py`](../../vanguard/packages/adapters/sandbox/toolkit.py) | — | Toolkit cell over the JSON-RPC wire |
+| [`stores/event_store.py`](../../vanguard/packages/adapters/stores/event_store.py) | 354 | **SQLite WAL + FULL sync** event store, per-Project hash chain |
+| [`stores/blob_store.py`](../../vanguard/packages/adapters/stores/blob_store.py) | 126 | Content-addressed blobs, `write→fsync→emit` |
+| [`stores/ledger_jsonl.py`](../../vanguard/packages/adapters/stores/ledger_jsonl.py) | 163 | JSONL export |
+| [`stores/repo_index.py`](../../vanguard/packages/adapters/stores/repo_index.py) | 124 | Merkle repo index |
+| [`stores/memory_engine.py`](../../vanguard/packages/adapters/stores/memory_engine.py) | 87 | KV memory engine |
+| [`models/invocation.py`](../../vanguard/packages/adapters/models/invocation.py) | 577 | `ProposalTranslator` — the schema-driven model→kernel waist (D-28) |
+| [`models/cassette.py`](../../vanguard/packages/adapters/models/cassette.py) | 190 | Deterministic replay cassettes |
+| [`models/ollama.py`](../../vanguard/packages/adapters/models/ollama.py) | 164 | Tier-1 local route |
+| [`models/lam.py`](../../vanguard/packages/adapters/models/lam.py) | 120 | LAM mock-server adapter |
+| [`models/env_loader.py`](../../vanguard/packages/adapters/models/env_loader.py) | 121 | Provider credential loading |
+| [`environment/git.py`](../../vanguard/packages/adapters/environment/git.py) | 847 | Git worktree environment (rollback fallback) |
+| [`environment/fake.py`](../../vanguard/packages/adapters/environment/fake.py) | 642 | Deterministic fake environment |
+| [`environment/sandboxed.py`](../../vanguard/packages/adapters/environment/sandboxed.py) | 265 | Sandboxed environment binding |
+| [`environment/tableworld.py`](../../vanguard/packages/adapters/environment/tableworld.py) | 138 | TableWorld — **the orphaned Pack #2 candidate** (D-27) |
+| [`context/window.py`](../../vanguard/packages/adapters/context/window.py) | 65 | Context-window accounting |
 
 **Totals [VERIFIED]:** 100 Python modules, 23,349 physical lines across `vanguard/packages/`.
 
@@ -525,35 +525,35 @@ that proves each linter fails closed rather than merely passing on clean code.
 
 > Everything in this section is **advisory**. It is options and evidence, not requirements.
 
-### 4.1 Review corpus — [`docs/07_reviews/`](docs/07_reviews/) (8 documents)
+### 4.1 Review corpus — [`docs/07_reviews/`](../07_reviews/) (8 documents)
 
 | # | Document | Lines | What it is | What it concluded | Weight |
 |---|---|---:|---|---|---|
-| — | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) | 858 | 25-section forensic investigation at HEAD `c7e9ded` | **Two Python runtimes claimed the same Layer-0 job.** Living CI gated `test/layer0` (25 OK) and did **not** run `test/kernel` (95 OK). `layer0/scheduler/driver.py:138` fabricated `VerdictRecorded {verdict:"pass"}`. `layer0/spi/ceiling.py:21` fail-opened on an empty capability list. **This is the failure the entire programme exists to prevent.** | Investigation, explicitly **not law** |
-| — | [`ARCHIVE.md`](docs/07_reviews/ARCHIVE.md) | 24 | Pointer to the pre-lock corpus | Everything pre-v0.6 lives in git history at anchor `4f9f8b1`. No `docs/archive/` tree exists on disk | Navigational |
-| 001 | [`001_V060_concept_phase_GAMMA.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | 624 | The Concept Lock plan — adjudicates four independent advisory lanes claim-by-claim | Twelve architectural P0s stand. Four **strengthening amendments** adopted: proof obligations (every lock ships a falsifier), typed budget algebra, event-kind writer authority, AI-load-bearing identity (`D_H` includes prompt/ceiling/policy/routes). `Project` locked as consistency unit. `ChildPrincipal` is **not** a second type | Lock plan, **not a second SPEC** |
-| 002 | [`002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | 313 | **The operational register.** Falsifiers F-01…F-21, wave exit gates, deferred/refused tables, P1-1…P1-17 | Wave 0 → Wave 4 sequence, then **stop**. A wave green by lexical grep is not done. §4.3 is the as-built-vs-law matrix | Authoritative on **outcomes**; cannot contradict SPEC/ADRs |
-| 003 | [`003_V060_DIRECTOR_REVIEW.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md) | 56 | Engineering Director independent review at `4f9f8b1` | **APPROVED.** Rationale: the lock tells the truth about the code; the kernel matches its constitution rule-for-rule; the decisions are correctly shaped; the roadmap is in the right order; every defect is registered. Adds **F-18** (linter narrower than I-7), **F-19** (13 tests silently uncollected), **F-20** (`preregistered_oracles.json` deleted, not relocated), **F-21** (`ProposalTranslator` really does degrade tool calls to prose) | **Binding via ADR-0075** |
-| 004 | [`004_V061_ALIGNMENT_ROADMAP.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) | 155 | v0.6.1 formalization mandate **plus** the full M-2→M-10 task ladder (Portuguese) | Names the corrections to formalize as ADR `0077`+: component graph, absent-vs-forged, `agent.spawn` design-only, F-12 hardening, Wave-3 rebalancing, Pack #2 as a gate, scheduled doc consolidation. Introduces **NOVA-1…NOVA-5** | Advisory instruction set; **the ADRs it calls for do not exist yet** |
-| 005 | [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) | 334 | **The strongest independent critique.** Asks: substrate, or coding harness with a kernel attached? | *"You are building the substrate. The primitives are right. The composition surface is not yet, and it is the layer your users will actually touch."* Eight weaknesses **W1–W8** and a 15-row decision register. W1 (fixed-slot manifest) is named highest leverage | Advisory. **Two recommendations request a Director scope call at M-3** |
-| 006 | [`006_V061_aether-substrate-briefing.md`](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/006_V061_aether-substrate-briefing.md) | 104 | Theoretical briefing (Portuguese), lecture-shaped: Ch.1 theory, Ch.2 application | Ch.1 derives the separability thesis, the three planes, why one identifier is not enough, recursion as a single primitive, the authority-vs-strategy line, and why schema-valid ≠ learnable. Ch.2 grades AETHER against each. Same conclusion as `005`, reached independently from theory rather than from code | Advisory / pedagogical |
+| — | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) | 858 | 25-section forensic investigation at HEAD `c7e9ded` | **Two Python runtimes claimed the same Layer-0 job.** Living CI gated `test/layer0` (25 OK) and did **not** run `test/kernel` (95 OK). `layer0/scheduler/driver.py:138` fabricated `VerdictRecorded {verdict:"pass"}`. `layer0/spi/ceiling.py:21` fail-opened on an empty capability list. **This is the failure the entire programme exists to prevent.** | Investigation, explicitly **not law** |
+| — | [`ARCHIVE.md`](../07_reviews/ARCHIVE.md) | 24 | Pointer to the pre-lock corpus | Everything pre-v0.6 lives in git history at anchor `4f9f8b1`. No `docs/archive/` tree exists on disk | Navigational |
+| 001 | [`001_V060_concept_phase_GAMMA.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | 624 | The Concept Lock plan — adjudicates four independent advisory lanes claim-by-claim | Twelve architectural P0s stand. Four **strengthening amendments** adopted: proof obligations (every lock ships a falsifier), typed budget algebra, event-kind writer authority, AI-load-bearing identity (`D_H` includes prompt/ceiling/policy/routes). `Project` locked as consistency unit. `ChildPrincipal` is **not** a second type | Lock plan, **not a second SPEC** |
+| 002 | [`002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | 313 | **The operational register.** Falsifiers F-01…F-21, wave exit gates, deferred/refused tables, P1-1…P1-17 | Wave 0 → Wave 4 sequence, then **stop**. A wave green by lexical grep is not done. §4.3 is the as-built-vs-law matrix | Authoritative on **outcomes**; cannot contradict SPEC/ADRs |
+| 003 | [`003_V060_DIRECTOR_REVIEW.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md) | 56 | Engineering Director independent review at `4f9f8b1` | **APPROVED.** Rationale: the lock tells the truth about the code; the kernel matches its constitution rule-for-rule; the decisions are correctly shaped; the roadmap is in the right order; every defect is registered. Adds **F-18** (linter narrower than I-7), **F-19** (13 tests silently uncollected), **F-20** (`preregistered_oracles.json` deleted, not relocated), **F-21** (`ProposalTranslator` really does degrade tool calls to prose) | **Binding via ADR-0075** |
+| 004 | [`004_V061_ALIGNMENT_ROADMAP.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) | 155 | v0.6.1 formalization mandate **plus** the full M-2→M-10 task ladder (Portuguese) | Names the corrections to formalize as ADR `0077`+: component graph, absent-vs-forged, `agent.spawn` design-only, F-12 hardening, Wave-3 rebalancing, Pack #2 as a gate, scheduled doc consolidation. Introduces **NOVA-1…NOVA-5** | Advisory instruction set; **the ADRs it calls for do not exist yet** |
+| 005 | [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) | 334 | **The strongest independent critique.** Asks: substrate, or coding harness with a kernel attached? | *"You are building the substrate. The primitives are right. The composition surface is not yet, and it is the layer your users will actually touch."* Eight weaknesses **W1–W8** and a 15-row decision register. W1 (fixed-slot manifest) is named highest leverage | Advisory. **Two recommendations request a Director scope call at M-3** |
+| 006 | [`006_V061_aether-substrate-briefing.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/006_V061_aether-substrate-briefing.md) | 104 | Theoretical briefing (Portuguese), lecture-shaped: Ch.1 theory, Ch.2 application | Ch.1 derives the separability thesis, the three planes, why one identifier is not enough, recursion as a single primitive, the authority-vs-strategy line, and why schema-valid ≠ learnable. Ch.2 grades AETHER against each. Same conclusion as `005`, reached independently from theory rather than from code | Advisory / pedagogical |
 
-### 4.2 Research corpus — [`docs/06_references/`](docs/06_references/) (12 documents)
+### 4.2 Research corpus — [`docs/06_references/`](../06_references/) (12 documents)
 
 | # | Document | Lines | Thesis | Disposition |
 |---|---|---:|---|---|
-| 1 | [`RESEARCH_harness_agentic_coding_builder_research_and_framework.md`](docs/06_references/RESEARCH_harness_agentic_coding_builder_research_and_framework.md) | 2323 | **SOTA survey.** *"Model is cognitive capacity; agent is an iterative decision policy; harness is the operating system that turns that policy into verifiable autonomous behaviour."* Terminal-Bench 2.0 evidence: same GPT-5.3-Codex, harness swing 64.7% → 78.4% | **Adopt the consensus.** Harness-as-independent-variable is already the project's thesis |
-| 2 | [`RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md`](docs/06_references/RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md) | 3266 | Successor synthesis. Ch.I research; Ch.II Harness-Builder architecture and the trajectory to meta-cognition / Meta-Harness / governed self-improvement | Advisory, explicitly **non-normative**. Largest single document in the corpus |
-| 3 | [`RESEARCH_k3_harness-suggestion.md`](docs/06_references/RESEARCH_k3_harness-suggestion.md) | 204 | **SOTA plan.** Restates the north star as four falsifiable claims: unforgeable · domain-blind · bounded solvers · proven on SWE. Origin of the **A-B-C-D** framing | **Reorders and hardens; never rewrites.** On conflict, SPEC/ADR/roadmap win — its own words |
-| 4 | [`RESEARCH_THEORETICAL_SYNTHESIS.md`](docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md) | 380 | Wave-6 first-principles math: variational free energy, causal credit assignment over discrete action traces, crystallizing verified invariants into procedure memory | **Defer to M-10.** Fits the law only as exterior, domain-blind, promotion-gated plugin/policy |
-| 5 | [`RESEARCH_THEORETICAL_SYNTHESIS_B.md`](docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS_B.md) | 380 | Near-identical successor of #4 (same `id: REF-06-M5`) | **Duplicate pair.** A consolidation candidate for M-5's doc collapse |
-| 6 | [`RESEARCH_deepseek-harness_algorithms-ideas.md`](docs/06_references/RESEARCH_deepseek-harness_algorithms-ideas.md) | 280 | Four-step reverse-engineering playbook against a competitor harness; PhD-style experiment sandbox structure | **Mine for method, not architecture.** Source of the "profile = ordered stack of plugin bundles" observation `005` §W1 cites |
-| 7 | [`RESEARCH_Harness_Builder_Framework.md`](docs/06_references/RESEARCH_Harness_Builder_Framework.md) | 714 | Greenfield product PRD for a universal plugin-composition framework (Redis / NATS / ChromaDB / K8s / event bus) | ⚠ **REJECT as a competing architecture.** It contradicts the locked hexagonal lattice and would re-create the dual-runtime failure. **Mine only as a catalog of plugin/adapter ideas** |
-| 8 | [`proposal_glm_harness_BETA.md`](docs/06_references/proposal_glm_harness_BETA.md) | 245 | External GLM independent assessment against live tree `83b5009` | *"The goal is reachable on this trajectory… the parts that remain are mostly surface, sequencing, and **one verified data-quality defect** that would quietly poison the entire third layer."* That defect is the hollow trajectory | The **only** reference that verifies claims against a working tree |
-| 9 | [`proposal_hy3_harness.md`](docs/06_references/proposal_hy3_harness.md) | 76 | Meta-analysis: what to *do* with the reference corpus | Five rulings: treat GLM as the operating synthesis · trajectory hardening is highest leverage · reject #7 as a second core · adopt the matching consensus · defer meta-cognition | Written under the pre-development-hold assumption |
-| 10 | [`proposal_hy3_improved.md`](docs/06_references/proposal_hy3_improved.md) | 76 | Corrected successor of #9 | Same five rulings, but corrects the premise: **ADR-0075 already lifted the hold**; only M-5…M-10, `agent.spawn`, Pack #2, and concurrency are gated. NOVA-1 is registered `PRONTA` — authorized, not blocked | **Supersedes #9.** Use this one |
-| 11 | [`vanguard_body_detailed.md`](docs/06_references/vanguard_body_detailed.md) | 484 | "Living treatise" — computational physics, biological emergence, neuro-symbolic cognition, evolutionary blueprint | ⚠ **Directly conflicts with ADR-M0-10 / REJ-10**, which forbids biological/cosmological framing in any document under `docs/`. Retain as inspiration or retire — a Director call ([§6.3](#63-director-decision-checklist) item 8) |
-| 12 | [`openrouter_llm_models_suggested.md`](docs/06_references/openrouter_llm_models_suggested.md) | 37 | Model routing reference — free / low-cost / frontier tiers | Operational input to `model_routes` in `harness.yaml`. Not architecture |
+| 1 | [`RESEARCH_harness_agentic_coding_builder_research_and_framework.md`](../06_references/RESEARCH_harness_agentic_coding_builder_research_and_framework.md) | 2323 | **SOTA survey.** *"Model is cognitive capacity; agent is an iterative decision policy; harness is the operating system that turns that policy into verifiable autonomous behaviour."* Terminal-Bench 2.0 evidence: same GPT-5.3-Codex, harness swing 64.7% → 78.4% | **Adopt the consensus.** Harness-as-independent-variable is already the project's thesis |
+| 2 | [`RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md`](../06_references/RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md) | 3266 | Successor synthesis. Ch.I research; Ch.II Harness-Builder architecture and the trajectory to meta-cognition / Meta-Harness / governed self-improvement | Advisory, explicitly **non-normative**. Largest single document in the corpus |
+| 3 | [`RESEARCH_k3_harness-suggestion.md`](../06_references/RESEARCH_k3_harness-suggestion.md) | 204 | **SOTA plan.** Restates the north star as four falsifiable claims: unforgeable · domain-blind · bounded solvers · proven on SWE. Origin of the **A-B-C-D** framing | **Reorders and hardens; never rewrites.** On conflict, SPEC/ADR/roadmap win — its own words |
+| 4 | [`RESEARCH_THEORETICAL_SYNTHESIS.md`](../06_references/RESEARCH_THEORETICAL_SYNTHESIS.md) | 380 | Wave-6 first-principles math: variational free energy, causal credit assignment over discrete action traces, crystallizing verified invariants into procedure memory | **Defer to M-10.** Fits the law only as exterior, domain-blind, promotion-gated plugin/policy |
+| 5 | [`RESEARCH_THEORETICAL_SYNTHESIS_B.md`](../06_references/RESEARCH_THEORETICAL_SYNTHESIS_B.md) | 380 | Near-identical successor of #4 (same `id: REF-06-M5`) | **Duplicate pair.** A consolidation candidate for M-5's doc collapse |
+| 6 | [`RESEARCH_deepseek-harness_algorithms-ideas.md`](../06_references/RESEARCH_deepseek-harness_algorithms-ideas.md) | 280 | Four-step reverse-engineering playbook against a competitor harness; PhD-style experiment sandbox structure | **Mine for method, not architecture.** Source of the "profile = ordered stack of plugin bundles" observation `005` §W1 cites |
+| 7 | [`RESEARCH_Harness_Builder_Framework.md`](../06_references/RESEARCH_Harness_Builder_Framework.md) | 714 | Greenfield product PRD for a universal plugin-composition framework (Redis / NATS / ChromaDB / K8s / event bus) | ⚠ **REJECT as a competing architecture.** It contradicts the locked hexagonal lattice and would re-create the dual-runtime failure. **Mine only as a catalog of plugin/adapter ideas** |
+| 8 | [`proposal_glm_harness_BETA.md`](../06_references/proposal_glm_harness_BETA.md) | 245 | External GLM independent assessment against live tree `83b5009` | *"The goal is reachable on this trajectory… the parts that remain are mostly surface, sequencing, and **one verified data-quality defect** that would quietly poison the entire third layer."* That defect is the hollow trajectory | The **only** reference that verifies claims against a working tree |
+| 9 | [`proposal_hy3_harness.md`](../06_references/proposal_hy3_harness.md) | 76 | Meta-analysis: what to *do* with the reference corpus | Five rulings: treat GLM as the operating synthesis · trajectory hardening is highest leverage · reject #7 as a second core · adopt the matching consensus · defer meta-cognition | Written under the pre-development-hold assumption |
+| 10 | [`proposal_hy3_improved.md`](../06_references/proposal_hy3_improved.md) | 76 | Corrected successor of #9 | Same five rulings, but corrects the premise: **ADR-0075 already lifted the hold**; only M-5…M-10, `agent.spawn`, Pack #2, and concurrency are gated. NOVA-1 is registered `PRONTA` — authorized, not blocked | **Supersedes #9.** Use this one |
+| 11 | [`vanguard_body_detailed.md`](../06_references/vanguard_body_detailed.md) | 484 | "Living treatise" — computational physics, biological emergence, neuro-symbolic cognition, evolutionary blueprint | ⚠ **Directly conflicts with ADR-M0-10 / REJ-10**, which forbids biological/cosmological framing in any document under `docs/`. Retain as inspiration or retire — a Director call ([§6.3](#63-director-decision-checklist) item 8) |
+| 12 | [`openrouter_llm_models_suggested.md`](../06_references/openrouter_llm_models_suggested.md) | 37 | Model routing reference — free / low-cost / frontier tiers | Operational input to `model_routes` in `harness.yaml`. Not architecture |
 
 **Reading the corpus honestly.** Documents 1, 2, 3, 8, 10 form the coherent advisory spine and
 agree with the law. Document 7 is a competing architecture and must not be built. Documents 4 and 5
@@ -568,8 +568,8 @@ where this audit has an opinion it is labelled **[Audit view]** and separated fr
 
 ### 5.1 T-1 · Manifest shape — fixed slots vs. named component graph
 
-**Where it lives:** [`packs/code-default/harness.yaml`](packs/code-default/harness.yaml),
-[`runtime/compose.py`](vanguard/packages/runtime/compose.py), `schemas/mhf/harness_manifest.schema.json`.
+**Where it lives:** [`packs/code-default/harness.yaml`](../../packs/code-default/harness.yaml),
+[`runtime/compose.py`](../../vanguard/packages/runtime/compose.py), `schemas/mhf/harness_manifest.schema.json`.
 
 | | **Option A — keep fixed 5-slot template** | **Option B — named component graph** |
 |---|---|---|
@@ -599,8 +599,8 @@ marked DIRECTOR**. No such ADR exists on disk **[VERIFIED]**.
 
 ### 5.2 T-2 · Spawning — engine-owned vs. capability-mediated `agent.spawn`
 
-**Where it lives:** [`agency/episode/engine.py`](vanguard/packages/agency/episode/engine.py) (693 LOC),
-[`ports/spi.py`](vanguard/packages/ports/spi.py).
+**Where it lives:** [`agency/episode/engine.py`](../../vanguard/packages/agency/episode/engine.py) (693 LOC),
+[`ports/spi.py`](../../vanguard/packages/ports/spi.py).
 
 | | **Option A — `spawn` stays engine-owned** | **Option B — `agent.spawn` as a kernel verb** |
 |---|---|---|
@@ -624,8 +624,8 @@ security — it is **sequencing**.
 ### 5.3 T-3 · Guardrails — mandatory mechanism vs. declarable "absent-vs-forged"
 
 **Where it lives:** `schemas/mhf/harness_manifest.schema.json`,
-[`runtime/compose.py`](vanguard/packages/runtime/compose.py),
-[`adapters/evaluators/daemon.py`](vanguard/packages/adapters/evaluators/daemon.py).
+[`runtime/compose.py`](../../vanguard/packages/runtime/compose.py),
+[`adapters/evaluators/daemon.py`](../../vanguard/packages/adapters/evaluators/daemon.py).
 
 | | **Option A — mandatory UID-10002 daemon** | **Option B — declarable absence, never forgeable** |
 |---|---|---|
@@ -650,7 +650,7 @@ No ADR on disk **[VERIFIED]**.
 
 **This is the only tension in this section that is a verified live defect rather than a design choice.**
 
-**[VERIFIED on disk, this audit]** — [`vanguard/packages/runtime/trajectory.py`](vanguard/packages/runtime/trajectory.py):
+**[VERIFIED on disk, this audit]** — [`vanguard/packages/runtime/trajectory.py`](../../vanguard/packages/runtime/trajectory.py):
 
 ```python
 line 10:  _ZERO_COST = {"usd_micros": 0, "tokens": 0, "bytes": 0, "millis": 0}
@@ -948,9 +948,9 @@ governance decisions this audit surfaced.
 **☐ 8 · GOVERNANCE & CORPUS HYGIENE (T-8)**
 
 - ☐ **8a.** Confirm doc collapse to **SPEC + ADR log + one living board** is scheduled at **M-5**, not now.
-- ☐ **8b.** Rule on [`vanguard_body_detailed.md`](docs/06_references/vanguard_body_detailed.md) — its biological/cosmological framing conflicts with ADR-M0-10 / REJ-10, which forbids that framing in any document under `docs/`. Retain as inspiration, relocate, or retire.
+- ☐ **8b.** Rule on [`vanguard_body_detailed.md`](../06_references/vanguard_body_detailed.md) — its biological/cosmological framing conflicts with ADR-M0-10 / REJ-10, which forbids that framing in any document under `docs/`. Retain as inspiration, relocate, or retire.
 - ☐ **8c.** Rule on the duplicate `RESEARCH_THEORETICAL_SYNTHESIS` / `_B` pair.
-- ☐ **8d.** Confirm [`RESEARCH_Harness_Builder_Framework.md`](docs/06_references/RESEARCH_Harness_Builder_Framework.md) is **rejected as a competing architecture** and mined only for plugin/adapter ideas.
+- ☐ **8d.** Confirm [`RESEARCH_Harness_Builder_Framework.md`](../06_references/RESEARCH_Harness_Builder_Framework.md) is **rejected as a competing architecture** and mined only for plugin/adapter ideas.
 
 **Determination:** ____________________________________________
 
@@ -981,8 +981,8 @@ For each item you decide, the binding output is:
 
 1. A new **append-only ADR `0077`+** citing which prior ADR it narrows or extends, with evidence.
 2. A **bound falsifier** — per ADR-0074, *a concept without a bound falsifier is not locked.*
-3. A row in the [`002` register](docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) §4.2, in the same table format.
-4. A task with a readiness label in [`sprint_active.md`](docs/03_sprints/sprint_active.md).
+3. A row in the [`002` register](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) §4.2, in the same table format.
+4. A task with a readiness label in [`sprint_active.md`](../03_sprints/sprint_active.md).
 5. An explicit disposition label: **lock now / strengthen now / generalize now / design-only-implement-later / revisit after Wave 4 / reject.**
 
 ---
@@ -1025,16 +1025,16 @@ exercised; no runtime or E2E execution was performed.
 
 ### 7.4 Corrections to V1
 
-[`DIRECTOR_TODO_LOCK_CONCEPTS.md`](DIRECTOR_TODO_LOCK_CONCEPTS.md) is a sound executive summary. Four
-factual corrections, none of which change its conclusions:
+`DIRECTOR_TODO_LOCK_CONCEPTS.md` (V1, recoverable at commit `b36481c`) is a sound executive
+summary. Four factual corrections, none of which change its conclusions:
 
 1. **Four ADR links in V1 §5.2 point at filenames that do not exist.** The correct paths are
-   [`0070-recursive-substrate-agent-spawn-swarm-as-policy.md`](docs/05_adr/0070-recursive-substrate-agent-spawn-swarm-as-policy.md),
-   [`0071-authority-state-ledger-identity-trinity.md`](docs/05_adr/0071-authority-state-ledger-identity-trinity.md),
-   [`0072-plugin-boundary-wire-first-evaluator-exterior.md`](docs/05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md), and
-   [`0074-gamma-lock-amendments-proof-budget-writer-identity.md`](docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md).
+   [`0070-recursive-substrate-agent-spawn-swarm-as-policy.md`](../05_adr/0070-recursive-substrate-agent-spawn-swarm-as-policy.md),
+   [`0071-authority-state-ledger-identity-trinity.md`](../05_adr/0071-authority-state-ledger-identity-trinity.md),
+   [`0072-plugin-boundary-wire-first-evaluator-exterior.md`](../05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md), and
+   [`0074-gamma-lock-amendments-proof-budget-writer-identity.md`](../05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md).
 2. **V1 §3 places `jcs.py` under `domain/ledger/`.** It is at
-   [`domain/canonicalisation/jcs.py`](vanguard/packages/domain/canonicalisation/jcs.py).
+   [`domain/canonicalisation/jcs.py`](../../vanguard/packages/domain/canonicalisation/jcs.py).
 3. **V1 §3 shows `layer0/` as holding only `registry/` and `compose/`.** `layer0/events/` (emitter,
    envelope, store, taxonomy) is also still present.
 4. **V1 §3 states "434 Tests 100% Green."** The last recorded full-root baseline is **1119 collected
@@ -1076,6 +1076,6 @@ substrate primitives.
 ---
 
 *Prepared as an independent audit lane. This document is advisory and amends nothing. Law remains
-[`docs/SPEC.md`](docs/SPEC.md) → [`docs/05_adr/`](docs/05_adr/) → [`docs/04_annex/`](docs/04_annex/).
+[`docs/SPEC.md`](../SPEC.md) → [`docs/05_adr/`](../05_adr/) → [`docs/04_annex/`](../04_annex/).
 Every determination recorded in [§6.3](#63-director-decision-checklist) becomes binding only through
 a new append-only ADR carrying a bound falsifier.*

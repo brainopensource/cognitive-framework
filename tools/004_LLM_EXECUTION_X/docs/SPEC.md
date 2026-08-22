@@ -81,15 +81,16 @@ Prompt strings (`coder_prompt`, `tester_prompt`) **MUST NOT** be embedded within
 ### 3.1. Evidence Producer Protocol
 Validation stages and linters **MUST NOT** emit boolean verdicts (`PASS`/`FAIL`). All validation stages **MUST** implement the `IEvidenceCollector` interface and return an immutable `Evidence` value object:
 
-```python
-@dataclass(frozen=True)
-class Evidence:
-    kind: EvidenceKind          # AST, RUFF, PYTEST, MUTATION, SECURITY
-    collector_id: str
-    timestamp: datetime
-    metrics: dict[str, Any]
-    artifacts_evaluated: list[str]
-    raw_output_digest: str      # SHA-256 of raw stdout/stderr
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Evidence {
+    pub kind: EvidenceKind,              // AstSyntax, RuffLint, Pytest, MutationProbe, SecurityAudit
+    pub collector_id: String,
+    pub timestamp: DateTime<Utc>,
+    pub metrics: HashMap<String, serde_json::Value>,
+    pub artifacts_evaluated: Vec<String>,
+    pub raw_output_digest: String,      // SHA-256 of raw stdout/stderr
+}
 ```
 
 ### 3.2. Verification Authority & Policy

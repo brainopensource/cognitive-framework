@@ -74,8 +74,9 @@ Enterprise software engineering teams and autonomous coding agent developers fac
 | **VRAM Consumption** | Peak VRAM ≤ 13.5 GB (on 24GB GPU) | Active polling via `GET /api/ps` / ROCm SMI |
 | **Mutation Score** | 100% of non-equivalent mutants caught | AST mutation test runner (`mutation_evaluator.py`) |
 | **Test Hermeticity** | 100% unit tests pass with zero GPU / zero network | CI test suite running with `FakeLlmProvider` |
-| **Security Isolation** | Zero network egress, zero filesystem escape | Adversarial sandbox test suite (`test_sandbox_security.py`)|
-| **Code Modularity** | Hexagonal boundary enforcement (0 illegal imports)| CI boundary linter (`linters/check_boundaries.py`) |
+| **Security Isolation** | Zero network egress, zero filesystem escape | Adversarial sandbox test suite (`test_sandbox_security`)|
+| **Engine Architecture** | 100% Pure Rust (`lex-core`) compiled binary | Single static binary, zero GIL, <1ms cold start |
+| **Code Modularity** | Hexagonal boundary enforcement (0 illegal module deps)| Rust module visibility & CI boundary verification |
 
 ---
 
@@ -88,6 +89,7 @@ Enterprise software engineering teams and autonomous coding agent developers fac
 │ Capability         │ LEX (Ours)   │ Claude Code  │ Cursor / IDE │ Aider     │
 ├────────────────────┼──────────────┼──────────────┼──────────────┼───────────┤
 │ 100% Airgap Local  │  YES (Local) │ ❌ Cloud API │ ❌ Cloud API │ ⚠️ Hybrid │
+│ Pure Rust Engine   │  YES (Native)│ ❌ Node/Py   │ ❌ Node/Py   │ ❌ Python │
 │ Multi-Model Swarm  │  YES (Tiered)│ ❌ Single LLM│ ❌ Single LLM│ ❌ Single │
 │ VRAM Drain Control │  YES (Metal) │ N/A          │ N/A          │ ❌ None   │
 │ Mutation Probing   │  YES (AST)   │ ❌ None      │ ❌ None      │ ❌ None   │
@@ -105,4 +107,4 @@ Enterprise software engineering teams and autonomous coding agent developers fac
 2. **SWE-bench Verified Resolution Rate:** $\ge 45\%$ on local weights.
 3. **First-Pass Synthesis Rate:** $\ge 70\%$ of standard tasks pass without entering self-healing.
 4. **Zero-Collusion Guarantee:** $0\%$ false-positive tests passing mutation probes.
-5. **Developer Adoption:** Seamless 1-command startup (`make test && python -m tools.004_LLM_EXECUTION_X.entrypoints.cli`).
+5. **Developer Adoption:** Seamless 1-command startup (`cargo test && cargo build --release`).

@@ -73,7 +73,7 @@ All project documentation lives in [`docs/`](docs/):
 
 ### Prerequisites
 - **OS:** Linux / WSL2 Ubuntu 24.04 LTS
-- **Python:** 3.10+ (tested on Python 3.12)
+- **Rust Toolchain:** `rustc` & `cargo` >= 1.75
 - **Local Ollama Daemon:** `http://127.0.0.1:11434`
 - **GPU:** AMD Radeon (16GB–24GB VRAM) with ROCm / NVIDIA GeForce (16GB–24GB VRAM)
 
@@ -83,22 +83,24 @@ ollama pull qwen2.5:1.5b
 ollama pull qwen3.8:27b
 ollama pull qwen2.5-coder:14b
 
-# 2. Run boundary linters & hermetic test suite (Zero GPU / Zero Network required)
-make lint
-make test
+# 2. Run hermetic Rust test suite (Zero GPU / Zero Network required)
+cargo test
 
-# 3. Execute interactive code synthesis
-python -m tools.004_LLM_EXECUTION_X.entrypoints.cli "Create an async TokenBucket rate limiter with Redis backend"
+# 3. Build optimized release binary
+cargo build --release
 
-# 4. Start the MCP JSON-RPC tool server
-python -m tools.004_LLM_EXECUTION_X.entrypoints.mcp_server --stdio
+# 4. Execute interactive code synthesis via compiled binary
+./target/release/lex "Create an async TokenBucket rate limiter with Redis backend"
+
+# 5. Start the native MCP JSON-RPC tool server
+./target/release/lex --mcp-stdio
 ```
 
 ---
 
 ## 4. Architectural Invariants
 
-1. **Hexagonal Boundary Purity:** `domain ← ports ← engine → adapters`. No domain or engine imports from adapters.
+1. **Pure Rust Hexagonal Crate:** `domain ← ports ← engine → adapters`. No domain or engine references to adapters.
 2. **Separation of Evidence and Verdict:** Validadores produzem dados (`Evidence`); apenas a `VerificationPolicy` emite o veredito.
 3. **Fail-Closed Sandbox:** Código não confiável gerado por IA nunca é executado in-process. Se o sandbox isolado não estiver disponível, cai para análise estática.
 4. **Active VRAM Drain:** Antes de carregar os workers de 14B, o adaptador de Ollama faz polling ativo até `size_vram == 0` no modelo de 27B.

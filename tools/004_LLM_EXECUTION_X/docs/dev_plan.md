@@ -334,9 +334,9 @@ domain ← ports ← engine → adapters
 
 ```text
 tools/004_LLM_EXECUTION_X/
-├── README.md                       # Operational runbook & benchmark guide
+├── Cargo.toml                      # Pure Rust crate definition (tokio, serde, reqwest, clap, etc.)
 ├── Makefile                        # Dev targets: make test, make lint, make bench, make clean
-├── pyproject.toml                  # Python 3.10+, dependencies (httpx, pyyaml, rich, pydantic, pytest, ruff)
+├── README.md                       # Operational runbook & benchmark guide
 ├── config/
 │   ├── lex_config.yaml             # Canonical runtime configuration
 │   ├── lex_config.schema.json      # JSON Schema for configuration validation
@@ -346,73 +346,48 @@ tools/004_LLM_EXECUTION_X/
 │       ├── coder.prompt
 │       ├── tester.prompt
 │       └── fixer.prompt
-├── domain/                         # Pure Python stdlib (Zero external dependencies)
-│   ├── __init__.py
-│   ├── task_graph.py               # TaskGraph, TaskNode, AcceptanceCriterion, InterfaceContract
-│   ├── evidence.py                 # Evidence, EvidenceSet, EvidenceKind, EvidenceProducer
-│   ├── verdict.py                  # Verdict, VerificationPolicy, VerdictStatus
-│   ├── receipt.py                  # ExecutionReceipt, ProvenanceDigest, ReceiptSigner
-│   ├── errors.py                   # Complete 12-class error hierarchy & FailureKind enum
-│   └── values.py                   # TokenBudget, ExecutionMetrics, ModelConfig, TraceId
-├── ports/                          # Protocol Interfaces (typing.Protocol only)
-│   ├── __init__.py
-│   ├── model_provider.py           # ILlmProvider (generate, generate_structured, stream, health_check)
-│   ├── sandbox.py                  # IExecutionSandbox (execute_isolated, cleanup, get_capabilities)
-│   ├── context_provider.py         # IContextProvider (extract_import_graph, extract_signatures)
-│   ├── evidence_collector.py       # IEvidenceCollector (collect_ast, collect_lint, collect_tests, collect_mutation)
-│   └── telemetry.py                # ITelemetryEmitter (log_span, export_csv, export_jsonl, export_otlp)
-├── adapters/                       # Concrete Implementations (Implements Ports, Imports Domain)
-│   ├── __init__.py
-│   ├── ollama_adapter.py           # Async HTTP client with structured outputs & VRAM drain polling
-│   ├── sandbox/
-│   │   ├── __init__.py
-│   │   ├── bwrap_sandbox.py        # Tier A: Bubblewrap rootless sandbox
-│   │   ├── unshare_sandbox.py      # Tier B: User namespace rootless sandbox
-│   │   └── static_sandbox.py       # Tier C: AST static analysis only (Refuses dynamic execution)
-│   ├── evidence/
-│   │   ├── ast_evaluator.py        # AST syntax & assertion density calculator
-│   │   ├── ruff_evaluator.py       # Ruff subprocess runner & violation parser
-│   │   ├── pytest_evaluator.py     # Sandboxed Pytest test runner
-│   │   └── mutation_evaluator.py   # Multi-operator AST mutation engine
-│   ├── context_provider.py         # RAG: Local repository AST indexer & signature extractor
-│   └── file_telemetry.py           # High-resolution span & receipt logger (JSONL + CSV)
-├── engine/                         # Core Agential Application Layer (Imports Ports, NEVER Adapters)
-│   ├── __init__.py
-│   ├── router.py                   # Level 1 deterministic risk filter + 1.5B SLM fallback
-│   ├── architect.py                # Level 2 compiler → TaskGraph IR via Structured Outputs
-│   ├── prompt_compiler.py          # Compiles TaskNode semantic contracts into model-specific prompts
-│   ├── worker_pool.py              # Level 3 topological DAG scheduler & concurrent dispatcher
-│   ├── anti_thrashing.py           # SHA-256 fingerprinting, oscillation detector, state tracker
-│   ├── failure_diagnostician.py    # Classifies failures into FailureKind taxonomy
-│   ├── self_healing.py             # Level 4 diagnosis-driven recovery coordinator
-│   ├── ui_renderer.py              # Real-time Rich TUI dynamic pipeline dashboard
-│   └── orchestrator.py             # End-to-end execution coordinator & receipt generator
-├── linters/                        # Architectural Enforcement Tools
-│   └── check_boundaries.py         # AST import checker verifying hexagonal boundary lattice
-├── entrypoints/                    # Composition Roots (Wires Adapters -> Ports -> Engine)
-│   ├── cli.py                      # Interactive Rich TUI & Batch CLI runner
-│   ├── mcp_server.py               # Model Context Protocol (MCP) JSON-RPC Tool Server
-│   └── benchmark_runner.py         # Multi-suite benchmark execution engine
+├── src/                            # Production Pure Rust Engine Source
+│   ├── lib.rs                      # Crate root exporting domain, ports, adapters, engine
+│   ├── main.rs                     # Standalone CLI entrypoint (`lex`)
+│   ├── domain/                     # Pure Rust Domain Models & Value Objects
+│   │   ├── mod.rs
+│   │   ├── task_graph.rs           # TaskGraph, TaskNode, AcceptanceCriterion, InterfaceContract
+│   │   ├── evidence.rs             # Evidence, EvidenceSet, EvidenceKind
+│   │   ├── verdict.rs              # Verdict, VerdictStatus, VerificationPolicy
+│   │   ├── receipt.rs              # ExecutionReceipt, ProvenanceDigest
+│   │   ├── errors.rs               # FailureKind enum, LexError error taxonomy
+│   │   └── values.rs               # StorageRef, ArtifactRef, TaskRequestEnvelope, ExecutionAccounting
+│   ├── ports/                      # Async Rust Traits (Ports Layer)
+│   │   ├── mod.rs
+│   │   ├── model_provider.rs       # LlmProvider trait (generate, generate_structured, unload)
+│   │   ├── sandbox.rs              # ExecutionSandbox trait (run_command, evaluate_task, cleanup)
+│   │   └── telemetry.rs            # TelemetryEmitter trait (log_span, record_receipt)
+│   ├── adapters/                   # Concrete Infrastructure Implementations
+│   │   ├── mod.rs
+│   │   ├── ollama_adapter.rs       # Async HTTP client with structured outputs & VRAM drain polling
+│   │   ├── file_telemetry.rs       # JSONL span & receipt recorder
+│   │   └── sandbox/
+│   │       ├── mod.rs
+│   │       └── unshare_sandbox.rs  # Isolated subprocess sandbox with ephemeral UUID dirs & env scrubbing
+│   └── engine/                     # Core Agential Application Layer
+│       ├── mod.rs
+│       └── orchestrator.rs         # Linear Sprint 1 orchestrator (Thin Vertical Slice)
 ├── docs/
+│   ├── PRD.md                      # Product Requirements Document
+│   ├── SPEC.md                     # Normative Technical Specification
+│   ├── ROADMAP.md                  # Macro Roadmap & Milestone Ladders
+│   ├── BACKLOG.md                  # Granular Sprint Task Register
 │   ├── dev_plan.md                 # [This Document] Canonical Execution Plan & Runbook
 │   └── dev_plan_review.md          # Architectural Masterclass & Theoretical Reference Whitepaper
-└── tests/                          # 100% Hermetic Test Suite (Zero GPU & Zero Network Required)
+└── tests/                          # 100% Hermetic Rust Integration & Unit Tests
     ├── fakes/
-    │   ├── fake_llm_provider.py    # Deterministic canned response provider keyed by prompt hash
-    │   ├── fake_sandbox.py         # Canned execution sandbox with configurable outputs
-    │   └── fixtures/               # Golden vectors & deterministic test data
-    ├── unit/
-    │   ├── test_task_graph.py
-    │   ├── test_evidence_policy.py
-    │   ├── test_anti_thrashing.py
-    │   ├── test_failure_diagnosis.py
-    │   ├── test_mutation_engine.py
-    │   ├── test_prompt_compiler.py
-    │   └── test_boundaries.py      # Runs check_boundaries.py against own codebase
-    └── integration/
-        ├── test_thin_vertical_slice.py # Complete hermetic end-to-end run with fakes
-        └── test_live_ollama.py     # Live hardware integration test (@pytest.mark.live)
+    │   ├── mod.rs
+    │   ├── fake_llm.rs             # Deterministic model double
+    │   └── fake_sandbox.rs         # Deterministic sandbox double
+    ├── domain_tests.rs             # Unit tests for TaskGraph, Evidence, VerificationPolicy
+    └── thin_vertical_slice.rs      # Complete hermetic end-to-end integration test
 ```
+
 
 ---
 
@@ -612,15 +587,15 @@ Sprint 9: Productization: Protected MCP Tool Server & Rich Live TUI
 
 ---
 
-## 11. Sprint 1 Execution Contract (The Minimum Real Circuit)
+## 11. Sprint 1 Execution Contract (The Minimum Real Circuit in Pure Rust)
 
-### 11.1. Immediate Deliverables for Sprint 1
-1. **Domain Primitives:** `task_graph.py` (Single `TaskNode`), `evidence.py`, `verdict.py`, `receipt.py`.
-2. **Ports:** `model_provider.py`, `sandbox.py`, `telemetry.py`.
-3. **Adapters:** `ollama_adapter.py` (calling 14B Worker), `unshare_sandbox.py` (executing Pytest in temp dir), `file_telemetry.py`.
-4. **Engine:** `orchestrator.py` executing the single linear chain:
+### 11.1. Immediate Deliverables for Sprint 1 (Rust Crate `lex-core`)
+1. **Domain Primitives (`src/domain/`):** `task_graph.rs` (Single `TaskNode`), `evidence.rs`, `verdict.rs`, `receipt.rs`, `errors.rs`, `values.rs`.
+2. **Ports Traits (`src/ports/`):** `model_provider.rs`, `sandbox.rs`, `telemetry.rs`.
+3. **Adapters (`src/adapters/`):** `ollama_adapter.rs` (calling 14B Worker via reqwest/async), `unshare_sandbox.rs` (executing Pytest in isolated temp dir), `file_telemetry.rs`.
+4. **Engine (`src/engine/`):** `orchestrator.rs` executing the single linear chain:
    $$\text{Request} \longrightarrow \text{TaskNode} \longrightarrow \text{Worker 14B} \longrightarrow \text{Sandbox} \longrightarrow \text{EvidenceSet} \longrightarrow \text{VerificationPolicy} \longrightarrow \text{AgentExecutionEnvelope}$$
-5. **Hermetic Test:** `test_thin_vertical_slice.py` executing with `FakeLlmProvider` and `FakeSandbox` in CI with zero external dependencies.
+5. **Hermetic Integration Test (`tests/thin_vertical_slice.rs`):** Executing with `FakeLlm` and `FakeSandbox` in CI with zero external dependencies via `cargo test`.
 
 ---
 
@@ -632,10 +607,12 @@ ollama pull qwen2.5:1.5b
 ollama pull qwen3.8:27b
 ollama pull qwen2.5-coder:14b
 
-# 2. Run boundary linter & hermetic test suite
-make lint
-make test
+# 2. Run hermetic Rust test suite (Zero GPU / Zero Network)
+cargo test
 
-# 3. Execute the Sprint 1 Thin Vertical Slice live
-python -m tools.004_LLM_EXECUTION_X.entrypoints.cli "Create an async TokenBucket limiter"
+# 3. Build optimized release binary
+cargo build --release
+
+# 4. Execute the Sprint 1 Thin Vertical Slice live via compiled binary
+./target/release/lex "Create an async TokenBucket limiter"
 ```

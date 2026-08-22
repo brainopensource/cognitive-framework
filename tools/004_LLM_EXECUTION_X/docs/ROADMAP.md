@@ -19,35 +19,35 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ## 2. Granular Sprint Roadmap
 
 ### Sprint 0: Architecture Lock & Boundary Enforcement
-* **Goal:** Establish domain primitives, typing protocols, JSON schemas, and automated CI boundary linters.
+* **Goal:** Establish Rust domain primitives, async trait protocols, Serde JSON schemas, and module boundary checks.
 * **Deliverables:**
-  - `domain/` value objects (`task_graph.py`, `evidence.py`, `verdict.py`, `receipt.py`, `errors.py`, `values.py`).
-  - `ports/` protocol interfaces (`model_provider.py`, `sandbox.py`, `telemetry.py`).
-  - `linters/check_boundaries.py` enforcing hexagonal imports.
+  - `src/domain/` value objects (`task_graph.rs`, `evidence.rs`, `verdict.rs`, `receipt.rs`, `errors.rs`, `values.rs`).
+  - `src/ports/` async traits (`model_provider.rs`, `sandbox.rs`, `telemetry.rs`).
+  - `Cargo.toml` dependencies (`tokio`, `serde`, `reqwest`, `sha2`, `chrono`, `uuid`).
   - `config/lex_config.schema.json` and base configuration.
 * **Story Points:** 5 SP
-* **Exit Gate:** `make lint` and 100% unit tests pass with zero violations.
+* **Exit Gate:** `cargo check` and 100% unit tests pass with zero compiler warnings.
 
 ---
 
-### Sprint 1: Thin Vertical Slice (The Minimum Real Circuit)
-* **Goal:** Execute the first complete linear synthesis chain from CLI prompt to verified execution envelope.
+### Sprint 1: Thin Vertical Slice (The Minimum Real Circuit in Pure Rust)
+* **Goal:** Execute the first complete linear synthesis chain from compiled CLI prompt to verified execution envelope.
 * **Deliverables:**
-  - `adapters/ollama_adapter.py` (Worker 14B call).
-  - `adapters/sandbox/unshare_sandbox.py` (Subprocess tempdir runner).
-  - `adapters/file_telemetry.py` (JSONL logger).
-  - `engine/orchestrator.py` linear pipeline:
+  - `src/adapters/ollama_adapter.rs` (Worker 14B async HTTP call).
+  - `src/adapters/sandbox/unshare_sandbox.rs` (Isolated subprocess tempdir runner).
+  - `src/adapters/file_telemetry.rs` (JSONL span and receipt recorder).
+  - `src/engine/orchestrator.rs` linear pipeline:
     $$\text{Request} \longrightarrow \text{TaskNode} \longrightarrow \text{Worker 14B} \longrightarrow \text{Sandbox} \longrightarrow \text{Evidence} \longrightarrow \text{Verdict} \longrightarrow \text{Envelope}$$
-  - `tests/fakes/` hermetic test suite (`test_thin_vertical_slice.py`).
+  - `tests/thin_vertical_slice.rs` hermetic integration test with `FakeLlm` and `FakeSandbox`.
 * **Story Points:** 8 SP
-* **Exit Gate:** Hermetic E2E test passes in CI without GPU; live run creates valid `.py` + `test_.py` in < 20s.
+* **Exit Gate:** `cargo test` passes 100% in CI without GPU; live binary synthesizes valid code in < 20s.
 
 ---
 
 ### Sprint 2: Measurement Harness & Baseline Telemetry
 * **Goal:** Build empirical measurement tools to capture real hardware latency, token speed, and VRAM usage.
 * **Deliverables:**
-  - `entrypoints/benchmark_runner.py` with HumanEval mini-suite (20 problems).
+  - `src/entrypoints/benchmark_runner.rs` with HumanEval mini-suite (20 problems).
   - Telemetry exporter (CSV + JSONL + W3C TraceContext).
   - Active VRAM capacity profiler.
 * **Story Points:** 5 SP
@@ -58,9 +58,9 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ### Sprint 3: `TaskGraph IR`, Context Compiler (RAG) & 27B Architect
 * **Goal:** Implement hierarchical intent decomposition into multi-module semantic contracts.
 * **Deliverables:**
-  - `engine/architect.py` invoking Qwen 27B with Structured Output JSON Schema.
-  - `engine/prompt_compiler.py` compiling `TaskNode` into model-specific prompts.
-  - `adapters/context_provider.py` local AST repository indexer (~500 token context window).
+  - `src/engine/architect.rs` invoking Qwen 27B with Structured Output JSON Schema.
+  - `src/engine/prompt_compiler.rs` compiling `TaskNode` into model-specific prompts.
+  - `src/adapters/context_provider.rs` local AST repository indexer (~500 token context window).
 * **Story Points:** 13 SP
 * **Exit Gate:** 27B generates valid multi-module `TaskGraph IR` for 10 distinct complex prompts.
 
@@ -69,7 +69,7 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ### Sprint 4: Multi-Module Topological DAG Worker Pool
 * **Goal:** Execute multi-file synthesis in dependency order with concurrent worker execution.
 * **Deliverables:**
-  - `engine/worker_pool.py` topological sort and async dispatch.
+  - `src/engine/worker_pool.rs` topological sort and Tokio async dispatch.
   - Concurrent Coder + Tester execution (`OLLAMA_NUM_PARALLEL=2`).
   - Active VRAM drain polling protocol (`GET /api/ps` -> `size_vram == 0`).
 * **Story Points:** 8 SP
@@ -80,8 +80,8 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ### Sprint 5: Independent Verification & Multi-Operator Mutation Engine
 * **Goal:** Eliminate test-code collusion through AST assertion density audits and active mutation probes.
 * **Deliverables:**
-  - `adapters/evidence/ast_evaluator.py` (Assertion density counter).
-  - `adapters/evidence/mutation_evaluator.py` (5 mutation operators).
+  - `src/adapters/evidence/ast_evaluator.rs` (Assertion density counter).
+  - `src/adapters/evidence/mutation_evaluator.rs` (5 mutation operators).
   - VerificationPolicy mutation threshold enforcement.
 * **Story Points:** 8 SP
 * **Exit Gate:** 100% of tautological tests (`assert True`) caught and rejected by mutation probe.
@@ -91,9 +91,9 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ### Sprint 6: Diagnosis-Driven Self-Healing & Anti-Thrashing FSM
 * **Goal:** Implement semantic failure diagnosis and state-hash oscillation circuit breakers.
 * **Deliverables:**
-  - `engine/failure_diagnostician.py` (`FailureKind` classification).
-  - `engine/anti_thrashing.py` ($\text{RepairStateHash}_n == \text{RepairStateHash}_{n-2}$).
-  - `engine/self_healing.py` surgical patch generation with cumulative error memory.
+  - `src/engine/failure_diagnostician.rs` (`FailureKind` classification).
+  - `src/engine/anti_thrashing.rs` ($\text{RepairStateHash}_n == \text{RepairStateHash}_{n-2}$).
+  - `src/engine/self_healing.rs` surgical patch generation with cumulative error memory.
 * **Story Points:** 13 SP
 * **Exit Gate:** Intentionally broken code auto-corrected in $\le 2$ cycles; duplicate tracebacks trip circuit breaker.
 
@@ -102,9 +102,9 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ### Sprint 7: 3-Tier Rootless Sandbox Hardening
 * **Goal:** Production-grade security sandboxing with zero `preexec_fn` deadlocks.
 * **Deliverables:**
-  - `adapters/sandbox/bwrap_sandbox.py` (Bubblewrap Tier A).
-  - `adapters/sandbox/unshare_sandbox.py` (User Namespaces Tier B).
-  - `adapters/sandbox/static_sandbox.py` (Fail-closed Tier C fallback).
+  - `src/adapters/sandbox/bwrap_sandbox.rs` (Bubblewrap Tier A).
+  - `src/adapters/sandbox/unshare_sandbox.rs` (User Namespaces Tier B).
+  - `src/adapters/sandbox/static_sandbox.rs` (Fail-closed Tier C fallback).
 * **Story Points:** 8 SP
 * **Exit Gate:** Adversarial security suite passes (network access blocked, filesystem escape blocked).
 
@@ -121,11 +121,11 @@ M-0 (Foundation Lock) ──► M-1 (Vertical Slice) ──► M-2 (Measurement 
 ---
 
 ### Sprint 9: Productization: Protected MCP Server & Real-Time Rich TUI
-* **Goal:** Expose LEX as an MCP tool server and deliver a beautiful terminal interface.
+* **Goal:** Expose LEX as an MCP tool server and deliver a high-performance terminal interface.
 * **Deliverables:**
-  - `entrypoints/mcp_server.py` (JSON-RPC 2.0 stdio tool server with `WorkspaceGrant` bounds).
-  - `engine/ui_renderer.py` (Rich live terminal dashboard with live tokens/s and VRAM telemetry).
-  - Packaging & distribution setup (`pyproject.toml`, standalone Rust FFI bindings).
+  - `src/entrypoints/mcp_server.rs` (JSON-RPC 2.0 stdio tool server with `WorkspaceGrant` bounds).
+  - `src/engine/ui_renderer.rs` (Terminal dashboard with live tokens/s and VRAM telemetry).
+  - Packaging & distribution setup (`Cargo.toml`, standalone release binary `lex`).
 * **Story Points:** 5 SP
 * **Exit Gate:** External coding agents (Claude Code, Cursor, Vanguard) successfully call `lex_synthesize` over MCP stdio.
 

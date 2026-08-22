@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Scientific Matrix Benchmarking & Data Science Pipeline for Ollama Inference.
+Scientific Matrix Benchmarking & Resilient Data Science Pipeline for Ollama.
 Location: tools/003_LLM_ENGINE_DESKTOP/matrix_execution/bench_matrix.py
+Usage:
+    python3 bench_matrix.py [MODEL_NAME]
+Examples:
+    python3 bench_matrix.py qwen2.5-coder:14b
+    python3 bench_matrix.py qwen3.8:27b
 """
 
 import ast
@@ -10,20 +15,43 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
+import sys
 import time
 import urllib.request
 
-# Paths configuration
+# Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROMPT_FILE = BASE_DIR / "docs" / "prompts" / "fibo_challenge_finetune.md"
-OUTPUT_DIR = BASE_DIR / "bench_finetune"
+BASE_OUTPUT_DIR = BASE_DIR / "bench_finetune"
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
+
+# Default model or from CLI argument
+DEFAULT_MODEL = "qwen2.5-coder:14b"
+MODEL_NAME = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_MODEL
+
+
+def get_model_folder_name(model_name: str) -> str:
+    """Maps model name to a clean, isolated directory name."""
+    mapping = {
+        "qwen3.8:27b": "qwen_38_27B",
+        "qwen2.5-coder:14b": "qwen_25C_14B",
+        "qwen2.5-coder:7b-instruct-q5_K_M": "qwen_25C_7B",
+        "qwen2.5:1.5b": "qwen_25_15B",
+    }
+    if model_name in mapping:
+        return mapping[model_name]
+    # Fallback to sanitized name
+    clean = model_name.replace(":", "_").replace("-", "_").replace(".", "")
+    return clean
+
+
+MODEL_FOLDER = get_model_folder_name(MODEL_NAME)
+OUTPUT_DIR = BASE_OUTPUT_DIR / MODEL_FOLDER
 RUNS_DIR = OUTPUT_DIR / "runs"
 CSV_FILE = OUTPUT_DIR / "benchmark_results.csv"
 JSONL_FILE = OUTPUT_DIR / "benchmark_results.jsonl"
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "qwen3.8:27b"
 
-# Ensure directories exist
+# Ensure isolated directories exist
 RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -36,9 +64,7 @@ def load_prompt() -> str:
 
 
 def evaluate_python_code(code_str: str) -> tuple[int, str]:
-    """
-    Evaluates generated code quality from 0 to 100 based on AST and requirements.
-    """
+    """Evaluates code quality (0-100) via AST parsing and validation rules."""
     score = 0
     feedback = []
 
@@ -91,7 +117,7 @@ def evaluate_python_code(code_str: str) -> tuple[int, str]:
     return score, " | ".join(feedback)
 
 
-# Test Matrix Experiments
+# Benchmark Experiments Matrix (1 variable isolated per test)
 MATRIX_EXPERIMENTS = [
     {
         "id": "run_01_baseline",
@@ -127,16 +153,38 @@ MATRIX_EXPERIMENTS = [
     {
         "id": "run_06_budget_stop_control",
         "name": "Budget & Stop Tokens",
-        "description": "num_predict=400 with stop tokens",
-        "options": {"num_predict": 400, "stop": ["<|im_end|>", "\n# Example", "```\n"]}
+        "description": "num_predict=600 with stop tokens",
+        "options": {"num_predict": 600, "stop": ["<|im_end|>", "\n# Example", "```\n"]}
     }
 ]
 
 
-def run_experiment(exp: dict, prompt: str) -> dict:
+def append_record_atomic(record: dict):
+    """
+    Appends a single record IMMEDIATELY to both CSV and JSONL with explicit flush.
+    Ensures zero data loss even if subsequent runs fail or are aborted.
+    """
+    # 1. Atomic JSONL append
+    with open(JSONL_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        f.flush()
+
+    # 2. Atomic CSV append
+    csv_exists = CSV_FILE.exists() and CSV_FILE.stat().st_size > 0
+    keys = list(record.keys())
+
+    with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        if not csv_exists:
+            writer.writeheader()
+        writer.writerow(record)
+        f.flush()
+
+
+def run_experiment(exp: dict, prompt: str, model_name: str) -> dict:
     """Executes single test against Ollama, saves raw code and records tabular record."""
     payload = {
-        "model": MODEL_NAME,
+        "model": model_name,
         "prompt": prompt,
         "stream": False,
         "options": exp.get("options", {})
@@ -144,7 +192,7 @@ def run_experiment(exp: dict, prompt: str) -> dict:
     if "system" in exp:
         payload["system"] = exp["system"]
 
-    print(f"🚀 Running {exp['name']}...")
+    print(f"🚀 Running: {exp['name']} (Model: {model_name})...")
     req = urllib.request.Request(
         OLLAMA_API_URL,
         data=json.dumps(payload).encode("utf-8"),
@@ -166,7 +214,7 @@ def run_experiment(exp: dict, prompt: str) -> dict:
     eval_tps = eval_count / eval_dur_sec if eval_dur_sec > 0 else 0
     prompt_tps = prompt_count / prompt_dur_sec if prompt_dur_sec > 0 else 0
 
-    # 1. Save raw unedited code
+    # 1. Save raw unedited code to isolated model folder
     output_py_file = RUNS_DIR / f"{exp['id']}.py"
     with open(output_py_file, "w", encoding="utf-8") as f:
         f.write(raw_response)
@@ -174,13 +222,13 @@ def run_experiment(exp: dict, prompt: str) -> dict:
     # 2. Automated Quality Score
     score, feedback = evaluate_python_code(raw_response)
 
-    # 3. Build Data Science Schema Row
+    # 3. Build Record
     opts = exp.get("options", {})
     record = {
         "timestamp_iso": datetime.now().isoformat(),
         "run_id": exp["id"],
         "experiment_name": exp["name"],
-        "model_name": MODEL_NAME,
+        "model_name": model_name,
         "num_ctx": opts.get("num_ctx", "default"),
         "num_thread": opts.get("num_thread", "default"),
         "temperature": opts.get("temperature", "default"),
@@ -196,57 +244,36 @@ def run_experiment(exp: dict, prompt: str) -> dict:
         "auto_score": score,
         "auto_feedback": feedback,
         "output_file": str(output_py_file.relative_to(BASE_DIR)),
-        "manual_pass": "",  # Empty for manual excel evaluation
-        "manual_notes": ""  # Empty for manual excel evaluation
+        "manual_pass": "",
+        "manual_notes": ""
     }
 
-    print(f"   ⏱️  Speed: {eval_tps:.2f} t/s | Latency: {wall_sec:.2f}s | Score: {score}/100")
+    # 4. Immediate Atomic Save
+    append_record_atomic(record)
+
+    print(f"   ⏱️  Speed: {eval_tps:.2f} t/s | Latency: {wall_sec:.2f}s | Score: {score}/100 [Saved -> {output_py_file.name}]")
     return record
-
-
-def save_datasets(records: list[dict]):
-    """Appends records to both CSV (Excel-ready) and JSONL (Full Metadata)."""
-    # Append to JSONL
-    with open(JSONL_FILE, "a", encoding="utf-8") as f:
-        for r in records:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-
-    # Write / Append to CSV
-    csv_exists = CSV_FILE.exists()
-    keys = list(records[0].keys())
-
-    with open(CSV_FILE, "a", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=keys)
-        if not csv_exists:
-            writer.writeheader()
-        for r in records:
-            writer.writerow(r)
-
-    print(f"\n📊 Datasets updated successfully:")
-    print(f"   - Excel / CSV Table : {CSV_FILE}")
-    print(f"   - JSONL Full Dataset: {JSONL_FILE}")
 
 
 def main():
     prompt = load_prompt()
     print("=" * 70)
-    print("🧪 EXECUTING SCIENTIFIC LLM BENCHMARK MATRIX & DATASET LOGGER")
-    print(f"Model Target : {MODEL_NAME}")
-    print(f"Prompt Source: {PROMPT_FILE}")
+    print("🧪 SCIENTIFIC LLM BENCHMARK MATRIX & RESILIENT DATA LOGGER")
+    print(f"Model Target  : {MODEL_NAME}")
+    print(f"Output Folder : {OUTPUT_DIR}")
+    print(f"Prompt Source : {PROMPT_FILE}")
+    print(f"CSV Storage   : {CSV_FILE}")
     print("=" * 70)
 
     records = []
     for exp in MATRIX_EXPERIMENTS:
         try:
-            r = run_experiment(exp, prompt)
+            r = run_experiment(exp, prompt, MODEL_NAME)
             records.append(r)
         except Exception as e:
             print(f"❌ Error in {exp['name']}: {e}")
 
-    if records:
-        save_datasets(records)
-
-    # Print summary table
+    # Summary Table
     print("\n" + "=" * 70)
     print("📊 BENCHMARK SUMMARY TABLE")
     print("=" * 70 + "\n")

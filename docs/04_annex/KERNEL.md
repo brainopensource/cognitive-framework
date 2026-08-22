@@ -1,8 +1,19 @@
 ---
+id: normative-annex-kernel
+class: law
+authority: normative
+canonical_for:
+  - kernel-capabilities-security-annex
+  - s0-s12-dispatch-contract
+status: living
+owner: principal-systems-architect
+version: "0.6.1"
+last_verified: 2026-08-21
 title: "Kernel, Capabilities & Security"
-status: NORMATIVE
 source: 01_specs/backend/05_vanguard_kernel_capabilities_and_security_v040.md (VG-05; git history, 4f9f8b1)
 amendments: [ADR-M0-08 (K-40 inverted), ADR-M0-09 (alarm set F-21a+F-24), "SA-1..SA-6 pipeline text struck (D-34, honoured non-build)", ADR-0069 (production lattice is vanguard/packages/; layer0/ is not an M1 destination rewrite), ADR-0074 (typed budget; writer authority; complete D_H)]
+supersedes: []
+superseded_by: null
 ---
 
 # Annex: Kernel, Capabilities & Security

@@ -1,3 +1,18 @@
+---
+id: normative-spec-mhf-v1
+class: law
+authority: normative
+canonical_for:
+  - vanguard-meta-harness-framework-v1
+  - normative-specification
+status: living
+owner: principal-systems-architect
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # SPEC — Vanguard Meta-Harness Framework (MHF v1)
 
 **Status:** Normative. The **only** living normative specification of Vanguard/GTS. RFC-2119 language

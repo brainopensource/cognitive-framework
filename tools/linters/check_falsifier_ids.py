@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Iterable
 
 _ROOT = Path(__file__).resolve().parents[2]
-_REGISTER = _ROOT / "docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md"
+_REGISTER = _ROOT / "docs/05_adr/INDEX.md"
 _CITATION_FILES = (
     _ROOT / "docs/SPEC.md",
     _ROOT / "docs/03_sprints/sprint_active.md",

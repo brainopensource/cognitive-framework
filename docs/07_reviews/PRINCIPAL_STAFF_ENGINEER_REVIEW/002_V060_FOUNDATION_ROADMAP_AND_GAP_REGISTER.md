@@ -225,6 +225,8 @@ Statuses: `DONE` (this docs wave) · `TODO` (authorized after director approval)
 
 #### 4.2.1 Ratified `RF-*` namespace and historical alias
 
+> **Canonical register:** The living master RF falsifier allocation register is maintained in [`docs/05_adr/INDEX.md`](../../05_adr/INDEX.md#canonical-rf-falsifier-allocation-register) (governed by `check_falsifier_ids.py`). The table below is retained as historical ratification record.
+
 `F-*` remains the historical kernel-control namespace. Existing `F-*` identifiers are never
 renamed or reassigned, and no new proposal requirement may allocate one. Ratified roadmap
 falsifiers use `RF-*`.

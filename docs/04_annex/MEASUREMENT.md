@@ -1,7 +1,18 @@
 ---
+id: normative-annex-measurement
+class: law
+authority: normative
+canonical_for:
+  - measurement-doctrine-annex
+  - statistical-verification-contract
+status: living
+owner: principal-systems-architect
+version: "0.6.1"
+last_verified: 2026-08-21
 title: "Measurement"
-status: NORMATIVE
 source: 01_specs/backend/07_vanguard_loop_engineering_and_measurement_v040.md (VG-07) §5 (git history, 4f9f8b1)
+supersedes: []
+superseded_by: null
 ---
 
 # Annex: Measurement

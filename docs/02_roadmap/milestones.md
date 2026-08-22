@@ -1,3 +1,18 @@
+---
+id: macro-milestones-ladder
+class: execution
+authority: execution
+canonical_for:
+  - macro-milestones-ladder
+  - wave-gates
+status: living
+owner: engineering-director
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # Macro Milestones — AETHER / Vanguard (M-0 → M-10)
 
 **Status:** Authoritative macro execution ladder. Macro milestones define high-level outcomes and objective exit gates only. Living task-level execution is centralized in [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md).

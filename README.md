@@ -1,3 +1,18 @@
+---
+id: repo-root-readme
+class: navigation
+authority: descriptive
+canonical_for:
+  - repository-overview
+  - quick-start
+status: living
+owner: documentation-architect
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # AETHER / Vanguard Substrates Upgrade — Version 6 (Concept Lock v0.6.1 Clean)
 
 A verifiable, capability-attenuated recursive-agency substrate.

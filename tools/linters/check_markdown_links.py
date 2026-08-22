@@ -23,8 +23,9 @@ FILE_URL = re.compile(r"file://[^\s)>\"]+")
 SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__"}
 DOC_GLOBS = (
     "README.md",
-    "docs/README.md",
-    "docs/agile/sprint6B/*.md",
+    "AGENTS.md",
+    "docs/**/*.md",
+    "vanguard/**/*.md",
 )
 
 

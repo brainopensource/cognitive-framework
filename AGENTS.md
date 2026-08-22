@@ -1,3 +1,18 @@
+---
+id: repo-agents-contract
+class: standard
+authority: execution
+canonical_for:
+  - agent-contributor-contract
+  - repository-anti-sprawl-rules
+status: living
+owner: repository-governance
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # Repository Guidelines
 
 **Start here:** [`README.md`](README.md) is the primary navigation map. This file specifies operational rules and procedures for AI agents and human contributors.

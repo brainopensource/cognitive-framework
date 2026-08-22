@@ -1,3 +1,17 @@
+---
+id: execution-backlog-pointer
+class: navigation
+authority: descriptive
+canonical_for:
+  - execution-backlog-pointer
+status: living
+owner: tech-lead
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # Execution Backlog — AETHER / Vanguard
 
 **Status:** Consolidated.

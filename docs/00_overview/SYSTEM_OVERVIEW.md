@@ -1,3 +1,18 @@
+---
+id: system-overview-and-audit
+class: architecture
+authority: descriptive
+canonical_for:
+  - system-architecture-overview
+  - repository-inventory
+status: living
+owner: senior-principal-systems-engineer
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # DIRECTOR TODO — LOCK CONCEPTS V2
 
 **Independent Companion Audit & Master Briefing**
@@ -119,7 +134,7 @@ after M-4**, not because they are blocked on engineering. They are laid out neut
 | What is unfinished, with named falsifiers | [`002` gap register](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) §4 |
 | What is being worked on right now | [`sprint_active.md`](../03_sprints/sprint_active.md) |
 | The strongest independent critique | [`005` Substrate Generality Review](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) §3 |
-| The failure this whole programme exists to prevent | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) §1 |
+| The failure this whole programme exists to prevent | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/VANGUARD_V060_FORENSIC_DISCOVERY.md) §1 |
 
 ---
 
@@ -529,7 +544,7 @@ that proves each linter fails closed rather than merely passing on clean code.
 
 | # | Document | Lines | What it is | What it concluded | Weight |
 |---|---|---:|---|---|---|
-| — | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md) | 858 | 25-section forensic investigation at HEAD `c7e9ded` | **Two Python runtimes claimed the same Layer-0 job.** Living CI gated `test/layer0` (25 OK) and did **not** run `test/kernel` (95 OK). `layer0/scheduler/driver.py:138` fabricated `VerdictRecorded {verdict:"pass"}`. `layer0/spi/ceiling.py:21` fail-opened on an empty capability list. **This is the failure the entire programme exists to prevent.** | Investigation, explicitly **not law** |
+| — | [`VANGUARD_V060_FORENSIC_DISCOVERY.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/VANGUARD_V060_FORENSIC_DISCOVERY.md) | 858 | 25-section forensic investigation at HEAD `c7e9ded` | **Two Python runtimes claimed the same Layer-0 job.** Living CI gated `test/layer0` (25 OK) and did **not** run `test/kernel` (95 OK). `layer0/scheduler/driver.py:138` fabricated `VerdictRecorded {verdict:"pass"}`. `layer0/spi/ceiling.py:21` fail-opened on an empty capability list. **This is the failure the entire programme exists to prevent.** | Investigation, explicitly **not law** |
 | — | [`ARCHIVE.md`](../07_reviews/ARCHIVE.md) | 24 | Pointer to the pre-lock corpus | Everything pre-v0.6 lives in git history at anchor `4f9f8b1`. No `docs/archive/` tree exists on disk | Navigational |
 | 001 | [`001_V060_concept_phase_GAMMA.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md) | 624 | The Concept Lock plan — adjudicates four independent advisory lanes claim-by-claim | Twelve architectural P0s stand. Four **strengthening amendments** adopted: proof obligations (every lock ships a falsifier), typed budget algebra, event-kind writer authority, AI-load-bearing identity (`D_H` includes prompt/ceiling/policy/routes). `Project` locked as consistency unit. `ChildPrincipal` is **not** a second type | Lock plan, **not a second SPEC** |
 | 002 | [`002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md) | 313 | **The operational register.** Falsifiers F-01…F-21, wave exit gates, deferred/refused tables, P1-1…P1-17 | Wave 0 → Wave 4 sequence, then **stop**. A wave green by lexical grep is not done. §4.3 is the as-built-vs-law matrix | Authoritative on **outcomes**; cannot contradict SPEC/ADRs |

@@ -6,9 +6,9 @@ authority: descriptive
 canonical_for:
   - c4-containers-view
 source_of_truth:
-  - docs/SPEC.md#2-process-architecture
+  - docs/SPEC.md
 derived_from:
-  - vanguard/packages/runtime/service/daemon.py
+  - vanguard/packages/runtime/service/server.py
   - vanguard/packages/adapters/stores/event_store.py
   - containers/worker.Dockerfile
   - containers/evaluator.Dockerfile
@@ -30,7 +30,7 @@ superseded_by: null
 flowchart LR
     subgraph Host["Host Operating System"]
         CLI["vg CLI (Node.js 20+ / Ink)"]
-        Daemon["RuntimeService Daemon (Python 3.10+)"]
+        Daemon["Runtime service (Python 3.10+)"]
         Store[("SQLite WAL Event Store")]
         
         subgraph WorkerNS["Worker Sandbox (UID 10001)"]
@@ -54,6 +54,6 @@ flowchart LR
 |---|---|---|---|
 | **CLI Client (`vg`)** | Node.js 20+ / Ink | Current User | Presentation client only; no domain or kernel imports |
 | **Control Plane Substrate** | Python 3.10+ | Current User | Hexagonal core, manages session lifecycle and ledger emissions |
-| **Worker Sandbox** | `containers/worker.Dockerfile` | `10001` | Bubblewrap jail; denies network access; tmpfs workspace |
+| **Worker Sandbox** | `containers/worker.Dockerfile` / bwrap adapter | `10001` target identity | Rootless isolation whose actual containment is reported by probes; do not infer every mount/network property from this diagram |
 | **Evaluator Daemon** | `containers/evaluator.Dockerfile` | `10002` | Independent process/mounts; possesses Ed25519 signing key |
 | **Storage Engine** | SQLite WAL | Current User | Embedded transactional append-only log with WAL mode |

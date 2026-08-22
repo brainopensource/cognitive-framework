@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - event-envelope-contract
 source_of_truth:
-  - docs/SPEC.md#2-ledger-as-truth
+  - docs/SPEC.md
   - docs/05_adr/0071-authority-state-ledger-identity-trinity.md
 derived_from:
   - schemas/mhf/event_envelope.schema.json
@@ -29,34 +29,19 @@ superseded_by: null
 
 ---
 
-## Structure & Fields
+## Structure & fields
 
-Every causal event appended to the SQLite WAL ledger is wrapped in an immutable `EventEnvelope`:
-
-```json
-{
-  "specversion": "mhf.event/1",
-  "id": "018f23a4-8b1c-7f89-9a23-456789abcdef",
-  "sequence": 42,
-  "timestamp": "2026-08-21T21:00:00.000000Z",
-  "kind": "EffectCompleted",
-  "project_id": "proj-aether-core",
-  "episode_id": "ep-001-turn-04",
-  "causation_id": "018f23a4-8b1c-7f89-9a23-456789abcdee",
-  "correlation_id": "018f23a4-8b1c-7f89-9a23-000000000001",
-  "writer_role": "runtime",
-  "payload": {
-    "descriptor": "fs.write",
-    "result_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "receipt_id": "rcpt-018f23a4"
-  },
-  "prev_digest": "sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069"
-}
-```
+The wire schema requires `schema_version`, `event_id`, `kind`, `seq`, `occurred_at`, `run_id`,
+`principal`, `payload`, and `digest`. Optional lineage includes episode/principal ancestry,
+`project_id`, `harness_digest`, branch, previous digest, causation, correlation, and idempotency.
+The richer domain envelope also carries scope, ownership, confidentiality, retention,
+trainability, and redaction data. The schema and parser are the exact references; this page does
+not duplicate a sample that could silently drift.
 
 ## Writer Authority Matrix
 
-Privileged event kinds can only be emitted by authorized writer roles:
-- **`kernel`**: `EffectAuthorized`, `CapabilityAttenuated`, `BudgetExhausted`
-- **`evaluator_gateway`**: `VerdictRecorded` (requires valid Ed25519 signature)
-- **`runtime`**: `RunStarted`, `RunRecovered`, `EpisodeCompleted`
+`runtime/ledger_emitter.py:PRIVILEGED_KIND_OWNERS` is the executable ownership table. It assigns
+capability, budget, effect, authorization, and alarm events to `kernel`; `VerdictRecorded` to
+`evaluator_gateway`; plugin lifecycle events to `registry`; `ApprovalResolved` to `approval`; and
+`EffectReconciled` to `kernel` or `recovery`. Unlisted ordinary events still require a recognized
+writer role and canonical emission path.

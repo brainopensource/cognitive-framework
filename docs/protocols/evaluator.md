@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - evaluator-port-protocol
 source_of_truth:
-  - docs/SPEC.md#1-system-charter-and-boundaries
+  - docs/SPEC.md
   - docs/05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md
 derived_from:
   - vanguard/packages/ports/evaluator.py

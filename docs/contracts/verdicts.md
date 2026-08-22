@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - signed-verdict-contract
 source_of_truth:
-  - docs/SPEC.md#1-system-charter-and-boundaries
+  - docs/SPEC.md
   - docs/05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md
 derived_from:
   - schemas/mhf/spi_payloads.schema.json
@@ -33,21 +33,18 @@ superseded_by: null
 
 ```json
 {
-  "evaluation_request_id": "req-018f23a4-8b1c-7f89",
-  "subject_run_id": "run-018f23a4-8b1c-0001",
-  "oracle_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "verdict": "pass",
-  "score": 1.0,
+  "signature": "base64-ed25519-signature",
+  "subject_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "evaluation_request_id": "req-018f23a4-8b1c-7f89",
+  "oracle_id": "eval-daemon-uid-10002",
   "nonce": "n-9a23456789abcdef",
-  "evaluator_identity": {
-    "evaluator_id": "eval-daemon-uid-10002",
-    "public_key": "ed25519:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
-  },
-  "signature": "base64:3f98ab...signed_jcs_bytes..."
+  "key_id": "evaluator-key-1",
+  "signed_at": "2026-08-21T21:00:00Z"
 }
 ```
 
 ## Security Invariants
-1. **Cryptographic Binding**: The signature covers JCS RFC 8785 canonical bytes of $(request\_id, subject\_id, oracle\_digest, verdict, score, nonce)$.
+1. **Cryptographic Binding**: The signature covers the RFC 8785 JCS bytes of every field except `signature`.
 2. **Replay & Unbound Rejection**: A verdict presented with a mismatched nonce or unbound run ID is rejected fail-closed.
 3. **Single Writer**: Evaluator gateway is the sole allowed writer of `VerdictRecorded` in the ledger.

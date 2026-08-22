@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - c4-system-context
 source_of_truth:
-  - docs/SPEC.md#1-system-charter-and-boundaries
+  - docs/SPEC.md
 derived_from:
   - vanguard/packages/runtime/session.py
   - vanguard/packages/adapters/evaluators/daemon.py
@@ -41,5 +41,5 @@ flowchart TD
 ## System Boundaries & Separation
 
 1. **Separability Thesis**: The solution and execution traces are strictly separable from the agent itself.
-2. **Evaluator Isolation (Invariant I-5)**: The grading judge runs as an independent exterior process (UID `10002`) and communicates exclusively via cryptographic Ed25519-signed verdicts over UDS.
+2. **Evaluator Isolation (Invariant I-5)**: The grading judge is an exterior identity (container target UID `10002`); promotion-eligible evidence uses bound Ed25519-signed verdicts through the evaluator boundary.
 3. **Execution Sandbox (Invariant I-6)**: Untrusted process execution is contained inside a rootless bubblewrap container (UID `10001`) with read-only root mounts and ephemeral tmpfs workspaces.

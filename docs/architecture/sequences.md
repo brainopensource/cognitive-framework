@@ -6,8 +6,8 @@ authority: descriptive
 canonical_for:
   - sequence-flows
 source_of_truth:
-  - docs/SPEC.md#4-execution-lifecycle
-  - docs/04_annex/KERNEL.md#2-the-13-stage-dispatch-pipeline
+  - docs/SPEC.md
+  - docs/04_annex/KERNEL.md#2-the-dispatch-sequence
 derived_from:
   - vanguard/packages/kernel/dispatch.py
   - vanguard/packages/runtime/session.py
@@ -24,7 +24,8 @@ superseded_by: null
 
 # Subsystem Sequence Flows
 
-> **Status:** `AS_BUILT` · Descriptive View.
+> **Status:** Mixed descriptive view. Sections 1–2 are `AS_BUILT`; section 3 is the
+> `RATIFIED_NOT_IMPLEMENTED` RF-25 target and must not be read as current behavior.
 
 ---
 
@@ -82,7 +83,7 @@ sequenceDiagram
 
 ---
 
-## 3. Cold Replay & Continuation Flow (NOVA-2 / RF-25)
+## 3. Cold Replay & Continuation Target (NOVA-2 / RF-25 — `RATIFIED_NOT_IMPLEMENTED`)
 
 ```mermaid
 sequenceDiagram
@@ -93,10 +94,13 @@ sequenceDiagram
     participant Reducer as LedgerState Reducer
     participant Session as Resumed HarnessSession
 
-    FreshProc->>Recovery: recover_from_file(db_path)
+    FreshProc->>Recovery: open file-backed store in a fresh interpreter
     Recovery->>Store: Read durable event prefix
     Recovery->>Reducer: fold_events(events) -> EffectiveState
     Note over Recovery: Check open S8a intents (reconcile vs undeterminable)
-    Recovery->>Session: construct_session(EffectiveState)
-    Session->>Session: continue_turn_loop()
+    Recovery->>Session: reconstruct legal continuation state
+    Session->>Session: continue without replaying settled or guessing uncertain effects
 ```
+
+RF-25 remains red. Current `runtime/ledger/recovery.py` can fold and scan durable events, but the
+complete fresh-interpreter reconciliation and continuation contract above is the M-2 proof target.

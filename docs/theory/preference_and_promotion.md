@@ -38,7 +38,7 @@ $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w,
 
 ## 2. McNemar's Exact Paired Promotion Test (`AS_BUILT`)
 
-Governed by [`docs/04_annex/MEASUREMENT.md §2`](../04_annex/MEASUREMENT.md#2-statistical-doctrine):
+Governed by [`docs/04_annex/MEASUREMENT.md §5`](../04_annex/MEASUREMENT.md#5-the-measurement-doctrine):
 
 | | Model B Pass | Model B Fail |
 |---|---|---|

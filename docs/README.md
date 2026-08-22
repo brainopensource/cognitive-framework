@@ -55,9 +55,9 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 
 | Subsystem Directory | Focus & Contents | Maturity |
 |---|---|---|
-| 📐 [`architecture/`](architecture/) | C4 Context, Containers, Components, Sequences, State Machines, Glossary, and Traceability Matrix | `AS_BUILT` |
-| 📜 [`contracts/`](contracts/) | Wire schemas for Envelopes (`mhf.event/1`), Trajectories (`mhf.trajectory/1`), Manifests, Verdicts, Selectors | `AS_BUILT` |
-| 🔌 [`protocols/`](protocols/) | Hexagonal Port Protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `SPI`) | `AS_BUILT` |
+| 📐 [`architecture/`](architecture/) | C4 Context, Containers, Components, Sequences, State Machines, Glossary, and Traceability Matrix | Per-section maturity; future targets explicitly labelled |
+| 📜 [`contracts/`](contracts/) | Wire schemas for Envelopes (`mhf.event/1`), Trajectories (`mhf.trajectory/1`), Manifests, Verdicts, Selectors | Mixed: current schemas plus RF-23/M-3 targets |
+| 🔌 [`protocols/`](protocols/) | Verified references for kernel dependencies, model, sandbox, evaluator, stores, and five SPIs | `AS_BUILT` |
 | 🧠 [`theory/`](theory/) | Active Inference ($\mathcal{F}/\mathcal{G}$), 6D Resource Tensor $\mathbf{R}$, Trajectory Credit Assignment, DPO Harvesting, McNemar Promotion | `RESEARCH` / `AS_BUILT` |
 | 🛠️ [`engineering/`](engineering/) | Contributor Workflow, Testing & Red Falsifiers, TCB Security, Adding Adapters, Adding Packs, Context Bundles | `AS_BUILT` |
 
@@ -72,7 +72,7 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 
 ### 💻 Feature Developer
 1. [`03_sprints/sprint_active.md`](03_sprints/sprint_active.md) — Find assigned task, file ownership boundary, and red falsifier test.
-2. [`engineering/context_bundles.md`](engineering/context_bundles.md) — Load the exact sub-1k token context bundle for your subsystem.
+2. [`engineering/context_bundles.md`](engineering/context_bundles.md) — Select the minimum starting bundle, then follow its authoritative links.
 3. Governing [`SPEC.md`](SPEC.md) clause & [`05_adr/`](05_adr/) decision.
 4. Named test file under `test/` — Confirm red-to-green proof obligation.
 
@@ -84,7 +84,7 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 ### 📐 Architect
 1. [`docs/README.md`](README.md) — This document.
 2. [`architecture/c4_component.md`](architecture/c4_component.md) — Hexagonal production lattice.
-3. [`architecture/traceability_matrix.md`](architecture/traceability_matrix.md) — Complete concept-to-test mapping.
+3. [`architecture/traceability_matrix.md`](architecture/traceability_matrix.md) — Maturity-labelled concept-to-evidence map.
 4. [`05_adr/INDEX.md`](05_adr/INDEX.md) — Architecture decision catalog (`0069`–`0086`).
 5. [`02_roadmap/milestones.md`](02_roadmap/milestones.md) — Macro gate ladder (M-0 through M-10).
 
@@ -97,5 +97,5 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 ### 🤖 AI Coding Agent
 1. [`AGENTS.md`](../AGENTS.md) — Operating contract and anti-sprawl rules.
 2. [`03_sprints/sprint_active.md`](03_sprints/sprint_active.md) — Active wave tasks, assigned files, and falsifiers.
-3. [`engineering/context_bundles.md`](engineering/context_bundles.md) — Ingest the specific ~500-token context bundle.
+3. [`engineering/context_bundles.md`](engineering/context_bundles.md) — Ingest the task-specific starting bundle; do not assume an unmeasured token count.
 4. Run verification linters: `check_boundaries.py`, `check_tcb_budget.py`, `check_doc_metadata.py`, `check_falsifier_ids.py`, `check_markdown_links.py`.

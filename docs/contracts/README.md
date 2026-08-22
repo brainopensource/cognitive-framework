@@ -21,7 +21,7 @@ superseded_by: null
 
 # Vanguard / AETHER Contracts & Schemas Index
 
-> **Classification:** Contract Reference (`AS_BUILT`).  
+> **Classification:** Contract reference with maturity stated per row.
 > **Authority:** Derived projection. Governing schemas live in [`schemas/`](../../schemas/) and normative law lives in [`docs/SPEC.md`](../SPEC.md).
 
 ---
@@ -30,8 +30,8 @@ superseded_by: null
 
 | Contract | Schema `$id` | Producer / Writer | Key Invariants & Guarantees |
 |---|---|---|---|
-| [`events.md`](events.md) | `mhf.event/1` | `runtime/ledger_emitter.py` | 56 catalogued event kinds; single-writer authority; full causal lineage |
-| [`trajectories.md`](trajectories.md) | `mhf.trajectory/1` | `runtime/trajectory.py` | NOVA-1: attributable model route, conserved cost vector, identity $D_H/D_R/D_X$ |
-| [`manifests.md`](manifests.md) | `mhf.manifest/2` | `runtime/compose.py` | Named Component Graph; typed plugin declarations and capability bindings |
+| [`events.md`](events.md) | `mhf.event/1` | `runtime/ledger_emitter.py` | `AS_BUILT`: schema catalog plus role-owned emission |
+| [`trajectories.md`](trajectories.md) | `mhf.trajectory/1` | `runtime/trajectory.py` | `ACTIVE_REPAIR`: schema exists; RF-23 content/accounting proof is red |
+| [`manifests.md`](manifests.md) | planned `mhf.manifest/2` | M-3 compose target | `RATIFIED_NOT_IMPLEMENTED`: Named Component Graph |
 | [`verdicts.md`](verdicts.md) | `mhf.spi_payloads/1` | `adapters/evaluators/daemon.py` | Ed25519 cryptographic signature over canonical JCS bytes; request/nonce bound |
 | [`selectors_and_budgets.md`](selectors_and_budgets.md) | Stdlib Python | `domain/selectors/` | Monotonic capability containment algebra; typed 6D budget dimensions |

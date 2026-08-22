@@ -6,14 +6,14 @@ authority: descriptive
 canonical_for:
   - trajectory-contract
 source_of_truth:
-  - docs/SPEC.md#6-trajectory-schema-and-evidence
+  - docs/SPEC.md#7-telemetry-self-tuning--model-distillation
   - docs/05_adr/0078-trajectory-un-hollowing-cost-accounting.md
 derived_from:
   - schemas/mhf/trajectory.schema.json
   - vanguard/packages/runtime/trajectory.py
 applies_to:
   - v0.6.1
-implementation_status: AS_BUILT
+implementation_status: RATIFIED_NOT_IMPLEMENTED
 owner: principal-systems-architect
 version: "0.6.1"
 last_verified: 2026-08-21
@@ -24,54 +24,22 @@ superseded_by: null
 # Trajectory Contract (`mhf.trajectory/1`)
 
 > **Schema:** [`schemas/mhf/trajectory.schema.json`](../../schemas/mhf/trajectory.schema.json)  
-> **Status:** `AS_BUILT` · Governed by ADR-0078 (NOVA-1 / RF-23).
+> **Status:** Schema and assembler exist, but the ADR-0078 content contract is
+> `RATIFIED_NOT_IMPLEMENTED` while RF-23 is red.
 
 ---
 
-## Content & Cost Attribution
+## Current schema surface
 
-A completed episode emits a truthful, un-hollowed `mhf.trajectory/1` recording per-turn attribution and conserved totals:
-
-```json
-{
-  "specversion": "mhf.trajectory/1",
-  "trajectory_id": "traj-018f23a4-8b1c-7f89",
-  "episode_id": "ep-001-turn-04",
-  "project_id": "proj-aether-core",
-  "identity": {
-    "dh": "sha256:11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
-    "dr": "sha256:aabbccddeeff11223344556677889900aabbccddeeff11223344556677889900",
-    "dx": "sha256:ffeeddccbbaa99887766554433221100ffeeddccbbaa99887766554433221100"
-  },
-  "accounting": {
-    "total_usd_micros": 4200,
-    "total_tokens": 1250,
-    "total_turns": 3,
-    "measurement_status": "measured"
-  },
-  "turns": [
-    {
-      "turn_index": 0,
-      "model_route": {
-        "provider": "openrouter",
-        "model": "anthropic/claude-3.5-sonnet",
-        "fingerprint": "fp_8b1c7f89"
-      },
-      "cost": {
-        "usd_micros": 1400,
-        "input_tokens": 350,
-        "output_tokens": 100,
-        "status": "measured"
-      },
-      "intent": "Read project README",
-      "action": "fs.read",
-      "receipt_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    }
-  ]
-}
-```
+The Draft 2020-12 schema currently requires `schema`, `project_id`, `run_id`, `episode_id`,
+`principal_id`, `harness_digest`, `turns`, `verdict`, and `cost`. It also defines optional
+`execution_digest`, `model_routes_used`, manifest genome, attribution, and outcome fields. Read the
+schema itself for exact field names and types; this page intentionally does not maintain a second
+JSON shape.
 
 ## Guarantees & Non-Fabrication
-1. **Conserved Cost**: Episode totals equal the exact sum of per-turn measurements. Zero fabrication (`_ZERO_COST` prohibited).
-2. **Distinct Measurement Status**: States are strictly typed as `measured`, `estimated`, or `unavailable`.
-3. **Derived Promotability**: Status is derived post-run from verdicts and cannot be forged by input.
+1. **Conserved Cost target**: Episode totals equal per-turn measurements; fabricated `_ZERO_COST` is prohibited.
+2. **Explicit absence target**: Missing measurements and fingerprints carry typed absence reasons rather than invented values.
+3. **Derived promotability target**: Eligibility is derived from evidence and cannot be supplied by a pack.
+
+These are ADR-0078/RF-23 obligations, not claims about the current green state.

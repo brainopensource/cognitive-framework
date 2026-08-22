@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - adding-an-adapter-guide
 source_of_truth:
-  - docs/SPEC.md#3-hexagonal-production-lattice
+  - docs/SPEC.md#1-layer-0--the-microkernel
 derived_from:
   - vanguard/packages/ports/
   - vanguard/packages/adapters/

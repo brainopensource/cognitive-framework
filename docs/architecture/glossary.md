@@ -26,11 +26,11 @@ superseded_by: null
 
 ---
 
-### A-B-C-D Operating Model
-- **`A` (Actuator / Engine)**: The cognitive turn loop that observes context and proposes tool effects.
-- **`B` (Boundary / Kernel)**: The 13-stage monotonic attenuation core (TCB) that enforces capabilities, budgets, and security.
-- **`C` (Chronicle / Ledger)**: The single-writer, append-only SQLite WAL stream containing immutable causal events.
-- **`D` (Discriminator / Evaluator)**: The physically isolated exterior judge that grades execution runs and issues signed verdicts.
+### A-B-C-D Operating Foundation
+- **`A` — Authority**: The domain-blind S0–S12 reference monitor, selectors, attenuation, leases, and fail-closed policy.
+- **`B` — Bundle**: The complete behavioral composition frozen into `FrozenHarness`; the Named Component Graph generalization is ratified for M-3.
+- **`C` — Corpus**: Durable WAL events, derived state, trajectories, artifacts, receipts, and exterior evidence used for attribution and learning.
+- **`D` — Digests**: The non-collapsible identity subjects $D_H$, $D_R$, and $D_X$.
 
 ### Three Planes of Responsibility
 1. **Decision Plane**: Ephemeral, unprivileged model proposal generation and context reasoning.
@@ -39,8 +39,8 @@ superseded_by: null
 
 ### Identity Trinity
 - **$D_H$ (Harness Composition Digest)**: SHA-256 digest over the complete behavioral composition (manifests, system prompts, capability ceilings, model routes, approval policies).
-- **$D_R$ (Runtime Run Digest)**: Unique cryptographic hash of a single continuous execution episode.
-- **$D_X$ (Experiment / Evaluation Digest)**: Hash over $(D_H, D_R, \text{TaskInputs}, \text{EvaluatorVersion})$.
+- **$D_R$ (Execution Digest)**: $H(D_H \parallel runtime \parallel environment \parallel model\ identity \parallel oracle\ identity)$.
+- **$D_X$ (Experiment Digest)**: $H(D_R \parallel dataset \parallel protocol)$.
 
 ### Trusted Computing Base (TCB)
 The minimal, domain-blind security core (`vanguard/packages/kernel/`) that enforces capability attenuation, action classification, and budget algebra. Strictly budgeted at $\le 1438$ logical lines of code.

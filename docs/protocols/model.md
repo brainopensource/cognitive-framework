@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - model-port-protocol
 source_of_truth:
-  - docs/SPEC.md#4-execution-lifecycle
+  - docs/SPEC.md
 derived_from:
   - vanguard/packages/ports/model.py
   - vanguard/packages/adapters/models/openrouter.py

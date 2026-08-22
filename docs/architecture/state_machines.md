@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - state-machines-fsm
 source_of_truth:
-  - docs/SPEC.md#5-state-machines-and-lifecycle
+  - docs/SPEC.md#1-layer-0--the-microkernel
 derived_from:
   - vanguard/packages/agency/episode/engine.py
   - vanguard/packages/domain/ledger/reducer.py
@@ -22,35 +22,37 @@ superseded_by: null
 
 # State Machines & Lifecycle FSMs
 
-> **Status:** `AS_BUILT` · Descriptive View.
+> **Status:** Mixed descriptive view. The episode mechanism is current; the seven-state plugin FSM
+> is `RATIFIED_NOT_IMPLEMENTED` until ADR-0081 lands in M-3.
 
 ---
 
-## 1. Episode Turn Engine Lifecycle
+## 1. Episode turn mechanism (`AS_BUILT` conceptual projection)
 
 Implemented in [`EpisodeEngine`](../../vanguard/packages/agency/episode/engine.py):
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Initialized: compose()
-    Initialized --> TurnStarted: start_turn()
-    TurnStarted --> Observing: build_context()
-    Observing --> Proposing: model.generate()
-    Proposing --> Authorizing: kernel.dispatch()
-    Authorizing --> EffectExecuting: grant valid
-    Authorizing --> TurnFailed: grant denied
-    EffectExecuting --> Receipting: effect completed
-    Receipting --> TurnCompleted: receipt recorded
-    TurnCompleted --> TurnStarted: budget & turns remain
-    TurnCompleted --> EpisodeCompleted: task finished / stop requested
-    TurnFailed --> EpisodeAborted: budget exhausted / unrecoverable error
+    [*] --> Running: EpisodeEngine.run()
+    Running --> ContextCompiled: context compiler
+    ContextCompiled --> ProposalProduced: ModelPort.propose()
+    ProposalProduced --> ChildEpisode: current spawn proposal path
+    ProposalProduced --> KernelDispatch: effect proposal
+    KernelDispatch --> TurnRecorded: receipt or authorization denial
+    ChildEpisode --> TurnRecorded: typed SpawnResult
+    TurnRecorded --> Running: turns remain and no terminal stop
+    TurnRecorded --> EpisodeCompleted: terminal success
+    Running --> EpisodeAborted: budget, instrument, malformed proposal, or no-progress terminal
     EpisodeCompleted --> [*]
     EpisodeAborted --> [*]
 ```
 
+This is an explanatory projection of control flow, not a claim that these labels are a persisted
+enum. Persisted truth is the event catalog and reducer.
+
 ---
 
-## 2. Plugin Lifecycle Finite State Machine (ADR-0081)
+## 2. Plugin Lifecycle Finite State Machine (ADR-0081 — `RATIFIED_NOT_IMPLEMENTED`)
 
 ```mermaid
 stateDiagram-v2
@@ -68,8 +70,8 @@ stateDiagram-v2
 
 | State | Entering Event | Description & Guarantees |
 |---|---|---|
-| `Discovered` | `PluginDiscovered` | Plugin manifest parsed from disk; paths validated |
-| `Verified` | `PluginVerified` | Schema and signature verification passed |
+| `Discovered` | `PluginDiscovered` | Target event; not yet present in the current event catalog |
+| `Verified` | `PluginVerified` | Target event; not yet present in the current event catalog |
 | `Resolved` | `PluginResolved` | Dependencies, capabilities, and port bindings resolved |
 | `Activated` | `PluginActivated` | Plugin loaded into memory, UDS socket opened |
 | `Quiesced` | `PluginQuiesced` | In-flight effects drained; safely paused |

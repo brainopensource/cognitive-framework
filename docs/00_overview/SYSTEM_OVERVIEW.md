@@ -15,7 +15,7 @@ superseded_by: null
 
 # Vanguard / AETHER System Overview
 
-> **Classification:** Descriptive Architecture (`AS_BUILT`).
+> **Classification:** Descriptive architecture with explicit current/future maturity.
 > **Authority:** Non-normative. Governing law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/04_annex/`](../04_annex/).
 
 ---
@@ -54,12 +54,12 @@ superseded_by: null
 
 ---
 
-## 3. The A-B-C-D Universal Operating Mechanism
+## 3. The A-B-C-D Foundation
 
-- **`A` (Actuator / Turn Loop)**: Proposes tool effects from model completions ([`agency/episode/engine.py`](../../vanguard/packages/agency/episode/engine.py)).
-- **`B` (Boundary / TCB Kernel)**: Monotonically attenuates capabilities and debits 6D budgets through 13 stages (S0–S12) ([`kernel/dispatch.py`](../../vanguard/packages/kernel/dispatch.py)).
-- **`C` (Chronicle / Single Writer)**: Atomically commits intents and receipts to SQLite WAL ([`runtime/ledger_emitter.py`](../../vanguard/packages/runtime/ledger_emitter.py)).
-- **`D` (Discriminator / Exterior Judge)**: Independent process (UID `10002`) grading runs and emitting signed verdicts ([`adapters/evaluators/daemon.py`](../../vanguard/packages/adapters/evaluators/daemon.py)).
+- **`A` — Authority (`AS_BUILT`)**: S0–S12 mediation, selectors, attenuation, typed leases, and fail-closed policy ([`kernel/dispatch.py`](../../vanguard/packages/kernel/dispatch.py)).
+- **`B` — Bundle (`AS_BUILT`, GENERIC GRAPH QUEUED M-3)**: Manifest, resolved components, ceilings, policies, prompts, and routes freeze into an attributable `FrozenHarness`; ADR-0077 replaces coding-shaped slots with a Named Component Graph in M-3.
+- **`C` — Corpus (`CONTRACT BUILT, CONTENT REPAIR ACTIVE M-2`)**: SQLite-WAL events and `mhf.trajectory/1` form the state/evidence corpus; RF-23 is still red for rich per-turn economics, route identity, and execution binding.
+- **`D` — Digests (`D_H AS_BUILT; D_R COMPLETION ACTIVE M-2; D_X EXPERIMENT-BOUND`)**: Composition, execution, and experiment identities remain distinct: $D_H \ne D_R \ne D_X$.
 
 ---
 
@@ -71,9 +71,9 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ```
 
 - **`domain/`**: Pure Python stdlib value objects, events, JCS canonicalization, and selector algebra.
-- **`ports/`**: Hexagonal protocols defining boundary seams (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `SPI`).
+- **`ports/`**: Hexagonal boundary protocols: kernel dependencies plus model, sandbox, evaluator, stores, environment, determinism, index, and five SPIs.
 - **`kernel/`**: Pure Trusted Computing Base ($\le 1438$ LOC budget). 13-stage dispatch pipeline, monotonic attenuation, and typed budget algebra.
-- **`agency/`**: Recursive turn engine (`EpisodeEngine`), subagent `spawn()`, and context compactor.
+- **`agency/`**: Turn engine (`EpisodeEngine`), current attenuated child construction, and context compaction. Capability-mediated `agent.spawn` through S0–S12 remains queued for M-6.
 - **`runtime/`**: Composition root (`compose.py`), session management, and single-writer ledger emitter.
 - **`adapters/`**: Port implementations (OpenRouter, Ollama, Cassette, Fake, bwrap sandbox, evaluator daemon).
 

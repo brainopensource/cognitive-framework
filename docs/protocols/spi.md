@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - spi-protocols-reference
 source_of_truth:
-  - docs/SPEC.md#3-hexagonal-production-lattice
+  - docs/SPEC.md#2-plugin-architecture--spi-definitions
   - docs/05_adr/0076-foundation-execution-decisions-canonical-artifacts.md
 derived_from:
   - vanguard/packages/ports/spi.py
@@ -27,11 +27,14 @@ superseded_by: null
 
 ---
 
-## 1. The Five Standard SPI Interfaces
+## 1. The five standard SPI interfaces
 
-The substrate standardizes 5 Service Provider Interfaces:
-1. **`ToolSPI`**: Plug-in tool execution.
-2. **`ModelSPI`**: Model inference adapter.
-3. **`MemorySPI`**: Long-term state & vector storage.
-4. **`SandboxSPI`**: Process & container isolation.
-5. **`EvaluatorSPI`**: Independent grading & signed verification.
+The exact protocols exported by `ports/spi.py` are:
+
+1. **`IPlanner`** — turn-level proposal planning, observation, and reflection.
+2. **`IContextManager`** — context compilation, receipt ingestion, compaction, and regrounding.
+3. **`IToolkit`** — verb schemas, effect execution, compensation, and health.
+4. **`IMemoryEngine`** — write, recall, consolidation, invalidation, and declared capabilities.
+5. **`IEvaluationGate`** — requests exterior judgment and returns gate decisions; it does not mint verdict authority.
+
+These Python protocols are client conveniences for the wire contract, not a second authority surface.

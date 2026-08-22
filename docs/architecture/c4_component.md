@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - c4-components-view
 source_of_truth:
-  - docs/SPEC.md#3-hexagonal-production-lattice
+  - docs/SPEC.md#1-layer-0--the-microkernel
 derived_from:
   - vanguard/packages/domain/__init__.py
   - vanguard/packages/ports/__init__.py
@@ -46,11 +46,11 @@ superseded_by: null
 1. **`domain/`** ([`vanguard/packages/domain/`](../../vanguard/packages/domain/)):
    - Value objects, wire contracts, JCS RFC 8785 canonicalization, ledger reducers, event definitions, evidence models, and selector algebra (`resource_selector.py`).
 2. **`ports/`** ([`vanguard/packages/ports/`](../../vanguard/packages/ports/)):
-   - Hexagonal interface protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and 5 SPI protocols in `spi.py`).
+   - Hexagonal interfaces: kernel-facing `Clock`, `EffectAdapter`, `EventSink`, and `Ledger`; `ModelPort`, `SandboxRunner`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `IndexPort`, injected clock/random ports, and five SPI protocols in `spi.py`.
 3. **`kernel/`** ([`vanguard/packages/kernel/`](../../vanguard/packages/kernel/)):
    - Trusted Computing Base ($\le 1438$ LOC budget). 13-stage effect dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, capability grants, action classification, fail-closed policy, and provenance DAG. Domain-blind (Invariant I-7).
 4. **`agency/`** ([`vanguard/packages/agency/`](../../vanguard/packages/agency/)):
-   - Recursive turn engine (`EpisodeEngine`), subagent `spawn()` with budget attenuation, context compiler, token compactor.
+   - Turn engine (`EpisodeEngine`), current attenuated child construction, context compiler, and token compactor. The capability-mediated `agent.spawn` effect is deferred to M-6.
 5. **`runtime/`** ([`vanguard/packages/runtime/`](../../vanguard/packages/runtime/)):
    - Lifecycle composition (`compose.py`), session management (`session.py`), dependency wiring (`wiring.py`), single-writer `LedgerEmitter` (`ledger_emitter.py`), and evaluator gateway (`evaluator_gateway.py`).
 6. **`adapters/`** ([`vanguard/packages/adapters/`](../../vanguard/packages/adapters/)):

@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - adding-a-pack-guide
 source_of_truth:
-  - docs/SPEC.md#7-harness-manifests-and-component-graphs
+  - docs/SPEC.md#4-coding-domain-pack-first-domain-foundation-e2e-not-this-lock-wave
 derived_from:
   - packs/code-default/
 applies_to:
@@ -30,8 +30,8 @@ superseded_by: null
 Coding is **Domain Pack #1** (`packs/code-default/`), not the architecture of the substrate. New domains (such as Pack #2 **Math & Formal Deductive Verification**, target: M-5) are added as standalone packs with:
 
 1. `harness.yaml`: Declarative harness specification and plugin dependencies.
-2. `plugins/`: Tool descriptors and capability schemas.
-3. `prompts/`: Domain-specific system prompts and instruction templates.
+2. `plugins/`: Tool descriptors and capability declarations.
+3. Domain-owned implementation/configuration such as toolkits, planners, oracles, policies, and `system-prompt.txt` as required by the pack.
 
 ---
 

@@ -37,10 +37,10 @@ This directory contains verified architectural views, C4 models, sequence diagra
 | [`c4_context.md`](c4_context.md) | C4 Level 1: System boundary, operators, evaluators, model providers, and environment | `AS_BUILT` |
 | [`c4_container.md`](c4_container.md) | C4 Level 2: Python control plane, CLI client, SQLite WAL store, sandbox container, evaluator daemon | `AS_BUILT` |
 | [`c4_component.md`](c4_component.md) | C4 Level 3: Domain, Ports, Kernel (TCB), Agency, Runtime, and Adapters | `AS_BUILT` |
-| [`sequences.md`](sequences.md) | Sequence flows: Compose, S0–S12 effect dispatch, signed evaluation, trajectory assembly, cold recovery | `AS_BUILT` |
-| [`state_machines.md`](state_machines.md) | Finite state machines: Episode turn loop, plugin lifecycle FSM, and lease management | `AS_BUILT` |
+| [`sequences.md`](sequences.md) | Verified dispatch/evaluation flows plus explicitly labelled RF-25 target flow | `MIXED — LABELLED PER SECTION` |
+| [`state_machines.md`](state_machines.md) | Current episode mechanism plus ADR-0081 target plugin FSM | `MIXED — LABELLED PER SECTION` |
 | [`glossary.md`](glossary.md) | Core concepts: A-B-C-D operating foundation, Three Planes, TCB, WAL, $D_H/D_R/D_X$, 6D tensor | `AS_BUILT` |
-| [`traceability_matrix.md`](traceability_matrix.md) | Full bidirectional traceability: Concept $\leftrightarrow$ Law $\leftrightarrow$ ADR $\leftrightarrow$ Schema $\leftrightarrow$ Symbol $\leftrightarrow$ Falsifier $\leftrightarrow$ Milestone | `AS_BUILT` |
+| [`traceability_matrix.md`](traceability_matrix.md) | Traceability with an explicit maturity column; queued rows are not implementation claims | `MIXED — LABELLED PER ROW` |
 
 ---
 
@@ -54,6 +54,6 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 1. **`domain/`**: Pure stdlib Python. Primitives, events, wire contracts, and selector algebra.
 2. **`ports/`**: Hexagonal interfaces defining boundary contracts.
 3. **`kernel/`**: Pure security core ($\le 1438$ LOC TCB budget). 13-stage dispatch pipeline (S0–S12).
-4. **`agency/`**: Recursive turn engine (`EpisodeEngine`), context compaction, and subagent spawn.
+4. **`agency/`**: Turn engine (`EpisodeEngine`), context compaction, and current child construction; mediated `agent.spawn` is M-6 work.
 5. **`runtime/`**: Composition, wiring, single-writer ledger emitter, and event store.
 6. **`adapters/`**: Concrete implementations of port protocols (Model providers, Bubblewrap sandbox, Evaluator daemon, SQLite WAL).

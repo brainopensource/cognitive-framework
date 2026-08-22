@@ -19,9 +19,9 @@ supersedes: []
 superseded_by: null
 ---
 
-# Subsystem Context Bundles & Measured Token Budgets
+# Subsystem Context Bundles & Context-Budget Estimates
 
-> **Status:** `AS_BUILT` · Optimized Sub-1k Context Slices for AI Coding Agents.
+> **Status:** `AS_BUILT` navigation aid. Token figures below are planning estimates, not benchmark results.
 
 ---
 
@@ -29,19 +29,21 @@ superseded_by: null
 
 Rather than ingesting multi-thousand-line monolithic specifications, an AI agent or human contributor loads only the targeted context bundle for their specific task:
 
-| Work Class | Ingested Context Bundle | Approx. Token Size | Direct File Links |
+| Work Class | Minimum starting bundle | Size status | Direct File Links |
 |---|---|---:|---|
-| **Kernel / TCB** | `KERNEL.md` + `ports/kernel.py` + `test_dispatch.py` | ~850 tokens | [`KERNEL.md`](../04_annex/KERNEL.md) · [`kernel.md`](../protocols/kernel.md) |
-| **Model Adapter** | `protocols/model.md` + `adding_an_adapter.md` | ~550 tokens | [`model.md`](../protocols/model.md) · [`adding_an_adapter.md`](adding_an_adapter.md) |
-| **State / Ledger** | `contracts/events.md` + `protocols/stores.md` | ~700 tokens | [`events.md`](../contracts/events.md) · [`stores.md`](../protocols/stores.md) |
-| **Trajectory (NOVA-1)** | `contracts/trajectories.md` + `ADR-0078` | ~650 tokens | [`trajectories.md`](../contracts/trajectories.md) · [`0078`](../05_adr/0078-trajectory-un-hollowing-cost-accounting.md) |
-| **Continuation (NOVA-2)** | `sequences.md` (§3) + `ADR-0082` | ~600 tokens | [`sequences.md`](../architecture/sequences.md) · [`0082`](../05_adr/0082-universal-turn-loop-m10-compatibility-contract.md) |
-| **Domain Pack** | `adding_a_pack.md` + `manifests.md` | ~500 tokens | [`adding_a_pack.md`](adding_a_pack.md) · [`manifests.md`](../contracts/manifests.md) |
-| **Evaluator** | `protocols/evaluator.md` + `verdicts.md` | ~600 tokens | [`evaluator.md`](../protocols/evaluator.md) · [`verdicts.md`](../contracts/verdicts.md) |
+| **Kernel / TCB** | Active task + KERNEL clause + kernel protocol + named test | Measure per task | [`KERNEL.md`](../04_annex/KERNEL.md) · [`kernel.md`](../protocols/kernel.md) |
+| **Model Adapter** | Active task + model protocol + adapter guide + contract test | Measure per task | [`model.md`](../protocols/model.md) · [`adding_an_adapter.md`](adding_an_adapter.md) |
+| **State / Ledger** | Active task + event contract + store protocol + ledger test | Measure per task | [`events.md`](../contracts/events.md) · [`stores.md`](../protocols/stores.md) |
+| **Trajectory (NOVA-1)** | Active RF-23 board row + ADR-0078 + schema + failing test | Measure per task | [`trajectories.md`](../contracts/trajectories.md) · [`0078`](../05_adr/0078-trajectory-un-hollowing-cost-accounting.md) |
+| **Continuation (NOVA-2)** | Active RF-25 board row + ADR-0082 + failing test | Measure per task | [`sequences.md`](../architecture/sequences.md) · [`0082`](../05_adr/0082-universal-turn-loop-m10-compatibility-contract.md) |
+| **Domain Pack** | Governing milestone + pack guide + current pack tests | Measure per task | [`adding_a_pack.md`](adding_a_pack.md) · [`milestones.md`](../02_roadmap/milestones.md) |
+| **Evaluator** | Evaluator protocol + verdict contract + security test | Measure per task | [`evaluator.md`](../protocols/evaluator.md) · [`verdicts.md`](../contracts/verdicts.md) |
 
 ---
 
-## Token Efficiency Measurement
-- **Monolithic Ingestion (`SYSTEM_OVERVIEW.md` + `SPEC.md` + `ADR INDEX`)**: $\approx 28,500$ tokens.
-- **Targeted Context Bundle**: $\approx 500 - 850$ tokens.
-- **Net Context Reduction**: **$97.5\%$ token savings** with zero loss of normative requirements or code context.
+## Measurement rule
+
+Do not claim a percentage reduction from line counts or estimates. For a representative task,
+record the exact files/slices loaded, tokenizer/model, token counts, successful destination, and
+whether leadership clarification was required. Only then compare the targeted bundle with the old
+reading path.

@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - ports-and-protocols-index
 source_of_truth:
-  - docs/SPEC.md#3-hexagonal-production-lattice
+  - docs/SPEC.md#1-layer-0--the-microkernel
 derived_from:
   - vanguard/packages/ports/
 applies_to:
@@ -30,9 +30,9 @@ superseded_by: null
 
 | Protocol | Source File | Implementing Adapters | Key Port Responsibilities |
 |---|---|---|---|
-| [`kernel.md`](kernel.md) | `ports/kernel.py` | `kernel/dispatch.py` | 13-stage monotonic effect dispatch (S0–S12) |
-| [`model.md`](model.md) | `ports/model.py` | `adapters/models/` | Model routing, streaming, and token measurement |
+| [`kernel.md`](kernel.md) | `ports/kernel.py` | consumed by `kernel/dispatch.py` | Four narrow dependency-inversion ports used by the TCB |
+| [`model.md`](model.md) | `ports/model.py` | `adapters/models/` | Proposal request/result seam; routing and measurement remain adapter/runtime concerns |
 | [`sandbox.md`](sandbox.md) | `ports/sandbox.py` | `adapters/sandbox/` | Bubblewrap process execution in UID 10001 |
 | [`evaluator.md`](evaluator.md) | `ports/evaluator.py` | `adapters/evaluators/` | Grading requests and signed verdict retrieval |
-| [`stores.md`](stores.md) | `ports/event_store.py` | `adapters/stores/` | SQLite WAL append, fold prefix, and state recovery |
-| [`spi.md`](spi.md) | `ports/spi.py` | 5 Standard SPIs | Service Provider Interfaces for extensible plugins |
+| [`stores.md`](stores.md) | `ports/event_store.py` | `adapters/stores/` | Append/read/digest/count seam; reducers and recovery live outside the port |
+| [`spi.md`](spi.md) | `ports/spi.py` | five wire-facing protocols | Planner, context, toolkit, memory, and evaluation-gate SPIs |

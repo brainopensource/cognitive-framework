@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - selector-algebra-and-budgets
 source_of_truth:
-  - docs/04_annex/KERNEL.md#3-capability-and-attenuation-algebra
+  - docs/04_annex/KERNEL.md
   - docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md
 derived_from:
   - vanguard/packages/domain/selectors/resource_selector.py
@@ -51,6 +51,6 @@ Budgets distinguish additive consumed resources from non-additive structural cei
 | `usd_micros` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
 | `tokens` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
 | `bytes` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
-| `charged_millis` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
+| `millis` | **Additive** | Charged compute milliseconds; $\text{Child} + \text{Remaining} \le \text{Parent}$ |
 | `depth` | **Structural** | $\text{ChildDepth} = \text{ParentDepth} + 1 \le \text{MaxDepth}$ (Siblings not summed) |
 | `turns` | **Structural** | Max turns allowed for current subagent turn loop |

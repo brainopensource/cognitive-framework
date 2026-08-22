@@ -57,25 +57,13 @@ class Ledger(Protocol):
 
 ---
 
-## 2. Kernel Dispatch Entrypoint (`kernel/dispatch.py`)
+## 2. Kernel dispatch entrypoint (`kernel/dispatch.py`)
 
-The kernel trusted computing base exports the 13-stage dispatch pipeline:
-
-```python
-def dispatch(
-    intent: IntentRequest,
-    justification: JustificationContext,
-    *,
-    clock: Clock,
-    adapter: EffectAdapter,
-    ledger: Ledger,
-    sink: EventSink,
-    policy: PolicyEngine,
-    budget: BudgetEngine,
-) -> DispatchReceipt:
-    """Execute the 13-stage pipeline (S0–S12) fail-closed."""
-    ...
-```
+`Kernel` receives adapters, policy, classifier, `Governor`, grant issuer, clock, ledger, event sink,
+and optional sink registry at construction. `Kernel.dispatch(request, *, requested_scope,
+reservation, spans=None, cross_process=False, purpose_digest=...)` executes the S1–S12 reference
+monitor sequence and returns `DispatchResult`. Refer to the source for the exact signature rather
+than copying it into a second API definition.
 
 ## Security Guarantees
 - **Domain-Blind (Invariant I-7)**: Kernel contains zero domain tokens (`coding`, `pytest`, `ast`).

@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - store-ports-protocol
 source_of_truth:
-  - docs/SPEC.md#2-ledger-as-truth
+  - docs/SPEC.md
 derived_from:
   - vanguard/packages/ports/event_store.py
   - vanguard/packages/adapters/stores/event_store.py

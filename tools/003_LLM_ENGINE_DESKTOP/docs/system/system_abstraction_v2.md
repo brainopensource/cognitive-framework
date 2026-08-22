@@ -1,8 +1,8 @@
-# High-Order Inference Abstraction: Full & Fractional Factorial DoE, Surrogate ML Modeling, and Hierarchical Swarms
+# High-Order Inference Abstraction: Full & Fractional Factorial DoE, Meta-Dimension Registry, Surrogate ML Modeling, and Hierarchical Swarms
 
 **Document ID:** `LLM-DESKTOP-SYS-ABSTRACTION-V2`  
 **Classification:** Staff Principal AI Architecture & Mathematical Specification  
-**Subject:** High-Dimensional Design of Experiments ($2^k$ and $2^{k-1}$ Matrices), Scikit-Learn Surrogate Regression Modeling, Pareto Optimal Frontier, and Multi-Tier Hybrid Agent Orchestration  
+**Subject:** N-Dimensional Declarative Space Topology, $2^k$ and $2^{k-1}$ Fractional Factorial Matrices, Zero-Refactor Meta-Dimension Registry, Scikit-Learn Surrogate Regression Modeling, Pareto Optimal Frontier, and Multi-Tier Hybrid Agent Orchestration  
 **Target Environment:** Local LLM Substrate (`qwen3.8:27b` + `qwen2.5-coder:14b` + `qwen2.5:1.5b` on AMD Radeon 16GB VRAM & Ryzen 5800X3D).
 
 ---
@@ -19,31 +19,82 @@ $$\text{Throughput}(A \cup B) \neq \text{Throughput}(A) + \text{Throughput}(B)$$
 
 ### 1.2 The $2^k$ Full Factorial Parameter Space
 
-We formalize the inference configuration as a binary feature vector $\mathbf{x} \in \{0, 1\}^5$, representing $k=5$ orthogonal optimization dimensions:
+We formalize the inference configuration as a binary feature vector $\mathbf{x} \in \{0, 1\}^k$, representing $k$ orthogonal optimization dimensions:
 
-$$\Omega = \prod_{i=1}^{k} D_i = \{0, 1\}^5 \implies |\Omega| = 2^5 = 32\text{ Experimental Configurations}$$
+$$\Omega = \prod_{i=1}^{k} D_i = \{0, 1\}^k \implies |\Omega| = 2^k\text{ Experimental Configurations}$$
+
+---
+
+## 2. Zero-Refactor Declarative Dimension Registry (Meta-Architecture)
+
+To allow scaling the benchmarking space to $N$ dimensions without refactoring code, the system implements a **Declarative Meta-Dimension Registry**.
 
 ```text
-                               ┌─────────────────────────────┐
-                               │  k=5 Optimization Features   │
-                               └──────────────┬──────────────┘
-                                              │
-         ┌──────────────────┬─────────────────┼──────────────────┬──────────────────┐
-         │                  │                 │                  │                  │
-┌────────▼────────┐ ┌───────▼────────┐ ┌──────▼────────┐ ┌───────▼────────┐ ┌───────▼────────┐
-│    $x_1$: CTX   │ │  $x_2$: THINK  │ │  $x_3$: GREEDY│ │  $x_4$: THREAD │ │  $x_5$: BUDGET │
-│ 0: Default (32k)│ │ 0: Normal      │ │ 0: Temp=0.7   │ │ 0: OS Default  │ │ 0: Unlimited   │
-│ 1: Trim (2048)  │ │ 1: Suppressed  │ │ 1: Temp=0.0   │ │ 1: 8 Phys Cores│ │ 1: Cap=600     │
-└─────────────────┘ └────────────────┘ └───────────────┘ └────────────────┘ └────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        1. DECLARATIVE DIMENSION REGISTRY (SCHEMA)                      │
+│                  DIMENSION_REGISTRY = { "num_ctx": [...], "mirostat": [...] }          │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │
+         ┌──────────────────────────────────┼──────────────────────────────────┐
+         │                                  │                                  │
+┌────────▼────────────────────────┐ ┌───────▼────────────────────────┐ ┌───────▼────────────────────────┐
+│    CARTESIAN PRODUCT ENGINE     │ │      SCHEMA LOGGER ADAPTER     │ │      AUTO-FEATURE ML PIPELINE   │
+│  $\bigotimes_{i=1}^n D_i$       │ │ Dynamic CSV/JSONL column mapper│ │ Scikit-Learn OneHotEncoder      │
+│  Generates N-dimensional tests  │ │ Auto-discovers schema headers  │ │ Automatic Feature Importances   │
+└─────────────────────────────────┘ └────────────────────────────────┘ └─────────────────────────────────┘
+```
+
+### 2.1 Mathematical Formalization of the Dynamic Tensor Product
+
+Let $\mathcal{D} = \{ (k_1, V_1), (k_2, V_2), \dots, (k_n, V_n) \}$ be the dynamic registry where $k_i \in \text{String}$ is the parameter name and $V_i = \{ v_{i,1}, \dots, v_{i,m_i} \}$ is the discrete domain of candidate values.
+
+The total search space $\mathcal{S}$ is the Cartesian product:
+$$\mathcal{S} = V_1 \times V_2 \times \dots \times V_n, \quad |\mathcal{S}| = \prod_{i=1}^n |V_i|$$
+
+### 2.2 Python Zero-Refactor Implementation
+
+```python
+import itertools
+from typing import Dict, List, Any
+import pandas as pd
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+# 1. Zero-Refactor Dimension Registry
+DIMENSION_REGISTRY: Dict[str, List[Any]] = {
+    "num_ctx": [1024, 2048, 8192],
+    "temperature": [0.0, 0.7],
+    "num_thread": [8, 16],
+    "repeat_penalty": [1.0, 1.15],
+    "top_k": [20, 40],
+    "system_prompt_mode": ["none", "strict_compiler"],
+    # Pluggable future extensions:
+    # "mirostat": [0, 2],
+    # "draft_heads": [1, 2],
+}
+
+def generate_dynamic_experiments(registry: Dict[str, List[Any]]) -> List[Dict[str, Any]]:
+    """Dynamically generates all test configurations without hardcoding keys."""
+    keys = list(registry.keys())
+    experiments = []
+    
+    for idx, combo in enumerate(itertools.product(*registry.values()), start=1):
+        config = dict(zip(keys, combo))
+        exp_id = f"exp_{idx:04d}_" + "_".join(f"{k}{v}" for k, v in config.items())
+        experiments.append({
+            "id": exp_id,
+            "dimensions": config,
+            "options": {k: v for k, v in config.items() if k != "system_prompt_mode"}
+        })
+    return experiments
 ```
 
 ---
 
-## 2. 16-Run Fractional Factorial Design ($2^{5-1}$) & Hypercube Sampling
+## 3. 16-Run Fractional Factorial Design ($2^{5-1}$) & Hypercube Sampling
 
 To cut benchmark time by 50% without sacrificing statistical power, we use a **Resolution V Fractional Factorial Design ($2^{5-1} = 16\text{ runs}$)**.
 
-### 2.1 Mathematical Basis of Half-Fraction Sampling
+### 3.1 Mathematical Basis of Half-Fraction Sampling
 
 By setting the 5th factor generator as the interaction of the first four:
 $$x_5 = x_1 \cdot x_2 \cdot x_3 \cdot x_4$$
@@ -53,7 +104,7 @@ We construct an orthogonal 16-row design matrix where:
 2. All main effects ($\beta_1 \dots \beta_5$) are completely unconfounded by 2-factor interactions ($\gamma_{ij}$).
 3. **Execution Time:** $16 \text{ runs} \times 18.0\text{s} \approx \mathbf{4.8\text{ minutes}}$ on the `qwen2.5-coder:14b`.
 
-### 2.2 The 16-Run Orthogonal Design Matrix
+### 3.2 The 16-Run Orthogonal Design Matrix
 
 | Run ID | $x_1$ (Context) | $x_2$ (No Think) | $x_3$ (Greedy) | $x_4$ (8 Threads) | $x_5$ (Budget Cap) | Semantic Tag |
 | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -76,15 +127,15 @@ We construct an orthogonal 16-row design matrix where:
 
 ---
 
-## 3. Surrogate Machine Learning Modeling & Hyperdimensional Topology
+## 4. Surrogate Machine Learning Modeling & Hyperdimensional Topology
 
-Once the 16 physical runs are executed, we do not need to physically run the remaining 16 combinations on the GPU. Instead, we train a **Surrogate Regressor** with Scikit-Learn.
+Once the 16 physical runs are executed, we train a **Surrogate Regressor** with Scikit-Learn to map the entire hyperdimensional space.
 
 ```text
 ┌──────────────────────────────────────┐
 │  16 PHYSICAL GPU RUNS (CSV Dataset)  │
 └──────────────────┬───────────────────┘
-                   │ Features: [x1, x2, x3, x4, x5] -> Target: Latency / TPS
+                   │ Features: [x1, x2, x3, x4, x5, ...] -> Target: Latency / TPS
 ┌──────────────────▼───────────────────┐
 │     SCIKIT-LEARN SURROGATE MODEL     │
 │   HistGradientBoostingRegressor()    │
@@ -94,50 +145,38 @@ Once the 16 physical runs are executed, we do not need to physically run the rem
                    │ Sub-millisecond Inference
 ┌──────────────────▼───────────────────┐
 │  HYPERDIMENSIONAL SWEET SPOT FINDER  │
-│  - Predicts all 32 combinations      │
+│  - Predicts all unexecuted states    │
 │  - Identifies Global Minimum Latency │
 │  - Parallel Coordinates Visualization│
 └──────────────────────────────────────┘
 ```
 
-### 3.1 Python Surrogate Model Architecture
+### 4.1 Dynamic Feature Pipeline & SHAP Feature Importances
 
 ```python
-import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor
-from sklearn.inspection import permutation_importance
-
-def train_surrogate_model(csv_path: str):
-    df = pd.read_csv(csv_path)
+def train_dynamic_surrogate(csv_file: str, dimension_keys: List[str]):
+    df = pd.read_csv(csv_file)
     
-    # Feature matrix (5 binary dimensions)
-    X = df[["flag_num_ctx", "flag_nothink", "flag_greedy", "flag_thread8", "flag_budget"]]
-    y_latency = df["wall_time_sec"]
+    # Dynamically extract all registered dimension columns
+    X = pd.get_dummies(df[dimension_keys])
     y_tps = df["eval_tps"]
+    y_latency = df["wall_time_sec"]
     
-    # Fit Gradient Boosted Trees
-    reg_latency = HistGradientBoostingRegressor(max_iter=100, min_samples_leaf=2)
-    reg_latency.fit(X, y_latency)
+    # Train Gradient Boosting Regressors
+    model_tps = HistGradientBoostingRegressor(max_iter=100, min_samples_leaf=2).fit(X, y_tps)
+    model_lat = HistGradientBoostingRegressor(max_iter=100, min_samples_leaf=2).fit(X, y_latency)
     
-    # Predict entire 32-combination space
-    all_32_combinations = ... # Full grid
-    predicted_latencies = reg_latency.predict(all_32_combinations)
-    
-    # Find theoretical global minimum
-    optimal_idx = predicted_latencies.argmin()
-    print(f"Optimal Configuration Predicted: {all_32_combinations[optimal_idx]}")
+    # Rank importance of every parameter automatically
+    print("=== PARAMETER IMPORTANCE RANKING ===")
+    for name, imp in zip(X.columns, model_tps.feature_importances_):
+        print(f"  Dimension [{name}]: {imp * 100:.2f}% contribution to TPS")
 ```
-
-### 3.2 Hyperdimensional Visualizations
-
-1. **Parallel Coordinates Plot:** Plots each parameter dimension as a vertical axis, connecting runs with colored lines (gradient mapped to Tokens/s or Latency).
-2. **SHAP (SHapley Additive exPlanations):** Measures the exact contribution of each parameter to generation acceleration.
 
 ---
 
-## 4. Mathematical Formalism: Pareto Optimal Inference Frontier
+## 5. Mathematical Formalism: Pareto Optimal Inference Frontier
 
-### 4.1 Multi-Objective Optimization Problem
+### 5.1 Multi-Objective Optimization Problem
 
 We formulate inference tuning as a constrained multi-objective optimization problem over configuration space $\Omega$:
 
@@ -146,25 +185,9 @@ $$\max_{\mathbf{x} \in \Omega} \mathbf{F}(\mathbf{x}) = \begin{bmatrix} f_{\text
 Subject to:
 $$f_{\text{quality}}(\mathbf{x}) \ge 85.0 \quad (\text{Strict AST Syntax \& Functionality Floor})$$
 
-```text
-       Nota do Código (Qualidade 0-100)
-       100 ▲                ┌──────────────────┐
-           │                │ ★ SWEET SPOT     │
-           │                │ (Score=100, t=16s)│
-        85 ┼────────────────┼──────────────────┴───────────────
-           │                │   ● Baseline (Score=100, t=212s)
-           │                │
-           │   ● Truncated  │
-           │  (Score=45, t=75s)
-           │
-         0 └────────────────┼─────────────────────────────────►
-           0               30                                220
-                                Latência Total (Segundos)
-```
-
 ---
 
-## 5. Hierarchical Multi-Agent Swarm Orchestrator (Planner-Worker Architecture)
+## 6. Hierarchical Multi-Agent Swarm Orchestrator (Planner-Worker Architecture)
 
 Instead of relying on a single monolithic model, the system establishes a **3-Tier Asymmetric Multi-Agent Swarm** that assigns tasks according to model parameter capacity, memory footprint, and generation velocity.
 
@@ -205,33 +228,4 @@ Instead of relying on a single monolithic model, the system establishes a **3-Ti
 │ - Success -> Return artifact to user.                                                  │
 │ - Failure -> Pass Traceback to Worker Coder for autonomous 4-second micro-patch.       │
 └────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 6. Autonomous Self-Healing Feedback Loop
-
-When code generated by the Worker fails verification, the engine initiates an automated local correction loop without human intervention:
-
-```text
-┌──────────────────────────────────────┐
-│  Worker Coder Generates `module.py`  │
-└──────────────────┬───────────────────┘
-                   │
-┌──────────────────▼───────────────────┐
-│ Subprocess executes: `pytest -q`     │
-└──────────────────┬───────────────────┘
-                   │
-        ┌──────────┴──────────┐
-        │                     │
-   [Tests Pass]          [AssertionError / Exception]
-        │                     │
-┌───────▼────────┐     ┌──────▼────────────────────────────────────────┐
-│ Deliver Output │     │ Hotfix Request to Qwen 2.5 Coder 14B:         │
-│  to User / Disk│     │ - Original Code Snippet                       │
-└────────────────┘     │ - Captured Terminal Traceback                 │
-                       │ - Prompt: "Fix only the failing line."        │
-                       └──────────────────────┬────────────────────────┘
-                                              │
-                                       (Repeats in <5s)
 ```

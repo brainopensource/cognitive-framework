@@ -11,7 +11,7 @@ source_section: "v0.6 Concept Lock GAMMA"
 recursive Agent, ledger authority, identity trinity, wire-first plugins, exterior evaluator,
 sequential execution, deferred list). Independent advisory reviews then showed that those ADRs
 under-specified *how a lock is proven* and several algebraic/identity details. GAMMA
-(`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md`) independently
+(`docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/001_V060_concept_phase_GAMMA.md`) independently
 validated a small set of strengthenings. ADRs are append-only (`ADR-0000`); this entry records them
 without silently editing `0069`–`0073`.
 
@@ -63,7 +63,7 @@ six-D additive conservation (mathematically false for `depth`). Keep `D_H` as pl
 fail-open `layer0/spi/ceiling.py:21-22`; compose dropping capabilities
 `layer0/compose/compiler.py`; tautological replay `test/layer0/replay/test_parity.py`. Bound tests
 are the falsifier table in
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+`docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
 `REQ-TRUST-001`.
 
 **Reversal condition.** A newer ADR that (a) names a different consistency unit than Project, (b)

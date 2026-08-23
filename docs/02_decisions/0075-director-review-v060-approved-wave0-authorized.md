@@ -17,12 +17,12 @@ and verified the headline defects on disk (F1 fabricated pass at
 `layer0/scheduler/driver.py`; fail-open ceiling at `layer0/spi/ceiling.py`; living CI
 gating `test/layer0` while `test/kernel` is unwired). Frontend/CLI/TUI surfaces were out
 of scope per the review mandate. Full findings:
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md`.
+`docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/003_V060_DIRECTOR_REVIEW.md`.
 
 **Decision.**
 
 1. **APPROVED.** The v0.6 Concept Lock (SPEC + ADRs `0069`–`0074` + `0075` +
-   `docs/04_annex/{KERNEL,MEASUREMENT}.md`) is locked. The `002` foundation register is
+   `docs/01_law/{DISPATCH,MEASUREMENT}.md`) is locked. The `002` foundation register is
    the living roadmap. **Wave 0 (CI subject-of-record + named falsifiers) is authorized
    as the next code change.** No Wave 0–4 implementation was performed in this review.
 
@@ -53,13 +53,13 @@ of scope per the review mandate. Full findings:
 4. **Review-corpus consolidation executed.** After verifying their durable conclusions
    are absorbed into SPEC, ADRs `0069`–`0074`, the annexes, and GAMMA's adjudication
    tables, the following were **removed from the active tree** (all recoverable at git
-   `4f9f8b1`): `docs/07_reviews/OLD_TECH_LEAD_REVIEW_archive/` (15 files),
+   `4f9f8b1`): `docs/_archive/reviews/OLD_TECH_LEAD_REVIEW_archive/` (15 files),
    `TODO_DONT_COMMIT_BEFORE_DOING_IT_v2.md`, `PROMPT_ARCHITECTURE_CONCEPT_LOCK_V060.md`,
    and the superseded advisory/phase documents under `PRINCIPAL_STAFF_ENGINEER_REVIEW/`
    (ALFA, BETA, DELTA, `principal_engineer_proposal.md`, Full Refactor v3.1, execution
    plan, parecer v4, `aether-v1-roadmap-waves.md`). Kept: GAMMA (lock plan), `002`
    (living register), `VANGUARD_V060_FORENSIC_DISCOVERY.md` (evidence cited by ADRs),
-   `003` (this review's report). `docs/07_reviews/ARCHIVE.md` records the removal.
+   `003` (this review's report). `docs/_archive/README.md` records the removal.
 
 5. **Test baseline is law until Wave 0 changes it.** `test/README.md` is the durable
    record of the fresh baseline: which suites are the production path, the expected reds

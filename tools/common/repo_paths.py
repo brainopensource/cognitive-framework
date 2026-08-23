@@ -173,7 +173,7 @@ def preregistered_oracles() -> Path:
     """Return the canonical path to the preregistered oracle registry.
 
     Wave 0 (ADR-0075 F-20): restored to test/fixtures/ as the stable,
-    test-suite-owned location. Fallback to docs/03_sprints/evidence/ for
+    test-suite-owned location. Fallback to docs/03_execution/evidence/ for
     historical compatibility. The sprint6B fallback is retired — that path
     no longer exists in the tree.
     """

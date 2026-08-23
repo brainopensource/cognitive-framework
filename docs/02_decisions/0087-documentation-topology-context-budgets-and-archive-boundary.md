@@ -33,6 +33,8 @@ superseded_by: null
 3. Historical references and reviews move atomically to `docs/_archive/references/` and
    `docs/_archive/reviews/`. They remain link- and secret-scanned, but normal developer/agent
    context bundles and searches exclude `_archive/`. No historical text is copied into living docs.
+   `docs/09_tools/` remains in place as a separate follow-up decision because its utility scope is
+   not the same as the frozen research/review corpus.
 4. Living documents expose `read_when` and `do_not_read_when` guidance where they are entry points;
    indexes route an implementation bundle to at most the sprint task, law clause, decision, contract,
    and falsifier before code changes.

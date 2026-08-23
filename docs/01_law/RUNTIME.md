@@ -835,6 +835,6 @@ with a measurement gate (honours D-38). Unknown selector footprint means conflic
 
 ---
 
-*This specification word count is held near the ≤9k-word target by cross-referencing `docs/04_annex/` and
-`docs/05_adr/` rather than restating their content — if a section here starts to restate a schema, that
+*This detailed law body is retained as the complete source; task-sized leaves under `docs/01_law/` and
+`docs/02_decisions/` provide progressive navigation rather than restating its content — if a section here starts to restate a schema, that
 content belongs in `docs/reference/` (generated, M1+) instead, not in this file.*

@@ -37,5 +37,5 @@
       "task": "S9-C-06"
     }
   ],
-  "relocationNote": "Restored at Wave 0 (ADR-0075 F-20). Original location docs/scrum/sprints/sprint6B/; relocated to docs/03_sprints/evidence/ at v0.5.1 baseline; deleted at commit caaa7af. Canonical path is now test/fixtures/preregistered_oracles.json (test-suite-owned, stable)."
+  "relocationNote": "Restored at Wave 0 (ADR-0075 F-20). Historical sprint paths are retired; the canonical path is test/fixtures/preregistered_oracles.json (test-suite-owned, stable)."
 }

@@ -7,7 +7,7 @@ source_section: "v0.6 Concept Lock"
 
 # ADR-0069: Runtime convergence — Python-first, packages canonical, layer0 absorbed
 
-**Context.** Forensic discovery (`docs/07_reviews/VANGUARD_V060_FORENSIC_DISCOVERY.md`) found two
+**Context.** Forensic discovery (`docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/VANGUARD_V060_FORENSIC_DISCOVERY.md`) found two
 Python runtimes claiming Layer-0 work. Living CI gates `test/layer0` (25 tests, OK) and does not
 run `test/kernel` (95 tests, OK). Durable WAL ledger, exterior evaluator daemon, and rootless
 sandbox live in `vanguard/packages/`. `layer0/` provides SPI contracts and JSON-RPC/UDS but uses

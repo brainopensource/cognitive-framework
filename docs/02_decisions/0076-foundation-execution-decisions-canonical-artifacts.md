@@ -82,7 +82,7 @@ substrate).
 (non-JCS bytes); `adapters/evaluators/gate.py:79` (verified verdict discarded);
 `runtime/evaluation_listener.py:87` (fabricated envelope identity); `layer0/spi/ceiling.py`
 (second algebra). Bound falsifiers: F-01/F-04/F-05/F-11/F-16 in the `002` register; execution detail
-in `docs/03_sprints/plans/`.
+in `docs/03_execution/`.
 
 **Reversal condition.** A newer ADR demonstrating the canonical artifact cannot carry the locked
 semantics (e.g. the domain algebra cannot express a required ceiling relation), with a failing

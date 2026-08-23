@@ -31,7 +31,7 @@ superseded_by: null
 ## Canonical algebra
 
 The selector partial order and six budget dimensions are defined normatively only in
-[`RUNTIME.md` §1.0](../01_law/RUNTIME.md#10-recursive-machine-authority-and-identity) and
+[`RUNTIME.md` §1.0](../01_law/RUNTIME.md#10-recursive-machine-authority-and-identity-adr-0070-adr-0071-adr-0074) and
 [`DISPATCH.md` §4](../01_law/DISPATCH.md#4-attenuation). ADR-0074 records why additive
 resources and structural ceilings are distinct. This page intentionally does not repeat their matrix.
 

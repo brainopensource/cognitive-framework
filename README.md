@@ -23,7 +23,7 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0086`](docs/05_adr/0086-historical-adr-working-tree-consolidation.md) |
+| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0087`](docs/02_decisions/0087-documentation-topology-context-budgets-and-archive-boundary.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Status** | **M-2 / v0.6.1 Wave 2C development active.** RF-72 is green; RF-23 (NOVA-1) and RF-25 (NOVA-2) are red for their intended causes and authorized as parallel implementation lanes. |
 | **Foundation Plan** | M-0–M-4 trusted foundation, then gated M-5–M-10 generality, delegation, concurrency, framework building, retrieval/macros, and governed meta-cognition |
@@ -31,7 +31,7 @@ observe → propose → authorize → effect → receipt → evaluate
 
 [![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Director_review-M--2_Wave_2C-brightgreen.svg)](docs/03_sprints/sprint_active.md)
+[![Approved](https://img.shields.io/badge/Director_review-M--2_Wave_2C-brightgreen.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. Executive Summary & Documentation Architecture
 
@@ -47,17 +47,17 @@ All documentation in this repository is strictly organized into three distinct a
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/04_annex/) — Pure RFC-2119 Normative Specification │
+│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ governs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                          2. THE DECISIONS (WHY)                          │
-│  docs/05_adr/ — Immutable, append-only Architecture Decision Records     │
+│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ directs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_sprints/sprint_active.md — Single living board & milestone ladder│
+│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -65,15 +65,15 @@ All documentation in this repository is strictly organized into three distinct a
 1. **This Document (`README.md`)** — Subsystem inventory, as-built architecture, and verified commands.
 2. **The Normative Law**:
    - [`docs/SPEC.md`](docs/SPEC.md) — The sole normative specification (RFC-2119).
-   - [`docs/04_annex/KERNEL.md`](docs/04_annex/KERNEL.md) — Dispatch, capability grants, and security model.
-   - [`docs/04_annex/MEASUREMENT.md`](docs/04_annex/MEASUREMENT.md) — Measurement doctrine.
+   - [`docs/01_law/DISPATCH.md`](docs/01_law/DISPATCH.md) — Dispatch, capability grants, and security model.
+   - [`docs/01_law/MEASUREMENT.md`](docs/01_law/MEASUREMENT.md) — Measurement doctrine.
 3. **The Decision Records**:
-   - [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md) — Architecture Decision Records (current foundation, Tier S+, and repository-governance lock: ADR-0069–0086).
+   - [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — Architecture Decision Records (current foundation, Tier S+, and repository-governance lock: ADR-0069–0087).
 4. **The Active Execution Board**:
-   - [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) — Single living execution board, active wave lanes, and task register.
-   - [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) — Macro sequencing and gates (M-0 through M-10).
+   - [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) — Single living execution board, active wave lanes, and task register.
+   - [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) — Macro sequencing and gates (M-0 through M-10).
 5. **Current Overview**:
-   - [`docs/00_overview/SYSTEM_OVERVIEW.md`](docs/00_overview/SYSTEM_OVERVIEW.md) — Concise as-built map; navigational, not authority.
+   - [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — Concise as-built map; navigational, not authority.
 
 ---
 
@@ -171,8 +171,8 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ## 5. Macro Roadmap & Execution Status
 
 Execution status and macro milestones are tracked in:
-- **Macro Roadmap (M-0 → M-10)**: [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md)
-- **Active Execution Board**: [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md)
+- **Macro Roadmap (M-0 → M-10)**: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md)
+- **Active Execution Board**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md)
 
 ```text
 M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (In Flight) ──▶ M-3 (Queued) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Gated)
@@ -242,4 +242,4 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files; current execution state lives only in
-[`sprint_active.md`](docs/03_sprints/sprint_active.md).
+[`sprint_active.md`](docs/03_execution/sprint_active.md).

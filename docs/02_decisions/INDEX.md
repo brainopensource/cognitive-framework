@@ -9,6 +9,11 @@ status: living
 owner: engineering-director
 version: "0.6.1"
 last_verified: 2026-08-21
+read_when:
+  - resolving-architectural-decisions
+  - selecting-an-implementation-bundle
+do_not_read_when:
+  - consulting-historical-reviews
 supersedes: []
 superseded_by: null
 ---
@@ -25,7 +30,7 @@ superseded_by: null
 
 - 🚀 [v0.6.0 Concept Lock & Foundation Execution (`0069`–`0076`)](#v060-concept-lock--foundation-execution-canonical-law) — **Start here for active production law**
 - 🧭 [Tier S+ Evolution Contract (`0077`–`0085`)](#tier-s-evolution-contract-00770085) — **Ratified v0.6.1→v1.0 design and reservation law**
-- 🧹 [Repository Governance (`0086`)](#repository-governance) — historical-body consolidation and recovery rule
+- 🧹 [Repository Governance (`0086`–`0087`)](#repository-governance) — historical-body consolidation, topology, and recovery rule
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -84,6 +89,7 @@ self-authorize their deferred code.
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
 | `0086` | [`0086-historical-adr-working-tree-consolidation.md`](0086-historical-adr-working-tree-consolidation.md) | **Historical consolidation:** preserve old identifiers, summaries, and recovery commit while removing 81 superseded bodies from normal retrieval scope. | accepted | 2026-08-21 |
+| `0087` | [`0087-documentation-topology-context-budgets-and-archive-boundary.md`](0087-documentation-topology-context-budgets-and-archive-boundary.md) | **Documentation topology:** authority-ordered directories, compact law index, context budgets, and `_archive/` boundary. | accepted | 2026-08-23 |
 
 ---
 
@@ -92,7 +98,7 @@ self-authorize their deferred code.
 Full bodies in this section were removed from the default working tree by ADR-0086. Their IDs are
 permanently reserved; the original bytes are recoverable at Git commit
 `5b9966c24c13d0ffc4315a39a97870fd756324a9`. These summaries are provenance, not current
-implementation authority. Current work cites SPEC/annexes and ADRs 0069–0086.
+implementation authority. Current work cites SPEC/law leaves and ADRs 0069–0087.
 
 <details>
 <summary>M0 and pre-v0.6 decision ledger (expand for archaeology)</summary>
@@ -241,5 +247,5 @@ meaning.
 - [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) — Comprehensive register of capabilities deferred to later phases or rejected with rationale.
 - [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) — Forensic register of historical drifts identified and resolved.
 - [`SPEC.md`](../SPEC.md) — Living normative specification (Vanguard Meta-Harness Framework).
-- [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — Substrate generality analysis and v0.6.1 recommendations.
-- [`004_V061_ALIGNMENT_ROADMAP.md`](../07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — v0.6.1 alignment and M-2 through M-10 execution roadmap.
+- [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — historical substrate generality analysis.
+- [`004_V061_ALIGNMENT_ROADMAP.md`](../_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — historical v0.6.1 alignment roadmap.

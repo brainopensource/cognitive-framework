@@ -1,0 +1,67 @@
+# ==========================================
+# Rust Build & Target Artifacts
+# ==========================================
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# ==========================================
+# Go & Wails Build Artifacts
+# ==========================================
+build/bin/
+build/windows/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ==========================================
+# Node.js & Web Frontend Artifacts
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+frontend/dist/
+frontend/build/
+
+# ==========================================
+# Python Virtual Environments & Cache
+# ==========================================
+.venv/
+env/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# Benchmarking Datasets & Raw Outputs
+# ==========================================
+bench_finetune/
+runs_*/
+*.csv
+*.jsonl
+
+# ==========================================
+# IDEs & System Files
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example

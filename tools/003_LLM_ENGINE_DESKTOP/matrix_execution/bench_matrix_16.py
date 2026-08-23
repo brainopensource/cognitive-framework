@@ -270,34 +270,48 @@ def run_experiment(exp: dict, prompt: str, model_name: str) -> dict:
 
 def main():
     prompt = load_prompt()
-    experiments = generate_fractional_16_design()
+    max_runs = int(sys.argv[2]) if len(sys.argv) > 2 else 16
+    
+    all_experiments = generate_fractional_16_design()
+    if max_runs == 4:
+        # Quick test: select 4 representative corners
+        experiments = [all_experiments[0], all_experiments[4], all_experiments[8], all_experiments[15]]
+        for i, e in enumerate(experiments):
+            e["run_index"] = i + 1
+    elif max_runs == 32:
+        experiments = all_experiments + all_experiments
+        for i, e in enumerate(experiments):
+            e["run_index"] = i + 1
+    else:
+        experiments = all_experiments[:max_runs]
 
-    print("=" * 75)
-    print(f"🧪 EXECUTING 16-RUN FRACTIONAL FACTORIAL DoE (2^(5-1)) MATRIX")
-    print(f"Target Model  : {MODEL_NAME}")
-    print(f"Isolated Dir  : {OUTPUT_DIR}")
-    print(f"Total Runs    : 16 Sequential Runs")
-    print(f"CSV Storage   : {CSV_FILE}")
-    print("=" * 75)
+    print("=" * 75, flush=True)
+    print(f"🧪 EXECUTING DoE BENCHMARK MATRIX ({len(experiments)} RUNS)", flush=True)
+    print(f"Target Model  : {MODEL_NAME}", flush=True)
+    print(f"Isolated Dir  : {OUTPUT_DIR}", flush=True)
+    print(f"Total Runs    : {len(experiments)} Sequential Runs", flush=True)
+    print(f"CSV Storage   : {CSV_FILE}", flush=True)
+    print("=" * 75, flush=True)
 
     records = []
     for exp in experiments:
         try:
+            print(f"[{exp['run_index']:02d}/{len(experiments)}] 🚀 Running: {exp['name']}...", flush=True)
             r = run_experiment(exp, prompt, MODEL_NAME)
             records.append(r)
         except Exception as e:
-            print(f"❌ Error in {exp['name']}: {e}")
+            print(f"❌ Error in {exp['name']}: {e}", flush=True)
 
     # Summary Table
-    print("\n" + "=" * 75)
-    print(f"📊 16-RUN DoE BENCHMARK SUMMARY TABLE: {MODEL_NAME}")
-    print("=" * 75 + "\n")
-    print("| # | Run ID | Tokens/s | Latência | Nota (0-100) | Avaliação |")
-    print("| :---: | :--- | :---: | :---: | :---: | :--- |")
+    print("\n" + "=" * 75, flush=True)
+    print(f"📊 DoE BENCHMARK SUMMARY TABLE: {MODEL_NAME}", flush=True)
+    print("=" * 75 + "\n", flush=True)
+    print("| # | Run ID | Tokens/s | Latência | Nota (0-100) | Avaliação |", flush=True)
+    print("| :---: | :--- | :---: | :---: | :---: | :--- |", flush=True)
     for r in records:
-        print(f"| {r['run_index']:02d} | **{r['run_id']}** | **{r['eval_tps']} t/s** | **{r['wall_time_sec']}s** | **{r['auto_score']}/100** | {r['auto_feedback']} |")
+        print(f"| {r['run_index']:02d} | **{r['run_id']}** | **{r['eval_tps']} t/s** | **{r['wall_time_sec']}s** | **{r['auto_score']}/100** | {r['auto_feedback']} |", flush=True)
 
-    print("\n✅ Dataset dos 16 testes gravado com sucesso em:", CSV_FILE)
+    print("\n✅ Dataset gravado com sucesso em:", CSV_FILE, flush=True)
 
 
 if __name__ == "__main__":

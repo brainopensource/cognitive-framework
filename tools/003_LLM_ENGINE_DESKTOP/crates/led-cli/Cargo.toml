@@ -1,0 +1,20 @@
+[package]
+name = "led-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "led"
+path = "src/main.rs"
+
+[dependencies]
+led-core = { path = "../led-core" }
+tokio.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono.workspace = true

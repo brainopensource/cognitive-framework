@@ -1,0 +1,27 @@
+[package]
+name = "led-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+sysinfo.workspace = true
+reqwest.workspace = true
+tokio-stream.workspace = true
+async-stream.workspace = true
+futures-util.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

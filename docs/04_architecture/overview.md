@@ -9,6 +9,10 @@ status: living
 owner: senior-principal-systems-engineer
 version: "0.6.1"
 last_verified: 2026-08-21
+read_when:
+  - orienting-in-the-system-architecture
+do_not_read_when:
+  - implementing-a-specific-contract
 supersedes: []
 superseded_by: null
 ---
@@ -16,7 +20,7 @@ superseded_by: null
 # Vanguard / AETHER System Overview
 
 > **Classification:** Descriptive architecture with explicit current/future maturity.
-> **Authority:** Non-normative. Governing law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/04_annex/`](../04_annex/).
+> **Authority:** Non-normative. Governing law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/01_law/`](../01_law/).
 
 ---
 
@@ -83,11 +87,11 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 | Deep Topic | Canonical Modular Location |
 |---|---|
-| **C4 Context, Container & Components** | [`docs/architecture/`](../architecture/) · [`c4_context.md`](../architecture/c4_context.md) · [`c4_component.md`](../architecture/c4_component.md) |
-| **S0–S12 Dispatch & Replay Sequences** | [`docs/architecture/sequences.md`](../architecture/sequences.md) |
-| **Episode & Plugin State Machines** | [`docs/architecture/state_machines.md`](../architecture/state_machines.md) |
-| **Traceability Matrix (Concept $\leftrightarrow$ Code $\leftrightarrow$ Test)** | [`docs/architecture/traceability_matrix.md`](../architecture/traceability_matrix.md) |
-| **Wire & Event Contracts** | [`docs/contracts/events.md`](../contracts/events.md) · [`trajectories.md`](../contracts/trajectories.md) |
-| **Hexagonal Port Protocols** | [`docs/protocols/kernel.md`](../protocols/kernel.md) · [`evaluator.md`](../protocols/evaluator.md) |
-| **Mathematical & Cognitive Theory** | [`docs/theory/active_inference.md`](../theory/active_inference.md) · [`economic_resources.md`](../theory/economic_resources.md) |
-| **Autonomous Contributor Guides** | [`docs/engineering/development.md`](../engineering/development.md) · [`context_bundles.md`](../engineering/context_bundles.md) |
+| **C4 Context, Container & Components** | [`docs/04_architecture/`](./) · [`c4_context.md`](c4_context.md) · [`c4_component.md`](c4_component.md) |
+| **S0–S12 Dispatch & Replay Sequences** | [`sequences.md`](sequences.md) |
+| **Episode & Plugin State Machines** | [`state_machines.md`](state_machines.md) |
+| **Traceability Matrix (Concept $\leftrightarrow$ Code $\leftrightarrow$ Test)** | [`traceability_matrix.md`](traceability_matrix.md) |
+| **Wire & Event Contracts** | [`docs/05_contracts/events.md`](../05_contracts/events.md) · [`trajectories.md`](../05_contracts/trajectories.md) |
+| **Hexagonal Port Protocols** | [`docs/06_protocols/kernel.md`](../06_protocols/kernel.md) · [`evaluator.md`](../06_protocols/evaluator.md) |
+| **Mathematical & Cognitive Theory** | [`docs/08_theory/active_inference.md`](../08_theory/active_inference.md) · [`economic_resources.md`](../08_theory/economic_resources.md) |
+| **Autonomous Contributor Guides** | [`docs/07_engineering/development.md`](../07_engineering/development.md) · [`context_bundles.md`](../07_engineering/context_bundles.md) |

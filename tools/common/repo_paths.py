@@ -5,11 +5,7 @@ Every governance, contract, baseline, audit and CI helper must resolve
 locations through this module. Callers must not scatter replacement
 literals for the documentation move:
 
-    docs/v4            -> docs/main_v4
-    docs/sprintN       -> docs/scrum/sprints/sprintN
-    docs/agile/sprintN -> docs/scrum/sprints/sprintN
-    docs/review        -> docs/reviews
-    docs/development   -> docs/scrum/development_guides
+    old numbered/module paths -> the authority-ordered docs tree
 
 Commands are independent of the process working directory: ``repo_root()``
 walks from this file (and, if needed, from cwd) until the live layout is
@@ -27,11 +23,23 @@ import re
 from pathlib import Path
 
 CANONICAL = {
-    "docs_main_v4": "docs/main_v4",
-    "docs_scrum": "docs/scrum",
-    "docs_sprints": "docs/scrum/sprints",
-    "docs_reviews": "docs/reviews",
-    "docs_development_guides": "docs/scrum/development_guides",
+    "docs_law": "docs/01_law",
+    "docs_decisions": "docs/02_decisions",
+    "docs_execution": "docs/03_execution",
+    "docs_architecture": "docs/04_architecture",
+    "docs_contracts": "docs/05_contracts",
+    "docs_protocols": "docs/06_protocols",
+    "docs_engineering": "docs/07_engineering",
+    "docs_theory": "docs/08_theory",
+    "docs_diagrams": "docs/09_diagrams",
+    "docs_archive": "docs/_archive",
+    "docs_references": "docs/_archive/references",
+    "docs_reviews": "docs/_archive/reviews",
+    # Compatibility names retained for callers; they resolve to the new owners.
+    "docs_main_v4": "docs/02_decisions",
+    "docs_scrum": "docs/03_execution",
+    "docs_sprints": "docs/03_execution",
+    "docs_development_guides": "docs/07_engineering",
 }
 
 # Pre-restructure layout, retained for resolution fallback only.
@@ -42,12 +50,7 @@ LEGACY = {
 }
 
 # Live prefixes that must not be flagged as stale.
-LIVE_PREFIXES = tuple(CANONICAL.values()) + (
-    "docs/agile/",
-    "docs/main_v4/",
-    "docs/reviews/",
-    "docs/scrum/",
-)
+LIVE_PREFIXES = tuple(CANONICAL.values())
 
 # Obsolete layouts left behind by the documentation move.
 # Negative lookaheads keep live `docs/reviews` and `docs/development_guides`.
@@ -117,20 +120,13 @@ def repo_path(*parts: str | os.PathLike[str]) -> Path:
 
 def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
-    if (root / "docs" / "01_specs" / "backend").exists():
-        return root.joinpath("docs", "01_specs", "backend", *parts)
-    if (root / "docs" / "archive" / "v045" / "01_specs" / "backend").exists():
-        return root.joinpath("docs", "archive", "v045", "01_specs", "backend", *parts)
-    if (root / "docs" / "05_adr").exists():
-        return root.joinpath("docs", "05_adr", *parts)
-    base = CANONICAL["docs_main_v4"] if (root / CANONICAL["docs_main_v4"]).exists() else "docs"
-    return root.joinpath(base, *parts)
+    return root.joinpath(CANONICAL["docs_decisions"], *parts)
 
 
 def docs_scrum(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
-    if (root / CANONICAL["docs_scrum"]).exists():
-        return root.joinpath(CANONICAL["docs_scrum"], *parts)
+    if (root / CANONICAL["docs_execution"]).exists():
+        return root.joinpath(CANONICAL["docs_execution"], *parts)
     if (root / LEGACY["docs_scrum"]).exists():
         return root.joinpath(LEGACY["docs_scrum"], *parts)
     return root.joinpath("docs", *parts)
@@ -140,8 +136,8 @@ def docs_sprint(sprint: str, *parts: str | os.PathLike[str]) -> Path:
     """Resolve a sprint directory. Sprints live under `docs/scrum/sprints/`."""
 
     root = repo_root()
-    if (root / CANONICAL["docs_sprints"]).exists():
-        return root.joinpath(CANONICAL["docs_sprints"], sprint, *parts)
+    if (root / CANONICAL["docs_execution"]).exists():
+        return root.joinpath(CANONICAL["docs_execution"], sprint, *parts)
     if (root / LEGACY["docs_sprints"]).exists():
         return root.joinpath(LEGACY["docs_sprints"], sprint, *parts)
     return root.joinpath("docs", sprint, *parts)
@@ -149,15 +145,13 @@ def docs_sprint(sprint: str, *parts: str | os.PathLike[str]) -> Path:
 
 def docs_reviews(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
-    if (root / CANONICAL["docs_reviews"]).exists():
-        return root.joinpath(CANONICAL["docs_reviews"], *parts)
-    return root.joinpath("docs", "review", *parts)
+    return root.joinpath(CANONICAL["docs_reviews"], *parts)
 
 
 def docs_development_guides(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
-    if (root / CANONICAL["docs_development_guides"]).exists():
-        return root.joinpath(CANONICAL["docs_development_guides"], *parts)
+    if (root / CANONICAL["docs_engineering"]).exists():
+        return root.joinpath(CANONICAL["docs_engineering"], *parts)
     if (root / LEGACY["docs_development_guides"]).exists():
         return root.joinpath(LEGACY["docs_development_guides"], *parts)
     return root.joinpath("docs", "development", *parts)
@@ -189,7 +183,7 @@ def preregistered_oracles() -> Path:
     if test_fixtures.exists():
         return test_fixtures
     # Legacy docs location (v0.5.1 baseline, deleted at commit caaa7af).
-    docs_evidence = root / "docs" / "03_sprints" / "evidence" / "preregistered_oracles.json"
+    docs_evidence = root / "docs" / "03_execution" / "evidence" / "preregistered_oracles.json"
     if docs_evidence.exists():
         return docs_evidence
     # Return canonical test/fixtures path even if missing so callers get a

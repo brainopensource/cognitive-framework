@@ -9,11 +9,11 @@ from pathlib import Path
 from typing import Iterable
 
 _ROOT = Path(__file__).resolve().parents[2]
-_REGISTER = _ROOT / "docs/05_adr/INDEX.md"
+_REGISTER = _ROOT / "docs/02_decisions/INDEX.md"
 _CITATION_FILES = (
     _ROOT / "docs/SPEC.md",
-    _ROOT / "docs/03_sprints/sprint_active.md",
-    *sorted((_ROOT / "docs/05_adr").glob("[0-9][0-9][0-9][0-9]-*.md")),
+    _ROOT / "docs/03_execution/sprint_active.md",
+    *sorted((_ROOT / "docs/02_decisions").glob("[0-9][0-9][0-9][0-9]-*.md")),
 )
 _TOKEN = re.compile(r"RF-(\d+)(?:`?\s*[–-]\s*`?(?:RF-)?(\d+))?")
 

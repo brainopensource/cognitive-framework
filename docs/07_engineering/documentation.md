@@ -27,12 +27,12 @@ superseded_by: null
 ---
 
 ## 1. The Clean Triad Rules
-1. **Law (What)** $\to$ Edit [`docs/SPEC.md`](../SPEC.md) and [`docs/04_annex/`](../04_annex/).
-2. **Decisions (Why)** $\to$ Append a new ADR in [`docs/05_adr/`](../05_adr/).
-3. **Execution (How & Now)** $\to$ Edit [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md).
+1. **Law (What)** $\to$ Edit [`docs/SPEC.md`](../SPEC.md) or the relevant leaf in [`docs/01_law/`](../01_law/).
+2. **Decisions (Why)** $\to$ Append a new ADR in [`docs/02_decisions/`](../02_decisions/).
+3. **Execution (How & Now)** $\to$ Edit [`docs/03_execution/sprint_active.md`](../03_execution/sprint_active.md).
 
 Future milestone sequencing and inactive backlog live in
-[`docs/02_roadmap/milestones.md`](../02_roadmap/milestones.md); they do not authorize work.
+[`docs/03_execution/milestones.md`](../03_execution/milestones.md); they do not authorize work.
 
 ## 2. Language and Placement
 

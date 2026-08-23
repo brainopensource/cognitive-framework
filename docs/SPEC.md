@@ -29,7 +29,9 @@ historical evidence only.
 
 ## Authority and precedence
 
-1. This specification and the five law leaves in [`01_law/`](01_law/) are the only normative text.
+1. This specification and the six `class: law`, `authority: normative` leaves in
+   [`01_law/`](01_law/) form the normative specification. No one leaf has independent precedence;
+   a change that affects more than one leaf MUST update every affected clause atomically.
 2. Append-only decisions in [`02_decisions/INDEX.md`](02_decisions/INDEX.md) record rationale and
    amendments; an accepted ADR is binding only when reflected in the law.
 3. [`03_execution/sprint_active.md`](03_execution/sprint_active.md) is the sole current work board;
@@ -59,16 +61,16 @@ historical evidence only.
 
 | ID | Short invariant | Canonical detail |
 |---|---|---|
-| I-1 | One production runtime | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#1-layer-0--the-microkernel) |
-| I-2 | TCB boundary and budget | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#1-the-trusted-computing-base) |
-| I-3 | Capability attenuation | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#4-attenuation) |
+| I-1 | One schema-generated `EffectRequest` | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
+| I-2 | Emitted equals declared; forged is rejected | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
+| I-3 | Every control merges with its call site | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
 | I-4 | Durable fresh-process replay | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#13-determinism--replay-contract) |
-| I-5 | JCS/schema determinism | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#13-determinism--replay-contract) |
-| I-6 | Rootless isolation | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#6-the-workload-perimeter) |
+| I-5 | Exterior signed judge | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#evaluator-and-verdicts) |
+| I-6 | Plugins untrusted by default | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#6-the-workload-perimeter) |
 | I-7 | Domain-blind kernel | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#1-the-trusted-computing-base) |
-| I-8 | Signed exterior evaluation | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#evaluator-and-verdicts) |
+| I-8 | Specifications are generated or normative, never both | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
 | I-9 | Complete recovered trajectory | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#trajectory-accounting) |
-| I-10 | No forged authority | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#absence-versus-falsification) |
+| I-10 | Metaphors are not architecture | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
 | I-11 | Single sequential turn loop | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#11-the-turn-state-machine) |
 
 ## Law map

@@ -92,6 +92,15 @@ change than it prevents. Reversal requires a newer ADR and migration/falsifier p
 
 ---
 
+## Amendment — 2026-08-23: documentation timing superseded by ADR-0087
+
+Decision clause 11's M-5 timing constraint is superseded by ADR-0087. The content-preserving
+topology migration completed before M-4 under link, metadata, duplication, and preservation gates.
+This amendment changes navigation only: it does not claim foundation evidence, open a milestone,
+or weaken any runtime, compatibility, or authority gate in this ADR.
+
+---
+
 ## Amendment — 2026-08-21: name deferred compatibility fitness tests
 
 Naming these tests closes their contracts without implementing their future capabilities:

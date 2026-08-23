@@ -26,8 +26,11 @@ of `D_H`, postponing the correction until after M-4 would make later corpus attr
 2. Multiple component instances MAY have the same SPI kind. Names are pack-owned identifiers;
    neither `kernel/` nor the universal episode loop may branch on a component name.
 3. The graph is a **composition graph**, not a workflow engine. Bindings express addressable
-   interfaces, not privileged scheduling semantics. Cycles are permitted when interfaces type
-   check; turns, depth, reservations, and verifier gates enforce termination. Self-edges fail.
+   interfaces, not privileged scheduling semantics. Eager construction and activation dependencies
+   MUST be acyclic and initialized in topological order. Lazy, post-activation interface references
+   MAY form cycles when interfaces type check; the runtime never walks those edges to derive an
+   execution order. Self-edges fail. Turns, depth, reservations, and verifier gates bound recursive
+   runtime calls; they are not a substitute for safe component initialization.
 4. One semantic compiler performs: schema validation; immutable reference resolution; interface
    and connection checks; ceiling intersection; isolation/evidence checks; unread-field rejection;
    then JCS freezing. Unknown refs, endpoints, kinds, required interfaces, or authority-bearing
@@ -46,10 +49,10 @@ of `D_H`, postponing the correction until after M-4 would make later corpus attr
    only when M-2 and RF-25 are green and M-3 is opened on the active board.
 
 **Bound falsifiers.** RF-28: two same-kind named components compile. RF-29: the linear,
-generator/critic, debate, bounded-tree, cyclic-critic, and stigmergic fixtures produce stable,
+generator/critic, debate, bounded-tree, lazy-reference cyclic-critic, and stigmergic fixtures produce stable,
 distinct `D_H` values with no kernel or episode-engine change. RF-30: an edge-only change changes
 `D_H`. RF-31: ceiling intersection fails closed. RF-32: unknown/dangling/unconsumed authority
-fails at compose. RF-33: one canonical parser exists.
+and eager activation cycles fail at compose. RF-33: one canonical parser exists.
 
 **Alternatives rejected.** A `stigmergic_blackboard` boolean; a larger fixed slot list; an open
 `relation` string that can smuggle in a workflow engine; a graph database as authority; or a new

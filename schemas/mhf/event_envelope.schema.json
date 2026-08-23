@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vanguard.dev/schemas/mhf/event_envelope.schema.json",
-  "$comment": "RFC 8785 JCS canonical envelope. Hash-chained per run via prev_digest. SPEC §1.2.",
+  "$comment": "RFC 8785 JCS canonical envelope. Canonical live writes are hash-chained and sequenced per project_id via prev_digest. Nullable lineage fields remain only for compatibility readers of historical rows; the production LedgerEmitter supplies project_id, principal_id, harness_digest, causation/correlation defaults, and the applicable episode lineage. SPEC §1.2.",
   "title": "EventEnvelope",
   "type": "object",
   "additionalProperties": false,
@@ -26,7 +26,7 @@
     "episode_id": { "type": ["string", "null"] },
     "parent_episode_id": { "type": ["string", "null"] },
     "principal": { "type": "string", "minLength": 1 },
-    "project_id": { "type": ["string", "null"], "$comment": "ADR-0074 §5: consistency unit; hash chain and seq are per Project. Optional until Wave 1 Sprint 1.2 flips ADR-0070 §5 lineage (project_id, principal_id, harness_digest) to required and regenerates types." },
+    "project_id": { "type": ["string", "null"], "$comment": "ADR-0074 §5 consistency unit. Nullable only for compatibility reads; canonical live writers require a non-empty value." },
     "principal_id": { "type": ["string", "null"] },
     "parent_principal_id": { "type": ["string", "null"] },
     "harness_digest": { "type": ["string", "null"], "$comment": "D_H of the composition under which this event was produced (ADR-0071)." },

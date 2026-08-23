@@ -411,4 +411,8 @@ For a reviewer with one day. Each line has a mechanical answer; an answer that r
 9. Do the four planes run under distinct identities at runtime, or only in the diagram?
 10. For every control in this document, name its must-fail test. **A control without one is not a control.**
 
-> **Outstanding obligation.** The rule-to-test map does not yet exist: `08 §5` owns the must-fail suite and is unwritten. Until `CI-9` passes, every rule in this document is *asserted and unproven*, which is a weaker position than this document's tone implies. No rule here may be cited as an established control before its test exists.
+> **Control-evidence status.** ADR-0075 and M-0 discharged the original CI-9 obligation for the
+> registered F-01…F-21 controls and the standing architecture/security gates. That milestone does
+> not prove every prose sentence in this document. A clause may be cited as an established control
+> only when its named must-fail test and production call site are both identifiable; otherwise it
+> remains normative design intent and must receive a falsifier before implementation reliance.

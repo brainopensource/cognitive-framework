@@ -49,3 +49,17 @@ class ModelPort(Protocol):
 2. **Ollama (`adapters/models/ollama.py`)**: Local open-weights daemon.
 3. **Cassette (`adapters/models/cassette.py`)**: Deterministic replay for hermetic CI.
 4. **Fake (`adapters/models/fake.py`)**: In-memory test doubles.
+
+## Authority and accounting boundary
+
+`ModelPort.propose()` generates cognition; it is not an S0–S12 environment-effect verb. Every
+concrete effect contained in the returned proposal still enters the canonical dispatcher. A remote
+adapter MUST use only the route, egress policy, credential reference, and budget ceiling frozen at
+composition. Credentials are adapter-private and MUST NOT appear in the context bundle, ledger, or
+trajectory.
+
+The runtime accounts each call attempt—including retries, fallback, and escalation—as one ordered
+`invocations` entry. Provider/model route, fingerprint or typed absence, usage provenance, latency,
+and `measured`/`estimated`/`unavailable` status follow
+[`EVIDENCE.md`](../01_law/EVIDENCE.md#trajectory-accounting). Unknown cost is never zero. RF-23 is
+the current conservation and attribution falsifier.

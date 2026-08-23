@@ -683,8 +683,10 @@ harness_digest, turn-prefix context_digest)` with divergent verdicts → (chosen
 *turn* granularity (the prefix-attribution telemetry already computes the divergence point); filter by
 verdict signature validity + anti-cheat lint (existing `test_anticheat.py` semantics); emit JSONL
 conforming to standard DPO trainer schemas, plus an SFT split from verdict-pass trajectories. Because
-verdicts are exterior-signed, the training signal is un-gameable by construction — the property no
-competitor pipeline has. Continuous loop: production telemetry → harvest → fine-tune open-weight
+exterior signatures make verdict substitution and subject rebinding tamper-evident under the stated
+key-separation threat model. They do **not** prevent evaluator exploitation, benchmark leakage,
+selection bias, Goodhart effects, or distribution shift; held-out and adversarial measurement gates
+remain mandatory. Continuous loop: production telemetry → harvest → fine-tune open-weight
 tier-1/2 models → cassette-replay regression in the lab → promotion pointer. This converts the existing
 tier-escalation cost curve into a self-lowering one. (VG-07 §4 "distillation & promotion" is this
 section's rationale, merged per matrix §1.10.)
@@ -707,7 +709,7 @@ does not authorize work.
 | **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
 | **M-3 / v0.6.2** | Named Component Graph, complete plugin lifecycle, absent-vs-forged rules, atomic `layer0/` deletion | RF-28–RF-45 and NOVA-4 green |
 | **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | one run ID, populated trajectory, exterior signed evidence; Foundation Stop Line |
-| **M-5 / v0.7.0** | Math/formal Pack #2 and Clean-Triad collapse | zero `domain/` or `kernel/` diffs; trajectory parity |
+| **M-5 / v0.7.0** | Math/formal Pack #2 and exact T0 witness memo | zero `domain/` or `kernel/` diffs; trajectory parity |
 | **M-6–M-10** | Mediated spawn, measured concurrency, declarative swarms, retrieval/macros, governed learning | each milestone's named falsifiers; no work before M-4 is green |
 
 **Standing CI gates for the code programme (Wave 0+, `ADR-0073`, `ADR-0074`):** production
@@ -765,8 +767,10 @@ and VG-10's `DEF-*`/`REJ-*` registers, now `docs/02_decisions/DEFERRED_REJECTED.
 - **No parallel fan-out** before independence-group events can be emitted and measured (D-38, Invariant
   I-11).
 - **No second wire contract for clients** — generated readers only (`ADR-0063`, AP-6).
-- **No metaphysical taxonomy of any kind** — biological, cosmological, or tier-of-being framing is
-  forbidden in any document under `docs/` (**ADR-M0-10**, `REJ-10`).
+- **No metaphysical taxonomy as system architecture** — biological, cosmological, or tier-of-being
+  framing is forbidden in living law, decisions, execution, architecture, contracts, protocols,
+  engineering, and theory (**ADR-M0-10**, `REJ-10`). Frozen provenance under `_archive/` and
+  `09_diagrams/` may preserve rejected historical language, but it never authorizes implementation.
 - **No playbook runtime**, ever — advisory (skill cards, §5.4) and guided (planner policy) rungs are the
   ceiling; `strict` deterministic DAG execution reintroduces the workflow-engine anti-pattern §1.1
   exists to prevent (`REJ-01`, `N-20`).
@@ -816,8 +820,9 @@ I-1 through I-10 are carried from the archived Tech Lead audit `CRITICAL_GAP_ANA
    execution is a privilege granted by policy, not the default.
 7. **The core is domain-blind.** `coding|ast|pytest` MUST NOT appear under `layer0/` or
    `vanguard/packages/{domain,kernel}/`. Domain packs live in `packs/` and `apps/` as clients.
-8. **Specs are generated or normative — never both.** One normative document (this one); schema
-   references generated; drift is a CI failure, not a register.
+8. **Specs are generated or normative — never both.** The normative specification is the compact
+   `SPEC.md` index plus the six `class: law`, `authority: normative` leaves in `01_law/`; schema
+   references are generated. Drift between them is a CI failure, not a register.
 9. **Telemetry is a dataset.** Every episode terminates in a schema-valid `mhf.trajectory/1` record
    that is, without transformation, a valid harvest row. For every invoked turn the row MUST carry
    an ordered sequence of all invocations (including retries and escalations), attributable
@@ -835,6 +840,6 @@ with a measurement gate (honours D-38). Unknown selector footprint means conflic
 
 ---
 
-*This detailed law body is retained as the complete source; task-sized leaves under `docs/01_law/` and
-`docs/02_decisions/` provide progressive navigation rather than restating its content — if a section here starts to restate a schema, that
-content belongs in `docs/reference/` (generated, M1+) instead, not in this file.*
+*This detailed law body is retained as the complete source; the compact index and thematic law leaves
+provide progressive navigation rather than competing authority. Generated schema reference belongs
+beside its owning contract or under `schemas/`, not duplicated in this file.*

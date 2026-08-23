@@ -49,6 +49,9 @@ assumption.
    immutable trajectories, no train/eval overlap, and no derived ineligibility. Candidate versus
    baseline evaluation uses exact paired McNemar, effect size/interval, an A/A floor, and the Pareto
    safety gate.
+   Exterior signatures make substitution and subject rebinding tamper-evident under the declared
+   threat model; they do not prevent evaluator exploitation, leakage, selection bias, Goodhart
+   effects, or distribution shift. Held-out and adversarial gates remain mandatory.
 10. Automated systems may nominate candidates. Only the human-controlled, versioned promotion
     pointer can change the production default, and rollback must be tested.
 11. No T1–T3 implementation begins before M-4; T0 begins only after Pack #2 establishes generality.

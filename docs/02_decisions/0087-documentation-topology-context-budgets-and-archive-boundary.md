@@ -14,13 +14,19 @@ read_when:
   - adding-context-bundles
 do_not_read_when:
   - implementing-runtime-behavior
-supersedes: []
+supersedes:
+  - adr-0082-clause-11-documentation-timing
 superseded_by: null
 ---
 
 # ADR-0087 — Documentation topology, context budgets, and archive boundary
 
 **Status:** Accepted. **Date:** 2026-08-23. **Decision owner:** Engineering Director.
+
+This ADR narrowly supersedes ADR-0082 decision clause 11's M-5 timing constraint. It does not
+supersede ADR-0082's universal-loop or compatibility contracts. The documentation migration was
+performed early because it was content-preserving, independently falsifiable, and required no
+runtime or authority change; M-4 remains the gate for capability claims.
 
 ## Decision
 

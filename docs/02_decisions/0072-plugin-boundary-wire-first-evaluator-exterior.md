@@ -80,3 +80,20 @@ the same schema-boundary validation and MUST NOT open a UDS, serialize JSON, or 
 bundles merely to simulate an out-of-process boundary. Subprocess and container tiers continue to
 use line-delimited JSON-RPC 2.0 over UDS. This optimization creates neither a second SPI nor a second
 payload dialect; RF-37 still requires explicit policy for the isolation privilege.
+
+---
+
+## Amendment — 2026-08-23: model invocation is metered cognition, not an effect bypass
+
+`ModelPort.propose()` is the provider-neutral cognition seam and is not an `EffectRequest` verb in
+v0.6. Model inference therefore does not traverse S0–S12 merely to simulate a tool effect. This is
+not an authorization bypass: every concrete environment mutation proposed by a model still MUST
+traverse the one S0–S12 reference monitor.
+
+Remote inference is nevertheless a privileged, metered runtime operation. The frozen composition
+fixes its permitted route, network destination policy, credential reference, and budget ceiling in
+`D_H`; provider credentials remain adapter-private and MUST NOT enter prompts, events, or
+trajectories. The runtime records every attempt as an ordered trajectory invocation, including
+retries and fallback, and settles measured, estimated, or explicitly unavailable usage without
+encoding unknown cost as zero. RF-23 owns the v0.6.1 conservation and attribution gate. Making
+model inference a kernel verb later would require a new ADR, wire contract, and bounded falsifier.

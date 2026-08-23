@@ -207,7 +207,9 @@ plugins invoked by the same loop. No component name or graph edge may add an alt
 
 ### 1.2 Event taxonomy (emission is mandatory)
 
-Full kind set, grouped; every kind lists its single production *owner*. Lexical CI rule `E-COV`
+Full kind set, grouped; every kind lists its single production *owner*. Kinds explicitly marked as
+M-3 lifecycle targets are accepted law but are not as-built claims until ADR-0081 lands; M-3 cannot
+close until they are schema-generated, emitted, reduced, and registry-owned. Lexical CI rule `E-COV`
 (string presence in a named directory) is a **weak proxy**, not I-2 (`ADR-0074`). I-2 requires a
 reachable production emitter *and* that forged/synthetic payloads (including
 `VerdictRecorded {verdict: "pass"}`) cannot become accepted history. Writer authority per kind is
@@ -223,7 +225,7 @@ in the Evidence column conceptually: kernel owns grants/budgets/effects; evaluat
 | Effects | `EffectStarted` (S8a, fsync-before-dispatch, K-47), `EffectCompleted`, `EffectFailed`, `EffectRejected`, `EffectReconciled` | kernel |
 | Evidence | `EvaluationRequested`, `VerdictRecorded` (signed), `ClaimRecorded`, `InvalidationChecked` | scheduler / evaluator gateway |
 | Governance | `ApprovalRequested`, `ApprovalResolved` (ledgered, fixes D-13), `KernelAlarm` (F-21a **and** F-24, per ADR-M0-09) | kernel / approval service |
-| Plugins | `PluginResolved`, `PluginActivated`, `PluginQuiesced`, `PluginRetired`, `PluginFaulted` | registry |
+| Plugins | `PluginDiscovered` (M-3), `PluginResolved`, `PluginVerified` (M-3), `PluginActivated`, `PluginQuiesced`, `PluginRetired`, `PluginFaulted` | registry |
 | Health | `Heartbeat` (HMAC-authenticated, fixes D-14), `CheckpointCreated` | scheduler |
 | Delegation | `ChildSpawned`, `ChildReturned` (carries provenance spans, fixes D-06) | scheduler |
 

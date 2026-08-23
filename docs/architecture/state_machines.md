@@ -7,15 +7,16 @@ canonical_for:
   - state-machines-fsm
 source_of_truth:
   - docs/SPEC.md#1-layer-0--the-microkernel
+  - docs/05_adr/0081-plugin-lifecycle-runtime-absorption-layer0-deletion.md
 derived_from:
   - vanguard/packages/agency/episode/engine.py
   - vanguard/packages/domain/ledger/reducer.py
 applies_to:
   - v0.6.1
-implementation_status: AS_BUILT
+implementation_status: MIXED
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -57,13 +58,16 @@ enum. Persisted truth is the event catalog and reducer.
 ```mermaid
 stateDiagram-v2
     [*] --> Discovered: manifest scanned
-    Discovered --> Verified: schemas & signatures valid
-    Verified --> Resolved: dependencies satisfied
-    Resolved --> Activated: resources bound & initialized
-    Activated --> Quiesced: turn pause / drain
-    Quiesced --> Activated: turn resume
-    Quiesced --> Retired: session closed
+    Discovered --> Resolved: immutable ref and dependencies resolved
+    Resolved --> Verified: schema, signature, interface, ceiling, and isolation verified
+    Verified --> Activated: frozen resources bound and initialized
+    Activated --> Quiescing: stop admission and drain leases
+    Quiescing --> Retired: process stopped and cleanup complete
+    Discovered --> Faulted: discovery failure
+    Resolved --> Faulted: resolution or verification failure
+    Verified --> Faulted: activation failure
     Activated --> Faulted: runtime exception
+    Quiescing --> Faulted: shutdown failure
     Faulted --> Retired: cleanup
     Retired --> [*]
 ```
@@ -71,9 +75,9 @@ stateDiagram-v2
 | State | Entering Event | Description & Guarantees |
 |---|---|---|
 | `Discovered` | `PluginDiscovered` | Target event; not yet present in the current event catalog |
-| `Verified` | `PluginVerified` | Target event; not yet present in the current event catalog |
 | `Resolved` | `PluginResolved` | Dependencies, capabilities, and port bindings resolved |
+| `Verified` | `PluginVerified` | Target event; schema, signature, interface, ceiling, and isolation evidence recorded |
 | `Activated` | `PluginActivated` | Plugin loaded into memory, UDS socket opened |
-| `Quiesced` | `PluginQuiesced` | In-flight effects drained; safely paused |
+| `Quiescing` | `PluginQuiesced` | New work denied while in-flight leases drain; no transition back to active |
 | `Faulted` | `PluginFaulted` | Failure recorded in ledger; isolated |
 | `Retired` | `PluginRetired` | Sockets closed, tmpfs workspace unmounted |

@@ -35,6 +35,26 @@ the delivery slices below remain ordered, non-active backlog until their depende
 
 ---
 
+### M-4 single-run evidence contract
+
+All nine rows MUST bind the same uninterrupted `run_id` and causal lineage. A stitched trace,
+cassette/fake substitution, manually copied verdict, host-execution fallback, or separately passing
+runs do not satisfy this gate.
+
+| # | Required observation | Objective evidence |
+|---:|---|---|
+| 1 | Real model invocation | Non-fake, non-cassette provider/model/fingerprint plus measured usage |
+| 2 | Authorized effect | Descriptor-bound grant, authorization decision, reservation, point-of-effect verification, and matching request |
+| 3 | Real filesystem change | Before/after artifact digests and patch receipt inside the run workspace |
+| 4 | Rootless sandbox | Recorded UID, mount, network, and syscall probes; evaluator path absent; no host fallback |
+| 5 | Exterior signed evaluation | Oracle/image/subject/protocol binding and a verifiable signature from the exterior evaluator |
+| 6 | SQLite-WAL record | Complete event range, project hash-chain continuity, and durable S8a intent |
+| 7 | Cold reconstruction | Fresh process reduces the persisted chain to the same state and legally continues without repeating a settled effect |
+| 8 | Rich trajectory | Populated, schema-valid `mhf.trajectory/1` with ordered invocations, conserved cost, `D_H/D_R/D_X`, receipts, outcome, and evidence |
+| 9 | One runtime authority | Trace/import evidence shows the canonical compose/session path and no alternate driver or Layer-0 runtime |
+
+---
+
 ## Post-Foundation Macro Roadmap (Waves 5 → 10)
 
 *These milestones define outcomes and gates only. Sprint-level detail is deferred until the preceding milestone is completed.*

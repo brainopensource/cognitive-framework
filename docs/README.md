@@ -131,3 +131,15 @@ explains the current system but never overrides its governing SPEC clause or ADR
 
 Before adding a document, use [`engineering/documentation.md`](engineering/documentation.md). The
 default is to update an existing owner rather than create another summary.
+
+### Historical validation anchors
+
+The final v0.6.1 architecture review used two frozen provenance anchors:
+
+- [`001 — ALFA decision briefing`](07_reviews/archive/proposals/001_alfa_review_full_decision.md)
+  records the Director-facing synthesis and corrections applied to the proposal set.
+- [`006 — Fi Tier S+ master proposal`](07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md)
+  preserves the detailed source architecture, algorithms, risks, and proposed falsifiers.
+
+They are useful for completeness audits only. The accepted ADR mapping in
+[`05_adr/INDEX.md`](05_adr/INDEX.md), not the draft numbering inside either proposal, is controlling.

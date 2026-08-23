@@ -17,7 +17,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -38,24 +38,26 @@ sequenceDiagram
     autonumber
     actor Engine as EpisodeEngine
     participant Kernel as Kernel Dispatch (TCB)
-    participant Policy as Policy & Attenuation
+    participant Policy as Policy / Grant Issuer / Governor
     participant Sandbox as Sandbox / Adapter
     participant Ledger as LedgerEmitter / WAL
 
-    Engine->>Kernel: dispatch(intent, justification)
-    Note over Kernel: S0 Observe Intent & Justification
-    Kernel->>Policy: S1 Parse & Validate Structure
-    Kernel->>Policy: S2 Classify Action & Check Ceiling
-    Kernel->>Policy: S3 Verify Principal Attenuation
-    Kernel->>Policy: S4 Check & Debit 6D Budget
-    Kernel->>Policy: S5 Request/Verify Approval (if privileged)
-    Kernel->>Policy: S6 Issue Descriptor-Bound Grant
-    Kernel->>Ledger: S7 Record Durable Intent in WAL
-    Kernel->>Sandbox: S8 Execute Authorized Effect
-    Sandbox-->>Kernel: S9 Capture Raw Execution Result
-    Kernel->>Policy: S10 Evaluate Safety Invariants
-    Kernel->>Ledger: S11 Issue Cryptographic Receipt & Event
-    Kernel-->>Engine: S12 Return Receipt to Caller
+    Engine->>Kernel: S0 ENTER EffectRequest
+    Note over Kernel: S1 PARSE schema
+    Note over Kernel: S2 RESOLVE action in closed adapter table
+    Note over Kernel: S3 DESCRIBE canonical descriptor digest
+    Kernel->>Policy: S4 CLASSIFY capability widening
+    Kernel->>Policy: S5 AUTHORIZE exact request
+    Kernel->>Policy: S6 GRANT descriptor-bound authority
+    Kernel->>Policy: S7 RESERVE parent-linked budget lease
+    Note over Kernel: S8 VERIFY grant at point of effect
+    Kernel->>Ledger: S8a INTENT append EffectStarted and fsync
+    Kernel->>Sandbox: S9 DISPATCH adapter.execute()
+    Sandbox-->>Kernel: AdapterOutcome and actual cost
+    Kernel->>Policy: S10 COMMIT actual cost, including overrun
+    Kernel->>Policy: S11 RELEASE lease on every path
+    Kernel->>Ledger: S12 EMIT terminal outcome events
+    Kernel-->>Engine: DispatchResult / receipt
 ```
 
 ---
@@ -92,14 +94,19 @@ sequenceDiagram
     participant Recovery as LedgerRecovery
     participant Store as SQLite WAL File
     participant Reducer as LedgerState Reducer
+    participant Governor as Reconstructed Governor
     participant Session as Resumed HarnessSession
+    participant Trajectory as Trajectory Assembler
 
     FreshProc->>Recovery: open file-backed store in a fresh interpreter
     Recovery->>Store: Read durable event prefix
     Recovery->>Reducer: fold_events(events) -> EffectiveState
-    Note over Recovery: Check open S8a intents (reconcile vs undeterminable)
+    Recovery->>Governor: restore and reconcile pending leases
+    Note over Recovery: Open S8a intents remain undeterminable until reconciled
     Recovery->>Session: reconstruct legal continuation state
+    Session->>Store: append RunRecovered through LedgerEmitter
     Session->>Session: continue without replaying settled or guessing uncertain effects
+    Session->>Trajectory: join verified prefix plus current turns exactly once
 ```
 
 RF-25 remains red. Current `runtime/ledger/recovery.py` can fold and scan durable events, but the

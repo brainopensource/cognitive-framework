@@ -16,7 +16,7 @@ applies_to:
 implementation_status: RATIFIED_NOT_IMPLEMENTED
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -39,5 +39,6 @@ This matrix maps foundational concepts directly to normative law, accepted decis
 | **Truthful Trajectory** | SPEC §7/I-9; ADR-0078 | `schemas/mhf/trajectory.schema.json` | `runtime/trajectory.py:assemble_trajectory` | `test/falsifiers/test_rf23_trajectory_content.py` | `ACTIVE_REPAIR` · RF-23 red, M-2 |
 | **SQLite-WAL Continuation** | SPEC §1.3/I-4; ADR-0082 | `ports/event_store.py` | `runtime/ledger/recovery.py:replay_ledger_state` | `test/falsifiers/test_rf25_cold_continuation.py` | `ACTIVE_REPAIR` · RF-25 red, M-2 |
 | **Named Component Graph** | ADR-0077 | planned `mhf.manifest/2` | current `runtime/compose.py:Runtime.compose` is not the graph | RF-28…RF-33 | `RATIFIED_NOT_IMPLEMENTED` · M-3 |
-| **Plugin Lifecycle Parity** | SPEC §2.1; ADR-0081 | current catalog has five of seven target events | current reducer folds `PluginResolved`…`PluginFaulted` | RF-38…RF-45 | `RATIFIED_NOT_IMPLEMENTED` · M-3 |
+| **Plugin Lifecycle Parity** | SPEC §1.2/§2.1; ADR-0081 | seven target events; `PluginDiscovered` and `PluginVerified` are not implemented | current reducer folds `PluginResolved`…`PluginFaulted` | RF-38…RF-45 | `RATIFIED_NOT_IMPLEMENTED` · M-3 |
+| **Foundation Single-Run Evidence** | SPEC §8; milestone M-4 evidence contract | existing schemas plus one causal `run_id` | canonical compose/session path | M-4 nine-row gate | `RATIFIED_NOT_IMPLEMENTED` · M-4 |
 | **Mediated `agent.spawn`** | SPEC A-6; ADR-0080 | future S0–S12 verb | current `EpisodeEngine.spawn` is not the M-6 mediated effect | RF-55…RF-59 | `RATIFIED_NOT_IMPLEMENTED` · M-6 |

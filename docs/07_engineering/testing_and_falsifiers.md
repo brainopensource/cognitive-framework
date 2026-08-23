@@ -7,7 +7,7 @@ canonical_for:
   - testing-and-falsifiers-guide
 source_of_truth:
   - docs/SPEC.md
-  - docs/05_adr/INDEX.md
+  - docs/02_decisions/INDEX.md
 derived_from:
   - test/
 applies_to:
@@ -28,7 +28,7 @@ superseded_by: null
 
 ## 1. Red Falsifier Proof Obligations
 Before writing production code for a requirement, an engineer must:
-1. Identify the allocated `RF-*` identifier from [`docs/05_adr/INDEX.md`](../05_adr/INDEX.md#canonical-rf-falsifier-allocation-register).
+1. Identify the allocated `RF-*` identifier from [`docs/02_decisions/INDEX.md`](../02_decisions/INDEX.md#canonical-rf-falsifier-allocation-register).
 2. Write a dedicated falsifier test file under `test/falsifiers/` (e.g. `test_rf23_trajectory_content.py`).
 3. Run the test and confirm it fails for the diagnosed defect (**RED CONFIRMED**).
 4. Implement the minimal production change.

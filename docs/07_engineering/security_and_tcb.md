@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - security-and-tcb-compliance-guide
 source_of_truth:
-  - docs/04_annex/KERNEL.md
+  - docs/01_law/DISPATCH.md
   - AGENTS.md
 derived_from:
   - tools/linters/check_tcb_budget.py

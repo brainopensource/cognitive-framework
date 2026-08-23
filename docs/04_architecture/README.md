@@ -24,7 +24,7 @@ superseded_by: null
 # Vanguard / AETHER Architecture Index
 
 > **Classification:** Descriptive Architecture.  
-> **Authority:** Non-normative. Governing normative law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/04_annex/`](../04_annex/).
+> **Authority:** Non-normative. Governing normative law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/01_law/`](../01_law/).
 
 This directory contains verified architectural views, C4 models, sequence diagrams, state machines, and traceability mappings for the Vanguard / AETHER recursive agency substrate.
 

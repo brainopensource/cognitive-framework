@@ -34,7 +34,7 @@ superseded_by: null
 
 ## 2. Active Wave 2C Execution Gates (M-2 / v0.6.1)
 
-Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-named-component-graph-manifest.md)–[`0086`](../05_adr/0086-historical-adr-working-tree-consolidation.md)). M-2 re-gate requires both primary gates green.
+Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../02_decisions/0077-named-component-graph-manifest.md)–[`0086`](../02_decisions/0086-historical-adr-working-tree-consolidation.md)). M-2 re-gate requires both primary gates green.
 
 | Gate | Decision | Falsifier Test | Owner | Status |
 |---|---|---|---|---|
@@ -106,7 +106,7 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-n
   command exits 0 and no new `layer0/` or duplicate state surface exists.
 
 Future work is intentionally absent from this live board. Ordered Sprint 3.1+ backlog and objective
-acceptance gates live in [`milestones.md` § Future Backlog](../02_roadmap/milestones.md#future-backlog-by-milestone-and-sprint).
+acceptance gates live in [`milestones.md` § Future Backlog](milestones.md#future-backlog-by-milestone-and-sprint).
 
 ### Definition of Done (All Tasks)
 1. Named falsifiers pass on `vanguard/packages/`.

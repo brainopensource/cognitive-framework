@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - kernel-port-protocol
 source_of_truth:
-  - docs/04_annex/KERNEL.md
+  - docs/01_law/DISPATCH.md
 derived_from:
   - vanguard/packages/ports/kernel.py
   - vanguard/packages/kernel/dispatch.py

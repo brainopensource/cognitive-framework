@@ -6,10 +6,10 @@ authority: descriptive
 canonical_for:
   - active-inference-theory
 source_of_truth:
-  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md
-  - docs/05_adr/0084-compounding-macro-tools-active-inference.md
+  - docs/_archive/references/RESEARCH_THEORETICAL_SYNTHESIS.md
+  - docs/02_decisions/0084-compounding-macro-tools-active-inference.md
 derived_from:
-  - docs/06_references/
+  - docs/_archive/references/
 applies_to:
   - v0.6.1
 implementation_status: RESEARCH

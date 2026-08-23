@@ -7,7 +7,7 @@ canonical_for:
   - state-machines-fsm
 source_of_truth:
   - docs/SPEC.md#1-layer-0--the-microkernel
-  - docs/05_adr/0081-plugin-lifecycle-runtime-absorption-layer0-deletion.md
+  - docs/02_decisions/0081-plugin-lifecycle-runtime-absorption-layer0-deletion.md
 derived_from:
   - vanguard/packages/agency/episode/engine.py
   - vanguard/packages/domain/ledger/reducer.py

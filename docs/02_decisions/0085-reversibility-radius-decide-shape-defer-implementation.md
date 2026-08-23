@@ -309,7 +309,7 @@ structural, not procedural.
 1. A new proposal document **may not reopen** a closed ADR. It may only present evidence matching
    that ADR's stated reversal condition. A proposal that re-argues a closed decision is returned
    without adjudication.
-2. **No ticket may cite `docs/07_reviews/` or `docs/06_references/` as a requirement.** If a
+2. **No ticket may cite `docs/_archive/reviews/` or `docs/_archive/references/` as a requirement.** If a
    developer needs something not present in an ADR, a schema, or a falsifier, that is the signal a
    decision has *not* been made — it escalates rather than getting improvised into the code.
 3. **Length is not evidence.** A twenty-thousand-word proposal and a forty-line ADR have equal
@@ -352,7 +352,7 @@ wholesale.
 | **Protobuf / Avro** reserved fields and forward-compatible schema evolution | §3's parse-and-reserve mechanism; the direct industrial precedent. | Their tolerance of unknown fields is **refused** — AETHER schemas are `additionalProperties: false` and unknown fields fail at compose (`ADR-0032`). |
 | **Merkle DAG / content addressing** | §3.2 — identity is the digest of the pre-image, so the pre-image is the compatibility surface. | Bytes come from JCS (RFC 8785) only (`ADR-0009`). |
 | **Popper**, falsifiability as demarcation | §3.4 and `ADR-0074` — a claim without a refutation condition is not a decision. | Not a claim about science; a rule about which documents bind. |
-| **Design-of-experiments**, paired comparison and Mill's Canon of Difference | §4.3 — a performance claim requires a paired measurement against a preserved baseline. | Exact tests over approximations, per `docs/04_annex/MEASUREMENT.md` M-03. |
+| **Design-of-experiments**, paired comparison and Mill's Canon of Difference | §4.3 — a performance claim requires a paired measurement against a preserved baseline. | Exact tests over approximations, per `docs/01_law/MEASUREMENT.md` M-03. |
 | **Reference-monitor tradition** (Anderson 1972; capability systems) | The invariant that no belief, price, rating, cache, or posterior may widen authority (§4.5). | Authority is mediated at S0–S12 only; no second authorization path, however advisory. |
 
 ---
@@ -378,7 +378,7 @@ This ADR is subject to its own rules and is admissible only if it passes them.
 |---|---|---|
 | `RF-73` | `test_every_reserved_field_is_in_the_identity_preimage` — enumerate reserved fields from §5, assert each participates in `D_H`/`D_R` | A reservation that is parsed but not digested (§3.2) — the failure that silently re-attributes the corpus |
 | `RF-74` | `test_every_inert_reservation_is_refused_at_compose` — each §5 row with an inert-until milestone is rejected at compose with a named reason | A reservation with a live code path |
-| `RF-75` | `tools/linters/check_adr_reversal_conditions.py` — every ADR under `docs/05_adr/` states a reversal condition | An ADR that cannot be closed, and therefore cannot stop being re-argued |
+| `RF-75` | `tools/linters/check_adr_reversal_conditions.py` — every ADR under `docs/02_decisions/` states a reversal condition | An ADR that cannot be closed, and therefore cannot stop being re-argued |
 
 ---
 

@@ -6,9 +6,9 @@ authority: descriptive
 canonical_for:
   - manifest-schema-contract
 source_of_truth:
-  - docs/05_adr/0077-named-component-graph-manifest.md
+  - docs/02_decisions/0077-named-component-graph-manifest.md
 derived_from:
-  - docs/05_adr/0077-named-component-graph-manifest.md
+  - docs/02_decisions/0077-named-component-graph-manifest.md
 applies_to:
   - v0.6.1
 implementation_status: RATIFIED_NOT_IMPLEMENTED

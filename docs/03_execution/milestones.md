@@ -16,7 +16,7 @@ superseded_by: null
 # Macro Milestones — AETHER / Vanguard (M-0 → M-10)
 
 **Status:** Authoritative macro execution ladder and future backlog. Only the currently opened tasks
-in [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md) authorize implementation;
+in [`docs/03_execution/sprint_active.md`](sprint_active.md) authorize implementation;
 the delivery slices below remain ordered, non-active backlog until their dependency gates open.
 
 **Principle:** A milestone is complete only when its objective falsifiers and gates pass on the canonical path—never when code merely merges.
@@ -72,7 +72,7 @@ runs do not satisfy this gate.
 
 ## Standing Architectural Constraints
 
-- **Single Execution Board:** Live sprint tasks live exclusively in [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md).
+- **Single Execution Board:** Live sprint tasks live exclusively in [`docs/03_execution/sprint_active.md`](sprint_active.md).
 - **Sequential Execution (I-11):** Sequential execution remains mandatory until the M-7 measurement gate fires.
 - **TCB Budget:** Microkernel in `vanguard/packages/kernel/` must not exceed $\le 1438$ LOC.
 - **Refusals:** Strictly adhere to the non-claims and refusals in [`SPEC.md` §9](../SPEC.md#9-what-this-specification-refuses-to-build).

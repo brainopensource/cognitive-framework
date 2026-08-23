@@ -22,7 +22,7 @@ superseded_by: null
 
 > **Status:** Living Master Index of Architecture Decision Records for Vanguard / AETHER.  
 > **Rule:** Decision identifiers and Git history are append-only. ADRs outrank general documentation; newer ADRs supersede older ones explicitly. Per ADR-0086, superseded bodies may leave the default working tree only after their permanent lineage and recovery commit are indexed.
-> **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_sprints/sprint_active.md).
+> **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_execution/sprint_active.md).
 
 ---
 

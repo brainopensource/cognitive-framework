@@ -7,7 +7,7 @@ canonical_for:
   - signed-verdict-contract
 source_of_truth:
   - docs/SPEC.md
-  - docs/05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md
+  - docs/02_decisions/0072-plugin-boundary-wire-first-evaluator-exterior.md
 derived_from:
   - schemas/mhf/spi_payloads.schema.json
   - vanguard/packages/adapters/evaluators/signing.py

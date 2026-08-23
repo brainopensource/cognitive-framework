@@ -6,10 +6,10 @@ authority: descriptive
 canonical_for:
   - trajectory-credit-assignment
 source_of_truth:
-  - docs/06_references/RESEARCH_THEORETICAL_SYNTHESIS.md
-  - docs/05_adr/0078-trajectory-un-hollowing-cost-accounting.md
+  - docs/_archive/references/RESEARCH_THEORETICAL_SYNTHESIS.md
+  - docs/02_decisions/0078-trajectory-un-hollowing-cost-accounting.md
 derived_from:
-  - docs/06_references/
+  - docs/_archive/references/
 applies_to:
   - v0.6.1
 implementation_status: RESEARCH

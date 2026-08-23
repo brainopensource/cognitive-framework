@@ -30,7 +30,7 @@ pre-crash prefix, appends current turns, preserves ordered `invocations`, and re
 Governor leases before emitting `RunRecovered`. Costs are additive across retries and escalations;
 each measurement is `measured`, `estimated`, or `unavailable`, never silently invented. See
 [`../05_contracts/trajectories.md`](../05_contracts/trajectories.md),
-[`../02_decisions/0078-trajectory-content-contract.md`](../02_decisions/0078-trajectory-content-contract.md),
+[`../02_decisions/0078-trajectory-un-hollowing-cost-accounting.md`](../02_decisions/0078-trajectory-un-hollowing-cost-accounting.md),
 and [`RUNTIME.md §1.3`](RUNTIME.md#13-determinism--replay-contract).
 
 ## Evaluator and verdicts
@@ -40,7 +40,7 @@ predicate binds `D_H`, `D_R`, `D_X`, evidence, and signer identity. A missing ev
 before execution as `evaluation: none`, deriving `unattributable_for_promotion = true`; an unsigned
 or forged verdict is a hard failure, never an absence. See
 [`../05_contracts/verdicts.md`](../05_contracts/verdicts.md) and
-[`../02_decisions/0079-absent-vs-forged-guardrails.md`](../02_decisions/0079-absent-vs-forged-guardrails.md).
+[`../02_decisions/0079-absent-vs-forged-derived-promotability.md`](../02_decisions/0079-absent-vs-forged-derived-promotability.md).
 
 ## Identity tuple
 

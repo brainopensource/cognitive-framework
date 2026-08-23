@@ -31,14 +31,14 @@ Rather than ingesting multi-thousand-line monolithic specifications, an AI agent
 
 | Work Class | Minimum starting bundle | Size status | Direct File Links |
 |---|---|---:|---|
-| **Kernel / TCB** | Active task + KERNEL clause + kernel protocol + named test | Measure per task | [`KERNEL.md`](../04_annex/KERNEL.md) · [`kernel.md`](../protocols/kernel.md) |
-| **Model Adapter** | Active task + model protocol + adapter guide + contract test | Measure per task | [`model.md`](../protocols/model.md) · [`adding_an_adapter.md`](adding_an_adapter.md) |
-| **State / Ledger** | Active task + event contract + store protocol + ledger test | Measure per task | [`events.md`](../contracts/events.md) · [`stores.md`](../protocols/stores.md) |
-| **Trajectory (NOVA-1)** | Active RF-23 board row + ADR-0078 + schema + failing test | Measure per task | [`trajectories.md`](../contracts/trajectories.md) · [`0078`](../05_adr/0078-trajectory-un-hollowing-cost-accounting.md) |
-| **Continuation (NOVA-2)** | Active RF-25 board row + ADR-0082 + failing test | Measure per task | [`sequences.md`](../architecture/sequences.md) · [`0082`](../05_adr/0082-universal-turn-loop-m10-compatibility-contract.md) |
-| **Composition / Plugins** | Open milestone + manifest contract + component graph ADR + compose tests | Measure per task | [`manifests.md`](../contracts/manifests.md) · [`0077`](../05_adr/0077-named-component-graph-manifest.md) |
-| **Domain Pack** | Governing milestone + pack guide + current pack tests | Measure per task | [`adding_a_pack.md`](adding_a_pack.md) · [`milestones.md`](../02_roadmap/milestones.md) |
-| **Evaluator** | Evaluator protocol + verdict contract + security test | Measure per task | [`evaluator.md`](../protocols/evaluator.md) · [`verdicts.md`](../contracts/verdicts.md) |
+| **Kernel / TCB** | Active task + dispatch clause + kernel protocol + named test | Measure per task | [`DISPATCH.md`](../01_law/DISPATCH.md) · [`kernel.md`](../06_protocols/kernel.md) |
+| **Model Adapter** | Active task + model protocol + adapter guide + contract test | Measure per task | [`model.md`](../06_protocols/model.md) · [`adding_an_adapter.md`](adding_an_adapter.md) |
+| **State / Ledger** | Active task + event contract + store protocol + ledger test | Measure per task | [`events.md`](../05_contracts/events.md) · [`stores.md`](../06_protocols/stores.md) |
+| **Trajectory (NOVA-1)** | Active RF-23 board row + ADR-0078 + schema + failing test | Measure per task | [`trajectories.md`](../05_contracts/trajectories.md) · [`0078`](../02_decisions/0078-trajectory-un-hollowing-cost-accounting.md) |
+| **Continuation (NOVA-2)** | Active RF-25 board row + ADR-0082 + failing test | Measure per task | [`sequences.md`](../04_architecture/sequences.md) · [`0082`](../02_decisions/0082-universal-turn-loop-m10-compatibility-contract.md) |
+| **Composition / Plugins** | Open milestone + manifest contract + component graph ADR + compose tests | Measure per task | [`manifests.md`](../05_contracts/manifests.md) · [`0077`](../02_decisions/0077-named-component-graph-manifest.md) |
+| **Domain Pack** | Governing milestone + pack guide + current pack tests | Measure per task | [`adding_a_pack.md`](adding_a_pack.md) · [`milestones.md`](../03_execution/milestones.md) |
+| **Evaluator** | Evaluator protocol + verdict contract + security test | Measure per task | [`evaluator.md`](../06_protocols/evaluator.md) · [`verdicts.md`](../05_contracts/verdicts.md) |
 | **Documentation** | Documentation owner + precedence index + governing linter | Measure per task | [`documentation.md`](documentation.md) · [`docs/README.md`](../README.md) |
 
 ---

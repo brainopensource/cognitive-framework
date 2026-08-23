@@ -7,7 +7,7 @@ canonical_for:
   - sequence-flows
 source_of_truth:
   - docs/SPEC.md
-  - docs/04_annex/KERNEL.md#2-the-dispatch-sequence
+  - docs/01_law/DISPATCH.md#2-the-dispatch-sequence
 derived_from:
   - vanguard/packages/kernel/dispatch.py
   - vanguard/packages/runtime/session.py
@@ -31,7 +31,7 @@ superseded_by: null
 
 ## 1. 13-Stage Kernel Effect Dispatch Pipeline (S0–S12)
 
-Governed by [`docs/04_annex/KERNEL.md`](../04_annex/KERNEL.md) and implemented in [`dispatch.py`](../../vanguard/packages/kernel/dispatch.py):
+Governed by [`docs/01_law/DISPATCH.md`](../01_law/DISPATCH.md) and implemented in [`dispatch.py`](../../vanguard/packages/kernel/dispatch.py):
 
 ```mermaid
 sequenceDiagram

@@ -6,7 +6,7 @@ authority: descriptive
 canonical_for:
   - sandbox-port-protocol
 source_of_truth:
-  - docs/04_annex/KERNEL.md#1-the-trusted-computing-base
+  - docs/01_law/DISPATCH.md#1-the-trusted-computing-base
 derived_from:
   - vanguard/packages/ports/sandbox.py
   - vanguard/packages/adapters/sandbox/rootless.py

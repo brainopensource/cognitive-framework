@@ -6,8 +6,8 @@ authority: descriptive
 canonical_for:
   - economic-resource-tensor
 source_of_truth:
-  - docs/04_annex/KERNEL.md#4-budget-algebra
-  - docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md
+  - docs/01_law/DISPATCH.md#4-attenuation
+  - docs/02_decisions/0074-gamma-lock-amendments-proof-budget-writer-identity.md
 derived_from:
   - vanguard/packages/kernel/budget.py
 applies_to:

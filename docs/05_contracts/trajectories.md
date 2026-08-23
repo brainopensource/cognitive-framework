@@ -7,7 +7,7 @@ canonical_for:
   - trajectory-contract
 source_of_truth:
   - docs/SPEC.md#7-telemetry-self-tuning--model-distillation
-  - docs/05_adr/0078-trajectory-un-hollowing-cost-accounting.md
+  - docs/02_decisions/0078-trajectory-un-hollowing-cost-accounting.md
 derived_from:
   - schemas/mhf/trajectory.schema.json
   - vanguard/packages/runtime/trajectory.py

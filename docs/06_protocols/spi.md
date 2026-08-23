@@ -7,7 +7,7 @@ canonical_for:
   - spi-protocols-reference
 source_of_truth:
   - docs/SPEC.md#2-plugin-architecture--spi-definitions
-  - docs/05_adr/0076-foundation-execution-decisions-canonical-artifacts.md
+  - docs/02_decisions/0076-foundation-execution-decisions-canonical-artifacts.md
 derived_from:
   - vanguard/packages/ports/spi.py
 applies_to:

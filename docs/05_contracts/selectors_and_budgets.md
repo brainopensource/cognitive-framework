@@ -6,8 +6,8 @@ authority: descriptive
 canonical_for:
   - selector-algebra-and-budgets
 source_of_truth:
-  - docs/04_annex/KERNEL.md
-  - docs/05_adr/0074-gamma-lock-amendments-proof-budget-writer-identity.md
+  - docs/01_law/DISPATCH.md
+  - docs/02_decisions/0074-gamma-lock-amendments-proof-budget-writer-identity.md
 derived_from:
   - vanguard/packages/domain/selectors/resource_selector.py
   - vanguard/packages/kernel/budget.py
@@ -32,7 +32,7 @@ superseded_by: null
 
 The selector partial order and six budget dimensions are defined normatively only in
 [`SPEC.md` §1.0](../SPEC.md#10-recursive-machine-authority-and-identity) and
-[`KERNEL.md` §4](../04_annex/KERNEL.md#4-the-capability-system). ADR-0074 records why additive
+[`DISPATCH.md` §4](../01_law/DISPATCH.md#4-attenuation). ADR-0074 records why additive
 resources and structural ceilings are distinct. This page intentionally does not repeat their matrix.
 
 Executable behavior lives in

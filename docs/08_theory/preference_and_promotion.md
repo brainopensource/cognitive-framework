@@ -6,10 +6,10 @@ authority: descriptive
 canonical_for:
   - preference-and-statistical-promotion
 source_of_truth:
-  - docs/04_annex/MEASUREMENT.md
-  - docs/05_adr/0084-compounding-macro-tools-active-inference.md
+  - docs/01_law/MEASUREMENT.md
+  - docs/02_decisions/0084-compounding-macro-tools-active-inference.md
 derived_from:
-  - docs/04_annex/MEASUREMENT.md
+  - docs/01_law/MEASUREMENT.md
 applies_to:
   - v0.6.1
 implementation_status: RESEARCH
@@ -24,7 +24,7 @@ superseded_by: null
 
 > **Maturity:**
 > - **DPO Preference Harvesting Pipeline**: `RESEARCH` · Target Milestone: **M-10** (Governed by ADR-0084).
-> - **Statistical McNemar Doctrine**: `AS_BUILT` · Governed by Normative Annex [`docs/04_annex/MEASUREMENT.md`](../04_annex/MEASUREMENT.md).
+> - **Statistical McNemar Doctrine**: `AS_BUILT` · Governed by Normative Law [`docs/01_law/MEASUREMENT.md`](../01_law/MEASUREMENT.md).
 
 ---
 
@@ -38,7 +38,7 @@ $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w,
 
 ## 2. McNemar's Exact Paired Promotion Test (`AS_BUILT`)
 
-Governed by [`docs/04_annex/MEASUREMENT.md §5`](../04_annex/MEASUREMENT.md#5-the-measurement-doctrine):
+Governed by [`docs/01_law/MEASUREMENT.md §5`](../01_law/MEASUREMENT.md#5-the-measurement-doctrine):
 
 | | Model B Pass | Model B Fail |
 |---|---|---|

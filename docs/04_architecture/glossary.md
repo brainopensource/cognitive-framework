@@ -7,7 +7,7 @@ canonical_for:
   - architectural-glossary
 source_of_truth:
   - docs/SPEC.md
-  - docs/05_adr/INDEX.md
+  - docs/02_decisions/INDEX.md
 derived_from:
   - vanguard/packages/domain/
 applies_to:

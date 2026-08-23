@@ -57,7 +57,7 @@ def iter_scan_files(root: Path) -> list[Path]:
                 continue
             if path.name in SKIP_NAMES:
                 continue
-            if ("adr" in path.parts or "05_adr" in path.parts) and _LEGACY_ADR_NAME.match(path.name):
+            if ("adr" in path.parts or "05_adr" in path.parts or "02_decisions" in path.parts) and _LEGACY_ADR_NAME.match(path.name):
                 continue
             files.add(path)
     return sorted(files)

@@ -55,6 +55,40 @@ def resolve_target(source: Path, raw: str, root: Path) -> Path | None:
     if not path_part:
         return None
     candidate = (source.parent / path_part).resolve()
+    if not candidate.exists() and "_archive" in source.parts:
+        # Frozen reviews preserve the paths that existed when they were written. Resolve those
+        # provenance aliases against the current canonical tree without adding compatibility stubs.
+        historical = path_part.replace("\\", "/")
+        if "docs/" in historical:
+            historical = historical.split("docs/", 1)[1]
+        historical = historical.lstrip("./")
+        for old, new in (
+            ("00_overview/", "04_architecture/"),
+            ("02_roadmap/", "03_execution/"),
+            ("03_sprints/", "03_execution/"),
+            ("04_annex/", "01_law/"),
+            ("05_adr/", "02_decisions/"),
+            ("06_references/", "_archive/references/"),
+            ("07_reviews/", "_archive/reviews/"),
+            ("architecture/", "04_architecture/"),
+            ("contracts/", "05_contracts/"),
+            ("protocols/", "06_protocols/"),
+            ("engineering/", "07_engineering/"),
+            ("theory/", "08_theory/"),
+        ):
+            if old in historical:
+                historical = historical.replace(old, new, 1)
+                break
+        if historical == "04_architecture/SYSTEM_OVERVIEW.md":
+            historical = "04_architecture/overview.md"
+        aliases = [root / "docs" / historical]
+        if historical == "ARCHIVE.md":
+            aliases.append(root / "docs" / "_archive" / "README.md")
+        if "test/" in historical:
+            aliases.append(root / historical[historical.index("test/") :])
+        for alias in aliases:
+            if alias.exists():
+                return alias
     return candidate
 
 

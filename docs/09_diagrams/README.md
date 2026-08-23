@@ -1,3 +1,20 @@
+---
+id: diagrams-archive-index
+class: archive
+authority: advisory
+canonical_for: []
+status: frozen
+owner: documentation-architect
+version: "0.6.1"
+last_verified: 2026-08-23
+read_when:
+  - inspecting-historical-diagrams
+do_not_read_when:
+  - implementing-runtime-behavior
+supersedes: []
+superseded_by: null
+---
+
 # Architecture & Epistemic Diagrams
 
 > **NON-NORMATIVE / FROZEN PROVENANCE**

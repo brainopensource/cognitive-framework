@@ -24,7 +24,7 @@ superseded_by: null
 # Dispatch, Capabilities & Security Law
 
 > Kept nearly verbatim from VG-05 per the archived `01_SPECS_MIGRATION_MATRIX.md` §1.8 (git history,
-> `4f9f8b1` — `docs/07_reviews/ARCHIVE.md`) — this
+> `4f9f8b1` — `docs/_archive/README.md`) — this
 > is the crown jewel, the normative twin of `vanguard/packages/kernel/dispatch.py`. RFC-2119
 > language (MUST/SHALL/SHOULD) is normative here, same as [`../SPEC.md`](../SPEC.md). Amendments are ADRs only
 > (front-matter); S0–S12 body is unchanged. **v0.6 (`ADR-0069`):** the production implementation of

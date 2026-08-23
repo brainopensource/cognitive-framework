@@ -43,7 +43,7 @@ disposition) — all in git history at `4f9f8b1`. Forensic and proposal reports 
 signed evaluator, harness-as-data manifests, measurement lab, SQLite WAL ledger.
 **Authority on conflict:** the compact index, this detailed law, and the other `01_law/` leaves define normative behavior;
 accepted ADRs record why that law was narrowed or extended and MUST be reflected here before
-implementation; `docs/03_sprints/sprint_active.md` is the sole current execution authority; the
+implementation; `docs/03_execution/sprint_active.md` is the sole current execution authority; the
 milestone ladder is macro sequencing only. Reviews, proposals, research, completed boards, and git
 history are evidence, never implementation requirements.
 
@@ -198,10 +198,10 @@ observe → propose → authorize → effect → receipt → evaluate → (refle
 registered `IPlanner` may be offered the terminal receipt set. State transitions are pure reducers over
 the ledger (`state = fold(events)`); the engine holds no state a replay cannot reconstruct. *(Handbook
 M1 "the episode is the program" — no workflow engine — is this section's ancestor and is reinforced by
-the REJ on playbook runtimes, `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`. VG-03 §2's loop-over-DAG
+the REJ on playbook runtimes, `docs/02_decisions/DEFERRED_REJECTED.md` `REJ-01`. VG-03 §2's loop-over-DAG
 inversion — "strictly less expressive than a loop that can invoke a loop, at roughly ten times the
 machinery, proof by construction" — is the argument for this shape and is carried here by citation
-rather than restated; see also `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`.)*
+rather than restated; see also `docs/02_decisions/DEFERRED_REJECTED.md` `REJ-01`.)*
 
 **I-11 (v0.6).** The scheduler is **sequential**. Concurrency (independence groups, §1.4) is a later
 scheduler property, gated on a measurement. Unknown selector footprint means conflict, not
@@ -346,7 +346,7 @@ The evaluator remains its own identity (UID 10002 daemon) — it is *not* a plug
 can replace; `IEvaluationGate` plugins run agent-side and merely *request* judgment; verdict signing keys
 never enter any plugin cell. The scheduler MUST **read** a signed verdict; emitting
 `VerdictRecorded {verdict: "pass"}` without a signature is defect F1, not a plugin strategy
-(`ADR-0072`). See `docs/04_annex/KERNEL.md` §6 (`K-40`, amended by **ADR-M0-08**).
+(`ADR-0072`). See `docs/01_law/DISPATCH.md` §6 (`K-40`, amended by **ADR-M0-08**).
 
 ### 2.2 SPI definitions (typed, frozen, versioned)
 
@@ -455,8 +455,8 @@ registry.
 superseded: MHF has exactly **five** frozen SPIs above (`IPlanner`, `IMemoryEngine`, `IToolkit`,
 `IContextManager`, `IEvaluationGate`) plus the first-party `IModelProvider`/`ISandbox`/store ports, which
 are not user-pluggable extension points in the same sense. **A sixth SPI requires a design review, not
-a PR** — see [`ADR-0072`](05_adr/0072-plugin-boundary-wire-first-evaluator-exterior.md) and the
-[consolidated M0 lineage](05_adr/INDEX.md#consolidated-historical-lineage).
+a PR** — see [`ADR-0072`](../02_decisions/0072-plugin-boundary-wire-first-evaluator-exterior.md) and the
+[consolidated M0 lineage](../02_decisions/INDEX.md#consolidated-historical-lineage).
 
 ### 2.3 Harness manifest (the compile target)
 
@@ -525,7 +525,7 @@ replay, and prevents both budget leakage and history truncation.
 
 **v0.6 status:** this section is the *shape* of Domain Pack #1. It is not authorized as the next
 commit. Foundation coding-agent E2E is Wave 4 of
-`docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
+`docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/002_V060_FOUNDATION_ROADMAP_AND_GAP_REGISTER.md`.
 
 Everything below is plugins + one domain pack; Layer-0 / production-core diff for a new pack MUST be
 zero (Invariant I-7: domain tokens `coding|pytest|ast` MUST NOT appear under `layer0/` **or**
@@ -698,8 +698,8 @@ ledger, exterior evaluator, sandbox, stores, models, episode engine). Promote `l
 JSON-RPC/UDS broker, lifecycle FSM, and compose digest shape. Do **not** rebuild WAL, evaluator, or
 sandbox inside `layer0/`. Do **not** create a third runtime. Do **not** rewrite the TCB in Rust.
 
-The living execution sequence is [`sprint_active.md`](03_sprints/sprint_active.md); macro gates are
-in [`milestones.md`](02_roadmap/milestones.md). The gap register allocates falsifier identifiers but
+The living execution sequence is [`sprint_active.md`](../03_execution/sprint_active.md); macro gates are
+in [`milestones.md`](../03_execution/milestones.md). The gap register allocates falsifier identifiers but
 does not authorize work.
 
 | Milestone | Content | Gate (proof command) |
@@ -735,7 +735,7 @@ the code is kept:
 - **`REQ-*`** as the PR-visible requirement namespace, not `TK-*` — `ADR-0045`/D-45, kept.
 - **Measurement apparatus stays outside `vanguard/packages/`** — `tools/telemetry/` and `lab/` remain
   siblings to the kernel tree, never imported by it — D-40, kept (also the "HONOUR TABLE" standing
-  refusal `TSK-CORE-010` in `docs/02_roadmap/milestones.md`).
+  refusal `TSK-CORE-010` in `docs/03_execution/milestones.md`).
 - **`MetaLoopEngine` stays deleted** — the outer loop is a plugin at a scheduler slot (§5.1), never an
   engine — `ADR-0041`/D-41 + **ADR-M0-12**, also `TSK-CORE-011`.
 
@@ -756,11 +756,11 @@ See §9 below — restated once, not duplicated.
 ## 9. What This Specification Refuses To Build
 
 Consistent with the audited codebase's own honoured deferrals (merged from the charter's §3 non-claims
-and VG-10's `DEF-*`/`REJ-*` registers, now `docs/05_adr/DEFERRED_REJECTED.md`):
+and VG-10's `DEF-*`/`REJ-*` registers, now `docs/02_decisions/DEFERRED_REJECTED.md`):
 
-- **No self-updating release pipeline** (`SA-1`…`SA-6` stay out — `docs/04_annex/KERNEL.md` §7, amended by
+- **No self-updating release pipeline** (`SA-1`…`SA-6` stay out — `docs/01_law/DISPATCH.md` §7, amended by
   **ADR-M0-10**'s companion, D-34).
-- **No competence-graph pretence** before the memory plugin ships (D-39; `docs/05_adr/DEFERRED_REJECTED.md`
+- **No competence-graph pretence** before the memory plugin ships (D-39; `docs/02_decisions/DEFERRED_REJECTED.md`
   `DEF-02`).
 - **No parallel fan-out** before independence-group events can be emitted and measured (D-38, Invariant
   I-11).
@@ -790,7 +790,7 @@ and VG-10's `DEF-*`/`REJ-*` registers, now `docs/05_adr/DEFERRED_REJECTED.md`):
   (`ADR-0074`).
 
 Every future capability enters through a plugin manifest, a new event kind with a legal writer and an
-emitter, and a paired measurement (`docs/04_annex/MEASUREMENT.md`) — or it does not enter.
+emitter, and a paired measurement (`docs/01_law/MEASUREMENT.md`) — or it does not enter.
 
 ---
 

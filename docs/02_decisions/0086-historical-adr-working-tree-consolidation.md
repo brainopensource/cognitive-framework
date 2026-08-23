@@ -33,7 +33,7 @@ working tree causes retrieval and contributor noise; Git already preserves the o
 
 **Bound falsifier.** The Markdown-link and stale-path checks find no live link to a removed body;
 `INDEX.md` contains every removed identifier and the recovery commit; no file below 0069 or in the
-ADR-M0 namespace remains under `docs/05_adr/`; active ADRs 0069–0086 remain indexed.
+ADR-M0 namespace remains under `docs/02_decisions/`; active ADRs 0069–0087 remain indexed.
 
 **Alternatives rejected.** Keeping all bodies in the active directory; deleting history without a
 recovery commit; renumbering active ADRs; copying historical prose into SPEC; or maintaining a

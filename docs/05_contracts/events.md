@@ -7,7 +7,7 @@ canonical_for:
   - event-envelope-contract
 source_of_truth:
   - docs/SPEC.md
-  - docs/05_adr/0071-authority-state-ledger-identity-trinity.md
+  - docs/02_decisions/0071-authority-state-ledger-identity-trinity.md
 derived_from:
   - schemas/mhf/event_envelope.schema.json
   - vanguard/packages/domain/ledger/events.py

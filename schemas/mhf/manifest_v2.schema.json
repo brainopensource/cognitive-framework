@@ -27,6 +27,17 @@
     "model_routes": { "type": "array", "items": { "type": "object" } },
     "budget": { "type": "object" }, "system_prompt": { "type": ["string", "null"] },
     "approval_policy": { "type": ["string", "null"] }, "guardrails": { "type": "object" },
+    "evaluation": { "oneOf": [
+      { "type": "object", "additionalProperties": false,
+        "required": ["mode"],
+        "properties": {
+          "mode": { "enum": ["none", "exterior"] },
+          "absence_reason": { "type": "string", "minLength": 1 },
+          "assurance_class": { "type": "string", "minLength": 1 },
+          "oracle": { "type": "string", "minLength": 1 }
+        }
+      }
+    ] },
     "undeletable": { "type": "boolean" }
   },
   "$defs": {

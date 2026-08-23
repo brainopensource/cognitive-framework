@@ -20,7 +20,7 @@ _V2_COMPONENT_FIELDS = frozenset({
 })
 _V2_TOP_FIELDS = frozenset({"api", "id", "components", "bindings", "entrypoints", "profiles", "ceiling",
                             "capabilities", "model_routes", "budget", "system_prompt", "approval_policy",
-                            "guardrails", "undeletable"})
+                            "guardrails", "evaluation", "undeletable"})
 _SPI_KINDS = frozenset({"IPlanner", "IMemoryEngine", "IToolkit", "IContextManager", "IEvaluationGate"})
 _ISOLATION = frozenset({"in_process", "subprocess", "container", "wasm"})
 
@@ -132,7 +132,13 @@ def parse_named_manifest(raw: object) -> NamedManifest:
             if left == name: visit(right)
         visiting.remove(name); visited.add(name)
     for name in names: visit(name)
-    return NamedManifest(raw["id"], tuple(components), tuple(bindings), tuple(raw["entrypoints"]), raw.get("profiles", {}), ceiling)
+    metadata = {
+        key: raw[key] for key in ("model_routes", "budget", "system_prompt", "approval_policy",
+                                  "guardrails", "evaluation", "undeletable") if key in raw
+    }
+    metadata["evaluation"] = _parse_evaluation_policy(raw.get("evaluation"))
+    return NamedManifest(raw["id"], tuple(components), tuple(bindings), tuple(raw["entrypoints"]), raw.get("profiles", {}), ceiling,
+                         metadata=metadata)
 
 
 def compose_named_manifest(manifest: NamedManifest, graph: ArtifactGraph) -> NamedManifest:
@@ -177,7 +183,7 @@ def _parse_named_component_map(raw: Mapping[str, Any], rows: Mapping[str, Any]) 
     """Normalize the ratified open-map `/2` surface to the domain value."""
     allowed = {"api", "id", "components", "bindings", "entrypoints", "profiles", "ceiling",
                "capabilities", "model_routes", "budget", "system_prompt", "approval_policy",
-               "guardrails", "undeletable"}
+               "guardrails", "evaluation", "undeletable"}
     unknown = set(raw) - allowed
     if unknown: raise ManifestError(f"manifest has unread fields: {sorted(unknown)}")
     if raw.get("api") != "mhf.manifest/2" or not isinstance(raw.get("id"), str) or not raw["id"]:
@@ -265,12 +271,38 @@ def _parse_named_component_map(raw: Mapping[str, Any], rows: Mapping[str, Any]) 
     if authority_names - consumed: raise ManifestError("authority-bearing component is unconsumed")
     _reject_eager_cycles(bindings, names)
     metadata = {key: raw[key] for key in ("model_routes", "budget", "system_prompt", "approval_policy",
-                                           "guardrails", "undeletable") if key in raw}
+                                           "guardrails", "evaluation", "undeletable") if key in raw}
+    metadata["evaluation"] = _parse_evaluation_policy(raw.get("evaluation"))
     metadata["entrypoints"] = entrypoint_identity
     if capabilities:
         metadata["capabilities"] = capabilities
     return NamedManifest(raw["id"], tuple(components), tuple(bindings), tuple(entrypoint_names), profiles, ceiling,
                          metadata=metadata)
+
+
+def _parse_evaluation_policy(value: object) -> Mapping[str, Any]:
+    """Parse the pre-execution evidence guardrail without creating a verdict."""
+    if value is None:
+        return {"mode": "exterior"}
+    if value == "none":
+        raise ManifestError("evaluation: none requires an explicit absence reason")
+    if not isinstance(value, dict):
+        raise ManifestError("evaluation must be 'none' or an object")
+    if set(value) - {"mode", "absence_reason", "assurance_class", "oracle"}:
+        raise ManifestError("evaluation has unread fields")
+    mode = value.get("mode")
+    if mode not in {"none", "exterior"}:
+        raise ManifestError("evaluation mode must be none or exterior")
+    if mode == "none":
+        reason = value.get("absence_reason")
+        assurance = value.get("assurance_class")
+        if not isinstance(reason, str) or not reason or not isinstance(assurance, str) or not assurance:
+            raise ManifestError("declared evaluation absence requires reason and assurance_class")
+        if "oracle" in value:
+            raise ManifestError("declared evaluation absence cannot name an oracle")
+    elif "absence_reason" in value or "assurance_class" in value:
+        raise ManifestError("absence fields are only valid for evaluation mode none")
+    return dict(value)
 
 
 def _canonical_selectors(value: object, label: str, *, allow_empty: bool = False) -> tuple[str, ...]:

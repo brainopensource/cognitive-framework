@@ -30,8 +30,8 @@ the delivery slices below remain ordered, non-active backlog until their depende
 | **M-0 Engineering truth** | v0.6.0 | 0 | Living CI measures `vanguard/packages/` and named falsifiers | Production suites wired in CI; F-01…F-21 registered as tests; codegen `--check` wired | **COMPLETE** | Director approval (ADR-0075) |
 | **M-1 Trust spine** | v0.6.0 | 1 | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green on canonical path; suites of record green; TCB budget ≤ 1438 LOC | **COMPLETE (GREEN)** | M-0 |
 | **M-2 One runtime** | v0.6.1 | 2 | One canonical runtime plus economically truthful trajectories and restart-safe state | RF-23 populated/conserved `mhf.trajectory/1` green; RF-25 fresh-interpreter SQLite-WAL continuation green; retained convergence gates green | **COMPLETE (GREEN)** | M-1 |
-| **M-3 Extensibility** | v0.6.2 | 3 | Typed Named Component Graph and complete plugin lifecycle on the canonical path | RF-28…RF-45; echo lifecycle over wire; NOVA-4 negatives; `layer0/` source/package/CI surface atomically absent | **IN FLIGHT** | M-2 |
-| **M-4 Foundation E2E (STOP)** | v0.6.3 | 4 | One honest coding-agent run through the complete substrate | Nine populated evidence rows, one uninterrupted `run_id`, zero human intervention or stitched/cassette substitution | **QUEUED** | M-1, M-2, M-3 |
+| **M-3 Extensibility** | v0.6.2 | 3 | Typed Named Component Graph and complete plugin lifecycle on the canonical path | RF-28…RF-45; echo lifecycle over wire; NOVA-4 negatives; `layer0/` source/package/CI surface atomically absent | **COMPLETE (GREEN)** | M-2 |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | 4 | One honest coding-agent run through the complete substrate | Nine populated evidence rows, one uninterrupted `run_id`, zero human intervention or stitched/cassette substitution | **ACTIVE — ENVIRONMENT BLOCKED** | M-1, M-2, M-3 |
 
 ---
 
@@ -86,10 +86,10 @@ repository's anti-sprawl rule. A slice moves to the active board only after ever
 
 | Sprint | Milestone | Deliverable | Acceptance and bound falsifier | Dependency | State |
 |---|---|---|---|---|---|
-| **3.1** | M-3 | Compile `mhf.manifest/2`: named instances, typed bindings, profiles, compatibility reader, one canonical parser | RF-28–RF-33, RF-46, RF-73–RF-74, and RF-76 green; edge-only changes alter `D_H`; unknown or unconsumed authority fails closed | M-2 | ACTIVE |
-| **3.2** | M-3 | Port the registry FSM and isolation broker to `vanguard/packages/`; run the echo plugin through the complete wire lifecycle | RF-34–RF-45 green; declared absence is pre-execution and ineligible; unsigned or forged evidence fails closed | Sprint 3.1 | PLANNED |
-| **3.3** | M-3 | Delete residual `layer0/` source, packaging, CI, and test surfaces atomically after parity | NOVA-4 / RF-38–RF-45 green; no stale import, package entry, workflow path, or duplicate parser remains | Sprint 3.2 | PLANNED |
-| **4.1** | M-4 | Execute one real coding-agent run from start to signed completion | One uninterrupted `run_id`; all nine evidence rows populated; no human repair, stitched trace, cassette substitution, or forged verdict | M-3 | PLANNED |
+| **3.1** | M-3 | Compile `mhf.manifest/2`: named instances, typed bindings, profiles, compatibility reader, one canonical parser | RF-28–RF-33, RF-46, RF-73–RF-74, and RF-76 green; edge-only changes alter `D_H`; unknown or unconsumed authority fails closed | M-2 | COMPLETE |
+| **3.2** | M-3 | Port the registry FSM and isolation broker to `vanguard/packages/`; run the echo plugin through the complete wire lifecycle | RF-34–RF-45 green; declared absence is pre-execution and ineligible; unsigned or forged evidence fails closed | Sprint 3.1 | COMPLETE |
+| **3.3** | M-3 | Delete residual `layer0/` source, packaging, CI, and test surfaces atomically after parity | NOVA-4 / RF-38–RF-45 green; no stale import, package entry, workflow path, or duplicate parser remains | Sprint 3.2 | COMPLETE |
+| **4.1** | M-4 | Execute one real coding-agent run from start to signed completion | One uninterrupted `run_id`; all nine evidence rows populated; no human repair, stitched trace, cassette substitution, or forged verdict | M-3 | ACTIVE — ENVIRONMENT BLOCKED |
 | **5.1** | M-5 | Add Math/Formal Pack #2 and prove substrate generality | Zero diffs under `vanguard/packages/{domain,kernel}/`; contract, trajectory, and exterior-evidence parity with Pack #1 | M-4 | PLANNED |
 | **5.2** | M-5 | Produce exact attributable T0 witness memo and finish post-foundation consolidation | RF-52–RF-53 and RF-34–RF-37 green; memo key binds subject, inputs, environment, checker, toolchain, assurance, and policy version | Sprint 5.1 | PLANNED |
 | **6.1** | M-6 | Mediate `agent.spawn` as an S0–S12 effect with attenuated child authority and budget | RF-55–RF-59 plus RF-26 green; absent grant denies; depth and selectors never widen; TCB remains within budget | M-5 | PLANNED |

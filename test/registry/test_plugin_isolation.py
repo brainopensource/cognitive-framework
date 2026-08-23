@@ -66,9 +66,32 @@ class PluginIsolationTests(unittest.TestCase):
         self.assertEqual(cell.state, CellState.RUNNING)
         self.assertIsNotNone(cell.pid)
         self.assertTrue(Path(cell.socket_path).exists())
+        mode = os.stat(cell.socket_path).st_mode & 0o777
+        self.assertEqual(mode, 0o600, f"socket mode is {oct(mode)}, expected 0o600")
         self.broker.terminate(cell)
         self.assertEqual(cell.state, CellState.TERMINATED)
         self.assertFalse(Path(cell.socket_path).exists())
+
+    def test_in_process_isolation_tier_direct_dispatch(self) -> None:
+        with self.assertRaises(PermissionError):
+            self.broker.bind("mhf.toolkit.denied", isolation="in_process")
+        cell = self.broker.bind(
+            "mhf.toolkit.inproc",
+            isolation="in_process",
+            capabilities=_ECHO_CAPS,
+            handler=lambda method, payload: {"inproc": payload.get("args", {}).get("text", "")},
+            policy_granted=True,
+        )
+        self.assertEqual(cell.state, CellState.BOUND)
+        self.assertEqual(cell.isolation, "in_process")
+        self.broker.start(cell)
+        self.assertEqual(cell.state, CellState.RUNNING)
+        self.assertIsNone(cell.pid)
+        response = self.broker.call(cell, "execute", _echo_params("direct"))
+        self.assertTrue(response.ok)
+        self.assertEqual(response.result["inproc"], "direct")
+        self.broker.terminate(cell)
+        self.assertEqual(cell.state, CellState.TERMINATED)
 
     def test_illegal_start_from_uninstantiated(self) -> None:
         cell = self.broker.cell("ghost")

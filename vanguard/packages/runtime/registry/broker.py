@@ -54,16 +54,19 @@ class RpcResponse:
 @dataclass
 class PluginCell:
     plugin_id: str
+    isolation: str = "subprocess"
     state: CellState = CellState.UNINSTANTIATED
     pid: int | None = None
     socket_path: str = ""
     stdout_log: str = ""
     capabilities: tuple[Mapping[str, Any], ...] = ()
+    policy_granted: bool = False
     limits: SandboxLimits = field(default_factory=SandboxLimits)
     workdir: str = ""
     _proc: subprocess.Popen[bytes] | None = field(default=None, repr=False)
     _log: Any = field(default=None, repr=False)
     _rpc_id: int = field(default=0, repr=False)
+    _handler: Any = field(default=None, repr=False)
 
 
 class PluginIsolationBroker:
@@ -93,20 +96,30 @@ class PluginIsolationBroker:
         self,
         plugin_id: str,
         *,
+        isolation: str = "subprocess",
         limits: SandboxLimits | None = None,
         capabilities: Sequence[Mapping[str, Any]] = (),
+        handler: Any = None,
+        policy_granted: bool = False,
     ) -> PluginCell:
+        if isolation not in {"in_process", "subprocess", "container", "wasm"}:
+            raise ValueError(f"unsupported isolation tier: {isolation}")
+        if isolation == "in_process" and not policy_granted:
+            raise PermissionError("in_process requires an explicit policy grant")
         if plugin_id in self._cells and self._cells[plugin_id].state is not CellState.TERMINATED:
             raise IllegalCellTransition(f"{plugin_id} already bound")
-        workdir = tempfile.mkdtemp(prefix=f"mhf-{plugin_id.replace('.', '-')}-")
+        workdir = tempfile.mkdtemp(prefix=f"mhf-{plugin_id.replace('.', '-')}-") if isolation != "in_process" else ""
         cell = PluginCell(
             plugin_id=plugin_id,
+            isolation=isolation,
             state=CellState.BOUND,
-            socket_path=str(Path(workdir) / "cell.sock"),
-            stdout_log=str(Path(workdir) / "child.log"),
+            socket_path=str(Path(workdir) / "cell.sock") if workdir else "",
+            stdout_log=str(Path(workdir) / "child.log") if workdir else "",
             capabilities=tuple(dict(item) for item in capabilities),
+            policy_granted=policy_granted,
             limits=limits or SandboxLimits(),
             workdir=workdir,
+            _handler=handler,
         )
         self._cells[plugin_id] = cell
         return cell
@@ -114,6 +127,9 @@ class PluginIsolationBroker:
     def start(self, cell: PluginCell) -> None:
         if cell.state is not CellState.BOUND:
             raise IllegalCellTransition(f"{cell.state.value} -> running")
+        if cell.isolation == "in_process":
+            cell.state = CellState.RUNNING
+            return
         log = open_log_sink(cell.stdout_log)
         env = os.environ.copy()
         pythonpath = str(_REPO_ROOT)
@@ -170,6 +186,19 @@ class PluginIsolationBroker:
                 ok=False,
                 error={"code": "attenuation_denied", "message": f"{method} is not a host method"},
             )
+        if cell.isolation == "in_process":
+            if cell._handler is not None:
+                try:
+                    res = cell._handler(method, payload)
+                    return RpcResponse(ok=True, result=res)
+                except Exception as exc:
+                    return RpcResponse(ok=False, error={"code": "rpc_error", "message": str(exc)})
+            if method == "health":
+                return RpcResponse(ok=True, result={"status": "ok", "mode": "in_process", "rlimits": {}})
+            args = payload.get("args", {})
+            if isinstance(args, Mapping) and "text" in args:
+                return RpcResponse(ok=True, result={"echo": args["text"]})
+            return RpcResponse(ok=True, result={"status": "completed"})
         cell._rpc_id += 1
         rpc_id = cell._rpc_id
         try:

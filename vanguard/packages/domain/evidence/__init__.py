@@ -9,6 +9,7 @@ from .claim import (
     Validity,
     parse_claim,
 )
+from .guardrails import derive_evidence_state
 
 __all__ = [
     "Claim",
@@ -18,4 +19,5 @@ __all__ = [
     "Uncertainty",
     "Validity",
     "parse_claim",
+    "derive_evidence_state",
 ]

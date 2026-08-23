@@ -27,8 +27,8 @@ superseded_by: null
 | **Wave 1** | M-1 | **CLOSED (GREEN)** | Trust spine: signed verdicts, single emitter, typed budgets, complete $D_H$. |
 | **Wave 2** | M-2 | **DONE (Round 4)** | Convergence core: absorbed SPI/JSON-RPC/lifecycle, deleted duplicate layer0 kernel. |
 | **Wave 2C** | M-2 / v0.6.1 | **CLOSED (GREEN)** | Evidence integrity: RF-23 (truthful trajectory) + RF-25 (fresh-process SQLite continuation). |
-| **Wave 3** | M-3 | **OPEN (ACTIVE)** | Finish canonical `mhf.manifest/2`, parser convergence, graph falsifiers, and objective Layer-0 retirement proof. |
-| **Wave 4** | M-4 | **QUEUED** | Foundation E2E Stop: one uncheated real coding-agent run with nine evidence rows, after M-3 closes. |
+| **Wave 3** | M-3 | **CLOSED (GREEN)** | Canonical `mhf.manifest/2`, parser convergence, graph/lifecycle falsifiers, and Layer-0 retirement proof are green. |
+| **Wave 4** | M-4 | **ACTIVE (ENVIRONMENT BLOCKED)** | Foundation E2E Stop: one uncheated real coding-agent run with nine evidence rows; provider/evaluator execution remains outstanding. |
 
 ---
 
@@ -85,7 +85,10 @@ prove no duplicate parser/writer/reducer/dialect remains. Layer-0 deletion is ev
 3.1 and 3.2 are green.
 
 **Gate:** RF-45/NOVA-4, boundary/duplication/stale-path/codegen/secret checks, all production suites,
-and zero Layer-0 source/package/test/CI/navigation entries. Until then M-3 stays open and M-4 queued.
+and zero Layer-0 source/package/test/CI/navigation entries. **Status: GREEN.**
+
+The historical transitional command `python3 -m unittest discover -s test/layer0 -t .` is
+intentionally obsolete: the directory is absent after atomic retirement and must not be recreated.
 
 ### Active verification commands
 
@@ -93,6 +96,7 @@ and zero Layer-0 source/package/test/CI/navigation entries. Until then M-3 stays
 python3 -m unittest test.falsifiers.test_rf38_rf45_plugin_lifecycle -v
 python3 -m unittest discover -s test/registry -t .
 python3 -m unittest test.contracts.test_event_coverage -v
+python3 -m unittest test.runtime.test_compatibility_readers -v
 python3 -m unittest discover -s test/packs -t .
 PYTHONPATH=tools/common python3 tools/codegen/generate_types.py --check
 python3 tools/linters/check_boundaries.py
@@ -100,6 +104,10 @@ python3 tools/linters/check_tcb_budget.py
 python3 tools/linters/check_duplication.py --enforce
 python3 tools/linters/check_stale_paths.py
 ```
+
+M-4 cannot be promoted by a mock, cassette, or unavailable provider. In this workspace the
+real-run gate is blocked because `OPENROUTER_API_KEY` and `DEEPSEEK_API_KEY` are unset and no
+local Ollama/evaluator endpoint is available. The runtime reports that as an instrument failure.
 
 ---
 

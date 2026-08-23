@@ -10,6 +10,7 @@ from pathlib import Path
 from vanguard.packages.agency.manifests.loader import ManifestLoader
 from vanguard.packages.domain.artifacts.graph import ArtifactFile, ArtifactGraph, KindRegistry
 from vanguard.packages.domain.artifacts.manifest import ManifestError, parse_named_manifest
+from vanguard.packages.domain.evidence.guardrails import derive_evidence_state
 from vanguard.packages.runtime.registry.compiler import compose_named
 
 
@@ -129,6 +130,38 @@ class NamedManifestGraphContract(unittest.TestCase):
             loaded = ManifestLoader(directory).load_named_manifest(path)
         self.assertEqual(loaded.api, "mhf.manifest/2")
         self.assertEqual(loaded.entrypoints, ("main",))
+
+    def test_evaluation_absence_is_explicit_and_identity_bound(self) -> None:
+        """RF-34/RF-36: absence is declared; eligibility is runtime-derived."""
+        absent = self.manifest()
+        absent["evaluation"] = {
+            "mode": "none", "absence_reason": "mechanical_only",
+            "assurance_class": "deterministic",
+        }
+        frozen = compose_named(absent, self.graph)
+        self.assertEqual(frozen.metadata["evaluation"]["mode"], "none")
+        self.assertNotEqual(frozen.digest, compose_named(self.manifest(), self.graph).digest)
+        self.assertEqual(derive_evidence_state(frozen.metadata["evaluation"], signed_verdict=None,
+                                               trajectory_complete=True)["evidence_state"],
+                         "absent_declared")
+        self.assertFalse(derive_evidence_state(frozen.metadata["evaluation"], signed_verdict=None,
+                                                trajectory_complete=True)["promotion_eligible"])
+
+    def test_unsigned_or_manifest_promotability_is_rejected(self) -> None:
+        """RF-35/RF-36: unsigned verdicts and caller-owned eligibility fail closed."""
+        absent = self.manifest()
+        absent["evaluation"] = {
+            "mode": "none", "absence_reason": "mechanical_only",
+            "assurance_class": "deterministic",
+        }
+        unsigned = derive_evidence_state(absent["evaluation"], signed_verdict={"signature": None},
+                                         trajectory_complete=True)
+        self.assertEqual(unsigned["evidence_state"], "forged_or_broken")
+        self.assertFalse(unsigned["promotion_eligible"])
+        forged = self.manifest()
+        forged["evaluation"] = {"mode": "exterior", "promotable": True}
+        with self.assertRaises(ManifestError):
+            parse_named_manifest(forged)
 
 
 if __name__ == "__main__":

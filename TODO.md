@@ -6,22 +6,22 @@
 - [x] **2C-SEAM / 2C-COMBINED:** Integration of Cold Resume & Full Trajectory Assembly in `session.py` [GREEN]
 - [x] **2C-REGATE:** Verify `test_rf25_cold_continuation.py` and `test_rf23_trajectory_content.py` GREEN [PASSED]
 
-## [Wave 3 / M-3] Extensibility & Named Component Graph (ACTIVE / IN PROGRESS)
-- [ ] **3.1-A:** Manifest Compiler for Named Component Graph (`mhf.manifest/2` / ADR-0077); parser convergence and RF-28–RF-33 remain
+## [Wave 3 / M-3] Extensibility & Named Component Graph (COMPLETED - GREEN)
+- [x] **3.1-A:** Manifest Compiler for Named Component Graph (`mhf.manifest/2` / ADR-0077); parser convergence and RF-28–RF-33 [GREEN]
 - [x] **3.1-B:** Plugin Lifecycle FSM in `runtime/registry/lifecycle.py` (`DISCOVERED -> RETIRED` / ADR-0081) [GREEN]
 - [x] **3.1-C:** Ledger `PluginDiscovered` and `PluginVerified` Events with single-writer validation (`ledger_emitter.py`, `reducer.py`) [GREEN]
 - [x] **3.1-D:** Echo Plugin Lifecycle Walking Skeleton over Unix Domain Sockets (UDS) (`broker.py`, `worker.py`, `test/registry/`) [GREEN]
-- [ ] **3.1-E:** Complete NOVA-4 and the missing Named Component Graph falsifiers
-- [ ] **3.1-F:** Finish atomic Layer-0 retirement by removing stale living navigation and proving parser parity
-- [ ] **3.1-GATE:** RF-28–RF-33, RF-46, RF-73–RF-74, RF-76; edge-only $D_H$ change; no duplicate parser or runtime scheduling
-- [ ] **3.2-GATE:** RF-34–RF-44; normal/fault echo lifecycle; UDS permissions, timeout, crash, denial, cleanup, event reduction
-- [ ] **3.3-GATE:** RF-45/NOVA-4; zero Layer-0 source/package/test/CI/navigation surface; full architecture gates
+- [x] **3.1-E:** Complete NOVA-4 and the missing Named Component Graph falsifiers [GREEN]
+- [x] **3.1-F:** Finish atomic Layer-0 retirement by removing stale living navigation and proving parser parity [GREEN]
+- [x] **3.1-GATE:** RF-28–RF-33, RF-46, RF-73–RF-74, RF-76; edge-only $D_H$ change; no duplicate parser or runtime scheduling [GREEN]
+- [x] **3.2-GATE:** RF-34–RF-44; normal/fault echo lifecycle; UDS permissions, timeout, crash, denial, cleanup, event reduction [GREEN]
+- [x] **3.3-GATE:** RF-45/NOVA-4; zero Layer-0 source/package/test/CI/navigation surface; full architecture gates [GREEN]
 
-## [Wave 4 / M-4] Foundation E2E Stop Line (QUEUED)
+## [Wave 4 / M-4] Foundation E2E Stop Line (ACTIVE / ENVIRONMENT BLOCKED)
 - [x] **4.1-A:** Preregistered Oracle and Coding Pack Fixture Setup (`test_composition_root.py`) [PREPARED]
-- [ ] **4.1-B:** Execute Uncheated Single Run Generating 9 Populated Evidence Rows (Stop-line real provider execution)
+- [ ] **4.1-B:** Execute Uncheated Single Run Generating 9 Populated Evidence Rows (Stop-line real provider execution) [BLOCKED: no authorized provider/evaluator]
 - [ ] **4.1-C:** Export Cassette for Hermetic CI Regression Suite (Post-M4)
-- [ ] **4.1-GATE:** One uninterrupted lineage binds real model, S0–S12 effect, sandbox, signed exterior verdict, WAL, cold replay, and rich trajectory
+- [ ] **4.1-GATE:** One uninterrupted lineage binds real model, S0–S12 effect, sandbox, signed exterior verdict, WAL, cold replay, and rich trajectory [OPEN]
 
 ## [Waves 5 → 10] Ordered Sprint Checklist (QUEUED)
 

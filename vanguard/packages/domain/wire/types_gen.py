@@ -318,6 +318,7 @@ class NamedManifestV2:
     system_prompt: str | None = None
     approval_policy: str | None = None
     guardrails: JsonObject = field(default_factory=dict)
+    evaluation: object | None = None
     undeletable: bool | None = None
 
 @dataclass(frozen=True, slots=True)

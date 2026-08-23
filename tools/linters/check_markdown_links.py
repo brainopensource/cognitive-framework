@@ -19,6 +19,7 @@ from repo_paths import repo_root
 
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 FILE_URL = re.compile(r"file://[^\s)>\"]+")
+HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 
 SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__"}
 DOC_GLOBS = (
@@ -37,6 +38,33 @@ def extract_targets(text: str) -> list[str]:
     targets = [match.group(1).strip() for match in LINK.finditer(text)]
     targets.extend(FILE_URL.findall(text))
     return targets
+
+
+def _fragment(raw: str) -> str:
+    target = raw.split()[0].strip("<>")
+    if target.startswith("#"):
+        return unquote(target[1:])
+    parsed = urlparse(target)
+    return unquote(parsed.fragment)
+
+
+def _github_slug(label: str) -> str:
+    """Return the stable subset of GitHub heading slugs used by repository docs."""
+    label = re.sub(r"<[^>]+>", "", label)
+    label = re.sub(r"[`*_~]", "", label).strip().lower()
+    label = re.sub(r"[^\w\- ]", "", label, flags=re.UNICODE)
+    return label.replace(" ", "-")
+
+
+def heading_anchors(text: str) -> set[str]:
+    anchors: set[str] = set()
+    occurrences: dict[str, int] = {}
+    for match in HEADING.finditer(text):
+        base = _github_slug(match.group(1))
+        number = occurrences.get(base, 0)
+        occurrences[base] = number + 1
+        anchors.add(base if number == 0 else f"{base}-{number}")
+    return anchors
 
 
 def resolve_target(source: Path, raw: str, root: Path) -> Path | None:
@@ -104,11 +132,30 @@ def check(root: Path) -> list[str]:
         text = path.read_text(encoding="utf-8")
         for raw in extract_targets(text):
             resolved = resolve_target(path, raw, root)
-            if resolved is None:
+            fragment = _fragment(raw)
+            if resolved is None and fragment:
+                resolved = path
+            elif resolved is None:
                 continue
             if not resolved.exists():
                 rel = path.relative_to(root) if path.is_relative_to(root) else path
                 errors.append(f"{rel}: broken local link {raw!r} -> {resolved}")
+                continue
+            # Frozen provenance keeps historical fragments exactly as cited. Living Markdown must
+            # resolve its fragments so a file rename cannot leave a deceptively valid deep link.
+            if (
+                fragment
+                and resolved.is_file()
+                and resolved.suffix.lower() == ".md"
+                and "_archive" not in path.parts
+            ):
+                anchors = heading_anchors(resolved.read_text(encoding="utf-8"))
+                if fragment not in anchors:
+                    rel = path.relative_to(root) if path.is_relative_to(root) else path
+                    errors.append(
+                        f"{rel}: broken markdown anchor {raw!r} "
+                        f"(#{fragment} not found in {resolved})"
+                    )
     return errors
 
 

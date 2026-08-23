@@ -21,6 +21,8 @@ superseded_by: null
 >
 > This directory preserves visual design history. Its diagrams cannot authorize implementation;
 > current behavior and work must be traced to SPEC/annex law, accepted ADRs, and the active board.
+> Biological, cosmological, and tier-of-being labels below are preserved rejected metaphors, not
+> components, authority boundaries, implementation requirements, or capability claims.
 
 This directory contains master vector blueprints illustrating the AETHER / Vanguard substrate architecture, epistemological boundaries, capability microkernel dispatch, and long-horizon evolution.
 

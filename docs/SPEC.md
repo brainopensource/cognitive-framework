@@ -132,7 +132,7 @@ See [`RUNTIME.md`](01_law/RUNTIME.md#3-autonomous-execution-safety--deterministi
 
 ## 4. Coding Domain Pack (first domain; foundation E2E, not this lock wave)
 
-See [`EXTENSIBILITY.md`](01_law/EXTENSIBILITY.md#packs-and-domain-boundaries).
+See [`EXTENSIBILITY.md`](01_law/EXTENSIBILITY.md#read-map).
 
 ## 5. Evolution Blueprint — Phase 2 (autonomous & meta-cognitive)
 

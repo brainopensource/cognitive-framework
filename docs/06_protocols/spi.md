@@ -30,8 +30,8 @@ superseded_by: null
 ## Canonical interface roster
 
 The normative five-SPI roster and method contracts live only in
-[`SPEC.md` §2.2](../SPEC.md#22-spi-definitions-typed-frozen-versioned). The executable Python surface
+[`RUNTIME.md` §2.2](../01_law/RUNTIME.md#22-spi-definitions-typed-frozen-versioned). The executable Python surface
 is [`ports/spi.py`](../../vanguard/packages/ports/spi.py); this page intentionally does not maintain a
 second interface list. Those protocols are client conveniences for the wire contract, not a second
 authority surface. Transport behavior, including direct in-memory `in_process` dispatch, is governed
-by [`SPEC.md` §2.1](../SPEC.md#21-plugin-model) and ADR-0072.
+by [`RUNTIME.md` §2.1](../01_law/RUNTIME.md#21-plugin-model) and ADR-0072.

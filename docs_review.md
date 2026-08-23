@@ -61,3 +61,14 @@ We want to overhaul and elevate our repository's documentation architecture to m
     ---
 
     Please present your response with a clear folder tree diagram, comparison tables, and concrete examples of how each tier interacts.
+
+
+
+
+Are we following these as guidelines for the concepts, decisions, documentation, planning and to start development and implementation later?
+
+[`001_alfa_review_full_decision.md`](docs/07_reviews/archive/proposals/001_alfa_review_full_decision.md)
+
+[`006_fi_review_full_gptsol_proposal.md`](docs/07_reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md) 
+
+

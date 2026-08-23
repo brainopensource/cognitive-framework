@@ -149,8 +149,17 @@ moves to [`sprint_active.md`](sprint_active.md) only after its dependency gate i
 - **Problem:** one coding pack can hide domain coupling in the substrate.
 - **Build:** Math/Formal pack as a client of existing ports: manifest, prompt/context policy, tools,
   checker registry, fixtures, and exterior evaluator. Add no SPI and change no domain/kernel code.
+- **Ordered slices after M-4 closes:**
+  1. Freeze a Math/Formal task corpus and deterministic checker protocol under `packs/` and `test/packs/`.
+  2. Compose the pack through `mhf.manifest/2` using only the five existing SPIs and canonical
+     selectors; any missing substrate primitive is a falsifier result, not permission to add an SPI.
+  3. Run the same model invocation, S0–S12 dispatch, SQLite-WAL, cold reconstruction,
+     `mhf.trajectory/1`, and exterior-signature path proven by M-4.
+  4. Record a path-scoped diff proving no change under `vanguard/packages/domain/` or
+     `vanguard/packages/kernel/` during the Pack #2 implementation interval.
 - **Gate:** zero diff under `vanguard/packages/{domain,kernel}/`; same composition, dispatch, ledger,
-  trajectory, recovery, and signed-evidence contracts as Pack #1.
+  trajectory, recovery, and signed-evidence contracts as Pack #1. A pack-local loop, writer,
+  reducer, budget controller, evaluator, or authority ledger fails the gate.
 
 ### Sprint 5.2 — Attributable witness and consolidation
 
@@ -158,6 +167,12 @@ moves to [`sprint_active.md`](sprint_active.md) only after its dependency gate i
 - **Build:** content-addressed T0 memo binding subject, inputs, environment, checker, toolchain,
   assurance, policy version, result, signature, and invalidation conditions. Derive eligibility from
   evidence; never accept a promotability flag from input.
+- **Identity preimage:** `subject_digest + input_digest + environment_digest + checker_digest +
+  toolchain_digest + assurance_class + policy_version + result_digest + invalidation_conditions`;
+  JCS-canonicalize once, digest once, and bind the exterior signature to that digest.
+- **Negative cases:** stale subject, changed checker/toolchain/policy, unsigned/self-signed result,
+  declared evaluator absence, invented promotability, and mismatched signature all remain
+  unattributable and ineligible.
 - **Gate:** RF-34–RF-37 and RF-52–RF-53; absent, forged, stale, or mismatched evidence is ineligible.
 
 ### Sprint 6.1 — Mediated delegation
@@ -166,9 +181,18 @@ moves to [`sprint_active.md`](sprint_active.md) only after its dependency gate i
 - **Build:** represent target harness as selector `agent://spawn/harness/<D_H>`; submit spawn as an
   ordinary effect; durably append intent before child creation; attenuate selectors, handles,
   budget sublease, depth, and turns; ledger child start/return/failure/cancellation and reconcile.
+- **Ordered slices after M-5 closes:**
+  1. Register the selector/descriptor semantics while retaining absent-grant denial.
+  2. Route spawn through the existing dispatcher; agency may request it but may not create a child.
+  3. After durable S8a intent, let a runtime adapter create the child with explicit parent/child IDs,
+     strict selector intersection, no implicit handles, and conserved budget/depth/turn sublease.
+  4. Return child receipts through S9–S12; ledger success, failure, and cancellation and reconcile
+     every lease before terminal parent state.
+  5. Prove fresh-process continuation reconstructs lineage and never repeats a settled spawn.
 - **Pseudocode:** `request -> S0..S8a intent -> create child -> child receipts -> S9..S12 settle`.
 - **Gate:** RF-55–RF-59 and RF-26; absent grant denies, child is a strict subset, cold continuation
-  preserves lineage, no direct agency subprocess, and TCB stays within budget.
+  preserves lineage, no direct agency subprocess, and TCB stays within budget. Activation remains
+  forbidden while M-4 or M-5 is open.
 
 ### Sprint 7.1 — Measure before concurrency
 

@@ -18,7 +18,7 @@
 - [x] **3.3-GATE:** RF-45/NOVA-4; zero Layer-0 source/package/test/CI/navigation surface; full architecture gates [GREEN]
 
 ## [Wave 4 / M-4] Foundation E2E Stop Line (ACTIVE / ENVIRONMENT BLOCKED)
-- [x] **4.1-A:** Preregistered Oracle and Coding Pack Fixture Setup (`test_composition_root.py`) [PREPARED]
+- [x] **4.1-A:** Preregistered oracle, coding fixture, and fail-closed nine-row evidence auditor (`test_m4_foundation_audit.py`) [PREPARED / 13 TESTS GREEN]
 - [ ] **4.1-B:** Execute Uncheated Single Run Generating 9 Populated Evidence Rows (Stop-line real provider execution) [BLOCKED: no authorized provider/evaluator]
 - [ ] **4.1-C:** Export Cassette for Hermetic CI Regression Suite (Post-M4)
 - [ ] **4.1-GATE:** One uninterrupted lineage binds real model, S0–S12 effect, sandbox, signed exterior verdict, WAL, cold replay, and rich trajectory [OPEN]

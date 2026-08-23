@@ -108,6 +108,10 @@ python3 tools/linters/check_stale_paths.py
 M-4 cannot be promoted by a mock, cassette, or unavailable provider. In this workspace the
 real-run gate is blocked because `OPENROUTER_API_KEY` and `DEEPSEEK_API_KEY` are unset and no
 local Ollama/evaluator endpoint is available. The runtime reports that as an instrument failure.
+The pure nine-row auditor is implemented and fail-closed: duplicate rows, discontinuous lineage,
+unverified signatures, incomplete sandbox probes, host fallback, synthetic providers, incomplete
+WAL/cold-replay evidence, and alternate runtime authority all deny promotion. This validator is
+preparation evidence only; it cannot create or replace the required real run.
 
 ---
 

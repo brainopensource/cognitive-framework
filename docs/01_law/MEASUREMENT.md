@@ -9,6 +9,10 @@ status: living
 owner: principal-systems-architect
 version: "0.6.1"
 last_verified: 2026-08-21
+read_when:
+  - changing-measurement-or-promotion
+do_not_read_when:
+  - changing-runtime-recovery-only
 title: "Measurement"
 source: 01_specs/backend/07_vanguard_loop_engineering_and_measurement_v040.md (VG-07) §5 (git history, 4f9f8b1)
 supersedes: []
@@ -21,7 +25,7 @@ superseded_by: null
 > `01_SPECS_MIGRATION_MATRIX.md` §1.10 (git history, `4f9f8b1`) — paired designs, McNemar's exact test,
 > multiple-comparison policy, the A/A noise floor, arm design, the instrument tuple, splits and
 > contamination discipline. This is what makes Phase-2 promotion (`docs/SPEC.md` §5.2, gate M5)
-> statistically honest. RFC-2119 language is normative here, same as `docs/SPEC.md`.
+> statistically honest. RFC-2119 language is normative here, same as [`../SPEC.md`](../SPEC.md).
 >
 > **v0.6 note (`ADR-0073`, `ADR-0074`).** This annex remains the measurement constitution.
 > Phase-2 promotion is a **deferred blueprint**, not foundation scope. Foundation identity

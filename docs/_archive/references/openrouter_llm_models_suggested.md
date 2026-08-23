@@ -1,5 +1,6 @@
 # OpenRouter LLM Models: Suggested SOTA Reference
 
+
 ## 0. Free Models
 
 - openrouter/free
@@ -35,9 +36,3 @@
 - openai/gpt-5.6-sol
 - x-ai/grok-4.6
 - anthropic/claude-opus-5
-
-## 4. Local Models
-
-- qwen2.5:1.5b
-- qwen2.5-coder:7b
-- deepseek-coder-v2:16b-instruct-q5

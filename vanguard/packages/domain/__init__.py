@@ -42,6 +42,11 @@ from .selectors.resource_selector import (
     includes,
     parse_selector,
 )
+from .selectors.independence import (
+    are_independent,
+    compute_independence_groups,
+    disjoint,
+)
 from .wire import WIRE_KINDS, WireError, parse_wire
 from .artifacts import (
     BUILTIN_KINDS, ArtifactFile, ArtifactGraph, ArtifactKind, CapabilityRequirement,

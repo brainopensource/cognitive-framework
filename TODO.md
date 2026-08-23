@@ -1,12 +1,12 @@
 # Vanguard / AETHER — Master Development Tracker
 
-## [Wave 2C / M-2] Runtime Convergence & Evidence Integrity (ACTIVE)
-- [ ] **2C-R25 (Dev B):** SQLite-WAL Cold Continuation & Lease Reconciliation (`recovery.py`, `session.py`)
-- [ ] **2C-R23 (Dev A):** Trajectory Economic Un-hollowing & Pre-Crash Join (`trajectory.py`, `session.py`)
-- [ ] **2C-SEAM:** Integration of Cold Resume & Full Trajectory Assembly in `session.py`
-- [ ] **2C-REGATE:** Verify `test_rf25_cold_continuation.py` and `test_rf23_trajectory_content.py` GREEN
+## [Wave 2C / M-2] Runtime Convergence & Evidence Integrity (COMPLETED - GREEN)
+- [x] **2C-R25 (Dev B):** SQLite-WAL Cold Continuation & Lease Reconciliation (`recovery.py`, `session.py`) [GREEN]
+- [x] **2C-R23 (Dev A):** Trajectory Economic Un-hollowing & Pre-Crash Join (`trajectory.py`, `session.py`) [GREEN]
+- [x] **2C-SEAM / 2C-COMBINED:** Integration of Cold Resume & Full Trajectory Assembly in `session.py` [GREEN]
+- [x] **2C-REGATE:** Verify `test_rf25_cold_continuation.py` and `test_rf23_trajectory_content.py` GREEN [PASSED]
 
-## [Wave 3 / M-3] Extensibility & Named Component Graph (QUEUED)
+## [Wave 3 / M-3] Extensibility & Named Component Graph (ACTIVE / IN PROGRESS)
 - [ ] **3.1-A:** Manifest Compiler for Named Component Graph (`mhf.manifest/2` / ADR-0077)
 - [ ] **3.1-B:** Plugin Lifecycle FSM in `runtime/registry/` (`DISCOVERED -> RETIRED` / ADR-0081)
 - [ ] **3.1-C:** Ledger `PluginDiscovered` and `PluginVerified` Events with single-writer validation

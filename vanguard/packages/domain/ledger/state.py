@@ -135,7 +135,7 @@ class PluginRecord:
     """Plugin lifecycle state record (ADR-M0-13, Wave 3)."""
 
     plugin_id: str
-    status: str  # "resolved", "activated", "quiesced", "retired", "faulted"
+    status: str  # "discovered", "resolved", "verified", "activated", "quiesced", "retired", "faulted"
     reason: Optional[str] = None
     manifest_digest: Optional[str] = None
     occurred_at: Optional[str] = None

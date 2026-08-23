@@ -46,6 +46,7 @@ from .compose import (
     TaskContext,
 )
 from .evaluator_gateway import record_verdict
+from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
 from .telemetry import RunTelemetry
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
@@ -261,9 +262,13 @@ class HarnessSession:
 
         # One kernel per run (`S8-A-01` DoD). Everything that used to vary
         # between the three constructions now varies behind `_SwappablePolicy`.
+        governor = Governor(harness.budget)
+        for dim, amt in self.ledger_state().cumulative_budget_debits.items():
+            governor._spent[dim] = amt
+
         self.kernel = Kernel(
             adapters=self.adapters, policy=self.policy, classifier=classifier,
-            governor=Governor(harness.budget), issuer=GrantIssuer(),
+            governor=governor, issuer=GrantIssuer(),
             clock=ports.clock, ledger=self.ledger, events=self.ledger,
             sinks=harness.sinks)
 
@@ -364,7 +369,8 @@ class HarnessSession:
         # fresh `HarnessSession` (fresh `LedgerBridge`) for the same
         # `episode_id`, and the guard must survive that reconstruction too,
         # or resume would double-append the beginning of the run.
-        if self.ledger_state().episode.status == "pending":
+        prior_state = self.ledger_state()
+        if prior_state.episode.status == "pending":
             self.ledger.emit(Event(
                 kind="EpisodeStarted",
                 reason="composed",
@@ -377,6 +383,27 @@ class HarnessSession:
                     "compositionDigest": harness.composition_digest,
                 },
             ))
+        else:
+            scanner = RecoveryScanner(controller_principal=task.principal)
+            scanner.reconcile_open_intents(ports.store, occurred_at=ports.clock.now())
+            self.ledger._seq, self.ledger._prev = self.ledger._load_chain(task.project_id)
+            read_events = ports.store.read(EventRange(episode_id=task.episode_id))
+            ev_list = list(read_events.value) if read_events.ok and read_events.value else []
+            kinds = [(e.payload.get("kind") if hasattr(e, "payload") and isinstance(e.payload, Mapping) else None) or getattr(e, "mhf_kind", "") for e in ev_list]
+            if "RunRecovered" not in kinds:
+                self.ledger.emit_kind(
+                    "RunRecovered",
+                    run_id=task.run_id,
+                    principal=task.principal,
+                    payload={
+                        "kind": "RunRecovered",
+                        "runId": task.run_id,
+                        "recoveryReason": "cold restart from durable ledger",
+                        "recoveredBy": task.principal,
+                        "priorState": prior_state.episode.status,
+                    },
+                    episode_id=task.episode_id,
+                )
 
         # `S8-A-02`. This used to be a bounded segment loop building a fresh
         # `Episode` each pass with a fresh `max_turns` -- so the real bound was
@@ -423,15 +450,8 @@ class HarnessSession:
             authorization = None
 
         verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
-        trajectory = assemble_trajectory(
-            task=task,
-            harness_digest=harness.composition_digest,
-            terminal=str(getattr(terminal, "value", terminal)),
-            receipts=receipts,
-            contexts=list(self.operator.contexts),
-            events=tuple(self.ledger.events),
-            verdict=verdict,
-        )
+        read_all = ports.store.read(EventRange(episode_id=task.episode_id))
+        durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
         if delayed.pending is None:
             terminal_name = str(getattr(terminal, "value", terminal))
             delayed.pending = Event(
@@ -442,18 +462,50 @@ class HarnessSession:
                 principal=task.principal,
                 payload={
                     "episodeId": task.episode_id,
-                    # `session_log.py` reads any `outcome` other than
-                    # `"resolved"` as a terminal refusal (`runtime/ledger/
-                    # projections.py`'s own default). A successful completion
-                    # synthesized here -- `engine.py` only emits its own
-                    # `EpisodeCompleted` on the no-turn-produced path -- must
-                    # not be mistaken for one.
                     "outcome": ("resolved"
                                if terminal in (RunTermination.COMPLETED, RunTermination.ABSTAINED)
                                else terminal_name),
                 },
             )
+
+        from ..domain.ledger.events import EventEnvelope
+        from ..domain.ledger.reducer import reduce_event
+        pending_env = EventEnvelope(
+            schema_version="mhf.event/1",
+            event_id="pending-terminal",
+            scope="episode",
+            seq=str(self.ledger._seq),
+            occurred_at=delayed.pending.at,
+            recorded_at=delayed.pending.at,
+            principal=task.principal,
+            principal_role="episode",
+            tenant_id="tenant-default",
+            owner_id="owner-platform",
+            confidentiality="internal",
+            retention_class="extended",
+            trainability="prohibited",
+            redaction_status="none",
+            payload=delayed.pending.payload,
+            run_id=task.run_id,
+            episode_id=task.episode_id,
+        )
+        final_state_digest = compute_state_digest(reduce_event(self.ledger_state(), pending_env))
+
+        trajectory = assemble_trajectory(
+            task=task,
+            harness_digest=harness.composition_digest,
+            terminal=str(getattr(terminal, "value", terminal)),
+            receipts=receipts,
+            contexts=list(self.operator.contexts),
+            events=tuple(durable_events),
+            verdict=verdict,
+            state_digest=final_state_digest,
+            model=self.ports.model,
+            environment=self.ports.environment,
+        )
         delayed.flush(trajectory)
+        if isinstance(trajectory, dict):
+            trajectory["state_digest"] = self.state_digest()
         ports.environment.dispose()
         return RunResult(
             harness=harness.harness,

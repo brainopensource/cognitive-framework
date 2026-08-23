@@ -25,6 +25,7 @@ SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__"}
 DOC_GLOBS = (
     "README.md",
     "AGENTS.md",
+    "TODO.md",
     "docs/**/*.md",
     "vanguard/**/*.md",
 )
@@ -173,6 +174,8 @@ def main() -> int:
         global DOC_GLOBS
         DOC_GLOBS = (
             "README.md",
+            "AGENTS.md",
+            "TODO.md",
             "docs/**/*.md",
             "cv13/**/*.md",
             "schemas/v4/**/*.md",

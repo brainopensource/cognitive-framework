@@ -538,6 +538,16 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 recorded_at=envelope.occurred_at,
             )
 
+    elif kind == "PluginDiscovered":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="discovered",
+                manifest_digest=payload.get("manifest_digest") or payload.get("manifestDigest"),
+                occurred_at=envelope.occurred_at,
+            )
+
     elif kind == "PluginResolved":
         plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
         if plugin_id:
@@ -545,6 +555,17 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 plugin_id=str(plugin_id),
                 status="resolved",
                 manifest_digest=payload.get("manifest_digest") or payload.get("manifestDigest"),
+                occurred_at=envelope.occurred_at,
+            )
+
+    elif kind == "PluginVerified":
+        plugin_id = payload.get("plugin_id") or payload.get("pluginId") or payload.get("id")
+        if plugin_id:
+            prev_plugin = plugins.get(str(plugin_id))
+            plugins[str(plugin_id)] = PluginRecord(
+                plugin_id=str(plugin_id),
+                status="verified",
+                manifest_digest=prev_plugin.manifest_digest if prev_plugin else (payload.get("manifest_digest") or payload.get("manifestDigest")),
                 occurred_at=envelope.occurred_at,
             )
 

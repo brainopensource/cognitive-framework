@@ -22,6 +22,19 @@
       "type": ["string", "null"],
       "$comment": "D_R = H(D_H ∥ runtime ∥ environment ∥ model identity ∥ oracle identity) (ADR-0071). Null until the run computes it; MUST NOT be collapsed into harness_digest."
     },
+    "state_digest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "event_range": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "first_seq": { "type": ["integer", "null"] },
+        "last_seq": { "type": ["integer", "null"] },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
     "manifest_genome": {
       "type": "object",
       "$comment": "JCS-diffable manifest fields for later mutation attribution (SPEC §5.2, deferred consumer)."
@@ -36,7 +49,8 @@
           "tier": { "type": "integer", "minimum": 1 },
           "provider": { "type": "string" },
           "model": { "type": "string" },
-          "model_fingerprint": { "type": ["string", "null"] }
+          "model_fingerprint": { "type": ["string", "null"] },
+          "fingerprint_unavailable_reason": { "type": ["string", "null"] }
         }
       }
     },
@@ -47,6 +61,9 @@
     "verdict": {
       "type": ["object", "null"],
       "$comment": "The SignedVerdict object exactly as ledgered in VerdictRecorded (schemas/mhf/spi_payloads.schema.json#/$defs/SignedVerdict), or null when the episode terminated without evaluation (aborted, budget-exhausted). Never a synthesized summary."
+    },
+    "verdict_absence_reason": {
+      "type": ["string", "null"]
     },
     "cost": { "$ref": "#/$defs/CostVector" },
     "attribution": {
@@ -97,6 +114,21 @@
             }
           }
         },
+        "model_route": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "model"],
+          "properties": {
+            "tier": { "type": "integer", "minimum": 1 },
+            "provider": { "type": "string" },
+            "model": { "type": "string" },
+            "model_fingerprint": { "type": ["string", "null"] },
+            "fingerprint_unavailable_reason": { "type": ["string", "null"] }
+          }
+        },
+        "invocations": {
+          "type": "array"
+        },
         "cost": { "$ref": "#/$defs/CostVector" }
       }
     },
@@ -110,7 +142,26 @@
         "usd_micros": { "type": "integer", "minimum": 0 },
         "tokens": { "type": "integer", "minimum": 0 },
         "bytes": { "type": "integer", "minimum": 0 },
-        "millis": { "type": "integer", "minimum": 0, "$comment": "Charged compute time, never wall-clock under concurrency (ADR-0074 §2)." }
+        "millis": { "type": "integer", "minimum": 0, "$comment": "Charged compute time, never wall-clock under concurrency (ADR-0074 §2)." },
+        "measurement_status": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "usd_micros": { "$ref": "#/$defs/MeasurementStatus" },
+            "tokens": { "$ref": "#/$defs/MeasurementStatus" },
+            "bytes": { "$ref": "#/$defs/MeasurementStatus" },
+            "millis": { "$ref": "#/$defs/MeasurementStatus" }
+          }
+        }
+      }
+    },
+    "MeasurementStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["measured", "estimated", "unavailable"] },
+        "reason": { "type": ["string", "null"] }
       }
     }
   }

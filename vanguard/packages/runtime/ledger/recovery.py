@@ -86,11 +86,12 @@ def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
         elif kind == "ApprovalResolved":
             resolved_approval = ev.payload.get("decision")
             status = "active"
-        elif kind == "EffectIntent":
+        elif kind in ("EffectIntent", "EffectStarted"):
             last_intent = dict(ev.payload)
-        elif kind == "Receipt" or kind == "EffectCompleted":
+        elif kind in ("Receipt", "EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled"):
             last_intent = None
-            receipts_count += 1
+            if kind in ("Receipt", "EffectCompleted"):
+                receipts_count += 1
 
     if status == "active" and last_intent is not None:
         status = "undeterminable"
@@ -260,16 +261,22 @@ class RecoveryScanner:
                 role="recovery",
                 anchor=intent,
             )
+            desc_digest = intent.payload.get("descriptorDigest") or intent.payload.get("descriptor_digest")
+            payload = {
+                "kind": "EffectReconciled",
+                "status": "undeterminable",
+                "occurrence": "undeterminable",
+                "reason": "process death between S8a and S9",
+            }
+            if desc_digest:
+                payload["descriptorDigest"] = desc_digest
+            if intent_key:
+                payload["idempotencyKey"] = intent_key
             out = emitter.recovery().emit_kind(
                 "EffectReconciled",
                 run_id=intent.run_id or "",
                 principal=self.controller_principal,
-                payload={
-                    "kind": "EffectReconciled",
-                    "status": "undeterminable",
-                    "occurrence": "undeterminable",
-                    "reason": "process death between S8a and S9",
-                },
+                payload=payload,
                 episode_id=intent.episode_id,
                 occurred_at=occurred_at,
                 causation_id=intent.event_id,

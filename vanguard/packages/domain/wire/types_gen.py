@@ -53,7 +53,9 @@ class EventKind(str, Enum):
     APPROVAL_REQUESTED = "ApprovalRequested"
     APPROVAL_RESOLVED = "ApprovalResolved"
     KERNEL_ALARM = "KernelAlarm"
+    PLUGIN_DISCOVERED = "PluginDiscovered"
     PLUGIN_RESOLVED = "PluginResolved"
+    PLUGIN_VERIFIED = "PluginVerified"
     PLUGIN_ACTIVATED = "PluginActivated"
     PLUGIN_QUIESCED = "PluginQuiesced"
     PLUGIN_RETIRED = "PluginRetired"
@@ -98,13 +100,6 @@ class ContextBundle:
     prefix: str
     suffix: str
     token_count: int | None = None
-
-@dataclass(frozen=True, slots=True)
-class CostVector:
-    usd_micros: int
-    tokens: int
-    bytes: int
-    millis: int
 
 @dataclass(frozen=True, slots=True)
 class EffectContext:
@@ -167,6 +162,11 @@ class EventEnvelope:
 class Health:
     ok: bool
     detail: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class MeasurementStatus:
+    status: str
+    reason: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class MemoryHit:
@@ -243,13 +243,12 @@ class TrajectoryRef:
     schema: str | None = None
 
 @dataclass(frozen=True, slots=True)
-class TrajectoryTurn:
-    turn: int
-    context_digest: str
-    proposal: JsonObject
-    receipts: tuple[JsonObject, ...]
-    cost: CostVector
-    context_ref: str | None = None
+class CostVector:
+    usd_micros: int
+    tokens: int
+    bytes: int
+    millis: int
+    measurement_status: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
 class EffectRequest:
@@ -294,6 +293,28 @@ class Receipt:
     artifacts: tuple[ArtifactRef, ...] = field(default_factory=tuple)
 
 @dataclass(frozen=True, slots=True)
+class TrajectoryTurn:
+    turn: int
+    context_digest: str
+    proposal: JsonObject
+    receipts: tuple[JsonObject, ...]
+    cost: CostVector
+    context_ref: str | None = None
+    model_route: JsonObject = field(default_factory=dict)
+    invocations: tuple[JsonObject, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class HarnessManifest:
+    api: str
+    id: str
+    plugins: PluginBindings
+    system_prompt: str | None = None
+    capabilities: tuple[JsonObject, ...] = field(default_factory=tuple)
+    budget: Reservation | None = None
+    approval_policy: str | None = None
+    undeletable: bool = False
+
+@dataclass(frozen=True, slots=True)
 class Trajectory:
     schema: str
     project_id: str
@@ -306,21 +327,13 @@ class Trajectory:
     cost: CostVector
     parent_episode_id: str | None = None
     execution_digest: str | None = None
+    state_digest: str | None = None
+    event_range: JsonObject | None = None
     manifest_genome: JsonObject = field(default_factory=dict)
     model_routes_used: tuple[JsonObject, ...] = field(default_factory=tuple)
+    verdict_absence_reason: str | None = None
     attribution: JsonObject = field(default_factory=dict)
     outcome: str | None = None
-
-@dataclass(frozen=True, slots=True)
-class HarnessManifest:
-    api: str
-    id: str
-    plugins: PluginBindings
-    system_prompt: str | None = None
-    capabilities: tuple[JsonObject, ...] = field(default_factory=tuple)
-    budget: Reservation | None = None
-    approval_policy: str | None = None
-    undeletable: bool = False
 
 __all__ = [
     "JsonObject",
@@ -338,7 +351,6 @@ __all__ = [
     "CompactionReport",
     "ConsolidationReport",
     "ContextBundle",
-    "CostVector",
     "EffectContext",
     "EffectFailure",
     "EpisodeOutcome",
@@ -346,6 +358,7 @@ __all__ = [
     "EvaluationSubject",
     "EventEnvelope",
     "Health",
+    "MeasurementStatus",
     "MemoryHit",
     "MemoryQuery",
     "MemoryRecord",
@@ -357,12 +370,13 @@ __all__ = [
     "SignedVerdict",
     "ToolSchema",
     "TrajectoryRef",
-    "TrajectoryTurn",
+    "CostVector",
     "EffectRequest",
     "FrozenHarness",
     "PluginBindings",
     "Proposal",
     "Receipt",
-    "Trajectory",
+    "TrajectoryTurn",
     "HarnessManifest",
+    "Trajectory",
 ]

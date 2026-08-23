@@ -26,8 +26,8 @@ superseded_by: null
 | **Wave 0** | M-0 | **CLOSED** | CI subject of record on `vanguard/packages/` + named falsifiers F-01…F-21. |
 | **Wave 1** | M-1 | **CLOSED (GREEN)** | Trust spine: signed verdicts, single emitter, typed budgets, complete $D_H$. |
 | **Wave 2** | M-2 | **DONE (Round 4)** | Convergence core: absorbed SPI/JSON-RPC/lifecycle, deleted duplicate layer0 kernel. |
-| **Wave 2C** | M-2 / v0.6.1 | **OPEN (ACTIVE)** | Evidence integrity: RF-23 (truthful trajectory) + RF-25 (fresh-process SQLite continuation). |
-| **Wave 3** | M-3 | **QUEUED** | Extensibility: Named Component Graph (`mhf.manifest/2`), plugin lifecycle FSM. |
+| **Wave 2C** | M-2 / v0.6.1 | **CLOSED (GREEN)** | Evidence integrity: RF-23 (truthful trajectory) + RF-25 (fresh-process SQLite continuation). |
+| **Wave 3** | M-3 | **OPEN (ACTIVE)** | Extensibility: Named Component Graph (`mhf.manifest/2`), plugin lifecycle FSM. |
 | **Wave 4** | M-4 | **QUEUED** | Foundation E2E Stop: One uncheated real coding-agent run with 9 evidence rows. |
 
 ---
@@ -39,8 +39,8 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../02_decisions/
 | Gate | Decision | Falsifier Test | Owner | Status |
 |---|---|---|---|---|
 | **RF-72 / Identifier Governance** | ADR-0085 | `test/tools/test_check_falsifier_ids.py` | Tooling | **GREEN** (Unit tests + linter pass) |
-| **RF-23 / NOVA-1 Trajectory** | ADR-0078 | `test/falsifiers/test_rf23_trajectory_content.py` | Developer A | **RED CONFIRMED — IN PROGRESS** |
-| **RF-25 / NOVA-2 Continuation** | ADR-0082 | `test/falsifiers/test_rf25_cold_continuation.py` | Developer B | **RED CONFIRMED — IN PROGRESS** |
+| **RF-23 / NOVA-1 Trajectory** | ADR-0078 | `test/falsifiers/test_rf23_trajectory_content.py` | Developer A | **GREEN** (Measured, attributable, conserved) |
+| **RF-25 / NOVA-2 Continuation** | ADR-0082 | `test/falsifiers/test_rf25_cold_continuation.py` | Developer B | **GREEN** (Cold continuation, lease reconciled) |
 
 > *Note:* RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23.
 
@@ -86,22 +86,22 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../02_decisions/
 ---
 
 ## 4. Wave 2C Actionable TODO
-
-- [ ] **2C-R25 — Developer B:** Implement fresh-process SQLite-WAL continuation; restore the
+ 
+- [x] **2C-R25 — Developer B:** Implement fresh-process SQLite-WAL continuation; restore the
   verified durable prefix; reconcile pending Governor leases without budget leakage; preserve open
   effects as undeterminable until reconciliation; emit `RunRecovered` through `LedgerEmitter`; and
   continue without replaying settled effects. Gate: RF-25
   (`test/falsifiers/test_rf25_cold_continuation.py`).
-- [ ] **2C-R23 — Developer A:** Implement `assemble_trajectory()` over pre-crash history and current
+- [x] **2C-R23 — Developer A:** Implement `assemble_trajectory()` over pre-crash history and current
   turns; record ordered `invocations`, resolved model routes, and `measured`/`estimated`/`unavailable`
   status; enforce invocation → turn → episode cost conservation; derive eligibility; and emit the
   complete `mhf.trajectory/1` row. Gate: RF-23
   (`test/falsifiers/test_rf23_trajectory_content.py`), with RF-24 and RF-27 supporting.
-- [ ] **2C-COMBINED — Developers A + B:** Integrate both seams in
+- [x] **2C-COMBINED — Developers A + B:** Integrate both seams in
   `vanguard/packages/runtime/session.py`; prove that a recovered episode includes each pre- and
   post-crash event/turn exactly once, carries continuous digest/budget lineage, and produces a
   complete trajectory. Gates: RF-23 and RF-25 green together.
-- [ ] **2C-REGATE — Tech Lead:** Run the complete M-2 falsifier suite plus all documentation,
+- [x] **2C-REGATE — Tech Lead:** Run the complete M-2 falsifier suite plus all documentation,
   architecture, TCB, isolation, secret, and governance checks; record approval only when every
   command exits 0 and no new `layer0/` or duplicate state surface exists.
 
@@ -123,6 +123,7 @@ acceptance gates live in [`milestones.md` § Future Backlog](milestones.md#futur
 | **M-0 (Wave 0)** | CI Truth & Falsifiers | **PASSED** | CI workflow `ci.yml` measures `vanguard/packages/`; F-01…F-21 registered; codegen checked. | 2026-08-20 |
 | **M-1 (Wave 1)** | Trust Spine | **PASSED** | Signed verdicts (`test_signed_verdict.py`), single writer `LedgerEmitter`, typed budgets, complete $D_H$. | 2026-08-21 |
 | **M-2 (Wave 2)** | Convergence Core | **PASSED** | Round-4 submission: 56 event kinds catalogued & folded in `reducer.py`, duplicate `layer0/kernel` deleted, `root.py` split into `compose.py`/`session.py`/`wiring.py`. | 2026-08-21 |
+| **Wave 2C (M-2 re-gate)** | Evidence Integrity & Cold Recovery | **PASSED** | RF-23 trajectory un-hollowing with conserved costs + RF-25 fresh-process SQLite-WAL continuation green. | 2026-08-23 |
 
 ---
 

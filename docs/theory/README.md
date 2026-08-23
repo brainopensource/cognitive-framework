@@ -15,7 +15,7 @@ applies_to:
 implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -28,6 +28,9 @@ superseded_by: null
 ---
 
 ## Theory Modules
+
+Every row carries a maturity label. `RESEARCH` explains a future mechanism but is not an
+implementation requirement; only an opened milestone and active-board task may authorize that work.
 
 | Module | Mathematical Formulation & Focus | Maturity |
 |---|---|---|

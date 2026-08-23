@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: documentation-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -47,7 +47,7 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 | **Tier 3 (Execution)** | [`03_sprints/sprint_active.md`](03_sprints/sprint_active.md) · [`02_roadmap/`](02_roadmap/) | **Execution** | Active sprint tasks, assigned files, exit gates, named falsifiers, and macro milestones (`milestones.md`). |
 | **Tier 4 (Architecture)** | [`00_overview/SYSTEM_OVERVIEW.md`](00_overview/SYSTEM_OVERVIEW.md) · [`architecture/`](architecture/) | **Descriptive** | System topology, C4 models, sequences, state machines, and verified as-built facts. |
 | **Tier 5 (Reference & Theory)** | [`contracts/`](contracts/) · [`protocols/`](protocols/) · [`theory/`](theory/) · [`engineering/`](engineering/) | **Descriptive / How-To** | Wire contracts, port protocols, cognitive equations, and contributor how-to guides. |
-| **Tier 6 (Archive)** | [`06_references/`](06_references/) · [`07_reviews/`](07_reviews/) | **Advisory / Frozen** | Historical research, proposals (001–008), forensic reviews, and design provenance. Non-authoritative. |
+| **Tier 6 (Archive)** | [`06_references/`](06_references/) · [`07_reviews/`](07_reviews/) · [`08_diagrams/`](08_diagrams/) · [`09_tools/`](09_tools/) | **Advisory / Frozen** | Historical research, proposals (001–008), visual models, tooling notes, forensic reviews, and design provenance. Non-authoritative. |
 
 ---
 
@@ -99,3 +99,35 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 2. [`03_sprints/sprint_active.md`](03_sprints/sprint_active.md) — Active wave tasks, assigned files, and falsifiers.
 3. [`engineering/context_bundles.md`](engineering/context_bundles.md) — Ingest the task-specific starting bundle; do not assume an unmeasured token count.
 4. Run verification linters: `check_boundaries.py`, `check_tcb_budget.py`, `check_doc_metadata.py`, `check_falsifier_ids.py`, `check_markdown_links.py`.
+
+---
+
+## 4. Find Information by Development Task
+
+Start with the active board, then load only the row relevant to the change. A descriptive module
+explains the current system but never overrides its governing SPEC clause or ADR.
+
+| Development question | Start here | Then inspect | Proof of completion |
+|---|---|---|---|
+| What should be implemented now? | [`sprint_active.md`](03_sprints/sprint_active.md) | Assigned ADR and files named by the task | Bound `RF-*` test and active-board gate |
+| What ships in a later release? | [`milestones.md`](02_roadmap/milestones.md) | Relevant accepted ADR | Objective milestone exit gate; backlog is not authorization |
+| How does the runtime fit together? | [`architecture/README.md`](architecture/README.md) | C4 view, sequence, or state machine for the affected boundary | [`traceability_matrix.md`](architecture/traceability_matrix.md) |
+| What is the exact wire/data shape? | [`contracts/README.md`](contracts/README.md) | Generated schema and producer/reader named in that page | Contract test plus schema/code generation check |
+| What can a boundary implementation call? | [`protocols/README.md`](protocols/README.md) | Exact port source and implementing adapter | Port/contract tests and boundary linter |
+| How do I change kernel/security behavior? | [`KERNEL.md`](04_annex/KERNEL.md) | Kernel protocol, dispatch sequence, security guide | Security test, boundary/domain-blindness checks, TCB budget |
+| How do I add an adapter or pack? | [`engineering/README.md`](engineering/README.md) | Adapter/pack guide and minimum context bundle | Hermetic tests; a new pack requires zero domain/kernel diff |
+| Is a cognitive or retrieval idea implemented? | [`theory/README.md`](theory/README.md) | Maturity label and governing roadmap/ADR | Only the named future milestone may promote it to active work |
+
+## 5. Where Information Belongs
+
+| Information type | Sole durable owner | Rule |
+|---|---|---|
+| Normative behavior or invariant | [`SPEC.md`](SPEC.md) or [`04_annex/`](04_annex/) | Use RFC-2119 language only here |
+| Architectural decision and reversal condition | New append-only ADR under [`05_adr/`](05_adr/) | Never silently rewrite an accepted decision |
+| Current work, ownership, and readiness | [`sprint_active.md`](03_sprints/sprint_active.md) | Keep only the active wave |
+| Future sequencing and backlog | [`milestones.md`](02_roadmap/milestones.md) | Does not authorize implementation before dependencies open |
+| As-built explanation and navigation | Existing module under `architecture/`, `contracts/`, `protocols/`, or `engineering/` | Link to law/schema/code; do not duplicate canonical tables |
+| Historical source or proposal | Frozen archive under `06_references/`–`09_tools/` | Preserve original language and content; never cite as execution authority |
+
+Before adding a document, use [`engineering/documentation.md`](engineering/documentation.md). The
+default is to update an existing owner rather than create another summary.

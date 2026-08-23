@@ -16,7 +16,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -27,6 +27,11 @@ superseded_by: null
 > **Authority:** Non-normative. Governing normative law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/04_annex/`](../04_annex/).
 
 This directory contains verified architectural views, C4 models, sequence diagrams, state machines, and traceability mappings for the Vanguard / AETHER recursive agency substrate.
+
+Use the smallest view that answers the question: C4 files show ownership and boundaries; sequences
+show ordering across boundaries; state machines show legal transitions; the glossary defines terms;
+the traceability matrix connects a concept to law, code, tests, maturity, and its gate. Requirements
+belong in SPEC/annexes, not in these views.
 
 ---
 

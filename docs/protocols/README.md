@@ -14,7 +14,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -27,6 +27,9 @@ superseded_by: null
 ---
 
 ## Hexagonal Port Specifications
+
+Use these pages to discover dependency direction and adapter ownership. The Python protocol source is
+the executable interface; JSON Schema/JCS owns wire values; SPEC and accepted ADRs own semantics.
 
 | Protocol | Source File | Implementing Adapters | Key Port Responsibilities |
 |---|---|---|---|

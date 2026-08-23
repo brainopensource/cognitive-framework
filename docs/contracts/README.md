@@ -14,7 +14,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -27,6 +27,10 @@ superseded_by: null
 ---
 
 ## Wire & Data Contracts
+
+For implementation, follow each row from contract page → generated schema → producer/reader → bound
+test. Contract pages are concise discovery aids and must not maintain a second JSON example or field
+matrix when a schema already owns the exact shape.
 
 | Contract | Schema `$id` | Producer / Writer | Key Invariants & Guarantees |
 |---|---|---|---|

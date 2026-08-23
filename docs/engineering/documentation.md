@@ -15,7 +15,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: lead-documentation-engineer
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -31,9 +31,23 @@ superseded_by: null
 2. **Decisions (Why)** $\to$ Append a new ADR in [`docs/05_adr/`](../05_adr/).
 3. **Execution (How & Now)** $\to$ Edit [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md).
 
+Future milestone sequencing and inactive backlog live in
+[`docs/02_roadmap/milestones.md`](../02_roadmap/milestones.md); they do not authorize work.
+
+## 2. Language and Placement
+
+- Living and canonical documentation is written in English.
+- Frozen research, proposals, diagrams, and tooling notes preserve their original language and are
+  not translated in place.
+- Update an existing canonical or modular owner before considering a new Markdown file.
+- Architecture pages explain boundaries and flows; contract pages point to exact schemas; protocol
+  pages point to executable ports; engineering pages describe repeatable contributor procedures.
+- Derived pages link to canonical law and code instead of copying event catalogs, SPI definitions,
+  schemas, or budget matrices.
+
 ---
 
-## 2. Automated Quality Verification
+## 3. Automated Quality Verification
 
 Every living document must pass automated linting before PR merge:
 

@@ -16,7 +16,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: lead-documentation-engineer
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -29,6 +29,9 @@ superseded_by: null
 ---
 
 ## Contributor Guides
+
+Begin every change with the active task and the minimum context bundle. Use `development.md` for the
+daily loop, then select only the specialized guide required by the boundary being changed.
 
 | Guide | Scope & Focus |
 |---|---|

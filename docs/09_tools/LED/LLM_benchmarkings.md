@@ -1,9 +1,9 @@
 # TOP LLMs: MODELOS GRATUITOS E OPEN-WEIGHTS (HARDWARE: RX 9060 16GB VRAM + 32GB RAM + RYZEN 7 5800X3D)
 
-> **NÃO NORMATIVO / PROVENIÊNCIA CONGELADA**
+> **NON-NORMATIVE / FROZEN PROVENANCE**
 >
-> Este material preserva pesquisa histórica de ferramentas e benchmarks. Ele não autoriza
-> implementação, seleção atual de modelos ou alteração de roadmap.
+> This file preserves historical tooling and benchmark research in its original language. It does
+> not authorize implementation, current model selection, or roadmap changes.
 
 Esta seção analisa os **Top 10 melhores modelos de linguagem gratuitos (open-weights)** especificamente ranqueados com base nas especificações exatas da sua máquina: **AMD Radeon RX 9060 16GB VRAM**, **32GB RAM** (~22GB de RAM do sistema disponíveis) e **CPU Ryzen 7 5800X3D** (com 96MB L3 V-Cache, garantindo offloading de CPU ultra-eficiente se necessário).
 

@@ -14,7 +14,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: lead-documentation-engineer
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -36,8 +36,10 @@ Rather than ingesting multi-thousand-line monolithic specifications, an AI agent
 | **State / Ledger** | Active task + event contract + store protocol + ledger test | Measure per task | [`events.md`](../contracts/events.md) · [`stores.md`](../protocols/stores.md) |
 | **Trajectory (NOVA-1)** | Active RF-23 board row + ADR-0078 + schema + failing test | Measure per task | [`trajectories.md`](../contracts/trajectories.md) · [`0078`](../05_adr/0078-trajectory-un-hollowing-cost-accounting.md) |
 | **Continuation (NOVA-2)** | Active RF-25 board row + ADR-0082 + failing test | Measure per task | [`sequences.md`](../architecture/sequences.md) · [`0082`](../05_adr/0082-universal-turn-loop-m10-compatibility-contract.md) |
+| **Composition / Plugins** | Open milestone + manifest contract + component graph ADR + compose tests | Measure per task | [`manifests.md`](../contracts/manifests.md) · [`0077`](../05_adr/0077-named-component-graph-manifest.md) |
 | **Domain Pack** | Governing milestone + pack guide + current pack tests | Measure per task | [`adding_a_pack.md`](adding_a_pack.md) · [`milestones.md`](../02_roadmap/milestones.md) |
 | **Evaluator** | Evaluator protocol + verdict contract + security test | Measure per task | [`evaluator.md`](../protocols/evaluator.md) · [`verdicts.md`](../contracts/verdicts.md) |
+| **Documentation** | Documentation owner + precedence index + governing linter | Measure per task | [`documentation.md`](documentation.md) · [`docs/README.md`](../README.md) |
 
 ---
 
@@ -47,3 +49,16 @@ Do not claim a percentage reduction from line counts or estimates. For a represe
 record the exact files/slices loaded, tokenizer/model, token counts, successful destination, and
 whether leadership clarification was required. Only then compare the targeted bundle with the old
 reading path.
+
+## Fixed execution pattern
+
+For every code task, load context in this order:
+
+1. active-board task and owner;
+2. governing SPEC clause and accepted ADR;
+3. one architecture/contract/protocol page for discovery;
+4. exact implementation symbols;
+5. bound falsifier and the smallest regression suite.
+
+Stop following links when the implementation symbol and proof obligation are unambiguous. Historical
+reviews may explain provenance but must not expand the active scope.

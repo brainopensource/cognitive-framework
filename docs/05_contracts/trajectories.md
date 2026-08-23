@@ -12,8 +12,8 @@ derived_from:
   - schemas/mhf/trajectory.schema.json
   - vanguard/packages/runtime/trajectory.py
 applies_to:
-  - v0.6.1
-implementation_status: RATIFIED_NOT_IMPLEMENTED
+  - v0.6.2
+implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
 last_verified: 2026-08-23
@@ -24,8 +24,7 @@ superseded_by: null
 # Trajectory Contract (`mhf.trajectory/1`)
 
 > **Schema:** [`schemas/mhf/trajectory.schema.json`](../../schemas/mhf/trajectory.schema.json)  
-> **Status:** Schema and assembler exist, but the ADR-0078 content contract is
-> `RATIFIED_NOT_IMPLEMENTED` while RF-23 is red.
+> **Status:** Schema and assembler are implemented; RF-23 is green on the canonical packages path.
 
 ---
 

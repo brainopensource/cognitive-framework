@@ -13,7 +13,7 @@ derived_from:
   - vanguard/packages/runtime/session.py
   - vanguard/packages/agency/episode/engine.py
 applies_to:
-  - v0.6.1
+  - v0.6.2
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
@@ -24,8 +24,8 @@ superseded_by: null
 
 # Subsystem Sequence Flows
 
-> **Status:** Mixed descriptive view. Sections 1–2 are `AS_BUILT`; section 3 is the
-> `RATIFIED_NOT_IMPLEMENTED` RF-25 target and must not be read as current behavior.
+> **Status:** Mixed descriptive view. Sections 1–3 are `AS_BUILT`; section 3 records the
+> fresh-process continuation behavior proven by RF-25.
 
 ---
 
@@ -85,7 +85,7 @@ sequenceDiagram
 
 ---
 
-## 3. Cold Replay & Continuation Target (NOVA-2 / RF-25 — `RATIFIED_NOT_IMPLEMENTED`)
+## 3. Cold Replay & Continuation (NOVA-2 / RF-25 — `AS_BUILT`)
 
 ```mermaid
 sequenceDiagram

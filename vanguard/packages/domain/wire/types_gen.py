@@ -77,6 +77,15 @@ class ArtifactRef:
     kind: str
 
 @dataclass(frozen=True, slots=True)
+class Binding:
+    from_: str
+    to: str
+    interface: str | None = None
+    relation: str | None = None
+    channel: str | None = None
+    lazy: bool | None = None
+
+@dataclass(frozen=True, slots=True)
 class BlobRef:
     digest: Digest
     media_type: str | None = None
@@ -222,6 +231,13 @@ class Reservation:
                 "turns": self.turns, "depth": self.depth}
 
 @dataclass(frozen=True, slots=True)
+class Selector:
+    kind: object
+    root: str | None = None
+    paths: tuple[JsonObject, ...] = field(default_factory=tuple)
+    uriPattern: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class SignedVerdict:
     verdict: str
     signature: str
@@ -241,6 +257,25 @@ class ToolSchema:
 class TrajectoryRef:
     digest: str
     schema: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class Capability:
+    verb: str
+    selector: Selector
+
+@dataclass(frozen=True, slots=True)
+class Component:
+    config: object
+    ceiling: tuple[Selector, ...]
+    isolation: object
+    interfaces: tuple[str, ...]
+    kind: object | None = None
+    spi: str | None = None
+    role: str | None = None
+    ref: str | None = None
+    implementation: str | None = None
+    entrypoints: tuple[str, ...] = field(default_factory=tuple)
+    authority: bool | None = None
 
 @dataclass(frozen=True, slots=True)
 class CostVector:
@@ -266,6 +301,23 @@ class FrozenHarness:
     resolved_refs: JsonObject
     budget: Reservation
     capability_ceiling: tuple[JsonObject, ...] = field(default_factory=tuple)
+    undeletable: bool | None = None
+
+@dataclass(frozen=True, slots=True)
+class NamedManifestV2:
+    api: object
+    id: str
+    components: JsonObject
+    entrypoints: tuple[str, ...] | JsonObject
+    bindings: tuple[Binding, ...] = field(default_factory=tuple)
+    profiles: JsonObject = field(default_factory=dict)
+    ceiling: tuple[Selector, ...] = field(default_factory=tuple)
+    capabilities: tuple[Capability, ...] = field(default_factory=tuple)
+    model_routes: tuple[JsonObject, ...] = field(default_factory=tuple)
+    budget: JsonObject = field(default_factory=dict)
+    system_prompt: str | None = None
+    approval_policy: str | None = None
+    guardrails: JsonObject = field(default_factory=dict)
     undeletable: bool | None = None
 
 @dataclass(frozen=True, slots=True)
@@ -346,6 +398,7 @@ __all__ = [
     "EventKind",
     "GateDecision",
     "ArtifactRef",
+    "Binding",
     "BlobRef",
     "ClaimRef",
     "CompactionReport",
@@ -367,12 +420,16 @@ __all__ = [
     "PluginRef",
     "Reflection",
     "Reservation",
+    "Selector",
     "SignedVerdict",
     "ToolSchema",
     "TrajectoryRef",
+    "Capability",
+    "Component",
     "CostVector",
     "EffectRequest",
     "FrozenHarness",
+    "NamedManifestV2",
     "PluginBindings",
     "Proposal",
     "Receipt",

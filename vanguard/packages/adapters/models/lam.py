@@ -26,6 +26,24 @@ except ImportError:  # pragma: no cover - packaging without benchmark resources
 __all__ = ["LamModelAdapter"]
 
 
+_DEFAULT_LAM_ALIASES = {
+    "read": "fs.read",
+    "search": "fs.search",
+    "patch": "patch.apply",
+    "test": "proc.exec",
+    "Read": "fs.read",
+    "Grep": "fs.search",
+    "Edit": "patch.apply",
+    "Bash": "proc.exec",
+    "view_file": "fs.read",
+    "grep_file": "fs.search",
+    "edit_file": "patch.apply",
+    "run_command": "proc.exec",
+    "bash": "proc.exec",
+    "list_dir": "fs.read",
+}
+
+
 class LamModelAdapter:
     """ModelPort adapter over the stateless local scenario engine."""
 
@@ -86,7 +104,7 @@ class LamModelAdapter:
             "pricing_known": True,
             "usd_micros": 0,
         }
-        return ProposalTranslator.translate(raw_proposal, tool_schemas=tools)
+        return ProposalTranslator.translate(raw_proposal, tool_schemas=tools, aliases=_DEFAULT_LAM_ALIASES)
 
 
 def _messages_from_context(context: ContextBundle) -> list[dict[str, str]]:

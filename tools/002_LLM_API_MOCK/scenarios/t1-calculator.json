@@ -17,7 +17,7 @@
           "id": "call_read_001",
           "type": "function",
           "function": {
-            "name": "fs.read",
+            "name": "view_file",
             "arguments": "{\"path\": \"src/calculator.py\"}"
           }
         }
@@ -32,8 +32,8 @@
           "id": "call_patch_002",
           "type": "function",
           "function": {
-            "name": "patch.apply",
-            "arguments": "{\"diff\": \"--- a/src/calculator.py\\n+++ b/src/calculator.py\\n@@ -1,3 +1,3 @@\\n def calculate_value(A: float, B: float) -> float:\\n-    resultado = (A + B) + B\\n+    resultado = (A + B) * B\\n     return resultado\\n\"}"
+            "name": "edit_file",
+            "arguments": "{\"path\": \"src/calculator.py\", \"diff\": \"--- a/src/calculator.py\\n+++ b/src/calculator.py\\n@@ -1,3 +1,3 @@\\n def calculate_value(A: float, B: float) -> float:\\n-    resultado = (A + B) + B\\n+    resultado = (A + B) * B\\n     return resultado\\n\"}"
           }
         }
       ]
@@ -47,7 +47,7 @@
           "id": "call_exec_003",
           "type": "function",
           "function": {
-            "name": "proc.exec",
+            "name": "run_command",
             "arguments": "{\"argv\": [\"python3\", \"-m\", \"pytest\", \"test_calculator.py\", \"-q\"]}"
           }
         }

@@ -12,7 +12,7 @@ derived_from:
   - vanguard/packages/agency/episode/engine.py
   - vanguard/packages/domain/ledger/reducer.py
 applies_to:
-  - v0.6.1
+  - v0.6.2
 implementation_status: MIXED
 owner: principal-systems-architect
 version: "0.6.1"
@@ -23,8 +23,8 @@ superseded_by: null
 
 # State Machines & Lifecycle FSMs
 
-> **Status:** Mixed descriptive view. The episode mechanism is current; the seven-state plugin FSM
-> is `RATIFIED_NOT_IMPLEMENTED` until ADR-0081 lands in M-3.
+> **Status:** Mixed descriptive view. The episode mechanism and packages-path seven-state plugin
+> FSM are implemented; M-3 remains open for final falsifier and convergence closure.
 
 ---
 
@@ -53,7 +53,7 @@ enum. Persisted truth is the event catalog and reducer.
 
 ---
 
-## 2. Plugin Lifecycle Finite State Machine (ADR-0081 — `RATIFIED_NOT_IMPLEMENTED`)
+## 2. Plugin Lifecycle Finite State Machine (ADR-0081 — `AS_BUILT`, M-3 closure active)
 
 ```mermaid
 stateDiagram-v2

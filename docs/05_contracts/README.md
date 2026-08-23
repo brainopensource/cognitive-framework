@@ -36,6 +36,6 @@ matrix when a schema already owns the exact shape.
 |---|---|---|---|
 | [`events.md`](events.md) | `mhf.event/1` | `runtime/ledger_emitter.py` | `AS_BUILT`: schema catalog plus role-owned emission |
 | [`trajectories.md`](trajectories.md) | `mhf.trajectory/1` | `runtime/trajectory.py` | `ACTIVE_REPAIR`: schema exists; RF-23 content/accounting proof is red |
-| [`manifests.md`](manifests.md) | planned `mhf.manifest/2` | M-3 compose target | `RATIFIED_NOT_IMPLEMENTED`: Named Component Graph |
+| [`manifests.md`](manifests.md) | `mhf.manifest/2` | M-3 compose target | `IMPLEMENTED_PENDING_M3_GATE`: Named Component Graph |
 | [`verdicts.md`](verdicts.md) | `mhf.spi_payloads/1` | `adapters/evaluators/daemon.py` | Ed25519 cryptographic signature over canonical JCS bytes; request/nonce bound |
 | [`selectors_and_budgets.md`](selectors_and_budgets.md) | Stdlib Python | `domain/selectors/` | Monotonic capability containment algebra; typed 6D budget dimensions |

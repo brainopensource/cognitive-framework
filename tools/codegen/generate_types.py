@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import keyword
 import sys
 from pathlib import Path
 
 _TOOLS = Path(__file__).resolve().parent.parent
-if str(_TOOLS) not in sys.path:
-    sys.path.insert(0, str(_TOOLS))
+_COMMON = _TOOLS / "common"
+for _path in (_COMMON, _TOOLS):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 from repo_paths import repo_root
 
@@ -187,31 +190,32 @@ def _dataclass_block(
         return "\n".join(lines) + "\n"
     for key in ordered:
         prop = properties[key]
+        field_name = f"{key}_" if keyword.iskeyword(key) else key
         annotation = _py_type(prop, defs, root_title=root_title)
         if key in required and "default" not in prop:
-            lines.append(f"    {key}: {annotation}")
+            lines.append(f"    {field_name}: {annotation}")
             continue
         default = prop.get("default", None)
         if annotation.startswith("tuple["):
             lines.append(
-                f"    {key}: {annotation} = field(default_factory=tuple)"
+                f"    {field_name}: {annotation} = field(default_factory=tuple)"
             )
         elif annotation == "JsonObject":
             lines.append(
-                f"    {key}: {annotation} = field(default_factory=dict)"
+                f"    {field_name}: {annotation} = field(default_factory=dict)"
             )
         elif default is None:
             if not annotation.endswith("| None") and "None" not in annotation.split():
                 annotation = f"{annotation} | None"
-            lines.append(f"    {key}: {annotation} = None")
+            lines.append(f"    {field_name}: {annotation} = None")
         elif isinstance(default, bool):
-            lines.append(f"    {key}: {annotation} = {default!s}")
+            lines.append(f"    {field_name}: {annotation} = {default!s}")
         elif isinstance(default, str):
-            lines.append(f"    {key}: {annotation} = {default!r}")
+            lines.append(f"    {field_name}: {annotation} = {default!r}")
         elif isinstance(default, (int, float)):
-            lines.append(f"    {key}: {annotation} = {default!r}")
+            lines.append(f"    {field_name}: {annotation} = {default!r}")
         else:
-            lines.append(f"    {key}: {annotation} = None")
+            lines.append(f"    {field_name}: {annotation} = None")
     if name == "Reservation":
         lines.append("")
         lines.append("    def as_map(self) -> Mapping[str, int]:")

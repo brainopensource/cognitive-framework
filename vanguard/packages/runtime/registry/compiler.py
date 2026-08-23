@@ -7,6 +7,12 @@ from typing import Any, Mapping
 
 from vanguard.packages.domain.selectors.resource_selector import decide
 from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.artifacts.graph import ArtifactGraph
+from vanguard.packages.domain.artifacts.manifest import (
+    NamedManifest,
+    compose_named_manifest,
+    parse_named_manifest,
+)
 from vanguard.packages.domain.wire.types_gen import (
     FrozenHarness,
     HarnessManifest,
@@ -16,7 +22,7 @@ from vanguard.packages.domain.wire.types_gen import (
     Reservation,
 )
 
-__all__ = ["ComposeError", "compose"]
+__all__ = ["ComposeError", "compose", "compose_named"]
 
 
 class ComposeError(ValueError):
@@ -33,10 +39,15 @@ _SPI_SLOTS = ("planner", "context", "memory", "evaluation")
 def compose(
     manifest: HarnessManifest | Mapping[str, object],
     *,
-    known_plugins: Mapping[str, str],
+    known_plugins: Mapping[str, str] | None = None,
     plugin_digests: Mapping[str, str] | None = None,
     plugin_ceilings: Mapping[str, tuple[Mapping[str, object], ...]] | None = None,
-) -> FrozenHarness:
+    graph: ArtifactGraph | None = None,
+) -> FrozenHarness | NamedManifest:
+    if isinstance(manifest, Mapping) and manifest.get("api") == "mhf.manifest/2":
+        if graph is None:
+            raise ComposeError("mhf.manifest/2 requires an artifact graph", "graph")
+        return compose_named(manifest, graph)
     parsed = manifest if isinstance(manifest, HarnessManifest) else _parse(manifest)
     if parsed.api != "mhf.harness/1":
         raise ComposeError(f"unsupported api {parsed.api!r}", "api")
@@ -46,9 +57,9 @@ def compose(
         ref = getattr(bindings, slot)
         if ref is None:
             continue
-        resolved[slot] = _resolve(ref, known_plugins, path=f"plugins.{slot}")
+        resolved[slot] = _resolve(ref, known_plugins or {}, path=f"plugins.{slot}")
     for index, ref in enumerate(bindings.toolkits):
-        resolved[f"toolkits[{index}]"] = _resolve(ref, known_plugins, path=f"plugins.toolkits[{index}]")
+        resolved[f"toolkits[{index}]"] = _resolve(ref, known_plugins or {}, path=f"plugins.toolkits[{index}]")
     for index, route in enumerate(bindings.model_routes):
         _ = route
         resolved[f"model_routes[{index}]"] = f"{route.provider}:{route.model}"
@@ -93,6 +104,11 @@ def _resolve(ref: PluginRef, known: Mapping[str, str], *, path: str) -> str:
     if ident not in known and ref.ref not in known:
         raise ComposeError(f"unknown plugin ref {ref.ref!r}", path)
     return known.get(ident) or known[ref.ref]
+
+
+def compose_named(raw: Mapping[str, object], graph: ArtifactGraph) -> NamedManifest:
+    """Parse, validate, resolve, and freeze one ``mhf.manifest/2`` graph."""
+    return compose_named_manifest(parse_named_manifest(raw), graph)
 
 
 def _parse(raw: Mapping[str, object]) -> HarnessManifest:

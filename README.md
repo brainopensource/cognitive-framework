@@ -79,7 +79,8 @@ All documentation in this repository is strictly organized into three distinct a
 
 ## 2. What Exists in This Repository (As-Built Inventory)
 
-The codebase strictly separates canonical production truth from temporary copy-forks, domain packs, tooling, and test infrastructure:
+The codebase keeps canonical production truth in `vanguard/packages/`, alongside domain packs,
+tooling, and test infrastructure:
 
 ```text
 Aether-D-System/
@@ -93,7 +94,6 @@ Aether-D-System/
 │   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
 │   │   └── apps/                     # Reserved client lattice slot
 │   └── clients/cli/                  # TypeScript/React/Ink interactive terminal UI (`vg`)
-├── layer0/                           # Residual M-3 migration input (events, registry, compose)
 ├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
 ├── test/                             # Automated test suite (1100+ tests across 17 categories)
 ├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
@@ -112,7 +112,7 @@ Aether-D-System/
 | **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
 | **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). |
 | **Apps** | `vanguard/packages/apps/` | Reserved boundary slot in hexagonal lattice. |
-| **Layer-0 Fork** | `layer0/` | Temporary M-3 parity source. Kernel, scheduler, SPI, and JSON-RPC surfaces already converged or were removed; residual events, registry, and compose surfaces are deleted atomically after NOVA-4. |
+| **Plugin Registry** | `vanguard/packages/runtime/registry/` | Canonical M-3 lifecycle FSM, isolation broker, worker wire, and composition compiler; M-3 falsifier closure remains active. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
 | **CLI / TUI** | `vanguard/clients/cli/` | Interactive terminal UI (`vg`) written in TypeScript using React and Ink. Workspace scripts: `npm run vg`. |
 | **Test Suite** | `test/` | Comprehensive test suite covering all layers (`test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, `test/security`, `test/trust`, `test/packs`, `test/falsifiers`, `test/registry`). Details in [`test/README.md`](test/README.md). |
@@ -175,8 +175,8 @@ Execution status and macro milestones are tracked in:
 - **Active Execution Board**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md)
 
 ```text
-M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (In Flight) ──▶ M-3 (Queued) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Gated)
-[CI Truth/Falsif]   [Trust Spine]      [Corpus + Resume] [Extensibility]    [One Real Coding E2E]    [Generality → v1.0]
+M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (Complete) ──▶ M-3 (Active) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Gated)
+[CI Truth/Falsif]   [Trust Spine]      [Corpus + Resume] [Extensibility] [One Real Coding E2E]    [Generality → v1.0]
 ```
 
 ---

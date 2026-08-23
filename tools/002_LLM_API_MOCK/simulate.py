@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shlex
 import subprocess
 import tempfile
 import time
@@ -125,6 +126,17 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
         path.parent.mkdir(parents=True, exist_ok=True)
         target = args.get("target") or ""
         replacement = args.get("replacement") or ""
+        diff = args.get("diff")
+        if diff and not target and not replacement:
+            text = path.read_text(encoding="utf-8") if path.exists() else ""
+            removals = [line[1:] for line in diff.splitlines() if line.startswith("-") and not line.startswith("---")]
+            additions = [line[1:] for line in diff.splitlines() if line.startswith("+") and not line.startswith("+++")]
+            if removals and additions:
+                target = "\n".join(removals)
+                replacement = "\n".join(additions)
+            elif additions:
+                path.write_text("\n".join(additions) + "\n", encoding="utf-8")
+                return json.dumps({"status": "success", "message": f"wrote {args['path']}"})
         if not path.exists() or target == "":
             path.write_text(replacement, encoding="utf-8")
             return json.dumps({"status": "success", "message": f"wrote {args['path']}"})
@@ -134,8 +146,11 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
         path.write_text(text.replace(target, replacement, 1), encoding="utf-8")
         return json.dumps({"status": "success", "message": f"replaced 1 occurrence in {args['path']}"})
     if name == "run_command":
+        cmd = args.get("command")
+        if not cmd and isinstance(args.get("argv"), (list, tuple)):
+            cmd = " ".join(shlex.quote(str(x)) for x in args["argv"])
         completed = subprocess.run(
-            args["command"],
+            cmd or "",
             cwd=workspace,
             shell=True,
             capture_output=True,

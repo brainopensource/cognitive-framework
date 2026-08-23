@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from ...domain.artifacts.manifest import HarnessManifest, parse_manifest
+from ...domain.artifacts.manifest import HarnessManifest, NamedManifest, parse_manifest, parse_named_manifest
 
 try:
     import jsonschema  # type: ignore
@@ -20,6 +20,7 @@ except ImportError:
     _HAS_JSONSCHEMA = False
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "schemas" / "v4" / "harness-manifest.schema.json"
+NAMED_SCHEMA_PATH = Path(__file__).resolve().parents[3] / "schemas" / "mhf" / "manifest_v2.schema.json"
 
 
 class ManifestLoadError(ValueError):
@@ -127,11 +128,43 @@ class ManifestLoader:
     def validate_schema(self, raw_manifest: Mapping[str, Any]) -> None:
         """Validate raw manifest dict against harness-manifest.schema.json if available."""
         schema = self._load_schema()
+        schema_path = SCHEMA_PATH
+        if raw_manifest.get("api") == "mhf.manifest/2":
+            schema_path = NAMED_SCHEMA_PATH
+            try:
+                schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            except OSError:
+                schema = None
         if _HAS_JSONSCHEMA and schema:
             try:
                 jsonschema.validate(instance=dict(raw_manifest), schema=schema)
             except Exception as exc:
                 raise ManifestLoadError(f"Schema validation failed: {exc}") from exc
+
+    def load_named_manifest(self, manifest_path: str | Path, validate: bool = True) -> NamedManifest:
+        """Read and validate one `/2` value through the canonical domain reader.
+
+        This is the compatibility-reader entrypoint for agency callers. It performs no
+        composition or activation; artifact resolution remains the runtime registry
+        compiler's single `compose_named` operation.
+        """
+        path = Path(manifest_path)
+        if not path.is_absolute():
+            path = (self.base_dir / path).resolve()
+        if path.is_dir():
+            path = path / "manifest.json"
+        try:
+            raw_manifest = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ManifestLoadError(f"Failed to read named manifest {path}: {exc}") from exc
+        if not isinstance(raw_manifest, Mapping) or raw_manifest.get("api") != "mhf.manifest/2":
+            raise ManifestLoadError("named manifest reader requires api='mhf.manifest/2'")
+        if validate:
+            self.validate_schema(raw_manifest)
+        try:
+            return parse_named_manifest(raw_manifest)
+        except Exception as exc:
+            raise ManifestLoadError(f"Invalid named manifest in {path}: {exc}") from exc
 
     def load_pack(self, pack_name_or_path: str | Path, validate: bool = True) -> LoadedManifestPack:
         """Load a manifest pack by name (relative to base_dir) or explicit Path."""

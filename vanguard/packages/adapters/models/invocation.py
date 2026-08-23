@@ -198,6 +198,13 @@ class ProposalTranslator:
             for key in cls.COMMAND_SYNONYMS:
                 args.pop(key, None)
 
+        if "path" not in args:
+            diff_text = args.get("diff") or args.get("patch")
+            if isinstance(diff_text, str):
+                match = re.search(r"^\+\+\+\s+(?:b/)?(\S+)", diff_text, re.MULTILINE) or re.search(r"^---\s+(?:a/)?(\S+)", diff_text, re.MULTILINE)
+                if match:
+                    args["path"] = match.group(1)
+
         missing = _missing_required(schema_of.get(action), args)
         if missing:
             return Result.fail(

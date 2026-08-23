@@ -11,7 +11,7 @@ derived_from:
   - docs/02_decisions/0077-named-component-graph-manifest.md
 applies_to:
   - v0.6.1
-implementation_status: RATIFIED_NOT_IMPLEMENTED
+implementation_status: IMPLEMENTED_PENDING_M3_GATE
 owner: principal-systems-architect
 version: "0.6.1"
 last_verified: 2026-08-23
@@ -21,8 +21,8 @@ superseded_by: null
 
 # Named Component Graph Manifest (`mhf.manifest/2`)
 
-> **Schema:** Not present yet; `mhf.manifest/2` is an M-3 deliverable.
-> **Status:** `RATIFIED_NOT_IMPLEMENTED` (Governed by ADR-0077; target milestone: **M-3**).
+> **Schema:** [`schemas/mhf/manifest_v2.schema.json`](../../schemas/mhf/manifest_v2.schema.json).
+> **Status:** Implemented in the packages domain/compiler; M-3 falsifier closure remains required.
 
 ---
 
@@ -35,7 +35,6 @@ The graph is frozen composition data only. Runtime execution remains the unary s
 bindings cannot become a dynamic DAG scheduler. Multi-agent execution is unavailable before mediated
 `agent.spawn` opens at M-6.
 
-The current repository contains `schemas/mhf/harness_manifest.schema.json` for the existing
-`mhf.harness/1` surface. There is no `mhf.manifest/2` schema or graph compiler on disk yet; M-3
-must land the schema, parser, bindings, compatibility reader, and RF-28…RF-33 together. Therefore
-this page deliberately provides no executable JSON example before the schema exists.
+The frozen `mhf.harness/1` reader remains supported for compatibility. New `/2` values are parsed by
+the domain named-graph reader and frozen through the packages registry compiler; runtime execution
+still uses the unary sequential loop and never schedules graph edges.

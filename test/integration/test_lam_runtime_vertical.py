@@ -44,8 +44,12 @@ class TestLamRuntimeVertical(unittest.TestCase):
             (repo / "src").mkdir()
             (repo / "src/value.py").write_text("VALUE = 1\n", encoding="utf-8")
             (repo / "test_value.py").write_text(
-                "from src.value import VALUE\n\n"
-                "def test_value():\n    assert VALUE == 2\n",
+                "import unittest\nfrom src.value import VALUE\n\n"
+                "class TestValue(unittest.TestCase):\n"
+                "    def test_value(self):\n"
+                "        self.assertEqual(VALUE, 2)\n\n"
+                "if __name__ == '__main__':\n"
+                "    unittest.main()\n",
                 encoding="utf-8",
             )
             model = _RecordingLam()

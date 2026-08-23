@@ -63,19 +63,6 @@ jobs:
       - name: Bound falsifiers F-01..F-21 (gating from M-1)
         run: python3 -m unittest discover -s test/falsifiers -t .
 
-      # `layer0/` is a copy-fork under deletion; it is not the subject of
-      # record. 2.2-B deleted `layer0/kernel/`, `layer0/scheduler/` (the
-      # unsigned `"pass"` defect F1 died with the driver) and `layer0/spi/`
-      # (Protocols/Result/types_gen/jsonrpc/ceiling all absorbed into
-      # packages). What remains -- `layer0/registry/`, `layer0/compose/`,
-      # the surviving `layer0/events/` halves -- is Wave-3 material with no
-      # packages equivalent yet (2.2-A triage). Still advisory so a fork
-      # awaiting its own deletion cannot mask a regression elsewhere; DELETED
-      # at 3.1, never un-quarantined before then.
-      - name: Layer-0 microkernel test suite (advisory; deleted 3.1)
-        continue-on-error: true
-        run: python3 -m unittest discover -s test/layer0 -t .
-
       - name: Hexagonal boundary lattice check
         run: python3 tools/linters/check_boundaries.py
 

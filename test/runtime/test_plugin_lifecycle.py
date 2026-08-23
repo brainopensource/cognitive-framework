@@ -20,9 +20,10 @@ class RecordingEmitter:
 class PluginLifecycleTests(unittest.TestCase):
     def test_every_state_entry_emits_once(self) -> None:
         emitter = RecordingEmitter()
-        lifecycle = PluginLifecycle("echo", emitter, run_id="run", principal="registry")
+        lifecycle = PluginLifecycle("echo", emitter, run_id="run", principal="registry",
+                                    manifest_digest="sha256:manifest")
         lifecycle.resolve()
-        lifecycle.verify(graph_digest="sha256:graph")
+        lifecycle.verify(graph_digest="sha256:graph", ceiling_digest="sha256:ceiling")
         lifecycle.activate()
         lifecycle.quiesce()
         lifecycle.retire()
@@ -35,7 +36,8 @@ class PluginLifecycleTests(unittest.TestCase):
 
     def test_fault_path_and_illegal_transition_fail_closed(self) -> None:
         emitter = RecordingEmitter()
-        lifecycle = PluginLifecycle("echo", emitter, run_id="run", principal="registry")
+        lifecycle = PluginLifecycle("echo", emitter, run_id="run", principal="registry",
+                                    manifest_digest="sha256:manifest")
         lifecycle.resolve()
         lifecycle.fault("verification failed")
         lifecycle.retire()

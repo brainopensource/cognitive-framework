@@ -124,26 +124,16 @@ domain → ports → kernel → agency → runtime → adapters
 ```
 
 Composition root remains `vanguard/packages/runtime/root.py`. This lattice is the **CI subject of
-record** (`ADR-0073`): living CI runs the packages kernel/runtime/agency/adapters suites. A green
-residual `test/layer0` suite alone does not satisfy I-2 or I-4.
+record** (`ADR-0073`): living CI runs the packages kernel/runtime/agency/adapters suites.
 
-**Convergence fork (not the destination).** `layer0/` now retains only the composition, registry,
-and event surfaces required for M-3 parity. JSON-RPC, SPI contracts, kernel, and scheduler surfaces
-have converged or been removed. The remainder MUST be absorbed into the production lattice and
-deleted atomically with packaging, CI, and tests after NOVA-4 passes. A third runtime tree is
-forbidden.
-
-```text
-layer0/          # temporary M-3 parity source; never production authority
-├── events/      # residual event compatibility surface
-├── registry/    # lifecycle FSM + isolation broker to absorb
-└── compose/     # manifest compiler behavior to converge
-```
+**Convergence boundary.** The former `layer0/` copy-fork has been removed from source, packaging,
+CI, and tests during M-3 migration. Its behavior is authoritative only where absorbed into the
+production lattice and covered by packages-path falsifiers. A compatibility stub or third runtime
+tree is forbidden.
 
 Boundary lattice (CI-enforced, closed roster) for the production hexagon:
 `domain ← ports ← kernel ← agency ← runtime → adapters`; adapters MUST NOT import `kernel` or
-`agency`. Plugins consume ports and wire contracts rather than importing the TCB. Residual
-`layer0/` code is migration input, never a replacement identity.
+`agency`. Plugins consume ports and wire contracts rather than importing the TCB.
 
 ### 1.0 Recursive machine, authority, and identity (`ADR-0070`, `ADR-0071`, `ADR-0074`)
 
@@ -695,10 +685,10 @@ section's rationale, merged per matrix §1.10.)
 
 ## 8. Migration Plan & CI Gates (v0.6.1; accepted ADRs `0069`–`0086`)
 
-**Direction (inverted from v0.5.0).** Recover mature `vanguard/packages/` semantics (kernel, JCS, WAL
-ledger, exterior evaluator, sandbox, stores, models, episode engine). Promote `layer0/` SPI contracts,
-JSON-RPC/UDS broker, lifecycle FSM, and compose digest shape. Do **not** rebuild WAL, evaluator, or
-sandbox inside `layer0/`. Do **not** create a third runtime. Do **not** rewrite the TCB in Rust.
+**Direction (inverted from v0.5.0).** The mature `vanguard/packages/` semantics remain canonical
+(kernel, JCS, WAL ledger, exterior evaluator, sandbox, stores, models, episode engine). Required SPI,
+JSON-RPC/UDS, lifecycle, and compose behavior from the former fork is absorbed here. Do **not**
+create a compatibility runtime, a third runtime, or a TCB rewrite.
 
 The living execution sequence is [`sprint_active.md`](../03_execution/sprint_active.md); macro gates are
 in [`milestones.md`](../03_execution/milestones.md). The gap register allocates falsifier identifiers but

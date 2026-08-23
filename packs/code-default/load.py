@@ -16,7 +16,7 @@ for _p in (_COMMON, _TOOLS):
 
 from simple_yaml import load as load_yaml  # noqa: E402
 
-from layer0.compose.compiler import compose
+from vanguard.packages.runtime.registry.compiler import compose
 from vanguard.packages.domain.wire.types_gen import FrozenHarness
 
 __all__ = [

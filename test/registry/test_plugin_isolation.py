@@ -10,9 +10,10 @@ import time
 import unittest
 from pathlib import Path
 
-from layer0.events.store import MemoryLedger
-from layer0.registry.broker import CellState, IllegalCellTransition, PluginIsolationBroker
-from layer0.registry.sandbox import SandboxLimits
+from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
+from vanguard.packages.runtime.registry.broker import CellState, IllegalCellTransition, PluginIsolationBroker
+from vanguard.packages.runtime.registry.sandbox import SandboxLimits
 from vanguard.packages.domain.wire.types_gen import EventKind
 
 _LIMITS = SandboxLimits(
@@ -23,6 +24,7 @@ _LIMITS = SandboxLimits(
 )
 _FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
 _ECHO_CAPS = ({"verb": "echo", "selector": _FS},)
+_DUMMY_HARNESS = "sha256:" + "0" * 64
 
 
 def _echo_params(text: str) -> dict:
@@ -40,11 +42,18 @@ def _wait_until(predicate, timeout: float = 3.0) -> bool:
 
 class PluginIsolationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.ledger = MemoryLedger()
+        self.store = InMemoryEventStore()
+        self.emitter = LedgerEmitter(
+            self.store,
+            episode_id="ep-iso",
+            project_id="proj-iso",
+            principal_id="agent-1",
+            harness_digest=_DUMMY_HARNESS,
+        )
         self.broker = PluginIsolationBroker(
-            emitter=self.ledger.emitter,
+            emitter=self.emitter,
             run_id="run-iso",
-            principal="layer0",
+            principal="agent-1",
         )
 
     def tearDown(self) -> None:
@@ -91,9 +100,9 @@ class PluginIsolationTests(unittest.TestCase):
         self.broker.reap(cell, timeout=3.0)
         self.assertEqual(cell.state, CellState.TERMINATED)
         self.assertFalse(Path(socket_path).exists())
-        kinds = [envelope.kind for envelope in self.ledger.envelopes]
-        self.assertIn(EventKind.PLUGIN_FAULTED, kinds)
-        payload = self.ledger.envelopes[-1].payload
+        kinds = [envelope.payload.get("kind") for envelope in self.store._events]
+        self.assertIn(EventKind.PLUGIN_FAULTED.value, kinds)
+        payload = self.store._events[-1].payload
         self.assertEqual(payload.get("status"), "PluginFailed")
 
     def test_sigsegv_does_not_crash_broker(self) -> None:
@@ -103,7 +112,7 @@ class PluginIsolationTests(unittest.TestCase):
         response = self.broker.call(cell, "execute", _echo_params("x"))
         self.assertFalse(response.ok)
         self.assertEqual(cell.state, CellState.TERMINATED)
-        self.assertEqual(self.ledger.envelopes[-1].kind, EventKind.PLUGIN_FAULTED)
+        self.assertEqual(self.store._events[-1].payload.get("kind"), EventKind.PLUGIN_FAULTED.value)
         # Broker remains usable for a new cell.
         other = self.broker.bind("mhf.toolkit.echo-2", limits=_LIMITS, capabilities=_ECHO_CAPS)
         self.broker.start(other)
@@ -128,7 +137,7 @@ class PluginIsolationTests(unittest.TestCase):
         self.broker.terminate(cell)
         self.broker.reap(cell, timeout=1.0)
         self.assertEqual(cell.state, CellState.TERMINATED)
-        faulted = [e for e in self.ledger.envelopes if e.kind is EventKind.PLUGIN_FAULTED]
+        faulted = [e for e in self.store._events if e.payload.get("kind") == EventKind.PLUGIN_FAULTED.value]
         self.assertEqual(faulted, [])
 
     def test_wait_helper_sees_running_pid(self) -> None:

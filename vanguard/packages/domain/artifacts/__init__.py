@@ -27,6 +27,11 @@ from .manifest import (
     ManifestError,
     compose,
     parse_manifest,
+    NamedComponent,
+    NamedManifest,
+    TypedBinding,
+    compose_named_manifest,
+    parse_named_manifest,
 )
 
 __all__ = [
@@ -35,6 +40,8 @@ __all__ = [
     "CapabilityRequirement", "FrozenHarness", "HarnessManifest", "ManifestRegistry",
     "RegisteredManifest", "ManifestError",
     "compose", "parse_manifest",
+    "NamedComponent", "NamedManifest", "TypedBinding", "compose_named_manifest",
+    "parse_named_manifest",
     "MAX_SKILL_INDEX_CHARS", "SkillCard", "SkillIndexError",
     "format_skill_index", "parse_skill_card",
 ]

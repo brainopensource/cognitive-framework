@@ -48,6 +48,8 @@ class PluginLifecycle:
                  manifest_digest: str | None = None) -> None:
         if not plugin_id:
             raise ValueError("plugin_id is required")
+        if not manifest_digest:
+            raise ValueError("manifest_digest is required")
         self.plugin_id = plugin_id
         self.state = PluginState.DISCOVERED
         self._emitter = emitter
@@ -59,8 +61,14 @@ class PluginLifecycle:
     def resolve(self) -> None:
         self._go(PluginState.RESOLVED)
 
-    def verify(self, *, graph_digest: str | None = None) -> None:
-        self._go(PluginState.VERIFIED, graph_digest=graph_digest)
+    def verify(self, *, graph_digest: str | None = None,
+               ceiling_digest: str | None = None) -> None:
+        if not graph_digest:
+            raise ValueError("graph_digest is required at verification")
+        if not ceiling_digest:
+            raise ValueError("ceiling_digest is required at verification")
+        self._go(PluginState.VERIFIED, graph_digest=graph_digest,
+                 ceiling_digest=ceiling_digest)
 
     def activate(self) -> None:
         self._go(PluginState.ACTIVATED)

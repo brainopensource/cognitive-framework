@@ -37,7 +37,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["vanguard*", "layer0*"]
+include = ["vanguard*"]
 namespaces = true
 
 [tool.setuptools.package-data]

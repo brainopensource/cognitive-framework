@@ -8,7 +8,7 @@ import signal
 import socket
 import sys
 
-from layer0.registry.sandbox import SandboxLimits, apply_rlimits
+from .sandbox import SandboxLimits, apply_rlimits
 from vanguard.packages.domain.wire import jsonrpc
 
 __all__ = ["main"]

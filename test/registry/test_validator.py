@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from layer0.registry.validator import (
+from vanguard.packages.runtime.registry.validator import (
     ManifestValidationError,
     compatible,
     parse_semver,
@@ -70,7 +70,7 @@ class ManifestTests(unittest.TestCase):
             "requires": [],
             "isolation": "subprocess",
             "capabilities": [{"verb": "echo", "selector": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}}],
-            "entry": "layer0.registry.worker:EchoToolkit",
+            "entry": "vanguard.packages.runtime.registry.worker:EchoToolkit",
             "tools": {
                 "echo": {
                     "type": "object",

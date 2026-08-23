@@ -73,6 +73,10 @@ SUBPROCESS_HOME = ("vanguard", "packages", "adapters", "sandbox")
 # rule, so entries are exact repo-relative paths and every one carries its
 # justification. Adding a row is a deliberate act with a reviewer attached.
 SUBPROCESS_ALLOWLIST = {
+    # M-3 plugin isolation broker owns the lifecycle boundary and launches the
+    # already constrained packages registry worker. The worker applies the
+    # declared rlimits before serving JSON-RPC over its private UDS.
+    "vanguard/packages/runtime/registry/broker.py",
     # The exterior judge executes the oracle in its own process. A-05/LT-4: the
     # evaluator is architecturally unreachable from the agent it judges, so it
     # cannot borrow the agent's sandbox to do this.

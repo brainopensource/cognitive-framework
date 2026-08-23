@@ -15,9 +15,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from layer0.events.emitter import LedgerEmitter
-from layer0.registry.sandbox import SandboxLimits, apply_rlimits, open_log_sink
-from vanguard.packages.adapters.sandbox.ceiling import ceiling_allows
+from .sandbox import SandboxLimits, apply_rlimits, open_log_sink
+from ..ledger_emitter import LedgerEmitter
+from ...adapters.sandbox.ceiling import ceiling_allows
 from vanguard.packages.domain.wire import jsonrpc
 from vanguard.packages.domain.wire.types_gen import EventKind
 
@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 _ALLOWED_METHODS = frozenset({"execute", "health", "compensate", "verbs", "quiesce", "init"})
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[4]
 
 
 class CellState(str, Enum):
@@ -67,7 +67,7 @@ class PluginCell:
 
 
 class PluginIsolationBroker:
-    """UNINSTANTIATED → BOUND → RUNNING → TERMINATED. Child death never kills Layer-0."""
+    """UNINSTANTIATED -> BOUND -> RUNNING -> TERMINATED. Child death never kills runtime."""
 
     def __init__(
         self,
@@ -113,7 +113,7 @@ class PluginIsolationBroker:
 
     def start(self, cell: PluginCell) -> None:
         if cell.state is not CellState.BOUND:
-            raise IllegalCellTransition(f"{cell.state.value} → running")
+            raise IllegalCellTransition(f"{cell.state.value} -> running")
         log = open_log_sink(cell.stdout_log)
         env = os.environ.copy()
         pythonpath = str(_REPO_ROOT)
@@ -122,7 +122,7 @@ class PluginIsolationBroker:
         argv = [
             sys.executable,
             "-m",
-            "layer0.registry.worker",
+            "vanguard.packages.runtime.registry.worker",
             "--socket",
             cell.socket_path,
             "--cpu",
@@ -195,7 +195,7 @@ class PluginIsolationBroker:
         if cell.state is CellState.TERMINATED:
             return
         if cell.state is CellState.UNINSTANTIATED:
-            raise IllegalCellTransition("uninstantiated → terminated")
+            raise IllegalCellTransition("uninstantiated -> terminated")
         self._stop_process(cell, expected=True)
         self._cleanup(cell)
         cell.state = CellState.TERMINATED
@@ -227,7 +227,7 @@ class PluginIsolationBroker:
         self._cleanup(cell)
         cell.state = CellState.TERMINATED
         self._emitter.emit_kind(
-            EventKind.PLUGIN_FAULTED,
+            EventKind.PLUGIN_FAULTED.value,
             run_id=self._run_id,
             principal=self._principal,
             payload={
@@ -236,6 +236,7 @@ class PluginIsolationBroker:
                 "status": "PluginFailed",
             },
             alertable=True,
+            writer="registry",
         )
 
     def _stop_process(self, cell: PluginCell, *, expected: bool) -> None:

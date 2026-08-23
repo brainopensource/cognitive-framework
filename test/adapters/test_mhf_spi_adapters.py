@@ -41,9 +41,10 @@ from vanguard.packages.adapters.stores.memory_engine import LocalFileMemoryAdapt
 from vanguard.packages.ports.event_store import Result as PortResult
 from vanguard.packages.ports.model import ModelPort
 
-from layer0.events.store import MemoryLedger
-from layer0.registry.broker import PluginIsolationBroker
-from layer0.registry.sandbox import SandboxLimits
+from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
+from vanguard.packages.runtime.registry.broker import PluginIsolationBroker
+from vanguard.packages.runtime.registry.sandbox import SandboxLimits
 from vanguard.packages.adapters.context.window import DefaultContextAdapter
 
 _BUDGET = Reservation(usd_micros=1, millis=1000, tokens=128, bytes=1024, turns=4, depth=1)
@@ -148,11 +149,18 @@ class DefaultContextAdapterTests(unittest.TestCase):
 
 class SubprocessToolkitAdapterTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.ledger = MemoryLedger()
+        self.store = InMemoryEventStore()
+        self.emitter = LedgerEmitter(
+            self.store,
+            episode_id="ep-tk",
+            project_id="proj-tk",
+            principal_id="agent-1",
+            harness_digest="sha256:" + "0" * 64,
+        )
         self.broker = PluginIsolationBroker(
-            emitter=self.ledger.emitter,
+            emitter=self.emitter,
             run_id="run-tk",
-            principal="layer0",
+            principal="agent-1",
         )
         self.cell = self.broker.bind(
             "mhf.toolkit.echo",

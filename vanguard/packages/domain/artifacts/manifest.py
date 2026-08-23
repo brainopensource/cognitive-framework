@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Mapping
 from ..canonicalisation.digest import digest_of
 from ..selectors.resource_selector import canonicalise_selector, parse_selector
@@ -11,6 +11,144 @@ from .graph import ArtifactGraph
 
 class ManifestError(ValueError):
     pass
+
+
+_V2_COMPONENT_FIELDS = frozenset({
+    "name", "kind", "implementation", "config", "isolation", "ceiling",
+    "interfaces", "entrypoints", "authority",
+})
+_V2_TOP_FIELDS = frozenset({"api", "id", "components", "bindings", "entrypoints", "profiles", "ceiling"})
+_SPI_KINDS = frozenset({"IPlanner", "IMemoryEngine", "IToolkit", "IContextManager", "IEvaluationGate"})
+_ISOLATION = frozenset({"in_process", "subprocess", "container", "wasm"})
+
+
+@dataclass(frozen=True, slots=True)
+class NamedComponent:
+    name: str
+    kind: str
+    implementation: str
+    config: str
+    isolation: str
+    ceiling: tuple[str, ...]
+    interfaces: tuple[str, ...]
+    entrypoints: tuple[str, ...]
+    authority: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class TypedBinding:
+    source: str
+    target: str
+    interface: str
+    lazy: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class NamedManifest:
+    manifest_id: str
+    components: tuple[NamedComponent, ...]
+    bindings: tuple[TypedBinding, ...]
+    entrypoints: tuple[str, ...]
+    profiles: Mapping[str, Any]
+    ceiling: tuple[str, ...]
+    api: str = "mhf.manifest/2"
+    digest: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "digest", digest_of({
+            "api": self.api, "id": self.manifest_id,
+            "components": [asdict(c) for c in self.components],
+            "bindings": [asdict(b) for b in self.bindings],
+            "entrypoints": self.entrypoints, "profiles": self.profiles,
+            "ceiling": self.ceiling,
+        }))
+
+
+def _v2_strings(value: object, label: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value or any(not isinstance(x, str) or not x for x in value):
+        raise ManifestError(f"{label} must be a non-empty string array")
+    return tuple(value)
+
+
+def parse_named_manifest(raw: object) -> NamedManifest:
+    """The sole parser for ``mhf.manifest/2``; all authority is consumed here."""
+    if not isinstance(raw, dict) or set(raw) - _V2_TOP_FIELDS:
+        raise ManifestError("manifest has unknown or unread top-level fields")
+    if raw.get("api") != "mhf.manifest/2" or not isinstance(raw.get("id"), str) or not raw["id"]:
+        raise ManifestError("mhf.manifest/2 requires api and id")
+    rows = raw.get("components")
+    if not isinstance(rows, list) or not rows:
+        raise ManifestError("components must be a non-empty array")
+    components: list[NamedComponent] = []
+    names: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict) or set(row) - _V2_COMPONENT_FIELDS:
+            raise ManifestError("component has unknown or unread fields")
+        required = ("name", "kind", "implementation", "config", "isolation", "ceiling", "interfaces", "entrypoints")
+        if any(key not in row for key in required): raise ManifestError("component is incomplete")
+        name = row["name"]
+        if not isinstance(name, str) or not name or name in names: raise ManifestError("component names must be unique")
+        kind = row["kind"]
+        if kind not in _SPI_KINDS: raise ManifestError(f"unknown SPI kind: {kind}")
+        if row["isolation"] not in _ISOLATION: raise ManifestError("invalid isolation")
+        if not isinstance(row["implementation"], str) or not row["implementation"] or not isinstance(row["config"], str) or not row["config"]:
+            raise ManifestError("implementation/config refs are required")
+        components.append(NamedComponent(name, kind, row["implementation"], row["config"], row["isolation"],
+                                         _v2_strings(row["ceiling"], "ceiling"), _v2_strings(row["interfaces"], "interfaces"),
+                                         _v2_strings(row["entrypoints"], "entrypoints"), row.get("authority") is True))
+        names.add(name)
+    binding_rows = raw.get("bindings", [])
+    if not isinstance(binding_rows, list): raise ManifestError("bindings must be an array")
+    bindings: list[TypedBinding] = []
+    for row in binding_rows:
+        if not isinstance(row, dict) or set(row) - {"from", "to", "interface", "lazy"} or not all(isinstance(row.get(x), str) and row[x] for x in ("from", "to", "interface")):
+            raise ManifestError("binding is malformed")
+        if row["from"] == row["to"] or row["from"] not in names or row["to"] not in names: raise ManifestError("binding endpoint is unknown or self-referential")
+        source = next(c for c in components if c.name == row["from"]); target = next(c for c in components if c.name == row["to"])
+        if row["interface"] not in target.interfaces: raise ManifestError("binding interface is not declared")
+        bindings.append(TypedBinding(row["from"], row["to"], row["interface"], row.get("lazy") is True))
+    if not isinstance(raw.get("entrypoints"), list) or not raw["entrypoints"] or any(x not in names for x in raw["entrypoints"]):
+        raise ManifestError("entrypoints must name components")
+    profiles = raw.get("profiles", {})
+    if not isinstance(profiles, dict): raise ManifestError("profiles must be an object")
+    ceiling = _v2_strings(raw.get("ceiling"), "harness ceiling")
+    authority_names = {c.name for c in components if c.authority}
+    consumed = {b.source for b in bindings} | set(raw["entrypoints"])
+    if authority_names - consumed: raise ManifestError("authority-bearing component is unconsumed")
+    # A non-lazy cycle is an eager construction cycle; lazy cycles are allowed.
+    edges = [(b.source, b.target) for b in bindings if not b.lazy]
+    visiting: set[str] = set(); visited: set[str] = set()
+    def visit(name: str) -> None:
+        if name in visiting: raise ManifestError("eager dependency cycle")
+        if name in visited: return
+        visiting.add(name)
+        for left, right in edges:
+            if left == name: visit(right)
+        visiting.remove(name); visited.add(name)
+    for name in names: visit(name)
+    return NamedManifest(raw["id"], tuple(components), tuple(bindings), tuple(raw["entrypoints"]), raw.get("profiles", {}), ceiling)
+
+
+def compose_named_manifest(manifest: NamedManifest, graph: ArtifactGraph) -> NamedManifest:
+    """Resolve immutable refs and return the already-frozen composition value."""
+    files = graph.by_path()
+    for component in manifest.components:
+        for ref in (component.implementation, component.config):
+            if ref not in files: raise ManifestError(f"component reference does not resolve: {ref}")
+    # Re-freeze with resolved implementation/config digests in the identity.
+    resolved = [{"name": c.name, "kind": c.kind, "implementation": files[c.implementation].digest,
+                 "config": files[c.config].digest, "isolation": c.isolation, "ceiling": c.ceiling,
+                 "interfaces": c.interfaces, "entrypoints": c.entrypoints, "authority": c.authority}
+                for c in manifest.components]
+    return replace_named_digest(manifest, resolved)
+
+
+def replace_named_digest(manifest: NamedManifest, resolved: list[Mapping[str, Any]]) -> NamedManifest:
+    value = NamedManifest(manifest.manifest_id, manifest.components, manifest.bindings, manifest.entrypoints, manifest.profiles, manifest.ceiling)
+    object.__setattr__(value, "digest", digest_of({"api": value.api, "id": value.manifest_id, "components": resolved,
+                                                    "bindings": [asdict(b) for b in value.bindings], "entrypoints": value.entrypoints,
+                                                    "profiles": value.profiles, "ceiling": value.ceiling}))
+    return value
 
 
 @dataclass(frozen=True, slots=True)

@@ -40,9 +40,6 @@ python3 -m unittest discover -s test/trust -t .
 # Run domain pack tests (code-default)
 python3 -m unittest discover -s test/packs -t .
 
-# Run layer0 copy-fork tests
-python3 -m unittest discover -s test/layer0 -t .
-
 # Run a single focused test module
 python3 -m unittest test.kernel.test_dispatch -v
 
@@ -70,7 +67,6 @@ test/
 ├── trust/             # Trust spine end-to-end receipt chains and cryptographic signature verification
 ├── governance/        # Ed25519 signature validation and human-in-the-loop approval policies
 ├── packs/             # Domain Pack #1 (packs/code-default) plugin tests (ast-patch, repo-map, planner, terminal)
-├── layer0/            # Copy-fork remainder (registry, compose; Wave-3 material) -- kernel/scheduler/spi absorbed and deleted at 2.2-B
 ├── registry/          # Plugin registry lifecycle, RPC gate attenuation, validator tests
 ├── benchmarks/        # Latency benchmarks, telemetry provenance, instrument tuple verification
 ├── lab/               # Lab measurement harness, AA runners, statistical splits (promotion deferred)
@@ -146,18 +142,12 @@ Tests domain-specific packs (`packs/code-default/`):
 - `test_terminal_runner.py`: Verifies safe terminal command execution within the sandbox.
 - `test_walking_skeleton.py`: Verifies the end-to-end flow of compiling `harness.yaml` into a runnable coding agent.
 
-### `test/layer0/` — Copy-Fork Remainder (4 tests)
-2.2-B deleted `layer0/kernel/`, `layer0/scheduler/` (defect F1's fabricated `"pass"` verdict died with
-the driver -- F-03 was repointed onto `runtime/evaluator_gateway.py` at M-1 and never lived here) and
-`layer0/spi/` (`interfaces.py`/`fakes.py`, and the `jsonrpc`/`result`/`types_gen`/`ceiling` re-export
-shims once every importer moved to `domain/wire/` and `adapters/sandbox/`). What remains is Wave-3
-material only, kept because it has no packages equivalent yet (2.2-A triage):
-- `compose/test_compiler.py`: Verifies the plugin-slot harness compiler (`layer0/compose/`).
-- `registry/test_lifecycle.py`: Verifies the plugin lifecycle FSM (`layer0/registry/`).
+### Retired Layer-0 parity surfaces
 
-Packages-side twins for the deleted surfaces already exist: replay-parity is
+Layer-0 source and tests were removed during M-3 migration. Packages-side parity lives in
+`test/registry/`; replay parity is
 `test/runtime/test_ledger_truth.py::ColdReplayParity` (cold fold from a real WAL file, not the
-same-list-twice mechanism `layer0/events/fold.py` used); the SPI Protocols are
+former same-list-twice mechanism); the SPI Protocols are
 `test/contracts/test_spi_protocols.py`, checked against real adapters via `ports/spi.py`.
 
 ### `test/broken/fixtures/` — Negative Architectural Fixtures
@@ -171,7 +161,7 @@ Contains deliberate architectural violations (cycles, illegal imports, domain le
 
 Root discovery (`python3 -m unittest discover -s test -t .`) collects **1,119 tests — 7 failures, 5 errors, 8 skipped**. The per-directory table below sums slightly higher because two directories are **silently excluded from discovery**: `test/integration/` (13 defined tests) and `test/governance/` are missing `__init__.py` and cannot be imported at all — they run in no configuration. This is falsifier **F-19** in the `002` gap register (Wave 0: make them importable or retire them with a recorded reason). Do not count them as green.
 
-**CI subject of record (ADR-0073):** the production-path suites are `test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, plus `test/security` and `test/trust`. A green `test/layer0` suite alone is **not** success — the layer0 driver fabricates its own `"pass"` verdict (defect F1), so its suite certifies the defect. Living CI does not yet run the production suites; wiring it is Wave 0.
+**CI subject of record (ADR-0073):** the production-path suites are `test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, plus `test/security` and `test/trust`. The retired Layer-0 fork is not a CI or packaging surface.
 
 ### Master Results Table
 
@@ -185,7 +175,6 @@ Root discovery (`python3 -m unittest discover -s test -t .`) collects **1,119 te
 | **Security** | `test/security/` | 45 | 45 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Trust Spine** | `test/trust/` | 22 | 22 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Domain Packs** | `test/packs/` | 27 | 27 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
-| **Layer-0 Fork** | `test/layer0/` | 25 | 25 | 0 | 0 | 0 | **100.0%** | ✅ PASS (Note: F1 passes silently) |
 | **Registry** | `test/registry/` | 26 | 26 | 0 | 0 | 0 | **100.0%** | ✅ PASS |
 | **Governance** | `test/governance/` | — | — | — | — | — | — | ⛔ NOT COLLECTED (no `__init__.py`, F-19) |
 | **Integration** | `test/integration/` | — | — | — | — | — | — | ⛔ NOT COLLECTED (13 defined tests never run, F-19) |
@@ -208,7 +197,7 @@ Root discovery (`python3 -m unittest discover -s test -t .`) collects **1,119 te
 - **`test/agency` (107/107)**: Recursive `EpisodeEngine` turn execution, subagent `spawn()`, context compaction, and manifest loaders pass.
 - **`test/security` & `test/trust` (67/67)**: Evaluator process isolation (UID 10002 unreachable from UID 10001 worker), rootless Bubblewrap sandbox isolation, and trust spine receipt verification pass.
 - **`test/packs` (27/27)**: All plugins for Domain Pack #1 (`code-default`) including AST patch, repo map, planner, and terminal runner pass.
-- **`test/layer0` & `test/registry` (51/51)**: Microkernel copy-fork and plugin registry lifecycle tests pass.
+- **`test/registry`**: Canonical plugin lifecycle, validator, attenuation, and isolation tests pass.
 - **`test/benchmarks`, `test/lab`, `test/tools` (112/112)**: Latency telemetry, measurement runners, and change verification tools pass.
 
 ### B. Understanding Non-Passing Tests & Root Causes
@@ -241,11 +230,10 @@ Status of static architectural enforcement scripts in `tools/`:
 check_boundaries.py        ✅ PASS  (297 source files checked, 0 violations)
 check_tcb_budget.py        ✅ PASS  (1347 LOC vs 1438 LOC threshold, 131 lines safety margin)
 scan_secrets.py            ✅ PASS  (0 leaked secrets/tokens in scanned surfaces)
-check_domain_blindness.py  ✅ PASS* (scans layer0/ ONLY — narrower than Invariant I-7, which also
-                                    covers vanguard/packages/{domain,kernel}/; falsifier F-18, Wave 0)
+check_domain_blindness.py  ✅ PASS  (scans vanguard/packages/{domain,kernel}/; Invariant I-7)
 check_isolation_policy.py  ✅ PASS  (Invariant I-6: proc.exec plugins declare container/subprocess)
 check_markdown_links.py    ✅ PASS  (All local markdown links resolve)
-check_stale_paths.py       ❌ FAIL  (RED on docs/sprint6B references — Wave 0 cleanup item)
+check_stale_paths.py       ✅ PASS
 ```
 
 > [!NOTE]

@@ -1,6 +1,6 @@
 # packs/
 
-Domain packs. The kernel stays domain-blind (`coding|ast|pytest` must not land in `layer0/` or `vanguard/packages/{domain,kernel}/`).
+Domain packs. The kernel stays domain-blind (`coding|ast|pytest` must not land in `vanguard/packages/{domain,kernel}/`).
 
 **On disk:** `code-default/` — first MHF-shaped coding harness (`harness.yaml`, plugin yaml, fs / ast-patch / repo-map / terminal). Tests: `test/packs/`.
 

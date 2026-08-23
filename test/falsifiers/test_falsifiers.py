@@ -450,9 +450,12 @@ class TestF17CISubject(unittest.TestCase):
         self.assertIn("test/agency", ci)
         self.assertIn("test/runtime", ci)
         self.assertIn("test/adapters", ci)
-        kernel_pos = ci.index("test/kernel")
-        layer0_pos = ci.index("test/layer0")
-        self.assertLess(kernel_pos, layer0_pos)
+        if "test/layer0" in ci:
+            kernel_pos = ci.index("test/kernel")
+            layer0_pos = ci.index("test/layer0")
+            self.assertLess(kernel_pos, layer0_pos)
+        else:
+            self.assertNotIn("test/layer0", ci)
 
 
 class TestF18DomainBlindnessScope(unittest.TestCase):

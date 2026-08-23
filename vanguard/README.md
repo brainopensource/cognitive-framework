@@ -8,8 +8,9 @@ packages/   domain ← ports ← kernel ← agency ← runtime → adapters
 clients/    cli (`vg`) · client-core
 ```
 
-This is the **canonical runtime** (`ADR-0069`). `../layer0/` is a fork to absorb, not a replacement.
+This is the **sole canonical runtime** (`ADR-0069`); the former Layer-0 copy-fork is retired.
 
 Entry points: `packages/runtime/root.py` (composition), `packages/agency/episode/engine.py` (`EpisodeEngine` / `spawn()`), `clients/cli/src/main.tsx` (`vg`), evaluator `packages/adapters/evaluators/daemon.py`.
 
-Do not start Wave 0–4 implementation until Director **APPROVED**. Map: [`../README.md`](../README.md).
+Current milestone authorization is recorded only in
+[`../docs/03_execution/sprint_active.md`](../docs/03_execution/sprint_active.md). Map: [`../README.md`](../README.md).

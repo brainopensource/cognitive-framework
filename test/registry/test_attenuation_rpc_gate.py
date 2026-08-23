@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import unittest
 
-from layer0.events.store import MemoryLedger
-from layer0.registry.broker import PluginIsolationBroker
-from layer0.registry.sandbox import SandboxLimits
+from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
+from vanguard.packages.runtime.registry.broker import PluginIsolationBroker
+from vanguard.packages.runtime.registry.sandbox import SandboxLimits
 from vanguard.packages.domain.wire.types_gen import EventKind, SinkClass
 
 _FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
@@ -23,15 +24,23 @@ _LIMITS = SandboxLimits(
     max_open_files=32,
     max_processes=64,
 )
+_DUMMY_HARNESS = "sha256:" + "0" * 64
 
 
 class AttenuationRpcGateTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.ledger = MemoryLedger()
+        self.store = InMemoryEventStore()
+        self.emitter = LedgerEmitter(
+            self.store,
+            episode_id="ep-att",
+            project_id="proj-att",
+            principal_id="agent-1",
+            harness_digest=_DUMMY_HARNESS,
+        )
         self.broker = PluginIsolationBroker(
-            emitter=self.ledger.emitter,
+            emitter=self.emitter,
             run_id="run-att",
-            principal="layer0",
+            principal="agent-1",
         )
         self.cell = self.broker.bind(
             "mhf.toolkit.echo",
@@ -99,8 +108,8 @@ class AttenuationRpcGateTests(unittest.TestCase):
         )
         self.assertFalse(response.ok)
         self.assertEqual(response.error["code"], "attenuation_denied")
-        kinds = [envelope.kind for envelope in self.ledger.envelopes]
-        self.assertNotIn(EventKind.CAPABILITY_GRANTED, kinds)
+        kinds = [envelope.payload.get("kind") for envelope in self.store._events]
+        self.assertNotIn(EventKind.CAPABILITY_GRANTED.value, kinds)
 
     def test_in_ceiling_fs_read_is_delivered(self) -> None:
         response = self.broker.call(

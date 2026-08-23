@@ -27,8 +27,8 @@ superseded_by: null
 | **Wave 1** | M-1 | **CLOSED (GREEN)** | Trust spine: signed verdicts, single emitter, typed budgets, complete $D_H$. |
 | **Wave 2** | M-2 | **DONE (Round 4)** | Convergence core: absorbed SPI/JSON-RPC/lifecycle, deleted duplicate layer0 kernel. |
 | **Wave 2C** | M-2 / v0.6.1 | **CLOSED (GREEN)** | Evidence integrity: RF-23 (truthful trajectory) + RF-25 (fresh-process SQLite continuation). |
-| **Wave 3** | M-3 | **OPEN (ACTIVE)** | Extensibility: Named Component Graph (`mhf.manifest/2`), plugin lifecycle FSM. |
-| **Wave 4** | M-4 | **QUEUED** | Foundation E2E Stop: One uncheated real coding-agent run with 9 evidence rows. |
+| **Wave 3** | M-3 | **CLOSED (GREEN)** | Extensibility: Named Component Graph (`mhf.manifest/2`), plugin lifecycle FSM (`DISCOVERED`..`RETIRED`), UDS broker, NOVA-4 (RF-38..RF-45), layer0 deleted. |
+| **Wave 4** | M-4 | **ACTIVE (STOP LINE)** | Foundation E2E Stop: One uncheated real coding-agent run with 9 evidence rows. |
 
 ---
 
@@ -124,6 +124,7 @@ acceptance gates live in [`milestones.md` § Future Backlog](milestones.md#futur
 | **M-1 (Wave 1)** | Trust Spine | **PASSED** | Signed verdicts (`test_signed_verdict.py`), single writer `LedgerEmitter`, typed budgets, complete $D_H$. | 2026-08-21 |
 | **M-2 (Wave 2)** | Convergence Core | **PASSED** | Round-4 submission: 56 event kinds catalogued & folded in `reducer.py`, duplicate `layer0/kernel` deleted, `root.py` split into `compose.py`/`session.py`/`wiring.py`. | 2026-08-21 |
 | **Wave 2C (M-2 re-gate)** | Evidence Integrity & Cold Recovery | **PASSED** | RF-23 trajectory un-hollowing with conserved costs + RF-25 fresh-process SQLite-WAL continuation green. | 2026-08-23 |
+| **Wave 3 (M-3)** | Extensibility & Lifecycle Parity | **PASSED** | Packages registry FSM, `PluginDiscovered`/`PluginVerified`, UDS broker, NOVA-4 (`RF-38`..`RF-45`), atomic `layer0/` deletion. | 2026-08-23 |
 
 ---
 

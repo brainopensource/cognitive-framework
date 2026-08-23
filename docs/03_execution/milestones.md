@@ -30,8 +30,8 @@ the delivery slices below remain ordered, non-active backlog until their depende
 | **M-0 Engineering truth** | v0.6.0 | 0 | Living CI measures `vanguard/packages/` and named falsifiers | Production suites wired in CI; F-01…F-21 registered as tests; codegen `--check` wired | **COMPLETE** | Director approval (ADR-0075) |
 | **M-1 Trust spine** | v0.6.0 | 1 | Unforgeable evidence, provable state, complete identity, typed budgets, real trajectories | F-01…F-15 green on canonical path; suites of record green; TCB budget ≤ 1438 LOC | **COMPLETE (GREEN)** | M-0 |
 | **M-2 One runtime** | v0.6.1 | 2 | One canonical runtime plus economically truthful trajectories and restart-safe state | RF-23 populated/conserved `mhf.trajectory/1` green; RF-25 fresh-interpreter SQLite-WAL continuation green; retained convergence gates green | **COMPLETE (GREEN)** | M-1 |
-| **M-3 Extensibility** | v0.6.2 | 3 | Typed Named Component Graph and complete plugin lifecycle on the canonical path | RF-28…RF-45; echo lifecycle over wire; NOVA-4 negatives; `layer0/` source/package/CI surface atomically absent | **COMPLETE (GREEN)** | M-2 |
-| **M-4 Foundation E2E (STOP)** | v0.6.3 | 4 | One honest coding-agent run through the complete substrate | Nine populated evidence rows, one uninterrupted `run_id`, zero human intervention or stitched/cassette substitution | **ACTIVE (STOP LINE)** | M-1, M-2, M-3 |
+| **M-3 Extensibility** | v0.6.2 | 3 | Typed Named Component Graph and complete plugin lifecycle on the canonical path | RF-28…RF-45; echo lifecycle over wire; NOVA-4 negatives; `layer0/` source/package/CI surface atomically absent | **IN FLIGHT** | M-2 |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | 4 | One honest coding-agent run through the complete substrate | Nine populated evidence rows, one uninterrupted `run_id`, zero human intervention or stitched/cassette substitution | **QUEUED** | M-1, M-2, M-3 |
 
 ---
 
@@ -86,7 +86,7 @@ repository's anti-sprawl rule. A slice moves to the active board only after ever
 
 | Sprint | Milestone | Deliverable | Acceptance and bound falsifier | Dependency | State |
 |---|---|---|---|---|---|
-| **3.1** | M-3 | Compile `mhf.manifest/2`: named instances, typed bindings, profiles, compatibility reader, one canonical parser | RF-28–RF-33, RF-46, RF-73–RF-74, and RF-76 green; edge-only changes alter `D_H`; unknown or unconsumed authority fails closed | M-2 | PLANNED |
+| **3.1** | M-3 | Compile `mhf.manifest/2`: named instances, typed bindings, profiles, compatibility reader, one canonical parser | RF-28–RF-33, RF-46, RF-73–RF-74, and RF-76 green; edge-only changes alter `D_H`; unknown or unconsumed authority fails closed | M-2 | ACTIVE |
 | **3.2** | M-3 | Port the registry FSM and isolation broker to `vanguard/packages/`; run the echo plugin through the complete wire lifecycle | RF-34–RF-45 green; declared absence is pre-execution and ineligible; unsigned or forged evidence fails closed | Sprint 3.1 | PLANNED |
 | **3.3** | M-3 | Delete residual `layer0/` source, packaging, CI, and test surfaces atomically after parity | NOVA-4 / RF-38–RF-45 green; no stale import, package entry, workflow path, or duplicate parser remains | Sprint 3.2 | PLANNED |
 | **4.1** | M-4 | Execute one real coding-agent run from start to signed completion | One uninterrupted `run_id`; all nine evidence rows populated; no human repair, stitched trace, cassette substitution, or forged verdict | M-3 | PLANNED |
@@ -98,3 +98,128 @@ repository's anti-sprawl rule. A slice moves to the active board only after ever
 | **8.1** | M-8 | Express debate, critic/reviser, bounded-tree, and evolutionary topologies through manifests | RF-65 green with zero kernel or episode-engine diff; RF-66 universal-loop challenge adjudicated | M-7 | PLANNED |
 | **9.1** | M-9 | Add rebuildable hybrid retrieval, evidence-ranked skills, and macro candidate laboratory | RF-77 and RF-67–RF-68 green; index rebuilds from immutable artifacts; macro selector hull remains least privilege | M-8 | PLANNED |
 | **10.1** | M-10 | Add governed Active-Inference belief/policy loop and reversible promotion | RF-69–RF-70 green; prediction precedes observation; exact paired McNemar, A/A floor, effect interval, signed evidence, human pointer, and rollback all pass | M-9 | PLANNED |
+
+---
+
+## Developer Implementation Briefs
+
+These briefs describe the smallest acceptable mechanism. They do not open queued work; a sprint
+moves to [`sprint_active.md`](sprint_active.md) only after its dependency gate is objectively green.
+
+### Sprint 3.1 — Canonical composition
+
+- **Problem:** fixed role/path manifests cannot express repeated SPI instances or typed topology,
+  and multiple parsers can disagree about authority or identity.
+- **Build:** one versioned reader normalizing supported old rows and `/2`; immutable component and
+  binding values; resolver and validator; one JCS identity preimage containing nodes, complete edge
+  set, refs/digests, interfaces, config, isolation, ceilings, profiles, and entrypoints.
+- **Core invariant:** composition produces addresses, never runtime scheduling.
+- **Gate:** RF-28–RF-33, RF-46, RF-73–RF-74, RF-76 plus unchanged kernel/episode-engine diffs.
+
+### Sprint 3.2 — Plugin lifecycle and cells
+
+- **Problem:** untrusted plugin code needs attributable lifecycle and bounded calls without another
+  event writer or authority path.
+- **Build:** registry-owned FSM/events/projection; common typed RPC semantics; direct dispatch only
+  for explicitly granted `in_process`; UDS process cell otherwise; timeout, method allowlist,
+  selector ceiling, log isolation, process cleanup, fault-to-retire path.
+- **Core invariant:** registry controls lifecycle; kernel controls grants; evaluator remains exterior.
+- **Gate:** RF-34–RF-44 and normal/fault echo traces reduce to the expected durable state.
+
+### Sprint 3.3 — Convergence proof
+
+- **Problem:** deleting a fork before parity or retaining a compatibility implementation both leave
+  ambiguous authority.
+- **Build:** migrate every caller/import/test/package/workflow/navigation reference, then remove the
+  fork atomically. Historical references remain only as history, never instructions.
+- **Gate:** RF-45/NOVA-4, no duplicate parser/writer/reducer/dialect, full CI and architecture gates.
+
+### Sprint 4.1 — Honest foundation run
+
+- **Problem:** hermetic components do not prove the substrate can complete one real task honestly.
+- **Build:** preregister task/oracle/environment; start one run through canonical composition; invoke
+  a real model; dispatch all effects through S0–S12; evaluate externally; persist WAL and trajectory;
+  reconstruct in a fresh process. Export a cassette only after the real run as regression material.
+- **Pseudocode:** `preregister -> compose -> run -> signed evaluate -> close -> cold replay -> audit`.
+- **Gate:** all nine evidence rows above share one run/lineage; no manual repair, fake, stitch, host
+  fallback, or copied verdict. Failure is evidence, not permission to substitute.
+
+### Sprint 5.1 — Pack #2 generality
+
+- **Problem:** one coding pack can hide domain coupling in the substrate.
+- **Build:** Math/Formal pack as a client of existing ports: manifest, prompt/context policy, tools,
+  checker registry, fixtures, and exterior evaluator. Add no SPI and change no domain/kernel code.
+- **Gate:** zero diff under `vanguard/packages/{domain,kernel}/`; same composition, dispatch, ledger,
+  trajectory, recovery, and signed-evidence contracts as Pack #1.
+
+### Sprint 5.2 — Attributable witness and consolidation
+
+- **Problem:** a result without exact subject/input/toolchain/policy binding is not reusable evidence.
+- **Build:** content-addressed T0 memo binding subject, inputs, environment, checker, toolchain,
+  assurance, policy version, result, signature, and invalidation conditions. Derive eligibility from
+  evidence; never accept a promotability flag from input.
+- **Gate:** RF-34–RF-37 and RF-52–RF-53; absent, forged, stale, or mismatched evidence is ineligible.
+
+### Sprint 6.1 — Mediated delegation
+
+- **Problem:** engine-owned spawn is implicit authority and cannot conserve parent budget/lineage.
+- **Build:** represent target harness as selector `agent://spawn/harness/<D_H>`; submit spawn as an
+  ordinary effect; durably append intent before child creation; attenuate selectors, handles,
+  budget sublease, depth, and turns; ledger child start/return/failure/cancellation and reconcile.
+- **Pseudocode:** `request -> S0..S8a intent -> create child -> child receipts -> S9..S12 settle`.
+- **Gate:** RF-55–RF-59 and RF-26; absent grant denies, child is a strict subset, cold continuation
+  preserves lineage, no direct agency subprocess, and TCB stays within budget.
+
+### Sprint 7.1 — Measure before concurrency
+
+- **Problem:** concurrency without workload and WAL measurements can duplicate effects or cost more
+  than it saves.
+- **Build:** measurement-only instrumentation for selector conflicts, calls, envelopes, bytes, WAL
+  waits/retries, critical path, cost, and signed-pass outcome. Run sequential baselines and proposed
+  worker bounds under fixed identities.
+- **Gate:** accepted measurement ADR and reproducible report; I-11 remains active.
+
+### Sprint 7.2 — Bounded concurrency and Pareto profiles
+
+- **Problem:** safe independence and durable work ownership are required before parallel effects.
+- **Build:** bounded worker pool over explicit independence groups; WAL-backed claim/lease state;
+  idempotency-key duplicate rejection; unknown selector means conflict; alpha–delta profile chooses
+  only among feasible actions and cannot alter authority.
+- **Pseudocode:** `partition -> durable claim -> dispatch independently -> settle/reconcile -> join`.
+- **Gate:** RF-46–RF-48 plus crash/retry/contention tests and measured improvement. Lift I-11 only by
+  explicit governance after evidence.
+
+### Sprint 8.1 — Framework builder
+
+- **Problem:** debate, critic/reviser, trees, and evolution must not become kernel modes.
+- **Build:** SDK/CLI emits ordinary manifests, profiles, plugin calls, and mediated spawn policies;
+  bound topology by depth/turns/budget; keep one universal episode mechanism.
+- **Gate:** RF-65 reference topologies run with zero kernel/episode-engine change; RF-66 challenge is
+  adjudicated with evidence, not a topology-specific runtime.
+
+### Sprint 9.1 — Retrieval, skills, and macro laboratory
+
+- **Problem:** derived indexes become hidden state, and learned macros can silently widen authority.
+- **Build:** rebuildable hybrid index from immutable artifacts; source-digest citations; evidence-
+  ranked skills; macro candidates whose selector is the least-privilege hull of constituent effects;
+  adversarial replay before promotion.
+- **Gate:** RF-77 rebuild equality, held-out retrieval lift, RF-67–RF-68 least-privilege/dispatch
+  proof, published scale measurements, and explicit five-SPI review.
+
+### Sprint 10.1 — Governed meta-cognition
+
+- **Problem:** adaptive policy without preregistered predictions and exact comparison becomes
+  unauditable self-modification.
+- **Build:** ledger prediction before observation; fit beliefs with VFE; rank feasible policies with
+  EFE; attribute credit to signed trajectories; propose promotion through governance with immutable
+  pointer and rollback target. Keep evaluation exterior.
+- **Gate:** RF-69–RF-70; paired exact McNemar, A/A floor, effect interval, Pareto safety, signed
+  evidence, human approval pointer, and tested rollback. No automatic irreversible promotion.
+
+### Common gate sequence
+
+```text
+targeted falsifier -> affected package suites -> full production suites
+-> codegen/schema -> boundaries/TCB/domain/isolation/duplication
+-> metadata/links/stale paths/IDs/secrets -> evidence recorded on active board
+```

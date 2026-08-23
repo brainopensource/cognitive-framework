@@ -14,10 +14,10 @@
       "content": "I will inspect `src/calculator.py` to check the current implementation of `calculate_value`.",
       "tool_calls": [
         {
-          "id": "call_view_001",
+          "id": "call_read_001",
           "type": "function",
           "function": {
-            "name": "view_file",
+            "name": "fs.read",
             "arguments": "{\"path\": \"src/calculator.py\"}"
           }
         }
@@ -29,11 +29,11 @@
       "content": "I see the bug: `(A + B) + B` adds `B` instead of multiplying by `B`. I will apply the fix.",
       "tool_calls": [
         {
-          "id": "call_edit_002",
+          "id": "call_patch_002",
           "type": "function",
           "function": {
-            "name": "edit_file",
-            "arguments": "{\"path\": \"src/calculator.py\", \"target\": \"resultado = (A + B) + B\", \"replacement\": \"resultado = (A + B) * B\"}"
+            "name": "patch.apply",
+            "arguments": "{\"diff\": \"--- a/src/calculator.py\\n+++ b/src/calculator.py\\n@@ -1,3 +1,3 @@\\n def calculate_value(A: float, B: float) -> float:\\n-    resultado = (A + B) + B\\n+    resultado = (A + B) * B\\n     return resultado\\n\"}"
           }
         }
       ]
@@ -44,11 +44,11 @@
       "content": "I will run the unit tests to verify the formula.",
       "tool_calls": [
         {
-          "id": "call_run_003",
+          "id": "call_exec_003",
           "type": "function",
           "function": {
-            "name": "run_command",
-            "arguments": "{\"command\": \"python3 -m pytest test_calculator.py -q\"}"
+            "name": "proc.exec",
+            "arguments": "{\"argv\": [\"python3\", \"-m\", \"pytest\", \"test_calculator.py\", \"-q\"]}"
           }
         }
       ]

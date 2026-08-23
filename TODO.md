@@ -13,16 +13,51 @@
 - [x] **3.1-D:** Echo Plugin Lifecycle Walking Skeleton over Unix Domain Sockets (UDS) (`broker.py`, `worker.py`, `test/registry/`) [GREEN]
 - [ ] **3.1-E:** Complete NOVA-4 and the missing Named Component Graph falsifiers
 - [ ] **3.1-F:** Finish atomic Layer-0 retirement by removing stale living navigation and proving parser parity
+- [ ] **3.1-GATE:** RF-28–RF-33, RF-46, RF-73–RF-74, RF-76; edge-only $D_H$ change; no duplicate parser or runtime scheduling
+- [ ] **3.2-GATE:** RF-34–RF-44; normal/fault echo lifecycle; UDS permissions, timeout, crash, denial, cleanup, event reduction
+- [ ] **3.3-GATE:** RF-45/NOVA-4; zero Layer-0 source/package/test/CI/navigation surface; full architecture gates
 
 ## [Wave 4 / M-4] Foundation E2E Stop Line (QUEUED)
 - [x] **4.1-A:** Preregistered Oracle and Coding Pack Fixture Setup (`test_composition_root.py`) [PREPARED]
 - [ ] **4.1-B:** Execute Uncheated Single Run Generating 9 Populated Evidence Rows (Stop-line real provider execution)
 - [ ] **4.1-C:** Export Cassette for Hermetic CI Regression Suite (Post-M4)
+- [ ] **4.1-GATE:** One uninterrupted lineage binds real model, S0–S12 effect, sandbox, signed exterior verdict, WAL, cold replay, and rich trajectory
 
-## [Waves 5 → 10] Macro Roadmap Evolution (QUEUED)
-- [ ] **M-5:** Pack #2 (Math & Formal Deductive Verification) with 0 diffs in `domain/` and `kernel/`
-- [ ] **M-6:** Capability-Mediated `agent.spawn` Dispatch through S0–S12 (ADR-0080)
-- [ ] **M-7:** Controlled Pareto Concurrency & Dynamic Routing Matrix (ADR-0083)
-- [ ] **M-8:** Declarative Framework Builder Topologies (Debate, Critic, Tree Search / ADR-0082)
-- [ ] **M-9:** Hybrid Retrieval, Skill Synthesis, and Macro-Tool Compilation (ADR-0084)
-- [ ] **M-10:** Governed Meta-Cognition, Active Inference (VFE/EFE), and Signed DPO Promotion
+## [Waves 5 → 10] Ordered Sprint Checklist (QUEUED)
+
+- [ ] **5.1 — Pack #2:** Implement Math/Formal as a ports-only pack; zero `domain/` or `kernel/` diff; prove trajectory/recovery/evaluator parity.
+- [ ] **5.2 — Witness:** Bind exact subject/input/environment/checker/toolchain/assurance/policy in a signed T0 memo; pass RF-34–RF-37 and RF-52–RF-53.
+- [ ] **6.1 — Delegation:** Route `agent.spawn` through S0–S12; durable intent precedes child; attenuate selectors/budget/depth/turns/handles; pass RF-55–RF-59 and RF-26.
+- [ ] **7.1 — Measurement:** Measure selector conflicts, calls, bytes, envelopes, WAL waits/retries, critical path, cost, and signed pass; accept ADR while I-11 remains active.
+- [ ] **7.2 — Concurrency:** Add bounded workers, WAL claims/leases, duplicate rejection, and authority-neutral Pareto profiles; pass RF-46–RF-48 before lifting I-11.
+- [ ] **8.1 — Frameworks:** Express debate, critic/reviser, bounded trees, and evolution with manifests/plugins/spawn; pass RF-65–RF-66 with zero kernel/engine diff.
+- [ ] **9.1 — Knowledge/Macros:** Rebuildable cited retrieval, evidence-ranked skills, least-privilege macro hull, adversarial replay; pass RF-77 and RF-67–RF-68.
+- [ ] **10.1 — Meta-Cognition:** Prediction-before-observation, VFE/EFE, signed trajectory credit, exact paired promotion, human pointer, rollback; pass RF-69–RF-70.
+
+## Gate Command Set
+
+```bash
+python3 -m unittest discover -s test/kernel -t .
+python3 -m unittest discover -s test/contracts -t .
+python3 -m unittest discover -s test/agency -t .
+python3 -m unittest discover -s test/runtime -t .
+python3 -m unittest discover -s test/adapters -t .
+python3 -m unittest discover -s test/security -t .
+python3 -m unittest discover -s test/trust -t .
+python3 -m unittest discover -s test/packs -t .
+python3 -m unittest discover -s test/falsifiers -t .
+PYTHONPATH=tools/common python3 tools/codegen/generate_types.py --check
+python3 tools/linters/check_boundaries.py
+python3 tools/linters/check_tcb_budget.py
+python3 tools/linters/check_domain_blindness.py
+python3 tools/linters/check_isolation_policy.py
+python3 tools/linters/check_duplication.py --enforce
+python3 tools/linters/check_doc_metadata.py
+python3 tools/linters/check_markdown_links.py
+python3 tools/linters/check_stale_paths.py
+python3 tools/linters/check_falsifier_ids.py
+python3 tools/linters/scan_secrets.py
+```
+
+Only `sprint_active.md` authorizes work. A checked implementation item does not close a sprint until
+its named falsifiers, production suites, architecture gates, and evidence row are green.

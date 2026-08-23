@@ -35,7 +35,10 @@ class RepoPathsTests(unittest.TestCase):
         self.assertFalse((root / "docs" / "scrum").exists())
         self.assertFalse((root / "docs" / "agile").exists())
         # The compatibility helpers now resolve the authority-ordered execution tree.
-        self.assertEqual(repo_paths.active_mvp_contract(), root / "docs/sprint0/active-mvp-contract.json")
+        self.assertEqual(
+            repo_paths.active_mvp_contract(),
+            root / "docs/03_execution/sprint0/active-mvp-contract.json",
+        )
         self.assertEqual(
             repo_paths.preregistered_oracles(),
             root / "test/fixtures/preregistered_oracles.json",
@@ -75,9 +78,9 @@ class ForeignCwdGovernanceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             foreign = Path(tmp)
             for script in (
-                "audit_v4.py",
-                "check_sprint0_governance.py",
-                "check_stale_paths.py",
+                "linters/check_boundaries.py",
+                "linters/check_doc_metadata.py",
+                "linters/check_stale_paths.py",
             ):
                 result = self._run(script, foreign)
                 self.assertEqual(
@@ -90,7 +93,12 @@ class ForeignCwdGovernanceTests(unittest.TestCase):
         fixture = ROOT / "test/broken/fixtures/stale_paths"
         self.assertTrue(fixture.is_dir())
         result = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "check_stale_paths.py"), "--root", str(fixture)],
+            [
+                sys.executable,
+                str(ROOT / "tools" / "linters" / "check_stale_paths.py"),
+                "--root",
+                str(fixture),
+            ],
             cwd=ROOT,
             text=True,
             capture_output=True,

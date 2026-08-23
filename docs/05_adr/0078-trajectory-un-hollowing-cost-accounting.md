@@ -59,3 +59,17 @@ the behavior it measures, followed by a newer ADR defining an equally truthful l
 contract. Learner tolerance of hollow rows is not reversal evidence.
 
 **Owner · status.** CIO / Runtime Lead · accepted by Engineering Director · 2026-08-21
+
+---
+
+## Amendment — 2026-08-23: ordered invocations and recovered-prefix accounting
+
+1. A turn contains an ordered `invocations` sequence. Retries, fallbacks, critic calls, and
+   escalations are separate entries with their resolved route, provider/model identity, fingerprint
+   or typed absence reason, measurement status, and additive cost.
+2. Cost conservation is hierarchical: invocation totals reconcile to the turn; turn totals plus
+   explicit non-turn charges reconcile to the episode. Any unavailable operand makes the enclosing
+   dimension unavailable with a bounded reason; it never becomes zero.
+3. After RF-25 recovery, `assemble_trajectory()` joins the verified durable pre-crash event prefix
+   with post-recovery turns exactly once, in ledger order. Truncating the prefix or double-counting a
+   recovered turn violates I-9 and RF-23.

@@ -16,7 +16,7 @@ applies_to:
 implementation_status: RATIFIED_NOT_IMPLEMENTED
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -38,8 +38,16 @@ schema itself for exact field names and types; this page intentionally does not 
 JSON shape.
 
 ## Guarantees & Non-Fabrication
-1. **Conserved Cost target**: Episode totals equal per-turn measurements; fabricated `_ZERO_COST` is prohibited.
-2. **Explicit absence target**: Missing measurements and fingerprints carry typed absence reasons rather than invented values.
-3. **Derived promotability target**: Eligibility is derived from evidence and cannot be supplied by a pack.
+
+1. **Ordered invocation target:** Each turn preserves every retry, fallback, critic call, and
+   escalation as an ordered invocation with route, identity, measurement status, and cost.
+2. **Conserved cost target:** Invocation totals reconcile to each turn, and turn totals plus explicit
+   non-turn charges reconcile to the episode; fabricated `_ZERO_COST` is prohibited.
+3. **Cold-continuity target:** A recovered episode joins the verified durable pre-crash prefix and
+   post-recovery turns exactly once before `EpisodeCompleted` emits the row.
+4. **Explicit absence target:** Missing measurements and fingerprints carry typed absence reasons
+   rather than invented values.
+5. **Derived promotability target:** Eligibility is derived from evidence and cannot be supplied by
+   a pack; `evaluation: none` is declared before execution and is always ineligible.
 
 These are ADR-0078/RF-23 obligations, not claims about the current green state.

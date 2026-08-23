@@ -84,3 +84,13 @@ silent rewrite and authorizes no M-3, M-6, or M-7 implementation.
 
 Clauses 3 and 9 remain controlling: the graph is not a workflow engine, and this reservation does
 not authorize graph, spawn, router, or concurrency implementation in M-2.
+
+---
+
+## Amendment — 2026-08-23: composition graph is statically exhausted
+
+The compiler resolves and freezes the complete Named Component Graph before a run begins. The
+runtime MUST NOT walk graph edges as a dynamic control-flow DAG, schedule graph nodes, or introduce
+a second episode engine. Every episode continues through one unary, sequential universal turn loop.
+Multi-agent topology requires capability-mediated `agent.spawn` at M-6; composed plugins remain
+ordinary callees of that loop. Typed bindings provide addresses and interfaces only.

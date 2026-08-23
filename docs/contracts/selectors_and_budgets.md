@@ -16,7 +16,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -28,29 +28,15 @@ superseded_by: null
 
 ---
 
-## 1. Monotonic Selector Algebra
+## Canonical algebra
 
-Selectors declare bounded permission scopes over resources:
-- **`fs`**: Path globs under authorized root (e.g., `["/workspace/**"]`).
-- **`generic`**: URI patterns (e.g., `["proc://exec/allow/git,pytest,ruff,python3"]`).
+The selector partial order and six budget dimensions are defined normatively only in
+[`SPEC.md` §1.0](../SPEC.md#10-recursive-machine-authority-and-identity) and
+[`KERNEL.md` §4](../04_annex/KERNEL.md#4-the-capability-system). ADR-0074 records why additive
+resources and structural ceilings are distinct. This page intentionally does not repeat their matrix.
 
-### Containment Rules
-$$\text{ChildSelector} \subseteq \text{ParentSelector}$$
-- Child grants must be an exact subset of the parent.
-- An empty ceiling denies all requests (`empty_ceiling`).
-- Unbounded child request under a bounded parent is denied fail-closed.
-
----
-
-## 2. 6D Typed Budget Algebra
-
-Budgets distinguish additive consumed resources from non-additive structural ceilings:
-
-| Dimension | Type | Algebraic Rule |
-|---|---|---|
-| `usd_micros` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
-| `tokens` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
-| `bytes` | **Additive** | $\text{Child} + \text{Remaining} \le \text{Parent}$ |
-| `millis` | **Additive** | Charged compute milliseconds; $\text{Child} + \text{Remaining} \le \text{Parent}$ |
-| `depth` | **Structural** | $\text{ChildDepth} = \text{ParentDepth} + 1 \le \text{MaxDepth}$ (Siblings not summed) |
-| `turns` | **Structural** | Max turns allowed for current subagent turn loop |
+Executable behavior lives in
+[`resource_selector.py`](../../vanguard/packages/domain/selectors/resource_selector.py) and
+[`budget.py`](../../vanguard/packages/kernel/budget.py). Implementations must preserve fail-closed
+comparison, empty-ceiling denial, component-wise conservation for additive resources, and the
+non-additive semantics of depth and turn ceilings.

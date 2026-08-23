@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: tech-lead
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -45,9 +45,15 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-n
 > *Note:* RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23.
 
 ### Immediate File Ownership & Boundaries
-- **Developer A (NOVA-1 / RF-23):** Owns `schemas/mhf/trajectory.schema.json`, `runtime/trajectory.py`, telemetry/model attribution, and the trajectory assembly join in `runtime/session.py`.
-- **Developer B (NOVA-2 / RF-25):** Owns `runtime/ledger/recovery.py`, the file-backed SQLite-WAL continuation path, and recovery-facing construction in `runtime/session.py`.
-- **Shared Hotspot (`runtime/session.py`):** Developer B lands the narrow resume seam first; Developer A rebases and joins trajectory assembly.
+
+- **Developer A (NOVA-1 / RF-23):** Owns `schemas/mhf/trajectory.schema.json`,
+  `vanguard/packages/runtime/trajectory.py`, telemetry/model attribution, and the trajectory assembly
+  join in `vanguard/packages/runtime/session.py`.
+- **Developer B (NOVA-2 / RF-25):** Owns `vanguard/packages/runtime/ledger/recovery.py`, the
+  file-backed SQLite-WAL continuation path, and the recovery seam in
+  `vanguard/packages/runtime/session.py`.
+- **Shared hotspot (`vanguard/packages/runtime/session.py`):** Developer B lands the narrow resume
+  seam first; Developer A rebases and joins trajectory assembly.
 - **Merge Order:** (1) RF-72 governance lock → (2) Developer B resume seam → (3) Developer A trajectory accounting → (4) Combined M-2 re-gate.
 
 ---
@@ -55,8 +61,13 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-n
 ## 3. Implementation Contracts
 
 ### Developer A — NOVA-1 / RF-23 (3–4 working days)
-- Populate `mhf.trajectory/1` with real model routes, explicit measurement statuses (`measured`, `estimated`, `unavailable`), and turn-level attribution.
-- Conserve episode-level cost totals from adapter telemetry without fabricated zeros.
+- Implement `assemble_trajectory()` over the verified pre-crash prefix plus current-process turns,
+  deduplicated by durable event identity and ordered by ledger sequence.
+- Populate every turn with an ordered `invocations` sequence covering retries, fallbacks, critic
+  calls, and escalations; record resolved model routes and explicit measurement statuses
+  (`measured`, `estimated`, `unavailable`).
+- Conserve invocation → turn → episode additive costs from adapter telemetry and ledger settlements
+  without fabricated zeros.
 - Bind final state/event ranges and compute $D_R$ without altering $D_H$.
 - Derive legacy/promotability status (never accept from input).
 - Preserve legal zero-turn aborted episodes (`model_not_invoked`).
@@ -64,7 +75,9 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-n
 
 ### Developer B — NOVA-2 / RF-25 (2–3 working days)
 - Use file-backed SQLite WAL as the sole state source in a fresh Python interpreter.
-- Fold durable event prefix, restore budgets/digests/sequence state.
+- Fold and expose the verified durable event prefix; restore budgets, digests, and sequence state.
+- Reconcile every pending Governor lease: release uncommitted reservations or preserve an
+  undeterminable reservation until exterior reconciliation, preventing both budget leak and reuse.
 - Classify open S8a intent as undeterminable unless exterior reconciliation confirms effect.
 - Ledger `RunRecovered` via canonical `LedgerEmitter`.
 - Continue execution without repeating settled effects or guessing uncertain ones.
@@ -72,17 +85,28 @@ Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../05_adr/0077-n
 
 ---
 
-## 4. Unified Task Register
+## 4. Wave 2C Actionable TODO
 
-| ID | Task | Falsifier / Gate | Readiness | Owner |
-|---|---|---|---|---|
-| **2C-R23** | NOVA-1: Truthful trajectory content and conserved accounting | RF-23 (`test_rf23_trajectory_content.py`) | **RED CONFIRMED** | Developer A |
-| **2C-R25** | NOVA-2: True fresh-process SQLite-WAL cold continuation | RF-25 (`test_rf25_cold_continuation.py`) | **RED CONFIRMED** | Developer B |
-| **2C-REGATE** | Run full M-2 gate suite; obtain Tech Lead signature | All M-2 gates green | BLOCKED (on 2C-R23/25) | Tech Lead |
-| **3.1-A** | Registry FSM on packages with ledgered transitions | RF-38…RF-45 | QUEUED (needs M-2) | Unassigned |
-| **3.1-B** | Manifest compiler for Named Component Graph | RF-28…RF-33 | QUEUED (needs M-2) | Unassigned |
-| **3.1-C** | Echo plugin lifecycle over wire (ADR-M0-13) | RF-38 | QUEUED (needs M-2) | Unassigned |
-| **4.1-A** | Foundation E2E uncheated run (9 evidence rows) | M-4 Gate | QUEUED (needs M-3) | Unassigned |
+- [ ] **2C-R25 — Developer B:** Implement fresh-process SQLite-WAL continuation; restore the
+  verified durable prefix; reconcile pending Governor leases without budget leakage; preserve open
+  effects as undeterminable until reconciliation; emit `RunRecovered` through `LedgerEmitter`; and
+  continue without replaying settled effects. Gate: RF-25
+  (`test/falsifiers/test_rf25_cold_continuation.py`).
+- [ ] **2C-R23 — Developer A:** Implement `assemble_trajectory()` over pre-crash history and current
+  turns; record ordered `invocations`, resolved model routes, and `measured`/`estimated`/`unavailable`
+  status; enforce invocation → turn → episode cost conservation; derive eligibility; and emit the
+  complete `mhf.trajectory/1` row. Gate: RF-23
+  (`test/falsifiers/test_rf23_trajectory_content.py`), with RF-24 and RF-27 supporting.
+- [ ] **2C-COMBINED — Developers A + B:** Integrate both seams in
+  `vanguard/packages/runtime/session.py`; prove that a recovered episode includes each pre- and
+  post-crash event/turn exactly once, carries continuous digest/budget lineage, and produces a
+  complete trajectory. Gates: RF-23 and RF-25 green together.
+- [ ] **2C-REGATE — Tech Lead:** Run the complete M-2 falsifier suite plus all documentation,
+  architecture, TCB, isolation, secret, and governance checks; record approval only when every
+  command exits 0 and no new `layer0/` or duplicate state surface exists.
+
+Future work is intentionally absent from this live board. Ordered Sprint 3.1+ backlog and objective
+acceptance gates live in [`milestones.md` § Future Backlog](../02_roadmap/milestones.md#future-backlog-by-milestone-and-sprint).
 
 ### Definition of Done (All Tasks)
 1. Named falsifiers pass on `vanguard/packages/`.

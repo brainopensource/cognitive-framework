@@ -268,35 +268,51 @@ def run_experiment(exp: dict, prompt: str, model_name: str) -> dict:
     return record
 
 
+def get_executed_run_ids() -> set[str]:
+    """Reads existing CSV to see which parameter combinations have already been benchmarked."""
+    if not CSV_FILE.exists() or CSV_FILE.stat().st_size == 0:
+        return set()
+    executed = set()
+    with open(CSV_FILE, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        for r in reader:
+            if "run_id" in r:
+                executed.add(r["run_id"])
+    return executed
+
+
 def main():
     prompt = load_prompt()
-    max_runs = int(sys.argv[2]) if len(sys.argv) > 2 else 16
+    requested_runs = int(sys.argv[2]) if len(sys.argv) > 2 else 16
     
     all_experiments = generate_fractional_16_design()
-    if max_runs == 4:
-        # Quick test: select 4 representative corners
-        experiments = [all_experiments[0], all_experiments[4], all_experiments[8], all_experiments[15]]
-        for i, e in enumerate(experiments):
-            e["run_index"] = i + 1
-    elif max_runs == 32:
-        experiments = all_experiments + all_experiments
-        for i, e in enumerate(experiments):
-            e["run_index"] = i + 1
-    else:
-        experiments = all_experiments[:max_runs]
+    executed_ids = get_executed_run_ids()
+    existing_count = len(executed_ids)
+
+    # Filter out experiments that were already run
+    unexecuted = [e for e in all_experiments if e["id"] not in executed_ids]
+
+    if not unexecuted:
+        print(f"ℹ️ All 16 DoE parameter space combinations already executed ({existing_count} total). Performing next round of high-order replicates...", flush=True)
+        unexecuted = all_experiments
+
+    # Select the next complementary batch of experiments
+    experiments = unexecuted[:requested_runs]
+    for i, e in enumerate(experiments):
+        e["run_index"] = existing_count + i + 1
 
     print("=" * 75, flush=True)
-    print(f"🧪 EXECUTING DoE BENCHMARK MATRIX ({len(experiments)} RUNS)", flush=True)
+    print(f"🧪 EXECUTING COMPLEMENTARY DoE BENCHMARK ({len(experiments)} RUNS)", flush=True)
     print(f"Target Model  : {MODEL_NAME}", flush=True)
-    print(f"Isolated Dir  : {OUTPUT_DIR}", flush=True)
-    print(f"Total Runs    : {len(experiments)} Sequential Runs", flush=True)
+    print(f"Previously Run: {existing_count} points in parameter space", flush=True)
+    print(f"New Points    : {len(experiments)} unvisited points", flush=True)
     print(f"CSV Storage   : {CSV_FILE}", flush=True)
     print("=" * 75, flush=True)
 
     records = []
     for exp in experiments:
         try:
-            print(f"[{exp['run_index']:02d}/{len(experiments)}] 🚀 Running: {exp['name']}...", flush=True)
+            print(f"[{exp['run_index']:02d}/{existing_count + len(experiments)}] 🚀 Running: {exp['name']}...", flush=True)
             r = run_experiment(exp, prompt, MODEL_NAME)
             records.append(r)
         except Exception as e:

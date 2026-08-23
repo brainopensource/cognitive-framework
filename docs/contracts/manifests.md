@@ -7,7 +7,6 @@ canonical_for:
   - manifest-schema-contract
 source_of_truth:
   - docs/05_adr/0077-named-component-graph-manifest.md
-  - docs/05_adr/0077-named-component-graph-manifest.md
 derived_from:
   - docs/05_adr/0077-named-component-graph-manifest.md
 applies_to:
@@ -15,7 +14,7 @@ applies_to:
 implementation_status: RATIFIED_NOT_IMPLEMENTED
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -32,6 +31,9 @@ superseded_by: null
 ADR-0077 requires typed named components, typed directed bindings, entrypoints, explicit profiles,
 and capability-selector-based spawn authorization. All behavior-affecting values enter `D_H`.
 Unknown kinds, dangling edges, incompatible bindings, and unconsumed authority fail at compose.
+The graph is frozen composition data only. Runtime execution remains the unary sequential turn loop;
+bindings cannot become a dynamic DAG scheduler. Multi-agent execution is unavailable before mediated
+`agent.spawn` opens at M-6.
 
 The current repository contains `schemas/mhf/harness_manifest.schema.json` for the existing
 `mhf.harness/1` surface. There is no `mhf.manifest/2` schema or graph compiler on disk yet; M-3

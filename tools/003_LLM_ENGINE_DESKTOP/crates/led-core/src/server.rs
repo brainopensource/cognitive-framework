@@ -416,12 +416,37 @@ async fn handle_tuner_calibrate(
     State(state): State<AppState>,
     Json(req): Json<CalibrateRequest>,
 ) -> Result<Json<TunerOptimizationResult>> {
-    let model = req.model.unwrap_or_else(|| "qwen2.5-coder:14b".to_string());
+    let model = req.model.unwrap_or_else(|| "qwen2.5:1.5b".to_string());
     info!("Triggering AI Auto-Tuner calibration for: {}", model);
 
-    let csv_file = state
+    // Dynamic folder resolution matching model name
+    let clean_model = if model.contains("14b") {
+        "qwen_25C_14B"
+    } else if model.contains("1.5b") {
+        "qwen_25_15B"
+    } else if model.contains("7b") {
+        "qwen_25C_7B"
+    } else {
+        "qwen_38_27B"
+    };
+
+    let mut csv_file = state
         .workspace_root
-        .join("bench_finetune/qwen_25C_14B/benchmark_results_16.csv");
+        .join(format!("bench_finetune/{}/benchmark_results_16.csv", clean_model));
+
+    // Fallback if specific model benchmark has not been run yet
+    if !csv_file.exists() {
+        let base_bench = state.workspace_root.join("bench_finetune");
+        if let Ok(entries) = std::fs::read_dir(&base_bench) {
+            for entry in entries.flatten() {
+                let candidate = entry.path().join("benchmark_results_16.csv");
+                if candidate.exists() {
+                    csv_file = candidate;
+                    break;
+                }
+            }
+        }
+    }
 
     let res = state
         .worker_bridge

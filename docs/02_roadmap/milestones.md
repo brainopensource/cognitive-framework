@@ -8,14 +8,16 @@ canonical_for:
 status: living
 owner: engineering-director
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
 
 # Macro Milestones — AETHER / Vanguard (M-0 → M-10)
 
-**Status:** Authoritative macro execution ladder. Macro milestones define high-level outcomes and objective exit gates only. Living task-level execution is centralized in [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md).
+**Status:** Authoritative macro execution ladder and future backlog. Only the currently opened tasks
+in [`docs/03_sprints/sprint_active.md`](../03_sprints/sprint_active.md) authorize implementation;
+the delivery slices below remain ordered, non-active backlog until their dependency gates open.
 
 **Principle:** A milestone is complete only when its objective falsifiers and gates pass on the canonical path—never when code merely merges.
 
@@ -54,3 +56,25 @@ superseded_by: null
 - **Sequential Execution (I-11):** Sequential execution remains mandatory until the M-7 measurement gate fires.
 - **TCB Budget:** Microkernel in `vanguard/packages/kernel/` must not exceed $\le 1438$ LOC.
 - **Refusals:** Strictly adhere to the non-claims and refusals in [`SPEC.md` §9](../SPEC.md#9-what-this-specification-refuses-to-build).
+
+---
+
+## Future Backlog by Milestone and Sprint
+
+This register replaces a separate `backlog.md`, which is intentionally not created under the
+repository's anti-sprawl rule. A slice moves to the active board only after every dependency is green.
+
+| Sprint | Milestone | Deliverable | Acceptance and bound falsifier | Dependency | State |
+|---|---|---|---|---|---|
+| **3.1** | M-3 | Compile `mhf.manifest/2`: named instances, typed bindings, profiles, compatibility reader, one canonical parser | RF-28–RF-33, RF-46, RF-73–RF-74, and RF-76 green; edge-only changes alter `D_H`; unknown or unconsumed authority fails closed | M-2 | PLANNED |
+| **3.2** | M-3 | Port the registry FSM and isolation broker to `vanguard/packages/`; run the echo plugin through the complete wire lifecycle | RF-34–RF-45 green; declared absence is pre-execution and ineligible; unsigned or forged evidence fails closed | Sprint 3.1 | PLANNED |
+| **3.3** | M-3 | Delete residual `layer0/` source, packaging, CI, and test surfaces atomically after parity | NOVA-4 / RF-38–RF-45 green; no stale import, package entry, workflow path, or duplicate parser remains | Sprint 3.2 | PLANNED |
+| **4.1** | M-4 | Execute one real coding-agent run from start to signed completion | One uninterrupted `run_id`; all nine evidence rows populated; no human repair, stitched trace, cassette substitution, or forged verdict | M-3 | PLANNED |
+| **5.1** | M-5 | Add Math/Formal Pack #2 and prove substrate generality | Zero diffs under `vanguard/packages/{domain,kernel}/`; contract, trajectory, and exterior-evidence parity with Pack #1 | M-4 | PLANNED |
+| **5.2** | M-5 | Produce exact attributable T0 witness memo and finish post-foundation consolidation | RF-52–RF-53 and RF-34–RF-37 green; memo key binds subject, inputs, environment, checker, toolchain, assurance, and policy version | Sprint 5.1 | PLANNED |
+| **6.1** | M-6 | Mediate `agent.spawn` as an S0–S12 effect with attenuated child authority and budget | RF-55–RF-59 plus RF-26 green; absent grant denies; depth and selectors never widen; TCB remains within budget | M-5 | PLANNED |
+| **7.1** | M-7 | Measure selector independence and WAL contention before enabling concurrency | Measurement ADR records calls, envelopes, bytes, retries, contention, critical path, and cost per signed pass; I-11 remains until ratification | M-6 | PLANNED |
+| **7.2** | M-7 | Activate bounded worker pool and alpha↔delta Pareto routing | RF-46–RF-48 green; no duplicate or unknown effect; claims and leases survive cold continuation | Sprint 7.1 | PLANNED |
+| **8.1** | M-8 | Express debate, critic/reviser, bounded-tree, and evolutionary topologies through manifests | RF-65 green with zero kernel or episode-engine diff; RF-66 universal-loop challenge adjudicated | M-7 | PLANNED |
+| **9.1** | M-9 | Add rebuildable hybrid retrieval, evidence-ranked skills, and macro candidate laboratory | RF-77 and RF-67–RF-68 green; index rebuilds from immutable artifacts; macro selector hull remains least privilege | M-8 | PLANNED |
+| **10.1** | M-10 | Add governed Active-Inference belief/policy loop and reversible promotion | RF-69–RF-70 green; prediction precedes observation; exact paired McNemar, A/A floor, effect interval, signed evidence, human pointer, and rollback all pass | M-9 | PLANNED |

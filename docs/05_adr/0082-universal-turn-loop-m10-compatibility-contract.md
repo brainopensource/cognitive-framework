@@ -106,3 +106,15 @@ Naming these tests closes their contracts without implementing their future capa
   preserving retrieval results and source-digest citations.
 
 No executable RF-76 or RF-77 test is added before its named milestone opens.
+
+---
+
+## Amendment — 2026-08-23: RF-25 and RF-23 form one recovery evidence gate
+
+Cold continuation restores more than reducible control state. In the fresh interpreter, the runtime
+must verify and fold the SQLite-WAL prefix, reconstruct digest/sequence and Governor state, and
+reconcile every pending lease so no reserved budget leaks or becomes spendable twice. Open S8a
+intents remain undeterminable until exterior reconciliation. The canonical writer then emits
+`RunRecovered` and resumes the legal turn. At `EpisodeCompleted`, RF-23 consumes that same verified
+prefix and all post-recovery turns exactly once to produce the complete `mhf.trajectory/1` record.
+RF-25 is therefore not green if recovery succeeds while trajectory history is truncated.

@@ -52,3 +52,13 @@ the derivation defect is repaired, the affected guardrail becomes mandatory and 
 
 **Owner · status.** CIO / Principal Systems Architect · accepted by Engineering Director ·
 2026-08-21
+
+---
+
+## Amendment — 2026-08-23: explicit derived value for declared absence
+
+For avoidance of implementation ambiguity, a frozen `evaluation: none` declaration made before
+execution deterministically derives `unattributable_for_promotion = true` and a null verdict. It is
+not a passing evaluation. Unsigned, self-produced, wrongly bound, tampered, or fabricated verdicts
+remain forged/broken and fail closed; no runtime recovery, compatibility reader, or pack policy may
+reclassify them as declared absence.

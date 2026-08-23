@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -198,6 +198,13 @@ rather than restated; see also `docs/05_adr/DEFERRED_REJECTED.md` `REJ-01`.)*
 scheduler property, gated on a measurement. Unknown selector footprint means conflict, not
 independence (`ADR-0073`, `ADR-0074`). This is Invariant I-11.
 
+**Composition is not control flow (`ADR-0077`, `ADR-0082`).** The Named Component Graph is resolved
+and frozen only at composition time. During execution, each episode still advances through one
+unary, sequential turn loop. Bindings make components addressable; they MUST NOT be interpreted as
+a dynamic workflow DAG, a graph scheduler, or authority to execute edges. Multi-agent topologies
+MUST enter through capability-mediated `agent.spawn` when M-6 opens, or through already composed
+plugins invoked by the same loop. No component name or graph edge may add an alternate runtime path.
+
 ### 1.2 Event taxonomy (emission is mandatory)
 
 Full kind set, grouped; every kind lists its single production *owner*. Lexical CI rule `E-COV`
@@ -308,14 +315,18 @@ MUST traverse this full lifecycle before any real plugin is written (ADR-M0-13, 
 rule), on the canonical production path.**
 
 The SPI **contract** is JSON-RPC 2.0, line-delimited, over Unix domain sockets (`ADR-0002`,
-`ADR-0059`, `ADR-0072`). Python `typing.Protocol` is a client convenience. `in_process` is an
-isolation privilege that still speaks the same wire (loopback), not a second SPI.
+`ADR-0059`, `ADR-0072`). Python `typing.Protocol` is a client convenience. Wire parity means every
+tier MUST accept and produce values conforming to the same generated JSON Schemas and method
+semantics; it does not require every tier to serialize bytes or open a socket. `in_process` is an
+isolation privilege, not a second SPI, and MUST dispatch validated typed values directly in memory.
+It MUST NOT incur UDS, JSON encoding/decoding, or copy-through-wire overhead for heavy context
+bundles. Subprocess and container tiers continue to use the normative UDS framing.
 
 **Isolation tiers (A-2):**
 
 | Tier | Mechanism | Latency | Use |
 |---|---|---|---|
-| `in_process` | Same interpreter; static import lint + audit hook | ~0 | First-party, signed, reviewed (context compiler) |
+| `in_process` | Same interpreter; direct typed dispatch after schema-boundary validation; static import lint + audit hook | ~0 | First-party, signed, reviewed (context compiler) |
 | `subprocess` | Fork per plugin; JSON-RPC over UDS; enforced rlimits + seccomp profile (closes D-31) | ~1–5 ms/call | Default for toolkits, planners |
 | `container` | Rootless bubblewrap/OCI, UID-separated (existing worker pattern) | ~10–50 ms cold | Anything executing user/model-authored code |
 | `wasm` | wasmtime component w/ WASI-preview2 caps | ~0.1–1 ms/call | Untrusted third-party pure-compute plugins |
@@ -486,9 +497,16 @@ manifest: `turn` (drop layer), `checkpoint` (fold to `CheckpointCreated`), `comp
 semantics). *(VG-03 §7.5's irreversibility analysis is this rollback taxonomy's ancestor, per matrix
 §1.6.)*
 
-**Crash recovery.** On boot: fold ledger → find open runs → verify heartbeat staleness (HMAC) →
-reconcile undeterminable effects → emit `RunRecovered` and resume at the exact turn, or `RunAborted` with
-cause. Zero-data-loss claim now holds because §1.2 makes every state-bearing fact an event.
+**Crash recovery and trajectory continuity (RF-25 / RF-23).** On boot in a fresh process: open the
+file-backed SQLite-WAL store → verify and fold the durable event prefix → find open runs → restore
+sequence/digest lineage and Governor budget state → release or reconcile every reserved-but-uncommitted
+lease without widening the remaining budget → verify heartbeat staleness (HMAC) → classify open S8a
+intents as undeterminable until an exterior reconciliation resolves them → emit `RunRecovered` through
+the canonical writer → resume at the exact legal turn, or emit `RunAborted` with cause. Live Python
+objects MUST NOT be a recovery input. The recovered session MUST retain the pre-crash prefix as an
+input to `assemble_trajectory()`; at `EpisodeCompleted`, the emitted `mhf.trajectory/1` row MUST join
+that prefix with all post-recovery turns exactly once. This joint obligation is I-9, not merely state
+replay, and prevents both budget leakage and history truncation.
 
 ---
 
@@ -621,6 +639,20 @@ the pack. **Acceptance: adding Pack #N requires zero diffs under
 promotion remain deferred (`ADR-0073`). The schema MUST exist and MUST be emitted at
 `EpisodeCompleted`; consumers of the dataset are not this version's kernel.
 
+Each turn MUST carry an ordered `invocations` sequence rather than a single implicit model call.
+Every retry, fallback, critic call, or escalation is a distinct invocation with resolved route,
+provider/model identity, fingerprint or typed absence reason, measurement status
+(`measured`, `estimated`, or `unavailable`), and additive cost. Turn cost is the sum of its
+invocations plus explicit non-model turn charges; episode cost is the sum of all turns plus explicit
+non-turn charges. Missing operands propagate typed unavailability and MUST NOT be replaced by zero.
+The ordered sequence is part of execution attribution and therefore contributes to `D_R`.
+
+Evaluation policy has three states from `ADR-0079`: valid signed evidence, absence declared in the
+frozen composition before execution, or forged/broken evidence. `evaluation: none` MUST derive
+`unattributable_for_promotion = true` and a null verdict; it MUST NOT be selected after observing the
+outcome. An unsigned, self-produced, wrongly bound, or fabricated verdict is forged/broken and MUST
+fail closed. It MUST NOT degrade into declared absence or operational success.
+
 **Trajectory record (emitted at every `EpisodeCompleted`, no transformation step):**
 
 ```json
@@ -629,7 +661,7 @@ promotion remain deferred (`ADR-0073`). The schema MUST exist and MUST be emitte
   "harness_digest": "...", "manifest_genome": {"...": "..."},
   "model_routes_used": [...],
   "turns": [{"context_digest": "...", "proposal": {...},
-             "receipts": [...], "cost": {...}}],
+             "invocations": [...], "receipts": [...], "cost": {...}}],
   "verdict": {"signed": "...", "oracle": "coding-oracle@3", "pass": true},
   "attribution": {"prefix_hits": 0.91, "escalations": 1}
 }
@@ -777,9 +809,11 @@ I-1 through I-10 are carried from the archived Tech Lead audit `CRITICAL_GAP_ANA
    references generated; drift is a CI failure, not a register.
 9. **Telemetry is a dataset.** Every episode terminates in a schema-valid `mhf.trajectory/1` record
    that is, without transformation, a valid harvest row. For every invoked turn the row MUST carry
-   attributable provider/model identity, fingerprint or an explicit unavailable reason, explicit
-   measurement status, conserved per-turn and episode cost, and distinct recomputable `D_H`, `D_R`,
-   and (when evaluated as an experiment) `D_X` subjects. Unknown cost MUST NOT be encoded as zero;
+   an ordered sequence of all invocations (including retries and escalations), attributable
+   provider/model identity, fingerprint or an explicit unavailable reason, explicit measurement
+   status, conserved invocation, turn, and episode cost, and distinct recomputable `D_H`, `D_R`,
+   and (when evaluated as an experiment) `D_X` subjects. A recovered episode MUST join its verified
+   pre-crash prefix with post-recovery turns exactly once. Unknown cost MUST NOT be encoded as zero;
    incomplete historical rows remain readable but are derived ineligible for learning or promotion
    (`ADR-0078`). A digest over `{ids, n}` is not this invariant (`ADR-0074`). DPO training itself is
    deferred.

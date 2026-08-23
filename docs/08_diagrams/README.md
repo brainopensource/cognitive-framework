@@ -1,5 +1,10 @@
 # Architecture & Epistemic Diagrams
 
+> **NON-NORMATIVE / FROZEN PROVENANCE**
+>
+> This directory preserves visual design history. Its diagrams cannot authorize implementation;
+> current behavior and work must be traced to SPEC/annex law, accepted ADRs, and the active board.
+
 This directory contains master vector blueprints illustrating the AETHER / Vanguard substrate architecture, epistemological boundaries, capability microkernel dispatch, and long-horizon evolution.
 
 ---

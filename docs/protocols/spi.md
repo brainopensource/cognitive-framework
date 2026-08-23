@@ -15,7 +15,7 @@ applies_to:
 implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
-last_verified: 2026-08-21
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -27,14 +27,11 @@ superseded_by: null
 
 ---
 
-## 1. The five standard SPI interfaces
+## Canonical interface roster
 
-The exact protocols exported by `ports/spi.py` are:
-
-1. **`IPlanner`** — turn-level proposal planning, observation, and reflection.
-2. **`IContextManager`** — context compilation, receipt ingestion, compaction, and regrounding.
-3. **`IToolkit`** — verb schemas, effect execution, compensation, and health.
-4. **`IMemoryEngine`** — write, recall, consolidation, invalidation, and declared capabilities.
-5. **`IEvaluationGate`** — requests exterior judgment and returns gate decisions; it does not mint verdict authority.
-
-These Python protocols are client conveniences for the wire contract, not a second authority surface.
+The normative five-SPI roster and method contracts live only in
+[`SPEC.md` §2.2](../SPEC.md#22-spi-definitions-typed-frozen-versioned). The executable Python surface
+is [`ports/spi.py`](../../vanguard/packages/ports/spi.py); this page intentionally does not maintain a
+second interface list. Those protocols are client conveniences for the wire contract, not a second
+authority surface. Transport behavior, including direct in-memory `in_process` dispatch, is governed
+by [`SPEC.md` §2.1](../SPEC.md#21-plugin-model) and ADR-0072.

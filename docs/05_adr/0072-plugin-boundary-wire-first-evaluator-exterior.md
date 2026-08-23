@@ -69,3 +69,14 @@ attribution scheme that preserves `D_H`/`D_R` without collapsing them. Replacing
 judge with an in-agent plugin is not available as reversal without also reversing ADR-0004.
 
 **Owner · status.** Principal Staff Engineer / Tech Lead · accepted · 2026-08-20 · accepted
+
+---
+
+## Amendment — 2026-08-23: wire parity without in-process transport overhead
+
+Clause 2's “same wire (loopback)” means schema and method-semantic parity, not mandatory byte
+transport. The trusted `in_process` tier dispatches generated typed values directly in memory after
+the same schema-boundary validation and MUST NOT open a UDS, serialize JSON, or copy heavy context
+bundles merely to simulate an out-of-process boundary. Subprocess and container tiers continue to
+use line-delimited JSON-RPC 2.0 over UDS. This optimization creates neither a second SPI nor a second
+payload dialect; RF-37 still requires explicit policy for the isolation privilege.

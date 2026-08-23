@@ -1,6 +1,6 @@
 # `vg` CLI / TUI
 
-Ink client for the RuntimeService daemon. Architecture: [`docs/scrum/development_guides/cli_tui_architecture.md`](../../../docs/scrum/development_guides/cli_tui_architecture.md). Lane lock: [`docs/scrum/development_guides/frontend_senior_review_and_two_lanes.md`](../../../docs/scrum/development_guides/frontend_senior_review_and_two_lanes.md).
+Ink client for the RuntimeService daemon. Architecture: [`docs/SPEC.md`](../../../docs/SPEC.md) · Decisions: [`docs/02_decisions/INDEX.md`](../../../docs/02_decisions/INDEX.md).
 
 Requires Node ≥ 20. Do not import `vanguard/packages`.
 

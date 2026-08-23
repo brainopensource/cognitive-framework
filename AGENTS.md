@@ -1,3 +1,18 @@
+---
+id: repo-agents-contract
+class: standard
+authority: execution
+canonical_for:
+  - agent-contributor-contract
+  - repository-anti-sprawl-rules
+status: living
+owner: repository-governance
+version: "0.6.1"
+last_verified: 2026-08-21
+supersedes: []
+superseded_by: null
+---
+
 # Repository Guidelines
 
 **Start here:** [`README.md`](README.md) is the primary navigation map. This file specifies operational rules and procedures for AI agents and human contributors.
@@ -14,23 +29,23 @@ All documentation is strictly partitioned into three distinct authority tiers:
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/04_annex/) — Pure RFC-2119 Normative Specification │
+│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ governs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                          2. THE DECISIONS (WHY)                          │
-│  docs/05_adr/ — Immutable, append-only Architecture Decision Records     │
+│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ directs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_sprints/sprint_active.md — Single living board & milestone ladder│
+│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs [`0069`](docs/05_adr/0069-runtime-convergence-python-first-packages-canonical.md)–[`0086`](docs/05_adr/0086-historical-adr-working-tree-consolidation.md).
-- **The Decisions**: [`docs/05_adr/INDEX.md`](docs/05_adr/INDEX.md).
-- **The Execution**: [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) & [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md).
+- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0087`](docs/02_decisions/0087-documentation-topology-context-budgets-and-archive-boundary.md).
+- **The Decisions**: [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md).
+- **The Execution**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) & [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md).
 
 ### Hexagonal Production Lattice (`vanguard/packages/`)
 The canonical production truth lives in `vanguard/packages/`, strictly enforcing the hexagonal boundary flow:
@@ -115,7 +130,7 @@ Execution sequence:
 5. **Wave 4 (QUEUED - Foundation Stop)**: First Real Coding-Agent E2E (one real run with zero human cheating).
 6. **Waves 5–10 (Macro Roadmap)**: Generality proof (Pack #2), mediated `agent.spawn`, concurrency, and Meta-Cognition.
 
-Current status belongs only in [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md).
+Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.
 
 ---
@@ -168,8 +183,8 @@ client of the runtime and must not duplicate domain or authority logic.
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
 > All documentation updates must strictly edit existing canonical files in the **Clean Triad**:
-> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md) (and [`docs/04_annex/`](docs/04_annex/)).
-> 2. **Recording Architectural Decisions** $\to$ Add a new append-only ADR in [`docs/05_adr/`](docs/05_adr/).
-> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/03_sprints/sprint_active.md`](docs/03_sprints/sprint_active.md) (and [`docs/02_roadmap/milestones.md`](docs/02_roadmap/milestones.md) for macro gates).
+> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md) or the linked leaf in [`docs/01_law/`](docs/01_law/).
+> 2. **Recording Architectural Decisions** $\to$ Add a new append-only ADR in [`docs/02_decisions/`](docs/02_decisions/).
+> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) (and [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) for macro gates).
 > 
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.

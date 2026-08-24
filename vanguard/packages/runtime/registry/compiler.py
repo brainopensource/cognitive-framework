@@ -1,4 +1,13 @@
-"""HarnessManifest -> FrozenHarness compiler. Unknown refs fail at compose (H-1)."""
+"""Plugin-ref resolution over the generated wire values (`H-1`).
+
+**Not a composition authority (`ADR-0088 §1`, A4).** The one production chain is
+`Runtime.compose` -> `CanonicalManifest` -> `FrozenComposition`, and `D_H` is
+issued there and nowhere else. This module resolves plugin refs and validates
+`/2` bytes against the wire schema; the `mhf.frozen-harness/1` digest it
+returns is a *wire representation*, never an execution identity, and no
+production caller reads it. Retained as bounded ingress/validation through the
+compatibility sunset reviewed at M-5.
+"""
 
 from __future__ import annotations
 

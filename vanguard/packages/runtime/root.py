@@ -22,11 +22,20 @@ from .compose import (
     Runtime as _ComposedRuntime,
     TaskContext,
 )
+from .activation import (
+    ActivationError,
+    ActivationPlan,
+    ActivationStep,
+    activate,
+    plan_activation,
+)
 from .determinism import SystemClock
+from .run_plan import RunPlan, RunPlanError, plan_run
 from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .session import HarnessSession, SessionPorts, _admit_turn_result
 from .wiring import (
     BindingContext,
+    BindingResolver,
     CompositionError,
     DEFAULT_BINDINGS,
     EVALUATOR_BINDINGS,
@@ -103,6 +112,15 @@ class Runtime(_ComposedRuntime):
 
 __all__ = [
     "DEFAULT_BINDINGS",
+    "ActivationError",
+    "ActivationPlan",
+    "ActivationStep",
+    "BindingResolver",
+    "RunPlan",
+    "RunPlanError",
+    "activate",
+    "plan_activation",
+    "plan_run",
     "EVALUATOR_BINDINGS",
     "BindingContext",
     "CompositionError",

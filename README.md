@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.6.2"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-24
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER / Higgs Substrates Upgrade — Version 6 (Concept Lock v0.6.2 Rev C)
+# AETHER — Higgs Release (v0.7.0)
 
 A verifiable, capability-attenuated recursive-agency substrate.
 
@@ -23,8 +23,8 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.2 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md) |
-| **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Concept Lock** | v0.7.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0092`](docs/02_decisions/0092-review-bundle-disposition-and-m7-measurement.md) |
+| **Shipped package** | `vanguard-runtime` `0.7.0` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Status** | **M-3C closed; RF-85 preparation merged at `1a1ed6c`; M-4 remains active with zero evidence rows claimed.** Current work is environment qualification, immutable preregistration, then one eligible run. |
 | **Foundation Plan** | M-3C convergence → M-4 real nine-row proof → M-5 Formal Pack #2 → M-6 mediated spawn → M-7 measured concurrency → M-8 declarative topologies; M-9+ remains post-v1 research |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |

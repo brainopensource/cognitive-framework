@@ -7,13 +7,13 @@ canonical_for:
   - wave-gates
 status: living
 owner: engineering-director
-version: "0.6.2"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-24
 supersedes: []
 superseded_by: null
 ---
 
-# Macro Milestones — AETHER / Vanguard (M-0 → M-10)
+# Macro Milestones — AETHER Higgs Release (v0.7.0)
 
 **Status:** authoritative sequencing and future backlog. Only tasks opened in
 [`sprint_active.md`](sprint_active.md) authorize implementation. A milestone closes on objective

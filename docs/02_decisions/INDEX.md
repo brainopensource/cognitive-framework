@@ -7,8 +7,8 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: engineering-director
-version: "0.6.2"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-24
 read_when:
   - resolving-architectural-decisions
   - selecting-an-implementation-bundle
@@ -124,6 +124,7 @@ stays LOCKED behind M-4 and M-5.
 |---|---|---|---|---|
 | `0091` | [`0091-delegation-state-digest-extension.md`](0091-delegation-state-digest-extension.md) | Non-empty child state is canonical identity; empty maps preserve historical non-delegating digests. | accepted | 2026-08-24 |
 | `0092` | [`0092-review-bundle-disposition-and-m7-measurement.md`](0092-review-bundle-disposition-and-m7-measurement.md) | Archived bundle remains non-production; context-store non-fix rejected; M7-01 authorized for measurement only. | accepted | 2026-08-24 |
+| `0093` | [`0093-aether-higgs-v070-release-baseline.md`](0093-aether-higgs-v070-release-baseline.md) | **AETHER — Higgs Release Baseline:** ratifies v0.7.0 version baseline while preserving internal module structure (`vanguard/packages/`). | accepted | 2026-08-24 |
 
 ---
 

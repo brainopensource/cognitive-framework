@@ -7,8 +7,8 @@ canonical_for:
   - invariant-registry
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-24
 read_when:
   - implementing-any-runtime-change
   - resolving-authority-conflicts
@@ -18,7 +18,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# SPEC — Vanguard Meta-Harness Framework (MHF v1)
+# AETHER Normative Specification — Higgs Release (v0.7.0)
 
 This file is the compact normative index. RFC-2119 terms (MUST, SHALL, SHOULD, MAY) are binding.
 The detailed clauses remain canonical in the linked law leaves under [`01_law/`](01_law/); this

@@ -7,13 +7,13 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.6.4"
+version: "0.7.0"
 last_verified: 2026-08-24
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint Board — v0.6.3 W-3D Product Runtime Profiles → M-4
+# Active Sprint Board — AETHER Higgs Release (v0.7.0)
 
 **Start here:** [`README.md`](../../README.md) is navigation; [`SPEC.md`](../SPEC.md) and the six
 normative leaves under [`01_law/`](../01_law/) are law. Accepted ADRs record decisions. This file is

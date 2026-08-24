@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from vanguard.packages.runtime.dogfood import WORKSPACE_MISSING, run_task_set
@@ -138,7 +139,10 @@ class TheLiveSmokeSkipsClosed(unittest.TestCase):
 
         from vanguard.packages.runtime.lab_driver import run_lab_task
 
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as tmp, patch(
+            "vanguard.packages.runtime.model_selection._ollama_tags",
+            return_value=("installed:tag",),
+        ):
             result = run_lab_task("vg-code-default", tmp, model_port="ollama",
                                   model_name="definitely-not-a-pulled-tag")
         self.assertEqual(result["outcome"], "instrument_error:model_tag_absent")

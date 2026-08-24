@@ -13,7 +13,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER / Vanguard Substrates Upgrade — Version 6 (Concept Lock v0.6.2)
+# AETHER / Higgs Substrates Upgrade — Version 6 (Concept Lock v0.6.2 Rev C)
 
 A verifiable, capability-attenuated recursive-agency substrate.
 

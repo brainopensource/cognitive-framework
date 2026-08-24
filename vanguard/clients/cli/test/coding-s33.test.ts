@@ -209,13 +209,42 @@ test("non-green fake backend returns non-zero", async () => {
   assert.equal(code, 1);
 });
 
-test("python coding backend adaptive fake (integration)", async () => {
+test("python coding backend doctor is real, deterministic and read-only (integration)", async () => {
+  const backend = createPythonCodingBackend();
+  const request = baseRequest({
+    command: "doctor",
+    fakeBackend: undefined,
+    brief: undefined,
+    interactive: false,
+  });
+  const { result, exitCode } = await backend.invoke(request);
+  // doctor never calls a model or spends budget; it only probes the host.
+  assert.ok(["completed", "unavailable"].includes(result.outcome));
+  assert.equal(exitCode, result.outcome === "completed" ? 0 : 3);
+  assert.equal(result.spentUsdMicros, null);
+  assert.equal(result.modelRoutes.length, 0);
+  const route = result.projections.find((item) => item.kind === "route");
+  assert.ok(route, "doctor result must embed a route projection with host facts");
+  const facts = (route as { facts?: Record<string, unknown> }).facts;
+  assert.ok(facts && typeof facts.enforcement === "string");
+});
+
+test("vg doctor human line renders host facts without inventing values", () => {
+  const lines = renderProjectionLines(
+    [{ kind: "route", facts: { enforcement: "full", isWsl: true } }],
+    { human: true }
+  );
+  assert.equal(lines.length, 1);
+  assert.match(lines[0]!, /^\[doctor\] /);
+  assert.match(lines[0]!, /enforcement="full"/);
+  assert.match(lines[0]!, /isWsl=true/);
+});
+
+test("python coding backend deterministic fake reaches the runtime", async () => {
   const backend = createPythonCodingBackend();
   const { result, exitCode } = await backend.invoke(baseRequest());
   assert.equal(exitCode, 0);
-  assert.equal(result.outcome, "oracle_green");
+  assert.equal(result.outcome, "completed");
   const kinds = result.projections.map((item) => item.kind);
-  assert.ok(kinds.includes("diagnose"));
-  assert.ok(kinds.includes("resume"));
-  assert.ok(kinds.includes("oracle"));
+  assert.ok(kinds.includes("complete"));
 });

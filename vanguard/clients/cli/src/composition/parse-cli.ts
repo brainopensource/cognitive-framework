@@ -17,6 +17,7 @@ export const USAGE =
   "          [--budget-usd DOLLARS] [--interactive|--benchmark] [--dry-plan] [--resume RUN_ID]\n" +
   "          [--jsonl-out PATH] [--json] [--headless]\n" +
   "  vg explain PATH --question TEXT [--headless] [--json]\n" +
+  "  vg doctor [PATH] [--headless] [--json]\n" +
   "  vg approve <run-id> --decision approve|reject\n" +
   "  vg resume <run-id> [--headless]\n" +
   "  vg trace <run-id> [--headless] [--replay <file.jsonl>] [--demo [scenario]]\n" +

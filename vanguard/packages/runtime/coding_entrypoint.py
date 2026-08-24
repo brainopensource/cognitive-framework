@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..adapters.models.openrouter import OpenRouterModel
+from ..adapters.models.fake import FakeModel
 from ..adapters.sandbox.platform import discover_platform
 from .compose import TaskContext
 from .profiles import SandboxUnavailable, resolve_profile
@@ -59,10 +60,19 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         project_id=str(request.get("projectId") or "coding-preview"),
         max_turns=int(request.get("maxTurnsPerEpisode") or 40),
     )
+    # The client-side deterministic smoke backend is an explicit, non-release
+    # choice.  It must reach the same Runtime path without touching a provider;
+    # it is never promotion-eligible evidence.
+    fake_backend = request.get("fakeBackend")
+    selected_model = (
+        FakeModel([{"kind": "finish", "note": "deterministic preview"}])
+        if isinstance(fake_backend, str) and fake_backend
+        else OpenRouterModel(model=str(request.get("plannerModel") or "openrouter/free"))
+    )
     result = Runtime.execute_profiled(
         _manifest(command), task,
         profile_id=str(request.get("profile") or "local"),
-        model=OpenRouterModel(model=str(request.get("plannerModel") or "openrouter/free")),
+        model=selected_model,
         interactive=bool(request.get("interactive", False)),
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))

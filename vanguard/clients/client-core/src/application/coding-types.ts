@@ -3,7 +3,7 @@
 export type CodingExitCode = 0 | 1 | 2 | 3 | 4;
 
 export type CodingRequest = {
-  command: "code" | "explain" | "resume";
+  command: "code" | "explain" | "resume" | "doctor";
   workspace: string;
   brief?: string;
   question?: string;

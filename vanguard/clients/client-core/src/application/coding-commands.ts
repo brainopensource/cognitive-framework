@@ -83,9 +83,15 @@ export function createPythonCodingBackend(options?: {
             return;
           }
           if (parsed.type === "result" && parsed.result) {
+            const resultProjections = (parsed.result as CodingTerminalResult).projections ?? [];
             terminal = {
               ...(parsed.result as CodingTerminalResult),
-              projections,
+              // Streamed `type: "projection"` frames are the step-by-step
+              // trace; the terminal result may additionally embed its own
+              // projections (e.g. `doctor`'s route facts) when no frames
+              // were streamed. Prefer the streamed trace, but never let it
+              // silently discard a result-embedded projection.
+              projections: projections.length > 0 ? projections : resultProjections,
             };
           }
         });

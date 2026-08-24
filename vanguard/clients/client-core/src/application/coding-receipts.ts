@@ -49,8 +49,16 @@ export function formatHumanReceipt(projection: CodingProjection): string {
     }
     case "budget":
       return `[budget] remaining ${formatUsdFromMicros(projection.remainingUsdMicros)}`;
-    case "route":
+    case "route": {
+      const facts = projection.facts as Record<string, unknown> | undefined;
+      if (facts) {
+        const pairs = Object.entries(facts)
+          .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
+          .join(" ");
+        return `[doctor] ${pairs}`;
+      }
       return `[route] ${projection.model ?? projection.text ?? "unknown"}`;
+    }
     case "error":
       return `[error] ${projection.detail ?? projection.text ?? "error"}`;
     default:

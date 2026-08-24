@@ -4,7 +4,7 @@ Owning contract: VG-03 §7.3, VG-08 Increment C, REQ-BENCH-001.
 
 Implements non-coding domain:
 - In-memory relational tables with versioned updates.
-- Verbs: `table.read`, `table.diff`, `table.patch`.
+- Verbs: `table.read`, `table.patch`.
 - Constraints: uniqueness, column range, checksums, sums, reconciliation.
 - Domain-native evaluator checking invariant satisfaction and abstention on inconsistency.
 - Zero shell commands, zero filesystem paths, zero git references.
@@ -65,10 +65,10 @@ class TableWorldEnvironment:
                     state.records[r_id] = row_data
                 self._tables[t_name] = state
 
-    def handle_read(self, table_name: str, filter_key: str | None = None, filter_val: Any = None) -> Result[dict[str, Any], str]:
+    def handle_read(self, table_name: str, filter_key: str | None = None, filter_val: Any = None) -> Result[dict[str, Any]]:
         if table_name not in self._tables:
-            return Result.failure(f"Table {table_name!r} not found")
-        rows = self._tables[table_name].select(filter_key, filter_val)
+            return Result.fail("not_found", f"Table {table_name!r} not found")
+        rows = copy.deepcopy(self._tables[table_name].select(filter_key, filter_val))
         return Result.success({
             "table": table_name,
             "version": self._tables[table_name].version,
@@ -76,15 +76,15 @@ class TableWorldEnvironment:
             "rows": rows,
         })
 
-    def handle_patch(self, table_name: str, record_id: str, updates: Mapping[str, Any]) -> Result[dict[str, Any], str]:
+    def handle_patch(self, table_name: str, record_id: str, updates: Mapping[str, Any]) -> Result[dict[str, Any]]:
         if table_name not in self._tables:
-            return Result.failure(f"Table {table_name!r} not found")
+            return Result.fail("not_found", f"Table {table_name!r} not found")
         self._tables[table_name].update_record(record_id, updates)
         return Result.success({
             "table": table_name,
             "recordId": record_id,
             "newVersion": self._tables[table_name].version,
-            "updated": dict(self._tables[table_name].records[record_id]),
+            "updated": copy.deepcopy(self._tables[table_name].records[record_id]),
         })
 
     def get_table_state(self, table_name: str) -> TableState | None:

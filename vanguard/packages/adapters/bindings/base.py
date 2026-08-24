@@ -39,8 +39,25 @@ class DomainBindingRegistry:
                 self.register(provider)
 
     def register(self, provider: BindingProvider) -> None:
-        self._providers[provider.namespace] = provider
-        for verb in provider.supported_verbs:
+        namespace = provider.namespace
+        verbs = tuple(provider.supported_verbs)
+        if not isinstance(namespace, str) or not namespace:
+            raise ValueError("binding provider namespace must be a non-empty string")
+        if not verbs or any(not isinstance(verb, str) or not verb for verb in verbs):
+            raise ValueError(f"binding provider {namespace!r} must declare non-empty verbs")
+        if len(set(verbs)) != len(verbs):
+            raise ValueError(f"binding provider {namespace!r} declares duplicate verbs")
+
+        existing_provider = self._providers.get(namespace)
+        if existing_provider is not None and existing_provider is not provider:
+            raise ValueError(f"binding provider namespace already registered: {namespace!r}")
+        collisions = [verb for verb in verbs
+                      if (owner := self._by_verb.get(verb)) is not None and owner is not provider]
+        if collisions:
+            raise ValueError(f"binding verbs already registered: {sorted(collisions)!r}")
+
+        self._providers[namespace] = provider
+        for verb in verbs:
             self._by_verb[verb] = provider
 
     def get_provider(self, namespace: str) -> BindingProvider | None:

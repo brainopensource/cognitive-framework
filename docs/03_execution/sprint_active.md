@@ -99,6 +99,11 @@ The two lanes start in parallel, but production refactoring remains closed until
 allocated. G0 remains open until RF-78/RF-79 target the public runtime and fail
 for the intended defect. Only then may Sprints 3C.1–3C.3 change production code.
 
+**A0 RED-lock evidence at baseline `6fb5e9a`:** `test/falsifiers/test_rf78_canonical_composition.py`
+and `test_rf79_legacy_normalisation.py` are red at the public `Runtime.compose` boundary; their
+authored `/2` fixtures are schema-valid and parse on the side path, so the only cause is that the
+legacy reader is the public authority and no `FrozenComposition` exists. A0 does not self-certify G0.
+
 ### Sprint 3C.1 — Canonical composition and two-domain ingress
 
 | Lane | Authorized work | Owned surfaces | Evidence / completion |

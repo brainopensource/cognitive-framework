@@ -163,6 +163,55 @@ class B1CanonicalPacksAndBindingProviderTests(unittest.TestCase):
         self.assertTrue(outcome.result_digest.startswith("sha256:"))
         self.assertIn("Alice", outcome.detail)
 
+    def test_b1_03a_table_adapter_fails_closed_on_invalid_requests(self) -> None:
+        """Table failures are typed and do not create an implicit record."""
+        provider = TableBindingProvider()
+        env = TableWorldEnvironment({"users": [{"id": "1", "name": "Alice"}]})
+
+        missing_table = provider.create_adapter("table.read", env).execute(
+            type("ReadReq", (), {"args": {"table": "missing"}})()
+        )
+        self.assertEqual(missing_table.status, "error")
+        self.assertEqual(missing_table.occurrence, "not_occurred")
+        self.assertIn("not found", missing_table.detail)
+
+        missing_id = provider.create_adapter("table.patch", env).execute(
+            type("PatchReq", (), {"args": {"table": "users", "updates": {"name": "Bob"}}})()
+        )
+        self.assertEqual(missing_id.status, "error")
+        self.assertEqual(missing_id.occurrence, "not_occurred")
+        self.assertIn("record id", missing_id.detail)
+
+        self.assertNotIn("table.diff", provider.supported_verbs)
+
+    def test_b1_03b_code_adapter_rejects_shell_strings_and_hashes_observations(self) -> None:
+        """Code bindings preserve argv-only execution and non-placeholder digests."""
+        class Environment:
+            def apply(self, request: object) -> object:
+                self.request = request
+                return type("Result", (), {"ok": True, "value": None})()
+
+        env = Environment()
+        adapter = CodeBindingProvider().create_adapter("proc.exec", env)
+        invalid = adapter.execute(type("Request", (), {"args": {"argv": "pytest"}})())
+        self.assertEqual(invalid.status, "error")
+        self.assertEqual(invalid.occurrence, "not_occurred")
+        self.assertIn("argv array", invalid.detail)
+
+        class ObservationEnvironment:
+            def observe(self, request: object) -> object:
+                return type(
+                    "Result",
+                    (),
+                    {"ok": True, "value": type("Observation", (), {"content": "hello", "metadata": {}})()},
+                )()
+
+        observed = CodeBindingProvider().create_adapter(
+            "fs.read", ObservationEnvironment()
+        ).execute(type("Request", (), {"args": {"path": "README.md"}})())
+        self.assertTrue(observed.result_digest.startswith("sha256:"))
+        self.assertNotEqual(observed.result_digest, "sha256:" + "0" * 64)
+
     def test_b1_04_table_verbs_do_not_pollute_default_bindings(self) -> None:
         """RF-81: Global DEFAULT_BINDINGS remains coding-only; domain registry isolates providers."""
         self.assertNotIn("table.read", DEFAULT_BINDINGS)
@@ -190,6 +239,17 @@ class B1CanonicalPacksAndBindingProviderTests(unittest.TestCase):
         ]
         with self.assertRaises(ManifestError):
             parse_named_manifest(eager_cycle)
+
+    def test_b1_06_registry_rejects_ambiguous_provider_registration(self) -> None:
+        """A later provider cannot silently replace an existing authority."""
+        registry = DomainBindingRegistry([TableBindingProvider()])
+
+        class ConflictingProvider:
+            namespace = "other"
+            supported_verbs = ("table.read",)
+
+        with self.assertRaises(ValueError):
+            registry.register(ConflictingProvider())
 
 
 if __name__ == "__main__":

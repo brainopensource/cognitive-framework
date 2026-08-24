@@ -44,8 +44,17 @@ class RF79LegacyNormalisation(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
-            legacy = self._compose(legacy_twin(base), failures, "legacy")
-            authored = self._compose(authored_twin(base), failures, "authored")
+            # Keep the ingress directories separate, but hold the logical pack
+            # identity and all referenced paths constant. Otherwise the
+            # falsifier would demand equal D_H values from different manifest
+            # ids (rf-legacy-twin vs rf-authored-twin), making convergence
+            # impossible by construction.
+            legacy = self._compose(
+                legacy_twin(base / "legacy", pack_id="rf-twin"), failures, "legacy"
+            )
+            authored = self._compose(
+                authored_twin(base / "authored", pack_id="rf-twin"), failures, "authored"
+            )
 
             if legacy is not None and authored is not None:
                 if legacy.composition_digest != authored.composition_digest:

@@ -7,7 +7,7 @@ Hexagonal boundary: Adapters package (imports only domain and ports).
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from typing import Any, Mapping
 
 from ...domain.canonicalisation.digest import digest_of
@@ -17,13 +17,18 @@ from ...ports.environment import ObservationRequest
 
 @dataclass(frozen=True, slots=True)
 class CodeAdapterOutcome:
-    """Outcome value object for code domain effects compatible with ports/kernel."""
+    """Outcome value object for the code domain adapter boundary."""
 
     status: str
     occurrence: str
     cost: Mapping[str, int]
     result_digest: str = "sha256:" + "0" * 64
     detail: str = ""
+
+    @property
+    def actual_cost(self) -> Mapping[str, int]:
+        """Name used by the kernel outcome projection at the runtime seam."""
+        return self.cost
 
 
 class CodeEffectAdapter:
@@ -38,9 +43,15 @@ class CodeEffectAdapter:
     def healthy(self) -> bool:
         if self._environment is None:
             return False
+        required_method = "observe" if self._call_type == "observe" else "apply"
+        if not callable(getattr(self._environment, required_method, None)):
+            return False
         if hasattr(self._environment, "profile"):
-            profile = self._environment.profile()
-            return bool(getattr(profile, "ok", True))
+            try:
+                profile = self._environment.profile()
+            except Exception:
+                return False
+            return bool(getattr(profile, "ok", False))
         return True
 
     def execute(self, request: Any) -> CodeAdapterOutcome:
@@ -55,6 +66,13 @@ class CodeEffectAdapter:
         if self._call_type == "observe":
             action = self.verb.split(".")[-1]
             args = getattr(request, "args", {}) or {}
+            if not isinstance(args, Mapping):
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="effect args must be an object",
+                )
             obs_req = ObservationRequest(
                 action=action,
                 path=args.get("path"),
@@ -65,9 +83,44 @@ class CodeEffectAdapter:
             occurred = "occurred"
         else:
             args = getattr(request, "args", {}) or {}
-            diff = args.get("diff") or args.get("patch")
-            argv = args.get("argv") or args.get("command")
-            action = "patch" if diff else ("exec" if argv else "write")
+            if not isinstance(args, Mapping):
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="effect args must be an object",
+                )
+            has_diff = "diff" in args or "patch" in args
+            diff = args.get("diff") if "diff" in args else args.get("patch")
+            has_argv = "argv" in args or "command" in args
+            argv = args.get("argv") if "argv" in args else args.get("command")
+            if has_diff and has_argv:
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="effect args cannot contain both patch and command",
+                )
+            if has_diff and not isinstance(diff, str):
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="patch/diff must be a string",
+                )
+            if has_argv and (
+                isinstance(argv, str)
+                or not isinstance(argv, (list, tuple))
+                or not argv
+                or not all(isinstance(item, str) for item in argv)
+            ):
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="command must be a non-empty argv array of strings",
+                )
+            action = "patch" if has_diff else ("exec" if has_argv else "write")
             eff_req = EnvironmentRequest(
                 verb=self.verb,
                 action=action,
@@ -91,7 +144,6 @@ class CodeEffectAdapter:
             )
 
         value = getattr(result, "value", None)
-        digest = getattr(value, "result_digest", None) or getattr(value, "metadata", {}).get("digest") or "sha256:" + "0" * 64
         detail = ""
         if hasattr(value, "content") and value.content is not None:
             detail = str(value.content)
@@ -109,6 +161,21 @@ class CodeEffectAdapter:
         exit_code = getattr(value, "exit_code", None)
         if isinstance(exit_code, int) and not isinstance(exit_code, bool):
             detail = f"[exit {exit_code}] {detail}" if detail else f"[exit {exit_code}]"
+
+        metadata = getattr(value, "metadata", {}) or {}
+        digest = getattr(value, "result_digest", None)
+        if not digest and isinstance(metadata, Mapping):
+            digest = metadata.get("digest")
+        if not digest:
+            if is_dataclass(value):
+                digest_value: Any = asdict(value)
+                if isinstance(digest_value, dict):
+                    digest_value.pop("observed_at", None)
+            elif isinstance(value, Mapping):
+                digest_value = dict(value)
+            else:
+                digest_value = {"detail": detail, "exit_code": exit_code}
+            digest = digest_of({"verb": self.verb, "value": digest_value})
 
         return CodeAdapterOutcome(
             status=status,

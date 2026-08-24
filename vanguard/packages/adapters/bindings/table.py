@@ -16,13 +16,18 @@ from ...ports.event_store import Result
 
 @dataclass(frozen=True, slots=True)
 class TableAdapterOutcome:
-    """Outcome value object for table domain effects compatible with ports/kernel."""
+    """Outcome value object for the table domain adapter boundary."""
 
     status: str
     occurrence: str
     cost: Mapping[str, int]
     result_digest: str = "sha256:" + "0" * 64
     detail: str = ""
+
+    @property
+    def actual_cost(self) -> Mapping[str, int]:
+        """Name used by the kernel outcome projection at the runtime seam."""
+        return self.cost
 
 
 class TableEffectAdapter:
@@ -34,10 +39,20 @@ class TableEffectAdapter:
         self._environment = environment
 
     def healthy(self) -> bool:
-        return self._environment is not None
+        if self._environment is None:
+            return False
+        method = "handle_read" if self.verb == "table.read" else "handle_patch"
+        return callable(getattr(self._environment, method, None))
 
     def execute(self, request: Any) -> TableAdapterOutcome:
         args = getattr(request, "args", {}) or {}
+        if not isinstance(args, Mapping):
+            return TableAdapterOutcome(
+                status="error",
+                occurrence="not_occurred",
+                cost={"usd_micros": 0},
+                detail="effect args must be an object",
+            )
         table_name = args.get("table") or args.get("table_name") or args.get("name")
         if not table_name:
             return TableAdapterOutcome(
@@ -47,7 +62,8 @@ class TableEffectAdapter:
                 detail="table name is required in effect args",
             )
 
-        if not hasattr(self._environment, "handle_read"):
+        required_method = "handle_read" if self.verb == "table.read" else "handle_patch"
+        if not hasattr(self._environment, required_method):
             return TableAdapterOutcome(
                 status="error",
                 occurrence="not_occurred",
@@ -58,7 +74,7 @@ class TableEffectAdapter:
         if self.verb == "table.read":
             filter_key = args.get("filter_key") or args.get("filter_field") or args.get("column")
             filter_val = args.get("filter_val") or args.get("filter_value") or args.get("value")
-            res: Result[dict[str, Any], str] = self._environment.handle_read(
+            res: Result[dict[str, Any]] = self._environment.handle_read(
                 table_name, filter_key=filter_key, filter_val=filter_val
             )
             if not res.ok:
@@ -66,7 +82,7 @@ class TableEffectAdapter:
                     status="error",
                     occurrence="not_occurred",
                     cost={"usd_micros": 0},
-                    detail=res.error or f"failed reading table {table_name}",
+                    detail=(res.error.message if res.error else f"failed reading table {table_name}"),
                 )
             digest = digest_of(res.value)
             return TableAdapterOutcome(
@@ -78,7 +94,15 @@ class TableEffectAdapter:
             )
 
         elif self.verb == "table.patch":
-            record_id = str(args.get("record_id") or args.get("id") or "")
+            raw_record_id = args.get("record_id") or args.get("id")
+            if raw_record_id is None or raw_record_id == "":
+                return TableAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="record id is required in effect args",
+                )
+            record_id = str(raw_record_id)
             updates = args.get("updates") or args.get("patch") or args.get("data") or {}
             if not isinstance(updates, Mapping):
                 return TableAdapterOutcome(
@@ -91,9 +115,9 @@ class TableEffectAdapter:
             if not res.ok:
                 return TableAdapterOutcome(
                     status="error",
-                    occurrence="undeterminable",
+                    occurrence="not_occurred",
                     cost={"usd_micros": 0},
-                    detail=res.error or f"failed patching table {table_name}",
+                    detail=(res.error.message if res.error else f"failed patching table {table_name}"),
                 )
             digest = digest_of(res.value)
             return TableAdapterOutcome(
@@ -121,7 +145,10 @@ class TableBindingProvider:
 
     @property
     def supported_verbs(self) -> tuple[str, ...]:
-        return ("table.read", "table.patch", "table.diff")
+        # The shipped TableWorld pack declares only these two operations. Do
+        # not advertise table.diff until the environment has a frozen diff
+        # contract and implementation.
+        return ("table.read", "table.patch")
 
     def create_adapter(self, verb: str, environment: Any, **kwargs: Any) -> TableEffectAdapter:
         if verb not in self.supported_verbs:

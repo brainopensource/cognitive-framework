@@ -109,6 +109,7 @@ class FoundationEvidence:
     run_id: str
     episode_id: str
     composition_digest: str
+    activation_digest: str
     run_digest: str
     #: Ledger event range this run occupies, as `{first_seq, last_seq, count}`.
     event_range: Mapping[str, Any]
@@ -118,6 +119,7 @@ class FoundationEvidence:
     #: subject from being chosen after the result is known.
     task_digest: str
     oracle: str | None
+    preregistration_digest: str
     rows: tuple[EvidenceRow, ...]
     #: Experiment identity, when this run belongs to one. Never collapsed into
     #: `D_H` or `D_R`.
@@ -128,8 +130,10 @@ class FoundationEvidence:
     def __post_init__(self) -> None:
         if not self.project_id or not self.run_id or not self.episode_id:
             raise FoundationEvidenceError("a bundle binds one project, run, and episode")
-        if not self.composition_digest or not self.run_digest:
-            raise FoundationEvidenceError("a bundle binds D_H and D_R")
+        if not self.composition_digest or not self.activation_digest or not self.run_digest:
+            raise FoundationEvidenceError("a bundle binds D_H, activation, and D_R")
+        if not self.task_digest or not self.preregistration_digest:
+            raise FoundationEvidenceError("a bundle binds task and preregistration digests")
         numbers = [row.number for row in self.rows]
         if sorted(numbers) != list(range(1, REQUIRED_ROW_COUNT + 1)):
             raise FoundationEvidenceError(
@@ -148,12 +152,14 @@ class FoundationEvidence:
             "run_id": self.run_id,
             "episode_id": self.episode_id,
             "composition_digest": self.composition_digest,
+            "activation_digest": self.activation_digest,
             "run_digest": self.run_digest,
             "experiment_digest": self.experiment_digest,
             "event_range": dict(self.event_range),
             "terminal_chain_digest": self.terminal_chain_digest,
             "task_digest": self.task_digest,
             "oracle": self.oracle,
+            "preregistration_digest": self.preregistration_digest,
             "row_source_digests": {
                 str(row.number): row.source_digest for row in self.rows},
         }
@@ -178,6 +184,7 @@ def build_foundation_evidence(
     lineage: Mapping[str, Any],
     task_digest: str,
     oracle: str | None,
+    preregistration_digest: str,
     event_range: Mapping[str, Any],
     terminal_chain_digest: str,
     rows: Sequence[EvidenceRow],
@@ -203,11 +210,13 @@ def build_foundation_evidence(
         run_id=str(lineage.get("run_id", "")),
         episode_id=str(lineage.get("episode_id", "")),
         composition_digest=str(lineage.get("composition_digest", "")),
+        activation_digest=str(lineage.get("activation_digest", "")),
         run_digest=str(lineage.get("run_digest", "")),
         event_range=dict(event_range),
         terminal_chain_digest=terminal_chain_digest,
         task_digest=task_digest,
         oracle=oracle,
+        preregistration_digest=preregistration_digest,
         rows=complete,
         experiment_digest=experiment_digest,
     )

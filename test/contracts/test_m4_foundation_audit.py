@@ -130,15 +130,16 @@ def _audit(rows: Any):
 
 
 class TestM4FoundationEvidenceAudit(unittest.TestCase):
-    def test_complete_valid_nine_rows_pass(self) -> None:
+    def test_legacy_nine_rows_are_non_promotional_without_bundle(self) -> None:
         rows = _valid_nine_rows()
         res = _audit(rows)
-        self.assertTrue(res.passed)
-        self.assertEqual(res.evidence_state, "present_valid")
-        self.assertTrue(res.promotion_eligible)
-        self.assertFalse(res.unattributable_for_promotion)
+        self.assertFalse(res.passed)
+        self.assertEqual(res.evidence_state, "unverifiable")
+        self.assertFalse(res.promotion_eligible)
+        self.assertTrue(res.unattributable_for_promotion)
         self.assertEqual(len(res.verified_rows), REQUIRED_ROW_COUNT)
         self.assertEqual(res.run_id, "run-foundation-001")
+        self.assertIn("canonical_foundation_bundle_required", res.rejection_reasons)
 
     def test_missing_any_row_fails(self) -> None:
         rows = _valid_nine_rows()

@@ -168,10 +168,11 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
         bundle = build_canonical_evidence_bundle()
         result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
-        self.assertTrue(result.passed)
-        self.assertEqual(result.evidence_state, "present_valid")
-        self.assertTrue(result.promotion_eligible)
-        self.assertFalse(result.unattributable_for_promotion)
+        self.assertFalse(result.passed)
+        self.assertEqual(result.evidence_state, "unverifiable")
+        self.assertFalse(result.promotion_eligible)
+        self.assertIn("canonical_foundation_bundle_required", result.rejection_reasons)
+        self.assertTrue(result.unattributable_for_promotion)
         self.assertEqual(len(result.verified_rows), REQUIRED_ROW_COUNT)
         self.assertEqual(result.run_id, "run-foundation-001")
 

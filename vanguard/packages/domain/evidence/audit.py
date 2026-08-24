@@ -66,6 +66,10 @@ def audit_foundation_evidence(
     *,
     expected_run_id: str | None = None,
     signature_verifier: Callable[[Mapping[str, Any], str, bytes], bool] | None = None,
+    expected_lineage: Mapping[str, Any] | None = None,
+    preregistration: Mapping[str, Any] | None = None,
+    artifact_verifiers: Mapping[int, Callable[[Mapping[str, Any]], bool]] | None = None,
+    _canonical_bundle: bool = False,
 ) -> EvidenceAuditResult:
     """Audit the nine required M-4 foundation evidence rows.
 
@@ -82,6 +86,7 @@ def audit_foundation_evidence(
     """
     reasons: list[str] = []
     verified_rows: list[int] = []
+    unavailable_verifier = False
 
     # Normalise row mapping from sequence or dictionary
     rows_by_idx: dict[int, Mapping[str, Any]] = {}
@@ -111,9 +116,107 @@ def audit_foundation_evidence(
                         break
     elif isinstance(evidence, Mapping):
         if "rows" in evidence and isinstance(evidence["rows"], (list, tuple, Mapping)):
-            return audit_foundation_evidence(
-                evidence["rows"], expected_run_id=expected_run_id or evidence.get("run_id"),
+            header = evidence.get("header")
+            canonical_envelope = (
+                evidence.get("api") == "mhf.foundation-evidence/1"
+                and isinstance(header, Mapping)
+                and isinstance(evidence.get("bundle_digest"), str)
+            )
+            result = audit_foundation_evidence(
+                evidence["rows"],
+                expected_run_id=expected_run_id or evidence.get("run_id")
+                or (header.get("run_id") if isinstance(header, Mapping) else None),
                 signature_verifier=signature_verifier,
+                expected_lineage=header if isinstance(header, Mapping) else expected_lineage,
+                preregistration=preregistration,
+                artifact_verifiers=artifact_verifiers,
+                _canonical_bundle=canonical_envelope,
+            )
+            outer_reasons: list[str] = []
+            preregistration_unavailable = False
+            if isinstance(header, Mapping):
+                row_digests = header.get("row_source_digests")
+                if not isinstance(row_digests, Mapping):
+                    outer_reasons.append("bundle_header: missing_row_source_digests")
+                else:
+                    for item in evidence["rows"]:
+                        if isinstance(item, Mapping):
+                            number = item.get("number", item.get("row"))
+                            if row_digests.get(str(number)) != item.get("source_digest", ""):
+                                outer_reasons.append(
+                                    f"row_{number}: header_source_digest_mismatch")
+                claimed_bundle_digest = evidence.get("bundle_digest")
+                recomputed_bundle_digest = digest_of({
+                    "api": evidence.get("api"),
+                    "header": dict(header),
+                    "rows": list(evidence["rows"]),
+                })
+                if claimed_bundle_digest != recomputed_bundle_digest:
+                    outer_reasons.append("bundle_digest_mismatch")
+                if preregistration is None:
+                    preregistration_unavailable = True
+                else:
+                    claimed_prereg = preregistration.get("preregistration_digest")
+                    identity = {
+                        key: value for key, value in preregistration.items()
+                        if key != "preregistration_digest"
+                    }
+                    if (claimed_prereg != digest_of(identity)
+                            or claimed_prereg != header.get("preregistration_digest")):
+                        outer_reasons.append("preregistration_digest_mismatch")
+                    row5 = next((item for item in evidence["rows"]
+                                 if isinstance(item, Mapping)
+                                 and item.get("number", item.get("row")) == 5), None)
+                    source5 = row5.get("source") if isinstance(row5, Mapping) else None
+                    if isinstance(source5, Mapping) and source5:
+                        if source5.get("signer_key_id") != preregistration.get("evaluator_key_id"):
+                            outer_reasons.append("row_5: signer_key_not_preregistered")
+                        if source5.get("public_key") != preregistration.get("evaluator_public_key"):
+                            outer_reasons.append("row_5: public_key_not_preregistered")
+                        if source5.get("oracle_binding") != preregistration.get("oracle_id"):
+                            outer_reasons.append("row_5: oracle_not_preregistered")
+                        signed_body = source5.get("signed_body")
+                        trust_bindings = {
+                            "task_digest": "task_digest",
+                            "oracle_digest": "oracle_digest",
+                            "protocol": "protocol",
+                            "subject_digest": "subject_digest",
+                            "preregistration_digest": "preregistration_digest",
+                        }
+                        if not isinstance(signed_body, Mapping):
+                            outer_reasons.append("row_5: signed_body_missing_trust_bindings")
+                        else:
+                            for body_key, prereg_key in trust_bindings.items():
+                                if signed_body.get(body_key) != preregistration.get(prereg_key):
+                                    outer_reasons.append(
+                                        f"row_5: signed_{body_key}_not_preregistered")
+                row6 = next((item for item in evidence["rows"]
+                             if isinstance(item, Mapping)
+                             and item.get("number", item.get("row")) == 6), None)
+                source6 = row6.get("source") if isinstance(row6, Mapping) else None
+                if isinstance(source6, Mapping) and source6:
+                    if source6.get("event_range") != header.get("event_range"):
+                        outer_reasons.append("row_6: header_event_range_mismatch")
+                    if source6.get("chain_digest") != header.get("terminal_chain_digest"):
+                        outer_reasons.append("row_6: header_terminal_chain_mismatch")
+            if not outer_reasons:
+                if not preregistration_unavailable:
+                    return result
+                return EvidenceAuditResult(
+                    passed=False, evidence_state="unverifiable",
+                    promotion_eligible=False, unattributable_for_promotion=True,
+                    run_id=result.run_id, verified_rows=result.verified_rows,
+                    rejection_reasons=result.rejection_reasons
+                    + ("bundle_header: preregistration_verifier_unavailable",),
+                )
+            return EvidenceAuditResult(
+                passed=False,
+                evidence_state="invalid",
+                promotion_eligible=False,
+                unattributable_for_promotion=True,
+                run_id=result.run_id,
+                verified_rows=result.verified_rows,
+                rejection_reasons=result.rejection_reasons + tuple(outer_reasons),
             )
         for num, name in REQUIRED_ROW_NAMES.items():
             if str(num) in evidence and isinstance(evidence[str(num)], Mapping):
@@ -123,9 +226,19 @@ def audit_foundation_evidence(
             elif name in evidence and isinstance(evidence[name], Mapping):
                 rows_by_idx[num] = evidence[name]
 
+    declared_absent: set[int] = set()
+
     # Every accepted row is a source-bound derivation. Legacy flat rows are
     # assertions and cannot become promotion evidence.
     for num, row in tuple(rows_by_idx.items()):
+        if row.get("status") == "absent":
+            absence_reason = row.get("absence_reason")
+            if (isinstance(absence_reason, str) and absence_reason.strip()
+                    and not row.get("source") and not row.get("observation")):
+                declared_absent.add(num)
+            else:
+                reasons.append(f"row_{num}: invalid_absence_declaration")
+            continue
         source = row.get("source")
         observation = row.get("observation")
         source_digest = row.get("source_digest")
@@ -134,6 +247,15 @@ def audit_foundation_evidence(
             continue
         if not isinstance(observation, Mapping):
             reasons.append(f"row_{num}: missing_derived_observation")
+            continue
+        # An exterior verdict can be structurally available while its trust
+        # root is not installed in this audit environment.  That is distinct
+        # from absence and from a failed verification.
+        if num == 5 and signature_verifier is None and (
+            source.get("signature") or observation.get("signature")
+        ):
+            unavailable_verifier = True
+            rows_by_idx[num] = observation
             continue
         recomputed = digest_of(dict(source))
         if source_digest != recomputed:
@@ -144,12 +266,25 @@ def audit_foundation_evidence(
             continue
         rows_by_idx[num] = observation
 
+    for num in declared_absent:
+        rows_by_idx.pop(num, None)
+
     # 1. Row count completeness
-    missing_rows = [num for num in range(1, REQUIRED_ROW_COUNT + 1) if num not in rows_by_idx]
+    missing_rows = [num for num in range(1, REQUIRED_ROW_COUNT + 1)
+                    if num not in rows_by_idx and num not in declared_absent]
     if missing_rows:
         reasons.append(f"missing_required_evidence_rows: {missing_rows}")
     if duplicate_rows:
         reasons.append(f"duplicate_evidence_rows: {sorted(duplicate_rows)}")
+
+    if len(declared_absent) == REQUIRED_ROW_COUNT and not reasons:
+        return EvidenceAuditResult(
+            passed=False,
+            evidence_state="absent",
+            promotion_eligible=False,
+            unattributable_for_promotion=True,
+            run_id=None,
+        )
 
     # 2. Check run_id continuity and lineage
     run_ids: set[str] = set()
@@ -172,6 +307,63 @@ def audit_foundation_evidence(
         reasons.append("no_valid_run_id_found")
 
     active_run_id = next(iter(run_ids)) if len(run_ids) == 1 else None
+
+    if expected_lineage is not None:
+        lineage_keys = (
+            "project_id", "run_id", "episode_id", "composition_digest",
+            "activation_digest", "run_digest", "preregistration_digest",
+        )
+        for key in lineage_keys:
+            expected = expected_lineage.get(key)
+            if not isinstance(expected, str) or not expected.strip():
+                reasons.append(f"bundle_header: missing_or_empty_{key}")
+                continue
+            for num, row in rows_by_idx.items():
+                actual = row.get(key)
+                if actual != expected:
+                    reasons.append(f"row_{num}: {key}_lineage_mismatch")
+        required_source_bindings: Mapping[int, tuple[str, ...]] = {
+            1: ("invocation_id",),
+            2: ("effect_started_digest", "settlement_digest"),
+            3: ("receipt_digest",),
+            4: ("containment_digest",),
+            6: ("store_path_digest",),
+            7: ("reconstruction_digest",),
+            8: ("trajectory_digest",),
+            9: ("trace_digest",),
+        }
+        for num, keys in required_source_bindings.items():
+            row = rows_by_idx.get(num)
+            if row is None:
+                continue
+            for key in keys:
+                if not isinstance(row.get(key), str) or not row[key].strip():
+                    reasons.append(f"row_{num}: missing_canonical_{key}")
+
+        row5 = rows_by_idx.get(5)
+        if row5 is not None and not unavailable_verifier:
+            body = row5.get("signed_body")
+            if isinstance(body, Mapping):
+                for key in lineage_keys:
+                    if body.get(key) != expected_lineage.get(key):
+                        reasons.append(f"row_5: signed_{key}_lineage_mismatch")
+
+        # These observations depend on authority outside this pure domain
+        # module.  A canonical bundle cannot promote by submitting booleans;
+        # its consumer must supply the verifier for the named source artifact.
+        for num in (2, 3, 4, 7):
+            row = rows_by_idx.get(num)
+            if row is None:
+                continue
+            verifier = (artifact_verifiers or {}).get(num)
+            if verifier is None:
+                unavailable_verifier = True
+                continue
+            try:
+                if not verifier(row):
+                    reasons.append(f"row_{num}: authoritative_source_verification_failed")
+            except Exception:
+                unavailable_verifier = True
 
     # Check for forbidden stitching / manual repair markers across all rows
     for num, row in rows_by_idx.items():
@@ -225,7 +417,7 @@ def audit_foundation_evidence(
         receipt = r3.get("patch_receipt") or r3.get("receipt")
         if not before or not after:
             reasons.append("row_3: missing_before_after_artifact_digests")
-        elif before == after and not r3.get("mutated"):
+        elif before == after:
             reasons.append("row_3: unmutated_filesystem_state")
         elif not receipt:
             reasons.append("row_3: missing_patch_receipt")
@@ -251,7 +443,7 @@ def audit_foundation_evidence(
 
     # Row 5: Exterior signed evaluation
     r5 = rows_by_idx.get(5)
-    if r5:
+    if r5 and not unavailable_verifier:
         signature = r5.get("signature") or (r5.get("signed_verdict", {}).get("signature") if isinstance(r5.get("signed_verdict"), Mapping) else None)
         verdict = r5.get("verdict") or (r5.get("signed_verdict", {}).get("verdict") if isinstance(r5.get("signed_verdict"), Mapping) else None)
         if not signature or not isinstance(signature, str):
@@ -340,7 +532,7 @@ def audit_foundation_evidence(
     r9 = rows_by_idx.get(9)
     if r9:
         layer0_present = r9.get("layer0_used") is True or r9.get("layer0_imported") is True
-        runtime_path = str(r9.get("runtime_path", "vanguard.packages.runtime"))
+        runtime_path = str(r9.get("runtime_path", ""))
         if layer0_present:
             reasons.append("row_9: layer0_runtime_authority_breached")
         elif "vanguard.packages.runtime" not in runtime_path:
@@ -356,7 +548,21 @@ def audit_foundation_evidence(
             verified_rows.append(9)
 
     passed = len(verified_rows) == REQUIRED_ROW_COUNT and not reasons
-    evidence_state = "present_valid" if passed else "forged_or_broken" if reasons else "absent_declared"
+    if passed and not _canonical_bundle:
+        return EvidenceAuditResult(
+            passed=False, evidence_state="unverifiable",
+            promotion_eligible=False, unattributable_for_promotion=True,
+            run_id=active_run_id, verified_rows=tuple(sorted(verified_rows)),
+            rejection_reasons=("canonical_foundation_bundle_required",),
+        )
+    if passed:
+        evidence_state = "present_valid"
+    elif unavailable_verifier and not reasons:
+        evidence_state = "unverifiable"
+    elif declared_absent and not reasons:
+        evidence_state = "absent"
+    else:
+        evidence_state = "invalid"
 
     return EvidenceAuditResult(
         passed=passed,

@@ -140,6 +140,8 @@ class RunResult:
     #: `S9-A-04`. The ledger reduction Lane C's paired runner pairs on.
     state_digest: str = ""
     trajectory: Mapping[str, Any] | None = None
+    run_digest: str = ""
+    activation_digest: str = ""
 
     #: Digests a benchmarked run must carry to be replayable (Phase 4 `V5-A`).
     #: `ClassVar` -- a constant, not a field.

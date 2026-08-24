@@ -264,16 +264,7 @@ class IdentityAndCeilings(unittest.TestCase):
         identity = dict(first.frozen.identity)
         identity["systemPrompt"] = identity.get("systemPrompt", "") + "\n# changed"
         from vanguard.packages.domain.canonicalisation.digest import digest_of
-        changed = digest_of({
-            "harness": first.frozen.harness,
-            "components": first.frozen.components,
-            "capabilities": tuple(
-                (i.verb, i.sink, i.selector, i.risk) for i in first.frozen.capabilities),
-            "evaluators": first.frozen.evaluators,
-            "budgetPolicy": first.frozen.budget_policy,
-            "graphDigest": first.frozen.graph_digest,
-            **identity,
-        })
+        changed = digest_of({**first.frozen.identity_preimage(), **identity})
         self.assertNotEqual(first.composition_digest, changed)
 
     def test_declared_ceiling_survives_compilation_and_denies(self) -> None:

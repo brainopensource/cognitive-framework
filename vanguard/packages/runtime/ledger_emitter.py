@@ -191,6 +191,7 @@ class LedgerEmitter:
             payload=body,
             alertable=alertable,
         )
+        self._remember(event)
         return self._write(
             event,
             role="emitted",

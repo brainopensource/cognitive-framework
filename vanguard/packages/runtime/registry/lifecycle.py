@@ -52,7 +52,8 @@ class PluginLifecycle:
             raise ValueError("manifest_digest is required")
         self.plugin_id = plugin_id
         self.state = PluginState.DISCOVERED
-        self._emitter = emitter
+        registry_scope = getattr(emitter, "registry", None)
+        self._emitter = registry_scope() if callable(registry_scope) else emitter
         self._run_id = run_id
         self._principal = principal
         self._manifest_digest = manifest_digest
@@ -100,5 +101,4 @@ class PluginLifecycle:
             payload["manifest_digest"] = self._manifest_digest
         self._emitter.emit_kind(
             _EVENTS[state], run_id=self._run_id, principal=self._principal, payload=payload,
-            writer="registry",
         )

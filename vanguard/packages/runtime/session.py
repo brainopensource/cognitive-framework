@@ -198,6 +198,7 @@ class HarnessSession:
         task: TaskContext,
         *,
         on_terminal: Callable[["HarnessSession"], Any] | None = None,
+        run_plan: Any = None,
     ) -> None:
         self.harness = harness
         self.ports = ports
@@ -209,6 +210,8 @@ class HarnessSession:
         # in-process `_evaluate()` RPC; a caller that supplies a callback
         # replaces the evaluation *authority* wholesale, not just its result.
         self._on_terminal = on_terminal
+        self.run_plan = run_plan
+        self._episode_begun_here = False
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -355,6 +358,27 @@ class HarnessSession:
 
     # -- the lifecycle ----------------------------------------------------
 
+    def begin_episode(self) -> None:
+        """Durably open a new episode before registry activation begins."""
+        if self.ledger_state().episode.status != "pending":
+            return
+        self.ledger.emit(Event(
+            kind="EpisodeStarted",
+            reason="composed",
+            at=self.ports.clock.now(),
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            payload={
+                "episodeId": self.task.episode_id,
+                "harness": self.harness.harness,
+                "compositionDigest": self.harness.composition_digest,
+                "activationDigest": getattr(self.run_plan, "activation_digest", ""),
+                "runDigest": getattr(self.run_plan, "run_digest", ""),
+                "taskDigest": getattr(self.run_plan, "task_digest", ""),
+            },
+        ))
+        self._episode_begun_here = True
+
     def run(self) -> RunResult:
         """Run the episode, resolve approvals, evaluate from outside."""
         harness, task, ports = self.harness, self.task, self.ports
@@ -370,19 +394,10 @@ class HarnessSession:
         # `episode_id`, and the guard must survive that reconstruction too,
         # or resume would double-append the beginning of the run.
         prior_state = self.ledger_state()
-        if prior_state.episode.status == "pending":
-            self.ledger.emit(Event(
-                kind="EpisodeStarted",
-                reason="composed",
-                at=ports.clock.now(),
-                run_id=task.run_id,
-                principal=task.principal,
-                payload={
-                    "episodeId": task.episode_id,
-                    "harness": harness.harness,
-                    "compositionDigest": harness.composition_digest,
-                },
-            ))
+        if self._episode_begun_here:
+            pass
+        elif prior_state.episode.status == "pending":
+            self.begin_episode()
         else:
             scanner = RecoveryScanner(controller_principal=task.principal)
             scanner.reconcile_open_intents(ports.store, occurred_at=ports.clock.now())
@@ -502,6 +517,7 @@ class HarnessSession:
             state_digest=final_state_digest,
             model=self.ports.model,
             environment=self.ports.environment,
+            run_plan=self.run_plan,
         )
         delayed.flush(trajectory)
         if isinstance(trajectory, dict):
@@ -521,6 +537,8 @@ class HarnessSession:
             instrument_error=self._instrument_error(),
             state_digest=self.state_digest(),
             trajectory=trajectory,
+            run_digest=getattr(self.run_plan, "run_digest", ""),
+            activation_digest=getattr(self.run_plan, "activation_digest", ""),
         )
 
     # -- what the instrument reads ----------------------------------------
@@ -695,4 +713,3 @@ def _resolve(flow: ApprovalFlow,
     if not isinstance(answer, ApprovalDecision) or not can_verify:
         return None
     return flow.verify(challenge, answer, request, now=clock.now())
-

@@ -731,6 +731,10 @@ class FrozenComposition:
     composition_digest: str = field(init=False)
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "composition_digest", digest_of(self.identity_preimage()))
+
+    def identity_preimage(self) -> Mapping[str, Any]:
+        """Return the JSON-shaped facts whose JCS digest is ``D_H``."""
         preimage = dict(self.manifest.identity_preimage())
         preimage["resolved"] = [
             {"name": name, "implementation": implementation, "config": config}
@@ -738,7 +742,7 @@ class FrozenComposition:
         ]
         preimage["budget"] = dict(self.budget)
         preimage.update(dict(self.identity))
-        object.__setattr__(self, "composition_digest", digest_of(preimage))
+        return preimage
 
     # -- the facts callers read -------------------------------------------
     #

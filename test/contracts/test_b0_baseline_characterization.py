@@ -59,10 +59,8 @@ class B0BaselineCharacterizationTests(unittest.TestCase):
         self.assertIn("fs.read", {c.verb for c in pack.manifest.capabilities})
         self.assertIn("proc.exec", {c.verb for c in pack.manifest.capabilities})
 
-    def test_b0_02_table_pack_cannot_be_wired_by_default_bindings(self) -> None:
-        """B0.2: Diagnosed Gap - vg-table-default requires table.read/table.patch,
-        which are not present in global DEFAULT_BINDINGS.
-        """
+    def test_b0_02_table_pack_uses_its_namespaced_provider(self) -> None:
+        """B0.2/B1: the diagnosed global-binding gap is now closed by a provider."""
         pack = self.loader.load_pack("vg-table-default")
         table_verbs = {c.verb for c in pack.manifest.capabilities}
         self.assertEqual(table_verbs, {"table.read", "table.patch"})
@@ -71,10 +69,8 @@ class B0BaselineCharacterizationTests(unittest.TestCase):
         for verb in table_verbs:
             self.assertNotIn(verb, DEFAULT_BINDINGS)
 
-        # Calling Runtime.compose with default bindings fails as diagnosed in ADR-0088
-        with self.assertRaises(CompositionError) as ctx:
-            Runtime.compose("vg-table-default")
-        self.assertIn("no adapter bound for ['table.patch', 'table.read']", str(ctx.exception))
+        composed = Runtime.compose("vg-table-default")
+        self.assertEqual(set(composed.bindings), table_verbs)
 
     def test_b0_03_named_manifest_v2_parser_and_compiler_exist_as_side_path(self) -> None:
         """B0.3: mhf.manifest/2 parser and compiler function correctly when invoked directly."""

@@ -46,6 +46,9 @@ class EvidenceRow:
     absence_reason: str = ""
     #: The derived observation itself, already read off the source.
     observation: Mapping[str, Any] = field(default_factory=dict)
+    #: Canonical artifact from which the observation was derived. The digest
+    #: is recomputed here; callers cannot attest their own source digest.
+    source: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.number not in REQUIRED_ROW_NAMES:
@@ -56,10 +59,15 @@ class EvidenceRow:
         if self.status not in {"derived", "absent"}:
             raise FoundationEvidenceError(
                 f"row {self.number} status must be derived or absent, not {self.status!r}")
-        if self.status == "derived" and not self.source_digest:
-            raise FoundationEvidenceError(
-                f"row {self.number} claims derivation with no source digest; a claim "
-                "without a source is an assertion")
+        if self.status == "derived":
+            if not self.source:
+                raise FoundationEvidenceError(
+                    f"row {self.number} claims derivation with no source artifact")
+            recomputed = digest_of(dict(self.source))
+            if self.source_digest and self.source_digest != recomputed:
+                raise FoundationEvidenceError(
+                    f"row {self.number} source digest does not match its artifact")
+            object.__setattr__(self, "source_digest", recomputed)
         if self.status == "absent" and not self.absence_reason:
             raise FoundationEvidenceError(
                 f"row {self.number} is absent with no reason; silent absence is "
@@ -77,6 +85,7 @@ class EvidenceRow:
             "source_digest": self.source_digest,
             "absence_reason": self.absence_reason,
             "observation": dict(self.observation),
+            "source": dict(self.source),
         }
 
 
@@ -86,10 +95,10 @@ def absent(number: int, reason: str) -> EvidenceRow:
                        absence_reason=reason)
 
 
-def derived(number: int, source_digest: str, observation: Mapping[str, Any]) -> EvidenceRow:
+def derived(number: int, source: Mapping[str, Any], observation: Mapping[str, Any]) -> EvidenceRow:
     """A row computed from a named canonical artifact."""
-    return EvidenceRow(number, REQUIRED_ROW_NAMES[number], source_digest=source_digest,
-                       status="derived", observation=dict(observation))
+    return EvidenceRow(number, REQUIRED_ROW_NAMES[number], status="derived",
+                       observation=dict(observation), source=dict(source))
 
 
 @dataclass(frozen=True, slots=True)

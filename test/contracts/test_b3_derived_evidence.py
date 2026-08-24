@@ -101,11 +101,13 @@ def build_canonical_evidence_bundle(
         {
             "row": 6,
             "run_id": run_id,
-            "event_count": 42,
-            "hash_chain_valid": True,
+            "event_count": 2,
             "event_range": {"first": 0, "last": 41},
-            "chain_digest": "sha256:wal_chain_001",
-            "durable_intent_present": True,
+            "chain_digest": "sha256:event_2",
+            "events": [
+                {"kind": "EffectStarted", "prev_digest": None, "digest": "sha256:event_1"},
+                {"kind": "EffectCompleted", "prev_digest": "sha256:event_1", "digest": "sha256:event_2"},
+            ],
             "wal_mode": wal_mode,
         },
         # Row 7: Fresh-process reconstruction report bound to same chain
@@ -122,12 +124,13 @@ def build_canonical_evidence_bundle(
             "row": 8,
             "run_id": run_id,
             "schema": "mhf.trajectory/1",
-            "cost_conserved": True,
             "harness_digest": d_h,
             "state_digest": "sha256:state_001",
             "execution_digest": d_r,
             "turns_count": 3,
             "receipts": ["sha256:receipt_001"],
+            "turn_costs": [{"usd_micros": 1, "tokens": 2, "bytes": 3, "millis": 4}],
+            "total_cost": {"usd_micros": 1, "tokens": 2, "bytes": 3, "millis": 4},
         },
         # Row 9: Runtime authority trace proving canonical path
         {
@@ -135,8 +138,11 @@ def build_canonical_evidence_bundle(
             "run_id": run_id,
             "runtime_path": "vanguard.packages.runtime.session",
             "layer0_used": layer0_used,
-            "canonical_trace_verified": True,
-            "alternate_runtime_detected": False,
+            "files": ["runtime/root.py"],
+            "violations": [],
+            "trace_digest": digest_of({"files": ["runtime/root.py"],
+                                       "public_boundary": "vanguard.packages.runtime.session",
+                                       "violations": []}),
         },
     ]
 

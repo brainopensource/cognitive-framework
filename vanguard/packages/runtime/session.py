@@ -24,6 +24,8 @@ from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel import (
     EffectRequest,
+    AdapterOutcome,
+    DispatchResult,
     Event,
     FailurePath,
     GrantIssuer,
@@ -31,6 +33,7 @@ from ..kernel import (
     HeldAuthority,
     Kernel,
     Mode,
+    Occurrence,
     StandardClassifier,
     StandardPolicy,
     Span,
@@ -352,6 +355,23 @@ class HarnessSession:
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
+        if request.idempotency_key:
+            settled = RecoveryScanner.settled_effect(
+                self.ports.store, request.idempotency_key
+            )
+            if settled is not None:
+                result = DispatchResult(
+                    FailurePath.OK,
+                    str(settled.payload.get("descriptorDigest") or ""),
+                    AdapterOutcome(
+                        status="ok", occurrence=Occurrence.OCCURRED,
+                        result_digest=settled.payload.get("resultDigest"),
+                        detail="reused durable settled effect; physical execution skipped",
+                    ),
+                    detail="reused durable settled effect; physical execution skipped",
+                )
+                self.calls.append((request, result))
+                return result
         result = self.kernel.dispatch(request, **kwargs)
         self.calls.append((request, result))
         return result

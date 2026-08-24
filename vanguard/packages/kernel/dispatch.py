@@ -390,7 +390,8 @@ class Kernel:
               reason: str, payload: Mapping[str, Any], *, alertable: bool = False) -> None:
         event = Event(kind=kind, reason=reason, at=self._clock.now(),
                       run_id=request.run_id, principal=request.principal,
-                      payload=dict(payload), alertable=alertable)
+                      payload={**dict(payload), **({"idempotencyKey": request.idempotency_key}
+                              if request.idempotency_key else {})}, alertable=alertable)
         emitted.append(event)
         self._publish(event)
 

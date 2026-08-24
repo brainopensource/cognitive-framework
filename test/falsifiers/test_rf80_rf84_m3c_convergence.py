@@ -14,11 +14,13 @@ from unittest.mock import patch
 from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.domain.evidence.foundation import FoundationEvidenceError, EvidenceRow
+from vanguard.packages.domain.ledger.reducer import compute_state_digest, reconstruct_state
 from vanguard.packages.runtime.compose import Runtime as CompositionRuntime
 from vanguard.packages.runtime.root import Runtime, TaskContext
 from vanguard.packages.runtime import lab_driver
 from vanguard.packages.runtime.authority_audit import audit_runtime_authority
 from vanguard.packages.runtime.wiring import DEFAULT_BINDINGS
+from vanguard.packages.ports.event_store import EventRange
 
 
 class M3CConvergenceFalsifiers(unittest.TestCase):
@@ -109,17 +111,30 @@ os._exit(23)
             reader = """
 import json,sys
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.domain.ledger.reducer import compute_state_digest,reconstruct_state
 from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.runtime.ledger.recovery import RecoveryScanner
 s=SqliteEventStore(sys.argv[1]); xs=list(s.read(EventRange(project_id='hard-project')).value)
 settled={e.payload.get('idempotency_key') for e in xs if e.payload.get('kind')=='EffectCompleted'}
-print(json.dumps({'count':len(xs),'should_reexecute':'settled-key' not in settled,'chain':xs[1].prev_digest==xs[0].digest()}))
+marker=sys.argv[2]
+def physical():
+    open(marker,'w').write('executed')
+    return 'executed'
+reused,_=RecoveryScanner.continue_idempotent_effect(s,'settled-key',physical)
+print(json.dumps({'count':len(xs),'reused':reused,'physical_executed':__import__('os').path.exists(marker),'chain':xs[1].prev_digest==xs[0].digest(),'state_digest':compute_state_digest(reconstruct_state(xs))}))
 """
+            marker = Path(directory) / "physical-effect.marker"
             recovered = subprocess.run(
-                [sys.executable, "-c", reader, str(db)], check=True,
+                [sys.executable, "-c", reader, str(db), str(marker)], check=True,
                 text=True, capture_output=True,
             )
             report = json.loads(recovered.stdout)
-            self.assertEqual(report, {"count": 2, "should_reexecute": False, "chain": True})
+            local_store = SqliteEventStore(db)
+            local_events = list(local_store.read(EventRange(project_id="hard-project")).value)
+            expected_state = compute_state_digest(reconstruct_state(local_events))
+            self.assertEqual(report, {"count": 2, "reused": True,
+                                      "physical_executed": False,
+                                      "chain": True, "state_digest": expected_state})
 
     def test_rf84_public_runtime_contains_one_compose_activate_session_trace(self) -> None:
         public_source = inspect.getsource(Runtime.execute_harness)

@@ -201,33 +201,32 @@ concurrency before M-7, M-3C closure, M-4 opening, or release versions after M-4
 ## 8. Integration Review — 2026-08-24
 
 **Owner:** Tech Lead (integration); independent G4 reviewer required before Director decision.
-**Subject baseline:** `a26b3bb`; retained M-3C commits `5872608`, `3cf6877`, `c4fa5fc`,
-`a26b3bb`. The corrective integration patch is still uncommitted and is not release evidence.
+**Subject baseline:** `db5d733`; retained M-3C commits `5872608`, `3cf6877`, `c4fa5fc`,
+`a26b3bb`, `324b1c9`, and `db5d733`. The final G3/G4 corrective patch is still uncommitted and is
+not release evidence.
 
 | Gate | State | Evidence and remaining blocker |
 |---|---|---|
-| **G2 / RF-80–RF-81** | **TECHNICALLY GREEN; REVIEW PENDING** | Public execution now enters the runtime-owned `run_composed` boundary, emits registry-owned lifecycle events on the episode lineage, and retires in reverse order. Code and table packs resolve through namespaced providers. `test/falsifiers` and `test/contracts` cover the public path. |
-| **G3 / RF-82** | **TECHNICALLY GREEN; REVIEW PENDING** | Release mode refuses `:memory:` and requires an explicit file-backed `SqliteEventStore`; WAL and cold-continuation fixtures pass. |
-| **G3 / RF-83** | **BLOCKED — REAL REGRESSION/CONTRACT GAP** | `domain/evidence/foundation.py` enforces derived-or-absent rows, but `domain/evidence/audit.py` still accepts caller-supplied booleans such as `signature_verified`, `cost_conserved`, and `canonical_trace_verified`. `RunPlan`/`D_R` is not yet bound into events, trajectory, `RunResult`, or the foundation bundle. The synthetic B3 fixture therefore does not prove source derivation, cross-digests, or authoritative Ed25519 verification. |
-| **G4 / RF-84** | **BLOCKED BY G3 AND INDEPENDENT REVIEW FINDINGS** | The direct `lab_driver -> HarnessSession.run()` bypass was found and migrated to `Runtime.run_composed`, but RF-84 remains a structural source assertion rather than an import/runtime trace. The retained public exports in `runtime/registry/compiler.py` still require an ingress-only enforcement decision, and teardown persistence failures are currently swallowed. Only the Engineering Director may close M-3C or open M-4. |
+| **G2 / RF-80–RF-81** | **TECHNICALLY GREEN; INDEPENDENTLY REVIEWED** | Public execution enters the runtime-owned `run_composed` boundary, emits registry-owned lifecycle events on the episode lineage, and retires in reverse order. Code and table packs resolve through namespaced providers. |
+| **G3 / RF-82** | **TECHNICALLY GREEN; INDEPENDENTLY REVIEWED** | Release mode requires effective file-backed SQLite-WAL. A hard-death fixture exits with `os._exit`, reconstructs state in a fresh process, verifies chain continuity, and invokes the recovery continuation boundary to prove the settled physical effect is not repeated. |
+| **G3 / RF-83** | **TECHNICALLY GREEN; INDEPENDENTLY REVIEWED** | `D_R` is bound through `EpisodeStarted`, WAL, `RunResult`, `mhf.trajectory/1`, and `FoundationEvidence`. Derived rows carry their canonical source, source digests are recomputed, flat/asserted rows deny, Ed25519 verification is verifier-driven, and WAL/cost/authority observations are recomputed rather than trusted as booleans. Unsupported rows remain explicitly absent. |
+| **G4 / RF-84** | **TECHNICALLY GREEN; DIRECTOR DECISION REQUIRED** | Executable AST caller/import audit plus a negative competing-authority fixture prove the production path converges on `Runtime.run_composed`; the lab driver bypass was retired, the legacy compiler is no longer package-exported, and lifecycle cleanup persistence failures propagate. Only the Engineering Director may mark M-3C closed or open M-4. |
 
 Verification on 2026-08-24:
 
-- outside the restricted executor sandbox: `test/falsifiers` 48/48, `test/contracts` 199/199,
+- outside the restricted executor sandbox: `test/falsifiers` 50/50, `test/contracts` 199/199,
   and `test/registry` 27/27 passed;
 - `test/runtime` passed 416 tests with 7 skips and 3 environment failures. All three require a
   reachable Ollama daemon to distinguish an absent tag and reported the truthful cause
   `provider_unreachable`; they are not M-3C code regressions;
 - inside the restricted executor sandbox, UDS, loopback, and Bubblewrap probes additionally fail
   with `EPERM`; rerunning outside that sandbox removes those failures;
-- boundaries, TCB (`1365 <= 1438`), secrets, domain blindness, isolation policy, duplication,
+- boundaries, TCB (`1366 <= 1438`), secrets, domain blindness, isolation policy, duplication,
   falsifier IDs, Markdown links, and stale-path linters passed.
 
-Independent review completed on 2026-08-24 with the recommendation **do not certify G4** until
-RF-82/RF-83 prove the full fresh-process/source-derived contract, `D_R` is operationally consumed,
-RF-84 becomes a real trace/import audit, and cleanup persistence cannot fail silently. A stale W14
-assertion found by the reviewer was corrected after migrating the lab driver; it was a test regression,
-not an environmental failure.
+Independent review first rejected G4 and identified the missing operational joins. After correction,
+the same independent reviewer reran 29 focused tests plus `test_composition_root` and reported no
+remaining technical G3/G4 blocker. This is technical closure evidence, not Director authorization.
 
 **M-4 remains frozen.** Permitted preparation remains limited to provisioning a real provider,
 exterior Ed25519 evaluator identity, clean rootless Linux/Bubblewrap, file-backed SQLite-WAL, and a

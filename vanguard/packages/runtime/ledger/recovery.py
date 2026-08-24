@@ -283,3 +283,33 @@ class RecoveryScanner:
             )
             reconciled.append(out)
         return reconciled
+
+    @staticmethod
+    def settled_effect(store: EventStorePort, idempotency_key: str) -> EventEnvelope | None:
+        """Return the durable terminal receipt for a key, if one already exists."""
+        read = store.read(EventRange())
+        if not read.ok or not read.value:
+            return None
+        for event in reversed(list(read.value)):
+            kind = event.payload.get("kind") or event.mhf_kind
+            key = (event.payload.get("idempotencyKey")
+                   or event.payload.get("idempotency_key") or event.idempotency_key)
+            if key == idempotency_key and kind in {
+                "EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled",
+            }:
+                return event
+        return None
+
+    @classmethod
+    def continue_idempotent_effect(
+        cls, store: EventStorePort, idempotency_key: str, execute: Any,
+    ) -> tuple[bool, Any]:
+        """Reuse a durable terminal receipt or execute exactly once if unsettled.
+
+        The boolean is ``True`` when recovery reused persistence and therefore
+        did not invoke the physical effector.
+        """
+        settled = cls.settled_effect(store, idempotency_key)
+        if settled is not None:
+            return True, settled
+        return False, execute()

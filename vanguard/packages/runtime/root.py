@@ -132,7 +132,7 @@ class Runtime(_ComposedRuntime):
         selected_store = ports.store
         if release and (
             not isinstance(selected_store, SqliteEventStore)
-            or selected_store.db_path == ":memory:"
+            or not selected_store.durable
         ):
             raise ValueError(
                 "release execution requires an explicit file-backed SQLite-WAL store"
@@ -148,14 +148,8 @@ class Runtime(_ComposedRuntime):
             store={
                 "kind": type(selected_store).__name__,
                 "path": getattr(selected_store, "db_path", ""),
-                "durable": (
-                    isinstance(selected_store, SqliteEventStore)
-                    and selected_store.db_path != ":memory:"
-                ),
-                "journal_mode": "wal" if (
-                    isinstance(selected_store, SqliteEventStore)
-                    and selected_store.db_path != ":memory:"
-                ) else "memory",
+                "durable": bool(getattr(selected_store, "durable", False)),
+                "journal_mode": getattr(selected_store, "journal_mode", "memory"),
             },
             model_route=(ports.model.to_dict() if callable(getattr(ports.model, "to_dict", None)) else {
                 "adapter": type(ports.model).__name__,
@@ -177,8 +171,13 @@ class Runtime(_ComposedRuntime):
             result = session.run()
         # Teardown is part of the public run lineage.  ``session.run()`` takes
         # its immutable event snapshot before the activation context exits, so
-        # refresh it after reverse-order retirement has been durably emitted.
-        return replace(result, events=tuple(session.ledger.events))
+        # refresh events and evidence after reverse-order retirement has been
+        # durably emitted.
+        result = replace(result, events=tuple(session.ledger.events))
+        from .foundation_evidence import derive_foundation_bundle
+        return replace(result, foundation_evidence=derive_foundation_bundle(
+            run_plan=run_plan, result=result, store=selected_store,
+        ))
 
 
 __all__ = [

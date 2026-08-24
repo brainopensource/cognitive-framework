@@ -43,26 +43,43 @@ def audit_runtime_authority(root: Path | None = None) -> AuthorityTrace:
         relative = path.relative_to(package_root).as_posix()
         relative_files.append(relative)
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        session_aliases = {"HarnessSession"}
+        compiler_aliases: set[str] = set()
         for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                for imported in node.names:
+                    local = imported.asname or imported.name
+                    if imported.name == "HarnessSession":
+                        session_aliases.add(local)
+                    if module.endswith("runtime.registry.compiler") and imported.name in {
+                        "compose", "compose_named"
+                    }:
+                        compiler_aliases.add(local)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef) and relative != "runtime/root.py":
+                if any(_call_name(base) in session_aliases for base in node.bases):
+                    violations.append(f"{relative}:{node.lineno}: HarnessSession subclass")
             if not isinstance(node, ast.Call):
                 continue
             name = _call_name(node.func)
-            if name.endswith("HarnessSession") and relative != "runtime/root.py":
+            if (name in session_aliases or name.endswith(".HarnessSession")) and relative != "runtime/root.py":
                 violations.append(f"{relative}:{node.lineno}: direct HarnessSession construction")
+            if name in compiler_aliases:
+                violations.append(f"{relative}:{node.lineno}: legacy compiler execution")
             if name.endswith(".run") and relative != "runtime/session.py":
                 owner = _call_name(node.func.value) if isinstance(node.func, ast.Attribute) else ""
                 if owner in {"session", "HarnessSession"} and relative != "runtime/root.py":
                     violations.append(f"{relative}:{node.lineno}: direct session.run")
-    body = {
-        "root": package_root.as_posix(),
+    digest_body = {
         "files": relative_files,
         "public_boundary": "vanguard.packages.runtime.root.Runtime.run_composed",
         "violations": sorted(violations),
     }
     return AuthorityTrace(
-        root=body["root"], files=tuple(relative_files),
-        public_boundary=body["public_boundary"],
-        violations=tuple(sorted(violations)), trace_digest=digest_of(body),
+        root=package_root.as_posix(), files=tuple(relative_files),
+        public_boundary=digest_body["public_boundary"],
+        violations=tuple(sorted(violations)), trace_digest=digest_of(digest_body),
     )
 
 

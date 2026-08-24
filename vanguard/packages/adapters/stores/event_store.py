@@ -185,7 +185,8 @@ class SqliteEventStore(EventStorePort):
                     envelope_json TEXT NOT NULL,
                     envelope_digest TEXT NOT NULL
                 );
-            """)
+                """)
+
             columns = {row[1] for row in cur.execute("PRAGMA table_info(events);").fetchall()}
             if "project_id" not in columns:
                 cur.execute("ALTER TABLE events ADD COLUMN project_id TEXT;")
@@ -193,6 +194,16 @@ class SqliteEventStore(EventStorePort):
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_scope ON events(scope);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_episode ON events(episode_id);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_events_project_seq ON events(project_id, seq);")
+
+    @property
+    def journal_mode(self) -> str:
+        """Report SQLite's effective mode; never infer WAL from the path."""
+        with self._lock:
+            return str(self._conn.execute("PRAGMA journal_mode;").fetchone()[0]).lower()
+
+    @property
+    def durable(self) -> bool:
+        return self.db_path != ":memory:" and self.journal_mode == "wal"
 
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
         """Atomically append an ordered sequence of event envelopes within a transaction."""

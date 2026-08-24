@@ -1,0 +1,223 @@
+From 53d823eaac4074ab426182d69318f24732341951 Mon Sep 17 00:00:00 2001
+From: dev <dev@local>
+Date: Mon, 24 Aug 2026 21:10:52 +0000
+Subject: [PATCH] M-6: close mediated delegation per ADR-0090
+
+- fold ChildSpawned/ChildReturned into LedgerState.children (was UNFOLDED_ALLOWLIST)
+- add ChildRecord; open until ChildReturned, cold path reconciles
+- register spawn_adapter as sole writer of both kinds
+- lazy model adapter imports (140.8ms -> 12.9ms cold start)
+
+Kernel untouched. Suite unchanged at 1294 passed / 8 failed.
+---
+ test/contracts/test_event_coverage.py         |  2 -
+ vanguard/packages/adapters/models/__init__.py | 52 +++++++++++++------
+ vanguard/packages/domain/ledger/reducer.py    | 38 ++++++++++++++
+ vanguard/packages/domain/ledger/state.py      | 24 +++++++++
+ vanguard/packages/runtime/ledger_emitter.py   |  4 ++
+ 5 files changed, 101 insertions(+), 19 deletions(-)
+
+diff --git a/test/contracts/test_event_coverage.py b/test/contracts/test_event_coverage.py
+index 9d68b26..38ed7a0 100644
+--- a/test/contracts/test_event_coverage.py
++++ b/test/contracts/test_event_coverage.py
+@@ -41,8 +41,6 @@ UNFOLDED_ALLOWLIST = frozenset({
+     "CandidateAttested",       # Phase-2 candidate release pipeline
+     "CandidateBuilt",          # Phase-2 candidate release pipeline
+     "CheckpointCreated",       # Snapshot/checkpoint marker
+-    "ChildReturned",           # Subagent return notification
+-    "ChildSpawned",            # Subagent spawn notification
+     "ClaimRecorded",           # Evidence claim legacy synonym (EvidenceClaimProduced is folded)
+     "CompetencePriorRecorded", # Prior competence distribution (Phase-2)
+     "CorrectionRecorded",      # Phase-2 human/supervisor feedback marker
+diff --git a/vanguard/packages/adapters/models/__init__.py b/vanguard/packages/adapters/models/__init__.py
+index 6d8503d..7ac02ea 100644
+--- a/vanguard/packages/adapters/models/__init__.py
++++ b/vanguard/packages/adapters/models/__init__.py
+@@ -1,19 +1,37 @@
+-"""Model adapter family; sibling adapter families must not import this package."""
++"""Model adapter family; sibling adapter families must not import this package.
+ 
+-from .cassette import Cassette, CassettePlayer, CassetteRecord, CassetteRecorder
+-from .fake import FakeModel
+-from .invocation import ModelInvocation, ProposalTranslator
+-from .lam import LamModelAdapter
+-from .ollama import OllamaModel
++PEP 562 lazy attribute access. `ollama` pulls urllib -> http.client ->
++email.parser (~106ms) which a `local`/fake-model run never uses. Names stay
++importable; the module body is only executed on first attribute access.
++"""
++from typing import TYPE_CHECKING
+ 
+-__all__ = [
+-    "Cassette",
+-    "CassettePlayer",
+-    "CassetteRecord",
+-    "CassetteRecorder",
+-    "FakeModel",
+-    "LamModelAdapter",
+-    "OllamaModel",
+-    "ModelInvocation",
+-    "ProposalTranslator",
+-]
++_LAZY = {
++    "Cassette": ".cassette", "CassettePlayer": ".cassette",
++    "CassetteRecord": ".cassette", "CassetteRecorder": ".cassette",
++    "FakeModel": ".fake",
++    "ModelInvocation": ".invocation", "ProposalTranslator": ".invocation",
++    "LamModelAdapter": ".lam",
++    "OllamaModel": ".ollama",
++}
++
++def __getattr__(name):
++    module = _LAZY.get(name)
++    if module is None:
++        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
++    from importlib import import_module
++    value = getattr(import_module(module, __name__), name)
++    globals()[name] = value          # cache: subsequent access is a dict hit
++    return value
++
++def __dir__():
++    return sorted(_LAZY)
++
++if TYPE_CHECKING:                    # keep static analysis and IDEs working
++    from .cassette import Cassette, CassettePlayer, CassetteRecord, CassetteRecorder
++    from .fake import FakeModel
++    from .invocation import ModelInvocation, ProposalTranslator
++    from .lam import LamModelAdapter
++    from .ollama import OllamaModel
++
++__all__ = list(_LAZY)
+diff --git a/vanguard/packages/domain/ledger/reducer.py b/vanguard/packages/domain/ledger/reducer.py
+index 13e58c5..cc55cd2 100644
+--- a/vanguard/packages/domain/ledger/reducer.py
++++ b/vanguard/packages/domain/ledger/reducer.py
+@@ -13,11 +13,13 @@ Pure reducer invariants:
+ 
+ from __future__ import annotations
+ 
++from dataclasses import replace
+ from typing import Any, Iterable, Mapping, Optional, Sequence
+ 
+ from ..canonicalisation.digest import digest_of
+ from .events import EventEnvelope
+ from .state import (
++    ChildRecord,
+     ApprovalRecord,
+     ArtifactRecord,
+     BudgetLeaseState,
+@@ -92,6 +94,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
+     terminal_recovery = state.terminal_recovery
+     verdicts = dict(state.verdicts)
+     plugins = dict(state.plugins)
++    children = dict(state.children)
+     unknown_events = list(state.unknown_events)
+ 
+     if kind == "EpisodeStarted":
+@@ -614,6 +617,40 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
+                 occurred_at=envelope.occurred_at,
+             )
+ 
++    elif kind == "ChildSpawned":
++        # ADR-0090: material FSM transition, not an advisory marker.
++        cid = payload.get("child_episode_id")
++        if cid:
++            cid = str(cid)
++            if cid in children:
++                raise ReducerError(f"duplicate ChildSpawned for {cid!r}")
++            children[cid] = ChildRecord(
++                child_episode_id=cid,
++                parent_episode_id=str(payload.get("parent_episode_id") or ""),
++                authority=tuple(payload.get("authority", ())),
++                depth=int(payload.get("depth") or 0),
++                lineage=tuple(payload.get("lineage", ())),
++                settled_intent_key=str(payload.get("settled_intent_key") or ""),
++            )
++
++    elif kind == "ChildReturned":
++        cid = payload.get("child_episode_id")
++        if cid:
++            cid = str(cid)
++            prev_child = children.get(cid)
++            if prev_child is None:
++                raise ReducerError(f"ChildReturned without ChildSpawned for {cid!r}")
++            if prev_child.status == "closed":
++                raise ReducerError(f"child {cid!r} returned twice")
++            key = payload.get("settled_intent_key")
++            if key is not None and prev_child.settled_intent_key != str(key):
++                raise ReducerError(f"settled intent key mismatch for {cid!r}")
++            children[cid] = replace(
++                prev_child, status="closed",
++                outcome=payload.get("outcome"), terminal=payload.get("terminal"),
++                cost=payload.get("cost"),
++            )
++
+     else:
+         # CT-44: unknown event kind preserved in state
+         unknown_events.append({
+@@ -650,6 +687,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
+         terminal_recovery=terminal_recovery,
+         verdicts=verdicts,
+         plugins=plugins,
++        children=children,
+         unknown_events=tuple(unknown_events),
+     )
+ 
+diff --git a/vanguard/packages/domain/ledger/state.py b/vanguard/packages/domain/ledger/state.py
+index 972f55d..36ace55 100644
+--- a/vanguard/packages/domain/ledger/state.py
++++ b/vanguard/packages/domain/ledger/state.py
+@@ -178,6 +178,10 @@ class LedgerState:
+     verdicts: Mapping[str, "VerdictRecord"] = field(default_factory=dict)
+     #: Plugin lifecycle state records (ADR-M0-13, Wave 3).
+     plugins: Mapping[str, "PluginRecord"] = field(default_factory=dict)
++    #: Mediated delegation child records (ADR-0090). A `ChildSpawned` with no
++    #: matching `ChildReturned` folds to `open` and is reconciled by the cold
++    #: path -- never assumed complete.
++    children: Mapping[str, "ChildRecord"] = field(default_factory=dict)
+     unknown_events: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+ 
+     def to_canonical_dict(self) -> dict[str, Any]:
+@@ -295,3 +299,23 @@ class LedgerState:
+     def digest(self) -> str:
+         """Compute the deterministic state digest (sha256:...)."""
+         return digest_of(self.to_canonical_dict())
++
++
++@dataclass(frozen=True)
++class ChildRecord:
++    """ADR-0090 mediated delegation record. `open` until ChildReturned folds."""
++
++    child_episode_id: str
++    parent_episode_id: str
++    authority: tuple[str, ...]
++    depth: int
++    lineage: tuple[str, ...]
++    settled_intent_key: str
++    status: str = "open"
++    outcome: Optional[str] = None
++    terminal: Optional[str] = None
++    cost: Optional[Mapping[str, Any]] = None
++
++    @property
++    def reconcilable(self) -> bool:
++        return self.status == "open"
+diff --git a/vanguard/packages/runtime/ledger_emitter.py b/vanguard/packages/runtime/ledger_emitter.py
+index ea9c463..0d824e5 100644
+--- a/vanguard/packages/runtime/ledger_emitter.py
++++ b/vanguard/packages/runtime/ledger_emitter.py
+@@ -51,6 +51,10 @@ PRIVILEGED_KIND_OWNERS: Mapping[str, frozenset[str]] = {
+     "AuthorizationDenied": frozenset({"kernel"}),
+     "KernelAlarm": frozenset({"kernel"}),
+     "VerdictRecorded": frozenset({"evaluator_gateway"}),
++    # ADR-0090 mediated delegation. SpawnAdapter is the SOLE legal writer:
++    # plugins, workers and child episodes propose, they never append.
++    "ChildSpawned": frozenset({"spawn_adapter"}),
++    "ChildReturned": frozenset({"spawn_adapter"}),
+     "PluginDiscovered": frozenset({"registry"}),
+     "PluginResolved": frozenset({"registry"}),
+     "PluginVerified": frozenset({"registry"}),
+-- 
+2.43.0
+

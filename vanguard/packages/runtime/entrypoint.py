@@ -10,6 +10,7 @@ from typing import Any, Mapping
 
 from ..adapters.models.openrouter import OpenRouterModel
 from ..adapters.models.fake import FakeModel
+from ..adapters.models.ollama import OllamaModel
 from ..adapters.sandbox.platform import discover_platform
 from .compose import TaskContext
 from .profiles import SandboxUnavailable, resolve_profile
@@ -64,11 +65,18 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     # choice.  It must reach the same Runtime path without touching a provider;
     # it is never promotion-eligible evidence.
     fake_backend = request.get("fakeBackend")
-    selected_model = (
-        FakeModel([{"kind": "finish", "note": "deterministic preview"}])
-        if isinstance(fake_backend, str) and fake_backend
-        else OpenRouterModel(model=str(request.get("plannerModel") or "openrouter/free"))
-    )
+    model_port = str(request.get("modelPort") or "").strip().lower()
+    planner_model = str(request.get("plannerModel") or "openrouter/free")
+    if isinstance(fake_backend, str) and fake_backend:
+        selected_model = FakeModel([{"kind": "finish", "note": "deterministic preview"}])
+    elif model_port == "ollama":
+        selected_model = OllamaModel(
+            model=planner_model,
+            endpoint=os.environ.get("VANGUARD_OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/chat"),
+            timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0),
+        )
+    else:
+        selected_model = OpenRouterModel(model=planner_model)
     result = Runtime.execute_profiled(
         _manifest(command), task,
         profile_id=str(request.get("profile") or "local"),
@@ -89,7 +97,7 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     if "--stdin-json" not in sys.argv:
-        print("coding_entrypoint requires --stdin-json", file=sys.stderr)
+        print("entrypoint requires --stdin-json", file=sys.stderr)
         return 2
     for line in sys.stdin:
         if not line.strip():

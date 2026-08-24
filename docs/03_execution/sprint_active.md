@@ -361,66 +361,43 @@ run. Waves 5+ remain locked.
 ---
 
 
-# DEVS WORK PROMPTS
+# CURRENT M-4 RELEASE WORK PROMPTS
+
+These prompts supersede the pre-integration A/B instructions. The implementation seams are merged;
+the remaining work is qualification and execution, not another architecture pass.
 
 ## DEV A
 
 ```text
-Você é o Dev A, Senior Runtime/Systems Engineer, com poder total de desenvolvimento dentro do
-escopo autorizado de M-4. Comece somente depois de o Dev C publicar e congelar os concept locks,
-contratos, interfaces, testes RED, matriz de ownership e critérios de evidência. Trabalhe em paralelo
-com o Dev B sem depender de commits intermediários dele: use exclusivamente as interfaces congeladas,
-fakes/fixtures contratuais e seams definidos pelo Dev C; qualquer incompatibilidade deve ser resolvida
-por adaptação local ou escalada objetiva ao Dev C, nunca bloqueando a outra lane.
-
-Implemente passo a passo o caminho de execução real de RF-85 pela única autoridade pública:
-RunPlan/D_R -> Runtime.run_composed -> eventos canônicos -> SQLite em WAL efetivo e file-backed ->
-trajetória mhf.trajectory/1 -> FoundationEvidence. Qualifique o provider real selecionado, o ambiente
-Linux rootless/Bubblewrap, lifecycle, durable intent, retomada cold/fresh-process e execução contínua
-do mesmo run_id. Garanta fail-closed, identidade e digests cruzados, budgets/custos verdadeiros,
-persistência antes de efeitos e recuperação sem repetir efeito físico já liquidado. Não introduza
-parser, compiler, binding table, emitter ou rota de ativação concorrente; não use :memory:, mock,
-cassette, host fallback, trace costurado, reparo manual ou evidência fabricada para certificar M-4.
-
-Entregue código, migrações estritamente necessárias, testes unitários/contratuais/de integração e
-falsificadores negativos da sua lane. Mire as linhas de evidência RF-85 atribuídas pelo Dev C ao
-runtime/provider/sandbox/WAL/continuação, mas somente marque uma linha como presente quando derivada
-do run real e recomputável a partir dos artefatos canônicos. Execute os testes focados e depois
-test/falsifiers, test/contracts, test/runtime, test/registry, test/security e test/trust aplicáveis,
-além de boundaries, TCB, secrets, domain blindness, isolation, duplication, RF IDs, links e stale
-paths. Separe regressão real de falha ambiental sem enfraquecer assertions. Faça commits pequenos,
-imperativos e rastreáveis; reporte ao Dev C commits, arquivos, requisitos, resultados, artefatos,
-riscos, rollback e bloqueios. Não altere decisões congeladas nem declare M-4 concluída.
+Você é o Dev A, Senior Runtime/Systems Engineer, responsável pela qualificação e operação da lane
+runtime de M-4 sobre a base integrada `1a1ed6c`. Em um host Linux limpo e não restrito, instale as
+dependências bloqueadas, qualifique um provider real alcançável e o worker rootless Bubblewrap, e
+prove file-backed SQLite-WAL, durable intent e cold continuation sem repetir efeito liquidado. Execute
+todos os gates antes do run. Depois que Dev B publicar o preregistro imutável, execute exatamente um
+run pela autoridade `Runtime.run_composed` e entregue somente fontes canônicas das linhas 1, 2, 3, 4,
+6, 7, 8 e 9. Se qualquer probe, provider, WAL, identidade, custo ou continuidade falhar, pare e
+registre o bloqueio; não use mock, cassette, `:memory:`, fallback host, stitching ou reparo manual.
+Reporte ao Dev C ambiente, comandos, SHAs, event range, digests e rollback. Não declare M-4 concluída.
 ```
 
 ## DEV B
 
 ```text
-Você é o Dev B, Senior Trust/Evidence Engineer, com poder total de desenvolvimento dentro do escopo
-autorizado de M-4. Comece somente depois de o Dev C publicar e congelar os concept locks, contratos,
-interfaces, testes RED, matriz de ownership e critérios de evidência. Trabalhe em paralelo com o Dev A
-sem depender de commits intermediários dele: implemente contra as interfaces congeladas e use fixtures
-contratuais próprias; não toque nos hotspots exclusivos do Dev A salvo reassignment explícito do Dev C.
-
-Implemente passo a passo a lane de confiança e certificação RF-85: evaluator real isolado com identidade
-fixa, protocolo RPC e verificação Ed25519; preregistro imutável do task/oracle antes da execução;
-derivação das linhas de evidence sob sua ownership; auditor que recompõe digests, lineage, assinatura,
-containment e resultado do oracle a partir das fontes canônicas. Complete adapters, fixtures,
-serialização, validação e testes negativos para chave/assinatura adulterada, lineage misturada,
-cross-digest divergente, fonte ausente, boolean autoatestado, containment não verificado, oracle não
-preregistrado e import/trace de autoridade concorrente. O auditor deve negar por padrão e distinguir
-ausente, inválido e não verificável. Nenhum texto, flag ou fixture sintética pode virar evidência M-4.
-
-Entregue código e testes unitários/contratuais/de integração/falsificadores independentes da lane A.
-Use um bundle sintético somente para provar formato e negativas, sempre inelegível para M-4; prepare o
-consumidor do bundle real sem criar resultados. Execute os testes focados e depois test/falsifiers,
-test/contracts, test/runtime, test/registry, test/security e test/trust aplicáveis, além de todos os
-linters obrigatórios. Classifique falhas ambientais separadamente, sem relaxar o fail-closed. Faça
-commits pequenos, imperativos e rastreáveis; reporte ao Dev C commits, arquivos, requisitos, resultados,
-artefatos, riscos, rollback e bloqueios. Não altere concept locks nem declare M-4 concluída.
+Você é o Dev B, Senior Trust/Evidence Engineer, responsável pela qualificação e auditoria da lane de
+confiança de M-4 sobre a base integrada `1a1ed6c`. Em um ambiente de evaluator separadamente isolado,
+fixe sua identidade e trust root, valide RPC/Ed25519 e publique antes do primeiro evento o preregistro
+imutável que liga task, oracle, digests, protocolo, subject e chave do evaluator. Durante o único run,
+derive a linha 5 e audite o envelope real completo com os verificadores autoritativos das nove linhas,
+recomputando source/bundle/cross-digests, lineage, WAL, containment, trajetória e assinatura. Qualquer
+ausência, invalidade ou fonte não verificável nega o gate. Não aceite bundle headerless, autoassinatura,
+fixture sintética, boolean autoatestado ou resultado copiado. Reporte ao Dev C preregistro, trust root,
+resultado do oracle, razões de auditoria, artefatos e rollback. Não declare M-4 concluída.
 ```
 
-## DEV C
+## DEV C — archived preparation prompt
+
+The Dev C preparation below is retained only as the execution record that produced `4a7ed9c`,
+`2a96158`, `6c82635`, and `1a1ed6c`; it MUST NOT be rerun as current work.
 
 ```text
 Você é o Dev C, Principal Engineer e autoridade técnica de preparação e integração. Execute este prompt

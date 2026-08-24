@@ -126,8 +126,8 @@ only compatibility seams until their gates. M-9+ is post-v1, non-authorizing res
 | M-1 | v0.6.0 | signed Ed25519 trust spine and verdicts — complete |
 | M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — Wave 2C |
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal; operational closure reopened |
-| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — active |
-| M-4 | v0.6.3 | RF-85 one real, un-forged E2E run with nine source-derived evidence lines |
+| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — complete |
+| M-4 | v0.6.3 | RF-85 one real, un-forged E2E run with nine source-derived evidence lines — active |
 | M-5 | v0.7.0 | RF-86 Formal Pack #2 parity with unchanged substrate plus RF-52/RF-53 T0 witness |
 | M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` through generic S0–S12 dispatch |
 | M-7…M-8 | future product gates | measured concurrency and declarative topology support |

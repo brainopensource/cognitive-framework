@@ -7,13 +7,13 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.6.2"
+version: "0.6.3"
 last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint Board — v0.6.2 Canonical Composition Convergence (M-3C)
+# Active Sprint Board — v0.6.3 Foundation E2E (M-4)
 
 **Start here:** [`README.md`](../../README.md) is navigation; [`SPEC.md`](../SPEC.md) and the six
 normative leaves under [`01_law/`](../01_law/) are law. Accepted ADRs record decisions. This file is
@@ -49,8 +49,8 @@ schema, compiler, lifecycle, or auditor tests cannot close M-3C or M-4.
 | Wave 1 | M-1 | **CLOSED (GREEN)** | Fail-closed Trust Spine and signed evidence. |
 | Wave 2 / 2C | M-2 | **CLOSED (GREEN)** | Truthful trajectory plus fresh-process recovery. |
 | Wave 3 | M-3 | **CONTRACT COMPLETE; OPERATIONAL CLOSURE REOPENED** | Prior graph, lifecycle, and Layer-0 work is retained as evidence, not discarded. |
-| Wave 3C | M-3C / v0.6.2 | **ACTIVE** | ADR-0088 locked; RF-78–RF-84 prove one public path, two domain probes, durable lineage, and no competing authority. |
-| Wave 4 | M-4 / v0.6.3 | **FROZEN — M-3C + ENVIRONMENT** | RF-85: M-3C green, then one real uninterrupted nine-row run. |
+| Wave 3C | M-3C / v0.6.2 | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | G0–G4 and RF-78–RF-84 independently reviewed; canonical authority, durable lineage, and authority retirement proven by `136436e`. |
+| Wave 4 | M-4 / v0.6.3 | **ACTIVE — ENVIRONMENT QUALIFICATION / RF-85** | One real uninterrupted nine-row run; no mock, stitched trace, repair, or synthetic substitution. |
 | Waves 5–10 | M-5–M-10 | **LOCKED** | Each preceding objective gate must close; roadmap text alone never authorizes work. |
 
 ## 2. Frozen Invariants and Decision Envelope
@@ -86,7 +86,7 @@ architecture hotspots; Devs B integrate only after the relevant contract is froz
 
 ## 3. Authorized Sprint Sequence
 
-### Sprint 3C.0 — Authority reconciliation and RED contract
+### Sprint 3C.0 — Authority reconciliation and RED contract (complete)
 
 The two lanes start in parallel, but production refactoring remains closed until Gate G0.
 
@@ -104,7 +104,7 @@ and `test_rf79_legacy_normalisation.py` are red at the public `Runtime.compose` 
 authored `/2` fixtures are schema-valid and parse on the side path, so the only cause is that the
 legacy reader is the public authority and no `FrozenComposition` exists. A0 does not self-certify G0.
 
-### Sprint 3C.1 — Canonical composition and two-domain ingress
+### Sprint 3C.1 — Canonical composition and two-domain ingress (complete)
 
 | Lane | Authorized work | Owned surfaces | Evidence / completion |
 |---|---|---|---|
@@ -116,7 +116,7 @@ changes alter `D_H`; compatibility preserves declared facts without inventing de
 value contains no legacy-only authority. Non-sequential profiles and `agent.spawn` remain named
 pre-authorization refusals until M-7 and M-6 respectively.
 
-### Sprint 3C.2 — Activation, lifecycle, and deterministic cleanup
+### Sprint 3C.2 — Activation, lifecycle, and deterministic cleanup (complete)
 
 | Lane | Authorized work | Owned surfaces | Evidence / completion |
 |---|---|---|---|
@@ -127,7 +127,7 @@ pre-authorization refusals until M-7 and M-6 respectively.
 through one runtime authority; registry events are reachable, owner-written, and reducible; no graph
 edge becomes runtime scheduling.
 
-### Sprint 3C.3 — Release durability and source-derived M-4 evidence
+### Sprint 3C.3 — Release durability and source-derived M-4 evidence (complete)
 
 | Lane | Authorized work | Owned surfaces | Evidence / completion |
 |---|---|---|---|
@@ -139,7 +139,7 @@ shape and negative cases, while remaining explicitly ineligible for M-4. Altered
 text-only signatures, mixed lineages, unverified containment, missing cost status, or asserted defaults
 must deny.
 
-### Sprint 3C.4 — Legacy retirement and independent certification
+### Sprint 3C.4 — Legacy retirement and independent certification (complete)
 
 | Lane | Authorized work | Owned surfaces | Evidence / completion |
 |---|---|---|---|
@@ -175,11 +175,12 @@ red falsifier confirmed -> focused suites -> cross-lane integration gate
 -> RF IDs/metadata/links/stale paths/secrets -> independent evidence review
 ```
 
-## 5. M-4 Hold Contract
+## 5. M-4 Active Contract
 
-M-4 preparation may provision a real provider, evaluator identity, rootless Linux environment, and
-preregistered coding task/oracle, but no run may be claimed as M-4 evidence before G4. After G4, M-4
-executes one uninterrupted `run_id` through the canonical release path and must populate all nine
+M-4 is opened by Director decision dated 2026-08-24. Its first authorized slice provisions and
+qualifies a real provider, evaluator identity, rootless Linux environment, file-backed WAL, and
+preregistered coding task/oracle. M-4 then executes one uninterrupted `run_id` through the canonical
+release path and must populate all nine
 rows defined in [`milestones.md`](milestones.md#m-4-single-run-evidence-contract) under RF-85. Mock, cassette,
 stitched trace, manual repair, host fallback, or separately passing runs remain ineligible.
 
@@ -228,6 +229,6 @@ Independent review first rejected G4 and identified the missing operational join
 the same independent reviewer reran 29 focused tests plus `test_composition_root` and reported no
 remaining technical G3/G4 blocker. This is technical closure evidence, not Director authorization.
 
-**M-4 remains frozen.** Permitted preparation remains limited to provisioning a real provider,
-exterior Ed25519 evaluator identity, clean rootless Linux/Bubblewrap, file-backed SQLite-WAL, and a
-preregistered task/oracle. No nine-row run is authorized and no synthetic fixture is M-4 evidence.
+**Director decision:** M-3C is closed and M-4 is open. The next authorized action is environment
+qualification and task/oracle preregistration, followed by one eligible RF-85 run only after every
+startup probe passes. No row is presently claimed, and no synthetic fixture is M-4 evidence.

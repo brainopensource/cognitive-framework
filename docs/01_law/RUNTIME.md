@@ -725,8 +725,8 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current gate:** M-2 is closed. M-3C is the only active implementation wave. M-4 and later work
-remains closed until the active board records the preceding objective evidence.
+**Current gate:** M-3C is closed by the Director decision recorded on the active board. M-4 is the
+only active implementation wave; M-5 and later work remain closed until RF-85 is satisfied.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 

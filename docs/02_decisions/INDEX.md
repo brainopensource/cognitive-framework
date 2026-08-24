@@ -33,6 +33,7 @@ superseded_by: null
 - 🧹 [Repository Governance (`0086`–`0087`)](#repository-governance) — historical-body consolidation, topology, and recovery rule
 - 🔒 [M-3C to M-8 Concept Lock (`0088`)](#m-3c-to-m-8-concept-lock) — canonical activation, evidence, generality, delegation, and scale seams
 - 🛠️ [W-3D Product Runtime Profiles (`0089`)](#w-3d-product-runtime-profiles-0089) — execution profiles, bootstrap, activation, and product/runtime seam
+- 🧬 [Mediated Delegation Event Roster (`0090`)](#mediated-delegation-event-roster-0090) — `ChildSpawned`/`ChildReturned` allocation, single writer, and reducer fold
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -97,6 +98,25 @@ macro promotion, adaptive routing, or meta-cognition.
 
 ---
 
+## Mediated Delegation Event Roster (`0090`)
+
+ADR-0090 was ratified by the CEO on 2026-08-24. It allocates exactly two event kinds for mediated
+delegation, binds `runtime.SpawnAdapter` as their sole legal writer, and folds them into
+`LedgerState.children`. The kernel is untouched; both events are emitted from `runtime/`.
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0090` | [`0090-mediated-delegation-event-roster.md`](0090-mediated-delegation-event-roster.md) | **Mediated delegation event roster:** `ChildSpawned`/`ChildReturned` allocated; `SpawnAdapter` sole writer; open-until-returned fold with cold reconciliation; cost conservation; derived authority; no `ChildFailed` third kind; no kernel change. | accepted | 2026-08-24 |
+
+**This ADR does not close M-6.** It closes the roster question only. `agent.spawn` remains inert at
+three points (`domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every
+spawn via `M6_SPAWN_ACTIVE = False`, and the verb is on the inert-verb list), so no `ChildSpawned` can
+be emitted by the product. **RF-55–RF-59 are named by ADR-0090 but remain unallocated** — no such test
+exists and the register below does not carry the range; allocating them is part of opening M-6, which
+stays LOCKED behind M-4 and M-5.
+
+---
+
 ## Repository Governance
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
@@ -119,7 +139,7 @@ macro promotion, adaptive routing, or meta-cognition.
 Full bodies in this section were removed from the default working tree by ADR-0086. Their IDs are
 permanently reserved; the original bytes are recoverable at Git commit
 `5b9966c24c13d0ffc4315a39a97870fd756324a9`. These summaries are provenance, not current
-implementation authority. Current work cites SPEC/law leaves and ADRs 0069–0088.
+implementation authority. Current work cites SPEC/law leaves and ADRs 0069–0090.
 
 <details>
 <summary>M0 and pre-v0.6 decision ledger (expand for archaeology)</summary>

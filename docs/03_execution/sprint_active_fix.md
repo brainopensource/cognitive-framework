@@ -1,3 +1,16 @@
+---
+id: m4-m8-leadership-control-report
+class: reference
+authority: advisory
+canonical_for: []
+status: frozen
+owner: principal-staff-engineer-review
+version: "0.6.3"
+last_verified: 2026-08-24
+supersedes: []
+superseded_by: null
+---
+
 # Leadership Control Report — AETHER M-4 → M-8 Bundle
 
 **To:** Project CEO / Engineering Leadership
@@ -7,6 +20,13 @@
 **Bundle root:** `docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/aether-m4-m8/m456/`
 **Decision requested:** ratify the application sequence in Chapter 3 and retain
 approval authority over the two gates marked **LEADERSHIP HOLD**.
+
+> **Application record (2026-08-24):** Chapter 3 Steps 1–8 were executed on
+> branch `feat/m6-adr0090`. Steps 9–11 remain **LEADERSHIP HOLD** and were not
+> executed. Outcomes, deviations and measured suite numbers are recorded in
+> [`sprint_active.md` §10](sprint_active.md#10-adr-0090-application-and-the-m-7-measurement-gate--2026-08-24),
+> which supersedes this report where the two disagree. This file is a review
+> input, not an authority.
 
 ---
 

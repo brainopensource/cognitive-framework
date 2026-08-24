@@ -22,6 +22,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install declared Python dependencies
+        run: python3 -m pip install -e '.[dev]'
+
       - name: Repo paths test (F-20)
         run: python3 -m unittest test.test_repo_paths
 

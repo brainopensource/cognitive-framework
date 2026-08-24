@@ -15,7 +15,7 @@ applies_to:
   - v0.6.2
 implementation_status: MIXED
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
@@ -24,7 +24,7 @@ superseded_by: null
 # State Machines & Lifecycle FSMs
 
 > **Status:** Mixed descriptive view. The episode mechanism and packages-path seven-state plugin
-> FSM are implemented; M-3 remains open for final falsifier and convergence closure.
+> FSM are implemented; M-3C must make the FSM reachable from the sole public activation path.
 
 ---
 
@@ -53,7 +53,7 @@ enum. Persisted truth is the event catalog and reducer.
 
 ---
 
-## 2. Plugin Lifecycle Finite State Machine (ADR-0081 — `AS_BUILT`, M-3 closure active)
+## 2. Plugin Lifecycle Finite State Machine (ADR-0081/0088 — component built, M-3C integration active)
 
 ```mermaid
 stateDiagram-v2
@@ -74,9 +74,9 @@ stateDiagram-v2
 
 | State | Entering Event | Description & Guarantees |
 |---|---|---|
-| `Discovered` | `PluginDiscovered` | Target event; not yet present in the current event catalog |
+| `Discovered` | `PluginDiscovered` | Registry-owned discovery evidence |
 | `Resolved` | `PluginResolved` | Dependencies, capabilities, and port bindings resolved |
-| `Verified` | `PluginVerified` | Target event; schema, signature, interface, ceiling, and isolation evidence recorded |
+| `Verified` | `PluginVerified` | Schema, signature, interface, ceiling, and isolation evidence recorded |
 | `Activated` | `PluginActivated` | Plugin loaded into memory, UDS socket opened |
 | `Quiescing` | `PluginQuiesced` | New work denied while in-flight leases drain; no transition back to active |
 | `Faulted` | `PluginFaulted` | Failure recorded in ledger; isolated |

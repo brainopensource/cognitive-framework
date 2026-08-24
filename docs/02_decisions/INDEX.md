@@ -7,8 +7,8 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: engineering-director
-version: "0.6.1"
-last_verified: 2026-08-21
+version: "0.6.2"
+last_verified: 2026-08-23
 read_when:
   - resolving-architectural-decisions
   - selecting-an-implementation-bundle
@@ -29,8 +29,9 @@ superseded_by: null
 ## Quick Navigation
 
 - 🚀 [v0.6.0 Concept Lock & Foundation Execution (`0069`–`0076`)](#v060-concept-lock--foundation-execution-canonical-law) — **Start here for active production law**
-- 🧭 [Tier S+ Evolution Contract (`0077`–`0085`)](#tier-s-evolution-contract-00770085) — **Ratified v0.6.1→v1.0 design and reservation law**
+- 🧭 [Tier S+ Evolution Contract (`0077`–`0085`)](#tier-s-evolution-contract-00770085) — **Ratified evolution contracts and reservation law**
 - 🧹 [Repository Governance (`0086`–`0087`)](#repository-governance) — historical-body consolidation, topology, and recovery rule
+- 🔒 [M-3C to M-8 Concept Lock (`0088`)](#m-3c-to-m-8-concept-lock) — canonical activation, evidence, generality, delegation, and scale seams
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -78,9 +79,8 @@ a separate ADR at that time. ADR-0085 carries the matching dated correction so i
 cannot conflict with the canonical selector algebra. ADR-0080 records RF-26, and ADR-0082 names
 RF-76/RF-77 without advancing their implementation milestones.
 
-**Immediate authorization boundary.** For M-2/v0.6.1, the newly active implementation gates are
-only ADR-0078/RF-23 and ADR-0082/RF-25. The other accepted ADRs constrain future design and do not
-self-authorize their deferred code.
+**Immediate authorization boundary.** M-2 is closed. ADR-0088 and the active board authorize only
+M-3C production work; accepted future designs do not self-authorize M-4 or later implementation.
 
 ---
 
@@ -93,12 +93,20 @@ self-authorize their deferred code.
 
 ---
 
+## M-3C to M-8 Concept Lock
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0088` | [`0088-m3c-m8-concept-lock.md`](0088-m3c-m8-concept-lock.md) | **Canonical foundation and scale seams:** one `/2 -> FrozenComposition -> ActivationPlan -> RunPlan` path; source-derived M-4 evidence; Formal Pack #2; generic-dispatch mediated spawn; reserved M-7/M-8 seams; M-9+ post-v1 research. | accepted; implementation phased | 2026-08-23 |
+
+---
+
 ## Consolidated Historical Lineage
 
 Full bodies in this section were removed from the default working tree by ADR-0086. Their IDs are
 permanently reserved; the original bytes are recoverable at Git commit
 `5b9966c24c13d0ffc4315a39a97870fd756324a9`. These summaries are provenance, not current
-implementation authority. Current work cites SPEC/law leaves and ADRs 0069–0087.
+implementation authority. Current work cites SPEC/law leaves and ADRs 0069–0088.
 
 <details>
 <summary>M0 and pre-v0.6 decision ledger (expand for archaeology)</summary>
@@ -233,6 +241,9 @@ falsifiers use `RF-*`.
 | `RF-73`–`RF-75` | ADR-0085 | Reservation identity, inert refusal, and ADR reversal-condition lint / staged milestones |
 | `RF-76` | ADR-0082 | Compatibility-reader fidelity for supported old WAL rows / M-3 |
 | `RF-77` | ADR-0082 | Index deletion and rebuild from immutable artifacts / M-9 |
+| `RF-78`–`RF-84` | ADR-0088 | Canonical public composition/activation, domain bindings, release durability, evidence derivation, and authority retirement / M-3C |
+| `RF-85` | ADR-0088 | One uninterrupted real nine-row foundation run / M-4 |
+| `RF-86` | ADR-0088 | Formal Pack #2 parity with unchanged substrate / M-5 |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

@@ -7,7 +7,7 @@ canonical_for:
   - detailed-runtime-law
 status: living
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 read_when:
   - implementing-runtime-events
@@ -448,37 +448,35 @@ are not user-pluggable extension points in the same sense. **A sixth SPI require
 a PR** — see [`ADR-0072`](../02_decisions/0072-plugin-boundary-wire-first-evaluator-exterior.md) and the
 [consolidated M0 lineage](../02_decisions/INDEX.md#consolidated-historical-lineage).
 
-### 2.3 Harness manifest (the compile target)
+### 2.3 Canonical manifest and execution plans (the compile target)
 
-```yaml
-# harness.yaml — mhf.harness/1 (successor of vg-code-* packs)
-api: mhf.harness/1
-id: code-default
-plugins:
-  planner:  {ref: mhf.planner.drive-until-green@^1, config: {max_repair_rounds: 4}}
-  context:  {ref: mhf.context.repo-map@^1}
-  memory:   {ref: mhf.memory.sqlite-kv@^1}
-  toolkits: [{ref: mhf.toolkit.fs@^1}, {ref: mhf.toolkit.ast-patch@^2},
-             {ref: mhf.toolkit.terminal@^1}, {ref: mhf.toolkit.index@^1}]
-  evaluation: {ref: mhf.eval.oracle-gate@^1, config: {oracle: coding-oracle@3}}
-  model_routes:
-    - {tier: 1, provider: ollama, model: qwen2.5:1.5b}
-    - {tier: 3, provider: openrouter, model: "$FRONTIER", escalate_on: [verdict_fail, budget_ok]}
-system_prompt: ./system-prompt.txt          # L1, byte-stable
-capabilities: [...]                          # grant ceiling (schema unchanged from v4)
-budget: {usd_micros: 250000, turns: 40, depth: 2}
-approval_policy: ./approval-policy.json
-undeletable: false
+`mhf.manifest/2` is the sole authored production form. It declares named components, typed bindings,
+resolved implementation/config references, interfaces, entrypoints, profiles, isolation/evidence
+policy, and capability ceilings. Supported `mhf.harness/1` bytes remain compatibility ingress through
+M-4, but normalize immediately and never become a second runtime value.
+
+```text
+mhf.manifest/2 bytes
+  -> CanonicalManifest
+  -> FrozenComposition [JCS D_H]
+  -> ActivationPlan [activation_digest binds D_H]
+  -> RunPlan [execution identity D_R]
+  -> EpisodeEngine -> S0-S12
 ```
 
-`compose()` resolves plugin refs, verifies capability ceilings (plugin ceiling ∩ harness grant set;
-**fail-closed**, empty ceilings authorize nothing, intersection stored on `FrozenHarness` —
-`ADR-0072`), freezes L1–L3, and emits a `FrozenHarness` whose digest `D_H` = JCS of the **full**
-behavior-affecting composition: resolved plugin refs and digests, system prompt, capability ceiling,
-approval policy, model routes (`ADR-0074`). The existing `vg-code-claude-shaped` /
-`vg-code-opencode-shaped` packs port mechanically — specialised harnesses are compiled artifacts of
-one engine. Registries freeze at composition; unknown names fail at composition, not runtime.
-Mid-run composition change is forbidden in v0.6 (`ADR-0005`, `ADR-0072`).
+`FrozenComposition` is the immutable logical graph. `ActivationPlan` is the deterministic runtime
+projection containing component factories/cells, effective ceilings, validated interfaces,
+initialization dependencies, readiness, and reverse cleanup; it introduces no authority and is not a
+workflow scheduler. `RunPlan` binds the composition/activation to task, project, environment, store,
+model, oracle/evaluator, root authority, budget, and execution mode. `run_id` correlates durable events
+and is bound to `D_R`; it is not an identity substitute.
+
+All behavior-affecting logical inputs enter `D_H`; activation/runtime/environment choices enter
+`D_R`; dataset/protocol choices enter `D_X`. Mid-run plan or composition change is forbidden.
+`FrozenHarness` may be a temporary API facade only when it wraps the single `FrozenComposition`.
+Unknown fields/refs/providers/interfaces/endpoints, unread authority, empty/incomparable ceilings, or
+eager activation cycles fail before activation. Domain verbs are provided by namespaced adapters
+behind ports, never by a global coding-specific extension authority (`ADR-0088`).
 
 ---
 
@@ -551,13 +549,21 @@ oracles — the agent never grades itself.
 authorized effect, filesystem, sandbox, signed eval, WAL, cold replay, and a schema-valid
 `mhf.trajectory/1`. Lexical E-COV = 100% is **not** that gate.
 
+**M-5 generality proof (`ADR-0088`).** Pack #2 is Math & Formal Deductive Verification. Its exact
+proof language/toolchain is selected and preregistered at M-5; it is not substrate law. The pack uses
+the same `/2 -> FrozenComposition -> ActivationPlan -> RunPlan`, S0–S12, exterior verdict, WAL,
+trajectory, and cold-reconstruction path. During the proof interval only pack, adapter,
+evaluator/container, and test surfaces may change; the semantic tree under
+`vanguard/packages/{domain,ports,kernel,agency,runtime}` remains unchanged. A missing generic
+primitive fails the proof and returns to governance. RF-86 is the gate.
+
 ---
 
 ## 5. Evolution Blueprint — Phase 2 (autonomous & meta-cognitive)
 
-**v0.6 status: deferred blueprint (`ADR-0073`).** Not foundation scope. Trajectory *schema and
-emission* are locked now so this phase does not require a corpus migration; promotion, mutation, and
-skill harvest are not.
+**Status: post-v1 research-only blueprint (`ADR-0088`).** Trajectory schema/emission remains locked so
+research can consume attributable data, but mutation, skill harvest, VFE/EFE, DPO, and promotion do
+not enter the v1 foundation programme and have no implementation authority here.
 
 All Phase-2 features are plugins consuming Phase-1 extension points.
 
@@ -574,9 +580,10 @@ engine — **ADR-M0-12** — this is what keeps the outer loop a plugin at a sch
 **5.2 Evolutionary prompt/manifest mutation.** The manifest is the genome (the repo's "genes" intuition,
 operationalised without the biology talk). Mutation operators over JCS-diffable manifest fields:
 system-prompt fragment substitution, tool-schema phrasing variants, compaction strategy, escalation
-thresholds. Selection = paired lab runs (existing McNemar machinery) against the undeletable baseline;
-promotion = signed `CanaryPromoted` event flipping the registry's default pointer. Population bookkeeping
-lives in `IMemoryEngine`; the lab is the fitness function — no new statistics code required.
+thresholds. Selection requires preregistered paired lab runs against an immutable baseline. No
+`CanaryPromoted` event or automatic pointer change is presumed: only the human-controlled promotion
+authority may move a versioned default after exact statistical, exterior-evidence, and rollback gates.
+Population bookkeeping remains exterior research state and carries no runtime authority.
 
 **5.3 Active-inference error minimisation.** Frame the gate decision as expected-free-energy
 minimisation without importing the full formalism: the planner maintains `P(pass | action, context)`
@@ -617,12 +624,19 @@ truthful bidding is incentive-compatible under second-price, and the *kernel rem
 layer* — the market only decides which reservations the scheduler submits. Budget conservation stays a
 kernel invariant; economics is policy.
 
-**6.3 Multi-agent economic delegation.** `spawn()` generalises to contracts: `ChildSpawned` carries a
-task brief, a capability attenuation (existing `Scope` machinery), a lease, and an acceptance oracle
-preregistered with the exterior evaluator; `ChildReturned` carries receipts + signed verdict +
-provenance spans. Heterogeneous swarms = children composed from *different harness manifests*
-competing/cooperating under the §6.2 allocator. Delegation depth is a `Reservation` dimension; the judge
-remains singular and exterior across the whole swarm — one economy, one court.
+**6.3 Capability-mediated delegation (M-6 plan).** `agent.spawn` is an ordinary privileged effect
+addressed by target `D_H`. Agency may request it but cannot create a production child. The generic
+kernel mediates S0–S8a; after durable intent, a runtime adapter creates the child principal, session,
+and workspace with the fail-closed intersection of parent, target, plugin, and request ceilings.
+`ChildSpawned`/`ChildReturned` plus the effect receipt carry lineage and settlement. Output returns as
+untrusted-derived context. No ambient handles, credentials, evaluator endpoint, or parent memory are
+inherited. Recovery never repeats a settled spawn; an open intent stays undeterminable. The kernel
+MUST NOT branch on the verb or learn child topology (`ADR-0080`, `ADR-0088`).
+
+```text
+spawn request -> S0..S8a intent -> runtime child adapter -> bounded child episode
+  -> ChildReturned/receipt -> S10..S12 settle -> untrusted-derived return
+```
 
 **6.4 Domain-agnostic decomposition.** A Domain Pack = {toolkit(s) + oracle suite + manifest defaults +
 selector vocabulary}. Pack #2 is **Math & Formal Deductive Verification**, the M-5 generality
@@ -683,7 +697,7 @@ section's rationale, merged per matrix §1.10.)
 
 ---
 
-## 8. Migration Plan & CI Gates (v0.6.1; accepted ADRs `0069`–`0086`)
+## 8. Migration Plan & CI Gates (v0.6.2; accepted ADRs `0069`–`0088`)
 
 **Direction (inverted from v0.5.0).** The mature `vanguard/packages/` semantics remain canonical
 (kernel, JCS, WAL ledger, exterior evaluator, sandbox, stores, models, episode engine). Required SPI,
@@ -697,10 +711,13 @@ does not authorize work.
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
 | **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
-| **M-3 / v0.6.2** | Named Component Graph, complete plugin lifecycle, absent-vs-forged rules, atomic `layer0/` deletion | RF-28–RF-45 and NOVA-4 green |
-| **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | one run ID, populated trajectory, exterior signed evidence; Foundation Stop Line |
-| **M-5 / v0.7.0** | Math/formal Pack #2 and exact T0 witness memo | zero `domain/` or `kernel/` diffs; trajectory parity |
-| **M-6–M-10** | Mediated spawn, measured concurrency, declarative swarms, retrieval/macros, governed learning | each milestone's named falsifiers; no work before M-4 is green |
+| **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained RF-28–RF-45 evidence; operational closure reopened |
+| **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
+| **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | RF-85; one lineage, populated trajectory, exterior signed evidence |
+| **M-5 / v0.7.0** | Formal Pack #2 and exact T0 witness memo | RF-86 and RF-52–RF-53; unchanged substrate; trajectory/evidence parity |
+| **M-6 / v0.8.0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
+| **M-7–M-8** | Measured concurrency then declarative topology support | RF-46–RF-48 and RF-65–RF-66; sequential until governance lift |
+| **M-9+** | Exterior post-v1 research | no implementation authority from this law |
 
 **Standing CI gates for the code programme (Wave 0+, `ADR-0073`, `ADR-0074`):** production
 kernel/runtime/agency/adapters suites as subject of record; `replay-parity` against disk (not
@@ -708,9 +725,8 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current M-2 gate:** RF-72 identifier governance is green. RF-23 and RF-25 are intentionally red
-for their diagnosed production gaps and are the only active implementation lanes. M-3 remains
-closed until both are green and the retained M-2 suite passes.
+**Current gate:** M-2 is closed. M-3C is the only active implementation wave. M-4 and later work
+remains closed until the active board records the preceding objective evidence.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -731,13 +747,12 @@ the code is kept:
 - **`MetaLoopEngine` stays deleted** — the outer loop is a plugin at a scheduler slot (§5.1), never an
   engine — `ADR-0041`/D-41 + **ADR-M0-12**, also `TSK-CORE-011`.
 
-### 8.2 Current foundation gaps
+### 8.2 Current foundation gap
 
-The earlier provenance, event-writer, ceiling, CI-subject, generated-`EffectRequest`, and cold replay
-gaps are closed on the packages path. Two M-2 gaps remain: RF-23 rejects content-valid but
-economically hollow or unattributable trajectories; RF-25 rejects reconstruction that cannot legally
-continue after hard process death. M-3 then closes the residual composition/registry fork and plugin
-lifecycle parity. Current status is recorded only on the active board.
+The Trust Spine, truthful trajectory, and cold continuation gates are retained green. M-3C closes the
+remaining operational split between legacy public composition and the named graph/registry side path,
+then makes release durability and source-derived M-4 evidence real. Current status is recorded only on
+the active board.
 
 ### 8.3 Honour table (SPEC §9, do not reopen)
 

@@ -7,7 +7,7 @@ canonical_for:
   - repository-inventory
 status: living
 owner: senior-principal-systems-engineer
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-21
 read_when:
   - orienting-in-the-system-architecture
@@ -29,7 +29,8 @@ superseded_by: null
 **Vanguard / AETHER** is a Python-first, domain-blind recursive-agency substrate designed for autonomous systems with mathematical safety, cryptographically verifiable provenance, and fail-closed capabilities.
 
 - **As-Built Core (`v0.6.1 Foundation`)**: A verified 13-stage reference monitor (TCB $\le 1438$ LOC, currently 1365 LOC), single-writer SQLite WAL event stream (`State = fold(events)`), rootless Bubblewrap sandbox (UID `10001`), and exterior Ed25519-signed evaluator daemon (UID `10002`).
-- **Target Substrate**: A universal recursive agency substrate that compiles declarative manifests into Named Component Graphs, mediates attenuated subagent spawning, and harvests unforgeable execution trajectories for active inference and meta-cognitive self-improvement.
+- **Active Correction (`v0.6.2 M-3C`)**: Join the implemented named graph and registry lifecycle to one public composition/activation/run path, two domain probes, release durability, and source-derived M-4 evidence.
+- **Product Horizon**: Prove the real coding run (M-4), second-domain generality (M-5), mediated delegation (M-6), measured concurrency (M-7), and declarative topologies (M-8). M-9+ adaptive cognition remains exterior post-v1 research.
 
 ---
 
@@ -61,9 +62,9 @@ superseded_by: null
 ## 3. The A-B-C-D Foundation
 
 - **`A` — Authority (`AS_BUILT`)**: S0–S12 mediation, selectors, attenuation, typed leases, and fail-closed policy ([`kernel/dispatch.py`](../../vanguard/packages/kernel/dispatch.py)).
-- **`B` — Bundle (`AS_BUILT`, GENERIC GRAPH QUEUED M-3)**: Manifest, resolved components, ceilings, policies, prompts, and routes freeze into an attributable `FrozenHarness`; ADR-0077 replaces coding-shaped slots with a Named Component Graph in M-3.
-- **`C` — Corpus (`CONTRACT BUILT, CONTENT REPAIR ACTIVE M-2`)**: SQLite-WAL events and `mhf.trajectory/1` form the state/evidence corpus; RF-23 is still red for rich per-turn economics, route identity, and execution binding.
-- **`D` — Digests (`D_H AS_BUILT; D_R COMPLETION ACTIVE M-2; D_X EXPERIMENT-BOUND`)**: Composition, execution, and experiment identities remain distinct: $D_H \ne D_R \ne D_X$.
+- **`B` — Bundle (`MIXED`, M-3C ACTIVE)**: `/2` and registry contracts exist, while the public runtime still requires convergence to `FrozenComposition -> ActivationPlan -> RunPlan`.
+- **`C` — Corpus (`AS_BUILT CORE`, M-4 BINDING PENDING)**: RF-23/RF-25 are retained green; M-3C must derive the nine-row evidence bundle from canonical sources.
+- **`D` — Digests (`AS_BUILT CORE`, CROSS-BINDING PENDING)**: $D_H \ne D_R \ne D_X$ remains law; activation and foundation evidence must preserve their subjects.
 
 ---
 

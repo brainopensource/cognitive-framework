@@ -7,7 +7,7 @@ canonical_for:
   - invariant-registry
 status: living
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 read_when:
   - implementing-any-runtime-change
@@ -86,6 +86,10 @@ historical evidence only.
 
 ## Architectural refusals
 
+- The sole production chain is `mhf.manifest/2 -> CanonicalManifest -> FrozenComposition ->
+  ActivationPlan -> RunPlan -> EpisodeEngine`. Compatibility formats normalize at ingress and never
+  become a second runtime value. `FrozenComposition` owns `D_H`; activation/runtime identity binds
+  it into `D_R`.
 - The runtime never executes a dynamic control-flow DAG. `mhf.manifest/2` is a static composition
   graph; the turn loop stays unary and sequential. Multi-agent behavior is mediated delegation
   (`agent.spawn`, M-6) or a composed plugin.
@@ -97,6 +101,22 @@ historical evidence only.
 - Cold continuation loads durable pre-crash events, joins the trajectory prefix, reconciles pending
   Governor leases (no budget leak), and emits `RunRecovered` before a complete `mhf.trajectory/1` at
   `EpisodeCompleted`.
+- M-4 evidence is derived from canonical model, kernel, workspace, containment, evaluator, WAL,
+  reconstruction, trajectory, and runtime-authority artifacts. Self-attested booleans, textual
+  signatures, mixed lineage, synthetic providers, and defaulted paths cannot satisfy the gate.
+- `agent.spawn` is a generic S0–S12 effect whose post-intent child creation belongs to a runtime
+  adapter; the kernel MUST NOT branch on the verb or know child topology.
+- Scheduler claim TTL/heartbeat is coordination metadata, not budget `millis`. Concurrent physical
+  attempts are at-least-once; durable settlement is idempotent/exactly-once per command identity.
+- M-8 topology is declared component/policy data lowered to ordinary scheduling and mediated spawn.
+  A substrate workflow/topology engine requires RF-66 reversal evidence and a successor ADR.
+
+## v0.6.2 concept lock
+
+ADR-0088 fixes M-3C and M-4 contracts and plans M-5/M-6 without opening them. M-3C is a bounded
+composition/activation convergence; M-4 is one real nine-row proof; M-5 is the Formal Pack #2
+generality proof with an unchanged substrate; M-6 is capability-mediated delegation. M-7/M-8 retain
+only compatibility seams until their gates. M-9+ is post-v1, non-authorizing research.
 
 ## Milestone compatibility
 
@@ -105,9 +125,13 @@ historical evidence only.
 | M-0 | v0.6.0 | CI truth and falsifiers F-01…F-21 — complete |
 | M-1 | v0.6.0 | signed Ed25519 trust spine and verdicts — complete |
 | M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — Wave 2C |
-| M-3 | v0.6.2 | `mhf.manifest/2`, plugin lifecycle, layer0 removal |
-| M-4 | v0.6.3 | one real, un-forged E2E run with nine evidence lines |
-| M-5…M-10 | future | Pack #2, mediated spawn, Pareto concurrency, builder, macros, active inference |
+| M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal; operational closure reopened |
+| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — active |
+| M-4 | v0.6.3 | RF-85 one real, un-forged E2E run with nine source-derived evidence lines |
+| M-5 | v0.7.0 | RF-86 Formal Pack #2 parity with unchanged substrate plus RF-52/RF-53 T0 witness |
+| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` through generic S0–S12 dispatch |
+| M-7…M-8 | future product gates | measured concurrency and declarative topology support |
+| M-9+ | post-v1 research | retrieval/macros/Active Inference/meta-cognition remain exterior and non-authorizing |
 
 ## Compatibility anchors for former SPEC sections
 

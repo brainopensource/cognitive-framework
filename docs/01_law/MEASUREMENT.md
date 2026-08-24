@@ -7,7 +7,7 @@ canonical_for:
   - statistical-verification-contract
 status: living
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-21
 read_when:
   - changing-measurement-or-promotion

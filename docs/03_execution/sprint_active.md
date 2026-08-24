@@ -7,214 +7,188 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint Board — v0.6.2 Extensibility (M-3)
+# Active Sprint Board — v0.6.2 Canonical Composition Convergence (M-3C)
 
-**Start here:** [`README.md`](../../README.md) and [`SPEC.md`](../SPEC.md) define production truth and normative law. This board is the **sole living execution authority**.
+**Start here:** [`README.md`](../../README.md) is navigation; [`SPEC.md`](../SPEC.md) and the six
+normative leaves under [`01_law/`](../01_law/) are law. Accepted ADRs record decisions. This file is
+the **sole living implementation authority**; [`milestones.md`](milestones.md) sequences unopened work.
 
----
+## 1. Director Decision and Current Truth
 
-## 1. Wave Status Summary
+**Decision:** reopen the operational closure of M-3 as the bounded corrective wave **M-3C**. Preserve
+the Trust Spine and converge only the `Composition -> Activation -> Runtime` seam before attempting
+M-4. This is not authorization for a platform rewrite.
 
-| Wave | Milestone | State | Focus & Exit Condition |
+Static reconciliation at repository commit `e3acc5c228f9a61a357d955c86317369f3339841` found that the
+M-3 contracts and side-path falsifiers exist, but the production closure claim is not yet supported by
+one executable authority:
+
+- `Runtime.compose()` still enters through `ManifestLoader.load_pack()`, the legacy manifest value,
+  and global `DEFAULT_BINDINGS`.
+- `mhf.manifest/2`, the named-graph compiler, registry lifecycle, and isolation broker are not joined
+  to that public path.
+- `vg-code-default` and `vg-table-default` remain legacy-shaped; the latter cannot be wired by the
+  production default binding table.
+- the release path defaults to an in-memory event store; file-backed WAL continuation has been proven
+  by a focused fixture, not by the product E2E path.
+- the nine-row M-4 auditor validates supplied rows but the release path does not yet derive and bind
+  all nine rows from canonical sources.
+
+Therefore M-4 is blocked by both M-3C and its real provider/evaluator environment. Passing isolated
+schema, compiler, lifecycle, or auditor tests cannot close M-3C or M-4.
+
+| Wave | Milestone | State | Exit condition |
 |---|---|---|---|
-| **Wave 0** | M-0 | **CLOSED** | CI subject of record on `vanguard/packages/` + named falsifiers F-01…F-21. |
-| **Wave 1** | M-1 | **CLOSED (GREEN)** | Trust spine: signed verdicts, single emitter, typed budgets, complete $D_H$. |
-| **Wave 2** | M-2 | **DONE (Round 4)** | Convergence core: absorbed SPI/JSON-RPC/lifecycle, deleted duplicate layer0 kernel. |
-| **Wave 2C** | M-2 / v0.6.1 | **CLOSED (GREEN)** | Evidence integrity: RF-23 (truthful trajectory) + RF-25 (fresh-process SQLite continuation). |
-| **Wave 3** | M-3 | **CLOSED (GREEN)** | Canonical `mhf.manifest/2`, parser convergence, graph/lifecycle falsifiers, and Layer-0 retirement proof are green. |
-| **Wave 4** | M-4 | **ACTIVE (ENVIRONMENT BLOCKED)** | Foundation E2E Stop: one uncheated real coding-agent run with nine evidence rows; provider/evaluator execution remains outstanding. |
+| Wave 0 | M-0 | **CLOSED (GREEN)** | CI truth and named falsifiers. |
+| Wave 1 | M-1 | **CLOSED (GREEN)** | Fail-closed Trust Spine and signed evidence. |
+| Wave 2 / 2C | M-2 | **CLOSED (GREEN)** | Truthful trajectory plus fresh-process recovery. |
+| Wave 3 | M-3 | **CONTRACT COMPLETE; OPERATIONAL CLOSURE REOPENED** | Prior graph, lifecycle, and Layer-0 work is retained as evidence, not discarded. |
+| Wave 3C | M-3C / v0.6.2 | **ACTIVE** | ADR-0088 locked; RF-78–RF-84 prove one public path, two domain probes, durable lineage, and no competing authority. |
+| Wave 4 | M-4 / v0.6.3 | **FROZEN — M-3C + ENVIRONMENT** | RF-85: M-3C green, then one real uninterrupted nine-row run. |
+| Waves 5–10 | M-5–M-10 | **LOCKED** | Each preceding objective gate must close; roadmap text alone never authorizes work. |
 
----
+## 2. Frozen Invariants and Decision Envelope
 
-## 2. Active M-3 Implementation Contract
+M-3C MUST preserve:
 
-### Sprint 3.1 — Named Component Graph
+- the domain-blind S0–S12 kernel, descriptor-bound grants, monotonic attenuation, typed reservation
+  and settlement, and the TCB ceiling of `<= 1438` LOC;
+- RFC 8785 JCS and distinct `D_H`, `D_R`, and `D_X` subjects;
+- append-only events, one legal writer per privileged event kind, SQLite-WAL recovery, and I-9
+  recovered trajectory continuity;
+- exterior Ed25519-signed evaluation, rootless worker isolation, and fail-closed absent/forged rules;
+- the unary sequential episode mechanism (I-11); composition is static addressing, never a runtime
+  workflow DAG;
+- the five-SPI freeze and the M-4 compatibility ingress for supported legacy manifests.
 
-**Implement:** make one canonical reader normalize supported legacy manifests and
-`mhf.manifest/2` into one immutable domain value. Compile named instances, same-kind repetitions,
-typed bindings, interfaces, implementation/config refs, isolation, ceilings, profiles, and named
-entrypoints. Resolve refs once, freeze the complete graph, and include every node/edge/config/ref
-digest in $D_H$.
+M-3C MUST NOT add `agent.spawn`, concurrency, swarms, topology engines, retrieval redesign, DPO,
+VFE/EFE, automatic promotion, a sixth SPI, a new event kind without allocation and writer proof, a
+third runtime tree, or packages created merely to mirror conceptual planes.
+
+The Higgs documents are corrective research inputs, not authority. Their proposals become binding
+only through the law/ADR/execution precedence defined by `SPEC.md`.
+
+### Decision rights
+
+| Group | Delegated authority | Mandatory escalation |
+|---|---|---|
+| **Devs A — Principal / Specialist / PhD lane** | Independently decide reversible internal boundaries, normalized composition representation, interface ownership, activation sequencing, migration mechanics, and cross-module implementation within the frozen law and this charter. Own the hardest architecture and integration work. | Any change to normative invariants, authority semantics, TCB scope/ceiling, hashes/JCS, event taxonomy, SPI roster, evaluator boundary, concurrency gate, or release authorization requires a successor ADR and the named Director approval. |
+| **Devs B — Senior Development lane** | Implement frozen contracts through packs, adapters, fixtures, persistence wiring, caller migration, conformance tests, CI, and bounded documentation synchronization. May make local implementation choices that do not alter an interface or authority boundary. | Must stop and return a falsifier when a task requires an unresolved architecture decision, kernel/identity/event redesign, or widening of scope. |
+
+Neither lane may be the sole acceptance authority for its own cross-lane gate. Devs A own shared
+architecture hotspots; Devs B integrate only after the relevant contract is frozen.
+
+## 3. Authorized Sprint Sequence
+
+### Sprint 3C.0 — Authority reconciliation and RED contract
+
+The two lanes start in parallel, but production refactoring remains closed until Gate G0.
+
+| Lane | Authorized work | Owned surfaces | Evidence / completion |
+|---|---|---|---|
+| **A0 — Architecture lock** | Reconcile `mhf.manifest/2` versus `mhf.harness/1`; define one authored shape, normalized internal value, freeze boundary, activation ownership, run-plan boundary, binding-provider contract, lifecycle lineage, persistence rule, evidence derivation rule, and compatibility sunset. Decide whether existing ADR-0077/0081 suffice or prepare the minimal successor ADR and atomic law amendments. Allocate new RF identifiers before creating new falsifiers. | `docs/SPEC.md`, affected `docs/01_law/`, successor ADR/index proposal, schemas and cross-module contract map. | Every open decision is classified frozen, retained compatibility, amended, or deferred; no contradiction remains between co-normative leaves; RF ownership is allocated. |
+| **B0 — Baseline and characterization** | Produce a claim-to-code-to-test matrix; enumerate every production caller of legacy and v2 readers, compilers, bindings, registry, release stores, and M-4 audit. Prepare bounded characterization fixtures for code and table packs without changing production behavior. | Existing tests/fixtures, pack inventories, CI and caller maps; no architecture hotspot edits. | Current `main` fails the proposed public-path claims for the diagnosed reason; no environment failure is mistaken for architectural evidence. |
+
+**Gate G0 — decision and RED lock:** ADR-0088 and the law amendments are ratified; RF-78–RF-84 are
+allocated. G0 remains open until RF-78/RF-79 target the public runtime and fail
+for the intended defect. Only then may Sprints 3C.1–3C.3 change production code.
+
+### Sprint 3C.1 — Canonical composition and two-domain ingress
+
+| Lane | Authorized work | Owned surfaces | Evidence / completion |
+|---|---|---|---|
+| **A1 — Canonical composition core** | Implement one schema-authoritative reader/normalizer and one immutable composition result; resolve refs, interfaces, ceilings, isolation, profiles, entrypoints, and all behavior-affecting identity inputs once. Make the public `Runtime.compose()` consume this result. Names such as `FrozenComposition`, `ActivationPlan`, or `RunPlan` are adopted only if G0 ratifies their distinct responsibilities. | `schemas/mhf/manifest_v2.schema.json`, `domain/artifacts/manifest.py`, `runtime/compose.py`, `runtime/registry/compiler.py`, narrow wiring interfaces. | Legacy compatibility input and authored `/2` converge to the same normalized facts and `D_H`; unknown/unconsumed authority fails before run; no second parser is production authority. |
+| **B1 — Packs and binding providers** | Convert `vg-code-default` and `vg-table-default` to the ratified authored shape; implement domain-provided, namespaced binding adapters against A1's frozen interface; add golden and differential fixtures. | `packs/`, `agency/manifests/`, domain adapters outside `domain/` and `kernel/`, pack/adapter/contract tests. | Both packs compose through the same public API; table verbs require no global coding-specific binding row; zero changes to `kernel/` or `agency/episode/`. |
+
+**Gate G1 — composition identity (RF-78/RF-79):** both domains compose through one public boundary; edge/config/ref
+changes alter `D_H`; compatibility preserves declared facts without inventing defaults; the normalized
+value contains no legacy-only authority. Non-sequential profiles and `agent.spawn` remain named
+pre-authorization refusals until M-7 and M-6 respectively.
+
+### Sprint 3C.2 — Activation, lifecycle, and deterministic cleanup
+
+| Lane | Authorized work | Owned surfaces | Evidence / completion |
+|---|---|---|---|
+| **A2 — Public activation** | Join canonical composition to one runtime-owned activation/run boundary and registry-owned lifecycle. Bind every activated component to the same run lineage; define deterministic reverse-order cleanup for compose, verify, activation, call, cancellation, evaluator failure, and crash paths. | `runtime/compose.py`, `runtime/root.py`, `runtime/session.py`, `runtime/registry/`, `runtime/wiring.py`. | Public execution walks discover→resolve→verify→activate→call→quiesce→retire; fault paths end fault→cleanup→retire; no plugin can mint grants, judge, or write privileged history. |
+| **B2 — Lifecycle integration** | Migrate callers and pack adapters to A2; extend echo, code, and table integration fixtures; cover UDS permissions, typed in-process parity, timeout, crash, cancellation, evaluator failure, log isolation, and cleanup. | Pack/adapters, caller tests, registry/integration fixtures; A-owned hotspots only through reviewed integration patches. | Code and table probes activate and retire through the same public runtime and lineage; injected failures leave no socket/process/workspace leak. |
+
+**Gate G2 — executable canonical path (RF-80/RF-81):** both domain probes compose, activate, execute, and clean up
+through one runtime authority; registry events are reachable, owner-written, and reducible; no graph
+edge becomes runtime scheduling.
+
+### Sprint 3C.3 — Release durability and source-derived M-4 evidence
+
+| Lane | Authorized work | Owned surfaces | Evidence / completion |
+|---|---|---|---|
+| **A3 — Durable identity/evidence join** | Bind composition, activation, run, event range, trajectory, containment, and verdict identities; replace self-attested M-4 booleans with derivation or verification against canonical artifacts; preserve absent/forged distinctions. | `runtime/session.py`, trajectory/evaluator/evidence seams, event projections, narrowly required schemas. | Evidence rows cross-bind one lineage and recomputable `D_H/D_R/D_X`; cryptographic verdict verification is authoritative; unsupported claims remain absent, never pass. |
+| **B3 — Release runner and fault proof** | Make the release/E2E path require an explicit file-backed SQLite-WAL store; add fresh-process continuation, durable-intent, cold reconstruction, and clean-Linux environment probes. Wire the nine-row auditor to derived artifacts without fabricating a real run. | Release/lab runner, store configuration, adapters, integration/falsifier fixtures and CI jobs. | Hard process death reconstructs the same composition/run/trajectory identity and does not repeat a settled effect; `:memory:` remains test/local-only and cannot certify M-4. |
+
+**Gate G3 — durable evidence lineage (RF-82/RF-83):** one synthetic hermetic integration fixture proves the complete
+shape and negative cases, while remaining explicitly ineligible for M-4. Altered cross-digests,
+text-only signatures, mixed lineages, unverified containment, missing cost status, or asserted defaults
+must deny.
+
+### Sprint 3C.4 — Legacy retirement and independent certification
+
+| Lane | Authorized work | Owned surfaces | Evidence / completion |
+|---|---|---|---|
+| **A4 — Authority retirement** | Remove or make ingress-only every competing production parser, compiler, binding authority, activation route, and default in-memory release path after differential parity. Audit import/runtime traces and architecture diff. | Production composition/activation/runtime surfaces and enforcement linters. | Exactly one public authority remains; supported legacy bytes terminate at the compatibility boundary and cannot survive as an execution value. |
+| **B4 — Migration close** | Migrate remaining callers, tests, packaging, CI, and living navigation; run the complete conformance, recovery, security, and documentation gates from a clean clone/environment. | Callers, tests, fixtures, packaging, workflows, existing canonical docs. | No stale production path, duplicate dialect, hidden binding table, package entry, or navigation claim remains. |
+
+**Gate G4 — M-3C closure (RF-84):** independent review confirms G0–G3, both domains use one public path,
+supported legacy ingress is bounded through M-4, no competing production authority remains, full
+suites and architecture/security/documentation gates are green, and rollback does not restore dual
+authority. Only the Engineering Director may then mark M-3C closed and open M-4.
+
+## 4. Parallel Integration Protocol
+
+1. Devs A publish the smallest frozen interface and red contract for each sprint before dependent
+   Devs B production work begins; B0 characterization may proceed immediately.
+2. Exclusive A hotspots are `domain/artifacts/manifest.py`, manifest schemas, `runtime/compose.py`,
+   `runtime/root.py`, `runtime/session.py`, `runtime/wiring.py`, and `runtime/registry/`. Devs B own
+   packs, adapters, fixtures, caller migration, runner configuration, and CI unless a reviewed
+   integration patch is explicitly assigned.
+3. Merge order per slice is `A contract/RED -> B rebase and implementation -> A integration ->
+   cross-lane gate -> independent review`; there is no repository-wide “A finishes before B starts”.
+4. Every PR states requirement/ADR, affected modules, dependency, risk, acceptance falsifier,
+   evidence artifact, rollback, and prohibited scope.
+5. Rollback is per reversible slice. A compatibility reader may be retained through M-4; a second
+   production authority may not be retained as fallback.
+
+### Common verification sequence
 
 ```text
-bytes -> schema/reader -> canonical manifest value -> resolve immutable refs
-      -> validate endpoints/interfaces/authority/cycles/ceilings -> JCS freeze -> D_H
+red falsifier confirmed -> focused suites -> cross-lane integration gate
+-> full production suites -> codegen/schema vectors
+-> boundaries/TCB/domain/isolation/duplication
+-> RF IDs/metadata/links/stale paths/secrets -> independent evidence review
 ```
 
-**Fail closed:** unknown fields/refs/SPI kinds/endpoints/interfaces/isolation; self-edge; unread or
-unconsumed authority; empty/incomparable ceiling; eager cycle. Only typed lazy post-activation
-cycles are legal. Profiles and `agent.spawn` fields enter identity but remain inert with their
-named pre-authorization refusal.
+## 5. M-4 Hold Contract
 
-**Do not build:** graph scheduling, component-name kernel branches, another parser, another episode
-engine, or dynamic turn order.
+M-4 preparation may provision a real provider, evaluator identity, rootless Linux environment, and
+preregistered coding task/oracle, but no run may be claimed as M-4 evidence before G4. After G4, M-4
+executes one uninterrupted `run_id` through the canonical release path and must populate all nine
+rows defined in [`milestones.md`](milestones.md#m-4-single-run-evidence-contract) under RF-85. Mock, cassette,
+stitched trace, manual repair, host fallback, or separately passing runs remain ineligible.
 
-**Gate:** RF-28–RF-33, RF-46, RF-73–RF-74, RF-76; edge-only change changes $D_H$; compatibility
-rows preserve facts without invented defaults; no production parser besides the canonical reader.
+## 6. Completed Evidence Kept in Force
 
-### Sprint 3.2 — Registry and isolation parity
-
-**Implement:** bind the packages registry FSM to `LedgerEmitter.registry()` and the canonical event
-catalog/reducer. For subprocess/container tiers use one JSON-RPC 2.0 schema over a mode-0600 UDS;
-for policy-granted `in_process`, use direct typed dispatch with identical method/result semantics.
-Enforce allowed methods, timeout, ceiling, cleanup, child-death containment, and isolated logs.
-
-```text
-discover -> resolve -> verify(D_H, ceiling result) -> activate -> call
-         -> quiesce -> retire
-any live state -> fault -> cleanup -> retire
-```
-
-Every entered state emits exactly one registry-owned event carrying plugin ID and manifest digest;
-verification also carries graph and ceiling digests. Never emit secrets, prompts, raw context, or
-private keys. Plugin code cannot mint grants, call the evaluator, or write privileged events.
-
-**Gate:** RF-34–RF-44, complete echo lifecycle and injected-crash lifecycle, event catalog/codegen,
-socket permissions, timeout/crash/capability-denial/cleanup tests, and registry-only writer proof.
-
-### Sprint 3.3 — Atomic convergence close
-
-**Implement:** prove all callers, tests, packaging, CI, and living navigation use packages paths;
-prove no duplicate parser/writer/reducer/dialect remains. Layer-0 deletion is evidence only after
-3.1 and 3.2 are green.
-
-**Gate:** RF-45/NOVA-4, boundary/duplication/stale-path/codegen/secret checks, all production suites,
-and zero Layer-0 source/package/test/CI/navigation entries. **Status: GREEN.**
-
-The historical transitional command `python3 -m unittest discover -s test/layer0 -t .` is
-intentionally obsolete: the directory is absent after atomic retirement and must not be recreated.
-
-### Active verification commands
-
-```bash
-python3 -m unittest test.falsifiers.test_rf38_rf45_plugin_lifecycle -v
-python3 -m unittest discover -s test/registry -t .
-python3 -m unittest test.contracts.test_event_coverage -v
-python3 -m unittest test.runtime.test_compatibility_readers -v
-python3 -m unittest discover -s test/packs -t .
-PYTHONPATH=tools/common python3 tools/codegen/generate_types.py --check
-python3 tools/linters/check_boundaries.py
-python3 tools/linters/check_tcb_budget.py
-python3 tools/linters/check_duplication.py --enforce
-python3 tools/linters/check_stale_paths.py
-```
-
-M-4 cannot be promoted by a mock, cassette, or unavailable provider. In this workspace the
-real-run gate is blocked because `OPENROUTER_API_KEY` and `DEEPSEEK_API_KEY` are unset and no
-local Ollama/evaluator endpoint is available. The runtime reports that as an instrument failure.
-The pure nine-row auditor is implemented and fail-closed: duplicate rows, discontinuous lineage,
-unverified signatures, incomplete sandbox probes, host fallback, synthetic providers, incomplete
-WAL/cold-replay evidence, and alternate runtime authority all deny promotion. This validator is
-preparation evidence only; it cannot create or replace the required real run.
-
----
-
-## 3. Completed Wave 2C Gate Reference (M-2 / v0.6.1)
-
-Ratified by Engineering Leadership on 2026-08-21 (ADRs [`0077`](../02_decisions/0077-named-component-graph-manifest.md)–[`0086`](../02_decisions/0086-historical-adr-working-tree-consolidation.md)). M-2 re-gate requires both primary gates green.
-
-| Gate | Decision | Falsifier Test | Owner | Status |
-|---|---|---|---|---|
-| **RF-72 / Identifier Governance** | ADR-0085 | `test/tools/test_check_falsifier_ids.py` | Tooling | **GREEN** (Unit tests + linter pass) |
-| **RF-23 / NOVA-1 Trajectory** | ADR-0078 | `test/falsifiers/test_rf23_trajectory_content.py` | Developer A | **GREEN** (Measured, attributable, conserved) |
-| **RF-25 / NOVA-2 Continuation** | ADR-0082 | `test/falsifiers/test_rf25_cold_continuation.py` | Developer B | **GREEN** (Cold continuation, lease reconciled) |
-
-> *Note:* RF-24 (cost-writer authority) and RF-27 (digest separation) are supporting assertions under RF-23.
-
-### Immediate File Ownership & Boundaries
-
-- **Developer A (NOVA-1 / RF-23):** Owns `schemas/mhf/trajectory.schema.json`,
-  `vanguard/packages/runtime/trajectory.py`, telemetry/model attribution, and the trajectory assembly
-  join in `vanguard/packages/runtime/session.py`.
-- **Developer B (NOVA-2 / RF-25):** Owns `vanguard/packages/runtime/ledger/recovery.py`, the
-  file-backed SQLite-WAL continuation path, and the recovery seam in
-  `vanguard/packages/runtime/session.py`.
-- **Shared hotspot (`vanguard/packages/runtime/session.py`):** Developer B lands the narrow resume
-  seam first; Developer A rebases and joins trajectory assembly.
-- **Merge Order:** (1) RF-72 governance lock → (2) Developer B resume seam → (3) Developer A trajectory accounting → (4) Combined M-2 re-gate.
-
----
-
-## 4. Completed M-2 Implementation Contracts
-
-### Developer A — NOVA-1 / RF-23 (3–4 working days)
-- Implement `assemble_trajectory()` over the verified pre-crash prefix plus current-process turns,
-  deduplicated by durable event identity and ordered by ledger sequence.
-- Populate every turn with an ordered `invocations` sequence covering retries, fallbacks, critic
-  calls, and escalations; record resolved model routes and explicit measurement statuses
-  (`measured`, `estimated`, `unavailable`).
-- Conserve invocation → turn → episode additive costs from adapter telemetry and ledger settlements
-  without fabricated zeros.
-- Bind final state/event ranges and compute $D_R$ without altering $D_H$.
-- Derive legacy/promotability status (never accept from input).
-- Preserve legal zero-turn aborted episodes (`model_not_invoked`).
-- **Constraint:** Do not add a second accounting store or edit `vanguard/packages/kernel/`.
-
-### Developer B — NOVA-2 / RF-25 (2–3 working days)
-- Use file-backed SQLite WAL as the sole state source in a fresh Python interpreter.
-- Fold and expose the verified durable event prefix; restore budgets, digests, and sequence state.
-- Reconcile every pending Governor lease: release uncommitted reservations or preserve an
-  undeterminable reservation until exterior reconciliation, preventing both budget leak and reuse.
-- Classify open S8a intent as undeterminable unless exterior reconciliation confirms effect.
-- Ledger `RunRecovered` via canonical `LedgerEmitter`.
-- Continue execution without repeating settled effects or guessing uncertain ones.
-- **Constraint:** Do not transfer live objects, create a second reducer/session, or edit `kernel/`.
-
----
-
-## 5. Completed Wave 2C Actions
- 
-- [x] **2C-R25 — Developer B:** Implement fresh-process SQLite-WAL continuation; restore the
-  verified durable prefix; reconcile pending Governor leases without budget leakage; preserve open
-  effects as undeterminable until reconciliation; emit `RunRecovered` through `LedgerEmitter`; and
-  continue without replaying settled effects. Gate: RF-25
-  (`test/falsifiers/test_rf25_cold_continuation.py`).
-- [x] **2C-R23 — Developer A:** Implement `assemble_trajectory()` over pre-crash history and current
-  turns; record ordered `invocations`, resolved model routes, and `measured`/`estimated`/`unavailable`
-  status; enforce invocation → turn → episode cost conservation; derive eligibility; and emit the
-  complete `mhf.trajectory/1` row. Gate: RF-23
-  (`test/falsifiers/test_rf23_trajectory_content.py`), with RF-24 and RF-27 supporting.
-- [x] **2C-COMBINED — Developers A + B:** Integrate both seams in
-  `vanguard/packages/runtime/session.py`; prove that a recovered episode includes each pre- and
-  post-crash event/turn exactly once, carries continuous digest/budget lineage, and produces a
-  complete trajectory. Gates: RF-23 and RF-25 green together.
-- [x] **2C-REGATE — Tech Lead:** Run the complete M-2 falsifier suite plus all documentation,
-  architecture, TCB, isolation, secret, and governance checks; record approval only when every
-  command exits 0 and no new `layer0/` or duplicate state surface exists.
-
-Queued work remains non-authoritative here. Its implementation briefs and objective acceptance
-gates live in [`milestones.md` § Developer Implementation Briefs](milestones.md#developer-implementation-briefs).
-
-### Definition of Done (All Tasks)
-1. Named falsifiers pass on `vanguard/packages/`.
-2. All production test suites remain green (`test/kernel`, `test/contracts`, `test/agency`, `test/packs`).
-3. Linters pass: `check_boundaries.py`, `check_tcb_budget.py` ($\le 1438$ LOC), `check_domain_blindness.py`, `check_falsifier_ids.py`, `check_markdown_links.py`, `scan_secrets.py`.
-4. No new `layer0` imports or duplicated state reducers.
-
----
-
-## 6. Completed Waves Evidence Summary
-
-| Milestone | Scope | Result | Key Evidence Pointers | Closed Date |
-|---|---|---|---|---|
-| **M-0 (Wave 0)** | CI Truth & Falsifiers | **PASSED** | CI workflow `ci.yml` measures `vanguard/packages/`; F-01…F-21 registered; codegen checked. | 2026-08-20 |
-| **M-1 (Wave 1)** | Trust Spine | **PASSED** | Signed verdicts (`test_signed_verdict.py`), single writer `LedgerEmitter`, typed budgets, complete $D_H$. | 2026-08-21 |
-| **M-2 (Wave 2)** | Convergence Core | **PASSED** | Round-4 submission: 56 event kinds catalogued & folded in `reducer.py`, duplicate `layer0/kernel` deleted, `root.py` split into `compose.py`/`session.py`/`wiring.py`. | 2026-08-21 |
-| **Wave 2C (M-2 re-gate)** | Evidence Integrity & Cold Recovery | **PASSED** | RF-23 trajectory un-hollowing with conserved costs + RF-25 fresh-process SQLite-WAL continuation green. | 2026-08-23 |
-
----
+| Milestone | Retained result |
+|---|---|
+| M-0 | CI subject of record and named falsifiers. |
+| M-1 | S0–S12 Trust Spine, signed verdicts, single writer, typed budgets, and bounded TCB. |
+| M-2 / 2C | RF-23 truthful `mhf.trajectory/1` and RF-25 fresh-process continuation. |
+| M-3 partial | Named-graph schema/compiler contracts, registry lifecycle components, and atomic `layer0/` source/package/CI retirement. Operational canonical-path closure is the sole reopened scope. |
 
 ## 7. Director Escalation Boundaries
 
-Only the Engineering Director may authorize:
-- Altering the Trusted Computing Base (TCB) budget threshold ($\le 1438$ LOC).
-- Introducing new event kinds or a sixth SPI protocol.
-- Modifying canonicalization (RFC 8785 JCS) or hash algorithms.
-- Enabling runtime concurrency prior to the M-7 gate.
-- Authorizing release versions post-M-4.
+Only the Engineering Director may authorize changing the TCB threshold, normative authority or security
+invariants, canonicalization/hash algorithms, event-kind or SPI rosters, evaluator trust boundary,
+concurrency before M-7, M-3C closure, M-4 opening, or release versions after M-4.

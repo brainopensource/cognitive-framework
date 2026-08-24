@@ -7,7 +7,7 @@ canonical_for:
   - isolation-and-tcb-law
 status: living
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 read_when:
   - changing-capabilities

@@ -12,11 +12,11 @@ derived_from:
   - vanguard/packages/ports/evaluator.py
   - vanguard/packages/adapters/evaluators/daemon.py
 applies_to:
-  - v0.6.1
+  - v0.6.2
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.6.1"
-last_verified: 2026-08-21
+version: "0.6.2"
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -55,3 +55,5 @@ class Verdict:
     binding: Mapping[str, Any] | None = None
 ```
 - **Binding Rule**: `runtime/evaluator_gateway.py` refuses to ledger a `VerdictRecorded` without an Ed25519 cryptographic signature over canonical JCS bytes.
+- **Foundation Rule**: the M-4 auditor verifies the exterior signature and its canonical lineage
+  bindings itself; it never promotes a caller-supplied boolean to evidence.

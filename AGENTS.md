@@ -7,8 +7,8 @@ canonical_for:
   - repository-anti-sprawl-rules
 status: living
 owner: repository-governance
-version: "0.6.1"
-last_verified: 2026-08-21
+version: "0.6.2"
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
@@ -43,7 +43,7 @@ All documentation is strictly partitioned into three distinct authority tiers:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0087`](docs/02_decisions/0087-documentation-topology-context-budgets-and-archive-boundary.md).
+- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md).
 - **The Decisions**: [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md).
 - **The Execution**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) & [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md).
 
@@ -125,10 +125,11 @@ python3 tools/linters/check_stale_paths.py        # Stale documentation path che
 Execution sequence:
 1. **Wave 0 (COMPLETE)**: CI Truth & Named Falsifiers (`vanguard/packages` as sole subject of record).
 2. **Wave 1 (COMPLETE - GREEN)**: Fail-Closed Trust Spine (bound signed verdicts, single emitter, typed budgets, `mhf.trajectory/1`).
-3. **Wave 2 (IN FLIGHT)**: Convergence core is complete; M-2 now closes on RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation. These are the two authorized parallel development lanes.
-4. **Wave 3 (QUEUED)**: Extensibility & Plugin Walking Skeleton (named component graphs, registry lifecycle on wire).
-5. **Wave 4 (QUEUED - Foundation Stop)**: First Real Coding-Agent E2E (one real run with zero human cheating).
-6. **Waves 5–10 (Macro Roadmap)**: Generality proof (Pack #2), mediated `agent.spawn`, concurrency, and Meta-Cognition.
+3. **Wave 2 (COMPLETE - GREEN)**: RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation close M-2.
+4. **Wave 3C (ACTIVE)**: M-3 contracts are retained, but operational closure is reopened as M-3C Canonical Composition Convergence under ADR-0088. Devs A own architecture/core convergence while Devs B implement bounded packs, adapters, fixtures, callers, and CI against frozen interfaces.
+5. **Wave 4 (FROZEN - M-3C + ENVIRONMENT)**: M-4 may open only after M-3C proves one production authority; then one real uninterrupted coding run must derive all nine evidence rows.
+6. **Waves 5–8 (LOCKED ROADMAP)**: M-5 generality, M-6 mediated delegation, M-7 measured scheduler/concurrency, and M-8 declarative topologies are concept-locked but not implementation-authorized.
+7. **Waves 9+ (POST-v1 RESEARCH)**: retrieval/macro experiments and governed meta-cognition remain exterior, non-authorizing horizons.
 
 Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.

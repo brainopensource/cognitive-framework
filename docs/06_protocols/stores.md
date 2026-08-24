@@ -14,7 +14,7 @@ applies_to:
   - v0.6.1
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-21
 supersedes: []
 superseded_by: null
@@ -49,3 +49,10 @@ class EventStorePort(Protocol):
         """Return the number of stored events."""
         ...
 ```
+
+## Release durability rule
+
+M-3C/M-4 release execution MUST receive an explicit file-backed SQLite store configured for WAL and
+the required synchronous durability. `:memory:` remains permitted for local/hermetic fixtures but is
+ineligible for foundation evidence. Fresh-process continuation reopens only the file and immutable
+artifacts; live Python objects are never recovery input (RF-82).

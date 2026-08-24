@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.6.1"
-last_verified: 2026-08-21
+version: "0.6.2"
+last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER / Vanguard Substrates Upgrade — Version 6 (Concept Lock v0.6.1 Clean)
+# AETHER / Vanguard Substrates Upgrade — Version 6 (Concept Lock v0.6.2)
 
 A verifiable, capability-attenuated recursive-agency substrate.
 
@@ -23,15 +23,15 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.6.1 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0087`](docs/02_decisions/0087-documentation-topology-context-budgets-and-archive-boundary.md) |
+| **Concept Lock** | v0.6.2 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-2 / v0.6.1 Wave 2C development active.** RF-72 is green; RF-23 (NOVA-1) and RF-25 (NOVA-2) are red for their intended causes and authorized as parallel implementation lanes. |
-| **Foundation Plan** | M-0–M-4 trusted foundation, then gated M-5–M-10 generality, delegation, concurrency, framework building, retrieval/macros, and governed meta-cognition |
+| **Status** | **M-3C (v0.6.2 Canonical Composition Convergence) active under ADR-0088.** M-4 is frozen until RF-78–RF-84/G0–G4 prove the canonical path and real environment readiness. |
+| **Foundation Plan** | M-3C convergence → M-4 real nine-row proof → M-5 Formal Pack #2 → M-6 mediated spawn → M-7 measured concurrency → M-8 declarative topologies; M-9+ remains post-v1 research |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Director_review-M--2_Wave_2C-brightgreen.svg)](docs/03_execution/sprint_active.md)
+[![Approved](https://img.shields.io/badge/Active_Sprint-M--3C_Convergence-brightgreen.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. Executive Summary & Documentation Architecture
 
@@ -175,8 +175,8 @@ Execution status and macro milestones are tracked in:
 - **Active Execution Board**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md)
 
 ```text
-M-0 (Complete) ──▶ M-1 (Complete) ──▶ M-2 (Complete) ──▶ M-3 (Active) ──▶ M-4 (Foundation Stop) ──▶ M-5..M-10 (Gated)
-[CI Truth/Falsif]   [Trust Spine]      [Corpus + Resume] [Extensibility] [One Real Coding E2E]    [Generality → v1.0]
+M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Active) -> M-4 -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
+[Trust foundation]     [retained]       [convergence]     [real]  [formal] [spawn] [scale] [topology]    [post-v1]
 ```
 
 ---

@@ -7,7 +7,7 @@ canonical_for:
   - evaluator-verdict-law
 status: living
 owner: principal-systems-architect
-version: "0.6.1"
+version: "0.6.2"
 last_verified: 2026-08-23
 read_when:
   - changing-trajectories-or-costs
@@ -46,3 +46,23 @@ or forged verdict is a hard failure, never an absence. See
 
 `D_H` identifies the complete harness composition; `D_R` adds runtime, environment, model, and oracle;
 `D_X` adds dataset and protocol. These identities MUST remain distinct in evidence and promotion.
+
+## Foundation evidence bundle (M-4)
+
+`mhf.foundation-evidence/1` is a derived audit artifact, not a new authority ledger. Its header binds
+one `project_id`, `run_id`, `episode_id`, `D_H`, `D_R`, optional `D_X`, ledger range, terminal chain
+digest, task/oracle preregistration, and the immutable source digest for each required row.
+
+The nine rows derive respectively from: model invocation/usage; kernel authorization/grant/budget and
+effect events; workspace artifact receipts; containment attestation/probes; evaluator-gateway
+signature verification; file-backed WAL chain; fresh-process reconstruction; the emitted rich
+trajectory; and import/runtime trace of the canonical composition/activation/session authority.
+
+The auditor MUST recompute a claim or invoke its authoritative verifier. It MUST NOT trust submitted
+booleans such as `signature_verified`, `cost_conserved`, or `sandboxed`, nor invent a canonical path
+when absent. Every row cross-binds the same composition, run/episode lineage, event range, and source
+artifacts. A textual signature, altered digest, mixed lineage, missing measurement status, unattested
+probe, fake/cassette provider, host fallback, manual repair, or stitched trace denies.
+
+A hermetic synthetic bundle may prove the M-3C validator and negative cases but is permanently
+ineligible for M-4. M-4 requires independent verification of one uninterrupted real run (RF-85).

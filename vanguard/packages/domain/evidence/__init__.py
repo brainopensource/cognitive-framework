@@ -15,6 +15,15 @@ from .claim import (
     Validity,
     parse_claim,
 )
+from .foundation import (
+    API as FOUNDATION_EVIDENCE_API,
+    EvidenceRow,
+    FoundationEvidence,
+    FoundationEvidenceError,
+    absent,
+    build_foundation_evidence,
+    derived,
+)
 from .guardrails import derive_evidence_state
 
 __all__ = [
@@ -30,4 +39,11 @@ __all__ = [
     "REQUIRED_ROW_COUNT",
     "REQUIRED_ROW_NAMES",
     "audit_foundation_evidence",
+    "FOUNDATION_EVIDENCE_API",
+    "EvidenceRow",
+    "FoundationEvidence",
+    "FoundationEvidenceError",
+    "absent",
+    "build_foundation_evidence",
+    "derived",
 ]

@@ -30,8 +30,8 @@ merges exist.
 | **M-1 Trust Spine** | v0.6.0 | Unforgeable authority, state, identity, and signed evidence | S0–S12 falsifiers green; single writer; exterior verifier; TCB `<= 1438` LOC | **COMPLETE (GREEN)** | M-0 |
 | **M-2 One runtime and recovery** | v0.6.1 | Truthful trajectories and restart-safe state | RF-23 rich/conserved `mhf.trajectory/1` plus RF-25 fresh-process SQLite-WAL continuation | **COMPLETE (GREEN)** | M-1 |
 | **M-3 Extensibility contracts** | v0.6.2 | Named graph, packages registry lifecycle, and Layer-0 retirement components | RF-28…RF-45 and prior NOVA-4 evidence retained | **OPERATIONAL CLOSURE REOPENED** | M-2 |
-| **M-3C Canonical Composition Convergence** | v0.6.2 | One canonical public `compose -> freeze -> activate -> run` authority across code and table probes | G0–G4 / RF-78–RF-84: canonical identity, lifecycle, durable evidence lineage, zero competing production authority | **ACTIVE; CONCEPT LOCKED BY ADR-0088** | M-2 plus retained M-3 evidence |
-| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **FROZEN — M-3C + ENVIRONMENT; CONCEPT LOCKED** | M-3C |
+| **M-3C Canonical Composition Convergence** | v0.6.2 | One canonical public `compose -> freeze -> activate -> run` authority across code and table probes | G0–G4 / RF-78–RF-84: canonical identity, lifecycle, durable evidence lineage, zero competing production authority | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | M-2 plus retained M-3 evidence |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **ACTIVE — ENVIRONMENT QUALIFICATION; CONCEPT LOCKED** | M-3C |
 
 ### Why M-3C exists
 
@@ -117,12 +117,12 @@ sequencing without duplicating implementation instructions.
 
 | Sprint | Primary outcome | Parallel ownership | Gate / dependency | State |
 |---|---|---|---|---|
-| **3C.0** | Ratify authority, reconcile law, allocate falsifiers, and confirm RED against the public path | A: architecture/decision; B: baseline/characterization | G0; M-2 and retained M-3 evidence | **ACTIVE** |
-| **3C.1** | Canonical authored manifest, normalization, composition identity, and code/table ingress | A: core contract/path; B: packs/binding providers/vectors | G1 after G0 | **QUEUED IN ACTIVE WAVE** |
-| **3C.2** | Public activation, registry lifecycle, shared lineage, and deterministic cleanup | A: runtime/registry integration; B: caller/lifecycle/fault integration | G2 after G1 | **QUEUED IN ACTIVE WAVE** |
-| **3C.3** | File-backed release durability and source-derived evidence bundle | A: identity/evidence join; B: runner/recovery/environment fixtures | G3 after G2; preparatory sub-slices may start after G0 interfaces freeze | **QUEUED IN ACTIVE WAVE** |
-| **3C.4** | Retire alternate authority and independently certify convergence | A: production retirement/audit; B: migration/full gates/docs sync | G4 after G1–G3 | **QUEUED IN ACTIVE WAVE** |
-| **4.1** | One real coding-agent run from preregistration to signed completion | Release + independent evidence review | M-3C/G4 and real provider/evaluator environment | **FROZEN** |
+| **3C.0** | Ratify authority, reconcile law, allocate falsifiers, and confirm RED against the public path | A: architecture/decision; B: baseline/characterization | G0; M-2 and retained M-3 evidence | **COMPLETE** |
+| **3C.1** | Canonical authored manifest, normalization, composition identity, and code/table ingress | A: core contract/path; B: packs/binding providers/vectors | G1 after G0 | **COMPLETE** |
+| **3C.2** | Public activation, registry lifecycle, shared lineage, and deterministic cleanup | A: runtime/registry integration; B: caller/lifecycle/fault integration | G2 after G1 | **COMPLETE** |
+| **3C.3** | File-backed release durability and source-derived evidence bundle | A: identity/evidence join; B: runner/recovery/environment fixtures | G3 after G2; preparatory sub-slices may start after G0 interfaces freeze | **COMPLETE** |
+| **3C.4** | Retire alternate authority and independently certify convergence | A: production retirement/audit; B: migration/full gates/docs sync | G4 after G1–G3 | **COMPLETE** |
+| **4.1** | One real coding-agent run from preregistration to signed completion | Release + independent evidence review | M-3C/G4 and real provider/evaluator environment | **ACTIVE — ENVIRONMENT QUALIFICATION** |
 | **5.1** | Math/Formal Pack #2 generality proof | Future allocation | M-4 | **LOCKED** |
 | **5.2** | Exact attributable T0 witness and consolidation | Future allocation | Sprint 5.1 | **LOCKED** |
 | **6.1** | Capability-mediated `agent.spawn` | Future allocation | M-5 | **LOCKED** |

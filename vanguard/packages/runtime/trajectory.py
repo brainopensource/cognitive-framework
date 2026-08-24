@@ -120,6 +120,7 @@ def assemble_trajectory(
     state_digest: str | None = None,
     model: Any = None,
     environment: Any = None,
+    run_plan: Any = None,
 ) -> dict[str, Any]:
     turns: list[dict[str, Any]] = []
     proposals = [
@@ -217,7 +218,7 @@ def assemble_trajectory(
         "models": [f"{r['provider']}:{r['model']}" for r in model_routes_used],
         "oracle": getattr(verdict, "oracle_id", "oracle-default") if verdict else "none",
     }
-    execution_digest = digest_of(d_r_payload)
+    execution_digest = getattr(run_plan, "run_digest", "") or digest_of(d_r_payload)
 
     seqs: list[int] = []
     for ev in events:
@@ -265,6 +266,9 @@ def assemble_trajectory(
         "parent_episode_id": getattr(task, "parent_episode_id", None),
         "principal_id": getattr(task, "principal", "agent-1"),
         "harness_digest": harness_digest,
+        "activation_digest": getattr(run_plan, "activation_digest", None),
+        "run_digest": execution_digest,
+        "task_digest": getattr(run_plan, "task_digest", None),
         "execution_digest": execution_digest,
         "state_digest": state_digest,
         "event_range": event_range,

@@ -20,10 +20,10 @@ composed anything, never ran a turn, and returned
 whether any work happened. A harness that reports completion for work it did
 not do is worse than one that reports nothing (`REQ-TRUST-001`).
 
-It now composes a real `Harness`, runs a real `HarnessSession`, and reports
+It now composes a real `Harness`, enters the runtime-owned activation boundary, and reports
 what the ledger says. Greenfield and bugfix are the same path: one compose, one
 episode tree, tools, receipts, ledger. There is no second agent loop here --
-the repair driver re-enters `HarnessSession.run()` and nothing else.
+the repair driver re-enters `Runtime.run_composed()` and nothing else.
 
 CLI:
   python3 -m vanguard.packages.runtime.lab_driver --pack vg-code-default --task-dir DIR
@@ -56,7 +56,7 @@ from .determinism import SystemClock
 from .model_selection import ModelUnavailable, select_model
 from .outcome_labels import classify_instrument_error
 from .repair import StopReason, drive_until_green
-from .root import HarnessSession, Runtime, SessionPorts, TaskContext
+from .root import Runtime, SessionPorts, TaskContext
 from .session_log import session_log
 
 DEFAULT_BRIEF = ("Inspect the workspace, make the failing suite pass, and run "
@@ -202,7 +202,7 @@ def run_lab_task(
         task = TaskContext(
             brief=brief, repo_path=task_path,
             run_id="lab-run", episode_id=episode_id, max_turns=max_turns)
-        return HarnessSession(harness, ports, task).run()
+        return Runtime.run_composed(harness, ports, task)
 
     # The oracle runs the task's **own** declared command, after the episode,
     # through the same sandbox. Reading the agent's `proc.exec` receipts

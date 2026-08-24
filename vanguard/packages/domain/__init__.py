@@ -50,6 +50,7 @@ from .selectors.independence import (
 from .wire import WIRE_KINDS, WireError, parse_wire
 from .artifacts import (
     BUILTIN_KINDS, ArtifactFile, ArtifactGraph, ArtifactKind, CapabilityRequirement,
+    CanonicalManifest, FrozenComposition,
     FrozenHarness, GraphError, HarnessManifest, KindRegistry, LogicalEdit,
     ManifestError, ManifestRegistry, RegisteredManifest, Workspace, compose, parse_manifest,
 )
@@ -69,7 +70,7 @@ __all__ = [
     "reconstruct_state", "compute_state_digest",
     "WIRE_KINDS", "WireError", "parse_wire",
     "BUILTIN_KINDS", "ArtifactFile", "ArtifactGraph", "ArtifactKind",
-    "CapabilityRequirement", "FrozenHarness", "GraphError", "HarnessManifest",
+    "CanonicalManifest", "CapabilityRequirement", "FrozenComposition", "FrozenHarness", "GraphError", "HarnessManifest",
     "KindRegistry", "LogicalEdit", "ManifestError", "ManifestRegistry",
     "RegisteredManifest", "Workspace", "compose",
     "parse_manifest",

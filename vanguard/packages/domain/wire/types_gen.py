@@ -262,6 +262,8 @@ class TrajectoryRef:
 class Capability:
     verb: str
     selector: Selector
+    sink: object
+    risk: str
 
 @dataclass(frozen=True, slots=True)
 class Component:

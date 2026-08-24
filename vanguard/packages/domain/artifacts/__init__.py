@@ -20,6 +20,8 @@ from .skill_index import (
 )
 from .manifest import (
     CapabilityRequirement,
+    CanonicalManifest,
+    FrozenComposition,
     FrozenHarness,
     HarnessManifest,
     ManifestRegistry,
@@ -37,7 +39,7 @@ from .manifest import (
 __all__ = [
     "BUILTIN_KINDS", "ArtifactFile", "ArtifactGraph", "ArtifactKind", "Commit",
     "GraphError", "KindRegistry", "LogicalEdit", "Workspace",
-    "CapabilityRequirement", "FrozenHarness", "HarnessManifest", "ManifestRegistry",
+    "CanonicalManifest", "CapabilityRequirement", "FrozenComposition", "FrozenHarness", "HarnessManifest", "ManifestRegistry",
     "RegisteredManifest", "ManifestError",
     "compose", "parse_manifest",
     "NamedComponent", "NamedManifest", "TypedBinding", "compose_named_manifest",

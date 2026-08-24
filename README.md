@@ -25,7 +25,7 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Concept Lock** | v0.6.2 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-3C (v0.6.2 Canonical Composition Convergence) active under ADR-0088.** M-4 is frozen until RF-78–RF-84/G0–G4 prove the canonical path and real environment readiness. |
+| **Status** | **M-3C closed; M-4 (v0.6.3 Foundation E2E) active under ADR-0088.** Current work is real-environment qualification and the single eligible RF-85 run. |
 | **Foundation Plan** | M-3C convergence → M-4 real nine-row proof → M-5 Formal Pack #2 → M-6 mediated spawn → M-7 measured concurrency → M-8 declarative topologies; M-9+ remains post-v1 research |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 

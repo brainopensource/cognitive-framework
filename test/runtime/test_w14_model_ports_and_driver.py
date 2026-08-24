@@ -166,9 +166,10 @@ class BothModesHoldUnderAProposingModel(unittest.TestCase):
 class TheDriverRunsRatherThanReports(unittest.TestCase):
     """The defect this wave repaired: `lab/run.py` fabricated its result."""
 
-    def test_the_driver_calls_the_session(self) -> None:
+    def test_the_driver_calls_the_canonical_runtime_boundary(self) -> None:
         source = inspect.getsource(lab_run)
-        self.assertIn("HarnessSession", source)
+        self.assertIn("Runtime.run_composed", source)
+        self.assertNotIn("HarnessSession(", source)
         self.assertIn("drive_until_green", source)
 
     def test_it_no_longer_hardcodes_a_completed_status(self) -> None:

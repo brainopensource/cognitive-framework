@@ -12,7 +12,6 @@ from .validator import (
 )
 from .broker import CellState, IllegalCellTransition, PluginCell, PluginIsolationBroker, RpcResponse
 from .sandbox import SandboxLimits, apply_rlimits, open_log_sink
-from .compiler import ComposeError, compose
 
 __all__ = [
     "IllegalPluginTransition",
@@ -33,6 +32,4 @@ __all__ = [
     "SandboxLimits",
     "apply_rlimits",
     "open_log_sink",
-    "ComposeError",
-    "compose",
 ]

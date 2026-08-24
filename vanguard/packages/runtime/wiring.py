@@ -9,9 +9,9 @@ from __future__ import annotations
 import json
 import os
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.evaluators.client import EvaluatorClient
 from ..adapters.evaluators.unavailable import UnavailableEvaluator
@@ -170,6 +170,130 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "fs.patch": EffectBinding(_environment_effector, carries_diff=True),
     "proc.exec": EffectBinding(_sandbox_effector),
 }
+
+
+# ---------------------------------------------------------------------------
+# Namespaced binding resolution — ADR-0088 Decision 1.7
+# ---------------------------------------------------------------------------
+#
+# A global coding-specific table cannot be the extension authority. Adding a
+# domain is registering a provider, not editing a row that every other domain
+# has to share. `DEFAULT_BINDINGS` survives as the *code* domain's own rows and
+# nothing more: it is one provider among several, not the authority.
+
+
+class _StaticBindingProvider:
+    """One namespace whose verbs are already `EffectBinding` rows."""
+
+    def __init__(self, namespace: str, table: Mapping[str, EffectBinding]) -> None:
+        self._namespace = namespace
+        self._table = dict(table)
+
+    @property
+    def namespace(self) -> str:
+        return self._namespace
+
+    @property
+    def supported_verbs(self) -> tuple[str, ...]:
+        return tuple(sorted(self._table))
+
+    def binding(self, verb: str) -> EffectBinding:
+        return self._table[verb]
+
+
+class _DomainProviderBridge:
+    """Adapts an `adapters.bindings` provider to the composition seam.
+
+    The provider owns how a verb executes; composition only needs to know that
+    the verb *can* be wired and with what factory. Keeping the bridge here means
+    a domain adapter never has to know what an `EffectBinding` is.
+    """
+
+    #: Verbs whose approval is descriptor-bound to a diff. A provider may
+    #: override by exposing `carries_diff(verb)`.
+    _DIFF_SUFFIXES = (".patch", ".apply")
+
+    def __init__(self, provider: Any) -> None:
+        self._provider = provider
+
+    @property
+    def namespace(self) -> str:
+        return self._provider.namespace
+
+    @property
+    def supported_verbs(self) -> tuple[str, ...]:
+        return tuple(sorted(self._provider.supported_verbs))
+
+    def binding(self, verb: str) -> EffectBinding:
+        provider = self._provider
+        declared = getattr(provider, "carries_diff", None)
+        carries_diff = bool(declared(verb)) if callable(declared) else verb.endswith(
+            self._DIFF_SUFFIXES)
+        return EffectBinding(
+            lambda context: provider.create_adapter(context.verb, context.environment),
+            carries_diff=carries_diff,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class BindingResolver:
+    """Verb → adapter, resolved from namespaced providers (`ADR-0088 §1.7`).
+
+    Resolution order is explicit rows, then providers in registration order. An
+    unresolvable verb denies at composition: a harness that cannot be wired must
+    never reach a run.
+    """
+
+    explicit: Mapping[str, EffectBinding] = field(default_factory=dict)
+    providers: tuple[Any, ...] = ()
+
+    def resolve(self, verb: str) -> EffectBinding | None:
+        binding = self.explicit.get(verb)
+        if binding is not None:
+            return binding
+        for provider in self.providers:
+            if verb in provider.supported_verbs:
+                return provider.binding(verb)
+        return None
+
+    def resolve_all(self, verbs: Sequence[str], *, harness: str) -> Mapping[str, EffectBinding]:
+        resolved: dict[str, EffectBinding] = {}
+        missing: list[str] = []
+        for verb in verbs:
+            binding = self.resolve(verb)
+            if binding is None:
+                missing.append(verb)
+            else:
+                resolved[verb] = binding
+        if missing:
+            raise CompositionError(
+                f"{harness}: no adapter bound for {sorted(missing)}; a harness "
+                "that cannot be wired must fail at composition")
+        return resolved
+
+    @property
+    def namespaces(self) -> tuple[str, ...]:
+        return tuple(provider.namespace for provider in self.providers)
+
+
+def default_providers() -> tuple[Any, ...]:
+    """The providers a production composition sees.
+
+    Imported lazily so that composing a harness never depends on a domain
+    adapter that this deployment does not ship.
+    """
+    providers: list[Any] = [_StaticBindingProvider("code", DEFAULT_BINDINGS)]
+    try:
+        from ..adapters.bindings.table import TableBindingProvider
+    except ImportError:  # pragma: no cover - the table domain is optional
+        return tuple(providers)
+    providers.append(_DomainProviderBridge(TableBindingProvider()))
+    return tuple(providers)
+
+
+def default_resolver(explicit: Mapping[str, EffectBinding] | None = None) -> BindingResolver:
+    return BindingResolver(dict(explicit or {}), default_providers())
+
 
 #: Manifest evaluator name → constructor. Unknown names bind nothing.
 #: There is no FakeEvaluator row: absence is inconclusive, not a pass (`M5`).

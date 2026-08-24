@@ -142,6 +142,7 @@ class RunResult:
     trajectory: Mapping[str, Any] | None = None
     run_digest: str = ""
     activation_digest: str = ""
+    foundation_evidence: Any = None
 
     #: Digests a benchmarked run must carry to be replayable (Phase 4 `V5-A`).
     #: `ClassVar` -- a constant, not a field.

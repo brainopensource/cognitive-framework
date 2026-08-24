@@ -193,7 +193,7 @@ class ActivationSession:
         return self._live.pop(name, None)
 
 
-def _retire(component: ActivatedComponent, *, faulted: bool, reason: str) -> None:
+def _retire(component: ActivatedComponent, *, faulted: bool, reason: str) -> Exception | None:
     """Take one component to `RETIRED`, whatever state it is in.
 
     Cleanup is not allowed to fail: a teardown error must not mask the fault
@@ -208,8 +208,9 @@ def _retire(component: ActivatedComponent, *, faulted: bool, reason: str) -> Non
         else:
             lifecycle.quiesce()
         lifecycle.retire()
-    except Exception:  # noqa: BLE001 - see docstring: cleanup never raises
-        pass
+        return None
+    except Exception as exc:  # noqa: BLE001 - all remaining components still retire
+        return exc
 
 
 @contextmanager
@@ -261,15 +262,28 @@ def activate(
     except BaseException as exc:  # noqa: BLE001 - cancellation must clean up too
         reason = f"{type(exc).__name__}: {exc}"
         if pending is not None:
-            _retire(pending, faulted=True, reason=reason)
-        _teardown(session, faulted=True, reason=reason)
+            pending_error = _retire(pending, faulted=True, reason=reason)
+            if pending_error is not None:
+                exc.add_note(f"pending component cleanup failed: {pending_error}")
+        cleanup_errors = _teardown(session, faulted=True, reason=reason)
+        for cleanup_error in cleanup_errors:
+            exc.add_note(f"component cleanup failed: {cleanup_error}")
         raise
     else:
-        _teardown(session, faulted=False, reason="")
+        cleanup_errors = _teardown(session, faulted=False, reason="")
+        if cleanup_errors:
+            raise ActivationError(
+                "activation cleanup was not durably recorded: "
+                + "; ".join(str(error) for error in cleanup_errors)
+            )
 
 
-def _teardown(session: ActivationSession, *, faulted: bool, reason: str) -> None:
+def _teardown(session: ActivationSession, *, faulted: bool, reason: str) -> tuple[Exception, ...]:
+    errors: list[Exception] = []
     for name in session.plan.cleanup_order:
         component = session._drop(name)
         if component is not None:
-            _retire(component, faulted=faulted, reason=reason)
+            error = _retire(component, faulted=faulted, reason=reason)
+            if error is not None:
+                errors.append(error)
+    return tuple(errors)

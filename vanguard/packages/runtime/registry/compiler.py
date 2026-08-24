@@ -31,7 +31,9 @@ from vanguard.packages.domain.wire.types_gen import (
     Reservation,
 )
 
-__all__ = ["ComposeError", "compose", "compose_named"]
+# Compatibility ingress is intentionally not re-exported as public runtime
+# authority. Explicit test/migration imports remain until the M-5 sunset.
+__all__ = ["ComposeError"]
 
 
 class ComposeError(ValueError):

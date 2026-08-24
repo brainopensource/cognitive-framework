@@ -11,6 +11,7 @@ Verifies:
 from __future__ import annotations
 
 import unittest
+import base64
 from typing import Any
 
 from vanguard.packages.domain.canonicalisation.digest import digest_of
@@ -19,6 +20,7 @@ from vanguard.packages.domain.evidence.audit import (
     REQUIRED_ROW_NAMES,
     audit_foundation_evidence,
 )
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 
 
 def build_canonical_evidence_bundle(
@@ -36,6 +38,9 @@ def build_canonical_evidence_bundle(
     layer0_used: bool = False,
 ) -> dict[str, Any]:
     """Assemble a canonical mhf.foundation-evidence/1 bundle from authoritative sources."""
+    signer = VerdictSigner(b"\x11" * 32, "evaluator-key-1")
+    signed_body = {"verdict": "pass", "run_id": run_id, "oracle_id": "oracle_calc_v1"}
+    signature = signer.sign(signed_body) if signature_verified else "invalid"
     rows = [
         # Row 1: Model adapter invocation and measured usage
         {
@@ -85,9 +90,10 @@ def build_canonical_evidence_bundle(
             "row": 5,
             "run_id": run_id,
             "verdict": "pass",
-            "signature": "ed25519:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+            "signature": signature,
+            "signed_body": signed_body,
+            "public_key": base64.b64encode(signer.public_bytes).decode("ascii"),
             "oracle_binding": "sha256:oracle_calc_v1",
-            "signature_verified": signature_verified,
             "signer_key_id": "evaluator-key-1",
             "binding_digest": "sha256:verdict_binding_001",
         },
@@ -140,7 +146,11 @@ def build_canonical_evidence_bundle(
         "project_id": project_id,
         "d_h": d_h,
         "d_r": d_r,
-        "rows": rows,
+        "rows": [
+            {"row": row["row"], "status": "derived", "source": dict(row),
+             "observation": dict(row), "source_digest": digest_of(row)}
+            for row in rows
+        ],
     }
 
 
@@ -150,7 +160,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_01_canonical_derived_bundle_passes_m4_auditor(self) -> None:
         """RF-83: Derived 9-row bundle satisfies all foundation auditor rules."""
         bundle = build_canonical_evidence_bundle()
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertTrue(result.passed)
         self.assertEqual(result.evidence_state, "present_valid")
@@ -162,7 +172,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_02_forged_or_unverified_exterior_signature_fails(self) -> None:
         """RF-83: Unverified or text-only signature fails closed with named rejection."""
         bundle = build_canonical_evidence_bundle(signature_verified=False)
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertFalse(result.passed)
         self.assertIn("row_5: exterior_signature_not_verified", result.rejection_reasons)
@@ -170,7 +180,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_03_non_rootless_uid_fails(self) -> None:
         """RF-83: Execution running as UID 0 or outside rootless range (10001) is rejected."""
         bundle = build_canonical_evidence_bundle(sandbox_uid=0)
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertFalse(result.passed)
         self.assertIn("row_4: missing_or_non_rootless_uid", result.rejection_reasons)
@@ -178,7 +188,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_04_memory_store_fails_release_audit(self) -> None:
         """RF-83: Memory event store cannot certify M-4 foundation evidence."""
         bundle = build_canonical_evidence_bundle(wal_mode="memory")
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertFalse(result.passed)
         self.assertIn("row_6: wal_or_durable_intent_unverified", result.rejection_reasons)
@@ -186,7 +196,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_05_replayed_settled_effects_fails(self) -> None:
         """RF-83: Repeating settled effects on cold reconstruction fails."""
         bundle = build_canonical_evidence_bundle(replayed_settled=True)
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertFalse(result.passed)
         self.assertIn("row_7: settled_effects_illegally_replayed", result.rejection_reasons)
@@ -194,7 +204,7 @@ class B3DerivedFoundationEvidenceTests(unittest.TestCase):
     def test_b3_06_layer0_breach_fails(self) -> None:
         """RF-83: Any invocation touching layer0 authority fails."""
         bundle = build_canonical_evidence_bundle(layer0_used=True)
-        result = audit_foundation_evidence(bundle)
+        result = audit_foundation_evidence(bundle, signature_verifier=VerdictSigner.verify)
 
         self.assertFalse(result.passed)
         self.assertIn("row_9: layer0_runtime_authority_breached", result.rejection_reasons)

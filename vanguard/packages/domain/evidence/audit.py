@@ -9,7 +9,10 @@ Derives evidence state and promotion eligibility without trusting input flags.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Sequence
+import base64
+from typing import Any, Callable, Mapping, Sequence
+
+from ..canonicalisation.digest import digest_of
 
 __all__ = [
     "EvidenceAuditResult",
@@ -62,6 +65,7 @@ def audit_foundation_evidence(
     evidence: Mapping[str, Any] | Sequence[Mapping[str, Any]],
     *,
     expected_run_id: str | None = None,
+    signature_verifier: Callable[[Mapping[str, Any], str, bytes], bool] | None = None,
 ) -> EvidenceAuditResult:
     """Audit the nine required M-4 foundation evidence rows.
 
@@ -107,7 +111,10 @@ def audit_foundation_evidence(
                         break
     elif isinstance(evidence, Mapping):
         if "rows" in evidence and isinstance(evidence["rows"], (list, tuple, Mapping)):
-            return audit_foundation_evidence(evidence["rows"], expected_run_id=expected_run_id or evidence.get("run_id"))
+            return audit_foundation_evidence(
+                evidence["rows"], expected_run_id=expected_run_id or evidence.get("run_id"),
+                signature_verifier=signature_verifier,
+            )
         for num, name in REQUIRED_ROW_NAMES.items():
             if str(num) in evidence and isinstance(evidence[str(num)], Mapping):
                 rows_by_idx[num] = evidence[str(num)]
@@ -115,6 +122,27 @@ def audit_foundation_evidence(
                 rows_by_idx[num] = evidence[num]
             elif name in evidence and isinstance(evidence[name], Mapping):
                 rows_by_idx[num] = evidence[name]
+
+    # Every accepted row is a source-bound derivation. Legacy flat rows are
+    # assertions and cannot become promotion evidence.
+    for num, row in tuple(rows_by_idx.items()):
+        source = row.get("source")
+        observation = row.get("observation")
+        source_digest = row.get("source_digest")
+        if row.get("status") != "derived" or not isinstance(source, Mapping):
+            reasons.append(f"row_{num}: asserted_evidence_rejected")
+            continue
+        if not isinstance(observation, Mapping):
+            reasons.append(f"row_{num}: missing_derived_observation")
+            continue
+        recomputed = digest_of(dict(source))
+        if source_digest != recomputed:
+            reasons.append(f"row_{num}: source_digest_mismatch")
+            continue
+        if dict(observation) != dict(source):
+            reasons.append(f"row_{num}: observation_not_derived_from_source")
+            continue
+        rows_by_idx[num] = observation
 
     # 1. Row count completeness
     missing_rows = [num for num in range(1, REQUIRED_ROW_COUNT + 1) if num not in rows_by_idx]
@@ -228,7 +256,13 @@ def audit_foundation_evidence(
         verdict = r5.get("verdict") or (r5.get("signed_verdict", {}).get("verdict") if isinstance(r5.get("signed_verdict"), Mapping) else None)
         if not signature or not isinstance(signature, str):
             reasons.append("row_5: missing_or_unsigned_exterior_verdict")
-        elif r5.get("signature_verified") is not True:
+        elif signature_verifier is None:
+            reasons.append("row_5: exterior_signature_verifier_absent")
+        elif not isinstance(r5.get("signed_body"), Mapping) or not isinstance(
+            r5.get("public_key"), str
+        ) or not _verify_signature(
+            signature_verifier, r5["signed_body"], signature, r5["public_key"]
+        ):
             reasons.append("row_5: exterior_signature_not_verified")
         elif not r5.get("signer_key_id") or not r5.get("binding_digest") or not r5.get("oracle_binding"):
             reasons.append("row_5: incomplete_exterior_binding")
@@ -312,3 +346,14 @@ def audit_foundation_evidence(
         verified_rows=tuple(sorted(verified_rows)),
         rejection_reasons=tuple(reasons),
     )
+
+
+def _verify_signature(
+    verifier: Callable[[Mapping[str, Any], str, bytes], bool],
+    body: Mapping[str, Any], signature: str, public_key: str,
+) -> bool:
+    try:
+        decoded = base64.b64decode(public_key, validate=True)
+    except (ValueError, TypeError):
+        return False
+    return verifier(body, signature, decoded)

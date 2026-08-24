@@ -7,7 +7,7 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -523,7 +523,7 @@ class HarnessSession:
         if isinstance(trajectory, dict):
             trajectory["state_digest"] = self.state_digest()
         ports.environment.dispose()
-        return RunResult(
+        result = RunResult(
             harness=harness.harness,
             composition_digest=harness.composition_digest,
             terminal=terminal,
@@ -540,6 +540,12 @@ class HarnessSession:
             run_digest=getattr(self.run_plan, "run_digest", ""),
             activation_digest=getattr(self.run_plan, "activation_digest", ""),
         )
+        if self.run_plan is not None:
+            from .foundation_evidence import derive_foundation_bundle
+            result = replace(result, foundation_evidence=derive_foundation_bundle(
+                run_plan=self.run_plan, result=result, store=ports.store,
+            ))
+        return result
 
     # -- what the instrument reads ----------------------------------------
 

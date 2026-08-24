@@ -1233,3 +1233,100 @@ graph TD
 3. **Step 3:** Run `lab_driver.py` with `deepseek/deepseek-v4-flash` / `gpt-5.6-luna` on `DOGFOOD-01` and verify `oracle_green`.
 4. **Step 4:** Transition to the clean Linux VM to start UID 10002 evaluator daemon, freeze preregistration, and derive all nine evidence rows for official M-4 closure.
 
+---
+
+## 15. Follow-up Session: Diagnostics Landed, §14 Verified, New Failure Mode Found
+
+This section records a second, independent pass over the same problem: it verifies every claim in §14 directly
+against the source tree (file:line, not description), lands the first concrete piece of §14's fix list
+(proposal/translation diagnostics), and reports one additional live-model failure mode §14 does not cover.
+
+### 15.1 Code shipped this session
+
+**`vanguard/packages/agency/episode/engine.py`** — Approach A observability (§14.3 Task 1's prerequisite: you
+cannot fix what the ledger does not expose).
+
+- `_DIAGNOSTIC_FIELDS` (new, ~line 89) and `_extract_diagnostics()` (new, ~line 100): pull
+  `usage`, `resolved_model`, `model_fingerprint`, `cost_usd`, `usd_micros`, `pricing_known`, `pricing_source`
+  off the raw provider proposal value. Deliberately excludes `text` and `args` — `REQ-TRUST-001` (zero secrets
+  in events).
+- `EpisodeEngine.run()` (~line 268): computes `diagnostics = _extract_diagnostics(raw_value)` once per turn,
+  right after `result.ok` is checked and before `parse_proposal()` discards everything parse_proposal doesn't
+  read.
+- `_emit_proposal()` and `_emit_terminal()`: both gained an optional `diagnostics: Mapping[str, Any] | None`
+  parameter; when present it's attached under `payload["diagnostics"]` on `ProposalProduced` and
+  `EpisodeCompleted` events.
+
+**Root cause this closes:** `vanguard/packages/adapters/models/openrouter.py:901-914`'s `_complete()` already
+computed `usage`/`resolved_model`/`cost_usd` and attached them to the canonical proposal dict, but
+`vanguard/packages/agency/episode/state.py`'s `parse_proposal()` only reads `kind`/`action`/`resource`/`args`/
+`reservation`/`note` — everything else was silently dropped before it ever reached a ledger event. This is the
+concrete mechanism behind the M-4 report's "the runtime does not reliably expose provider proposal/tool-call
+details in the final result" complaint (§13.6, item 1).
+
+**Verification:** `python3 -m unittest test.agency.test_episode test.agency.test_episode_spawn` (35 tests),
+`test.runtime.test_w14_model_ports_and_driver test.runtime.test_anticheat test.runtime.test_s22_refusal_is_recorded
+test.runtime.test_s24_interactive_write_path` (70 tests), and `discover -s test/falsifiers -p test_rf*.py`
+(41 falsifiers, RF-78 through RF-94) — all green, including the REQ-TRUST-001 test
+(`test_a_proposal_event_discloses_a_descriptor_not_arguments`) that would have caught an args/secret leak.
+
+### 15.2 §14 claims verified against source (all confirmed accurate)
+
+| §14 claim | Verified at |
+|---|---|
+| L5 dialogue is flattened to a single `user`-role text blob, no `assistant`/`tool` pairing | `vanguard/packages/agency/context/layers.py:63-70` (`ROLE_FOR_LAYER[Layer.DIALOGUE] = "user"`), `layers.py:203-226` (`bundle()` joins all L5 fragments with `"\n\n".join(...)` into one message) |
+| `AutonomousGrant` only minted for `interactive and not isolate` | `vanguard/packages/runtime/lab_driver.py:156-179` — the `elif approve_writes:` branch (line 173) sets an `approver`/`approval_key` but never calls `create_autonomous_grant` |
+| `F-09` / `DENIED_UNTRUSTED_JUSTIFYING` is a real, distinct kernel failure path | `vanguard/packages/kernel/model.py:137` |
+| Paid-model band guard, now fixed | `vanguard/packages/runtime/model_selection.py:75-88` (`allow_paid` param + `VANGUARD_ALLOW_PAID` env), `lab_driver.py:84`, `:445-484` (`--allow-paid` CLI flag). `test/runtime/test_w14_model_ports_and_driver.py:117-128` — 27/27 pass |
+| `RoleAwareRouter`, `TierLadder`, `run_with_escalation` exist as named | `vanguard/packages/runtime/tier_escalation.py:40,73,130,197` |
+| `packs/.../system-prompt.txt` referenced by manifest exists | `vanguard/packages/agency/manifests/vg-code-default/system-prompt.txt` (confirmed present; `manifest.json:4` references it) |
+
+No fabricated file paths or class names in §14 — every one resolves to real code.
+
+### 15.3 New live-model runs this session (models §14.1's table does not cover)
+
+All against `benchmarks/greenfield/dogfood-01-multi-turn-file-rollback` (fix the reversed-argument bug in
+`src/calculator.py:divide`, verify with `python3 -m unittest test_calculator.py`), via
+`vanguard.packages.runtime.lab_driver.run_lab_task`.
+
+| Model | Port | Outcome | Turns | Detail |
+|---|---|---|---|---|
+| `qwen2.5-coder:14b` | ollama | `attempts_exhausted` | 32 | Every `patch.apply` denied `denied_ask_fail_closed` — no approver wired in that call shape |
+| `codestral:latest` | ollama | `instrument_error:unclassified` | 0 | `HTTP Error 400: Bad Request` — same tool-schema/template incompatibility already logged for `deepseek-coder-v2:16b` in §13.3 |
+| `gemma4:26b` | ollama | `attempts_exhausted` | 32 | Same `denied_ask_fail_closed` pattern as qwen2.5-coder:14b |
+| `nvidia/nemotron-3-super-120b-a12b:free` | openrouter | `attempts_exhausted` | 18 | Read `test_calculator.py` and `src/calculator.py` (turns 1-2, both `EffectCompleted`), then never emitted a third proposal with a `kind` `parse_proposal` could use before exhausting 3 attempts — consistent with §14.2's L5-flattening/state-amnesia mechanism |
+| `openai/gpt-oss-20b:free` | openrouter | `instrument_error` | 0 | `provider stream returned HTTP 404` — tag not routable through OpenRouter at time of run |
+| `deepseek/deepseek-v4-flash` | openrouter (paid, `--allow-paid`) | `instrument_error:unclassified` | 10 | **New failure mode, not in §14.1:** `"filesystem path escapes workspace"` after 2 attempts / 38,937 prompt tokens / 1,563 completion tokens. The model was actively working (high token count) but something in its proposed `resource`/`args` path resolved outside the isolated staging copy the sandbox environment adapter allows. Root cause not yet isolated — needs the per-turn `proposalDescriptor` pulled from the ledger (now recoverable via §15.1's diagnostics) to see the exact path the model emitted vs. the workspace root it was given. |
+| `openai/gpt-5.6-luna` | openrouter (paid, `--allow-paid`, plain `--interactive`, no grant) | `escalated` | 14 | Read `TASK.md` (fs.search, turns 1-2) and `src/calculator.py` (fs.read, turn 3), then emitted a correct `patch.apply` on turn 4 — the only live-paid model this session to reach a real fix proposal — and stalled on `ApprovalRequested` because plain `--interactive` without `--in-place` mints no `AutonomousGrant` and no approver. This is exactly §14.2 root cause #2, reproduced live. |
+
+### 15.4 What this adds to §14's fix list
+
+1. **New bug: "filesystem path escapes workspace" on `deepseek/deepseek-v4-flash`.** Not yet root-caused. Next
+   step is a run with the §15.1 diagnostics already landed, reading the `ProposalProduced` events' `diagnostics`
+   payload plus the `proposalDescriptor` to see what path/resource the model actually proposed. Candidate causes:
+   (a) the model emitting an absolute host path instead of a workspace-relative one, (b) the isolated staging
+   copy's root not matching what the model was told in `L3`/`L4` context, (c) a real environment-adapter
+   containment bug worth its own falsifier if (a)/(b) are ruled out.
+2. **`denied_ask_fail_closed` on `qwen2.5-coder:14b` and `gemma4:26b`** confirms §14.2 root cause #2 (no
+   `AutonomousGrant`/approver in isolated staging) is not paid-model-specific — every local model that got far
+   enough to propose `patch.apply` hit the identical wall. Task 2 (mint the grant automatically under
+   `approve_writes`/isolated staging, not only `--in-place --interactive`) fixes this class outright; it is the
+   single highest-leverage unimplemented item from §14.3.
+3. **`gpt-5.6-luna` reaching `patch.apply` on turn 4** is the strongest positive signal in either session: a
+   paid reasoning model, given the current (unfixed) flattened-L5 context, still identified and proposed the
+   correct fix. That weakens the urgency of §14.3 Task 1 (structured tool-call history) relative to Task 2 — the
+   approval/grant wall is what is actually blocking a green run today, not context legibility, at least for
+   capable paid models. Task 1 remains necessary for the weaker local models that loop on `fs.read`
+   indefinitely (`deepseek/deepseek-v4-flash`, `nemotron-3-super-120b-a12b:free`), but Task 2 should land first
+   since it is a smaller, mechanical change and unblocks the model that already works.
+4. **`codestral:latest` joins `deepseek-coder-v2:16b`** on the HTTP 400 tool-schema-incompatibility list —
+   worth a short note in the model-compatibility matrix (not yet written anywhere in this doc) so future runs
+   don't re-spend a probe on either tag.
+
+### 15.5 Recommended immediate next step
+
+Implement §14.3 Task 2 alone first (smallest diff, unblocks the one model that already proposed a correct fix),
+rerun `gpt-5.6-luna` on `DOGFOOD-01`, and confirm `oracle_green`. Only if that still fails should Task 1
+(structured dialogue) be attempted before a second live run — each paid-model run has a real dollar cost, and
+Task 2 targets the exact wall `gpt-5.6-luna` hit.
+

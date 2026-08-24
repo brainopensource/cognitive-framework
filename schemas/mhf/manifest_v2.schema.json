@@ -60,7 +60,7 @@
       "properties": {
         "from": { "type": "string", "minLength": 1 }, "to": { "type": "string", "minLength": 1 }, "interface": { "type": "string", "minLength": 1 }, "relation": { "type": "string", "minLength": 1 }, "channel": { "type": "string", "minLength": 1 }, "lazy": { "type": "boolean" }
       } },
-    "Capability": { "type": "object", "additionalProperties": false, "required": ["verb", "selector"], "properties": { "verb": { "type": "string" }, "selector": { "$ref": "#/$defs/Selector" } } },
+    "Capability": { "type": "object", "additionalProperties": false, "required": ["verb", "selector", "sink", "risk"], "properties": { "verb": { "type": "string", "minLength": 1 }, "selector": { "$ref": "#/$defs/Selector" }, "sink": { "enum": ["pure", "observation", "privileged"] }, "risk": { "type": "string", "minLength": 1 } } },
     "Selector": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["fs", "network", "secret", "git", "table", "browser", "generic"] }, "root": { "type": "string" }, "paths": { "type": "array" }, "uriPattern": { "type": "string" } } }
   }
 }

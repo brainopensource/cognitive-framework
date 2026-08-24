@@ -13,13 +13,15 @@ from pathlib import Path
 from typing import Any, Callable, ClassVar, Mapping, Sequence
 
 from ..agency import RunTermination
-from ..agency.manifests.loader import ManifestLoader, ManifestLoadError
-from ..domain.artifacts.graph import ArtifactFile, LogicalEdit, Workspace
+from ..agency.manifests.loader import AliasTranslator, ManifestLoader
+from ..domain.artifacts.graph import ArtifactFile, GraphError, LogicalEdit, Workspace
 from ..domain.artifacts.skill_index import SkillCard, SkillIndexError, parse_skill_card
 from ..domain.artifacts.manifest import (
-    FrozenHarness,
+    FrozenComposition,
     ManifestError,
-    compose,
+    artifact_kind_for,
+    freeze_composition,
+    read_canonical_manifest,
 )
 from ..kernel import (
     Event,
@@ -30,7 +32,14 @@ from ..kernel import (
 from ..ports.evaluator import Verdict
 from ..ports.event_store import EventStorePort
 from .telemetry import RunTelemetry
-from .wiring import BindingContext, CompositionError, DEFAULT_BINDINGS, EffectBinding
+from .wiring import (
+    BindingContext,
+    BindingResolver,
+    CompositionError,
+    DEFAULT_BINDINGS,
+    EffectBinding,
+    default_resolver,
+)
 
 #: Manifest component role → artifact kind. The manifest names roles; the
 #: artifact graph types them. Declared here because it is the one mapping the
@@ -154,7 +163,7 @@ class Harness:
     """A composed, frozen harness. Nothing here varies after composition."""
 
     harness: str
-    frozen: FrozenHarness
+    frozen: FrozenComposition
     verbs: tuple[str, ...]
     sinks: SinkRegistry
     risk_of: Mapping[str, str]
@@ -203,74 +212,71 @@ class Runtime:
         *,
         episode_id: str = "episode-1",
         bindings: Mapping[str, EffectBinding] | None = None,
+        resolver: BindingResolver | None = None,
     ) -> Harness:
-        """Freeze one harness. Every failure here is a failure *before* a run."""
-        table = DEFAULT_BINDINGS if bindings is None else bindings
-        loader = ManifestLoader()
-        path = Path(manifest_path)
-        if not path.is_absolute() and not path.exists():
-            candidate = loader.base_dir / path
-            if candidate.exists():
-                path = candidate
-        if path.is_dir():
-            path = path / "manifest.json"
+        """Freeze one harness. Every failure here is a failure *before* a run.
 
+        This is the one public composition path (`ADR-0088 §1`). Bytes are
+        normalized to a `CanonicalManifest` before any semantic validation, so
+        the dialect a pack happens to be written in stops at ingress and never
+        becomes an execution value.
+        """
+        path = cls._manifest_file(manifest_path)
+        directory = path.parent
         try:
-            pack = loader.load_pack(path.parent if path.name == "manifest.json" else path)
-            manifest = pack.manifest
-            translator = pack.translator
-        except ManifestLoadError as exc:
-            raise CompositionError(str(exc)) from exc
+            raw = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
 
-        directory = path.parent
-        artifacts, contents = cls._artifacts(manifest, directory)
-        workspace = Workspace.empty().apply(
-            LogicalEdit(f"compose {manifest.harness}", artifacts))
-        components = dict(manifest.components)
-        system_core = "\n".join(contents[p] for p in components.get("system_prompt", ()))
-        approval_policy = "\n".join(
-            contents[p] for p in components.get("approval_policy", ()) if p in contents)
-        model_routes = tuple(
-            contents[p] for p in components.get("routing_policy", ()) if p in contents)
-        ceiling = tuple(capability.selector for capability in manifest.capabilities)
         try:
-            frozen = compose(
-                manifest, workspace.graph, episode_id,
+            canonical = read_canonical_manifest(raw)
+        except ManifestError as exc:
+            raise CompositionError(f"{path.name}: {exc}") from exc
+
+        artifacts, contents = cls._artifacts(canonical, directory)
+        workspace = Workspace.empty().apply(
+            LogicalEdit(f"compose {canonical.manifest_id}", artifacts))
+
+        system_core = cls._role_text(canonical, contents, "system_prompt") or (
+            contents.get(canonical.system_prompt or "", ""))
+        approval_policy = cls._role_text(canonical, contents, "approval_policy") or (
+            contents.get(canonical.approval_policy or "", ""))
+        model_routes = cls._role_texts(canonical, contents, "routing_policy") + tuple(
+            contents[ref] for ref in canonical.model_routes if ref in contents)
+
+        try:
+            frozen = freeze_composition(
+                canonical, workspace.graph, episode_id,
                 identity={
                     "systemPrompt": system_core,
-                    "ceiling": ceiling,
                     "approvalPolicy": approval_policy,
                     "modelRoutes": model_routes,
                 },
             )
-        except ManifestError as exc:
+        except (ManifestError, GraphError) as exc:
             raise CompositionError(str(exc)) from exc
 
-        verbs = tuple(capability.verb for capability in manifest.capabilities)
-        missing = [verb for verb in verbs if verb not in table]
-        if missing:
-            raise CompositionError(
-                f"{manifest.harness}: no adapter bound for {sorted(missing)}; a harness "
-                "that cannot be wired must fail at composition")
+        verbs = canonical.verbs
+        # An explicitly supplied table is the *whole* table: a caller that names
+        # its bindings is stating the complete wiring, so provider fallback
+        # would silently widen it. Only the default path consults providers.
+        if resolver is None:
+            resolver = (BindingResolver(dict(bindings), ()) if bindings is not None
+                        else default_resolver())
+        table = resolver.resolve_all(verbs, harness=canonical.manifest_id)
 
         sinks = SinkRegistry()
-        for capability in manifest.capabilities:
+        for capability in canonical.capabilities:
             try:
                 sinks.register(capability.verb, SinkClass(capability.sink))
             except (SinkMismatch, ValueError) as exc:
                 raise CompositionError(
-                    f"{manifest.harness}: {capability.verb} declares "
+                    f"{canonical.manifest_id}: {capability.verb} declares "
                     f"{capability.sink!r}: {exc}") from exc
 
-        schemas = []
-        for tool_path in components.get("tools", ()):
-            try:
-                schemas.append(json.loads(contents[tool_path]))
-            except json.JSONDecodeError as exc:
-                raise CompositionError(f"tool schema is not JSON: {tool_path}: {exc}") from exc
-        schemas = cls._schemas_with_aliases(schemas, pack.translator)
+        translator = cls._translator(canonical, directory)
+        schemas = cls._tool_schemas(canonical, contents, translator)
+        skill_cards = cls._skill_cards(canonical, contents)
 
         gene_digests = {
             relative: "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -279,62 +285,167 @@ class Runtime:
         aliases_file = directory / "aliases.json"
         if aliases_file.is_file():
             gene_digests["aliases.json"] = "sha256:" + hashlib.sha256(
-                aliases_file.read_bytes()
-            ).hexdigest()
-
-        skill_raw = pack.components_data.get("skill") or pack.components_data.get("skills") or ()
-        try:
-            skill_cards = tuple(parse_skill_card(card) for card in skill_raw if isinstance(card, Mapping))
-        except SkillIndexError as exc:
-            raise CompositionError(f"{manifest.harness}: bad skill card: {exc}") from exc
+                aliases_file.read_bytes()).hexdigest()
 
         return Harness(
-            harness=manifest.harness,
+            harness=canonical.manifest_id,
             frozen=frozen,
             verbs=verbs,
             sinks=sinks,
-            risk_of={c.verb: c.risk for c in manifest.capabilities},
+            risk_of={item.verb: item.risk for item in canonical.capabilities},
             system_core=system_core,
             tool_schemas=tuple(schemas),
-            budget=cls._budget(contents[manifest.budget_policy], manifest.budget_policy),
-            effect_budget=cls._effect_budget(
-                contents[manifest.budget_policy], manifest.budget_policy),
+            budget=cls._budget(frozen.budget),
+            effect_budget=cls._effect_budget(frozen.budget),
             index_component=next(
-                (path for role, paths in manifest.components
-                 if role in {"repo_index", "index_component"} for path in paths),
+                (component.implementation for component in canonical.components
+                 if cls._role_of(component.name) in {"repo_index", "index_component"}),
                 None),
-            evaluators=manifest.evaluators,
-            bindings={verb: table[verb] for verb in verbs},
+            evaluators=canonical.evaluators,
+            bindings=table,
             translator=translator,
             gene_digests=gene_digests,
             skill_cards=skill_cards,
-            capability_ceiling=ceiling,
+            capability_ceiling=canonical.ceiling,
         )
-
 
     # -- composition internals -------------------------------------------
 
     @staticmethod
-    def _artifacts(manifest: Any, directory: Path) -> tuple[tuple[ArtifactFile, ...],
-                                                            dict[str, str]]:
-        """Read every component the manifest names, relative to its own dir."""
+    def _manifest_file(manifest_path: str | Path) -> Path:
+        """Locate a pack's manifest by path or by registered pack name.
+
+        Pack *location* is an asset service, not manifest authority: the loader
+        is asked where a pack lives and nothing else.
+        """
+        path = Path(manifest_path)
+        if not path.is_absolute() and not path.exists():
+            candidate = ManifestLoader().base_dir / path
+            if candidate.exists():
+                path = candidate
+        if path.is_dir():
+            path = path / "manifest.json"
+        return path
+
+    @staticmethod
+    def _role_of(name: str) -> str:
+        """The role a canonical component name carries.
+
+        Compatibility ingress names a component after the `/1` role it came
+        from, suffixing only when a role carried several artifacts, so the role
+        is the name up to the first positional suffix.
+        """
+        head, _, tail = name.rpartition(".")
+        return head if head and tail.isdigit() else name
+
+    @classmethod
+    def _components_for(cls, canonical: Any, role: str) -> tuple[Any, ...]:
+        return tuple(component for component in canonical.components
+                     if cls._role_of(component.name) == role)
+
+    @classmethod
+    def _role_texts(cls, canonical: Any, contents: Mapping[str, str],
+                    role: str) -> tuple[str, ...]:
+        return tuple(contents[component.implementation]
+                     for component in cls._components_for(canonical, role)
+                     if component.implementation in contents)
+
+    @classmethod
+    def _role_text(cls, canonical: Any, contents: Mapping[str, str], role: str) -> str:
+        return "\n".join(cls._role_texts(canonical, contents, role))
+
+    @staticmethod
+    def _artifacts(canonical: Any, directory: Path) -> tuple[tuple[ArtifactFile, ...],
+                                                             dict[str, str]]:
+        """Read every artifact the canonical manifest names, and only those.
+
+        A file the manifest does not name is not a composition input and must
+        not reach `D_H`. Kinds come from the component's SPI interface rather
+        than from a dialect's role vocabulary, so identical bytes carry an
+        identical artifact digest whichever dialect named them.
+        """
         root = directory.parent
+        wanted: list[tuple[str, str]] = []
+        for component in canonical.components:
+            kind = artifact_kind_for(component)
+            wanted.append((component.implementation, kind))
+            if isinstance(component.config, str):
+                wanted.append((component.config, kind))
+        if isinstance(canonical.budget_policy, str):
+            wanted.append((canonical.budget_policy, "budget_policy"))
+        if canonical.system_prompt:
+            wanted.append((canonical.system_prompt, "system_prompt"))
+        if canonical.approval_policy:
+            wanted.append((canonical.approval_policy, "approval_policy"))
+        for ref in canonical.model_routes:
+            wanted.append((ref, "routing_policy"))
+
         contents: dict[str, str] = {}
         artifacts: list[ArtifactFile] = []
-        wanted = [(role, path) for role, paths in manifest.components for path in paths]
-        wanted.append(("budget_policy", manifest.budget_policy))
-        for role, relative in wanted:
-            kind = ROLE_KIND.get(role, role)
+        for relative, kind in wanted:
+            if relative in contents:
+                continue
             source = root / relative
             if not source.exists():
                 source = directory / Path(relative).name
             try:
                 text = source.read_text(encoding="utf-8")
             except OSError as exc:
-                raise CompositionError(f"component does not resolve: {relative}: {exc}") from exc
+                raise CompositionError(
+                    f"component does not resolve: {relative}: {exc}") from exc
             contents[relative] = text
             artifacts.append(ArtifactFile(relative, kind, text))
         return tuple(artifacts), contents
+
+    @classmethod
+    def _translator(cls, canonical: Any, directory: Path) -> AliasTranslator:
+        """Pack aliases, fail-closed against the declared capability verbs."""
+        declared = set(canonical.verbs)
+        aliases_file = directory / "aliases.json"
+        if not aliases_file.is_file():
+            identity = {verb: verb for verb in declared}
+            return AliasTranslator(identity, identity)
+        try:
+            translator = AliasTranslator.from_dict(json.loads(
+                aliases_file.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            raise CompositionError(f"aliases do not load: {aliases_file}: {exc}") from exc
+        for alias, verb in translator.to_canonical_map.items():
+            if verb not in declared:
+                raise CompositionError(
+                    f"{canonical.manifest_id}: alias {alias!r} targets {verb!r}, which is "
+                    f"not a declared capability verb: {sorted(declared)}")
+        return translator
+
+    @classmethod
+    def _tool_schemas(cls, canonical: Any, contents: Mapping[str, str],
+                      translator: Any) -> list[dict[str, Any]]:
+        schemas: list[dict[str, Any]] = []
+        for component in cls._components_for(canonical, "tools"):
+            text = contents.get(component.implementation)
+            if text is None:
+                continue
+            try:
+                schemas.append(json.loads(text))
+            except json.JSONDecodeError as exc:
+                raise CompositionError(
+                    f"tool schema is not JSON: {component.implementation}: {exc}") from exc
+        return cls._schemas_with_aliases(schemas, translator)
+
+    @classmethod
+    def _skill_cards(cls, canonical: Any, contents: Mapping[str, str]) -> tuple[SkillCard, ...]:
+        cards: list[SkillCard] = []
+        for role in ("skill", "skills"):
+            for component in cls._components_for(canonical, role):
+                text = contents.get(component.implementation)
+                if text is None:
+                    continue
+                try:
+                    cards.append(parse_skill_card(json.loads(text)))
+                except (json.JSONDecodeError, SkillIndexError) as exc:
+                    raise CompositionError(
+                        f"{canonical.manifest_id}: bad skill card: {exc}") from exc
+        return tuple(cards)
 
     @staticmethod
     def _schemas_with_aliases(schemas: list[dict[str, Any]], translator: Any) -> list[dict[str, Any]]:
@@ -352,32 +463,38 @@ class Runtime:
         return schemas + extra
 
     @staticmethod
-    def _effect_budget(raw: str, path: str) -> int:
+    def _policy(policy: Mapping[str, Any] | str, path: str = "budget policy") -> Mapping[str, Any]:
+        """A budget policy as a mapping, whether it arrived parsed or as bytes."""
+        if isinstance(policy, str):
+            try:
+                policy = json.loads(policy)
+            except json.JSONDecodeError as exc:
+                raise CompositionError(f"budget policy is not JSON: {path}: {exc}") from exc
+        if not isinstance(policy, Mapping):
+            raise CompositionError(f"budget policy must be an object: {path}")
+        return policy
+
+    @classmethod
+    def _effect_budget(cls, policy: Mapping[str, Any] | str, path: str = "budget policy") -> int:
         """How many effects the policy budgets for one run.
 
         `F-12`: a policy that declines to bound its effect count gets 1, so the
         first dispatch reserves the whole ceiling and the second is denied.
         An absent bound is not a generous bound.
         """
-        try:
-            policy = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise CompositionError(f"budget policy is not JSON: {path}: {exc}") from exc
+        policy = cls._policy(policy, path)
         if "effects" not in policy:
             return 1
         try:
             return max(int(policy["effects"]), 1)
         except (TypeError, ValueError) as exc:
-            raise CompositionError(
-                f"budget policy effects is not an integer: {path}") from exc
+            raise CompositionError("budget policy effects is not an integer") from exc
 
-    @staticmethod
-    def _budget(raw: str, path: str) -> Mapping[str, int]:
+    @classmethod
+    def _budget(cls, policy: Mapping[str, Any] | str,
+                path: str = "budget policy") -> Mapping[str, int]:
         """Budget ceilings, as `Reservation` dimensions (`CT-06`: int strings)."""
-        try:
-            policy = json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise CompositionError(f"budget policy is not JSON: {path}: {exc}") from exc
+        policy = cls._policy(policy, path)
         ceilings: dict[str, int] = {"usd_micros": 1_000_000}
         for key, dimension in BUDGET_DIMENSION.items():
             if key in policy:
@@ -385,6 +502,5 @@ class Runtime:
                     ceilings[dimension] = int(policy[key])
                 except (TypeError, ValueError) as exc:
                     raise CompositionError(
-                        f"budget policy {key} is not an integer: {path}") from exc
+                        f"budget policy {key} is not an integer") from exc
         return ceilings
-

@@ -76,7 +76,8 @@ def authored_v2(pack_id: str, capabilities: tuple[Mapping[str, Any], ...], *,
         ],
         "entrypoints": {"IPlanner": {"component": "planner", "interface": "IPlanner"}},
         "ceiling": list(ceiling),
-        "capabilities": [{"verb": row["verb"], "selector": row["selector"]}
+        "capabilities": [{"verb": row["verb"], "selector": row["selector"],
+                          "sink": row["sink"], "risk": row["risk"]}
                          for row in capabilities],
         "budget": dict(_BUDGET_POLICY),
         "system_prompt": system_prompt,
@@ -174,7 +175,8 @@ def authored_twin(base: Path, pack_id: str = "rf-authored-twin") -> Path:
         "bindings": [],
         "entrypoints": {"IToolkit": {"component": "tools", "interface": "IToolkit"}},
         "ceiling": list(ceiling),
-        "capabilities": [{"verb": row["verb"], "selector": row["selector"]}
+        "capabilities": [{"verb": row["verb"], "selector": row["selector"],
+                          "sink": row["sink"], "risk": row["risk"]}
                          for row in CODE_CAPABILITIES],
         "budget": dict(_BUDGET_POLICY),
         "system_prompt": f"{pack_id}/system-prompt.txt",

@@ -348,12 +348,25 @@ def _parse_capabilities(value: object) -> tuple[Mapping[str, Any], ...]:
         raise ManifestError("capabilities must be an array")
     result: list[Mapping[str, Any]] = []
     for index, item in enumerate(value):
-        if not isinstance(item, dict) or set(item) != {"verb", "selector"}:
-            raise ManifestError(f"capabilities[{index}] must contain only verb and selector")
+        # `sink` and `risk` decide which kernel pipeline a verb takes, so `/2`
+        # states them exactly as `/1` always has. Without them the authored
+        # dialect could not express a harness the compatibility dialect can,
+        # and the two ingress routes could never reach one `D_H` (RF-79).
+        if not isinstance(item, dict) or set(item) - {"verb", "selector", "sink", "risk"}:
+            raise ManifestError(
+                f"capabilities[{index}] may contain only verb, selector, sink, and risk")
+        if not {"verb", "selector"} <= set(item):
+            raise ManifestError(f"capabilities[{index}] requires verb and selector")
         if not isinstance(item["verb"], str) or not item["verb"] or not isinstance(item["selector"], dict):
             raise ManifestError(f"capabilities[{index}] is malformed")
         selector = canonicalise_selector(parse_selector(item["selector"]))
-        result.append({"verb": item["verb"], "selector": selector})
+        row = {"verb": item["verb"], "selector": selector}
+        for key in ("sink", "risk"):
+            if key in item:
+                if not isinstance(item[key], str) or not item[key]:
+                    raise ManifestError(f"capabilities[{index}] {key} must be a non-empty string")
+                row[key] = item[key]
+        result.append(row)
     return tuple(result)
 
 
@@ -546,3 +559,501 @@ def compose(manifest: HarnessManifest, graph: ArtifactGraph, episode_id: str,
                          manifest.capabilities, manifest.evaluators,
                          files[manifest.budget_policy].digest, closure_digest,
                          dict(identity or {}))
+
+
+# ---------------------------------------------------------------------------
+# Canonical composition — ADR-0088 Decision 1
+# ---------------------------------------------------------------------------
+#
+# The one production chain is
+#
+#     mhf.manifest/2 bytes -> CanonicalManifest -> FrozenComposition [D_H]
+#
+# `CanonicalManifest` is the sole schema-authoritative normalized value. Both
+# supported dialects terminate here: `mhf.harness/1` bytes stop at
+# `canonical_from_legacy` and `mhf.manifest/2` bytes stop at `canonical_from_v2`.
+# Nothing downstream may read a dialect-specific value, which is what makes the
+# compatibility reader ingress rather than a second execution authority.
+
+#: Legacy `mhf.harness/1` component role -> the SPI interface that consumes it.
+#:
+#: This table *is* the declared meaning of the legacy dialect, not an invented
+#: default. `/1` names a role, and the runtime has always resolved that role to
+#: exactly one consumer; writing the resolution down is what lets a `/1` pack
+#: and the authored `/2` statement of the same harness reach one `D_H` (RF-79).
+#: A role with no row is unconsumed authority and denies at ingress, matching
+#: the loader's own `REGISTERED_COMPONENT_CONSUMERS` rule.
+LEGACY_ROLE_INTERFACE: Mapping[str, str] = {
+    "system_prompt": "IContextManager",
+    "context_policy": "IContextManager",
+    "routing_policy": "IContextManager",
+    "compaction_policy": "IContextManager",
+    "approval_policy": "IEvaluationGate",
+    "retrieval_policy": "IMemoryEngine",
+    "repo_index": "IMemoryEngine",
+    "index_component": "IMemoryEngine",
+    "skill": "IMemoryEngine",
+    "skills": "IMemoryEngine",
+    "tools": "IToolkit",
+}
+
+#: `/1` had no isolation tier and every shipped `/1` pack runs in the host
+#: process. Normalizing to `in_process` records what the dialect already meant;
+#: it never grants a legacy pack a tier it did not declare.
+LEGACY_ISOLATION = "in_process"
+
+#: Verbs that parse and digest but have no live code path before their
+#: milestone. Refusing them at ingress keeps the reservation identity-bearing
+#: (ADR-0085) while ADR-0088 keeps `agent.spawn` inert until M-6.
+_INERT_VERBS: Mapping[str, str] = {
+    "agent.spawn": "agent.spawn is capability-mediated delegation, inert until M-6",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class CanonicalManifest:
+    """The sole schema-authoritative normalized manifest value (ADR-0088 §1.1).
+
+    Every behaviour-affecting fact a composition can declare is resolved once,
+    here, in dialect-independent form. Two manifests that state the same facts
+    in different dialects normalize to equal values and therefore to one `D_H`.
+    """
+
+    manifest_id: str
+    components: tuple[NamedComponent, ...]
+    bindings: tuple[TypedBinding, ...]
+    entrypoints: tuple[str, ...]
+    ceiling: tuple[str, ...]
+    capabilities: tuple[CapabilityRequirement, ...]
+    evaluators: tuple[str, ...]
+    budget_policy: str
+    evaluation: Mapping[str, Any] = field(default_factory=lambda: {"mode": "exterior"})
+    profiles: Mapping[str, Any] = field(default_factory=dict)
+    system_prompt: str | None = None
+    approval_policy: str | None = None
+    model_routes: tuple[str, ...] = ()
+    guardrails: Mapping[str, Any] = field(default_factory=dict)
+    undeletable: bool = False
+
+    def component(self, name: str) -> NamedComponent:
+        for item in self.components:
+            if item.name == name:
+                return item
+        raise ManifestError(f"composition declares no component named {name!r}")
+
+    def components_for(self, interface: str) -> tuple[NamedComponent, ...]:
+        """Every component consumed through `interface`, in declaration order."""
+        return tuple(item for item in self.components if interface in item.interfaces)
+
+    @property
+    def verbs(self) -> tuple[str, ...]:
+        return tuple(item.verb for item in self.capabilities)
+
+    @property
+    def artifact_refs(self) -> tuple[str, ...]:
+        """Every artifact path this composition names, deduplicated in order.
+
+        Composition reads exactly this set. A file the manifest does not name
+        cannot enter `D_H`, and a named file that does not resolve denies.
+        """
+        refs: list[str] = []
+        for item in self.components:
+            for ref in (item.implementation, item.config):
+                if isinstance(ref, str) and ref and ref not in refs:
+                    refs.append(ref)
+        for ref in (self.budget_policy, self.system_prompt, self.approval_policy):
+            if isinstance(ref, str) and ref and ref not in refs:
+                refs.append(ref)
+        for ref in self.model_routes:
+            if ref not in refs:
+                refs.append(ref)
+        return tuple(refs)
+
+    def identity_preimage(self) -> Mapping[str, Any]:
+        """The dialect-independent facts, before artifact resolution.
+
+        Kept separate from `FrozenComposition` so that normalization can be
+        compared between two ingress routes without composing either.
+        """
+        return {
+            "id": self.manifest_id,
+            "components": [
+                {
+                    "name": item.name,
+                    "kind": item.kind,
+                    "isolation": item.isolation,
+                    "ceiling": list(item.ceiling),
+                    "interfaces": list(item.interfaces),
+                    "entrypoints": list(item.entrypoints),
+                    "authority": item.authority,
+                }
+                for item in self.components
+            ],
+            "bindings": [asdict(item) for item in self.bindings],
+            "entrypoints": list(self.entrypoints),
+            "ceiling": list(self.ceiling),
+            "capabilities": [
+                [item.verb, item.sink, item.selector, item.risk] for item in self.capabilities
+            ],
+            "evaluators": list(self.evaluators),
+            "evaluation": dict(self.evaluation),
+            "profiles": dict(self.profiles),
+            "guardrails": dict(self.guardrails),
+            "undeletable": self.undeletable,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenComposition:
+    """The one immutable composition value; its JCS digest is `D_H` (ADR-0088 §1.2).
+
+    Freezing resolves every artifact reference the manifest names to immutable
+    content, so `D_H` is a function of *what the composition is*, never of where
+    its bytes happen to sit. Two ingress dialects that declare the same facts
+    over the same bytes therefore reach the same digest (RF-79).
+
+    `episode_id` is instance identity and is deliberately excluded from `D_H`
+    (ADR-0076 §4): the same harness composed for two episodes is one harness.
+    """
+
+    manifest: CanonicalManifest
+    episode_id: str
+    #: component name -> (implementation digest, config digest or inline value)
+    component_digests: tuple[tuple[str, str, Any], ...]
+    #: The budget policy as a resolved value, never as the ref that carried it.
+    budget: Mapping[str, Any]
+    #: Closure digest over the artifacts this composition read. Carried for
+    #: attribution and replay, deliberately *not* part of `D_H`: a manifest that
+    #: names the same inputs must not change identity because an unnamed file
+    #: sits beside it, and an inline value must digest as its file-borne twin.
+    graph_digest: str = ""
+    identity: Mapping[str, Any] = field(default_factory=dict)
+    composition_digest: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        preimage = dict(self.manifest.identity_preimage())
+        preimage["resolved"] = [
+            {"name": name, "implementation": implementation, "config": config}
+            for name, implementation, config in self.component_digests
+        ]
+        preimage["budget"] = dict(self.budget)
+        preimage.update(dict(self.identity))
+        object.__setattr__(self, "composition_digest", digest_of(preimage))
+
+    # -- the facts callers read -------------------------------------------
+    #
+    # Exposed on the composition rather than reached through `.manifest` so
+    # that a caller cannot accidentally bind to a dialect-shaped value.
+
+    @property
+    def harness(self) -> str:
+        return self.manifest.manifest_id
+
+    @property
+    def components(self) -> tuple[NamedComponent, ...]:
+        return self.manifest.components
+
+    @property
+    def capabilities(self) -> tuple[CapabilityRequirement, ...]:
+        return self.manifest.capabilities
+
+    @property
+    def evaluators(self) -> tuple[str, ...]:
+        return self.manifest.evaluators
+
+    @property
+    def budget_policy(self) -> Any:
+        """The policy as declared: an artifact ref, or an inline object."""
+        return self.manifest.budget_policy
+
+    @property
+    def bindings(self) -> tuple[TypedBinding, ...]:
+        return self.manifest.bindings
+
+    @property
+    def entrypoints(self) -> tuple[str, ...]:
+        return self.manifest.entrypoints
+
+    @property
+    def ceiling(self) -> tuple[str, ...]:
+        return self.manifest.ceiling
+
+    def capability(self, verb: str) -> CapabilityRequirement:
+        matches = tuple(item for item in self.capabilities if item.verb == verb)
+        if len(matches) != 1:
+            raise ManifestError(f"expected one capability for {verb}, found {len(matches)}")
+        return matches[0]
+
+
+def _canonical_capabilities(rows: object, *, dialect: str) -> tuple[CapabilityRequirement, ...]:
+    """Normalize capability rows from either dialect.
+
+    `sink` and `risk` are behaviour-affecting: the sink class decides which
+    kernel pipeline a verb takes. A dialect that cannot state them cannot state
+    the harness, so `/2` carries them exactly as `/1` always has.
+    """
+    if rows is None:
+        return ()
+    if not isinstance(rows, (list, tuple)):
+        raise ManifestError("capabilities must be an array")
+    result: list[CapabilityRequirement] = []
+    seen: set[str] = set()
+    for index, item in enumerate(rows):
+        if not isinstance(item, Mapping):
+            raise ManifestError(f"capabilities[{index}] must be an object")
+        unread = set(item) - {"verb", "sink", "selector", "risk"}
+        if unread:
+            raise ManifestError(
+                f"capabilities[{index}] has unread fields: {sorted(unread)}")
+        verb = item.get("verb")
+        if not isinstance(verb, str) or not verb:
+            raise ManifestError(f"capabilities[{index}] requires a verb")
+        if verb in seen:
+            raise ManifestError(f"capability {verb} is declared twice")
+        seen.add(verb)
+        if verb in _INERT_VERBS:
+            raise ManifestError(_INERT_VERBS[verb])
+        sink = item.get("sink")
+        risk = item.get("risk")
+        if not isinstance(sink, str) or sink not in {"pure", "observation", "privileged"}:
+            raise ManifestError(
+                f"capabilities[{index}] ({verb}) requires sink pure|observation|privileged; "
+                f"{dialect} states no default")
+        if not isinstance(risk, str) or not risk:
+            raise ManifestError(f"capabilities[{index}] ({verb}) requires a risk class")
+        # A selector arrives either as authored JSON or already canonicalised
+        # by the `/2` parser. Both are accepted; both end as one canonical form,
+        # because the selector string is what enters `D_H`.
+        selector = item.get("selector")
+        if isinstance(selector, str) and selector:
+            source: Any = _selector_object(selector)
+        elif isinstance(selector, Mapping):
+            source = dict(selector)
+        else:
+            raise ManifestError(f"capabilities[{index}] ({verb}) requires a selector")
+        try:
+            canonical = canonicalise_selector(parse_selector(source))
+        except (TypeError, ValueError) as exc:
+            raise ManifestError(
+                f"capabilities[{index}] ({verb}) selector is invalid: {exc}") from exc
+        result.append(CapabilityRequirement(verb, sink, canonical, risk))
+    return tuple(result)
+
+
+def _sorted_components(components: tuple[NamedComponent, ...]) -> tuple[NamedComponent, ...]:
+    """Canonical component order.
+
+    Dialects disagree about order: `/1` sorts roles, `/2` preserves authoring
+    order. Order is not a behaviour-affecting fact, so normalization fixes it
+    rather than letting it fork `D_H`.
+    """
+    names = [item.name for item in components]
+    if len(set(names)) != len(names):
+        raise ManifestError("component names must be unique")
+    return tuple(sorted(components, key=lambda item: item.name))
+
+
+def _split_evaluation(evaluation: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[str, ...]]:
+    """Hoist the named oracle out of the evaluation policy.
+
+    `/1` names oracles in `evaluators`; `/2` names one in `evaluation.oracle`.
+    Both mean "this exterior judge", so the canonical value carries the judge in
+    one place and leaves mode/absence semantics in the policy.
+    """
+    policy = {key: value for key, value in evaluation.items() if key != "oracle"}
+    oracle = evaluation.get("oracle")
+    return policy, ((oracle,) if isinstance(oracle, str) and oracle else ())
+
+
+def canonical_from_v2(raw: object) -> CanonicalManifest:
+    """Normalize authored `mhf.manifest/2` bytes.
+
+    Delegates every `/2` rule to `parse_named_manifest`, which stays the sole
+    `/2` parser; this function only projects that value onto the canonical one.
+    """
+    named = parse_named_manifest(raw)
+    metadata = dict(named.metadata)
+    evaluation, evaluators = _split_evaluation(metadata.get("evaluation") or {"mode": "exterior"})
+    capabilities = _canonical_capabilities(metadata.get("capabilities"), dialect="mhf.manifest/2")
+    budget = metadata.get("budget")
+    if budget is not None and not isinstance(budget, (Mapping, str)):
+        raise ManifestError("budget must be an object or an artifact ref")
+    model_routes = metadata.get("model_routes") or ()
+    if not isinstance(model_routes, (list, tuple)):
+        raise ManifestError("model_routes must be an array")
+    return CanonicalManifest(
+        manifest_id=named.manifest_id,
+        components=_sorted_components(named.components),
+        bindings=tuple(named.bindings),
+        entrypoints=tuple(named.entrypoints),
+        ceiling=tuple(named.ceiling),
+        capabilities=capabilities,
+        evaluators=evaluators,
+        budget_policy=budget if budget is not None else {},
+        evaluation=evaluation,
+        profiles=dict(named.profiles),
+        system_prompt=metadata.get("system_prompt"),
+        approval_policy=metadata.get("approval_policy"),
+        model_routes=tuple(str(item) for item in model_routes),
+        guardrails=dict(metadata.get("guardrails") or {}),
+        undeletable=metadata.get("undeletable") is True,
+    )
+
+
+def canonical_from_legacy(raw: object) -> CanonicalManifest:
+    """Normalize supported `mhf.harness/1` bytes at the compatibility boundary.
+
+    This is ingress, not an execution authority (ADR-0088 §1.1, §1.6): it reads
+    the legacy dialect and emits the canonical value directly. No
+    `HarnessManifest` is constructed, so no legacy value can cross into
+    composition and become a second identity.
+    """
+    if not isinstance(raw, Mapping):
+        raise ManifestError("manifest must be an object")
+    unread = set(raw) - {"harness", "components", "capabilities", "evaluators",
+                         "budgetPolicy", "undeletable", "api"}
+    if unread:
+        raise ManifestError(f"manifest has unread fields: {sorted(unread)}")
+    harness = raw.get("harness")
+    if not isinstance(harness, str) or not harness:
+        raise ManifestError("harness must be a non-empty string")
+    rows = raw.get("components")
+    if not isinstance(rows, Mapping) or not rows:
+        raise ManifestError("components must be a non-empty object")
+    budget_policy = raw.get("budgetPolicy")
+    if not isinstance(budget_policy, str) or not budget_policy:
+        raise ManifestError("budgetPolicy must be a non-empty artifact path")
+
+    capabilities = _canonical_capabilities(raw.get("capabilities"), dialect="mhf.harness/1")
+    if not capabilities:
+        raise ManifestError("a harness must declare at least one capability")
+    ceiling = tuple(item.selector for item in capabilities)
+
+    components: list[NamedComponent] = []
+    for role in sorted(rows):
+        interface = LEGACY_ROLE_INTERFACE.get(role)
+        if interface is None:
+            raise ManifestError(
+                f"component role {role!r} has no registered consumer; unread "
+                "components are forbidden at composition")
+        paths = _strings(rows[role], f"components.{role}")
+        for index, path in enumerate(paths):
+            # One role may carry several artifacts. The suffix is positional and
+            # stable, so a `/2` author can state the same graph by name.
+            name = role if len(paths) == 1 else f"{role}.{index}"
+            components.append(NamedComponent(
+                name=name, kind=interface, implementation=path, config=path,
+                isolation=LEGACY_ISOLATION, ceiling=ceiling,
+                interfaces=(interface,), entrypoints=(name,), authority=False))
+
+    entrypoints = tuple(item.name for item in components if "IToolkit" in item.interfaces)
+    if not entrypoints:
+        # A pack that declares no toolkit is entered through everything it
+        # declares; deriving nothing would make the composition unreachable.
+        entrypoints = tuple(item.name for item in components)
+
+    return CanonicalManifest(
+        manifest_id=harness,
+        components=_sorted_components(tuple(components)),
+        bindings=(),
+        entrypoints=tuple(sorted(entrypoints)),
+        ceiling=ceiling,
+        capabilities=capabilities,
+        evaluators=_strings(raw.get("evaluators", []), "evaluators")
+        if raw.get("evaluators") else (),
+        budget_policy=budget_policy,
+        evaluation={"mode": "exterior"},
+        undeletable=raw.get("undeletable") is True,
+    )
+
+
+def read_canonical_manifest(raw: object) -> CanonicalManifest:
+    """The one production ingress. Dialect is decided here and nowhere else."""
+    if not isinstance(raw, Mapping):
+        raise ManifestError("manifest must be an object")
+    api = raw.get("api")
+    if api == "mhf.manifest/2":
+        return canonical_from_v2(raw)
+    if api is None or api == "mhf.harness/1":
+        return canonical_from_legacy(raw)
+    raise ManifestError(f"unsupported manifest api: {api!r}")
+
+
+#: SPI interface -> the registered artifact kind its component files carry.
+#:
+#: `kind` participates in an artifact's digest, so the two dialects must agree
+#: on it or identical bytes would digest differently. Deriving it from the
+#: canonical interface — rather than from the `/1` role name — is what keeps
+#: that agreement, and every value here is already a `BUILTIN_KINDS` row.
+SPI_ARTIFACT_KIND: Mapping[str, str] = {
+    "IToolkit": "tool_schema",
+    "IContextManager": "context_policy",
+    "IMemoryEngine": "retrieval_policy",
+    "IPlanner": "routing_policy",
+    "IEvaluationGate": "approval_policy",
+}
+
+
+def artifact_kind_for(component: NamedComponent) -> str:
+    kind = SPI_ARTIFACT_KIND.get(component.kind)
+    if kind is None:
+        raise ManifestError(
+            f"component {component.name} declares unknown SPI kind {component.kind!r}")
+    return kind
+
+
+def freeze_composition(manifest: CanonicalManifest, graph: ArtifactGraph, episode_id: str,
+                       identity: Mapping[str, Any] | None = None) -> FrozenComposition:
+    """Resolve every named reference and freeze one composition (`D_H`).
+
+    Every failure here is a failure *before* a run: an unresolved ref, a
+    component ceiling that widens the harness ceiling, or a budget policy that
+    is not readable all deny at composition rather than at first effect.
+    """
+    if not episode_id:
+        raise ManifestError("composition requires an episode id")
+    files = graph.by_path()
+
+    harness_ceiling = [_selector_object(item) for item in manifest.ceiling]
+    resolved: list[tuple[str, str, Any]] = []
+    for component in manifest.components:
+        implementation = component.implementation
+        if implementation not in files:
+            raise ManifestError(f"component reference does not resolve: {implementation}")
+        if isinstance(component.config, str):
+            if component.config not in files:
+                raise ManifestError(
+                    f"component config reference does not resolve: {component.config}")
+            config: Any = files[component.config].digest
+        else:
+            config = component.config
+        for selector in component.ceiling:
+            # Monotonic attenuation is a composition-time property: a component
+            # may narrow the harness ceiling, never widen it.
+            if not ceiling_allows(harness_ceiling, _selector_object(selector)).included:
+                raise ManifestError(
+                    f"component ceiling widens harness ceiling: {component.name}")
+        resolved.append((component.name, files[implementation].digest, config))
+
+    budget = manifest.budget_policy
+    if isinstance(budget, str):
+        if budget not in files:
+            raise ManifestError(f"budget policy does not resolve: {budget}")
+        try:
+            budget = parse_json_text(files[budget].content)
+        except (TypeError, ValueError) as exc:
+            raise ManifestError(f"budget policy is not JSON: {manifest.budget_policy}") from exc
+    if not isinstance(budget, Mapping):
+        raise ManifestError("budget policy must resolve to an object")
+
+    closure = graph.closure(tuple(ref for ref in manifest.artifact_refs if ref in files))
+    graph_digest = digest_of([(item.path, item.kind, item.digest) for item in closure])
+
+    return FrozenComposition(
+        manifest=manifest,
+        episode_id=episode_id,
+        component_digests=tuple(resolved),
+        budget=dict(budget),
+        graph_digest=graph_digest,
+        identity=dict(identity or {}),
+    )

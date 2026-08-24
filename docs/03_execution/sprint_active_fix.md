@@ -3,7 +3,7 @@
 **To:** Project CEO / Engineering Leadership
 **From:** Principal Staff Engineer review track
 **Date:** 2026-08-24
-**Baseline:** `cognitive-framework@feat_W4-W6_Higgs_core`, commit `c8fc6dd`
+**Baseline:** `cognitive-framework@feat_W4-W6_Higgs_core`
 **Bundle root:** `docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/aether-m4-m8/m456/`
 **Decision requested:** ratify the application sequence in Chapter 3 and retain
 approval authority over the two gates marked **LEADERSHIP HOLD**.

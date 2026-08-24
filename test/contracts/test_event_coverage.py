@@ -181,14 +181,38 @@ class CataloguedKindsAreFoldedOrAllowlisted(unittest.TestCase):
             "AuthorizationDenied": {"reason": "denied"},
             "ObservationProduced": {"snapshot": "snap"},
             "ProposalProduced": {"toolCalls": []},
+            # ADR-0090. Both kinds left UNFOLDED_ALLOWLIST when the fold landed,
+            # but neither got a dummy payload, so the loop fed them `{}` and the
+            # branch skipped an event it could not identify -- passing this test
+            # while folding nothing. The reducer now denies an unidentifiable
+            # child event, so these payloads are what exercises the real fold.
+            "ChildSpawned": {"parentEpisodeId": "ep-test", "childEpisodeId": "ep-child",
+                             "authority": ["fs.read"], "depth": 1,
+                             "lineage": ["ep-test"], "settledIntentKey": "intent-1"},
+            "ChildReturned": {"childEpisodeId": "ep-child", "outcome": "completed",
+                              "terminal": "ok", "cost": {"usd_micros": 1},
+                              "settledIntentKey": "intent-1"},
+        }
+
+        # Kinds whose fold legitimately denies without a predecessor. Seeding it
+        # is not a relaxation: `ChildReturned` MUST reject an orphan return
+        # (ADR-0090), so the only honest way to exercise its fold is to give it
+        # the spawn it is closing.
+        prerequisites = {
+            "ChildReturned": ("ChildSpawned", dummy_payloads["ChildSpawned"]),
         }
 
         for seq, kind in enumerate(sorted(EVENT_KINDS), 1):
             if kind in UNFOLDED_ALLOWLIST:
                 continue
             payload = dummy_payloads.get(kind, {})
+            state = initial_state("run-test", "ep-test")
+            prerequisite = prerequisites.get(kind)
+            if prerequisite is not None:
+                state = reduce_event(state, self._envelope(seq, *prerequisite))
+                seq += 1
             env = self._envelope(seq, kind, payload)
-            state = reduce_event(initial_state("run-test", "ep-test"), env)
+            state = reduce_event(state, env)
             if state.unknown_events:
                 unhandled_silently.append(kind)
 

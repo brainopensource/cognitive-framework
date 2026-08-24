@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
+from ..adapters.environment.git import GitEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
@@ -71,6 +72,7 @@ class Runtime(_ComposedRuntime):
         approval_key: bytes | None = None,
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
+        sandbox_mode: str = "rootless",
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -83,6 +85,10 @@ class Runtime(_ComposedRuntime):
                               bindings=bindings)
         repo = Path(task_context.repo_path).resolve()
         selected_store = store or SqliteEventStore(":memory:")
+        if sandbox_mode not in {"rootless", "host-dev"}:
+            raise ValueError("sandbox_mode must be 'rootless' or 'host-dev'")
+        if release and sandbox_mode != "rootless":
+            raise ValueError("release execution requires rootless containment")
         if release and (
             not isinstance(selected_store, SqliteEventStore)
             or not selected_store.durable
@@ -91,25 +97,34 @@ class Runtime(_ComposedRuntime):
                 "release execution requires an explicit file-backed SQLite-WAL store"
             )
 
-        # Runtime phase. Composition has already succeeded; a host without
-        # bubblewrap is a failure of *this* run, not of the harness, so the
-        # probe lives here and not behind `compose`.
-        bwrap = _bwrap_path()
-        sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
-        sealed_bundle = sealed_dir / "bundle"
-        sealed_bundle.write_bytes(
-            b"sealed evaluator mount is intentionally unavailable to worker\n")
-        worker = WorkerProtocol(
-            RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle, runtime=bwrap))
-        environment = SandboxedEnvironmentAdapter(
-            worker, repo, environment_id=f"workspace:{repo}")
+        sealed_dir: Path | None = None
+        if sandbox_mode == "host-dev":
+            # Explicit development escape hatch for local CLI work.  This
+            # adapter preserves the EnvironmentPort, path checks, argv
+            # allowlist, receipts, and compensation, but it is intentionally
+            # not a containment attestation and is barred from release.
+            environment = GitEnvironmentAdapter(
+                repo, environment_id=f"workspace-host-dev:{repo}")
+        else:
+            # Runtime phase. Composition has already succeeded; a host
+            # without bubblewrap is a failure of this rootless run, not of
+            # the harness, so the probe lives here and not behind `compose`.
+            bwrap = _bwrap_path()
+            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
+            sealed_bundle = sealed_dir / "bundle"
+            sealed_bundle.write_bytes(
+                b"sealed evaluator mount is intentionally unavailable to worker\n")
+            worker = WorkerProtocol(
+                RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle, runtime=bwrap))
+            environment = SandboxedEnvironmentAdapter(
+                worker, repo, environment_id=f"workspace:{repo}")
 
-        if release:
-            qualified = environment.qualify()
-            if not qualified.ok:
-                raise RuntimeError(
-                    f"release containment qualification failed: {qualified.error.kind}: "
-                    f"{qualified.error.message}")
+            if release:
+                qualified = environment.qualify()
+                if not qualified.ok:
+                    raise RuntimeError(
+                        f"release containment qualification failed: {qualified.error.kind}: "
+                        f"{qualified.error.message}")
 
         if model is None:
             from ..adapters.models.openrouter import OpenRouterModel
@@ -131,7 +146,8 @@ class Runtime(_ComposedRuntime):
                 harness, ports, task_context, on_terminal=on_terminal, release=release
             )
         finally:
-            shutil.rmtree(sealed_dir, ignore_errors=True)
+            if sealed_dir is not None:
+                shutil.rmtree(sealed_dir, ignore_errors=True)
 
     @classmethod
     def run_composed(

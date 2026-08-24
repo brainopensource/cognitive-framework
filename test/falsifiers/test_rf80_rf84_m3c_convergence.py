@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.domain.canonicalisation.digest import digest_of
 from vanguard.packages.domain.evidence.foundation import FoundationEvidenceError, EvidenceRow
 from vanguard.packages.domain.ledger.reducer import compute_state_digest, reconstruct_state
 from vanguard.packages.runtime.compose import Runtime as CompositionRuntime
@@ -26,15 +27,65 @@ from vanguard.packages.ports.event_store import EventRange
 class M3CConvergenceFalsifiers(unittest.TestCase):
     def _execute(self, *, store: SqliteEventStore | None = None, release: bool = False):
         with tempfile.TemporaryDirectory() as directory, patch(
-            "vanguard.packages.runtime.root._bwrap_path", return_value="/bin/true"
-        ):
+            "vanguard.packages.runtime.wiring._bwrap_path", return_value="/bin/true"
+        ), patch(
+            "vanguard.packages.adapters.sandbox.rootless.RootlessSandboxRunner.qualify"
+        ) as mock_qual:
+            from vanguard.packages.ports.event_store import Result
+            from vanguard.packages.ports.sandbox import ContainmentReport
+            mock_qual.return_value = Result.success(
+                ContainmentReport(
+                    runtime="bubblewrap-rootless",
+                    runtime_version="bubblewrap 0.9.0",
+                    namespace="user,mount,ipc,pid,uts,cgroup,network",
+                    syscall_profile="namespace capability boundary; denial probe recorded",
+                    network_enforcement="outer bubblewrap network namespace",
+                    writable_mounts=("/workspace", "/tmp"),
+                    exposed_sockets=(),
+                    resource_limits={},
+                    startup_probes=(),
+                    attested_at="2026-08-24T00:00:00Z",
+                    contained=True,
+                    verified=True,
+                    visibility_mark="probe-verified-rootless",
+                )
+            )
+            prereg: dict[str, Any] | None = None
+            if release:
+                task_digest = digest_of({"task": "finish"})
+                identity = {
+                    "api": "mhf.preregistration/1",
+                    "task_digest": task_digest,
+                    "oracle_id": "tableworld-evaluator@1",
+                    "oracle_digest": "sha256:" + "3" * 64,
+                    "evaluator_key_id": "evaluator-key-1",
+                    "evaluator_public_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA",
+                    "protocol": "unix-jsonrpc-v1",
+                    "subject_digest": "sha256:" + "4" * 64,
+                    "created_at": "2026-08-24T00:00:00Z",
+                    "metadata": {},
+                }
+                prereg = dict(identity)
+                prereg["preregistration_digest"] = digest_of(identity)
+
+            model = FakeModel([{"kind": "finish", "note": "done"}])
+            if release:
+                object.__setattr__(model, "provider", "openrouter")
+                object.__setattr__(model, "mode", "live")
             return Runtime.execute_harness(
                 "vg-table-default",
-                TaskContext("finish", Path(directory), run_id="rf80-run", episode_id="rf80-ep"),
-                model=FakeModel([{"kind": "finish", "note": "done"}]),
+                TaskContext(
+                    "finish",
+                    Path(directory),
+                    run_id="rf80-run",
+                    episode_id="rf80-ep",
+                    preregistration=prereg,
+                ),
+                model=model,
                 store=store,
                 release=release,
             )
+
 
     def test_rf80_public_execution_traverses_registry_and_retires(self) -> None:
         result = self._execute()

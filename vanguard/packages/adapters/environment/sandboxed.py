@@ -74,10 +74,17 @@ class SandboxedEnvironmentAdapter:
 
     def qualify(self) -> Result[Any]:
         """Run the worker perimeter probes before release execution starts."""
-        result = self.worker.runner.execute(("/usr/bin/true",))
-        if not result.ok:
-            return Result.fail(result.error.kind, result.error.message)
-        report = result.value.containment
+        runner = getattr(self.worker, "runner", None)
+        if runner is not None and hasattr(runner, "qualify"):
+            result = runner.qualify()
+            if not result.ok:
+                return Result.fail(result.error.kind, result.error.message)
+            report = result.value
+        else:
+            result = self.worker.runner.execute(("/usr/bin/true",))
+            if not result.ok:
+                return Result.fail(result.error.kind, result.error.message)
+            report = result.value.containment
         if not report.verified or not report.contained:
             return Result.fail("containment_unverified", "rootless containment probes failed")
         self.containment_report = report

@@ -150,6 +150,64 @@ class Runtime(_ComposedRuntime):
                 shutil.rmtree(sealed_dir, ignore_errors=True)
 
     @classmethod
+    def execute_profiled(
+        cls,
+        manifest_path: str | Path,
+        task_context: TaskContext,
+        profile_id: str,
+        interactive: bool = True,
+        *,
+        model: Any = None,
+        approver: Callable[[Any], Any] | None = None,
+        verifier: Any = None,
+        store: Any = None,
+        bindings: Mapping[str, EffectBinding] | None = None,
+        approval_key: bytes | None = None,
+        on_terminal: Callable[[HarnessSession], Any] | None = None,
+        host_qualifies: bool = True,
+        host_facts: Mapping[str, Any] | None = None,
+    ) -> RunResult:
+        """Compose and run one episode through the `RuntimeBootstrap` seam.
+
+        This is the ADR-0089 target entrypoint: `Runtime` selects no adapter
+        here — `RuntimeBootstrap.build()` does, from `profile_id` alone. A
+        `sandboxed`/`hermetic` profile that the host cannot qualify raises
+        `SandboxUnavailable`; it never silently executes on `host`
+        (`RF-88`). `execute_harness` remains the legacy entrypoint until
+        every caller has migrated and W3D-12 sunsets it.
+        """
+        from .bootstrap import RuntimeBootstrap
+
+        harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
+                              bindings=bindings)
+        deps = RuntimeBootstrap.build(
+            profile_id=profile_id,
+            repo_path=Path(task_context.repo_path),
+            model=model,
+            store=store,
+            host_qualifies=host_qualifies,
+            host_facts=host_facts,
+        )
+        release = deps.profile.requested.assurance_level == "hermetic"
+        ports = SessionPorts(
+            model=deps.model,
+            environment=deps.environment,
+            clock=deps.clock,
+            store=deps.store,
+            verifier=verifier,
+            approver=approver,
+            approval_key=approval_key,
+            interactive=interactive,
+        )
+        try:
+            return cls.run_composed(
+                harness, ports, task_context, on_terminal=on_terminal,
+                release=release, profile=deps.profile,
+            )
+        finally:
+            deps.cleanup()
+
+    @classmethod
     def run_composed(
         cls,
         harness: Harness,
@@ -158,8 +216,17 @@ class Runtime(_ComposedRuntime):
         *,
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
+        profile: Any | None = None,
     ) -> RunResult:
-        """Run an already composed harness through the sole activation boundary."""
+        """Run an already composed harness through the sole activation boundary.
+
+        `profile`, when given, is an `EffectiveExecutionProfile`
+        (`runtime/profiles.py`, typically produced by `RuntimeBootstrap`).
+        It folds into `RunPlan`/`D_R` alongside `environment`/`store`/
+        `model_route` (`ADR-0089 §Decision 1`, `RF-87`). Omitting it leaves
+        `RunPlan.profile_id` empty — legible for pre-W3D callers during
+        migration, but never release/promotion eligible.
+        """
         selected_store = ports.store
         if release and (
             not isinstance(selected_store, SqliteEventStore)
@@ -196,6 +263,7 @@ class Runtime(_ComposedRuntime):
             oracle=harness.evaluators[0] if harness.evaluators else None,
             root_principal=task_context.principal,
             budget=harness.budget,
+            profile=profile,
         )
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan

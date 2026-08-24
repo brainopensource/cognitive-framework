@@ -31,7 +31,22 @@ merges exist.
 | **M-2 One runtime and recovery** | v0.6.1 | Truthful trajectories and restart-safe state | RF-23 rich/conserved `mhf.trajectory/1` plus RF-25 fresh-process SQLite-WAL continuation | **COMPLETE (GREEN)** | M-1 |
 | **M-3 Extensibility contracts** | v0.6.2 | Named graph, packages registry lifecycle, and Layer-0 retirement components | RF-28…RF-45 and prior NOVA-4 evidence retained | **OPERATIONAL CLOSURE REOPENED** | M-2 |
 | **M-3C Canonical Composition Convergence** | v0.6.2 | One canonical public `compose -> freeze -> activate -> run` authority across code and table probes | G0–G4 / RF-78–RF-84: canonical identity, lifecycle, durable evidence lineage, zero competing production authority | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | M-2 plus retained M-3 evidence |
-| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **ACTIVE — ENVIRONMENT QUALIFICATION; CONCEPT LOCKED** | M-3C |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **PAUSED FOR ACCEPTED W-3D CORRECTION** | M-3C + W-3D |
+
+### W-3D Product Runtime Profiles — accepted corrective wave
+
+ADR-0089 was accepted by the Engineering Director on 2026-08-24. W-3D runs after M-3C and before
+RF-85 execution. It requalifies the product/runtime seam without reopening M-3C or authorizing M-5+.
+
+| Slice | Owner | Gate |
+|---|---|---|
+| W3D-00–01 governance, baseline, RF-87–RF-94 RED | A + B | ADR-0089 accepted; falsifiers reproduce the diagnosed defects |
+| W3D-02–06 profile, bootstrap, portability, filesystem/process split, activation | Dev A | RF-87–RF-89 and RF-93 green; no kernel/agency loop change |
+| W3D-07–10 packs, generic entrypoint, persistence/evidence | Dev B | RF-90–RF-92 and RF-94 green; shared runtime path and source-derived evidence |
+| W3D-11–12 preview and cleanup | A + B | RF-87–RF-94 green; full architecture/security/documentation gates green |
+
+W-3D acceptance requalifies RF-78–RF-84 and then reopens the existing M-4 environment qualification
+lane. No RF-85 evidence is claimed during the corrective wave.
 
 ### Why M-3C exists
 

@@ -32,6 +32,7 @@ superseded_by: null
 - 🧭 [Tier S+ Evolution Contract (`0077`–`0085`)](#tier-s-evolution-contract-00770085) — **Ratified evolution contracts and reservation law**
 - 🧹 [Repository Governance (`0086`–`0087`)](#repository-governance) — historical-body consolidation, topology, and recovery rule
 - 🔒 [M-3C to M-8 Concept Lock (`0088`)](#m-3c-to-m-8-concept-lock) — canonical activation, evidence, generality, delegation, and scale seams
+- 🛠️ [W-3D Product Runtime Profiles (`0089`)](#w-3d-product-runtime-profiles-0089) — execution profiles, bootstrap, activation, and product/runtime seam
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -79,8 +80,20 @@ a separate ADR at that time. ADR-0085 carries the matching dated correction so i
 cannot conflict with the canonical selector algebra. ADR-0080 records RF-26, and ADR-0082 names
 RF-76/RF-77 without advancing their implementation milestones.
 
-**Immediate authorization boundary.** M-2 is closed. ADR-0088 and the active board authorize only
-M-3C production work; accepted future designs do not self-authorize M-4 or later implementation.
+## W-3D Product Runtime Profiles (`0089`)
+
+ADR-0089 was accepted by the Engineering Director on 2026-08-24. W-3D is an authorized corrective
+wave for execution profiles, adapter bootstrap, real plugin activation, portable assurance modes, and
+the generic CLI/runtime entrypoint. RF-85 execution is paused until W-3D requalifies the baseline;
+M-5 through M-8 remain locked.
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0089` | [`0089-execution-assurance-profiles-and-product-runtime.md`](0089-execution-assurance-profiles-and-product-runtime.md) | **W-3D Product Runtime Profiles:** identity-bearing execution profile, one bootstrap seam, explicit assurance modes, real activation handles, shared generic entrypoint, durable streaming fan-out. | accepted | 2026-08-24 |
+
+**Immediate authorization boundary.** W-3D may implement only W3D-00 through W3D-12 and its RF-87–RF-94
+falsifiers. It does not authorize `agent.spawn`, concurrency, topology engines, Pack #2, retrieval,
+macro promotion, adaptive routing, or meta-cognition.
 
 ---
 
@@ -244,6 +257,7 @@ falsifiers use `RF-*`.
 | `RF-78`–`RF-84` | ADR-0088 | Canonical public composition/activation, domain bindings, release durability, evidence derivation, and authority retirement / M-3C |
 | `RF-85` | ADR-0088 | One uninterrupted real nine-row foundation run / M-4 |
 | `RF-86` | ADR-0088 | Formal Pack #2 parity with unchanged substrate / M-5 |
+| `RF-87`–`RF-94` | ADR-0089 | Execution profile identity, fail-closed assurance, capability qualification, generic entrypoint, shared tools, event streaming, real activation, and single runtime authority / W-3D |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

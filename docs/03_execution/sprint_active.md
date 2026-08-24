@@ -13,7 +13,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint Board — v0.6.3 Foundation E2E (M-4)
+# Active Sprint Board — v0.6.3 W-3D Product Runtime Profiles → M-4
 
 **Start here:** [`README.md`](../../README.md) is navigation; [`SPEC.md`](../SPEC.md) and the six
 normative leaves under [`01_law/`](../01_law/) are law. Accepted ADRs record decisions. This file is
@@ -21,9 +21,9 @@ the **sole living implementation authority**; [`milestones.md`](milestones.md) s
 
 ## 1. Director Decision and Current Truth
 
-**Current Director decision (2026-08-24):** M-3C is closed at `136436e`; M-4 is open only for
-environment qualification, immutable task/oracle preregistration, and one eligible RF-85 run. This is
-not authorization for a platform rewrite or for M-5+ implementation.
+**Current Director decision (2026-08-24):** M-3C is closed at `136436e`. W-3D Product Runtime
+Profiles is accepted under ADR-0089 and is now the active corrective wave. RF-85 execution is paused
+until W-3D requalifies the baseline; M-5+ remains locked.
 
 The retained M-3C diagnosis at repository commit `e3acc5c228f9a61a357d955c86317369f3339841` found that the
 M-3 contracts and side-path falsifiers exist, but the production closure claim is not yet supported by
@@ -52,7 +52,7 @@ compiler, lifecycle, auditor, fake or synthetic tests cannot close M-4.
 | Wave 2 / 2C | M-2 | **CLOSED (GREEN)** | Truthful trajectory plus fresh-process recovery. |
 | Wave 3 | M-3 | **CONTRACT COMPLETE; OPERATIONAL CLOSURE RESOLVED BY M-3C** | Prior graph, lifecycle, and Layer-0 work is retained as evidence, not discarded. |
 | Wave 3C | M-3C / v0.6.2 | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | G0–G4 and RF-78–RF-84 independently reviewed; canonical authority, durable lineage, and authority retirement proven by `136436e`. |
-| Wave 4 | M-4 / v0.6.3 | **ACTIVE — ENVIRONMENT QUALIFICATION / RF-85** | One real uninterrupted nine-row run; no mock, stitched trace, repair, or synthetic substitution. |
+| Wave 4 | M-4 / v0.6.3 | **PAUSED — W-3D REQUALIFICATION REQUIRED** | One real uninterrupted nine-row run after W-3D; no mock, stitched trace, repair, or synthetic substitution. |
 | Waves 5–10 | M-5–M-10 | **LOCKED** | Each preceding objective gate must close; roadmap text alone never authorizes work. |
 
 ## 2. Frozen Invariants and Decision Envelope
@@ -87,6 +87,21 @@ Neither lane may be the sole acceptance authority for its own cross-lane gate. D
 architecture hotspots; Devs B integrate only after the relevant contract is frozen.
 
 ## 3. Authorized Sprint Sequence
+
+### W-3D — Product Runtime Profiles (active)
+
+W-3D is authorized by ADR-0089. Dev A owns runtime/profile/bootstrap/activation architecture
+hotspots; Dev B owns packs, adapters, CLI entrypoint, fixtures, evidence plumbing, and CI. Both may
+work in parallel, but B integrates only against A's frozen contracts. The merge order is:
+
+`RF-87–RF-94 RED → A interface freeze → B implementation → A integration → cross-lane gate → full gates`.
+
+W-3D MUST preserve the kernel, S0–S12, sequential I-11 loop, evaluator boundary, WAL truth, and
+RF-85 requirements. It MUST NOT implement M-5–M-8 features. W3D-00 through W3D-12 are tracked in
+`TODO_W-3D_final.md`; this board is the authorization source.
+
+**Current W-3D gate:** W3D-00 is ratified. W3D-01 must land the baseline and RF-87–RF-94 RED
+falsifiers before production refactoring. After W3D-12, re-run RF-78–RF-84 and reopen M-4.
 
 ### Sprint 3C.0 — Authority reconciliation and RED contract (complete)
 
@@ -179,8 +194,8 @@ red falsifier confirmed -> focused suites -> cross-lane integration gate
 
 ## 5. M-4 Active Contract
 
-M-4 is opened by Director decision dated 2026-08-24. Its first authorized slice provisions and
-qualifies a real provider, evaluator identity, rootless Linux environment, file-backed WAL, and
+M-4 remains the retained foundation contract, but its release lane is paused by ADR-0089. After W-3D
+requalification, its first authorized slice provisions and qualifies a real provider, evaluator identity, rootless Linux environment, file-backed WAL, and
 preregistered coding task/oracle. M-4 then executes one uninterrupted `run_id` through the canonical
 release path and must populate all nine
 rows defined in [`milestones.md`](milestones.md#m-4-single-run-evidence-contract) under RF-85. Mock, cassette,
@@ -231,9 +246,8 @@ Independent review first rejected G4 and identified the missing operational join
 the same independent reviewer reran 29 focused tests plus `test_composition_root` and reported no
 remaining technical G3/G4 blocker. This is technical closure evidence, not Director authorization.
 
-**Director decision:** M-3C is closed and M-4 is open. The next authorized action is environment
-qualification and task/oracle preregistration, followed by one eligible RF-85 run only after every
-startup probe passes. No row is presently claimed, and no synthetic fixture is M-4 evidence.
+**Director decision:** M-3C is closed and W-3D is active under ADR-0089. The next authorized action is
+W-3D-01 baseline/falsifier work. RF-85 remains unclaimed and paused; no synthetic fixture is M-4 evidence.
 
 ## 9. Dev C RF-85 Preparation and Frozen Two-Lane Contract — 2026-08-24
 

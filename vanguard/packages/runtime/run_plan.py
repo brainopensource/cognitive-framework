@@ -60,6 +60,14 @@ class RunPlan:
     root_principal: str = ""
     budget: Mapping[str, int] = field(default_factory=dict)
     execution_mode: str = "sequential"
+    #: `ExecutionProfile` identity (`ADR-0089 §Decision 1`, `RF-87`). Empty
+    #: `profile_id` remains legible for pre-W3D callers during migration, but
+    #: an empty profile is never release/promotion eligible — see
+    #: `EffectiveExecutionProfile.to_run_plan_fields()` in `profiles.py`.
+    profile_id: str = ""
+    profile_digest: str = ""
+    assurance_level: str = ""
+    promotion_eligible: bool = False
     run_digest: str = field(init=False)
 
     def __post_init__(self) -> None:
@@ -71,6 +79,8 @@ class RunPlan:
             raise RunPlanError(
                 f"execution mode {self.execution_mode!r} is not authorized before M-7; "
                 "I-11 keeps the turn loop unary and sequential")
+        if self.promotion_eligible and self.assurance_level != "hermetic":
+            raise RunPlanError("only assurance_level='hermetic' may be promotion_eligible")
         object.__setattr__(self, "run_digest", digest_of({
             "compositionDigest": self.composition_digest,
             "activationDigest": self.activation_digest,
@@ -84,6 +94,10 @@ class RunPlan:
             "rootPrincipal": self.root_principal,
             "budget": dict(self.budget),
             "executionMode": self.execution_mode,
+            "profileId": self.profile_id,
+            "profileDigest": self.profile_digest,
+            "assuranceLevel": self.assurance_level,
+            "promotionEligible": self.promotion_eligible,
         }))
 
     @property
@@ -104,6 +118,8 @@ class RunPlan:
             "composition_digest": self.composition_digest,
             "activation_digest": self.activation_digest,
             "run_digest": self.run_digest,
+            "profile_id": self.profile_id,
+            "profile_digest": self.profile_digest,
         }
 
 
@@ -123,8 +139,31 @@ def plan_run(
     root_principal: str = "",
     budget: Mapping[str, int] | None = None,
     execution_mode: str = "sequential",
+    profile: Any | None = None,
+    profile_id: str | None = None,
+    profile_digest: str | None = None,
+    assurance_level: str | None = None,
+    promotion_eligible: bool | None = None,
 ) -> RunPlan:
-    """Bind one activation to the run it is about to perform."""
+    """Bind one activation to the run it is about to perform.
+
+    Profile identity reaches `run_digest` two ways, matching how every other
+    `RunPlan` field is either a plain scalar/dict or absent:
+
+    * `profile`, an `EffectiveExecutionProfile` (`runtime/profiles.py`) — the
+      bootstrap-driven path; its `to_run_plan_fields()` supplies all four
+      scalars at once.
+    * `profile_id`/`profile_digest`/`assurance_level`/`promotion_eligible`
+      directly — for callers (tests, lower-level fixtures) that already hold
+      the scalars and do not need to construct a profile object.
+
+    Explicit scalar arguments always win over `profile` on a per-field basis,
+    so a caller may pass `profile` for the common fields and override one.
+    Either path lands the resolved deployment/assurance identity in
+    `run_digest` alongside `environment`/`store`/`model_route`
+    (`ADR-0089 §Decision 1`, `RF-87`).
+    """
+    profile_fields: Mapping[str, Any] = profile.to_run_plan_fields() if profile is not None else {}
     return RunPlan(
         composition_digest=activation.composition_digest,
         activation_digest=activation.activation_digest,
@@ -140,4 +179,11 @@ def plan_run(
         root_principal=root_principal,
         budget=dict(budget or {}),
         execution_mode=execution_mode,
+        profile_id=profile_id if profile_id is not None else profile_fields.get("profileId", ""),
+        profile_digest=profile_digest if profile_digest is not None else profile_fields.get("profileDigest", ""),
+        assurance_level=assurance_level if assurance_level is not None else profile_fields.get("assuranceLevel", ""),
+        promotion_eligible=(
+            promotion_eligible if promotion_eligible is not None
+            else bool(profile_fields.get("promotionEligible", False))
+        ),
     )

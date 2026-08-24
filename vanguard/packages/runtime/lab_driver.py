@@ -473,6 +473,10 @@ def main() -> int:
         "--allow-paid", action="store_true",
         help="Authorise paid OpenRouter models (overrides free-band refusal)",
     )
+    parser.add_argument(
+        "--approve-writes", action="store_true",
+        help="Auto-approve write proposals via lab operator signer (labelled lab departure)",
+    )
 
     args = parser.parse_args()
     result = run_lab_task(
@@ -484,6 +488,7 @@ def main() -> int:
         sandbox_mode=args.sandbox,
         isolate=not args.in_place,
         allow_paid=args.allow_paid,
+        approve_writes=args.approve_writes,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

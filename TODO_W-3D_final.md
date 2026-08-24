@@ -1154,3 +1154,82 @@ and execute the real hermetic run there.
 
 **Director status:** W-3D focused implementation is largely green. M-4/RF-85 is not closed. M-5 and
 M-6 remain locked. No metacognition work is authorized.
+
+---
+
+## 14. Empirical Diagnostics, Root Cause Analysis, and Actionable Fix Strategy
+
+### 14.1 Empirical Findings from Live Benchmark Runs
+
+Recent live runs on `DOGFOOD-01` against real models (`deepseek/deepseek-chat`, `deepseek/deepseek-v4-flash`, `openai/gpt-5.6-luna`, `gemma4:26b`, `qwen2.5-coder:14b`, `nemotron-3-super-120b:free`) revealed three distinct failure modes:
+
+| Model | Observed Behavior | Primary Blocker |
+|---|---|---|
+| `deepseek/deepseek-v4-flash` | Repeatedly emitted `fs.read` on `src/calculator.py` across all 8 turns per attempt. | **State Amnesia via Flat Dialogue:** Dialogue flattened into generic text blocks in L5 without assistant tool-call pairing, causing the model to lose progression context. |
+| `deepseek/deepseek-chat` | Read `TASK.md`, `src/calculator.py`, and `test_calculator.py` in turns 1–3, then attempted `proc.exec` on turn 4. | **Kernel Authority Denial:** Denied with `AuthorizationDenied: denied_untrusted_justifying` (F-09) due to missing `AutonomousGrant` on isolated staging sandbox. |
+| `openai/gpt-5.6-luna` | Read files, understood bug, emitted `patch.apply` on turn 4. | **Approval Suspension:** Stalled on `ApprovalRequested` when running in plain interactive mode without `--in-place` / `approve_writes`. |
+| Local Ollama & Free Models | Exhausted turns reading or failed with schema incompatibility (HTTP 400). | **Reasoning/Schema Capacity:** Free/local tier models lack tool-call precision or have incompatible parameter formatting. |
+
+---
+
+### 14.2 Root Causes: Why It Fails & How the Harness Behaves
+
+1. **Dialogue History Flattener vs. Standard LLM Tool Call Format:**
+   - *The Mechanism:* `ContextCompiler` flattens dialogue into Layer 5 text blocks (`"[user] tool result turn=1 digest=... \n <file content>"`).
+   - *The Problem:* Frontier models are instruction-tuned on standard OpenAI message structures (`[user] -> [assistant: tool_calls=[...]] -> [tool: result]`). When previous tool calls are presented as concatenated text in a single user message without their matching assistant invocation, models lose track of what action they just performed and re-read the file repeatedly.
+2. **Authority Predicate (F-09) & Autonomous Grants in Staging Environments:**
+   - *The Mechanism:* Reading workspace files (`TASK.md`, `src/calculator.py`) labels accumulated spans as `UNTRUSTED_EXTERNAL`. S5 authorization forbids ungranted capability widening on untrusted spans.
+   - *The Problem:* In `lab_driver.py`, `AutonomousGrant` was historically only minted for `--in-place --interactive`. When running in isolated temporary directories (`isolate=True`), `grant` remained `None`. Consequently, when the model attempted `proc.exec`, the kernel classified it as unheld capability widening and failed-closed with `denied_untrusted_justifying`.
+3. **Model Band Guard:**
+   - *Resolution:* Successfully resolved by adding explicit `--allow-paid` CLI support and `VANGUARD_ALLOW_PAID` environment variable support to `model_selection.py` and `lab_driver.py` without violating fail-closed CI defaults.
+
+---
+
+### 14.3 Concrete Suggestions & Next Tasks to Reach `oracle_green`
+
+#### Task 1: OpenAI-Compatible Structured Tool Dialogue in `ContextCompiler` / `_LayeredOperator`
+- **Goal:** Format conversation history so models see standard assistant `tool_calls` paired with `tool` role responses while preserving prefix-layer caching (`L1–L4`).
+- **Implementation:**
+  - Update `vanguard/packages/agency/context/layers.py` to allow L5 fragments to render as structured `assistant` + `tool` message sequences in `bundle()["messages"]`.
+  - Alternatively, in `_LayeredOperator.propose()`, reconstruct the turn transcript into standard `[{"role": "assistant", "tool_calls": [...]}, {"role": "tool", "content": ...}]` format before dispatching to `OpenRouterModel`.
+
+#### Task 2: Automated `AutonomousGrant` Binding for Isolated Lab Staging
+- **Goal:** Eliminate spurious `denied_untrusted_justifying` denials when running isolated benchmark tasks with `--approve-writes`.
+- **Implementation:**
+  - In `vanguard/packages/runtime/lab_driver.py`, ensure that when `approve_writes=True` or when running interactive lab episodes, an `AutonomousGrant` is automatically minted for `task_path` (even when isolated in a staging directory), granting held authority for `proc.exec` and `patch.apply`.
+
+#### Task 3: Anti-Loop Directives & Progressive State Hints in System Prompts
+- **Goal:** Prevent reasoning models from repeating identical read actions.
+- **Implementation:**
+  - Update `vanguard/packages/agency/manifests/vg-code-default/system-prompt.txt` with explicit loop-breaking rules:
+    ```text
+    - PROGRESSION RULE: Never invoke Read (fs.read) on the same file twice. Once you have inspected the file and located the bug, proceed immediately to Edit (patch.apply).
+    - EDIT RULE: Submit the fix using patch.apply with the exact path and corrected content or unified diff.
+    - VERIFY RULE: After applying the patch, run the test command via Bash (proc.exec).
+    ```
+
+#### Task 4: Connect Tier Escalation (`RoleAwareRouter`) to Paid Authorization
+- **Goal:** Allow the autonomous repair loop (`run_with_escalation`) to automatically climb from free exploration models to paid reasoning models when stuck on repetitive reads.
+- **Implementation:**
+  - Wire `allow_paid=True` through `RoleAwareRouter.choose()` and `TierLadder` so paid rungs (`deepseek/deepseek-v4-flash`, `openai/gpt-5.6-luna`) are seamlessly authorized during automated repair escalation.
+
+---
+
+### 14.4 Step-by-Step Action Plan to Close RF-85
+
+```mermaid
+graph TD
+    A[1. Mint AutonomousGrant in Staging] --> B[2. Refine L5 Dialogue Structure & Prompt]
+    B --> C[3. Run DOGFOOD-01 with deepseek-v4-flash / gpt-5.6-luna]
+    C --> D{oracle_green Reached?}
+    D -- Yes --> E[4. Provision UID 10002 Evaluator on Clean VM]
+    D -- No --> B
+    E --> F[5. Execute Single Hermetic RF-85 Release Run]
+    F --> G[6. Close M-4 & Open M-5]
+```
+
+1. **Step 1:** Apply Task 2 (mint `AutonomousGrant` for staging sandbox in `lab_driver.py`).
+2. **Step 2:** Apply Task 3 & Task 1 (add anti-loop prompt directives and structured turn history).
+3. **Step 3:** Run `lab_driver.py` with `deepseek/deepseek-v4-flash` / `gpt-5.6-luna` on `DOGFOOD-01` and verify `oracle_green`.
+4. **Step 4:** Transition to the clean Linux VM to start UID 10002 evaluator daemon, freeze preregistration, and derive all nine evidence rows for official M-4 closure.
+

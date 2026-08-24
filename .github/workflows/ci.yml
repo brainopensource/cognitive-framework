@@ -26,7 +26,11 @@ jobs:
         run: python3 -m pip install -e '.[dev]'
 
       - name: Install rootless sandbox runtime
-        run: sudo apt-get update && sudo apt-get install --yes bubblewrap
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          bwrap --unshare-all --unshare-user --ro-bind /usr /usr --proc /proc --dev /dev -- /usr/bin/true
 
       - name: Repo paths test (F-20)
         run: python3 -m unittest test.test_repo_paths

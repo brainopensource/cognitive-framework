@@ -13,11 +13,14 @@ Pure reducer invariants:
 
 from __future__ import annotations
 
+import re
+from dataclasses import replace
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
 from ..canonicalisation.digest import digest_of
 from .events import EventEnvelope
 from .state import (
+    ChildRecord,
     ApprovalRecord,
     ArtifactRecord,
     BudgetLeaseState,
@@ -50,6 +53,28 @@ def initial_state(run_id: Optional[str] = None, episode_id: Optional[str] = None
         episode_id=episode_id,
         episode=EpisodeState(run_id=run_id, episode_id=episode_id),
     )
+
+
+
+def _child_field(payload: Mapping[str, Any], camel: str) -> Any:
+    """Read an ADR-0090 child payload field under either spelling.
+
+    Every other payload in this reducer is camelCase (`grantId`,
+    `descriptorDigest`, `parentGrantId`), and so is every emitter in the tree.
+    The ADR-0090 fold shipped reading snake_case only, matching the bundle's
+    `child_events.schema.json` but nothing that emits into this ledger -- so on
+    a repo-convention `ChildSpawned` it read `None` and folded nothing.
+
+    Both spellings are accepted rather than one being declared the winner,
+    because `SpawnAdapter` does not exist yet and picking for it here would be
+    guessing. camelCase is preferred, matching the rest of the roster. When the
+    adapter lands and the schema is ratified into `schemas/mhf/`, the loser can
+    be dropped.
+    """
+    if camel in payload:
+        return payload[camel]
+    snake = re.sub(r"(?<!^)(?=[A-Z])", "_", camel).lower()
+    return payload.get(snake)
 
 
 def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
@@ -92,6 +117,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
     terminal_recovery = state.terminal_recovery
     verdicts = dict(state.verdicts)
     plugins = dict(state.plugins)
+    children = dict(state.children)
     unknown_events = list(state.unknown_events)
 
     if kind == "EpisodeStarted":
@@ -614,6 +640,47 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
                 occurred_at=envelope.occurred_at,
             )
 
+    elif kind == "ChildSpawned":
+        # ADR-0090: material FSM transition, not an advisory marker.
+        cid = _child_field(payload, "childEpisodeId")
+        if not cid:
+            # Fail closed. The original ADR-0090 fold skipped a payload whose id
+            # it could not read, so a `ChildSpawned` this reducer did not
+            # understand folded to nothing *and said nothing* -- and the orphan
+            # guard below then had no record to fire against. A delegation event
+            # that cannot be folded is a reducer error, not a no-op.
+            raise ReducerError("ChildSpawned without a child episode id")
+        cid = str(cid)
+        if cid in children:
+            raise ReducerError(f"duplicate ChildSpawned for {cid!r}")
+        children[cid] = ChildRecord(
+            child_episode_id=cid,
+            parent_episode_id=str(_child_field(payload, "parentEpisodeId") or ""),
+            authority=tuple(payload.get("authority", ())),
+            depth=int(payload.get("depth") or 0),
+            lineage=tuple(payload.get("lineage", ())),
+            settled_intent_key=str(_child_field(payload, "settledIntentKey") or ""),
+        )
+
+    elif kind == "ChildReturned":
+        cid = _child_field(payload, "childEpisodeId")
+        if not cid:
+            raise ReducerError("ChildReturned without a child episode id")
+        cid = str(cid)
+        prev_child = children.get(cid)
+        if prev_child is None:
+            raise ReducerError(f"ChildReturned without ChildSpawned for {cid!r}")
+        if prev_child.status == "closed":
+            raise ReducerError(f"child {cid!r} returned twice")
+        key = _child_field(payload, "settledIntentKey")
+        if key is not None and prev_child.settled_intent_key != str(key):
+            raise ReducerError(f"settled intent key mismatch for {cid!r}")
+        children[cid] = replace(
+            prev_child, status="closed",
+            outcome=payload.get("outcome"), terminal=payload.get("terminal"),
+            cost=payload.get("cost"),
+        )
+
     else:
         # CT-44: unknown event kind preserved in state
         unknown_events.append({
@@ -650,6 +717,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         terminal_recovery=terminal_recovery,
         verdicts=verdicts,
         plugins=plugins,
+        children=children,
         unknown_events=tuple(unknown_events),
     )
 

@@ -178,6 +178,10 @@ class LedgerState:
     verdicts: Mapping[str, "VerdictRecord"] = field(default_factory=dict)
     #: Plugin lifecycle state records (ADR-M0-13, Wave 3).
     plugins: Mapping[str, "PluginRecord"] = field(default_factory=dict)
+    #: Mediated delegation child records (ADR-0090). A `ChildSpawned` with no
+    #: matching `ChildReturned` folds to `open` and is reconciled by the cold
+    #: path -- never assumed complete.
+    children: Mapping[str, "ChildRecord"] = field(default_factory=dict)
     unknown_events: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
 
     def to_canonical_dict(self) -> dict[str, Any]:
@@ -295,3 +299,23 @@ class LedgerState:
     def digest(self) -> str:
         """Compute the deterministic state digest (sha256:...)."""
         return digest_of(self.to_canonical_dict())
+
+
+@dataclass(frozen=True)
+class ChildRecord:
+    """ADR-0090 mediated delegation record. `open` until ChildReturned folds."""
+
+    child_episode_id: str
+    parent_episode_id: str
+    authority: tuple[str, ...]
+    depth: int
+    lineage: tuple[str, ...]
+    settled_intent_key: str
+    status: str = "open"
+    outcome: Optional[str] = None
+    terminal: Optional[str] = None
+    cost: Optional[Mapping[str, Any]] = None
+
+    @property
+    def reconcilable(self) -> bool:
+        return self.status == "open"

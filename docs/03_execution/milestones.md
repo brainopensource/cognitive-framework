@@ -84,6 +84,34 @@ host-execution fallback, or separately passing runs does not satisfy this gate.
 | 8 | Rich trajectory | Populated `mhf.trajectory/1` with ordered invocations, explicit measurement status, conserved cost, identities, receipts, outcome, and evidence |
 | 9 | One runtime authority | Trace/import evidence proves the canonical composition/activation/session path and no alternate production driver |
 
+#### Row state as at 2026-08-24 — **no RF-85 evidence is claimed**
+
+The review bundle's `local`-profile auditor reports five of the nine rows as
+*deriving from a canonical source* and four as environment-gated:
+
+| State | Rows | Meaning |
+|---|---|---|
+| Deriving | 2, 3, 6, 8, 9 | A canonical source exists and the row is computed from it, not asserted. |
+| Environment-gated | 1, 4, 5, 7 | No reachable provider (1), no attestable rootless sandbox (4), no isolated evaluator identity (5), no live multi-process run (7). |
+
+Two qualifications, both binding:
+
+1. **This is not promotion evidence and does not advance RF-85.** "Deriving"
+   describes the auditor's four-state algebra (`absent` / `invalid` /
+   `unverifiable` / `present_valid`); it is not `present_valid`. Every run the
+   bundle can produce self-reports `promotion_eligible = False`. RF-85 still
+   requires one uninterrupted real run producing all nine source-derived rows.
+2. **The row states are the bundle's measurement, not this repository's.** The
+   auditor that produced them (`evidence.py` / `local_verifiers.py`) was
+   deliberately *not* wired into the production import path — it duplicates
+   `domain/evidence/{foundation,audit}.py`, which already owns this contract.
+   The figures are recorded here as an input to planning, not as a repository
+   gate result.
+
+Rows 1, 4 and 7 close with the environment work in `sprint_active.md` §10; row 5
+closes with the M-5 exterior oracle. No code change is required for any of them
+— the profile upgrades the same evidence rows in place.
+
 ---
 
 ## Post-Foundation Macro Roadmap (Waves 5 → 10)
@@ -94,10 +122,10 @@ successor ADR; roadmap prose cannot reopen them.
 
 | Milestone | Version | Focus and outcome | Exit gate | Status | Depends on |
 |---|---|---|---|---|---|
-| **M-5 Generality Proof** | v0.7.0 | Substantive Math/Formal Pack #2 and attributable T0 witness | RF-86: same public path as Pack #1 and zero semantic diff under `domain/`, `ports/`, `kernel/`, `agency/`, or `runtime/` during the proof | **LOCKED; PLANNED** | M-4 |
-| **M-6 Mediated Delegation** | v0.8.0 | `agent.spawn` as an ordinary S0–S12 capability-mediated effect | RF-55–RF-59 and RF-26; no grant denies; authority, budget, depth, turns, and lineage attenuate; recovery never repeats settled spawn | **LOCKED; PLANNED** | M-5 |
-| **M-7 Measured Scheduler and Bounded Concurrency** | v0.9.0 | Measure first, then optionally lift I-11 for independence groups, leases, and Pareto profiles | Accepted measurement ADR; reproducible sequential baseline; RF-46–RF-48; no duplicate/unknown effect; explicit Director lift of I-11 | **CONCEPT LOCKED** | M-5, M-6 |
-| **M-8 Explicit Topology Support** | v0.9.x | Debate, critic/reviser, planner/executor/verifier, bounded trees, evolution, and swarms expressed through composition plus mediated delegation | RF-65 reference topologies with zero kernel/episode-engine diff; RF-66 universal-loop challenge adjudicated with evidence | **CONCEPT LOCKED** | M-6, M-7 |
+| **M-5 Generality Proof** | v0.7.0 | Substantive Math/Formal Pack #2 and attributable T0 witness | RF-86: same public path as Pack #1 and zero semantic diff under `domain/`, `ports/`, `kernel/`, `agency/`, or `runtime/` during the proof, measured against the `M-5-BASE` tag | **LOCKED; PLANNED — RF-86 GATE NOW WIRED** | M-4 |
+| **M-6 Mediated Delegation** | v0.8.0 | `agent.spawn` as an ordinary S0–S12 capability-mediated effect | RF-55–RF-59 and RF-26; no grant denies; authority, budget, depth, turns, and lineage attenuate; recovery never repeats settled spawn | **LOCKED; PLANNED — event roster CLOSED by ADR-0090 (ratified 2026-08-24); exit gate unmet** | M-5 |
+| **M-7 Measured Scheduler and Bounded Concurrency** | v0.9.0 | Measure first, then optionally lift I-11 for independence groups, leases, and Pareto profiles | Accepted measurement ADR; reproducible sequential baseline; RF-46–RF-48; no duplicate/unknown effect; explicit Director lift of I-11 | **LOCKED — gated on the effect-log measurement (Step 9), which does not yet exist** | M-5, M-6 |
+| **M-8 Explicit Topology Support** | v0.9.x | Debate, critic/reviser, planner/executor/verifier, bounded trees, evolution, and swarms expressed through composition plus mediated delegation | RF-65 reference topologies with zero kernel/episode-engine diff; RF-66 universal-loop challenge adjudicated with evidence | **LOCKED — must not begin before Step 9 produces a sequential baseline** | M-6, M-7 |
 | **M-9 Retrieval, Skills, and Macro Laboratory** | post-v1 research horizon | Rebuildable retrieval, evidence-ranked skills, scaled orchestration measurement, and least-privilege macro candidates | RF-77 rebuild equality; held-out lift; RF-67–RF-68 selector hull/dispatch; five-SPI review; published scale evidence | **NON-AUTHORIZING HORIZON** | M-7, M-8, separate v1 review |
 | **M-10 Governed Meta-Cognition** | post-v1 research horizon | Attributable belief/policy experiments and reversible human promotion | RF-69–RF-70; preregistered prediction; exact paired McNemar, A/A floor, effect interval, exterior verdict, human pointer, and tested rollback | **NON-AUTHORIZING HORIZON** | M-8, M-9 |
 
@@ -121,6 +149,83 @@ Authority, six-dimensional budget, turns, depth, lineage, cancellation, and reco
 parent request(agent.spawn) -> S0..S8a durable intent -> runtime spawn adapter
 -> attenuated child context -> ChildSpawned/ChildReturned -> S9..S12 settlement
 ```
+
+#### The `M-5-BASE` tag and RF-86 (binding)
+
+RF-86 is measured as a diff against the `M-5-BASE` tag over five frozen paths:
+`vanguard/packages/{domain, kernel, ports, runtime, agency/episode}`. The gate
+runs in CI as `ci/rf86_gate.sh` and was wired on 2026-08-24, before M-5 work
+begins — a gate added at the end of a milestone catches nothing; its entire
+value is catching the incremental kernel hook the moment it lands.
+
+Two rules govern it:
+
+1. **`M-5-BASE` MUST be re-tagged after any ADR-authorised substrate change,
+   and only after it lands.** Tagging before an authorised change makes RF-86
+   fire on the change itself — the gate cannot distinguish an ADR-authorised
+   edit from an illicit kernel hook, and it is not supposed to. Observed twice
+   on 2026-08-24: tagging before the ADR-0090 commit fired on
+   `domain/ledger/{reducer,state}.py` and `runtime/ledger_emitter.py`, and the
+   later ADR-0090 fold correction fired again until the tag was moved. **Both
+   firings were the gate working correctly.**
+2. **RF-86 MUST NOT be weakened to accommodate a substrate change.** Not by
+   narrowing the frozen path list, not by allowlisting a file, not by
+   downgrading the failure to a warning. If a change genuinely needs a frozen
+   path, the answer is an ADR and a re-tag, never a smaller gate. A substrate
+   change with no ADR behind it is the finding, not the tag.
+
+The gate fails closed when `M-5-BASE` does not resolve, so a shallow CI clone
+without tags reports the failure instead of reporting five clean paths it never
+compared. `actions/checkout` therefore runs with `fetch-depth: 0`, and the tag
+must be pushed alongside the branch.
+
+#### M-6 status after ADR-0090 (ratified 2026-08-24)
+
+ADR-0090 closes the **event roster** question and nothing more. `ChildSpawned`
+and `ChildReturned` are allocated, folded into `LedgerState.children`,
+single-writer bound to `SpawnAdapter`, and schema-described.
+
+M-6 itself is **not closed**, and the gate above is unmet:
+
+- `agent.spawn` is inert at three independent points —
+  `domain/artifacts/manifest.py` refuses any manifest declaring the verb,
+  `runtime/delegation.py` refuses every spawn (`M6_SPAWN_ACTIVE = False`), and
+  the verb sits on the inert-verb list. No child episode can be created, so the
+  product cannot emit either event.
+- **RF-55–RF-59 are named by ADR-0090 but unallocated.** No such test exists and
+  `02_decisions/INDEX.md` does not register the range.
+- No `SpawnAdapter` exists. The attenuation algebra and spawn adapter in the
+  review bundle are a reference implementation, held outside the production
+  import path.
+- The kill-tree drill (SIGKILL the parent mid-child; assert the cold path
+  returns `UNDETERMINABLE`, never a retry) is outstanding and needs a live
+  multi-process run.
+
+M-6 therefore remains **LOCKED behind M-4 and M-5**. Marking it closed would
+invert the dependency ladder this document exists to hold: M-4 is open on RF-85
+qualification and M-5 has not started.
+
+#### M-7 and M-8 remain LOCKED, gated on one measurement
+
+M-7 is gated on an effect-log capture that **does not yet exist**: `EffectRef`
+built from ledger `EffectStarted` payloads carrying concrete resolved paths, over
+a fixed-seed task set run sequentially, capturing `selector`, `sink`,
+`idempotency_key`, wall/model/tool timings and `cache_hit_rate` per effect.
+
+The static independent-fraction numbers a manifest scan produces are **not** the
+decision input. Two `fs.read` capabilities both declaring `root: /workspace`
+look overlapping on paper and read different files at runtime. A 0.0% static
+reading is not evidence against M-7; it is evidence the measurement has not been
+taken.
+
+If the measured independent fraction is below roughly 30%, the correct outcome
+is to **cancel M-7 and keep I-11** — that saves a scheduler, a leasing protocol
+and an entire concurrency recovery surface, and it is a success of the process.
+Only the Engineering Director may lift I-11.
+
+M-8 must not begin before that baseline exists. Without a sequential baseline a
+topology win cannot be distinguished from a scheduler win, which would make M-8
+unfalsifiable by construction.
 
 ---
 

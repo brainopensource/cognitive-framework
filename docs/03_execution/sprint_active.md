@@ -7,8 +7,8 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.6.3"
-last_verified: 2026-08-23
+version: "0.6.4"
+last_verified: 2026-08-24
 supersedes: []
 superseded_by: null
 ---
@@ -374,6 +374,103 @@ install the locked dependencies, rerun all gates, then create the immutable task
 Only after every startup probe passes may Release Engineering start the single uninterrupted RF-85
 run. Waves 5+ remain locked.
 
+
+---
+
+## 10. ADR-0090 Application and the M-7 Measurement Gate — 2026-08-24
+
+**Branch:** `feat/m6-adr0090`, cut from `feat_W4-W6_Higgs_core` @ `caa78d7`.
+**Authority:** ADR-0090, ratified by the CEO on 2026-08-24. Steps 1–8 of the
+Leadership Control Report application sequence only. Steps 9–11 are
+**LEADERSHIP HOLD** and were not executed.
+
+**No RF-85 foundation evidence is claimed by this work.** Nothing in this
+section advances M-4. The nine-row gate is untouched and still requires one
+uninterrupted real run.
+
+### 10.1 M-6 work items — closed and not closed
+
+| Item | State | Evidence |
+|---|---|---|
+| `ChildSpawned`/`ChildReturned` allocated in the event roster | **CLOSED** | Already present in the 42-kind enum; the defect was their classification as advisory markers in `UNFOLDED_ALLOWLIST`. |
+| Both kinds folded into `LedgerState.children` | **CLOSED** | `domain/ledger/reducer.py`; open-until-returned, cold path reconciles, never assumed complete. |
+| `SpawnAdapter` bound as sole legal writer of both kinds | **CLOSED** | `runtime/ledger_emitter.py` `PRIVILEGED_KIND_OWNERS`; kernel and orchestrator denied. |
+| ADR-0090 ratified and indexed | **CLOSED** | [`02_decisions/0090-mediated-delegation-event-roster.md`](../02_decisions/0090-mediated-delegation-event-roster.md). |
+| Child payload schema ratified into `schemas/mhf/` | **OPEN** | Only the review bundle carries it, and its spelling disagrees with the ADR. The reducer accepts both spellings until `SpawnAdapter` fixes the wire. |
+| `agent.spawn` capability active | **OPEN** | Inert at three points: `domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every spawn (`M6_SPAWN_ACTIVE = False`), verb on the inert list. |
+| RF-55–RF-59 allocated and red | **OPEN** | Named by ADR-0090, unallocated in `INDEX.md`, no test exists. |
+| Kill-tree drill | **OPEN** | Needs a live multi-process run; gated with the M-4 rows. |
+| `LedgerState` digest covers `children` | **OPEN — DIRECTOR** | `to_canonical_dict()` omits `children`, so a spawned child does not move the state digest. Closing it changes the digest of every existing run, which is a canonicalisation change under §7. Must close before M-4 row 7 can be claimed for a run containing delegation. |
+
+M-6 remains **LOCKED**. ADR-0090 closed the roster question; the milestone's
+exit gate is unmet and its dependencies (M-4, M-5) are not closed.
+
+### 10.2 Next sprint — the sole authorized M-7 item
+
+**M7-01 — capture the sequential effect log.** Measurement only. **Do not build
+a scheduler, a leasing protocol, or a topology engine.**
+
+| Field | Value |
+|---|---|
+| Outcome | One effect log over a fixed-seed task set, run sequentially, sufficient to compute a measured independent fraction. |
+| Source | `EffectRef` constructed from ledger `EffectStarted` payloads carrying **concrete resolved paths** — never from pack manifests. |
+| Capture per effect | `selector`, `sink`, `idempotency_key`, wall/model/tool timings, `cache_hit_rate`. |
+| Owner | Release Engineering (capture); Devs A (analysis). |
+| Prohibited scope | Any concurrency, lease, claim-TTL, scheduler or topology implementation. I-11 stays mandatory. |
+| Definition of done | The log exists, is reproducible from a fixed seed, and yields a number. The number is reported to the Engineering Director; it is not acted on. |
+| Falsifier | To be allocated at the measurement ADR. RF-46–RF-48 remain reserved for M-7 implementation and MUST NOT be consumed by the measurement. |
+
+**Static manifest scans are not the decision input.** Two `fs.read`
+capabilities both declaring `root: /workspace` look overlapping on paper and
+read different files at runtime. A 0.0% static reading is not evidence against
+M-7; it is evidence the measurement has not been taken.
+
+If the measured fraction is below roughly 30%, the correct outcome is to
+**cancel M-7 and keep I-11**. Only the Engineering Director may lift I-11, and
+only against an accepted measurement ADR stating the speedup ceiling,
+contention cost and leasing protocol. M-8 must not begin before this log exists.
+
+### 10.3 Operational findings
+
+**Finding 1 — CI MUST run as a non-root user.** Running as uid 0 grants
+`CAP_SYS_ADMIN` inside the Bubblewrap user namespace, so the nested-`unshare`
+probe correctly refuses to attest containment, and containment becomes
+unattestable. Five of the eight failures seen under root close simply by
+switching user; the product code is not involved. GitHub CI already satisfies
+this — `.github/workflows/ci.yml` runs on `ubuntu-latest` with no container, so
+steps execute as the unprivileged `runner` user — so **no workflow change is
+required**. The finding binds local, WSL2 and self-hosted runners: never run the
+suite as root and never interpret a root run's containment failures as product
+defects.
+
+**Finding 2 — Bubblewrap is already optional; WSL2 is not blocked.** The
+`local` execution profile presets `process_backend: "host"` and
+`attestation_required: False` (`runtime/profiles.py`), so a host without
+Bubblewrap runs the product through the same canonical path. What such a host
+cannot do is produce promotion-eligible evidence: `local` also presets
+`evaluation_mode: "none"` and `promotion_eligible: False`, and an unavailable
+requested containment mode still fails closed rather than falling back to the
+host. So WSL2 is a valid development and product environment and an invalid
+RF-85 qualification environment. These are different claims and were previously
+conflated into "M-4 is blocked".
+
+### 10.4 Verification
+
+Baseline established before any change, on this host as uid 1000 (non-root):
+**1297 passed / 5 failed / 8 skipped / 2 errors**. The five failures decompose
+as three environmental (no Ollama daemon; the implementation truthfully reports
+`provider_unreachable` where the tests expect `model_tag_absent`) and two
+`docs/03_execution/sprint_active_fix.md` doc-metadata failures introduced by
+commit `caa78d7`, which committed that report without YAML frontmatter. The two
+errors are a pytest artifact: the helper `def tests_pass(repo)` in two files
+matches the default `test*` collection glob and errors on a missing fixture. The
+repository's canonical runner is `unittest` (see `.github/workflows/ci.yml`),
+under which neither error occurs.
+
+Every step held that baseline exactly. The final suite is **1312 passed / 5
+failed / 8 skipped / 2 errors** — the same failure and error set, plus 15 new
+tests. `ci/rf86_gate.sh M-5-BASE` reports all five frozen paths clean, and the
+kernel TCB is unchanged at 1366 logical lines against the 1438 ceiling.
 
 ---
 

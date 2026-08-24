@@ -72,6 +72,7 @@ def select_model(
     probe: Callable[[str], bool] | None = None,
     free_models: Callable[[], Sequence[str]] | None = None,
     env: Any = None,
+    allow_paid: bool = False,
 ) -> SelectedModel:
     """Return a labelled `ModelPort`, or raise `ModelUnavailable`.
 
@@ -84,6 +85,7 @@ def select_model(
     import os
 
     environ = env if env is not None else os.environ
+    paid_allowed = allow_paid or (str(environ.get("VANGUARD_ALLOW_PAID", "")).strip().lower() in {"1", "true", "yes"})
     choice = (port or "mock").strip().lower()
     if choice not in MODEL_PORTS:
         raise ModelUnavailable(choice, f"unknown model port; expected one of {MODEL_PORTS}")
@@ -156,6 +158,15 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        if paid_allowed:
+            if not model_name:
+                allowed = list(free_models() if free_models is not None else _free_band())
+                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+            else:
+                name = model_name
+            return SelectedModel(port=choice, model=OpenRouterModel(model=name),
+                                 label=f"{choice}:{name}")
+
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
             raise ModelUnavailable(
@@ -175,6 +186,15 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        if paid_allowed:
+            if not model_name:
+                allowed = list(free_models() if free_models is not None else _free_band())
+                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+            else:
+                name = model_name
+            return SelectedModel(port="router", model=OpenRouterModel(model=name),
+                                 label=f"router:{name}")
+
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
             raise ModelUnavailable(choice, "no free-band models are registered")

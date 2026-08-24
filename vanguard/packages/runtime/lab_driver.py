@@ -81,6 +81,7 @@ def run_lab_task(
     tier_escalation: bool = False,
     tiers: Sequence[str] | None = None,
     sandbox_mode: str = "rootless",
+    allow_paid: bool = False,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -123,6 +124,7 @@ def run_lab_task(
             model_port,
             model_name=model_name or (tiers[0] if tier_escalation and tiers else None),
             tape=tape,
+            allow_paid=allow_paid,
         )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
@@ -467,6 +469,10 @@ def main() -> int:
         "--sandbox", choices=("rootless", "host-dev"), default="rootless",
         help="Execution boundary; host-dev is explicit, local-only, and not RF-85 eligible",
     )
+    parser.add_argument(
+        "--allow-paid", action="store_true",
+        help="Authorise paid OpenRouter models (overrides free-band refusal)",
+    )
 
     args = parser.parse_args()
     result = run_lab_task(
@@ -477,6 +483,7 @@ def main() -> int:
         tier_escalation=args.tier_escalation, tiers=args.tiers,
         sandbox_mode=args.sandbox,
         isolate=not args.in_place,
+        allow_paid=args.allow_paid,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

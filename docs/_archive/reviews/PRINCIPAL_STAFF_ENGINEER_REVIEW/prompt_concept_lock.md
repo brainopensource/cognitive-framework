@@ -5,8 +5,8 @@
 | ID | Nome / Alias | Caminho do Arquivo (Filepath) | Descrição e Foco |
 |:---|:---|:---|:---|
 | 02 | `milestones` | `docs/03_execution/milestones.md` | Escada macro de marcos e sequenciamento (M-0 a M-10) |
-| 03 | `higgs_concepts` | `docs/03_execution/Higgs_update_concepts.md` | Plano diretor, auditoria forense e convergência M-3C |
-| 04 | `higgs_todo` | `docs/03_execution/Higgs_update_todo_list.md` | Checklist operacional e backlog detalhado de tarefas |
+| 03 | `higgs_concepts` | `docs/_archive/reviews/Higgs_update_concepts.md` | Plano diretor, auditoria forense e convergência M-3C |
+| 04 | `higgs_todo` | `docs/_archive/reviews/Higgs_update_todo_list.md` | Checklist operacional e backlog detalhado de tarefas |
 | 05 | `spec_normative` | `docs/SPEC.md` | Especificação normativa central, axiomas e invariantes |
 | 06 | `law_runtime` | `docs/01_law/RUNTIME.md` | Regras de composição, ActivationPlan e execução |
 | 07 | `law_dispatch` | `docs/01_law/DISPATCH.md` | Pipeline S0-S12, monitor TCB e leases tipados 6D |
@@ -41,8 +41,8 @@
 
 | ID | Caminho Relativo (Filepath) | Categoria | Foco / Importância para a Liderança |
 |:---|:---|:---|:---|
-| 01 | `docs/03_execution/Higgs_update_concepts.md` | Executivo / Auditoria | Plano diretor, auditoria forense e convergência M-3C |
-| 02 | `docs/03_execution/Higgs_update_todo_list.md` | Executivo / Backlog | Backlog operacional e tarefas detalhadas da convergência |
+| 01 | `docs/_archive/reviews/Higgs_update_concepts.md` | Executivo / Auditoria | Plano diretor, auditoria forense e convergência M-3C |
+| 02 | `docs/_archive/reviews/Higgs_update_todo_list.md` | Executivo / Backlog | Backlog operacional e tarefas detalhadas da convergência |
 | 03 | `docs/03_execution/milestones.md` | Macro-Roadmap | Escada de marcos do projeto (M-0 ao M-10) |
 | 04 | `docs/03_execution/sprint_active.md` | Execução Viva | Quadro de tarefas da sprint atual e gates imediatos |
 | 05 | `docs/SPEC.md` | Lei Normativa Central | Axiomas A-1..A-6, invariantes I-1..I-11 e precedência |

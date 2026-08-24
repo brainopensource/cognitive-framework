@@ -186,7 +186,7 @@ class LedgerState:
 
     def to_canonical_dict(self) -> dict[str, Any]:
         """Convert state to a sorted canonical dictionary for digest computation."""
-        return {
+        canonical = {
             "runId": self.run_id,
             "episodeId": self.episode_id,
             "lastSeq": self.last_seq,
@@ -295,6 +295,28 @@ class LedgerState:
             },
             "unknownEventsCount": len(self.unknown_events),
         }
+        # ADR-0091: preserve the canonical bytes (and therefore the digest) of
+        # every historical non-delegating state, while making delegation a
+        # material part of state identity.  Omitting an empty extension field
+        # is the compatibility boundary; once a child exists, all reducer
+        # semantics needed for cold-replay equality are committed here.
+        if self.children:
+            canonical["children"] = {
+                k: {
+                    "childEpisodeId": v.child_episode_id,
+                    "parentEpisodeId": v.parent_episode_id,
+                    "authority": list(v.authority),
+                    "depth": v.depth,
+                    "lineage": list(v.lineage),
+                    "settledIntentKey": v.settled_intent_key,
+                    "status": v.status,
+                    "outcome": v.outcome,
+                    "terminal": v.terminal,
+                    "cost": dict(v.cost) if v.cost is not None else None,
+                }
+                for k, v in sorted(self.children.items())
+            }
+        return canonical
 
     def digest(self) -> str:
         """Compute the deterministic state digest (sha256:...)."""

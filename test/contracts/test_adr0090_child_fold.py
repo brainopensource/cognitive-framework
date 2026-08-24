@@ -136,27 +136,35 @@ class EveryGuardFires(unittest.TestCase):
         self.assertEqual(state.children[CHILD].status, "closed")
 
 
-class TheStateDigestDoesNotSeeChildren(unittest.TestCase):
-    """Recorded, not asserted to be correct -- see the PR report.
+class TheStateDigestCommitsToChildren(unittest.TestCase):
+    """ADR-0091 closes the child-state collision without historical churn."""
 
-    `LedgerState.to_canonical_dict()` omits `children`, so two states differing
-    only by a spawned child digest identically. Closing that gap changes the
-    digest of every existing run, which is a Director-level decision (a change
-    to the canonicalisation surface), so this test pins the CURRENT behaviour
-    and exists to be updated deliberately rather than discovered by accident.
-    """
-
-    def test_children_are_absent_from_the_canonical_dict(self) -> None:
+    def test_children_are_present_in_the_canonical_dict(self) -> None:
         state = reduce_event(_empty(), _envelope(1, _spawned_camel()))
         self.assertIn(CHILD, state.children)
-        self.assertNotIn("children", state.to_canonical_dict())
+        child = state.to_canonical_dict()["children"][CHILD]
+        self.assertEqual(child["childEpisodeId"], CHILD)
+        self.assertEqual(child["status"], "open")
 
-    def test_a_spawned_child_does_not_move_the_state_digest(self) -> None:
-        """Same state, children dropped -- identical digest."""
+    def test_a_spawned_child_moves_the_state_digest(self) -> None:
         spawned = reduce_event(_empty(), _envelope(1, _spawned_camel()))
         without = replace(spawned, children={})
         self.assertNotEqual(dict(spawned.children), dict(without.children))
-        self.assertEqual(spawned.digest(), without.digest())
+        self.assertNotEqual(spawned.digest(), without.digest())
+
+    def test_empty_children_preserve_the_legacy_canonical_shape(self) -> None:
+        self.assertNotIn("children", _empty().to_canonical_dict())
+
+    def test_child_order_does_not_change_the_digest(self) -> None:
+        first = reduce_event(_empty(), _envelope(1, _spawned_camel()))
+        second_payload = _spawned_camel()
+        second_payload["childEpisodeId"] = "ep-child-2"
+        second_payload["settledIntentKey"] = "intent-2"
+        ordered = reduce_event(first, _envelope(2, second_payload))
+        reversed_children = replace(
+            ordered, children=dict(reversed(tuple(ordered.children.items())))
+        )
+        self.assertEqual(ordered.digest(), reversed_children.digest())
 
 if __name__ == "__main__":
     unittest.main()

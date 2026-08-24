@@ -148,14 +148,11 @@ not exist yet; when it lands and the schema is ratified into `schemas/mhf/`, the
 losing spelling is dropped. Pinned by
 `test/contracts/test_adr0090_child_fold.py`.
 
-### Known gap, deliberately not closed here
+### Known gap closed by successor ADR-0091
 
-`LedgerState.to_canonical_dict()` omits `children`, so the state digest is blind
-to delegation: a state with a spawned child and one without digest identically.
-Closing it changes the digest of every existing run — a change to the
-canonicalisation surface, which is Director-only under
-[`sprint_active.md`](../03_execution/sprint_active.md) §7. It must be closed
-before M-4 row 7 (cold reconstruction folds to the *same state*) can be claimed
-for any run containing delegation. Current behaviour is pinned by
-`TheStateDigestDoesNotSeeChildren` so it is changed deliberately, not
-discovered.
+The original application omitted `children` from the state digest. The Director
+closed that collision in
+[`ADR-0091`](0091-delegation-state-digest-extension.md): non-empty child state
+is now canonical, while the absent/empty compatibility boundary preserves every
+historical non-delegating digest. M-6 remains locked for the independent reasons
+above.

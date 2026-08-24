@@ -400,7 +400,7 @@ uninterrupted real run.
 | `agent.spawn` capability active | **OPEN** | Inert at three points: `domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every spawn (`M6_SPAWN_ACTIVE = False`), verb on the inert list. |
 | RF-55–RF-59 allocated and red | **OPEN** | Named by ADR-0090, unallocated in `INDEX.md`, no test exists. |
 | Kill-tree drill | **OPEN** | Needs a live multi-process run; gated with the M-4 rows. |
-| `LedgerState` digest covers `children` | **OPEN — DIRECTOR** | `to_canonical_dict()` omits `children`, so a spawned child does not move the state digest. Closing it changes the digest of every existing run, which is a canonicalisation change under §7. Must close before M-4 row 7 can be claimed for a run containing delegation. |
+| `LedgerState` digest covers `children` | **CLOSED** | ADR-0091 commits every non-empty child record while preserving the exact canonical shape and digest of historical non-delegating states. |
 
 M-6 remains **LOCKED**. ADR-0090 closed the roster question; the milestone's
 exit gate is unmet and its dependencies (M-4, M-5) are not closed.
@@ -409,6 +409,9 @@ exit gate is unmet and its dependencies (M-4, M-5) are not closed.
 
 **M7-01 — capture the sequential effect log.** Measurement only. **Do not build
 a scheduler, a leasing protocol, or a topology engine.**
+
+ADR-0092 authorizes this measurement after the ADR-0091 stabilization patch.
+It does not open M-7 or lift I-11.
 
 | Field | Value |
 |---|---|

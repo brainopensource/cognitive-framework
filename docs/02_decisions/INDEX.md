@@ -34,6 +34,7 @@ superseded_by: null
 - 🔒 [M-3C to M-8 Concept Lock (`0088`)](#m-3c-to-m-8-concept-lock) — canonical activation, evidence, generality, delegation, and scale seams
 - 🛠️ [W-3D Product Runtime Profiles (`0089`)](#w-3d-product-runtime-profiles-0089) — execution profiles, bootstrap, activation, and product/runtime seam
 - 🧬 [Mediated Delegation Event Roster (`0090`)](#mediated-delegation-event-roster-0090) — `ChildSpawned`/`ChildReturned` allocation, single writer, and reducer fold
+- 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -114,6 +115,15 @@ spawn via `M6_SPAWN_ACTIVE = False`, and the verb is on the inert-verb list), so
 be emitted by the product. **RF-55–RF-59 are named by ADR-0090 but remain unallocated** — no such test
 exists and the register below does not carry the range; allocating them is part of opening M-6, which
 stays LOCKED behind M-4 and M-5.
+
+---
+
+## Delegation Digest and Measurement Decisions (`0091`–`0092`)
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0091` | [`0091-delegation-state-digest-extension.md`](0091-delegation-state-digest-extension.md) | Non-empty child state is canonical identity; empty maps preserve historical non-delegating digests. | accepted | 2026-08-24 |
+| `0092` | [`0092-review-bundle-disposition-and-m7-measurement.md`](0092-review-bundle-disposition-and-m7-measurement.md) | Archived bundle remains non-production; context-store non-fix rejected; M7-01 authorized for measurement only. | accepted | 2026-08-24 |
 
 ---
 

@@ -47,6 +47,12 @@ class MockRecorder:
                 conn.execute("ALTER TABLE mock_calls ADD COLUMN tokens INTEGER DEFAULT 0;")
             if "millis" not in cols:
                 conn.execute("ALTER TABLE mock_calls ADD COLUMN millis INTEGER DEFAULT 0;")
+            if "prompt_tokens" not in cols:
+                conn.execute("ALTER TABLE mock_calls ADD COLUMN prompt_tokens INTEGER DEFAULT 0;")
+            if "completion_tokens" not in cols:
+                conn.execute("ALTER TABLE mock_calls ADD COLUMN completion_tokens INTEGER DEFAULT 0;")
+            if "cost_usd" not in cols:
+                conn.execute("ALTER TABLE mock_calls ADD COLUMN cost_usd REAL DEFAULT 0.0;")
             conn.commit()
 
     def record_call(
@@ -63,6 +69,9 @@ class MockRecorder:
         response: str = "",
         evidence_label: str = "lam-replay",
         tokens: int = 0,
+        prompt_tokens: int = 0,
+        completion_tokens: int = 0,
+        cost_usd: float | None = None,
         millis: int = 0,
     ) -> None:
         created_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -73,8 +82,8 @@ class MockRecorder:
                     created_at, request_sha256, scenario_key, tier,
                     requested_turn, returned_turn, reply_sha256,
                     source_label, run_id, prompt_snippet, response_snippet,
-                    evidence_label, tokens, millis
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    evidence_label, tokens, prompt_tokens, completion_tokens, cost_usd, millis
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     created_at,
@@ -90,6 +99,9 @@ class MockRecorder:
                     response[:200],
                     evidence_label,
                     tokens,
+                    prompt_tokens,
+                    completion_tokens,
+                    cost_usd if cost_usd is not None else 0.0,
                     millis,
                 ),
             )

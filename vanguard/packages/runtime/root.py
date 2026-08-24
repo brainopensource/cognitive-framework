@@ -330,7 +330,7 @@ def _validate_release_inputs(
         raise ValueError("release provider must declare provider identity and execution mode")
     provider = provider_value.lower()
     mode = mode_value.lower()
-    if any(label in provider for label in ("fake", "scripted", "cassette", "mock")) or mode != "live":
+    if any(label in provider for label in ("fake", "scripted", "cassette", "mock", "lam")) or mode != "live":
         raise ValueError("release execution requires a live non-fake/non-cassette provider")
 
     report = getattr(ports.environment, "containment_report", None)

@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
-"""Standalone, dependency-free multi-tier LLM API Mock Server.
+"""Standalone LLM API Mock Server [DEPRECATED -> Use server.py instead].
 
-Implements OpenAI / OpenRouter / Ollama wire protocols with stateless multi-turn
-turn progression, tier degradation, and SSE streaming.
+DEPRECATED: Prefer server.py (the unified LAM HTTP server) which supports
+OpenAI + Ollama wire protocols, live proxy mode, and explicit evidence labels.
 """
 
 from __future__ import annotations
+import warnings
+warnings.warn(
+    "mock_server.py is deprecated; use server.py (unified LAM server) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import argparse
 import hashlib

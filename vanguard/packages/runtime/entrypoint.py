@@ -69,6 +69,9 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     planner_model = str(request.get("plannerModel") or "openrouter/free")
     if isinstance(fake_backend, str) and fake_backend:
         selected_model = FakeModel([{"kind": "finish", "note": "deterministic preview"}])
+    elif model_port == "lam":
+        from .model_selection import select_model
+        selected_model = select_model("lam", model_name=planner_model if planner_model != "openrouter/free" else None).model
     elif model_port == "ollama":
         selected_model = OllamaModel(
             model=planner_model,

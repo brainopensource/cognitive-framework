@@ -954,3 +954,203 @@ Isso preserva as partes difíceis e valiosas do AETHER — authority, provenance
 - Codex Linux/WSL2 bwrap behavior: https://github.com/openai/codex/blob/main/codex-rs/linux-sandbox/README.md
 - DeepSeek Harness plugin/profile architecture: https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.md
 - DeepSeek sandbox seam e enforcement facts: https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/sandbox.md
+
+## 13. Director execution log — appended 2026-08-24
+
+This section is appended after the original W-3D text. The preceding text is unchanged.
+
+### 13.1 Implemented work
+
+- Identity-bearing `ExecutionProfile` and profile digest binding into `D_R`.
+- Single `RuntimeBootstrap` composition seam.
+- Capability-based platform discovery and rootless Bubblewrap qualification.
+- Filesystem/process separation for local preview and confined subprocess execution.
+- Real component materialization and reverse-order teardown.
+- `code-default` / `code-explain` pack convergence and read-only explain capabilities.
+- Generic runtime entrypoint plus `vg code`, `vg explain`, and `vg doctor` paths.
+- Developer Studio preview.
+- Durable event persistence with replay/live fan-out from the same store.
+- Assurance policy and foundation-evidence integration.
+- RF-90 generic-entrypoint, RF-92 durable-stream, and RF-94 authority-audit falsifiers.
+- Pack aliases preserving canonical kernel verbs:
+
+```json
+{
+  "read_file": "fs.read",
+  "search_files": "fs.search",
+  "edit_file": "patch.apply"
+}
+```
+
+- Ollama errors now retain a bounded provider response body.
+- OpenRouter and Ollama default completion budgets were raised from 256 to 1024 tokens because
+  reasoning models were exhausting the old budget before emitting a tool call.
+
+### 13.2 Verified focused gates
+
+```text
+RF-78 PASS
+RF-79 PASS
+RF-80 PASS
+RF-81 PASS
+RF-82 PASS
+RF-83 PASS
+RF-84 PASS
+RF-87 PASS
+RF-88 PASS
+RF-89 PASS
+RF-90 PASS
+RF-91 PASS
+RF-92 PASS
+RF-93 PASS
+RF-94 PASS
+RF-ID allocation linter PASS
+Boundary linter PASS — 262 source files
+TCB budget PASS — 1366 / 1438 LOC
+Duplication detector PASS
+client-core TypeScript typecheck PASS
+CLI TypeScript typecheck PASS
+```
+
+The full CLI suite still contains environment/legacy failures: restricted Unix-socket tests return
+`EPERM`, and some legacy demo subprocess assertions fail in the current execution container. The
+repository also contains pre-existing blank-line-at-EOF findings in `tools/002_LLM_API_MOCK` files.
+
+### 13.3 Provider and model logs
+
+All provider calls used the canonical runtime entrypoint and isolated temporary workspaces for coding
+attempts. No benchmark workspace in the repository was modified.
+
+WSL2 reached Windows-host Ollama at `http://127.0.0.1:11434`. Bubblewrap doctor reported WSL2,
+Bubblewrap 0.9.0, user namespaces available, and `enforcement=full`. Relevant installed tags were:
+
+```text
+qwen2.5:1.5b
+qwen2.5-coder:7b-instruct-q5_K_M
+deepseek-coder-v2:16b
+gemma4:26b
+```
+
+`qwen2.5:1.5b` completed a two-turn read request but returned a confused generic response and is
+not suitable for reliable coding.
+
+`qwen2.5-cod:7b` and `deepseek-code-v2:16b` returned HTTP 404 because those exact tags do not exist.
+
+`qwen2.5-coder:7b-instruct-q5_K_M` initially returned `read_file`; before aliases this failed with:
+
+```text
+tool is not declared by manifest: read_file
+```
+
+After aliases were added, a four-turn proof completed and returned a `tool_result` digest plus
+`docs/SPEC.md` content, proving alias canonicalization.
+
+`deepseek-coder-v2:16b` returned HTTP 400 during tool calling; its current Ollama template remains
+incompatible with the tool request/response format.
+
+`gemma4:26b` completed a one-turn authority request and returned:
+
+```text
+The canonical execution authority is docs/03_execution/sprint_active.md.
+```
+
+The root `.env` contains `OPENROUTER_API_KEY`; its value was never printed. A direct probe of
+`deepseek/deepseek-v4-flash` returned HTTP 200 from provider `StreamLake`:
+
+```text
+prompt_tokens=12 completion_tokens=8 total_tokens=20 cost=$0.0000016072
+```
+
+The eight-token probe ended during reasoning and returned no visible content. A four-turn coding
+attempt using the same route returned:
+
+```json
+{
+  "outcome": "abandoned",
+  "turns": 4,
+  "detail": "turn bound 4 reached"
+}
+```
+
+The isolated task workspace remained unchanged.
+
+### 13.4 Real coding benchmark logs
+
+Benchmark: `DOGFOOD-01 Multi-Turn File Rollback`.
+
+Task: fix `src/calculator.py` and verify with:
+
+```text
+python3 -m unittest test_calculator.py
+```
+
+Original defect:
+
+```python
+def divide(a, b):
+    return b / a
+```
+
+Expected behavior is `divide(10, 2) == 5.0`.
+
+```text
+qwen2.5-coder:7b-instruct-q5_K_M: outcome=abandoned, turns=8,
+  detail=turn bound 8 reached, test FAIL: 0.2 != 5.0
+gemma4:26b: outcome=abandoned, turns=8,
+  detail=turn bound 8 reached, test FAIL: 0.2 != 5.0
+deepseek/deepseek-v4-flash: outcome=abandoned, turns=4,
+  detail=turn bound 4 reached, test FAIL: 0.2 != 5.0
+```
+
+These runs prove the live provider paths were reached, but do not prove successful coding or RF-85.
+The model proposal trace is not sufficiently exposed in the final entrypoint result; this remains an
+observability defect. LAM and `tools/002_LLM_API_MOCK` are valid for deterministic wiring/cassette
+tests only and are ineligible as RF-85 evidence.
+
+### 13.5 Issues and likely causes
+
+1. The former 256-token provider default was too small for reasoning models; it was raised to 1024.
+2. Small/reasoning models can consume the budget without a visible tool call.
+3. Several requested Ollama model names do not match installed tags.
+4. `deepseek-coder-v2:16b` returns HTTP 400 for the current tool schema/template.
+5. Model proposal and translation details are not sufficiently visible in final run output.
+6. Local coding runs reached the runtime but failed to make the required edit within the turn bound.
+7. Docker is installed but inaccessible through `/var/run/docker.sock`.
+8. `sudo` cannot elevate because the container has `no new privileges`.
+9. No evaluator process is available as UID 10002.
+
+### 13.6 Remaining W-3D/M-4 TODO
+
+- Persist and expose model proposal, tool-call, translation, and turn-failure diagnostics.
+- Select a provider/model that completes the benchmark task reliably.
+- Provision the evaluator as a separate UID-10002 process over UDS.
+- Bind evaluator image digest, public key, oracle identity, and protocol.
+- Freeze immutable task/oracle preregistration before the first run event.
+- Use durable SQLite-WAL storage for the candidate run.
+- Execute one uninterrupted hermetic coding run through Bubblewrap.
+- Derive all nine RF-85 source-derived evidence rows from that same lineage.
+- Obtain independent artifact audit and Director closure of M-4.
+
+### 13.7 Requirements before M-5, M-6, and metacognition
+
+M-5 requires M-4 closure, Formal Pack #2, RF-86, an exterior verifier, and zero semantic changes
+under `domain/`, `ports/`, `kernel/`, `agency/`, or `runtime/` during the proof.
+
+M-6 requires M-5 closure and capability-mediated `agent.spawn` with attenuated authority, budget,
+depth, turns, lineage, and recovery behavior under RF-55–RF-59 and RF-26.
+
+M-7 and M-8 must precede metacognition: measured scheduling/concurrency first, then declarative
+topologies and mediated delegation. M-9/M-10 remain non-authorizing until those gates close.
+
+### 13.8 Suggested approaches
+
+**Approach A — Runtime observability first:** persist provider proposal/translation diagnostics,
+run short provider probes, choose the first model that emits a valid declared tool call, then repeat
+the benchmark with bounded turns.
+
+**Approach B — Clean release host first:** move the RF-85 attempt to a clean Linux host/VM where
+Docker or rootless UID provisioning works, start the UID-10002 evaluator, preregister the benchmark,
+and execute the real hermetic run there.
+
+**Director status:** W-3D focused implementation is largely green. M-4/RF-85 is not closed. M-5 and
+M-6 remain locked. No metacognition work is authorized.

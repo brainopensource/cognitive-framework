@@ -177,9 +177,55 @@ class ServerIntegrationAndEvidenceTests(unittest.TestCase):
                 self.assertTrue(data.get("done"))
                 self.assertIn("message", data)
 
+            # 4. Unknown model return 404
+            req_body_unknown = json.dumps({
+                "model": "unknown-nonexistent-model",
+                "messages": [{"role": "user", "content": "hello"}],
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "http://127.0.0.1:8991/v1/chat/completions",
+                data=req_body_unknown,
+                headers={"Content-Type": "application/json"},
+            )
+            with self.assertRaises(urllib.error.HTTPError) as err:
+                urllib.request.urlopen(req)
+            self.assertEqual(err.exception.code, 404)
+
         finally:
             server.shutdown()
             server.server_close()
+
+    def test_recorder_schema_and_proxy_usage(self) -> None:
+        import sys
+        import tempfile
+        import sqlite3
+        sys.path.insert(0, str(LAM))
+        from recorder import MockRecorder
+
+        with tempfile.NamedTemporaryFile(suffix=".sqlite") as tf:
+            rec = MockRecorder(tf.name)
+            rec.record_call(
+                request_sha256="req123",
+                scenario_key="test-key",
+                tier=1,
+                requested_turn=0,
+                returned_turn=0,
+                reply_sha256="rep123",
+                evidence_label="ollama-live",
+                tokens=100,
+                prompt_tokens=60,
+                completion_tokens=40,
+                cost_usd=0.0015,
+                millis=120,
+            )
+            with sqlite3.connect(tf.name) as conn:
+                cur = conn.execute("SELECT evidence_label, tokens, prompt_tokens, completion_tokens, cost_usd FROM mock_calls")
+                row = cur.fetchone()
+                self.assertEqual(row[0], "ollama-live")
+                self.assertEqual(row[1], 100)
+                self.assertEqual(row[2], 60)
+                self.assertEqual(row[3], 40)
+                self.assertAlmostEqual(row[4], 0.0015)
 
     def test_select_model_lam_port(self) -> None:
         from vanguard.packages.runtime.model_selection import select_model, ModelUnavailable

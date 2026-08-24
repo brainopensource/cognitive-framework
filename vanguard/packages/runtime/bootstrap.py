@@ -120,6 +120,9 @@ class RuntimeBootstrap:
                 from ..adapters.models.openrouter import OpenRouterModel
                 selected_model = OpenRouterModel()
 
+        if selected_model is None:
+            raise RuntimeError(f"no model adapter could be selected or resolved for profile {profile_id!r}")
+
         return RuntimeDependencies(
             model=selected_model,
             store=selected_store,

@@ -207,8 +207,12 @@ class LamServerHandler(BaseHTTPRequestHandler):
 
     def _proxy_to_upstream(self, path: str, raw_body: bytes, body: dict[str, Any]) -> None:
         target = f"{self.upstream_url.rstrip('/')}{path}"
-        headers = {"Content-Type": "application/json"}
-        req = urllib.request.Request(target, data=raw_body, headers=headers, method="POST")
+        # Forward content type and Authorization header (MITM: pass client creds to upstream)
+        fwd_headers: dict[str, str] = {"Content-Type": "application/json"}
+        auth = self.headers.get("Authorization")
+        if auth:
+            fwd_headers["Authorization"] = auth
+        req = urllib.request.Request(target, data=raw_body, headers=fwd_headers, method="POST")
         start_t = time.monotonic()
         try:
             with urllib.request.urlopen(req, timeout=120.0) as resp:
@@ -216,7 +220,25 @@ class LamServerHandler(BaseHTTPRequestHandler):
                 elapsed_ms = int((time.monotonic() - start_t) * 1000)
                 resp_status = int(resp.status)
 
-                # Record provenance
+                # Extract token usage from upstream JSON response (OpenAI or Ollama shape)
+                tokens = 0
+                prompt_tokens = 0
+                completion_tokens = 0
+                cost_usd: float | None = None
+                try:
+                    resp_json = json.loads(resp_bytes.decode("utf-8"))
+                    usage = resp_json.get("usage") or {}
+                    prompt_tokens = int(usage.get("prompt_tokens") or usage.get("prompt_eval_count") or 0)
+                    completion_tokens = int(usage.get("completion_tokens") or usage.get("eval_count") or 0)
+                    tokens = int(usage.get("total_tokens") or (prompt_tokens + completion_tokens))
+                    # OpenRouter surfaces cost in usage.cost (USD float)
+                    raw_cost = usage.get("cost")
+                    if raw_cost is not None:
+                        cost_usd = float(raw_cost)
+                except Exception:
+                    pass
+
+                # Record provenance with full usage
                 if self.recorder:
                     self.recorder.record_call(
                         request_sha256=hashlib.sha256(raw_body).hexdigest(),
@@ -230,6 +252,10 @@ class LamServerHandler(BaseHTTPRequestHandler):
                         prompt=str(body.get("prompt") or body.get("messages", ""))[:200],
                         response=resp_bytes.decode("utf-8", errors="replace")[:200],
                         evidence_label="ollama-live",
+                        tokens=tokens,
+                        prompt_tokens=prompt_tokens,
+                        completion_tokens=completion_tokens,
+                        cost_usd=cost_usd,
                         millis=elapsed_ms,
                     )
 

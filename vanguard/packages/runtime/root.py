@@ -31,8 +31,10 @@ from .activation import (
     ActivationPlan,
     ActivationStep,
     activate,
+    ComponentHandle,
     plan_activation,
 )
+from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run
 from .ledger_emitter import LedgerBridge, LedgerEmitter
@@ -274,6 +276,8 @@ class Runtime(_ComposedRuntime):
             emitter=session.ledger.registry(),
             run_id=task_context.run_id,
             principal=task_context.principal,
+            build=lambda step: _build_component_handle(
+                step, harness=harness, ports=ports, run_id=task_context.run_id),
         ):
             result = session.run()
         # Teardown is part of the public run lineage.  ``session.run()`` takes
@@ -282,9 +286,11 @@ class Runtime(_ComposedRuntime):
         # durably emitted.
         result = replace(result, events=tuple(session.ledger.events))
         from .foundation_evidence import derive_foundation_bundle
-        return replace(result, foundation_evidence=derive_foundation_bundle(
+        policy = AssurancePolicy.from_profile(profile)
+        bundle = derive_foundation_bundle(
             run_plan=run_plan, result=result, store=selected_store,
-        ))
+        ) if policy.collects_foundation_evidence else None
+        return replace(result, foundation_evidence=bundle)
 
 
 def _validate_release_inputs(
@@ -370,6 +376,33 @@ def _model_route_identity(model: Any) -> Mapping[str, Any]:
         "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
         "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
     }
+
+
+def _build_component_handle(
+    step: ActivationStep,
+    *,
+    harness: Harness,
+    ports: SessionPorts,
+    run_id: str,
+) -> ComponentHandle:
+    """Materialize declared services from the already-wired runtime surface."""
+    services: dict[str, Any] = {
+        "system_prompt": harness.system_core,
+        "tools": harness.tool_schemas,
+        "context_policy": harness.system_core,
+        "routing_policy": harness.bindings,
+        "approval_policy": ports.approver,
+        "skills": harness.skill_cards,
+        "retrieval_policy": harness.index_component,
+        "model": ports.model,
+        "environment": ports.environment,
+        "evaluator": ports.verifier,
+        "store": ports.store,
+    }
+    service = services.get(step.interface)
+    if service is None:
+        service = {"component": step.name, "interface": step.interface}
+    return ComponentHandle(step=step, run_id=run_id, service=service)
 
 
 __all__ = [

@@ -161,6 +161,24 @@ class ActivatedComponent:
     cell: Any = None
 
 
+@dataclass(slots=True)
+class ComponentHandle:
+    """Runtime-owned handle for a materialized component service."""
+
+    step: ActivationStep
+    run_id: str
+    service: Any
+    closed: bool = False
+
+    def close(self) -> None:
+        if self.closed:
+            return
+        closer = getattr(self.service, "close", None)
+        if callable(closer):
+            closer()
+        self.closed = True
+
+
 class ActivationSession:
     """The live components of one activation, addressed by name."""
 
@@ -203,6 +221,9 @@ def _retire(component: ActivatedComponent, *, faulted: bool, reason: str) -> Exc
     """
     lifecycle = component.lifecycle
     try:
+        closer = getattr(component.cell, "close", None)
+        if callable(closer):
+            closer()
         if faulted:
             lifecycle.fault(reason)
         else:

@@ -1,21 +1,4 @@
-"""RF-93 (ADR-0089, accepted 2026-08-24): activated components must be real.
-
-`activate()` (`activation.py:217-260`) defaults its `build` parameter to
-`None`, so `cell = build(step) if build is not None else None` leaves every
-component's `cell` at `None` unless a caller supplies `build`. The one
-production caller, `Runtime.execute_harness` (`root.py:204-208`), calls
-`activate(activation, emitter=..., run_id=..., principal=...)` without
-`build`. So every component activated on the public path today proves it was
-walked and torn down (`PluginDiscovered -> ... -> PluginRetired`), but not
-that any declared service was materialized or used.
-
-This test exercises `activate()` exactly as the production caller does — no
-`build` — and characterizes today's defect directly (`cell is None`). It is
-the W3D-06 acceptance marker in reverse: once `root.py`'s production caller
-passes a real `build` factory, this assertion must be inverted to
-`assertIsNotNone` (a materialized, non-`None` cell) and the test renamed to
-prove the target invariant, not the defect.
-"""
+"""RF-93 (ADR-0089, accepted 2026-08-24): activated components must be real."""
 
 from __future__ import annotations
 
@@ -39,8 +22,7 @@ class RF93PluginActivationMaterializesServicesFalsifier(unittest.TestCase):
         )
         return ActivationPlan(COMPOSITION_DIGEST, (step,))
 
-    def test_production_shaped_activation_leaves_cell_none_today(self) -> None:
-        # This mirrors root.py:204-208's exact call shape: no `build` kwarg.
+    def test_production_shaped_activation_materializes_and_closes_service(self) -> None:
         emitter = LedgerEmitter(
             InMemoryEventStore(),
             episode_id="rf93-ep",
@@ -49,14 +31,20 @@ class RF93PluginActivationMaterializesServicesFalsifier(unittest.TestCase):
             harness_digest=COMPOSITION_DIGEST,
         )
         plan = self._plan()
-        with activate(plan, emitter=emitter, run_id="rf93-run", principal="root") as session:
+        class Service:
+            closed = False
+
+            def close(self) -> None:
+                self.closed = True
+
+        service = Service()
+        with activate(
+            plan, emitter=emitter, run_id="rf93-run", principal="root",
+            build=lambda _step: service,
+        ) as session:
             cell = session["rf93-component"].cell
-            # RF-93 RED PROOF (falsifier): production-shaped activation currently leaves
-            # cell is None because no build factory is passed.
-            self.assertIsNone(
-                cell,
-                "RF-93 characterization: cell is None when no build factory is passed.",
-            )
+            self.assertIs(cell, service)
+        self.assertTrue(service.closed)
 
 
 if __name__ == "__main__":

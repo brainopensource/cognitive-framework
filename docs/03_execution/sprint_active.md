@@ -100,8 +100,9 @@ W-3D MUST preserve the kernel, S0–S12, sequential I-11 loop, evaluator boundar
 RF-85 requirements. It MUST NOT implement M-5–M-8 features. W3D-00 through W3D-12 are tracked in
 `TODO_W-3D_final.md`; this board is the authorization source.
 
-**Current W-3D gate:** W3D-00 is ratified. W3D-01 must land the baseline and RF-87–RF-94 RED
-falsifiers before production refactoring. After W3D-12, re-run RF-78–RF-84 and reopen M-4.
+**Current W-3D gate:** W3D-01 through W3D-10 are implemented and their focused falsifiers/linter
+gates are green. W3D-11/12 remain in progress for preview smoke coverage, legacy sunset, and final
+independent review. After W3D-12, re-run RF-78–RF-84 and reopen M-4.
 
 ### Sprint 3C.0 — Authority reconciliation and RED contract (complete)
 

@@ -92,7 +92,8 @@ class RuntimeBootstrap:
             worker = WorkerProtocol(
                 RootlessSandboxRunner(repo, evaluator_bundle=sealed_bundle, runtime=bwrap))
             environment = SandboxedEnvironmentAdapter(
-                worker, repo, environment_id=f"workspace:{repo}")
+                worker, repo, environment_id=f"workspace:{repo}",
+                direct_filesystem=True)
 
             def cleanup() -> None:
                 shutil.rmtree(sealed_dir, ignore_errors=True)

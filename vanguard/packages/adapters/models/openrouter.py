@@ -578,6 +578,18 @@ class OpenRouterModel:
             return self._player.propose(context, tools, sampling)
         return self._complete(context, tools, sampling)
 
+    @property
+    def provider(self) -> str:
+        return "openrouter"
+
+    @property
+    def model(self) -> str:
+        return self._model
+
+    @property
+    def mode(self) -> str:
+        return self._mode
+
     def _lookup_secret(self) -> str | None:
         if self._environ is not None:
             value = self._environ.get(self.api_key_ref)
@@ -815,6 +827,9 @@ class OpenRouterModel:
                     )
                 if isinstance(parsed.get("usage"), Mapping):
                     raw_usage = dict(parsed["usage"])
+                fingerprint = parsed.get("system_fingerprint")
+                if isinstance(fingerprint, str) and fingerprint:
+                    proposal["model_fingerprint"] = fingerprint
 
         # Token usage and priced accounting
         if raw_usage is not None:
@@ -888,6 +903,8 @@ class OpenRouterModel:
         canonical["pricing_known"] = proposal["pricing_known"]
         canonical["pricing_source"] = proposal["pricing_source"]
         canonical["resolved_model"] = proposal["resolved_model"]
+        if isinstance(proposal.get("model_fingerprint"), str):
+            canonical["model_fingerprint"] = proposal["model_fingerprint"]
         canonical["text"] = proposal.get("text", "")
         return Result.success(canonical)
 

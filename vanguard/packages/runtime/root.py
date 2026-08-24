@@ -17,6 +17,7 @@ from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..domain.canonicalisation.digest import digest_of
 from .compose import (
     Harness,
     Receipt,
@@ -81,6 +82,14 @@ class Runtime(_ComposedRuntime):
         harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
                               bindings=bindings)
         repo = Path(task_context.repo_path).resolve()
+        selected_store = store or SqliteEventStore(":memory:")
+        if release and (
+            not isinstance(selected_store, SqliteEventStore)
+            or not selected_store.durable
+        ):
+            raise ValueError(
+                "release execution requires an explicit file-backed SQLite-WAL store"
+            )
 
         # Runtime phase. Composition has already succeeded; a host without
         # bubblewrap is a failure of *this* run, not of the harness, so the
@@ -95,12 +104,18 @@ class Runtime(_ComposedRuntime):
         environment = SandboxedEnvironmentAdapter(
             worker, repo, environment_id=f"workspace:{repo}")
 
+        if release:
+            qualified = environment.qualify()
+            if not qualified.ok:
+                raise RuntimeError(
+                    f"release containment qualification failed: {qualified.error.kind}: "
+                    f"{qualified.error.message}")
+
         if model is None:
             from ..adapters.models.openrouter import OpenRouterModel
 
             model = OpenRouterModel()
 
-        selected_store = store or SqliteEventStore(":memory:")
         ports = SessionPorts(
             model=model,
             environment=environment,
@@ -137,6 +152,14 @@ class Runtime(_ComposedRuntime):
             raise ValueError(
                 "release execution requires an explicit file-backed SQLite-WAL store"
             )
+        preregistration = dict(task_context.preregistration or {})
+        preregistration_digest = str(
+            preregistration.get("preregistration_digest")
+            or preregistration.get("digest") or "")
+        if release:
+            preregistration_digest = _validate_release_inputs(
+                ports, task_context, preregistration,
+                expected_oracle=(harness.evaluators[0] if harness.evaluators else None))
         activation = plan_activation(harness.frozen)
         run_plan = plan_run(
             activation,
@@ -144,16 +167,16 @@ class Runtime(_ComposedRuntime):
             run_id=task_context.run_id,
             episode_id=task_context.episode_id,
             task=task_context.brief,
-            environment={"kind": type(ports.environment).__name__, "rootless": True},
+            task_digest=str(preregistration.get("task_digest") or "") or None,
+            preregistration_digest=preregistration_digest,
+            environment=_environment_identity(ports.environment),
             store={
                 "kind": type(selected_store).__name__,
                 "path": getattr(selected_store, "db_path", ""),
                 "durable": bool(getattr(selected_store, "durable", False)),
                 "journal_mode": getattr(selected_store, "journal_mode", "memory"),
             },
-            model_route=(ports.model.to_dict() if callable(getattr(ports.model, "to_dict", None)) else {
-                "adapter": type(ports.model).__name__,
-            }),
+            model_route=_model_route_identity(ports.model),
             oracle=harness.evaluators[0] if harness.evaluators else None,
             root_principal=task_context.principal,
             budget=harness.budget,
@@ -178,6 +201,91 @@ class Runtime(_ComposedRuntime):
         return replace(result, foundation_evidence=derive_foundation_bundle(
             run_plan=run_plan, result=result, store=selected_store,
         ))
+
+
+def _validate_release_inputs(
+    ports: SessionPorts,
+    task_context: TaskContext,
+    preregistration: Mapping[str, Any],
+    expected_oracle: str | None = None,
+) -> str:
+    """Fail closed before the first event of an RF-85 candidate run."""
+    digest = preregistration.get("preregistration_digest")
+    task_digest = preregistration.get("task_digest")
+    if not isinstance(digest, str) or not digest or not isinstance(task_digest, str) or not task_digest:
+        raise ValueError("release execution requires immutable task/oracle preregistration")
+    expected = digest_of({"task": task_context.brief})
+    if task_digest != expected:
+        raise ValueError("preregistered task digest does not bind the requested task")
+    required = (
+        "api", "task_digest", "oracle_id", "oracle_digest",
+        "evaluator_key_id", "evaluator_public_key", "protocol",
+        "subject_digest", "created_at", "metadata",
+    )
+    if any(key not in preregistration for key in required):
+        raise ValueError("release preregistration is missing immutable trust bindings")
+    identity = {key: preregistration[key] for key in required}
+    if identity["api"] != "mhf.preregistration/1" or digest_of(identity) != digest:
+        raise ValueError("release preregistration digest does not match its trust bindings")
+    oracle = preregistration.get("oracle_id")
+    if not isinstance(oracle, str) or not oracle:
+        raise ValueError("release preregistration requires an exterior oracle identity")
+    if expected_oracle is None or oracle != expected_oracle:
+        raise ValueError("preregistered oracle does not match the composed evaluator")
+
+    model = ports.model
+    provider_value = getattr(model, "provider", None)
+    mode_value = getattr(model, "mode", getattr(model, "_mode", None))
+    if not isinstance(provider_value, str) or not provider_value or not isinstance(mode_value, str):
+        raise ValueError("release provider must declare provider identity and execution mode")
+    provider = provider_value.lower()
+    mode = mode_value.lower()
+    if any(label in provider for label in ("fake", "scripted", "cassette", "mock")) or mode != "live":
+        raise ValueError("release execution requires a live non-fake/non-cassette provider")
+
+    report = getattr(ports.environment, "containment_report", None)
+    if report is None or not getattr(report, "verified", False) or not getattr(report, "contained", False):
+        raise ValueError("release execution requires probe-verified rootless Bubblewrap containment")
+    if "bubblewrap-rootless" != getattr(report, "runtime", ""):
+        raise ValueError("release execution forbids host sandbox fallback")
+    return digest
+
+
+def _environment_identity(environment: Any) -> Mapping[str, Any]:
+    report = getattr(environment, "containment_report", None)
+    if report is None:
+        return {"kind": type(environment).__name__, "containment": "unverified"}
+    return {
+        "kind": type(environment).__name__,
+        "runtime": getattr(report, "runtime", ""),
+        "runtime_version": getattr(report, "runtime_version", ""),
+        "namespace": getattr(report, "namespace", ""),
+        "syscall_profile": getattr(report, "syscall_profile", ""),
+        "network_enforcement": getattr(report, "network_enforcement", ""),
+        "writable_mounts": list(getattr(report, "writable_mounts", ())),
+        "exposed_sockets": list(getattr(report, "exposed_sockets", ())),
+        "resource_limits": dict(getattr(report, "resource_limits", {})),
+        "startup_probes": [
+            {"kind": probe.kind, "attempted": probe.attempted,
+             "observed": probe.observed, "verified": probe.verified}
+            for probe in getattr(report, "startup_probes", ())
+        ],
+        "attested_at": getattr(report, "attested_at", ""),
+        "visibility_mark": getattr(report, "visibility_mark", ""),
+        "verified": bool(getattr(report, "verified", False)),
+        "contained": bool(getattr(report, "contained", False)),
+    }
+
+
+def _model_route_identity(model: Any) -> Mapping[str, Any]:
+    declared = model.to_dict() if callable(getattr(model, "to_dict", None)) else {}
+    return {
+        **dict(declared),
+        "adapter": type(model).__name__,
+        "provider": str(getattr(model, "provider", "")),
+        "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
+        "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
+    }
 
 
 __all__ = [

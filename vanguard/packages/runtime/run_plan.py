@@ -43,6 +43,10 @@ class RunPlan:
     #: Digest of the preregistered task/brief. Preregistration is what stops a
     #: task from being edited to fit the result it got.
     task_digest: str
+    #: Digest of the immutable task/oracle preregistration created before the
+    #: first event.  Empty remains legible for local runs but is never release
+    #: eligible.
+    preregistration_digest: str = ""
     #: Identity of the environment the effects land in (kind, containment).
     environment: Mapping[str, Any] = field(default_factory=dict)
     #: Identity of the durable store. `:memory:` is legible here and is exactly
@@ -72,6 +76,7 @@ class RunPlan:
             "activationDigest": self.activation_digest,
             "projectId": self.project_id,
             "taskDigest": self.task_digest,
+            "preregistrationDigest": self.preregistration_digest,
             "environment": dict(self.environment),
             "store": dict(self.store),
             "modelRoute": dict(self.model_route),
@@ -109,6 +114,8 @@ def plan_run(
     run_id: str,
     episode_id: str,
     task: str,
+    task_digest: str | None = None,
+    preregistration_digest: str = "",
     environment: Mapping[str, Any] | None = None,
     store: Mapping[str, Any] | None = None,
     model_route: Mapping[str, Any] | None = None,
@@ -124,7 +131,8 @@ def plan_run(
         project_id=project_id,
         run_id=run_id,
         episode_id=episode_id,
-        task_digest=digest_of({"task": task}),
+        task_digest=task_digest or digest_of({"task": task}),
+        preregistration_digest=preregistration_digest,
         environment=dict(environment or {}),
         store=dict(store or {}),
         model_route=dict(model_route or {}),

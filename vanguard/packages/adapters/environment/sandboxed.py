@@ -70,6 +70,18 @@ class SandboxedEnvironmentAdapter:
         self.worker = worker
         self.workspace = workspace
         self.environment_id = environment_id
+        self.containment_report: Any = None
+
+    def qualify(self) -> Result[Any]:
+        """Run the worker perimeter probes before release execution starts."""
+        result = self.worker.runner.execute(("/usr/bin/true",))
+        if not result.ok:
+            return Result.fail(result.error.kind, result.error.message)
+        report = result.value.containment
+        if not report.verified or not report.contained:
+            return Result.fail("containment_unverified", "rootless containment probes failed")
+        self.containment_report = report
+        return Result.success(report)
 
     def profile(self) -> Result[EnvironmentProfile]:
         return Result.success(

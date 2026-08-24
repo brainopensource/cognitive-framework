@@ -59,6 +59,9 @@ class OllamaModel:
         )
         self.timeout_seconds = timeout_seconds
 
+    provider = "ollama"
+    mode = "live"
+
     def propose(
         self,
         context: ContextBundle,

@@ -125,7 +125,26 @@ class _LayeredOperator:
             bundle["messages"] = tuple(messages)
             bundle["lastReceiptDigest"] = digest
         self.contexts.append(bundle)
-        return self._model.propose(bundle, tools, sampling)
+        answer = self._model.propose(bundle, tools, sampling)
+        value = getattr(answer, "value", None)
+        if isinstance(value, Mapping):
+            usage = value.get("usage")
+            if isinstance(usage, Mapping):
+                measured = dict(self.contexts[-1])
+                for key in ("prompt_tokens", "completion_tokens", "usd_micros",
+                            "ttft_millis"):
+                    reported = usage.get(key)
+                    if isinstance(reported, int) and not isinstance(reported, bool):
+                        measured[key] = reported
+                measured["provider_usage_reported"] = True
+                resolved = value.get("resolved_model")
+                if isinstance(resolved, str) and resolved:
+                    measured["model"] = resolved
+                fingerprint = value.get("model_fingerprint")
+                if isinstance(fingerprint, str) and fingerprint:
+                    measured["model_fingerprint"] = fingerprint
+                self.contexts[-1] = measured
+        return answer
 
 
 
@@ -360,6 +379,22 @@ class HarnessSession:
                 self.ports.store, request.idempotency_key
             )
             if settled is not None:
+                occurrence = str(settled.payload.get("occurrence") or "")
+                status = str(settled.payload.get("status") or "")
+                if occurrence == "undeterminable" or status == "undeterminable":
+                    result = DispatchResult(
+                        FailurePath.UNDETERMINABLE,
+                        str(settled.payload.get("descriptorDigest") or ""),
+                        AdapterOutcome(
+                            status="error", occurrence=Occurrence.UNDETERMINABLE,
+                            detail="recovered durable intent remains undeterminable; "
+                                   "physical execution denied pending exterior reconciliation",
+                        ),
+                        detail="recovered durable intent remains undeterminable; "
+                               "physical execution denied pending exterior reconciliation",
+                    )
+                    self.calls.append((request, result))
+                    return result
                 result = DispatchResult(
                     FailurePath.OK,
                     str(settled.payload.get("descriptorDigest") or ""),
@@ -395,6 +430,8 @@ class HarnessSession:
                 "activationDigest": getattr(self.run_plan, "activation_digest", ""),
                 "runDigest": getattr(self.run_plan, "run_digest", ""),
                 "taskDigest": getattr(self.run_plan, "task_digest", ""),
+                "preregistrationDigest": getattr(
+                    self.run_plan, "preregistration_digest", ""),
             },
         ))
         self._episode_begun_here = True

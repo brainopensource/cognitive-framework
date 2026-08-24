@@ -77,7 +77,7 @@ def _compute_turn_cost(
     if cost_micros is not None:
         usd_micros = int(cost_micros)
         usd_status = "measured"
-    elif route["provider"] in ("scripted", "fake", "mock", "ollama"):
+    elif route["provider"] in ("scripted", "fake", "mock", "lam", "ollama"):
         usd_micros = 0
         usd_status = "measured"
     else:

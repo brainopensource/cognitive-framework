@@ -447,7 +447,7 @@ def main() -> int:
     parser.add_argument("--pack", required=True)
     parser.add_argument("--task-dir", required=True)
     parser.add_argument("--model", default="mock",
-                        choices=("mock", "ollama", "openrouter", "deepseek", "router"))
+                        choices=("mock", "lam", "ollama", "openrouter", "deepseek", "router"))
     parser.add_argument("--model-name", default=None)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--interactive", action="store_true")

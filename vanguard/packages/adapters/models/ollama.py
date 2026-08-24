@@ -73,6 +73,8 @@ class OllamaModel:
         options = dict(sampling)
         if "num_ctx" not in options:
             options["num_ctx"] = 4096
+        if "maxTokens" not in options and "num_predict" not in options:
+            options["num_predict"] = 1024
         if "maxTokens" in options and "num_predict" not in options:
             options["num_predict"] = options.pop("maxTokens")
         body: dict[str, Any] = {
@@ -88,7 +90,13 @@ class OllamaModel:
         except Exception as exc:
             return Result.fail("instrument_error", f"Ollama request failed: {exc}", retryable=True)
         if status != 200:
-            return Result.fail("instrument_error", f"Ollama returned HTTP {status}", retryable=status in {429, 500, 502, 503, 504})
+            detail = raw.decode("utf-8", errors="replace").strip()[:512]
+            suffix = f": {detail}" if detail else ""
+            return Result.fail(
+                "instrument_error",
+                f"Ollama returned HTTP {status}{suffix}",
+                retryable=status in {429, 500, 502, 503, 504},
+            )
         try:
             payload = json.loads(raw.decode("utf-8"))
             message = payload.get("message")

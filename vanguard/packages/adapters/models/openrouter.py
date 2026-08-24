@@ -540,11 +540,13 @@ class OpenRouterModel:
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
         monotonic: Callable[[], float] = time.monotonic,
+        provider: str = "openrouter",
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
         self._model = model
         self._mode = mode
+        self._provider = provider
         self._transport = transport
         self._stream_transport = stream_transport
         self._environ = dict(environ) if environ is not None else None
@@ -580,7 +582,7 @@ class OpenRouterModel:
 
     @property
     def provider(self) -> str:
-        return "openrouter"
+        return self._provider
 
     @property
     def model(self) -> str:
@@ -753,7 +755,12 @@ class OpenRouterModel:
             "model": route.resolved_model,
             "messages": _messages(context),
             "temperature": sampling.get("temperature", 0.0),
-            "max_tokens": sampling.get("maxTokens", 256),
+            # Reasoning-capable routes can spend the first tokens on hidden
+            # deliberation.  The old 256-token default routinely exhausted
+            # before a tool call, producing an empty proposal and burning a
+            # turn.  Keep the bound explicit while leaving callers free to
+            # narrow it through the sampling contract.
+            "max_tokens": sampling.get("maxTokens", 1024),
         }
         if self._stream:
             body_obj["stream"] = True

@@ -13,9 +13,9 @@
 | W3D-08 | TODO | Criar entrypoint genérico e unir CLI, daemon e one-shot | novo `runtime/entrypoint.py`, `runtime/service/`, `clients/client-core/`, `clients/cli/` | `vg code` e `vg explain` executam pelo mesmo `Runtime.run_composed` |
 | W3D-09 | TODO | Unificar persistência e streaming sem criar segunda verdade | `runtime/ledger_emitter.py`, novo `runtime/event_stream.py`, `runtime/service/`, `ports/event_store.py` | store durável é verdade; live stream é fan-out/replay, não outro ledger |
 | W3D-10 | DONE | Tornar evidência e evaluator políticas de assurance | `runtime/assurance.py`, `runtime/foundation_evidence.py`, profiles | local é executável e não-promocional; hermetic continua fail-closed |
-| W3D-11 | IN_PROGRESS | Entregar Developer Preview no WSL2 | CLI, packs, integração e UX | coding + explain reais, local, file-backed, sem bwrap obrigatório |
-| W3D-12 | IN_PROGRESS | Remover shims, caminhos mortos e duplicação após paridade | loaders/compilers antigos, `lab_driver.py`, manifests legados, testes | RF-94 prova uma única autoridade; duplication/boundary gates verdes |
-| W4-01 | TODO | Requalificar baseline e executar RF-85 hermético | release runner, sandbox/evaluator/WAL/evidence | nove linhas reais em uma lineage; WSL2 é aceito somente se passar os mesmos probes |
+| W3D-11 | DONE | Entregar Developer Preview no WSL2 | CLI, packs, integração e UX | coding + explain local pelo runtime comum, doctor com fatos reais, file-backed, sem bwrap obrigatório |
+| W3D-12 | DONE | Remover shims, caminhos mortos e duplicação após paridade | loaders/compilers antigos, `lab_driver.py`, manifests legados, testes | RF-94 prova uma única autoridade; duplication/boundary gates verdes |
+| W4-01 | IN_PROGRESS | Requalificar baseline e executar RF-85 hermético | release runner, sandbox/evaluator/WAL/evidence | nove linhas reais em uma lineage; WSL2 é aceito somente se passar os mesmos probes |
 | W5-01 | LOCKED | Formal Pack #2 e prova de generalidade | novo `packs/formal-*`, adapter/checker/testes | RF-86; zero diff semântico no substrato durante o intervalo de prova |
 | W6-01 | LOCKED | `agent.spawn` mediado | `runtime/delegation.py`, adapter de spawn, schemas/testes | RF-55…RF-59; autoridade, budget, lineage e recovery atenuados |
 | W7-01 | PLANNED | Medir e decidir concorrência limitada | scheduler/measurement exterior, testes RF-46…RF-48 | benefício reproduzível antes de levantar I-11 |

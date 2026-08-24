@@ -31,7 +31,7 @@ merges exist.
 | **M-2 One runtime and recovery** | v0.6.1 | Truthful trajectories and restart-safe state | RF-23 rich/conserved `mhf.trajectory/1` plus RF-25 fresh-process SQLite-WAL continuation | **COMPLETE (GREEN)** | M-1 |
 | **M-3 Extensibility contracts** | v0.6.2 | Named graph, packages registry lifecycle, and Layer-0 retirement components | RF-28…RF-45 and prior NOVA-4 evidence retained | **OPERATIONAL CLOSURE REOPENED** | M-2 |
 | **M-3C Canonical Composition Convergence** | v0.6.2 | One canonical public `compose -> freeze -> activate -> run` authority across code and table probes | G0–G4 / RF-78–RF-84: canonical identity, lifecycle, durable evidence lineage, zero competing production authority | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | M-2 plus retained M-3 evidence |
-| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **PAUSED FOR ACCEPTED W-3D CORRECTION** | M-3C + W-3D |
+| **M-4 Foundation E2E (STOP)** | v0.6.3 | One honest coding-agent run through the complete substrate | RF-85: nine source-derived rows, one uninterrupted lineage, zero human repair or synthetic substitution | **OPEN — RF-85 QUALIFICATION** | M-3C + W-3D |
 
 ### W-3D Product Runtime Profiles — accepted corrective wave
 

@@ -108,9 +108,17 @@ class RuntimeBootstrap:
 
         selected_model = model
         if selected_model is None:
-            from ..adapters.models.openrouter import OpenRouterModel
-
-            selected_model = OpenRouterModel()
+            import os
+            model_port = os.environ.get("VANGUARD_MODEL_PORT")
+            if model_port:
+                from .model_selection import select_model
+                selected_model = select_model(model_port).model
+            elif profile.requested.id == "local":
+                from ..adapters.models.fake import FakeModel
+                selected_model = FakeModel([])
+            else:
+                from ..adapters.models.openrouter import OpenRouterModel
+                selected_model = OpenRouterModel()
 
         return RuntimeDependencies(
             model=selected_model,

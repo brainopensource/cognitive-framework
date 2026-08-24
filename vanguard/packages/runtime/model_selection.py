@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 #: Selectable ports. `mock` is the default and the only one CI may rely on.
-MODEL_PORTS = ("mock", "ollama", "openrouter", "deepseek", "router")
+MODEL_PORTS = ("mock", "lam", "ollama", "openrouter", "deepseek", "router")
 
 #: Default local tag. Overridable, because whatever is pulled locally wins.
 DEFAULT_OLLAMA_MODEL = "deepseek-r1"
@@ -72,6 +72,7 @@ def select_model(
     probe: Callable[[str], bool] | None = None,
     free_models: Callable[[], Sequence[str]] | None = None,
     env: Any = None,
+    allow_paid: bool = False,
 ) -> SelectedModel:
     """Return a labelled `ModelPort`, or raise `ModelUnavailable`.
 
@@ -84,6 +85,7 @@ def select_model(
     import os
 
     environ = env if env is not None else os.environ
+    paid_allowed = allow_paid or (str(environ.get("VANGUARD_ALLOW_PAID", "")).strip().lower() in {"1", "true", "yes"})
     choice = (port or "mock").strip().lower()
     if choice not in MODEL_PORTS:
         raise ModelUnavailable(choice, f"unknown model port; expected one of {MODEL_PORTS}")
@@ -93,6 +95,30 @@ def select_model(
 
         return SelectedModel(port="mock", model=FakeModel(list(tape)),
                              label="mock-scripted")
+
+    if choice == "lam":
+        from ..adapters.models.openrouter import OpenRouterModel
+
+        base_url = environ.get("LAM_BASE_URL", "http://127.0.0.1:8787")
+        endpoint = f"{base_url.rstrip('/')}/v1/chat/completions"
+        target_model = model_name or "lam/t1-calculator"
+        if probe is not None:
+            if not probe(f"{base_url}/health"):
+                raise ModelUnavailable("lam", f"no daemon answering at {base_url}")
+        else:
+            if not _probe_http(f"{base_url}/health"):
+                raise ModelUnavailable("lam", f"no daemon answering at {base_url}")
+
+        model = OpenRouterModel(
+            endpoint=endpoint,
+            model=target_model,
+            mode="replay",
+            provider="lam",
+            api_key_ref="LAM_MOCK_KEY",
+            environ={"LAM_MOCK_KEY": "sk-lam-mock-key"},
+            stream=False,
+        )
+        return SelectedModel(port="lam", model=model, label=f"lam:{target_model}")
 
     if choice == "ollama":
         from ..adapters.models.ollama import OllamaModel
@@ -132,6 +158,15 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        if paid_allowed:
+            if not model_name:
+                allowed = list(free_models() if free_models is not None else _free_band())
+                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+            else:
+                name = model_name
+            return SelectedModel(port=choice, model=OpenRouterModel(model=name),
+                                 label=f"{choice}:{name}")
+
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
             raise ModelUnavailable(
@@ -151,6 +186,15 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        if paid_allowed:
+            if not model_name:
+                allowed = list(free_models() if free_models is not None else _free_band())
+                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+            else:
+                name = model_name
+            return SelectedModel(port="router", model=OpenRouterModel(model=name),
+                                 label=f"router:{name}")
+
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
             raise ModelUnavailable(choice, "no free-band models are registered")

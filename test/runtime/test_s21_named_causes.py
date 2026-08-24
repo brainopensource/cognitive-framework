@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from vanguard.packages.runtime.lab_driver import run_lab_task
@@ -75,8 +76,14 @@ class TheDriverEmitsTheLabel(unittest.TestCase):
         self.assertEqual(result["outcome"], "inconclusive:workspace_missing")
 
     def test_an_absent_tag_is_labelled_not_soup(self) -> None:
-        result = run_lab_task("vg-code-default", DOGFOOD_01, model_port="ollama",
-                              model_name="definitely-not-a-pulled-tag")
+        with patch(
+            "vanguard.packages.runtime.model_selection._ollama_tags",
+            return_value=("installed:tag",),
+        ):
+            result = run_lab_task(
+                "vg-code-default", DOGFOOD_01, model_port="ollama",
+                model_name="definitely-not-a-pulled-tag",
+            )
         self.assertEqual(result["outcome"], "instrument_error:model_tag_absent")
         self.assertNotEqual(result["outcome"], StopReason.INSTRUMENT_ERROR)
 

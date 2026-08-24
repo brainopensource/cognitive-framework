@@ -1,0 +1,5 @@
+{"name":"check","verb":"formal.check",
+ "description":"Discharge a proof obligation with the bound solver. Single action.",
+ "schema":{"type":"object","additionalProperties":false,
+  "properties":{"goal":{"type":"string"},"inputs":{"type":"array","items":{"type":"string"}}},
+  "required":["goal"]}}

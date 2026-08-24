@@ -540,11 +540,13 @@ class OpenRouterModel:
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
         monotonic: Callable[[], float] = time.monotonic,
+        provider: str = "openrouter",
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
         self._model = model
         self._mode = mode
+        self._provider = provider
         self._transport = transport
         self._stream_transport = stream_transport
         self._environ = dict(environ) if environ is not None else None
@@ -577,6 +579,18 @@ class OpenRouterModel:
         if self._player is not None:
             return self._player.propose(context, tools, sampling)
         return self._complete(context, tools, sampling)
+
+    @property
+    def provider(self) -> str:
+        return self._provider
+
+    @property
+    def model(self) -> str:
+        return self._model
+
+    @property
+    def mode(self) -> str:
+        return self._mode
 
     def _lookup_secret(self) -> str | None:
         if self._environ is not None:
@@ -741,7 +755,12 @@ class OpenRouterModel:
             "model": route.resolved_model,
             "messages": _messages(context),
             "temperature": sampling.get("temperature", 0.0),
-            "max_tokens": sampling.get("maxTokens", 256),
+            # Reasoning-capable routes can spend the first tokens on hidden
+            # deliberation.  The old 256-token default routinely exhausted
+            # before a tool call, producing an empty proposal and burning a
+            # turn.  Keep the bound explicit while leaving callers free to
+            # narrow it through the sampling contract.
+            "max_tokens": sampling.get("maxTokens", 1024),
         }
         if self._stream:
             body_obj["stream"] = True
@@ -815,6 +834,9 @@ class OpenRouterModel:
                     )
                 if isinstance(parsed.get("usage"), Mapping):
                     raw_usage = dict(parsed["usage"])
+                fingerprint = parsed.get("system_fingerprint")
+                if isinstance(fingerprint, str) and fingerprint:
+                    proposal["model_fingerprint"] = fingerprint
 
         # Token usage and priced accounting
         if raw_usage is not None:
@@ -888,6 +910,8 @@ class OpenRouterModel:
         canonical["pricing_known"] = proposal["pricing_known"]
         canonical["pricing_source"] = proposal["pricing_source"]
         canonical["resolved_model"] = proposal["resolved_model"]
+        if isinstance(proposal.get("model_fingerprint"), str):
+            canonical["model_fingerprint"] = proposal["model_fingerprint"]
         canonical["text"] = proposal.get("text", "")
         return Result.success(canonical)
 

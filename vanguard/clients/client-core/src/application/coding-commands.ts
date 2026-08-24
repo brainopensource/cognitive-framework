@@ -48,7 +48,7 @@ export function createPythonCodingBackend(options?: {
   pythonPath?: string;
 }): CodingBackend {
   const pythonBin = options?.pythonBin ?? process.env.VANGUARD_PYTHON ?? "python3";
-  const module = options?.module ?? "vanguard.packages.runtime.coding_entrypoint";
+  const module = options?.module ?? "vanguard.packages.runtime.entrypoint";
   const cwd =
     options?.cwd ??
     process.env.VANGUARD_ROOT ??
@@ -83,9 +83,15 @@ export function createPythonCodingBackend(options?: {
             return;
           }
           if (parsed.type === "result" && parsed.result) {
+            const resultProjections = (parsed.result as CodingTerminalResult).projections ?? [];
             terminal = {
               ...(parsed.result as CodingTerminalResult),
-              projections,
+              // Streamed `type: "projection"` frames are the step-by-step
+              // trace; the terminal result may additionally embed its own
+              // projections (e.g. `doctor`'s route facts) when no frames
+              // were streamed. Prefer the streamed trace, but never let it
+              // silently discard a result-embedded projection.
+              projections: projections.length > 0 ? projections : resultProjections,
             };
           }
         });
@@ -112,7 +118,7 @@ export function createPythonCodingBackend(options?: {
               promptTokens: null,
               completionTokens: null,
               spentUsdMicros: null,
-              detail: stderr.trim() || `coding_entrypoint exited ${code ?? "null"}`,
+              detail: stderr.trim() || `entrypoint exited ${code ?? "null"}`,
               projections,
             };
           }

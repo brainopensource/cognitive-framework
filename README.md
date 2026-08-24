@@ -25,13 +25,13 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Concept Lock** | v0.6.2 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md) |
 | **Shipped package** | `vanguard-runtime` `0.4.5b1` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-3C closed; M-4 (v0.6.3 Foundation E2E) active under ADR-0088.** Current work is real-environment qualification and the single eligible RF-85 run. |
+| **Status** | **M-3C closed; RF-85 preparation merged at `1a1ed6c`; M-4 remains active with zero evidence rows claimed.** Current work is environment qualification, immutable preregistration, then one eligible run. |
 | **Foundation Plan** | M-3C convergence → M-4 real nine-row proof → M-5 Formal Pack #2 → M-6 mediated spawn → M-7 measured concurrency → M-8 declarative topologies; M-9+ remains post-v1 research |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Active_Sprint-M--3C_Convergence-brightgreen.svg)](docs/03_execution/sprint_active.md)
+[![Approved](https://img.shields.io/badge/Active_Sprint-M--4_RF--85-orange.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. Executive Summary & Documentation Architecture
 
@@ -175,9 +175,13 @@ Execution status and macro milestones are tracked in:
 - **Active Execution Board**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md)
 
 ```text
-M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Active) -> M-4 -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
-[Trust foundation]     [retained]       [convergence]     [real]  [formal] [spawn] [scale] [topology]    [post-v1]
+M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Closed) -> M-4 (Active) -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
+[Trust foundation]     [retained]       [converged]       [RF-85 real run] [locked until each preceding gate]       [post-v1]
 ```
+
+The only next authorized sequence is: qualify a clean Linux rootless/Bubblewrap environment and the
+isolated evaluator, select a reachable real provider, install locked dependencies and pass all gates,
+immutably preregister the task/oracle, then execute one uninterrupted RF-85 run. M-5+ remains locked.
 
 ---
 

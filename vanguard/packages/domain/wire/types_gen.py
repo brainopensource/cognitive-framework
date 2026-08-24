@@ -168,6 +168,19 @@ class EventEnvelope:
     alertable: bool = False
 
 @dataclass(frozen=True, slots=True)
+class ExecutionProfile:
+    api: object
+    id: str
+    workspace: JsonObject
+    process: JsonObject
+    approval: JsonObject
+    persistence: JsonObject
+    evaluation: JsonObject
+    assurance: JsonObject
+    capture: JsonObject
+    network: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
 class Health:
     ok: bool
     detail: str | None = None
@@ -413,6 +426,7 @@ __all__ = [
     "EpisodeView",
     "EvaluationSubject",
     "EventEnvelope",
+    "ExecutionProfile",
     "Health",
     "MeasurementStatus",
     "MemoryHit",

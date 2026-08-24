@@ -196,6 +196,41 @@ class RootlessSandboxRunner:
             return "unavailable"
         return result.stdout.decode(errors="replace").strip() or "unknown"
 
+    def qualify(self) -> Result[ContainmentReport]:
+        """Run startup containment probes once and return cached report."""
+        val_res = self._validate_workspace()
+        if not val_res.ok:
+            return Result.fail(val_res.error.kind, val_res.error.message)
+            
+        rt_ver = self._runtime_version()
+        if rt_ver == "unavailable":
+            return Result.fail("unavailable", "Bubblewrap runtime is not available")
+
+        probes = self._probes()
+        verified = all(probe.verified for probe in probes)
+        attested_at = self._attested_at or datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        report = ContainmentReport(
+            runtime="bubblewrap-rootless",
+            runtime_version=rt_ver,
+            namespace="user,mount,ipc,pid,uts,cgroup,network",
+            syscall_profile="namespace capability boundary; denial probe recorded",
+            network_enforcement="outer bubblewrap network namespace",
+            writable_mounts=("/workspace", "/tmp"),
+            exposed_sockets=(),
+            resource_limits={
+                "wallClockSeconds": self.timeout_seconds,
+                "nofile": 256,
+                "as_bytes": 536870912,
+                "nproc": 64
+            },
+            startup_probes=probes,
+            attested_at=attested_at,
+            contained=verified,
+            verified=verified,
+            visibility_mark="probe-verified-rootless" if verified else "unverified-rootless-perimeter",
+        )
+        return Result.success(report)
+
     def execute(self, argv: Sequence[str]) -> Result[SandboxResult]:
         if not argv or not all(isinstance(arg, str) and arg for arg in argv):
             return Result.fail("invalid_request", "sandbox argv must be a non-empty string sequence")
@@ -246,3 +281,4 @@ class RootlessSandboxRunner:
                 containment=report,
             )
         )
+

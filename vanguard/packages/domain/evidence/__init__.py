@@ -25,6 +25,11 @@ from .foundation import (
     derived,
 )
 from .guardrails import derive_evidence_state
+from .preregistration import (
+    API as PREREGISTRATION_API,
+    Preregistration,
+    PreregistrationError,
+)
 
 __all__ = [
     "Claim",
@@ -46,4 +51,7 @@ __all__ = [
     "absent",
     "build_foundation_evidence",
     "derived",
+    "PREREGISTRATION_API",
+    "Preregistration",
+    "PreregistrationError",
 ]

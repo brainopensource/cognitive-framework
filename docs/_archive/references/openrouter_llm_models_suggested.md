@@ -2,6 +2,7 @@
 
 ## 0. Free Models
 
+- stealth/ox-alpha
 - openrouter/free
 - z-ai/glm-5.2:free
 - inclusionai/ling-3.0-tiny:free

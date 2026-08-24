@@ -80,6 +80,8 @@ def run_lab_task(
     isolate: bool = True,
     tier_escalation: bool = False,
     tiers: Sequence[str] | None = None,
+    sandbox_mode: str = "rootless",
+    allow_paid: bool = False,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -122,6 +124,7 @@ def run_lab_task(
             model_port,
             model_name=model_name or (tiers[0] if tier_escalation and tiers else None),
             tape=tape,
+            allow_paid=allow_paid,
         )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
@@ -194,7 +197,9 @@ def run_lab_task(
         episode_id = f"lab-episode-{attempt}"
         ports = SessionPorts(
             model=selected.model,
-            environment=_bind_grant(_environment_for(task_path, cleanup_roots), grant),
+            environment=_bind_grant(
+                _environment_for(task_path, cleanup_roots, sandbox_mode=sandbox_mode),
+                grant),
             clock=SystemClock(), store=store,
             index=FileRepoIndex() if harness.index_component is not None else None,
             interactive=interactive,
@@ -209,7 +214,7 @@ def run_lab_task(
     # instead would let a model exit 0 on any trivial command and score green.
     verify_argv = verify_argv_from_task(task_path)
     environment_for_oracle = _bind_grant(
-        _environment_for(task_path, cleanup_roots), grant)
+        _environment_for(task_path, cleanup_roots, sandbox_mode=sandbox_mode), grant)
 
     def declared_oracle(_result: Any) -> bool:
         if verify_argv is None:
@@ -373,7 +378,12 @@ def _bind_grant(environment: Any, grant: Any) -> Any:
     return _GrantBoundEnvironment(environment, grant)
 
 
-def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -> Any:
+def _environment_for(
+    task_path: Path,
+    cleanup_roots: list[Path] | None = None,
+    *,
+    sandbox_mode: str = "rootless",
+) -> Any:
     """The sandboxed environment, exactly as `execute_harness` composes it.
 
     This used to return `GitEnvironmentAdapter`, which runs `proc.exec` through
@@ -385,6 +395,18 @@ def _environment_for(task_path: Path, cleanup_roots: list[Path] | None = None) -
     The bubblewrap worker also reports `outcome="failed"` on a non-zero exit,
     which is what makes a ledger-derived oracle possible at all.
     """
+    if sandbox_mode == "host-dev":
+        # Local CLI development only. This keeps the same EnvironmentPort and
+        # receipts while making WSL/native development usable. It is not a
+        # containment report and cannot be selected by RF-85 release code.
+        from ..adapters.environment.git import GitEnvironmentAdapter
+        return GitEnvironmentAdapter(
+            task_path.resolve(),
+            environment_id=f"workspace-host-dev:{task_path.resolve()}",
+        )
+    if sandbox_mode != "rootless":
+        raise ValueError("sandbox_mode must be 'rootless' or 'host-dev'")
+
     from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
     from ..adapters.sandbox.rootless import RootlessSandboxRunner
     from ..adapters.sandbox.worker import WorkerProtocol
@@ -427,7 +449,7 @@ def main() -> int:
     parser.add_argument("--pack", required=True)
     parser.add_argument("--task-dir", required=True)
     parser.add_argument("--model", default="mock",
-                        choices=("mock", "ollama", "openrouter", "deepseek", "router"))
+                        choices=("mock", "lam", "ollama", "openrouter", "deepseek", "router"))
     parser.add_argument("--model-name", default=None)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--interactive", action="store_true")
@@ -443,6 +465,18 @@ def main() -> int:
                         help="Select the initial tier; outcome-driven escalation is coordinated externally")
     parser.add_argument("--tiers", nargs="+", default=None,
                         help="Ordered list of models for tier escalation")
+    parser.add_argument(
+        "--sandbox", choices=("rootless", "host-dev"), default="rootless",
+        help="Execution boundary; host-dev is explicit, local-only, and not RF-85 eligible",
+    )
+    parser.add_argument(
+        "--allow-paid", action="store_true",
+        help="Authorise paid OpenRouter models (overrides free-band refusal)",
+    )
+    parser.add_argument(
+        "--approve-writes", action="store_true",
+        help="Auto-approve write proposals via lab operator signer (labelled lab departure)",
+    )
 
     args = parser.parse_args()
     result = run_lab_task(
@@ -451,7 +485,10 @@ def main() -> int:
         interactive=args.interactive, max_turns=args.max_turns,
         max_attempts=args.max_attempts, jsonl_out=args.jsonl_out,
         tier_escalation=args.tier_escalation, tiers=args.tiers,
+        sandbox_mode=args.sandbox,
         isolate=not args.in_place,
+        allow_paid=args.allow_paid,
+        approve_writes=args.approve_writes,
     )
     print(json.dumps(result, indent=2, sort_keys=True) if args.json else result["outcome"])
     return 0 if result["outcome"] == StopReason.ORACLE_GREEN else 1

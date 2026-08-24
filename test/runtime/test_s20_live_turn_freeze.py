@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import inspect
 import unittest
+from unittest.mock import patch
 
 from vanguard.packages.adapters.models.ollama import _tool_payload
 from vanguard.packages.runtime import lab_driver
@@ -63,7 +64,10 @@ class ProbeAndTimeoutAreInstrumentConcerns(unittest.TestCase):
         self.assertEqual(selected.model.timeout_seconds, 123.0)
 
     def test_an_absent_tag_is_refused_by_name(self) -> None:
-        with self.assertRaises(ModelUnavailable) as caught:
+        with patch(
+            "vanguard.packages.runtime.model_selection._ollama_tags",
+            return_value=("installed:tag",),
+        ), self.assertRaises(ModelUnavailable) as caught:
             select_model("ollama", model_name="definitely-not-pulled")
         self.assertIn("not pulled", caught.exception.reason)
 

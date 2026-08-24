@@ -77,7 +77,7 @@ def _compute_turn_cost(
     if cost_micros is not None:
         usd_micros = int(cost_micros)
         usd_status = "measured"
-    elif route["provider"] in ("scripted", "fake", "mock", "ollama"):
+    elif route["provider"] in ("scripted", "fake", "mock", "lam", "ollama"):
         usd_micros = 0
         usd_status = "measured"
     else:
@@ -165,6 +165,10 @@ def assemble_trajectory(
             "invocations": [{
                 "tier": 1,
                 "route": route,
+                "usage": {
+                    "prompt_tokens": ctx.get("prompt_tokens"),
+                    "completion_tokens": ctx.get("completion_tokens"),
+                },
                 "cost": turn_cost,
             }],
             "cost": turn_cost,
@@ -269,6 +273,8 @@ def assemble_trajectory(
         "activation_digest": getattr(run_plan, "activation_digest", None),
         "run_digest": execution_digest,
         "task_digest": getattr(run_plan, "task_digest", None),
+        "preregistration_digest": getattr(
+            run_plan, "preregistration_digest", None),
         "execution_digest": execution_digest,
         "state_digest": state_digest,
         "event_range": event_range,

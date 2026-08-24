@@ -81,6 +81,35 @@ _RESERVATION_FIELDS = {
     "bytes": "bytes_",
 }
 
+#: Provider telemetry fields safe to carry into a durable event. Deliberately
+#: excludes "text" and any argument payload: those may reference a secret or
+#: task content, and `REQ-TRUST-001` requires zero secrets in events. Everything
+#: here is either a token count, a cost figure, or a resolved identifier — the
+#: instrument's own bookkeeping, never the model's answer.
+_DIAGNOSTIC_FIELDS = (
+    "usage",
+    "resolved_model",
+    "model_fingerprint",
+    "cost_usd",
+    "usd_micros",
+    "pricing_known",
+    "pricing_source",
+)
+
+
+def _extract_diagnostics(raw_value: Any) -> Mapping[str, Any]:
+    """Pull provider/translator telemetry off a raw proposal value (`M-4 Approach A`).
+
+    `parse_proposal` only reads `kind`/`action`/`args`/... and silently drops
+    everything else, so the token usage, resolved model name, and cost the
+    adapter already computed (`openrouter.py`'s `_complete`) never reached a
+    durable event. This is why the canonical runtime could not answer "what
+    did the provider actually say" from the ledger alone.
+    """
+    if not isinstance(raw_value, Mapping):
+        return {}
+    return {field: raw_value[field] for field in _DIAGNOSTIC_FIELDS if field in raw_value}
+
 
 @dataclass(frozen=True, slots=True)
 class EpisodeOutcome:
@@ -235,21 +264,23 @@ class EpisodeEngine:
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
                 self._emit_terminal(episode, "instrument_error", str(exc))
                 break
+            raw_value = getattr(result, "value", None)
+            diagnostics = _extract_diagnostics(raw_value)
             if not getattr(result, "ok", False):
                 error = getattr(result, "error", None)
                 reason = (getattr(error, "message", "")
                           or "provider returned no proposal")
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, reason)
-                self._emit_terminal(episode, "instrument_error", reason)
+                self._emit_terminal(episode, "instrument_error", reason, diagnostics=diagnostics)
                 break
             try:
-                proposal = parse_proposal(getattr(result, "value", None))
+                proposal = parse_proposal(raw_value)
             except ProposalMalformed as exc:
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
-                self._emit_terminal(episode, "instrument_error", str(exc))
+                self._emit_terminal(episode, "instrument_error", str(exc), diagnostics=diagnostics)
                 break
 
-            self._emit_proposal(episode, proposal)
+            self._emit_proposal(episode, proposal, diagnostics=diagnostics)
 
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
@@ -419,7 +450,8 @@ class EpisodeEngine:
                                    if episode.turns else None),
         }
 
-    def _emit_terminal(self, episode: Episode, outcome: str, detail: str) -> None:
+    def _emit_terminal(self, episode: Episode, outcome: str, detail: str,
+                       diagnostics: Mapping[str, Any] | None = None) -> None:
         """`EpisodeCompleted` — record a termination that produced no turn (`C-01`).
 
         The three paths above end an episode *before* `_emit_proposal`, so a
@@ -432,20 +464,28 @@ class EpisodeEngine:
         This emits the terminal the episode actually reached, using the
         existing `EpisodeCompleted` kind the reducer already understands. It is
         not a turn -- no turn occurred -- and it opens no second store.
+
+        `diagnostics`, when present, is whatever provider telemetry survived
+        to this point (`_extract_diagnostics`) — e.g. usage/cost on a
+        malformed-proposal instrument error, so the ledger records the
+        instrument still answered even though its answer was unusable.
         """
+        payload: dict[str, Any] = {
+            "episodeId": episode.episode_id,
+            "outcome": outcome,
+            "turn": episode.turn_count,
+            # The refusal reason, which is the whole point of the event.
+            "detail": detail,
+        }
+        if diagnostics:
+            payload["diagnostics"] = dict(diagnostics)
         self._events.emit(Event(
             kind="EpisodeCompleted",
             reason=outcome,
             at=self._clock.now(),
             run_id=episode.run_id,
             principal=episode.principal,
-            payload={
-                "episodeId": episode.episode_id,
-                "outcome": outcome,
-                "turn": episode.turn_count,
-                # The refusal reason, which is the whole point of the event.
-                "detail": detail,
-            },
+            payload=payload,
         ))
 
     def _emit_scope_escalation_denied(self, episode: Episode, proposal: Proposal) -> None:
@@ -475,25 +515,35 @@ class EpisodeEngine:
             # `F-25`: emission failure never fails the work it describes.
             pass
 
-    def _emit_proposal(self, episode: Episode, proposal: Proposal) -> None:
+    def _emit_proposal(self, episode: Episode, proposal: Proposal,
+                       diagnostics: Mapping[str, Any] | None = None) -> None:
         """`ProposalProduced` — the one event the loop appends itself.
 
         The payload carries the proposal *descriptor*, never its arguments: an
         argument may reference a secret, and `REQ-TRUST-001` requires zero
         secrets in events.
+
+        `diagnostics` (`_extract_diagnostics`) adds the provider's own
+        telemetry — token usage, resolved model, cost — that `parse_proposal`
+        discards when it builds the `Proposal`. Without this the ledger could
+        show a turn happened but never what it cost or which model actually
+        answered (`M-4 Approach A`).
         """
+        payload: dict[str, Any] = {
+            "episodeId": episode.episode_id,
+            "turn": episode.turn_count,
+            "action": proposal.action,
+            "proposalDescriptor": proposal.descriptor,
+        }
+        if diagnostics:
+            payload["diagnostics"] = dict(diagnostics)
         event = Event(
             kind="ProposalProduced",
             reason=proposal.kind.value,
             at=self._clock.now(),
             run_id=episode.run_id,
             principal=episode.principal,
-            payload={
-                "episodeId": episode.episode_id,
-                "turn": episode.turn_count,
-                "action": proposal.action,
-                "proposalDescriptor": proposal.descriptor,
-            },
+            payload=payload,
         )
         try:
             self._events.emit(event)

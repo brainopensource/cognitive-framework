@@ -30,7 +30,7 @@ const parsed = parseCliOptions(rest);
 const runtime = clientFor(parsed);
 
 function codingRequestFromParsed(
-  cmd: "code" | "explain" | "resume",
+  cmd: "code" | "explain" | "resume" | "doctor",
   overrides: Partial<CodingRequest> = {}
 ): CodingRequest {
   return {
@@ -92,6 +92,11 @@ if (command === "run") {
 } else if (command === "explain") {
   if (!parsed.question) usage();
   exitCode = await runCodingCommand(codingRequestFromParsed("explain"), console.log);
+} else if (command === "doctor") {
+  exitCode = await runCodingCommand(
+    codingRequestFromParsed("doctor", { workspace: parsed.repo ?? "." }),
+    console.log
+  );
 } else if (command === "approve") {
   const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
   if (!runId || !parsed.decision) usage();
@@ -128,7 +133,8 @@ if (
   command === "why" ||
   command === "resume" ||
   command === "code" ||
-  command === "explain"
+  command === "explain" ||
+  command === "doctor"
 ) {
   process.exit(exitCode);
 }

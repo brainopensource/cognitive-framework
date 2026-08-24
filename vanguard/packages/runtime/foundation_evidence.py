@@ -17,20 +17,34 @@ from .authority_audit import audit_runtime_authority
 
 def derive_foundation_bundle(
     *, run_plan: Any, result: Any, store: Any,
-) -> FoundationEvidence:
+) -> FoundationEvidence | None:
     """Build derived rows where canonical sources exist; leave all gaps absent."""
+    if not getattr(run_plan, "preregistration_digest", ""):
+        # Local/legacy runs remain executable, but there is no honest RF-85
+        # bundle header without a preregistration created before the ledger.
+        return None
     read = store.read(EventRange(run_id=run_plan.run_id))
     envelopes = list(read.value) if read.ok and read.value else []
     trajectory = dict(result.trajectory or {})
     rows: list[EvidenceRow] = []
+    lineage = {
+        **dict(run_plan.lineage()),
+        "preregistration_digest": run_plan.preregistration_digest,
+    }
 
     routes = list(trajectory.get("model_routes_used") or ())
     if routes:
         route = dict(routes[0])
         turns = list(trajectory.get("turns") or ())
         usage = _usage(turns)
+        turns = list(trajectory.get("turns") or ())
         source = {
-            "row": 1, "run_id": run_plan.run_id,
+            **lineage, "row": 1,
+            "invocation_id": digest_of({
+                "run_digest": run_plan.run_digest,
+                "invocation": (turns[0].get("invocations") or [route])[0]
+                if turns else route,
+            }),
             "provider": route.get("provider"), "model": route.get("model"),
             "fingerprint": route.get("model_fingerprint"),
             "measurement_status": usage["measurement_status"],
@@ -40,9 +54,8 @@ def derive_foundation_bundle(
 
     trace = audit_runtime_authority()
     trace_source = {
-        "row": 9, "run_id": run_plan.run_id,
+        **lineage, "row": 9,
         "runtime_path": trace.public_boundary,
-        "layer0_used": False,
         "trace_digest": trace.trace_digest,
         "files": list(trace.files), "violations": list(trace.violations),
     }
@@ -54,7 +67,7 @@ def derive_foundation_bundle(
                        "outcome": r.outcome}) for r in result.receipts
         ]
         source = {
-            "row": 8, "run_id": run_plan.run_id,
+            **lineage, "row": 8,
             "schema": trajectory.get("schema"),
             "harness_digest": trajectory.get("harness_digest"),
             "state_digest": trajectory.get("state_digest"),
@@ -70,10 +83,16 @@ def derive_foundation_bundle(
 
     if envelopes and bool(run_plan.store.get("durable")):
         source = {
-            "row": 6, "run_id": run_plan.run_id,
+            **lineage, "row": 6,
+            "store_path_digest": digest_of({
+                "kind": run_plan.store.get("kind"),
+                "path": run_plan.store.get("path"),
+                "journal_mode": run_plan.store.get("journal_mode"),
+            }),
             "event_count": len(envelopes),
-            "event_range": {"first": int(envelopes[0].seq),
-                            "last": int(envelopes[-1].seq)},
+            "event_range": {"first_seq": int(envelopes[0].seq),
+                            "last_seq": int(envelopes[-1].seq),
+                            "count": len(envelopes)},
             "chain_digest": envelopes[-1].content_digest or envelopes[-1].digest(),
             "wal_mode": run_plan.store.get("journal_mode"),
             "run_digest": run_plan.run_digest,
@@ -95,6 +114,7 @@ def derive_foundation_bundle(
     )
     return build_foundation_evidence(
         lineage=run_plan.lineage(), task_digest=run_plan.task_digest,
+        preregistration_digest=getattr(run_plan, "preregistration_digest", ""),
         oracle=run_plan.oracle, event_range=event_range,
         terminal_chain_digest=terminal, rows=rows,
     )
@@ -105,6 +125,16 @@ def _usage(turns: list[Mapping[str, Any]]) -> dict[str, Any]:
     measured = bool(turns)
     for turn in turns:
         cost = turn.get("cost") or {}
+        invocations = list(turn.get("invocations") or ())
+        usage = (invocations[0].get("usage") or {}) if invocations else {}
+        prompt_value = usage.get("prompt_tokens")
+        completion_value = usage.get("completion_tokens")
+        if (not isinstance(prompt_value, int) or isinstance(prompt_value, bool)
+                or not isinstance(completion_value, int) or isinstance(completion_value, bool)):
+            measured = False
+        else:
+            prompt += prompt_value
+            completion += completion_value
         total += int(cost.get("tokens") or 0)
         statuses = cost.get("measurement_status") or {}
         measured = measured and (statuses.get("tokens") or {}).get("status") == "measured"

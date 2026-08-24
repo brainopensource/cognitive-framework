@@ -19,6 +19,7 @@ __all__ = [
     "EvaluationProtocol",
     "Verdict",
     "EvaluatorPort",
+    "PreregisteredEvaluation",
 ]
 
 
@@ -36,6 +37,19 @@ class EvaluationProtocol:
 
     name: str
     parameters: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class PreregisteredEvaluation:
+    """Immutable trust inputs supplied to the exterior evaluator."""
+
+    preregistration_digest: str
+    task_digest: str
+    oracle_id: str
+    oracle_digest: str
+    evaluator_key_id: str
+    protocol: str
+    subject_digest: str
 
 
 @dataclass(frozen=True, slots=True)

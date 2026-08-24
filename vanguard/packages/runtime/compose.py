@@ -97,6 +97,9 @@ class TaskContext:
     project_id: str = "project-default"
     parent_principal_id: str | None = None
     parent_episode_id: str | None = None
+    #: Immutable preregistration values supplied by the trust lane.  Runtime
+    #: treats this as a wire mapping and never imports its implementation.
+    preregistration: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -114,6 +114,19 @@ class OnlyFreeModelsAreReachable(unittest.TestCase):
         self.assertIn("OpenRouterModel", source)
         self.assertNotIn("http.client", source)
 
+    def test_a_paid_model_is_selected_when_explicitly_authorized(self) -> None:
+        selected = select_model("openrouter", model_name="anthropic/claude-3.5-sonnet",
+                                env=self.ENV, free_models=lambda: ["vendor/model:free"],
+                                allow_paid=True)
+        self.assertEqual(selected.label, "openrouter:anthropic/claude-3.5-sonnet")
+
+    def test_a_paid_model_is_selected_when_env_var_set(self) -> None:
+        env = dict(self.ENV)
+        env["VANGUARD_ALLOW_PAID"] = "1"
+        selected = select_model("openrouter", model_name="anthropic/claude-3.5-sonnet",
+                                env=env, free_models=lambda: ["vendor/model:free"])
+        self.assertEqual(selected.label, "openrouter:anthropic/claude-3.5-sonnet")
+
 
 def _scope(actions, depth: int = 0) -> Scope:
     return Scope(actions=frozenset(actions), resources=(RESOURCE,),

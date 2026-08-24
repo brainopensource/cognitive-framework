@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/child_events.schema.json",
+  "$comment": "ADR-0090. Payload schemas for mediated delegation. Sole legal writer is runtime.SpawnAdapter. Emitted only AFTER attenuation succeeds and AFTER the S8a durable intent.",
+  "title": "ChildEventPayloads",
+  "$defs": {
+    "ChildSpawned": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind","parent_episode_id","child_episode_id","authority",
+                   "budget_share","depth","lineage","descriptor_digest",
+                   "grant_id","settled_intent_key"],
+      "properties": {
+        "kind": {"const": "ChildSpawned"},
+        "parent_episode_id": {"type":"string","minLength":1},
+        "child_episode_id":  {"type":"string","minLength":1},
+        "authority": {
+          "$comment": "DERIVED output of attenuate(), not the request. An auditor recomputes the intersection against the parent grant rather than trusting this field.",
+          "type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},
+        "budget_share": {
+          "type":"object","additionalProperties":false,
+          "properties":{
+            "usd_micros":{"type":"integer","minimum":0},
+            "tokens":{"type":"integer","minimum":0},
+            "bytes":{"type":"integer","minimum":0},
+            "millis":{"type":"integer","minimum":0},
+            "turns":{"type":"integer","minimum":0},
+            "spawns":{"type":"integer","minimum":0}}},
+        "depth": {"type":"integer","minimum":1,"maximum":4},
+        "lineage": {"type":"array","items":{"type":"string","minLength":1}},
+        "descriptor_digest": {"type":"string","pattern":"^sha256:[0-9a-f]{64}$"},
+        "grant_id": {"type":"string","minLength":1},
+        "settled_intent_key": {"type":"string","minLength":1}
+      }
+    },
+    "ChildReturned": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind","child_episode_id","outcome","terminal","cost",
+                   "settled_intent_key"],
+      "properties": {
+        "kind": {"const": "ChildReturned"},
+        "child_episode_id": {"type":"string","minLength":1},
+        "outcome": {"enum":["completed","failed","denied","aborted"]},
+        "terminal": {"type":"string","minLength":1},
+        "cost": {
+          "$comment": "Folds into the PARENT trajectory as a nested invocation. A child's spend is the parent's spend; never new budget.",
+          "type":"object","additionalProperties":false,
+          "properties":{
+            "usd_micros":{"type":"integer","minimum":0},
+            "tokens":{"type":["integer","null"]},
+            "millis":{"type":"integer","minimum":0},
+            "measurement_status":{"type":"object"}}},
+        "settled_intent_key": {"type":"string","minLength":1}
+      }
+    }
+  }
+}

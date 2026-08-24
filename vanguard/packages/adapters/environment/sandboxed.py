@@ -66,10 +66,36 @@ class WorkerPort(Protocol):
 
 
 class SandboxedEnvironmentAdapter:
-    def __init__(self, worker: Any, workspace: Path, environment_id: str) -> None:
+    def __init__(
+        self, worker: Any, workspace: Path, environment_id: str,
+        *, direct_filesystem: bool = False,
+    ) -> None:
         self.worker = worker
         self.workspace = workspace
         self.environment_id = environment_id
+        self.containment_report: Any = None
+        self._direct_filesystem = direct_filesystem
+        from .git import GitEnvironmentAdapter
+        self._filesystem = GitEnvironmentAdapter(
+            workspace, environment_id=f"{environment_id}:filesystem")
+
+    def qualify(self) -> Result[Any]:
+        """Run the worker perimeter probes before release execution starts."""
+        runner = getattr(self.worker, "runner", None)
+        if runner is not None and hasattr(runner, "qualify"):
+            result = runner.qualify()
+            if not result.ok:
+                return Result.fail(result.error.kind, result.error.message)
+            report = result.value
+        else:
+            result = self.worker.runner.execute(("/usr/bin/true",))
+            if not result.ok:
+                return Result.fail(result.error.kind, result.error.message)
+            report = result.value.containment
+        if not report.verified or not report.contained:
+            return Result.fail("containment_unverified", "rootless containment probes failed")
+        self.containment_report = report
+        return Result.success(report)
 
     def profile(self) -> Result[EnvironmentProfile]:
         return Result.success(
@@ -97,6 +123,8 @@ class SandboxedEnvironmentAdapter:
         )
 
     def observe(self, req: ObservationRequest, grant: Optional[Any] = None) -> Result[Observation]:
+        if self._direct_filesystem and req.action in {"read", "search", "list", "glob", "stat"}:
+            return self._filesystem.observe(req, grant)
         if req.action == "read":
             if not req.path:
                 return Result.fail("invalid_request", "path is required for read")
@@ -138,6 +166,8 @@ class SandboxedEnvironmentAdapter:
         return Result.fail("unsupported_action", f"Action {req.action} not supported")
 
     def preview(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectPreview]:
+        if self._direct_filesystem and (req.verb in {"patch.apply", "fs.patch", "fs.write"} or req.action in {"patch", "write"}):
+            return self._filesystem.preview(req, grant)
         if req.verb == "patch.apply" or req.action == "patch":
             patch = req.patch or req.args.get("patch")
             if not patch:
@@ -158,6 +188,8 @@ class SandboxedEnvironmentAdapter:
         return Result.fail("unsupported_verb", f"Verb {req.verb} not supported for preview")
 
     def apply(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectReceipt]:
+        if self._direct_filesystem and (req.verb in {"patch.apply", "fs.patch", "fs.write"} or req.action in {"patch", "write"}):
+            return self._filesystem.apply(req, grant)
         if req.verb == "patch.apply" or req.action == "patch":
             patch = req.patch or req.args.get("patch")
             if not patch:

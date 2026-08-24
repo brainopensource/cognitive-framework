@@ -21,11 +21,11 @@ the **sole living implementation authority**; [`milestones.md`](milestones.md) s
 
 ## 1. Director Decision and Current Truth
 
-**Decision:** reopen the operational closure of M-3 as the bounded corrective wave **M-3C**. Preserve
-the Trust Spine and converge only the `Composition -> Activation -> Runtime` seam before attempting
-M-4. This is not authorization for a platform rewrite.
+**Current Director decision (2026-08-24):** M-3C is closed at `136436e`; M-4 is open only for
+environment qualification, immutable task/oracle preregistration, and one eligible RF-85 run. This is
+not authorization for a platform rewrite or for M-5+ implementation.
 
-Static reconciliation at repository commit `e3acc5c228f9a61a357d955c86317369f3339841` found that the
+The retained M-3C diagnosis at repository commit `e3acc5c228f9a61a357d955c86317369f3339841` found that the
 M-3 contracts and side-path falsifiers exist, but the production closure claim is not yet supported by
 one executable authority:
 
@@ -40,15 +40,17 @@ one executable authority:
 - the nine-row M-4 auditor validates supplied rows but the release path does not yet derive and bind
   all nine rows from canonical sources.
 
-Therefore M-4 is blocked by both M-3C and its real provider/evaluator environment. Passing isolated
-schema, compiler, lifecycle, or auditor tests cannot close M-3C or M-4.
+Those defects were corrected and independently reviewed by G0-G4/RF-78-RF-84. M-4 is no longer
+blocked by M-3C; it remains blocked until the real provider, evaluator and rootless Linux environment
+qualify and the preregistered run produces all nine source-derived rows. Passing isolated schema,
+compiler, lifecycle, auditor, fake or synthetic tests cannot close M-4.
 
 | Wave | Milestone | State | Exit condition |
 |---|---|---|---|
 | Wave 0 | M-0 | **CLOSED (GREEN)** | CI truth and named falsifiers. |
 | Wave 1 | M-1 | **CLOSED (GREEN)** | Fail-closed Trust Spine and signed evidence. |
 | Wave 2 / 2C | M-2 | **CLOSED (GREEN)** | Truthful trajectory plus fresh-process recovery. |
-| Wave 3 | M-3 | **CONTRACT COMPLETE; OPERATIONAL CLOSURE REOPENED** | Prior graph, lifecycle, and Layer-0 work is retained as evidence, not discarded. |
+| Wave 3 | M-3 | **CONTRACT COMPLETE; OPERATIONAL CLOSURE RESOLVED BY M-3C** | Prior graph, lifecycle, and Layer-0 work is retained as evidence, not discarded. |
 | Wave 3C | M-3C / v0.6.2 | **CLOSED (GREEN) — DIRECTOR DECISION 2026-08-24** | G0–G4 and RF-78–RF-84 independently reviewed; canonical authority, durable lineage, and authority retirement proven by `136436e`. |
 | Wave 4 | M-4 / v0.6.3 | **ACTIVE — ENVIRONMENT QUALIFICATION / RF-85** | One real uninterrupted nine-row run; no mock, stitched trace, repair, or synthetic substitution. |
 | Waves 5–10 | M-5–M-10 | **LOCKED** | Each preceding objective gate must close; roadmap text alone never authorizes work. |
@@ -232,3 +234,182 @@ remaining technical G3/G4 blocker. This is technical closure evidence, not Direc
 **Director decision:** M-3C is closed and M-4 is open. The next authorized action is environment
 qualification and task/oracle preregistration, followed by one eligible RF-85 run only after every
 startup probe passes. No row is presently claimed, and no synthetic fixture is M-4 evidence.
+
+## 9. Dev C RF-85 Preparation and Frozen Two-Lane Contract — 2026-08-24
+
+**Preparation baseline:** `5229e720be37d708b24a009f35423691aacb3d49` plus the Dev C contract
+commit recorded below. ADR-0088 already decides every architecture-bearing question; no successor ADR
+is required. `Runtime.run_composed` is the sole public execution authority. `run_id` is correlation,
+while `D_R` is the immutable execution-configuration identity. An eligible run is one whose task and
+oracle were immutably preregistered before its first event and whose one `RunPlan` binds one `D_R`,
+`project_id`, `run_id`, `episode_id`, `D_H`, activation digest, environment, real model route,
+file-backed store and evaluator. Every event, WAL range, trajectory and evidence source MUST join that
+same tuple.
+
+**Uninterrupted** means one causal ledger lineage from the preregistered start to terminal outcome.
+A hard process death may cross a process boundary without breaking continuity only when a fresh
+process verifies and folds the durable prefix, retains the same plan and identifiers, reconciles each
+open S8a intent, and appends through the canonical writer. A settled physical effect is never invoked
+again. An unresolved intent is `unverifiable`/undeterminable and denies continuation of that effect
+until exterior reconciliation; it is never guessed successful or retried. A new plan, copied event,
+stitched trace, manual edit, alternate run, fallback or post-hoc preregistration breaks eligibility.
+
+**Eligibility environment:** the provider MUST perform a live non-fake/non-cassette invocation and
+return provider/model/fingerprint plus measured usage. The worker MUST be Linux rootless Bubblewrap,
+with effective UID/mount/network/syscall probes and no host fallback or evaluator path. The evaluator
+MUST be a separately isolated identity and verify a preregistered oracle, returning an Ed25519 verdict
+whose JCS body binds the task/oracle, subject, protocol, `D_H`, `D_R`, run/episode and evidence. Failure
+to reach or verify any of these is an environmental or trust blocker, never a passing row.
+
+**Evidence state algebra:** `absent` means no canonical source existed and carries a typed reason;
+`invalid` means a source or bundle exists but violates schema, lineage, digest, policy or signature;
+`unverifiable` means a well-shaped source exists but its required exterior verifier/probe is unavailable
+or an open intent cannot be reconciled. Only nine independently verified derived rows produce
+`present_valid`. All other states fail closed and are ineligible for promotion. Synthetic fixtures may
+exercise all states but cannot change their own eligibility.
+
+### Frozen interfaces and lane ownership
+
+| Contract | Frozen minimum | Owner |
+|---|---|---|
+| Run plan/identity | `RunPlan.lineage()` keys: `project_id`, `run_id`, `episode_id`, `composition_digest`, `activation_digest`, `run_digest`; `D_R` binds task preregistration, environment, file store, route, oracle, authority, budget and sequential mode | A |
+| Runtime/events/WAL | `Runtime.run_composed`; canonical event envelopes and one `LedgerEmitter`; file-backed SQLite with effective `journal_mode=wal`; S8a `EffectStarted` durable before physical effect; terminal receipt/reconciliation | A |
+| Provider/sandbox/recovery | live provider telemetry; rootless Bubblewrap attestation; fresh-process reconstruction report with chain/state digests and settled-effect non-repetition | A |
+| Evaluator protocol | existing `EvaluatorPort`/JSON-RPC and `SignedVerdict`; RFC-8785 JCS body, Ed25519 key ID/public key and task/oracle/subject/protocol/identity binding | B |
+| Preregistration | immutable digest created before first run event, binding task bytes/digest, oracle files/digests, evaluator identity, protocol and subject; referenced by `RunPlan`, verdict and bundle header | B |
+| Evidence/auditor | `mhf.foundation-evidence/1`; exact nine numbered rows with canonical source plus recomputed source digest; auditor recomputes joins/verifiers and returns `absent`, `invalid`, `unverifiable`, or `present_valid` | B |
+
+No file overlap is authorized. Dev A owns `vanguard/packages/runtime/{root.py,session.py,run_plan.py,
+foundation_evidence.py,trajectory.py,ledger/}`, `vanguard/packages/adapters/models/`,
+`vanguard/packages/adapters/sandbox/`, `vanguard/packages/adapters/stores/event_store.py`, and A-lane
+tests/fixtures. Dev B owns `vanguard/packages/adapters/evaluators/`, `vanguard/packages/ports/evaluator.py`,
+`vanguard/packages/domain/evidence/`, evaluator/preregistration schemas and B-lane tests/fixtures. Shared
+exports or schema-generated files require a Dev C integration patch; neither lane edits the other's
+surfaces. The kernel, episode engine, event-kind roster, JCS and TCB ceiling are frozen.
+
+### RF-85 row ownership and objective acceptance
+
+| Row | Producer / verifier | Passing observation |
+|---:|---|---|
+| 1 | A / B auditor | one live provider invocation with non-synthetic identity/fingerprint and measured usage |
+| 2 | A / B auditor | matching request, descriptor grant, decision, reservation, S8 verification, durable intent and terminal settlement |
+| 3 | A / B auditor | before/after workspace digests differ and bind the canonical patch receipt |
+| 4 | A / B auditor | rootless UID plus mount/network/syscall attestations; evaluator absent; no host fallback |
+| 5 | B | isolated evaluator verifies preregistered oracle and Ed25519 binding |
+| 6 | A / B auditor | effective file WAL, complete event range, terminal digest, chain continuity and durable intent |
+| 7 | A / B auditor | fresh process reconstructs identical folded state/lineage and proves no settled effect repeated |
+| 8 | A / B auditor | one `mhf.trajectory/1`, ordered invocations/receipts, explicit measurement states and conserved cost |
+| 9 | A / B auditor | executable import/runtime trace reaches only canonical compose/activate/session authority |
+
+**Rollback and merge gate:** each lane is one revertable commit series against the frozen SHA. A lane
+may merge only when its focused tests, the frozen cross-lane contract, negative security cases and
+applicable suites pass, it changes no foreign-owned file, and it introduces no competing parser,
+compiler, binding table, emitter, evaluator bypass or host fallback. Integration then runs the full
+Python suite, TypeScript typecheck/tests and all mandatory architecture/security linters. Rollback is
+the lane commit series; it must not restore legacy execution authority or mutate durable evidence.
+
+**Preparation baseline result:** contracts 199/199, falsifiers 50/50, registry 27/27, security 45/45
+and trust 22/22 passed. Runtime ran 419 tests with 7 skips and three environment failures because no
+Ollama daemon answered at `127.0.0.1:11434`; the implementation truthfully returned
+`provider_unreachable` while the live-tag tests expected `model_tag_absent`. These are environmental
+qualification failures, not permission to weaken assertions. The new frozen RF-85 contract is RED
+only for the missing preregistration join and evidence-state algebra described above.
+
+
+---
+
+
+# DEVS WORK PROMPTS
+
+## DEV A
+
+```text
+Você é o Dev A, Senior Runtime/Systems Engineer, com poder total de desenvolvimento dentro do
+escopo autorizado de M-4. Comece somente depois de o Dev C publicar e congelar os concept locks,
+contratos, interfaces, testes RED, matriz de ownership e critérios de evidência. Trabalhe em paralelo
+com o Dev B sem depender de commits intermediários dele: use exclusivamente as interfaces congeladas,
+fakes/fixtures contratuais e seams definidos pelo Dev C; qualquer incompatibilidade deve ser resolvida
+por adaptação local ou escalada objetiva ao Dev C, nunca bloqueando a outra lane.
+
+Implemente passo a passo o caminho de execução real de RF-85 pela única autoridade pública:
+RunPlan/D_R -> Runtime.run_composed -> eventos canônicos -> SQLite em WAL efetivo e file-backed ->
+trajetória mhf.trajectory/1 -> FoundationEvidence. Qualifique o provider real selecionado, o ambiente
+Linux rootless/Bubblewrap, lifecycle, durable intent, retomada cold/fresh-process e execução contínua
+do mesmo run_id. Garanta fail-closed, identidade e digests cruzados, budgets/custos verdadeiros,
+persistência antes de efeitos e recuperação sem repetir efeito físico já liquidado. Não introduza
+parser, compiler, binding table, emitter ou rota de ativação concorrente; não use :memory:, mock,
+cassette, host fallback, trace costurado, reparo manual ou evidência fabricada para certificar M-4.
+
+Entregue código, migrações estritamente necessárias, testes unitários/contratuais/de integração e
+falsificadores negativos da sua lane. Mire as linhas de evidência RF-85 atribuídas pelo Dev C ao
+runtime/provider/sandbox/WAL/continuação, mas somente marque uma linha como presente quando derivada
+do run real e recomputável a partir dos artefatos canônicos. Execute os testes focados e depois
+test/falsifiers, test/contracts, test/runtime, test/registry, test/security e test/trust aplicáveis,
+além de boundaries, TCB, secrets, domain blindness, isolation, duplication, RF IDs, links e stale
+paths. Separe regressão real de falha ambiental sem enfraquecer assertions. Faça commits pequenos,
+imperativos e rastreáveis; reporte ao Dev C commits, arquivos, requisitos, resultados, artefatos,
+riscos, rollback e bloqueios. Não altere decisões congeladas nem declare M-4 concluída.
+```
+
+## DEV B
+
+```text
+Você é o Dev B, Senior Trust/Evidence Engineer, com poder total de desenvolvimento dentro do escopo
+autorizado de M-4. Comece somente depois de o Dev C publicar e congelar os concept locks, contratos,
+interfaces, testes RED, matriz de ownership e critérios de evidência. Trabalhe em paralelo com o Dev A
+sem depender de commits intermediários dele: implemente contra as interfaces congeladas e use fixtures
+contratuais próprias; não toque nos hotspots exclusivos do Dev A salvo reassignment explícito do Dev C.
+
+Implemente passo a passo a lane de confiança e certificação RF-85: evaluator real isolado com identidade
+fixa, protocolo RPC e verificação Ed25519; preregistro imutável do task/oracle antes da execução;
+derivação das linhas de evidence sob sua ownership; auditor que recompõe digests, lineage, assinatura,
+containment e resultado do oracle a partir das fontes canônicas. Complete adapters, fixtures,
+serialização, validação e testes negativos para chave/assinatura adulterada, lineage misturada,
+cross-digest divergente, fonte ausente, boolean autoatestado, containment não verificado, oracle não
+preregistrado e import/trace de autoridade concorrente. O auditor deve negar por padrão e distinguir
+ausente, inválido e não verificável. Nenhum texto, flag ou fixture sintética pode virar evidência M-4.
+
+Entregue código e testes unitários/contratuais/de integração/falsificadores independentes da lane A.
+Use um bundle sintético somente para provar formato e negativas, sempre inelegível para M-4; prepare o
+consumidor do bundle real sem criar resultados. Execute os testes focados e depois test/falsifiers,
+test/contracts, test/runtime, test/registry, test/security e test/trust aplicáveis, além de todos os
+linters obrigatórios. Classifique falhas ambientais separadamente, sem relaxar o fail-closed. Faça
+commits pequenos, imperativos e rastreáveis; reporte ao Dev C commits, arquivos, requisitos, resultados,
+artefatos, riscos, rollback e bloqueios. Não altere concept locks nem declare M-4 concluída.
+```
+
+## DEV C
+
+```text
+Você é o Dev C, Principal Engineer e autoridade técnica de preparação e integração. Execute este prompt
+integralmente antes de liberar Dev A e Dev B. Você tem poder total de desenvolvimento dentro da
+autorização vigente, mas não pode fabricar evidência, ampliar M-4 por inferência nem abrir Waves 5+.
+
+Primeiro reconcilie README.md, docs/SPEC.md, docs/01_law, ADR-0069–0088, milestones.md e este board com
+o código real. Elimine toda ambiguidade remanescente de M-3/M-3C/M-4 e registre nas autoridades
+canônicas existentes, sem criar Markdown de planejamento: definições exatas de run elegível e
+ininterrupto; autoridade pública única; identidade e joins RunPlan/D_R/eventos/WAL/trajetória/evidence;
+semântica de durable intent, hard-death e cold continuation sem repetição de efeitos; provider real;
+Linux rootless/Bubblewrap; evaluator isolado e Ed25519; preregistro de task/oracle; nove linhas RF-85;
+estados absent/invalid/unverifiable; critérios fail-closed; proibições de mock, cassette, stitching,
+fallback e reparo manual; ownership, rollback e gates finais. Se uma nova decisão arquitetural for
+realmente necessária, registre um ADR append-only e atualize os índices/links canônicos.
+
+Depois congele interfaces mínimas e tipos de wire entre as duas lanes, incluindo schemas, IDs/digests,
+eventos, ports, protocolos do evaluator, preregistro, evidence bundle e auditor. Defina uma matriz sem
+overlap de arquivos: Dev A possui runtime/composição/provider/sandbox/WAL/continuação; Dev B possui
+evaluator/Ed25519/preregistro/auditoria/fixtures de confiança. Crie ou ajuste os testes contratuais RED
+que fixam cada interface, as negativas de segurança e os critérios objetivos das nove linhas, deixando
+fakes suficientes para A e B avançarem em paralelo sem commits um do outro. Resolva previamente cada
+decisão difícil; não transfira ambiguidade arquitetural aos seniors.
+
+Valide a baseline completa, diferencie regressões de limitações ambientais e publique no próprio
+sprint_active.md o contrato congelado, owners, dependências, comandos, resultados e bloqueios reais.
+Então libere simultaneamente Dev A e Dev B com SHAs-base e critérios de merge. Durante a integração,
+revise ambos independentemente, resolva conflitos preservando a autoridade única, execute todas as
+suítes e linters obrigatórios e confirme que nenhuma autoridade concorrente ou bypass reapareceu.
+Somente um run real, preregistrado, contínuo e auditável pode preencher RF-85. Ao final, registre commits
+e evidências reais no board e entregue à Leadership: próximo passo oficial, gate alcançado, bloqueios,
+responsável e única ação seguinte autorizada. A declaração final de conclusão/avanço permanece com a
+Leadership/Engineering Director.
+```

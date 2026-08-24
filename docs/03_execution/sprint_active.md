@@ -315,6 +315,48 @@ Ollama daemon answered at `127.0.0.1:11434`; the implementation truthfully retur
 qualification failures, not permission to weaken assertions. The new frozen RF-85 contract is RED
 only for the missing preregistration join and evidence-state algebra described above.
 
+### Integration record and Leadership handoff
+
+**Frozen base:** `4a7ed9c`. **Dev A integrated:** `2a96158` (`feat(runtime): enforce RF-85 release
+admission`). **Dev B integrated:** `6c82635` (`feat(evidence): bind RF-85 preregistration trust`). Dev C
+explicitly reassigned `adapters/environment/sandboxed.py` to A because it is the runtime-owned adapter
+that invokes the already frozen Bubblewrap perimeter probe; no evaluator/trust surface moved lanes.
+Rollback is commit-local in reverse order and must leave `4a7ed9c`'s non-promotional RED lock intact.
+
+Independent review initially rejected integration for an incompatible preregistration wire, an
+unverified self-attested preregistration digest, a row-5 self-selected trust key, permissive provider
+defaults, incomplete lineage and recovery that converted `undeterminable` into `OK/OCCURRED`. Dev C
+corrected each finding. Final independent re-review found no remaining critical merge blocker and ran
+24 focused tests green. Legacy/headerless evidence is now always `unverifiable` and non-promotional;
+the canonical envelope requires API/header/bundle digest, the preregistration source, authoritative
+row verifiers and complete signed evaluator bindings. An unreconciled cold intent returns F-22 and
+cannot execute or claim occurrence.
+
+Integration verification on 2026-08-24:
+
+- focused RF-85 trust/release/recovery contracts: 27/27 green; all contract tests reached 207 green
+  on the first integrated run, with a later rerun showing two executor-only UDS bind timeouts;
+- registry 27/27, security 45/45 and trust 22/22 green;
+- full Python discovery ran 1,291 tests: 1,287 passed, 3 skipped, and one RF-82 release fixture was
+  blocked before execution because Bubblewrap probes were unverified under the restricted executor;
+- runtime discovery ran 424 tests: 414 passed, 7 skipped, and three live Ollama assertions failed
+  because no daemon answered; the truthful result was `provider_unreachable`, not `model_tag_absent`;
+- boundaries, TCB (`1366 <= 1438`), secrets, domain blindness, isolation policy, duplication, RF IDs,
+  Markdown links, stale paths and diff checks passed;
+- TypeScript typecheck/tests did not start because `tsc`/installed npm dependencies are absent;
+  this is an environment/setup blocker, not a passing or failing product assertion.
+
+**Gate status:** the RF-85 preparation/interface/merge gate is technically reached. M-4/RF-85 is not
+reached and has zero claimed rows. Current blockers are a clean non-WSL restricted Linux environment
+that can attest rootless Bubblewrap and evaluator isolation, a reachable selected real provider, an
+installed TypeScript toolchain for repository gates, and immutable task/oracle preregistration made
+in that qualified environment. **Responsible:** Release Engineering owns environment qualification;
+Trust/Evidence owns preregistration and independent audit; Leadership/Engineering Director retains
+the milestone decision. **Only next authorized action:** provision and qualify that environment,
+install the locked dependencies, rerun all gates, then create the immutable task/oracle preregistration.
+Only after every startup probe passes may Release Engineering start the single uninterrupted RF-85
+run. Waves 5+ remain locked.
+
 
 ---
 

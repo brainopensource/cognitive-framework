@@ -51,6 +51,10 @@ PRIVILEGED_KIND_OWNERS: Mapping[str, frozenset[str]] = {
     "AuthorizationDenied": frozenset({"kernel"}),
     "KernelAlarm": frozenset({"kernel"}),
     "VerdictRecorded": frozenset({"evaluator_gateway"}),
+    # ADR-0090 mediated delegation. SpawnAdapter is the SOLE legal writer:
+    # plugins, workers and child episodes propose, they never append.
+    "ChildSpawned": frozenset({"spawn_adapter"}),
+    "ChildReturned": frozenset({"spawn_adapter"}),
     "PluginDiscovered": frozenset({"registry"}),
     "PluginResolved": frozenset({"registry"}),
     "PluginVerified": frozenset({"registry"}),

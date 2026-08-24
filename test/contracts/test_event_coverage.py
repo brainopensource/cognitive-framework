@@ -41,8 +41,6 @@ UNFOLDED_ALLOWLIST = frozenset({
     "CandidateAttested",       # Phase-2 candidate release pipeline
     "CandidateBuilt",          # Phase-2 candidate release pipeline
     "CheckpointCreated",       # Snapshot/checkpoint marker
-    "ChildReturned",           # Subagent return notification
-    "ChildSpawned",            # Subagent spawn notification
     "ClaimRecorded",           # Evidence claim legacy synonym (EvidenceClaimProduced is folded)
     "CompetencePriorRecorded", # Prior competence distribution (Phase-2)
     "CorrectionRecorded",      # Phase-2 human/supervisor feedback marker

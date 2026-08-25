@@ -82,29 +82,44 @@ the kernel.
 **Exit:** the agent inspects before editing, applies a valid change, runs the preregistered
 verification command, reacts to failure, and stops after success within declared budgets.
 
-### M4-04 — Scientific trajectory capture — **IMPLEMENTED**
+### M4-04 — Scientific trajectory capture — **PARTIAL (1 of 4)**
 
 Implement the provenance rule from [`../01_law/EVIDENCE.md`](../01_law/EVIDENCE.md): every variable
 that can materially affect a result gets observable identity and provenance.
 
-- Emit context-selection, compaction, and cache events carrying policy identity, parameters, input
-  digest, and output digest — **digests and references, not inlined blobs**.
-- Store large content (full prompts, raw model outputs, snapshots, patches) in the artifact store,
-  content-addressed.
-- Add retention as an `ExecutionProfile` axis; the reproducibility class MUST enter `D_R`.
-- Provide a trajectory reader good enough to compare two runs (`vanguard/packages/runtime/trajectory_reader.py`).
+- ❌ **NOT DONE.** Emit context-selection, compaction, and cache provenance carrying policy identity,
+  parameters, input digest, and output digest — **digests and references, not inlined blobs**.
+  Verified absent: `agency/context/` compacts via `CompactionReport` and emits nothing durable.
+- ❌ **NOT DONE.** Store large content (full prompts, raw model outputs, snapshots, patches) in the
+  artifact store, content-addressed. No writer path exists for prompts/outputs/snapshots.
+- ❌ **NOT DONE.** Add retention as an `ExecutionProfile` axis; the reproducibility assessment MUST
+  enter `D_R`. Verified absent: `runtime/profiles.py` has no `retention` and no `reproducib*` field,
+  so nothing reaches `D_R` through `ExecutionProfile.to_dict()` — the `profile_digest` preimage.
+- ✅ **DONE.** Trajectory reader good enough to compare two runs
+  (`vanguard/packages/runtime/trajectory_reader.py`, 6 tests).
 
-**Exit:** two runs of the same task can be diffed on the variables that differed. Without this,
-M-6.5, M-7, and M-8 cannot be measured.
+**Exit (NOT MET):** two runs of the same task can be diffed on the variables that differed. The
+reader exists, but the three variable classes it is meant to diff — context selection, compaction,
+cache — are never recorded, so the diff is currently empty by construction. Without this, M-6.5,
+M-7, and M-8 cannot be measured.
 
-### M4-05 — Execute RF-95 *(runner & fixture PREPARED; awaiting Dev A GO and review)*
+> **Do not cite `RF-100`.** It is reserved by `ADR-0096`, which is still `proposed`. No obligation
+> under it is binding, and no work may be reported as satisfying it, until ratification.
+
+### M4-05 — Execute RF-95 — **NO-GO (blocked on M4-04)**
 
 Freeze a non-trivial coding task and verifier before the run. Execute exactly one candidate with a
 live non-fake provider through canonical compose/activate/`Runtime.run_composed`, the `product`
 profile in `D_R`, at least one observation, one mutation, one verification effect, a non-empty diff,
 a passing verifier receipt, file-backed WAL, a complete terminal trajectory, and fresh-process
 reconstruction. An independent reviewer confirms the evidence; the Engineering Director closes M-4.
-RF-85 is not implicitly satisfied. Runner script and fixture setup are ready in `tools/runners/run_rf95_product_proof.py`.
+RF-85 is not implicitly satisfied.
+
+Runner and fixture are ready and dry-run qualified (`tools/runners/run_rf95_product_proof.py`); the
+gate itself has **not** been executed. **NO-GO stands until M4-04 closes all four bullets**, because
+RF-95 requires *a complete terminal trajectory* and the trajectory is currently missing context,
+compaction, cache, and retention/reproducibility provenance. Firing a paid live run now would burn
+the one-candidate gate on evidence that cannot pass independent review.
 
 ## 4. Lane B — M-5a preparation *(may start now)*
 

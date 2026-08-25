@@ -1,5 +1,4 @@
 ---
-
 id: adr-0096-constitutional-correction-evidence-causal-invariants-and-falsifiers
 adr: 0096
 class: decision
@@ -20,7 +19,6 @@ extends:
 supersedes:
   - ADR-0095-lock-clause-only
 superseded_by: null
-
 ---
 
 # ADR-0096 — Constitutional Correction: Evidence Admissibility, Causal Invariants and Falsifiers

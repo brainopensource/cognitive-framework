@@ -7,7 +7,7 @@ canonical_for:
   - statistical-verification-contract
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
+version: "0.7.1"
 last_verified: 2026-08-21
 read_when:
   - changing-measurement-or-promotion
@@ -31,6 +31,14 @@ superseded_by: null
 > it may still ship as an opt-in, explicitly unproven capability. Variables that materially affect
 > results must carry the provenance required by [`EVIDENCE.md`](EVIDENCE.md); without it, an ablation
 > is not constructible and the claim is unfalsifiable by design.
+
+> **Promotion unit and authority.** A skill, policy, topology fragment, or retrieval component is a
+> candidate; the promotion unit is the complete versioned composition that contains it. Promotion
+> evidence MUST decompose gross gains, regressions, residual failures, presence-only effects,
+> invocation, grounding, verification, transfer, and held-out performance under a risk-based
+> regression budget. Generator, evaluator, and promoter MUST be distinct authorities. A candidate
+> may propose evidence but MUST NOT self-certify or self-promote. Every promotion path requires an
+> executable rollback that restores the preceding composition behavior.
 
 > The lab's constitution, kept nearly whole from VG-07 §5 per the archived
 > `01_SPECS_MIGRATION_MATRIX.md` §1.10 (git history, `4f9f8b1`) — paired designs, McNemar's exact test,

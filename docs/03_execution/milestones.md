@@ -7,7 +7,7 @@ canonical_for:
   - wave-gates
 status: living
 owner: engineering-director
-version: "0.7.0"
+version: "0.7.1"
 last_verified: 2026-08-25
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -17,7 +17,7 @@ superseded_by: null
 # Macro Milestones — AETHER v0.7+
 
 Sequencing and objective exit gates for the roadmap locked by [`VISION.md`](../../VISION.md) (Law
-Zero) and [`ADR-0095`](../02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md). Only
+Zero) and accepted ADRs through [`ADR-0097`](../02_decisions/0097-phase0-ratification-and-two-lane-activation.md). Only
 [`sprint_active.md`](sprint_active.md) authorizes current implementation. A milestone closes on
 evidence from the canonical executable path, never because code, schemas, or isolated tests exist.
 
@@ -34,10 +34,10 @@ names that dependency. There are no milestone-wide locks.
 | **M-2 Runtime Recovery** | Truthful trajectories and restart-safe state | RF-23 rich trajectory; RF-25 fresh-process WAL continuation | **COMPLETE** | — |
 | **M-3 / M-3C Contracts & Convergence** | One `compose -> activate -> run` authority | RF-28–RF-45 retained; RF-78–RF-84 | **COMPLETE** | — |
 | **W-3D Product Profiles** | Identity-bearing profiles and one adapter bootstrap | RF-87–RF-94 | **COMPLETE** | — |
-| **M-4 Product Coding Proof + Trajectory Capture** | Useful, durable coding agent **and** the scientific observability that every later milestone is measured with | RF-95 plus an analyzable trajectory carrying context/compaction/cache/model provenance | **ACTIVE — gate NOT met** | M4-04: context/compaction/cache provenance unemitted; artifact-store writer absent; no retention or reproducibility axis in `ExecutionProfile`, so neither reaches `D_R` |
-| **M-5a Event-Derived Agent** | `Operation`, `Lineage`, `Scope`, `AgentView`; semantic state reconstructible from events; new `M-5-BASE` | A fresh process rebuilds goal, plan, prior attempts, settled effects, budget, strategy, and terminal status from the ledger alone | **PLANNED** | M-4 trajectory vocabulary |
-| **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs the re-tagged baseline; deterministic independent witness | **PLANNED** | M-5a baseline re-tag |
-| **M-6 Recursive Delegation** | `agent.spawn` as nested execution lineages | RF-55–RF-59; attenuation of authority/budget/depth/turns; join, cancellation, kill-tree recovery after real restart | **PLANNED** | `SpawnAdapter` + attenuation algebra in the production import path |
+| **M-4 Product Coding Proof + Trajectory Capture** | Useful, durable coding agent **and** the scientific observability that every later milestone is measured with | RF-95 plus `mhf.trajectory/2`, exact model-I/O and context/compaction/cache provenance, proof-honest RF-100, and fresh-process reconstruction | **ACTIVE — DEV A/B AUTHORIZED; gate NOT met** | Dev A/B packages, integrated gate, then RF-95 |
+| **M-5a Event-Derived Agent** | `Operation`, `Lineage`, `Scope`, `AgentView`; semantic state reconstructible from events; immutable `M-5A-BASE-v2` | RF-96/97/99/100; fresh process rebuilds goal identity, plan, attempts, settled effects, budget, strategy, and terminal status | **PLANNED** | M-4 closure + accepted ADR-0098 |
+| **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs `M-5A-BASE-v2`; deterministic independent witness | **PLANNED; parallel with M-6** | `M-5A-BASE-v2` + oracle decision |
+| **M-6 Recursive Delegation** | `agent.spawn` as nested execution lineages | RF-55–RF-59; four-dimensional additive conservation; independent depth/turn limits; join, cancellation, kill-tree recovery | **PLANNED; parallel with M-5b** | `M-5A-BASE-v2` + production `SpawnAdapter` contract |
 | **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **PLANNED** | M-4 telemetry (measurement); M-6 only for the delegate action |
 | **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PLANNED** | M-6.5 + M7-01 result |
 | **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PLANNED** | M-7 |
@@ -114,7 +114,8 @@ single; domains may hold their own projections over it. What stays stable across
 contracts for event identity, lineage, persistence, effects, and composition.
 
 M-5a knowingly changes substrate semantics and therefore happens **before** the baseline used to
-prove generality. `M-5-BASE` is re-tagged only after the migration lands and gates are green.
+prove generality. The historical `M-5-BASE` tag is immutable and MUST NOT move. `M-5A-BASE-v2` is
+created once only after the migration lands and gates are green.
 
 ### M-5b — generality as falsification
 
@@ -122,17 +123,17 @@ M-5b tries to break the abstraction with a materially non-coding domain producin
 independently checkable witness. If executing it requires mathematical knowledge in the kernel, a
 change to the generic episode mechanism, or a second runtime, that is an architectural finding.
 
-RF-86 is measured as a diff against `M-5-BASE` over `vanguard/packages/{domain, kernel, ports,
+RF-86 is measured as a diff against `M-5A-BASE-v2` over `vanguard/packages/{domain, kernel, ports,
 runtime, agency/episode}` and runs in CI as `ci/rf86_gate.sh`. Two rules are binding:
 
-1. **`M-5-BASE` MUST be re-tagged only after an ADR-authorised substrate change lands.** Tagging
-   before makes the gate fire on the authorised change itself; the gate cannot distinguish an
-   authorised edit from an illicit kernel hook, and is not supposed to.
+1. **`M-5A-BASE-v2` MUST be created only after the ADR-authorised substrate change lands.** Creating
+   it early makes the gate fire on the authorised change itself; the historical `M-5-BASE` remains
+   immutable provenance.
 2. **RF-86 MUST NOT be weakened to accommodate a substrate change** — not by narrowing the frozen
    paths, not by allowlisting a file, not by downgrading the failure to a warning. A substrate change
    with no ADR behind it is the finding, not the tag.
 
-The gate fails closed when `M-5-BASE` does not resolve, so `actions/checkout` runs with
+The gate fails closed when `M-5A-BASE-v2` does not resolve, so `actions/checkout` runs with
 `fetch-depth: 0` and the tag is pushed alongside the branch.
 
 ### M-6 — recursion as nested lineages
@@ -244,7 +245,7 @@ A interface + RED -> B bounded implementation -> A integration
 
 - Work is blocked only by a named unfinished interface, schema, invariant, primitive, or runtime
   contract — never because a preceding milestone has not been ceremonially closed.
-- `M-5-BASE` must point to the reviewed post-M-5a substrate before Formal Pack code begins.
+- `M-5A-BASE-v2` must point to the reviewed post-M-5a substrate before Formal Pack or mediated-delegation implementation begins. The historical `M-5-BASE` tag is never moved.
 - An ADR-authorized substrate correction makes the old RF-86 baseline intentionally red; advance the
   tag only after the correction is committed and verified. RF-86 is never weakened.
 - ADR-0090/0091 prepare M-6 event/digest semantics but do not activate delegation.

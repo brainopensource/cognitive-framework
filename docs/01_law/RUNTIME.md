@@ -7,7 +7,7 @@ canonical_for:
   - detailed-runtime-law
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
+version: "0.7.1"
 last_verified: 2026-08-25
 read_when:
   - implementing-runtime-events
@@ -326,7 +326,8 @@ source of truth.
 > inside `Episode`/`HarnessSession` objects rather than in projections, and the `AgentView` event
 > vocabulary (goal declaration, plan revision, strategy selection, progress assessment, context
 > compaction) is not yet allocated. This is a documented migration, not a weakening of the rule
-> above. The substrate is re-tagged as the new `M-5-BASE` once the migration lands.
+> above. The historical `M-5-BASE` tag is immutable; the migrated substrate is tagged once as
+> `M-5A-BASE-v2` after M-5a gates pass.
 
 ### 1.6 Physical append order and the logical causal graph
 

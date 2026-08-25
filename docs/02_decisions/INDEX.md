@@ -7,7 +7,7 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: engineering-director
-version: "0.7.0"
+version: "0.7.1"
 last_verified: 2026-08-25
 read_when:
   - resolving-architectural-decisions
@@ -37,6 +37,7 @@ superseded_by: null
 - 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
 - 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
 - 🌟 [Vision as Law Zero (`0095`)](#vision-as-law-zero-0095) — **`VISION.md` is the constitutional authority for v0.7+**; roadmap reconciled; milestone identifier mapping
+- 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0097`)](#constitutional-evidence-and-two-lane-activation-00960097) — proof-honest evidence, strict schema evolution, Phase-0 closure, and M-4 Dev A/Dev B authorization
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -139,12 +140,19 @@ falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
-| `0095` | [`0095-vision-as-law-zero-and-roadmap-reconciliation.md`](0095-vision-as-law-zero-and-roadmap-reconciliation.md) | **Authority hierarchy inverted to match the accepted architecture:** [`VISION.md`](../../VISION.md) becomes `authority: constitutional` Law Zero for v0.7+; agent-as-projection ontology locked; roadmap reconciled to M-4 → M-5a → M-5b → M-6 → M-6.5 → M-7 → M-8 → M-9; milestone identifier mapping preserves historical provenance; M7-01 retained as a named parallel lane; assurance honesty invariants unaffected. | accepted | 2026-08-25 |
+| `0095` | [`0095-vision-as-law-zero-and-roadmap-reconciliation.md`](0095-vision-as-law-zero-and-roadmap-reconciliation.md) | **Authority hierarchy inverted to match the accepted architecture:** [`VISION.md`](../../VISION.md) becomes constitutional Law Zero; agent-as-projection ontology and milestone identities locked. M-5b/M-6 delivery sequencing is refined by ADR-0097 without changing milestone meaning. | accepted; sequencing refined by ADR-0097 | 2026-08-25 |
 
 > **Precedence note.** Since ADR-0095, ADRs no longer outrank all general documentation without
 > qualification: `VISION.md` sits above the law and the decision record. An ADR may refine how the
 > Vision is realized; it may not contradict a locked Vision concept without an explicit
 > Vision-superseding decision.
+
+## Constitutional Evidence and Two-Lane Activation (`0096`–`0097`)
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0096` | [`0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md`](0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md) | **Evidence and falsifiability correction:** admissible counter-evidence, causal-history invariants, proof-honest reproducibility, strict `/2` schema evolution, evidence failure/degradation, privacy/capture separation, transitive TCB measurement, and RF-96…RF-100. | accepted v0.4.0 | 2026-08-25 |
+| `0097` | [`0097-phase0-ratification-and-two-lane-activation.md`](0097-phase0-ratification-and-two-lane-activation.md) | **Execution activation:** ratifies the corrected package; authorizes two M-4 Senior lanes; records Linux RF-38…RF-45 qualification; permits M-5b/M-6 parallel work after M-5a; preserves historical `M-5-BASE` and allocates `M-5A-BASE-v2`. | accepted v0.2.0 | 2026-08-25 |
 
 ---
 
@@ -310,7 +318,7 @@ falsifiers use `RF-*`.
 | `RF-86` | ADR-0088 | Formal Pack #2 parity with unchanged substrate / M-5 |
 | `RF-87`–`RF-94` | ADR-0089 | Execution profile identity, fail-closed assurance, capability qualification, generic entrypoint, shared tools, event streaming, real activation, and single runtime authority / W-3D |
 | `RF-95` | ADR-0094 | Real-model, durable, resumable product coding run / M-4 |
-| `RF-96`–`RF-100` | ADR-0096 (**proposed**) | Cold reconstruction, multidimensional Trusted Core Budget, Kernel Neutrality Gate, authority provenance, and computed reproducibility vector / M-4 (RF-100 capture) through M-5b. **Identities are reserved to prevent collision; the obligations become binding only if ADR-0096 is ratified.** |
+| `RF-96`–`RF-100` | ADR-0096 | Cold reconstruction, transitive multidimensional Trusted Core Budget, Kernel Neutrality Gate, authority provenance, and proof-honest computed reproducibility / M-4 (RF-100 capture and run-close assessment) through M-5b. |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

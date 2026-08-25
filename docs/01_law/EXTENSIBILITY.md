@@ -7,7 +7,7 @@ canonical_for:
   - component-graph-static-law
 status: living
 owner: principal-systems-architect
-version: "0.7.0"
+version: "0.7.1"
 last_verified: 2026-08-25
 read_when:
   - changing-manifests-or-plugins
@@ -38,6 +38,15 @@ policies, packs, and adapters. A domain name appearing in a runtime module is a 
 Domain effects enter through namespaced binding providers implementing existing ports. Neither a
 global coding-specific binding table nor a hardcoded command/manifest mapping is an extensibility
 authority.
+
+## Kernel Neutrality Gate
+
+Any milestone introducing a new domain or changing a foundational contract MUST run RF-98. The
+expected result is zero Kernel semantic diff. A non-zero diff fails the gate unless an accepted ADR
+explains why the capability cannot be expressed through ports, adapters, packs, policies,
+projections, or Runtime mechanisms. RF-97 measures the automatically discovered transitive
+executable import closure of production Kernel modules; directory-only or hard-coded dependency
+counts are insufficient.
 
 > **Current-state gap / planned migration.** Source code still carries domain knowledge inside the
 > runtime package. Named instances at `ADR-0095` acceptance:

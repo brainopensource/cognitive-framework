@@ -10,10 +10,11 @@ canonical_for:
   - trusted-core-minimality
   - reproducibility-metadata
   - composition-level-skill-promotion
-status: proposed
+status: accepted
 owner: principal-systems-architect
-version: "0.3.0"
+version: "0.4.0"
 last_verified: 2026-08-25
+accepted_date: 2026-08-25
 extends:
   - ADR-0095-vision-as-law-zero-and-roadmap-reconciliation
 supersedes:
@@ -25,9 +26,11 @@ superseded_by: null
 
 ## Status
 
-**Proposed — Vision-superseding constitutional correction.**
+**Accepted — ratified by Project Ownership and Engineering Leadership on 2026-08-25.**
 
-Requires ratification by the Engineering Director and atomic reflection in `VISION.md`.
+The ratification includes the proof, compatibility, privacy, resource, and activation corrections in
+§14. The amendments are reflected atomically in the constitutional and execution stack by
+ADR-0097.
 
 ---
 
@@ -825,7 +828,7 @@ rows are written in the ratification commit.
 | `RF-97` | Trusted Core Budget is multidimensional: `check_tcb_budget.py` gates invariants, public contracts, privileged operations, dependencies, domain concepts (=0), extension knowledge (=0) and change amplification — not LOC alone | §7.1 | M-5a |
 | `RF-98` | Kernel Neutrality Gate: introducing a new capability or domain yields kernel semantic diff == 0, or an ADR explains why not | §7.2, §7.4 | M-5b, re-run at M-7/M-8 |
 | `RF-99` | Authority provenance is present as typed protocol data for every operation to which it applies, with `null` permitted only where semantically inapplicable | §6 | M-5a |
-| `RF-100` | Reproducibility is a computed vector, not self-declared, and `reproducibility_at_run_close` is never overwritten | §8 | M-4 (M4-04) for capture; M-5a for computation |
+| `RF-100` | Reproducibility is a computed vector separating capability from executed verification; verified values require immutable run-bound receipts, and `reproducibility_at_run_close` is never overwritten | §8, §14.4 | M-4 (capture and run-close assessment); M-5a (current-state recomputation) |
 
 `RF-100` is the only ADR-0096 falsifier with an M-4 component, and it is satisfied by M4-04's
 existing scope — it does **not** reopen M-4.
@@ -837,6 +840,74 @@ Historical ADRs remain immutable provenance.
 ADR-0095 is superseded only where its lock semantics prevent admissible empirical falsification from triggering constitutional review.
 
 The Vision-as-Law-Zero authority ladder introduced by ADR-0095 is retained and strengthened.
+
+---
+
+# 14. Ratified execution corrections
+
+These amendments close the objective inconsistencies found during the final Phase-0 audit. They
+refine this ADR; they do not create a second architecture.
+
+## 14.1 Exact model-I/O capture
+
+Runtime owns exact provider-call capture at `runtime/session.py::_LayeredOperator.propose`.
+Finalized provider input is captured immediately before invocation and raw structured output
+immediately after return, before material downstream interpretation. Agency exposes only a generic
+provenance protocol and MUST NOT import Runtime.
+
+## 14.2 Evidence failure and degradation
+
+Evidence-ledger append failure is fatal. Artifact failure is fatal when `capture.required=true`.
+When capture is optional, degradation is permitted only after a durable `capture_incomplete` fact;
+the run is then non-evidentiary and cannot satisfy RF-95 or promotion evidence. Failure to record
+either evidence or its degradation is fatal. A generic `EvidenceCaptureRequiredError` crosses the
+Agency protocol without creating an Agency-to-Runtime dependency.
+
+## 14.3 Strict schema evolution
+
+`mhf.trajectory/1` and `mhf.execution-profile/1` are frozen. M-4 introduces `/2` for new retention,
+capture, provenance, artifact-index, and reproducibility fields. Readers dual-read `/1` and `/2`;
+new production writers single-write `/2`. Historical identities and strict validators are never
+rewritten.
+
+## 14.4 Proof-honest reproducibility
+
+State reconstruction and semantic replay each record both capability and verification:
+
+```text
+state_reconstruction.capability   = none | from_checkpoint | full_cold
+state_reconstruction.verification = unverified | verified
+semantic_replay.capability        = unpinned | pinned
+semantic_replay.verification      = unverified | verified
+```
+
+WAL presence and pin presence establish prerequisites only. `verified` requires an immutable,
+run-bound executed receipt covering the input history or checkpoint digest, reducer/schema pins,
+and reconstructed output/state digest.
+
+## 14.5 Resources, goals, retention, and privacy
+
+- Additive conserved resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`.
+- `depth` and `turns` are structural ceilings, never additive costs.
+- Goal events carry `goalDigest` and optional verified `goalArtifact`, never raw goal text.
+- Execution retention values are exactly `digests_only`, `standard`, and `full`.
+- Retention does not authorize capture. Runtime resolves content-capture and sensitivity policy
+  before persisting raw prompts, model outputs, contexts, snapshots, patches, or reports; policy
+  identity/version enters provenance. Unauthorized capture degrades to an allowed digest-only fact
+  or fails closed when capture is required.
+
+## 14.6 Trusted closure
+
+RF-97 starts from production Kernel modules, parses imports, recursively follows in-repository
+executable dependencies, and fails on unexpected transitive trust-surface growth. Known domain
+dependencies are regression assertions, not a hard-coded discovery mechanism.
+
+## 14.7 Activation and delivery
+
+Planning metadata is non-authorizing until the active board records its qualification receipts.
+`PACKAGE_READY`, `MERGED`, and `GATE_ACCEPTED` are distinct states; only `GATE_ACCEPTED` closes a
+milestone. Two Senior lanes own production delivery, while GOV/RT/AG/DM/SC/TL/PK/TS/LB remain
+responsibility classes assigned to a lane or Leadership.
 
 ---
 
@@ -910,13 +981,12 @@ Upon ratification:
 
 This ADR MUST NOT reopen M-4.
 
-It MUST NOT alter the reconciled milestone sequence:
+The accepted delivery sequence is:
 
 ```text
 M-4
 → M-5a
-→ M-5b
-→ M-6
+→ {M-5b ∥ M-6}
 → M-6.5
 → M-7
 → M-8
@@ -924,5 +994,9 @@ M-4
 ```
 
 Implementation-heavy consequences remain assigned to their appropriate milestones.
+
+Parallel M-5b/M-6 work starts only from the reviewed post-M-5a baseline. This changes delivery
+sequencing, not architecture: the two packages have disjoint implementation surfaces and neither
+may consume the other's unfinished branch.
 
 ADR-0096 is a **constitutional correction**, not a project rewrite and not a new architectural direction.

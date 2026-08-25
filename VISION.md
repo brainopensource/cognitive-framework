@@ -9,9 +9,9 @@ canonical_for:
   - long-term-direction
 status: locked
 owner: principal-systems-architect
-version: "0.7.0"
+version: "0.7.1"
 last_verified: 2026-08-25
-locked_by: ADR-0095
+locked_by: ADR-0095+ADR-0096+ADR-0097
 read_when:
   - resolving-any-architectural-authority-conflict
   - proposing-a-new-milestone-or-roadmap-change
@@ -48,13 +48,36 @@ Three rules follow from this ladder:
 1. **A lower document may not be used to reject a Vision concept.** If law, an ADR, a protocol, or
    the README still describes the previous architecture, that text is stale and MUST be reconciled —
    it is not a counter-authority.
-2. **The Vision is changed only by an explicit Vision-superseding ADR**, ratified by the Engineering
-   Director and reflected here atomically. Drift by prose is not amendment.
-3. **Where implementation has not reached the Vision, that is a documented gap, never a reason to
-   weaken the Vision.** Subordinate documents MUST record such divergence as
-   *current-state gap / planned migration*.
+2. **The Vision is changed only by an explicit Vision-superseding ADR**, ratified by Engineering
+   Leadership and reflected here atomically. Sustained material reproducible counter-evidence MUST
+   trigger Vision review, but evidence never amends the constitution implicitly.
+3. Divergence is classified explicitly. **Implementation non-conformance** is a documented gap and
+   has no constitutional effect. **Reproducible material counter-evidence** triggers mandatory
+   architectural review and may change the Vision only through a ratified successor ADR.
 
 Historical ADRs remain immutable provenance. They are superseded, never rewritten.
+
+## Ratified constitutional clarifications (v0.7.1)
+
+ADR-0096 and ADR-0097 bind the following interpretations throughout this Vision:
+
+- Event sourcing is the v0.7 reference realization of durable causal history, attributable
+  artifacts, reconstructable projections, committed outcomes, authority, cold replay, and
+  process-independent continuation. A replacement requires equivalent invariants and falsifiers.
+- Runtime Agent objects are permitted conveniences; authoritative persistent in-memory Agent state
+  is prohibited.
+- The causal record is authoritative; telemetry is correlated operational evidence and never a
+  second truth.
+- Reproducibility is computed, multidimensional, time-aware, and proof-honest. Capability or
+  prerequisite presence is not executed verification.
+- Settlement belongs to the substrate; Kernel owns admissibility, authority, and generic resource
+  invariants. The Trusted Core is its transitive executable import closure, not a directory count.
+- Memory, topology, scheduling, learning, delegation, and metacognition are derived capability
+  families. They do not become mandatory independent layers or Kernel semantics.
+- Composition-level promotion requires regression decomposition and distinct generator, evaluator,
+  and promoter authority.
+- Authority provenance and capture/privacy policy are first-class protocol data. Retention never
+  grants permission to capture content.
 
 ---
 
@@ -70,7 +93,7 @@ Essa formulação muda a direção do desenvolvimento. Não devemos tentar preve
 
 A arquitetura já existente fornece boa parte dessa fundação: kernel domain-blind, ports tipados, runtime de composição, agency genérica, adapters, domain packs e ledger persistente. Os documentos recentes já reconhecem que comportamento de coding, research e outros domínios deve permanecer fora do kernel e ser implementado por packs, plugins, adapters e policies.
 
-A filosofia da v0.7+ deve ser, portanto, **product-first, agent-first e experiment-first**, sem abandonar a disciplina arquitetural conquistada. O sistema precisa se tornar útil rapidamente, mas sua utilidade deve surgir pela mesma arquitetura que permitirá generalização futura. Não queremos um produto temporário que posteriormente será substituído pelo Meta-Framework; queremos que o produto seja a primeira manifestação prática do Meta-Framework.
+A filosofia da v0.7+ deve ser, portanto, **product-first, composition-first, evidence-first e experiment-first**, sem abandonar a disciplina arquitetural conquistada. O sistema precisa se tornar útil rapidamente, mas sua utilidade deve surgir pela mesma arquitetura que permitirá generalização futura. Não queremos um produto temporário que posteriormente será substituído pelo Meta-Framework; queremos que o produto seja a primeira manifestação prática do Meta-Framework.
 
 ---
 
@@ -166,7 +189,7 @@ A **Extensibility Layer** contém tools, model adapters, plugins, indexes, conte
 
 Os **Packs e Policies** definem como essas capacidades são organizadas para tarefas concretas.
 
-As futuras **Topology, Scheduler, Memory, Learning e Meta-Control Layers** devem ficar acima dessa fundação e utilizar as mesmas primitivas.
+As futuras famílias de capacidade de **Topology, Scheduler, Memory, Learning e Meta-Control** devem ser derivadas acima dessa fundação e utilizar as mesmas primitivas; elas não são camadas obrigatórias nem runtimes independentes.
 
 Essa separação é importante porque permite aumentar drasticamente a complexidade comportamental sem aumentar proporcionalmente o Trusted Core. Inteligência pode crescer nas bordas enquanto o substrate permanece estável.
 
@@ -392,7 +415,7 @@ Se uma compaction alterou o contexto, registre source range, compactor identity,
 
 Isso permite estudar posteriormente se determinada optimization foi responsável por grande parcela do desempenho.
 
-Retention também deve ser configurável. Experiment profiles podem reter quase todos os artifacts; interactive profiles podem manter apenas digests e alguns blobs essenciais. A reproducibility class da execução deve ser explicitamente conhecida.
+Retention também deve ser configurável, mas não autoriza captura. Experiment profiles podem reter quase todos os artifacts autorizados; interactive profiles podem manter apenas digests e alguns blobs essenciais. A reproducibilidade da execução deve ser um vetor computado e temporal que separa capacidade de verificação executada; WAL e pins isoladamente não provam replay ou reconstrução.
 
 ---
 
@@ -446,7 +469,7 @@ Essa é a principal justificativa para manter o kernel mínimo: quanto menos com
 
 A documentação da v0.7+ deve refletir essa tese de maneira inequívoca.
 
-O roadmap recomendado começa por **M-4**, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem **M-5a**, formalizando AgentView e agent state como projections event-sourced e estabilizando o novo baseline. **M-5b** utiliza um segundo domínio materialmente diferente para tentar falsificar a generalidade desse substrate. **M-6** adiciona recursive delegation por nested lineages. **M-6.5** introduz adaptive strategy e meta-control como policy/reducer/plugin. **M-7** introduz declarative topologies. **M-8** consolida memory, retrieval, skills e learning. **M-9** integra esses elementos em um AETHER v1.0 General Agent Framework. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.
+O roadmap recomendado começa por **M-4**, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem **M-5a**, formalizando AgentView e agent state como projections event-sourced e estabilizando `M-5A-BASE-v2`. A partir desse baseline, **M-5b** tenta falsificar a generalidade em um segundo domínio enquanto **M-6** implementa recursive delegation por nested lineages em uma lane independente. **M-6.5** introduz adaptive strategy e meta-control como policy/reducer/plugin. **M-7** introduz declarative topologies. **M-8** consolida memory, retrieval, skills e learning. **M-9** integra esses elementos em um AETHER v1.0 General Agent Framework. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.
 
 Essa reorganização deve ser refletida em `README`, Product Vision, `SPEC.md`, architecture documentation, protocols, milestone definitions, sprint boards e novos ADRs. ADRs antigos permanecem como provenance histórica; novas decisões supersedem apenas aquilo que realmente mudou.
 

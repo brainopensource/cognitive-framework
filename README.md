@@ -36,10 +36,10 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0095`](docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md) |
+| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0097`](docs/02_decisions/0097-phase0-ratification-and-two-lane-activation.md) |
 | **Shipped package** | `vanguard-runtime` `0.7.0` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-4 active:** useful coding product plus scientific trajectory capture. RF-85 hermetic assurance is optional and claims zero rows. |
-| **Roadmap** | M-4 → M-5a event-derived agent → M-5b generality falsifier → M-6 nested-lineage delegation → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
+| **Status** | **M-4 Dev A/Dev B active:** evidence Runtime and scientific contracts may start; RF-95 remains serial-last. |
+| **Roadmap** | M-4 → M-5a event-derived agent → {M-5b generality ∥ M-6 delegation} → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
@@ -89,7 +89,7 @@ of its own.
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
 3. [`docs/01_law/`](docs/01_law/) — detailed contracts (`DISPATCH`, `RUNTIME`, `EXTENSIBILITY`, `EVIDENCE`, `MEASUREMENT`, `SECURITY`).
-4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — ADRs `0069`–`0095`.
+4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — accepted ADRs through `0097`.
 5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) then [`sprint_active.md`](docs/03_execution/sprint_active.md).
 6. [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — as-built map, navigational only.
 
@@ -166,9 +166,9 @@ Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md)
 
 ```text
 M-4  useful coding product + scientific trajectory capture      <- ACTIVE
-M-5a agent as event-derived projection; re-tag M-5-BASE
-M-5b Formal Pack #2 as generality falsifier (RF-86)
-M-6  recursive delegation as nested lineages
+M-5a agent as event-derived projection; create immutable M-5A-BASE-v2
+M-5b Formal Pack #2 as generality falsifier (RF-86)  <- parallel after M-5a
+M-6  recursive delegation as nested lineages         <- parallel after M-5a
 M-6.5 adaptive strategy / metacognition as policy-reducer-plugin
 M-7  declarative topologies + justified concurrency
 M-8  memory, retrieval, skills, learning

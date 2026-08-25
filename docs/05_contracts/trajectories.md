@@ -15,7 +15,7 @@ applies_to:
   - v0.6.2
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.6.2"
+version: "0.7.1"
 last_verified: 2026-08-23
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -26,6 +26,29 @@ superseded_by: null
 
 > **Schema:** [`schemas/mhf/trajectory.schema.json`](../../schemas/mhf/trajectory.schema.json)  
 > **Status:** Schema and assembler are implemented; RF-23 is green on the canonical packages path.
+
+`mhf.trajectory/1` is frozen. ADR-0096/0097 authorize Dev B to implement
+`mhf.trajectory/2`; readers dual-read `/1|/2` and new production writers single-write `/2`.
+Historical `/1` bytes and identity are never rewritten.
+
+## Frozen M-4 `/2` extension contract
+
+`/2` retains all `/1` obligations and adds these required top-level sections:
+
+- `artifacts`: immutable artifact identity, digest, role, schema, measured size, retention, stored
+  status, capture-policy identity/version, and correlation references;
+- `provenance.context`, `.compaction`, and `.cache`: policy identity/version, parameters digest,
+  input/output or key/source digests, artifact references when authorized, metrics, and turn index;
+- `model_io`: finalized provider-input and raw structured provider-output artifact references bound
+  to invocation, route, turn, and policy identity;
+- `reproducibility_at_run_close`: six-dimensional assessment plus separate capability/verification
+  for reconstruction and replay, observable basis, reducer/schema pins, and immutable executed
+  receipts for every `verified` value;
+- `capture`: `required`, `complete`, optional durable degradation reference, resolved policy identity,
+  and non-evidentiary status.
+
+Unknown or unavailable evidence is represented explicitly and never upgraded from configuration
+alone. A run with incomplete capture cannot satisfy RF-95 or promotion evidence.
 
 ---
 

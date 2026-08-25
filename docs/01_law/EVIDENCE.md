@@ -7,7 +7,7 @@ canonical_for:
   - evaluator-verdict-law
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
+version: "0.7.1"
 last_verified: 2026-08-25
 read_when:
   - changing-trajectories-or-costs
@@ -49,10 +49,22 @@ Concretely: when a compaction alters context, record source range, compactor ide
 parameters, input digest, and output digest. When a cache is hit, record cache identity, key, source
 artifact, and validation result. The event stays small; the blob is referenced, not inlined.
 
-Retention is a profile axis. Experiment profiles MAY retain nearly all artifacts; interactive profiles
-MAY retain only digests and essential blobs. **The reproducibility class of a run MUST be explicitly
-known and MUST enter `D_R`** — an unreproducible run is a legitimate run, but it may never be
-presented as a reproducible one.
+Retention is a profile axis with values `digests_only`, `standard`, and `full`. It does not authorize
+capture: content-capture, redaction, and sensitivity policy MUST be resolved before bytes are stored,
+and the applied policy identity/version enters provenance. Experiment profiles MAY retain nearly all
+authorized artifacts; interactive profiles MAY retain only digests and essential blobs.
+
+**Reproducibility is a computed vector that MUST enter `D_R`, not an ordinal or self-declared
+class.** State reconstruction and semantic replay separately record capability and verification.
+WAL presence or pins establish prerequisites only; `verified` requires an immutable executed receipt
+bound to the run, input history/checkpoint digest, reducer/schema pins, and reconstructed output/state
+digest. `reproducibility_at_run_close` is immutable historical evidence; a later
+`reproducibility_current` is a new assessment and MUST NOT overwrite it.
+
+Evidence-ledger append failure is fatal. Artifact failure is fatal when capture is required. Optional
+capture may degrade only after a durable `capture_incomplete` fact; the resulting run is
+non-evidentiary and cannot satisfy RF-95 or promotion evidence. The causal record remains
+authoritative; traces, spans, and metrics are correlated telemetry, never system truth.
 
 Without this, later claims such as "metacognition improved performance", "this skill is superior", or
 "this topology works better" are opinion rather than evidence.
@@ -64,7 +76,8 @@ Without this, later claims such as "metacognition improved performance", "this s
 
 ## Trajectory accounting
 
-`EpisodeCompleted` MUST contain a complete `mhf.trajectory/1`. A cold continuation loads the durable
+Legacy runs retain a complete `mhf.trajectory/1`; new M-4 writers MUST emit complete
+`mhf.trajectory/2` while readers dual-read both versions. A cold continuation loads the durable
 pre-crash prefix, appends current turns, preserves ordered `invocations`, and reconciles pending
 Governor leases before emitting `RunRecovered`. Costs are additive across retries and escalations;
 each measurement is `measured`, `estimated`, or `unavailable`, never silently invented. See

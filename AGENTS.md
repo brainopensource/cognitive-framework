@@ -7,7 +7,7 @@ canonical_for:
   - repository-anti-sprawl-rules
 status: living
 owner: repository-governance
-version: "0.6.2"
+version: "0.7.1"
 last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
@@ -43,7 +43,7 @@ All documentation is strictly partitioned into three distinct authority tiers:
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0088`](docs/02_decisions/0088-m3c-m8-concept-lock.md).
+- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0097`](docs/02_decisions/0097-phase0-ratification-and-two-lane-activation.md).
 - **The Decisions**: [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md).
 - **The Execution**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) & [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md).
 
@@ -126,9 +126,9 @@ Execution sequence:
 1. **Wave 0 (COMPLETE)**: CI Truth & Named Falsifiers (`vanguard/packages` as sole subject of record).
 2. **Wave 1 (COMPLETE - GREEN)**: Fail-Closed Trust Spine (bound signed verdicts, single emitter, typed budgets, `mhf.trajectory/1`).
 3. **Wave 2 (COMPLETE - GREEN)**: RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation close M-2.
-4. **Wave 3C (ACTIVE)**: M-3 contracts are retained, but operational closure is reopened as M-3C Canonical Composition Convergence under ADR-0088. Devs A own architecture/core convergence while Devs B implement bounded packs, adapters, fixtures, callers, and CI against frozen interfaces.
-5. **Wave 4 (FROZEN - M-3C + ENVIRONMENT)**: M-4 may open only after M-3C proves one production authority; then one real uninterrupted coding run must derive all nine evidence rows.
-6. **Waves 5–8 (LOCKED ROADMAP)**: M-5 generality, M-6 mediated delegation, M-7 measured scheduler/concurrency, and M-8 declarative topologies are concept-locked but not implementation-authorized.
+4. **M-3C / W-3D (COMPLETE)**: canonical composition, activation, durability, evidence, profiles, and product bootstrap are closed.
+5. **M-4 (ACTIVE)**: ADR-0097 authorizes two Senior lanes: Dev A evidence Runtime/causal capture and Dev B scientific contracts/verification. RF-95 remains serial-last and NO-GO until integrated capture is complete.
+6. **M-5a–M-8 (PLANNED)**: M-5a creates immutable `M-5A-BASE-v2`; M-5b generality and M-6 delegation may then run in parallel; M-6.5, M-7, and M-8 retain their named decision and evidence gates.
 7. **Waves 9+ (POST-v1 RESEARCH)**: retrieval/macro experiments and governed meta-cognition remain exterior, non-authorizing horizons.
 
 Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).

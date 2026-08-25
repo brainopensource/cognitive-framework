@@ -7,7 +7,7 @@ canonical_for:
   - invariant-registry
 status: living
 owner: principal-systems-architect
-version: "0.7.0"
+version: "0.7.1"
 last_verified: 2026-08-24
 read_when:
   - implementing-any-runtime-change
@@ -59,7 +59,8 @@ historical evidence only.
    [`01_law/`](01_law/) form the normative specification. No one leaf has independent precedence;
    a change that affects more than one leaf MUST update every affected clause atomically.
 2. Append-only decisions in [`02_decisions/INDEX.md`](02_decisions/INDEX.md) record rationale and
-   amendments; an accepted ADR is binding only when reflected in the law.
+   amendments; an accepted ADR is binding only when reflected in the law. Sustained material
+   counter-evidence triggers review but never implicit amendment.
 3. [`03_execution/sprint_active.md`](03_execution/sprint_active.md) is the sole current work board;
    [`03_execution/milestones.md`](03_execution/milestones.md) is sequencing, not authorization.
 4. Architecture, contracts, protocols, engineering guides, and theory are descriptive or advisory
@@ -141,6 +142,16 @@ historical evidence only.
   composition, ordinary mediated tools, a real workspace diff, task verification, file-backed WAL,
   trajectory, and fresh-process reconstruction. Synthetic providers, alternate drivers, stitched
   traces, and manual event repair cannot satisfy the gate.
+- `mhf.trajectory/1` and `mhf.execution-profile/1` are frozen strict contracts. M-4 extensions write
+  `/2`; readers dual-read `/1|/2`, production writers single-write `/2`, and historical identities
+  are never rewritten.
+- Evidence-ledger failure is fatal. Required capture failure is fatal; optional degradation is
+  admissible only after a durable `capture_incomplete` fact and makes the run non-evidentiary.
+- Reproducibility distinguishes capability from executed verification. WAL and pins are
+  prerequisites; verified values require immutable run-bound receipts.
+- Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; `depth` and `turns`
+  are structural ceilings. Goal events carry a digest and optional artifact reference, never raw
+  goal text. Retention uses `digests_only|standard|full` and does not authorize content capture.
 - RF-85 retains the stronger nine-row hermetic assurance contract but no longer blocks M-4 or M-5.
   Its canonical auditor distinguishes `absent`, `invalid`, `unverifiable`, and `present_valid`; only
   a complete envelope bound to immutable preregistration and authoritative verifiers may be
@@ -161,11 +172,13 @@ historical evidence only.
 
 ## v0.7+ concept lock
 
-[`VISION.md`](../VISION.md) is Law Zero; `ADR-0095` locks the architectural thesis and the roadmap.
+[`VISION.md`](../VISION.md) is Law Zero; `ADR-0095` locks the architectural thesis and ADR-0097
+refines delivery sequencing without changing that thesis.
 `ADR-0094` remains in force: M-4 is the RF-95 useful, durable coding proof and RF-85 is an optional
-hermetic assurance certification. The substrate baseline is re-tagged after **M-5a**, so RF-86
+hermetic assurance certification. `M-5A-BASE-v2` is created after **M-5a**, so RF-86
 measures Formal Pack #2 against the event-derived agent semantics rather than against a substrate
-that is about to change. Prior sequencing in ADR-0088/0093 is superseded by `ADR-0095` §3–§4;
+that is about to change. After that baseline, M-5b and M-6 may run in parallel. Prior sequencing in
+ADR-0088/0093/0090 is superseded only where explicitly stated by ADR-0095 and ADR-0097;
 their composition, identity, refusal, and release-baseline content is retained.
 
 ## Milestone compatibility
@@ -182,9 +195,9 @@ historical meaning; `ADR-0095` §4 is the authoritative translation table.
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal — complete |
 | M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence — complete |
 | M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, fresh-process reconstruction — **plus scientific trajectory capture** |
-| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance for context/cache/compaction; substrate re-tagged to a new `M-5-BASE` |
-| M-5b | v0.7.x | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness, measured against the post-M-5a baseline |
-| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` as nested execution lineages through generic S0–S12 dispatch |
+| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance for context/cache/compaction; immutable post-window baseline tagged `M-5A-BASE-v2` |
+| M-5b | v0.7.x | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness, measured against `M-5A-BASE-v2`; may run in parallel with M-6 |
+| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` as nested execution lineages through generic S0–S12 dispatch; may run in parallel with M-5b from `M-5A-BASE-v2` |
 | M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
 | M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
 | M-8 | v0.9.x | Memory, retrieval, skills, and learning as projections with held-out evaluation, provenance, and rollback |

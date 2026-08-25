@@ -15,10 +15,19 @@ superseded_by: null
 
 # AETHER — Higgs Release (v0.7.0)
 
-A general event-sourced agentic substrate built from reusable, domain-blind primitives: events,
-state, effects, capabilities, budgets, context, artifacts, persistence, replay/recovery, and
-composition. Verifiability, isolation, and exterior evaluation are optional assurance profiles
-over that substrate — not the project's purpose.
+**AETHER is a general event-sourced agentic computation framework and experimental substrate.**
+
+Complex agentic behavior emerges from composing small, observable, replaceable primitives — not from
+hard-coded domain workflows. The fundamental unit is a **typed causal operation within an execution
+lineage**. An "agent" is not a persistent object in this architecture: it is a *projection* over
+lineage, events, artifacts, policy, context, budget, and execution boundaries. A process can die;
+another process opens the ledger and continues.
+
+Coding agents, researchers, planners, critics, teams, memory, and metacognition are different
+organizations over the same substrate. Security, containment, exterior evaluation, and cryptographic
+promotion evidence are **optional assurance profiles** — real capabilities, not the project's purpose.
+
+The architectural authority is [`VISION.md`](VISION.md) (Law Zero, `ADR-0095`).
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -26,61 +35,67 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.7.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0094`](docs/02_decisions/0094-product-first-m4-and-optional-assurance.md) |
+| **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
+| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0095`](docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md) |
 | **Shipped package** | `vanguard-runtime` `0.7.0` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-3C and W-3D closed; M-4/RF-95 product proof active.** RF-85 hermetic assurance is retained as optional and claims zero rows. |
-| **Foundation Plan** | M-4 useful durable coding run → M-5 Formal Pack #2 → M-6 mediated spawn → measured M-7 → M-8 declarative topologies; M-9+ remains post-v1 research |
-| **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
+| **Status** | **M-4 active:** useful coding product plus scientific trajectory capture. RF-85 hermetic assurance is optional and claims zero rows. |
+| **Roadmap** | M-4 → M-5a event-derived agent → M-5b generality falsifier → M-6 nested-lineage delegation → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
+| **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
-[![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
+[![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
 [![Approved](https://img.shields.io/badge/Active_Sprint-M--4_RF--95-orange.svg)](docs/03_execution/sprint_active.md)
 
-## 1. Executive Summary & Documentation Architecture
+## 1. What exists today vs the locked target
 
-Vanguard / AETHER provides a verifiable, capability-attenuated recursive-agency substrate:
-1. **The Separability Thesis**: The solution and its execution traces must be strictly separable from the agent itself.
-2. **Evaluator Isolation**: The judge that evaluates and grades an agent's run is physically and cryptographically unreachable from the agent it grades (Worker UID `10001` vs Evaluator UID `10002`).
-3. **Pluggable Agency**: Harnesses are compiled from declarative manifests and plugins into an immutable `FrozenHarness`. Coding is **Domain Pack #1** (`packs/code-default/`), not the hardcoded ontology of the substrate.
+This section is deliberately honest about the gap. The target below is binding architecture; the
+"today" column is what the code actually does.
 
-### The Canonical Documentation Triad
+| Capability | Today | Locked target |
+|---|---|---|
+| Event-sourced ledger, cold replay | **Works.** Single-writer SQLite-WAL, `State = fold(events)`, fresh-process continuation (RF-25) | unchanged |
+| Canonical composition → activation → run | **Works.** One authority (RF-78–RF-84) | unchanged |
+| Capability-mediated effects, typed budgets | **Works.** S0–S12, monotonic attenuation, TCB ≤ 1438 LOC | unchanged |
+| Execution profiles in `D_R` | **Works.** `product`/`local`/`sandboxed`/`hermetic`, fail-closed | + retention/reproducibility axis (M-4) |
+| Coding agent product (`vg code`, resume) | **In progress** (M-4) | useful end-to-end loop |
+| Scientific trajectory capture | **Partial.** Invocations, costs, identities, receipts, outcome | + context/compaction/cache/strategy provenance (M-4) |
+| Agent state as projection | **Not yet.** Part of continuation state lives in `Episode`/`HarnessSession` objects | `AgentView` projection (M-5a) |
+| Second domain (formal pack) | **Not yet** | generality falsifier (M-5b) |
+| `agent.spawn` / recursive delegation | **Inert.** `M6_SPAWN_ACTIVE = False`; no `SpawnAdapter` | nested execution lineages (M-6) |
+| Metacognition / adaptive strategy | **Does not exist** | policy/reducer/plugin (M-6.5) |
+| Topologies, scheduler, concurrency | **Does not exist.** Sequential turn loop (I-11) | versioned topology data + justified concurrency (M-7) |
+| Memory, retrieval, skills, learning | **Does not exist** | projections and plugins (M-8) |
+| Hermetic assurance (RF-85) | **Available, optional, claims zero rows** | stays optional |
 
-All documentation in this repository is strictly organized into three distinct authority layers:
+Nothing in the roadmap columns is claimed to work today.
 
-```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ governs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                          2. THE DECISIONS (WHY)                          │
-│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ directs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
-└──────────────────────────────────────────────────────────────────────────┘
-```
+## 2. Documentation authority
 
-### Clean Triad Reading Order
-1. **This Document (`README.md`)** — Subsystem inventory, as-built architecture, and verified commands.
-2. **The Normative Law**:
-   - [`docs/SPEC.md`](docs/SPEC.md) — The sole normative specification (RFC-2119).
-   - [`docs/01_law/DISPATCH.md`](docs/01_law/DISPATCH.md) — Dispatch, capability grants, and security model.
-   - [`docs/01_law/MEASUREMENT.md`](docs/01_law/MEASUREMENT.md) — Measurement doctrine.
-3. **The Decision Records**:
-   - [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — Architecture Decision Records (current foundation, Tier S+, and repository-governance lock: ADR-0069–0087).
-4. **The Active Execution Board**:
-   - [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) — Single living execution board, active wave lanes, and task register.
-   - [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) — Macro sequencing and gates (M-0 through M-10).
-5. **Current Overview**:
-   - [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — Concise as-built map; navigational, not authority.
+| # | Layer | Documents |
+|---|---|---|
+| 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
+| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/01_law/`](docs/01_law/) |
+| 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) |
+| 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` |
+| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) |
+| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) |
+| 6 | **Communication** | this README, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/) |
+
+A lower document may not be used to reject a Vision concept. This README introduces no architecture
+of its own.
+
+### Reading order
+
+1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
+2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
+3. [`docs/01_law/`](docs/01_law/) — detailed contracts (`DISPATCH`, `RUNTIME`, `EXTENSIBILITY`, `EVIDENCE`, `MEASUREMENT`, `SECURITY`).
+4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — ADRs `0069`–`0095`.
+5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) then [`sprint_active.md`](docs/03_execution/sprint_active.md).
+6. [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — as-built map, navigational only.
 
 ---
 
-## 2. What Exists in This Repository (As-Built Inventory)
+## 3. What Exists in This Repository (As-Built Inventory)
 
 The codebase keeps canonical production truth in `vanguard/packages/`, alongside domain packs,
 tooling, and test infrastructure:
@@ -124,7 +139,7 @@ Aether-D-System/
 
 ---
 
-## 3. Architecture & Hexagonal Boundary Lattice
+## 4. Architecture & Hexagonal Boundary Lattice
 
 The architecture strictly enforces a hexagonal boundary lattice verified on every commit by `tools/check_boundaries.py`:
 
@@ -144,7 +159,41 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ---
 
-## 4. Trust, Attenuation, & Security Model
+## 5. Roadmap & Execution Status
+
+Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md). Authorization:
+[`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
+
+```text
+M-4  useful coding product + scientific trajectory capture      <- ACTIVE
+M-5a agent as event-derived projection; re-tag M-5-BASE
+M-5b Formal Pack #2 as generality falsifier (RF-86)
+M-6  recursive delegation as nested lineages
+M-6.5 adaptive strategy / metacognition as policy-reducer-plugin
+M-7  declarative topologies + justified concurrency
+M-8  memory, retrieval, skills, learning
+M-9  AETHER v1.0 General Agent Framework
+```
+
+**Blocking is technical, never ceremonial.** Work is blocked only by a named unfinished interface,
+schema, invariant, primitive, or runtime contract. M-5a depends on M-4's telemetry vocabulary; M-5b on
+the M-5a baseline re-tag; M-6 on a `SpawnAdapter` and the attenuation algebra reaching the production
+import path; M-7 on the M7-01 measurement result. Everything else runs in parallel: model and tool
+adapters, UI/CLI, indexing behind `IndexPort`, context management, the coding pack, tooling, and docs.
+
+`M7-01` remains a named parallel measurement lane (`ADR-0092`) and ends in an explicit decision to
+implement, simplify, or cancel advanced scheduling.
+
+Historical milestone identifiers keep their meaning; `ADR-0095` §4 is the translation table.
+
+---
+
+## 6. Optional Assurance: Trust, Attenuation & Isolation
+
+> These are **optional profiles**, not the identity of AETHER and not prerequisites for ordinary
+> development (`ADR-0094`, `ADR-0095`). What is always binding is honesty: the resolved
+> `ExecutionProfile` enters `D_R`, no run may claim assurance it did not have, and an explicitly
+> requested containment mode that is unavailable fails closed rather than falling back to the host.
 
 ```text
                ┌────────────────────────────────────────────────────────┐
@@ -171,31 +220,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ---
 
-## 5. Macro Roadmap & Execution Status
-
-Execution status and macro milestones are tracked in:
-- **Macro Roadmap (M-0 → M-10)**: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md)
-- **Active Execution Board**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md)
-
-```text
-M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Closed) -> M-4 (Active) -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
-[Trust foundation]     [retained]       [converged]       [RF-95 product] [each gated on a named technical dependency]  [post-v1]
-```
-
-Work is blocked only by a named unfinished interface, schema, invariant, primitive, or runtime
-contract — never by a milestone that has not been ceremonially closed. M-5 depends on RF-95 because
-RF-86's zero-semantic-diff proof needs a substrate baseline a real run has exercised. M-6 depends on
-a `SpawnAdapter` and the attenuation algebra reaching the production import path (`agent.spawn` is
-inert today). M-7/M-8 depend on the M7-01 sequential effect-log baseline, which does not yet exist.
-
-Lanes with no such dependency run in parallel now: coding CLI/TUI, coding pack tool loop, model and
-tool adapters, M-5 formal-pack preparation, M7-01 measurement, indexing/retrieval behind `IndexPort`,
-context management, and tooling. RF-85 containment/evaluator certification is an optional assurance
-profile and blocks nothing.
-
----
-
-## 6. Developer & Reviewer Commands
+## 7. Developer & Reviewer Commands
 
 ### Python Environment (Python 3.10+)
 ```bash
@@ -240,7 +265,7 @@ npm run vg
 
 ---
 
-## 7. Model Access & Adapter Architecture
+## 8. Model Access & Adapter Architecture
 
 Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/ports/model.py`):
 - **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), Ollama (`adapters/models/ollama.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
@@ -249,7 +274,7 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 ---
 
-## 8. Contributor & Agent References
+## 9. Contributor & Agent References
 
 - **Contributor & Agent Procedure**: [`AGENTS.md`](AGENTS.md)
 - **Testing Architecture & Guide**: [`test/README.md`](test/README.md)

@@ -14,11 +14,31 @@ read_when:
   - resolving-authority-conflicts
 do_not_read_when:
   - consulting-historical-proposals
+subordinate_to: VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # AETHER Normative Specification — Higgs Release (v0.7.0)
+
+## What AETHER is
+
+AETHER is a **general event-sourced agentic computation framework and experimental substrate**. It is
+not primarily a security-certification system, a coding harness, or a workflow engine. The
+fundamental unit is a **typed causal operation occurring within an execution lineage**. An "agent" is
+not a privileged persistent object; it is a dynamic projection over lineage, events, artifacts,
+policy, context, budget, and execution boundaries.
+
+Events are the canonical causal history. Artifacts retain large relevant content. Projections
+reconstruct semantic state. Caches and indexes remain derived and rebuildable. The kernel stays
+minimal and domain-blind. Memory, skills, learning, topologies, and metacognition are higher-level
+projections, plugins, or policies composed from the same primitives — never new kernel semantics.
+
+This identity is fixed by [`VISION.md`](../VISION.md) (Law Zero) under
+[`ADR-0095`](02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md). This specification
+translates it into current normative requirements; it does not restate or amend it.
+
+---
 
 This file is the compact normative index. RFC-2119 terms (MUST, SHALL, SHOULD, MAY) are binding.
 The detailed clauses remain canonical in the linked law leaves under [`01_law/`](01_law/); this
@@ -29,6 +49,12 @@ historical evidence only.
 
 ## Authority and precedence
 
+0. [`VISION.md`](../VISION.md) is **Law Zero** (`class: charter`, `authority: constitutional`,
+   `status: locked`). It defines architectural identity, ontology, product principles, and long-term
+   direction for v0.7+. This specification and every leaf below it are **subordinate to it**. A
+   conflict between this specification and the locked Vision is resolved in favour of the Vision, and
+   the conflicting clause here MUST be reconciled rather than cited as a counter-authority. The Vision
+   changes only through an explicit Vision-superseding ADR (`ADR-0095`).
 1. This specification and the six `class: law`, `authority: normative` leaves in
    [`01_law/`](01_law/) form the normative specification. No one leaf has independent precedence;
    a change that affects more than one leaf MUST update every affected clause atomically.
@@ -90,9 +116,19 @@ historical evidence only.
   ActivationPlan -> RunPlan -> EpisodeEngine`. Compatibility formats normalize at ingress and never
   become a second runtime value. `FrozenComposition` owns `D_H`; activation/runtime identity binds
   it into `D_R`.
-- The runtime never executes a dynamic control-flow DAG. `mhf.manifest/2` is a static composition
-  graph; the turn loop stays unary and sequential. Multi-agent behavior is mediated delegation
-  (`agent.spawn`, M-6) or a composed plugin.
+- The runtime never executes a dynamic control-flow DAG *as a substrate authority*. `mhf.manifest/2`
+  is a static composition graph declaring the space of possibilities; the trajectory recorded in the
+  ledger is the emergent causal graph of what was actually used. The turn loop stays unary and
+  sequential (I-11) until M-7 measurement and an explicit Director lift. Multi-agent behavior is
+  mediated delegation (`agent.spawn`, M-6) or a composed plugin — never a second engine.
+- **An agent is not a persistent privileged object.** `Agent = Identity + Policy + Event-Derived
+  Projection + Execution Boundary`. Runtime objects MAY hold transient optimization state, but no
+  state required for semantic continuation may exist only inside them (see
+  [`01_law/RUNTIME.md`](01_law/RUNTIME.md#15-agent-state-is-a-projection)). Target architecture;
+  M-5a closes the current gap.
+- **Memory, skills, learning, topology, scheduling, and metacognition are never kernel semantics.**
+  They land as projections, plugins, policies, or versioned configuration over the same primitives.
+  A meta-controller holds no special authority and passes through S0–S12 like any other proposer.
 - UDS and in-process dispatch share schemas and wire semantics, but in-process execution is direct,
   zero-copy memory dispatch; it does not pay socket/serialization overhead for context bundles.
 - A turn owns an ordered list of `invocations`, so retries and escalations conserve additive costs.
@@ -123,27 +159,36 @@ historical evidence only.
   activation MUST materialize a service/handle or fail; lifecycle metadata without a callable service
   is not production activation.
 
-## v0.6.2 concept lock
+## v0.7+ concept lock
 
-ADR-0094 supersedes only ADR-0088's M-4 exit dependency: M-4 is now the RF-95 useful, durable coding
-proof, while RF-85 remains an optional hermetic assurance certification. M-5 is the Formal Pack #2
-generality proof with an unchanged substrate; M-6 is capability-mediated delegation. M-7/M-8 retain
-only compatibility seams until their gates. M-9+ is post-v1, non-authorizing research.
+[`VISION.md`](../VISION.md) is Law Zero; `ADR-0095` locks the architectural thesis and the roadmap.
+`ADR-0094` remains in force: M-4 is the RF-95 useful, durable coding proof and RF-85 is an optional
+hermetic assurance certification. The substrate baseline is re-tagged after **M-5a**, so RF-86
+measures Formal Pack #2 against the event-derived agent semantics rather than against a substrate
+that is about to change. Prior sequencing in ADR-0088/0093 is superseded by `ADR-0095` §3–§4;
+their composition, identity, refusal, and release-baseline content is retained.
 
 ## Milestone compatibility
+
+Sequencing detail and technical dependencies live in
+[`03_execution/milestones.md`](03_execution/milestones.md). Historical identifiers keep their
+historical meaning; `ADR-0095` §4 is the authoritative translation table.
 
 | Milestone | Version | Gate |
 |---|---|---|
 | M-0 | v0.6.0 | CI truth and falsifiers F-01…F-21 — complete |
 | M-1 | v0.6.0 | signed Ed25519 trust spine and verdicts — complete |
-| M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — Wave 2C |
-| M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal; operational closure resolved by M-3C |
-| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — complete |
-| M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, and fresh-process reconstruction |
-| M-5 | v0.7.0 | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness; depends on RF-95 because RF-86 measures zero semantic diff against a substrate baseline a real run has exercised |
-| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` through generic S0–S12 dispatch |
-| M-7…M-8 | future product gates | measured concurrency and declarative topology support |
-| M-9+ | post-v1 research | retrieval/macros/Active Inference/meta-cognition remain exterior and non-authorizing |
+| M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — complete |
+| M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal — complete |
+| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence — complete |
+| M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, fresh-process reconstruction — **plus scientific trajectory capture** |
+| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance for context/cache/compaction; substrate re-tagged to a new `M-5-BASE` |
+| M-5b | v0.7.x | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness, measured against the post-M-5a baseline |
+| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` as nested execution lineages through generic S0–S12 dispatch |
+| M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
+| M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
+| M-8 | v0.9.x | Memory, retrieval, skills, and learning as projections with held-out evaluation, provenance, and rollback |
+| M-9 | v1.0 | Integrated AETHER v1.0 General Agent Framework |
 
 ## Compatibility anchors for former SPEC sections
 

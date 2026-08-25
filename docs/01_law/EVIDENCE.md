@@ -14,6 +14,7 @@ read_when:
   - changing-evaluator-verdicts
 do_not_read_when:
   - changing-only-ui-or-documentation
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -22,6 +23,44 @@ superseded_by: null
 
 The evidence contract is distributed across the detailed runtime law, measurement constitution, and
 the trajectory/verdict contracts. This index prevents agents from loading unrelated law.
+
+> **Authority.** Normative, but subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`).
+
+## Observability is part of the product, not post-processing
+
+Every execution is potentially an experimental observation. A trajectory MUST therefore preserve more
+than final messages: inputs, selected context, model outputs, tool invocations, transformations,
+costs, latency, errors, compaction operations, cache behaviour, strategy changes, and terminal
+outcome MUST be correlatable.
+
+**The provenance rule.** *Any variable that can materially affect a result MUST have observable
+identity and provenance appropriate to the selected observability profile* — even when its full
+content is stored outside the ledger or is subject to a retention policy.
+
+This does **not** require every byte to live in the ledger. The truth model stays three-layered:
+
+| Layer | Holds | Retention |
+|---|---|---|
+| **Ledger** | small, durable causal facts, plus identities and digests | permanent, append-only |
+| **Artifact store** | large content: full prompts, model outputs, source snapshots, compressed contexts, patches, reports, datasets | content-addressed, configurable retention |
+| **Projections** | indexes, embeddings, caches, semantic memory, repo maps | derived, rebuildable, never canonical |
+
+Concretely: when a compaction alters context, record source range, compactor identity, relevant
+parameters, input digest, and output digest. When a cache is hit, record cache identity, key, source
+artifact, and validation result. The event stays small; the blob is referenced, not inlined.
+
+Retention is a profile axis. Experiment profiles MAY retain nearly all artifacts; interactive profiles
+MAY retain only digests and essential blobs. **The reproducibility class of a run MUST be explicitly
+known and MUST enter `D_R`** — an unreproducible run is a legitimate run, but it may never be
+presented as a reproducible one.
+
+Without this, later claims such as "metacognition improved performance", "this skill is superior", or
+"this topology works better" are opinion rather than evidence.
+
+> **Current-state gap (M-4 lane).** Trajectory capture today covers invocations, costs, identities,
+> receipts, and outcome. Context-selection, compaction, cache, strategy-change, retrieval, delegation,
+> and topology provenance are **not yet** emitted, and retention is not yet a profile axis. Both are
+> M-4/M-5a migration tasks; the rule above is binding on new instrumentation.
 
 ## Trajectory accounting
 

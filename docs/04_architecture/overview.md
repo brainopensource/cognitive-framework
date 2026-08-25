@@ -7,30 +7,80 @@ canonical_for:
   - repository-inventory
 status: living
 owner: senior-principal-systems-engineer
-version: "0.6.2"
-last_verified: 2026-08-21
+version: "0.7.0"
+last_verified: 2026-08-25
 read_when:
   - orienting-in-the-system-architecture
 do_not_read_when:
   - implementing-a-specific-contract
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Vanguard / AETHER System Overview
 
-> **Classification:** Descriptive architecture with explicit current/future maturity.
-> **Authority:** Non-normative. Governing law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/01_law/`](../01_law/).
+> **Classification:** Descriptive architecture with explicit current/target maturity.
+> **Authority:** Non-normative and introduces no architecture of its own. Governing authority is
+> [`VISION.md`](../../VISION.md) (Law Zero), then [`docs/SPEC.md`](../SPEC.md) and
+> [`docs/01_law/`](../01_law/).
 
 ---
 
-## 1. System Charter & Executive Summary
+## 1. System Charter
 
-**Vanguard / AETHER** is a Python-first, domain-blind recursive-agency substrate designed for autonomous systems with mathematical safety, cryptographically verifiable provenance, and fail-closed capabilities.
+**AETHER is a general event-sourced agentic computation framework and experimental substrate.** The
+fundamental unit is a **typed causal operation within an execution lineage**. An agent is a
+projection over lineage, events, artifacts, policy, context, budget, and execution boundaries — not a
+persistent privileged object.
 
-- **As-Built Core (`v0.6.1 Foundation`)**: A verified 13-stage reference monitor (TCB $\le 1438$ LOC, currently 1365 LOC), single-writer SQLite WAL event stream (`State = fold(events)`), rootless Bubblewrap sandbox (UID `10001`), and exterior Ed25519-signed evaluator daemon (UID `10002`).
-- **Active Correction (`v0.6.2 M-3C`)**: Join the implemented named graph and registry lifecycle to one public composition/activation/run path, two domain probes, release durability, and source-derived M-4 evidence.
-- **Product Horizon**: Prove the real coding run (M-4), second-domain generality (M-5), mediated delegation (M-6), measured concurrency (M-7), and declarative topologies (M-8). M-9+ adaptive cognition remains exterior post-v1 research.
+### Layer decomposition
+
+| Layer | Owns | Must not own |
+|---|---|---|
+| **Kernel** | Minimal generic invariants: authority, budgets, effect admissibility | Any domain, topology, scheduling, memory, or meta semantics |
+| **Event / Artifact substrate** | Durable causal facts, lineage, reducers, identities, artifacts | Derived state as truth |
+| **Runtime** | Composition, sessions, lifecycle, effects, persistence, reconstruction | Domain behavior |
+| **Agency** | Generic observation/proposal/operation transition mechanics | Specific agents |
+| **Extensibility** | Tools, model adapters, plugins, indexes, context providers, evaluators, protocol adapters | Authority |
+| **Packs & policies** | How capabilities are organized for concrete tasks | Substrate semantics |
+| **Topology / scheduler / memory / learning / meta-control** *(future)* | Structure, temporality, projections, adaptation | New cores |
+
+Behavioral complexity grows at the edges; the trusted core stays small.
+
+### Four separated responsibilities
+
+```text
+Topology   defines WHAT may run        (structure; versioned data)
+Scheduler  decides WHEN/WHERE          (readiness, placement, temporality)
+Kernel     decides WHETHER authorized  (generic invariants)
+Ledger     records WHAT HAPPENED       (append-only truth)
+```
+
+These never merge. Topology and scheduler do not exist yet — see the maturity table below.
+
+### Composition vs trajectory
+
+**Composition** is the static declaration of the space of possibilities (`mhf.manifest/2`, frozen into
+`D_H`). **Trajectory** is the emergent causal graph of what was actually used, recorded in the ledger
+and observed after the fact. The runtime is not a workflow engine and executes no dynamic control-flow
+DAG as a substrate authority.
+
+### Physical order vs logical causality
+
+`seq` is durable append order within a `project_id`. It is **not** logical dependency. Causation,
+parentage, correlation, lineage, branches, and joins define the logical, partially ordered execution
+graph. Branch/join/readiness semantics are target architecture (M-7), not current behavior.
+
+### Maturity
+
+| Area | Today | Target |
+|---|---|---|
+| Ledger, cold replay, composition, S0–S12, profiles | implemented | unchanged |
+| Coding product + scientific trajectory capture | M-4 in progress | complete loop with context/compaction/cache provenance |
+| Agent state as projection (`AgentView`) | partly inside `Episode`/`HarnessSession` | M-5a |
+| Runtime domain-blindness | gaps in `entrypoint.py`, `scoring.py`, `autonomous_grant.py` | M-5a migration |
+| Second domain, delegation, meta-control, topology, memory | not implemented | M-5b → M-8 |
 
 ---
 

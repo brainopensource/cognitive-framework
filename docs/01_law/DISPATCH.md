@@ -7,7 +7,7 @@ canonical_for:
   - s0-s12-dispatch-contract
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
+version: "0.7.0"
 last_verified: 2026-08-21
 read_when:
   - changing-dispatch-or-capabilities
@@ -17,6 +17,7 @@ do_not_read_when:
 title: "Kernel, Capabilities & Security"
 source: 01_specs/backend/05_vanguard_kernel_capabilities_and_security_v040.md (VG-05; git history, 4f9f8b1)
 amendments: [ADR-M0-08 (K-40 inverted), ADR-M0-09 (alarm set F-21a+F-24), "SA-1..SA-6 pipeline text struck (D-34, honoured non-build)", ADR-0069 (production lattice is vanguard/packages/; layer0/ is not an M1 destination rewrite), ADR-0074 (typed budget; writer authority; complete D_H)]
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -36,6 +37,16 @@ superseded_by: null
 > **Standing exception.** Compression applies everywhere in this set except here. The kernel, the verifier boundary and the capability algebra are the only things standing between *self-improving* and *self-deceiving*. Nothing in this document is shortened to meet a budget; if it does not fit, something else gives way.
 
 ---
+
+> **Authority.** Normative, but subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`).
+>
+> **Scope.** This leaf specifies the *generic* authority and effect invariants owned by the minimal,
+> domain-blind kernel. Containment, exterior evaluation, and cryptographic promotion evidence are
+> **optional assurance capabilities selected by `ExecutionProfile`** (`ADR-0089`, `ADR-0094`), not the
+> identity of AETHER and not prerequisites for ordinary framework development. The honesty invariants
+> below remain binding in every profile: the resolved profile enters `D_R`; no profile may disguise its
+> assurance level; unsigned or forged verdicts fail closed; and an explicitly requested containment mode
+> that is unavailable fails closed rather than falling back to the host under the same `D_R`.
 
 ## 0. Audit stance
 

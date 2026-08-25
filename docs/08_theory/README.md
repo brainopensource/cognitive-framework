@@ -16,11 +16,15 @@ implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Cognitive Systems & Mathematical Foundations Index
+
+> **Authority.** These theory notes are subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`), then [`SPEC.md`](../SPEC.md) and [`01_law/`](../01_law/). They realize the law on the wire and introduce no architecture of their own. Where they still describe the pre-0095 architecture, the Vision wins and the text is reconciled.
+
 
 > **Classification:** Theoretical Foundation & Cognitive Research.  
 > **Authority:** Non-normative. Research literature retained in [`docs/_archive/references/`](../_archive/references/).

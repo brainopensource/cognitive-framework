@@ -21,7 +21,7 @@ superseded_by: null
 # ADR Index — Architecture Decision Records
 
 > **Status:** Living Master Index of Architecture Decision Records for Vanguard / AETHER.  
-> **Rule:** Decision identifiers and Git history are append-only. ADRs outrank general documentation; newer ADRs supersede older ones explicitly. Per ADR-0086, superseded bodies may leave the default working tree only after their permanent lineage and recovery commit are indexed.
+> **Rule:** Decision identifiers and Git history are append-only. [`VISION.md`](../../VISION.md) is Law Zero and outranks every ADR (`ADR-0095`); ADRs outrank general documentation; newer ADRs supersede older ones explicitly. Per ADR-0086, superseded bodies may leave the default working tree only after their permanent lineage and recovery commit are indexed.
 > **Companion Documents:** [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) · [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) · [`SPEC.md`](../SPEC.md) · [`sprint_active.md`](../03_execution/sprint_active.md).
 
 ---
@@ -36,6 +36,7 @@ superseded_by: null
 - 🧬 [Mediated Delegation Event Roster (`0090`)](#mediated-delegation-event-roster-0090) — `ChildSpawned`/`ChildReturned` allocation, single writer, and reducer fold
 - 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
 - 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
+- 🌟 [Vision as Law Zero (`0095`)](#vision-as-law-zero-0095) — **`VISION.md` is the constitutional authority for v0.7+**; roadmap reconciled; milestone identifier mapping
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -124,13 +125,26 @@ falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
 |---|---|---|---|---|
 | `0091` | [`0091-delegation-state-digest-extension.md`](0091-delegation-state-digest-extension.md) | Non-empty child state is canonical identity; empty maps preserve historical non-delegating digests. | accepted | 2026-08-24 |
 | `0092` | [`0092-review-bundle-disposition-and-m7-measurement.md`](0092-review-bundle-disposition-and-m7-measurement.md) | Archived bundle remains non-production; context-store non-fix rejected; M7-01 authorized for measurement only. | accepted | 2026-08-24 |
-| `0093` | [`0093-aether-higgs-v070-release-baseline.md`](0093-aether-higgs-v070-release-baseline.md) | **AETHER — Higgs Release Baseline:** ratifies v0.7.0 version baseline while preserving internal module structure (`vanguard/packages/`). | accepted | 2026-08-24 |
+| `0093` | [`0093-aether-higgs-v070-release-baseline.md`](0093-aether-higgs-v070-release-baseline.md) | **AETHER — Higgs Release Baseline:** ratifies v0.7.0 version baseline while preserving internal module structure (`vanguard/packages/`). **Milestone identifier semantics superseded by ADR-0095 §4**; release-baseline content retained. | accepted; identifiers amended by ADR-0095 | 2026-08-24 |
 
 ## Product-first M-4 (`0094`)
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
 | `0094` | [`0094-product-first-m4-and-optional-assurance.md`](0094-product-first-m4-and-optional-assurance.md) | RF-95 closes M-4 with a useful durable real-model coding run; RF-85 hermetic assurance is retained but no longer blocks product/generalization work. | accepted | 2026-08-25 |
+
+---
+
+## Vision as Law Zero (`0095`)
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0095` | [`0095-vision-as-law-zero-and-roadmap-reconciliation.md`](0095-vision-as-law-zero-and-roadmap-reconciliation.md) | **Authority hierarchy inverted to match the accepted architecture:** [`VISION.md`](../../VISION.md) becomes `authority: constitutional` Law Zero for v0.7+; agent-as-projection ontology locked; roadmap reconciled to M-4 → M-5a → M-5b → M-6 → M-6.5 → M-7 → M-8 → M-9; milestone identifier mapping preserves historical provenance; M7-01 retained as a named parallel lane; assurance honesty invariants unaffected. | accepted | 2026-08-25 |
+
+> **Precedence note.** Since ADR-0095, ADRs no longer outrank all general documentation without
+> qualification: `VISION.md` sits above the law and the decision record. An ADR may refine how the
+> Vision is realized; it may not contradict a locked Vision concept without an explicit
+> Vision-superseding decision.
 
 ---
 
@@ -147,7 +161,7 @@ falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
-| `0088` | [`0088-m3c-m8-concept-lock.md`](0088-m3c-m8-concept-lock.md) | **Canonical foundation and scale seams:** one `/2 -> FrozenComposition -> ActivationPlan -> RunPlan` path; RF-85 assurance evidence; Formal Pack #2; generic-dispatch mediated spawn; reserved M-7/M-8 seams. Its M-4 exit dependency is superseded by ADR-0094. | accepted; M-4 gate amended by ADR-0094 | 2026-08-23 |
+| `0088` | [`0088-m3c-m8-concept-lock.md`](0088-m3c-m8-concept-lock.md) | **Canonical foundation and scale seams:** one `/2 -> FrozenComposition -> ActivationPlan -> RunPlan` path; RF-85 assurance evidence; Formal Pack #2; generic-dispatch mediated spawn; reserved M-7/M-8 seams. Its M-4 exit dependency is superseded by ADR-0094; its **M-5…M-8 roadmap sequencing is superseded by ADR-0095** (concept-lock content on composition, identity, and refusals is retained). | accepted; M-4 gate amended by ADR-0094; sequencing amended by ADR-0095 | 2026-08-23 |
 
 ---
 

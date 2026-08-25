@@ -17,11 +17,15 @@ implementation_status: AS_BUILT
 owner: lead-documentation-engineer
 version: "0.6.1"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Autonomous Engineering & Contributor Guides
+
+> **Authority.** These engineering guides are subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`), then [`SPEC.md`](../SPEC.md) and [`01_law/`](../01_law/). They realize the law on the wire and introduce no architecture of their own. Where they still describe the pre-0095 architecture, the Vision wins and the text is reconciled.
+
 
 > **Classification:** How-To & Operational Engineering Reference.  
 > **Authority:** Non-normative. Operational instructions for extending and verifying the substrate.

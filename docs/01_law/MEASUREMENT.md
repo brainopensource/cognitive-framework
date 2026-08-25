@@ -15,11 +15,22 @@ do_not_read_when:
   - changing-runtime-recovery-only
 title: "Measurement"
 source: 01_specs/backend/07_vanguard_loop_engineering_and_measurement_v040.md (VG-07) §5 (git history, 4f9f8b1)
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Annex: Measurement
+
+> **Authority.** Normative, but subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`).
+>
+> **Scope note (v0.7+).** Every adaptive feature on the roadmap — meta-control (M-6.5), topologies and
+> concurrency (M-7), memory/retrieval/skills/learning (M-8) — MUST be justified by the doctrine in
+> this annex before it is promoted: paired designs, a fixed task set, a held-out workload, an A/A noise
+> floor, and an explicit effect interval. A feature that cannot be measured this way is not promoted;
+> it may still ship as an opt-in, explicitly unproven capability. Variables that materially affect
+> results must carry the provenance required by [`EVIDENCE.md`](EVIDENCE.md); without it, an ablation
+> is not constructible and the claim is unfalsifiable by design.
 
 > The lab's constitution, kept nearly whole from VG-07 §5 per the archived
 > `01_SPECS_MIGRATION_MATRIX.md` §1.10 (git history, `4f9f8b1`) — paired designs, McNemar's exact test,

@@ -16,6 +16,7 @@ implementation_status: CONTRACT_LOCKED_M3C_IMPLEMENTATION_PENDING
 owner: principal-systems-architect
 version: "0.6.2"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---

@@ -11,6 +11,7 @@ read_when:
   - inspecting-historical-diagrams
 do_not_read_when:
   - implementing-runtime-behavior
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---

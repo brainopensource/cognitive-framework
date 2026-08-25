@@ -16,6 +16,7 @@ implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
 last_verified: 2026-08-21
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---

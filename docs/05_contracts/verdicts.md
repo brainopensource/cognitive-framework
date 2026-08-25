@@ -18,6 +18,7 @@ implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.2"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -48,6 +49,9 @@ superseded_by: null
 1. **Cryptographic Binding**: The signature covers the RFC 8785 JCS bytes of every field except `signature`.
 2. **Replay & Unbound Rejection**: A verdict presented with a mismatched nonce or unbound run ID is rejected fail-closed.
 3. **Single Writer**: Evaluator gateway is the sole allowed writer of `VerdictRecorded` in the ledger.
-4. **M-4 Eligibility**: RF-85 requires cryptographic verification against the same composition, run,
-   trajectory, oracle, image, protocol, and event-range lineage; a copied signature or asserted
-   `verified` flag is not evidence.
+4. **Optional assurance eligibility**: signed exterior evaluation is **not** an M-4/RF-95
+   requirement (`ADR-0094`). Where a run does claim it, RF-85 requires cryptographic verification
+   against the same composition, run, trajectory, oracle, image, protocol, and event-range lineage;
+   a copied signature or asserted `verified` flag is not evidence. A run without an evaluator is a
+   legitimate run and derives `unattributable_for_promotion = true`; it may never present itself as
+   promotion-eligible.

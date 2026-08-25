@@ -9,36 +9,30 @@ status: living
 owner: tech-lead
 version: "0.7.0"
 last_verified: 2026-08-25
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint Board — Product M-4 and M-5 Preparation
+# Active Sprint Board — M-4 and Parallel Lanes
 
-[`README.md`](../../README.md) is navigation; [`SPEC.md`](../SPEC.md) and
-[`01_law/`](../01_law/) are law; accepted ADRs record decisions. This is the sole living work board.
+Authority order: [`VISION.md`](../../VISION.md) (Law Zero) → [`SPEC.md`](../SPEC.md) +
+[`01_law/`](../01_law/) → accepted ADRs → [`milestones.md`](milestones.md) sequencing → **this board**,
+the only document that authorizes current work. `README.md` communicates; it does not decide.
 
 ## 1. Current Decision
 
-ADR-0094 separates product viability from optional adversarial assurance:
+`ADR-0095` locks [`VISION.md`](../../VISION.md) as the constitutional authority and reconciles the
+roadmap to **M-4 → M-5a → M-5b → M-6 → M-6.5 → M-7 → M-8 → M-9**. `ADR-0094` remains in force:
+M-4 is the RF-95 product proof and RF-85 is optional assurance claiming zero rows.
 
-- **M-4 / RF-95 is active:** prove a useful coding agent through the canonical runtime with a live
-  model, real tools, durable WAL, and fresh-process reconstruction.
-- **RF-85 is retained but non-blocking:** the original nine-row hermetic/isolated-evaluator audit is
-  an optional assurance certification and currently claims zero completed evidence rows.
-- **M7-01 may run in parallel:** measurement only; no scheduler or concurrency.
-- **M-5 remains locked until RF-95 closes.** Preparation may define the pack, task, oracle, and RED
-  tests, but may not change the frozen substrate or claim generality.
-- M-6 implementation, M-7 implementation, M-8, and later horizons remain locked.
-
-The repository baseline on 2026-08-25 is 1,327 Python tests passing with three skips. Architecture,
-TCB, secrets, domain-blindness, isolation, event coverage, RF-ID, duplication, RF-86, link, and stale
-path gates pass. Node is installed but locked workspace dependencies still require `npm ci` before
-TypeScript gates are qualified.
+- **M-4 is active** and now includes scientific trajectory capture, not only the coding loop.
+- **Nothing is blocked by a milestone.** Only named technical dependencies block work.
+- **M-5a preparation may start now** — the ontology (`Operation`, `Lineage`, `Scope`, `AgentView`)
+  can be designed against M-4's emerging telemetry vocabulary.
+- **M7-01 continues in parallel** as a named measurement lane and must not add scheduling.
 
 ## 2. Architectural Boundary
-
-The product-first pivot does not authorize a rewrite. These boundaries remain mandatory:
 
 ```text
 clients/products -> runtime -> agency -> kernel
@@ -46,130 +40,121 @@ clients/products -> runtime -> agency -> kernel
                     adapters <- ports <- domain
 ```
 
-- Clients own UX, commands, streaming display, approvals, and session selection.
-- Packs own coding/formal/research prompts, tools, policies, and domain semantics.
-- Runtime owns composition, adapter bootstrap, profiles, lifecycle, sessions, persistence, and replay.
-- Agency owns the domain-neutral sequential turn mechanism and context lifecycle.
-- Kernel owns only generic effect authority, budgets, selectors, and provenance.
-- Adapters implement models, workspace tools, stores, evaluators, indexes, sandboxing, and protocols.
-- The append-only ledger and immutable artifacts are canonical; indexes, caches, maps, and summaries
-  are rebuildable projections.
+- Clients own UX, commands, streaming display, approvals, session selection.
+- Packs own domain prompts, tools, policies, and semantics.
+- Runtime owns composition, bootstrap, profiles, lifecycle, sessions, persistence, replay —
+  **and no domain behavior**.
+- Agency owns the domain-neutral turn mechanism and context lifecycle.
+- Kernel owns generic effect authority, budgets, selectors, provenance only.
+- Adapters implement models, tools, stores, evaluators, indexes, sandboxing, protocols.
+- Ledger and artifacts are canonical; indexes, caches, maps, summaries are rebuildable projections.
 
-Security mechanisms may be optional by profile, but no profile may disguise its assurance level in
-`D_R`. `product` may use host execution and no evaluator. `hermetic` keeps the existing containment,
-preregistration, signature, and promotion rules. No coding or formal semantics enter the kernel.
+Assurance may vary by profile, but no profile may disguise its assurance level in `D_R`.
 
-## 3. Active Lane A — Finish M-4 / RF-95
+## 3. Lane A — M-4 product proof (serializing lane)
 
-### M4-01 — Product execution profile and durable bootstrap
+### M4-01 — Product execution profile and durable bootstrap — **IMPLEMENTED**
 
-**State: IMPLEMENTED; verification pending full suite.**
-
-- Add explicit `product` profile: in-place host workspace, explicit approval policy, SQLite-WAL,
-  optional evaluator, recorded/non-promotional assurance.
-- Make the bootstrap honor `persistence_mode=sqlite-wal` with a file-backed store by default.
-- Default the generic CLI entrypoint to `product`; keep `local`, `sandboxed`, and `hermetic` explicit.
-- RF-95 guards that product use does not require containment/evaluator infrastructure and never
-  silently falls back to memory persistence.
+`product` profile (in-place host workspace, explicit approvals, SQLite-WAL, optional evaluator,
+non-promotional assurance), file-backed store by default, generic entrypoint defaulting to `product`.
+RF-95 guards that product use requires no containment/evaluator and never silently falls back to
+memory persistence.
 
 ### M4-02 — Make the coding CLI operable
 
-Build the shortest useful vertical slice rather than more framework abstractions:
-
-1. Install Node dependencies and qualify CLI typecheck/tests.
-2. Expose provider/model, workspace, run id, event-store path, turn/effect/token budgets, and approval
-   mode through the existing client request contract.
-3. Stream model/tool/receipt/terminal events from the existing runtime event fan-out.
+1. Install Node dependencies; qualify CLI typecheck and tests.
+2. Expose provider/model, workspace, run id, event-store path, turn/effect/token budgets, and
+   approval mode through the existing client request contract.
+3. Stream model/tool/receipt/terminal events from the existing runtime fan-out.
 4. Present reviewable diffs and approval prompts; do not duplicate authority logic in TypeScript.
 5. Add `vg resume <run-id>` over the existing WAL/reconstruction path.
 
-Exit: a developer can start, observe, approve, interrupt, and resume a product coding session from
-the CLI without constructing Python objects manually.
+**Exit:** a developer can start, observe, approve, interrupt, and resume a product coding session from
+the CLI without constructing Python objects by hand.
 
 ### M4-03 — Close tool-loop gaps
 
-Exercise `vg-code-default` against a small existing repository and fix only defects exposed by the
-run. The minimum product tool surface is `fs.read`, `fs.search`, `patch.apply`, and allowlisted
-`proc.exec`. Improve prompts, schemas, receipts, diff ergonomics, and context compaction in the pack,
-clients, or adapters—not the kernel.
+Exercise `vg-code-default` against a small real repository and fix only defects the run exposes. The
+minimum tool surface is `fs.read`, `fs.search`, `patch.apply`, and allowlisted `proc.exec`. Improve
+prompts, schemas, receipts, diff ergonomics, and compaction in the pack, clients, or adapters — never
+the kernel.
 
-Exit: the agent inspects before editing, applies a valid change, runs the preregistered verification
-command, reacts to failure, and stops after success within declared budgets.
+**Exit:** the agent inspects before editing, applies a valid change, runs the preregistered
+verification command, reacts to failure, and stops after success within declared budgets.
 
-### M4-04 — Execute RF-95
+### M4-04 — Scientific trajectory capture *(new; parallel with M4-02/03)*
 
-Freeze a non-trivial coding task and verifier before the run. Execute exactly one candidate with:
+Implement the provenance rule from [`../01_law/EVIDENCE.md`](../01_law/EVIDENCE.md): every variable
+that can materially affect a result gets observable identity and provenance.
 
-- a live non-fake/non-cassette provider;
-- `vg-code-default` through canonical compose/activate/`Runtime.run_composed`;
-- the `product` profile bound into `D_R`;
-- at least one repository observation, file mutation, and verification process effect;
-- a non-empty before/after diff and passing verifier receipt;
-- file-backed SQLite-WAL and complete terminal trajectory;
-- a fresh process reopening the ledger and reconstructing the same terminal state.
+- Emit context-selection, compaction, and cache events carrying policy identity, parameters, input
+  digest, and output digest — **digests and references, not inlined blobs**.
+- Store large content (full prompts, raw model outputs, snapshots, patches) in the artifact store,
+  content-addressed.
+- Add retention as an `ExecutionProfile` axis; the reproducibility class MUST enter `D_R`.
+- Provide a trajectory reader good enough to compare two runs.
 
-No alternate driver, stitched trace, manual event repair, or post-hoc task change qualifies. An
-independent reviewer confirms the evidence and the Engineering Director closes M-4. RF-85 is not
-implicitly satisfied.
+**Exit:** two runs of the same task can be diffed on the variables that differed. Without this,
+M-6.5, M-7, and M-8 cannot be measured.
 
-## 4. Active Lane B — M7-01 Measurement
+### M4-05 — Execute RF-95 *(serializing; depends on M4-02, M4-03, M4-04)*
 
-ADR-0092 authorizes a sequential effect-log measurement in parallel with M-4. Construct effect
-references from actual `EffectStarted` records with resolved resources—not static manifests. Capture
-selector, sink, idempotency key, wall/model/tool timing, and cache-hit rate over a fixed-seed workload.
+Freeze a non-trivial coding task and verifier before the run. Execute exactly one candidate with a
+live non-fake provider through canonical compose/activate/`Runtime.run_composed`, the `product`
+profile in `D_R`, at least one observation, one mutation, one verification effect, a non-empty diff,
+a passing verifier receipt, file-backed WAL, a complete terminal trajectory, and fresh-process
+reconstruction. An independent reviewer confirms the evidence; the Engineering Director closes M-4.
+RF-85 is not implicitly satisfied.
 
-Allowed: capture, analysis, deterministic fixtures, reproducible runner. Forbidden: scheduler,
-concurrency, claim TTL, leasing protocol, worker pool, or topology engine. Below 30% useful
-independence, the default decision is to cancel M-7. At or above 30%, a successor ADR is still needed.
+## 4. Lane B — M-5a preparation *(may start now)*
 
-## 5. M-5 Preparation — Formal Pack #2
+Design only; implementation opens when M-4's telemetry vocabulary stabilizes.
 
-Preparation starts now; implementation starts only after RF-95 closes.
+- **M5a-P1** — define `Operation`, `Lineage`, `Scope`, `AgentView` as contracts.
+- **M5a-P2** — decide which facts are semantically necessary for reconstruction. Criterion: *does
+  this change the history we must reconstruct or analyze?* — never "it happened internally".
+- **M5a-P3** — RED tests: a fresh process must rebuild goal, plan, prior attempts, settled effects,
+  budget, strategy, and terminal status from the ledger alone.
+- **M5a-P4** — plan the runtime domain-decoupling migration named in
+  [`../01_law/EXTENSIBILITY.md`](../01_law/EXTENSIBILITY.md): `runtime/entrypoint.py`,
+  `runtime/scoring.py`, `runtime/autonomous_grant.py`.
 
-### M5-P1 — Choose the falsification task
+Prohibited before the ADR: adding event kinds, changing the reducer, or re-tagging `M-5-BASE`.
 
-Use a deterministic, materially non-coding domain. Preferred first slice: structured arithmetic or
-SMT witness production with an independent checker. The task must require model reasoning and tool
-use, produce a typed witness, and admit a deterministic pass/fail oracle.
+## 5. Lane C — M7-01 measurement *(non-blocking, named historical lane)*
 
-### M5-P2 — Freeze the pack boundary
+`ADR-0092` authorizes sequential effect-log measurement in parallel. Build `EffectRef` from actual
+`EffectStarted` records with resolved resources — not static manifests. Capture selector, sink,
+idempotency key, wall/model/tool timing, and cache-hit rate over a fixed-seed workload.
 
-The new pack may add:
+Allowed: capture, analysis, deterministic fixtures, reproducible runner. **Forbidden:** scheduler,
+concurrency, claim TTL, leasing, worker pool, topology engine. Terminates in an explicit Director
+decision — implement, simplify, or cancel — recorded as a successor ADR.
 
-- `packs/formal-default/` manifest, prompts, schemas, and policies;
-- formal environment and checker/evaluator adapters behind existing ports;
-- typed witness artifacts and pack-owned fixtures;
-- client selection and result rendering.
+## 6. Always-parallel lanes
 
-It may not change semantics under `vanguard/packages/{domain,ports,kernel,runtime,agency/episode}`
-during the RF-86 proof interval. If it cannot be expressed through the existing ports and composition,
-M-5 fails and returns an abstraction finding; RF-86 is never weakened.
+Open now; each blocks only on its own named interface. Every charter MUST name the RF-86 frozen paths
+(`vanguard/packages/{domain, ports, kernel, runtime, agency/episode}`) as prohibited scope.
 
-### M5-P3 — RED contract before implementation
+| Lane | Home | Blocks on |
+|---|---|---|
+| Model & tool adapters | `vanguard/packages/adapters/` | `ports/` |
+| UI / CLI | `vanguard/clients/cli/` | client request contract |
+| Indexing & retrieval | adapters | `IndexPort` |
+| Context management | `agency/context/` | nothing |
+| Coding pack tool loop | `packs/code-default/` | existing SPI |
+| Tooling, linters, docs | `tools/`, `docs/` | nothing |
 
-Before opening M-5, add tests proving that code and formal packs:
+## 7. Explicit Non-Scope
 
-- compose through the same API and activation lifecycle;
-- use the same episode mechanism, effect dispatch, budgets, WAL, and trajectory contracts;
-- differ only in pack/adapters/artifacts/client presentation;
-- produce independently checkable domain outputs;
-- leave all RF-86 frozen paths unchanged.
+- Do not implement `agent.spawn` before M-5b closes.
+- Do not implement concurrency, scheduling, or topologies from M7-01 data without a successor ADR.
+- Do not build memory, broad MCP support, swarms, learned skills, or metacognition now.
+- Do not delete RF-85 assurance code; it remains an optional profile.
+- Do not add a second execution authority, a conceptual mirror package, or kernel domain semantics.
+- Do not weaken RF-86 or move `M-5-BASE` outside an ADR-authorized substrate change.
 
-### M5 exit
-
-One real formal task produces a valid witness through the unchanged substrate and deterministic
-checker. A failure requiring substrate semantics is valuable falsification evidence, not permission
-to patch the kernel until the claim passes.
-
-## 6. Explicit Non-Scope
-
-- Do not implement `agent.spawn` before M-5 closes.
-- Do not implement concurrency or topologies from M7-01 data without a successor ADR.
-- Do not build advanced memory, broad MCP support, swarms, learned skills, or metacognition now.
-- Do not delete RF-85 assurance code merely because it is no longer the product gate.
-- Do not add conceptual mirror packages or a second execution authority.
-
-## 7. Verification
+## 8. Verification
 
 ```bash
 python3 -m unittest discover -s test -t .

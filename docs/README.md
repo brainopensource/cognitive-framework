@@ -7,43 +7,68 @@ canonical_for:
   - role-based-reading-paths
 status: living
 owner: documentation-architect
-version: "0.6.1"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-25
 read_when:
   - selecting-a-documentation-bundle
   - navigating-the-repository
 do_not_read_when:
   - implementing-a-specific-module-after-bundle-selection
+subordinate_to: ../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Vanguard / AETHER Documentation Index
 
-> **Status:** Living documentation precedence ladder, tier catalog, and progressive reading paths for Vanguard / AETHER v0.6.1 Foundation.
+> **Status:** Living documentation precedence ladder and reading paths for AETHER v0.7+.
 
 ---
 
 ## 1. Documentation Precedence & Authority Tiers
 
-All repository documentation follows a strict precedence hierarchy. Only Tiers 1, 2, and 3 authorize implementation work. Tiers 4 and 5 are descriptive and advisory.
+Highest first. **In a conflict, the higher document wins.**
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
+│                    0. THE VISION (WHAT AETHER IS)                        │
+│  VISION.md — constitutional. Identity, ontology, direction. Law Zero.    │
+└────────────────────────────────────┬─────────────────────────────────────┘
+                                     │ governs
+┌────────────────────────────────────▼─────────────────────────────────────┐
+│                             1. THE LAW (RULES)                           │
+│  docs/SPEC.md (+ docs/01_law/) — RFC-2119 normative specification        │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ governs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                          2. THE DECISIONS (WHY)                          │
-│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
+│  docs/02_decisions/ — immutable, append-only ADRs                        │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ directs
 ┌────────────────────────────────────▼─────────────────────────────────────┐
-│                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
+│              3. CONTRACTS & PROTOCOLS (WIRE REALIZATION)                 │
+│  docs/05_contracts/, docs/06_protocols/, schemas/                        │
+└────────────────────────────────────┬─────────────────────────────────────┘
+                                     │ scheduled by
+┌────────────────────────────────────▼─────────────────────────────────────┐
+│                        4/5. THE EXECUTION (HOW & NOW)                    │
+│  milestones.md sequences · sprint_active.md authorizes                   │
+└────────────────────────────────────┬─────────────────────────────────────┘
+                                     │ described by
+┌────────────────────────────────────▼─────────────────────────────────────┐
+│                         6. COMMUNICATION ONLY                            │
+│  README · 04_architecture · 07_engineering · 08_theory — no architecture │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+Three binding rules (`ADR-0095`):
+
+1. A lower document may **not** be used to reject a concept accepted in the locked
+   [`VISION.md`](../VISION.md). Conflicting lower text is stale and must be reconciled.
+2. The Vision changes only through an explicit Vision-superseding ADR.
+3. Where implementation has not reached the Vision, that is documented as
+   *current-state gap / planned migration* — never as a reason to weaken the Vision.
+
 
 | Tier | Directory / File | Authority | Role & Contents |
 |---|---|---|---|
@@ -92,7 +117,7 @@ All repository documentation follows a strict precedence hierarchy. Only Tiers 1
 2. [`04_architecture/c4_component.md`](04_architecture/c4_component.md) — Hexagonal production lattice.
 3. [`04_architecture/traceability_matrix.md`](04_architecture/traceability_matrix.md) — Maturity-labelled concept-to-evidence map.
 4. [`02_decisions/INDEX.md`](02_decisions/INDEX.md) — Architecture decision catalog (`0069`–`0087`).
-5. [`03_execution/milestones.md`](03_execution/milestones.md) — Macro gate ladder (M-0 through M-10).
+5. [`03_execution/milestones.md`](03_execution/milestones.md) — Macro gate ladder (M-0 through M-9; `ADR-0095` §4 maps historical identifiers).
 
 ### 🔬 Cognitive Systems Researcher
 1. [`08_theory/README.md`](08_theory/README.md) — Theory index and maturity ratings.

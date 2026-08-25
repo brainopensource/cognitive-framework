@@ -16,6 +16,7 @@ implementation_status: AS_BUILT
 owner: lead-documentation-engineer
 version: "0.6.1"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---

@@ -14,6 +14,7 @@ read_when:
   - implementing-cold-recovery
 do_not_read_when:
   - changing-only-documentation-navigation
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -51,7 +52,12 @@ history are evidence, never implementation requirements.
 
 ## Preamble
 
-**Vanguard is a recursive agency substrate that compiles harnesses.** The first *domain pack* is
+> **Authority.** This leaf is normative but **subordinate to [`VISION.md`](../../VISION.md)** (Law
+> Zero, `ADR-0095`). Where a clause here still describes the pre-0095 architecture, the Vision wins
+> and the clause is reconciled — it is never a counter-authority. Clauses marked
+> *current-state gap* describe implementation that has not yet reached the locked target.
+
+**Vanguard is a general event-sourced agentic computation substrate that compiles harnesses.** The first *domain pack* is
 coding; coding is not the architecture. One execution machine
 (`Agent = Principal + HarnessInstance`, `ADR-0070`) runs every agent, subagent, and (later) swarm
 participant. Declarative manifests plus versioned plugins compile into specialised harnesses. The
@@ -248,6 +254,26 @@ sync (keep, D-16) with JSONL export; blob writes are `write→fsync→emit(diges
 
 ### 1.3 Determinism & replay contract
 
+**Replay and re-execution MUST NOT be conflated.**
+
+*Replay* applies persisted events to compatible reducers and reconstructs the semantically equivalent
+state that existed at a point in the execution. A prior model response is **not** recomputed: it is
+already a recorded fact. Under identified schemas, reducer versions, and artifacts, replay is
+deterministically reproducible. Replay answers: *what state results from the history that occurred?*
+
+*Re-execution* runs models, tools, or policies again over equivalent inputs. It carries **no such
+guarantee**. Even at temperature zero, backend changes, floating-point behaviour, batching, model
+routing, provider revisions, and infrastructure differences may change the result. Low temperature
+reduces variance; it does not make modern model inference deterministic. Re-execution answers:
+*what would happen if equivalent conditions were submitted again?*
+
+Both are legitimate and both are used. Re-execution over a recorded trajectory is the basis of
+**re-simulation**: hold part of a trajectory fixed and vary a model, prompt, topology, compaction
+policy, retrieval depth, recursion depth, budget, tool selection, or strategy controller. The
+scientific requirement is not to pretend determinism exists, but to state exactly which variables
+were held constant, which were changed, and what resulted — see
+[`MEASUREMENT.md`](MEASUREMENT.md) and [`EVIDENCE.md`](EVIDENCE.md).
+
 `ClockPort`, `RandomPort`, and model cassettes remain injected; replay mode substitutes recorded values
 keyed by `(run_id, seq)`. **Replay taxonomy (`ADR-0071`) — these MUST NOT be conflated:** state replay
 (deterministic reconstruction of grants, budgets, approvals, episode FSM); schedule replay (needs
@@ -272,6 +298,50 @@ not enable it in v0.6), cooperative cancellation tokens, turn/depth ceilings as 
 the six named fields remain `{usd_micros, millis, tokens, bytes, turns, depth}`, but they are **not**
 one additive vector — additive conserved `{usd_micros, tokens, bytes, charged millis}` versus
 structural ceilings `{depth, turns}`. Sibling depths are not summed. Heartbeat emission stays.
+
+### 1.5 Agent state is a projection
+
+**`Agent = Identity + Policy + Event-Derived Projection + Execution Boundary`.** There is no
+privileged persistent `Agent` object in the architecture. *Identity* correlates a lineage; *policy*
+influences which operations are chosen; *projection* derives the semantically relevant state from the
+ledger; *execution boundary* bounds resources, context, budget, depth, and terminal conditions.
+
+`Episode`, `HarnessSession`, `_LayeredOperator._dialogue`, and equivalent runtime objects MAY hold
+transient optimization state — caches, buffers, open handles, memoized context. **No state required
+for semantic continuation may exist only inside those objects.** Everything needed to recover the
+current goal, plan, relevant observations, settled effects, budget state, strategy state, context
+references, and terminal status MUST be reconstructible from canonical events and artifacts through
+projections. A process may die; another process opens the ledger, rebuilds the lineage, and continues.
+
+Because state is projected rather than stored in an object, a lineage may be **metamorphic**: the same
+identity may begin exploring, adopt a planning strategy, enter debugging behaviour, request
+delegation, abandon a hypothesis, and terminate as a synthesizer — without its ontological nature
+being fixed in advance and without destroying provenance.
+
+Domains MAY define their own projections. The canonical **ledger reducer remains single**; a
+domain-specific view is a projection over it, never a second reducer of record and never a second
+source of truth.
+
+> **Current-state gap (closed by M-5a).** Today, part of the semantic continuation state still lives
+> inside `Episode`/`HarnessSession` objects rather than in projections, and the `AgentView` event
+> vocabulary (goal declaration, plan revision, strategy selection, progress assessment, context
+> compaction) is not yet allocated. This is a documented migration, not a weakening of the rule
+> above. The substrate is re-tagged as the new `M-5-BASE` once the migration lands.
+
+### 1.6 Physical append order and the logical causal graph
+
+`seq` is the **durable physical append order** within a consistency unit (`project_id`). It provides
+total order for persistence, recovery scanning, and `(run_id, seq)` keying.
+
+`seq` is **not** logical dependency. Causation, parentage, correlation, lineage, branches, and joins
+define the **logical, partially ordered execution graph**. `A -> C` and `B -> C` may both hold without
+any ordering between `A` and `B`. Conflating the two is what turns an event log into a false claim
+about what depended on what.
+
+> **Current-state gap.** The runtime today executes a single sequential turn loop (I-11) and the
+> partially ordered graph is expressed only through `causation_id`/`correlation_id` on the envelope.
+> Branch, join, and readiness semantics are **target architecture**, gated on the M7-01 measurement
+> and a successor ADR under M-7. Nothing in this section claims those features exist today.
 
 ---
 

@@ -9,100 +9,247 @@ status: living
 owner: engineering-director
 version: "0.7.0"
 last_verified: 2026-08-25
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Macro Milestones — AETHER Higgs Release
+# Macro Milestones — AETHER v0.7+
 
-This file defines sequencing and objective exit gates. Only
+Sequencing and objective exit gates for the roadmap locked by [`VISION.md`](../../VISION.md) (Law
+Zero) and [`ADR-0095`](../02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md). Only
 [`sprint_active.md`](sprint_active.md) authorizes current implementation. A milestone closes on
 evidence from the canonical executable path, never because code, schemas, or isolated tests exist.
 
+**Blocking is technical, never ceremonial.** A team is blocked only when its work depends on an
+unfinished interface, schema, invariant, primitive, or runtime contract. Every blocked row below
+names that dependency. There are no milestone-wide locks.
+
 ## Milestone Ladder
 
-| Milestone | Outcome | Exit gate | Status | Depends on |
+| Milestone | Outcome | Exit gate | Status | Blocked on |
 |---|---|---|---|---|
-| **M-0 Engineering Truth** | CI measures production truth and named falsifiers | Production suites, F-01…F-21, codegen, architecture gates | **COMPLETE** | ADR-0075 |
-| **M-1 Trust Spine** | Generic effect authority, budgets, provenance, event truth | S0–S12 falsifiers; single writer; TCB `<=1438` | **COMPLETE** | M-0 |
-| **M-2 Runtime Recovery** | Truthful trajectories and restart-safe state | RF-23 rich trajectory and RF-25 fresh-process WAL continuation | **COMPLETE** | M-1 |
-| **M-3 Extensibility Contracts** | Named graph, registry lifecycle, Layer-0 retirement | RF-28–RF-45 retained; operational closure resolved by M-3C | **COMPLETE** | M-2 |
-| **M-3C Canonical Convergence** | One `compose -> activate -> run` authority | RF-78–RF-84; identity, lifecycle, durability, authority retirement | **COMPLETE** | M-3 |
-| **W-3D Product Profiles** | Identity-bearing profiles and one adapter bootstrap | RF-87–RF-94 | **COMPLETE** | M-3C |
-| **M-4 Product Coding Proof** | Useful, durable coding agent through the framework | RF-95 | **ACTIVE** | W-3D, ADR-0094 |
-| **M-5 Generality Proof** | Deterministic Formal Pack #2 through unchanged substrate | RF-86 plus RF-52/RF-53 witness | **BLOCKED ON RF-95** — RF-86 measures zero diff against a substrate baseline a real run has exercised. Preparation (pack, task, oracle, RED tests) is open now. | RF-95 |
-| **M-6 Mediated Delegation** | Capability-bounded `agent.spawn` as an ordinary effect | RF-55–RF-59; attenuation, recovery, kill-tree proof | **BLOCKED ON `SpawnAdapter`** — no spawn adapter or attenuation algebra in the production import path; `agent.spawn` is inert in `runtime/delegation.py` (`M6_SPAWN_ACTIVE = False`), `domain/artifacts/manifest.py`, and the inert-verb list. | `SpawnAdapter` + attenuation algebra |
-| **M-7 Measured Concurrency** | Optional scheduler only if measurement justifies it | M7-01 plus successor ADR and RF-46–RF-48 | **BLOCKED ON M7-01 BASELINE** — the sequential effect-log capture does not exist yet; without it a scheduler win is unmeasurable. | M7-01 result |
-| **M-8 Declarative Topologies** | Replaceable agent coordination above generic execution | RF-65/RF-66; zero privileged second engine | **BLOCKED ON M7-01 BASELINE** — without a sequential baseline a topology win cannot be told from a scheduler win. | M7-01 result, M-6 |
-| **M-9 Retrieval/Skills Lab** | Rebuildable retrieval and governed macro experiments | RF-67/RF-68/RF-77 plus measured lift | **HORIZON** | M-8, v1 review |
-| **M-10 Governed Adaptation** | Reversible, attributable promotion experiments | RF-69/RF-70 and human rollback | **HORIZON** | M-9 |
+| **M-0 Engineering Truth** | CI measures production truth and named falsifiers | F-01…F-21, codegen, architecture gates | **COMPLETE** | — |
+| **M-1 Trust Spine** | Generic effect authority, budgets, provenance, event truth | S0–S12 falsifiers; single writer; TCB `<=1438` | **COMPLETE** | — |
+| **M-2 Runtime Recovery** | Truthful trajectories and restart-safe state | RF-23 rich trajectory; RF-25 fresh-process WAL continuation | **COMPLETE** | — |
+| **M-3 / M-3C Contracts & Convergence** | One `compose -> activate -> run` authority | RF-28–RF-45 retained; RF-78–RF-84 | **COMPLETE** | — |
+| **W-3D Product Profiles** | Identity-bearing profiles and one adapter bootstrap | RF-87–RF-94 | **COMPLETE** | — |
+| **M-4 Product Coding Proof + Trajectory Capture** | Useful, durable coding agent **and** the scientific observability that every later milestone is measured with | RF-95 plus an analyzable trajectory carrying context/compaction/cache/model provenance | **ACTIVE** | — |
+| **M-5a Event-Derived Agent** | `Operation`, `Lineage`, `Scope`, `AgentView`; semantic state reconstructible from events; new `M-5-BASE` | A fresh process rebuilds goal, plan, prior attempts, settled effects, budget, strategy, and terminal status from the ledger alone | **PLANNED** | M-4 trajectory vocabulary |
+| **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs the re-tagged baseline; deterministic independent witness | **PLANNED** | M-5a baseline re-tag |
+| **M-6 Recursive Delegation** | `agent.spawn` as nested execution lineages | RF-55–RF-59; attenuation of authority/budget/depth/turns; join, cancellation, kill-tree recovery after real restart | **PLANNED** | `SpawnAdapter` + attenuation algebra in the production import path |
+| **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **PLANNED** | M-4 telemetry (measurement); M-6 only for the delegate action |
+| **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PLANNED** | M-6.5 + M7-01 result |
+| **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PLANNED** | M-7 |
+| **M-9 AETHER v1.0** | Integrated coding + formal + research general agent framework | Adaptation, transfer, and long-horizon criteria met; v1.0 release | **PLANNED** | M-8 |
 
-## M-4 — Product Coding Proof (RF-95)
+### Always-parallel lanes
 
-One fixed coding task must complete through the canonical coding pack and `Runtime.run_composed` with:
+These never block on a milestone. They block only on their own named interface.
 
-1. a live, attributable provider and measured usage;
-2. repository observation through mediated tools;
-3. an authorized real file mutation and non-empty diff;
-4. a passing preregistered verification command receipt;
-5. the `product` profile bound into `D_R`;
-6. file-backed SQLite-WAL and a complete terminal trajectory;
-7. fresh-process reconstruction of the same terminal state;
-8. no fake/cassette model, alternate driver, stitched trace, or manual event repair.
+| Lane | Home | Depends on |
+|---|---|---|
+| Model & tool adapters | `vanguard/packages/adapters/` | `ports/` |
+| UI / CLI | `vanguard/clients/cli/` | client request contract |
+| Indexing & retrieval | adapters | `IndexPort` |
+| Context management | `agency/context/` | generic; no kernel change |
+| Coding pack tool loop | `packs/code-default/` | existing SPI |
+| Tooling, linters, docs | `tools/`, `docs/` | — |
+| **M7-01 concurrency measurement** | analysis only | none — **named historical lane, retained** |
 
-Host execution is allowed, but it remains an adapter behind the same capability/effect mediation and
-ledger. It is not permission for the client or model to mutate the workspace outside the substrate.
+**M7-01** keeps its identifier and its provenance (`ADR-0092`). It captures actual sequential
+`EffectStarted`/settlement records with resolved resources, selectors, sinks, idempotency keys,
+timing, WAL contention, and cache-hit rates over a fixed-seed workload. It may not add concurrency,
+scheduler, workers, claims, leases, or topology. It terminates in an explicit Director decision to
+**implement, simplify, or cancel**, recorded as a successor ADR. Below ~30% useful independence the
+default decision is to cancel advanced scheduling and retain I-11 — that is a success of the process,
+not a failure. This decision is an input to M-7 and does not gate M-4, M-5a, M-5b, M-6, or M-6.5.
 
-### Optional RF-85 assurance
+## Milestone identifier mapping
 
-RF-85 retains its original nine-row hermetic contract: real model, authorized effect, workspace
-change, rootless containment, exterior signed evaluation, WAL, cold reconstruction, rich trajectory,
-and one runtime authority bound to one uninterrupted lineage. ADR-0094 makes this an optional
-higher-assurance certification rather than the M-4/M-5 dependency. No RF-85 rows are currently claimed.
+Historical identifiers keep their historical meaning; `ADR-0095` §4 is authoritative for translation.
+Older documents and ADRs are read through this table rather than edited.
 
-## M-5 — Formal Pack #2
+| Historical id | Historical meaning | v0.7+ successor |
+|---|---|---|
+| M-4 | Product coding proof (RF-95) | **M-4**, plus trajectory capture |
+| M-5 | Formal Pack #2 (RF-86) | split into **M-5a** then **M-5b** |
+| M-6 | Mediated `agent.spawn` | **M-6**, reframed as nested lineages |
+| M-7 | Measured scheduler / concurrency | folded into **M-7**; M7-01 keeps its name |
+| M-8 | Declarative topology support | folded into **M-7** |
+| M-9 | Retrieval, skills, macro laboratory | **M-8** |
+| M-10 | Governed meta-cognition | **M-6.5** (operational) and **M-9** (integration) |
 
-M-5 tests whether coding is a client of the framework rather than hidden substrate semantics. The
-first workload should produce a structured arithmetic/SMT-style witness checked by a deterministic,
-independent adapter.
+## Milestone contracts
 
-Allowed during the proof:
+### M-4 — product proof and scientific baseline (RF-95)
 
-- a new pack, prompts, policies, schemas, and fixtures;
-- domain adapters behind existing ports/binding-provider contracts;
-- witness artifacts, deterministic checker, and client rendering.
+One fixed coding task completes through the canonical coding pack and `Runtime.run_composed` with a
+live attributable provider, mediated repository observation, an authorized real file mutation and
+non-empty diff, a passing preregistered verification receipt, the `product` profile in `D_R`,
+file-backed SQLite-WAL, a complete terminal trajectory, and fresh-process reconstruction. No
+fake/cassette model, alternate driver, stitched trace, or manual event repair qualifies.
 
-Forbidden during the RF-86 proof interval:
+M-4 additionally installs the observability that the rest of the roadmap is measured with: model
+invocations, selected context, tool calls, effects, failures, retries, latency, tokens, cost,
+artifacts, and outcomes, following the provenance rule in
+[`../01_law/EVIDENCE.md`](../01_law/EVIDENCE.md). Without it, M-6.5, M-7, and M-8 are unfalsifiable
+by construction.
 
-- semantic changes under `vanguard/packages/{domain,ports,kernel,runtime,agency/episode}`;
-- a formal-specific branch in kernel, agency, session, or runtime;
-- weakening RF-86 or moving `M-5-BASE` after Formal Pack implementation begins.
+Host execution is allowed; it remains an adapter behind the same capability mediation and ledger. It
+is not permission for the client or model to mutate the workspace outside the substrate.
 
-If the formal domain requires a substrate change, M-5 returns an abstraction finding. Make the
-generic correction under a successor ADR, re-run M-4 if behavior changed materially, then establish a
-new baseline before restarting the proof.
+### M-5a — the agent becomes a projection
 
-## M7-01 — Authorized Measurement Only
+M-5a defines which facts are semantically necessary to reconstruct an agentic execution: goal
+declaration, plan creation and revision, observation, proposal, effect settlement, progress
+assessment, strategy change, context compaction, evaluation, and conclusion.
 
-M7-01 may proceed in parallel. It captures actual sequential `EffectStarted`/settlement records,
-resolved resources, selectors, sinks, idempotency keys, timing, WAL contention, and cache-hit rates
-over a fixed-seed workload. It may not add concurrency, scheduler, workers, claims, leases, or topology.
+The criterion for introducing an event kind is **not** "this happened internally". It is: *does this
+change the history we must reconstruct or analyze?* Each new kind still requires an ADR, allocation,
+writer, reducer, schema, conformance vector, and coverage proof.
 
-Below 30% useful independence, the default Director decision is to cancel M-7 and retain I-11. At or
-above 30%, a successor ADR must still quantify attainable speedup and contention cost.
+`AgentView` is a **projection, not a second source of truth**. The canonical ledger reducer stays
+single; domains may hold their own projections over it. What stays stable across domains are the
+contracts for event identity, lineage, persistence, effects, and composition.
+
+M-5a knowingly changes substrate semantics and therefore happens **before** the baseline used to
+prove generality. `M-5-BASE` is re-tagged only after the migration lands and gates are green.
+
+### M-5b — generality as falsification
+
+M-5b tries to break the abstraction with a materially non-coding domain producing a deterministic,
+independently checkable witness. If executing it requires mathematical knowledge in the kernel, a
+change to the generic episode mechanism, or a second runtime, that is an architectural finding.
+
+RF-86 is measured as a diff against `M-5-BASE` over `vanguard/packages/{domain, kernel, ports,
+runtime, agency/episode}` and runs in CI as `ci/rf86_gate.sh`. Two rules are binding:
+
+1. **`M-5-BASE` MUST be re-tagged only after an ADR-authorised substrate change lands.** Tagging
+   before makes the gate fire on the authorised change itself; the gate cannot distinguish an
+   authorised edit from an illicit kernel hook, and is not supposed to.
+2. **RF-86 MUST NOT be weakened to accommodate a substrate change** — not by narrowing the frozen
+   paths, not by allowlisting a file, not by downgrading the failure to a warning. A substrate change
+   with no ADR behind it is the finding, not the tag.
+
+The gate fails closed when `M-5-BASE` does not resolve, so `actions/checkout` runs with
+`fetch-depth: 0` and the tag is pushed alongside the branch.
+
+### M-6 — recursion as nested lineages
+
+Spawn does not instantiate an agent. It creates a child lineage with its own identity, parent
+reference, goal, selected context, budget, capabilities, depth boundary, and terminal conditions,
+which produces its own events and artifacts and whose result the parent incorporates. Recursion is
+the nesting of bounded causal regions.
+
+Recovery follows from this: neither parent nor child must survive as a process. Reopen the ledger and
+classify each lineage as complete, interrupted, waiting, or still executable. The kill-tree drill —
+SIGKILL the parent mid-child, assert the cold path returns `UNDETERMINABLE` and never a silent
+retry — is part of the gate.
+
+### M-6.5 — metacognition without privilege
+
+A meta-controller observes projections of progress, failure, repetition, uncertainty, budget
+consumption, or missing knowledge, and selects a strategy: revise the plan, request context, abandon a
+hypothesis, change verification, delegate, or stop.
+
+No decision rewrites history. `PlanRevised` does not delete the previous plan; it supersedes it in the
+projection while preserving the path by which the change happened. That is precisely what makes the
+approach scientifically useful later.
+
+**Metacognition is policy/reducer/plugin, never a kernel primitive.** Its benefit is established by
+paired runs with and without the controller over success rate, wasted loops, tool calls, cost,
+latency, failure recovery, and final quality.
+
+### M-7 — structure, time, and justified concurrency
+
+Topology defines structure: which roles or lineages exist, which causal relations are permitted, who
+may request work from whom, which artifacts connect stages. The scheduler decides temporality: among
+ready operations, which run first, where, which are parallelized, suspended, or prioritized. The
+kernel decides admissibility. The ledger records what happened. **These four responsibilities do not
+merge.**
+
+A role is not a new class — it is a lineage created with a given policy, context configuration,
+capabilities, and goal. Direct agent, planner/executor, critic/reviser, debate, research fan-out, and
+bounded tree search become configurations of one operational language.
+
+Simple, obviously safe parallelism (independent reads, independent searches) may land as soon as the
+contracts permit. Advanced scheduling — claim TTL, leasing, worker pools — requires the M7-01 result
+and a successor ADR, because the hard part is budget reservation, idempotent settlement, and recovery
+with in-flight effects, not the reads.
+
+### M-8 — memory, skills, and learning
+
+Memory and retrieval are projections and plugins, never canonical truth. Skills are versioned
+reusable structures — prompt policies, small programs, parameterized operation sequences, topology
+fragments, heuristics, strategy policies — derived from analyzed trajectories.
+
+The lifecycle is: runs produce trajectories; trajectories produce data; analysis identifies success
+and failure patterns; candidate skills or policies emerge; candidates are evaluated on independent
+workloads; improved versions are explicitly promoted; poor versions are rolled back.
+
+**An agent may propose a skill; it may not unilaterally declare it better.** Promotion requires
+explicit evaluation, provenance, and tested rollback.
+
+### M-9 — AETHER v1.0
+
+Integration of coding, formal reasoning, research, event-derived identity, durable recovery,
+recursive delegation, metacognitive replanning, topologies, long-term memory, skill acquisition,
+model/tool routing, bounded autonomous execution, and full observability and reproduction.
+
+The v1 test is not component count. It is: solve novel tasks in at least three domains; create and
+revise plans autonomously; recognize failure and change strategy; delegate subtasks; recover after a
+crash; reuse knowledge from prior executions; produce verifiable results; improve policies/skills
+without modifying the core; operate over long horizons under bounded budget; and keep working when
+models, tools, and topologies are replaced.
+
+This is released as **AETHER v1.0 General Agent Framework**. No AGI claim is made or implied.
+
+## Standing Architectural Constraints
+
+- [`VISION.md`](../../VISION.md) is Law Zero. This file sequences it; it does not amend it.
+- `sprint_active.md` is the only current implementation authority.
+- S0–S12, monotonic attenuation, typed budgets, JCS, `D_H/D_R/D_X`, single-writer ledger truth, and
+  I-9 continuity remain frozen. Assurance mechanisms remain available as optional profiles; profile
+  identity in `D_R`, no false promotion claims, and fail-closed behaviour on an explicitly requested
+  unavailable profile remain binding in every mode.
+- I-11 sequential execution remains mandatory until M-7 measurement and explicit Director lift.
+- Composition is a static declaration of possibilities; the trajectory is the emergent causal graph.
+  Neither is a runtime workflow engine.
+- Memory, skills, learning, topology, scheduling, and metacognition never become kernel semantics.
+- A new event kind requires a successor decision, allocation, writer, reducer, schema, conformance
+  vector, and coverage proof.
+- No broad rewrite, third runtime, domain-specific kernel branch, or package-per-concept taxonomy.
+
+## Two-Lane Delivery Model
+
+| Dimension | Devs A — Principal / Specialist | Devs B — Senior Developers |
+|---|---|---|
+| Primary responsibility | Irreversible or cross-module architecture, contract ownership, identity, lifecycle, composition/activation integration, final technical arbitration within ratified law | Bounded implementation of frozen contracts: packs, adapters, persistence wiring, fixtures, callers, conformance, CI, migrations |
+| Autonomy | May decide high-level reversible design within the active charter without per-task approval | May decide local implementation details without changing an interface, authority boundary, or accepted decision |
+| Prohibited delegation | Unresolved ontology, trust, identity, event-writer, compatibility-sunset, or recovery decisions cannot be delegated to B | Must not redesign kernel, authority, identity, canonicalization, lifecycle ownership, event semantics, or recovery |
+| Integration | Publishes interface + RED contract; owns shared hotspots and cross-lane merge | Builds against frozen interfaces; rebases after A contract slices; reports architectural gaps as falsifiers |
+| Acceptance | Cannot self-certify a cross-lane gate | Cannot close a milestone from local tests alone |
+
+Every task moved to the active board MUST state: owner lane/class, exact outcome, affected modules,
+dependencies, architectural risk, migration path, rollback, acceptance criterion, allocated falsifier,
+evidence artifact, definition of done, and prohibited scope.
+
+```text
+A interface + RED -> B bounded implementation -> A integration
+-> cross-lane gate -> full repository gates -> independent sign-off
+```
 
 ## Dependency Rules
 
 - Work is blocked only by a named unfinished interface, schema, invariant, primitive, or runtime
-  contract — never because a preceding milestone has not been ceremonially closed. Every lane
-  without such a dependency (coding CLI/TUI, coding pack, model/tool adapters, M-5 preparation,
-  M7-01, indexing behind `IndexPort`, context management, tooling) runs in parallel now.
-- `M-5-BASE` must point to the reviewed post-ADR-0094 substrate before Formal Pack code begins.
-- An ADR-authorized substrate correction makes the old RF-86 baseline intentionally red; RF-86 is
-  never weakened. Advance the tag only after the correction is committed and verified.
+  contract — never because a preceding milestone has not been ceremonially closed.
+- `M-5-BASE` must point to the reviewed post-M-5a substrate before Formal Pack code begins.
+- An ADR-authorized substrate correction makes the old RF-86 baseline intentionally red; advance the
+  tag only after the correction is committed and verified. RF-86 is never weakened.
 - ADR-0090/0091 prepare M-6 event/digest semantics but do not activate delegation.
 - Topology decides what may run; scheduler decides when/where; kernel decides whether an effect is
-  authorized. These responsibilities do not merge.
+  authorized; the ledger records what happened. These responsibilities do not merge.
 - Security/assurance may vary by execution profile. Layer boundaries, event lineage, and authority
   mediation do not.
 - Reviews under `_archive/` are inputs, never execution authority.

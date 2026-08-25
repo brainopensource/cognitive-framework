@@ -15,7 +15,10 @@ superseded_by: null
 
 # AETHER — Higgs Release (v0.7.0)
 
-A verifiable, capability-attenuated recursive-agency substrate.
+A general event-sourced agentic substrate built from reusable, domain-blind primitives: events,
+state, effects, capabilities, budgets, context, artifacts, persistence, replay/recovery, and
+composition. Verifiability, isolation, and exterior evaluation are optional assurance profiles
+over that substrate — not the project's purpose.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -31,7 +34,7 @@ observe → propose → authorize → effect → receipt → evaluate
 
 [![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Active_Sprint-M--4_RF--85-orange.svg)](docs/03_execution/sprint_active.md)
+[![Approved](https://img.shields.io/badge/Active_Sprint-M--4_RF--95-orange.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. Executive Summary & Documentation Architecture
 
@@ -176,13 +179,19 @@ Execution status and macro milestones are tracked in:
 
 ```text
 M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Closed) -> M-4 (Active) -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
-[Trust foundation]     [retained]       [converged]       [RF-95 product] [locked until each preceding gate]       [post-v1]
+[Trust foundation]     [retained]       [converged]       [RF-95 product] [each gated on a named technical dependency]  [post-v1]
 ```
 
-The next authorized sequence is: qualify the durable product CLI, select a reachable real provider,
-then execute and reconstruct one non-trivial RF-95 coding run. M-5 opens only after that product proof.
-RF-85 containment/evaluator certification is optional and non-blocking; ADR-0092 separately permits
-only the non-blocking M7-01 measurement lane.
+Work is blocked only by a named unfinished interface, schema, invariant, primitive, or runtime
+contract — never by a milestone that has not been ceremonially closed. M-5 depends on RF-95 because
+RF-86's zero-semantic-diff proof needs a substrate baseline a real run has exercised. M-6 depends on
+a `SpawnAdapter` and the attenuation algebra reaching the production import path (`agent.spawn` is
+inert today). M-7/M-8 depend on the M7-01 sequential effect-log baseline, which does not yet exist.
+
+Lanes with no such dependency run in parallel now: coding CLI/TUI, coding pack tool loop, model and
+tool adapters, M-5 formal-pack preparation, M7-01 measurement, indexing/retrieval behind `IndexPort`,
+context management, and tooling. RF-85 containment/evaluator certification is an optional assurance
+profile and blocks nothing.
 
 ---
 

@@ -140,7 +140,7 @@ only compatibility seams until their gates. M-9+ is post-v1, non-authorizing res
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal; operational closure resolved by M-3C |
 | M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — complete |
 | M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, and fresh-process reconstruction |
-| M-5 | v0.7.0 | LOCKED until M-4 Director closure: RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness |
+| M-5 | v0.7.0 | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness; depends on RF-95 because RF-86 measures zero semantic diff against a substrate baseline a real run has exercised |
 | M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` through generic S0–S12 dispatch |
 | M-7…M-8 | future product gates | measured concurrency and declarative topology support |
 | M-9+ | post-v1 research | retrieval/macros/Active Inference/meta-cognition remain exterior and non-authorizing |

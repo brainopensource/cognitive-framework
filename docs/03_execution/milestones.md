@@ -30,10 +30,10 @@ evidence from the canonical executable path, never because code, schemas, or iso
 | **M-3C Canonical Convergence** | One `compose -> activate -> run` authority | RF-78–RF-84; identity, lifecycle, durability, authority retirement | **COMPLETE** | M-3 |
 | **W-3D Product Profiles** | Identity-bearing profiles and one adapter bootstrap | RF-87–RF-94 | **COMPLETE** | M-3C |
 | **M-4 Product Coding Proof** | Useful, durable coding agent through the framework | RF-95 | **ACTIVE** | W-3D, ADR-0094 |
-| **M-5 Generality Proof** | Deterministic Formal Pack #2 through unchanged substrate | RF-86 plus RF-52/RF-53 witness | **LOCKED** | M-4 |
-| **M-6 Mediated Delegation** | Capability-bounded `agent.spawn` as an ordinary effect | RF-55–RF-59; attenuation, recovery, kill-tree proof | **LOCKED** | M-5 |
-| **M-7 Measured Concurrency** | Optional scheduler only if measurement justifies it | M7-01 plus successor ADR and RF-46–RF-48 | **LOCKED** | M-6 |
-| **M-8 Declarative Topologies** | Replaceable agent coordination above generic execution | RF-65/RF-66; zero privileged second engine | **LOCKED** | M-7 |
+| **M-5 Generality Proof** | Deterministic Formal Pack #2 through unchanged substrate | RF-86 plus RF-52/RF-53 witness | **BLOCKED ON RF-95** — RF-86 measures zero diff against a substrate baseline a real run has exercised. Preparation (pack, task, oracle, RED tests) is open now. | RF-95 |
+| **M-6 Mediated Delegation** | Capability-bounded `agent.spawn` as an ordinary effect | RF-55–RF-59; attenuation, recovery, kill-tree proof | **BLOCKED ON `SpawnAdapter`** — no spawn adapter or attenuation algebra in the production import path; `agent.spawn` is inert in `runtime/delegation.py` (`M6_SPAWN_ACTIVE = False`), `domain/artifacts/manifest.py`, and the inert-verb list. | `SpawnAdapter` + attenuation algebra |
+| **M-7 Measured Concurrency** | Optional scheduler only if measurement justifies it | M7-01 plus successor ADR and RF-46–RF-48 | **BLOCKED ON M7-01 BASELINE** — the sequential effect-log capture does not exist yet; without it a scheduler win is unmeasurable. | M7-01 result |
+| **M-8 Declarative Topologies** | Replaceable agent coordination above generic execution | RF-65/RF-66; zero privileged second engine | **BLOCKED ON M7-01 BASELINE** — without a sequential baseline a topology win cannot be told from a scheduler win. | M7-01 result, M-6 |
 | **M-9 Retrieval/Skills Lab** | Rebuildable retrieval and governed macro experiments | RF-67/RF-68/RF-77 plus measured lift | **HORIZON** | M-8, v1 review |
 | **M-10 Governed Adaptation** | Reversible, attributable promotion experiments | RF-69/RF-70 and human rollback | **HORIZON** | M-9 |
 
@@ -93,6 +93,10 @@ above 30%, a successor ADR must still quantify attainable speedup and contention
 
 ## Dependency Rules
 
+- Work is blocked only by a named unfinished interface, schema, invariant, primitive, or runtime
+  contract — never because a preceding milestone has not been ceremonially closed. Every lane
+  without such a dependency (coding CLI/TUI, coding pack, model/tool adapters, M-5 preparation,
+  M7-01, indexing behind `IndexPort`, context management, tooling) runs in parallel now.
 - `M-5-BASE` must point to the reviewed post-ADR-0094 substrate before Formal Pack code begins.
 - An ADR-authorized substrate correction makes the old RF-86 baseline intentionally red; RF-86 is
   never weakened. Advance the tag only after the correction is committed and verified.

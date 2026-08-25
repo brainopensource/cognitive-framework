@@ -38,6 +38,21 @@ class RF95ProductExecutionProfileFalsifier(unittest.TestCase):
             finally:
                 deps.cleanup()
 
+    def test_rf95_fixture_setup_is_hermetic_and_isolated(self) -> None:
+        import sys
+        tools_path = Path(__file__).resolve().parents[2] / "tools" / "runners"
+        if str(tools_path) not in sys.path:
+            sys.path.insert(0, str(tools_path))
+        from run_rf95_product_proof import setup_rf95_fixture
+
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            setup_rf95_fixture(repo)
+            self.assertTrue((repo / "src" / "calc.py").is_file())
+            self.assertTrue((repo / "tests" / "test_calc.py").is_file())
+            self.assertTrue((repo / "TASK.md").is_file())
+            self.assertTrue((repo / ".git").is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()

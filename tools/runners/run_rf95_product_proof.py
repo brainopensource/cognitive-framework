@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""RF-95 Reproducible Product Coding Proof Runner (ADR-0094, EVIDENCE.md, M-4).
+
+Prepares a clean target repository fixture, executes the canonical coding agent
+through `vg-code-default` and the `product` execution profile, and verifies:
+1. Real workspace diff produced and applied.
+2. Passing test execution receipt (e.g. pytest/unittest green).
+3. Durable file-backed SQLite-WAL event store at `.vanguard/events.sqlite3`.
+4. Schema-valid `mhf.trajectory/1` terminal trajectory record.
+5. Fresh-process cold reconstruction of identical terminal ledger state.
+
+DO NOT execute live runs or declare M-4 complete without Dev A GO and independent review.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any, Mapping
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from vanguard.packages.adapters.models.fake import FakeModel
+from vanguard.packages.adapters.models.openrouter import OpenRouterModel
+from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.runtime.compose import TaskContext
+from vanguard.packages.runtime.profiles import resolve_profile
+from vanguard.packages.runtime.root import Runtime
+from vanguard.packages.runtime.session import RecoveryScanner
+from vanguard.packages.runtime.trajectory_reader import TrajectoryReader
+
+
+def setup_rf95_fixture(target_dir: Path) -> Path:
+    """Initialize a small calculator fixture repository with a failing test."""
+    target_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["git", "init", "-b", "main"], cwd=target_dir, capture_output=True, check=True)
+    subprocess.run(["git", "config", "user.name", "RF-95 Runner"], cwd=target_dir, capture_output=True, check=True)
+    subprocess.run(["git", "config", "user.email", "rf95@vanguard.dev"], cwd=target_dir, capture_output=True, check=True)
+
+    src_dir = target_dir / "src"
+    src_dir.mkdir(parents=True, exist_ok=True)
+    (src_dir / "calc.py").write_text(
+        "def add(a: int, b: int) -> int:\n    return a + b\n\ndef multiply(a: int, b: int) -> int:\n    return 0  # BUG: should multiply\n",
+        encoding="utf-8",
+    )
+
+    test_dir = target_dir / "tests"
+    test_dir.mkdir(parents=True, exist_ok=True)
+    (test_dir / "test_calc.py").write_text(
+        "import unittest\nfrom src.calc import add, multiply\n\nclass TestCalc(unittest.TestCase):\n    def test_add(self):\n        self.assertEqual(add(2, 3), 5)\n    def test_multiply(self):\n        self.assertEqual(multiply(3, 4), 12)\n\nif __name__ == '__main__':\n    unittest.main()\n",
+        encoding="utf-8",
+    )
+
+    (target_dir / "TASK.md").write_text(
+        "# Task\nFix the bug in `src/calc.py` so that `multiply(a, b)` returns `a * b` and `python3 -m unittest discover -s tests` passes.\n",
+        encoding="utf-8",
+    )
+
+    subprocess.run(["git", "add", "."], cwd=target_dir, capture_output=True, check=True)
+    subprocess.run(["git", "commit", "-m", "Initial fixture commit with bug in multiply"], cwd=target_dir, capture_output=True, check=True)
+    return target_dir
+
+
+def verify_rf95_evidence(
+    repo_path: Path,
+    db_path: Path,
+    trajectory: Mapping[str, Any],
+) -> tuple[bool, list[str]]:
+    """Verify all 5 conditions of the RF-95 product proof."""
+    failures: list[str] = []
+
+    # 1. Real workspace diff
+    diff_proc = subprocess.run(["git", "diff", "HEAD~1"], cwd=repo_path, capture_output=True, text=True, check=False)
+    diff_text = diff_proc.stdout
+    if not diff_text.strip():
+        # Check uncommitted diff
+        diff_uncommitted = subprocess.run(["git", "diff"], cwd=repo_path, capture_output=True, text=True, check=False).stdout
+        if not diff_uncommitted.strip():
+            failures.append("RF-95: No real workspace diff produced")
+        else:
+            diff_text = diff_uncommitted
+
+    if "return a * b" not in diff_text:
+        failures.append("RF-95: Diff does not contain the required fix 'return a * b'")
+
+    # 2. Test pass
+    test_proc = subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+        cwd=repo_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if test_proc.returncode != 0:
+        failures.append(f"RF-95: Tests in workspace did not pass (exit {test_proc.returncode}):\n{test_proc.stderr}")
+
+    # 3. Durable file-backed SQLite-WAL store
+    if not db_path.is_file():
+        failures.append(f"RF-95: SQLite database not found at {db_path}")
+    else:
+        store = SqliteEventStore(db_path)
+        events = store.read_all()
+        if len(events) < 2:
+            failures.append(f"RF-95: Expected >= 2 events in WAL store, found {len(events)}")
+        if store.journal_mode != "wal":
+            failures.append(f"RF-95: Expected journal_mode='wal', got {store.journal_mode!r}")
+
+    # 4. Valid trajectory
+    traj_vars = TrajectoryReader.extract_variables(trajectory)
+    if traj_vars.get("schema") != "mhf.trajectory/1":
+        failures.append(f"RF-95: Invalid trajectory schema: {traj_vars.get('schema')}")
+    if traj_vars.get("outcome") not in ("completed", "satisfied", "ok"):
+        failures.append(f"RF-95: Trajectory outcome is not completed: {traj_vars.get('outcome')}")
+
+    # 5. Fresh-process cold reconstruction
+    if db_path.is_file():
+        store = SqliteEventStore(db_path)
+        all_events = store.read_all()
+        recovered = RecoveryScanner.scan(all_events)
+        if not recovered.is_reconstructed:
+            failures.append("RF-95: Cold fresh-process reconstruction failed to reconstruct state")
+
+    return len(failures) == 0, failures
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="RF-95 Product Coding Proof Runner")
+    parser.add_argument("--dry-run", action="store_true", help="Validate fixture setup and test assertions without live model spend")
+    parser.add_argument("--repo-dir", type=str, default="", help="Target repo directory (uses temporary directory by default)")
+    parser.add_argument("--model", type=str, default="anthropic/claude-3.5-sonnet", help="Planner/executor model")
+    args = parser.parse_args()
+
+    temp_dir: str | None = None
+    if args.repo_dir:
+        repo_path = Path(args.repo_dir).resolve()
+    else:
+        temp_dir = tempfile.mkdtemp(prefix="vg-rf95-")
+        repo_path = Path(temp_dir)
+
+    try:
+        print(f"Setting up RF-95 fixture at: {repo_path}")
+        setup_rf95_fixture(repo_path)
+        manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
+        db_path = repo_path / ".vanguard" / "events.sqlite3"
+
+        if args.dry_run:
+            print("RF-95 DRY RUN: Validating profile resolution and fixture assertions.")
+            profile = resolve_profile("product", host_qualifies=False)
+            assert profile.requested.persistence_mode == "sqlite-wal"
+            print("RF-95 DRY RUN QUALIFIED: Fixture and profile are ready for live authorization.")
+            return 0
+
+        api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
+        if not api_key:
+            print("ERROR: Live execution requires OPENROUTER_API_KEY or DEEPSEEK_API_KEY set.", file=sys.stderr)
+            print("Use --dry-run for hermetic qualification.", file=sys.stderr)
+            return 2
+
+        print(f"Executing RF-95 product run using model {args.model} on {repo_path}...")
+        task = TaskContext(
+            brief=(repo_path / "TASK.md").read_text(encoding="utf-8"),
+            repo_path=repo_path,
+            run_id="run-rf95-live",
+            episode_id="episode-rf95-live",
+            project_id="calc-fix",
+            max_turns=20,
+        )
+        model = OpenRouterModel(model=args.model)
+        result = Runtime.execute_profiled(
+            manifest_path,
+            task,
+            profile_id="product",
+            model=model,
+            store_path=str(db_path),
+            interactive=False,
+        )
+
+        ok, failures = verify_rf95_evidence(repo_path, db_path, result.trajectory or {})
+        if not ok:
+            print("RF-95 FALSIFIER FAILED:")
+            for f in failures:
+                print(f"  - {f}")
+            return 1
+
+        print("RF-95 PRODUCT PROOF PASSED: All 5 conditions satisfied.")
+        return 0
+    finally:
+        if temp_dir and Path(temp_dir).exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

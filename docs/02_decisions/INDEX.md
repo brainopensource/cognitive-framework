@@ -310,6 +310,7 @@ falsifiers use `RF-*`.
 | `RF-86` | ADR-0088 | Formal Pack #2 parity with unchanged substrate / M-5 |
 | `RF-87`–`RF-94` | ADR-0089 | Execution profile identity, fail-closed assurance, capability qualification, generic entrypoint, shared tools, event streaming, real activation, and single runtime authority / W-3D |
 | `RF-95` | ADR-0094 | Real-model, durable, resumable product coding run / M-4 |
+| `RF-96`–`RF-100` | ADR-0096 (**proposed**) | Cold reconstruction, multidimensional Trusted Core Budget, Kernel Neutrality Gate, authority provenance, and computed reproducibility vector / M-4 (RF-100 capture) through M-5b. **Identities are reserved to prevent collision; the obligations become binding only if ADR-0096 is ratified.** |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

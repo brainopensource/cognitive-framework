@@ -254,8 +254,8 @@ class GitEnvironment:
             except (ValueError, TypeError):
                 max_results = 50
 
-            # Execute git grep
-            cmd = ["git", "grep", "-n", "--", pattern]
+            # Execute git grep with untracked files included
+            cmd = ["git", "grep", "--untracked", "-n", "--", pattern]
             if path_filter and isinstance(path_filter, str) and path_filter not in (".", "/workspace", ""):
                 cmd.extend(["--", path_filter])
 
@@ -266,6 +266,18 @@ class GitEnvironment:
                 text=True,
                 check=False,
             )
+            if grep_proc.returncode != 0 and "not a git repository" in (grep_proc.stderr or ""):
+                cmd_fallback = ["git", "grep", "--no-index", "-n", "--", pattern]
+                if path_filter and isinstance(path_filter, str) and path_filter not in (".", "/workspace", ""):
+                    cmd_fallback.extend(["--", path_filter])
+                grep_proc = subprocess.run(
+                    cmd_fallback,
+                    cwd=self._working_dir,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+
             matches: list[dict[str, Any]] = []
             matching_files: list[str] = []
             file_match_counts: dict[str, int] = {}
@@ -302,11 +314,22 @@ class GitEnvironment:
         if action in ("list", "glob"):
             pattern = req.pattern or req.args.get("pattern", "*")
             ls_proc = subprocess.run(
-                ["git", "ls-files"], cwd=self._working_dir, capture_output=True, text=True, check=False
+                ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+                cwd=self._working_dir,
+                capture_output=True,
+                text=True,
+                check=False,
             )
             import fnmatch
-            all_files = ls_proc.stdout.splitlines() if ls_proc.returncode == 0 else []
-            matching = [f for f in sorted(all_files) if fnmatch.fnmatch(f, pattern) or pattern in ("*", "")]
+            if ls_proc.returncode == 0:
+                all_files = ls_proc.stdout.splitlines()
+            else:
+                all_files = [
+                    str(p.relative_to(self._working_dir)).replace("\\", "/")
+                    for p in self._working_dir.rglob("*")
+                    if p.is_file() and not any(part.startswith(".") for part in p.relative_to(self._working_dir).parts)
+                ]
+            matching = [f for f in sorted(set(all_files)) if fnmatch.fnmatch(f, pattern) or pattern in ("*", "")]
             return Result.success(
                 Observation(
                     action=action,

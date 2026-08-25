@@ -49,12 +49,12 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     command = str(request.get("command", "code"))
     if command == "doctor":
         return _doctor(request)
-    if command not in {"code", "explain"}:
+    if command not in {"code", "explain", "resume"}:
         raise ValueError(f"unsupported coding command: {command!r}")
-    brief = str(request.get("brief") or request.get("question") or "").strip()
+    run_id = str(request.get("runId") or request.get("resumeFrom") or "run-cli")
+    brief = str(request.get("brief") or request.get("question") or (f"Resume run {run_id}" if command == "resume" else "")).strip()
     if not brief:
         raise ValueError("brief or question is required")
-    run_id = str(request.get("runId") or "run-cli")
     task = TaskContext(
         brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
         run_id=run_id, episode_id=f"episode-{run_id}",
@@ -89,13 +89,25 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))
     outcome = "completed" if terminal in {"completed", "abstained"} else terminal
+    projections: list[dict[str, Any]] = []
+    for rec in getattr(result, "receipts", ()) or ():
+        verb = getattr(rec, "verb", "")
+        rec_outcome = getattr(rec, "outcome", "")
+        rec_detail = getattr(rec, "detail", "")
+        if verb == "fs.read":
+            projections.append({"kind": "read", "path": rec_detail or "file"})
+        elif verb in ("patch.apply", "fs.patch", "fs.write"):
+            projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
+        elif verb == "proc.exec":
+            projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+    projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
     return {"type": "result", "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
         "turns": int(getattr(result.telemetry, "turns", 0)),
         "planDigest": result.run_digest or None, "activeStepId": None,
         "verifiedStepIds": [], "modelRoutes": [], "promptTokens": None,
         "completionTokens": None, "spentUsdMicros": None, "detail": result.detail,
-        "projections": [{"kind": "complete", "outcome": outcome}],
+        "projections": projections,
     }}
 
 

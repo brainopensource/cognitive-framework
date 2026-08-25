@@ -12,19 +12,21 @@ export const USAGE =
   "  vg run [repo] [--headless] [--prompt <text>] [--brief <text>] [--model <id>] [--manifest <path>]\n" +
   "          [--run-id <id>] [--resume <id>] [--checkpoint-every <n>] [--socket-path <path>]\n" +
   "          [--demo [scenario]] [--replay <file.jsonl>] [--scenario] [--feed] [--yes|-y]\n" +
-  "  vg code PATH [--brief TASK.md] [--planner MODEL] [--executor-band free|medium|high]\n" +
-  "          [--recovery-model MODEL] [--max-turns N] [--max-episodes N] [--max-replans N]\n" +
-  "          [--budget-usd DOLLARS] [--interactive|--benchmark] [--dry-plan] [--resume RUN_ID]\n" +
-  "          [--jsonl-out PATH] [--json] [--headless]\n" +
+  "  vg code PATH [--brief TASK.md] [--planner MODEL] [--provider PROVIDER] [--model-port PORT]\n" +
+  "          [--executor-band free|medium|high] [--recovery-model MODEL] [--profile PROFILE]\n" +
+  "          [--wal-path PATH] [--store-path PATH] [--max-turns N] [--max-episodes N] [--max-replans N]\n" +
+  "          [--token-budget N] [--effect-budget N] [--budget-usd DOLLARS] [--interactive|--benchmark]\n" +
+  "          [--dry-plan] [--resume RUN_ID] [--jsonl-out PATH] [--json] [--headless]\n" +
   "  vg explain PATH --question TEXT [--headless] [--json]\n" +
   "  vg doctor [PATH] [--headless] [--json]\n" +
   "  vg approve <run-id> --decision approve|reject\n" +
-  "  vg resume <run-id> [--headless]\n" +
+  "  vg resume <run-id> [--headless] [--wal-path PATH]\n" +
   "  vg trace <run-id> [--headless] [--replay <file.jsonl>] [--demo [scenario]]\n" +
   "  vg why <artifact> [--headless] [--replay <file.jsonl>] [--demo [scenario]]\n" +
   "Flags: --headless --feed --scenario --demo --replay --run-id --resume --checkpoint-every\n" +
-  "       --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y\n" +
-  "       --planner --executor-band --recovery-model --max-turns --max-episodes --max-replans\n" +
+  "       --repo --workspace --prompt --brief --model --manifest --decision --socket-path --yes|-y\n" +
+  "       --planner --provider --model-port --executor-band --recovery-model --profile\n" +
+  "       --wal-path --store-path --token-budget --effect-budget --max-turns --max-episodes --max-replans\n" +
   "       --budget-usd --interactive --benchmark --dry-plan --jsonl-out --json --question --help";
 
 export function usage(): never {
@@ -38,6 +40,7 @@ const VALUE_FLAGS = new Set([
   "--resume",
   "--checkpoint-every",
   "--repo",
+  "--workspace",
   "--prompt",
   "--brief",
   "--model",
@@ -45,6 +48,13 @@ const VALUE_FLAGS = new Set([
   "--decision",
   "--socket-path",
   "--planner",
+  "--provider",
+  "--model-port",
+  "--profile",
+  "--wal-path",
+  "--store-path",
+  "--token-budget",
+  "--effect-budget",
   "--executor-band",
   "--recovery-model",
   "--max-turns",
@@ -85,7 +95,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
 
   const promptFromFlags = value("--prompt") ?? value("--brief");
   let prompt = promptFromFlags;
-  let repo = value("--repo");
+  let repo = value("--workspace") ?? value("--repo");
   const decisionVal = value("--decision");
   const decision: "approve" | "reject" | undefined =
     decisionVal === "approve" || decisionVal === "reject" ? decisionVal : undefined;
@@ -142,7 +152,12 @@ export function parseCliOptions(args: string[]): ParsedCli {
     demo,
     demoScenario,
     promptExplicit,
-    plannerModel: value("--planner") ?? "openrouter/free",
+    plannerModel: value("--planner") ?? value("--model") ?? "openrouter/free",
+    modelPort: value("--model-port") ?? value("--provider"),
+    storePath: value("--store-path") ?? value("--wal-path"),
+    profile: value("--profile"),
+    tokenBudget: intOr(value("--token-budget"), undefined as unknown as number),
+    effectBudget: intOr(value("--effect-budget"), undefined as unknown as number),
     executorBand: value("--executor-band") ?? "free",
     recoveryModel: value("--recovery-model") ?? "openrouter/free",
     maxTurns: intOr(value("--max-turns"), 40),

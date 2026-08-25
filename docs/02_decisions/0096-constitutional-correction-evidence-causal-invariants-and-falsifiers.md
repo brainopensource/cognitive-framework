@@ -12,12 +12,12 @@ canonical_for:
   - composition-level-skill-promotion
 status: proposed
 owner: principal-systems-architect
-version: "0.2.0"
+version: "0.3.0"
 last_verified: 2026-08-25
 extends:
   - ADR-0095-vision-as-law-zero-and-roadmap-reconciliation
 supersedes:
-  - ADR-0095-lock-clause-only
+  - ADR-0095 §1 — lock semantics only (the precedence ladder itself is retained and strengthened)
 superseded_by: null
 ---
 
@@ -237,6 +237,14 @@ INVALIDATED
 
 These names describe required semantic distinctions; protocol evolution MAY refine their concrete representation.
 
+They are **semantic distinctions, not an event roster**. The existing roster —
+`AuthorizationRequested`/`AuthorizationDenied`, `CapabilityGranted`, `BudgetReserved`/`BudgetCommitted`,
+`EffectStarted`/`EffectCompleted`/`EffectFailed`/`EffectRejected`/`EffectReconciled`,
+`ApprovalRequested`/`ApprovalResolved`, `InvalidationChecked` — already carries these distinctions.
+
+This ADR creates **no new event kind** and authorizes none. Any roster change remains an M-5a
+substrate decision under its own ADR.
+
 ### 4.3 Observation is not commitment
 
 An observed event and an authoritatively committed outcome are distinct.
@@ -325,6 +333,26 @@ Their absence of applicability MUST NOT require fabrication of synthetic approva
 
 Where an approval or capability grant materially authorizes an operation, the corresponding reference MUST be populated.
 
+### 6.2bis Milestone assignment and substrate protection
+
+The authority provenance model above is a **constitutional requirement, not an immediate wire change**.
+
+`mhf.event/1` today carries `principal`, `principal_id`, `parent_principal_id`, `causation_id`,
+`correlation_id`, `idempotency_key` and `harness_digest`. It does **not** carry `authority_source`,
+`policy_version`, `approval_reference` or `capability_grant` as typed envelope fields.
+
+Adding envelope fields changes the `digest` preimage and therefore the substrate baseline.
+
+Therefore:
+
+* extension of the event envelope with the missing authority-provenance fields is assigned to
+  **M-5a**, inside the ADR-authorized substrate change that re-tags `M-5-BASE`;
+* before M-5a, authority provenance MUST be carried in existing envelope fields and in typed payload
+  positions, and MUST NOT alter the envelope schema, the reducer, or `M-5-BASE`;
+* this ADR grants **no** authorization to change the event envelope during M-4.
+
+`RF-99` (§13) is the falsifier for the M-5a envelope extension.
+
 ### 6.3 Strategic identity versus operational ontology
 
 Security is not the strategic identity of AETHER.
@@ -367,6 +395,14 @@ The standing Trusted Core Budget evaluates at least:
 * Kernel knowledge of extensions — target: **zero**;
 * change amplification caused by Kernel modifications;
 * whether introduction of a new capability or domain requires Kernel semantic modification.
+
+The repository's current enforcement (`tools/linters/check_tcb_budget.py`) measures **logical LOC
+only** against `baseline_logical_loc` + `alarm_delta_lines`. That is precisely the gameable measure
+§7.1 rejects.
+
+The requirement is therefore falsifiable and owned: `RF-97` (§13) requires
+`check_tcb_budget.py` to emit and gate the dimensions above, not LOC alone. Until `RF-97` closes,
+§7.1 is a **documented gap**, not a satisfied invariant.
 
 ### 7.2 Kernel Neutrality Gate
 
@@ -755,6 +791,47 @@ No single confidence measurement mechanism is constitutionalized in advance.
 | Cap. 19                    | Add first-class authority provenance and nullable semantics for non-applicable approval/capability references                                          |
 | Cap. 20                    | Add Trusted Core Budget and recurring Kernel Neutrality Gate; preserve existing roadmap                                                                |
 
+## 12.1 Required subordinate edits (same atomic commit)
+
+§12 alone is **not** an atomic amendment. Ratification step 2 previously said "update subordinate
+documentation where terminology changed" without enumerating it, which is unverifiable. The
+enumeration is:
+
+| Document | Required edit |
+| --- | --- |
+| `docs/01_law/EVIDENCE.md` | Replace the singular *reproducibility class* with the §8.1 vector; add `reproducibility_at_run_close` as historical evidence; record the causal-record/telemetry separation |
+| `docs/01_law/MEASUREMENT.md` | Bind promotion evidence to composition-level regression decomposition (§9.3) and generator/evaluator/promoter separation (§10) |
+| `docs/01_law/EXTENSIBILITY.md` | Record the Kernel Neutrality Gate (§7.2) as the gate for milestones changing foundational contracts |
+| `docs/SPEC.md` | Reflect the amended precedence-ladder rules 2 and 3 |
+| `docs/02_decisions/INDEX.md` | Add the §13 `RF-96`…`RF-100` allocation rows |
+| `docs/03_execution/sprint_active.md` | Restate M4-04 in the frozen §13 vocabulary; keep the M-4 → M-9 sequence unchanged |
+| `docs/03_execution/milestones.md` | Attach `RF-96`…`RF-100` to their owning milestone gates |
+
+No other document is edited. No new document is created — this ADR forbids a parallel
+constitutional commentary.
+
+---
+
+# 13. Falsifier allocation
+
+ADR-0082 / `RF-72` require every falsifiable obligation to hold an allocated `RF-*` identity in
+`docs/02_decisions/INDEX.md`. ADR-0096 v0.2.0 introduced falsifiers in §3.4 and §7.4 with **no
+identity**, making them unowned and unexecutable. `RF-96`…`RF-100` are allocated here; the register
+rows are written in the ratification commit.
+
+| Id | Obligation | Source | Milestone |
+| --- | --- | --- | --- |
+| `RF-96` | Cold reconstruction: a conforming execution survives process destruction and rebuilds without depending on inaccessible authoritative object state | §3.4 | M-5a |
+| `RF-97` | Trusted Core Budget is multidimensional: `check_tcb_budget.py` gates invariants, public contracts, privileged operations, dependencies, domain concepts (=0), extension knowledge (=0) and change amplification — not LOC alone | §7.1 | M-5a |
+| `RF-98` | Kernel Neutrality Gate: introducing a new capability or domain yields kernel semantic diff == 0, or an ADR explains why not | §7.2, §7.4 | M-5b, re-run at M-7/M-8 |
+| `RF-99` | Authority provenance is present as typed protocol data for every operation to which it applies, with `null` permitted only where semantically inapplicable | §6 | M-5a |
+| `RF-100` | Reproducibility is a computed vector, not self-declared, and `reproducibility_at_run_close` is never overwritten | §8 | M-4 (M4-04) for capture; M-5a for computation |
+
+`RF-100` is the only ADR-0096 falsifier with an M-4 component, and it is satisfied by M4-04's
+existing scope — it does **not** reopen M-4.
+
+---
+
 Historical ADRs remain immutable provenance.
 
 ADR-0095 is superseded only where its lock semantics prevent admissible empirical falsification from triggering constitutional review.
@@ -823,8 +900,8 @@ The following alternatives are rejected:
 
 Upon ratification:
 
-1. apply all §12 changes atomically;
-2. update subordinate architecture documentation where terminology changed;
+1. apply all §12 **and §12.1** changes in one atomic commit;
+2. write the §13 `RF-96`…`RF-100` rows into `docs/02_decisions/INDEX.md`;
 3. verify that no subordinate normative text contradicts the amended Vision;
 4. update ADR-0096 status to `accepted`;
 5. update `VISION.md` metadata and supersession references;

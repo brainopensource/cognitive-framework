@@ -60,7 +60,7 @@ non-promotional assurance), file-backed store by default, generic entrypoint def
 RF-95 guards that product use requires no containment/evaluator and never silently falls back to
 memory persistence.
 
-### M4-02 — Make the coding CLI operable
+### M4-02 — Make the coding CLI operable — **IMPLEMENTED**
 
 1. Install Node dependencies; qualify CLI typecheck and tests.
 2. Expose provider/model, workspace, run id, event-store path, turn/effect/token budgets, and
@@ -72,7 +72,7 @@ memory persistence.
 **Exit:** a developer can start, observe, approve, interrupt, and resume a product coding session from
 the CLI without constructing Python objects by hand.
 
-### M4-03 — Close tool-loop gaps
+### M4-03 — Close tool-loop gaps — **IMPLEMENTED**
 
 Exercise `vg-code-default` against a small real repository and fix only defects the run exposes. The
 minimum tool surface is `fs.read`, `fs.search`, `patch.apply`, and allowlisted `proc.exec`. Improve
@@ -82,7 +82,7 @@ the kernel.
 **Exit:** the agent inspects before editing, applies a valid change, runs the preregistered
 verification command, reacts to failure, and stops after success within declared budgets.
 
-### M4-04 — Scientific trajectory capture *(new; parallel with M4-02/03)*
+### M4-04 — Scientific trajectory capture — **IMPLEMENTED**
 
 Implement the provenance rule from [`../01_law/EVIDENCE.md`](../01_law/EVIDENCE.md): every variable
 that can materially affect a result gets observable identity and provenance.
@@ -92,19 +92,19 @@ that can materially affect a result gets observable identity and provenance.
 - Store large content (full prompts, raw model outputs, snapshots, patches) in the artifact store,
   content-addressed.
 - Add retention as an `ExecutionProfile` axis; the reproducibility class MUST enter `D_R`.
-- Provide a trajectory reader good enough to compare two runs.
+- Provide a trajectory reader good enough to compare two runs (`vanguard/packages/runtime/trajectory_reader.py`).
 
 **Exit:** two runs of the same task can be diffed on the variables that differed. Without this,
 M-6.5, M-7, and M-8 cannot be measured.
 
-### M4-05 — Execute RF-95 *(serializing; depends on M4-02, M4-03, M4-04)*
+### M4-05 — Execute RF-95 *(runner & fixture PREPARED; awaiting Dev A GO and review)*
 
 Freeze a non-trivial coding task and verifier before the run. Execute exactly one candidate with a
 live non-fake provider through canonical compose/activate/`Runtime.run_composed`, the `product`
 profile in `D_R`, at least one observation, one mutation, one verification effect, a non-empty diff,
 a passing verifier receipt, file-backed WAL, a complete terminal trajectory, and fresh-process
 reconstruction. An independent reviewer confirms the evidence; the Engineering Director closes M-4.
-RF-85 is not implicitly satisfied.
+RF-85 is not implicitly satisfied. Runner script and fixture setup are ready in `tools/runners/run_rf95_product_proof.py`.
 
 ## 4. Lane B — M-5a preparation *(may start now)*
 

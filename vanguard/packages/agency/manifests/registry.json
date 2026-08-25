@@ -4,6 +4,7 @@
     {"name":"vg-code-default","path":"vg-code-default/manifest.json","undeletable":false,"role":"product-default"},
     {"name":"vg-code-claude-shaped","path":"vg-code-claude-shaped/manifest.json","undeletable":false,"role":"reconstruction"},
     {"name":"vg-code-opencode-shaped","path":"vg-code-opencode-shaped/manifest.json","undeletable":false,"role":"reconstruction"},
-    {"name":"vg-code-swe-mini","path":"vg-code-swe-mini/manifest.json","undeletable":false,"role":"reconstruction"}
+    {"name":"vg-code-swe-mini","path":"vg-code-swe-mini/manifest.json","undeletable":false,"role":"reconstruction"},
+    {"name":"vg-code-lex","path":"vg-code-lex/manifest.json","undeletable":false,"role":"sota-solver"}
   ]
 }

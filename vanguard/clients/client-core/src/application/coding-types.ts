@@ -10,6 +10,12 @@ export type CodingRequest = {
   runId?: string;
   resumeFrom?: string;
   plannerModel: string;
+  modelPort?: string;
+  storePath?: string;
+  profile?: string;
+  approvalMode?: "interactive" | "auto" | "deny";
+  tokenBudget?: number;
+  effectBudget?: number;
   executorBand: string;
   executorModels: string[];
   recoveryModels: string[];

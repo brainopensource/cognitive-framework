@@ -25,6 +25,11 @@ export type CliOptions = {
   demoScenario?: string;
   /** Product coding surface (S33). Absent on legacy `vg run`. */
   plannerModel?: string;
+  modelPort?: string;
+  storePath?: string;
+  profile?: string;
+  tokenBudget?: number;
+  effectBudget?: number;
   executorBand?: string;
   recoveryModel?: string;
   maxTurns?: number;

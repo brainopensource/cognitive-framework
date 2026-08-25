@@ -40,7 +40,12 @@ function codingRequestFromParsed(
     question: parsed.question,
     runId: parsed.runId,
     resumeFrom: parsed.resumeFrom,
-    plannerModel: parsed.plannerModel ?? "openrouter/free",
+    plannerModel: parsed.plannerModel ?? parsed.model ?? "openrouter/free",
+    modelPort: parsed.modelPort,
+    storePath: parsed.storePath,
+    profile: parsed.profile ?? "product",
+    tokenBudget: parsed.tokenBudget,
+    effectBudget: parsed.effectBudget,
     executorBand: parsed.executorBand ?? "free",
     executorModels: [],
     recoveryModels: parsed.recoveryModel ? [parsed.recoveryModel] : [],
@@ -104,7 +109,15 @@ if (command === "run") {
 } else if (command === "resume") {
   const runId = parsed.runId ?? rest.find((a) => !a.startsWith("-"));
   if (!runId) usage();
-  exitCode = await resumeRun(runtime, { ...parsed, runId }, console.log);
+  if (parsed.socketPath || parsed.demo) {
+    exitCode = await resumeRun(runtime, { ...parsed, runId }, console.log);
+  } else {
+    const request = codingRequestFromParsed("resume", {
+      runId,
+      resumeFrom: runId,
+    });
+    exitCode = await runCodingCommand(request, console.log);
+  }
 } else if (command === "trace") {
   const target = rest.find((arg) => !arg.startsWith("-") && arg !== parsed.demoScenario) ?? usage();
   exitCode = await streamTrace(runtime, target, console.log);

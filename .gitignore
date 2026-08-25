@@ -16,3 +16,4 @@ logo.png
 .vscode/settings.json
 delete.md
 vanguard/clients/studio/dist-browser/
+.vanguard/

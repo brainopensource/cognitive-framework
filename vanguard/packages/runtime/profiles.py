@@ -108,6 +108,20 @@ class ExecutionProfile:
 
 
 PRESETS: Mapping[str, ExecutionProfile] = {
+    "product": ExecutionProfile(
+        id="product",
+        workspace_mode="in-place",
+        workspace_access="workspace-write",
+        process_backend="host",
+        approval_default="ask",
+        persistence_mode="sqlite-wal",
+        persistence_durable=True,
+        evaluation_mode="none",
+        evaluation_absence_reason="product run: exterior assurance is optional",
+        assurance_level="recorded",
+        attestation_required=False,
+        promotion_eligible=False,
+    ),
     "local": ExecutionProfile(
         id="local",
         workspace_mode="in-place",

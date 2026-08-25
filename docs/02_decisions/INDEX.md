@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: engineering-director
 version: "0.7.0"
-last_verified: 2026-08-24
+last_verified: 2026-08-25
 read_when:
   - resolving-architectural-decisions
   - selecting-an-implementation-bundle
@@ -35,6 +35,7 @@ superseded_by: null
 - 🛠️ [W-3D Product Runtime Profiles (`0089`)](#w-3d-product-runtime-profiles-0089) — execution profiles, bootstrap, activation, and product/runtime seam
 - 🧬 [Mediated Delegation Event Roster (`0090`)](#mediated-delegation-event-roster-0090) — `ChildSpawned`/`ChildReturned` allocation, single writer, and reducer fold
 - 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
+- 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -112,9 +113,8 @@ delegation, binds `runtime.SpawnAdapter` as their sole legal writer, and folds t
 **This ADR does not close M-6.** It closes the roster question only. `agent.spawn` remains inert at
 three points (`domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every
 spawn via `M6_SPAWN_ACTIVE = False`, and the verb is on the inert-verb list), so no `ChildSpawned` can
-be emitted by the product. **RF-55–RF-59 are named by ADR-0090 but remain unallocated** — no such test
-exists and the register below does not carry the range; allocating them is part of opening M-6, which
-stays LOCKED behind M-4 and M-5.
+be emitted by the product. RF-55–RF-59 are allocated by ADR-0080, but their M-6 implementation
+falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
 
 ---
 
@@ -125,6 +125,12 @@ stays LOCKED behind M-4 and M-5.
 | `0091` | [`0091-delegation-state-digest-extension.md`](0091-delegation-state-digest-extension.md) | Non-empty child state is canonical identity; empty maps preserve historical non-delegating digests. | accepted | 2026-08-24 |
 | `0092` | [`0092-review-bundle-disposition-and-m7-measurement.md`](0092-review-bundle-disposition-and-m7-measurement.md) | Archived bundle remains non-production; context-store non-fix rejected; M7-01 authorized for measurement only. | accepted | 2026-08-24 |
 | `0093` | [`0093-aether-higgs-v070-release-baseline.md`](0093-aether-higgs-v070-release-baseline.md) | **AETHER — Higgs Release Baseline:** ratifies v0.7.0 version baseline while preserving internal module structure (`vanguard/packages/`). | accepted | 2026-08-24 |
+
+## Product-first M-4 (`0094`)
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0094` | [`0094-product-first-m4-and-optional-assurance.md`](0094-product-first-m4-and-optional-assurance.md) | RF-95 closes M-4 with a useful durable real-model coding run; RF-85 hermetic assurance is retained but no longer blocks product/generalization work. | accepted | 2026-08-25 |
 
 ---
 
@@ -141,7 +147,7 @@ stays LOCKED behind M-4 and M-5.
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
-| `0088` | [`0088-m3c-m8-concept-lock.md`](0088-m3c-m8-concept-lock.md) | **Canonical foundation and scale seams:** one `/2 -> FrozenComposition -> ActivationPlan -> RunPlan` path; source-derived M-4 evidence; Formal Pack #2; generic-dispatch mediated spawn; reserved M-7/M-8 seams; M-9+ post-v1 research. | accepted; implementation phased | 2026-08-23 |
+| `0088` | [`0088-m3c-m8-concept-lock.md`](0088-m3c-m8-concept-lock.md) | **Canonical foundation and scale seams:** one `/2 -> FrozenComposition -> ActivationPlan -> RunPlan` path; RF-85 assurance evidence; Formal Pack #2; generic-dispatch mediated spawn; reserved M-7/M-8 seams. Its M-4 exit dependency is superseded by ADR-0094. | accepted; M-4 gate amended by ADR-0094 | 2026-08-23 |
 
 ---
 
@@ -286,9 +292,10 @@ falsifiers use `RF-*`.
 | `RF-76` | ADR-0082 | Compatibility-reader fidelity for supported old WAL rows / M-3 |
 | `RF-77` | ADR-0082 | Index deletion and rebuild from immutable artifacts / M-9 |
 | `RF-78`–`RF-84` | ADR-0088 | Canonical public composition/activation, domain bindings, release durability, evidence derivation, and authority retirement / M-3C |
-| `RF-85` | ADR-0088 | One uninterrupted real nine-row foundation run / M-4 |
+| `RF-85` | ADR-0088 + ADR-0094 | Optional uninterrupted nine-row hermetic assurance certification; no longer the M-4 exit gate |
 | `RF-86` | ADR-0088 | Formal Pack #2 parity with unchanged substrate / M-5 |
 | `RF-87`–`RF-94` | ADR-0089 | Execution profile identity, fail-closed assurance, capability qualification, generic entrypoint, shared tools, event streaming, real activation, and single runtime authority / W-3D |
+| `RF-95` | ADR-0094 | Real-model, durable, resumable product coding run / M-4 |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

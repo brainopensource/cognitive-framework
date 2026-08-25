@@ -23,10 +23,10 @@ observe → propose → authorize → effect → receipt → evaluate
 
 | Dimension | Details |
 |---|---|
-| **Concept Lock** | v0.7.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0092`](docs/02_decisions/0092-review-bundle-disposition-and-m7-measurement.md) |
+| **Concept Lock** | v0.7.0 — Normative Law: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs [`0069`](docs/02_decisions/0069-runtime-convergence-python-first-packages-canonical.md)–[`0094`](docs/02_decisions/0094-product-first-m4-and-optional-assurance.md) |
 | **Shipped package** | `vanguard-runtime` `0.7.0` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-3C closed; RF-85 preparation merged at `1a1ed6c`; M-4 remains active with zero evidence rows claimed.** Current work is environment qualification, immutable preregistration, then one eligible run. |
-| **Foundation Plan** | M-3C convergence → M-4 real nine-row proof → M-5 Formal Pack #2 → M-6 mediated spawn → M-7 measured concurrency → M-8 declarative topologies; M-9+ remains post-v1 research |
+| **Status** | **M-3C and W-3D closed; M-4/RF-95 product proof active.** RF-85 hermetic assurance is retained as optional and claims zero rows. |
+| **Foundation Plan** | M-4 useful durable coding run → M-5 Formal Pack #2 → M-6 mediated spawn → measured M-7 → M-8 declarative topologies; M-9+ remains post-v1 research |
 | **Production Truth** | `vanguard/packages/` (Hexagonal lattice: `domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Foundation Lock](https://img.shields.io/badge/AETHER-v0.6.1--foundation--lock-blue.svg)](docs/SPEC.md)
@@ -176,12 +176,13 @@ Execution status and macro milestones are tracked in:
 
 ```text
 M-0..M-2 (Complete) -> M-3 contracts -> M-3C (Closed) -> M-4 (Active) -> M-5 -> M-6 -> M-7 -> M-8 -> v1 review -> M-9+ research
-[Trust foundation]     [retained]       [converged]       [RF-85 real run] [locked until each preceding gate]       [post-v1]
+[Trust foundation]     [retained]       [converged]       [RF-95 product] [locked until each preceding gate]       [post-v1]
 ```
 
-The only next authorized sequence is: qualify a clean Linux rootless/Bubblewrap environment and the
-isolated evaluator, select a reachable real provider, install locked dependencies and pass all gates,
-immutably preregister the task/oracle, then execute one uninterrupted RF-85 run. M-5+ remains locked.
+The next authorized sequence is: qualify the durable product CLI, select a reachable real provider,
+then execute and reconstruct one non-trivial RF-95 coding run. M-5 opens only after that product proof.
+RF-85 containment/evaluator certification is optional and non-blocking; ADR-0092 separately permits
+only the non-blocking M7-01 measurement lane.
 
 ---
 

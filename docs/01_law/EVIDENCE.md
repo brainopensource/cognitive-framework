@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.6.2"
-last_verified: 2026-08-23
+last_verified: 2026-08-25
 read_when:
   - changing-trajectories-or-costs
   - changing-evaluator-verdicts
@@ -35,10 +35,10 @@ and [`RUNTIME.md §1.3`](RUNTIME.md#13-determinism--replay-contract).
 
 ## Evaluator and verdicts
 
-The evaluator is exterior to the judged runtime and verdicts are Ed25519-signed. The authority
-predicate binds `D_H`, `D_R`, `D_X`, evidence, and signer identity. A missing evaluator is declared
-before execution as `evaluation: none`, deriving `unattributable_for_promotion = true`; an unsigned
-or forged verdict is a hard failure, never an absence. See
+For a promotion-eligible assurance run, the evaluator is exterior to the judged runtime and verdicts
+are Ed25519-signed. Product runs MAY declare `evaluation: none`; that choice enters `D_R` and derives
+`unattributable_for_promotion = true`, but does not make the product execution invalid. An unsigned
+or forged verdict is a hard failure when evaluation was declared, never an absence. See
 [`../05_contracts/verdicts.md`](../05_contracts/verdicts.md) and
 [`../02_decisions/0079-absent-vs-forged-derived-promotability.md`](../02_decisions/0079-absent-vs-forged-derived-promotability.md).
 
@@ -47,7 +47,15 @@ or forged verdict is a hard failure, never an absence. See
 `D_H` identifies the complete harness composition; `D_R` adds runtime, environment, model, and oracle;
 `D_X` adds dataset and protocol. These identities MUST remain distinct in evidence and promotion.
 
-## Foundation evidence bundle (M-4)
+## Product proof (M-4 / RF-95)
+
+M-4 requires one live-model coding run through canonical composition and ordinary mediated tools. It
+MUST produce a real workspace diff, a passing task-specific verification receipt, a file-backed WAL,
+a complete terminal trajectory, and fresh-process reconstruction of the same terminal state. Fake or
+cassette providers, alternate execution drivers, stitched traces, and manual event repair deny RF-95.
+Exterior evaluation and containment MAY be selected but are not required for this product gate.
+
+## Hermetic foundation evidence bundle (RF-85 optional assurance)
 
 `mhf.foundation-evidence/1` is a derived audit artifact, not a new authority ledger. Its header binds
 one `project_id`, `run_id`, `episode_id`, `D_H`, `D_R`, optional `D_X`, ledger range, terminal chain
@@ -64,5 +72,6 @@ when absent. Every row cross-binds the same composition, run/episode lineage, ev
 artifacts. A textual signature, altered digest, mixed lineage, missing measurement status, unattested
 probe, fake/cassette provider, host fallback, manual repair, or stitched trace denies.
 
-A hermetic synthetic bundle may prove the M-3C validator and negative cases but is permanently
-ineligible for M-4. M-4 requires independent verification of one uninterrupted real run (RF-85).
+A hermetic synthetic bundle may prove validator and negative cases but is permanently ineligible for
+RF-85. RF-85 retains its original nine-row independent-verification contract and MUST NOT be claimed
+by an RF-95 product run.

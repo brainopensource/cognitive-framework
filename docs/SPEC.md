@@ -101,15 +101,14 @@ historical evidence only.
 - Cold continuation loads durable pre-crash events, joins the trajectory prefix, reconciles pending
   Governor leases (no budget leak), and emits `RunRecovered` before a complete `mhf.trajectory/1` at
   `EpisodeCompleted`.
-- M-4 evidence is derived from canonical model, kernel, workspace, containment, evaluator, WAL,
-  reconstruction, trajectory, and runtime-authority artifacts. Self-attested booleans, textual
-  signatures, mixed lineage, synthetic providers, and defaulted paths cannot satisfy the gate.
-- RF-85 preparation is complete at repository commit `1a1ed6c`, but preparation artifacts and
-  synthetic contracts are not M-4 evidence. The canonical auditor distinguishes `absent`, `invalid`,
-  `unverifiable`, and `present_valid`; only a complete canonical envelope bound to its immutable
-  preregistration and authoritative verifiers may be promotion-eligible. Headerless/legacy rows are
-  always non-promotional. An unreconciled S8a intent remains F-22 `undeterminable` and MUST NOT be
-  reported as successful, repeated, or counted as a settled physical effect.
+- M-4 product evidence (RF-95) is derived from one real-model coding run through canonical
+  composition, ordinary mediated tools, a real workspace diff, task verification, file-backed WAL,
+  trajectory, and fresh-process reconstruction. Synthetic providers, alternate drivers, stitched
+  traces, and manual event repair cannot satisfy the gate.
+- RF-85 retains the stronger nine-row hermetic assurance contract but no longer blocks M-4 or M-5.
+  Its canonical auditor distinguishes `absent`, `invalid`, `unverifiable`, and `present_valid`; only
+  a complete envelope bound to immutable preregistration and authoritative verifiers may be
+  promotion-eligible. An unresolved S8a intent remains F-22 `undeterminable` in every profile.
 - `agent.spawn` is a generic S0–S12 effect whose post-intent child creation belongs to a runtime
   adapter; the kernel MUST NOT branch on the verb or know child topology.
 - Scheduler claim TTL/heartbeat is coordination metadata, not budget `millis`. Concurrent physical
@@ -117,18 +116,17 @@ historical evidence only.
 - M-8 topology is declared component/policy data lowered to ordinary scheduling and mediated spawn.
   A substrate workflow/topology engine requires RF-66 reversal evidence and a successor ADR.
 - Execution assurance is explicit and identity-bearing: the resolved `ExecutionProfile` MUST enter
-  `D_R`; `local`, `sandboxed`, and `hermetic` are distinct modes, and an unavailable requested
-  containment mode MUST fail closed rather than silently falling back to the host.
+  `D_R`; `product`, `local`, `sandboxed`, and `hermetic` are distinct modes. Product execution MAY
+  use the host adapter with durable WAL and explicit approvals. An unavailable requested containment
+  mode MUST fail closed rather than silently falling back to the host.
 - The runtime bootstrap is the sole production seam for concrete adapter construction. Plugin
   activation MUST materialize a service/handle or fail; lifecycle metadata without a callable service
   is not production activation.
 
 ## v0.6.2 concept lock
 
-ADR-0088 fixes M-3C and M-4 contracts and plans M-5/M-6 without opening them. ADR-0089 opens the
-bounded W-3D Product Runtime Profiles corrective wave and pauses RF-85 execution until its baseline
-is requalified. M-3C is a bounded
-composition/activation convergence; M-4 is one real nine-row proof; M-5 is the Formal Pack #2
+ADR-0094 supersedes only ADR-0088's M-4 exit dependency: M-4 is now the RF-95 useful, durable coding
+proof, while RF-85 remains an optional hermetic assurance certification. M-5 is the Formal Pack #2
 generality proof with an unchanged substrate; M-6 is capability-mediated delegation. M-7/M-8 retain
 only compatibility seams until their gates. M-9+ is post-v1, non-authorizing research.
 
@@ -141,7 +139,7 @@ only compatibility seams until their gates. M-9+ is post-v1, non-authorizing res
 | M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — Wave 2C |
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal; operational closure resolved by M-3C |
 | M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence derivation, and authority retirement — complete |
-| M-4 | v0.6.3 | RF-85 preparation retained; execution paused during accepted W-3D correction, then one real, un-forged E2E run with nine source-derived evidence lines |
+| M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, and fresh-process reconstruction |
 | M-5 | v0.7.0 | LOCKED until M-4 Director closure: RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness |
 | M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` through generic S0–S12 dispatch |
 | M-7…M-8 | future product gates | measured concurrency and declarative topology support |

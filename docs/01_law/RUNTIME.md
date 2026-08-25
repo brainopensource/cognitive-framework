@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.6.2"
-last_verified: 2026-08-23
+last_verified: 2026-08-25
 read_when:
   - implementing-runtime-events
   - implementing-cold-recovery
@@ -55,16 +55,16 @@ history are evidence, never implementation requirements.
 coding; coding is not the architecture. One execution machine
 (`Agent = Principal + HarnessInstance`, `ADR-0070`) runs every agent, subagent, and (later) swarm
 participant. Declarative manifests plus versioned plugins compile into specialised harnesses. The
-attenuation kernel, the exterior judge, and the measurement lab are the moat. Self-improvement and
+attenuation kernel, durable execution record, and optional assurance/evaluation modes are reusable
+substrate capabilities. Self-improvement and
 meta-cognition are Phase-2 plugins, not Layer-0 features, and they are **not implemented in v0.6**
 (`ADR-0073`).
 
-**What solved it must be separable, and the judge must be unreachable from the judged** (the
-separability thesis, carried from `docs/01_specs/backend/02_vanguard_charter_claims_and_non_claims_v040.md`
-§1, now archived — this sentence is the project's one-sentence identity and it stays). A harness that
-passes a benchmark is worthless as evidence unless the mechanism that produced the pass is separable
-from the mechanism that graded it, and the grader cannot be read, patched, or reasoned about by the
-thing it grades.
+**What solved it must remain separable from the substrate that executed it.** Domain behavior belongs
+in packs, plugins, adapters, and clients rather than the kernel or generic turn engine. When a run
+claims independent promotion evidence, the judge must additionally be exterior and unreachable from
+the judged process. Ordinary product runs may declare no evaluator and remain useful but
+non-promotional.
 
 **Non-claims** (merged line-by-line from the charter's §3, now folded into §9 below rather than kept as
 a separate document): this specification does not claim continuous learning, does not claim the system
@@ -713,7 +713,7 @@ does not authorize work.
 | **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
 | **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained RF-28–RF-45 evidence; operational closure reopened |
 | **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
-| **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | RF-85; one lineage, populated trajectory, exterior signed evidence |
+| **M-4 / v0.7.0** | One useful real coding-agent run with durable replay | RF-95; live model, mediated observe/edit/verify, diff, WAL, trajectory, fresh-process reconstruction |
 | **M-5 / v0.7.0** | Formal Pack #2 and exact T0 witness memo | RF-86 and RF-52–RF-53; unchanged substrate; trajectory/evidence parity |
 | **M-6 / v0.8.0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
 | **M-7–M-8** | Measured concurrency then declarative topology support | RF-46–RF-48 and RF-65–RF-66; sequential until governance lift |
@@ -725,8 +725,8 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current gate:** M-3C is closed by the Director decision recorded on the active board. M-4 is the
-only active implementation wave; M-5 and later work remain closed until RF-85 is satisfied.
+**Current gate:** M-3C and W-3D are closed. M-4 is the active RF-95 product proof; M-5 remains closed
+until RF-95 is satisfied. RF-85 continues independently as optional hermetic assurance.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -749,10 +749,9 @@ the code is kept:
 
 ### 8.2 Current foundation gap
 
-The Trust Spine, truthful trajectory, and cold continuation gates are retained green. M-3C closes the
-remaining operational split between legacy public composition and the named graph/registry side path,
-then makes release durability and source-derived M-4 evidence real. Current status is recorded only on
-the active board.
+The Trust Spine, truthful trajectory, and cold continuation gates are retained green. M-3C closed the
+operational split between legacy public composition and the named graph/registry side path and made
+durable product and assurance evidence derivable. Current status is recorded only on the active board.
 
 ### 8.3 Honour table (SPEC §9, do not reopen)
 

@@ -90,6 +90,16 @@ test("malformed budget surfaces as budgetError for exit 2", () => {
   assert.ok(parsed.budgetError);
 });
 
+test("coding defaults are usable and cost-safe", () => {
+  const parsed = parseCliOptions(["."]);
+  assert.equal(parsed.plannerModel, "openrouter/free");
+  assert.equal(parsed.recoveryModel, "openrouter/free");
+  assert.equal(parsed.interactive, true);
+
+  const benchmark = parseCliOptions([".", "--benchmark"]);
+  assert.equal(benchmark.interactive, false);
+});
+
 test("human receipts cover required transitions without ANSI", () => {
   const lines = renderProjectionLines(
     [

@@ -9,9 +9,10 @@ from vanguard.packages.runtime import entrypoint
 
 class RF90GenericEntrypointFalsifier(unittest.TestCase):
     def test_doctor_is_available_without_model_or_network(self) -> None:
-        frame = entrypoint.execute({"command": "doctor", "profile": "local"})
+        frame = entrypoint.execute({"command": "doctor"})
         self.assertEqual(frame["type"], "result")
         self.assertEqual(frame["result"]["phase"], "doctor")
+        self.assertIsNotNone(frame["result"]["planDigest"])
 
     def test_code_and_explain_resolve_the_shared_manifest_entrypoint(self) -> None:
         self.assertEqual(entrypoint._manifest("code").name, "manifest.json")

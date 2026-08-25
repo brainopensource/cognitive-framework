@@ -163,6 +163,7 @@ class Runtime(_ComposedRuntime):
         approver: Callable[[Any], Any] | None = None,
         verifier: Any = None,
         store: Any = None,
+        store_path: str | Path | None = None,
         bindings: Mapping[str, EffectBinding] | None = None,
         approval_key: bytes | None = None,
         on_terminal: Callable[[HarnessSession], Any] | None = None,
@@ -187,6 +188,7 @@ class Runtime(_ComposedRuntime):
             repo_path=Path(task_context.repo_path),
             model=model,
             store=store,
+            store_path=Path(store_path) if store_path is not None else None,
             host_qualifies=host_qualifies,
             host_facts=host_facts,
         )

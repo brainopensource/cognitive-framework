@@ -40,7 +40,7 @@ function codingRequestFromParsed(
     question: parsed.question,
     runId: parsed.runId,
     resumeFrom: parsed.resumeFrom,
-    plannerModel: parsed.plannerModel ?? "deepseek/deepseek-v4-flash",
+    plannerModel: parsed.plannerModel ?? "openrouter/free",
     executorBand: parsed.executorBand ?? "free",
     executorModels: [],
     recoveryModels: parsed.recoveryModel ? [parsed.recoveryModel] : [],

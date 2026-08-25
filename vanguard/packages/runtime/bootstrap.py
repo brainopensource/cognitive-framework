@@ -62,6 +62,7 @@ class RuntimeBootstrap:
         repo_path: Path,
         model: Any = None,
         store: Any = None,
+        store_path: Path | None = None,
         clock: ClockPort | None = None,
         host_qualifies: bool = True,
         host_facts: Mapping[str, Any] | None = None,
@@ -77,7 +78,14 @@ class RuntimeBootstrap:
             profile_id, host_qualifies=host_qualifies, host_facts=host_facts, overrides=overrides,
         )
         repo = Path(repo_path).resolve()
-        selected_store = store or SqliteEventStore(":memory:")
+        if store is not None:
+            selected_store = store
+        elif profile.requested.persistence_mode == "sqlite-wal":
+            db_path = Path(store_path) if store_path is not None else repo / ".vanguard" / "events.sqlite3"
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            selected_store = SqliteEventStore(db_path)
+        else:
+            selected_store = SqliteEventStore(":memory:")
         cleanup: Callable[[], None] = lambda: None
 
         if profile.requested.process_backend == "host":

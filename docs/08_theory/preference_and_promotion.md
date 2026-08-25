@@ -16,6 +16,7 @@ implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
 last_verified: 2026-08-21
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -23,12 +24,12 @@ superseded_by: null
 # Pairwise Preference Harvesting & Statistical Promotion
 
 > **Maturity:**
-> - **DPO Preference Harvesting Pipeline**: `RESEARCH` · Target Milestone: **M-10** (Governed by ADR-0084).
+> - **DPO Preference Harvesting Pipeline**: `RESEARCH` · Target Milestone: **M-8/M-9** (historically M-10; `ADR-0095` §4) (Governed by ADR-0084).
 > - **Statistical McNemar Doctrine**: `AS_BUILT` · Governed by Normative Law [`docs/01_law/MEASUREMENT.md`](../01_law/MEASUREMENT.md).
 
 ---
 
-## 1. Unforgeable DPO Preference Harvesting (`RESEARCH` - M-10)
+## 1. Unforgeable DPO Preference Harvesting (`RESEARCH` — M-8/M-9, historically M-10)
 
 Given paired execution runs $(y_w, y_l)$ where $y_w$ passed exterior signed evaluation and $y_l$ failed:
 

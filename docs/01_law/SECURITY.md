@@ -7,13 +7,14 @@ canonical_for:
   - isolation-and-tcb-law
 status: living
 owner: principal-systems-architect
-version: "0.6.2"
-last_verified: 2026-08-23
+version: "0.7.0"
+last_verified: 2026-08-25
 read_when:
   - changing-capabilities
   - changing-isolation-or-tcb
 do_not_read_when:
   - changing-only-model-routing
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -24,6 +25,15 @@ This is the task-sized entry point for security work. The complete normative tex
 [`DISPATCH.md`](DISPATCH.md): its sections on the TCB, mutability, grants, attenuation, provenance,
 the workload perimeter, architecture tests, and threat model are authoritative and are not duplicated
 here.
+
+> **Authority.** Normative, but subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`).
+>
+> **AETHER is not primarily a security or certification project.** Security mechanisms here are
+> reusable substrate capabilities, available as optional profiles. They do not gate normal
+> development, and RF-85 hermetic certification blocks no milestone (`ADR-0094`). What remains
+> non-negotiable is *honesty*, not *mandatory containment*: profile identity in `D_R`, no false
+> promotion claims, and fail-closed behaviour when a stronger assurance profile is explicitly
+> requested and cannot be provided.
 
 ## Read map
 

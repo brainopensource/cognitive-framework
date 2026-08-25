@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanguard-runtime"
-version = "0.4.5b1"
-description = "Vanguard Hexagonal Agentic Runtime (Phase 2 Beta)"
+version = "0.7.0"
+description = "AETHER — Higgs Release (v0.7.0)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

@@ -17,11 +17,15 @@ implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.1"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Vanguard / AETHER Architecture Index
+
+> **Authority.** These architecture descriptions are subordinate to [`VISION.md`](../../VISION.md) (Law Zero, `ADR-0095`), then [`SPEC.md`](../SPEC.md) and [`01_law/`](../01_law/). They realize the law on the wire and introduce no architecture of their own. Where they still describe the pre-0095 architecture, the Vision wins and the text is reconciled.
+
 
 > **Classification:** Descriptive Architecture.  
 > **Authority:** Non-normative. Governing normative law lives in [`docs/SPEC.md`](../SPEC.md) and [`docs/01_law/`](../01_law/).

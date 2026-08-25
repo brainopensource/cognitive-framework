@@ -8,12 +8,13 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.6.2"
-last_verified: 2026-08-23
+last_verified: 2026-08-25
 read_when:
   - implementing-runtime-events
   - implementing-cold-recovery
 do_not_read_when:
   - changing-only-documentation-navigation
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -51,20 +52,25 @@ history are evidence, never implementation requirements.
 
 ## Preamble
 
-**Vanguard is a recursive agency substrate that compiles harnesses.** The first *domain pack* is
+> **Authority.** This leaf is normative but **subordinate to [`VISION.md`](../../VISION.md)** (Law
+> Zero, `ADR-0095`). Where a clause here still describes the pre-0095 architecture, the Vision wins
+> and the clause is reconciled — it is never a counter-authority. Clauses marked
+> *current-state gap* describe implementation that has not yet reached the locked target.
+
+**Vanguard is a general event-sourced agentic computation substrate that compiles harnesses.** The first *domain pack* is
 coding; coding is not the architecture. One execution machine
 (`Agent = Principal + HarnessInstance`, `ADR-0070`) runs every agent, subagent, and (later) swarm
 participant. Declarative manifests plus versioned plugins compile into specialised harnesses. The
-attenuation kernel, the exterior judge, and the measurement lab are the moat. Self-improvement and
+attenuation kernel, durable execution record, and optional assurance/evaluation modes are reusable
+substrate capabilities. Self-improvement and
 meta-cognition are Phase-2 plugins, not Layer-0 features, and they are **not implemented in v0.6**
 (`ADR-0073`).
 
-**What solved it must be separable, and the judge must be unreachable from the judged** (the
-separability thesis, carried from `docs/01_specs/backend/02_vanguard_charter_claims_and_non_claims_v040.md`
-§1, now archived — this sentence is the project's one-sentence identity and it stays). A harness that
-passes a benchmark is worthless as evidence unless the mechanism that produced the pass is separable
-from the mechanism that graded it, and the grader cannot be read, patched, or reasoned about by the
-thing it grades.
+**What solved it must remain separable from the substrate that executed it.** Domain behavior belongs
+in packs, plugins, adapters, and clients rather than the kernel or generic turn engine. When a run
+claims independent promotion evidence, the judge must additionally be exterior and unreachable from
+the judged process. Ordinary product runs may declare no evaluator and remain useful but
+non-promotional.
 
 **Non-claims** (merged line-by-line from the charter's §3, now folded into §9 below rather than kept as
 a separate document): this specification does not claim continuous learning, does not claim the system
@@ -248,6 +254,26 @@ sync (keep, D-16) with JSONL export; blob writes are `write→fsync→emit(diges
 
 ### 1.3 Determinism & replay contract
 
+**Replay and re-execution MUST NOT be conflated.**
+
+*Replay* applies persisted events to compatible reducers and reconstructs the semantically equivalent
+state that existed at a point in the execution. A prior model response is **not** recomputed: it is
+already a recorded fact. Under identified schemas, reducer versions, and artifacts, replay is
+deterministically reproducible. Replay answers: *what state results from the history that occurred?*
+
+*Re-execution* runs models, tools, or policies again over equivalent inputs. It carries **no such
+guarantee**. Even at temperature zero, backend changes, floating-point behaviour, batching, model
+routing, provider revisions, and infrastructure differences may change the result. Low temperature
+reduces variance; it does not make modern model inference deterministic. Re-execution answers:
+*what would happen if equivalent conditions were submitted again?*
+
+Both are legitimate and both are used. Re-execution over a recorded trajectory is the basis of
+**re-simulation**: hold part of a trajectory fixed and vary a model, prompt, topology, compaction
+policy, retrieval depth, recursion depth, budget, tool selection, or strategy controller. The
+scientific requirement is not to pretend determinism exists, but to state exactly which variables
+were held constant, which were changed, and what resulted — see
+[`MEASUREMENT.md`](MEASUREMENT.md) and [`EVIDENCE.md`](EVIDENCE.md).
+
 `ClockPort`, `RandomPort`, and model cassettes remain injected; replay mode substitutes recorded values
 keyed by `(run_id, seq)`. **Replay taxonomy (`ADR-0071`) — these MUST NOT be conflated:** state replay
 (deterministic reconstruction of grants, budgets, approvals, episode FSM); schedule replay (needs
@@ -272,6 +298,50 @@ not enable it in v0.6), cooperative cancellation tokens, turn/depth ceilings as 
 the six named fields remain `{usd_micros, millis, tokens, bytes, turns, depth}`, but they are **not**
 one additive vector — additive conserved `{usd_micros, tokens, bytes, charged millis}` versus
 structural ceilings `{depth, turns}`. Sibling depths are not summed. Heartbeat emission stays.
+
+### 1.5 Agent state is a projection
+
+**`Agent = Identity + Policy + Event-Derived Projection + Execution Boundary`.** There is no
+privileged persistent `Agent` object in the architecture. *Identity* correlates a lineage; *policy*
+influences which operations are chosen; *projection* derives the semantically relevant state from the
+ledger; *execution boundary* bounds resources, context, budget, depth, and terminal conditions.
+
+`Episode`, `HarnessSession`, `_LayeredOperator._dialogue`, and equivalent runtime objects MAY hold
+transient optimization state — caches, buffers, open handles, memoized context. **No state required
+for semantic continuation may exist only inside those objects.** Everything needed to recover the
+current goal, plan, relevant observations, settled effects, budget state, strategy state, context
+references, and terminal status MUST be reconstructible from canonical events and artifacts through
+projections. A process may die; another process opens the ledger, rebuilds the lineage, and continues.
+
+Because state is projected rather than stored in an object, a lineage may be **metamorphic**: the same
+identity may begin exploring, adopt a planning strategy, enter debugging behaviour, request
+delegation, abandon a hypothesis, and terminate as a synthesizer — without its ontological nature
+being fixed in advance and without destroying provenance.
+
+Domains MAY define their own projections. The canonical **ledger reducer remains single**; a
+domain-specific view is a projection over it, never a second reducer of record and never a second
+source of truth.
+
+> **Current-state gap (closed by M-5a).** Today, part of the semantic continuation state still lives
+> inside `Episode`/`HarnessSession` objects rather than in projections, and the `AgentView` event
+> vocabulary (goal declaration, plan revision, strategy selection, progress assessment, context
+> compaction) is not yet allocated. This is a documented migration, not a weakening of the rule
+> above. The substrate is re-tagged as the new `M-5-BASE` once the migration lands.
+
+### 1.6 Physical append order and the logical causal graph
+
+`seq` is the **durable physical append order** within a consistency unit (`project_id`). It provides
+total order for persistence, recovery scanning, and `(run_id, seq)` keying.
+
+`seq` is **not** logical dependency. Causation, parentage, correlation, lineage, branches, and joins
+define the **logical, partially ordered execution graph**. `A -> C` and `B -> C` may both hold without
+any ordering between `A` and `B`. Conflating the two is what turns an event log into a false claim
+about what depended on what.
+
+> **Current-state gap.** The runtime today executes a single sequential turn loop (I-11) and the
+> partially ordered graph is expressed only through `causation_id`/`correlation_id` on the envelope.
+> Branch, join, and readiness semantics are **target architecture**, gated on the M7-01 measurement
+> and a successor ADR under M-7. Nothing in this section claims those features exist today.
 
 ---
 
@@ -713,7 +783,7 @@ does not authorize work.
 | **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
 | **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained RF-28–RF-45 evidence; operational closure reopened |
 | **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
-| **M-4 / v0.6.3** | One uncheated real coding-agent run with all nine foundation rows | RF-85; one lineage, populated trajectory, exterior signed evidence |
+| **M-4 / v0.7.0** | One useful real coding-agent run with durable replay | RF-95; live model, mediated observe/edit/verify, diff, WAL, trajectory, fresh-process reconstruction |
 | **M-5 / v0.7.0** | Formal Pack #2 and exact T0 witness memo | RF-86 and RF-52–RF-53; unchanged substrate; trajectory/evidence parity |
 | **M-6 / v0.8.0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
 | **M-7–M-8** | Measured concurrency then declarative topology support | RF-46–RF-48 and RF-65–RF-66; sequential until governance lift |
@@ -725,8 +795,8 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current gate:** M-3C is closed by the Director decision recorded on the active board. M-4 is the
-only active implementation wave; M-5 and later work remain closed until RF-85 is satisfied.
+**Current gate:** M-3C and W-3D are closed. M-4 is the active RF-95 product proof; M-5 remains closed
+until RF-95 is satisfied. RF-85 continues independently as optional hermetic assurance.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 
@@ -749,10 +819,9 @@ the code is kept:
 
 ### 8.2 Current foundation gap
 
-The Trust Spine, truthful trajectory, and cold continuation gates are retained green. M-3C closes the
-remaining operational split between legacy public composition and the named graph/registry side path,
-then makes release durability and source-derived M-4 evidence real. Current status is recorded only on
-the active board.
+The Trust Spine, truthful trajectory, and cold continuation gates are retained green. M-3C closed the
+operational split between legacy public composition and the named graph/registry side path and made
+durable product and assurance evidence derivable. Current status is recorded only on the active board.
 
 ### 8.3 Honour table (SPEC §9, do not reopen)
 

@@ -28,7 +28,7 @@ def _manifest(command: str) -> Path:
 
 def _doctor(request: Mapping[str, Any]) -> dict[str, Any]:
     facts = dict(discover_platform().to_dict())
-    profile_id = str(request.get("profile") or "local")
+    profile_id = str(request.get("profile") or "product")
     try:
         resolved = resolve_profile(
             profile_id, host_qualifies=facts.get("enforcement") == "full", host_facts=facts)
@@ -82,9 +82,10 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         selected_model = OpenRouterModel(model=planner_model)
     result = Runtime.execute_profiled(
         _manifest(command), task,
-        profile_id=str(request.get("profile") or "local"),
+        profile_id=str(request.get("profile") or "product"),
         model=selected_model,
-        interactive=bool(request.get("interactive", False)),
+        store_path=(str(request["storePath"]) if request.get("storePath") else None),
+        interactive=bool(request.get("interactive", True)),
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))
     outcome = "completed" if terminal in {"completed", "abstained"} else terminal

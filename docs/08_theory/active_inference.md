@@ -16,13 +16,14 @@ implementation_status: RESEARCH
 owner: cognitive-systems-researcher
 version: "0.6.1"
 last_verified: 2026-08-21
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
 # Active Inference & Free Energy Minimization
 
-> **Status:** `RESEARCH` · Target Milestone: **M-10** (Governed by ADR-0084).
+> **Status:** `RESEARCH` · Target Milestone: **M-8/M-9** (historically M-10; `ADR-0095` §4) (Governed by ADR-0084).
 
 ---
 

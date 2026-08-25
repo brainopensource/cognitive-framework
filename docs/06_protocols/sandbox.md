@@ -16,6 +16,7 @@ implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.2"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -41,5 +42,9 @@ class SandboxRunner(Protocol):
 - **Containment Probes**: `ContainmentReport` requires verified startup probes (`mount`, `egress`, `syscall`).
 - **Publication Gate**: `publication_decision(report)` refuses publication fail-closed if `report.verified` is false (K-44).
 - **Isolation Policy (Invariant I-6)**: Untrusted execution runs in rootless Bubblewrap (UID `10001`) with read-only root and tmpfs workspaces.
-- **M-4 Eligibility**: containment evidence is derived from verified runtime probes bound to the same
-  run and event range; host fallback, an unverified report, or a caller assertion denies RF-85.
+- **Optional assurance eligibility**: containment is **not** an M-4/RF-95 requirement
+  (`ADR-0094`); the `product` profile may execute on the host with durable WAL and explicit
+  approvals. Where a run claims hermetic assurance, containment evidence must be derived from
+  verified runtime probes bound to the same run and event range; host fallback, an unverified report,
+  or a caller assertion denies RF-85. An explicitly requested containment mode that is unavailable
+  fails closed — it never silently degrades to the host under the same `D_R`.

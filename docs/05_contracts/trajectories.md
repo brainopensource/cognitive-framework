@@ -17,6 +17,7 @@ implementation_status: AS_BUILT
 owner: principal-systems-architect
 version: "0.6.2"
 last_verified: 2026-08-23
+subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
@@ -57,4 +58,4 @@ requires their source-bound occurrence inside the single real foundation run.
 For M-4, the trajectory is row 8 of `mhf.foundation-evidence/1` and cross-binds the bundle's
 `project_id`, `run_id`, `episode_id`, `D_H`, `D_R`, optional `D_X`, ledger range, terminal chain
 digest, receipts, outcome, and source digest. It cannot be substituted from another run or treated as
-complete merely because its JSON validates. RF-83 proves source derivation; RF-85 proves the real run.
+complete merely because its JSON validates. RF-83 proves source derivation; RF-95 proves the real product run. RF-85 remains the separate, optional hermetic assurance certification.

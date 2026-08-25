@@ -173,3 +173,52 @@ npm ci
 npm run typecheck --workspaces --if-present
 npm test --workspaces --if-present
 ```
+
+
+# TODO list
+
++-----------+------------------------------------------------------+---------------------------+------
+| Milestone | Task                                                 | Objetivo                  |
++-----------+------------------------------------------------------+---------------------------+------
+| GOV       | Tornar VISION.md autoridade arquitetural superior    | Eliminar ambiguidade      |  OK 
+| GOV       | Criar ADR-0095 de transição e remapeamento           | Fixar nova governança     |  OK
+| GOV       | Reconciliar SPEC, LAW, README, milestones e sprints  | Uma única verdade ativa   |  OK
+| GOV       | Remover locks cerimoniais; usar dependências técnicas| Desbloquear equipes       |  OK
++-----------+------------------------------------------------------+---------------------------+------
+| M-4       | Finalizar vg code útil                               | Produto funcional         |
+| M-4       | Streaming, tools, diff, tests, resume, WAL            | Loop agentic completo    |
+| M-4       | Telemetria e trajectory capture desde o início        | Base científica          |
+| M-4       | Executar RF-95 real                                  | Validar caminho do produto|
++-----------+------------------------------------------------------+---------------------------+------
+| M-5a      | Definir Operation, Lineage, Scope e AgentView         | Nova ontologia do agente |
+| M-5a      | Tornar estado necessário reconstruível por eventos    | Agent event-derived      |
+| M-5a      | Separar ledger reducer de projections                 | Evitar acoplamento       |
+| M-5a      | Registrar provenance de context/cache/compaction      | Reprodutibilidade        |
+| M-5a      | Congelar e re-tag novo M-5-BASE                       | Baseline estável         |
++-----------+------------------------------------------------------+---------------------------+------
+| M-5b      | Criar formal-default + checker determinístico         | Provar generalidade      |
+| M-5b      | Executar RF-86 contra novo baseline                   | Zero domain leakage      |
++-----------+------------------------------------------------------+---------------------------+------
+| M-6       | Implementar spawn como nested lineage                 | Delegação recursiva      |
+| M-6       | Child scopes, budget/capability attenuation           | Limites claros           |
+| M-6       | Join, cancelamento e recovery                         | Recursão durável         |
++-----------+------------------------------------------------------+---------------------------+------
+| M-6.5     | Criar ProgressProjection + meta-controller            | Estratégia adaptativa    |
+| M-6.5     | Medir runs com/sem meta-controller                    | Validar metacognição     |
++-----------+------------------------------------------------------+---------------------------+------
+| M-7       | Definir topology como artifact/config versionado      | Grafos agentic           |
+| M-7       | Formalizar causal partial order / branch / join       | Execução não linear      |
+| M-7       | Adicionar paralelismo observacional simples           | Ganho imediato           |
+| M-7       | Scheduler avançado apenas se medições justificarem    | Evitar complexidade inúti|
++-----------+------------------------------------------------------+---------------------------+------
+| M-8       | Memory e retrieval como projections/plugins           | Memória reutilizável     |
+| M-8       | Skills versionadas derivadas de trajetórias           | Aprendizagem operacional |
+| M-8       | Held-out evaluation + promotion + rollback            | Aprender com rigor       |
++-----------+------------------------------------------------------+---------------------------+------
+| M-9       | Integrar coding + formal + research                   | General Agent Framework  |
+| M-9       | Testar adaptação, transferência e long-horizon        | Validar v1.0             |
+| M-9       | Release AETHER v1.0                                   | Framework geral integrado|
++-----------+------------------------------------------------------+---------------------------+------
+| PARALELO  | Adapters, UI/CLI, indexing, context, tooling, docs    | Não bloquear 20 devs     |
+| PARALELO  | Concurrency measurement histórica                    | Decidir scheduler por dado|
++-----------+------------------------------------------------------+---------------------------+------

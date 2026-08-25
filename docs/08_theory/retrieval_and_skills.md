@@ -23,7 +23,7 @@ superseded_by: null
 
 # 384d Dense Hybrid Retrieval & Elo Skill Eviction
 
-> **Status:** `RESEARCH` · Target Milestone: **M-9**.
+> **Status:** `RESEARCH` · Target Milestone: **M-8** (historically M-9; `ADR-0095` §4).
 
 ---
 

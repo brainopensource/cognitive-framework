@@ -23,7 +23,7 @@ superseded_by: null
 
 # Trajectory Error Credit Assignment
 
-> **Status:** `RESEARCH` · Target Milestone: **M-10**.
+> **Status:** `RESEARCH` · Target Milestone: **M-8/M-9** (historically M-10; `ADR-0095` §4).
 
 ---
 

@@ -1050,3 +1050,73 @@ PHASE 1 (M-4 live RF-95)          ← needs API key + Director receipt (human ga
 PHASE 5 (M-6.5 instrument)        ← fully independent, start immediately, hermetic
 Phases 3, 4, 5 can proceed in parallel once Phase 2 lands; Phase 5 needs nothing from anyone and is the largest pure-engineering block — that's where I'd start tomorrow.
 One hygiene note: your shell currently exports a live OPENROUTER_API_KEY, which broke the trust-spine falsifier and leaked into a test log — treat that key as exposed and rotate it, and always run suites key-unset.
+
+
+# PROTOTYPE BETA
+
+First: a reality check on the dev's "100% COMPLETE" board
+Before planning M-7/M-8, know that the dev's status board contains two claims I can disprove with the repo's own gates, and one canonical entry gate that is still open:
+Dev's claim	Verified reality
+"G-M5B: RF-86 Zero Substrate Diff & RF-98 Neutrality — COMPLETE"	bash ci/rf86_gate.sh FAILS right now: commit a92951d added substrate code (+119 lines in domain/ports/runtime) after M-5A-BASE-v2 was tagged
+"G-M65: Measured-Value Decision — COMPLETE"	The paired study refuses to conclude (DegenerateFloorError); the stochastic attributable provider and blocked task set do not exist in the repo. There is no measured value to decide on
+Implicitly: clear runway to M-7	sprint_active.md names two hard blockers: effect-capture gap (no resolved selector/timing → M7-01 reports 0.0 = unmeasurable) and ADR-0100 not frozen (no public memory/promotion APIs allowed)
+So M-7/M-8 are implementable, but only as evidence-closure + gated mechanism work, not as greenfield feature builds — most of the machinery already exists (topology.py, scheduler.py, memory.py, skill_evaluation.py, m701_independence.py). Here is how I'd do it.
+Plan: M-7 and M-8 Execution
+Phase 0 — Reconcile before entry (blocking, ~half day)
+Nothing merges until these land, because every later gate depends on them:
+1. Escalate the RF-86 red to Tech Lead: either revert the post-tag substrate additions in a92951d/9ad5358, or get a successor ADR authorizing them. Never move the tag.
+2. Push or formally reconcile M-5A-BASE-v2 — it resolves locally but not on origin.
+3. Rotate OPENROUTER_API_KEY (confirmed exported in shell) and run all suites key-unset.
+4. Correct the sprint board so G-M65 reads "measurement refused — instrument incomplete", not COMPLETE. Proof-honesty (C-04) applies to status boards too.
+Phase 1 — M-7: make M7-01 measurable, then decide (the actual blocker)
+The law here is strict: no concurrency before an interpretable M7-01 report and an explicit Director lift of I-11 (SPEC refusal + masterplan §18). So M-7 is not "build parallelism" — it's "build the measurement, then let evidence decide".
+Step 1.1 — A-M7a: close the effect-capture gap (Dev A surface)
+Extend EffectStarted/EffectCompleted capture in the runtime write path with exactly the two missing fields the board names: runtime/session.py effect-capture region (alongside existing ## descriptorDigest/sinkClass/grantId/leaseId):
+resolved_selector   # output of domain/selectors/resource_selector.py —
+                    # the PROVEN-disjoint resource identity, not the requested one
+settle_timing       # started_ns / settled_ns monotonic pair, wall-clock-free
+Key decisions:
+- This is additive provenance, following the M4-106 precedent (additive members, no version bump, old events parse) — dual-read stays intact. If review says it's semantic, escalate instead of bumping silently.
+- The RED contract already exists: test_m701_recorded_workload.py fails if this gap closes silently — implement until it passes, never weaken it.
+- Kernel untouched; capture lives in the runtime emitter path. TCB stays ≤1438 (currently 1373 — headroom matters, keep everything outside kernel/).
+Step 1.2 — B-M7b: produce an interpretable M7-01 report (Dev B surface)
+- Re-run lab/m701_independence.py over fixed-seed recorded canonical workloads (now richer because selectors/timing exist).
+- Decompose: serialization-vs-dependency analysis, contention on shared mutable resources, disjoint-read pairs via safe_read_only_group semantics. Missing selector = dependent; shared observation/advisory sinks = non-exclusive (board rule).
+- Output: versioned independence report artifact → input to ADR-0099.
+Step 1.3 — G-M7: Leadership decides ADR-0099
+- Implement / simplify / cancel, with cancel as default below ~30% useful independence (BACKLOG register).
+- Do not pre-build a concurrent executor. If Option A wins, that's a new bounded block opened by the ADR. If B/C win, M-7 closes with topology-as-data + scheduler mechanism (already PACKAGE_READY) plus the three-topology zero-diff falsifier (lab/topology_analysis.py, 8 fixtures) and an RF-98 rerun.
+Phase 2 — M-8: freeze the contract kit, then wire what exists
+Board truth: B-M8 is PACKAGE_READY — unmeasured; memory seams are PREPARED — exterior only. What's missing is the decision and the integrated acceptance studies.
+Step 2.1 — OD-6 / ADR-0100 first (Leadership, blocks all code below)
+Decide lifecycle representation:
+- Reintroduce deprecated kinds (CandidateBuilt, etc.) with a full kind package (ADR + allocation + writer + reducer + schema + conformance vector + coverage proof), or
+- Typed claims over the existing ClaimRecorded{...} vocabulary — my recommendation: lower-risk, no new event-kind authority chain, consistent with the deprecation discipline in events.md.
+Also freeze the five-category vocabulary (session state / persistent knowledge / experience / skills / project memory) as port contracts before any public API lands.
+Step 2.2 — A-M8: category ports + retrieval infrastructure (Dev A)
+- Materialize KnowledgePort / ExperiencePort / ProjectMemoryPort in ports/ (shapes per SPEC_M65_M7_M8 §3 provisional sketches), concrete stores/adapters in adapters/, session state stays WAL + AgentView (no new mechanism).
+- Capability-mediated access — extend the existing MemoryAccess(grant, …) tenant-binding seam; access without a valid grant fails closed.
+- Retrieval provenance is non-negotiable: any retrieved material reaching model context goes through the M4-102 ProvenanceSink path (context_selection claims), so later experiments can attribute lifts to retrieval.
+- Revocation/auditability hooks where required. Zero kernel diff; RF-98 structural scan must stay clean.
+Step 2.3 — B-M8: promotion pipeline integration study (Dev B)
+skill_evaluation.py already has separated authorities, contamination-checked held-out split, presence-only adversarial checks, Ed25519 promotion evidence, and an executed injected-regression rollback. Remaining work is the real end-to-end study:
+1. Trajectories (from M-4 runs) → failure/pattern analysis → candidate skill/composition vN+1.
+2. Held-out evaluation + affected-context regression + grounding/verification suites, inside the regression budget.
+3. Promote exactly one composition whose held-out lift is demonstrated; execute a real rollback and assert pre-promotion behavior restoration.
+4. Generator ≠ Evaluator ≠ Promoter asserted structurally (test that a candidate cannot sign its own promotion evidence).
+Invariant: the unit of promotion is the versioned composition, never a skill in isolation.
+Phase 3 — Sequencing & merge order
+Phase 0 (reconcile) ──► M-7 Step 1.1 (capture gap)
+                    └──► M-8 Step 2.1 (ADR-0100, independent)
+Step 1.1 ──► Step 1.2 ──► ADR-0099            (A → B → decision)
+Step 2.1 ──► Steps 2.2 ∥ 2.3 ──► integrated    (A → B → gate)
+- M-7 capture work and M-8 ADR/ports are disjoint surfaces — safe to parallelize per the C-11 independence rule.
+- Both phases reuse the frozen Contract Kit pattern: whoever verifies develops against golden fixtures, integrates after the producer merges.
+- Every PR carries the §22 architecture declaration ("kernel changed? No") and the named falsifier mapping.
+What I deliberately would NOT do
+- No concurrent executor, worker pool, claims/leases activation, or I-11 lift ahead of ADR-0099.
+- No new event kinds outside an accepted kind package — prefer ClaimRecorded typed payloads pending ADR-0100.
+- No "memory" blob-store monolith; five categories stay distinct.
+- No acceptance based on the dev's 1786-test figure alone — I'd rerun the canonical suite (unittest discover -s test -t .) key-unset and verify the static gates myself, since the same dev's board already overstated RF-86 and G-M65.
+This plan keeps every change inside the constitutional boundaries, converts the two genuinely-open blockers (capture gap, ADR-0100) into first-class steps, and treats M-7's outcome as an evidence-driven decision rather than a concurrency feature drop.
+If this looks right, switch to act mode and I'll start with Phase 0 reconciliation and M-7 Step 1.1 (the selector/timing capture against test_m701_recorded_workload.py's RED contract).

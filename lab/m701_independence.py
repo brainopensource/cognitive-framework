@@ -32,6 +32,7 @@ a scheduler, workers, claims, leases, or a topology.
 
 from __future__ import annotations
 
+from datetime import datetime
 import json
 import sys
 from pathlib import Path
@@ -83,6 +84,27 @@ def _millis(payload: Mapping[str, Any], *names: str) -> float | None:
     return None
 
 
+def _event_millis(
+    event: Mapping[str, Any],
+    payload: Mapping[str, Any],
+    *payload_names: str,
+) -> float | None:
+    """Read explicit numeric timing or the event envelope's ISO timestamp."""
+    explicit = _millis(payload, *payload_names)
+    if explicit is not None:
+        return explicit
+    for source in (event, payload):
+        for name in ("occurredAt", "occurred_at", "at"):
+            value = source.get(name)
+            if not isinstance(value, str) or not value:
+                continue
+            try:
+                return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000.0
+            except ValueError:
+                continue
+    return None
+
+
 def _cache_state(payload: Mapping[str, Any]) -> str | None:
     """Normalise the several spellings a cache observation arrives under."""
     value = payload.get("cacheState", payload.get("cache_state"))
@@ -110,8 +132,8 @@ def analyze_events(events: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
     with missing selectors are counted as conservatively dependent, never
     treated as evidence for concurrency.
     """
-    started: dict[str, Mapping[str, Any]] = {}
-    settlements: dict[str, Mapping[str, Any]] = {}
+    started: dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]] = {}
+    settlements: dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]] = {}
     for event in events:
         payload = _payload(event)
         key = _key(payload)
@@ -119,21 +141,24 @@ def analyze_events(events: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
         if not key:
             continue
         if kind == "EffectStarted":
-            started[key] = payload
+            started[key] = (payload, event)
         elif kind in {"EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled"}:
-            settlements[key] = payload
+            settlements[key] = (payload, event)
 
     records = []
-    for key, payload in sorted(started.items()):
+    for key, (payload, started_event) in sorted(started.items()):
         if key not in settlements:
             continue
-        settled_payload = settlements[key]
+        settled_payload, settled_event = settlements[key]
         record: dict[str, Any] = {
             "key": key, "selector": _selector(payload), "sink": _sink(payload),
             "predecessors": sorted(_causal_predecessors(payload)),
         }
-        start = _millis(payload, "atMillis", "at_millis", "startedAtMillis")
-        end = _millis(settled_payload, "atMillis", "at_millis", "settledAtMillis")
+        start = _event_millis(
+            started_event, payload, "atMillis", "at_millis", "startedAtMillis")
+        end = _event_millis(
+            settled_event, settled_payload,
+            "atMillis", "at_millis", "settledAtMillis")
         if start is not None:
             record["started_at_millis"] = start
         if end is not None:

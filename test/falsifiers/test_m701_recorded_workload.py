@@ -6,23 +6,12 @@ whose right answer is known by construction.  This file runs it against the
 deterministic offline LAM provider -- because an analysis validated only on
 its own fixtures measures its author's expectations.
 
-The result is a finding, and the finding is the deliverable:
-
-**The canonical ledger does not currently carry what M7-01 needs.**
-`EffectStarted` writes `descriptorDigest`, `sinkClass`, `grantId` and
-`leaseId`, but `idempotencyKey` is `null` and there is **no resolved resource
-selector and no timing**.  Without a selector the analyzer cannot show two
-effects touch disjoint resources, so every pair is conservatively dependent
-and useful independence on the real path is `0.0`.
-
-That zero is not evidence that concurrency would not help.  It is evidence
-that the question cannot yet be asked, which is a different statement and must
-not be reported as the first one.  `ADR-0099` needs the measured fraction over
-recorded workloads; until effect capture carries resolved selectors, M7-01 can
-report only the conservative floor.  The tests below pin both halves so the
-gap cannot close silently in either direction: if capture starts carrying
-selectors, `test_the_capture_gap_is_still_open` fails and this file is updated
-with a real fraction.
+The canonical capture path records the resolved selector on `EffectStarted`
+and the analyzer reads the authoritative event timestamps. The workload thus
+produces a real independence decomposition rather than a conservative value
+caused by missing fields. Cache and WAL-writer instrumentation remain separate
+inputs and an unobserved value is never treated as a hit, miss, or zero-cost
+measurement.
 """
 
 from __future__ import annotations
@@ -74,7 +63,8 @@ def _record_canonical_workload():
             approval_key=signer.public_bytes,
             verifier=_Verifier(),
         )
-        return result, [{"payload": {"kind": event.kind, **dict(event.payload)}}
+        return result, [{"at": event.at,
+                         "payload": {"kind": event.kind, **dict(event.payload)}}
                         for event in result.events]
 
 
@@ -95,36 +85,30 @@ class M701RunsOnTheCanonicalPath(unittest.TestCase):
         self.assertEqual(report["settled_effects"], 3)
         self.assertEqual(report["pair_count"], 3)
 
-    def test_useful_independence_on_the_real_path_is_the_conservative_floor(self) -> None:
+    def test_useful_independence_on_the_real_path_is_measured(self) -> None:
         report = analyze_events(self.events)
-        self.assertEqual(report["independent_pairs"], 0)
-        self.assertEqual(report["useful_independence_fraction"], 0.0)
+        self.assertEqual(report["independent_pairs"], 1)
+        self.assertAlmostEqual(report["useful_independence_fraction"], 1 / 3)
 
-    def test_the_capture_gap_is_still_open(self) -> None:
-        # THE FINDING. Every pair is dependent for one reason only: no
-        # resolved selector was recorded. If this ever fails because capture
-        # improved, that is good news and this file must be updated with a
-        # real measured fraction rather than left asserting the floor.
+    def test_resolved_selectors_drive_the_decomposition(self) -> None:
         reasons = analyze_events(self.events)["serialization"]["reasons"]
-        self.assertEqual(reasons["unknown_selector"], 3,
-                         "effect capture now carries selectors: rerun M7-01 and "
-                         "record the measured independence fraction for ADR-0099")
-        self.assertEqual(reasons["resource"], 0)
+        self.assertEqual(reasons["unknown_selector"], 0)
+        self.assertEqual(reasons["resource"], 1)
         self.assertEqual(reasons["causal"], 0)
+        self.assertEqual(reasons["sink"], 1)
 
-    def test_no_timing_is_recorded_so_contention_is_unmeasured(self) -> None:
+    def test_effect_windows_use_recorded_event_timestamps(self) -> None:
         contention = analyze_events(self.events)["wal_contention"]
-        self.assertEqual(contention["measured_windows"], 0)
-        self.assertEqual(contention["observed_span_millis"], 0.0)
+        self.assertEqual(contention["measured_windows"], 3)
+        self.assertGreaterEqual(contention["observed_span_millis"], 0.0)
+        self.assertEqual(contention["overlapping_windows"], 0)
 
-    def test_the_conservative_floor_is_not_reported_as_a_cancel_decision(self) -> None:
-        # `ADR-0092` cancels advanced scheduling below ~30% useful
-        # independence. This 0.0 is unmeasurable, not measured, and must not
-        # be handed to that decision as if it were the latter.
+    def test_unobserved_cache_and_wal_metrics_are_not_invented(self) -> None:
         report = analyze_events(self.events)
         self.assertTrue(report["analysis_only"])
         self.assertEqual(report["cache"]["observed"], 0)
         self.assertEqual(report["cache"]["unobserved"], 3)
+        self.assertEqual(report["wal_contention"]["wal_write_millis"], 0.0)
 
     def test_the_report_over_a_fixed_seed_run_is_digest_stable(self) -> None:
         self.assertEqual(analyze_events(self.events)["report_digest"],

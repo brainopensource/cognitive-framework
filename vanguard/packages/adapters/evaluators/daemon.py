@@ -17,11 +17,13 @@ import base64
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Mapping
 
 from vanguard.packages.adapters.evaluators.isolated import IsolatedEvaluator
 from vanguard.packages.adapters.evaluators.signing import VerdictSigner
 from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.canonicalisation.digest import digest_bytes
 from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
 
 __all__ = ["DaemonConfig", "EvaluatorDaemon", "main"]
@@ -56,6 +58,7 @@ class DaemonConfig:
     verdict_key_id: str = "evaluator-key-default"
     expected_client_uid: int | None = None
     oracle_root: str | None = None
+    evidence_paths: Mapping[str, str] | None = None
 
 
 class EvaluatorDaemon:
@@ -166,6 +169,15 @@ class EvaluatorDaemon:
             # is the same fresh, single-use handshake nonce the client already
             # echoed back, so a captured signature cannot be replayed against
             # a later connection.
+            artifact_digests: dict[str, str] = {}
+            for label, raw_path in sorted((self._config.evidence_paths or {}).items()):
+                if not isinstance(label, str) or not label or not isinstance(raw_path, str):
+                    raise ValueError("evaluator evidence paths must name string labels and paths")
+                path = Path(raw_path)
+                if not path.is_file():
+                    raise ValueError(f"evaluator evidence artifact {label!r} is unavailable")
+                artifact_digests[label] = digest_bytes(path.read_bytes())
+
             signed_body: dict = {
                 "verdict": _reduce_outcome(verdict) if self._signer is not None else "inconclusive",
                 "subject_digest": digest_of({"run_id": run_ref.run_id, "episode_id": run_ref.episode_id}),
@@ -174,6 +186,7 @@ class EvaluatorDaemon:
                 "nonce": nonce,
                 "key_id": self._signer.key_id if self._signer else "",
                 "signed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "artifact_digests": artifact_digests,
             }
             signature = self._signer.sign(signed_body) if self._signer else ""
             resp = {

@@ -105,6 +105,13 @@ class ArtifactCreatedPayload:
     refs: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
+class ArtifactFlow:
+    artifact: str
+    from_: str
+    to: str
+    schemaId: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class ArtifactIndexEntry:
     artifactId: str
     digest: str
@@ -427,6 +434,20 @@ class ToolSchema:
     schema: JsonObject
 
 @dataclass(frozen=True, slots=True)
+class TopologyEdge:
+    from_: str
+    to: str
+    relation: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class TopologyRole:
+    id: str
+    policyRef: str
+    scope: JsonObject = field(default_factory=dict)
+    budget: JsonObject = field(default_factory=dict)
+    context: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
 class TrajectoryRef:
     digest: str
     schema: str | None = None
@@ -519,6 +540,16 @@ class Receipt:
     cost: Reservation
     stdout_ref: BlobRef | object | None = None
     artifacts: tuple[ArtifactRef, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class TopologyArtifact:
+    topologyId: str
+    version: str
+    entryRole: str
+    roles: tuple[TopologyRole, ...]
+    edges: tuple[TopologyEdge, ...]
+    artifactFlows: tuple[ArtifactFlow, ...]
+    api: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class TrajectoryTurn:
@@ -616,6 +647,7 @@ __all__ = [
     "EventKind",
     "GateDecision",
     "ArtifactCreatedPayload",
+    "ArtifactFlow",
     "ArtifactIndexEntry",
     "ArtifactRef",
     "Binding",
@@ -653,6 +685,8 @@ __all__ = [
     "SignedVerdict",
     "StrategyChangedPayload",
     "ToolSchema",
+    "TopologyEdge",
+    "TopologyRole",
     "TrajectoryRef",
     "Capability",
     "Component",
@@ -663,6 +697,7 @@ __all__ = [
     "PluginBindings",
     "Proposal",
     "Receipt",
+    "TopologyArtifact",
     "TrajectoryTurn",
     "TrajectoryTurnV2",
     "TrajectoryV2",

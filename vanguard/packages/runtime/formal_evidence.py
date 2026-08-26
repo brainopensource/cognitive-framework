@@ -103,6 +103,8 @@ class FormalVerdictBundle:
     signature: str
     key_id: str
     terminal_status: str    # ledger truth, never the evaluator's opinion
+    signature_verified: bool = False
+    artifacts_bound: bool = False
 
     @property
     def signed(self) -> bool:
@@ -114,7 +116,8 @@ class FormalVerdictBundle:
 
         An unsigned `pass` is an assertion by whoever is reporting it.
         """
-        return (self.signed and self.verdict == "pass"
+        return (self.signed and self.signature_verified and self.artifacts_bound
+                and self.verdict == "pass"
                 and self.terminal_status == TERMINAL_COMPLETED)
 
     def to_dict(self) -> dict[str, Any]:
@@ -130,6 +133,8 @@ class FormalVerdictBundle:
             "keyId": self.key_id,
             "terminalStatus": self.terminal_status,
             "signed": self.signed,
+            "signatureVerified": self.signature_verified,
+            "artifactsBound": self.artifacts_bound,
             "promotable": self.promotable,
         }
 
@@ -152,6 +157,9 @@ def build_bundle(
     verdict: Verdict,
     events: Iterable[Any],
     oracle_path: Path | str,
+    witness_path: Path | str,
+    witness_role: str,
+    public_key: bytes,
 ) -> FormalVerdictBundle:
     """Assemble evidence from pinned bytes, a daemon verdict, and the ledger.
 
@@ -164,29 +172,56 @@ def build_bundle(
     task = _registry_task(registry, task_id)
 
     formula_digest = _sha256((root / str(task["formula"])).read_bytes())
-    witness_digest = _sha256((root / str(task["positiveWitness"])).read_bytes())
+    actual_witness = Path(witness_path)
+    witness_digest = _sha256(actual_witness.read_bytes())
     oracle_digest = _sha256(Path(oracle_path).read_bytes())
     if formula_digest != task.get("formulaDigest"):
         raise ValueError("formula bytes drifted from the pinned registry digest")
-    if witness_digest != task.get("positiveWitnessDigest"):
-        raise ValueError("witness bytes drifted from the pinned registry digest")
+    if witness_role == "positive":
+        if witness_digest != task.get("positiveWitnessDigest"):
+            raise ValueError("witness bytes drifted from the pinned registry digest")
+    elif witness_role != "negative" or not task.get("negativeVector"):
+        raise ValueError("witness role must name a registered positive or negative vector")
     if oracle_digest != registry.get("oracleDigest"):
         raise ValueError("oracle bytes drifted from the pinned registry digest")
 
     binding = verdict.binding if isinstance(verdict.binding, Mapping) else None
-    reduced = str(binding.get("verdict")) if binding else "inconclusive"
+    signature = verdict.signature or ""
+    key_id = verdict.signer_key_id or (str(binding.get("key_id")) if binding else "")
+    signature_verified = False
+    if binding and signature and key_id and key_id == str(binding.get("key_id", "")):
+        try:
+            import base64
+            from cryptography.hazmat.primitives.asymmetric import ed25519
+
+            key = ed25519.Ed25519PublicKey.from_public_bytes(public_key)
+            key.verify(base64.b64decode(signature, validate=True), canonical_bytes(dict(binding)))
+            signature_verified = True
+        except Exception:
+            signature_verified = False
+    artifacts = binding.get("artifact_digests") if binding else None
+    artifacts_bound = bool(
+        isinstance(artifacts, Mapping)
+        and artifacts.get("formula") == formula_digest
+        and artifacts.get("witness") == witness_digest
+        and artifacts.get("oracle") == oracle_digest
+    )
+    reduced = str(binding.get("verdict")) if signature_verified and binding else "inconclusive"
+    if reduced not in {"pass", "fail", "inconclusive"}:
+        reduced = "inconclusive"
     return FormalVerdictBundle(
         task_id=task_id,
         formula_digest=formula_digest,
         witness_digest=witness_digest,
         oracle_digest=oracle_digest,
-        registry_digest=_sha256(json.dumps(dict(registry), sort_keys=True,
-                                           separators=(",", ":")).encode("utf-8")),
-        verdict=reduced if binding else "inconclusive",
+        registry_digest=digest_of(dict(registry)),
+        verdict=reduced,
         signed_body=dict(binding) if binding else {},
-        signature=verdict.signature or "",
-        key_id=verdict.signer_key_id or (str(binding.get("key_id")) if binding else ""),
+        signature=signature,
+        key_id=key_id,
         terminal_status=terminal_status_from_events(events),
+        signature_verified=signature_verified,
+        artifacts_bound=artifacts_bound,
     )
 
 
@@ -209,6 +244,13 @@ def verify_bundle(bundle: FormalVerdictBundle, public_key: bytes) -> bool:
         key = ed25519.Ed25519PublicKey.from_public_bytes(public_key)
         key.verify(base64.b64decode(bundle.signature, validate=True),
                    canonical_bytes(dict(bundle.signed_body)))
-        return True
+        artifacts = bundle.signed_body.get("artifact_digests")
+        return bool(
+            bundle.key_id == bundle.signed_body.get("key_id")
+            and isinstance(artifacts, Mapping)
+            and artifacts.get("formula") == bundle.formula_digest
+            and artifacts.get("witness") == bundle.witness_digest
+            and artifacts.get("oracle") == bundle.oracle_digest
+        )
     except Exception:
         return False

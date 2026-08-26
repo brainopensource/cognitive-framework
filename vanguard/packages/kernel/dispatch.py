@@ -286,6 +286,7 @@ class Kernel:
                              "grantDigest": digest_of(grant.payload()) if grant else None,
                              "leaseId": lease.lease_id,
                              "idempotencyKey": request.idempotency_key,
+                             "resource": dict(request.resource),
                              "sinkClass": self._sinks.sink_class(request.action).value})
                 try:
                     self._ledger.append_intent(intent)

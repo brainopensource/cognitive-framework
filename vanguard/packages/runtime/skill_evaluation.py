@@ -141,9 +141,25 @@ class EvaluationWorkload:
     def __post_init__(self) -> None:
         if not self.held_out:
             raise ValueError("a held-out split is required")
-        overlap = sorted(set(self.dev) & set(self.held_out))
-        if overlap:
-            raise ValueError(f"held-out tasks {overlap} are contaminated by the dev split")
+        splits = {
+            "dev": self.dev,
+            "held-out": self.held_out,
+            "adversarial": self.adversarial,
+            "transfer": self.transfer,
+        }
+        for name, tasks in splits.items():
+            if any(not isinstance(task, str) or not task for task in tasks):
+                raise ValueError(f"{name} task ids must be non-empty strings")
+            if len(set(tasks)) != len(tasks):
+                raise ValueError(f"{name} split contains duplicate task ids")
+        names = tuple(splits)
+        for index, left_name in enumerate(names):
+            for right_name in names[index + 1:]:
+                overlap = sorted(set(splits[left_name]) & set(splits[right_name]))
+                if overlap:
+                    raise ValueError(
+                        f"tasks {overlap} are contaminated across {left_name} and "
+                        f"{right_name} splits")
 
     def digest(self) -> str:
         return digest_of({"dev": sorted(self.dev), "heldOut": sorted(self.held_out),
@@ -182,12 +198,12 @@ class SkillEvaluationDetail:
 
     @property
     def presence_only(self) -> bool:
-        """Retrieved on every task it gained on, but never actually invoked.
+        """One or more reported gains lack an invocation of the candidate.
 
         The classic false positive: the skill was in context, the score moved,
         and the two facts are unrelated.
         """
-        return bool(self.gross_gains) and not set(self.invoked_on) & set(self.gross_gains)
+        return bool(set(self.gross_gains) - set(self.invoked_on))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -222,6 +238,21 @@ TaskOutcome = Mapping[str, bool]
 TaskRunner = Callable[[str, str], TaskOutcome]
 
 
+def _observation(value: Any, task: str, version: str) -> TaskOutcome:
+    if not isinstance(value, Mapping):
+        raise TypeError(f"runner observation for {task!r}/{version!r} must be an object")
+    allowed = frozenset({"passed", "invoked", "grounded", "verified"})
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"runner observation has unknown fields: {unknown}")
+    if not isinstance(value.get("passed"), bool):
+        raise TypeError(f"runner observation for {task!r}/{version!r} needs boolean passed")
+    for field in ("invoked", "grounded", "verified"):
+        if field in value and not isinstance(value[field], bool):
+            raise TypeError(f"runner observation field {field!r} must be boolean")
+    return value
+
+
 class HeldOutEvaluator:
     """Scores a candidate on a held-out split it never optimised against.
 
@@ -240,6 +271,10 @@ class HeldOutEvaluator:
     ) -> None:
         if not evaluator_id:
             raise ValueError("evaluator id is required")
+        if not 0.0 < min_held_out_lift <= 1.0:
+            raise ValueError("minimum held-out lift must be in (0, 1]")
+        if not 0.0 <= regression_budget <= 1.0:
+            raise ValueError("regression budget must be in [0, 1]")
         self.evaluator_id = evaluator_id
         self._workload = workload
         self._runner = runner
@@ -255,6 +290,8 @@ class HeldOutEvaluator:
     ) -> tuple[EvaluationReport, SkillEvaluationDetail]:
         if baseline_version == candidate_version:
             raise ValueError("baseline and candidate compositions must differ")
+        if candidate.composition_version != baseline_version:
+            raise ValueError("candidate was not generated from the evaluated baseline")
 
         gains: list[str] = []
         regressions: list[str] = []
@@ -265,9 +302,10 @@ class HeldOutEvaluator:
         baseline_passes = candidate_passes = 0
 
         for task in sorted(self._workload.held_out):
-            before = bool(self._runner(task, baseline_version).get("passed"))
-            after_obs = self._runner(task, candidate_version)
-            after = bool(after_obs.get("passed"))
+            before_obs = _observation(self._runner(task, baseline_version), task, baseline_version)
+            after_obs = _observation(self._runner(task, candidate_version), task, candidate_version)
+            before = before_obs["passed"]
+            after = after_obs["passed"]
             baseline_passes += int(before)
             candidate_passes += int(after)
             if after and not before:
@@ -288,11 +326,15 @@ class HeldOutEvaluator:
         # start passing because of it.
         present_only = [
             task for task in sorted(self._workload.adversarial)
-            if self._runner(task, candidate_version).get("invoked")
+            if _observation(
+                self._runner(task, candidate_version), task, candidate_version
+            ).get("invoked")
         ]
         transfer_passes = sum(
             1 for task in sorted(self._workload.transfer)
-            if self._runner(task, candidate_version).get("passed"))
+            if _observation(
+                self._runner(task, candidate_version), task, candidate_version
+            ).get("passed"))
 
         detail = SkillEvaluationDetail(
             candidate_id=candidate.candidate_id,
@@ -381,6 +423,15 @@ def verify_promotion_evidence(
     public_key: bytes,
 ) -> bool:
     """Re-check a promotion signature without holding the promoter's key."""
+    if (
+        evidence.candidate_id != candidate.candidate_id
+        or evidence.report_digest != report.report_digest
+        or report.candidate_id != candidate.candidate_id
+        or detail.candidate_id != candidate.candidate_id
+        or report.report_digest != detail.digest()
+        or candidate.composition_version != evidence.previous_version
+    ):
+        return False
     body = promotion_body(candidate, report, detail,
                           promoter_id=evidence.promoter_id,
                           previous_version=evidence.previous_version,
@@ -425,6 +476,8 @@ class SignedSkillPromoter:
     ) -> PromotionEvidence:
         if report.candidate_id != candidate.candidate_id:
             raise PromotionRefused("the report does not describe this candidate")
+        if detail.candidate_id != candidate.candidate_id:
+            raise PromotionRefused("the detail does not describe this candidate")
         if report.report_digest != detail.digest():
             raise PromotionRefused(
                 "the report digest does not match its own decomposition; the "
@@ -435,6 +488,8 @@ class SignedSkillPromoter:
                 "or verification evaluation")
         if previous_version == promoted_version:
             raise PromotionRefused("a promotion must change the composition version")
+        if candidate.composition_version != previous_version:
+            raise PromotionRefused("candidate was generated from another composition version")
         body = promotion_body(candidate, report, detail, promoter_id=self.promoter_id,
                               previous_version=previous_version,
                               promoted_version=promoted_version)
@@ -452,6 +507,13 @@ def promote_and_register(
     registry: CompositionRegistry,
     evidence: PromotionEvidence,
     report: EvaluationReport,
+    candidate: SkillCandidate,
+    detail: SkillEvaluationDetail,
+    public_key: bytes,
 ) -> str:
-    """Apply signed evidence to the registry, leaving rollback available."""
-    return registry.promote(evidence, report)
+    """Verify signed evidence, then apply it with rollback still available."""
+    if not verify_promotion_evidence(
+        evidence, candidate, report, detail, public_key
+    ):
+        raise PromotionRefused("promotion signature or evidence binding is invalid")
+    return registry._apply_verified(evidence, report)

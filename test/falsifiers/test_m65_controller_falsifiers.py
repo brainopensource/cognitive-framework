@@ -94,7 +94,15 @@ class MissingReferencesAreRefused(unittest.TestCase):
 
     def test_the_reference_set_is_a_fold_not_a_free_pass(self) -> None:
         self.assertNotIn("anything", view_reference_set(VIEW))
-        self.assertEqual(view_reference_set(AgentView("bare")), frozenset({"bare"}))
+        self.assertEqual(view_reference_set(AgentView("bare")),
+                         frozenset({"bare", "goal"}))
+
+    def test_the_goal_is_referenceable_even_though_c06_keeps_it_out_of_the_ledger(self) -> None:
+        # The lineage has a goal whether or not its text was ledgered, so
+        # goal-level confidence must remain expressible on the real path.
+        validate_confidence(AgentView("lin-2", context_epoch=0), (
+            ConfidenceRecord("behavioral", 0.4, "goal", ("e",),
+                             {"contextEpoch": 0}),))
 
 
 class NondeterministicDirectivesAreRefused(unittest.TestCase):

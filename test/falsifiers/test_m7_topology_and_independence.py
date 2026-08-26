@@ -40,7 +40,7 @@ from test.fixtures.m7_topologies import (
     SAFE_READ_WORKLOAD,
     VALID_TOPOLOGIES,
 )
-from vanguard.packages.runtime.topology import parse_topology
+from vanguard.packages.runtime.topology import TopologyError, parse_topology
 
 
 class TheAnalyzerCanReportThatConcurrencyWouldNotHelp(unittest.TestCase):
@@ -157,18 +157,17 @@ class UnrunnableTopologiesAreRejectedBeforeLowering(unittest.TestCase):
         self.assertEqual(report["findings"][0]["code"], "parse_rejected")
 
     def test_a_consumed_artifact_nobody_produces_is_a_finding(self) -> None:
-        # This one parses cleanly today. A topology that lowers and then
-        # deadlocks is worse than one that is refused, so the falsifier
-        # catches it here and the gap is reported to the owning lane rather
-        # than patched into a module this lane does not own.
+        # A topology that lowers and then deadlocks is worse than one refused
+        # at the value boundary. A-M7 closes the former parser gap here.
         report = analyze_topology(MISSING_RESOURCE)
-        self.assertTrue(report["parsed"])
+        self.assertFalse(report["parsed"])
         self.assertFalse(report["runnable"])
-        self.assertEqual([f["code"] for f in report["findings"]], ["missing_resource"])
+        self.assertEqual([f["code"] for f in report["findings"]], ["parse_rejected"])
+        self.assertIn("no declared producer", report["findings"][0]["detail"])
 
     def test_the_missing_resource_is_named_not_merely_counted(self) -> None:
-        self.assertEqual(missing_resources(parse_topology(MISSING_RESOURCE)),
-                         ("researchNotes->executor",))
+        with self.assertRaisesRegex(TopologyError, "researchNotes.*researcher"):
+            parse_topology(MISSING_RESOURCE)
 
     def test_a_wired_topology_has_no_missing_resources(self) -> None:
         for raw in VALID_TOPOLOGIES:
@@ -179,7 +178,8 @@ class UnrunnableTopologiesAreRejectedBeforeLowering(unittest.TestCase):
                     "roles": PLANNER_EXECUTOR["roles"] + [
                         {"id": "ghost", "policyRef": "policy/ghost@1"}],
                     "artifactFlows": []}
-        self.assertEqual(unreachable_roles(parse_topology(orphaned)), ("ghost",))
+        with self.assertRaisesRegex(TopologyError, "unreachable.*ghost"):
+            parse_topology(orphaned)
 
     def test_a_topology_carrying_authority_is_refused_by_the_parser(self) -> None:
         # Topology decides what may run; the kernel decides what is

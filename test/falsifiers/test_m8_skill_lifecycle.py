@@ -130,6 +130,26 @@ class HeldOutEvidenceMustBeReal(unittest.TestCase):
         with self.assertRaises(ValueError):
             EvaluationWorkload(dev=("D1",), held_out=())
 
+    def test_duplicate_or_cross_split_tasks_are_refused(self) -> None:
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            EvaluationWorkload(dev=("D1",), held_out=("H1", "H1"))
+        with self.assertRaisesRegex(ValueError, "contaminate"):
+            EvaluationWorkload(dev=("D1",), held_out=("H1",), transfer=("H1",))
+
+    def test_measurement_thresholds_cannot_be_disabled(self) -> None:
+        with self.assertRaises(ValueError):
+            HeldOutEvaluator("eval", WORKLOAD, _runner(), min_held_out_lift=0.0)
+        with self.assertRaises(ValueError):
+            HeldOutEvaluator("eval", WORKLOAD, _runner(), regression_budget=1.1)
+
+    def test_non_boolean_runner_outcomes_are_refused(self) -> None:
+        evaluator = HeldOutEvaluator(
+            "eval", WORKLOAD, lambda _task, _version: {"passed": "false"})
+        candidate = TrajectorySkillGenerator("gen").generate(
+            "sha256:traj", composition_version=BASE)
+        with self.assertRaises(TypeError):
+            evaluator.evaluate(candidate, baseline_version=BASE, candidate_version=NEXT)
+
     def test_a_lift_below_the_threshold_does_not_promote(self) -> None:
         # One task in forty is 0.025 -- inside the range a fixed set moves on
         # its own, and below the 0.05 the promoter will not lower.
@@ -171,6 +191,11 @@ class PresenceIsNotUseAndUseIsNotGrounding(unittest.TestCase):
         with self.assertRaises(PromotionRefused):
             promoter.promote(candidate, report, detail,
                              previous_version=BASE, promoted_version=NEXT)
+
+    def test_every_reported_gain_must_have_an_invocation(self) -> None:
+        _, report, detail, _ = _pipeline(invoked=("H1",))
+        self.assertTrue(detail.presence_only)
+        self.assertFalse(report.adversarial_pass)
 
     def test_an_ungrounded_gain_is_refused(self) -> None:
         _, report, _, _ = _pipeline(grounded=("H1",))
@@ -247,8 +272,26 @@ class RollbackIsExecutableNotDocumented(unittest.TestCase):
         registry = CompositionRegistry(BASE)
         evidence = promoter.promote(candidate, report, detail,
                                     previous_version=BASE, promoted_version=NEXT)
-        self.assertEqual(promote_and_register(registry, evidence, report), NEXT)
+        self.assertEqual(promote_and_register(
+            registry, evidence, report, candidate, detail,
+            promoter.signer.public_bytes), NEXT)
         self.assertEqual(registry.rollback(), BASE)
+
+    def test_fabricated_nonempty_signature_cannot_reach_the_registry(self) -> None:
+        import dataclasses
+
+        candidate, report, detail, promoter = _pipeline()
+        evidence = promoter.promote(candidate, report, detail,
+                                    previous_version=BASE, promoted_version=NEXT)
+        forged = dataclasses.replace(evidence, signature="not-a-signature")
+        registry = CompositionRegistry(BASE)
+        with self.assertRaises(PromotionRefused):
+            promote_and_register(
+                registry, forged, report, candidate, detail,
+                promoter.signer.public_bytes)
+        self.assertEqual(registry.current, BASE)
+        with self.assertRaises(PermissionError):
+            registry.promote(forged, report)
 
     def test_an_injected_regression_is_caught_and_the_rollback_restores_behaviour(self) -> None:
         # The only honest rollback test: promote a composition, break a task
@@ -257,7 +300,9 @@ class RollbackIsExecutableNotDocumented(unittest.TestCase):
         registry = CompositionRegistry(BASE)
         evidence = promoter.promote(candidate, report, detail,
                                     previous_version=BASE, promoted_version=NEXT)
-        promote_and_register(registry, evidence, report)
+        promote_and_register(
+            registry, evidence, report, candidate, detail,
+            promoter.signer.public_bytes)
 
         injected = _runner(breaks=("H7", "H8", "H9"))
         broken = [task for task in HELD_OUT
@@ -280,7 +325,9 @@ class RollbackIsExecutableNotDocumented(unittest.TestCase):
         evidence = promoter.promote(candidate, report, detail,
                                     previous_version=BASE, promoted_version=NEXT)
         with self.assertRaises(ValueError):
-            promote_and_register(registry, evidence, report)
+            promote_and_register(
+                registry, evidence, report, candidate, detail,
+                promoter.signer.public_bytes)
 
 
 class ReproducibilityIsRecomputedAfterPromotion(unittest.TestCase):

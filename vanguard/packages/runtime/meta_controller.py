@@ -128,10 +128,14 @@ def view_reference_set(view: AgentView) -> frozenset[str]:
     computes the same set. A reference outside it is unverifiable by
     construction, which is why it is refused rather than ignored.
     """
-    refs: set[str] = {view.lineage_id}
+    # `goal` is always a legitimate subject: every lineage has exactly one,
+    # and `C-06` keeps its *content* out of the ledger. Excluding the token
+    # because the content is absent would make goal-level confidence
+    # inexpressible on the canonical path -- which is what happened the first
+    # time this guard met a real run.
+    refs: set[str] = {view.lineage_id, "goal"}
     if view.goal:
         refs.add(view.goal)
-        refs.add("goal")
     refs.update(str(key) for key in view.settled_effects)
     if view.strategy:
         refs.add(view.strategy)

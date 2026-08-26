@@ -10,7 +10,6 @@ from vanguard.packages.ports.meta_controller import StrategyDirective
 from vanguard.packages.runtime.memory import InMemoryMemoryPort, MemoryAccess
 from vanguard.packages.runtime.meta_controller import consult
 from vanguard.packages.runtime.scheduler import ReadyOperation, SequentialScheduler, safe_read_only_group
-from vanguard.packages.runtime.skill_lifecycle import CompositionRegistry, EvaluationReport, PromotionEvidence
 from vanguard.packages.runtime.topology import TopologyError, parse_topology
 
 
@@ -47,11 +46,6 @@ class SeamsTests(unittest.TestCase):
         result = memory.recall("fact", access)
         self.assertEqual(result.record_ids, (rid,))
         self.assertTrue(result.provenance.digest())
-        registry = CompositionRegistry("v1")
-        report = EvaluationReport("c", True, True, True, True, True, "report")
-        evidence = PromotionEvidence("c", "report", "operator", "sig", "v1", "v2")
-        registry.promote(evidence, report)
-        self.assertEqual(registry.rollback(), "v1")
 
 
 if __name__ == "__main__":

@@ -122,6 +122,11 @@ class SignedSatVerdictTests(unittest.TestCase):
             verdict_private_key=_KEY if sign else None,
             verdict_key_id="m5b-eval-key",
             oracle_root=str(self.sealed),
+            evidence_paths={
+                "formula": str(self.workspace / "sat-001.cnf"),
+                "witness": str(self.workspace / witness),
+                "oracle": str(self.sealed / "formal_sat.py"),
+            },
         ))
         thread = threading.Thread(target=daemon.serve_once, daemon=True)
         thread.start()
@@ -185,6 +190,13 @@ class SignedSatVerdictTests(unittest.TestCase):
         return build_bundle(
             task_id="SAT-001", pack_root=PACK, registry=REGISTRY,
             verdict=verdict, events=events, oracle_path=ORACLE,
+            witness_path=self.workspace / (
+                "sat-001.witness.json" if verdict.binding and
+                verdict.binding.get("verdict") == "pass"
+                else "sat-001.invalid-witness.json"),
+            witness_role=("positive" if verdict.binding and
+                          verdict.binding.get("verdict") == "pass" else "negative"),
+            public_key=self.signer.public_bytes,
         )
 
     def test_a_signed_pass_over_a_completed_run_is_promotable(self) -> None:
@@ -236,19 +248,28 @@ class DriftedPinsRefuseToProduceEvidence(unittest.TestCase):
         registry["tasks"][0]["formulaDigest"] = "sha256:" + "0" * 64
         with self.assertRaises(ValueError):
             build_bundle(task_id="SAT-001", pack_root=PACK, registry=registry,
-                         verdict=self._verdict(), events=(), oracle_path=ORACLE)
+                         verdict=self._verdict(), events=(), oracle_path=ORACLE,
+                         witness_path=PACK / "tasks/sat-001.witness.json",
+                         witness_role="positive",
+                         public_key=VerdictSigner(_KEY, "k").public_bytes)
 
     def test_a_drifted_oracle_digest_raises(self) -> None:
         registry = json.loads(json.dumps(REGISTRY))
         registry["oracleDigest"] = "sha256:" + "0" * 64
         with self.assertRaises(ValueError):
             build_bundle(task_id="SAT-001", pack_root=PACK, registry=registry,
-                         verdict=self._verdict(), events=(), oracle_path=ORACLE)
+                         verdict=self._verdict(), events=(), oracle_path=ORACLE,
+                         witness_path=PACK / "tasks/sat-001.witness.json",
+                         witness_role="positive",
+                         public_key=VerdictSigner(_KEY, "k").public_bytes)
 
     def test_an_unknown_task_raises(self) -> None:
         with self.assertRaises(ValueError):
             build_bundle(task_id="SAT-999", pack_root=PACK, registry=REGISTRY,
-                         verdict=self._verdict(), events=(), oracle_path=ORACLE)
+                         verdict=self._verdict(), events=(), oracle_path=ORACLE,
+                         witness_path=PACK / "tasks/sat-001.witness.json",
+                         witness_role="positive",
+                         public_key=VerdictSigner(_KEY, "k").public_bytes)
 
 
 class TerminalTruthIsFoldedNotAsserted(unittest.TestCase):

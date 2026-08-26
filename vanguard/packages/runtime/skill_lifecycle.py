@@ -70,7 +70,8 @@ class CompositionRegistry:
     @property
     def current(self) -> str: return self._current
 
-    def promote(self, evidence: PromotionEvidence, report: EvaluationReport) -> str:
+    def _apply_verified(self, evidence: PromotionEvidence, report: EvaluationReport) -> str:
+        """Apply evidence only after the concrete promoter verifies its signature."""
         if not report.promotable or evidence.report_digest != report.report_digest:
             raise ValueError("promotion evidence is not valid")
         if evidence.previous_version != self._current or not evidence.signature:
@@ -78,6 +79,10 @@ class CompositionRegistry:
         self._current = evidence.promoted_version
         self._history.append(self._current)
         return self._current
+
+    def promote(self, evidence: PromotionEvidence, report: EvaluationReport) -> str:
+        raise PermissionError(
+            "unsigned registry promotion is forbidden; use promote_and_register")
 
     def rollback(self) -> str:
         if len(self._history) < 2: raise ValueError("no promoted composition to roll back")

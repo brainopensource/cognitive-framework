@@ -7,7 +7,7 @@ canonical_for:
   - wave-gates
 status: living
 owner: engineering-director
-version: "0.7.3"
+version: "0.7.4"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -36,11 +36,11 @@ names that dependency. There are no milestone-wide locks.
 | **W-3D Product Profiles** | Identity-bearing profiles and one adapter bootstrap | RF-87–RF-94 | **COMPLETE** | — |
 | **M-4 Product Coding Proof + Trajectory Capture** | Useful, durable coding agent **and** the scientific observability that every later milestone is measured with | RF-95 plus `mhf.trajectory/2`, exact model-I/O and context/compaction/cache provenance, proof-honest RF-100, and fresh-process reconstruction | **PROVISIONALLY ACCEPTED FOR DEVELOPMENT — RF-95/review evidence open** | Passing RF-95 and independent review remain required for evidence release and baseline tagging |
 | **M-5a Event-Derived Agent** | `Operation`, `Lineage`, `Scope`, `AgentView`; semantic state reconstructible from events; immutable `M-5A-BASE-v2` | RF-96/97/99/100; fresh process rebuilds goal identity, plan, attempts, settled effects, budget, strategy, and terminal status | **ACTIVE — implementation green; promotion pending** | M-4 closure, ADR-0098 acceptance, benchmark re-freeze, reviewed tag |
-| **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs `M-5A-BASE-v2`; deterministic independent witness | **ACTIVE — SAT/CNF OD-3 selected; pack/oracle slice green** | `M-5A-BASE-v2` for RF-86 and material formal run |
+| **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs `M-5A-BASE-v2`; deterministic independent witness | **ACTIVE — material run executed and daemon-signed; RF-86/RF-98 historical blocked** | `M-5A-BASE-v2` for RF-86 and the RF-98 historical half |
 | **M-6 Recursive Delegation** | `agent.spawn` as nested execution lineages | RF-55–RF-59; four-dimensional additive conservation; independent depth/turn limits; join, cancellation, kill-tree recovery | **IMPLEMENTATION COMPLETE — acceptance review open** | independent review and recorded evidence receipt |
-| **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **IMPLEMENTATION ACTIVE — pure seam hardened; measurement not run** | M-4 telemetry (measurement); M-6 only for the delegate action |
-| **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PREPARATION ACTIVE — topology/scheduler contracts prepared; I-11 remains sequential** | M-6.5 + M7-01 result + ADR-0099 |
-| **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PREPARATION ACTIVE — exterior contract kit prepared; ADR-0100 open** | M-7 + ADR-0100 |
+| **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **IMPLEMENTATION ACTIVE — controller integrated and study exercised; measurement refused as unfalsifiable** | a stochastic attributable provider and deliberately-blocked tasks, without which the A/A floor is degenerate (`M-07`) |
+| **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PREPARATION ACTIVE — three topologies share one lowering path; M7-01 blocked by effect-capture gap; I-11 remains sequential** | resolved resource selector and settle timing in `EffectStarted`/settlement capture, then M7-01 result + ADR-0099 |
+| **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PREPARATION ACTIVE — separated lifecycle authorities and executed rollback implemented; no measured lift; ADR-0100 open** | M-7 + ADR-0100 + a real held-out workload |
 | **M-9 AETHER v1.0** | Integrated coding + formal + research general agent framework | Adaptation, transfer, and long-horizon criteria met; v1.0 release | **PLANNED** | M-8 |
 
 ### Always-parallel lanes
@@ -59,8 +59,14 @@ These never block on a milestone. They block only on their own named interface.
 
 **M7-01** keeps its identifier and its provenance (`ADR-0092`). It captures actual sequential
 `EffectStarted`/settlement records with resolved resources, selectors, sinks, idempotency keys,
-timing, WAL contention, and cache-hit rates over a fixed-seed workload. It may not add concurrency,
-scheduler, workers, claims, leases, or topology. It terminates in an explicit Director decision to
+timing, WAL contention, and cache-hit rates over a fixed-seed workload. **Effect capture does not
+yet carry the resolved selector or settle timing**, so over a recorded canonical workload the
+analyzer can report only its conservative floor: every pair counts as dependent for lack of a
+selector, and useful independence reads `0.0`. That figure is *unmeasurable*, not *measured*, and
+is not an input to the cancel decision below — reading it as one would cancel advanced scheduling
+on the strength of a missing field.
+
+The lane may not add concurrency, scheduler, workers, claims, leases, or topology. It terminates in an explicit Director decision to
 **implement, simplify, or cancel**, recorded as a successor ADR. Below ~30% useful independence the
 default decision is to cancel advanced scheduling and retain I-11 — that is a success of the process,
 not a failure. This decision is an input to M-7 and does not gate M-4, M-5a, M-5b, M-6, or M-6.5.
@@ -127,6 +133,14 @@ change to the generic episode mechanism, or a second runtime, that is an archite
 clause deterministically from pinned DIMACS and witness bytes; it performs no search and the
 generator cannot self-grade. This gives an exact positive witness and negative vectors with no
 solver dependency or substrate knowledge. Lean/SMT remain later pack candidates, not M-5b gates.
+
+The material run is executed: the pack completes through `Runtime.execute_harness` — the same
+composition, kernel dispatch, operator approval and trajectory path the coding pack uses — and its
+witness is graded by the exterior evaluator **daemon** under that daemon's own key. Two axes stay
+separate and are both recorded, because a witness that verifies says nothing about whether the run
+that produced it finished: the evaluator owns the evaluation axis, `RunTermination` owns the run
+axis, and evidence is promotable only when both are clean *and* the pass carries a signature. An
+unsigned pass is an assertion by whoever reports it.
 
 RF-86 is measured as a diff against `M-5A-BASE-v2` over `vanguard/packages/{domain, kernel, ports,
 runtime, agency/episode}` and runs in CI as `ci/rf86_gate.sh`. Two rules are binding:

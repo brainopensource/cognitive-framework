@@ -43,8 +43,8 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-4 | B-M4 contracts, trajectory `/2`, RF-100 | Dev B | DONE | `PACKAGE_READY` |
 | M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,575 Python; 68/68 TS; all named gates |
 | M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | AUTHORIZED — attempt 3 | new preregistration required after D7; preserve evidence regardless of outcome |
-| M-4 | G-M4-05 independent review receipt | Human reviewer | TODO | reviewer did not author candidate implementation |
-| M-4 | G-M4-06 closure | Tech Lead | TODO | RF-95 accepted + review receipt |
+| M-4 | G-M4-05 independent review receipt | Director | WAIVED — development only | no evidence-release or promotion claim permitted |
+| M-4 | G-M4-06 closure | Tech Lead | PROVISIONAL | implementation may continue; RF-95 evidence closure remains open |
 | M-5a | Event `/2`, vocabulary and emitter cutover | Dev A | DONE | mixed `/1|/2`, `/2` writes, historical bytes preserved |
 | M-5a | CheckpointManager and RF-96/RF-99 | Dev A | DONE | proof-bound cache, cold fallback, fresh process |
 | M-5a | AgentView and Operation/Lineage/Scope | Dev B | DONE | deterministic event projection and contracts |
@@ -84,7 +84,8 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 ## 4. Immediate sequence
 
 1. Senior completes the single RF-95 candidate and preserves all evidence, pass or fail.
-2. Human reviewer supplies G-M4-05; Tech Lead closes M-4 only if both receipts pass.
+2. Director waiver permits development continuation; obtain G-M4-05 and a passing RF-95 before
+   evidence release, promotion, or immutable baseline tagging.
 3. Accept ADR-0098, run the append/fold benchmark, explain and freeze the new digests, rerun gates.
 4. Create and push `M-5A-BASE-v2` on the reviewed M-5a substrate commit.
 5. Dev B executes the material SAT run; Dev A completes M-6 product activation and demonstration.

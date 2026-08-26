@@ -65,6 +65,7 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-7 | Topology/scheduler implementation and ADR-0099 | Dev A + Leadership | TODO | after M-6 and evidence review |
 | M-8 | ADR-0100 category/lifecycle decision | Leadership | TODO | required before public M-8 APIs |
 | M-8 | Memory and skills implementation/evaluation | Dev A + Dev B | TODO | capability, provenance, held-out lift, rollback |
+| M-6.5 | ConfidenceRecord, ProgressView, exterior MetaController contract | Dev A | IN PROGRESS | pure projection/contract slice; no runtime authority |
 
 ## 3. Decisions in force
 
@@ -93,6 +94,8 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 7. Use `lab/m701_independence.py` on fixed recorded workloads; attach its digest-stable report to
    the ADR-0099 decision. Keep I-11 sequential until that decision.
 8. Freeze ADR-0100 and the five-category M-8 contract kit before enabling memory or promotion APIs.
+9. Complete the M-6.5 runtime consultation seam and paired evaluation before opening M-7 scheduler
+   implementation.
 
 The RF-95 failure also fixed two substrate/adapter defects: determinate adapter errors now emit
 `EffectFailed` after `EffectStarted`, and model-authored bare `@@` hunks are context-anchored by

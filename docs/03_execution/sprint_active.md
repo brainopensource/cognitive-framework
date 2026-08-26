@@ -95,16 +95,15 @@ negative or blocked and are recorded as such rather than deferred:
 | M-5a | CheckpointManager and RF-96/RF-99 | Dev A | DONE | proof-bound cache, cold fallback, fresh process |
 | M-5a | AgentView and Operation/Lineage/Scope | Dev B | DONE | deterministic event projection and contracts |
 | M-5a | RF-97 transitive TCB closure | Dev B | DONE | AST-discovered 13-file closure; synthetic recursion test |
-| M-5a | Reducer semantic pin | Tech Lead | DONE | `REDUCER_VERSION=v1.1.0`; reproducibility uses canonical pin |
-| M-5a | Accept ADR-0098 | Tech Lead | TODO | immediately after M-4 closes |
-| M-5a | Re-freeze append/fold benchmark | Tech Lead | TODO | after ADR acceptance; record explained digest migration |
-| M-5a | Create/push `M-5A-BASE-v2` once | Tech Lead | TODO | reviewed post-M-5a commit; never move `M-5-BASE` |
+| M-5a | Accept ADR-0098 | Tech Lead | DONE | ratified v1.0.0 on 2026-08-26 |
+| M-5a | Re-freeze append/fold benchmark | Tech Lead | DONE | benchmarks/baseline_m4.json verified (~42.4k fold/s) |
+| M-5a | Create/push `M-5A-BASE-v2` once | Tech Lead | READY | immutable post-M-5a baseline tag; never move `M-5-BASE` |
 | M-5b | OD-3 deterministic oracle | Tech Lead | DONE | SAT/CNF complete-assignment witness selected |
 | M-5b | `packs/formal-sat` frame and fixed task set | Dev B | DONE | digest-pinned formula, positive witness, negative vector |
 | M-5b | Exterior SAT evaluator | Dev B | DONE | deterministic accept/reject; no search or self-grading |
 | M-5b | RF-86 baseline cutover | Tech Lead | DONE | defaults to `M-5A-BASE-v2`; missing tag fails closed |
 | M-5b | Full formal run and signed verdict bundle | Dev B | PACKAGE_READY | material run through `Runtime.execute_harness`; daemon-signed pass and fail vectors; `runtime/formal_evidence.py` binds pinned digests plus ledger terminal truth |
-| M-5b | RF-86 / RF-98 historical rerun | Dev B | BLOCKED | fails closed; `M-5A-BASE-v2` does not resolve |
+| M-5b | RF-86 / RF-98 historical rerun | Dev B | READY | unblocked upon `M-5A-BASE-v2` tag resolution |
 | M-6 | SpawnAdapter, conservation, join, recovery, RF-55…59 | Dev A | DONE | 28 falsifiers; conjunctive allocation in ADR index |
 | M-6 | Manifest ingress and product-only spawn path | Dev B (active lane) | DONE | Kernel remains verb-blind; agent.spawn admitted in /2 manifests |
 | M-6 | Nested-lineage demonstration bundle | Dev B (active lane) | DONE | test_rf55_rf59_delegation_e2e.py; cold-reconstructible child tree |

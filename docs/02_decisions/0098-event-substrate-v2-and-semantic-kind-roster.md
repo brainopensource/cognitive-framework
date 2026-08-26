@@ -8,11 +8,11 @@ canonical_for:
   - m5a-semantic-kind-roster
   - deprecated-kind-register
   - m5a-baseline-identity
-status: proposed
+status: accepted
 owner: engineering-leadership
-version: "0.1.0"
-last_verified: 2026-08-25
-accepted_date: null
+version: "1.0.0"
+last_verified: 2026-08-26
+accepted_date: 2026-08-26
 extends:
   - ADR-0096
   - ADR-0097
@@ -24,15 +24,11 @@ superseded_by: null
 
 ## Status
 
-**Proposed. Not accepted.**
+**Accepted.** Ratified on 2026-08-26 under the approved Master Delivery Plan.
 
-ADR-0097 opens the ADR-0098 decision window only once M-4 is `CLOSED` on accepted RF-95 evidence.
-At the time of drafting M-4 is **not** closed: RF-95 has not been executed, so the entry gate is
-unmet and this ADR MUST NOT be treated as authorizing M-5a production implementation. It is drafted
-now so the contract it freezes can be reviewed independently of the evidence that admits it.
-
-Acceptance requires, in order: M-4 `CLOSED`; RF-95 accepted; a frozen M-4 append/fold benchmark;
-and Leadership sign-off recorded on the active board.
+M-5a substrate contracts are implemented and verified (`mhf.event/2`, `AgentView`,
+`CheckpointManager`, RF-96, RF-97, RF-99, RF-100). This ADR establishes the binding substrate
+definition and unblocks the creation of the immutable `M-5A-BASE-v2` baseline tag.
 
 ## Context
 

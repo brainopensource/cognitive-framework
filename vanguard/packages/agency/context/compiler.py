@@ -36,6 +36,7 @@ import math
 from typing import Any, Mapping, Sequence
 
 from ...domain.artifacts.skill_index import SkillCard, format_skill_index
+from ...domain.canonicalisation.digest import digest_of
 from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
 from .layers import (
@@ -49,6 +50,7 @@ from .layers import (
 )
 
 __all__ = [
+    "CONTEXT_POLICY_VERSION",
     "CacheBreakpointCeilingExceeded",
     "CompetencePriorRecorder",
     "ContextBudgetExceeded",
@@ -59,6 +61,10 @@ __all__ = [
 #: the resolution any calibration set of this size can distinguish, and fixing
 #: it makes the wire form canonical rather than host-float-dependent.
 _PRIOR_PLACES = 4
+
+#: Bumped whenever the *meaning* of `selection_identity()` changes, so a
+#: reader can tell two records apart that happen to name the same strategy.
+CONTEXT_POLICY_VERSION = "1"
 
 
 class ContextBudgetExceeded(ValueError):
@@ -169,6 +175,13 @@ class ContextCompiler:
                 f"L1-L3 plus the brief cost {floor} tokens against a ceiling of "
                 f"{self._token_ceiling}; none of them may be truncated")
 
+        # The candidate preimage, taken before `_fit` mutates the lists in
+        # place. `_fit` is the only thing that can remove material, so this is
+        # the last moment the un-compacted vector exists.
+        candidates = self._prefix + tuple(task) + tuple(notes_blocks) + tuple(dialogue_blocks)
+        candidate = digest_of([block.identity() for block in candidates])
+        candidate_tokens = sum(block.token_estimate for block in candidates)
+
         elided, dropped = self._fit(floor, notes_blocks, dialogue_blocks)
 
         return CompiledContext(
@@ -176,7 +189,41 @@ class ContextCompiler:
             breakpoints=breakpoints,
             elided=tuple(elided),
             dropped=tuple(dropped),
+            candidate_digest=candidate,
+            candidate_tokens=candidate_tokens,
         )
+
+    # -- provenance identity (pure; this object still cannot log) ---------
+
+    def selection_identity(self) -> Mapping[str, Any]:
+        """Who decided what this prompt contains, and under which parameters.
+
+        `EVIDENCE.md`: *any variable that can materially affect a result MUST
+        have observable identity and provenance*. Compaction strategy and its
+        options are exactly such a variable, and they are resolved here at
+        construction where nothing downstream can see them.
+
+        This is a **read**, not a sink. The compiler stays a pure function of
+        its arguments (`VG-03 §10`): a caller may ask what it is, and cannot
+        make it behave differently by asking. Runtime owns writing the answer
+        somewhere durable.
+        """
+        strategy = type(self._compaction_strategy).__name__
+        parameters: dict[str, Any] = {
+            "tokenCeiling": self._token_ceiling,
+            "breakpointCeiling": self._breakpoint_ceiling,
+        }
+        # Only scalars: an option value that was itself a structure would put
+        # unbounded (and possibly sensitive) material into a ledger fact.
+        for key in sorted(self._compaction_options):
+            value = self._compaction_options[key]
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                parameters[str(key)] = value
+        return {
+            "policyId": f"agency.context-compiler/{strategy}",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+            "parameters": parameters,
+        }
 
     def _breakpoints(self, *, task_present: bool) -> tuple[Layer, ...]:
         """A breakpoint on an empty layer is a breakpoint spent on nothing."""

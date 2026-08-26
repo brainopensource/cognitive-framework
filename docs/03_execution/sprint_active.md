@@ -5,189 +5,195 @@ authority: execution
 canonical_for:
   - active-sprint-tasks
   - current-milestone-gates
-status: active
+status: living
 owner: tech-lead
-version: "0.7.1"
+version: "0.7.2"
 last_verified: 2026-08-25
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint — S-P2-01 M-4 Two-Lane Implementation
+# Active Sprint — S-P2-01 M-4 Package Delivery
 
 Authority: [`VISION.md`](../../VISION.md) -> [`SPEC.md`](../SPEC.md) +
 [`01_law/`](../01_law/) -> accepted ADRs through
 [`ADR-0097`](../02_decisions/0097-phase0-ratification-and-two-lane-activation.md) ->
 [`milestones.md`](milestones.md) -> this board. This is the sole current implementation
-authorization.
+authorization. The Director handoff and reviews under `docs/00_leadership_supersede_all/` informed
+this board but do not form a second execution authority.
 
-## 1. Activation decision and receipts
+## 1. Current phase and activation receipts
 
-**Dev A and Dev B are authorized to start their M-4 packages from baseline**
-`f9d7ceb257e8e2c7d6014bd0a29604ffcd89ee0e`.
+**Phase 0 complete. S-P2-01 is in M-4 package delivery from activated baseline
+`f9d7ceb257e8e2c7d6014bd0a29604ffcd89ee0e`. Dev A and Dev B are both `PACKAGE_READY`; the G-M4
+review is open and unfinished (§5b).**
 
-Phase-0 decisions are closed:
+Activation receipts: ADR-0096 v0.4.0 and ADR-0097 v0.2.0 accepted; canonical law, milestones and
+execution authorization reconciled; the M-4 Contract Kit, ownership boundaries, merge order and
+acceptance states frozen; Linux RF-38…RF-45 passed 13/13 on 2026-08-25 including both RF-43 UDS
+tests; both lanes published surveys and implementation plans.
 
-- ADR-0096 v0.4.0 accepted; ADR-0097 v0.2.0 accepted.
-- Strict `/1` compatibility, evidence failure/degradation, RF-100 proof semantics, resources,
-  goal privacy, retention, content-capture policy, and transitive TCB measurement are decided.
-- Linux RF-38…RF-45 qualification passed 13/13 on 2026-08-25, including both RF-43 UDS tests.
-  CI MUST repeat this suite before merge; any failure blocks integration.
-- Shared contracts, file ownership, merge order, and package/integration states are frozen below.
+`PACKAGE_READY` is isolated readiness only — neither `MERGED` nor `GATE_ACCEPTED`, and it closes
+nothing. RF-95 remains **NO-GO** until §6 passes. M-5a implementation remains blocked on M-4
+closure and accepted ADR-0098.
 
-RF-95 remains **NO-GO** until both packages merge and the integrated prerequisites in §5 pass.
+## 2. Frozen delivery decisions
 
-## 2. Frozen M-4 Contract Kit
+These are ratified in [`ADR-0096 §14`](../02_decisions/0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md)
+and [`ADR-0097`](../02_decisions/0097-phase0-ratification-and-two-lane-activation.md) and are not
+restated here; the board records status, the ADRs hold the decisions. In force for M-4: `/1`
+byte-frozen with dual-read `/1|/2` and single-write `/2`; historical bytes, digests and identities
+never rewritten; exact provider I/O captured at `runtime/session.py::_LayeredOperator.propose`;
+blob before ledger fact with the store computing the digest; evidence-append and required-capture
+failure fatal; optional degradation only after a durable `capture_incomplete`, making the run
+non-evidentiary; retention (`digests_only|standard|full`) never authorizing capture; WAL and pins
+as prerequisites only, `verified` needing a run-bound executed receipt; run-close assessment
+immutable.
 
-The lanes implement these public outcomes; internal implementation remains owned by each Senior.
+Ownership seam: Dev B owns profile/trajectory schemas, writer, reader, reproducibility and contract
+falsifiers, and published the frozen fixtures first. Dev A owns Runtime capture/wiring and the
+generic Agency provenance integration, does not edit Dev B-owned surfaces, and escalates a missing
+required field rather than working around it. No new event kinds, envelope changes, Kernel
+semantics, or Agency -> Runtime import are authorized in M-4.
 
-### Schema and compatibility
+## 3. Simple active backlog
 
-- `mhf.execution-profile/1` and `mhf.trajectory/1` are frozen.
-- M-4 adds `/2`; readers dual-read `/1|/2`; production writers single-write `/2`.
-- Historical bytes, digests, and identities are never rewritten.
+Canonical compact backlog; acceptance rules are in §§4–6 and the accepted law/ADR stack.
 
-### Evidence
+### Done
 
-- Exact provider input/output capture occurs at `runtime/session.py::_LayeredOperator.propose`.
-- Evidence-ledger append failure is fatal.
-- Required capture failure is fatal.
-- Optional capture degradation requires a durable `capture_incomplete` fact and makes the run
-  non-evidentiary.
-- `mhf.trajectory/2` carries artifact index, context/compaction/cache provenance, exact model-I/O
-  references, and `reproducibility_at_run_close`.
+PH0-00…PH0-05 and A-M4-00/B-M4-00 are complete; see git history.
 
-### Reproducibility
+### In progress — M-4 packages
 
-- State reconstruction and semantic replay separately record capability and verification.
-- WAL and pins are prerequisites only.
-- `verified` requires immutable run-bound executed receipts covering inputs, pins, and output digest.
-- The run-close assessment is immutable; later current-state assessment is a new claim.
+- [x] B-M4-01 Publish frozen cross-lane artifact/provenance fixtures first.
+- [x] A-M4-01 Implement policy-gated `ArtifactWriter` with durable failure semantics.
+- [x] A-M4-02 Implement generic Agency provenance protocol and Runtime-owned sink.
+- [x] A-M4-03 Capture context selection, compaction, exact model I/O, and applicable cache provenance.
+- [x] A-M4-04 Wire optional blob/capture services while preserving the legacy no-capture path.
+- [x] A-M4-05 Pass focused Runtime/Agency tests and declare `PACKAGE_READY`.
+- [x] B-M4-02 Add `mhf.execution-profile/2` and preserve the `/1` identity preimage.
+- [x] B-M4-03 Add `mhf.trajectory/2`, dual-read `/1|/2`, and single-write `/2`.
+- [x] B-M4-04 Implement proof-honest reproducibility derivation and run-close contract.
+- [x] B-M4-05 Add strict golden vectors, falsifiers, and the append/fold benchmark baseline.
+- [x] B-M4-06 Pass focused schema/reader/RF-100 tests and declare `PACKAGE_READY`.
 
-### Resources, privacy, and retention
+### Next — integration and gate
 
-- Additive resources: `usd_micros`, `millis`, `tokens`, `bytes`.
-- Structural ceilings: `depth`, `turns`.
-- Goal facts use `goalDigest` and optional digest-verified `goalArtifact`; no raw goal ledger text.
-- Retention: `digests_only`, `standard`, `full`.
-- Retention never authorizes capture. Runtime resolves capture, redaction, secret, and sensitivity
-  policy before blob persistence and records policy identity/version.
+- [ ] G-M4-01 Tech Lead reviews both packages against the frozen fixtures and ownership matrix.
+- [ ] G-M4-02 Merge Dev B first; rebase and merge Dev A second.
+- [ ] G-M4-03 Run the combined repository, architecture, security, and governance gates.
+- [ ] G-M4-04 Freeze one non-trivial live task and verifier, then execute RF-95 exactly once.
+- [ ] G-M4-05 Independently review the unrepaired evidence bundle and accept or reject M-4.
+- [ ] G-M4-06 On acceptance, mark M-4 complete and open the ADR-0098 decision window.
 
-## 3. Dev A — Evidence Runtime and Causal Capture
+### Blocked future backlog
 
-State: **READY**. WIP limit: one package.
+M-5a (G-M4 + ADR-0098), M-5b and M-6 (`M-5A-BASE-v2`; plus the oracle decision and the production
+SpawnAdapter contract respectively), M-6.5 (M-4 telemetry, and M-6 for delegation), M-7 (M-6.5 and
+the M7-01 decision), M-8 (M-7). Ladder detail lives in [`milestones.md`](milestones.md).
 
-Objective: build the production path from Runtime execution to durable, policy-authorized artifacts
-and provenance without changing the event envelope, event roster, or Kernel semantics.
+## 4. Dev A — Evidence Runtime and Causal Capture
 
-Required outcomes:
+State: **PACKAGE_READY**. WIP limit: one package.
 
-- Runtime `ArtifactWriter` over existing blob-store ports/adapters; blob-first/event-second;
-  store-computed digest; no large content inline in events.
-- Generic Agency provenance protocol plus Runtime-owned sink; no Agency -> Runtime import.
-- Context-selection and compaction provenance with policy identity, parameters, input/output digests,
-  and policy-authorized artifact references.
-- Exact finalized provider input capture immediately before invocation and raw structured output
-  capture immediately after return at `_LayeredOperator.propose`.
-- Cache/cassette provenance when applicable; no claim required for a live no-cache invocation.
-- Required/fatal and optional/durable-degradation behavior from ADR-0096 §14.2.
-- Capture/privacy policy enforcement before any prompt, output, context, snapshot, patch, or report
-  bytes are stored.
+Surfaces: new `runtime/{artifacts,provenance}.py` and `agency/provenance.py`; edits to
+`runtime/{session,root}.py` and `agency/context/{compiler,layers}.py` (additive pure reads only);
+`test/runtime/test_evidence_capture.py` (76 tests).
 
-Exclusive files/surfaces:
+Obligation -> proof, all in `test_evidence_capture.py`: blob-first/event-second and fatal orphan
+(`BlobFirstEventSecond`); store-owned digest (`TheStoreOwnsTheDigest`); no inline content
+(`NoInlineContent`); retention never authorizes capture (`RetentionIsNotAuthorization`); redaction
+before persistence (`RedactionHappensBeforePersistence`); fatal required-capture failure
+(`RequiredCaptureFailureIsFatal`); degradation only after a durable fact
+(`OptionalCaptureDegradesOnlyOnTheRecord`); fatal evidence append failure
+(`ProvenanceAppendFailureIsFatal`); exact pre-call/post-return I/O at
+`_LayeredOperator.propose` (`ExactModelIOAtTheRealSeam`); cache claims only when reported
+(`CacheClaimsOnlyWhenReported`); legacy `blobs=None` (`LegacyCompositionStaysLegal`); boundary
+(`TheBoundaryHolds`); envelope/roster unchanged (`TheEventContractIsUnchanged`); frozen B-M4-01
+seam (`TheFrozenCrossLaneContractIsHonoured`); integrated `/2` bundle
+(`TheIntegratedTrajectoryCarriesTheCapture`).
 
-- `vanguard/packages/runtime/session.py`
-- `vanguard/packages/runtime/artifacts.py`
-- `vanguard/packages/runtime/provenance.py`
-- `vanguard/packages/runtime/wiring.py`
-- `vanguard/packages/runtime/root.py`
-- `vanguard/packages/runtime/ledger_emitter.py`
-- Agency provenance/compiler integration
+The published B-M4-01 fixture was consumed as frozen; no Dev B-owned file was edited. Dev A adopted
+the fixture's `checkpoint_state` role name. No fixture field was materially missing, so no
+escalation is open against B-M4-01.
 
-Dev A MUST NOT edit Dev B-owned profile/trajectory schemas or readers. Dev A reaches
-`PACKAGE_READY` on its isolated contract suite and frozen Dev-B fixtures; integrated trajectory and
-RF-100 checks occur after merge.
+## 5. Dev B — Scientific Contracts and Verification
 
-## 4. Dev B — Scientific Contracts and Verification
-
-State: **READY**. WIP limit: one package.
+State: **PACKAGE_READY**. WIP limit: one package.
 
 Objective: implement versioned scientific contracts and falsifiers that prevent evidence claims from
 exceeding executed proof.
 
-Required outcomes:
+Exclusive surfaces: `runtime/{profiles,reproducibility,trajectory,trajectory_reader}.py`, profile and
+trajectory schemas/vectors/readers/fixtures, Dev B-focused tests, and the append/fold benchmark.
 
-- `mhf.execution-profile/2` with retention, capture-required/evidence semantics, and identity preimage.
-- `mhf.trajectory/2` with artifact/provenance/reproducibility sections.
-- Dual-read `/1|/2`, single-write `/2`, strict golden vectors, and historical-reader tests.
-- Proof-honest RF-100 derivation and immutable verification-receipt contract.
-- Append/fold benchmark baseline for M-5a.
-- M7-01 analysis may begin over existing ledgers but MUST NOT add concurrency, scheduling, workers,
-  claims, leases, or topology.
+Package contract: publish B-M4-01 first, then complete B-M4-02…06 in §3. `/1` stays frozen;
+`/2` is the sole new write contract; absent historical evidence remains absent; RF-100 cannot
+overclaim; and the benchmark is frozen. Use supported `python3`; the broken `.venv` is out of scope
+without separate authorization. `PACKAGE_READY` requires all focused contract tests green.
 
-Exclusive files/surfaces:
+## 5b. G-M4 review findings (Tech Lead)
 
-- `vanguard/packages/runtime/profiles.py`
-- `vanguard/packages/runtime/reproducibility.py`
-- `vanguard/packages/runtime/trajectory.py`
-- `vanguard/packages/runtime/trajectory_reader.py`
-- execution-profile and trajectory schemas/vectors/readers
+Review **partially complete**. Gate **NOT** accepted; RF-95 remains **NO-GO**.
 
-Dev B MUST NOT edit Dev A-owned Runtime capture/wiring surfaces. Dev B reaches `PACKAGE_READY` on
-schema, reader, RF-100, and benchmark tests using frozen artifact/provenance fixtures.
+Verified: full suite 1446 passed / 8 skipped / 0 failed; codegen `--check`; eleven linters;
+RF-38…RF-45 13/13. Confirmed frozen: `/1` schema files byte-unmodified; `domain/ledger/events.py`
+and `_V4_ONLY_KINDS` zero-line diff; RF-100 `verified` requires a run-bound executed receipt. Dev
+B's F-12 and `audit.py` edits extend coverage and dual-read; they do not weaken falsifiers.
 
-## 5. Integration and RF-95
+Defects found and fixed (D1–D3 in the B-M4 commit, D4 in A-M4):
 
-Package states are distinct:
+- **D1** codegen resolved `"$ref": "#"` against one global root title, so adding a schema file
+  silently retyped `Proposal.requests` to `ArtifactCreatedPayload`; `--check` passed because the
+  generator agreed with itself. Now per-document; `TestF13RefsResolvePerDocument` fails unfixed.
+- **D2** the `/1` profile preimage was pinned by nothing, so shape-only tests would stay green
+  while every historical `profile_digest` (which enters `D_R`) moved. Four digests now pinned.
+- **D3** `/2` defaulted an absent capture status to `complete`; now null, keeping "captured
+  nothing" distinct from "captured all that was asked".
+- **D4** `assemble_trajectory` accepted the artifact index, provenance and capture status;
+  `session.py` passed none, so each lane proved only its own half. Wired and asserted end-to-end.
+
+Blocking, gate cannot close:
+
+1. Merge order was **reconstructed**: both packages were built in one working tree, so no
+   B-M4/A-M4 branches existed. Commits land B-then-A with correct attribution, but Leadership must
+   accept the reconstruction or require a redo.
+2. RF-95 not executed and not authorized here (needs an attributable live provider, forbids
+   fake/cassette, single preregistered irreversible run).
+3. TypeScript suite unmet in this environment (`tsc: not found`); no TS surface changed.
+4. No independent review receipt exists; none is self-assertable.
+
+Pre-existing doc-budget overruns, not from either lane: `milestones.md` (269), `SPEC.md` (253).
+
+## 6. Integration and RF-95
 
 ```text
 READY -> IN_PROGRESS -> PR_OPEN -> REVIEW -> PACKAGE_READY -> MERGED -> GATE_ACCEPTED
 ```
 
-Merge order:
-
-1. Dev B merges profile/trajectory contracts and readers.
-2. Dev A rebases on main and merges production capture wiring.
-3. Leadership runs the combined suite; both packages become `GATE_ACCEPTED` together.
-
-RF-95 may run only after:
-
-- both packages are `GATE_ACCEPTED`;
-- full Python/TypeScript, architecture, TCB, secrets, event, and governance gates are green;
-- RF-38…RF-45 is green in CI;
-- a non-trivial live task and verifier are frozen before execution;
-- profile `/2` resolves `retention=standard` and `capture.required=true`;
-- the live provider is attributable and is not fake/cassette.
+Merge order is Dev B, then Dev A rebased on main, then the integrated gate; both packages become
+`GATE_ACCEPTED` together or neither does. RF-95 may run only once both are `GATE_ACCEPTED`, every
+gate in §7 is green, RF-38…RF-45 is green in CI, a non-trivial live task and its verifier are frozen
+before execution, profile `/2` resolves `retention=standard` and `capture.required=true`, and the
+provider is attributable rather than fake/cassette.
 
 The single candidate must produce a terminal `mhf.trajectory/2`, exact model-I/O artifacts,
-context/compaction/cache provenance, proof-honest reproducibility, real workspace diff, passing
-verifier receipt, durable WAL, and fresh-process reconstruction receipt. Failure is preserved without
-manual repair and keeps M-4 open. Independent review plus Leadership acceptance closes M-4.
+context/compaction/cache provenance as applicable, proof-honest reproducibility, a real workspace
+diff, passing verifier receipt, durable WAL, and fresh-process reconstruction receipt. Failure is
+preserved without manual repair and keeps M-4 open. Independent review plus Leadership acceptance
+closes M-4.
 
-## 6. Explicit non-scope
+## 7. Required verification
+
+Every gate listed in [`AGENTS.md §2`](../../AGENTS.md), plus the full Python and TypeScript suites.
+
+## 8. Explicit non-scope
 
 - No event-envelope or event-kind change before accepted ADR-0098 and M-5a.
 - No `agent.spawn`, topology, scheduler, memory, skills, or meta-control implementation in M-4.
 - No Kernel semantic change, second runtime, upward dependency, or weakened falsifier.
 - No historical ADR rewrite or movement/deletion of the historical `M-5-BASE` tag.
-- M-5a implementation remains blocked on M-4 closure and ADR-0098.
-- After M-5a, M-5b and M-6 may run in parallel from immutable `M-5A-BASE-v2`.
-
-## 7. Required verification
-
-```bash
-python3 -m unittest discover -s test -t .
-python3 tools/linters/check_boundaries.py
-python3 tools/linters/check_tcb_budget.py
-python3 tools/linters/scan_secrets.py
-python3 tools/linters/check_domain_blindness.py
-python3 tools/linters/check_isolation_policy.py
-python3 tools/linters/check_event_coverage.py
-python3 tools/linters/check_falsifier_ids.py
-python3 tools/linters/check_duplication.py --enforce
-python3 tools/linters/check_markdown_links.py
-python3 tools/linters/check_stale_paths.py
-npm run typecheck --workspaces --if-present
-npm test --workspaces --if-present
-```
+- No M-5a implementation before M-4 closure and ADR-0098 acceptance; no separate backlog or scratch
+  Markdown outside the Clean Triad.

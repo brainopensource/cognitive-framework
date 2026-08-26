@@ -155,6 +155,17 @@ class CompiledContext:
     breakpoints: tuple[Layer, ...]
     elided: tuple[str, ...] = ()
     dropped: tuple[str, ...] = ()
+    #: The vector as it stood *before* the budget ruled on it (`ADR-0096
+    #: §14`). `digest` alone reports what was selected; without the candidate
+    #: preimage nobody can tell a context that fit from one that was cut to
+    #: fit, which is exactly the variable compaction provenance exists to
+    #: attribute. Defaults to empty for callers constructing a context
+    #: directly, so this stays additive.
+    candidate_digest: str = ""
+    #: Token cost of that same candidate vector. `total_tokens` is the cost
+    #: after the budget ruled; the difference between the two is exactly what
+    #: compaction removed, which no consumer can compute from `digest` alone.
+    candidate_tokens: int = 0
 
     @property
     def total_tokens(self) -> int:

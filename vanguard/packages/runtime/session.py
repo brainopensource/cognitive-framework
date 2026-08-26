@@ -20,6 +20,7 @@ from ..agency.context import (
     Fragment,
 )
 from ..agency.manifests.discovery import WorkspaceDiscovery
+from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel import (
@@ -38,6 +39,7 @@ from ..kernel import (
     StandardPolicy,
     Span,
 )
+from ..ports.blob_store import BlobStorePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.event_store import EventRange, EventStorePort
@@ -48,9 +50,11 @@ from .compose import (
     RunResult,
     TaskContext,
 )
+from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
+from .provenance import RuntimeProvenanceSink, cache_participation
 from .telemetry import RunTelemetry
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
 from .governance.approvals import (
@@ -85,13 +89,20 @@ class _LayeredOperator:
 
     def __init__(self, model: Any, compiler: ContextCompiler, *,
                  recorder: CompetencePriorRecorder | None = None,
-                 task: TaskContext) -> None:
+                 task: TaskContext,
+                 artifacts: ArtifactWriter | None = None,
+                 provenance: ProvenanceSink | None = None) -> None:
         self._model = model
         self._compiler = compiler
         self._recorder = recorder
         self._task = task
         self._dialogue: list[Fragment] = []
         self.contexts: list[Mapping[str, Any]] = []
+        # `None` is the legacy no-capture composition (`blobs=None`). It is a
+        # first-class state, not a degraded one: a session with no artifact
+        # store captures nothing and therefore claims nothing.
+        self._artifacts = artifacts
+        self._provenance = provenance
 
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
@@ -125,8 +136,53 @@ class _LayeredOperator:
             bundle["messages"] = tuple(messages)
             bundle["lastReceiptDigest"] = digest
         self.contexts.append(bundle)
+        # 0-based, matching `turn`/`turnIndex` in the frozen cross-lane
+        # fixture and in `mhf.trajectory/1`'s existing turn numbering.
+        turn = len(self.contexts) - 1
+
+        # Context/compaction provenance, then the exact provider input. All
+        # of it before the call, because after the call the only honest thing
+        # to say about a prompt is what it *was*.
+        self._record_selection(compiled, turn)
+        input_ref = self._capture(
+            "prompt", bundle, turn=turn,
+            labels={"promptDigest": compiled.digest,
+                    "prefixDigest": compiled.prefix_digest})
+
         answer = self._model.propose(bundle, tools, sampling)
+
+        # `ADR-0096 §14.1`: the raw structured response, immediately on
+        # return and before anything below reinterprets it. The `usage` and
+        # `resolved_model` folding further down rewrites what this run
+        # *believes* about the call; capturing after it would record the
+        # belief rather than the response.
         value = getattr(answer, "value", None)
+        raw = value if value is not None else answer
+        output_ref = self._capture("model_output", raw, turn=turn)
+        # The trajectory `/2` writer reads per-turn exact-I/O references off
+        # the context record (`trajectory.py`), so the refs are stamped here
+        # rather than rediscovered later by matching digests back to turns.
+        if input_ref is not None or output_ref is not None:
+            stamped = dict(self.contexts[-1])
+            if input_ref is not None and input_ref.digest:
+                stamped["model_input_ref"] = input_ref.digest
+            if output_ref is not None and output_ref.digest:
+                stamped["model_output_ref"] = output_ref.digest
+            self.contexts[-1] = stamped
+
+        if self._provenance is not None and hasattr(self._provenance, "record_model_io"):
+            policy = (self._artifacts.policy.identity()
+                      if self._artifacts is not None else {})
+            self._provenance.record_model_io(
+                route=_route_of(self._model), input_ref=input_ref,
+                output_ref=output_ref, capture_policy=policy, turn=turn)
+            # Only when the provider itself reported cache participation. A
+            # live call that touched no cache emits nothing (`14.1` capture is
+            # about what happened, not about what the composition could do).
+            self._provenance.record_cache(
+                reported=cache_participation(value), turn=turn,
+                source_digest=output_ref.digest if output_ref else "")
+
         if isinstance(value, Mapping):
             usage = value.get("usage")
             if isinstance(usage, Mapping):
@@ -146,6 +202,67 @@ class _LayeredOperator:
                 self.contexts[-1] = measured
         return answer
 
+    # -- capture helpers ---------------------------------------------------
+
+    def _capture(self, role: str, payload: Any, *, turn: int,
+                 labels: Mapping[str, Any] | None = None) -> Any:
+        """Hand bytes to the writer, or do nothing on the legacy path.
+
+        Nothing is caught here. `EvidenceCaptureRequiredError` and
+        `EvidenceLedgerAppendError` are fatal by `ADR-0096 §14.2` and must
+        reach the caller through the generic Agency protocol; swallowing them
+        would leave the turn running with evidence it does not have.
+        """
+        if self._artifacts is None:
+            return None
+        return self._artifacts.capture(role, payload, turn=turn, labels=labels)
+
+    def _record_selection(self, compiled: CompiledContext, turn: int) -> None:
+        """Context-selection and compaction provenance for one turn.
+
+        The compiler stays pure: it is *asked* for its identity here rather
+        than handed a sink, so no prompt can be assembled differently on the
+        run where provenance was enabled.
+        """
+        if self._provenance is None or not hasattr(self._provenance, "record_context_selection"):
+            return
+        identity = self._compiler.selection_identity()
+        selected = [block.label for block in compiled.blocks]
+        # Per-layer token counts, not a layer tally: `L5` growing while `L1`
+        # holds still is the signal a cache-cost regression looks like, and a
+        # single integer erases it.
+        layer_counts: dict[str, int] = {}
+        for block in compiled.blocks:
+            key = block.layer.value
+            layer_counts[key] = layer_counts.get(key, 0) + block.token_estimate
+        self._provenance.record_context_selection(
+            identity=identity,
+            candidate_digest=compiled.candidate_digest,
+            selected_digest=compiled.digest,
+            prefix_digest=compiled.prefix_digest,
+            selected=selected, dropped=compiled.dropped, elided=compiled.elided,
+            tokens=compiled.total_tokens, layer_counts=layer_counts, turn=turn)
+        self._provenance.record_compaction(
+            identity=identity,
+            input_digest=compiled.candidate_digest,
+            output_digest=compiled.digest,
+            dropped=compiled.dropped, elided=compiled.elided,
+            tokens_before=compiled.candidate_tokens,
+            tokens_after=compiled.total_tokens, turn=turn)
+
+
+def _route_of(model: Any) -> Mapping[str, Any]:
+    """Which provider/model this call actually went to.
+
+    Small and identity-only: a route that carried credentials or headers
+    would put them in an append-only store.
+    """
+    return {
+        "adapter": type(model).__name__,
+        "provider": str(getattr(model, "provider", "")),
+        "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
+        "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,6 +287,15 @@ class SessionPorts:
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
     interactive: bool = True
+    #: `ADR-0096 §14`. `None` is the legacy no-capture composition and stays
+    #: legal indefinitely: a session with no artifact store emits no
+    #: artifact facts and makes no evidence claim it cannot support. Binding
+    #: one turns capture on for this session and nothing else about it.
+    blobs: BlobStorePort | None = None
+    #: The resolved capture/redaction/sensitivity/retention policy. `None`
+    #: resolves from `profile` at composition, or to the conservative default
+    #: (`standard` retention, optional capture, redaction on).
+    capture_policy: CapturePolicy | None = None
 
 
 class _SwappablePolicy:
@@ -329,9 +455,32 @@ class HarnessSession:
             skill_cards=harness.skill_cards,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
+        # `ADR-0096 §14`. One optional seam, resolved once: either this
+        # session captures evidence or it does not. There is no second
+        # composition root and no per-call switch -- a capture path that could
+        # be enabled halfway through a run would produce a trajectory whose
+        # gaps mean nothing.
+        self.artifacts: ArtifactWriter | None = None
+        self.provenance: ProvenanceSink = NullProvenanceSink()
+        if ports.blobs is not None:
+            self.capture_policy = ports.capture_policy or resolve_capture_policy(
+                getattr(run_plan, "profile", None))
+            self.artifacts = ArtifactWriter(
+                ports.blobs, self.ledger,
+                policy=self.capture_policy,
+                run_id=task.run_id, principal=task.principal,
+                episode_id=task.episode_id)
+            self.provenance = RuntimeProvenanceSink(
+                self.ledger, run_id=task.run_id, principal=task.principal,
+                episode_id=task.episode_id)
+        else:
+            self.capture_policy = ports.capture_policy
+
         self.operator = _LayeredOperator(
             ports.model, compiler, task=task,
-            recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger))
+            recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger),
+            artifacts=self.artifacts,
+            provenance=self.provenance if self.artifacts is not None else None)
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -575,6 +724,7 @@ class HarnessSession:
             model=self.ports.model,
             environment=self.ports.environment,
             run_plan=self.run_plan,
+            **self._capture_evidence(),
         )
         delayed.flush(trajectory)
         if isinstance(trajectory, dict):
@@ -605,6 +755,25 @@ class HarnessSession:
         return result
 
     # -- what the instrument reads ----------------------------------------
+
+    def _capture_evidence(self) -> dict[str, Any]:
+        """What this run actually captured, for the `mhf.trajectory/2` writer.
+
+        Empty on the legacy path, and deliberately so: `assemble_trajectory`
+        renders an absent artifact index and a null capture status rather than
+        synthesising a complete one, so a run that captured nothing says that
+        instead of claiming it captured everything it was asked to.
+        """
+        if self.artifacts is None:
+            return {}
+        provenance = self.provenance.trajectory_provenance()
+        return {
+            "artifact_index": list(self.artifacts.index_entries()),
+            "context_provenance": provenance["context"],
+            "compaction_provenance": provenance["compaction"],
+            "cache_provenance": provenance["cache"],
+            "capture_status": self.artifacts.capture_state(),
+        }
 
     def _telemetry(self) -> RunTelemetry:
         """Integer telemetry, with absence preserved (`S9-A-02`).

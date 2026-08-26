@@ -38,6 +38,7 @@ from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run
 from .ledger_emitter import LedgerBridge, LedgerEmitter
+from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
 from .wiring import (
     BindingContext,
@@ -75,6 +76,8 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
         sandbox_mode: str = "rootless",
+        blobs: Any = None,
+        capture_policy: Any = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -142,6 +145,8 @@ class Runtime(_ComposedRuntime):
             approver=approver,
             approval_key=approval_key,
             interactive=interactive,
+            blobs=blobs,
+            capture_policy=capture_policy,
         )
         try:
             return cls.run_composed(
@@ -169,6 +174,8 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         host_qualifies: bool = True,
         host_facts: Mapping[str, Any] | None = None,
+        blobs: Any = None,
+        capture_policy: Any = None,
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -202,6 +209,8 @@ class Runtime(_ComposedRuntime):
             approver=approver,
             approval_key=approval_key,
             interactive=interactive,
+            blobs=blobs,
+            capture_policy=capture_policy,
         )
         try:
             return cls.run_composed(
@@ -269,6 +278,12 @@ class Runtime(_ComposedRuntime):
             budget=harness.budget,
             profile=profile,
         )
+        # `ADR-0096 §14.5`. The profile is the only thing that knows the
+        # run's retention and capture-required posture, and `RunPlan` carries
+        # only its scalars, so the policy is resolved here -- once, at the one
+        # composition seam -- rather than rediscovered inside the session.
+        if ports.blobs is not None and ports.capture_policy is None:
+            ports = replace(ports, capture_policy=resolve_capture_policy(profile))
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan
         )
@@ -419,7 +434,9 @@ __all__ = [
     "plan_activation",
     "plan_run",
     "EVALUATOR_BINDINGS",
+    "ArtifactWriter",
     "BindingContext",
+    "CapturePolicy",
     "CompositionError",
     "EffectBinding",
     "Harness",
@@ -430,6 +447,7 @@ __all__ = [
     "RunResult",
     "Runtime",
     "SessionPorts",
+    "resolve_capture_policy",
     "TaskContext",
     "_admit_turn_result",
     "_bwrap_path",

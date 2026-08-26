@@ -71,7 +71,6 @@ class DegenerateFloorError(ValueError):
 
 
 MeasurementRefused = DegenerateFloorError
-StudyVerdict = M65StudyReport
 
 
 def _compatibility_key(tuple_: Mapping[str, Any]) -> dict[str, Any]:
@@ -169,9 +168,6 @@ def a_a_floor_is_degenerate(provider_or_runs: Any) -> bool:
     return False
 
 
-paired_study = run_study
-
-
 def holm_bonferroni(p_values: Mapping[str, float], alpha: float = 0.05) -> dict[str, bool]:
     """`M-05`: family-wise error control, uniformly more powerful than plain Bonferroni."""
     ordered = sorted(p_values.items(), key=lambda item: item[1])
@@ -222,6 +218,9 @@ class M65StudyReport:
         }
         body["reportDigest"] = self.report_digest or digest_of(body)
         return body
+
+
+StudyVerdict = M65StudyReport
 
 
 def run_study(
@@ -321,6 +320,9 @@ def _decide(*, reduction, shared, b, c, test, holm, floor, alpha):
     return ("regression",
             f"treatment lost {b} discordant pairs to {c}, p={test.p_value}, "
             f"risk difference {test.risk_difference:+.3f}", False)
+
+
+paired_study = run_study
 
 
 def main(argv: list[str] | None = None) -> int:

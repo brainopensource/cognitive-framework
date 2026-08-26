@@ -278,7 +278,7 @@ def _wal_contention(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     )
     overlaps = sum(1 for index, (_, end) in enumerate(windows[:-1])
                    if windows[index + 1][0] < end)
-    span = (windows[-1][1] - windows[0][0]) if windows else 0.0
+    span = max(0.0, max((w[1] for w in windows), default=0.0) - min((w[0] for w in windows), default=0.0)) if windows else 0.0
     wal = sum(float(record["wal_write_millis"]) for record in records
               if "wal_write_millis" in record)
     return {

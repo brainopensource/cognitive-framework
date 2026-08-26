@@ -42,7 +42,7 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-4 | A-M4 evidence runtime and causal capture | Dev A | DONE | `PACKAGE_READY` |
 | M-4 | B-M4 contracts, trajectory `/2`, RF-100 | Dev B | DONE | `PACKAGE_READY` |
 | M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,575 Python; 68/68 TS; all named gates |
-| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | FAILED — evidence preserved | second candidate still produced no workspace diff; no repair or acceptance |
+| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | AUTHORIZED — attempt 3 | new preregistration required after D7; preserve evidence regardless of outcome |
 | M-4 | G-M4-05 independent review receipt | Human reviewer | TODO | reviewer did not author candidate implementation |
 | M-4 | G-M4-06 closure | Tech Lead | TODO | RF-95 accepted + review receipt |
 | M-5a | Event `/2`, vocabulary and emitter cutover | Dev A | DONE | mixed `/1|/2`, `/2` writes, historical bytes preserved |

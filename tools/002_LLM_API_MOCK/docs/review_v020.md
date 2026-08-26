@@ -1528,3 +1528,27 @@ The result is a useful, low-cost LAM laboratory: five observed provider trajecto
 eleven explicitly synthetic trajectories for breadth, and a common executable harness contract for
 both. It is strong evidence about LAM and the harness; it is intentionally not evidence that the
 synthetic traces equal a real DeepSeek benchmark score.
+
+
+
+
+
+
+# NOTES
+
+ Root Cause in Tiers 4–6                 │ Why It Happened                               │ Recommended Improvement / Solution
+  ─────────────────────────────────────────┼───────────────────────────────────────────────┼───────────────────────────────────────────────
+   Tight Turn Budget (6–10 turns)          │ Models used 4–6 turns just exploring multi-   │ Increase call budget to 20–30 turns for Tier
+                                           │ file repos (list_dir, view_file) before       │ 4–6 tasks during live collection.
+                                           │ writing code.                                 │
+   Context Window Saturation (length stop) │ Repeated full file reads bloated the prompt   │ Implement rolling tool message compaction or
+                                           │ context past provider token limits.           │ sub-file viewing (line ranges).
+   Lack of Sub-Agent / Planning Loop       │ Flat single-agent loop tackled complex        │ Inject a 2-phase strategy prompt: Phase 1
+                                           │ architectures reactively without pre-         │ (Plan & locate invariant) → Phase 2 (Targeted
+                                           │ planning.                                     │ patch & pytest).
+   Absence of Test Feedback Loop           │ Models stopped after first attempt or ran out │ Ensure models run pytest -q early in the turn
+                                           │ of calls before seeing test assertion         │ loop to use compiler/assertion errors as
+                                           │ failures.                                     │ guidance.
+   LAM Replay Fidelity                     │ LAM faithfully records and replays whatever   │ No fix needed in LAM itself; LAM's value is
+                                           │ the LLM did (including failures).             │ precisely preserving both gold passes and
+                                           │                                               │ real-world failure modes.

@@ -13,7 +13,7 @@ CALIBRATION_ATOMS = ("read", "patch", "test")
 # The corpus deliberately contains calibration (t0), task (t1-t5), and
 # integration/deep (t6) scenarios. Freeze that vocabulary explicitly rather
 # than silently accepting arbitrary tier names.
-SCENARIO_ID_PATTERN = re.compile(r"^t[0-6]-")
+SCENARIO_ID_PATTERN = re.compile(r"^t([0-9]|10)-")
 
 
 def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALLOWED_ATOMS) -> None:
@@ -26,14 +26,14 @@ def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALL
         raise ValueError("Scenario missing valid 'id' string")
 
     if not SCENARIO_ID_PATTERN.match(scenario_id):
-        raise ValueError(f"Scenario id '{scenario_id}' must match pattern '^t[0-6]-'")
+        raise ValueError(f"Scenario id '{scenario_id}' must match pattern '^t[0-10]-'")
 
     effective_atoms = CALIBRATION_ATOMS if scenario_id.startswith("t0-") else allowed_atoms
 
     tier = raw.get("tier")
     if tier is not None:
-        if not isinstance(tier, int) or tier < 1 or tier > 6:
-            raise ValueError(f"Scenario tier '{tier}' must be an integer 1..6")
+        if not isinstance(tier, int) or tier < 0 or tier > 10:
+            raise ValueError(f"Scenario tier '{tier}' must be an integer 0..10")
 
     workspace = raw.get("workspace")
     if workspace is not None:

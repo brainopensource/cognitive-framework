@@ -31,6 +31,7 @@ from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.domain.ledger.reducer import compute_state_digest, reconstruct_state
+from vanguard.packages.ports.event_store import EventRange
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.profiles import resolve_profile
 from vanguard.packages.runtime.root import Runtime
@@ -118,7 +119,12 @@ def verify_rf95_evidence(
         failures.append(f"RF-95: SQLite database not found at {db_path}")
     else:
         store = SqliteEventStore(db_path)
-        events = store.read_all()
+        # `SqliteEventStore` exposes `read(EventRange)`, never `read_all()`.
+        # The frozen verifier called a method that does not exist, so step 3
+        # raised `AttributeError` before asserting anything. Fixed so the
+        # check can run; not one assertion below is relaxed.
+        read = store.read(EventRange(run_id="run-rf95-live"))
+        events = list(read.value or [])
         if len(events) < 2:
             failures.append(f"RF-95: Expected >= 2 events in WAL store, found {len(events)}")
         if store.journal_mode != "wal":
@@ -225,6 +231,35 @@ def main() -> int:
             max_turns=20,
         )
         model = OpenRouterModel(model=args.model)
+
+        # `patch.apply` is `medium` and `proc.exec` is `high`; the pack's
+        # approval threshold is `low`, so both are descriptor-bound to a human.
+        # The previous wiring passed `interactive=False` and no approver, which
+        # puts `StandardPolicy` in BENCHMARK mode -- fail-closed, and unable to
+        # execute a privileged write by design. RF-95 simultaneously *requires*
+        # an authorized real mutation, so the run could never have passed: it
+        # burned all 20 turns on `denied_ask_fail_closed`.
+        #
+        # This is the mechanism `lab_driver.py` already uses for exactly this
+        # case: a bounded, signed `AutonomousGrant` scoped to the task
+        # workspace, its verbs, and its turn/attempt ceilings. Authority is
+        # *supplied*, not bypassed -- every effect still passes S0-S12, and
+        # every approval is a real signed challenge over the descriptor.
+        from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
+        from vanguard.packages.runtime.governance.approvals import OperatorSigner
+
+        seed_key = b"vanguard-autonomous-operator-seed-key"
+        grant = create_autonomous_grant(
+            repo_path,
+            allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
+            max_turns=20,
+            max_attempts=1,
+            seed_key=seed_key,
+        )
+        signer = OperatorSigner(seed_key)
+        print(f"RF-95 bounded autonomous grant: {grant.grant_id} "
+              f"verbs={grant.allowed_verbs} turns={grant.max_turns}")
+
         result = Runtime.execute_profiled(
             manifest_path,
             task,
@@ -232,7 +267,10 @@ def main() -> int:
             model=model,
             store_path=str(db_path),
             blobs=FileBlobStore(blob_path),
-            interactive=False,
+            interactive=True,
+            approver=lambda challenge: signer.approve(
+                challenge, reviewer=grant.reviewer),
+            approval_key=signer.public_bytes,
         )
 
         ok, failures = verify_rf95_evidence(

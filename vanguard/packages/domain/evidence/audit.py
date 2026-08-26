@@ -517,7 +517,7 @@ def audit_foundation_evidence(
         )
         d_h = r8.get("harness_digest") or r8.get("D_H")
         d_r = r8.get("execution_digest") or r8.get("run_digest") or r8.get("D_R")
-        if schema != "mhf.trajectory/1":
+        if schema not in ("mhf.trajectory/1", "mhf.trajectory/2"):
             reasons.append(f"row_8: invalid_trajectory_schema: {schema}")
         elif not cost_conserved:
             reasons.append("row_8: non_conserved_trajectory_cost")

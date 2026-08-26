@@ -61,17 +61,31 @@ def _load_schemas(schema_dir: Path) -> list[dict]:
     return schemas
 
 
-def _collect_defs(schemas: list[dict]) -> dict[str, dict]:
+def _collect_defs(schemas: list[dict]) -> tuple[dict[str, dict], dict[str, str]]:
+    """Definitions, plus the title of the document each one came from.
+
+    `"$ref": "#"` means *the root of the document the ref appears in* (JSON
+    Schema core). Resolving it against a single global root title made the
+    generated types depend on which schema file happened to sort first: adding
+    `artifact_created.schema.json` silently retyped `Proposal.requests` from
+    `EffectRequest` to `ArtifactCreatedPayload`, and `--check` passed because
+    the generator agreed with itself. Owning documents are tracked here so the
+    resolution is document-relative, as the spec says it is.
+    """
     defs: dict[str, dict] = {}
+    roots: dict[str, str] = {}
     for schema in schemas:
         title = schema.get("title")
         if title and schema.get("type") == "object" and title not in SKIP_DEFS:
             defs[title] = schema
+            roots[title] = title
         for name, body in schema.get("$defs", {}).items():
             if name in SKIP_DEFS:
                 continue
             defs[name] = body
-    return defs
+            if title:
+                roots[name] = title
+    return defs, roots
 
 
 def _ref_name(ref: str, *, root_title: str | None = None) -> str:
@@ -231,7 +245,8 @@ def _dataclass_block(
     return "\n".join(lines) + "\n"
 
 
-def _topo(defs: dict[str, dict], *, root_title: str | None = None) -> list[str]:
+def _topo(defs: dict[str, dict], *, roots: dict[str, str],
+          root_title: str | None = None) -> list[str]:
     enums = [name for name, node in defs.items() if _is_enum(node)]
     objects = [name for name, node in defs.items() if _is_object(node)]
     remaining = set(objects)
@@ -239,7 +254,8 @@ def _topo(defs: dict[str, dict], *, root_title: str | None = None) -> list[str]:
     while remaining:
         progress = False
         for name in sorted(remaining):
-            deps = _object_deps(defs[name], defs, root_title=root_title)
+            deps = _object_deps(defs[name], defs,
+                                root_title=roots.get(name, root_title))
             if deps <= (set(ordered) | set(enums) | SKIP_DEFS):
                 ordered.append(name)
                 remaining.remove(name)
@@ -276,7 +292,7 @@ def _object_deps(
 
 def render(schema_dir: Path) -> str:
     schemas = _load_schemas(schema_dir)
-    defs = _collect_defs(schemas)
+    defs, roots = _collect_defs(schemas)
     root_title = next(
         (schema.get("title") for schema in schemas if schema.get("title")),
         "object",
@@ -286,13 +302,14 @@ def render(schema_dir: Path) -> str:
         "JsonObject", "ResourceSelector", "Digest", "MemoryId",
         "EvaluationRequestId", "PreregistrationId",
     ]
-    for name in _topo(defs, root_title=root_title):
+    for name in _topo(defs, roots=roots, root_title=root_title):
         node = defs[name]
         if _is_enum(node):
             chunks.append(_enum_block(name, node))
             exported.append(name)
         elif _is_object(node):
-            chunks.append(_dataclass_block(name, node, defs, root_title=root_title))
+            chunks.append(_dataclass_block(name, node, defs,
+                                           root_title=roots.get(name, root_title)))
             exported.append(name)
     chunks.append("__all__ = [")
     for name in exported:

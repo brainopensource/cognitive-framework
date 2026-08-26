@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/trajectory_v2.schema.json",
+  "$comment": "mhf.trajectory/2 — Invariant I-9 (ADR-0096 §14, ADR-0097 §1, SPEC §7). Adds artifact index, context/compaction/cache provenance, and proof-honest reproducibility_at_run_close.",
+  "title": "TrajectoryV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "run_id",
+    "episode_id",
+    "principal_id",
+    "harness_digest",
+    "turns",
+    "verdict",
+    "cost",
+    "artifacts",
+    "provenance",
+    "reproducibility_at_run_close"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "mhf.trajectory/2" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "episode_id": { "type": "string", "minLength": 1 },
+    "parent_episode_id": { "type": ["string", "null"] },
+    "principal_id": { "type": "string", "minLength": 1 },
+    "harness_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "$comment": "D_H only — the complete composition digest. Never D_R or D_X."
+    },
+    "execution_digest": {
+      "type": ["string", "null"],
+      "$comment": "D_R = H(D_H || runtime || environment || model identity || oracle identity)."
+    },
+    "run_digest": {
+      "type": ["string", "null"]
+    },
+    "activation_digest": {
+      "type": ["string", "null"]
+    },
+    "task_digest": {
+      "type": ["string", "null"]
+    },
+    "preregistration_digest": {
+      "type": ["string", "null"]
+    },
+    "state_digest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "event_range": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "first_seq": { "type": ["integer", "null"] },
+        "last_seq": { "type": ["integer", "null"] },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "manifest_genome": {
+      "type": "object"
+    },
+    "model_routes_used": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tier", "provider", "model"],
+        "properties": {
+          "tier": { "type": "integer", "minimum": 1 },
+          "provider": { "type": "string" },
+          "model": { "type": "string" },
+          "model_fingerprint": { "type": ["string", "null"] },
+          "fingerprint_unavailable_reason": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "turns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/TrajectoryTurnV2" }
+    },
+    "verdict": {
+      "type": ["object", "null"]
+    },
+    "verdict_absence_reason": {
+      "type": ["string", "null"]
+    },
+    "cost": { "$ref": "#/$defs/CostVector" },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefix_hits": { "type": "number", "minimum": 0, "maximum": 1 },
+        "escalations": { "type": "integer", "minimum": 0 },
+        "repair_rounds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["completed", "aborted", "budget_exhausted", "instrument_error"]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ArtifactIndexEntry" }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context", "compaction", "cache"],
+      "properties": {
+        "context": { "type": "array", "items": { "type": "object" } },
+        "compaction": { "type": "array", "items": { "type": "object" } },
+        "cache": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "reproducibility_at_run_close": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["values", "assessed_at", "basis", "reducer_version", "schema_versions"],
+      "properties": {
+        "values": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state_reconstruction",
+            "semantic_replay",
+            "external_reexecution",
+            "artifact_retention",
+            "environment_capture",
+            "provider_model_identity"
+          ],
+          "properties": {
+            "state_reconstruction": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["capability", "verification"],
+              "properties": {
+                "capability": { "enum": ["none", "from_checkpoint", "full_cold"] },
+                "verification": { "enum": ["unverified", "verified"] }
+              }
+            },
+            "semantic_replay": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["capability", "verification"],
+              "properties": {
+                "capability": { "enum": ["unpinned", "pinned"] },
+                "verification": { "enum": ["unverified", "verified"] }
+              }
+            },
+            "external_reexecution": { "enum": ["unavailable", "degraded", "available"] },
+            "artifact_retention": { "enum": ["digests_only", "partial", "full"] },
+            "environment_capture": { "enum": ["none", "declared", "snapshot"] },
+            "provider_model_identity": { "enum": ["unattributed", "attributed", "attested"] }
+          }
+        },
+        "assessed_at": { "type": "string" },
+        "basis": { "type": "array", "items": { "type": "string" } },
+        "reducer_version": { "type": "string" },
+        "schema_versions": { "type": "object" },
+        "state_reconstruction_receipt": { "type": ["object", "null"] },
+        "semantic_replay_receipt": { "type": ["object", "null"] }
+      }
+    },
+    "capture": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["status", "required", "policy_id", "policy_version"],
+      "properties": {
+        "status": { "type": "string", "enum": ["complete", "incomplete"] },
+        "required": { "type": "boolean" },
+        "policy_id": { "type": "string" },
+        "policy_version": { "type": "string" },
+        "degradation_reason": { "type": ["string", "null"] }
+      }
+    }
+  },
+  "$defs": {
+    "TrajectoryTurnV2": {
+      "title": "TrajectoryTurnV2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turn", "context_digest", "proposal", "receipts", "cost"],
+      "properties": {
+        "turn": { "type": "integer", "minimum": 0 },
+        "context_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "context_ref": { "type": ["string", "null"] },
+        "proposal": {
+          "type": "object"
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["request_digest", "outcome"],
+            "properties": {
+              "request_digest": { "type": "string" },
+              "outcome": { "type": "string", "enum": ["completed", "failed", "rejected", "undeterminable"] },
+              "grant_digest": { "type": ["string", "null"] },
+              "lease_id": { "type": ["string", "null"] },
+              "stdout_ref": { "type": ["string", "null"] },
+              "artifact_refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "model_route": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "model"],
+          "properties": {
+            "tier": { "type": "integer", "minimum": 1 },
+            "provider": { "type": "string" },
+            "model": { "type": "string" },
+            "model_fingerprint": { "type": ["string", "null"] },
+            "fingerprint_unavailable_reason": { "type": ["string", "null"] }
+          }
+        },
+        "invocations": {
+          "type": "array"
+        },
+        "cost": { "$ref": "#/$defs/CostVector" },
+        "model_input_ref": { "type": ["string", "null"] },
+        "model_output_ref": { "type": ["string", "null"] }
+      }
+    },
+    "ArtifactIndexEntry": {
+      "title": "ArtifactIndexEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactId", "digest", "role", "schemaId", "sizeBytes", "retentionClass", "stored"],
+      "properties": {
+        "artifactId": { "type": "string" },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "role": { "type": "string" },
+        "schemaId": { "type": "string" },
+        "sizeBytes": { "type": "integer", "minimum": 0 },
+        "retentionClass": { "type": "string", "enum": ["digests_only", "standard", "full"] },
+        "stored": { "type": "boolean" },
+        "producedBy": { "type": "object" },
+        "refs": { "type": "object" }
+      }
+    },
+    "CostVector": {
+      "title": "CostVector",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usd_micros", "tokens", "bytes", "millis"],
+      "properties": {
+        "usd_micros": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "millis": { "type": "integer", "minimum": 0 },
+        "measurement_status": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "usd_micros": { "$ref": "#/$defs/MeasurementStatus" },
+            "tokens": { "$ref": "#/$defs/MeasurementStatus" },
+            "bytes": { "$ref": "#/$defs/MeasurementStatus" },
+            "millis": { "$ref": "#/$defs/MeasurementStatus" }
+          }
+        }
+      }
+    },
+    "MeasurementStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["measured", "estimated", "unavailable"] },
+        "reason": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

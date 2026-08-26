@@ -366,9 +366,9 @@ class TrajectoryEmission(unittest.TestCase):
         self.assertIsNotNone(result.trajectory)
         row = result.trajectory
         assert row is not None
-        self.assertEqual(row["schema"], "mhf.trajectory/1")
-        schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
-        for key in schema["required"]:
+        self.assertEqual(row["schema"], "mhf.trajectory/2")
+        schema_v2 = json.loads((SCHEMA.parent / "trajectory_v2.schema.json").read_text(encoding="utf-8"))
+        for key in schema_v2["required"]:
             self.assertIn(key, row)
         aborted = assemble_trajectory(
             task=session.task, harness_digest=harness.composition_digest,
@@ -381,7 +381,7 @@ class TrajectoryEmission(unittest.TestCase):
         ]
         self.assertTrue(completed)
         self.assertEqual(completed[-1].payload.get("trajectory", {}).get("schema"),
-                         "mhf.trajectory/1")
+                         "mhf.trajectory/2")
 
 
 if __name__ == "__main__":

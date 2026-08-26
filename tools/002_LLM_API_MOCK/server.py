@@ -290,6 +290,8 @@ class LamServerHandler(BaseHTTPRequestHandler):
         if not model_name.startswith("lam/"):
             if model_name in self.engine._by_id:
                 body["model"] = f"lam/{model_name}"
+            elif model_name.startswith(("iq-", "iq_", "tier-", "tier_")):
+                body["model"] = f"lam/{model_name}"
             elif model_name == "" or model_name.startswith("lam"):
                 # Empty or ambiguous lam prefix: use default
                 body["model"] = "lam/t1-calculator"
@@ -302,9 +304,28 @@ class LamServerHandler(BaseHTTPRequestHandler):
                 )
                 return
 
+        # Extract capability IQ level (0..5) from header or payload
+        cap_tier: Optional[int] = None
+        hdr_iq = self.headers.get("X-Mock-IQ") or self.headers.get("X-Mock-Tier")
+        if hdr_iq is not None:
+            try:
+                cap_tier = int(hdr_iq)
+            except ValueError:
+                pass
+        if cap_tier is None and "iq" in body:
+            try:
+                cap_tier = int(body["iq"])
+            except (ValueError, TypeError):
+                pass
+        if cap_tier is None and "capability_tier" in body:
+            try:
+                cap_tier = int(body["capability_tier"])
+            except (ValueError, TypeError):
+                pass
+
         start_t = time.monotonic()
         try:
-            completion = self.engine.complete(body)
+            completion = self.engine.complete(body, capability_tier=cap_tier)
         except KeyError as exc:
             self._send_json(404, {"error": {"message": f"unknown lam scenario: {exc}", "type": "invalid_request_error"}})
             return

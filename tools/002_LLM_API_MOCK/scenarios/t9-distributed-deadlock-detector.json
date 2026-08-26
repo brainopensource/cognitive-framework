@@ -1,0 +1,105 @@
+{
+  "id": "t9-distributed-deadlock-detector",
+  "tier": 9,
+  "title": "SWE-bench Pro: Distributed Wait-For-Graph Deadlock Cycle Detector",
+  "workspace": {
+    "deadlock/__init__.py": "from typing import Dict, Set, List, Optional\n\nclass WaitForGraph:\n    def __init__(self):\n        self.adj: Dict[str, Set[str]] = {}\n\n    def add_wait(self, tx_a: str, tx_b: str) -> None:\n        # tx_a is waiting for tx_b\n        self.adj.setdefault(tx_a, set()).add(tx_b)\n\n    def remove_wait(self, tx_a: str, tx_b: str) -> None:\n        if tx_a in self.adj and tx_b in self.adj[tx_a]:\n            self.adj[tx_a].remove(tx_b)\n\n    def detect_deadlock(self) -> List[str]:\n        # Detect cycles using DFS\n        visited = set()\n        rec_stack = []\n\n        def dfs(node: str) -> Optional[List[str]]:\n            visited.add(node)\n            rec_stack.append(node)\n            for neighbor in self.adj.get(node, []):\n                if neighbor not in visited:\n                    res = dfs(neighbor)\n                    if res: return res\n                elif neighbor in rec_stack:\n                    idx = rec_stack.index(neighbor)\n                    return rec_stack[idx:] + [neighbor]\n            rec_stack.pop()\n            return None\n\n        for n in list(self.adj.keys()):\n            if n not in visited:\n                cycle = dfs(n)\n                if cycle: return cycle\n        return []\n",
+    "problem.md": "# Distributed Wait-For-Graph Deadlock Detector\nImplement cycle detection in distributed transaction dependency graphs.\n",
+    "tests/test_deadlock.py": "import unittest\nfrom deadlock import WaitForGraph\n\nclass TestDeadlock(unittest.TestCase):\n    def test_cycle_detection(self):\n        wfg = WaitForGraph()\n        wfg.add_wait(\"T1\", \"T2\")\n        wfg.add_wait(\"T2\", \"T3\")\n        wfg.add_wait(\"T3\", \"T1\")\n        cycle = wfg.detect_deadlock()\n        self.assertTrue(len(cycle) >= 3)\n        self.assertEqual(cycle[0], cycle[-1])\n\nif __name__ == \"__main__\":\n    unittest.main()\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"deadlock/__init__.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_deadlock.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/ -q 2>&1 | tail -5\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "stop",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -c \\\"\\nfrom deadlock import WaitForGraph\\nw = WaitForGraph()\\nw.add_wait('A','A')\\nprint(w.detect_deadlock())\\nw2 = WaitForGraph()\\nw2.add_wait('T1','T2'); w2.add_wait('T2','T3'); w2.add_wait('T3','T1')\\nprint(w2.detect_deadlock())\\nw2.remove_wait('T3','T1')\\nprint(w2.detect_deadlock())\\n\\\"\"}"
+          }
+        }
+      ],
+      "content": "The tests pass already, but let me verify the implementation handles edge cases correctly (e.g., self-loops, cycles not reachable from first node, stale empty sets):"
+    }
+  ]
+}

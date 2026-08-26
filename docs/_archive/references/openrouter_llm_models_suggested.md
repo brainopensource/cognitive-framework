@@ -48,3 +48,32 @@
 - qwen2.5:1.5b
 - qwen2.5-coder:7b
 - deepseek-coder-v2:16b-instruct-q5
+
+
+
+
+
+
+
+   ┌──────┬──────────────────┬──────────────────────────────────────────┬──────────┬───────────┬──────────────┬──────────────┐
+    │ IQ   │ Capability Tier  │ Real OpenRouter Model                    │ Real ms  │ LAM ms    │ Real Cost    │ Parity Score │
+    ├──────┼──────────────────┼──────────────────────────────────────────┼──────────┼───────────┼──────────────┼──────────────┤
+    │ IQ 0 │ SWE Basics       │ `openrouter/free`                        │ 3792 ms  │ 0.10 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 1 │ SWE Easy         │ `poolside/laguna-s-2.1:free`             │ 15977 ms │ 0.09 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 2 │ SWE Medium       │ `nvidia/nemotron-3-super-120b-a12b:free` │ 1453 ms  │ 0.09 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 3 │ SWE Advanced     │ `stealth/ox-alpha`                       │ 3479 ms  │ 0.07 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 4 │ SWE Pro Entry    │ `deepseek/deepseek-v4-flash`             │ 3386 ms  │ 0.07 ms   │ $0.000059    │ 95 / 100     │
+    │ IQ 5 │ SWE Pro Hard     │ `openai/gpt-5.6-luna`                    │ 2363 ms  │ 0.07 ms   │ $0.000068    │ 95 / 100     │
+    └──────┴──────────────────┴──────────────────────────────────────────┴──────────┴───────────┴──────────────┴──────────────┘
+
+
+     ┌──────┬──────────────────┬──────────────────────────────────────────┬──────────┬───────────┬──────────────┬──────────────┐
+    │ IQ   │ Capability Tier  │ Real OpenRouter Model                    │ Real ms  │ LAM ms    │ Real Cost    │ Parity Score │
+    ├──────┼──────────────────┼──────────────────────────────────────────┼──────────┼───────────┼──────────────┼──────────────┤
+    │ IQ 0 │ SWE Basics       │ `openrouter/free`                        │ 3792 ms  │ 0.10 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 1 │ SWE Easy         │ `poolside/laguna-s-2.1:free`             │ 15977 ms │ 0.09 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 2 │ SWE Medium       │ `nvidia/nemotron-3-super-120b-a12b:free` │ 1453 ms  │ 0.09 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 3 │ SWE Advanced     │ `stealth/ox-alpha`                       │ 3479 ms  │ 0.07 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 4 │ SWE Pro Entry    │ `deepseek/deepseek-v4-flash`             │ 3386 ms  │ 0.07 ms   │ $0.000059    │ 95 / 100     │
+    │ IQ 5 │ SWE Pro Hard     │ `openai/gpt-5.6-luna`                    │ 2363 ms  │ 0.07 ms   │ $0.000068    │ 95 / 100     │
+    └──────┴──────────────────┴──────────────────────────────────────────┴──────────┴───────────┴──────────────┴──────────────┘

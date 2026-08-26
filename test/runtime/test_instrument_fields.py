@@ -200,7 +200,8 @@ class NoVerbLacksABinding(unittest.TestCase):
         from vanguard.packages.adapters.sandbox.worker import WorkerProtocol
         from vanguard.packages.runtime.root import DEFAULT_BINDINGS
 
-        supported = set(WorkerProtocol.SUPPORTED_OPERATIONS)
+        # Sandbox worker operations plus in-process mediated delegation (M-6 agent.spawn)
+        supported = set(WorkerProtocol.SUPPORTED_OPERATIONS) | {"agent.spawn"}
         self.assertTrue(set(DEFAULT_BINDINGS) <= supported,
                         f"bound but unsupported: {sorted(set(DEFAULT_BINDINGS) - supported)}")
 

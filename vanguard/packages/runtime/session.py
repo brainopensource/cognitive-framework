@@ -584,6 +584,7 @@ class HarnessSession:
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
+        request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
                 self.ports.store, request.idempotency_key
@@ -1006,3 +1007,50 @@ def _resolve(flow: ApprovalFlow,
     if not isinstance(answer, ApprovalDecision) or not can_verify:
         return None
     return flow.verify(challenge, answer, request, now=clock.now())
+
+
+def _with_diff_headers(request: EffectRequest) -> EffectRequest:
+    """Name the file a headerless hunk is already addressed to, once, at the seam.
+
+    A model routinely emits a bare `@@` hunk and carries the target in `path`.
+    That diff is unambiguous in context but not on its own, and two layers
+    downstream rejected it for opposite-looking reasons: the approval flow
+    refused to build a challenge at all (`normalise_unified_diff` -- a
+    signature over a diff with no filename is a signature over an ambiguity),
+    so the episode escalated before any effect started; and the applier could
+    not tell which file to open.
+
+    This is the runtime seam, which is where it belongs. Unified diffs are
+    coding-domain knowledge, so `agency` must not carry it (`ADR-0060`: the
+    generic engine names no domain verb) and the kernel must not either. Doing
+    it *here*, before `Kernel.dispatch`, is also what keeps the layers honest
+    about each other: the descriptor digest, the bytes the approver signs and
+    the bytes the environment writes are then all computed over the same text.
+    Patching it further downstream would leave the human approving one thing
+    and the environment applying another -- precisely the binding `K-15`
+    re-verifies at resumption.
+    """
+    args = getattr(request, "args", None)
+    if not isinstance(args, Mapping):
+        return request
+    diff = args.get("diff") or args.get("patch")
+    path = args.get("path")
+    if not isinstance(diff, str) or not isinstance(path, str) or not path:
+        return request
+    if not diff.lstrip().startswith("@@"):
+        return request
+    for line in diff.splitlines():
+        if line.startswith("--- ") or line.startswith("diff --" + "git "):
+            return request
+    headed = f"--- a/{path}\n+++ b/{path}\n{diff}"
+    updated = dict(args)
+    for key in ("diff", "patch"):
+        if key in updated:
+            updated[key] = headed
+    try:
+        return replace(request, args=updated)
+    except TypeError:
+        # Not a dataclass: a caller passed a request-shaped double. Leaving it
+        # untouched is correct -- normalisation is a convenience for real
+        # proposals, never a precondition of dispatch.
+        return request

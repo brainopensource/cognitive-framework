@@ -7,7 +7,7 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.8.1"
+version: "0.8.2"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -32,12 +32,18 @@ parallel because their current work uses frozen interfaces and disjoint surfaces
 promotion evidence until `M-5A-BASE-v2` resolves.
 
 Latest accepted integrated evidence remains **1,575 Python passed / 8 skipped / 0 failed; TypeScript
-68/68**. The current full-suite rerun is **1,610 tests: 18 failures / 26 errors / 8 skipped**
-(dogfood mutation/verdict and sandbox-timeout failures); it is not promotion evidence. Current
-TypeScript checks are environment-blocked because `tsc` is unavailable. New seam tests pass **9/9**.
-Static gates pass: TCB **1,372/1,438**, boundaries, secrets, domain blindness, isolation,
-duplication, links, stale paths, and RF-98 structural neutrality; RF-98 historical comparison is
-unavailable because `M-5A-BASE-v2` does not resolve.
+68/68**. The current development tree rerun is now **1,717 Python passed / 8 skipped / 0 failed**;
+TypeScript typecheck and **68/68** CLI tests pass after restoring the locked npm dependencies. This
+does not replace the accepted evidence bundle or close any promotion gate. Static gates pass: TCB
+**1,372/1,438**, boundaries, secrets, domain blindness, isolation, duplication, links, stale paths,
+and RF-98 structural neutrality; RF-98 historical comparison is unavailable because
+`M-5A-BASE-v2` does not resolve.
+
+A-M65 is package-ready but deliberately unmeasured: Runtime now binds an optional controller,
+consults it only between durable turns through event-derived projections and guarded confidence,
+lowers `delegate` to the mediated `agent.spawn` proposal, records attributed strategy/plan changes,
+and preserves the controller-off path. No improvement or default-enable claim is authorized before
+the B-M65 paired study and integrated gate.
 
 ## 2. Active board
 
@@ -69,7 +75,8 @@ unavailable because `M-5A-BASE-v2` does not resolve.
 | M-7 | Topology/scheduler implementation and ADR-0099 | Dev A + Leadership | PREPARED — sequential only | topology validation/lowering, scheduler interface, safe-group seam; no activation |
 | M-8 | ADR-0100 category/lifecycle decision | Leadership | TODO | required before public M-8 APIs |
 | M-8 | Memory and skills implementation/evaluation | Dev A + Dev B | PREPARED — exterior only | capability/provenance/reference lifecycle; no public activation or measured lift |
-| M-6.5 | ConfidenceRecord, ProgressView, exterior MetaController contract | Dev A | IMPLEMENTATION ACTIVE — unmeasured | pure projection/controller seam and 9 falsifier/contract tests; paired improvement not run |
+| M-6.5 | A-M65 Meta-Control Runtime integration | Dev A | PACKAGE_READY — unmeasured | optional binding; guarded between-turn consultation; directive lowering; `StrategyChanged` attribution; controller-off baseline preserved |
+| M-6.5 | B-M65 confidence, progress and paired evaluation | Dev B | IN PROGRESS — unmeasured | fail-closed measurement contracts and study tooling; canonical paired improvement run not accepted |
 
 ## 3. Decisions in force
 
@@ -98,8 +105,8 @@ unavailable because `M-5A-BASE-v2` does not resolve.
 7. Use `lab/m701_independence.py` on fixed recorded workloads; attach its digest-stable report to
    the ADR-0099 decision. Keep I-11 sequential until that decision.
 8. Freeze ADR-0100 and the five-category M-8 contract kit before enabling memory or promotion APIs.
-9. Run the M-6.5 paired evaluation only on the canonical measured path; do not claim improvement
-   until it produces signed, attributable evidence.
+9. Integrate A-M65 with B-M65, then run the paired evaluation only on the canonical measured path;
+   do not claim improvement until it produces signed, attributable evidence.
 
 The RF-95 failure also fixed two substrate/adapter defects: determinate adapter errors now emit
 `EffectFailed` after `EffectStarted`, and model-authored bare `@@` hunks are context-anchored by

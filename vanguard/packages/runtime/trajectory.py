@@ -120,6 +120,20 @@ def _compute_turn_cost(
     }
 
 
+def _zero_controller_cost() -> dict[str, Any]:
+    """A policy-produced proposal made no provider invocation."""
+    return {
+        "usd_micros": 0,
+        "tokens": 0,
+        "bytes": 0,
+        "millis": 0,
+        "measurement_status": {
+            dimension: {"status": "measured", "reason": "no_provider_invocation"}
+            for dimension in ("usd_micros", "tokens", "bytes", "millis")
+        },
+    }
+
+
 def assemble_trajectory(
     *,
     task: Any,
@@ -155,13 +169,17 @@ def assemble_trajectory(
         context_digest = digest_of(dict(ctx) if ctx else {"turn": index})
         proposal_payload = dict(proposal.payload) if hasattr(proposal, "payload") and isinstance(proposal.payload, Mapping) else dict(proposal)
 
-        route = _resolve_model_route(model, ctx)
-        route_key = (route["provider"], route["model"])
-        if route_key not in seen_routes:
-            seen_routes.add(route_key)
-            model_routes_used.append({"tier": 1, **route})
+        controller_produced = ctx.get("proposal_source") == "meta_controller"
+        route = None if controller_produced else _resolve_model_route(model, ctx)
+        if route is not None:
+            route_key = (route["provider"], route["model"])
+            if route_key not in seen_routes:
+                seen_routes.add(route_key)
+                model_routes_used.append({"tier": 1, **route})
 
-        turn_cost = _compute_turn_cost(ctx, proposal_payload, route)
+        turn_cost = (
+            _zero_controller_cost()
+            if controller_produced else _compute_turn_cost(ctx, proposal_payload, route))
 
         turn_receipts = []
         if index < len(receipts):
@@ -184,8 +202,7 @@ def assemble_trajectory(
             "context_ref": ctx.get("context_ref"),
             "proposal": proposal_payload,
             "receipts": turn_receipts,
-            "model_route": route,
-            "invocations": [{
+            "invocations": ([] if controller_produced else [{
                 "tier": 1,
                 "route": route,
                 "usage": {
@@ -193,9 +210,11 @@ def assemble_trajectory(
                     "completion_tokens": ctx.get("completion_tokens"),
                 },
                 "cost": turn_cost,
-            }],
+            }]),
             "cost": turn_cost,
         }
+        if route is not None:
+            turn_dict["model_route"] = route
 
         if schema_version == "mhf.trajectory/2":
             turn_dict["model_input_ref"] = ctx.get("model_input_ref") or ctx.get("prompt_digest")

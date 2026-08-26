@@ -78,6 +78,8 @@ class Runtime(_ComposedRuntime):
         sandbox_mode: str = "rootless",
         blobs: Any = None,
         capture_policy: Any = None,
+        meta_controller: Any = None,
+        controller_confidence: tuple[Any, ...] = (),
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -147,6 +149,8 @@ class Runtime(_ComposedRuntime):
             interactive=interactive,
             blobs=blobs,
             capture_policy=capture_policy,
+            meta_controller=meta_controller,
+            controller_confidence=tuple(controller_confidence),
         )
         try:
             return cls.run_composed(
@@ -176,6 +180,8 @@ class Runtime(_ComposedRuntime):
         host_facts: Mapping[str, Any] | None = None,
         blobs: Any = None,
         capture_policy: Any = None,
+        meta_controller: Any = None,
+        controller_confidence: tuple[Any, ...] = (),
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -211,6 +217,8 @@ class Runtime(_ComposedRuntime):
             interactive=interactive,
             blobs=blobs,
             capture_policy=capture_policy,
+            meta_controller=meta_controller,
+            controller_confidence=tuple(controller_confidence),
         )
         try:
             return cls.run_composed(
@@ -236,7 +244,8 @@ class Runtime(_ComposedRuntime):
         `profile`, when given, is an `EffectiveExecutionProfile`
         (`runtime/profiles.py`, typically produced by `RuntimeBootstrap`).
         It folds into `RunPlan`/`D_R` alongside `environment`/`store`/
-        `model_route` (`ADR-0089 §Decision 1`, `RF-87`). Omitting it leaves
+        `model_route`; an optional meta-controller is bound there as a separate
+        policy identity (`ADR-0089 §Decision 1`, `RF-87`). Omitting it leaves
         `RunPlan.profile_id` empty — legible for pre-W3D callers during
         migration, but never release/promotion eligible.
         """
@@ -273,6 +282,7 @@ class Runtime(_ComposedRuntime):
                 "journal_mode": getattr(selected_store, "journal_mode", "memory"),
             },
             model_route=_model_route_identity(ports.model),
+            meta_controller=_meta_controller_identity(ports.meta_controller),
             oracle=harness.evaluators[0] if harness.evaluators else None,
             root_principal=task_context.principal,
             budget=harness.budget,
@@ -395,6 +405,20 @@ def _model_route_identity(model: Any) -> Mapping[str, Any]:
     }
 
 
+def _meta_controller_identity(controller: Any) -> Mapping[str, Any]:
+    if controller is None:
+        return {}
+    controller_id = str(getattr(controller, "controller_id", ""))
+    if not controller_id:
+        raise ValueError("a bound meta-controller must declare controller_id")
+    cls = type(controller)
+    return {
+        "controllerId": controller_id,
+        "implementation": f"{cls.__module__}.{cls.__qualname__}",
+        "version": str(getattr(controller, "version", "")),
+    }
+
+
 def _build_component_handle(
     step: ActivationStep,
     *,
@@ -415,6 +439,7 @@ def _build_component_handle(
         "environment": ports.environment,
         "evaluator": ports.verifier,
         "store": ports.store,
+        "meta_controller": ports.meta_controller,
     }
     service = services.get(step.interface)
     if service is None:

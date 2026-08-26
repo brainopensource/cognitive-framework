@@ -2,9 +2,10 @@
 
 `D_H` says *what was composed*. `D_R` adds *what it was run against*: the
 project under evaluation, the task, the environment, the durable store, the
-model route, the exterior oracle, the root authority, the budget, and the
-execution mode. The three identity subjects stay distinct and are never
-collapsed — `D_X` (dataset/protocol) is added by the experiment layer above.
+model route, optional meta-controller policy, the exterior oracle, the root
+authority, the budget, and the execution mode. The three identity subjects
+stay distinct and are never collapsed — `D_X` (dataset/protocol) is added by
+the experiment layer above.
 
 `run_id` and `episode_id` are correlation identifiers: they bind this plan to
 its events, and they are deliberately **not** part of `D_R`. Two runs of the
@@ -54,6 +55,9 @@ class RunPlan:
     store: Mapping[str, Any] = field(default_factory=dict)
     #: Provider, model, and fingerprint. A fake or cassette route is legible.
     model_route: Mapping[str, Any] = field(default_factory=dict)
+    #: Optional M-6.5 policy-plugin identity. Presence changes ``D_R`` even
+    #: though the controller has no authority and is disabled by default.
+    meta_controller: Mapping[str, Any] = field(default_factory=dict)
     #: The exterior evaluator identity, or `None` when evaluation is declared
     #: absent. Absent is a typed state, never a pass.
     oracle: str | None = None
@@ -90,6 +94,7 @@ class RunPlan:
             "environment": dict(self.environment),
             "store": dict(self.store),
             "modelRoute": dict(self.model_route),
+            "metaController": dict(self.meta_controller),
             "oracle": self.oracle,
             "rootPrincipal": self.root_principal,
             "budget": dict(self.budget),
@@ -135,6 +140,7 @@ def plan_run(
     environment: Mapping[str, Any] | None = None,
     store: Mapping[str, Any] | None = None,
     model_route: Mapping[str, Any] | None = None,
+    meta_controller: Mapping[str, Any] | None = None,
     oracle: str | None = None,
     root_principal: str = "",
     budget: Mapping[str, int] | None = None,
@@ -175,6 +181,7 @@ def plan_run(
         environment=dict(environment or {}),
         store=dict(store or {}),
         model_route=dict(model_route or {}),
+        meta_controller=dict(meta_controller or {}),
         oracle=oracle,
         root_principal=root_principal,
         budget=dict(budget or {}),

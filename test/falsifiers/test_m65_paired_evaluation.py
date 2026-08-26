@@ -129,17 +129,16 @@ class OnlySharedPairsAreCompared(unittest.TestCase):
         self.assertIn("controllerEnabledByDefault", report.to_dict())
 
 
-class TheControllerIsNotYetIntegrated(unittest.TestCase):
-    """Honest status: the seam exists, nothing consults it."""
+class TheControllerIsIntegrated(unittest.TestCase):
+    """A-M65 supplies the optional path the B-M65 study exercises."""
 
-    def test_no_concrete_controller_is_wired_into_the_runtime(self) -> None:
-        from pathlib import Path
-        root = Path(__file__).resolve().parents[2] / "vanguard/packages"
-        session = (root / "runtime/session.py").read_text(encoding="utf-8")
-        # When A-M65 wires `consult()` into the turn loop this test should be
-        # updated to assert the integration, and a real paired study becomes
-        # possible. Until then any "controller_on" arm is the baseline.
-        self.assertNotIn("meta_controller", session)
+    def test_runtime_exposes_an_opt_in_controller_binding(self) -> None:
+        from vanguard.packages.runtime.session import SessionPorts
+
+        fields = SessionPorts.__dataclass_fields__
+        self.assertIn("meta_controller", fields)
+        self.assertIsNone(fields["meta_controller"].default)
+        self.assertEqual(fields["controller_confidence"].default, ())
 
 
 if __name__ == "__main__":

@@ -21,6 +21,9 @@ from ..agency.context import (
 )
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
+from ..domain.canonicalisation.digest import digest_of
+from ..domain.ledger.agent_view import AgentView, fold_agent_view
+from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel import (
@@ -42,8 +45,9 @@ from ..kernel import (
 from ..ports.blob_store import BlobStorePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
-from ..ports.event_store import EventRange, EventStorePort
+from ..ports.event_store import EventRange, EventStorePort, Result
 from ..ports.index import IndexPort
+from ..ports.meta_controller import MetaController
 from .compose import (
     Harness,
     Receipt,
@@ -55,6 +59,7 @@ from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
+from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
 from .telemetry import RunTelemetry
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
@@ -78,6 +83,66 @@ from .wiring import (
     _span_for,
 )
 
+
+_CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
+    "usd_micros": "usd_micros",
+    "usdMicros": "usd_micros",
+    "millis": "millis",
+    "tokens": "tokens",
+    "bytes": "bytes",
+}
+
+
+def _lower_controller_directive(
+    proposal: ControllerProposal,
+) -> Mapping[str, Any] | None:
+    """Map direct strategy decisions onto existing episode proposals.
+
+    Advisory directives return ``None`` and enter L5 before the provider is
+    called. ``conclude`` follows the ordinary terminal proposal path, while
+    ``delegate`` becomes the already-mediated M-6 effect. This function grants
+    no authority and does not inspect capabilities; the Kernel still decides.
+    """
+    if proposal.kind == "conclude":
+        return {"kind": "finish", "note": str(proposal.payload["reason"])}
+    if proposal.kind != "delegate":
+        return None
+
+    scope = dict(proposal.payload.get("scope") or {})
+    resource = scope.pop(
+        "resource", {"kind": "generic", "uriPattern": "agent://spawn/*"})
+    budget: dict[str, int] = {}
+    for source, target in _CONTROLLER_BUDGET_KEYS.items():
+        amount = scope.pop(source, None)
+        if isinstance(amount, int) and not isinstance(amount, bool) and amount >= 0:
+            budget[target] = amount
+    args: dict[str, Any] = {
+        "brief": str(proposal.payload["brief"]),
+        **scope,
+    }
+    if budget:
+        args["budget"] = budget
+    return {
+        "kind": "effect",
+        "action": "agent.spawn",
+        "resource": dict(resource) if isinstance(resource, Mapping) else {},
+        "args": args,
+        "reservation": budget,
+        "note": str(proposal.payload["reason"]),
+    }
+
+
+def _controller_trigger(proposal: ControllerProposal) -> str:
+    """Bind the closed StrategyChanged payload to confidence by digest."""
+    refs = ",".join(str(item) for item in proposal.attribution["confidenceRefs"])
+    return (
+        f"directive={proposal.kind};"
+        f"reason={proposal.attribution['reasonDigest']};"
+        f"input={proposal.attribution['inputDigest']};"
+        f"confidence={refs}"
+    )
+
+
 class _LayeredOperator:
     """Compiles L1–L5 for each turn and hands the bundle to the real model.
 
@@ -92,7 +157,8 @@ class _LayeredOperator:
                  recorder: CompetencePriorRecorder | None = None,
                  task: TaskContext,
                  artifacts: ArtifactWriter | None = None,
-                 provenance: ProvenanceSink | None = None) -> None:
+                 provenance: ProvenanceSink | None = None,
+                 meta_controller: Callable[[], ControllerProposal | None] | None = None) -> None:
         self._model = model
         self._compiler = compiler
         self._recorder = recorder
@@ -104,6 +170,7 @@ class _LayeredOperator:
         # store captures nothing and therefore claims nothing.
         self._artifacts = artifacts
         self._provenance = provenance
+        self._meta_controller = meta_controller
 
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
@@ -113,6 +180,27 @@ class _LayeredOperator:
 
     def propose(self, view: Mapping[str, Any], tools: Sequence[Mapping[str, Any]],
                 sampling: Mapping[str, Any]) -> Any:
+        directive = self._meta_controller() if self._meta_controller is not None else None
+        if directive is not None:
+            lowered = _lower_controller_directive(directive)
+            if lowered is not None:
+                # Keep turns aligned without claiming the policy decision was
+                # a provider invocation. Trajectory assembly recognises this
+                # marker and reports an empty invocation list and zero cost.
+                self.contexts.append({
+                    "proposal_source": "meta_controller",
+                    "controller_id": directive.attribution["controllerId"],
+                    "directive_kind": directive.kind,
+                    "controller_input_digest": directive.attribution["inputDigest"],
+                    "confidence_refs": tuple(directive.attribution["confidenceRefs"]),
+                })
+                return Result.success(dict(lowered))
+            self.note(
+                label=f"strategy-{directive.kind}-{len(self.contexts)}",
+                source=f"meta-controller:{directive.attribution['controllerId']}",
+                text=(f"Strategy directive: {directive.kind}. "
+                      f"Reason: {directive.payload['reason']}"),
+            )
         compiled: CompiledContext = self._compiler.compile(
             brief=self._task.brief, dialogue=tuple(self._dialogue))
         if self._recorder is not None and self._task.competence_prior is not None:
@@ -297,6 +385,13 @@ class SessionPorts:
     #: resolves from `profile` at composition, or to the conservative default
     #: (`standard` retention, optional capture, redaction on).
     capture_policy: CapturePolicy | None = None
+    #: `A-M65`. Disabled by default. The controller receives projections and
+    #: confidence values only; the runtime retains every authority-bearing
+    #: collaborator.
+    meta_controller: MetaController | None = None
+    #: Immutable evidence admitted by B-M65. An acting controller must bind at
+    #: least one current record into its durable attribution.
+    controller_confidence: tuple[ConfidenceRecord, ...] = ()
 
 
 class _SwappablePolicy:
@@ -505,7 +600,11 @@ class HarnessSession:
             ports.model, compiler, task=task,
             recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger),
             artifacts=self.artifacts,
-            provenance=self.provenance if self.artifacts is not None else None)
+            provenance=self.provenance if self.artifacts is not None else None,
+            meta_controller=(
+                self._consult_meta_controller
+                if ports.meta_controller is not None else None
+            ))
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -530,6 +629,92 @@ class HarnessSession:
         read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
+
+    def _controller_remaining_budget(self, view: AgentView) -> Mapping[str, int]:
+        remaining = {
+            dimension: max(
+                0,
+                int(self.harness.budget.get(dimension, 0) or 0)
+                - int(view.budget_consumed.get(dimension, 0) or 0),
+            )
+            for dimension in ("usd_micros", "millis", "tokens", "bytes")
+        }
+        remaining["turns"] = max(0, self.task.max_turns - self.turns_consumed())
+        remaining["depth"] = max(
+            0, self.scope.constraints.max_depth - self.scope.depth)
+        return remaining
+
+    def _consult_meta_controller(self) -> ControllerProposal | None:
+        """Consult the optional policy plugin from durable between-turn state.
+
+        The first provider turn has no prior proposal and is intentionally not
+        a consultation point. Thereafter the controller sees only pure M-5a
+        projections and B-M65 confidence records. It never receives this
+        session, its ports, the model, the store, the emitter, or the Kernel.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        envelopes = tuple(read.value) if read.ok and read.value is not None else ()
+        if not any(
+            (event.payload.get("kind") or event.mhf_kind) == "ProposalProduced"
+            for event in envelopes
+        ):
+            return None
+        view: AgentView = fold_agent_view(None, envelopes)
+        progress: ProgressView = fold_progress(
+            {"payload": dict(event.payload)} for event in envelopes)
+        proposal = guarded_consult(
+            self.ports.meta_controller,
+            view,
+            progress,
+            self.ports.controller_confidence,
+            remaining_budget=self._controller_remaining_budget(view),
+        )
+        if proposal is None:
+            return None
+        if not self.ports.controller_confidence:
+            raise ValueError("an acting meta-controller requires confidence evidence")
+        if proposal.attribution["controllerId"] != self.ports.meta_controller.controller_id:
+            raise ValueError("controller directive identity does not match its binding")
+
+        self.ledger.emit_kind(
+            "StrategyChanged",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            payload={
+                "from": view.strategy,
+                "to": proposal.kind,
+                "trigger": _controller_trigger(proposal),
+                "controllerId": proposal.attribution["controllerId"],
+            },
+            episode_id=self.task.episode_id,
+        )
+        if proposal.kind == "revise_plan":
+            previous = (
+                view.plan_revisions[-1].get("planDigest")
+                if view.plan_revisions else None
+            )
+            plan_digest = digest_of({
+                "controllerId": proposal.attribution["controllerId"],
+                "directive": proposal.kind,
+                "brief": proposal.payload.get("brief"),
+                "reasonDigest": proposal.attribution["reasonDigest"],
+                "previousPlanDigest": previous,
+            })
+            payload: dict[str, Any] = {
+                "revision": len(view.plan_revisions) + 1,
+                "planDigest": plan_digest,
+                "rationaleDigest": proposal.attribution["reasonDigest"],
+            }
+            if isinstance(previous, str) and previous:
+                payload["previousPlanDigest"] = previous
+            self.ledger.orchestrator().emit_kind(
+                "PlanRevised",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                payload=payload,
+                episode_id=self.task.episode_id,
+            )
+        return proposal
 
     def checkpoint(self, *, turn: int | None = None) -> Checkpoint | None:
         """Memoise the current fold, if this session can store one.

@@ -58,6 +58,22 @@ class RunMetrics:
     latency_millis: int = 0
     recoveries: int = 0
     directives: int = 0
+    wasted_loops: int = 0
+    signed_passes: int = 0
+    signed_verdicts: int = 0
+
+    @property
+    def signed_pass_rate(self) -> float:
+        """Passes among *signed* verdicts only.
+
+        An unsigned verdict is not a fail -- it is an absence of evidence, and
+        folding it into the denominator as a failure would penalise the arm
+        whose evaluator was unreachable rather than the arm that did worse.
+        A run with no signed verdict at all contributes nothing here, and the
+        arm summary reports how many verdicts were actually signed so the
+        reader can see how thin the base is.
+        """
+        return self.signed_passes / self.signed_verdicts if self.signed_verdicts else 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -65,9 +81,13 @@ class RunMetrics:
             "success": self.success, "turns": self.turns,
             "toolCalls": self.tool_calls, "rejectedCalls": self.rejected_calls,
             "repeatLoops": self.repeat_loops,
+            "wastedLoops": self.wasted_loops,
             "costUsdMicros": self.cost_usd_micros,
             "latencyMillis": self.latency_millis,
             "recoveries": self.recoveries, "directives": self.directives,
+            "signedPasses": self.signed_passes,
+            "signedVerdicts": self.signed_verdicts,
+            "signedPassRate": round(self.signed_pass_rate, 6),
         }
 
 
@@ -82,12 +102,21 @@ def measure_run(
 ) -> RunMetrics:
     """Reduce one run's durable events into the M-6.5 metric vector."""
     turns = tool_calls = rejected = cost = recoveries = directives = 0
+    signed_passes = signed_verdicts = wasted = 0
     descriptors: list[str] = []
+    #: Whether the turn currently open has settled any effect yet. A turn that
+    #: closes without one burned a model call and produced nothing durable --
+    #: the "wasted loop" M-6.5 exists to reduce.
+    turn_open = False
+    turn_settled = False
 
     for event in events:
         payload = getattr(event, "payload", None) or {}
         kind = payload.get("kind")
         if kind == "ProposalProduced":
+            if turn_open and not turn_settled:
+                wasted += 1
+            turn_open, turn_settled = True, False
             turns += 1
             diagnostics = payload.get("diagnostics")
             if isinstance(diagnostics, Mapping):
@@ -98,11 +127,20 @@ def measure_run(
                     cost += micros
         elif kind in _SETTLED:
             tool_calls += 1
+            turn_settled = True
             descriptor = payload.get("descriptorDigest")
             if isinstance(descriptor, str):
                 descriptors.append(descriptor)
         elif kind in _REJECTED:
             rejected += 1
+        if kind == "VerdictRecorded":
+            # Only the evaluator daemon's own signed body counts. A verdict
+            # with no signature is not evidence of anything (`ADR-0076 §5`),
+            # so it moves neither numerator nor denominator.
+            body = payload.get("signedVerdict")
+            if isinstance(body, Mapping) and body.get("signature"):
+                signed_verdicts += 1
+                signed_passes += int(body.get("verdict") == "pass")
         if kind in _RECOVERY:
             recoveries += 1
         if kind == "StrategyChanged" or payload.get("controllerId"):
@@ -114,6 +152,8 @@ def measure_run(
         repeat_loops=_repeat_loops(descriptors), cost_usd_micros=cost,
         latency_millis=latency_millis, recoveries=recoveries,
         directives=directives,
+        wasted_loops=wasted + int(turn_open and not turn_settled),
+        signed_passes=signed_passes, signed_verdicts=signed_verdicts,
     )
 
 
@@ -148,6 +188,13 @@ class ArmSummary:
     mean_latency_millis: float
     recoveries: int
     directives: int
+    mean_wasted_loops: float = 0.0
+    signed_passes: int = 0
+    signed_verdicts: int = 0
+
+    @property
+    def signed_pass_rate(self) -> float:
+        return self.signed_passes / self.signed_verdicts if self.signed_verdicts else 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -156,9 +203,13 @@ class ArmSummary:
             "meanTurns": round(self.mean_turns, 6),
             "meanToolCalls": round(self.mean_tool_calls, 6),
             "meanRepeatLoops": round(self.mean_repeat_loops, 6),
+            "meanWastedLoops": round(self.mean_wasted_loops, 6),
             "meanCostUsdMicros": round(self.mean_cost_usd_micros, 6),
             "meanLatencyMillis": round(self.mean_latency_millis, 6),
             "recoveries": self.recoveries, "directives": self.directives,
+            "signedPasses": self.signed_passes,
+            "signedVerdicts": self.signed_verdicts,
+            "signedPassRate": round(self.signed_pass_rate, 6),
         }
 
 
@@ -176,6 +227,9 @@ def _summarise(arm: str, runs: Sequence[RunMetrics]) -> ArmSummary:
         mean_latency_millis=sum(r.latency_millis for r in runs) / count,
         recoveries=sum(r.recoveries for r in runs),
         directives=sum(r.directives for r in runs),
+        mean_wasted_loops=sum(r.wasted_loops for r in runs) / count,
+        signed_passes=sum(r.signed_passes for r in runs),
+        signed_verdicts=sum(r.signed_verdicts for r in runs),
     )
 
 
@@ -231,6 +285,8 @@ def paired_report(
         "meanTurns": treat_summary.mean_turns - base_summary.mean_turns,
         "meanToolCalls": treat_summary.mean_tool_calls - base_summary.mean_tool_calls,
         "meanRepeatLoops": treat_summary.mean_repeat_loops - base_summary.mean_repeat_loops,
+        "meanWastedLoops": treat_summary.mean_wasted_loops - base_summary.mean_wasted_loops,
+        "signedPassRate": treat_summary.signed_pass_rate - base_summary.signed_pass_rate,
         "meanCostUsdMicros": (treat_summary.mean_cost_usd_micros
                               - base_summary.mean_cost_usd_micros),
         "meanLatencyMillis": (treat_summary.mean_latency_millis

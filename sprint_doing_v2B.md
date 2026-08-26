@@ -169,6 +169,331 @@ bundle/m6_nested_lineage/
 ```
 
 ```python
+"""Seeded stall-injection wrapper over any ModelPort (B-M65 instrument)."""
+from __future__ import annotations
+import random
+from typing import Any, Callable, Mapping, Sequence
+
+from ...ports.event_store import Result
+from ...ports.model import ContextBundle, ModelPort, Proposal, Sampling, ToolSchemas
+
+
+class StochasticStallModel:
+    """Wraps a base ModelPort and injects attributable stalls.
+
+    Contract (all five falsified in test_stall_provider.py):
+      C1 Determinism:  propose() depends ONLY on (base output, run_seed, turn_index).
+                       Same (base transcript, seed) => byte-identical proposal sequence.
+      C2 Variance:     over seeds S = [0, N), outcome discordance ∈ (0, 1) EXCLUSIVE —
+                       a floor at either end re-degenerates the A/A statistic.
+      C3 Attribution:  every deviation recoverable: an auditor replays the derived rng
+                       stream and reproduces exactly which turns stalled and why.
+      C4 No authority: a stalled proposal travels the ORDINARY parse/dispatch path;
+                       the wrapper adds no capabilities, grants, or ledger writes.
+      C5 Provenance:   (run_seed, p_stall, stall_decay, base_model_id) enter D_R via the
+                       model-selection identity; unstated => ComparabilityError upstream.
+    """
+
+    def __init__(self, base: ModelPort, run_seed: int, *,
+                 p_stall: float = 0.35, stall_decay: float = 0.9,
+                 turn_source: Callable[[], int]) -> None:
+        self._base, self._seed = base, run_seed
+        self._p, self._decay = p_stall, stall_decay
+        self._turn_source = turn_source        # injected by session; NEVER wall clock
+        self.stall_log: list[dict[str, Any]] = []  # telemetry; NEVER ledger truth
+
+    def propose(self, context: ContextBundle, tools: ToolSchemas,
+                sampling: Sampling) -> Result[Proposal]:
+        result = self._base.propose(context, tools, sampling)
+        if not getattr(result, "ok", False):
+            return result                      # instrument errors pass through untouched
+        turn = self._turn_source()
+        rng = random.Random(f"{self._seed}:{turn}")   # derived stream per turn (C1)
+        p_t = self._p * (self._decay ** turn)         # stalls fade — late turns converge
+        if rng.random() >= p_t:
+            return result
+        stalled = self._stall_variant(result.value, ctx_digest=_digest(context), rng=rng)
+        self.stall_log.append({"turn": turn, "seed": self._seed,
+                               "kind": stalled["stallKind"]})
+        return Result.ok(stalled)
+
+    def _stall_variant(self, proposal: Proposal, *, ctx_digest: str,
+                       rng: random.Random) -> Proposal:
+        """Three regressive families chosen from the SAME derived stream:
+           repeat  – re-issue previous action (wasted-loop generator);
+           regress – patch the wrong direction (forces revise_plan recovery);
+           abandon – propose early conclude (forces change_verification recovery).
+           The variant is an ordinary Proposal payload; nothing here is privileged."""
+        ...
+```
+
+Wiring (Dev A review point): the seed must enter the run's declared model identity so
+`assert_comparable()` sees arms differing ONLY on `controller_enabled`:
+
+```python
+# runtime/model_selection.py — extend the resolved route record (additive, runtime lane):
+route_record["stallInstrument"] = {
+    "kind": "stochastic-stall/v1",
+    "seed": run_seed,                 # per-run, recorded pre-execution
+    "pStall": p_stall, "stallDecay": decay,
+}
+
+### 2-2 Deliberately-blockable task set (Dev B)
+
+Location: extend `runtime/task_sets.py` (already owns digest-pinned resolution via
+`resolve_task_set`) + fixtures under `packs/code-default/task_sets/blocked_v1/`.
+
+Three archetypes, each mapping 1:1 onto a directive family the controller may emit
+(`revise_plan | request_context | change_verification | abandon_hypothesis | delegate |
+conclude`):
+
+```python
+BLOCKED_TASK_ARCHETYPES = (
+    BlockedTask(
+        task_id="t1-wrong-first-fix",
+        plant=PlantedBug(obvious_fix_breaks="test_downstream"),  # symptom fix breaks suite
+        elicits={"revise_plan"},
+    ),
+    BlockedTask(
+        task_id="t2-missing-context",
+        plant=HiddenDependency(path=".env.test"),                # unreadable w/o request_context
+        elicits={"request_context"},
+    ),
+    BlockedTask(
+        task_id="t3-flaky-verify",
+        plant=FlakyFirstAttempt(seed_key="t3", p_fail=0.5),      # seeded flake, hermetic
+        elicits={"change_verification"},
+    ),
+)
+
+def materialize_task_set(seed: int) -> TaskSetManifest:
+    """Both arms consume BYTE-IDENTICAL tasks (M-18 comparability precondition)."""
+    tasks = tuple(t.materialize(random.Random(f"{seed}:{t.task_id}"))
+                  for t in BLOCKED_TASK_ARCHETYPES)
+    manifest = TaskSetManifest(tasks=tasks, seed=seed)
+    manifest.manifest_digest = digest_of(jcs(manifest.to_dict()))
+    return manifest
+```
+
+Hard constraints: fixed-seed generation; the flake's coin derives from the manifest seed so the
+SAME task instance flakes identically in both arms (otherwise the treatment axis is
+contaminated); grading is the exterior evaluator, never an in-process suite call (the
+`.passed` bug class is already fixed — keep it fixed).
+
+### 2-3 Paired study execution + verdict (Dev B)
+
+`lab/m65_study.py` statistics are built and correct — wire, don't rewrite:
+
+```python
+
+---
+
+## 5. PHASE 3 — M-7: effect-capture truth, topology lowering, concurrency decision
+
+Owners: Dev A (capture + lowering + scheduler mechanism), Dev B (independence analysis +
+falsifiers). Gate order: **3-1 → 3-2 → 3-3 → 3-4**.
+
+### 3-1 EffectStarted resolved-selector + timing capture (closes D-5) — ESCALATION-GATED
+
+Adding fields to an emitted event payload is masterplan escalation trigger #4/#6 territory.
+The Tech Lead records the decision FIRST: recommended = additive OPTIONAL fields on the
+existing `EffectStarted` kind under the `/2` envelope (old reducers ignore them; they are
+projection-additive and reducer-total), vs a successor kind.
+
+```python
+# runtime/session.py — effect admission path (Dev A). Additive, emitter-side only:
+self.emitter.emit_kind("EffectStarted",
+    run_id=..., principal=..., episode_id=...,
+    payload={
+        **existing_fields,                     # descriptorDigest, sinkClass, grantId, leaseId
+        "resolvedSelector": selector.to_canonical_dict(),  # domain selector algebra OUTPUT
+        "startedMonotonicNs": t0,              # CLOCK_MONOTONIC — duration math ONLY
+        "settledMonotonicNs": None,            # completed at settlement by the SAME writer
+    })
+```
+
+Rules: the resolved selector is the canonical form from the domain selector algebra
+(`selectors/resource_selector.py`) — never a raw string; timing uses monotonic clocks and is
+coordination metadata, **never** budget `millis` (SPEC refusal); a missing field means
+unknown, never zero (M-07 discipline); old ledgers replay unchanged (fields absent ⇒ pairs
+dependent ⇒ report says unmeasurable, still never fabricated).
+
+### 3-2 M7-01 independence re-run (Dev B)
+
+With selectors present, `lab/m701_independence.py` computes real useful-independence over
+recorded canonical workloads: pair independent ⟺ proven-disjoint selectors; missing selector
+⇒ dependent; shared observation/advisory sinks ⇒ non-exclusive (safe-read case only).
+Produce the report artifact ADR-0099 consumes. I-11 stays sequential throughout — analysis
+never activates concurrency.
+
+### 3-3 Topology lowering integration (Dev A)
+
+`parse_topology` / `lower_topology` / `SchedulerPolicy` exist, are package-ready and NOT yet
+bound into the composed run path. Integration is additive-only:
+
+```python
+# runtime/compose.py — accept the optional RunPlanExtension produced by lower_topology():
+plan = plan_run(manifest, ...)
+if activation.topology_extension is not None:
+    ext = activation.topology_extension          # digest-pinned, authority-free (validated)
+    plan.operations = lower_topology(ext)        # causal role ops + explicit may_delegate_to
+
+# runtime/root.py — bind the reference SequentialScheduler behind SchedulerPolicy;
+# readiness comes from ready_operations(operations, settled) — predecessors settled only.
+```
+
+Must-not list (each backed by an existing or new falsifier): no second workflow engine; no
+topology authority (validation already rejects authority-bearing graphs — keep that red-proof);
+no concurrent executor; no kernel diff (`rf86` surfaces clean); disabled-topology path
+
+### 4-1 Durable category-port adapters (Dev A)
+
+`runtime/memory.py` defines the five categories with capability checks and
+`RetrievalProvenance`. Ship durable adapters in the adapter lane:
+
+```python
+# vanguard/packages/adapters/stores/memory_sqlite.py
+class SqliteMemoryPort:
+    """One durable backend per CATEGORY — never one universal 'memory' primitive.
+    Rows are content-addressed (sha256 of JCS form); writes are append+index;
+    recall returns MemoryResult + RetrievalProvenance(record_id, digests, category,
+    query_digest) so anything reaching model context is provenance-visible (M4-102 path).
+    Access control re-checks MemoryAccess.permitted() at READ time — revocation works."""
+    def __init__(self, category: str, db_path: Path, *, scope: str) -> None: ...
+    def write(self, value: Mapping[str, Any], access: MemoryAccess) -> str: ...
+    def recall(self, query: str, access: MemoryAccess, limit: int = 20) -> MemoryResult: ...
+    def invalidate(self, record_id: str, access: MemoryAccess) -> None: ...
+```
+
+Invariants: category boundaries preserved (one adapter class, five instances, distinct
+scopes); retrieval provenance flows into the existing context-provenance sink; capability
+mediation enforced at the port boundary; no kernel diff. Falsifiers: cross-category isolation
+(a knowledge write invisible to experience recall), revoked-access read fails closed,
+provenance digest round-trips.
+
+### 4-2 Skill candidate → evaluation → promotion → rollback (Dev B)
+
+`runtime/skill_evaluation.py` owns the separated-authority harness. Complete the executable
+lifecycle:
+
+```text
+1. Generator (analyzes trajectories)  → SkillCandidate {promptPolicy|topologyFragment|
+                                          parametrizedOps}, provenance-bound to source runs.
+2. Evaluator (independent authority)  → held-out suite + affected-context regression +
+                                          presence-only adversarial + grounding/verification,
+                                          over composition vN+1 (the UNIT is the versioned
+                                          composition, never a lone skill).
+3. Promoter (distinct authority)      → Ed25519 promotion evidence requires measured held-out
+                                          lift; no self-promotion path exists (falsify: a
+                                          generator key in the promoter ring ⇒ refuse).
+4. Rollback                           → EXECUTED, not simulated: inject a regression into a
+                                          promoted composition, prove atomic restore to vN
+                                          restores pre-promotion behavior bit-identically.
+```
+
+Lifecycle representation follows ADR-0100. **DoD:** measured held-out lift for ≥1 promoted
+composition + executed rollback + RF-98/neutrality green → M-8 CLOSED. M-9+ remains exterior,
+non-authorizing horizon.
+
+---
+
+## 7. Execution order, ownership, and gates
+
+```text
+PHASE R (governance repair)                       ← SERIAL-FIRST, blocks everything
+   └─► PHASE 1 (close M-5b ∥ close M-6)           ← evidence + review receipts only
+   └─► PHASE 2 (M-6.5 instrument)                 ← start immediately after R; hermetic
+         └─► PHASE 3 (M-7: 3-1→3-2→3-3→ADR-0099)  ← 3-1 gated on TL schema decision
+               └─► PHASE 4 (M-8: ADR-0100 → 4-1 ∥ 4-2)
+```
+
+| Phase | Owner | Merge order | Exit gate |
+|---|---|---|---|
+| R | Tech Lead | serial | rf86 exit 0; tag pushed; hygiene linter green |
+| 1 (M-5b/M-6) | Dev B ∥ Dev A | either (disjoint) | review receipts; board flips |
+| 2 (M-6.5) | Dev B (+ Dev A wiring review) | B → A → integrated | non-degenerate A/A + paired verdict |
+| 3 (M-7) | A capture/lowering; B analysis | A → B → ADR-0099 | interpretable M7-01 + ADR-0099 |
+| 4 (M-8) | A adapters; B pipeline | A → B → integrated | lift + executed rollback + neutrality |
+
+## 8. Global Definition of Done (every phase)
+
+1. Canonical suite green hermetically: `python3 -m unittest discover -s test -t .` with all
+   provider keys unset (enforced by R-3 linter).
+2. Static gates green: `check_boundaries.py`, `check_tcb_budget.py` (**≤1438 logical LOC;
+   65 LOC headroom — treat as scarce; new logic goes to runtime/adapters/lab, never
+   kernel**), `scan_secrets.py`, `check_domain_blindness.py`, `check_duplication.py
+   --enforce`, `ci/rf86_gate.sh`.
+3. Every new module ships its named falsifier; no falsifier weakened anywhere in the diff.
+4. Claims ≤ proof: every board flip cites an executed artifact (bundle digest, signed report,
+   review receipt), never configuration or intention.
+5. No new Markdown under `docs/`; decisions land as append-only ADRs; status lives only in
+   `docs/03_execution/sprint_active.md`.
+
+## 9. New falsifier register (allocate IDs via check_falsifier_ids before landing)
+
+| Candidate ID (TL allocates) | Attacks | Phase |
+|---|---|---|
+| stall-provider reproducibility / variance / attribution trio | C1/C2/C3 above | 2 |
+| aa-floor-interior + arms-comparable | manufactured improvement | 2 |
+| blocked-task-elicits-directive (×3 archetypes) | task-set vacuity | 2 |
+| effect-selector-presence (fails if gap "silently" closes wrong) | D-5 regression | 3 |
+| topology-disabled-path-bit-identity | smuggled engine | 3 |
+| memory cross-category isolation + revocation-fail-closed | memory conflation | 4 |
+| generator-in-promoter-ringback refusal | self-promotion | 4 |
+| injected-regression atomic rollback | fake rollback | 4 |
+bit-identical to current behavior.
+
+### 3-4 ADR-0099 (Leadership, evidence-driven)
+
+From 3-2's report: implement / simplify (safe read-parallelism only — `safe_read_only_group`
+already sketches the ceiling) / cancel. Default cancel if benefit < threshold. No advanced
+concurrent engine without this ADR. **DoD: M-7 CLOSED.**
+
+---
+
+## 6. PHASE 4 — M-8: capability-mediated memory + skill promotion/rollback
+
+Gate order: ADR-0100 FIRST (OD-6: reintroduce lifecycle kinds vs typed claims — recommend
+typed claims via `ClaimRecorded` payloads; a new event-kind package is trigger #6 and buys
+nothing), then two packages.
+report = paired_study(
+    baseline  = run_arm(manifest, controller_enabled=False, seeds=N_SEEDS),
+    treatment = run_arm(manifest, controller_enabled=True,  seeds=N_SEEDS),
+    declared_treatment_dimensions=["controller_enabled"],   # M-18 gate
+    aa_floor_seeds=A_A_SEEDS,                               # both arms OFF
+)
+# Inside: assert_comparable -> aa_noise_floor (raises DegenerateFloorError at 0/100%)
+#         -> mcnemar_exact(discordant) -> holm_bonferroni -> paired_bootstrap_ci (M-04)
+```
+
+Decision semantics (MEASUREMENT law, unchanged): Holm-corrected significance + CI excluding
+null + no regression-budget breach ⇒ report RECOMMENDS enable; default-enable stays a
+Leadership call. Negative result ⇒ controller stays disabled-by-default; milestone closes as
+an honest test. Either way M-6.5 CLOSES.
+
+New falsifiers: `test_aa_floor_is_interior`, `test_blocked_task_elicits_directive`,
+`test_arms_comparable_except_declared_axis`; keep `test_controller_off_path_bit_identical`
+and `test_confidence_records_are_epoch_bound` strict (they exist — do not weaken).
+
+**DoD:** non-degenerate A/A floor + paired verdict + signed report artifact → M-6.5 CLOSED.
+```
+
+> Escalation check: this extends a runtime record, not a frozen `/1` wire schema. If it must
+> surface inside `mhf.execution-profile/*` payloads, it goes through profile `/2` semantics —
+> `/1` is never touched.
+
+Unit falsifiers (`test/adapters/models/test_stall_provider.py`, hermetic):
+
+```text
+test_same_seed_replays_identical_sequence           # C1
+test_discordance_strictly_interior_over_seed_sweep  # C2: 0 < d < 1 across >=200 seeds
+test_every_deviation_attributable_by_replay         # C3: auditor rebuilds the stall log
+test_instrument_error_passthrough_untouched         # provider failures not masked
+test_stalled_proposal_passes_ordinary_dispatch      # C4: no S0–S12 bypass
+test_route_record_carries_instrument_identity       # C5
+```
+
+```python
 # test/falsifiers/test_budget_tree_conservation.py
 def test_no_subtree_spends_beyond_root_ceiling(ledger, root_lineage):
     """C-05: conservation is structural — ONE accountant (the kernel committing

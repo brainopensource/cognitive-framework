@@ -64,6 +64,27 @@ class EventKind(str, Enum):
     CHECKPOINT_CREATED = "CheckpointCreated"
     CHILD_SPAWNED = "ChildSpawned"
     CHILD_RETURNED = "ChildReturned"
+    ACTIVATION_CHANGED = "ActivationChanged"
+    ARTIFACT_CREATED = "ArtifactCreated"
+    COMPETENCE_PRIOR_RECORDED = "CompetencePriorRecorded"
+    CONFLICT_DETECTED = "ConflictDetected"
+    EFFECT_PREVIEWED = "EffectPreviewed"
+    EPISODE_STATE_CHANGED = "EpisodeStateChanged"
+    EVIDENCE_CLAIM_PRODUCED = "EvidenceClaimProduced"
+    OBSERVATION_PRODUCED = "ObservationProduced"
+    OBSERVATION_REQUESTED = "ObservationRequested"
+    OPERATOR_INVOKED = "OperatorInvoked"
+    OPERATOR_SELECTED = "OperatorSelected"
+    CORRECTION_RECORDED = "CorrectionRecorded"
+    CANDIDATE_BUILT = "CandidateBuilt"
+    CANDIDATE_ATTESTED = "CandidateAttested"
+    CANARY_PROMOTED = "CanaryPromoted"
+    ROLLBACK_TRIGGERED = "RollbackTriggered"
+    GOAL_DECLARED = "GoalDeclared"
+    PLAN_REVISED = "PlanRevised"
+    STRATEGY_CHANGED = "StrategyChanged"
+    PROGRESS_ASSESSED = "ProgressAssessed"
+    CONTEXT_COMPACTED = "ContextCompacted"
 
 class GateDecision(str, Enum):
     PASS = "PASS"
@@ -190,6 +211,34 @@ class EventEnvelope:
     correlation_id: str | None = None
     idempotency_key: str | None = None
     alertable: bool = False
+
+@dataclass(frozen=True, slots=True)
+class EventEnvelopeV2:
+    schema_version: str
+    event_id: str
+    kind: EventKind
+    seq: int
+    occurred_at: str
+    run_id: str
+    principal: str
+    payload: JsonObject
+    digest: str
+    authority_source: str
+    policy_version: str
+    episode_id: str | None = None
+    parent_episode_id: str | None = None
+    project_id: str | None = None
+    principal_id: str | None = None
+    parent_principal_id: str | None = None
+    harness_digest: str | None = None
+    branch_id: str = 'main'
+    prev_digest: str | None = None
+    causation_id: str | None = None
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
+    alertable: bool = False
+    approval_reference: str | None = None
+    capability_grant: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class ExecutionProfile:
@@ -533,6 +582,7 @@ __all__ = [
     "EpisodeView",
     "EvaluationSubject",
     "EventEnvelope",
+    "EventEnvelopeV2",
     "ExecutionProfile",
     "ExecutionProfileV2",
     "Health",

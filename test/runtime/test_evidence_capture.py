@@ -609,12 +609,12 @@ class TheEventContractIsUnchanged(unittest.TestCase):
         for kind in emitter.kinds():
             self.assertIn(kind, EVENT_KINDS)
 
-    def test_the_envelope_schema_version_is_untouched(self) -> None:
+    def test_the_production_writer_single_writes_the_current_version(self) -> None:
         session = _session(ScriptedModel([finish()]), blobs=InMemoryBlobStore())
         session.run()
         read = session.ports.store.read(EventRange(episode_id="ep-capture-1"))
         versions = {envelope.schema_version for envelope in (read.value or ())}
-        self.assertEqual(versions, {"mhf.event/1"})
+        self.assertEqual(versions, {"mhf.event/2"})
 
     def test_artifact_roles_cover_the_adr_0096_capture_surface(self) -> None:
         required = {

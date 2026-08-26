@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vanguard.dev/schemas/mhf/event_envelope.schema.json",
+  "$id": "https://vanguard.dev/schemas/mhf/event_envelope_v2.schema.json",
   "$comment": "RFC 8785 JCS canonical envelope. Canonical live writes are hash-chained and sequenced per project_id via prev_digest. Nullable lineage fields remain only for compatibility readers of historical rows; the production LedgerEmitter supplies project_id, principal_id, harness_digest, causation/correlation defaults, and the applicable episode lineage. SPEC \u00a71.2.",
-  "title": "EventEnvelope",
+  "title": "EventEnvelopeV2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,19 +14,21 @@
     "run_id",
     "principal",
     "payload",
-    "digest"
+    "digest",
+    "authority_source",
+    "policy_version"
   ],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "mhf.event/1"
+      "const": "mhf.event/2"
     },
     "event_id": {
       "type": "string",
       "minLength": 1
     },
     "kind": {
-      "$ref": "#/$defs/EventKind"
+      "$ref": "event_envelope.schema.json#/$defs/EventKind"
     },
     "seq": {
       "type": "integer",
@@ -120,78 +122,29 @@
     "digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authority_source": {
+      "type": "string",
+      "description": "Writer role whose authority admitted this event. Never inferred from the payload."
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Policy version in force at append."
+    },
+    "approval_reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Human approval this event rests on; null only when semantically inapplicable."
+    },
+    "capability_grant": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Capability grant this event rests on; null only when semantically inapplicable."
     }
   },
-  "$defs": {
-    "EventKind": {
-      "title": "EventKind",
-      "type": "string",
-      "enum": [
-        "RunStarted",
-        "EpisodeStarted",
-        "TurnStarted",
-        "EpisodeCompleted",
-        "RunCompleted",
-        "RunAborted",
-        "RunRecovered",
-        "ProposalProduced",
-        "ProposalRejected",
-        "ReflectionProduced",
-        "AuthorizationRequested",
-        "AuthorizationDenied",
-        "CapabilityGranted",
-        "CapabilityAttenuated",
-        "CapabilityRevoked",
-        "BudgetReserved",
-        "BudgetCommitted",
-        "BudgetReleased",
-        "BudgetExhausted",
-        "EffectStarted",
-        "EffectCompleted",
-        "EffectFailed",
-        "EffectRejected",
-        "EffectReconciled",
-        "EvaluationRequested",
-        "VerdictRecorded",
-        "ClaimRecorded",
-        "InvalidationChecked",
-        "ApprovalRequested",
-        "ApprovalResolved",
-        "KernelAlarm",
-        "PluginDiscovered",
-        "PluginResolved",
-        "PluginVerified",
-        "PluginActivated",
-        "PluginQuiesced",
-        "PluginRetired",
-        "PluginFaulted",
-        "Heartbeat",
-        "CheckpointCreated",
-        "ChildSpawned",
-        "ChildReturned",
-        "ActivationChanged",
-        "ArtifactCreated",
-        "CompetencePriorRecorded",
-        "ConflictDetected",
-        "EffectPreviewed",
-        "EpisodeStateChanged",
-        "EvidenceClaimProduced",
-        "ObservationProduced",
-        "ObservationRequested",
-        "OperatorInvoked",
-        "OperatorSelected",
-        "CorrectionRecorded",
-        "CandidateBuilt",
-        "CandidateAttested",
-        "CanaryPromoted",
-        "RollbackTriggered",
-        "GoalDeclared",
-        "PlanRevised",
-        "StrategyChanged",
-        "ProgressAssessed",
-        "ContextCompacted"
-      ],
-      "description": "ADR-0098 Decision 3/4/5: the eight live VG-04 kinds, the eight deprecated-but-readable historical kinds, and the five M-5a semantic kinds are folded in, making this enum the sole live event-kind authority. Deprecation is a write rule (DEPRECATED_KINDS), not an absence from the vocabulary -- a historical ledger legally contains these names."
-    }
-  }
+  "description": "mhf.event/2 -- the mhf.event/1 envelope plus four typed authority-provenance fields (ADR-0098 Decision 1). /1 remains readable and unchanged."
 }

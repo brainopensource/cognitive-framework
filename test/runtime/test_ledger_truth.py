@@ -55,7 +55,10 @@ class EnvelopeLineage(unittest.TestCase):
             "EpisodeStarted", run_id="run-1", principal="agent-1",
             payload={"kind": "EpisodeStarted"})
         wire = envelope.to_mhf_dict()
-        self.assertEqual(wire["schema_version"], "mhf.event/1")
+        # ADR-0098 cutover: production single-writes /2. /1 stays readable.
+        self.assertEqual(wire["schema_version"], "mhf.event/2")
+        self.assertTrue(wire["authority_source"])
+        self.assertTrue(wire["policy_version"])
         for field in LINEAGE:
             self.assertIn(field, wire)
         second = emitter.emit_kind(

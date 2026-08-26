@@ -82,9 +82,19 @@ def _collect_defs(schemas: list[dict]) -> tuple[dict[str, dict], dict[str, str]]
         for name, body in schema.get("$defs", {}).items():
             if name in SKIP_DEFS:
                 continue
+            if name in defs and defs[name] != body:
+                # Silent last-writer-wins across documents is how a stale copy
+                # of a shared vocabulary quietly replaces the live one: the
+                # generator would emit the loser's definition and `--check`
+                # would agree with itself about it. Shared definitions belong
+                # to exactly one document and are `$ref`d from the others.
+                raise SystemExit(
+                    f"CODEGEN FAIL: '{name}' is defined differently in "
+                    f"{roots.get(name)!r} and {title!r}; $ref the owning "
+                    "document instead of copying the definition")
             defs[name] = body
             if title:
-                roots[name] = title
+                roots.setdefault(name, title)
     return defs, roots
 
 

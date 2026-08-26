@@ -71,26 +71,34 @@ VALID_PRINCIPAL_ROLES = frozenset({"user", "operator", "episode", "process", "ev
 # -- kept because nothing authorises deleting a locked kind, not because
 # anything emits them today. Wave-3's `Plugin*` lifecycle kinds are already
 # present via `_WireEventKind` -- see `test/contracts/test_event_coverage.py`.
-_V4_ONLY_KINDS = frozenset({
-    "ActivationChanged",
-    "ArtifactCreated",
-    "CanaryPromoted",
-    "CandidateAttested",
-    "CandidateBuilt",
-    "CompetencePriorRecorded",
-    "ConflictDetected",
-    "CorrectionRecorded",
-    "EffectPreviewed",
-    "EpisodeStateChanged",
-    "EvidenceClaimProduced",
-    "ObservationProduced",
+#: Historical kinds that remain **readable** forever and reject every new
+#: write (`ADR-0098 Decision 4`). Deprecation is a write rule, not an erasure:
+#: ledgers legally contain these names, so removing them from the vocabulary
+#: would make valid history unparseable. Reintroduction requires a full kind
+#: package -- ADR, allocation, writer, reducer, schema, golden vector, and
+#: coverage proof -- never a one-line addition to this set.
+DEPRECATED_KINDS = frozenset({
     "ObservationRequested",
     "OperatorInvoked",
     "OperatorSelected",
+    "CorrectionRecorded",
+    "CandidateBuilt",
+    "CandidateAttested",
+    "CanaryPromoted",
     "RollbackTriggered",
 })
 
-EVENT_KINDS = frozenset(kind.value for kind in _WireEventKind) | _V4_ONLY_KINDS
+#: Every kind a reader may encounter. The generated schema is now the sole
+#: live event-kind authority (`ADR-0098 Decision 3`): `_V4_ONLY_KINDS` is
+#: deleted, so there is no longer a second catalog that can drift from the
+#: first and let `LedgerEmitter` write a kind the schema never heard of.
+READABLE_KINDS = frozenset(kind.value for kind in _WireEventKind)
+
+#: What a production writer may originate: everything readable, minus what is
+#: deprecated.
+WRITABLE_KINDS = READABLE_KINDS - DEPRECATED_KINDS
+
+EVENT_KINDS = READABLE_KINDS
 
 _UUIDV7_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
@@ -137,6 +145,16 @@ class EventEnvelope:
     alertable: bool = False
     mhf_kind: Optional[str] = None
     mhf_branch_id: Optional[str] = None
+    # `mhf.event/2` authority provenance (ADR-0098 Decision 1). `/1` records
+    # what happened and never on whose authority, so an orchestrator appending
+    # an event is indistinguishable from the kernel appending the same one --
+    # the RF-99 gap. These stay `None` on `/1` and are never written back into
+    # a `/1` preimage: a reader-side default is a projection, not a fact.
+    authority_source: Optional[str] = None
+    policy_version: Optional[str] = None
+    #: Null only when semantically inapplicable -- never to paper over unknown.
+    approval_reference: Optional[str] = None
+    capability_grant: Optional[str] = None
     unknown_fields: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -193,11 +211,19 @@ class EventEnvelope:
         return digest_of(self.to_dict())
 
     def to_mhf_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
-        """`mhf.event/1` wire object (snake_case). Lineage keys are always present."""
+        """`mhf.event/1` or `/2` wire object (snake_case).
+
+        The `/1` preimage is byte-identical to what it has always been: the
+        four `/2` authority keys are appended only for `/2`, so every
+        historical digest recomputes unchanged. A `/1` envelope that happened
+        to carry authority values in memory still serialises without them --
+        adding them would rewrite history to match the present.
+        """
+        version = self.schema_version if self.schema_version == "mhf.event/2" else "mhf.event/1"
         kind = self.mhf_kind or self.payload.get("kind") or "Heartbeat"
         payload = dict(self.payload)
         unsigned: dict[str, Any] = {
-            "schema_version": "mhf.event/1",
+            "schema_version": version,
             "event_id": self.event_id,
             "kind": kind,
             "seq": int(self.seq),
@@ -218,6 +244,11 @@ class EventEnvelope:
             "idempotency_key": self.idempotency_key,
             "alertable": bool(self.alertable),
         }
+        if version == "mhf.event/2":
+            unsigned["authority_source"] = self.authority_source or ""
+            unsigned["policy_version"] = self.policy_version or ""
+            unsigned["approval_reference"] = self.approval_reference
+            unsigned["capability_grant"] = self.capability_grant
         if include_digest:
             unsigned["digest"] = self.content_digest or digest_of(
                 {k: v for k, v in unsigned.items()}
@@ -226,7 +257,7 @@ class EventEnvelope:
 
     def wire_dict(self) -> dict[str, Any]:
         """Store/write shape: mhf.event/1 from the Wave-1 writer, else v4 camelCase."""
-        if self.schema_version == "mhf.event/1":
+        if self.schema_version in ("mhf.event/1", "mhf.event/2"):
             return self.to_mhf_dict()
         return self.to_dict()
 
@@ -237,7 +268,7 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         raise ParseError("EventEnvelope", "type", f"expected mapping, got {type(raw).__name__}")
 
     schema_version = raw.get("schema_version") or raw.get("schemaVersion")
-    if schema_version == "mhf.event/1" and "event_id" in raw:
+    if schema_version in ("mhf.event/1", "mhf.event/2") and "event_id" in raw:
         return _parse_mhf_event_envelope(raw)
     if schema_version != "vg.4":
         raise ParseError("EventEnvelope", "schemaVersion", f"must be 'vg.4', got {schema_version!r}")
@@ -394,7 +425,14 @@ def parse_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
 
 
 def _parse_mhf_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
-    """Read-path adapter: `mhf.event/1` → the v4 dataclass plus lineage fields."""
+    """Read-path adapter: `mhf.event/1|2` → the v4 dataclass plus lineage fields.
+
+    A `/1` event keeps `None` for every authority field. That absence is the
+    honest reading: `/1` never recorded authority, and defaulting it here to
+    something plausible would manufacture provenance for history that has
+    none. `ADR-0098 Decision 1`: reader-side defaults are projections and are
+    never written back.
+    """
     event_id = raw.get("event_id")
     if not isinstance(event_id, str) or not event_id:
         raise ParseError("EventEnvelope", "event_id", "mhf.event/1 requires event_id")
@@ -427,8 +465,16 @@ def _parse_mhf_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
     if digest is not None and not isinstance(digest, str):
         raise ParseError("EventEnvelope", "digest", "digest must be a string")
     correlation = raw.get("correlation_id")
+    version = "mhf.event/2" if raw.get("schema_version") == "mhf.event/2" else "mhf.event/1"
+
+    def _authority(key: str) -> str | None:
+        if version != "mhf.event/2":
+            return None
+        value = raw.get(key)
+        return value if isinstance(value, str) and value else None
+
     return EventEnvelope(
-        schema_version="mhf.event/1",
+        schema_version=version,
         event_id=event_id,
         scope="episode",
         seq=seq_str,
@@ -465,6 +511,10 @@ def _parse_mhf_event_envelope(raw: Mapping[str, Any]) -> EventEnvelope:
         idempotency_key=(
             raw.get("idempotency_key") if isinstance(raw.get("idempotency_key"), str) else None
         ),
+        authority_source=_authority("authority_source"),
+        policy_version=_authority("policy_version"),
+        approval_reference=_authority("approval_reference"),
+        capability_grant=_authority("capability_grant"),
         alertable=bool(raw.get("alertable", False)),
         mhf_kind=kind,
         mhf_branch_id=raw.get("branch_id") if isinstance(raw.get("branch_id"), str) else "main",

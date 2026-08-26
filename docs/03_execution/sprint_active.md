@@ -29,14 +29,12 @@ this board but do not form a second execution authority.
 `f9d7ceb257e8e2c7d6014bd0a29604ffcd89ee0e`. Dev A and Dev B are both `PACKAGE_READY`; the G-M4
 review is open and unfinished (§5b).**
 
-Activation receipts: ADR-0096 v0.4.0 and ADR-0097 v0.2.0 accepted; canonical law, milestones and
-execution authorization reconciled; the M-4 Contract Kit, ownership boundaries, merge order and
-acceptance states frozen; Linux RF-38…RF-45 passed 13/13 on 2026-08-25 including both RF-43 UDS
-tests; both lanes published surveys and implementation plans.
+Activation receipts: ADR-0096 v0.4.0 and ADR-0097 v0.2.0 accepted; law, milestones and execution
+authorization reconciled; Contract Kit, ownership and merge order frozen; Linux RF-38…RF-45 13/13
+on 2026-08-25.
 
-`PACKAGE_READY` is isolated readiness only — neither `MERGED` nor `GATE_ACCEPTED`, and it closes
-nothing. RF-95 remains **NO-GO** until §6 passes. M-5a implementation remains blocked on M-4
-closure and accepted ADR-0098.
+`PACKAGE_READY` is isolated readiness only — neither `MERGED` nor `GATE_ACCEPTED`. RF-95 remains
+**NO-GO** until §6 passes; M-5a remains blocked on M-4 closure and accepted ADR-0098.
 
 ## 2. Frozen delivery decisions
 
@@ -53,13 +51,12 @@ immutable.
 
 Ownership seam: Dev B owns profile/trajectory schemas, writer, reader, reproducibility and contract
 falsifiers, and published the frozen fixtures first. Dev A owns Runtime capture/wiring and the
-generic Agency provenance integration, does not edit Dev B-owned surfaces, and escalates a missing
-required field rather than working around it. No new event kinds, envelope changes, Kernel
-semantics, or Agency -> Runtime import are authorized in M-4.
+generic Agency provenance integration, edits no Dev B-owned surface, and escalates rather than
+works around a missing field. M-4 authorizes no event-kind, envelope, Kernel, or import change.
 
 ## 3. Simple active backlog
 
-Canonical compact backlog; acceptance rules are in §§4–6 and the accepted law/ADR stack.
+Acceptance rules are in §§4–6 and the accepted law/ADR stack.
 
 ### Done
 
@@ -67,26 +64,12 @@ PH0-00…PH0-05 and A-M4-00/B-M4-00 are complete; see git history.
 
 ### In progress — M-4 packages
 
-- [x] B-M4-01 Publish frozen cross-lane artifact/provenance fixtures first.
-- [x] A-M4-01 Implement policy-gated `ArtifactWriter` with durable failure semantics.
-- [x] A-M4-02 Implement generic Agency provenance protocol and Runtime-owned sink.
-- [x] A-M4-03 Capture context selection, compaction, exact model I/O, and applicable cache provenance.
-- [x] A-M4-04 Wire optional blob/capture services while preserving the legacy no-capture path.
-- [x] A-M4-05 Pass focused Runtime/Agency tests and declare `PACKAGE_READY`.
-- [x] B-M4-02 Add `mhf.execution-profile/2` and preserve the `/1` identity preimage.
-- [x] B-M4-03 Add `mhf.trajectory/2`, dual-read `/1|/2`, and single-write `/2`.
-- [x] B-M4-04 Implement proof-honest reproducibility derivation and run-close contract.
-- [x] B-M4-05 Add strict golden vectors, falsifiers, and the append/fold benchmark baseline.
-- [x] B-M4-06 Pass focused schema/reader/RF-100 tests and declare `PACKAGE_READY`.
+A-M4-01…05 and B-M4-01…06 are complete; both lanes are `PACKAGE_READY`.
 
 ### Next — integration and gate
 
-- [ ] G-M4-01 Tech Lead reviews both packages against the frozen fixtures and ownership matrix.
-- [ ] G-M4-02 Merge Dev B first; rebase and merge Dev A second.
-- [ ] G-M4-03 Run the combined repository, architecture, security, and governance gates.
-- [ ] G-M4-04 Freeze one non-trivial live task and verifier, then execute RF-95 exactly once.
-- [ ] G-M4-05 Independently review the unrepaired evidence bundle and accept or reject M-4.
-- [ ] G-M4-06 On acceptance, mark M-4 complete and open the ADR-0098 decision window.
+G-M4-01/02 done (review + reconstructed merge order). G-M4-03 gates green except the TypeScript
+suite. G-M4-04 (RF-95), G-M4-05 (independent review) and G-M4-06 (closure) remain open.
 
 ### Blocked future backlog
 
@@ -98,22 +81,14 @@ the M7-01 decision), M-8 (M-7). Ladder detail lives in [`milestones.md`](milesto
 
 State: **PACKAGE_READY**. WIP limit: one package.
 
-Surfaces: new `runtime/{artifacts,provenance}.py` and `agency/provenance.py`; edits to
-`runtime/{session,root}.py` and `agency/context/{compiler,layers}.py` (additive pure reads only);
-`test/runtime/test_evidence_capture.py` (76 tests).
+Surfaces: new `runtime/{artifacts,provenance}.py`, `agency/provenance.py`; edits to
+`runtime/{session,root}.py` and `agency/context/{compiler,layers}.py`; 76 focused tests.
 
-Obligation -> proof, all in `test_evidence_capture.py`: blob-first/event-second and fatal orphan
-(`BlobFirstEventSecond`); store-owned digest (`TheStoreOwnsTheDigest`); no inline content
-(`NoInlineContent`); retention never authorizes capture (`RetentionIsNotAuthorization`); redaction
-before persistence (`RedactionHappensBeforePersistence`); fatal required-capture failure
-(`RequiredCaptureFailureIsFatal`); degradation only after a durable fact
-(`OptionalCaptureDegradesOnlyOnTheRecord`); fatal evidence append failure
-(`ProvenanceAppendFailureIsFatal`); exact pre-call/post-return I/O at
-`_LayeredOperator.propose` (`ExactModelIOAtTheRealSeam`); cache claims only when reported
-(`CacheClaimsOnlyWhenReported`); legacy `blobs=None` (`LegacyCompositionStaysLegal`); boundary
-(`TheBoundaryHolds`); envelope/roster unchanged (`TheEventContractIsUnchanged`); frozen B-M4-01
-seam (`TheFrozenCrossLaneContractIsHonoured`); integrated `/2` bundle
-(`TheIntegratedTrajectoryCarriesTheCapture`).
+Obligations map to named test classes in `test/runtime/test_evidence_capture.py`, one class per
+rule: durable ordering, store-owned digest, no inline content, retention-is-not-authorization,
+redaction before persistence, fatal required-capture failure, durable degradation, fatal
+evidence append, exact I/O at the provider seam, cache-only-when-reported, legacy `blobs=None`,
+boundary, roster stability, the frozen B-M4-01 seam, and the integrated `/2` bundle.
 
 The published B-M4-01 fixture was consumed as frozen; no Dev B-owned file was edited. Dev A adopted
 the fixture's `checkpoint_state` role name. No fixture field was materially missing, so no
@@ -165,7 +140,34 @@ Blocking, gate cannot close:
 3. TypeScript suite unmet in this environment (`tsc: not found`); no TS surface changed.
 4. No independent review receipt exists; none is self-assertable.
 
-Pre-existing doc-budget overruns, not from either lane: `milestones.md` (269), `SPEC.md` (253).
+Pre-existing doc-budget overruns: `milestones.md` (269), `SPEC.md` (253).
+
+
+## 5c. M-5a status (drafted ahead of its entry gate)
+
+ADR-0098 is **drafted and `proposed`, not accepted**: its entry gate (M-4 `CLOSED` on accepted
+RF-95) is unmet, so it authorizes nothing. The A-M5A substrate work is implemented against it so
+the contract can be reviewed against real code rather than prose, and is **not** `PACKAGE_READY`.
+
+Implemented: `mhf.event/2` with the four typed authority fields, `/1` preimage byte-identical and
+digest-pinned; role-derived authority with orchestrator forgery of capability/approval refused;
+the eight live legacy kinds folded into the generated schema and `_V4_ONLY_KINDS` deleted, making
+that schema the sole live vocabulary; `DEPRECATED_KINDS`/`READABLE_KINDS` with the eight historical
+kinds readable and unwritable; the five semantic kinds allocated, reduced, and entering the state
+digest, with `GoalDeclared` carrying digests only; `prev_digest` continuity across mixed chains;
+explicit `writer_version` rollback. Kernel semantic diff is exactly zero.
+
+Verified: 1481 passed / 8 skipped / 0 failed, including 35 A-M5A falsifiers and fresh-process
+mixed-chain replay parity over a file-backed WAL. Eleven linters, codegen `--check`, and the
+zero-Kernel-diff check pass.
+
+A further generator defect surfaced while folding the vocabulary: duplicate `$defs` across schema
+documents were resolved last-writer-wins, so a stale copy silently replaced the live definition
+(`CostVector` diverged between `/1` and `/2`). The generator now refuses conflicting duplicates and
+the shared definitions are `$ref`d from their owning document.
+
+**`M-5A-BASE-v2` is NOT created.** Tag creation requires every G-M5A gate green, and RF-95, the
+TypeScript suite, and independent review remain unmet.
 
 ## 6. Integration and RF-95
 
@@ -188,7 +190,6 @@ closes M-4.
 ## 7. Required verification
 
 Every gate listed in [`AGENTS.md §2`](../../AGENTS.md), plus the full Python and TypeScript suites.
-
 ## 8. Explicit non-scope
 
 - No event-envelope or event-kind change before accepted ADR-0098 and M-5a.

@@ -182,6 +182,21 @@ class LedgerState:
     #: matching `ChildReturned` folds to `open` and is reconciled by the cold
     #: path -- never assumed complete.
     children: Mapping[str, "ChildRecord"] = field(default_factory=dict)
+    #: ADR-0098 Decision 5 semantic kinds, folded in arrival order. These are
+    #: the agent's own reasoning made replayable: what it was aiming at, how
+    #: the plan and strategy moved, what it believed about its progress, and
+    #: what context it compacted away. Ordered tuples rather than
+    #: last-write-wins maps -- a revision that overwrote its predecessor would
+    #: erase the very trajectory these kinds exist to record.
+    #:
+    #: `goals` carries `goalDigest` and never raw goal text (ADR-0098
+    #: Decision 5): a goal may quote a secret and an append-only store is the
+    #: one place from which nothing can be withdrawn.
+    goals: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+    plan_revisions: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+    strategy_changes: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+    progress_assessments: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
+    context_compactions: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
     unknown_events: tuple[Mapping[str, Any], ...] = field(default_factory=tuple)
 
     def to_canonical_dict(self) -> dict[str, Any]:
@@ -268,6 +283,15 @@ class LedgerState:
             },
             "heartbeats": {k: dict(v) for k, v in sorted(self.heartbeats.items())},
             "conflicts": [dict(c) for c in self.conflicts],
+            # ADR-0098 Decision 5 kinds enter the state digest. A semantic kind
+            # that folded into state but not into its digest would let two
+            # genuinely different histories produce the same digest, which is
+            # exactly what RF-96 reconstruction parity is supposed to detect.
+            "goals": [dict(g) for g in self.goals],
+            "planRevisions": [dict(r) for r in self.plan_revisions],
+            "strategyChanges": [dict(c) for c in self.strategy_changes],
+            "progressAssessments": [dict(a) for a in self.progress_assessments],
+            "contextCompactions": [dict(c) for c in self.context_compactions],
             "terminalRecovery": dict(self.terminal_recovery) if self.terminal_recovery else None,
             "verdicts": {
                 k: {

@@ -162,7 +162,8 @@ class TheJsonlIsALedgerExport(unittest.TestCase):
                      target.read_text().splitlines() if line.strip()]
             self.assertTrue(lines)
             for envelope in lines:
-                self.assertEqual(envelope["schema_version"], "mhf.event/1")
+                self.assertIn(envelope["schema_version"],
+                              ("mhf.event/1", "mhf.event/2"))
 
     def test_the_projection_reads_it(self) -> None:
         from vanguard.packages.adapters.stores.ledger_jsonl import import_jsonl

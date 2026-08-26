@@ -65,7 +65,8 @@ class TestF01EnvelopeLineage(unittest.TestCase):
         wire = emitter.emit_kind(
             "TurnStarted", run_id="run-1", principal="agent-1",
             payload={"turn": 1}).to_mhf_dict()
-        self.assertEqual(wire["schema_version"], "mhf.event/1")
+        self.assertEqual(wire["schema_version"], "mhf.event/2")
+        self.assertTrue(wire["authority_source"])
         for field in ("project_id", "principal_id", "parent_principal_id",
                       "parent_episode_id", "harness_digest", "episode_id"):
             self.assertIn(field, wire)

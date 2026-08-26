@@ -1165,3 +1165,366 @@ benchmark-wide pass-rate estimate comes primarily from the number and representa
 39 scripted LAM scenarios; the future objective is to expand the live, evaluator-backed corpus to
 60 Verified tasks and 70 Pro tasks, then use LAM replay for large-scale zero-cost harness
 regression experiments.
+
+# Hybrid REAL + MOCKED SWE Verified Challenges (30/70 of 16 coding challenges)
+
+## Purpose and operating rule
+
+The immediate objective is not to claim that LAM reproduces DeepSeek, ChatGPT, or any other
+specific model. The objective is to validate the harness: message construction, tool schemas,
+workspace isolation, file editing, test feedback, retry behavior, termination, replay, accounting,
+and evidence capture. A hybrid corpus is appropriate for that objective because five real runs can
+anchor the behavioral distribution while eleven synthetic runs expand task and failure coverage at
+nearly zero inference cost.
+
+For a 16-task corpus, the nearest integer implementation of a 30/70 split is:
+
+| Corpus segment | Count | Evidence label | Role |
+|---|---:|---|---|
+| Real OpenRouter runs | **5** | `real-openrouter` | Behavioral calibration and audit |
+| LAM-generated traces | **11** | `synthetic-chatgpt-proxy` | Broad harness and replay coverage |
+| Total | **16** | — | Fixed internal validation corpus |
+
+Four existing live traces from the LEX lab may be used as a generic prior for tool-use patterns,
+but they must not be counted as SWE-bench Verified calibration unless their task IDs and evaluator
+semantics are actually part of this 16-task manifest. If only four SWE tasks are run live, the
+corpus is 25/75 rather than 30/70; that is acceptable, but it must be recorded honestly.
+
+The central data-integrity rule is:
+
+> Synthetic traces may validate harness behavior and populate replay scenarios, but they must never
+> be combined with real pass/fail outcomes and reported as a real model benchmark score.
+
+## 1. Freeze the 16-task and calibration manifests
+
+Create one immutable manifest before collecting or generating responses. It should reference the
+existing compact fixtures under `tools/005_SWE_VERIFIED_REPO/`, the four existing tasks if they are
+part of the final 16, and the exact base commit for every repository. Freeze a seed and never
+silently replace a task after results exist.
+
+Recommended allocation:
+
+1. Select five tasks using stratification across repository, difficulty, patch size, number of
+   changed files, and expected test complexity.
+2. Use four of those five real runs as the calibration set.
+3. Keep the fifth real run untouched as an audit set. Do not show its trajectory to the synthetic
+   generator; use it only to test whether calibration generalized.
+4. Generate the eleven synthetic traces from the remaining tasks.
+5. Use the audit task to measure whether the synthetic behavior profile is directionally plausible.
+
+The five real tasks should not all be easy one-file fixes. A practical small sample is two easy,
+two medium, and one multi-file or high-context task, with repository diversity preserved. The exact
+selection belongs in `calibration_split.json`:
+
+```json
+{
+  "schema_version": "lam.swe-calibration-split/1",
+  "seed": 20260825,
+  "total_tasks": 16,
+  "real_task_ids": ["task-a", "task-b", "task-c", "task-d", "task-e"],
+  "real_calibration_task_ids": ["task-a", "task-b", "task-c", "task-d"],
+  "real_audit_task_ids": ["task-e"],
+  "synthetic_task_ids": ["task-f", "task-g", "task-h"],
+  "policy": "real traces calibrate behavior; synthetic traces validate harness mechanics"
+}
+```
+
+The actual manifest should contain all 16 IDs; the abbreviated example only shows the contract.
+
+## 2. What the current live-coding collector does
+
+`tools/002_LLM_API_MOCK/live_coding.py` already provides the essential real-run loop:
+
+- reads `OPENROUTER_API_KEY` from the environment or the configured dotenv file without printing
+  it;
+- calls the OpenRouter chat-completions endpoint with a bounded model, call count, token budget,
+  and dollar budget;
+- exposes `view_file`, `edit_file`, `run_command`, and `list_dir` tools;
+- copies a task into a temporary workspace;
+- records every request, response, tool call, tool result, cassette entry, final diff, verification
+  output, stop reason, call count, and spend;
+- emits `trajectory.json`, `cassette.jsonl`, and `result.json` for later replay and analysis.
+
+The current collector was built for the LEX tasks and expects `problem.md` plus an already runnable
+workspace. The new SWE fixtures use `context.md`, `challenge.json`, and a compact `public/` source
+slice, so they should not be passed to the current collector unchanged. The collector needs a SWE
+fixture adapter before a run can be called an evaluator-backed SWE run.
+
+The existing LEX command remains useful for regression testing the collector itself:
+
+```bash
+python3 tools/002_LLM_API_MOCK/live_coding.py \
+  --challenge-root /home/rocha/Coding/LEX_LLM_EXECUTION/lab \
+  --challenge semver_parser \
+  --dotenv /home/rocha/Coding/LEX_LLM_EXECUTION/.env \
+  --model deepseek/deepseek-v4-flash \
+  --max-calls 60 \
+  --max-usd 0.10
+```
+
+The target SWE-capable interface should retain those safety flags and add an explicit fixture
+format, for example:
+
+```bash
+python3 tools/002_LLM_API_MOCK/live_coding.py \
+  --fixture-root tools/005_SWE_VERIFIED_REPO \
+  --challenge astropy__astropy-12907 \
+  --format swe-verified \
+  --evaluator-root /var/tmp/lam-swe-evaluator \
+  --dotenv /home/rocha/Coding/LEX_LLM_EXECUTION/.env \
+  --model deepseek/deepseek-v4-flash \
+  --max-calls 60 \
+  --max-usd 0.10
+```
+
+That command is the target runbook, not a claim that the current LEX-only loader already supports
+those flags.
+
+## 3. Required SWE fixture adapter and evaluator separation
+
+The adapter must make the public/private boundary mechanical:
+
+1. Read `challenge.json` and `context.md`.
+2. Copy only `public/` into the agent workspace. Never copy the task directory wholesale.
+3. For a real evaluator-backed run, materialize a repository checkout at `base_commit` in a
+   separate evaluator workspace. The compact source slice is useful for prompt and harness tests,
+   but it is not a substitute for dependencies and the full test suite.
+4. Apply `private/test.patch` only in the evaluator workspace, never in the agent workspace.
+5. Let the agent inspect and edit its workspace through the existing tool contract.
+6. When the agent stops, compute its diff and apply that diff to a fresh evaluator checkout.
+7. Run the recorded `FAIL_TO_PASS` tests and verify that the recorded `PASS_TO_PASS` tests do not
+   regress. The evaluator owns the verdict; the model cannot self-report success.
+8. Store only evaluator status, test names, exit codes, and sanitized output in the LAM record.
+   Never send `gold.patch` or `test.patch` to the model, synthetic generator, or replay client.
+
+The `Challenge` abstraction should therefore carry at least:
+
+```text
+task_id, repo, base_commit, problem_statement, public_root,
+evaluator_recipe, fail_to_pass, pass_to_pass, difficulty, provenance
+```
+
+The evaluator should be keyed by `(repo, base_commit, evaluator_version, dependency_image)` so a
+later library upgrade cannot silently invalidate old scores. If a full checkout is too expensive
+for the first harness smoke test, run compact mode and label its result
+`compact-no-evaluator`; never call that result a SWE-bench pass.
+
+## 4. Real calibration runbook: five tasks
+
+Run the five real tasks with exactly the same harness configuration intended for LAM replay. Do
+not give the model special prompts, extra tools, hidden tests, or a different timeout. Capture the
+following for every turn:
+
+- canonical request JSON and request hash;
+- model name, provider, temperature, token limits, and API response metadata;
+- assistant text and every structured tool call;
+- tool arguments, tool result, exit status, timeout, and truncation marker;
+- workspace snapshot or content-addressed file diff after each edit;
+- visible test commands and outputs;
+- hidden evaluator commands and verdict, stored outside the model-visible trajectory;
+- wall time, token usage, estimated/provider-reported cost, and stop reason;
+- harness version, fixture hash, base commit, and evaluator version.
+
+Use a single bounded budget for the five-task batch. The current collector defaults to 60 calls and
+$0.10, but the budget must be treated as a hard ceiling, not a target. A run that stops because of
+the budget is a valid `budget_stop` trajectory, not a failed API or a passed coding task.
+
+After collection, normalize the four calibration trajectories into behavioral atoms:
+
+```text
+observe -> locate -> inspect -> hypothesize -> edit -> test -> diagnose -> repair -> retest -> stop
+```
+
+Record distributions rather than copying only successful answers:
+
+| Feature | Examples to measure |
+|---|---|
+| Exploration | files listed, files viewed, bytes read before first edit |
+| Editing | first-edit turn, files changed, diff size, overwrite frequency |
+| Verification | tests per task, test timing, test-before-edit behavior |
+| Recovery | failed commands, parse errors, retries, revert attempts |
+| Termination | verified stop, premature stop, max-turn stop, budget stop |
+| Tool protocol | valid calls, unknown tools, malformed arguments, repeated calls |
+| Outcome | pass, partial, fail, evaluator error, environment error |
+
+The fifth real trajectory is an audit: compare it to the profile only after synthetic generation is
+complete. This prevents accidentally tuning the generator to the answer it is later judged against.
+
+## 5. Generate the eleven synthetic traces
+
+The synthetic generator uses the SWE challenge context, public source slice, harness tool schema,
+and the *summarized behavior profile* from the four real calibration runs. It must not receive the
+gold patch, test patch, hidden evaluator output, or the audit trajectory. ChatGPT's coding knowledge
+is used as a teacher for plausible generic-agent behavior, not as evidence of what DeepSeek would
+have done.
+
+Each generated trace should contain a deliberate mixture of behaviors:
+
+- a competent path that inspects before editing and verifies the change;
+- a path with a realistic wrong hypothesis followed by test-driven repair;
+- a path that stops early, hits a tool error, times out, or makes an incomplete change;
+- malformed or redundant tool calls when testing protocol robustness;
+- environment/evaluator failures clearly separated from agent failures.
+
+Do not force all eleven synthetic tasks to pass. For harness testing, a varied corpus is more useful
+than an artificially perfect corpus. The outcome distribution must be documented as a generation
+policy and must never be presented as an empirical model score.
+
+Recommended generation sequence:
+
+```text
+for task in synthetic_tasks:
+    public_context = load(task.context.md, task.challenge.json, task.public/)
+    behavior_profile = fit_profile(real_calibration_trajectories)
+
+    draft = teacher_generate(
+        task=public_context,
+        tools=lam_tool_schema,
+        behavior_profile=behavior_profile,
+        constraints=[no_oracle, bounded_turns, valid_trace_schema],
+    )
+
+    trace = execute_in_isolated_workspace(draft, task.public/)
+    outcome = evaluator_or_compact_verifier(trace.diff, task)
+
+    if trace_is_invalid(trace):
+        trace = bounded_repair(trace, reason="schema/tool/workspace violation")
+        outcome = evaluator_or_compact_verifier(trace.diff, task)
+
+    record(
+        trace=trace,
+        outcome=outcome,
+        source_kind="synthetic",
+        teacher_model="chatgpt-proxy",
+        calibrated_from=real_calibration_task_ids,
+        confidence="low-to-medium",
+    )
+```
+
+`execute_in_isolated_workspace` is essential. A generated JSON trace must not be trusted merely
+because it parses: the harness must execute its tool calls, enforce path boundaries, capture the
+resulting diff, and replay the same request sequence successfully. If the trace is meant to model a
+live agent, its tool results should be generated by the workspace rather than invented by the
+teacher.
+
+## 6. Import synthetic and real traces into LAM
+
+LAM should preserve two related artifacts:
+
+1. **Trajectory artifact** — the complete evidence record, including requests, responses, tools,
+   files, evaluator result, and provenance.
+2. **Replay scenario** — the normalized LAM response sequence or exact cassette used by the mock
+   server. This is the cheap deterministic object consumed by harness regression tests.
+
+The existing `importer.py` and scenario schema can be extended to accept the collector's
+`trajectory.json`. The importer should:
+
+- validate every turn and tool argument against the canonical schema;
+- assign a stable scenario ID such as `t6-swe-astropy-12907-real` or
+  `t6-swe-astropy-12907-synthetic`;
+- preserve `source_kind`, `teacher_model`, `calibration_set`, task ID, base commit, and evaluator
+  version;
+- store exact request hashes for cassette replay;
+- reject traces containing private patch text, hidden test output, API keys, or workspace paths
+  outside the sandbox;
+- write an immutable import manifest recording the source hashes and generator configuration.
+
+The SQLite record should include at least:
+
+```text
+run_id, task_id, scenario_id, source_kind, model, teacher_model,
+base_commit, fixture_sha256, harness_version, evaluator_version,
+turn_count, tool_call_count, passed, stop_reason, cost_usd,
+trajectory_path, cassette_path, created_at
+```
+
+Real and synthetic records must remain queryable together but never indistinguishable. Every report
+should be able to answer: “Was this observed from a provider, generated by a teacher, replayed from
+a cassette, or inferred by a profile?”
+
+## 7. Calibration checks before trusting the 70 percent
+
+Run these gates before using the populated LAM corpus for harness comparisons:
+
+1. **Schema gate:** all 16 trajectories validate; all tool calls are executable or explicitly
+   marked as provider errors.
+2. **Isolation gate:** no public artifact contains `gold.patch`, `test.patch`, hidden test output,
+   API keys, or an evaluator-only path.
+3. **Replay gate:** every imported cassette reproduces the same response sequence under the same
+   request hashes.
+4. **Workspace gate:** replayed tool calls produce the recorded file diff and cannot escape the
+   task workspace.
+5. **Evaluator gate:** real pass/fail results come only from the separate evaluator workspace.
+6. **Behavioral gate:** compare real and synthetic distributions for tool calls, first-edit turn,
+   retry count, test frequency, stop reasons, and diff size. Large divergence means the generator
+   needs recalibration; it does not mean the synthetic score is wrong in a benchmark sense.
+7. **Audit gate:** evaluate the fifth real task against the profile created from the other four.
+8. **Label gate:** every chart and aggregate separates `real-openrouter`, `synthetic-chatgpt-proxy`,
+   `replay`, and `inferred` evidence.
+
+With only four calibration trajectories, use descriptive statistics and bootstrap ranges rather than
+strong claims about population behavior. A useful first target is harness stability: identical
+inputs and cassettes should produce identical tool/evidence outcomes, while controlled fault
+injection should produce the expected recovery or failure classification.
+
+## 8. Development plan
+
+### Phase A — Manifest and loader
+
+Add a SWE fixture loader that understands `challenge.json`, `context.md`, `public/`, and provenance.
+Add a frozen 16-task manifest and the five-task real/synthetic split. Add tests proving that copying a
+fixture never copies `private/`.
+
+### Phase B — Evaluator bridge
+
+Implement repository checkout caching by `(repo, base_commit)`, private test-patch application in a
+separate workspace, changed-diff transfer, `FAIL_TO_PASS`/`PASS_TO_PASS` execution, timeout limits,
+and structured evaluator results. Make compact mode explicit and non-benchmark-labelled.
+
+### Phase C — Collector hardening
+
+Refactor `live_coding.py` so the LEX and SWE loaders share the same agent loop. Add per-turn
+snapshots, tool-result truncation metadata, evaluator callbacks, run IDs, fixture hashes, and
+provider retry/error classification. Keep the existing call and dollar guards.
+
+### Phase D — Five real calibration runs
+
+Run the selected five tasks with one frozen harness configuration. Inspect the four calibration
+trajectories, preserve the fifth as audit, and import all five with `source_kind=real-openrouter`.
+
+### Phase E — Eleven synthetic traces
+
+Fit the behavior profile from four real traces plus the clearly labelled existing LEX prior. Generate
+and execute eleven public-context-only traces. Validate them in isolated workspaces, import them as
+`synthetic-chatgpt-proxy`, and retain generation prompts/configuration for reproducibility.
+
+### Phase F — LAM replay and harness experiments
+
+Convert every accepted trajectory into a deterministic scenario/cassette. Run the same harness over
+all 16 scenarios repeatedly while varying only one harness variable at a time: tool schema,
+context compiler, retry policy, test-feedback policy, timeout, or stopping rule. Compare harness
+metrics within source-kind strata and then report the combined corpus only as a synthetic validation
+corpus.
+
+### Phase G — Expansion
+
+Once the adapter and evaluator are stable, increase real coverage gradually. The next meaningful
+milestone is not more synthetic answers; it is more distinct evaluator-backed tasks. Synthetic
+traces remain valuable for edge-case and fault-injection coverage, while real traces anchor claims
+about provider behavior.
+
+## Recommended first execution
+
+1. Freeze five real task IDs and eleven synthetic task IDs.
+2. Extend the collector to load SWE fixtures without exposing `private/`.
+3. Run one real task end-to-end and verify the evaluator, trajectory, cassette, and SQLite record.
+4. Run the remaining four real tasks under the same budget and configuration.
+5. Generate one synthetic trace and pass it through exactly the same workspace, schema, and replay
+   gates.
+6. Only after those two paths are identical at the harness boundary, generate the remaining ten
+   synthetic traces and import the full 16-task corpus.
+
+The result is a useful, low-cost LAM laboratory: five observed provider trajectories for calibration,
+eleven explicitly synthetic trajectories for breadth, and a common executable harness contract for
+both. It is strong evidence about LAM and the harness; it is intentionally not evidence that the
+synthetic traces equal a real DeepSeek benchmark score.

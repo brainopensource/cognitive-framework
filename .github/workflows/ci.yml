@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # RF-86 diffs the working tree against the M-5-BASE tag; the
+          # RF-86 diffs the working tree against the M-5A-BASE-v2 tag; the
           # default shallow clone has neither the tag nor the history.
           fetch-depth: 0
       - uses: actions/setup-python@v5
@@ -112,5 +112,5 @@ jobs:
       - name: RF-86 frozen substrate gate (M-5 generality)
         # Wired before further M-5 work: the gate's value is catching the
         # incremental kernel hook the moment it lands, not at milestone end.
-        # Fails closed if M-5-BASE is unreachable -- push the tag with the branch.
-        run: bash ci/rf86_gate.sh M-5-BASE
+        # Fails closed if M-5A-BASE-v2 is unreachable -- push the tag with the branch.
+        run: bash ci/rf86_gate.sh M-5A-BASE-v2

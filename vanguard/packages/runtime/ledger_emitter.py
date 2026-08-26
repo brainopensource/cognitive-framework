@@ -46,6 +46,12 @@ ROLE_AUTHORITY_SOURCES: Mapping[str, str] = {
     "approval": "human-approval",
     "recovery": "recovery-policy",
     "orchestrator": "orchestrator-policy",
+    # ADR-0080/M-6. `PRIVILEGED_KIND_OWNERS` has named `spawn_adapter` the sole
+    # writer of `ChildSpawned`/`ChildReturned` since ADR-0090, but the role was
+    # absent from `WRITER_ROLES` -- so the only legal writer of those kinds was
+    # a role the emitter refused to construct. Nothing caught it because
+    # `agent.spawn` was inert.
+    "spawn_adapter": "delegation-policy",
 }
 
 #: Roles that may bind a `capabilityGrant`. An orchestrator that named one
@@ -106,6 +112,7 @@ WRITER_ROLES = frozenset({
     "recovery",
     "orchestrator",
     "session",  # kernel ∪ scheduler: the HarnessSession composition object
+    "spawn_adapter",  # ADR-0080/M-6 mediated delegation
 })
 
 _SESSION_ROLES = frozenset({"kernel", "scheduler", "session"})
@@ -197,6 +204,9 @@ class LedgerEmitter:
 
     def registry(self) -> RoleScopedEmitter:
         return RoleScopedEmitter(self, "registry")
+
+    def spawn_adapter(self) -> RoleScopedEmitter:
+        return RoleScopedEmitter(self, "spawn_adapter")
 
     def evaluator_gateway(self) -> RoleScopedEmitter:
         return RoleScopedEmitter(self, "evaluator_gateway")

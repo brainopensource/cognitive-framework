@@ -21,6 +21,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
+from ..domain.ledger.reducer import REDUCER_VERSION
+
 __all__ = [
     "REPRO_DOMAINS",
     "StateReconstructionAssessment",
@@ -237,7 +239,7 @@ def assess_reproducibility(
     state_reconstruction_receipt: Mapping[str, Any] | None = None,
     semantic_replay_receipt: Mapping[str, Any] | None = None,
     assessed_at: str | None = None,
-    reducer_version: str = "v1.0.0",
+    reducer_version: str = REDUCER_VERSION,
     schema_versions: Mapping[str, str] | None = None,
     state_digest: str | None = None,
     run_id: str | None = None,

@@ -113,10 +113,12 @@ delegation, binds `runtime.SpawnAdapter` as their sole legal writer, and folds t
 | `0090` | [`0090-mediated-delegation-event-roster.md`](0090-mediated-delegation-event-roster.md) | **Mediated delegation event roster:** `ChildSpawned`/`ChildReturned` allocated; `SpawnAdapter` sole writer; open-until-returned fold with cold reconciliation; cost conservation; derived authority; no `ChildFailed` third kind; no kernel change. | accepted | 2026-08-24 |
 
 **This ADR does not close M-6.** It closes the roster question only. `agent.spawn` remains inert at
-three points (`domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every
-spawn via `M6_SPAWN_ACTIVE = False`, and the verb is on the inert-verb list), so no `ChildSpawned` can
-be emitted by the product. RF-55–RF-59 are allocated by ADR-0080, but their M-6 implementation
-falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
+manifest ingress and the product path until the active M-6 gate enables those seams. RF-55–RF-59
+are implemented as one conjunctive gate: RF-55 grant denial/no child event; RF-56 durable intent,
+idempotent receipt and strict attenuation; RF-57 declared target, four-dimensional conservation and
+depth/turn ceilings; RF-58 explicit evaluator authority plus typed acyclic join; RF-59 sole-writer
+enforcement plus kill-tree recovery as `UNDETERMINABLE` with no silent retry. This register resolves
+the narrower historical wordings in ADR-0080 and ADR-0090 without weakening either decision.
 
 ---
 
@@ -307,7 +309,7 @@ falsifiers use `RF-*`.
 | `RF-38`–`RF-45` | ADR-0081 | Plugin lifecycle parity and NOVA-4 Layer-0 retirement / M-3 |
 | `RF-46`–`RF-48` | ADR-0083 | Pareto profile identity, authority, and reservation / M-3 and M-7 |
 | `RF-52`–`RF-53` | ADR-0084 | Attributable witness memo / M-5 |
-| `RF-55`–`RF-59` | ADR-0080 | Capability-mediated `agent.spawn` / M-6 |
+| `RF-55`–`RF-59` | ADR-0080 + ADR-0090 | Conjunctive mediated-spawn gate: grant/no-child denial; durable idempotent intent and attenuation; declared target plus four-dimensional conservation and structural ceilings; evaluator-authorized typed acyclic join; sole writer plus kill-tree `UNDETERMINABLE` recovery / M-6 |
 | `RF-65`–`RF-66` | ADR-0082 | Advanced topology fitness and the universal-loop challenge / M-8 |
 | `RF-67`–`RF-70` | ADR-0084 | Macro least privilege, dispatch, and exact promotion / M-9–M-10 |
 | `RF-72` | ADR-0082 | Identifier uniqueness linter and this one-time historical alias table / governance |

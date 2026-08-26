@@ -16,6 +16,7 @@ import unittest
 from typing import Any
 
 from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.ledger.reducer import REDUCER_VERSION
 from vanguard.packages.runtime.profiles import PRESETS, resolve_profile
 from vanguard.packages.runtime.reproducibility import (
     REPRO_DOMAINS,
@@ -66,7 +67,7 @@ class RF100ReproducibilityFalsifier(unittest.TestCase):
             "verified": True,
             "run_id": run_id,
             "reconstructed_state_digest": state_digest,
-            "reducer_version": "v1.0.0",
+            "reducer_version": REDUCER_VERSION,
             "input_history_digest": "sha256:history-123",
             "event_count": 42,
         }
@@ -75,7 +76,7 @@ class RF100ReproducibilityFalsifier(unittest.TestCase):
             valid_receipt,
             expected_run_id=run_id,
             expected_state_digest=state_digest,
-            expected_reducer_version="v1.0.0",
+            expected_reducer_version=REDUCER_VERSION,
         ))
 
         vector = assess_reproducibility(

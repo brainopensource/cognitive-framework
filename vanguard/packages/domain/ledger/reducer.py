@@ -49,7 +49,7 @@ __all__ = [
 #: falls back to a cold fold when it moves. Bump it whenever a change to
 #: `reduce_event` or `LedgerState` would make an existing fold a fold of
 #: different rules -- a stale pin is a wrong answer served fast.
-REDUCER_VERSION = "v1.0.0"
+REDUCER_VERSION = "v1.1.0"
 
 
 class ReducerError(ValueError):

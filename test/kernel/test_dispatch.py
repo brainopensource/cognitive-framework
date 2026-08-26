@@ -169,6 +169,22 @@ class FailClosed(unittest.TestCase):
         self.assertEqual(len(reconciled), 1)
         self.assertEqual(reconciled[0].payload["occurrence"], "undeterminable")
 
+    def test_determinate_adapter_error_settles_as_effect_failed(self) -> None:
+        """F-22 distinguishes a known rejected/invalid effect from unknown I/O."""
+        adapter = fakes.FakeAdapter("fs.write", outcome=AdapterOutcome(
+            "error", Occurrence.DID_NOT_OCCUR, {"usd_micros": 0},
+            detail="malformed hunk header"))
+        harness = fakes.build(adapter=adapter)
+        result = harness.kernel.dispatch(fakes.request(),
+                                         requested_scope=fakes.child_scope(),
+                                         reservation=fakes.reservation())
+        self.assertIs(result.failure, FailurePath.ADAPTER_ERROR)
+        kinds = [event.kind for event in result.events]
+        self.assertIn("EffectStarted", kinds)
+        self.assertIn("EffectFailed", kinds)
+        self.assertNotIn("EffectCompleted", kinds)
+        self.assertNotIn("EffectReconciled", kinds)
+
     def test_adapter_exception_leaves_occurrence_unknown(self) -> None:
         harness = fakes.build(adapter=fakes.FakeAdapter(
             "fs.write", raises=RuntimeError("connection reset mid-write")))

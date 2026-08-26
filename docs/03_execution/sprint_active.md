@@ -31,7 +31,7 @@ M-5a implementation is complete and gate-green ahead of promotion. M-5b and M-6 
 parallel because their current work uses frozen interfaces and disjoint surfaces. Neither may claim
 promotion evidence until `M-5A-BASE-v2` resolves.
 
-Latest integrated evidence: **1,560 Python passed / 8 skipped / 0 failed; TypeScript 68/68; codegen,
+Latest integrated evidence: **1,567 Python passed / 8 skipped / 0 failed; TypeScript 68/68; codegen,
 boundaries, TCB 1366/1438, RF-97 transitive closure, secrets, domain blindness, isolation,
 duplication, links, stale paths and RF allocation green; Kernel semantic diff zero.**
 
@@ -41,8 +41,8 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 |---|---|---|---|---|
 | M-4 | A-M4 evidence runtime and causal capture | Dev A | DONE | `PACKAGE_READY` |
 | M-4 | B-M4 contracts, trajectory `/2`, RF-100 | Dev B | DONE | `PACKAGE_READY` |
-| M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,560 Python; 68/68 TS; all named gates |
-| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | IN PROGRESS | terminal trajectory `/2`, exact I/O, diff, verifier, WAL, cold receipt |
+| M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,567 Python; 68/68 TS; all named gates |
+| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | FAILED — evidence preserved | malformed model hunk produced no diff; fresh candidate required after repair |
 | M-4 | G-M4-05 independent review receipt | Human reviewer | TODO | reviewer did not author candidate implementation |
 | M-4 | G-M4-06 closure | Tech Lead | TODO | RF-95 accepted + review receipt |
 | M-5a | Event `/2`, vocabulary and emitter cutover | Dev A | DONE | mixed `/1|/2`, `/2` writes, historical bytes preserved |
@@ -57,7 +57,7 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-5b | `packs/formal-sat` frame and fixed task set | Dev B | DONE | digest-pinned formula, positive witness, negative vector |
 | M-5b | Exterior SAT evaluator | Dev B | DONE | deterministic accept/reject; no search or self-grading |
 | M-5b | RF-86 baseline cutover | Tech Lead | DONE | defaults to `M-5A-BASE-v2`; missing tag fails closed |
-| M-5b | Full formal run and signed verdict bundle | Dev B | TODO | trajectory, signed verdict, cold reconstruction |
+| M-5b | Full formal run and signed verdict bundle | Dev B | IN PROGRESS | SAT/CNF pack is executable; material run waits for reviewed v2 baseline |
 | M-5b | RF-86/RF-98 final zero-diff review | Tech Lead | TODO | zero frozen-substrate semantic diff from v2 tag |
 | M-6 | SpawnAdapter, conservation, join, recovery, RF-55…59 | Dev A | PACKAGE READY | 28 falsifiers; conjunctive allocation in ADR index |
 | M-6 | Manifest ingress and product-only spawn path | Dev A | IN PROGRESS | Kernel remains verb-blind |
@@ -85,6 +85,11 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 4. Create and push `M-5A-BASE-v2` on the reviewed M-5a substrate commit.
 5. Dev B executes the material SAT run; Dev A completes M-6 product activation and demonstration.
 6. Run RF-86/RF-98 and independent cross-lane review; close M-5b/M-6 separately on evidence.
+
+The RF-95 failure also fixed two substrate/adapter defects: determinate adapter errors now emit
+`EffectFailed` after `EffectStarted`, and model-authored bare `@@` hunks are context-anchored by
+the environment adapters. These repairs are covered by focused tests; they do not make the failed
+candidate pass and do not authorize a retry.
 
 ## 5. Prohibited scope
 

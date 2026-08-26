@@ -23,10 +23,11 @@ supersedes: []
 superseded_by: null
 ---
 
-# Event Envelope Contract (`mhf.event/1`)
+# Event Envelope Contract (`mhf.event/1` and `/2`)
 
-> **Schema:** [`schemas/mhf/event_envelope.schema.json`](../../schemas/mhf/event_envelope.schema.json)  
-> **Status:** `AS_BUILT` · Governed by ADR-0071 / ADR-0076.
+> **Schemas:** [`event_envelope.schema.json`](../../schemas/mhf/event_envelope.schema.json) and
+> [`event_envelope_v2.schema.json`](../../schemas/mhf/event_envelope_v2.schema.json)
+> **Status:** `/1` readable and byte-frozen; `/2` single-write migration under ADR-0098.
 
 ---
 
@@ -38,6 +39,29 @@ The wire schema requires `schema_version`, `event_id`, `kind`, `seq`, `occurred_
 The richer domain envelope also carries scope, ownership, confidentiality, retention,
 trainability, and redaction data. The schema and parser are the exact references; this page does
 not duplicate a sample that could silently drift.
+
+`mhf.event/2` adds exactly four typed authority fields: `authority_source` and `policy_version`
+are required strings; `approval_reference` and `capability_grant` are nullable references. The
+reader keeps `/1` authority absent rather than inventing defaults, and mixed `/1` → `/2` chains
+preserve `prev_digest` continuity.
+
+## Semantic projection kinds
+
+The M-5a semantic roster is fixed by ADR-0098. Payload schemas and generated types are the source
+for field shape; `AgentView` is a projection over the canonical ledger reducer, never a second
+source of truth.
+
+| Kind | Required payload identity | Projection effect |
+|---|---|---|
+| `GoalDeclared` | `goalDigest` | latest goal identity |
+| `PlanRevised` | `revision`, `planDigest` | append ordered plan revision |
+| `StrategyChanged` | `from`, `to`, `trigger` | update strategy history |
+| `ProgressAssessed` | `assessment`, `signals`, `basis` | append progress assessment |
+| `ContextCompacted` | `inputDigest`, `outputDigest` | advance context epoch |
+
+The following historical kinds remain readable but are unwritable: `ObservationRequested`,
+`OperatorInvoked`, `OperatorSelected`, `CorrectionRecorded`, `CandidateBuilt`,
+`CandidateAttested`, `CanaryPromoted`, and `RollbackTriggered`.
 
 ## Writer Authority Matrix
 

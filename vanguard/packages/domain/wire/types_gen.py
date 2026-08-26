@@ -136,6 +136,16 @@ class BlobRef:
     media_type: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class CheckpointPayload:
+    projectionId: str
+    reducerVersion: str
+    schemaVersions: JsonObject
+    stateDigest: str
+    stateArtifact: str
+    coveredThroughEventId: str
+    coveredThroughSeq: str
+
+@dataclass(frozen=True, slots=True)
 class ClaimRef:
     claim_id: str
 
@@ -154,6 +164,15 @@ class ContextBundle:
     prefix: str
     suffix: str
     token_count: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class ContextCompactedPayload:
+    inputDigest: str
+    outputDigest: str
+    strategy: str | None = None
+    tokensBefore: int | None = None
+    tokensAfter: int | None = None
+    removedTokens: int | None = None
 
 @dataclass(frozen=True, slots=True)
 class EffectContext:
@@ -268,6 +287,12 @@ class ExecutionProfileV2:
     network: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
+class GoalDeclaredPayload:
+    goalDigest: str
+    goalArtifact: str | None = None
+    parentGoalDigest: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class Health:
     ok: bool
     detail: str | None = None
@@ -308,9 +333,25 @@ class OracleSpec:
     digest: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class PlanRevisedPayload:
+    revision: int
+    planDigest: str
+    previousPlanDigest: str | None = None
+    planArtifact: str | None = None
+    rationaleDigest: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class PluginRef:
     ref: str
     config: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class ProgressAssessedPayload:
+    assessment: str
+    signals: JsonObject
+    basis: tuple[str, ...]
+    confidence: float | None = None
+    evidenceDigest: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class ProvenanceClaimPayload:
@@ -372,6 +413,13 @@ class SignedVerdict:
     nonce: str
     key_id: str
     signed_at: str
+
+@dataclass(frozen=True, slots=True)
+class StrategyChangedPayload:
+    from_: str | None
+    to: str
+    trigger: str
+    controllerId: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class ToolSchema:
@@ -572,10 +620,12 @@ __all__ = [
     "ArtifactRef",
     "Binding",
     "BlobRef",
+    "CheckpointPayload",
     "ClaimRef",
     "CompactionReport",
     "ConsolidationReport",
     "ContextBundle",
+    "ContextCompactedPayload",
     "EffectContext",
     "EffectFailure",
     "EpisodeOutcome",
@@ -585,6 +635,7 @@ __all__ = [
     "EventEnvelopeV2",
     "ExecutionProfile",
     "ExecutionProfileV2",
+    "GoalDeclaredPayload",
     "Health",
     "MeasurementStatus",
     "MemoryHit",
@@ -592,12 +643,15 @@ __all__ = [
     "MemoryRecord",
     "ModelRoute",
     "OracleSpec",
+    "PlanRevisedPayload",
     "PluginRef",
+    "ProgressAssessedPayload",
     "ProvenanceClaimPayload",
     "Reflection",
     "Reservation",
     "Selector",
     "SignedVerdict",
+    "StrategyChangedPayload",
     "ToolSchema",
     "TrajectoryRef",
     "Capability",

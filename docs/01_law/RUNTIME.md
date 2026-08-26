@@ -322,12 +322,11 @@ Domains MAY define their own projections. The canonical **ledger reducer remains
 domain-specific view is a projection over it, never a second reducer of record and never a second
 source of truth.
 
-> **Current-state gap (closed by M-5a).** Today, part of the semantic continuation state still lives
-> inside `Episode`/`HarnessSession` objects rather than in projections, and the `AgentView` event
-> vocabulary (goal declaration, plan revision, strategy selection, progress assessment, context
-> compaction) is not yet allocated. This is a documented migration, not a weakening of the rule
-> above. The historical `M-5-BASE` tag is immutable; the migrated substrate is tagged once as
-> `M-5A-BASE-v2` after M-5a gates pass.
+> **M-5a migration status.** The semantic event roster and pure `AgentView` projection are now
+> implemented, while runtime checkpoint integration and the complete RF-96/RF-97/RF-99 gate remain
+> in progress. This is a documented migration, not a weakening of the rule above. The historical
+> `M-5-BASE` tag is immutable; the migrated substrate is tagged once as `M-5A-BASE-v2` after all
+> M-5a gates pass.
 
 ### 1.6 Physical append order and the logical causal graph
 

@@ -51,6 +51,7 @@ from .compose import (
     TaskContext,
 )
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
+from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
@@ -473,8 +474,17 @@ class HarnessSession:
             self.provenance = RuntimeProvenanceSink(
                 self.ledger, run_id=task.run_id, principal=task.principal,
                 episode_id=task.episode_id)
+            # `ADR-0098 Decision 6`. The checkpoint rides the same optional
+            # seam as capture, because it is written through the same writer:
+            # a session with nowhere to put bytes has nowhere to put a
+            # checkpoint either, and cold folding is the correct behaviour
+            # there rather than a degraded one.
+            self.checkpoints = CheckpointManager(
+                ports.blobs, artifacts=self.artifacts)
         else:
             self.capture_policy = ports.capture_policy
+            self.checkpoints: CheckpointManager | None = None
+        self.last_checkpoint: Checkpoint | None = None
 
         self.operator = _LayeredOperator(
             ports.model, compiler, task=task,
@@ -505,6 +515,42 @@ class HarnessSession:
         read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
+
+    def checkpoint(self, *, turn: int | None = None) -> Checkpoint | None:
+        """Memoise the current fold, if this session can store one.
+
+        Returns `None` rather than raising when there is no store, no
+        authorisation, or no retention for it. A checkpoint is a cache: the
+        events remain the truth and the cold fold remains available, so an
+        unwritten checkpoint costs time and never correctness.
+        """
+        if self.checkpoints is None:
+            return None
+        self.last_checkpoint = self.checkpoints.capture(
+            self.ledger_state(), turn=turn)
+        return self.last_checkpoint
+
+    def reconstruct(self, *, verify: bool = False) -> Reconstruction:
+        """Rebuild episode state, using a checkpoint only once it has proven itself.
+
+        Every validation failure falls back to the full cold fold and records
+        why (`runtime/checkpoints.py`). `verification="verified"` is reachable
+        only with `verify=True`, which executes the parity comparison -- `C-04`
+        separates capability from proof and this is where that separation is
+        actually enforced on the runtime path.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        envelopes = list(read.value) if read.ok and read.value is not None else []
+        if self.checkpoints is None:
+            if not envelopes:
+                return Reconstruction(state=None, capability="none")
+            return Reconstruction(
+                state=reconstruct_state(envelopes),
+                capability="full_cold",
+                events_replayed=len(envelopes),
+            )
+        return self.checkpoints.reconstruct(
+            envelopes, checkpoint=self.last_checkpoint, verify=verify)
 
     def turns_consumed(self) -> int:
         """Turns this episode has already spent, counted from the ledger.

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/checkpoint.schema.json",
+  "title": "CheckpointPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["projectionId", "reducerVersion", "schemaVersions", "stateDigest", "stateArtifact", "coveredThroughEventId", "coveredThroughSeq"],
+  "properties": {
+    "projectionId": {"type": "string", "enum": ["agent_view", "ledger_state"]},
+    "reducerVersion": {"type": "string", "minLength": 1},
+    "schemaVersions": {"type": "object", "additionalProperties": {"type": "string"}},
+    "stateDigest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stateArtifact": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "coveredThroughEventId": {"type": "string", "minLength": 1},
+    "coveredThroughSeq": {"type": "string", "pattern": "^[0-9]+$"}
+  }
+}

@@ -33,6 +33,7 @@ from .state import (
 )
 
 __all__ = [
+    "REDUCER_VERSION",
     "ReducerError",
     "initial_state",
     "reduce_event",
@@ -40,6 +41,15 @@ __all__ = [
     "reconstruct_state",
     "compute_state_digest",
 ]
+
+
+#: The identity of the fold these functions perform (`ADR-0098 Decision 6`).
+#: A checkpoint is a memo of `reduce_batch`, so it is only reusable under the
+#: reducer that produced it; `runtime/checkpoints.py` pins this value and
+#: falls back to a cold fold when it moves. Bump it whenever a change to
+#: `reduce_event` or `LedgerState` would make an existing fold a fold of
+#: different rules -- a stale pin is a wrong answer served fast.
+REDUCER_VERSION = "v1.0.0"
 
 
 class ReducerError(ValueError):
@@ -523,7 +533,9 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             "occurredAt": envelope.occurred_at,
             "planDigest": payload.get("planDigest"),
             "previousPlanDigest": payload.get("previousPlanDigest"),
-            "reason": payload.get("reason"),
+            "planArtifact": payload.get("planArtifact"),
+            "rationaleDigest": payload.get("rationaleDigest"),
+            "reason": payload.get("reason") or payload.get("rationaleDigest"),
             "revision": payload.get("revision"),
         })
 
@@ -531,9 +543,10 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         strategy_changes.append({
             "seq": envelope.seq,
             "occurredAt": envelope.occurred_at,
-            "fromStrategy": payload.get("fromStrategy"),
-            "toStrategy": payload.get("toStrategy"),
-            "reason": payload.get("reason"),
+            "fromStrategy": payload.get("from") or payload.get("fromStrategy"),
+            "toStrategy": payload.get("to") or payload.get("toStrategy"),
+            "reason": payload.get("trigger") or payload.get("reason"),
+            "controllerId": payload.get("controllerId"),
         })
 
     elif kind == "ProgressAssessed":
@@ -541,6 +554,8 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             "seq": envelope.seq,
             "occurredAt": envelope.occurred_at,
             "assessment": payload.get("assessment"),
+            "signals": payload.get("signals", {}),
+            "basis": payload.get("basis", []),
             "confidence": payload.get("confidence"),
             "evidenceDigest": payload.get("evidenceDigest"),
         })
@@ -554,6 +569,7 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             "outputDigest": payload.get("outputDigest"),
             "tokensBefore": payload.get("tokensBefore"),
             "tokensAfter": payload.get("tokensAfter"),
+            "removedTokens": payload.get("removedTokens"),
         })
 
     elif kind == "RunRecovered":

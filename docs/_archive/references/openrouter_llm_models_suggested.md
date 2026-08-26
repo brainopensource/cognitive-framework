@@ -4,6 +4,7 @@
 
 - stealth/ox-alpha
 - openrouter/free
+- minimax/minimax-m3:free
 - z-ai/glm-5.2:free
 - inclusionai/ling-3.0-tiny:free
 - poolside/laguna-s-2.1:free
@@ -14,9 +15,14 @@
 
 ## 1. Verified Low-Cost Paid Models
 
-- deepseek/deepseek-v4-flash
+- deepseek/deepseek-v4-flash-0731 (v2 coding)
+- deepseek/deepseek-v4-flash (v2 0423)
 - openai/gpt-5.6-luna
+- qwen/qwen3.8-27b
+- stepfun/step-3.7-flash
 - xiaomi/mimo-v2.5
+- xiaomi/mimo-v2.5-pro
+- google/gemini-3.7-flash
 - minimax/minimax-m3
 - tencent/hy3-preview
 - upstage/solar-pro4

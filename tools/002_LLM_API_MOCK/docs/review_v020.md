@@ -90,3 +90,1078 @@ All raw evaluation records are saved in:
 - `benchmarkings/tasks_phase2_LAM/test001/outputs/ollama_deepseek-r1_14b.json`
 - `benchmarkings/tasks_phase2_LAM/test001/outputs/openrouter_deepseek_deepseek-chat.json`
 - `benchmarkings/tasks_phase2_LAM/test001/outputs/refinement_summary.json`
+
+---
+
+# Independent Chapter — LAM Product Improvement and SOTA Local Agent Laboratory
+
+**Chapter status:** Product and research roadmap
+
+**Audience:** Staff Engineering, Principal Architecture, AI/ML research, LLM systems,
+agentic-coding infrastructure, evaluation, and reproducibility teams
+
+**Purpose:** Define how LAM can become a substantially more capable, faster, safer, and more
+scientifically useful local laboratory for agentic coding—while remaining honest that a replay
+system is not itself a neural language model.
+
+## Chapter table of contents
+
+1. [Executive summary](#61-executive-summary)
+2. [Epistemic boundary: what LAM can and cannot become](#62-epistemic-boundary-what-lam-can-and-cannot-become)
+3. [What LAM already has](#63-what-lam-already-has)
+4. [How to use LAM today](#64-how-to-use-lam-today)
+5. [Target product architecture](#65-target-product-architecture)
+6. [Capability ladder](#66-capability-ladder)
+7. [SOTA improvement program](#67-sota-improvement-program)
+8. [Trajectory and dataset design](#68-trajectory-and-dataset-design)
+9. [Evaluation and scientific methodology](#69-evaluation-and-scientific-methodology)
+10. [Security, privacy, and benchmark integrity](#610-security-privacy-and-benchmark-integrity)
+11. [Performance and cost engineering](#611-performance-and-cost-engineering)
+12. [Implementation roadmap and acceptance gates](#612-implementation-roadmap-and-acceptance-gates)
+13. [Research opportunities](#613-research-opportunities)
+14. [Non-goals and hard limitations](#614-non-goals-and-hard-limitations)
+15. [Final recommendation](#615-final-recommendation)
+16. [Technical references](#616-technical-references)
+
+## 6.1 Executive summary
+
+LAM should be treated as a **model-behavior laboratory**, not as a claim that a finite answer
+bank has acquired the general intelligence of DeepSeek, Claude, GPT, or any other model. Its
+highest-value product direction is a layered system with four distinct modes:
+
+| Mode | What it provides | Cost | Scientific claim it supports |
+|---|---|---:|---|
+| Protocol mock | OpenAI/Ollama-compatible request and response behavior | $0 | The harness can speak the expected wire protocol |
+| Exact cassette replay | Deterministic replay of a previously observed request/response trajectory | $0 | This exact execution trace can be reproduced |
+| Behavioral scenario model | Scripted, state-conditioned responses over a challenge family | $0 after authoring | The harness behavior is robust to controlled response patterns |
+| Live teacher collection | Real model decisions, tool calls, failures, and verifier outcomes | Paid or local compute | This model/harness/task run produced the recorded evidence |
+
+The product should move upward through these layers without collapsing their labels. A replayed
+DeepSeek trajectory is valuable because it enables fast regression testing, but it is not a new
+DeepSeek inference. A learned local surrogate may approximate a model’s action distribution, but
+it is not equivalent to the source model unless equivalence is demonstrated for a declared task
+distribution and metric.
+
+The recommended target is therefore:
+
+> **A local, deterministic, evidence-labeled agentic-coding laboratory that can replay real
+> model behavior, perturb the harness, compare policies, train or fit bounded surrogates, and
+> expose every causal step needed to explain success or failure.**
+
+LAM already has the essential seed of this product: a stateless scenario engine, an HTTP server,
+OpenAI/Ollama wire adapters, exact cassettes, a live proxy, a SQLite metrics store, a model
+router, a Vanguard tool-name bridge, and a standalone live coding collector. The next work is
+not to make the mock pretend to be live. It is to make the distinction between live, replayed,
+synthetic, and inferred behavior mechanically explicit while increasing the fidelity and utility
+of each mode.
+
+The most important near-term priorities are:
+
+1. preserve complete live trajectories rather than short snippets;
+2. make replay state- and request-conditioned instead of only turn-count-conditioned;
+3. formalize a challenge/workspace/evaluator protocol;
+4. add systematic failure, retry, reflection, and context-policy experiments;
+5. build controlled behavioral surrogates from real traces;
+6. measure harness effects with paired, reproducible experiments;
+7. keep benchmark leakage, secret exposure, and false live claims impossible by construction.
+
+## 6.2 Epistemic boundary: what LAM can and cannot become
+
+### 6.2.1 A mock is not a language model
+
+A language model computes a conditional distribution over token sequences, approximately:
+
+\[
+P(y_{1:n} \mid x_{1:m}, \theta),
+\]
+
+where \(\theta\) is a learned parameterization and the output is sampled or decoded under a
+policy. The current LAM engine does not compute that distribution. It selects a stored response
+from a scenario using observable conversation features such as tool-result count or prior text.
+
+That is not a defect for replay. It is the correct mechanism for deterministic infrastructure
+tests. It becomes a defect only if LAM labels the result as a measurement of general model
+capability.
+
+### 6.2.2 Four useful notions of “similarity”
+
+LAM can approach a real model along several independent axes:
+
+| Similarity axis | Definition | Measurement |
+|---|---|---|
+| Protocol fidelity | Same request/response schema, streaming, errors, and tool-call encoding | Contract tests and wire fixtures |
+| Trace fidelity | Same response for the same canonical request and history | Request digest and byte comparison |
+| Behavioral fidelity | Similar action/tool/test/error distributions over a task distribution | Distributional metrics and held-out tasks |
+| Capability fidelity | Similar solve rate, patch quality, calibration, and generalization | Paired benchmark evaluation |
+
+Exact cassette replay can reach near-100% trace fidelity for the recorded trace while providing
+zero evidence about capability fidelity on a new task. A learned surrogate can improve
+behavioral fidelity, but it requires held-out evaluation and must not inherit labels from its
+teacher traces without accounting for leakage and selection bias.
+
+### 6.2.3 Why “free and local” has a limit
+
+There are three different meanings of free:
+
+1. **Free replay:** already-collected traces can be replayed locally at negligible cost.
+2. **Free local inference:** an open-weight model can run on local hardware, with latency and
+   quality determined by model size, quantization, memory, and runtime.
+3. **Free general intelligence:** impossible without either a capable pre-trained model or a
+   substantial training/distillation investment.
+
+LAM can make the first two highly efficient. It cannot create the third by recording a few dozen
+responses. The honest product objective is a local laboratory that maximizes the value extracted
+from each expensive or slow inference and allows thousands of no-cost controlled experiments
+afterward.
+
+## 6.3 What LAM already has
+
+### 6.3.1 Existing system components
+
+The present LAM implementation includes:
+
+- a stateless scenario engine with multi-turn tool-observation progression;
+- a gold answer/scenario bank organized into task tiers;
+- OpenAI-compatible `/v1/chat/completions` responses;
+- Ollama-compatible `/api/chat` and `/api/generate` responses;
+- optional SSE-style OpenAI streaming;
+- exact request-hash cassette loading and replay;
+- an upstream proxy path for live Ollama-compatible services;
+- explicit evidence labels such as `lam-replay`, `cassette-exact`, and live-provider labels;
+- SQLite call and benchmark provenance records;
+- model-router integration through the existing mock provider;
+- LAM/Vanguard tool-name translation;
+- scenario import and secret-redaction helpers;
+- a standalone real-model coding collector in `live_coding.py`;
+- temporary workspaces, safe tool execution, test verification, diff capture, and budget guards;
+- complete JSON trajectories and exact cassettes for collected runs.
+
+### 6.3.2 Empirical baseline already collected
+
+The standalone collector has now exercised four real coding challenges from the LEX laboratory
+as read-only source inputs copied into temporary workspaces:
+
+| Challenge | Problem family | Result in the recorded DeepSeek run |
+|---|---|---|
+| `semver_parser` | Semantic-version precedence and build metadata | Failed verification; the model corrupted the file, and the evaluator caught it |
+| `isolated_coding_test` | LRU/TTL expiry and recency | Passed |
+| `plugin_dag` | Cycle detection and topological load order | Passed |
+| `token_bucket` | Refill saturation boundary | Passed |
+
+The collection used 51 total API calls including the validation call, spent approximately
+`$0.00837`, and produced complete trajectories and replay cassettes. The result is not a
+benchmark score. It is a useful first teacher corpus showing that the harness can observe both
+successful repair and catastrophic editing failure without mutating the source challenge tree.
+
+### 6.3.3 Current strengths
+
+LAM is already particularly strong for:
+
+- deterministic CI and regression tests;
+- validating tool schemas and turn-loop state transitions;
+- testing harness behavior without network or provider credentials;
+- replaying expensive agent trajectories;
+- comparing prompt or tool-policy changes against identical model outputs;
+- collecting latency, token, cost, and verifier outcomes;
+- fault injection and negative fixtures;
+- rapidly exercising many model/harness combinations after traces exist.
+
+### 6.3.4 Current weaknesses
+
+The major gaps are:
+
+- the older recorder stores hashes and short snippets rather than a canonical full-fidelity event
+  log;
+- scenario progression based on tool count is not equivalent to response selection from the
+  actual workspace state;
+- exact cassettes are brittle when prompts, tool schemas, or context formatting change;
+- replay does not yet model alternative branches, uncertainty, or response distributions;
+- the SQLite schema is a metrics index, not a complete trajectory database;
+- there is no first-class challenge manifest and evaluator contract for arbitrary repositories;
+- the standalone collector’s tool surface is intentionally small and not yet configurable as an
+  agent-computer interface profile;
+- no learned surrogate or calibrated behavior model exists;
+- no systematic policy-ablation runner exists for context, retry, reflection, or memory;
+- no automatic leakage detector proves that gold patches and hidden tests stayed outside the
+  model-visible context;
+- a live model’s nondeterminism, provider routing, and changing model snapshot are not yet
+  represented as complete compatibility metadata.
+
+## 6.4 How to use LAM today
+
+### 6.4.1 Run the deterministic scenario bank
+
+```bash
+python3 tools/002_LLM_API_MOCK/simulate.py
+```
+
+This exercises the pre-authored LAM scenarios without network access or API credentials.
+
+### 6.4.2 Run the hermetic LAM tests
+
+```bash
+python3 -m unittest test.tools.test_llm_api_mock
+python3 -m unittest test.tools.test_lam_live_coding
+```
+
+### 6.4.3 Collect bounded real-model coding traces
+
+The collector reads the configured OpenRouter key internally from the environment or the
+specified dotenv file. It never prints the key or places it in a trajectory:
+
+```bash
+python3 tools/002_LLM_API_MOCK/live_coding.py \
+  --challenge semver_parser \
+  --challenge isolated_coding_test \
+  --challenge plugin_dag \
+  --challenge token_bucket \
+  --max-calls 60 \
+  --max-usd 0.10
+```
+
+Every challenge is copied into a temporary workspace. The model can use the declared tools to
+inspect and edit files and run bounded commands. The collector then runs the verifier, records
+the final diff, and saves:
+
+- `trajectory.json` — full request/response/tool-result history;
+- `cassette.jsonl` — exact request-hash to response mapping;
+- `result.json` — pass/fail, cost, call count, verification output, and diff;
+- `collection_summary.json` — aggregate collection metadata.
+
+Generated live captures belong under the ignored run-artifact directory and should be treated as
+experimental evidence, not casually committed model-output dumps.
+
+### 6.4.4 Replay a captured model response
+
+```bash
+python3 tools/002_LLM_API_MOCK/server.py \
+  --cassette tools/002_LLM_API_MOCK/runs/live_captures/<run-id>/cassette.jsonl \
+  --port 8787
+```
+
+The harness must send the same canonical request body to obtain an exact cassette hit. A changed
+system prompt, tool schema, or message serialization should produce a mismatch rather than a
+silent approximate answer. That failure is useful: it identifies a compatibility change.
+
+## 6.5 Target product architecture
+
+The mature LAM laboratory should be organized as a set of explicit planes:
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Challenge Plane                                                          │
+│  task manifest · base workspace · hidden/public tests · evaluator policy │
+└───────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Agent Controller Plane                                                   │
+│  prompt compiler · context policy · turn loop · retry · reflection       │
+│  planning · memory · tool choice · stop/continue policy                   │
+└───────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Model Plane                                                              │
+│  live OpenRouter · local Ollama · exact cassette · behavioral surrogate   │
+└───────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Environment Plane                                                        │
+│  read · search · edit · execute · test · patch · reset · snapshot         │
+└───────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Evidence Plane                                                           │
+│  causal trajectory · artifacts · evaluator receipts · metrics · cassettes│
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+The essential architectural rule is that the model plane must be replaceable without changing
+the challenge, controller, environment, or evaluator contracts. This makes LAM useful for
+isolating whether a result came from the model, the harness, the task environment, or the
+verification policy.
+
+### 6.5.1 Challenge manifest
+
+Every challenge should have a machine-readable manifest containing:
+
+- stable challenge ID and version;
+- source repository or fixture digest;
+- base commit/workspace digest;
+- public task statement digest;
+- allowed file mutation scope;
+- setup command and dependency lock;
+- visible test command;
+- hidden evaluator command or evaluator image digest;
+- expected patch region, when known;
+- difficulty dimensions;
+- leakage classification;
+- timeout, memory, and process limits;
+- dataset split and provenance.
+
+The model must receive only the public projection of this manifest. The evaluator retains the
+oracle projection. This separates task construction from task execution and makes leakage
+auditable.
+
+### 6.5.2 Agent-computer interface profiles
+
+LAM should support multiple tool profiles rather than one fixed tool vocabulary:
+
+1. **Minimal shell profile:** `view_file`, `edit_file`, `run_command`.
+2. **Repository profile:** add `list_dir`, `grep_file`, `find_references`, `git_diff`.
+3. **Structured patch profile:** replace whole-file editing with validated unified patches.
+4. **CodeAct profile:** permit a bounded Python/bash execution action under a sandbox.
+5. **Review profile:** expose test failures, diff summaries, and static-analysis findings.
+
+Agent-computer interface design materially affects software-engineering performance; this is a
+central finding of the SWE-agent research program, not merely a UI concern. LAM should therefore
+make the interface a versioned experimental variable rather than burying it in the server.
+
+## 6.6 Capability ladder
+
+LAM should expose capability levels with separate evidence labels and acceptance criteria.
+
+### Level 0 — Protocol-compatible mock
+
+Purpose: validate clients, schemas, errors, streaming, and tool-call parsing.
+
+Required properties:
+
+- OpenAI and Ollama shape conformance;
+- deterministic error responses;
+- explicit model-not-found behavior;
+- streaming termination correctness;
+- no live label on replay traffic.
+
+### Level 1 — Exact trajectory player
+
+Purpose: replay a real model run exactly.
+
+Required properties:
+
+- canonical request digest;
+- response byte digest;
+- ordered tool-observation history;
+- mismatch refusal;
+- cassette version and schema identity;
+- fresh-process replay parity.
+
+### Level 2 — State-conditioned scenario engine
+
+Purpose: respond to the harness state rather than only to the number of tool messages.
+
+The scenario should declare predicates over:
+
+- visible file contents or file digests;
+- previous tool outcomes;
+- test failure classes;
+- changed-file set;
+- remaining budget;
+- prior model action;
+- current phase of the repair plan.
+
+The engine chooses a response from a finite state machine or policy table. It remains scripted,
+but it is much more useful than a global turn counter because it can test recovery and branching.
+
+### Level 3 — Distributional behavioral surrogate
+
+Purpose: approximate the action distribution of a teacher model over a declared challenge family.
+
+Possible implementations, in increasing complexity:
+
+- nearest-neighbor retrieval over canonicalized prompt/history states;
+- decision trees over tool/error/test features;
+- gradient-boosted action selection;
+- small local language model fine-tuned on sanitized trajectories;
+- constrained sequence model over tool calls and patches;
+- hybrid retrieval plus local generation with verifier filtering.
+
+This level needs held-out tasks and calibration. It must report similarity metrics and uncertainty,
+not claim identity with the teacher model.
+
+### Level 4 — Local agent with an open-weight model
+
+Purpose: run a genuinely generative model locally through the same LAM controller and evaluator.
+
+LAM becomes the stable experiment harness while Ollama or another local runtime supplies neural
+inference. The local model can be compared against recorded DeepSeek traces under identical task,
+tool, prompt, timeout, and evaluator conditions.
+
+### Level 5 — Teacher-student laboratory
+
+Purpose: use limited paid teacher calls to improve a local student or policy.
+
+The teacher supplies trajectories, critiques, repair alternatives, and failure explanations. The
+student is evaluated on tasks and perturbations excluded from teacher collection. Improvement is
+accepted only when held-out solve rate or efficiency improves without unacceptable regressions.
+
+## 6.7 SOTA improvement program
+
+### 6.7.1 ReAct-style interleaved reasoning and action
+
+The original ReAct work established the value of interleaving reasoning traces and environment
+actions so that the agent can update a plan from observations rather than produce one isolated
+answer. LAM should implement this as a configurable controller policy:
+
+- `inspect → hypothesize → act → observe → verify` phases;
+- explicit phase transitions in the trajectory;
+- action justification as optional diagnostic metadata;
+- no requirement to expose private chain-of-thought in the stored corpus;
+- compact decision summaries instead of unrestricted hidden-reasoning retention;
+- ablation runs with and without phase guidance.
+
+The useful research object is not the private prose itself. It is the causal relationship between
+observation, action selection, verification feedback, and state transition. See [ReAct](https://arxiv.org/abs/2210.03629).
+
+### 6.7.2 SWE-agent-style agent-computer interfaces
+
+LAM should make interface design measurable:
+
+- compare whole-file edit, patch edit, and CodeAct execution;
+- test bounded search versus unrestricted shell;
+- measure context returned per tool call;
+- expose line ranges, symbol summaries, and dependency references;
+- add command output truncation with explicit continuation handles;
+- preserve nonzero exit code, signal, timeout, and stderr as typed observations;
+- record every interface version in the compatibility key.
+
+The interface should optimize for information gained per token and per tool call. A tool that
+returns 200 lines of irrelevant code is worse than a tool that returns the exact symbol and its
+callers, provided the retrieval policy is itself measured.
+
+### 6.7.3 CodeAct-compatible execution
+
+OpenHands documents a CodeAct-style agent in which the model can execute code as its primary
+action space. LAM can support a constrained CodeAct profile without granting unrestricted host
+authority:
+
+- execute only inside a temporary workspace;
+- disable network by default;
+- mount only declared files and tools;
+- enforce CPU, memory, process-count, and wall-clock limits;
+- record stdout, stderr, exit status, signals, and changed files;
+- classify commands into read-only, mutation, test, and forbidden classes;
+- require evaluator confirmation before treating a result as solved.
+
+This can improve model flexibility while preserving reproducibility. It should be compared against
+the structured-tool profile, not silently replace it. See [OpenHands CodeAct documentation](https://docs.openhands.dev/openhands/usage/agents).
+
+### 6.7.4 Reflexion-style verbal feedback and episodic memory
+
+After a failed verification, LAM can generate a compact diagnostic record containing:
+
+- failure class;
+- likely causal file and symbol;
+- attempted change;
+- evidence that falsified the hypothesis;
+- next testable hypothesis;
+- constraints that must not be violated on retry.
+
+That record can be returned to the same model on a fresh attempt or used as a retrieved memory on
+a related task. The memory must be versioned and evaluated against a no-memory control. This is a
+practical, no-weight-update improvement path inspired by Reflexion’s verbal reinforcement idea.
+See [Reflexion](https://arxiv.org/abs/2303.11366).
+
+Important safeguards:
+
+- reflection cannot rewrite the original trajectory;
+- the evaluator result remains authoritative;
+- reflection text is a derived artifact, not ground truth;
+- memory retrieval must not leak the gold patch from another task;
+- gains must be measured on held-out tasks.
+
+### 6.7.5 Test-driven repair controller
+
+The controller should treat tests as evidence, not as an afterthought. Add a typed failure
+classifier for:
+
+- syntax/import failure;
+- assertion mismatch;
+- timeout/deadlock;
+- flaky or nondeterministic test;
+- dependency/setup failure;
+- environment mismatch;
+- unchanged bug after patch;
+- regression in previously passing tests.
+
+Each category can trigger a different next action. For example, an import failure should usually
+reduce the search space to module/package structure, while an assertion mismatch should expose
+the failing input and expected/actual values. The classifier itself must be evaluated against a
+labeled corpus and should never silently convert infrastructure failure into model failure.
+
+### 6.7.6 Context engineering and retrieval
+
+Implement context policies as interchangeable modules:
+
+- recent-window history;
+- failure-focused history;
+- symbol-level retrieval;
+- dependency-graph retrieval;
+- test-name retrieval;
+- patch-history retrieval;
+- repository map summaries;
+- semantic search over prior successful repairs;
+- compaction with digest-preserving provenance.
+
+Measure:
+
+- tokens per successful repair;
+- tool calls per successful repair;
+- context recall of the eventual changed symbols;
+- irrelevant-context ratio;
+- latency and cost;
+- regression rate after compaction;
+- performance under a fixed context budget.
+
+The central question is not “does retrieval help?” but “which information policy helps which task
+family under which budget, and does it generalize beyond the tasks used to tune it?”
+
+### 6.7.7 Candidate generation, patch ranking, and verifier selection
+
+For small tasks, generate multiple candidate patches and rank them using cheap checks before
+spending expensive model turns:
+
+1. syntax and import checks;
+2. targeted unit tests;
+3. static type/lint checks;
+4. full visible tests;
+5. hidden evaluator;
+6. independent review or second-model critique.
+
+Candidate generation can be done by repeated temperature seeds, model variants, or retrieved
+repair templates. The ranking policy must not see hidden tests or gold patches. Store every
+candidate, rejection reason, and evaluator receipt so that selection quality can be measured
+separately from generation quality.
+
+### 6.7.8 Model routing and adaptive escalation
+
+LAM can become a routing research platform:
+
+- start with a cheap local model;
+- detect uncertainty from repeated failures, tool loops, or budget waste;
+- escalate to a stronger local/cloud model;
+- optionally return the stronger model’s repair to the cheaper model for explanation or review;
+- compare fixed routing against adaptive routing under equal cost budgets.
+
+Routing signals should include behavioral evidence rather than self-report alone:
+
+- test progress;
+- changed-file locality;
+- repeated identical actions;
+- increasing error severity;
+- unresolved symbols;
+- token and time burn;
+- patch churn;
+- verifier disagreement.
+
+An escalation decision is itself a recorded policy event. Otherwise routing improvements cannot be
+distinguished from luck in model assignment.
+
+### 6.7.9 Teacher-student distillation without pretending equivalence
+
+The collected DeepSeek trajectories can support a local surrogate program:
+
+- normalize messages and tool schemas;
+- remove credentials and unrelated repository content;
+- represent tool calls as structured actions;
+- represent observations as typed, bounded features plus content digests;
+- store task and repository split boundaries;
+- train or fit only on the training split;
+- evaluate on held-out challenge families and unseen repositories;
+- compare action accuracy, tool sequence edit distance, patch validity, solve rate, and cost.
+
+Possible student targets include:
+
+- next-tool classifier;
+- stop/continue classifier;
+- error-category predictor;
+- patch-ranking model;
+- retrieval policy;
+- small local instruction model fine-tuned on full sanitized interactions;
+- hybrid finite-state policy for common repair patterns.
+
+The student should be allowed to disagree with the teacher. The purpose is not to clone every
+teacher mistake; it is to learn useful, measurable behavior at lower cost. Teacher and student
+results must carry separate evidence labels.
+
+### 6.7.10 Controlled self-improvement loop
+
+A safe LAM improvement loop is:
+
+```text
+collect → verify → classify failures → propose policy change →
+run paired evaluation → accept only with held-out evidence → version policy
+```
+
+The policy may change prompts, retrieval, tools, retry limits, reflection, routing, or candidate
+selection. It must not mutate historical trajectories or retroactively relabel failures. Every
+accepted policy receives a content digest, parent policy, training/evaluation split, and rollback
+record.
+
+### 6.7.11 Multi-agent and debate experiments
+
+LAM can simulate or run multiple roles without claiming that more agents are automatically better:
+
+- investigator: reads and localizes the defect;
+- implementer: edits the workspace;
+- verifier: runs tests and classifies failure;
+- reviewer: critiques the diff;
+- synthesizer: chooses among candidates.
+
+Run these roles sequentially first. Add parallelism only when the resources and artifact sinks are
+provably independent. Metrics should include coordination overhead, duplicate work, wall time,
+token cost, and failure recovery—not only pass rate.
+
+### 6.7.12 Counterfactual and fault-injection laboratory
+
+Once a trajectory is recorded, LAM can replay it under controlled perturbations:
+
+- remove one tool observation;
+- corrupt a test output;
+- delay a command;
+- return a transient failure;
+- alter context ordering;
+- truncate a file read;
+- inject a stale cache result;
+- change a tool schema version;
+- kill the agent process after an edit;
+- remove one previous memory item.
+
+This exposes which observations and controller decisions were causally necessary. Counterfactual
+results must be labeled synthetic and never merged with live-model evidence.
+
+## 6.8 Trajectory and dataset design
+
+### 6.8.1 Canonical run record
+
+Each run should have a stable envelope containing:
+
+```json
+{
+  "run_id": "...",
+  "challenge_id": "...",
+  "challenge_version": "...",
+  "workspace_digest": "...",
+  "model_id": "...",
+  "provider": "...",
+  "model_snapshot": "...",
+  "sampling": {"temperature": 0.2, "top_p": null, "seed": null},
+  "agent_policy_digest": "...",
+  "tool_profile_digest": "...",
+  "evaluator_digest": "...",
+  "evidence_label": "openrouter-live",
+  "turns": [],
+  "artifacts": [],
+  "outcome": {},
+  "cost": {},
+  "timing": {}
+}
+```
+
+The exact field names may evolve, but the semantics should remain stable: a reviewer must be able
+to reconstruct what the model saw, what it produced, what the environment returned, what changed,
+and how success was determined.
+
+### 6.8.2 Separate content from ledger metadata
+
+Large prompts, model outputs, file snapshots, diffs, and test logs belong in content-addressed
+artifacts. The SQLite index should hold:
+
+- digest;
+- media type;
+- size;
+- run/turn/attempt relation;
+- retention class;
+- redaction policy;
+- creation time;
+- evidence label.
+
+This avoids turning `lam.sqlite` into an unbounded text dump while preserving complete retrieval.
+
+### 6.8.3 Dataset splits
+
+At minimum, maintain:
+
+- **development:** prompt/tool/controller tuning;
+- **validation:** model and policy selection;
+- **held-out test:** final claims;
+- **counterfactual:** perturbation studies;
+- **replay regression:** fixed traces for infrastructure changes;
+- **fresh live:** tasks not represented in the teacher corpus.
+
+Repository, issue, author, and temporal leakage must be considered. A model that has seen the
+original patch or a near-duplicate task may produce a useful engineering result but does not
+provide clean evidence of generalization.
+
+### 6.8.4 Artifact retention and privacy
+
+Raw model interactions can contain proprietary source, secrets accidentally emitted by tools, and
+personal data from issue text. The collector should support:
+
+- capture authorization before persistence;
+- secret scanning and redaction;
+- path allowlists;
+- configurable `digests_only`, `standard`, and `full` retention;
+- encrypted or access-controlled full artifacts;
+- deterministic redaction receipts;
+- legal hold and deletion eligibility;
+- no API key in request artifacts, logs, cassettes, or SQLite.
+
+## 6.9 Evaluation and scientific methodology
+
+### 6.9.1 Primary outcome metrics
+
+For coding tasks, report at least:
+
+- verifier pass rate;
+- patch validity rate;
+- regression-free pass rate;
+- first-pass success;
+- pass@1 and pass@k where repeated candidates are used;
+- task completion time;
+- model calls and tool calls;
+- input/output tokens;
+- direct cost;
+- wall-clock latency;
+- changed-line count and patch churn;
+- human-review acceptance, if applicable.
+
+### 6.9.2 Harness metrics
+
+To measure the harness independently from the model, hold the model response trace fixed and vary:
+
+- context compiler;
+- tool descriptions;
+- observation truncation;
+- retry policy;
+- test feedback formatting;
+- reflection memory;
+- routing policy;
+- candidate ranking;
+- workspace interface.
+
+This is the most important use of exact replay: it turns a stochastic model into a controlled
+experimental input while retaining the causal sequence that actually occurred.
+
+### 6.9.3 Paired evaluation
+
+Every policy claim should use paired tasks and a compatibility key containing:
+
+- benchmark and split hash;
+- challenge version;
+- model/provider/snapshot;
+- sampling parameters;
+- harness commit;
+- agent-policy digest;
+- tool-profile digest;
+- evaluator image and test digest;
+- LAM schema version.
+
+Comparisons with different keys are descriptive, not controlled causal comparisons.
+
+### 6.9.4 Calibration and uncertainty
+
+LAM should capture agent confidence only as a diagnostic signal. A useful calibration report
+compares:
+
+- self-reported confidence;
+- behavioral confidence from repeated success/failure;
+- verifier status;
+- candidate disagreement;
+- estimated probability of success;
+- actual held-out outcome.
+
+Report reliability diagrams, Brier score where binary outcomes exist, abstention quality, and
+selective risk. Never promote self-reported confidence to truth.
+
+### 6.9.5 Replay determinism tests
+
+For every cassette:
+
+1. replay in a fresh process;
+2. verify request digest matching;
+3. verify response digest matching;
+4. verify tool-result order;
+5. verify final workspace diff;
+6. verify evaluator result;
+7. verify that a deliberate request mutation fails closed.
+
+## 6.10 Security, privacy, and benchmark integrity
+
+LAM executes model-generated actions. Even a local “mock” can become dangerous if its tool layer
+is connected to the real repository or host. The default security posture should be:
+
+- temporary workspace only;
+- no write access outside workspace;
+- no network from task commands;
+- no process-kill or privilege escalation tools;
+- command allowlists or sandboxed execution;
+- CPU, memory, file-count, and wall-clock quotas;
+- no inherited provider credentials inside task subprocesses;
+- test and evaluator separation;
+- immutable original task snapshot;
+- complete changed-file manifest;
+- fail-closed on path traversal and malformed tool arguments.
+
+Benchmark integrity requires additional controls:
+
+- hide gold patches and hidden tests;
+- detect references to oracle paths;
+- scan prompts and tool observations for leaked gold content;
+- prevent the model from editing tests unless the experiment explicitly studies that behavior;
+- distinguish infrastructure failure from agent failure;
+- preserve failed runs without repair;
+- do not count a replay pass as a live-model pass;
+- do not use the same run for policy tuning and final evaluation.
+
+## 6.11 Performance and cost engineering
+
+### 6.11.1 Fast replay path
+
+The fast path should avoid network, model initialization, and unnecessary serialization:
+
+- memory-map or cache cassette indexes;
+- use request digests before parsing large payloads;
+- store compressed response bodies;
+- stream large artifacts rather than copying them through SQLite;
+- use one writer and batched metadata transactions;
+- precompute challenge and policy digests;
+- parallelize independent replay runs;
+- keep evaluator images warm where isolation permits.
+
+### 6.11.2 Live collection path
+
+Live calls are expensive and slow relative to replay. The collector should:
+
+- reserve budget before each request;
+- stop on call or spend ceiling;
+- use short, explicit timeouts;
+- preserve partial trajectories after timeout;
+- avoid retries unless they are part of the experiment;
+- record provider usage rather than estimating silently;
+- use small pilot sets before a full benchmark;
+- cache exact successful responses only when the experiment declares caching;
+- preserve model route and provider metadata.
+
+### 6.11.3 Cost-aware experiment design
+
+The best use of a small paid budget is not a broad but shallow sweep. Prefer:
+
+1. a few diverse challenges;
+2. one fixed harness baseline;
+3. one controlled policy change;
+4. full trajectory capture;
+5. replay-based ablations;
+6. only then a larger live sample.
+
+This maximizes information per paid call and prevents a misleading “average” from hiding distinct
+failure modes.
+
+## 6.12 Implementation roadmap and acceptance gates
+
+### Phase A — Evidence-grade capture
+
+Implement:
+
+- versioned run envelope;
+- full request/response artifact writer;
+- typed tool-result records;
+- provider/model/sampling metadata;
+- redaction and secret scan;
+- SQLite index references;
+- partial-run persistence on timeout and budget stop.
+
+Acceptance:
+
+- no full content lost when a run fails;
+- fresh-process readback works;
+- request/response hashes verify;
+- API credentials never appear in artifacts;
+- failed runs remain inspectable.
+
+### Phase B — Challenge and evaluator protocol
+
+Implement:
+
+- JSON challenge manifests;
+- public/oracle projections;
+- workspace snapshot and restore;
+- evaluator subprocess contract;
+- hidden-test separation;
+- challenge version and split digests.
+
+Acceptance:
+
+- the same challenge can run under live, replay, and local-model backends;
+- the evaluator cannot read the model’s private prompt state;
+- task mutations are fully accounted for.
+
+### Phase C — Stateful replay
+
+Implement:
+
+- predicates over workspace and observations;
+- branching scenario graphs;
+- state transitions and exhaustion policies;
+- deterministic fault injection;
+- mismatch diagnostics.
+
+Acceptance:
+
+- replay can distinguish a correct edit, failed test, retry, and stop decision;
+- changing an observation selects the declared alternate branch;
+- unsupported state produces an explicit refusal.
+
+### Phase D — Harness policy laboratory
+
+Implement configurable policies for:
+
+- context compilation;
+- observation truncation;
+- retry and escalation;
+- reflection memory;
+- candidate generation/ranking;
+- tool profile;
+- model routing.
+
+Acceptance:
+
+- all policies are versioned and digest-bound;
+- paired replay experiments produce comparable metrics;
+- policy changes cannot alter historical traces.
+
+### Phase E — Behavioral surrogate
+
+Implement first a non-neural baseline:
+
+- nearest-neighbor state retrieval;
+- tool-action classifier;
+- stop/continue classifier;
+- verifier-outcome predictor;
+- uncertainty and abstention.
+
+Then evaluate whether a local open-weight sequence model adds value. Do not begin fine-tuning
+before the trajectory schema and splits are stable.
+
+Acceptance:
+
+- held-out behavioral similarity is reported;
+- surrogate failures are labeled as surrogate failures;
+- no teacher/test leakage is detected;
+- the surrogate is cheaper or faster for the declared use case.
+
+### Phase F — Local model and teacher-student operation
+
+Implement:
+
+- Ollama/local backend under the same controller;
+- OpenRouter teacher backend;
+- automatic trace comparison;
+- model routing and escalation;
+- distillation/feedback experiments;
+- rollback and model registry metadata.
+
+Acceptance:
+
+- live, local, replay, and surrogate modes share the same challenge/evaluator contract;
+- quality, latency, cost, and uncertainty are reported together;
+- a claimed improvement survives held-out paired evaluation.
+
+## 6.13 Research opportunities
+
+LAM can support publishable or internally valuable research questions:
+
+1. **Interface causality:** which tool representation most improves repair under a fixed model?
+2. **Observation value:** which test outputs and file slices have the highest marginal information?
+3. **Failure recovery:** can typed failure classes reduce repeated invalid actions?
+4. **Reflection value:** when does verbal memory help, and when does it amplify a wrong hypothesis?
+5. **Routing economics:** what behavioral signal best predicts when escalation is worth its cost?
+6. **Patch selection:** can cheap static checks predict which candidate deserves full verification?
+7. **Surrogate fidelity:** which action-level statistics predict useful harness substitution?
+8. **Context compression:** how much evidence can be removed before solve rate degrades?
+9. **Reproducibility:** which provider metadata is necessary to explain run-to-run variance?
+10. **Multi-agent economics:** when does a reviewer or planner repay its coordination overhead?
+11. **Counterfactual replay:** which observations are causally necessary for a successful repair?
+12. **Transfer:** do repair trajectories transfer across repositories or merely memorize patterns?
+
+Each question should have a preregistered outcome, a control arm, a compatibility key, and a
+held-out evaluation set.
+
+## 6.14 Non-goals and hard limitations
+
+LAM must not claim any of the following without new evidence:
+
+- that a finite scenario bank is equivalent to a general LLM;
+- that a replay pass is a live-model benchmark result;
+- that a scripted response demonstrates reasoning;
+- that a local surrogate has the teacher’s capability on unseen tasks;
+- that a model’s self-reported confidence is calibrated truth;
+- that a coding task was solved merely because the model emitted a plausible patch;
+- that a hidden-test result is valid if the oracle leaked into the prompt;
+- that a policy improvement is causal when task/model/evaluator keys changed;
+- that more turns, more agents, or more tokens are inherently better;
+- that an API proxy is free when it forwards requests to a paid provider.
+
+The closest realistic endpoint is not “a free DeepSeek clone.” It is a **high-fidelity local
+experimental substrate** that gives us the same controllable surfaces around a model: challenges,
+tools, observations, memory, evaluation, replay, and evidence. That is more useful and more
+defensible than pretending the model itself has been reproduced.
+
+## 6.15 Final recommendation
+
+The recommended order is:
+
+1. finish evidence-grade full trajectory capture;
+2. formalize challenge and evaluator manifests;
+3. implement state-conditioned replay and fault injection;
+4. add ReAct-style controller phases and typed test-failure feedback;
+5. add configurable context, reflection, routing, and candidate policies;
+6. collect a small, diverse teacher corpus with strict budget and leakage controls;
+7. build a simple behavioral surrogate before attempting neural distillation;
+8. add local open-weight inference under the same contract;
+9. evaluate all improvements on held-out tasks with paired metrics;
+10. only then expand toward multi-agent search, retrieval, skills, and adaptive strategy.
+
+This roadmap turns LAM from a useful mock into a progressively more capable **agentic coding
+laboratory**. Its scientific value comes from preserving the boundary between what was observed,
+what was replayed, what was generated synthetically, and what was inferred by a surrogate.
+
+## 6.16 Technical references
+
+- [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
+  — interleaved reasoning/action trajectories and environment feedback.
+- [SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering](https://arxiv.org/abs/2405.15793)
+  — evidence that the agent-computer interface is a first-class performance variable.
+- [Reflexion: Language Agents with Verbal Reinforcement Learning](https://arxiv.org/abs/2303.11366)
+  — verbal feedback and episodic memory without weight updates.
+- [OpenHands CodeAct documentation](https://docs.openhands.dev/openhands/usage/agents)
+  — code execution as an agent action space for software engineering.
+- [SWE-bench official dataset guide](https://github.com/SWE-bench/SWE-bench/blob/main/docs/guides/datasets.md)
+  — task manifests, repository/base-commit metadata, evaluator fields, and benchmark split handling.
+
+## 6.17 Internal benchmark-validation targets
+
+For future project validation, LAM should maintain two fixed, stratified internal subsets:
+
+| Benchmark family | Internal target | Approximate 90% confidence interpretation | Current distinct live coverage | Additional target |
+|---|---:|---|---:|---:|
+| SWE-bench Verified | **60 tasks** | Approximately ±10 percentage points for a finite population of 500 | 4 | **56 more** |
+| SWE-bench Pro public-scale subset | **70 tasks** | More conservative than the minimum ~62–63-task sample for a population around 731–800 | 4 | **66 more** |
+
+These are **internal directional-validation targets**, not official leaderboard evaluations. Official
+benchmark claims still require the complete declared benchmark split. The 60-task Verified subset
+and 70-task Pro subset must be selected with a frozen seed and stratified by repository, task
+difficulty, context size, patch size, language or framework where applicable, and expected test
+complexity. The same task IDs, base commits, evaluator versions, and compatibility key must be
+used when comparing harness or policy variants.
+
+Repeated trajectories on the same task do not increase population coverage. LAM may record many
+DeepSeek, local-model, replay, or counterfactual runs for one task, but confidence in the
+benchmark-wide pass-rate estimate comes primarily from the number and representativeness of
+**distinct tasks**. The current inventory is four distinct real DeepSeek coding challenges and
+39 scripted LAM scenarios; the future objective is to expand the live, evaluator-backed corpus to
+60 Verified tasks and 70 Pro tasks, then use LAM replay for large-scale zero-cost harness
+regression experiments.

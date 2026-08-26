@@ -37,6 +37,17 @@ class ConfidenceRecord:
         # mutable calibration dict must not change a record's digest later.
         object.__setattr__(self, "calibration", dict(self.calibration))
 
+    @property
+    def subject(self) -> str:
+        return self.subject_ref
+
+    @property
+    def context_epoch(self) -> int | None:
+        if not self.calibration:
+            return None
+        epoch = self.calibration.get("contextEpoch", self.calibration.get("context_epoch"))
+        return int(epoch) if epoch is not None else None
+
     def digest(self) -> str:
         return digest_of({"signal": self.signal, "value": self.value,
                           "subjectRef": self.subject_ref, "basis": self.basis,

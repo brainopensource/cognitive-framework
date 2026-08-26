@@ -46,6 +46,12 @@ from .sandbox import (
     SandboxRunner,
     publication_decision,
 )
+from .evidence_errors import (
+    EvidenceCaptureDegraded,
+    EvidenceCaptureError,
+    EvidenceCaptureRequiredError,
+    EvidenceSink,
+)
 
 __all__ = [
     "AffectedResource",
@@ -81,4 +87,8 @@ __all__ = [
     "SandboxResult",
     "SandboxRunner",
     "publication_decision",
+    "EvidenceCaptureDegraded",
+    "EvidenceCaptureError",
+    "EvidenceCaptureRequiredError",
+    "EvidenceSink",
 ]

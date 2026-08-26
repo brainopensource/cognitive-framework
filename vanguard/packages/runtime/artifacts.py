@@ -545,6 +545,36 @@ class ArtifactWriter:
         self._index.append(ref)
         return ref
 
+    def write(
+        self,
+        role: str,
+        payload: Any,
+        *,
+        digest: bytes | str | None = None,
+        required: bool = True,
+        turn: int | None = None,
+        labels: Mapping[str, Any] | None = None,
+    ) -> ArtifactRef:
+        """Alias for capture with optional caller-supplied digest verification (C-06)."""
+        if digest is not None:
+            raw_data = _encode(payload)
+            if self.policy.redact and self._redactor is not None:
+                try:
+                    text = raw_data.decode("utf-8")
+                except UnicodeDecodeError:
+                    text = None
+                if text is not None:
+                    scrubbed, _ = self._redactor.redact(text)
+                    raw_data = scrubbed.encode("utf-8")
+            actual_bytes_digest = hashlib.sha256(raw_data).digest()
+            actual_str_digest = "sha256:" + hashlib.sha256(raw_data).hexdigest()
+            if isinstance(digest, bytes) and digest != actual_bytes_digest:
+                raise EvidenceCaptureRequiredError("digest mismatch")
+            elif isinstance(digest, str) and digest != actual_str_digest and digest != actual_str_digest[7:]:
+                raise EvidenceCaptureRequiredError("digest mismatch")
+
+        return self.capture(role, payload, required=required, turn=turn, labels=labels)
+
     def reference(self, digest: str) -> bool:
         """Whether a required blob a fact is about to name actually exists.
 

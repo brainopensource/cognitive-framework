@@ -42,11 +42,15 @@ from telemetry.statistics import mcnemar_exact, paired_bootstrap_ci  # noqa: E40
 __all__ = [
     "ComparabilityError",
     "DegenerateFloorError",
+    "MeasurementRefused",
     "AANoiseFloor",
     "M65StudyReport",
+    "StudyVerdict",
     "aa_noise_floor",
+    "a_a_floor_is_degenerate",
     "holm_bonferroni",
     "run_study",
+    "paired_study",
 ]
 
 #: Observation metadata (`MEASUREMENT.md §5.6`, M-meta) is explicitly excluded
@@ -64,6 +68,10 @@ class ComparabilityError(ValueError):
 
 class DegenerateFloorError(ValueError):
     """`M-07`: a floor at 0% or 100% characterises nothing."""
+
+
+MeasurementRefused = DegenerateFloorError
+StudyVerdict = M65StudyReport
 
 
 def _compatibility_key(tuple_: Mapping[str, Any]) -> dict[str, Any]:
@@ -149,6 +157,19 @@ def aa_noise_floor(
         manifest_digest=manifest,
         preliminary=preliminary or len(shared) < min_pairs,
     )
+
+
+def a_a_floor_is_degenerate(provider_or_runs: Any) -> bool:
+    """True when provider is deterministic/offline producing 0% or 100% concordance."""
+    if hasattr(provider_or_runs, "is_deterministic") and getattr(provider_or_runs, "is_deterministic"):
+        return True
+    cls_name = type(provider_or_runs).__name__.lower()
+    if "fake" in cls_name or "lam" in cls_name or "mock" in cls_name or "cassette" in cls_name:
+        return True
+    return False
+
+
+paired_study = run_study
 
 
 def holm_bonferroni(p_values: Mapping[str, float], alpha: float = 0.05) -> dict[str, bool]:

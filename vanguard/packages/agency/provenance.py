@@ -23,12 +23,19 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, runtime_checkable
 
+from ..ports.evidence_errors import (
+    EvidenceCaptureDegraded,
+    EvidenceCaptureError,
+)
+
 __all__ = [
     "CONTEXT_SELECTION",
     "COMPACTION",
     "MODEL_IO",
     "CACHE",
     "CAPTURE_INCOMPLETE",
+    "EvidenceCaptureError",
+    "EvidenceCaptureDegraded",
     "EvidenceCaptureRequiredError",
     "NullProvenanceSink",
     "ProvenanceRecord",
@@ -45,7 +52,7 @@ CACHE = "cache"
 CAPTURE_INCOMPLETE = "capture_incomplete"
 
 
-class EvidenceCaptureRequiredError(RuntimeError):
+class EvidenceCaptureRequiredError(EvidenceCaptureError, RuntimeError):
     """Required evidence capture failed; the run must not continue.
 
     `ADR-0096 §14.2`. Raised by a Runtime-owned artifact writer when

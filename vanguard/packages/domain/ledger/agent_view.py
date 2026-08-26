@@ -65,6 +65,19 @@ class AgentView:
     def digest(self) -> str:
         return digest_of(self.to_canonical_dict())
 
+    @classmethod
+    def empty(cls, lineage_id: str = "") -> "AgentView":
+        """Construct an initial empty AgentView."""
+        return cls(lineage_id=lineage_id)
+
+    @staticmethod
+    def fold(
+        events: Iterable[EventEnvelope],
+        checkpoint: AgentViewCheckpoint | None = None,
+    ) -> "AgentView":
+        """Deterministic fold of events into an AgentView."""
+        return fold_agent_view(checkpoint, events)
+
 
 @dataclass(frozen=True, slots=True)
 class AgentViewCheckpoint:

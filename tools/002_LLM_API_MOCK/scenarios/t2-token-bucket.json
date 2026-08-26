@@ -1,0 +1,125 @@
+{
+  "id": "t2-token-bucket",
+  "tier": 2,
+  "title": "SWE-Verified: Thread-safe Token Bucket rate limiter capacity clamp and burst refill",
+  "workspace": {
+    "problem.md": "# Challenge: Token Bucket Burst Boundary Refill\n\nThe sliding window token bucket in `token_bucket.py` grants one token above\nbucket capacity once enough wall-clock time has elapsed for a full refill\n(off-by-one in `_refill`). Fix the saturation bound so `tokens` never exceed\n`capacity`. Do not modify the test suite or public signatures.\n",
+    "tests/test_token_bucket.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom token_bucket import TokenBucketRateLimiter\n\n\ndef test_initial_burst_capacity():\n    t = [1000.0]\n    bucket = TokenBucketRateLimiter(3, 10.0, clock=lambda: t[0])\n    t[0] += 0.25  # accrues 2.5 tokens on top of a full bucket\n    assert bucket.consume(4) is False  # must never grant above capacity\n    assert bucket.consume(3) is True\n    assert bucket.consume(1) is False\n\n\ndef test_refill_boundary_precision():\n    t = [0.0]\n    bucket = TokenBucketRateLimiter(3, 10.0, clock=lambda: t[0])\n    assert bucket.consume(3) is True\n    t[0] += 0.5  # accrues 5.0 tokens; bucket must saturate exactly at capacity\n    assert bucket.consume(4) is False\n    assert bucket.consume(3) is True\n    t[0] += 0.15  # accrues 1.5 tokens\n    assert bucket.consume(1) is True\n    assert bucket.consume(1) is False\n\n\ndef test_negative_or_zero_values():\n    with pytest.raises(ValueError):\n        TokenBucketRateLimiter(0, 1.0)\n    with pytest.raises(ValueError):\n        TokenBucketRateLimiter(5, -1.0)\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Challenge: Token Bucket Burst Boundary Refill\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n",
+    "token_bucket.py": "\"\"\"Thread-safe sliding window token bucket rate limiter.\"\"\"\nimport threading\nimport time\n\n\nclass TokenBucketRateLimiter:\n    \"\"\"Token bucket with burst support and continuous refill.\"\"\"\n\n    def __init__(self, capacity, refill_rate_per_sec, clock=time.monotonic):\n        if capacity <= 0 or refill_rate_per_sec <= 0:\n            raise ValueError(\"Capacity and refill rate must be positive\")\n        self.capacity = float(capacity)\n        self.refill_rate = float(refill_rate_per_sec)\n        self.tokens = float(capacity)\n        self.last_refill = clock()\n        self.lock = threading.Lock()\n        self._clock = clock\n\n    def _refill(self):\n        now = self._clock()\n        elapsed = now - self.last_refill\n        # BENCHMARK BUG: saturation bound is capacity + 1 (off-by-one).\n        self.tokens = min(self.capacity + 1.0, self.tokens + elapsed * self.refill_rate)\n        self.last_refill = now\n\n    def consume(self, amount=1):\n        \"\"\"Consume ``amount`` tokens; return True when granted atomically.\"\"\"\n        with self.lock:\n            self._refill()\n            if self.tokens >= amount:\n                self.tokens -= amount\n                return True\n            return False\n\n    @property\n    def available(self):\n        with self.lock:\n            self._refill()\n            return self.tokens\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"token_bucket.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_token_bucket.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Thread-safe sliding window token bucket rate limiter.\\\"\\\"\\\"\\nimport threading\\nimport time\\n\\n\\nclass TokenBucketRateLimiter:\\n    \\\"\\\"\\\"Token bucket with burst support and continuous refill.\\\"\\\"\\\"\\n\\n    def __init__(self, capacity, refill_rate_per_sec, clock=time.monotonic):\\n        if capacity <= 0 or refill_rate_per_sec <= 0:\\n            raise ValueError(\\\"Capacity and refill rate must be positive\\\")\\n        self.capacity = float(capacity)\\n        self.refill_rate = float(refill_rate_per_sec)\\n        self.tokens = float(capacity)\\n        self.last_refill = clock()\\n        self.lock = threading.Lock()\\n        self._clock = clock\\n\\n    def _refill(self):\\n        now = self._clock()\\n        elapsed = now - self.last_refill\\n        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)\\n        self.last_refill = now\\n\\n    def consume(self, amount=1):\\n        \\\"\\\"\\\"Consume ``amount`` tokens; return True when granted atomically.\\\"\\\"\\\"\\n        with self.lock:\\n            self._refill()\\n            if self.tokens >= amount:\\n                self.tokens -= amount\\n                return True\\n            return False\\n\\n    @property\\n    def available(self):\\n        with self.lock:\\n            self._refill()\\n            return self.tokens\", \"path\": \"token_bucket.py\"}"
+          }
+        }
+      ],
+      "content": "The bug is in `_refill` where the saturation bound is `self.capacity + 1.0` instead of `self.capacity`. Let me fix"
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"cd /home/user && python -m pytest tests/test_token_bucket.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/test_token_bucket.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"which python3\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 6,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/test_token_bucket.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 7,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "All 3 tests pass. The fix was a one-character change: replacing `self.capacity + 1.0` with `self.capacity` in the `_refill` method's `min()` call, so the token count never exceeds the bucket's true capacity."
+    }
+  ]
+}

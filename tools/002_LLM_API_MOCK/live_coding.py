@@ -47,9 +47,9 @@ class Challenge:
     key: str
     root: Path
     problem: str
-    verifier: tuple[str, ...] = ("python3", "-m", "pytest", "-q")
-
-
+    is_swe_fixture: bool = False
+    public_root: Path | None = None
+    private_root: Path | None = None
 @dataclass
 class Budget:
     max_calls: int = DEFAULT_MAX_CALLS
@@ -100,14 +100,36 @@ def resolve_api_key(dotenv_path: Path) -> str:
 def load_challenge(root: Path, key: str) -> Challenge:
     challenge_root = (root / key).resolve()
     root_resolved = root.resolve()
-    if root_resolved not in challenge_root.parents:
+    if root_resolved not in challenge_root.parents and challenge_root != root_resolved:
         raise ValueError(f"challenge escapes root: {key}")
     if not challenge_root.is_dir():
         raise FileNotFoundError(f"challenge not found: {challenge_root}")
+
+    # Check for SWE-style fixture (challenge.json + context.md + public/)
+    context_md = challenge_root / "context.md"
+    challenge_json = challenge_root / "challenge.json"
+    public_dir = challenge_root / "public"
+    private_dir = challenge_root / "private"
+    if context_md.is_file() and public_dir.is_dir():
+        problem_text = context_md.read_text(encoding="utf-8")
+        return Challenge(
+            key=key,
+            root=challenge_root,
+            problem=problem_text,
+            is_swe_fixture=True,
+            public_root=public_dir,
+            private_root=private_dir if private_dir.is_dir() else None,
+        )
+
     problem_path = challenge_root / "problem.md"
     if not problem_path.is_file():
-        raise FileNotFoundError(f"challenge has no problem.md: {challenge_root}")
-    return Challenge(key=key, root=challenge_root, problem=problem_path.read_text(encoding="utf-8"))
+        raise FileNotFoundError(f"challenge has no problem.md or context.md: {challenge_root}")
+    return Challenge(
+        key=key,
+        root=challenge_root,
+        problem=problem_path.read_text(encoding="utf-8"),
+        is_swe_fixture=False,
+    )
 
 
 def _safe_path(workspace: Path, raw_path: str) -> Path:
@@ -324,7 +346,10 @@ def collect_challenge(
 
     with tempfile.TemporaryDirectory(prefix="lam-task-") as temp_dir:
         workspace = Path(temp_dir) / challenge.key
-        shutil.copytree(challenge.root, workspace)
+        if challenge.is_swe_fixture and challenge.public_root:
+            shutil.copytree(challenge.public_root, workspace)
+        else:
+            shutil.copytree(challenge.root, workspace)
         before_snapshot = _snapshot(workspace)
         system = (
             "You are a careful repository coding agent. Solve the user's bug in the provided "
@@ -388,7 +413,20 @@ def collect_challenge(
         else:
             stop_reason = "max_turns"
 
-        verification = _run_command(workspace, "python3 -m pytest -q", timeout=60)
+        # Verification in isolated evaluator space if private root exists
+        if challenge.is_swe_fixture and challenge.private_root:
+            eval_workspace = Path(temp_dir) / f"{challenge.key}-eval"
+            shutil.copytree(workspace, eval_workspace)
+            # Apply private test files/patches only into eval_workspace
+            for p_file in challenge.private_root.rglob("*"):
+                if p_file.is_file():
+                    target_p = eval_workspace / p_file.relative_to(challenge.private_root)
+                    target_p.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(p_file, target_p)
+            verification = _run_command(eval_workspace, "python3 -m pytest -q", timeout=60)
+        else:
+            verification = _run_command(workspace, "python3 -m pytest -q", timeout=60)
+
         passed = verification.startswith("exit=0")
         diff = _text_diff(before_snapshot, _snapshot(workspace))
 
@@ -407,6 +445,7 @@ def collect_challenge(
             "verification": verification,
             "diff": diff,
             "wall_s": round(time.time() - started, 3),
+            "evidence_label": "real-openrouter",
         },
     )
     return json.loads((run_dir / "result.json").read_text(encoding="utf-8"))
@@ -415,6 +454,8 @@ def collect_challenge(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Collect bounded real-model coding traces for LAM replay.")
     parser.add_argument("--challenge-root", type=Path, default=DEFAULT_CHALLENGE_ROOT)
+    parser.add_argument("--split-manifest", type=Path, default=LAM_DIR / "calibration_split.json")
+    parser.add_argument("--split", choices=["all", "real_calibration", "real_audit", "real_all", "synthetic"], default=None)
     parser.add_argument("--challenge", action="append", dest="challenges")
     parser.add_argument("--dotenv", type=Path, default=Path("/home/rocha/Coding/LEX_LLM_EXECUTION/.env"))
     parser.add_argument("--output", type=Path, default=LAM_DIR / "runs" / "live_captures")
@@ -428,7 +469,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not api_key:
         print("OPENROUTER_API_KEY is unavailable", file=sys.stderr)
         return 2
-    keys = args.challenges or ["semver_parser", "isolated_coding_test", "plugin_dag", "token_bucket"]
+
+    keys: list[str] = []
+    if args.challenges:
+        keys = args.challenges
+    elif args.split and args.split_manifest.is_file():
+        manifest = json.loads(args.split_manifest.read_text(encoding="utf-8"))
+        if args.split == "real_calibration":
+            keys = manifest.get("real_calibration_task_ids", [])
+        elif args.split == "real_audit":
+            keys = manifest.get("real_audit_task_ids", [])
+        elif args.split == "real_all":
+            keys = manifest.get("real_task_ids", [])
+        elif args.split == "synthetic":
+            keys = manifest.get("synthetic_task_ids", [])
+        elif args.split == "all":
+            keys = [t["id"] for t in manifest.get("tasks", [])]
+    else:
+        keys = ["semver_parser", "isolated_coding_test", "plugin_dag", "token_bucket", "circuit_breaker"]
+
     challenges = [load_challenge(args.challenge_root, key) for key in keys]
     args.output.mkdir(parents=True, exist_ok=True)
     budget = Budget(max_calls=args.max_calls, max_usd=args.max_usd)

@@ -1,0 +1,81 @@
+{
+  "id": "t3-circuit-breaker",
+  "tier": 3,
+  "title": "SWE-Verified: Circuit breaker state transition machine with exponential backoff",
+  "workspace": {
+    "circuit_breaker/__init__.py": "\"\"\"Circuit breaker resilience package.\"\"\"\nfrom .breaker import CallNotPermittedError, CircuitBreaker\nfrom .policy import BackoffPolicy\nfrom .storage import CLOSED, HALF_OPEN, OPEN, InMemoryStorage\n\n__all__ = [\n    \"CircuitBreaker\",\n    \"CallNotPermittedError\",\n    \"BackoffPolicy\",\n    \"InMemoryStorage\",\n    \"CLOSED\",\n    \"OPEN\",\n    \"HALF_OPEN\",\n]\n",
+    "circuit_breaker/breaker.py": "\"\"\"Circuit breaker state machine.\"\"\"\nimport time\n\nfrom .storage import CLOSED, HALF_OPEN, OPEN\n\n\nclass CallNotPermittedError(RuntimeError):\n    pass\n\n\nclass CircuitBreaker:\n    def __init__(self, failure_threshold=3, half_open_successes=2,\n                 cool_off_seconds=1.0, policy=None, clock=time.monotonic):\n        self.failure_threshold = failure_threshold\n        self.half_open_successes = half_open_successes\n        self.cool_off_seconds = cool_off_seconds\n        self.policy = policy\n        self._clock = clock\n        from .storage import InMemoryStorage\n        self.storage = InMemoryStorage()\n        self.opened_at = None\n\n    @property\n    def state(self):\n        return self.storage.state\n\n    def allow_request(self):\n        now = self._clock()\n        if self.storage.state == OPEN:\n            if now - self.opened_at >= self.cool_off_seconds:\n                self.storage.state = HALF_OPEN\n                self.storage.success_streak = 0\n            else:\n                raise CallNotPermittedError(\"circuit is OPEN\")\n        return True\n\n    def call(self, fn, *args, **kwargs):\n        self.allow_request()\n        try:\n            result = fn(*args, **kwargs)\n        except Exception:\n            self.record_failure()\n            raise\n        self.record_success()\n        return result\n\n    def record_failure(self):\n        if self.storage.state == HALF_OPEN:\n            self.trip_open()\n            return\n        self.storage.failure_count += 1\n        self.storage.success_streak = 0\n        if self.storage.failure_count >= self.failure_threshold:\n            self.trip_open()\n\n    def record_success(self):\n        if self.storage.state == HALF_OPEN:\n            # BENCHMARK BUG: one success is enough to close the breaker and\n            # counters are never cleared on transition.\n            self.storage.state = CLOSED\n            return\n        self.storage.success_streak += 1\n\n    def trip_open(self):\n        self.storage.state = OPEN\n        self.opened_at = self._clock()\n        self.storage.reset()\n",
+    "circuit_breaker/policy.py": "\"\"\"Exponential backoff policy with decorrelated full jitter.\"\"\"\nimport random\n\n\nclass BackoffPolicy:\n    def __init__(self, base_delay=0.1, max_delay=30.0):\n        if base_delay <= 0 or max_delay < base_delay:\n            raise ValueError(\"require 0 < base_delay <= max_delay\")\n        self.base_delay = float(base_delay)\n        self.max_delay = float(max_delay)\n\n    def raw_delay(self, attempt):\n        \"\"\"Pure exponential backoff for ``attempt`` (0-based).\"\"\"\n        return min(self.max_delay, self.base_delay * (2 ** attempt))\n\n    def jittered_delay(self, attempt, rng):\n        \"\"\"Full-jitter delay: uniform sample over [0, raw_delay].\"\"\"\n        # BENCHMARK BUG: rng is ignored \u2014 the raw delay is returned.\n        return self.raw_delay(attempt)\n",
+    "circuit_breaker/storage.py": "\"\"\"Breaker state storage (counters + current state).\"\"\"\n\nCLOSED = \"CLOSED\"\nOPEN = \"OPEN\"\nHALF_OPEN = \"HALF_OPEN\"\n\n\nclass InMemoryStorage:\n    def __init__(self):\n        self.state = CLOSED\n        self.failure_count = 0\n        self.success_streak = 0\n\n    def reset(self):\n        self.failure_count = 0\n        self.success_streak = 0\n\n    def snapshot(self):\n        return {\n            \"state\": self.state,\n            \"failure_count\": self.failure_count,\n            \"success_streak\": self.success_streak,\n        }\n",
+    "problem.md": "# Challenge: Circuit Breaker Exponential Backoff State Transition\n\nThe resilience stack has two defects:\n\n1. `breaker.py`: in HALF_OPEN state a single successful probe transitions\n   straight to CLOSED, ignoring the configured consecutive-success streak,\n   and the success/failure counters are never reset on transition.\n2. `policy.py`: `jittered_delay()` ignores the provided random generator and\n   returns the raw exponential delay, defeating decorrelated jitter.\n\nFix both defects. Do not modify the test suite.\n",
+    "tests/test_circuit_breaker.py": "import os\nimport random\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom circuit_breaker import (\n    BackoffPolicy,\n    CallNotPermittedError,\n    CircuitBreaker,\n    HALF_OPEN,\n    OPEN,\n)\n\n\ndef test_half_open_to_closed_on_success_streak():\n    t = [100.0]\n    breaker = CircuitBreaker(failure_threshold=2, half_open_successes=3,\n                             cool_off_seconds=1.0, clock=lambda: t[0])\n    for _ in range(2):\n        breaker.record_failure()\n    assert breaker.state == OPEN\n    t[0] += 2.0  # cool-off elapsed -> next request probes in HALF_OPEN\n    assert breaker.allow_request() is True\n    assert breaker.state == HALF_OPEN\n\n    breaker.record_success()\n    breaker.record_success()\n    assert breaker.state == HALF_OPEN  # streak not yet complete\n    breaker.record_success()\n    assert breaker.state != HALF_OPEN  # streak complete -> CLOSED\n    assert breaker.state == \"CLOSED\"\n    snap = breaker.storage.snapshot()\n    assert snap[\"failure_count\"] == 0 and snap[\"success_streak\"] == 0\n\n\ndef test_jittered_backoff_calculation():\n    policy = BackoffPolicy(base_delay=0.5, max_delay=8.0)\n    rng_a = random.Random(42)\n    rng_b = random.Random(42)\n\n    for attempt in range(4):\n        raw = policy.raw_delay(attempt)\n        ja = policy.jittered_delay(attempt, rng_a)\n        jb = policy.jittered_delay(attempt, rng_b)\n        assert 0.0 <= ja <= raw\n        assert ja == jb  # same seed => deterministic sequence\n    assert policy.jittered_delay(3, random.Random(7)) != raw or raw == 8.0\n\n\ndef test_initial_closed_state():\n    breaker = CircuitBreaker()\n    assert breaker.state == \"CLOSED\"\n    assert breaker.allow_request() is True\n\n\ndef test_trip_to_open_on_error_threshold():\n    t = [0.0]\n    breaker = CircuitBreaker(failure_threshold=3, clock=lambda: t[0])\n\n    def boom():\n        raise RuntimeError(\"boom\")\n\n    for _ in range(3):\n        with pytest.raises(RuntimeError):\n            breaker.call(boom)\n    assert breaker.state == OPEN\n    with pytest.raises(CallNotPermittedError):\n        breaker.allow_request()\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Challenge: Circuit Breaker Exponential Backoff State Transition\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"circuit_breaker/breaker.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"circuit_breaker/policy.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_circuit_breaker.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"circuit_breaker/storage.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"circuit_breaker/__init__.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "stop",
+      "tool_calls": []
+    }
+  ]
+}

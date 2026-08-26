@@ -6,7 +6,7 @@ through `vg-code-default` and the `product` execution profile, and verifies:
 1. Real workspace diff produced and applied.
 2. Passing test execution receipt (e.g. pytest/unittest green).
 3. Durable file-backed SQLite-WAL event store at `.vanguard/events.sqlite3`.
-4. Schema-valid `mhf.trajectory/1` terminal trajectory record.
+4. Durable captured artifacts and schema-valid `mhf.trajectory/2` terminal record.
 5. Fresh-process cold reconstruction of identical terminal ledger state.
 
 DO NOT execute live runs or declare M-4 complete without Dev A GO and independent review.
@@ -27,14 +27,13 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.adapters.models.openrouter import OpenRouterModel
+from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
-from vanguard.packages.domain.canonicalisation.digest import digest_of
+from vanguard.packages.domain.ledger.reducer import compute_state_digest, reconstruct_state
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.profiles import resolve_profile
 from vanguard.packages.runtime.root import Runtime
-from vanguard.packages.runtime.session import RecoveryScanner
 from vanguard.packages.runtime.trajectory_reader import TrajectoryReader
 
 
@@ -72,9 +71,11 @@ def setup_rf95_fixture(target_dir: Path) -> Path:
 def verify_rf95_evidence(
     repo_path: Path,
     db_path: Path,
+    blob_path: Path,
+    result: Any,
     trajectory: Mapping[str, Any],
 ) -> tuple[bool, list[str]]:
-    """Verify all 5 conditions of the RF-95 product proof."""
+    """Verify the single real-run RF-95 product proof and capture contract."""
     failures: list[str] = []
 
     # 1. Real workspace diff
@@ -102,6 +103,16 @@ def verify_rf95_evidence(
     if test_proc.returncode != 0:
         failures.append(f"RF-95: Tests in workspace did not pass (exit {test_proc.returncode}):\n{test_proc.stderr}")
 
+    receipts = tuple(getattr(result, "receipts", ()) or ())
+    if not any(getattr(receipt, "verb", "") == "proc.exec"
+               and getattr(receipt, "outcome", "") == "ok"
+               for receipt in receipts):
+        failures.append("RF-95: No successful mediated proc.exec verification receipt")
+    if not any(getattr(receipt, "verb", "") in {"patch.apply", "fs.patch", "fs.write"}
+               and getattr(receipt, "outcome", "") == "ok"
+               for receipt in receipts):
+        failures.append("RF-95: No successful mediated workspace mutation receipt")
+
     # 3. Durable file-backed SQLite-WAL store
     if not db_path.is_file():
         failures.append(f"RF-95: SQLite database not found at {db_path}")
@@ -113,20 +124,58 @@ def verify_rf95_evidence(
         if store.journal_mode != "wal":
             failures.append(f"RF-95: Expected journal_mode='wal', got {store.journal_mode!r}")
 
+        run_ids = {event.run_id for event in events}
+        if run_ids != {"run-rf95-live"}:
+            failures.append(f"RF-95: WAL contains unexpected run IDs: {sorted(run_ids)!r}")
+
+        try:
+            reconstructed = reconstruct_state(events)
+            reconstructed_digest = compute_state_digest(reconstructed)
+        except Exception as exc:  # pragma: no cover - defensive gate reporting
+            reconstructed_digest = ""
+            failures.append(f"RF-95: Fresh-process reducer failed: {exc}")
+        if reconstructed_digest and trajectory.get("state_digest") != reconstructed_digest:
+            failures.append(
+                "RF-95: Cold reconstructed state digest differs from terminal trajectory"
+            )
+
+    blob_store = FileBlobStore(blob_path)
+    artifacts = list(trajectory.get("artifacts") or ())
+    roles = {entry.get("role") for entry in artifacts if isinstance(entry, Mapping)}
+    if not {"prompt", "model_output"}.issubset(roles):
+        failures.append(f"RF-95: Capture index lacks prompt/model_output roles: {sorted(roles)!r}")
+    for entry in artifacts:
+        if not isinstance(entry, Mapping):
+            failures.append("RF-95: Artifact index contains a non-object entry")
+            continue
+        digest = entry.get("digest")
+        if entry.get("stored") is not True or not isinstance(digest, str) or not blob_store.has(digest):
+            failures.append(f"RF-95: Captured artifact is not durably resolvable: {entry!r}")
+
+    provenance = trajectory.get("provenance")
+    if not isinstance(provenance, Mapping) or not isinstance(provenance.get("context"), list):
+        failures.append("RF-95: Missing context provenance section")
+    if not isinstance(provenance, Mapping) or "compaction" not in provenance or "cache" not in provenance:
+        failures.append("RF-95: Missing compaction/cache provenance sections")
+
+    capture = trajectory.get("capture")
+    if not isinstance(capture, Mapping) or capture.get("required") is not True or capture.get("status") != "complete":
+        failures.append(f"RF-95: Capture is not complete and required: {capture!r}")
+
+    for turn in trajectory.get("turns") or ():
+        if not turn.get("model_input_ref") or not turn.get("model_output_ref"):
+            failures.append(f"RF-95: Turn lacks exact model I/O references: {turn.get('turn')!r}")
+
     # 4. Valid trajectory
     traj_vars = TrajectoryReader.extract_variables(trajectory)
-    if traj_vars.get("schema") != "mhf.trajectory/1":
+    if traj_vars.get("schema") != "mhf.trajectory/2":
         failures.append(f"RF-95: Invalid trajectory schema: {traj_vars.get('schema')}")
-    if traj_vars.get("outcome") not in ("completed", "satisfied", "ok"):
+    if traj_vars.get("outcome") != "completed":
         failures.append(f"RF-95: Trajectory outcome is not completed: {traj_vars.get('outcome')}")
 
     # 5. Fresh-process cold reconstruction
-    if db_path.is_file():
-        store = SqliteEventStore(db_path)
-        all_events = store.read_all()
-        recovered = RecoveryScanner.scan(all_events)
-        if not recovered.is_reconstructed:
-            failures.append("RF-95: Cold fresh-process reconstruction failed to reconstruct state")
+    if db_path.is_file() and not trajectory.get("state_digest"):
+        failures.append("RF-95: Terminal trajectory has no state digest for cold comparison")
 
     return len(failures) == 0, failures
 
@@ -136,6 +185,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Validate fixture setup and test assertions without live model spend")
     parser.add_argument("--repo-dir", type=str, default="", help="Target repo directory (uses temporary directory by default)")
     parser.add_argument("--model", type=str, default="anthropic/claude-3.5-sonnet", help="Planner/executor model")
+    parser.add_argument("--keep-run", action="store_true", help="Keep the temporary run directory as an evidence artifact")
     args = parser.parse_args()
 
     temp_dir: str | None = None
@@ -150,6 +200,7 @@ def main() -> int:
         setup_rf95_fixture(repo_path)
         manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
         db_path = repo_path / ".vanguard" / "events.sqlite3"
+        blob_path = repo_path / ".vanguard" / "blobs"
 
         if args.dry_run:
             print("RF-95 DRY RUN: Validating profile resolution and fixture assertions.")
@@ -180,10 +231,12 @@ def main() -> int:
             profile_id="product",
             model=model,
             store_path=str(db_path),
+            blobs=FileBlobStore(blob_path),
             interactive=False,
         )
 
-        ok, failures = verify_rf95_evidence(repo_path, db_path, result.trajectory or {})
+        ok, failures = verify_rf95_evidence(
+            repo_path, db_path, blob_path, result, result.trajectory or {})
         if not ok:
             print("RF-95 FALSIFIER FAILED:")
             for f in failures:
@@ -193,7 +246,7 @@ def main() -> int:
         print("RF-95 PRODUCT PROOF PASSED: All 5 conditions satisfied.")
         return 0
     finally:
-        if temp_dir and Path(temp_dir).exists():
+        if temp_dir and Path(temp_dir).exists() and not args.keep_run:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 

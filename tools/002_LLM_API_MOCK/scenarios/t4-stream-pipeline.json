@@ -1,0 +1,87 @@
+{
+  "id": "t4-stream-pipeline",
+  "tier": 4,
+  "title": "SWE-Verified: Multi-stage async stream processing pipeline with windowing and backpressure",
+  "workspace": {
+    "problem.md": "# Problem: Multi-Stage Async Stream Processing Pipeline\n\nImplement an asynchronous stream data processor featuring:\n1. `DataRecord`: Structured immutable payload with `id`, `timestamp`, `key`, and `data` map.\n2. `Stage` abstractions: FilterStage, MapStage, and WindowStage.\n3. `TumblingWindow` & `SlidingWindow`: Aggregations (count, sum, avg) over tumbling or sliding time/count windows.\n4. `StreamPipeline`: Asynchronous channel orchestration with backpressure and graceful flush.\n\nAll unit tests in `tests/test_pipeline.py` must pass.\n",
+    "requirements.txt": "pytest>=7.0.0\npytest-asyncio>=0.21.0\n",
+    "stream_pipeline/__init__.py": "from .record import DataRecord\nfrom .stages import FilterStage, MapStage\nfrom .window import TumblingWindow, SlidingWindow\nfrom .pipeline import StreamPipeline\n\n__all__ = [\"DataRecord\", \"FilterStage\", \"MapStage\", \"TumblingWindow\", \"SlidingWindow\", \"StreamPipeline\"]\n",
+    "stream_pipeline/pipeline.py": "import asyncio\nfrom typing import List, Any\nfrom .record import DataRecord\nfrom .stages import BaseStage\n\nclass StreamPipeline:\n\n    def __init__(self, max_buffer_size: int=100) -> None:\n        self.stages: List[BaseStage] = []\n        self.queue: asyncio.Queue[DataRecord] = asyncio.Queue(maxsize=max_buffer_size)\n        self.output_sink: List[DataRecord] = []\n        self.running = False\n\n    def add_stage(self, stage: BaseStage) -> 'StreamPipeline':\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    async def emit(self, record: DataRecord) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    async def process_one(self, record: DataRecord) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    async def run_drain(self) -> List[DataRecord]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "stream_pipeline/record.py": "from dataclasses import dataclass, field\nimport time\nfrom typing import Any, Dict\n\n@dataclass(frozen=True)\nclass DataRecord:\n    key: str\n    data: Dict[str, Any]\n    id: str = ''\n    timestamp: float = field(default_factory=time.time)\n\n    def get(self, field_name: str, default: Any=None) -> Any:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "stream_pipeline/stages.py": "from abc import ABC, abstractmethod\nfrom typing import Callable, Optional\nfrom .record import DataRecord\n\nclass BaseStage(ABC):\n\n    @abstractmethod\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\nclass FilterStage(BaseStage):\n\n    def __init__(self, predicate: Callable[[DataRecord], bool]) -> None:\n        self.predicate = predicate\n\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\nclass MapStage(BaseStage):\n\n    def __init__(self, transform: Callable[[DataRecord], DataRecord]) -> None:\n        self.transform = transform\n\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "stream_pipeline/window.py": "from typing import List, Dict, Any\nfrom .record import DataRecord\n\nclass TumblingWindow:\n\n    def __init__(self, window_size: int) -> None:\n        self.window_size = window_size\n        self.buffer: List[DataRecord] = []\n\n    def add(self, record: DataRecord) -> List[Dict[str, Any]]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def flush(self) -> List[Dict[str, Any]]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def _aggregate(self, records: List[DataRecord]) -> Dict[str, Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\nclass SlidingWindow:\n\n    def __init__(self, window_size: int, slide_step: int=1) -> None:\n        self.window_size = window_size\n        self.slide_step = slide_step\n        self.buffer: List[DataRecord] = []\n\n    def add(self, record: DataRecord) -> List[Dict[str, Any]]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "tests/test_pipeline.py": "import unittest\nfrom stream_pipeline.record import DataRecord\nfrom stream_pipeline.stages import FilterStage, MapStage\nfrom stream_pipeline.window import TumblingWindow, SlidingWindow\nfrom stream_pipeline.pipeline import StreamPipeline\n\nclass TestStreamPipeline(unittest.IsolatedAsyncioTestCase):\n    def test_data_record_and_filtering(self):\n        r1 = DataRecord(key=\"user_1\", data={\"value\": 50, \"status\": \"active\"})\n        r2 = DataRecord(key=\"user_2\", data={\"value\": -10, \"status\": \"inactive\"})\n\n        filter_stage = FilterStage(lambda r: r.get(\"value\", 0) > 0 and r.get(\"status\") == \"active\")\n        self.assertEqual(filter_stage.process(r1), r1)\n        self.assertIsNone(filter_stage.process(r2))\n\n    def test_tumbling_and_sliding_window(self):\n        window = TumblingWindow(window_size=3)\n        r1 = DataRecord(key=\"a\", data={\"value\": 10})\n        r2 = DataRecord(key=\"b\", data={\"value\": 20})\n        r3 = DataRecord(key=\"c\", data={\"value\": 30})\n\n        self.assertEqual(window.add(r1), [])\n        self.assertEqual(window.add(r2), [])\n        aggs = window.add(r3)\n        self.assertEqual(len(aggs), 1)\n        self.assertEqual(aggs[0][\"count\"], 3)\n        self.assertEqual(aggs[0][\"sum\"], 60)\n        self.assertEqual(aggs[0][\"avg\"], 20.0)\n\n    async def test_stream_pipeline_end_to_end(self):\n        pipeline = StreamPipeline()\n        pipeline.add_stage(FilterStage(lambda r: r.get(\"value\", 0) > 0))\n        pipeline.add_stage(MapStage(lambda r: DataRecord(key=r.key, data={\"value\": r.get(\"value\") * 2})))\n\n        await pipeline.emit(DataRecord(key=\"k1\", data={\"value\": 10}))\n        await pipeline.emit(DataRecord(key=\"k2\", data={\"value\": -5}))\n        await pipeline.emit(DataRecord(key=\"k3\", data={\"value\": 20}))\n\n        results = await pipeline.run_drain()\n        self.assertEqual(len(results), 2)\n        self.assertEqual(results[0].data[\"value\"], 20)\n        self.assertEqual(results[1].data[\"value\"], 40)\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Problem: Multi-Stage Async Stream Processing Pipeline\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ],
+      "content": "I will list the workspace directory to locate the source code and tests."
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"DataRecord structure with field lookup.\\\"\\\"\\\"\\nfrom dataclasses import dataclass, field\\nimport time\\nfrom typing import Any, Dict\\n\\n\\n@dataclass(frozen=True)\\nclass DataRecord:\\n    key: str\\n    data: Dict[str, Any]\\n    id: str = \\\"\\\"\\n    timestamp: float = field(default_factory=time.time)\\n\\n    def get(self, field_name: str, default: Any = None) -> Any:\\n        return self.data.get(field_name, default)\\n\", \"path\": \"stream_pipeline/record.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Stream processing stages.\\\"\\\"\\\"\\nfrom abc import ABC, abstractmethod\\nfrom typing import Callable, Optional\\nfrom .record import DataRecord\\n\\n\\nclass BaseStage(ABC):\\n    @abstractmethod\\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\\n        raise NotImplementedError()\\n\\n\\nclass FilterStage(BaseStage):\\n    def __init__(self, predicate: Callable[[DataRecord], bool]) -> None:\\n        self.predicate = predicate\\n\\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\\n        return record if self.predicate(record) else None\\n\\n\\nclass MapStage(BaseStage):\\n    def __init__(self, transform: Callable[[DataRecord], DataRecord]) -> None:\\n        self.transform = transform\\n\\n    def process(self, record: DataRecord) -> Optional[DataRecord]:\\n        return self.transform(record)\\n\", \"path\": \"stream_pipeline/stages.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Windowing stages for stream processing.\\\"\\\"\\\"\\nfrom typing import Any, Dict, List\\nfrom .record import DataRecord\\n\\n\\nclass TumblingWindow:\\n    def __init__(self, window_size: int) -> None:\\n        self.window_size = window_size\\n        self.buffer: List[DataRecord] = []\\n\\n    def add(self, record: DataRecord) -> List[Dict[str, Any]]:\\n        self.buffer.append(record)\\n        if len(self.buffer) >= self.window_size:\\n            return self.flush()\\n        return []\\n\\n    def flush(self) -> List[Dict[str, Any]]:\\n        if not self.buffer:\\n            return []\\n        agg = self._aggregate(self.buffer)\\n        self.buffer.clear()\\n        return [agg]\\n\\n    def _aggregate(self, records: List[DataRecord]) -> Dict[str, Any]:\\n        values = [r.get(\\\"value\\\", 0) for r in records]\\n        return {\\n            \\\"count\\\": len(values),\\n            \\\"sum\\\": sum(values),\\n            \\\"avg\\\": sum(values) / len(values) if values else 0.0,\\n        }\\n\\n\\nclass SlidingWindow:\\n    def __init__(self, window_size: int, slide_step: int = 1) -> None:\\n        self.window_size = window_size\\n        self.slide_step = slide_step\\n        self.buffer: List[DataRecord] = []\\n\\n    def add(self, record: DataRecord) -> List[Dict[str, Any]]:\\n        self.buffer.append(record)\\n        if len(self.buffer) >= self.window_size:\\n            values = [r.get(\\\"value\\\", 0) for r in self.buffer]\\n            agg = {\\n                \\\"count\\\": len(values),\\n                \\\"sum\\\": sum(values),\\n                \\\"avg\\\": sum(values) / len(values) if values else 0.0,\\n            }\\n            self.buffer = self.buffer[self.slide_step:]\\n            return [agg]\\n        return []\\n\", \"path\": \"stream_pipeline/window.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Asynchronous multi-stage stream pipeline.\\\"\\\"\\\"\\nimport asyncio\\nfrom typing import Any, List\\nfrom .record import DataRecord\\nfrom .stages import BaseStage\\n\\n\\nclass StreamPipeline:\\n    def __init__(self, max_buffer_size: int = 100) -> None:\\n        self.stages: List[BaseStage] = []\\n        self.queue: asyncio.Queue[DataRecord] = asyncio.Queue(maxsize=max_buffer_size)\\n        self.output_sink: List[DataRecord] = []\\n        self.running = False\\n\\n    def add_stage(self, stage: BaseStage) -> \\\"StreamPipeline\\\":\\n        self.stages.append(stage)\\n        return self\\n\\n    async def emit(self, record: DataRecord) -> None:\\n        await self.queue.put(record)\\n\\n    async def process_one(self, record: DataRecord) -> None:\\n        current = record\\n        for stage in self.stages:\\n            if hasattr(stage, \\\"process\\\"):\\n                current = stage.process(current)\\n            if current is None:\\n                break\\n        if current is not None:\\n            self.output_sink.append(current)\\n\\n    async def run_drain(self) -> List[DataRecord]:\\n        while not self.queue.empty():\\n            rec = await self.queue.get()\\n            await self.process_one(rec)\\n            self.queue.task_done()\\n        results = list(self.output_sink)\\n        self.output_sink.clear()\\n        return results\\n\", \"path\": \"stream_pipeline/pipeline.py\"}"
+          }
+        }
+      ],
+      "content": "I will apply the fix to resolve the specifications for stream_pipeline."
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest -q\"}"
+          }
+        }
+      ],
+      "content": "Now I will run pytest to verify that all tests pass."
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Verification passed successfully! All test suites for stream_pipeline are green (exit=0)."
+    }
+  ]
+}

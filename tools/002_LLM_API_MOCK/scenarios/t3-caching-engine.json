@@ -1,0 +1,80 @@
+{
+  "id": "t3-caching-engine",
+  "tier": 3,
+  "title": "SWE-Verified: Multi-policy in-memory caching engine (LRU, LFU, TTL) with eviction invariants",
+  "workspace": {
+    "caching_engine/__init__.py": "from .base import BaseCache\nfrom .lru import LRUCache\nfrom .lfu import LFUCache\nfrom .ttl import TTLCache\n\n__all__ = [\"BaseCache\", \"LRUCache\", \"LFUCache\", \"TTLCache\"]\n",
+    "caching_engine/base.py": "from abc import ABC, abstractmethod\nfrom typing import Any, Optional\n\nclass BaseCache(ABC):\n\n    @abstractmethod\n    def get(self, key: str) -> Optional[Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def put(self, key: str, value: Any) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def delete(self, key: str) -> bool:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def size(self) -> int:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "caching_engine/lfu.py": "from collections import defaultdict, OrderedDict\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\nclass LFUCache(BaseCache):\n\n    def __init__(self, capacity: int) -> None:\n        if capacity <= 0:\n            raise ValueError('Capacity must be positive')\n        self.capacity = capacity\n        self.key_to_val: dict[str, Any] = {}\n        self.key_to_freq: dict[str, int] = {}\n        self.freq_to_keys: dict[int, OrderedDict[str, None]] = defaultdict(OrderedDict)\n        self.min_freq = 0\n\n    def get(self, key: str) -> Optional[Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def put(self, key: str, value: Any) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def _increment_freq(self, key: str) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def delete(self, key: str) -> bool:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def size(self) -> int:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "caching_engine/lru.py": "from collections import OrderedDict\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\nclass LRUCache(BaseCache):\n\n    def __init__(self, capacity: int) -> None:\n        if capacity <= 0:\n            raise ValueError('Capacity must be positive')\n        self.capacity = capacity\n        self.cache: OrderedDict[str, Any] = OrderedDict()\n        self.hits = 0\n        self.misses = 0\n\n    def get(self, key: str) -> Optional[Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def put(self, key: str, value: Any) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def delete(self, key: str) -> bool:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def size(self) -> int:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "caching_engine/ttl.py": "import time\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\nclass TTLCache(BaseCache):\n\n    def __init__(self, capacity: int, default_ttl_seconds: float=60.0) -> None:\n        if capacity <= 0:\n            raise ValueError('Capacity must be positive')\n        self.capacity = capacity\n        self.default_ttl = default_ttl_seconds\n        self.entries: dict[str, tuple[Any, float]] = {}\n\n    def get(self, key: str) -> Optional[Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def put(self, key: str, value: Any, ttl_seconds: Optional[float]=None) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def delete(self, key: str) -> bool:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def size(self) -> int:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    def _prune_expired(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "problem.md": "# Problem: Multi-Policy In-Memory Caching Engine\n\nImplement a high-performance, multi-policy Python caching engine supporting:\n1. `LRUCache(capacity: int)`: Evicts least recently accessed key on capacity overflow.\n2. `LFUCache(capacity: int)`: Evicts least frequently used key, breaking frequency ties using LRU order.\n3. `TTLCache(capacity: int, default_ttl_seconds: float)`: Evicts expired entries and enforces capacity bounds.\n\nEnsure all implementations adhere to `BaseCache` interface in `caching_engine.base`.\nAll unit tests in `tests/test_caching.py` must pass.\n",
+    "requirements.txt": "pytest>=7.0.0\npytest-asyncio>=0.21.0\n",
+    "tests/test_caching.py": "import time\nimport unittest\nfrom caching_engine.lru import LRUCache\nfrom caching_engine.lfu import LFUCache\nfrom caching_engine.ttl import TTLCache\n\nclass TestCaching(unittest.TestCase):\n    def test_lru_basic_and_eviction(self):\n        cache = LRUCache(2)\n        cache.put(\"a\", 1)\n        cache.put(\"b\", 2)\n        self.assertEqual(cache.get(\"a\"), 1)\n        cache.put(\"c\", 3)  # Evicts \"b\"\n        self.assertIsNone(cache.get(\"b\"))\n        self.assertEqual(cache.get(\"c\"), 3)\n        self.assertEqual(cache.get(\"a\"), 1)\n        self.assertEqual(cache.size(), 2)\n\n    def test_lfu_eviction_and_tie_breaking(self):\n        cache = LFUCache(2)\n        cache.put(\"a\", 10)\n        cache.put(\"b\", 20)\n        # Both \"a\" and \"b\" have frequency 1. \"a\" is oldest.\n        # Inserting \"c\" should evict \"a\" (LRU tie break among frequency 1)\n        cache.put(\"c\", 30)\n        self.assertIsNone(cache.get(\"a\"), \"LFU tie-break must evict oldest key 'a'\")\n        self.assertEqual(cache.get(\"b\"), 20)\n        self.assertEqual(cache.get(\"c\"), 30)\n\n    def test_ttl_expiration_and_oldest_eviction(self):\n        cache = TTLCache(2, default_ttl_seconds=60.0)\n        cache.put(\"long_lived\", 100, ttl_seconds=100.0)\n        cache.put(\"short_lived\", 200, ttl_seconds=5.0)\n        \n        # When capacity is exceeded, evict earliest expiring entry (\"short_lived\")\n        cache.put(\"new_entry\", 300, ttl_seconds=50.0)\n        self.assertEqual(cache.get(\"long_lived\"), 100)\n        self.assertIsNone(cache.get(\"short_lived\"), \"TTLCache must evict soonest-expiring key 'short_lived'\")\n        self.assertEqual(cache.get(\"new_entry\"), 300)\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Problem: Multi-Policy In-Memory Caching Engine\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ],
+      "content": "I will list the workspace directory to locate the source code and tests."
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Least Recently Used (LRU) Cache implementation.\\\"\\\"\\\"\\nfrom collections import OrderedDict\\nfrom typing import Any, Optional\\nfrom caching_engine.base import BaseCache\\n\\n\\nclass LRUCache(BaseCache):\\n    def __init__(self, capacity: int):\\n        self.capacity = capacity\\n        self._data: OrderedDict[str, Any] = OrderedDict()\\n\\n    def get(self, key: str) -> Optional[Any]:\\n        if key not in self._data:\\n            return None\\n        self._data.move_to_end(key)\\n        return self._data[key]\\n\\n    def put(self, key: str, value: Any) -> None:\\n        if key in self._data:\\n            self._data.move_to_end(key)\\n            self._data[key] = value\\n            return\\n        if len(self._data) >= self.capacity:\\n            self._data.popitem(last=False)\\n        self._data[key] = value\\n\\n    def delete(self, key: str) -> bool:\\n        if key in self._data:\\n            del self._data[key]\\n            return True\\n        return False\\n\\n    def clear(self) -> None:\\n        self._data.clear()\\n\\n    def size(self) -> int:\\n        return len(self._data)\\n\", \"path\": \"caching_engine/lru.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Least Frequently Used (LFU) Cache implementation.\\\"\\\"\\\"\\nfrom collections import defaultdict\\nfrom typing import Any, Optional\\nfrom caching_engine.base import BaseCache\\n\\n\\nclass LFUCache(BaseCache):\\n    def __init__(self, capacity: int):\\n        self.capacity = capacity\\n        self._data: dict[str, Any] = {}\\n        self._freq: dict[str, int] = defaultdict(int)\\n        self._access_order: list[str] = []\\n\\n    def get(self, key: str) -> Optional[Any]:\\n        if key not in self._data:\\n            return None\\n        self._freq[key] += 1\\n        if key in self._access_order:\\n            self._access_order.remove(key)\\n        self._access_order.append(key)\\n        return self._data[key]\\n\\n    def put(self, key: str, value: Any) -> None:\\n        if self.capacity <= 0:\\n            return\\n        if key in self._data:\\n            self._data[key] = value\\n            self._freq[key] += 1\\n            if key in self._access_order:\\n                self._access_order.remove(key)\\n            self._access_order.append(key)\\n            return\\n        if len(self._data) >= self.capacity:\\n            min_freq = min(self._freq[k] for k in self._data)\\n            candidates = [k for k in self._access_order if self._freq[k] == min_freq]\\n            evict_k = candidates[0]\\n            del self._data[evict_k]\\n            del self._freq[evict_k]\\n            self._access_order.remove(evict_k)\\n\\n        self._data[key] = value\\n        self._freq[key] = 1\\n        self._access_order.append(key)\\n\\n    def delete(self, key: str) -> bool:\\n        if key in self._data:\\n            del self._data[key]\\n            del self._freq[key]\\n            if key in self._access_order:\\n                self._access_order.remove(key)\\n            return True\\n        return False\\n\\n    def clear(self) -> None:\\n        self._data.clear()\\n        self._freq.clear()\\n        self._access_order.clear()\\n\\n    def size(self) -> int:\\n        return len(self._data)\\n\", \"path\": \"caching_engine/lfu.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Time-To-Live (TTL) Cache implementation.\\\"\\\"\\\"\\nimport time\\nfrom typing import Any, Callable, Optional\\nfrom caching_engine.base import BaseCache\\n\\n\\nclass TTLCache(BaseCache):\\n    def __init__(self, capacity: int, default_ttl_seconds: float = 60.0, clock: Optional[Callable[[], float]] = None):\\n        self.capacity = capacity\\n        self.default_ttl = default_ttl_seconds\\n        self._clock = clock or time.time\\n        self._data: dict[str, tuple[Any, float]] = {}\\n\\n    def get(self, key: str) -> Optional[Any]:\\n        if key not in self._data:\\n            return None\\n        val, expires_at = self._data[key]\\n        if self._clock() > expires_at:\\n            del self._data[key]\\n            return None\\n        return val\\n\\n    def put(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:\\n        ttl = ttl_seconds if ttl_seconds is not None else self.default_ttl\\n        expires_at = self._clock() + ttl\\n        if key in self._data:\\n            self._data[key] = (value, expires_at)\\n            return\\n        if len(self._data) >= self.capacity:\\n            earliest_k = min(self._data.keys(), key=lambda k: self._data[k][1])\\n            del self._data[earliest_k]\\n        self._data[key] = (value, expires_at)\\n\\n    def delete(self, key: str) -> bool:\\n        if key in self._data:\\n            del self._data[key]\\n            return True\\n        return False\\n\\n    def clear(self) -> None:\\n        self._data.clear()\\n\\n    def size(self) -> int:\\n        now = self._clock()\\n        return len([k for k, (_, exp) in self._data.items() if now <= exp])\\n\", \"path\": \"caching_engine/ttl.py\"}"
+          }
+        }
+      ],
+      "content": "I will apply the fix to resolve the specifications for caching_engine."
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest -q\"}"
+          }
+        }
+      ],
+      "content": "Now I will run pytest to verify that all tests pass."
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Verification passed successfully! All test suites for caching_engine are green (exit=0)."
+    }
+  ]
+}

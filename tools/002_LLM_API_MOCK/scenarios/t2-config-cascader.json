@@ -1,0 +1,71 @@
+{
+  "id": "t2-config-cascader",
+  "tier": 2,
+  "title": "SWE-Verified: Hierarchical configuration loader with environment variable interpolation and deep merge",
+  "workspace": {
+    "config/__init__.py": "\"\"\"Hierarchical configuration cascading package.\"\"\"\nfrom .interpolator import ConfigError, interpolate_str, interpolate_tree\nfrom .loader import load_layer\nfrom .merger import deep_merge\n\n__all__ = [\n    \"ConfigError\",\n    \"interpolate_str\",\n    \"interpolate_tree\",\n    \"load_layer\",\n    \"deep_merge\",\n]\n",
+    "config/interpolator.py": "\"\"\"Environment-variable interpolation for configuration trees.\"\"\"\nimport re\n\n\nclass ConfigError(KeyError):\n    pass\n\n\n# BENCHMARK BUG: pattern only recognizes bare ${VAR} references; the\n# ${VAR:-default} form never matches and leaks through as literal text.\n_VAR_RE = re.compile(r\"\\$\\{([A-Za-z_][A-Za-z0-9_]*)\\}\")\n\n\ndef interpolate_str(value, env):\n    \"\"\"Substitute ${VAR} / ${VAR:-default} references in a single string.\"\"\"\n    def repl(match):\n        var = match.group(1)\n        if var in env:\n            return env[var]\n        raise ConfigError(var)\n\n    return _VAR_RE.sub(repl, value)\n\n\ndef interpolate_tree(node, env):\n    \"\"\"Recursively interpolate every string inside dicts/lists/trees.\"\"\"\n    if isinstance(node, str):\n        return interpolate_str(node, env)\n    if isinstance(node, dict):\n        return {key: interpolate_tree(value, env) for key, value in node.items()}\n    if isinstance(node, list):\n        return [interpolate_tree(item, env) for item in node]\n    return node\n",
+    "config/loader.py": "\"\"\"Layered JSON configuration loader.\"\"\"\nimport json\n\nfrom .interpolator import interpolate_tree\nfrom .merger import deep_merge\n\n\ndef load_layer(paths, env=None, array_strategy=\"append\"):\n    \"\"\"Load JSON config files in order; later layers win.\n\n    Values are merged with ``array_strategy``, then environment\n    interpolation is applied over the merged tree.\n    \"\"\"\n    env = dict(env if env is not None else {})\n    merged = {}\n    for path in paths:\n        with open(path, \"r\", encoding=\"utf-8\") as handle:\n            layer = json.load(handle)\n        if isinstance(layer, dict):\n            merged = deep_merge(merged, layer, array_strategy=array_strategy)\n    return interpolate_tree(merged, env)\n",
+    "config/merger.py": "\"\"\"Deep merge for layered configuration dictionaries.\"\"\"\n\n\ndef deep_merge(base, override, array_strategy=\"replace\"):\n    \"\"\"Merge ``override`` into ``base`` recursively.\n\n    Dicts merge recursively. Arrays follow ``array_strategy``:\n    ``\"replace\"`` keeps the override list, ``\"append\"`` concatenates\n    base + override.\n    \"\"\"\n    result = dict(base)\n    for key, value in override.items():\n        if key in result and isinstance(result[key], dict) and isinstance(value, dict):\n            result[key] = deep_merge(result[key], value, array_strategy=array_strategy)\n        elif key in result and isinstance(result[key], list) and isinstance(value, list):\n            # BENCHMARK BUG: array_strategy is ignored; lists are always\n            # replaced regardless of the requested strategy.\n            result[key] = list(value)\n        else:\n            result[key] = value\n    return result\n",
+    "problem.md": "# Challenge: Hierarchical Config Cascader\n\nThe configuration stack has two defects:\n\n1. `interpolator.py`: `${VAR:-default}` fallback syntax and nested defaults\n   (`${A:-${B:-fallback}}`) are not recognized \u2014 the regex only matches bare\n   `${VAR}` references, so default expressions leak through literally.\n2. `merger.py`: `deep_merge()` accepts an ``array_strategy`` parameter but\n   silently ignores it, always replacing lists instead of appending.\n\nFix both defects. Do not modify the test suite.\n",
+    "tests/test_config_cascader.py": "import json\nimport os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom config import ConfigError, deep_merge, interpolate_str, interpolate_tree, load_layer\n\n\ndef test_recursive_env_interpolation():\n    tree = {\n        \"url\": \"${HOST:-${HOST_FALLBACK}}\",\n        \"port\": \"${PORT:-8080}\",\n        \"explicit\": \"${KNOWN}\",\n    }\n    env = {\"KNOWN\": \"lex\", \"PORT\": \"9000\", \"HOST_FALLBACK\": \"fallback-host\"}\n    resolved = interpolate_tree(tree, env)\n    assert resolved[\"url\"] == \"fallback-host\"  # nested default resolves fully\n    assert resolved[\"port\"] == \"9000\"\n    assert resolved[\"explicit\"] == \"lex\"\n\n\ndef test_default_fallback_resolution():\n    env = {}\n    assert interpolate_str(\"${A:-alpha}\", env) == \"alpha\"\n    assert interpolate_str(\"${A:-${B:-beta}}\", env) == \"beta\"\n    assert interpolate_str(\"srv://${A:-${B:-gamma}}:1\", env) == \"srv://gamma:1\"\n    assert interpolate_str(\"${A:-alpha}\", {\"A\": \"real\"}) == \"real\"\n    with pytest.raises(ConfigError):\n        interpolate_str(\"${MISSING}\", {})\n\n\ndef test_deep_merge_array_append_strategy():\n    base = {\"routes\": [1, 2], \"keep\": {\"a\": 1}}\n    override = {\"routes\": [3], \"keep\": {\"b\": 2}}\n    merged = deep_merge(base, override, array_strategy=\"append\")\n    assert merged[\"routes\"] == [1, 2, 3]\n    assert merged[\"keep\"] == {\"a\": 1, \"b\": 2}\n    replaced = deep_merge(base, override, array_strategy=\"replace\")\n    assert replaced[\"routes\"] == [3]\n\n\ndef test_flat_key_override():\n    merged = deep_merge({\"x\": 1, \"y\": {\"z\": 2}}, {\"x\": 9, \"y\": {\"w\": 3}})\n    assert merged == {\"x\": 9, \"y\": {\"z\": 2, \"w\": 3}}\n\n\ndef test_json_file_parsing(tmp_path):\n    base = tmp_path / \"base.json\"\n    over = tmp_path / \"overlay.json\"\n    base.write_text(json.dumps({\"db\": {\"host\": \"local\", \"retries\": [1]}}))\n    over.write_text(json.dumps({\"db\": {\"host\": \"${DB_HOST}\"}, \"tag\": \"${TAG}\"}))\n    cfg = load_layer([base, over], env={\"DB_HOST\": \"prod\", \"TAG\": \"t1\"})\n    assert cfg[\"db\"][\"host\"] == \"prod\"\n    assert cfg[\"tag\"] == \"t1\"\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Challenge: Hierarchical Config Cascader\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ],
+      "content": "I will list the workspace directory to locate the source code and tests."
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Environment variable interpolation for configuration strings and trees.\\\"\\\"\\\"\\nimport os\\nimport re\\n\\n_ENV_VAR_RE = re.compile(r\\\"\\\\$\\\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\\\}\\\")\\n\\n\\nclass ConfigError(Exception):\\n    \\\"\\\"\\\"Raised when an environment variable reference cannot be resolved.\\\"\\\"\\\"\\n\\n\\ndef _interpolate_str_single(text: str, env: dict) -> str:\\n    def _replace(match: re.Match) -> str:\\n        name = match.group(1)\\n        default = match.group(2)\\n        if name in env:\\n            return env[name]\\n        if default is not None:\\n            return interpolate_str(default, env)\\n        raise ConfigError(f\\\"unset variable: {name!r}\\\")\\n\\n    prev = None\\n    curr = text\\n    while prev != curr:\\n        prev = curr\\n        curr = _ENV_VAR_RE.sub(_replace, curr)\\n    return curr\\n\\n\\ndef interpolate_str(text: str, env: dict | None = None) -> str:\\n    environ = os.environ if env is None else env\\n    return _interpolate_str_single(text, environ)\\n\\n\\ndef interpolate_tree(tree: dict | list | str | int | float | bool | None,\\n                     env: dict | None = None) -> dict | list | str | int | float | bool | None:\\n    environ = os.environ if env is None else env\\n    if isinstance(tree, dict):\\n        return {k: interpolate_tree(v, environ) for k, v in tree.items()}\\n    if isinstance(tree, list):\\n        return [interpolate_tree(item, environ) for item in tree]\\n    if isinstance(tree, str):\\n        return interpolate_str(tree, environ)\\n    return tree\\n\", \"path\": \"config/interpolator.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Deep merger for nested dictionaries and lists.\\\"\\\"\\\"\\n\\n\\ndef deep_merge(base: dict, override: dict, array_strategy: str = \\\"replace\\\") -> dict:\\n    result = dict(base)\\n    for key, value in override.items():\\n        if key in result and isinstance(result[key], dict) and isinstance(value, dict):\\n            result[key] = deep_merge(result[key], value, array_strategy=array_strategy)\\n        elif key in result and isinstance(result[key], list) and isinstance(value, list):\\n            if array_strategy == \\\"append\\\":\\n                result[key] = result[key] + value\\n            elif array_strategy == \\\"prepend\\\":\\n                result[key] = value + result[key]\\n            else:  # replace\\n                result[key] = value\\n        else:\\n            result[key] = value\\n    return result\\n\", \"path\": \"config/merger.py\"}"
+          }
+        }
+      ],
+      "content": "I will apply the fix to resolve the specifications for config_cascader."
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest -q\"}"
+          }
+        }
+      ],
+      "content": "Now I will run pytest to verify that all tests pass."
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Verification passed successfully! All test suites for config_cascader are green (exit=0)."
+    }
+  ]
+}

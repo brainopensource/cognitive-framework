@@ -1,0 +1,199 @@
+{
+  "schema_version": "lam.swe-calibration-split/1",
+  "seed": 20260825,
+  "total_tasks": 16,
+  "real_count": 5,
+  "synthetic_count": 11,
+  "policy": "5 real OpenRouter DeepSeek V4 Flash runs for behavioral calibration and audit; 11 synthetic isolated-workspace runs for zero-cost harness replay",
+  "real_task_ids": [
+    "semver_parser",
+    "isolated_coding_test",
+    "plugin_dag",
+    "token_bucket",
+    "circuit_breaker"
+  ],
+  "real_calibration_task_ids": [
+    "semver_parser",
+    "isolated_coding_test",
+    "plugin_dag",
+    "token_bucket"
+  ],
+  "real_audit_task_ids": [
+    "circuit_breaker"
+  ],
+  "synthetic_task_ids": [
+    "caching_engine",
+    "concurrent_lsm_engine",
+    "config_cascader",
+    "connection_pool",
+    "distributed_wal_fsm",
+    "event_bus",
+    "json_validator",
+    "protocol_fsm",
+    "raft_consensus",
+    "stream_pipeline",
+    "trie_router"
+  ],
+  "tasks": [
+    {
+      "id": "semver_parser",
+      "tier": 1,
+      "domain": "parsers",
+      "difficulty": "easy",
+      "split": "real_calibration",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "Semantic Version 2.0.0 parser and total ordering with pre-release precedence"
+    },
+    {
+      "id": "isolated_coding_test",
+      "tier": 2,
+      "domain": "caching",
+      "difficulty": "medium",
+      "split": "real_calibration",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "LRU/TTL cache invalidation window and recency refresh order"
+    },
+    {
+      "id": "plugin_dag",
+      "tier": 3,
+      "domain": "graph_algorithms",
+      "difficulty": "medium",
+      "split": "real_calibration",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Plugin dependency DAG topological load order and cycle detection"
+    },
+    {
+      "id": "token_bucket",
+      "tier": 2,
+      "domain": "concurrency",
+      "difficulty": "medium",
+      "split": "real_calibration",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "Thread-safe Token Bucket rate limiter capacity clamp and burst refill"
+    },
+    {
+      "id": "circuit_breaker",
+      "tier": 3,
+      "domain": "fault_tolerance",
+      "difficulty": "medium",
+      "split": "real_audit",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Circuit breaker state transition machine with exponential backoff"
+    },
+    {
+      "id": "caching_engine",
+      "tier": 3,
+      "domain": "caching",
+      "difficulty": "medium",
+      "split": "synthetic",
+      "files_count": 4,
+      "test_framework": "pytest",
+      "description": "Multi-policy in-memory caching engine (LRU, LFU, TTL) with eviction invariants"
+    },
+    {
+      "id": "concurrent_lsm_engine",
+      "tier": 5,
+      "domain": "storage_engines",
+      "difficulty": "hard",
+      "split": "synthetic",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "Concurrent Log-Structured Merge Tree memtable and SSTable flushing"
+    },
+    {
+      "id": "config_cascader",
+      "tier": 2,
+      "domain": "configuration",
+      "difficulty": "medium",
+      "split": "synthetic",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Hierarchical configuration loader with environment variable interpolation and deep merge"
+    },
+    {
+      "id": "connection_pool",
+      "tier": 3,
+      "domain": "networking",
+      "difficulty": "medium",
+      "split": "synthetic",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Thread-safe connection pool with lease timeouts, health checks, and reaping"
+    },
+    {
+      "id": "distributed_wal_fsm",
+      "tier": 5,
+      "domain": "distributed_systems",
+      "difficulty": "hard",
+      "split": "synthetic",
+      "files_count": 4,
+      "test_framework": "pytest",
+      "description": "Distributed Write-Ahead Log (WAL) and replicated finite state machine"
+    },
+    {
+      "id": "event_bus",
+      "tier": 3,
+      "domain": "messaging",
+      "difficulty": "medium",
+      "split": "synthetic",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Asynchronous event broker with topic pattern matching and dead-letter queues"
+    },
+    {
+      "id": "json_validator",
+      "tier": 2,
+      "domain": "parsers",
+      "difficulty": "easy",
+      "split": "synthetic",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "JSON Schema format validator handling unicode escapes and null byte constraints"
+    },
+    {
+      "id": "protocol_fsm",
+      "tier": 4,
+      "domain": "networking",
+      "difficulty": "hard",
+      "split": "synthetic",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Binary streaming protocol framing and cluster membership state machine"
+    },
+    {
+      "id": "raft_consensus",
+      "tier": 6,
+      "domain": "consensus",
+      "difficulty": "sota",
+      "split": "synthetic",
+      "files_count": 3,
+      "test_framework": "pytest",
+      "description": "Raft consensus election safety, term monotonicity, and log replication"
+    },
+    {
+      "id": "stream_pipeline",
+      "tier": 4,
+      "domain": "streaming",
+      "difficulty": "hard",
+      "split": "synthetic",
+      "files_count": 4,
+      "test_framework": "pytest",
+      "description": "Multi-stage async stream processing pipeline with windowing and backpressure"
+    },
+    {
+      "id": "trie_router",
+      "tier": 2,
+      "domain": "routing",
+      "difficulty": "easy",
+      "split": "synthetic",
+      "files_count": 1,
+      "test_framework": "pytest",
+      "description": "Radix trie URL router with wildcard precedence and parameter extraction"
+    }
+  ]
+}

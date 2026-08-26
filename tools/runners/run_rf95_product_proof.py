@@ -215,7 +215,12 @@ def main() -> int:
             print("RF-95 DRY RUN QUALIFIED: Fixture and profile are ready for live authorization.")
             return 0
 
+        from vanguard.packages.adapters.models.env_loader import load_api_key
         api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
+        if not api_key:
+            res_env = load_api_key(_REPO_ROOT)
+            if res_env.ok and res_env.value:
+                api_key = res_env.value
         if not api_key:
             print("ERROR: Live execution requires OPENROUTER_API_KEY or DEEPSEEK_API_KEY set.", file=sys.stderr)
             print("Use --dry-run for hermetic qualification.", file=sys.stderr)
@@ -230,7 +235,7 @@ def main() -> int:
             project_id="calc-fix",
             max_turns=20,
         )
-        model = OpenRouterModel(model=args.model)
+        model = OpenRouterModel(model=args.model, stream=False, environ={"OPENROUTER_API_KEY": api_key})
 
         # `patch.apply` is `medium` and `proc.exec` is `high`; the pack's
         # approval threshold is `low`, so both are descriptor-bound to a human.

@@ -232,7 +232,7 @@ def validate_proposal_schema(proposal: Mapping[str, Any]) -> Result[None]:
         return Result.fail("instrument_error", "provider proposal must be an object")
 
     allowed = {"text", "toolCalls", "usage", "cost_usd", "usd_micros",
-               "pricing_known", "pricing_source", "resolved_model"}
+               "pricing_known", "pricing_source", "resolved_model", "model_fingerprint"}
     unknown = set(proposal) - allowed
     if unknown:
         return Result.fail("instrument_error", f"proposal contains unsupported fields: {sorted(unknown)}")

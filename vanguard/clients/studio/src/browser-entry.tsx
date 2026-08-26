@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ColumnarEventStore } from "./store/event-store.js";
 import { initialStudioFold, StudioFoldEngine } from "./store/fold.js";
@@ -114,53 +114,151 @@ document.head.appendChild(style);
 function DemoObservatory() {
   const [store] = useState(() => new ColumnarEventStore());
   const [engine] = useState(() => new StudioFoldEngine());
-  const [count, setCount] = useState(demoEvents.length);
+  const [mode, setMode] = useState<"live" | "demo">("demo");
+  const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
+  const [demoCount, setDemoCount] = useState(demoEvents.length);
   const [session, setSession] = useState(INITIAL_SESSION_STATE);
+  const [eventVersion, setEventVersion] = useState(0);
 
-  const rows = useMemo(() => store.appendBatch(demoEvents.slice(0, count)), [count, store]);
+  // Check Backend Health & Connect SSE
+  useEffect(() => {
+    let sse: EventSource | null = null;
+
+    const checkHealth = async () => {
+      try {
+        const res = await fetch("/api/health");
+        if (res.ok) {
+          setIsBackendOnline(true);
+          setMode("live");
+          connectSSE();
+        }
+      } catch {
+        setIsBackendOnline(false);
+      }
+    };
+
+    const connectSSE = () => {
+      try {
+        sse = new EventSource("/api/events/stream");
+        sse.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data) as EventEnvelope;
+            store.append(parsed);
+            setEventVersion((v) => v + 1);
+          } catch (err) {
+            console.error("SSE parse error", err);
+          }
+        };
+        sse.onerror = () => {
+          console.warn("SSE disconnected, polling fallback...");
+        };
+      } catch (e) {
+        console.error("SSE init failed", e);
+      }
+    };
+
+    checkHealth();
+
+    return () => {
+      if (sse) sse.close();
+    };
+  }, [store]);
+
+  const rows = useMemo(() => {
+    if (mode === "demo") {
+      return store.appendBatch(demoEvents.slice(0, demoCount));
+    }
+    // Live mode
+    return store.getAllRows();
+  }, [mode, demoCount, store, eventVersion]);
+
   const liveFold = engine.foldAll(rows);
   const fold = session.isScrubbing ? engine.foldToSeq(session.selectedSeq, rows) : liveFold;
 
-  const appendNext = () => setCount((value) => Math.min(demoEvents.length, value + 1));
+  const appendNext = () => setDemoCount((value) => Math.min(demoEvents.length, value + 1));
   const selectSeq = (seq: bigint) =>
     setSession((value) => ({
       ...value,
       selectedSeq: seq,
-      isScrubbing: seq > 0n && seq < BigInt(count),
+      isScrubbing: seq > 0n && seq < BigInt(rows.length),
     }));
 
   const resolveApproval = async (approvalId: string, decision: "approve" | "reject") => {
-    setCount((value) => Math.max(value, 11));
+    if (mode === "live") {
+      try {
+        await fetch("/api/approvals/resolve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approvalId, decision }),
+        });
+      } catch (err) {
+        console.error("Failed to submit live approval", err);
+      }
+    } else {
+      setDemoCount((value) => Math.max(value, 11));
+    }
   };
 
   return (
     <>
+      {/* Floating Mode Switcher & Stepper Pill */}
       <div
         style={{
           position: "fixed",
-          zIndex: 40,
+          zIndex: 50,
           bottom: 48,
           left: 16,
           display: "flex",
-          gap: 6,
-          padding: 4,
+          alignItems: "center",
+          gap: 8,
+          padding: "6px 10px",
           background: "rgba(18, 18, 21, 0.95)",
           border: "1px solid var(--border-medium)",
           borderRadius: "var(--radius-md)",
           boxShadow: "var(--shadow-elevation)",
+          backdropFilter: "blur(8px)",
         }}
       >
-        <button onClick={() => setCount(5)} style={demoButton}>
-          Reset (Turn 1)
-        </button>
-        <button onClick={appendNext} disabled={count >= demoEvents.length} style={demoButton}>
-          Advance Event ({count}/{demoEvents.length})
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: isBackendOnline ? "var(--signal-proof)" : "var(--signal-hold)",
+              display: "inline-block",
+            }}
+          />
+          <span className="font-mono" style={{ fontSize: 10, fontWeight: 700, color: "var(--text-primary)" }}>
+            {mode === "live" ? "LIVE BACKEND" : "FIXTURE MODE"}
+          </span>
+        </div>
+
+        <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
+
+        {mode === "demo" ? (
+          <>
+            <button onClick={() => setDemoCount(5)} style={pillButton}>
+              Reset
+            </button>
+            <button onClick={appendNext} disabled={demoCount >= demoEvents.length} style={pillButton}>
+              Advance ({demoCount}/{demoEvents.length})
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setMode("demo")}
+            style={{ ...pillButton, color: "var(--signal-flow)" }}
+          >
+            Switch to Demo
+          </button>
+        )}
+
         <button
           onClick={() => setSession((value) => ({ ...value, selectedSeq: 0n, isScrubbing: false }))}
-          style={demoButton}
+          style={pillButton}
         >
-          Return Live
+          Live Head
         </button>
       </div>
 
@@ -177,10 +275,10 @@ function DemoObservatory() {
   );
 }
 
-const demoButton: React.CSSProperties = {
+const pillButton: React.CSSProperties = {
   border: "1px solid var(--border-subtle)",
   borderRadius: "var(--radius-sm)",
-  padding: "4px 8px",
+  padding: "3px 8px",
   background: "var(--bg-card)",
   color: "var(--text-primary)",
   cursor: "pointer",

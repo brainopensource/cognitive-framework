@@ -1,7 +1,24 @@
 import type { StudioFold } from "./fold.js";
 
+export type StudioSurface =
+  | "workbench"
+  | "coding"
+  | "generality"
+  | "lineage"
+  | "evolution"
+  | "theatre"
+  | "map"
+  | "studio"
+  | "effect"
+  | "evidence"
+  | "arena"
+  | "ledger"
+  | "watch"
+  | "brain";
+
 export type StudioSessionState = {
-  readonly activeSurface: "theatre" | "map" | "studio" | "effect" | "evidence" | "arena" | "ledger" | "watch" | "brain";
+  readonly activeSurface: StudioSurface;
+  readonly activeMilestone: "M-1" | "M-2" | "M-3C" | "M-4" | "M-5a" | "M-5b" | "M-6" | "M-6.5" | "M-7" | "M-8" | "ALL";
   readonly density: "operate" | "watch";
   readonly theme: "dark" | "light";
   readonly selectedSeq: bigint;
@@ -14,7 +31,8 @@ export type StudioSessionState = {
 };
 
 export const INITIAL_SESSION_STATE: StudioSessionState = {
-  activeSurface: "theatre",
+  activeSurface: "workbench",
+  activeMilestone: "ALL",
   density: "operate",
   theme: "dark",
   selectedSeq: 0n,

@@ -377,9 +377,25 @@ class HarnessSession:
             role="session",
         )
 
+        self.scope = _scope_for(harness)
         self.adapters = {
             verb: harness.bindings[verb].factory(
-                BindingContext(verb=verb, environment=ports.environment, repo_path=repo))
+                BindingContext(
+                    verb=verb,
+                    environment=ports.environment,
+                    repo_path=repo,
+                    emitter=self.ledger.spawn_adapter() if verb == "agent.spawn" else None,
+                    parent_scope=self.scope,
+                    clock=ports.clock,
+                    store=ports.store,
+                    parent_episode_id=task.episode_id,
+                    max_depth=self.scope.constraints.max_depth,
+                    max_turns=getattr(task, "max_turns", 10),
+                    run_child=getattr(task, "run_child", None),
+                    lineage=getattr(task, "lineage", (task.episode_id,)),
+                    ledger=self.ledger,
+                )
+            )
             for verb in harness.verbs
         }
         # `W11-A`. The index is bound only when the pack declares it. A
@@ -395,7 +411,6 @@ class HarnessSession:
                 "an IndexPort was supplied but the manifest declares no index "
                 "component; bind it in the pack or do not pass it")
 
-        self.scope = _scope_for(harness)
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
                           _ceiling_resources(harness), max_depth=4)])

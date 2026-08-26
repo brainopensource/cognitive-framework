@@ -155,10 +155,6 @@ def compose_named_manifest(manifest: NamedManifest, graph: ArtifactGraph) -> Nam
                 _selector_object(component_selector),
             ).included:
                 raise ManifestError(f"component ceiling widens harness ceiling: {component.name}")
-    capabilities = manifest.metadata.get("capabilities", ())
-    if any(item.get("verb") == "agent.spawn" for item in capabilities
-           if isinstance(item, Mapping)):
-        raise ManifestError("agent.spawn not implemented before M-6")
     # Re-freeze with resolved implementation/config digests in the identity.
     resolved = [{"name": c.name, "kind": c.kind, "implementation": files[c.implementation].digest,
                  "config": (files[c.config].digest if isinstance(c.config, str) and c.config in files
@@ -604,10 +600,8 @@ LEGACY_ISOLATION = "in_process"
 
 #: Verbs that parse and digest but have no live code path before their
 #: milestone. Refusing them at ingress keeps the reservation identity-bearing
-#: (ADR-0085) while ADR-0088 keeps `agent.spawn` inert until M-6.
-_INERT_VERBS: Mapping[str, str] = {
-    "agent.spawn": "agent.spawn is capability-mediated delegation, inert until M-6",
-}
+#: (ADR-0085). M-6 activates `agent.spawn`.
+_INERT_VERBS: Mapping[str, str] = {}
 
 
 @dataclass(frozen=True, slots=True)

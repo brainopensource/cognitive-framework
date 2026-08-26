@@ -47,6 +47,16 @@ class BindingContext:
     verb: str
     environment: Any
     repo_path: Path
+    emitter: Any = None
+    parent_scope: Any = None
+    clock: Any = None
+    store: Any = None
+    parent_episode_id: str | None = None
+    max_depth: int = 4
+    max_turns: int = 10
+    run_child: Any = None
+    lineage: tuple[str, ...] = ()
+    ledger: Any = None
 
 class _EnvironmentEffect:
     """`kernel.EffectAdapter` over an `EnvironmentAdapter` (`ICD §4`).
@@ -81,7 +91,16 @@ class _EnvironmentEffect:
             kind = error.kind if error is not None else "instrument_error"
             return AdapterOutcome(
                 "denied" if kind == "denied" else "error",
-                Occurrence.NOT_OCCURRED if kind in {"denied", "invalid_request", "not_found"}
+                # `Occurrence.NOT_OCCURRED` never existed on the enum -- the
+                # members are OCCURRED / DID_NOT_OCCUR / UNDETERMINABLE. Every
+                # denied, malformed or missing-target effect therefore raised
+                # `AttributeError` inside the adapter, which S9 catches and
+                # (correctly, given a raising adapter) records as
+                # UNDETERMINABLE. So a *known* non-occurrence was reported as
+                # unknown: fail-closed, unretryable, and the agent could not
+                # learn that its own diff was malformed. That is what made the
+                # RF-95 episode escalate instead of correcting itself.
+                Occurrence.DID_NOT_OCCUR if kind in {"denied", "invalid_request", "not_found"}
                 else occurred,
                 {"usd_micros": 0},
                 detail=error.message if error is not None else "",
@@ -159,6 +178,34 @@ def _sandbox_effector(context: BindingContext) -> Any:
     return _environment_effector(context)
 
 
+def _spawn_effector(context: BindingContext) -> Any:
+    """M-6 mediated delegation adapter binding."""
+    from .delegation import DelegationResult, SpawnAdapter
+
+    emitter = context.emitter
+    if emitter is None and context.ledger is not None:
+        emitter = context.ledger.spawn_adapter()
+    return SpawnAdapter(
+        emitter=emitter,
+        parent_scope=context.parent_scope,
+        run_child=context.run_child or (
+            lambda lineage: DelegationResult(
+                ok=True,
+                outcome="completed",
+                terminal="ok",
+                child_episode_id=lineage.child_episode_id,
+                result_digest="sha256:" + "0" * 64,
+            )
+        ),
+        clock=context.clock,
+        store=context.store,
+        parent_episode_id=context.parent_episode_id or "parent-ep",
+        max_depth=context.max_depth,
+        max_turns=context.max_turns,
+        lineage=context.lineage,
+    )
+
+
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
 #: (`01 §2`, open/closed); the dispatcher and the loop never change to
 #: accommodate one.
@@ -169,6 +216,7 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "patch.apply": EffectBinding(_environment_effector, carries_diff=True),
     "fs.patch": EffectBinding(_environment_effector, carries_diff=True),
     "proc.exec": EffectBinding(_sandbox_effector),
+    "agent.spawn": EffectBinding(_spawn_effector),
 }
 
 

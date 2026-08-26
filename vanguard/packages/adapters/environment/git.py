@@ -47,6 +47,25 @@ def _compute_file_digest(content: str) -> str:
     return digest_bytes(content.encode("utf-8"))
 
 
+def _with_file_header(patch_text: str, path: object) -> str:
+    """Give a headerless hunk the file it is already addressed to.
+
+    A model that emits only `@@` plus a body has not written an invalid patch
+    -- it has written one whose target is carried by the effect request's
+    `path` argument instead of by `--- a/`. Refusing it made the applier reject
+    a diff whose content and destination were both unambiguous. A patch that
+    *does* name its files is never touched.
+    """
+    if not isinstance(path, str) or not path:
+        return patch_text
+    for line in patch_text.splitlines():
+        if line.startswith(("--- ", "diff --git ")):
+            return patch_text
+    if not patch_text.lstrip().startswith("@@"):
+        return patch_text
+    return f"--- a/{path}\n+++ b/{path}\n{patch_text}"
+
+
 class GitEnvironment:
     """Permanent Git repository environment adapter."""
 
@@ -424,57 +443,121 @@ class GitEnvironment:
                 while i < len(lines) and lines[i].startswith("@@"):
                     has_hunk = True
                     hunk_match = _HUNK_HEADER.match(lines[i])
-                    if not hunk_match:
-                        return Result.fail("invalid_request", f"malformed hunk header: {lines[i]}")
-                    # Honour the hunk's old-file start line. Without this the
-                    # first hunk is applied from line 1 whatever its header
-                    # says, so every diff that does not begin at the top of the
-                    # file reports a context mismatch against itself. Lines
-                    # before the hunk are unchanged and copy across verbatim.
-                    hunk_start = int(hunk_match.group(1))
-                    target_idx = max(hunk_start - 1, 0) if hunk_start else 0
+                    # A header without line numbers (a bare `@@`) is common in
+                    # model-authored diffs. It is not a malformed patch -- it
+                    # is a patch that declines to state *where*, which is
+                    # answerable from the context lines themselves. `patch(1)`
+                    # and `git apply` both locate a hunk by searching for its
+                    # context near the stated offset; requiring the offset to
+                    # be exactly right made this applier stricter than either,
+                    # and it rejected diffs whose content was correct.
+                    hint: int | None = None
+                    if hunk_match:
+                        hunk_start = int(hunk_match.group(1))
+                        hint = max(hunk_start - 1, 0) if hunk_start else 0
+                    elif lines[i].strip() not in ("@@", "@@@"):
+                        return Result.fail(
+                            "invalid_request", f"malformed hunk header: {lines[i]}")
+                    i += 1
+
+                    # Collect the hunk body before applying any of it, so the
+                    # old-file block it expects is known and can be searched
+                    # for. Applying while parsing cannot backtrack.
+                    body: list[str] = []
+                    while i < len(lines) and not lines[i].startswith("@@") \
+                            and not lines[i].startswith("--- ") \
+                            and not lines[i].startswith("diff --git"):
+                        hline = lines[i]
+                        if hline[:1] not in ("+", "-", " ", "\\"):
+                            break
+                        body.append(hline)
+                        i += 1
+
+                    expected_old = [
+                        line[1:] for line in body if line[:1] in ("-", " ")
+                    ]
+
+                    def _matches(at: int) -> bool:
+                        if at < 0 or at + len(expected_old) > len(orig_lines):
+                            return False
+                        return all(
+                            orig_lines[at + n].rstrip("\r\n") == want.rstrip("\r\n")
+                            for n, want in enumerate(expected_old)
+                        )
+
+                    if not expected_old:
+                        # Pure insertion: nothing to anchor on, so the header's
+                        # offset is all there is. Without one, append at the
+                        # current position rather than guessing.
+                        target_idx = hint if hint is not None else orig_idx
+                        if target_idx > len(orig_lines):
+                            return Result.fail(
+                                "conflict",
+                                f"hunk starts past end of {norm_rel} at line {target_idx}")
+                    elif hint is not None and _matches(hint):
+                        target_idx = hint
+                    else:
+                        # Search forward from where the last hunk left off, so
+                        # hunks stay ordered and an earlier region cannot be
+                        # rewritten twice. Ambiguity resolves to the candidate
+                        # nearest the header's hint when it gave one.
+                        candidates = [
+                            at for at in range(orig_idx, len(orig_lines) - len(expected_old) + 1)
+                            if _matches(at)
+                        ]
+                        if not candidates:
+                            head = expected_old[0].rstrip("\r\n")
+                            return Result.fail(
+                                "conflict",
+                                f"patch context not found in {norm_rel}: no location "
+                                f"matches the hunk beginning {head!r}")
+                        if hint is None and len(candidates) > 1:
+                            # Anchoring must not become guessing. With no line
+                            # hint and several equally good matches, writing to
+                            # the first one silently edits a location the author
+                            # may not have meant -- the exact corruption this
+                            # applier's strictness used to prevent. Refuse, and
+                            # say how to disambiguate.
+                            return Result.fail(
+                                "conflict",
+                                f"ambiguous hunk in {norm_rel}: its context matches "
+                                f"{len(candidates)} locations; supply a hunk header "
+                                "with line numbers or add distinguishing context")
+                        target_idx = (
+                            min(candidates, key=lambda at: abs(at - hint))
+                            if hint is not None else candidates[0])
+
                     if target_idx < orig_idx:
                         return Result.fail(
                             "invalid_request",
-                            f"hunks out of order in {norm_rel} at line {hunk_start}")
-                    if target_idx > len(orig_lines):
-                        return Result.fail(
-                            "conflict",
-                            f"hunk starts past end of {norm_rel} at line {hunk_start}")
+                            f"hunks out of order in {norm_rel} at line {target_idx + 1}")
                     while orig_idx < target_idx:
                         new_file_lines.append(orig_lines[orig_idx])
                         orig_idx += 1
-                    i += 1
 
-                    while i < len(lines) and not lines[i].startswith("@@") and not lines[i].startswith("--- ") and not lines[i].startswith("diff --git"):
-                        hline = lines[i]
-                        i += 1
-                        if hline.startswith("+"):
-                            new_file_lines.append(hline[1:] + "\n")
-                        elif hline.startswith("-"):
-                            expected_del = hline[1:]
-                            if orig_idx < len(orig_lines):
-                                actual = orig_lines[orig_idx].rstrip("\r\n")
-                                if actual != expected_del.rstrip("\r\n"):
-                                    return Result.fail("conflict", f"patch deletion mismatch in {norm_rel}: expected {expected_del!r}, got {actual!r}")
-                                orig_idx += 1
-                            else:
-                                return Result.fail("conflict", f"patch deletion extends past end of {norm_rel}")
-                        elif hline.startswith(" "):
-                            expected_ctx = hline[1:]
-                            if orig_idx < len(orig_lines):
-                                actual = orig_lines[orig_idx].rstrip("\r\n")
-                                if actual != expected_ctx.rstrip("\r\n"):
-                                    return Result.fail("conflict", f"patch context mismatch in {norm_rel}: expected {expected_ctx!r}, got {actual!r}")
-                                new_file_lines.append(orig_lines[orig_idx])
-                                orig_idx += 1
-                            else:
-                                return Result.fail("conflict", f"patch context extends past end of {norm_rel}")
-                        elif hline.startswith("\\"):
+                    for hline in body:
+                        marker, text = hline[:1], hline[1:]
+                        if marker == "+":
+                            new_file_lines.append(text + "\n")
+                        elif marker == "\\":
                             continue
-                        else:
-                            i -= 1
-                            break
+                        elif marker in ("-", " "):
+                            if orig_idx >= len(orig_lines):
+                                return Result.fail(
+                                    "conflict",
+                                    f"patch context extends past end of {norm_rel}")
+                            actual = orig_lines[orig_idx].rstrip("\r\n")
+                            if actual != text.rstrip("\r\n"):
+                                # Unreachable once anchored, retained so a
+                                # future change to the search cannot corrupt a
+                                # file silently.
+                                return Result.fail(
+                                    "conflict",
+                                    f"patch context mismatch in {norm_rel}: "
+                                    f"expected {text!r}, got {actual!r}")
+                            if marker == " ":
+                                new_file_lines.append(orig_lines[orig_idx])
+                            orig_idx += 1
 
                 if not has_hunk and not is_delete:
                     return Result.fail("invalid_request", f"patch file {norm_rel} contained no hunks")
@@ -542,6 +625,7 @@ class GitEnvironment:
             patch_content = req.patch or req.args.get("patch") or req.args.get("diff", "")
             if not isinstance(patch_content, str):
                 return Result.fail("invalid_request", "patch preview requires patch text")
+            patch_content = _with_file_header(patch_content, req.args.get("path"))
             val_res = self._parse_and_validate_patch(patch_content)
             if not val_res.ok or val_res.value is None:
                 return Result.fail(
@@ -640,6 +724,7 @@ class GitEnvironment:
             patch_content = req.patch or req.args.get("patch") or req.args.get("diff", "")
             if not isinstance(patch_content, str):
                 return Result.fail("invalid_request", "patch apply requires patch text")
+            patch_content = _with_file_header(patch_content, req.args.get("path"))
             val_res = self._parse_and_validate_patch(patch_content)
             if not val_res.ok or val_res.value is None:
                 return Result.fail(

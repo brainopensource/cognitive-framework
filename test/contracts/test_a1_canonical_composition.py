@@ -50,7 +50,7 @@ class A1CanonicalCompositionSupportTests(unittest.TestCase):
         authored = canonical_from_v2(authored_raw)
         self.assertEqual(legacy.identity_preimage(), authored.identity_preimage())
 
-    def test_agent_spawn_is_refused_before_freeze(self) -> None:
+    def test_agent_spawn_is_admitted_in_m6(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             pack = code_pack(Path(tmp))
             manifest_path = pack / "manifest.json"
@@ -64,9 +64,8 @@ class A1CanonicalCompositionSupportTests(unittest.TestCase):
             })
             raw["ceiling"].append(spawn_selector)
 
-        with self.assertRaises(ManifestError) as ctx:
-            canonical_from_v2(raw)
-        self.assertIn("agent.spawn", str(ctx.exception))
+        canonical = canonical_from_v2(raw)
+        self.assertIn("agent.spawn", canonical.verbs)
 
 
 if __name__ == "__main__":

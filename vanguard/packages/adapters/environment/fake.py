@@ -257,13 +257,40 @@ class FakeEnvironment:
                 while i < len(lines) and lines[i].startswith("@@"):
                     has_hunk = True
                     hunk_match = _HUNK_HEADER.match(lines[i])
-                    if not hunk_match:
+                    hint = None
+                    if hunk_match:
+                        hint = max(int(hunk_match.group(1)) - 1, 0)
+                    elif lines[i].strip() not in ("@@", "@@@"):
                         return Result.fail("invalid_request", f"malformed hunk header: {lines[i]}")
                     i += 1
 
+                    body: list[str] = []
                     while i < len(lines) and not lines[i].startswith("@@") and not lines[i].startswith("--- ") and not lines[i].startswith("diff --git"):
                         hline = lines[i]
                         i += 1
+                        if hline[:1] in ("+", "-", " ", "\\"):
+                            body.append(hline)
+                        else:
+                            i -= 1
+                            break
+
+                    expected_old = [line[1:] for line in body if line[:1] in ("-", " ")]
+                    if hint is None and expected_old:
+                        candidates = [
+                            at for at in range(orig_idx, len(orig_lines) - len(expected_old) + 1)
+                            if all(orig_lines[at + n].rstrip("\r\n") == want.rstrip("\r\n")
+                                   for n, want in enumerate(expected_old))
+                        ]
+                        if not candidates:
+                            return Result.fail("conflict", f"patch context not found in {target_path}")
+                        hint = candidates[0]
+                    if hint is not None:
+                        if hint < orig_idx or hint > len(orig_lines):
+                            return Result.fail("conflict", f"hunk starts past end of {target_path}")
+                        new_file_lines.extend(orig_lines[orig_idx:hint])
+                        orig_idx = hint
+
+                    for hline in body:
                         if hline.startswith("+"):
                             new_file_lines.append(hline[1:] + "\n")
                         elif hline.startswith("-"):
@@ -291,9 +318,7 @@ class FakeEnvironment:
                             # \ No newline at end of file
                             continue
                         else:
-                            # End of hunk or unexpected line
-                            i -= 1
-                            break
+                            return Result.fail("invalid_request", f"malformed hunk line: {hline}")
 
                 if not has_hunk and not is_delete:
                     return Result.fail("invalid_request", f"patch file {target_path} contained no hunks")

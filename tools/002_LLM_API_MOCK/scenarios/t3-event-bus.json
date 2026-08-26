@@ -1,7 +1,7 @@
 {
   "id": "t3-event-bus",
   "tier": 3,
-  "title": "SWE-Verified: Asynchronous event broker with topic pattern matching and dead-letter queues",
+  "title": "SWE-Verified: Asynchronous event bus broker with regex topic matching and dead-letter queue",
   "workspace": {
     "bus/__init__.py": "\"\"\"Event bus package.\"\"\"\nfrom .broker import Broker\nfrom .filters import compile_topic_regex\nfrom .subscription import Subscription, topic_matches\n\n__all__ = [\"Broker\", \"Subscription\", \"topic_matches\", \"compile_topic_regex\"]\n",
     "bus/broker.py": "\"\"\"In-process topic broker with retries and a dead letter queue.\"\"\"\nfrom .filters import compile_topic_regex\nfrom .subscription import Subscription\n\n\nclass Broker:\n    def __init__(self):\n        self._subscriptions = []\n        self.dead_letters = []  # list of (topic, payload, subscription)\n\n    @property\n    def dlq(self):\n        return self.dead_letters\n\n    def subscribe(self, subscription):\n        self._subscriptions.append(subscription)\n        return subscription\n\n    def unsubscribe(self, subscription):\n        self._subscriptions = [s for s in self._subscriptions if s is not subscription]\n\n    def subscribe_regex(self, pattern, callback, retries=0):\n        # BENCHMARK BUG: the compiled regex is never used; the raw pattern\n        # string is registered as a literal topic pattern.\n        sub = Subscription(pattern, callback, retries=retries)\n        self.subscribe(sub)\n        return sub\n\n    def publish(self, topic, payload):\n        for sub in list(self._subscriptions):\n            if not sub.matches(topic):\n                continue\n            # BENCHMARK BUG: no exception handling \u2014 subscriber errors\n            # escape publish() and nothing reaches the dead letter queue.\n            sub.callback(topic, payload)\n",
@@ -9,7 +9,7 @@
     "bus/subscription.py": "\"\"\"Subscription model and topic matching.\"\"\"\n\n\nclass Subscription:\n    def __init__(self, topic_pattern, callback, retries=0):\n        self.topic_pattern = topic_pattern\n        self.callback = callback\n        self.retries = int(retries)\n\n    def matches(self, topic):\n        return topic_matches(self.topic_pattern, topic)\n\n\ndef topic_matches(pattern, topic):\n    \"\"\"Dot-separated topic match; ``*`` matches exactly one segment.\"\"\"\n    pattern_segments = pattern.split(\".\")\n    topic_segments = topic.split(\".\")\n    if len(pattern_segments) != len(topic_segments):\n        return False\n    return all(p == \"*\" or p == t for p, t in zip(pattern_segments, topic_segments))\n",
     "problem.md": "# Challenge: Async Event Bus \u2014 DLQ Redelivery & Regex Subscriptions\n\nThe pub/sub broker has two defects:\n\n1. `broker.py`: subscriber exceptions propagate out of `publish()`; failed\n   dispatches are never retried and never reach the Dead Letter Queue.\n2. `broker.py`: `subscribe_regex()` stores its pattern as a literal topic\n   string, so regex subscriptions never match.\n\nFix both defects. Do not modify the test suite.\n",
     "tests/test_event_bus.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom bus import Broker, Subscription\n\n\ndef test_dead_letter_queue_redelivery():\n    broker = Broker()\n    calls = {\"flaky\": 0}\n\n    def flaky(topic, payload):\n        calls[\"flaky\"] += 1\n        if calls[\"flaky\"] <= 2:\n            raise RuntimeError(\"transient failure\")\n\n    def reliable(topic, payload):\n        reliable.received = True\n\n    broker.subscribe(Subscription(\"orders.*\", flaky, retries=3))\n    broker.subscribe(Subscription(\"orders.*\", reliable, retries=0))\n    broker.publish(\"orders.created\", {\"id\": 7})  # must not raise\n    assert calls[\"flaky\"] == 3  # two failures then one successful redelivery\n    assert reliable.received\n    assert broker.dlq == []\n\n    def hopeless(topic, payload):\n        raise RuntimeError(\"permanent failure\")\n\n    broker.subscribe(Subscription(\"billing.*\", hopeless, retries=1))\n    broker.publish(\"billing.charge\", {\"amount\": 10})\n    assert len(broker.dlq) == 1\n    assert broker.dlq[0][0] == \"billing.charge\"\n    assert broker.dlq[0][1] == {\"amount\": 10}\n\n\ndef test_regex_topic_matching():\n    broker = Broker()\n    received = []\n\n    def cb(topic, payload):\n        received.append((topic, payload))\n\n    broker.subscribe_regex(r\"order\\.[0-9]+\\.created\", cb)\n    broker.publish(\"order.42.created\", {\"total\": 5})\n    assert received and received[0][1] == {\"total\": 5}\n    broker.publish(\"order.XX.created\", {\"bad\": 1})\n    assert len(received) == 1  # non-matching topic stays unmatched\n\n\ndef test_direct_topic_publish():\n    broker = Broker()\n    got = []\n    broker.subscribe(Subscription(\"metrics.cpu\", lambda t, p: got.append((t, p))))\n    broker.publish(\"metrics.cpu\", 0.75)\n    assert got == [(\"metrics.cpu\", 0.75)]\n\n\ndef test_wildcard_unsubscribe():\n    broker = Broker()\n    got = []\n    sub = Subscription(\"logs.*\", lambda t, p: got.append(t))\n    broker.subscribe(sub)\n    broker.publish(\"logs.app\", \"hello\")\n    assert got == [\"logs.app\"]\n    broker.unsubscribe(sub)\n    broker.publish(\"logs.app\", \"world\")\n    assert len(got) == 1\n",
-    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Challenge: Async Event Bus \u2014 DLQ Redelivery & Regex Subscriptions\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [x] [T-001] Investigate codebase and plan implementation for: # Challenge: Async Event Bus \u2014 DLQ Redelivery & Regex Subscriptions <!-- Inspected broker, subscription, filters, and existing tests. Root causes confirmed: publish invokes callbacks without retry/exception handling; regex helper is imported but unused and Subscription matching only supports dot wildcards. -->\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
   },
   "turns": [
     {
@@ -23,8 +23,7 @@
             "arguments": "{\"path\": \".\"}"
           }
         }
-      ],
-      "content": "I will list the workspace directory to locate the source code and tests."
+      ]
     },
     {
       "tool_messages_seen": 1,
@@ -33,32 +32,44 @@
         {
           "type": "function",
           "function": {
-            "name": "edit_file",
-            "arguments": "{\"content\": \"\\\"\\\"\\\"Asynchronous pub/sub event broker with DLQ and retry policies.\\\"\\\"\\\"\\nimport re\\nfrom typing import Any, Callable, List, Tuple\\nfrom bus.subscription import Subscription\\n\\n\\nclass Broker:\\n    def __init__(self):\\n        self._subscriptions: List[Subscription] = []\\n        self._regex_subscriptions: List[Tuple[re.Pattern, Callable[[str, Any], None]]] = []\\n        self.dlq: List[Tuple[str, Any]] = []\\n\\n    def subscribe(self, subscription: Subscription) -> None:\\n        self._subscriptions.append(subscription)\\n\\n    def unsubscribe(self, subscription: Subscription) -> None:\\n        if subscription in self._subscriptions:\\n            self._subscriptions.remove(subscription)\\n\\n    def subscribe_regex(self, pattern: str, callback: Callable[[str, Any], None]) -> None:\\n        compiled = re.compile(pattern)\\n        self._regex_subscriptions.append((compiled, callback))\\n\\n    def publish(self, topic: str, payload: Any) -> None:\\n        for pattern, callback in list(self._regex_subscriptions):\\n            if pattern.search(topic):\\n                try:\\n                    callback(topic, payload)\\n                except Exception:\\n                    self.dlq.append((topic, payload))\\n\\n        for sub in list(self._subscriptions):\\n            if sub.matches(topic):\\n                success = False\\n                attempts = 0\\n                max_attempts = max(1, sub.retries + 1)\\n                while attempts < max_attempts:\\n                    attempts += 1\\n                    try:\\n                        sub.callback(topic, payload)\\n                        success = True\\n                        break\\n                    except Exception:\\n                        pass\\n                if not success:\\n                    self.dlq.append((topic, payload))\\n\", \"path\": \"bus/broker.py\"}"
+            "name": "view_file",
+            "arguments": "{\"path\": \"bus/broker.py\"}"
           }
-        }
-      ],
-      "content": "I will apply the fix to resolve the specifications for event_bus."
-    },
-    {
-      "tool_messages_seen": 2,
-      "finish_reason": "tool_calls",
-      "tool_calls": [
+        },
         {
           "type": "function",
           "function": {
-            "name": "run_command",
-            "arguments": "{\"command\": \"python3 -m pytest -q\"}"
+            "name": "view_file",
+            "arguments": "{\"path\": \"bus/subscription.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"bus/filters.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_event_bus.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
           }
         }
-      ],
-      "content": "Now I will run pytest to verify that all tests pass."
+      ]
     },
     {
-      "tool_messages_seen": 3,
+      "tool_messages_seen": 2,
       "finish_reason": "stop",
-      "tool_calls": [],
-      "content": "Verification passed successfully! All test suites for event_bus are green (exit=0)."
+      "tool_calls": []
     }
   ]
 }

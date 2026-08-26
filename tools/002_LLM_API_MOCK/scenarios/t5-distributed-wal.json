@@ -1,7 +1,7 @@
 {
   "id": "t5-distributed-wal",
   "tier": 5,
-  "title": "SWE-Verified: Distributed Write-Ahead Log (WAL) and replicated finite state machine",
+  "title": "SWE-Verified: Distributed Write-Ahead Log (WAL) with finite state machine replication and quorum commits",
   "workspace": {
     "problem.md": "# Problem: Distributed Write-Ahead Log (WAL) & Replicated State Machine\n\nImplement a resilient, distributed Write-Ahead Log (WAL) and finite state machine (FSM) cluster engine in Python supporting:\n1. `LogEntry(index, term, command, payload, checksum)` in `wal_fsm.entry`:\n   - Must calculate CRC32 checksum over `(index, term, command, payload)` to ensure zero byte corruption.\n2. `WriteAheadLog` in `wal_fsm.log_storage`:\n   - Supports append, index-based seek, and conflict reconciliation via `truncate_after(index)` which preserves entries up to `index` and discards all entries strictly with index > `index`.\n3. `KeyValueFSM` in `wal_fsm.state_machine`:\n   - Applies deterministic state transitions (`SET`, `DELETE`, `INCREMENT`).\n   - Supports atomic `create_snapshot()` and `apply_snapshot(snapshot_dict)` ensuring `last_applied_index` is strictly synchronized.\n4. `DistributedNode` in `wal_fsm.node`:\n   - Manages term election, quorum-based log replication, and state machine commits.\n   - Enforces strict majority quorum condition: `votes > total_nodes // 2`.\n\nAll unit tests in `tests/test_wal_fsm.py` must pass hermetically without altering test fixtures.\n",
     "requirements.txt": "# requirements.txt\n",

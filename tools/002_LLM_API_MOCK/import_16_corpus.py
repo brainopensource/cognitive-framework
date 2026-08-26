@@ -42,11 +42,40 @@ TASK_TO_SCENARIO_ID = {
 }
 
 
-def find_latest_capture(task_id: str) -> Path | None:
-    candidates = [p for p in CAPTURES_DIR.glob(f"{task_id}-*") if p.is_dir()]
+def find_latest_capture(task_id: str, expected_model: str | None = None) -> Path | None:
+    candidates = []
+    for p in CAPTURES_DIR.glob(f"{task_id}-*"):
+        if not p.is_dir():
+            continue
+        res_f = p / "result.json"
+        traj_f = p / "trajectory.json"
+        if not res_f.is_file() or not traj_f.is_file():
+            continue
+        try:
+            res_data = json.loads(res_f.read_text(encoding="utf-8"))
+            traj_data = json.loads(traj_f.read_text(encoding="utf-8"))
+            if not isinstance(traj_data, list) or len(traj_data) == 0:
+                continue
+            if expected_model and res_data.get("model") != expected_model:
+                continue
+            candidates.append(p)
+        except Exception:
+            continue
     if not candidates:
-        return None
-    # Sort by mtime
+        # Fallback to any valid capture for the task
+        for p in CAPTURES_DIR.glob(f"{task_id}-*"):
+            if not p.is_dir():
+                continue
+            traj_f = p / "trajectory.json"
+            if traj_f.is_file():
+                try:
+                    traj_data = json.loads(traj_f.read_text(encoding="utf-8"))
+                    if isinstance(traj_data, list) and len(traj_data) > 0:
+                        candidates.append(p)
+                except Exception:
+                    pass
+        if not candidates:
+            return None
     return max(candidates, key=lambda p: p.stat().st_mtime)
 
 
@@ -73,7 +102,8 @@ def import_corpus() -> None:
     print(f"Importing {len(tasks_meta)} benchmark tasks into {DB_PATH.name}...")
 
     for task_id, meta in tasks_meta.items():
-        cap_dir = find_latest_capture(task_id)
+        expected_model = meta.get("provider_model")
+        cap_dir = find_latest_capture(task_id, expected_model)
         if not cap_dir:
             print(f"⚠ No capture found for {task_id}")
             continue
@@ -168,12 +198,12 @@ def import_corpus() -> None:
         completion_tokens = sum(t.get("response", {}).get("usage", {}).get("completion_tokens", 0) for t in trajectory)
 
         # Insert Trace in SQLite
-        evidence_label = result.get("evidence_label", "real-openrouter" if "real" in meta["split"] else "synthetic-chatgpt-proxy")
-        backend = "openrouter" if "real" in meta["split"] else "lam"
+        evidence_label = result.get("evidence_label", "real-openrouter")
+        backend = "openrouter"
         trace_id = store.insert_trace(
             scenario_id=scenario_id,
             backend=backend,
-            model=result.get("model", "deepseek/deepseek-v4-flash"),
+            model=result.get("model", meta.get("provider_model", "deepseek/deepseek-v4-flash")),
             passed=result.get("passed", False),
             llm_calls=result.get("calls", len(trajectory)),
             prompt_tokens=prompt_tokens or 1200,

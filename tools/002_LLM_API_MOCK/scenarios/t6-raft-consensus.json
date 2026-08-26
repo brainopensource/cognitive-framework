@@ -1,7 +1,7 @@
 {
   "id": "t6-raft-consensus",
   "tier": 6,
-  "title": "SWE-Verified: Raft consensus election safety, term monotonicity, and log replication",
+  "title": "SWE-Verified: Full Raft consensus algorithm implementation (leader election, log replication, safety)",
   "workspace": {
     "problem.md": "# Challenge: Async Raft Consensus \u2014 Split-Brain Election Safety\n\nThe Raft implementation has two safety defects in `raft/election.py`:\n\n1. Term precedence is ignored: `handle_request_vote()` grants votes even for\n   messages carrying stale terms without stepping down, and a candidate that\n   observes a higher term in a vote response never steps down \u2014 permitting\n   split-brain leadership.\n2. `handle_append_entries()` does not verify the prev-log (index, term) pair\n   before truncating, so committed follower entries can be silently\n   overwritten.\n\nFix both defects. Do not modify the test suite.\n",
     "raft/__init__.py": "\"\"\"Minimal synchronous Raft model for benchmark scenarios.\"\"\"\nfrom .node import RaftNode\n\n__all__ = [\"RaftNode\"]\n",

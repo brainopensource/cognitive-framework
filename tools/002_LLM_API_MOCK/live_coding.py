@@ -265,6 +265,8 @@ class OpenRouterClient:
             "max_tokens": 600,
             "stream": False,
         }
+        if self.model.startswith("stealth/"):
+            request_body["reasoning"] = {"effort": "low"}
         raw_request = json.dumps(request_body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         estimated_usd = (
             (len(raw_request) / 4) * FALLBACK_INPUT_USD_PER_MILLION
@@ -282,8 +284,29 @@ class OpenRouterClient:
             },
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=self.timeout_s) as response:
-            raw_response = response.read()
+        last_exc: Exception | None = None
+        for attempt in range(4):
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout_s) as response:
+                    raw_response = response.read()
+                break
+            except urllib.error.HTTPError as exc:
+                last_exc = exc
+                if exc.code in (429, 500, 502, 503, 504) and attempt < 3:
+                    time.sleep(2 ** attempt + 1)
+                    continue
+                raise
+            except Exception as exc:
+                last_exc = exc
+                if attempt < 3:
+                    time.sleep(2 ** attempt + 1)
+                    continue
+                raise
+        else:
+            if last_exc:
+                raise last_exc
+            raise RuntimeError("Request failed after retries")
+
         payload = json.loads(raw_response.decode("utf-8"))
         usage = payload.get("usage") or {}
         cost = usage.get("cost")

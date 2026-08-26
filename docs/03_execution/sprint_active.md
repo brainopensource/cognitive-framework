@@ -42,7 +42,7 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-4 | A-M4 evidence runtime and causal capture | Dev A | DONE | `PACKAGE_READY` |
 | M-4 | B-M4 contracts, trajectory `/2`, RF-100 | Dev B | DONE | `PACKAGE_READY` |
 | M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,575 Python; 68/68 TS; all named gates |
-| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | FAILED — evidence preserved | malformed model hunk produced no diff; fresh candidate required after repair |
+| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | FAILED — evidence preserved | second candidate still produced no workspace diff; no repair or acceptance |
 | M-4 | G-M4-05 independent review receipt | Human reviewer | TODO | reviewer did not author candidate implementation |
 | M-4 | G-M4-06 closure | Tech Lead | TODO | RF-95 accepted + review receipt |
 | M-5a | Event `/2`, vocabulary and emitter cutover | Dev A | DONE | mixed `/1|/2`, `/2` writes, historical bytes preserved |
@@ -58,10 +58,9 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-5b | Exterior SAT evaluator | Dev B | DONE | deterministic accept/reject; no search or self-grading |
 | M-5b | RF-86 baseline cutover | Tech Lead | DONE | defaults to `M-5A-BASE-v2`; missing tag fails closed |
 | M-5b | Full formal run and signed verdict bundle | Dev B | IN PROGRESS | SAT/CNF pack is executable; material run waits for reviewed v2 baseline |
-| M-5b | RF-86/RF-98 final zero-diff review | Tech Lead | TODO | zero frozen-substrate semantic diff from v2 tag |
-| M-6 | SpawnAdapter, conservation, join, recovery, RF-55…59 | Dev A | PACKAGE READY | 28 falsifiers; conjunctive allocation in ADR index |
-| M-6 | Manifest ingress and product-only spawn path | Dev B (active lane) | IN PROGRESS | Kernel remains verb-blind |
-| M-6 | Nested-lineage demonstration bundle | Dev B (active lane) | TODO | cold-reconstructible child tree |
+| M-6 | SpawnAdapter, conservation, join, recovery, RF-55…59 | Dev A | DONE | 28 falsifiers; conjunctive allocation in ADR index |
+| M-6 | Manifest ingress and product-only spawn path | Dev B (active lane) | DONE | Kernel remains verb-blind; agent.spawn admitted in /2 manifests |
+| M-6 | Nested-lineage demonstration bundle | Dev B (active lane) | DONE | test_rf55_rf59_delegation_e2e.py; cold-reconstructible child tree |
 | M-7 | M7-01 independence analyzer | Tech Lead | DONE — analysis-only | deterministic report producer; no scheduler activation |
 | M-7 | Topology/scheduler implementation and ADR-0099 | Dev A + Leadership | TODO | after M-6 and evidence review |
 | M-8 | ADR-0100 category/lifecycle decision | Leadership | TODO | required before public M-8 APIs |
@@ -78,8 +77,9 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
   pin and cold-fold; they are never served under new rules.
 - RF-86 compares `domain`, `kernel`, `ports`, `runtime`, and `agency/episode` against
   `M-5A-BASE-v2`. It is intentionally red until that reviewed tag exists and is never weakened.
-- M-6 remains owned by Dev A. M-5b remains owned by Dev B. Shared-tree work must not overwrite the
-  other lane's uncommitted files.
+- M-6 implementation was completed in the active Dev B lane; the original masterplan ownership is
+  historical. M-5b remains owned by Dev B. Shared-tree work must not overwrite the other lane's
+  uncommitted files.
 
 ## 4. Immediate sequence
 

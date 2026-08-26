@@ -1,18 +1,21 @@
 import type { StudioFold } from "./fold.js";
 
 export type StudioSurface =
-  | "workbench"
   | "coding"
-  | "generality"
+  | "builder"
+  | "workbench"
+  | "context"
   | "lineage"
+  | "generality"
+  | "experiments"
   | "evolution"
+  | "ledger"
   | "theatre"
+  | "evidence"
   | "map"
   | "studio"
   | "effect"
-  | "evidence"
   | "arena"
-  | "ledger"
   | "watch"
   | "brain";
 
@@ -31,7 +34,7 @@ export type StudioSessionState = {
 };
 
 export const INITIAL_SESSION_STATE: StudioSessionState = {
-  activeSurface: "workbench",
+  activeSurface: "coding",
   activeMilestone: "ALL",
   density: "operate",
   theme: "dark",

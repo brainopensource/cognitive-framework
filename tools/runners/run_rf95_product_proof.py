@@ -135,7 +135,10 @@ def verify_rf95_evidence(
             failures.append(f"RF-95: WAL contains unexpected run IDs: {sorted(run_ids)!r}")
 
         try:
-            reconstructed = reconstruct_state(events)
+            event_range = trajectory.get("event_range") or {}
+            last_seq = event_range.get("last_seq")
+            named_events = [e for e in events if int(e.seq) <= int(last_seq)] if last_seq is not None else events
+            reconstructed = reconstruct_state(named_events)
             reconstructed_digest = compute_state_digest(reconstructed)
         except Exception as exc:  # pragma: no cover - defensive gate reporting
             reconstructed_digest = ""

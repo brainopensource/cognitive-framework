@@ -87,23 +87,23 @@ negative or blocked and are recorded as such rather than deferred:
 |---|---|---|---|---|
 | M-4 | A-M4 evidence runtime and causal capture | Dev A | DONE | `PACKAGE_READY` |
 | M-4 | B-M4 contracts, trajectory `/2`, RF-100 | Dev B | DONE | `PACKAGE_READY` |
-| M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,575 Python; 68/68 TS; all named gates |
-| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | AUTHORIZED — attempt 3 | new preregistration required after D7; preserve evidence regardless of outcome |
+| M-4 | G-M4-03 integrated repository gates | Tech Lead | DONE | 1,786 Python; 68/68 TS; all named gates |
+| M-4 | G-M4-04 one preregistered live RF-95 candidate | Senior | DONE | live run passed all 5 exit conditions (diff, tests, WAL, trajectory /2, cold replay) |
 | M-4 | G-M4-05 independent review receipt | Director | WAIVED — development only | no evidence-release or promotion claim permitted |
-| M-4 | G-M4-06 closure | Tech Lead | PROVISIONAL | implementation may continue; RF-95 evidence closure remains open |
+| M-4 | G-M4-06 closure | Tech Lead | CLOSED | M-4 CLOSED on live attributable RF-95 proof evidence |
 | M-5a | Event `/2`, vocabulary and emitter cutover | Dev A | DONE | mixed `/1|/2`, `/2` writes, historical bytes preserved |
 | M-5a | CheckpointManager and RF-96/RF-99 | Dev A | DONE | proof-bound cache, cold fallback, fresh process |
 | M-5a | AgentView and Operation/Lineage/Scope | Dev B | DONE | deterministic event projection and contracts |
 | M-5a | RF-97 transitive TCB closure | Dev B | DONE | AST-discovered 13-file closure; synthetic recursion test |
 | M-5a | Accept ADR-0098 | Tech Lead | DONE | ratified v1.0.0 on 2026-08-26 |
 | M-5a | Re-freeze append/fold benchmark | Tech Lead | DONE | benchmarks/baseline_m4.json verified (~42.4k fold/s) |
-| M-5a | Create/push `M-5A-BASE-v2` once | Tech Lead | READY | immutable post-M-5a baseline tag; never move `M-5-BASE` |
+| M-5a | Create/push `M-5A-BASE-v2` once | Tech Lead | DONE | immutable post-M-5a baseline tag created |
 | M-5b | OD-3 deterministic oracle | Tech Lead | DONE | SAT/CNF complete-assignment witness selected |
 | M-5b | `packs/formal-sat` frame and fixed task set | Dev B | DONE | digest-pinned formula, positive witness, negative vector |
 | M-5b | Exterior SAT evaluator | Dev B | DONE | deterministic accept/reject; no search or self-grading |
 | M-5b | RF-86 baseline cutover | Tech Lead | DONE | defaults to `M-5A-BASE-v2`; missing tag fails closed |
 | M-5b | Full formal run and signed verdict bundle | Dev B | PACKAGE_READY | material run through `Runtime.execute_harness`; daemon-signed pass and fail vectors; `runtime/formal_evidence.py` binds pinned digests plus ledger terminal truth |
-| M-5b | RF-86 / RF-98 historical rerun | Dev B | READY | unblocked upon `M-5A-BASE-v2` tag resolution |
+| M-5b | RF-86 / RF-98 historical rerun | Dev B | DONE | RF-86 zero semantic diff and RF-98 clean neutrality against `M-5A-BASE-v2` |
 | M-6 | SpawnAdapter, conservation, join, recovery, RF-55…59 | Dev A | DONE | 28 falsifiers; conjunctive allocation in ADR index |
 | M-6 | Manifest ingress and product-only spawn path | Dev B (active lane) | DONE | Kernel remains verb-blind; agent.spawn admitted in /2 manifests |
 | M-6 | Nested-lineage demonstration bundle | Dev B (active lane) | DONE | test_rf55_rf59_delegation_e2e.py; cold-reconstructible child tree |

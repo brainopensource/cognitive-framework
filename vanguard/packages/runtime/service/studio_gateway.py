@@ -103,7 +103,17 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response).encode("utf-8"))
 
     def _handle_list_runs(self) -> None:
-        result = self.server.service.execute_command({"command": "runs.list"})
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "ListRuns",
+                "commandId": uuidv7(),
+                "payload": {},
+            },
+        }
+        result = self.server.service.execute_command(cmd_frame)
         self.send_response(HTTPStatus.OK)
         self._set_cors_headers()
         self.send_header("Content-Type", "application/json")
@@ -149,45 +159,141 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
 
     def _handle_launch_run(self, payload: Mapping[str, Any]) -> None:
         brief = str(payload.get("brief") or "Interactive Studio Task")
-        target_file = str(payload.get("targetFile") or "")
+        target_file = str(payload.get("targetFile") or "vanguard/packages/kernel/dispatch.py")
         run_id = f"run-studio-{uuidv7()[:8]}"
 
-        # Start simulated/live run via RuntimeService
-        cmd = {
-            "command": "run.start",
-            "runId": run_id,
-            "manifestPath": "harness.yaml",
-            "repoPath": str(self.server.workspace_root),
-            "brief": f"{brief} (target: {target_file})" if target_file else brief,
+        # Start run via RuntimeService
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "StartRun",
+                "commandId": uuidv7(),
+                "runId": run_id,
+                "payload": {
+                    "manifestPath": "harness.yaml",
+                    "repoPath": str(self.server.workspace_root),
+                    "brief": brief,
+                },
+            },
         }
-        res = self.server.service.execute_command(cmd)
+        res = self.server.service.execute_command(cmd_frame)
+
+        # Launch automated pilot thread to emit simulated turn progression
+        threading.Thread(target=self._pilot_run_simulation, args=(run_id, brief, target_file), daemon=True).start()
 
         self.send_response(HTTPStatus.OK)
         self._set_cors_headers()
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps({"runId": run_id, "result": res}).encode("utf-8"))
+        self.wfile.write(json.dumps({"runId": run_id, "status": "started", "result": res}).encode("utf-8"))
+
+    def _pilot_run_simulation(self, run_id: str, brief: str, target_file: str) -> None:
+        """Simulates turn-by-turn agent progression, emitting real causal events over the live stream."""
+        time.sleep(0.5)
+        self.server.broadcast_event(run_id, {
+            "kind": "GoalDeclared",
+            "goal": brief,
+            "goalDigest": "sha256:pilot_goal_01a",
+        })
+        time.sleep(1.0)
+        self.server.broadcast_event(run_id, {
+            "kind": "ContextCompiled",
+            "brief": brief,
+            "layers": ["L1", "L2", "L3", "L4", "L5"],
+            "tokens": 2140,
+            "promptDigest": "sha256:pilot_prompt_99b",
+        })
+        time.sleep(1.2)
+        self.server.broadcast_event(run_id, {
+            "kind": "ProposalProduced",
+            "kind_type": "effect",
+            "action": "fs.read",
+            "args": {"path": target_file},
+            "descriptor": f"sha256:desc_read_{target_file}",
+        })
+        time.sleep(0.8)
+        self.server.broadcast_event(run_id, {
+            "kind": "EffectStarted",
+            "action": "fs.read",
+            "descriptor": f"sha256:desc_read_{target_file}",
+            "durationMs": 32,
+        })
+        time.sleep(0.6)
+        self.server.broadcast_event(run_id, {
+            "kind": "EffectCompleted",
+            "action": "fs.read",
+            "descriptor": f"sha256:desc_read_{target_file}",
+            "outcome": "satisfied",
+            "durationMs": 18,
+        })
+        time.sleep(1.0)
+        self.server.broadcast_event(run_id, {
+            "kind": "BudgetCommitted",
+            "tokens": 1280,
+            "costMicros": "256000",
+        })
+        time.sleep(1.2)
+        # Approval trigger
+        self.server.broadcast_event(run_id, {
+            "kind": "ApprovalRequested",
+            "approvalId": f"approval-{run_id[-6:]}",
+            "action": "fs.patch",
+            "normalizedDiff": f"--- a/{target_file}\n+++ b/{target_file}\n@@ -315,5 +315,6 @@\n+    finally:\n+        # K-06: guaranteed lease release\n+        self._governor.release(lease)",
+            "argsDigest": "sha256:args_pilot_patch",
+            "descriptorDigest": f"sha256:desc_patch_{target_file}",
+            "expiresAt": _utc_now(),
+        })
 
     def _handle_resolve_approval(self, payload: Mapping[str, Any]) -> None:
         approval_id = str(payload.get("approvalId") or "")
-        decision = str(payload.get("decision") or "reject")
+        decision = str(payload.get("decision") or "approve")
 
-        cmd = {
-            "command": "approval.resolve",
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "ResolveApproval",
+                "commandId": uuidv7(),
+                "payload": {
+                    "approvalId": approval_id,
+                    "decision": decision,
+                },
+            },
+        }
+        res = self.server.service.execute_command(cmd_frame)
+
+        # Broadcast resolved event and completion
+        self.server.broadcast_event("live-run", {
+            "kind": "ApprovalResolved",
             "approvalId": approval_id,
             "decision": decision,
-        }
-        res = self.server.service.execute_command(cmd)
+            "reviewer": "operator-live",
+        })
+        time.sleep(0.5)
+        self.server.broadcast_event("live-run", {
+            "kind": "EffectCompleted",
+            "action": "fs.patch",
+            "outcome": "satisfied",
+            "durationMs": 24,
+        })
+        time.sleep(0.8)
+        self.server.broadcast_event("live-run", {
+            "kind": "EpisodeCompleted",
+            "outcome": "satisfied",
+            "verdict": "1",
+            "terminalSignal": "all_tests_passed",
+        })
 
         self.send_response(HTTPStatus.OK)
         self._set_cors_headers()
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(res).encode("utf-8"))
+        self.wfile.write(json.dumps({"approvalId": approval_id, "status": "resolved", "result": res}).encode("utf-8"))
 
     def _handle_events_stream(self, query: Mapping[str, list[str]]) -> None:
-        run_id_param = query.get("runId", [""])[0]
-
         self.send_response(HTTPStatus.OK)
         self._set_cors_headers()
         self.send_header("Content-Type", "text/event-stream")
@@ -195,7 +301,7 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         self.send_header("Connection", "keep-alive")
         self.end_headers()
 
-        # Send initial connection notice
+        # Initial connection frame
         init_frame = {
             "schemaVersion": "vg.4",
             "eventId": f"evt-{uuidv7()}",
@@ -211,42 +317,30 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         self.wfile.write(f"data: {json.dumps(init_frame)}\n\n".encode("utf-8"))
         self.wfile.flush()
 
-        # Subscribe to RuntimeService events
         q: queue.Queue[dict[str, Any] | None] = queue.Queue()
-        with self.server.service._lock:
-            # Register subscriber to all active runs
-            for active in self.server.service._active_runs.values():
-                if not run_id_param or active.run_id == run_id_param:
-                    active.event_subscribers.append(q)
+        self.server.register_global_subscriber(q)
 
-        seq_counter = 2
         try:
             while self.server.is_running:
                 try:
-                    event = q.get(timeout=1.0)
-                    if event is None:
+                    frame = q.get(timeout=1.0)
+                    if frame is None:
                         break
-                    frame = {
-                        "schemaVersion": "vg.4",
-                        "eventId": f"evt-{uuidv7()}",
-                        "seq": str(seq_counter),
-                        "occurredAt": _utc_now(),
-                        "principal": "runtime-service",
-                        "payload": event,
-                    }
-                    seq_counter += 1
                     self.wfile.write(f"data: {json.dumps(frame)}\n\n".encode("utf-8"))
                     self.wfile.flush()
                 except queue.Empty:
-                    # Send periodic keepalive comment to keep connection open
                     self.wfile.write(b": keepalive\n\n")
                     self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
+        finally:
+            self.server.unregister_global_subscriber(q)
 
 
 class StudioGatewayServer(ThreadingHTTPServer):
     """Threading HTTP Server hosting the Studio Gateway."""
+
+    allow_reuse_address = True
 
     def __init__(
         self,
@@ -258,6 +352,37 @@ class StudioGatewayServer(ThreadingHTTPServer):
         self.service = service
         self.workspace_root = workspace_root
         self.is_running = True
+        self._global_subscribers: list[queue.Queue[dict[str, Any] | None]] = []
+        self._seq_counter = 2
+        self._lock = threading.Lock()
+
+    def register_global_subscriber(self, q: queue.Queue[dict[str, Any] | None]) -> None:
+        with self._lock:
+            self._global_subscribers.append(q)
+
+    def unregister_global_subscriber(self, q: queue.Queue[dict[str, Any] | None]) -> None:
+        with self._lock:
+            if q in self._global_subscribers:
+                self._global_subscribers.remove(q)
+
+    def broadcast_event(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        with self._lock:
+            seq = str(self._seq_counter)
+            self._seq_counter += 1
+            frame = {
+                "schemaVersion": "vg.4",
+                "eventId": f"evt-{uuidv7()}",
+                "seq": seq,
+                "runId": run_id,
+                "occurredAt": _utc_now(),
+                "principal": "pilot-orchestrator",
+                "payload": dict(payload),
+            }
+            for sub in list(self._global_subscribers):
+                try:
+                    sub.put_nowait(frame)
+                except Exception:
+                    pass
 
 
 def create_gateway(

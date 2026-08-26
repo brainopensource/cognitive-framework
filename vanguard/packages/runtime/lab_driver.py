@@ -296,9 +296,17 @@ def _verify(environment: Any, argv: Sequence[str]) -> bool:
 
 
 def _verdict_is_green(result: Any) -> bool:
-    """The oracle is the run's own exterior verdict, never a suite run here."""
+    """The oracle is the run's own exterior verdict, never a suite run here.
+
+    A `Verdict` carries no `passed` flag; the signed pass-signal is
+    `outcome == "claims"` with every claim holding. An inconclusive verdict,
+    a missing verdict, or an unsigned binding is not green (`ports/evaluator.py`).
+    """
     verdict = getattr(result, "verdict", None)
-    return bool(verdict is not None and getattr(verdict, "passed", False))
+    if verdict is None or getattr(verdict, "outcome", "") != "claims":
+        return False
+    claims = getattr(verdict, "claims", ()) or ()
+    return bool(claims) and all(bool(claim.get("holds")) for claim in claims)
 
 
 class _GrantBoundEnvironment:

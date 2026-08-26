@@ -427,12 +427,21 @@ class Runtime:
     def _tool_schemas(cls, canonical: Any, contents: Mapping[str, str],
                       translator: Any) -> list[dict[str, Any]]:
         schemas: list[dict[str, Any]] = []
+        selectors = {
+            c.verb: c.selector
+            for c in getattr(canonical, "capabilities", ())
+            if getattr(c, "selector", None) is not None
+        }
         for component in cls._components_for(canonical, "tools"):
             text = contents.get(component.implementation)
             if text is None:
                 continue
             try:
-                schemas.append(json.loads(text))
+                schema_dict = json.loads(text)
+                verb = schema_dict.get("verb")
+                if verb and verb in selectors and "selector" not in schema_dict:
+                    schema_dict["selector"] = selectors[verb]
+                schemas.append(schema_dict)
             except json.JSONDecodeError as exc:
                 raise CompositionError(
                     f"tool schema is not JSON: {component.implementation}: {exc}") from exc

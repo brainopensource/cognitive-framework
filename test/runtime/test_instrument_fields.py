@@ -176,9 +176,31 @@ class LedgerQueriesForThePairedRunner(unittest.TestCase):
         self.assertIsNotNone(session.ledger_state().episode_id)
 
     def test_the_state_digest_is_available_for_pairing(self) -> None:
+        """The paired runner needs a digest it can *recompute*, not one that
+        merely round-trips through a live object.
+
+        This used to assert `result.state_digest == session.state_digest()`.
+        Both were then re-reads of the ledger *after* the terminal event, and
+        that event carries the trajectory, which carries the digest -- so the
+        value summarised a state containing itself and no fresh process could
+        reproduce it (D9). The run-close digest now folds exactly the events
+        the trajectory declares, so the property worth pinning is that a cold
+        fold of that range returns it.
+        """
+        from vanguard.packages.domain.ledger.reducer import (
+            compute_state_digest, reconstruct_state,
+        )
+        from vanguard.packages.ports.event_store import EventRange
+
         session = _session([finish()])
         result = session.run()
-        self.assertEqual(result.state_digest, session.state_digest())
+        last = (result.trajectory or {})["event_range"]["last_seq"]
+        events = list(session.ports.store.read(
+            EventRange(episode_id=session.task.episode_id)).value or [])
+        named = [event for event in events if int(event.seq) <= int(last)]
+
+        self.assertEqual(compute_state_digest(reconstruct_state(named)),
+                         result.state_digest)
 
 
 if __name__ == "__main__":

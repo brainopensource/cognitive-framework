@@ -20,7 +20,7 @@ class ConfidenceRecord:
     value: float
     subject_ref: str
     basis: tuple[str, ...] = ()
-    calibration: Mapping[str, Any] = None  # type: ignore[assignment]
+    calibration: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.signal not in {"self_report", "logprob", "behavioral", "external_verifier", "ensemble_disagreement"}:
@@ -29,13 +29,18 @@ class ConfidenceRecord:
             raise ValueError("confidence value must be between 0 and 1")
         if not self.subject_ref:
             raise ValueError("confidence subject_ref is required")
-        if self.calibration is None:
-            object.__setattr__(self, "calibration", {})
+        if not self.basis or any(not isinstance(item, str) or not item for item in self.basis):
+            raise ValueError("confidence evidence basis is required")
+        if self.calibration is None or not isinstance(self.calibration, Mapping):
+            raise ValueError("confidence calibration metadata is required")
+        # Freeze the externally supplied mapping at the value boundary.  A
+        # mutable calibration dict must not change a record's digest later.
+        object.__setattr__(self, "calibration", dict(self.calibration))
 
     def digest(self) -> str:
         return digest_of({"signal": self.signal, "value": self.value,
                           "subjectRef": self.subject_ref, "basis": self.basis,
-                          "calibration": dict(self.calibration or {})})
+                          "calibration": dict(self.calibration)})
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +50,7 @@ class ProgressView:
     repeat_signatures: tuple[str, ...] = ()
     budget_burn_rate: float = 0.0
     last_change: str | None = None
+    confidence_digests: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {"assessment": self.assessment, "stallCount": self.stall_count,

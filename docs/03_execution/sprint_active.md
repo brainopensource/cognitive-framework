@@ -7,7 +7,7 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: tech-lead
-version: "0.8.0"
+version: "0.8.1"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -23,7 +23,7 @@ execution authority.
 
 ## 1. Current state
 
-M-4 implementation and integrated gates are green. RF-95 is being executed by the Senior lane with
+M-4 implementation and integrated static gates are green. RF-95 is being executed by the Senior lane with
 the preregistered real-provider candidate; its evidence is not accepted until the verifier and
 fresh-process checks complete. Independent review remains a separate human receipt.
 
@@ -31,9 +31,13 @@ M-5a implementation is complete and gate-green ahead of promotion. M-5b and M-6 
 parallel because their current work uses frozen interfaces and disjoint surfaces. Neither may claim
 promotion evidence until `M-5A-BASE-v2` resolves.
 
-Latest integrated evidence: **1,575 Python passed / 8 skipped / 0 failed; TypeScript 68/68; codegen,
-boundaries, TCB 1366/1438, RF-97 transitive closure, secrets, domain blindness, isolation,
-duplication, links, stale paths and RF allocation green; Kernel semantic diff zero.**
+Latest accepted integrated evidence remains **1,575 Python passed / 8 skipped / 0 failed; TypeScript
+68/68**. The current full-suite rerun is **1,610 tests: 18 failures / 26 errors / 8 skipped**
+(dogfood mutation/verdict and sandbox-timeout failures); it is not promotion evidence. Current
+TypeScript checks are environment-blocked because `tsc` is unavailable. New seam tests pass **9/9**.
+Static gates pass: TCB **1,372/1,438**, boundaries, secrets, domain blindness, isolation,
+duplication, links, stale paths, and RF-98 structural neutrality; RF-98 historical comparison is
+unavailable because `M-5A-BASE-v2` does not resolve.
 
 ## 2. Active board
 
@@ -62,10 +66,10 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 | M-6 | Manifest ingress and product-only spawn path | Dev B (active lane) | DONE | Kernel remains verb-blind; agent.spawn admitted in /2 manifests |
 | M-6 | Nested-lineage demonstration bundle | Dev B (active lane) | DONE | test_rf55_rf59_delegation_e2e.py; cold-reconstructible child tree |
 | M-7 | M7-01 independence analyzer | Tech Lead | DONE — analysis-only | deterministic report producer; no scheduler activation |
-| M-7 | Topology/scheduler implementation and ADR-0099 | Dev A + Leadership | TODO | after M-6 and evidence review |
+| M-7 | Topology/scheduler implementation and ADR-0099 | Dev A + Leadership | PREPARED — sequential only | topology validation/lowering, scheduler interface, safe-group seam; no activation |
 | M-8 | ADR-0100 category/lifecycle decision | Leadership | TODO | required before public M-8 APIs |
-| M-8 | Memory and skills implementation/evaluation | Dev A + Dev B | TODO | capability, provenance, held-out lift, rollback |
-| M-6.5 | ConfidenceRecord, ProgressView, exterior MetaController contract | Dev A | IN PROGRESS | pure projection/contract slice; no runtime authority |
+| M-8 | Memory and skills implementation/evaluation | Dev A + Dev B | PREPARED — exterior only | capability/provenance/reference lifecycle; no public activation or measured lift |
+| M-6.5 | ConfidenceRecord, ProgressView, exterior MetaController contract | Dev A | IMPLEMENTATION ACTIVE — unmeasured | pure projection/controller seam and 9 falsifier/contract tests; paired improvement not run |
 
 ## 3. Decisions in force
 
@@ -94,8 +98,8 @@ duplication, links, stale paths and RF allocation green; Kernel semantic diff ze
 7. Use `lab/m701_independence.py` on fixed recorded workloads; attach its digest-stable report to
    the ADR-0099 decision. Keep I-11 sequential until that decision.
 8. Freeze ADR-0100 and the five-category M-8 contract kit before enabling memory or promotion APIs.
-9. Complete the M-6.5 runtime consultation seam and paired evaluation before opening M-7 scheduler
-   implementation.
+9. Run the M-6.5 paired evaluation only on the canonical measured path; do not claim improvement
+   until it produces signed, attributable evidence.
 
 The RF-95 failure also fixed two substrate/adapter defects: determinate adapter errors now emit
 `EffectFailed` after `EffectStarted`, and model-authored bare `@@` hunks are context-anchored by

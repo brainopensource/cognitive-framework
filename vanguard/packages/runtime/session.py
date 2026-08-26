@@ -751,28 +751,19 @@ class HarnessSession:
                 },
             )
 
-        from ..domain.ledger.events import EventEnvelope
-        from ..domain.ledger.reducer import reduce_event
-        pending_env = EventEnvelope(
-            schema_version="mhf.event/1",
-            event_id="pending-terminal",
-            scope="episode",
-            seq=str(self.ledger._seq),
-            occurred_at=delayed.pending.at,
-            recorded_at=delayed.pending.at,
-            principal=task.principal,
-            principal_role="episode",
-            tenant_id="tenant-default",
-            owner_id="owner-platform",
-            confidentiality="internal",
-            retention_class="extended",
-            trainability="prohibited",
-            redaction_status="none",
-            payload=delayed.pending.payload,
-            run_id=task.run_id,
-            episode_id=task.episode_id,
-        )
-        final_state_digest = compute_state_digest(reduce_event(self.ledger_state(), pending_env))
+        # The digest of the state this trajectory *describes*: the fold of
+        # exactly the events named by `event_range`, which stops before the
+        # terminal event that carries the trajectory.
+        #
+        # It cannot include the terminal event. That event's payload contains
+        # this trajectory, which contains this digest, so a digest computed
+        # over a state containing it is self-referential and no fresh process
+        # can ever reproduce it. The previous value folded the pending
+        # `EpisodeCompleted` in and was then overwritten a few lines later by a
+        # third value, so the recorded digest matched no fold of the durable
+        # log at all -- reconstruction had nothing honest to verify against
+        # (`C-04`: a claim no receipt can confirm).
+        final_state_digest = compute_state_digest(self.ledger_state())
 
         trajectory = assemble_trajectory(
             task=task,
@@ -789,8 +780,6 @@ class HarnessSession:
             **self._capture_evidence(),
         )
         delayed.flush(trajectory)
-        if isinstance(trajectory, dict):
-            trajectory["state_digest"] = self.state_digest()
         ports.environment.dispose()
         result = RunResult(
             harness=harness.harness,
@@ -804,7 +793,11 @@ class HarnessSession:
             gene_digests=dict(harness.gene_digests),
             telemetry=self._telemetry(),
             instrument_error=self._instrument_error(),
-            state_digest=self.state_digest(),
+            # The same value the trajectory binds (`RF-23`), and the one a
+            # fresh process can reproduce by folding the declared
+            # `event_range`. Re-reading the ledger here would fold the terminal
+            # event back in and reintroduce the self-reference D9 removed.
+            state_digest=final_state_digest,
             trajectory=trajectory,
             run_digest=getattr(self.run_plan, "run_digest", ""),
             activation_digest=getattr(self.run_plan, "activation_digest", ""),

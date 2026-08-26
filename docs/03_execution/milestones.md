@@ -7,7 +7,7 @@ canonical_for:
   - wave-gates
 status: living
 owner: engineering-director
-version: "0.7.2"
+version: "0.7.3"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
@@ -38,9 +38,9 @@ names that dependency. There are no milestone-wide locks.
 | **M-5a Event-Derived Agent** | `Operation`, `Lineage`, `Scope`, `AgentView`; semantic state reconstructible from events; immutable `M-5A-BASE-v2` | RF-96/97/99/100; fresh process rebuilds goal identity, plan, attempts, settled effects, budget, strategy, and terminal status | **ACTIVE — implementation green; promotion pending** | M-4 closure, ADR-0098 acceptance, benchmark re-freeze, reviewed tag |
 | **M-5b Generality Falsifier** | Formal Pack #2 through the unchanged post-M-5a substrate | RF-86 zero semantic diff vs `M-5A-BASE-v2`; deterministic independent witness | **ACTIVE — SAT/CNF OD-3 selected; pack/oracle slice green** | `M-5A-BASE-v2` for RF-86 and material formal run |
 | **M-6 Recursive Delegation** | `agent.spawn` as nested execution lineages | RF-55–RF-59; four-dimensional additive conservation; independent depth/turn limits; join, cancellation, kill-tree recovery | **IMPLEMENTATION COMPLETE — acceptance review open** | independent review and recorded evidence receipt |
-| **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **IMPLEMENTATION ACTIVE — pure projection/controller contract landed** | M-4 telemetry (measurement); M-6 only for the delegate action |
-| **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PREPARATION ACTIVE — M7-01 analyzer ready; I-11 remains sequential** | M-6.5 + M7-01 result |
-| **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PREPARATION ACTIVE — ADR-0100 and category contract kit open** | M-7 |
+| **M-6.5 Adaptive Strategy** | `ProgressProjection` + meta-controller as policy/reducer/plugin | Deliberately blocked tasks show observable strategy change; paired runs with/without the controller show measured improvement | **IMPLEMENTATION ACTIVE — pure seam hardened; measurement not run** | M-4 telemetry (measurement); M-6 only for the delegate action |
+| **M-7 Topologies & Justified Concurrency** | Topology as versioned artifact/config; causal partial order; simple safe parallelism | ≥3 topologies through one runtime with zero kernel/episode diff; advanced scheduler only if M7-01 justifies it | **PREPARATION ACTIVE — topology/scheduler contracts prepared; I-11 remains sequential** | M-6.5 + M7-01 result + ADR-0099 |
+| **M-8 Memory, Skills, Learning** | Retrieval and memory as projections/plugins; versioned skills derived from trajectories | Measured lift on a held-out set with provenance and tested rollback | **PREPARATION ACTIVE — exterior contract kit prepared; ADR-0100 open** | M-7 + ADR-0100 |
 | **M-9 AETHER v1.0** | Integrated coding + formal + research general agent framework | Adaptation, transfer, and long-horizon criteria met; v1.0 release | **PLANNED** | M-8 |
 
 ### Always-parallel lanes

@@ -45,7 +45,7 @@ TIER_ALIASES: dict[str, int] = {
     "qwen/qwen-2.5-72b-instruct": 3,
     "tier-3": 3,
     "mock-tier-3": 3,
-    "anthropic/claude-3.5-sonnet": 4,
+    "deepseek/deepseek-v4-flash-0731": 4,
     "openai/gpt-4o": 4,
     "tier-4": 4,
     "mock-tier-4": 4,

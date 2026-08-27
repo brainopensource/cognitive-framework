@@ -1,6 +1,6 @@
 {
   "strategy": "tier-escalation",
-  "primary_model": "claude-3-5-sonnet",
-  "escalation_model": "claude-3-opus",
+  "primary_model": "deepseek/deepseek-v4-flash-0731",
+  "escalation_model": "z-ai/glm-5.3-flash",
   "escalate_after_attempts": 2
 }

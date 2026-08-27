@@ -37,7 +37,7 @@ class RF100ReproducibilityFalsifier(unittest.TestCase):
         vector = assess_reproducibility(
             profile=profile,
             wal_durable=True,
-            model_route={"provider": "openrouter", "model": "anthropic/claude-3.5-sonnet"},
+            model_route={"provider": "openrouter", "model": "deepseek/deepseek-v4-flash-0731"},
         )
         self.assertEqual(vector.state_reconstruction.capability, "full_cold")
         self.assertEqual(vector.state_reconstruction.verification, "unverified")
@@ -53,7 +53,7 @@ class RF100ReproducibilityFalsifier(unittest.TestCase):
         vector = assess_reproducibility(
             profile=profile,
             pins={"reducer": "v1.0.0", "schemas": "v1.0.0"},
-            model_route={"provider": "openrouter", "model": "anthropic/claude-3.5-sonnet"},
+            model_route={"provider": "openrouter", "model": "deepseek/deepseek-v4-flash-0731"},
         )
         self.assertEqual(vector.semantic_replay.capability, "pinned")
         self.assertEqual(vector.semantic_replay.verification, "unverified")
@@ -121,7 +121,7 @@ class RF100ReproducibilityFalsifier(unittest.TestCase):
         run_close_vector = assess_reproducibility(
             profile=resolve_profile("product"),
             wal_durable=True,
-            model_route={"provider": "openrouter", "model": "anthropic/claude-3.5-sonnet"},
+            model_route={"provider": "openrouter", "model": "deepseek/deepseek-v4-flash-0731"},
             assessed_at="2026-08-25T12:00:00.000Z",
         )
         self.assertEqual(run_close_vector.state_reconstruction.verification, "unverified")

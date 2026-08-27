@@ -52,16 +52,16 @@ PACK_NAME_ONLY = (
 # (regex, replacement) pairs applied in order, on each line.
 RULES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"anthropic/claude-3\.5-sonnet"), "deepseek/deepseek-v4-flash-0731"),
-    (re.compile(r"anthropic/claude-3-5-sonnet"), "deepseek/deepseek-v4-flash-0731"),
-    (re.compile(r"anthropic/claude-sonnet-4(?:\.\d+)?"), "deepseek/deepseek-v4-flash-0731"),
-    (re.compile(r"anthropic/claude-opus-4(?:\.\d+)?"), "z-ai/glm-5.3-flash"),
-    (re.compile(r"anthropic/claude-3-opus"), "z-ai/glm-5.3-flash"),
+    (re.compile(r"deepseek/deepseek-v4-flash-0731"), "deepseek/deepseek-v4-flash-0731"),
+    (re.compile(r"deepseek/deepseek-v4-flash-0731(?:\.\d+)?"), "deepseek/deepseek-v4-flash-0731"),
+    (re.compile(r"z-ai/glm-5.3-flash(?:\.\d+)?"), "z-ai/glm-5.3-flash"),
+    (re.compile(r"z-ai/glm-5.3-flash"), "z-ai/glm-5.3-flash"),
     (re.compile(r"anthropic/claude-3\.7-sonnet"), "z-ai/glm-5.3-flash"),
-    (re.compile(r"anthropic/claude-3-7-sonnet"), "z-ai/glm-5.3-flash"),
+    (re.compile(r"z-ai/glm-5.3-flash"), "z-ai/glm-5.3-flash"),
     (re.compile(r"\bclaude-3-5-sonnet\b"), "deepseek/deepseek-v4-flash-0731"),
     (re.compile(r"\bclaude-3-opus\b"),     "z-ai/glm-5.3-flash"),
-    (re.compile(r"fp_claude35(?:_prod)?"), "fp_deepseekv4flash"),
-    (re.compile(r"fp:claude-3-5-sonnet"),  "fp:deepseek-v4-flash-0731"),
+    (re.compile(r"fp_deepseekv4flash(?:_prod)?"), "fp_deepseekv4flash"),
+    (re.compile(r"fp:deepseek/deepseek-v4-flash-0731"),  "fp:deepseek-v4-flash-0731"),
 ]
 
 

@@ -373,8 +373,8 @@ def sample_conforming_trajectory_v1(
         "model_routes_used": [{
             "tier": 1,
             "provider": "openrouter",
-            "model": "anthropic/claude-3.5-sonnet",
-            "model_fingerprint": "fp_claude35",
+            "model": "deepseek/deepseek-v4-flash-0731",
+            "model_fingerprint": "fp_deepseekv4flash",
             "fingerprint_unavailable_reason": None,
         }],
         "turns": [{
@@ -393,8 +393,8 @@ def sample_conforming_trajectory_v1(
             "model_route": {
                 "tier": 1,
                 "provider": "openrouter",
-                "model": "anthropic/claude-3.5-sonnet",
-                "model_fingerprint": "fp_claude35",
+                "model": "deepseek/deepseek-v4-flash-0731",
+                "model_fingerprint": "fp_deepseekv4flash",
                 "fingerprint_unavailable_reason": None,
             },
             "invocations": [],
@@ -487,8 +487,8 @@ def build_trajectory_v2_fixture(
         "model_routes_used": [{
             "tier": 1,
             "provider": "openrouter",
-            "model": "anthropic/claude-3.5-sonnet",
-            "model_fingerprint": "fp_claude35",
+            "model": "deepseek/deepseek-v4-flash-0731",
+            "model_fingerprint": "fp_deepseekv4flash",
             "fingerprint_unavailable_reason": None,
         }],
         "turns": [{
@@ -507,16 +507,16 @@ def build_trajectory_v2_fixture(
             "model_route": {
                 "tier": 1,
                 "provider": "openrouter",
-                "model": "anthropic/claude-3.5-sonnet",
-                "model_fingerprint": "fp_claude35",
+                "model": "deepseek/deepseek-v4-flash-0731",
+                "model_fingerprint": "fp_deepseekv4flash",
                 "fingerprint_unavailable_reason": None,
             },
             "invocations": [{
                 "tier": 1,
                 "route": {
                     "provider": "openrouter",
-                    "model": "anthropic/claude-3.5-sonnet",
-                    "model_fingerprint": "fp_claude35",
+                    "model": "deepseek/deepseek-v4-flash-0731",
+                    "model_fingerprint": "fp_deepseekv4flash",
                     "fingerprint_unavailable_reason": None,
                 },
                 "usage": {"prompt_tokens": 100, "completion_tokens": 50},

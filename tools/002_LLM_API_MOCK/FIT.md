@@ -55,4 +55,4 @@
 | **Tier 3 (Cloud)** | `openrouter/free` $\rightarrow$ `cohere/north-mini-code:free` | Tier 3 | Cloud OpenRouter |
 | **Tier 4 (Cloud)** | `google/gemma-4-26b-a4b-it` $\rightarrow$ `deepseek/deepseek-v4-flash-0731` | Tier 4 | Cloud OpenRouter |
 | **Tier 5 (Cloud)** | `openai/gpt-5.6-luna` $\rightarrow$ `google/gemini-3.7-flash` | Tier 5 | Cloud OpenRouter |
-| **Tier 6 (Frontier)** | `anthropic/claude-3.7-sonnet` $\rightarrow$ `openai/gpt-5.6-luna` | **Tier 6** | Opus-Level SOTA |
+| **Tier 6 (Frontier)** | `z-ai/glm-5.3-flash` $\rightarrow$ `openai/gpt-5.6-luna` | **Tier 6** | Opus-Level SOTA |

@@ -26,7 +26,7 @@
 | **Tier 3** | Subdirectory refactoring & search | `openrouter/free` $\rightarrow$ `cohere/north-mini-code:free` | **Cloud OpenRouter** | **$0.00** (Free Tier) |
 | **Tier 4** | Subsystem workflows & state machines | `google/gemma-4-26b` $\rightarrow$ `deepseek/deepseek-v4-flash-0731` | **Cloud OpenRouter** | Medium Paid |
 | **Tier 5** | Autonomous SOTA modular refactoring | `openai/gpt-5.6-luna` $\rightarrow$ `google/gemini-3.7-flash` | **Cloud OpenRouter** | High Paid |
-| **Tier 6** | Opus-Level persistent data structures & consensus | `anthropic/claude-3.7-sonnet` $\rightarrow$ `openai/gpt-5.6-luna` | **Frontier Cloud / Recorded Gold** | Frontier Paid |
+| **Tier 6** | Opus-Level persistent data structures & consensus | `z-ai/glm-5.3-flash` $\rightarrow$ `openai/gpt-5.6-luna` | **Frontier Cloud / Recorded Gold** | Frontier Paid |
 
 ---
 

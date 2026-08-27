@@ -60,7 +60,7 @@ class InstrumentTupleTest(unittest.TestCase):
         compat_diff_model = CompatibilityKey(
             benchmark_id="swe_bench_lite",
             split_hash="sha256:split_1",
-            model_fingerprint="anthropic/claude-3.5-sonnet",  # Different model
+            model_fingerprint="deepseek/deepseek-v4-flash-0731",  # Different model
             sampling_params={"temperature": 0.0, "max_tokens": 256},
             harness_commit="cddaaa33",
             agent_hash="agent_v4",

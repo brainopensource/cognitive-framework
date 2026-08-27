@@ -193,7 +193,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="RF-95 Product Coding Proof Runner")
     parser.add_argument("--dry-run", action="store_true", help="Validate fixture setup and test assertions without live model spend")
     parser.add_argument("--repo-dir", type=str, default="", help="Target repo directory (uses temporary directory by default)")
-    # `anthropic/claude-3.5-sonnet` was the default until 2026-08-27, by which
+    # `deepseek/deepseek-v4-flash-0731` was the default until 2026-08-27, by which
     # point the route had been retired upstream and every live run died at
     # turn 0 with `provider returned HTTP 404` -- an `instrument_error`, which
     # RF-95 must classify UNDETERMINABLE rather than failed. A stale model pin

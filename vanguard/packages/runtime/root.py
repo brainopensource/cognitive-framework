@@ -37,6 +37,8 @@ from .activation import (
 from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run
+from .topology import lower_topology, parse_topology
+from .scheduler import ReadyOperation, SequentialScheduler
 from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
@@ -268,6 +270,20 @@ class Runtime(_ComposedRuntime):
                 ports, task_context, preregistration,
                 expected_oracle=(harness.evaluators[0] if harness.evaluators else None))
         activation = plan_activation(harness.frozen)
+        extensions: tuple[Mapping[str, Any], ...] = ()
+        if task_context.topology is not None:
+            topology = parse_topology(task_context.topology)
+            lowered = lower_topology(topology, harness)
+            operations = tuple(
+                ReadyOperation(
+                    operation_id=str(item["operationId"]),
+                    causal_predecessors=tuple(str(x) for x in item.get("causalPredecessors", ())),
+                ) for item in lowered["roleOperations"]
+            )
+            scheduled = SequentialScheduler().decide(operations)
+            if len(scheduled) != len(operations):
+                raise RunPlanError("topology contains operations that are not sequentially schedulable")
+            extensions = (lowered,)
         run_plan = plan_run(
             activation,
             project_id=task_context.project_id,
@@ -289,6 +305,7 @@ class Runtime(_ComposedRuntime):
             root_principal=task_context.principal,
             budget=harness.budget,
             profile=profile,
+            extensions=extensions,
         )
         # `ADR-0096 §14.5`. The profile is the only thing that knows the
         # run's retention and capture-required posture, and `RunPlan` carries

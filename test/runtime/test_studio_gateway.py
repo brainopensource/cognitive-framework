@@ -130,17 +130,24 @@ class TestStudioGateway(unittest.TestCase):
         runs = list_data.get("receipt", {}).get("result", {}).get("runs", [])
         self.assertTrue(any(r.get("run_id") == run_id for r in runs))
 
-        # Resolve approval
-        status, app_data = self._post(
-            "/api/approvals/resolve",
-            {
-                "runId": run_id,
-                "approvalId": "app-001",
-                "decision": "approved",
-            },
+        # Resolve approval: an unsigned decision must be refused (WP-C1, I-5).
+        # This previously succeeded because the gateway substituted
+        # "dummy-sig-approved" for the missing signature and the service
+        # recorded the result without verifying anything.
+        with self.assertRaises(urllib.error.HTTPError) as ctx:
+            self._post(
+                "/api/approvals/resolve",
+                {
+                    "runId": run_id,
+                    "approvalId": "app-001",
+                    "decision": "approved",
+                },
+            )
+        self.assertEqual(ctx.exception.code, HTTPStatus.BAD_REQUEST)
+        body = json.loads(ctx.exception.read().decode("utf-8"))
+        self.assertEqual(
+            body.get("receipt", {}).get("error", {}).get("code"), "invalid_request"
         )
-        self.assertEqual(status, HTTPStatus.OK)
-        self.assertEqual(app_data.get("receipt", {}).get("result", {}).get("status"), "resolved")
 
         # Cancel run
         status, cancel_data = self._post(f"/api/runs/{run_id}:cancel", {})

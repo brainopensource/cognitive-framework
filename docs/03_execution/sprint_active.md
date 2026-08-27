@@ -30,8 +30,17 @@ This is the sole current work authorization. Stable task contracts are in
 - RF-86: **fails** on 111 added protected-substrate lines at the verification subject.
 - RF-98: structural Kernel neutrality and Kernel diff are green against the local tag, but this
   cannot validate the contaminated control.
-- RF-95/M-6 release bundles: **produced** by WP-A1 in `docs/03_execution/evidence/`.
-  Independent review receipts: still absent — the producer cannot accept its own work.
+- RF-95/M-6 release bundles: **produced** by WP-A1 in `docs/03_execution/evidence/`, and now
+  **producer-signed** (`dev-a-operator`). Both record `undeterminable`, not `passed`:
+  - `M-4-rf95-candidate-03.json` — the run did not bind its preregistration (empty
+    `preregistration_digest`), and its ledger artifact lived in a volatile temporary
+    directory whose bytes no longer match the recorded digest, so the material is
+    unresolvable. The runner now threads preregistration and can export portable artifacts.
+  - `M-6-canonical-recursion.json` — `pins.dirty` is true, so the pinned commit does not
+    name the bytes that produced the result and a reviewer cannot recompute it.
+
+  Independent review receipts: still absent — the producer cannot accept its own work, and
+  neither bundle is currently in a state a reviewer could accept.
 - WP-B1 evidence bundle: **absent**; only Lane A and the reported WP-B2 bundle are present. WP-B1
   remains `IN_PROGRESS` pending its baseline and M-5b evidence bundle.
 - Original RF-95 bundle: searched for and **not recoverable** (git history at `349c7d1`
@@ -47,10 +56,10 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | Milestone | Mechanism / integration truth | Package state | Merge | Gate | Evidence | Blocked on |
 |---|---|---|---|---|---|---|
 | M-0–M-3C/W-3D | Historical mechanisms integrated | **ACCEPTED** | `MERGED` | `ACCEPTED` | accepted ADR/gate lineage | — |
-| M-4 | `/2`, RF-100 and product runner present; RF-95 candidate 03 executed and passed | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-4-rf95-candidate-03.json` (`sha256:aec94c0f…`) | independent acceptance receipt |
+| M-4 | `/2`, RF-100 and product runner present; RF-95 candidate 03 executed and passed its five conditions | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-4-rf95-candidate-03.json` (`sha256:5a98afee…`, signed, outcome `undeterminable`) | re-executed candidate under the preregistration-binding runner, then independent acceptance |
 | M-5a | AgentView/checkpoints integrated; historical control invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | accepted successor baseline |
 | M-5b | Graph coloring material run, exterior oracle, and daemon signatures verified; undeterminable without remote control | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-5b-graph-coloring.json` (`sha256:cb0a3956…`) | successor baseline, remote tag, review |
-| M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:041c4d62…`) | independent acceptance receipt |
+| M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:33316512…`, signed, outcome `undeterminable`) | re-production against a clean subject with depth>=3 and kill-tree artifacts, then independent acceptance |
 | M-6.5 | Stochastic attributable paired study and signed evidence envelope produced | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6.5-attributable-paired-study.json` (`sha256:293e738c…`) | independent acceptance receipt |
 | M-7 | Topology library present; public runtime integration absent | **IN_PROGRESS** | `PARTIAL` | `OPEN` | `[]` | three topologies, monotonic telemetry, M7-01, ADR-0099 |
 | M-8 | In-memory prototypes only | **NOT_STARTED** | `PREPARATION_ONLY` | `OPEN` | `[]` | M-7 disposition, durable authorized memory, lift and rollback |
@@ -60,7 +69,7 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 
 | ID | Milestone | Owner | State | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
-| WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; digest-addressed M-4/M-6 bundles produced; independent receipts outstanding |
+| WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **PACKAGE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; M-4/M-6 bundles producer-signed but `undeterminable` (unbound preregistration; unresolvable artifact; dirty subject). Re-execution against a clean subject required before independent review |
 | WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **PACKAGE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; M-5b-graph-coloring.json produced; blocked on remote successor tag |
 | WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **EVIDENCE_READY** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle produced |
 | WP-C1 | Backend service trust spine and canonical event truth | Dev A | **IN_PROGRESS** | accepted ADR-0062/0089/0101; no Kernel or schema change | falsifiers for key material, non-TTY approval denial, approval verification, gateway auth/origin/size, `StreamEvents` validation, canonical single-writer append, envelope round-trip fidelity, checkpoint reconstruction, resume restart, worker-observed cancellation |

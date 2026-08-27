@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import secrets
 import shutil
 import subprocess
 import sys
@@ -105,7 +106,8 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             max_turns=20,
         )
         
-        seed_key = b"vanguard-autonomous-operator-seed-key"
+        # Run-scoped ephemeral identity; see run_rf95_product_proof.py.
+        seed_key = secrets.token_bytes(32)
         grant = create_autonomous_grant(
             scratch_dir,
             allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
@@ -211,7 +213,8 @@ def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict
             max_turns=20,
         )
         
-        seed_key = b"vanguard-autonomous-operator-seed-key"
+        # Run-scoped ephemeral identity; see run_rf95_product_proof.py.
+        seed_key = secrets.token_bytes(32)
         grant = create_autonomous_grant(
             scratch_dir,
             allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
@@ -332,7 +335,12 @@ def main() -> int:
     parser.add_argument("--challenge", type=str, help="Specific challenge ID to run")
     parser.add_argument("--tiers", type=str, help="Comma-separated list of tiers to run (e.g. 1,2,3)")
     parser.add_argument("--verified", type=str, default=None, help="Run a real SWE-bench Verified instance from tools/005_SWE_VERIFIED_REPO (e.g. pallets__flask-5014, psf__requests-1142)")
-    parser.add_argument("--model", type=str, default="openrouter/free", help="Model to use (default: openrouter/free)")
+    # Resolved from the registry rather than hardcoded: a literal here is a
+    # second source of `D_R` model identity that drifts from the registry the
+    # other runners resolve, so two runs can disagree about what "default" meant.
+    from vanguard.packages.adapters.models.config import get_default_model
+
+    parser.add_argument("--model", type=str, default=get_default_model(), help="Model to use")
     parser.add_argument("--keep-dir", action="store_true", help="Keep temporary scratch directories")
     args = parser.parse_args()
 

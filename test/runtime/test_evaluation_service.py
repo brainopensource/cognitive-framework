@@ -10,6 +10,11 @@ import unittest
 from pathlib import Path
 
 from vanguard.packages.domain.primitives.primitives import uuidv7
+from vanguard.packages.runtime.governance.approvals import (
+    ApprovalAuthority,
+    ApprovalChallenge,
+    OperatorSigner,
+)
 from vanguard.packages.runtime.service import RuntimeService, ServiceInboxStore
 
 
@@ -17,7 +22,9 @@ class RuntimeServiceLedgerWriter(unittest.TestCase):
     def setUp(self) -> None:
         self._tempdir = tempfile.TemporaryDirectory()
         self.inbox = ServiceInboxStore(Path(self._tempdir.name) / "service.db")
-        self.service = RuntimeService(self.inbox)
+        self.signer = OperatorSigner(key_id="op-test")
+        self.authority = ApprovalAuthority({"op-test": self.signer.public_bytes})
+        self.service = RuntimeService(self.inbox, authority=self.authority)
 
     def tearDown(self) -> None:
         self.inbox.close()
@@ -50,39 +57,74 @@ class RuntimeServiceLedgerWriter(unittest.TestCase):
         self.assertIn("Heartbeat", kinds)
 
     def test_resolve_approval_appends_approval_resolved(self) -> None:
+        """A decision is recorded only when it verifies against its challenge.
+
+        The decision is signed by the operator over the *issued* challenge.
+        A placeholder signature -- which this test previously used -- now
+        appends nothing, which is the point of the approval spine.
+        """
         self._start("run-appr")
-        frame = {
+        challenge = ApprovalChallenge(
+            approval_id="appr-1",
+            process_id="proc-1",
+            action="patch.apply",
+            normalized_diff="--- a/x\n+++ b/x\n@@ -0,0 +1 @@\n+y\n",
+            args_digest="sha256:" + "a" * 64,
+            descriptor_digest="sha256:" + "b" * 64,
+            principal="operator",
+            expires_at="2099-08-18T12:00:00.000Z",
+        )
+        self.service.publish_event(
+            "run-appr",
+            {
+                "eventId": uuidv7(),
+                "runId": "run-appr",
+                "principal": "runtime",
+                "payload": {"kind": "ApprovalRequested", **challenge.payload()},
+            },
+        )
+        before = len(self.service._load_events("run-appr"))
+
+        # A forged signature must append nothing at all.
+        forged = dict(self.signer.approve(challenge, reviewer="operator").payload())
+        forged["signature"] = "00" * 64
+        res = self.service.execute_command(self._resolve_frame("cmd-forged", forged))
+        self.assertEqual(res["receipt"]["error"]["code"], "permission_denied")
+        self.assertEqual(len(self.service._load_events("run-appr")), before)
+
+        # The genuine decision is recorded.
+        decision = self.signer.approve(challenge, reviewer="operator")
+        res = self.service.execute_command(
+            self._resolve_frame("cmd-appr-1", dict(decision.payload()))
+        )
+        self.assertEqual(res.get("frameType"), "receipt", res)
+        self.assertEqual(res["receipt"]["status"], "completed")
+
+        events = [
+            evt
+            for evt in self.service._load_events("run-appr")
+            if evt.get("payload", {}).get("kind") == "ApprovalResolved"
+        ]
+        self.assertEqual(len(events), 1)
+        recorded = events[0]["payload"]["decision"]
+        self.assertEqual(recorded["approvalId"], "appr-1")
+        self.assertEqual(recorded["resolution"], "approved")
+        self.assertEqual(recorded["signature"], decision.signature)
+
+    def _resolve_frame(self, command_id: str, decision: dict) -> dict:
+        return {
             "version": "vg.4",
             "frameType": "command",
             "frameId": uuidv7(),
             "command": {
                 "name": "ResolveApproval",
-                "commandId": "cmd-appr-1",
-                "idempotencyKey": "idem-appr-1",
+                "commandId": command_id,
+                "idempotencyKey": f"idem-{command_id}",
                 "runId": "run-appr",
                 "actor": "operator",
-                "payload": {
-                    "decision": {
-                        "approvalId": "appr-1",
-                        "resolution": "approved",
-                        "reviewer": "operator",
-                        "argsDigest": "sha256:" + "a" * 64,
-                        "descriptorDigest": "sha256:" + "b" * 64,
-                        "expiresAt": "2026-08-18T12:00:00.000Z",
-                        "keyId": "op-test",
-                        "signature": "sig-placeholder",
-                    }
-                },
+                "payload": {"decision": decision},
             },
         }
-        res = self.service.execute_command(frame)
-        self.assertEqual(res.get("frameType"), "receipt", res)
-        events = [evt for evt in self.inbox.get_events("run-appr")
-                  if evt.get("payload", {}).get("kind") == "ApprovalResolved"]
-        self.assertEqual(len(events), 1)
-        decision = events[0]["payload"]["decision"]
-        self.assertEqual(decision["approvalId"], "appr-1")
-        self.assertEqual(decision["resolution"], "approved")
 
     def test_episode_completed_triggers_evaluation_requested(self) -> None:
         self._start("run-eval")

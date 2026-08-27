@@ -31,6 +31,7 @@ __all__ = [
     "BaselineManifest",
     "BaselineVerificationResult",
     "classify_ref_disposition",
+    "countersign_baseline_manifest",
     "create_signed_baseline_manifest",
     "sign_manifest_payload",
     "verify_baseline_manifest",
@@ -168,18 +169,51 @@ def create_signed_baseline_manifest(
     creator_key_id: str,
     creator_private_key: bytes,
     reviewer_key_id: str,
-    reviewer_private_key: bytes,
+    reviewer_public_key: str,
+    reviewer_private_key: bytes | None = None,
 ) -> BaselineManifest:
+    """Build a manifest signed by its *creator*, leaving the reviewer slot open.
+
+    The reviewer's signature is deliberately not derivable here. This function
+    previously accepted ``reviewer_private_key`` and minted both signatures, so
+    a single party could produce a manifest that looked independently reviewed
+    -- the same self-acceptance ``accepts()`` refuses for evidence envelopes.
+    The reviewer's *public* key is recorded so the slot names who must
+    countersign; the signature itself arrives through
+    ``countersign_baseline_manifest``.
+
+    ``reviewer_private_key`` remains accepted only so a hermetic test can build
+    a fully-signed fixture in one call, and it raises when it matches the
+    creator's key.
+    """
     from cryptography.hazmat.primitives.asymmetric import ed25519
 
     creator_priv = ed25519.Ed25519PrivateKey.from_private_bytes(creator_private_key)
     creator_pub = base64.b64encode(creator_priv.public_key().public_bytes_raw()).decode("ascii")
 
-    reviewer_priv = ed25519.Ed25519PrivateKey.from_private_bytes(reviewer_private_key)
-    reviewer_pub = base64.b64encode(reviewer_priv.public_key().public_bytes_raw()).decode("ascii")
+    if reviewer_private_key is not None:
+        if reviewer_private_key == creator_private_key:
+            raise ValueError(
+                "creator and reviewer keys are identical; a baseline cannot review itself"
+            )
+        reviewer_priv = ed25519.Ed25519PrivateKey.from_private_bytes(reviewer_private_key)
+        derived = base64.b64encode(
+            reviewer_priv.public_key().public_bytes_raw()).decode("ascii")
+        if reviewer_public_key and derived != reviewer_public_key:
+            raise ValueError("reviewer_private_key does not match reviewer_public_key")
+        reviewer_public_key = derived
+
+    if not reviewer_public_key:
+        raise ValueError(
+            "reviewer_public_key is required: the reviewer slot must name who may countersign"
+        )
+    if reviewer_public_key == creator_pub:
+        raise ValueError(
+            "creator and reviewer are the same identity; a baseline cannot review itself"
+        )
 
     creator_actor = BaselineActor(key_id=creator_key_id, public_key=creator_pub)
-    reviewer_actor = BaselineActor(key_id=reviewer_key_id, public_key=reviewer_pub)
+    reviewer_actor = BaselineActor(key_id=reviewer_key_id, public_key=reviewer_public_key)
 
     manifest = BaselineManifest(
         schema_version=schema_version,
@@ -199,8 +233,9 @@ def create_signed_baseline_manifest(
         signatures={},
     )
     unsigned = manifest.unsigned_payload()
-    creator_sig = sign_manifest_payload(unsigned, creator_private_key)
-    reviewer_sig = sign_manifest_payload(unsigned, reviewer_private_key)
+    signatures = {"creator": sign_manifest_payload(unsigned, creator_private_key)}
+    if reviewer_private_key is not None:
+        signatures["reviewer"] = sign_manifest_payload(unsigned, reviewer_private_key)
 
     return BaselineManifest(
         schema_version=schema_version,
@@ -217,7 +252,55 @@ def create_signed_baseline_manifest(
         required_gates=tuple(required_gates),
         creator=creator_actor,
         reviewer=reviewer_actor,
-        signatures={"creator": creator_sig, "reviewer": reviewer_sig},
+        signatures=signatures,
+    )
+
+
+def countersign_baseline_manifest(
+    manifest: BaselineManifest,
+    reviewer_private_key: bytes,
+) -> BaselineManifest:
+    """Add the reviewer's signature to a creator-signed manifest.
+
+    Refuses when the key is the creator's, and when the key does not match the
+    reviewer slot the creator named -- otherwise "independent review" would mean
+    only "a second signature", which any one party can produce.
+    """
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+
+    reviewer_priv = ed25519.Ed25519PrivateKey.from_private_bytes(reviewer_private_key)
+    reviewer_pub = base64.b64encode(
+        reviewer_priv.public_key().public_bytes_raw()).decode("ascii")
+
+    if reviewer_pub == manifest.creator.public_key:
+        raise ValueError(
+            "reviewer key equals the creator key; a baseline cannot review itself")
+    if manifest.reviewer.public_key and reviewer_pub != manifest.reviewer.public_key:
+        raise ValueError(
+            "reviewer key does not match the reviewer slot named by the creator")
+    if not manifest.signatures.get("creator"):
+        raise ValueError("cannot countersign a manifest that its creator has not signed")
+
+    unsigned = manifest.unsigned_payload()
+    signatures = dict(manifest.signatures)
+    signatures["reviewer"] = sign_manifest_payload(unsigned, reviewer_private_key)
+
+    return BaselineManifest(
+        schema_version=manifest.schema_version,
+        baseline_id=manifest.baseline_id,
+        git_tag=manifest.git_tag,
+        tag_object_sha=manifest.tag_object_sha,
+        commit_sha=manifest.commit_sha,
+        tree_digest=manifest.tree_digest,
+        package_version=manifest.package_version,
+        dependency_lock_digest=manifest.dependency_lock_digest,
+        schema_pins=dict(manifest.schema_pins),
+        reducer_pins=dict(manifest.reducer_pins),
+        prohibited_treatment_paths=manifest.prohibited_treatment_paths,
+        required_gates=manifest.required_gates,
+        creator=manifest.creator,
+        reviewer=manifest.reviewer,
+        signatures=signatures,
     )
 
 

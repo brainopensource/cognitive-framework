@@ -72,6 +72,8 @@ class RunPlan:
     profile_digest: str = ""
     assurance_level: str = ""
     promotion_eligible: bool = False
+    #: Digest-pinned, authority-free routing extensions (M-7).
+    extensions: tuple[Mapping[str, Any], ...] = ()
     run_digest: str = field(init=False)
 
     def __post_init__(self) -> None:
@@ -103,6 +105,7 @@ class RunPlan:
             "profileDigest": self.profile_digest,
             "assuranceLevel": self.assurance_level,
             "promotionEligible": self.promotion_eligible,
+            "extensions": tuple(dict(item) for item in self.extensions),
         }))
 
     @property
@@ -150,6 +153,7 @@ def plan_run(
     profile_digest: str | None = None,
     assurance_level: str | None = None,
     promotion_eligible: bool | None = None,
+    extensions: tuple[Mapping[str, Any], ...] = (),
 ) -> RunPlan:
     """Bind one activation to the run it is about to perform.
 
@@ -193,4 +197,5 @@ def plan_run(
             promotion_eligible if promotion_eligible is not None
             else bool(profile_fields.get("promotionEligible", False))
         ),
+        extensions=tuple(dict(item) for item in extensions),
     )

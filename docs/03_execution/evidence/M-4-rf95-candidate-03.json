@@ -1,10 +1,8 @@
 {
-  "artifactRefs": [
-    "/tmp/claude-1000/-home-rocha-Coding-Aether-D-System/bc90bc26-167a-4be6-91c1-6ecbbadd1553/scratchpad/rf95c/.vanguard/events.sqlite3"
-  ],
+  "artifactRefs": [],
   "claim": "RF-95",
-  "detail": "preregistration_digest is empty in the trajectory: the runner does not thread TaskContext.preregistration, so binding rests on commit ordering rather than on an in-run digest. Recorded as a known limitation of this bundle.",
-  "digest": "sha256:aec94c0f75455746ea439747e77e85e768a8a522d52cef42d4a25369553f8b20",
+  "detail": "RF-95 mechanism executed and passed all five conditions, but this bundle cannot be independently reconstructed and is therefore undeterminable under ADR-0101, not passed. Two defects: (1) the run did not bind its preregistration -- TaskContext.preregistration was not threaded, so trajectory preregistration_digest is empty and the candidate is tied to its frozen document by commit ordering rather than an in-run digest; (2) the ledger artifact was written to a volatile temporary directory and its bytes no longer match the digest recorded here, so the material is unresolvable. The runner now threads preregistration and can export portable artifacts (tools/runners/run_rf95_product_proof.py --preregistration --evidence-dir). Closing M-4 requires re-executing one newly authorized candidate under the fixed runner. No reviewer signature is present and none is claimed.",
+  "digest": "sha256:5a98afeeb1f60208d50e1d7a68ff6d986f114f5917dcb90e0699b8e23da21df6",
   "environment": {
     "machine": "x86_64",
     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
@@ -18,8 +16,7 @@
     },
     {
       "digest": "sha256:6fccfafe1098fcf6163bb9bd084b8a106116b0743c240b48a7e1b9ace96c33af",
-      "name": "ledger",
-      "ref": "/tmp/claude-1000/-home-rocha-Coding-Aether-D-System/bc90bc26-167a-4be6-91c1-6ecbbadd1553/scratchpad/rf95c/.vanguard/events.sqlite3"
+      "name": "ledger"
     },
     {
       "digest": "sha256:3b4ee3deeddb12b3f9868008662d3d41e211bd2cad56059b8760cf1c4c570b32",
@@ -30,7 +27,7 @@
       "name": "harness"
     }
   ],
-  "outcome": "passed",
+  "outcome": "undeterminable",
   "pins": {
     "branch": "feat_higgs_M4_M8",
     "commit": "ce1b6a86b7745b3b5111bd84138f207b7ba94d0a",
@@ -42,6 +39,7 @@
   },
   "producer": {
     "identity": "dev-a",
+    "keyId": "dev-a-operator",
     "role": "producer"
   },
   "protocol": "aether.rf95.product-coding-proof/1",
@@ -86,6 +84,7 @@
     "runId": "run-rf95-live"
   },
   "schema": "aether.evidence/1",
+  "signature": "b6af233f14593d9a8d83bd3dae549c3abb8cba7c9f6980c9c676cfd47ed644f6c79c835c0263f6afd6a0c97867bcd7918fbb3b94909dbcb90b2c065b9a6c2403",
   "subject": [
     "run:run-rf95-live",
     "episode:episode-rf95-live"

@@ -15,7 +15,10 @@ DO NOT execute live runs or declare M-4 complete without Dev A GO and independen
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
+import secrets
 import shutil
 import subprocess
 import sys
@@ -189,6 +192,79 @@ def verify_rf95_evidence(
     return len(failures) == 0, failures
 
 
+def export_rf95_artifacts(
+    target: Path,
+    *,
+    repo_path: Path,
+    db_path: Path,
+    blob_path: Path,
+    trajectory: dict,
+    preregistration: dict,
+    operator_public_key: str,
+    model: str,
+) -> dict:
+    """Copy the run's immutable artifacts somewhere a reviewer can reach.
+
+    An evidence bundle that points at `/tmp/vg-rf95-xxxx/.vanguard/events.sqlite3`
+    is not portable: the path is gone before anyone reads the bundle, so the
+    claim cannot be reconstructed in a clean environment and no countersignature
+    could cure that. Digests are recorded alongside the copies so the exported
+    artifacts are self-verifying.
+    """
+    target.mkdir(parents=True, exist_ok=True)
+    manifest: dict = {
+        "schema": "aether.rf95-artifacts/1",
+        "preregistration": dict(preregistration),
+        "operatorPublicKey": operator_public_key,
+        "model": model,
+        "artifacts": {},
+    }
+
+    if db_path.is_file():
+        dest = target / "events.sqlite3"
+        shutil.copy2(db_path, dest)
+        manifest["artifacts"]["eventStore"] = {
+            "path": dest.name,
+            "digest": f"sha256:{hashlib.sha256(dest.read_bytes()).hexdigest()}",
+            "bytes": dest.stat().st_size,
+        }
+
+    if blob_path.is_dir():
+        dest_blobs = target / "blobs"
+        if dest_blobs.exists():
+            shutil.rmtree(dest_blobs)
+        shutil.copytree(blob_path, dest_blobs)
+        blob_digests = {
+            f.relative_to(dest_blobs).as_posix():
+                f"sha256:{hashlib.sha256(f.read_bytes()).hexdigest()}"
+            for f in sorted(dest_blobs.rglob("*")) if f.is_file()
+        }
+        manifest["artifacts"]["blobs"] = {"path": "blobs", "digests": blob_digests}
+
+    traj_path = target / "trajectory.json"
+    traj_bytes = json.dumps(trajectory, sort_keys=True, indent=2).encode("utf-8")
+    traj_path.write_bytes(traj_bytes)
+    manifest["artifacts"]["trajectory"] = {
+        "path": traj_path.name,
+        "digest": f"sha256:{hashlib.sha256(traj_bytes).hexdigest()}",
+    }
+
+    diff_source = repo_path / "calculator.py"
+    if diff_source.is_file():
+        dest_subject = target / "calculator.py"
+        shutil.copy2(diff_source, dest_subject)
+        manifest["artifacts"]["subject"] = {
+            "path": dest_subject.name,
+            "digest": f"sha256:{hashlib.sha256(dest_subject.read_bytes()).hexdigest()}",
+        }
+
+    manifest_path = target / "artifacts.json"
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    print(f"RF-95 artifacts exported to {target} ({len(manifest['artifacts'])} kinds)")
+    return manifest
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="RF-95 Product Coding Proof Runner")
     parser.add_argument("--dry-run", action="store_true", help="Validate fixture setup and test assertions without live model spend")
@@ -202,6 +278,27 @@ def main() -> int:
     from vanguard.packages.adapters.models.config import get_default_model
     parser.add_argument("--model", type=str, default=get_default_model(), help="Planner/executor model")
     parser.add_argument("--keep-run", action="store_true", help="Keep the temporary run directory as an evidence artifact")
+    parser.add_argument(
+        "--preregistration",
+        type=str,
+        default=str(_REPO_ROOT / "docs/03_execution/prereg/RF-95-candidate-03.md"),
+        help="Frozen preregistration document bound into the run",
+    )
+    parser.add_argument(
+        "--frozen-at",
+        type=str,
+        default="2026-08-27T00:00:00Z",
+        help="Timestamp at which the preregistration was frozen",
+    )
+    parser.add_argument(
+        "--evidence-dir",
+        type=str,
+        default="",
+        help=(
+            "Directory to copy the WAL, blobs and trajectory into. Evidence that "
+            "references a temporary directory cannot be reconstructed by a reviewer."
+        ),
+    )
     args = parser.parse_args()
 
     temp_dir: str | None = None
@@ -237,13 +334,39 @@ def main() -> int:
             return 2
 
         print(f"Executing RF-95 product run using model {args.model} on {repo_path}...")
+
+        # Bind the frozen preregistration *into the run*, before execution.
+        # Without this the trajectory's `preregistration_digest` is empty and
+        # the candidate is tied to its frozen document only by commit ordering
+        # -- which is exactly the retrospective binding RF-95 forbids. The
+        # digest must be computed from the document's bytes and carried through
+        # `TaskContext` so it enters the trajectory the run actually produces.
+        prereg_path = Path(args.preregistration).resolve()
+        if not prereg_path.is_file():
+            print(f"ERROR: preregistration document not found: {prereg_path}", file=sys.stderr)
+            return 2
+        prereg_bytes = prereg_path.read_bytes()
+        prereg_digest = f"sha256:{hashlib.sha256(prereg_bytes).hexdigest()}"
+        try:
+            prereg_rel = prereg_path.relative_to(_REPO_ROOT).as_posix()
+        except ValueError:
+            prereg_rel = prereg_path.as_posix()
+        print(f"RF-95 preregistration: {prereg_rel} {prereg_digest}")
+
+        task_bytes = (repo_path / "TASK.md").read_bytes()
         task = TaskContext(
-            brief=(repo_path / "TASK.md").read_text(encoding="utf-8"),
+            brief=task_bytes.decode("utf-8"),
             repo_path=repo_path,
             run_id="run-rf95-live",
             episode_id="episode-rf95-live",
             project_id="calc-fix",
             max_turns=20,
+            preregistration={
+                "preregistration_digest": prereg_digest,
+                "preregistration_uri": prereg_rel,
+                "task_digest": f"sha256:{hashlib.sha256(task_bytes).hexdigest()}",
+                "frozen_at": args.frozen_at,
+            },
         )
         model = OpenRouterModel(model=args.model, stream=False, environ={"OPENROUTER_API_KEY": api_key})
 
@@ -263,17 +386,23 @@ def main() -> int:
         from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
         from vanguard.packages.runtime.governance.approvals import OperatorSigner
 
-        seed_key = b"vanguard-autonomous-operator-seed-key"
+        # A run-scoped ephemeral identity. The previous shared literal seed made
+        # every grant on every installation attributable to the same key, so the
+        # signature proved nothing about who authorised this run. The public
+        # half is printed and enters the evidence, which is what makes the
+        # authorisation checkable by a reviewer.
+        seed_key = secrets.token_bytes(32)
+        signer = OperatorSigner(seed_key, key_id="rf95-run-operator")
         grant = create_autonomous_grant(
             repo_path,
             allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
             max_turns=20,
             max_attempts=1,
-            seed_key=seed_key,
+            signer=signer,
         )
-        signer = OperatorSigner(seed_key)
         print(f"RF-95 bounded autonomous grant: {grant.grant_id} "
               f"verbs={grant.allowed_verbs} turns={grant.max_turns}")
+        print(f"RF-95 run operator public key: {signer.public_bytes.hex()}")
 
         result = Runtime.execute_profiled(
             manifest_path,
@@ -290,6 +419,23 @@ def main() -> int:
 
         ok, failures = verify_rf95_evidence(
             repo_path, db_path, blob_path, result, result.trajectory or {})
+
+        if args.evidence_dir:
+            export_rf95_artifacts(
+                Path(args.evidence_dir).resolve(),
+                repo_path=repo_path,
+                db_path=db_path,
+                blob_path=blob_path,
+                trajectory=result.trajectory or {},
+                preregistration={
+                    "digest": prereg_digest,
+                    "uri": prereg_rel,
+                    "frozenAt": args.frozen_at,
+                },
+                operator_public_key=signer.public_bytes.hex(),
+                model=args.model,
+            )
+
         if not ok:
             print("RF-95 FALSIFIER FAILED:")
             for f in failures:

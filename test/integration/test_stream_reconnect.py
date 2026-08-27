@@ -11,6 +11,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from vanguard.packages.domain.primitives.primitives import uuidv7
 from vanguard.packages.runtime.service.inbox import ServiceInboxStore
 from vanguard.packages.runtime.service.service import RuntimeService
 
@@ -36,14 +37,19 @@ class TestStreamReconnect(unittest.TestCase):
             payload={"run_id": run_id, "prompt": "test"},
         )
 
-        # Record 5 events
+        # Record 5 events through the canonical writer. Seeding the inbox
+        # outbox directly exercised the second event history WP-C1 removed;
+        # streams now replay from the one durable store, which is what this
+        # test's own contract ("no dropped frames or duplicate delivery")
+        # is about.
         for i in range(1, 6):
-            self.store.append_event(
-                run_id=run_id,
-                event_envelope={
-                    "eventId": f"evt-{i}",
-                    "kind": "Log",
-                    "payload": {"msg": f"Event {i}", "step": i},
+            self.service.publish_event(
+                run_id,
+                {
+                    "eventId": uuidv7(),
+                    "runId": run_id,
+                    "principal": "operator",
+                    "payload": {"kind": "Log", "msg": f"Event {i}", "step": i},
                 },
             )
 
@@ -60,12 +66,13 @@ class TestStreamReconnect(unittest.TestCase):
         self.assertEqual([int(e.get("seq", 0)) for e in resumed_events], [3, 4, 5])
 
         # Append more events mid-run
-        self.store.append_event(
-            run_id=run_id,
-            event_envelope={
-                "eventId": "evt-6",
-                "kind": "Outcome",
-                "payload": {"status": "completed"},
+        self.service.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "runId": run_id,
+                "principal": "operator",
+                "payload": {"kind": "Outcome", "status": "completed"},
             },
         )
 
@@ -74,7 +81,7 @@ class TestStreamReconnect(unittest.TestCase):
         self.assertEqual(len(final_frames), 1)
         final_event = final_frames[0]["event"]
         self.assertEqual(int(final_event.get("seq", 0)), 6)
-        self.assertEqual(final_event["kind"], "Outcome")
+        self.assertEqual(final_event["payload"]["kind"], "Outcome")
 
 
 if __name__ == "__main__":

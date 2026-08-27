@@ -104,6 +104,8 @@ class TaskContext:
     #: the session substitutes `(episode_id,)`. Carried explicitly so a cold
     #: reader can rebuild the tree without a live parent object (`RF-59`).
     lineage: tuple[str, ...] = ()
+    #: Optional authority-free M-7 topology routing data.
+    topology: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

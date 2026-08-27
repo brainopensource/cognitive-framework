@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
 from ...adapters.stores.event_store import SqliteEventStore
-from ...domain.ledger.events import EventEnvelope, parse_event_envelope
+from ...domain.ledger.events import VALID_SCOPES, EventEnvelope, parse_event_envelope
 from ...domain.primitives.primitives import uuidv7
 from ...domain.evidence.claim import Claim, ClaimError, parse_claim
 from ...domain.wire.contracts import parse_wire
@@ -151,11 +151,12 @@ class RuntimeService:
         self._write_lock = threading.Lock()
         self._evaluation_store = _ServiceEventStore(self)
         self._evaluation_listener = EvaluationListener(self._evaluation_store)
-        #: Checkpoint/resume need somewhere to put a folded state. Absent a blob
-        #: store the capability is *unavailable* and says so, rather than
+        #: Checkpoint/resume need somewhere to put a folded state. A file-backed
+        #: service gets one beside its database; a purely in-memory service does
+        #: not, and then the capability is *unavailable* and says so rather than
         #: recording an empty checkpoint that resume cannot use.
-        self._blobs = blobs
-        self._checkpoints = CheckpointManager(blobs) if blobs is not None else None
+        self._blobs = blobs if blobs is not None else _default_blob_store(self.store.db_path)
+        self._checkpoints = CheckpointManager(self._blobs) if self._blobs is not None else None
 
     def execute_command(self, frame: Mapping[str, Any]) -> dict[str, Any]:
         """Execute a validated command frame and return a response frame."""
@@ -547,12 +548,20 @@ class RuntimeService:
             },
         )
 
-        if ctx is None:
+        if ctx is not None and ctx.thread is None:
+            # A registered run with no worker (nothing was ever launched). It
+            # settles immediately and deterministically.
+            ctx.cancel_event.set()
+            ctx.status = "cancelled"
+            ctx.approval_response_queue.put(None)
+            with self._lock:
+                self._active_runs.pop(run_id, None)
+
+        if ctx is None or ctx.thread is None:
             # Nothing is executing: settle it here and record the terminal fact.
-            self.store.set_run_state(
-                run_id, state["manifest_path"], state["repo_path"], "cancelled",
-                now=_utc_now(),
-            )
+            manifest = state["manifest_path"] if state else (ctx.manifest_path if ctx else "")
+            repo = state["repo_path"] if state else (ctx.repo_path if ctx else ".")
+            self.store.set_run_state(run_id, manifest, repo, "cancelled", now=_utc_now())
             self.publish_event(
                 run_id,
                 {
@@ -747,13 +756,17 @@ class RuntimeService:
         )
 
         restarted = self._restart_from_state(run_id, state, reconstruction)
+        # "resumed" means the lineage was re-entered from verified durable
+        # state; it does not by itself claim a worker is executing. `restarted`,
+        # `capability` and `verification` carry that distinction explicitly
+        # rather than letting one word imply all three.
+        status = "running" if restarted else "resumed"
         self.store.set_run_state(
-            run_id, state["manifest_path"], state["repo_path"],
-            "running" if restarted else "recovered", now=now,
+            run_id, state["manifest_path"], state["repo_path"], status, now=now,
         )
         return {
             "runId": run_id,
-            "status": "running" if restarted else "recovered",
+            "status": status,
             "asOfSeq": str(seq),
             "stateDigest": reconstruction.state_digest,
             "capability": reconstruction.capability,
@@ -1202,21 +1215,74 @@ def _parse_strict_approval_decision(raw: Any) -> ApprovalDecision:
     )
 
 
+def _default_blob_store(db_path: Any) -> Any:
+    """A blob store beside the service database, when the service is durable.
+
+    An in-memory service gets ``None``: checkpoints would have nowhere to live,
+    and a checkpoint that points at bytes nobody kept is the dangling reference
+    the artifact layer refuses to emit.
+    """
+    if db_path in (None, ":memory:"):
+        return None
+    try:
+        from ...adapters.stores.blob_store import FileBlobStore
+
+        return FileBlobStore(Path(str(db_path)).resolve().parent / "blobs")
+    except Exception:  # noqa: BLE001 - absence degrades a capability, not the run
+        return None
+
+
+def _canonical_scope(has_run: bool, has_episode: bool) -> str:
+    """The scope the canonical reader will accept for a service-authored fact.
+
+    The domain's scope rules are conditional on identity, not on topic:
+
+    ==============  ==============  ================
+    scope           runId           episodeId
+    ==============  ==============  ================
+    ``episode``     required        required
+    ``recovery``    required        forbidden
+    ``governance``  forbidden       forbidden
+    ``evolution``   forbidden       forbidden
+    ==============  ==============  ================
+
+    Every service fact is *about a run* and therefore carries a ``runId``, so
+    only ``episode`` and ``recovery`` are admissible. The service previously
+    wrote ``scope: "run"``, which is not a scope at all -- so each of its own
+    events failed to parse on read and the old inbox fallback silently served
+    them from the other store. That is exactly the state-dependent truth this
+    package removes.
+    """
+    if has_run and has_episode:
+        return "episode"
+    if has_run:
+        return "recovery"
+    return "governance"
+
+
 def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> EventEnvelope:
     payload = event.get("payload")
     if not isinstance(payload, Mapping):
         payload = {}
     now = str(event.get("occurredAt") or _utc_now())
-    episode_id = event.get("episodeId")
+    raw_episode = event.get("episodeId")
+    episode_id = raw_episode if isinstance(raw_episode, str) and raw_episode else None
+    resolved_run = str(event.get("runId") or run_id)
+    raw_scope = str(event.get("scope") or "")
+    scope = (
+        raw_scope
+        if raw_scope in VALID_SCOPES
+        else _canonical_scope(bool(resolved_run), episode_id is not None)
+    )
     return EventEnvelope(
-        schema_version=str(event.get("schemaVersion", "4.0.0")),
+        schema_version=str(event.get("schemaVersion", "vg.4")),
         event_id=str(event.get("eventId") or uuidv7()),
-        scope=str(event.get("scope") or "episode"),
+        scope=scope,
         seq=str(event.get("seq") or "0"),
         occurred_at=now,
         recorded_at=str(event.get("recordedAt") or now),
         principal=str(event.get("principal") or "runtime"),
-        principal_role=str(event.get("principalRole") or "episode"),
+        principal_role=str(event.get("principalRole") or "operator"),
         tenant_id=str(event.get("tenantId") or "tenant-default"),
         owner_id=str(event.get("ownerId") or "owner-platform"),
         confidentiality=str(event.get("confidentiality") or "internal"),
@@ -1224,8 +1290,10 @@ def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> Event
         trainability=str(event.get("trainability") or "prohibited"),
         redaction_status=str(event.get("redactionStatus") or "none"),
         payload=dict(payload),
-        run_id=str(event.get("runId") or run_id),
-        episode_id=episode_id if isinstance(episode_id, str) else None,
+        # `governance`/`evolution` forbid a run identity; `episode`/`recovery`
+        # require one. Only `episode` may carry an episode identity.
+        run_id=resolved_run if scope in ("episode", "recovery") else None,
+        episode_id=episode_id if scope == "episode" else None,
         trace_id=str(event.get("traceId") or "trace-service"),
         span_id=str(event.get("spanId") or "span-service"),
     )

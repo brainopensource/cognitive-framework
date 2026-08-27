@@ -148,6 +148,15 @@ class BaselineManifestVerifierContractTests(unittest.TestCase):
             creator_key_id="creator-key-01",
             creator_private_key=self.creator_key_bytes,
             reviewer_key_id="reviewer-key-01",
+            # The reviewer slot names a public key; the private key is supplied
+            # here only because this fixture needs a fully-countersigned
+            # manifest in one call. Production countersigning goes through
+            # `countersign_baseline_manifest`, which the creator cannot invoke.
+            reviewer_public_key=base64.b64encode(
+                ed25519.Ed25519PrivateKey.from_private_bytes(self.reviewer_key_bytes)
+                .public_key()
+                .public_bytes_raw()
+            ).decode("ascii"),
             reviewer_private_key=self.reviewer_key_bytes,
         )
 

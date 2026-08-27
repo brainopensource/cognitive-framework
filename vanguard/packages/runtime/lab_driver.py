@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import secrets
 import shutil
 import sys
 import tempfile
@@ -61,6 +62,23 @@ from .session_log import session_log
 
 DEFAULT_BRIEF = ("Inspect the workspace, make the failing suite pass, and run "
                  "the tests through the allowlisted process verb.")
+
+
+def _lab_operator_signer() -> Any:
+    """The installation's operator key, or a run-scoped ephemeral identity.
+
+    The lab is not an interactive product surface, so it must not *require*
+    `vanguard init`; but it must also not fall back to a constant shared by
+    every checkout. An ephemeral key is attributable to this run and to nothing
+    else, which is the honest default when no operator identity is installed.
+    """
+    from .governance.approvals import OperatorSigner
+    from .keys import KeyMaterialError, load_operator_signer
+
+    try:
+        return load_operator_signer(allow_create=False)
+    except KeyMaterialError:
+        return OperatorSigner(secrets.token_bytes(32), key_id="lab-ephemeral-operator")
 
 
 def run_lab_task(
@@ -159,23 +177,26 @@ def run_lab_task(
         from .autonomous_grant import create_autonomous_grant
         from .governance.approvals import OperatorSigner
 
-        grant_signer_key = b"vanguard-autonomous-operator-seed-key"
+        # The installation's operator key, or a run-scoped ephemeral identity
+        # when none is initialised. A shared literal seed made every grant in
+        # every checkout attributable to the same key, so the signature proved
+        # nothing about who authorised the run.
+        signer = _lab_operator_signer()
         grant = create_autonomous_grant(
             task_path,
             allowed_verbs=tuple(harness_preview.verbs),
             max_turns=max_turns,
             max_attempts=max_attempts,
-            seed_key=grant_signer_key,
+            signer=signer,
         )
         max_turns = min(max_turns, grant.max_turns)
         max_attempts = min(max_attempts, grant.max_attempts)
-        signer = OperatorSigner(grant_signer_key)
         approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
         approval_key = signer.public_bytes
     elif approve_writes:
         from .governance.approvals import OperatorSigner
 
-        signer = OperatorSigner(b"vanguard-lab-operator-key")
+        signer = OperatorSigner(secrets.token_bytes(32), key_id="lab-operator")
         approver = lambda challenge: signer.approve(challenge, reviewer="lab-operator")
         approval_key = signer.public_bytes
         interactive = True

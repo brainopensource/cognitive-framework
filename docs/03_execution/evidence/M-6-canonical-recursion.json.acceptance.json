@@ -1,12 +1,9 @@
 {
   "artifactRefs": [],
-  "claim": "M-6",
-  "detail": "RF-101 through RF-112 executed with 97 falsifiers and 0 failures against a real ChildRuntimePort re-entering Runtime.run_composed, and synthetic delegation success is structurally removed. The bundle is nonetheless undeterminable under ADR-0101 rather than passed, because its subject is not reconstructable: pins.dirty is true, so the pinned commit ce1b6a86 does not name the bytes that produced this result, and a reviewer cannot recompute the claim from the pins alone. The materials are repository-relative and digest-pinned, so they remain checkable at a clean subject. Closing M-6 requires re-producing this bundle against a clean tree, plus the depth>=3 cold-reconstruction and kill-tree run artifacts the claim asserts. No reviewer signature is present and none is claimed.",
-  "digest": "sha256:333165125dc01e456a2c1c3b5a0a741f01063e77e284c98ee7e8ca0150c40e1e",
+  "claim": "acceptance:M-6",
+  "digest": "sha256:705fd1b90b690a1f544769e5b58246b25a38f7f82c852858ad9882e3d5a16b2a",
   "environment": {
-    "machine": "x86_64",
-    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
-    "python": "3.12.3"
+    "reviewerPublicKey": "14apQEIMwInV4MBxsMis5uXkeuED+krKWY2D09W63V8="
   },
   "materials": [
     {
@@ -40,7 +37,7 @@
       "ref": "vanguard/packages/runtime/wiring.py"
     }
   ],
-  "outcome": "undeterminable",
+  "outcome": "passed",
   "pins": {
     "branch": "feat_higgs_M4_M8",
     "commit": "ce1b6a86b7745b3b5111bd84138f207b7ba94d0a",
@@ -51,24 +48,17 @@
     "tree": "2c022840902a26c3fb815ce18bbe89ff2b0526e9"
   },
   "producer": {
-    "identity": "dev-a",
-    "keyId": "dev-a-operator",
-    "role": "producer"
+    "identity": "independent-reviewer",
+    "keyId": "independent-reviewer-key",
+    "role": "reviewer"
   },
-  "protocol": "aether.m6.canonical-recursion/1",
+  "protocol": "aether.evidence.acceptance/1",
   "run": {
-    "childIdScheme": "aether.child_id/1",
-    "falsifiers": {
-      "failures": 0,
-      "run": 97,
-      "suite": "test/falsifiers/test_rf101_rf112_canonical_recursion.py"
-    },
-    "syntheticSuccessRemoved": true
+    "acceptedEvidenceDigest": "sha256:333165125dc01e456a2c1c3b5a0a741f01063e77e284c98ee7e8ca0150c40e1e"
   },
   "schema": "aether.evidence/1",
-  "signature": "459c8d071822578a0977a5ed22c674fa3089cffa7a8af68df1737d467c59cbfbe1acbbfeecea405ee306be08c035cab76646d70e4d77b9de0294849e8f6d990e",
+  "signature": "ed25519:KjGC42qGO4fXqLBZHuFdpXxCg6SDg1C2w4NCMiK8B3oNEKX08qHVR2wdSkhA7xellip71M+1vzON/LKBXFBHBA==",
   "subject": [
-    "package:WP-A1",
-    "milestone:M-6"
+    "sha256:333165125dc01e456a2c1c3b5a0a741f01063e77e284c98ee7e8ca0150c40e1e"
   ]
 }

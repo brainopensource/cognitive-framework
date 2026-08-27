@@ -492,28 +492,29 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         workspace_root = self.server.workspace_root.resolve()
         target_path = (workspace_root / file_param).resolve()
 
-        # Selector mediation. Containment alone still exposes every secret a
-        # workspace happens to contain, so the selector is an allowlist of
-        # readable kinds plus an explicit denylist of credential-bearing names.
-        if (
-            target_path.name in WORKSPACE_READ_DENYLIST
-            or target_path.suffix.lower() not in WORKSPACE_READ_SUFFIXES
-            or any(part.startswith(".") and part not in (".", "..")
-                   for part in target_path.relative_to(workspace_root).parts[:-1]
-                   if target_path.is_relative_to(workspace_root))
-        ):
-            self._send_error_code(
-                "permission_denied",
-                f"path {file_param!r} is outside the readable workspace selector",
-            )
-            return
-
+        # Containment first: a path outside the workspace is indistinguishable
+        # from one that does not exist, so it must not be answerable.
         if not target_path.is_relative_to(workspace_root) or not target_path.exists() or not target_path.is_file():
             self.send_response(HTTPStatus.NOT_FOUND)
             self._set_cors_headers()
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"error": f"File not found or outside workspace: {file_param}"}).encode("utf-8"))
+            return
+
+        # Selector mediation. Containment alone still exposes every secret the
+        # workspace happens to contain, so reads are restricted to an allowlist
+        # of readable kinds, outside dot-directories, minus credential names.
+        relative = target_path.relative_to(workspace_root)
+        if (
+            target_path.name in WORKSPACE_READ_DENYLIST
+            or target_path.suffix.lower() not in WORKSPACE_READ_SUFFIXES
+            or any(part.startswith(".") for part in relative.parts[:-1])
+        ):
+            self._send_error_code(
+                "permission_denied",
+                f"path {file_param!r} is not within the readable workspace selector",
+            )
             return
 
         try:

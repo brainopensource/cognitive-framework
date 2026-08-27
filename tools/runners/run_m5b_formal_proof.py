@@ -24,6 +24,7 @@ import argparse
 import hashlib
 import json
 import os
+import secrets
 import shutil
 import subprocess
 import sys
@@ -190,7 +191,9 @@ def main() -> int:
             print("ERROR: live execution requires OPENROUTER_API_KEY.", file=sys.stderr)
             return 2
 
-        signer = OperatorSigner(b"vanguard-autonomous-operator-seed-key")
+        # Run-scoped ephemeral identity; a shared literal seed makes every
+        # evidence run attributable to the same key, which proves nothing.
+        signer = OperatorSigner(secrets.token_bytes(32), key_id="m5b-run-operator")
         result = Runtime.execute_profiled(
             str(PACK),
             TaskContext(

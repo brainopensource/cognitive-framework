@@ -7,7 +7,7 @@ canonical_for:
   - repository-inventory
 status: living
 owner: senior-principal-systems-engineer
-version: "0.8.0"
+version: "0.7.3.dev0"
 last_verified: 2026-08-26
 read_when:
   - orienting-in-the-system-architecture

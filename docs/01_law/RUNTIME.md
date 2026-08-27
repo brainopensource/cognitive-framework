@@ -7,7 +7,7 @@ canonical_for:
   - detailed-runtime-law
 status: living
 owner: principal-systems-architect
-version: "0.7.1"
+version: "0.7.3.dev0"
 last_verified: 2026-08-25
 read_when:
   - implementing-runtime-events
@@ -784,7 +784,7 @@ does not authorize work.
 | **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
 | **M-4 / v0.7.0** | One useful real coding-agent run with durable replay | RF-95; live model, mediated observe/edit/verify, diff, WAL, trajectory, fresh-process reconstruction |
 | **M-5a/M-5b / v0.7.x** | Event-derived agent then fresh Formal Pack witness | accepted successor baseline; RF-86/RF-98 against `CONVERGENCE-BASE-v1`; trajectory/evidence parity |
-| **M-6 / v0.8.0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
+| **M-6 / v0.7.3.dev0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
 | **M-7** | Three topologies through one runtime and explicit scheduler disposition | M7-01 plus ADR-0099; sequential until governance lift |
 | **M-8** | Verified durable memory and governed composition promotion | ADR-0100; held-out lift, CAS promotion, executed rollback, RF-98 |
 | **M-9/M-10** | Exterior post-MVP research | compatibility only; no implementation authority from this law |

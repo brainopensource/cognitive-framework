@@ -15,7 +15,7 @@ applies_to:
   - v0.6.2
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.8.0"
+version: "0.7.3.dev0"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []

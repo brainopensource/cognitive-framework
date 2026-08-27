@@ -7,7 +7,7 @@ canonical_for:
   - role-based-reading-paths
 status: living
 owner: documentation-architect
-version: "0.8.0"
+version: "0.7.3.dev0"
 last_verified: 2026-08-26
 read_when:
   - selecting-a-documentation-bundle

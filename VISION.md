@@ -9,7 +9,7 @@ canonical_for:
   - long-term-direction
 status: locked
 owner: principal-systems-architect
-version: "0.8.0"
+version: "0.7.3.dev0"
 last_verified: 2026-08-26
 locked_by: ADR-0095+ADR-0096+ADR-0097+ADR-0100+ADR-0101+ADR-0102
 read_when:

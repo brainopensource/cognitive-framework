@@ -13,7 +13,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Higgs Release (v0.7.0)
+# AETHER — Higgs Development (`0.7.3.dev0`)
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 
@@ -38,13 +38,13 @@ observe → propose → authorize → effect → receipt → evaluate
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
 | **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0102`](docs/02_decisions/0102-convergence-and-baseline-succession.md) |
 | **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **Convergence C1 active:** M-4/M-5a/M-5b evidence remains open; M-6 runtime repair and successor-baseline forensics are the only active packages. |
+| **Current status** | [`sprint_active.md`](docs/03_execution/sprint_active.md) is the sole current-state source; status is not duplicated here. |
 | **Roadmap** | M-4 → M-5a event-derived agent → {M-5b generality ∥ M-6 delegation} → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Active_Sprint-C1_Convergence-orange.svg)](docs/03_execution/sprint_active.md)
+[![Active board](https://img.shields.io/badge/Status-sprint__active-orange.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. What exists today vs the locked target
 
@@ -164,22 +164,9 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md). Authorization:
 [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 
-```text
-M-4  useful coding product + scientific trajectory capture      <- evidence open
-M-5a agent as event-derived projection + accepted successor baseline
-M-5b fresh Formal Pack falsifier against CONVERGENCE-BASE-v1
-M-6  canonical recursive delegation repair                       <- ACTIVE
-M-6.5 adaptive strategy / metacognition as policy-reducer-plugin
-M-7  declarative topologies + justified concurrency
-M-8  memory, retrieval, skills, learning
-M-9/M-10 compatibility horizon only until M-8 acceptance
-```
-
-**Blocking is technical, never ceremonial.** Work is blocked only by a named unfinished interface,
-schema, invariant, primitive, or runtime contract. M-5a depends on M-4's telemetry vocabulary; M-5b on
-the M-5a baseline re-tag; M-6 on a `SpawnAdapter` and the attenuation algebra reaching the production
-import path; M-7 on the M7-01 measurement result. Everything else runs in parallel: model and tool
-adapters, UI/CLI, indexing behind `IndexPort`, context management, the coding pack, tooling, and docs.
+Stable dependency order is `C0 -> {M-4, M-5a}`, `M-5a -> M-5b`, `M-4 -> M-6`,
+`M-6 -> {M-6.5, M-7}`, and `{M-6.5, M-7} -> M-8`. Exact current state and permitted parallel work
+belong only to the active board.
 
 `M7-01` remains a named parallel measurement lane (`ADR-0092`) and ends in an explicit decision to
 implement, simplify, or cancel advanced scheduling.

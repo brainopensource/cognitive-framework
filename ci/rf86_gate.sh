@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# RF-86 — the M-5 generality gate. Run in CI on every commit.
-# Fails if Pack #2 work mutated the frozen substrate.
+# RF-86 — the M-5 generality gate. Run after the ADR-0102 successor exists.
+# Fails closed if the baseline is missing or Pack #2 mutates the frozen substrate.
 #
 # Source: docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/aether-m4-m8/m456/rf86_gate.sh
 # Deltas from the bundle copy (both strengthen the gate; neither weakens an assertion):
@@ -11,7 +11,7 @@
 #      invoked. Printing a raw count against the *logical* 1438 ceiling reads as a
 #      breach (1737 vs 1438) when the ceiling is not in fact exceeded.
 set -uo pipefail
-BASE="${1:-M-5A-BASE-v2}"
+BASE="${1:-CONVERGENCE-BASE-v1}"
 FROZEN=(domain kernel ports runtime agency/episode)
 
 if ! git rev-parse --verify --quiet "${BASE}^{commit}" >/dev/null; then

@@ -15,6 +15,7 @@ import threading
 import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from importlib.metadata import PackageNotFoundError, version as distribution_version
 from pathlib import Path
 from typing import Any, Mapping
 from urllib.parse import parse_qs, urlparse
@@ -22,6 +23,14 @@ from urllib.parse import parse_qs, urlparse
 from ...domain.primitives.primitives import uuidv7
 from ..governance.approvals import OperatorSigner
 from .service import RuntimeService, _utc_now
+
+
+def _package_version() -> str:
+    """Read the installed version whose source is ``pyproject.toml``."""
+    try:
+        return distribution_version("vanguard-runtime")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 class StudioGatewayHandler(BaseHTTPRequestHandler):
@@ -96,7 +105,7 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         response = {
             "status": "ok",
             "service": "vanguard-studio-gateway",
-            "version": "0.7.0",
+            "version": _package_version(),
             "activeRuns": len(self.server.service._active_runs),
             "timestamp": _utc_now(),
         }

@@ -19,7 +19,9 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER Normative Specification — Higgs Release (v0.7.0)
+# AETHER Normative Specification — Higgs Development Line
+
+Document revision is `0.8.0`; software version comes from `pyproject.toml` (`0.7.3.dev0`). They are independent.
 
 ## What AETHER is
 
@@ -189,10 +191,10 @@ historical meaning; `ADR-0095` §4 is the authoritative translation table.
 | M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — complete |
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal — complete |
 | M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence — complete |
-| M-4 | v0.7.x | RF-95 useful real-model coding proof plus scientific capture; package ready, immutable bundle and independent acceptance open |
-| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance and accepted successor baseline; mechanism ready, baseline gate open |
-| M-5b | v0.7.x | RF-86/RF-98 fresh non-contaminated Formal Pack witness against `CONVERGENCE-BASE-v1`; existing SAT path is regression evidence |
-| M-6 | v0.8.0 | RF-55…RF-59 canonical recursive child runtime with durable identity and conserved attenuated budgets; integration/evidence open |
+| M-4 | v0.7.x | RF-95 useful real-model coding proof, scientific capture, immutable bundle, and independent acceptance |
+| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance, and accepted successor baseline |
+| M-5b | v0.7.x | RF-86/RF-98 fresh non-contaminated Formal Pack witness against `CONVERGENCE-BASE-v1` |
+| M-6 | v0.8.0 | RF-55…RF-59 canonical recursive child runtime with durable identity, conserved attenuated budgets, recovery evidence, and review |
 | M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
 | M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
 | M-8 | v0.9.x | Verified durable memory and composition learning with held-out evaluation, atomic promotion, provenance, and executed rollback |

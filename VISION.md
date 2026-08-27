@@ -24,6 +24,9 @@ superseded_by: null
 
 # AETHER — Vision (Law Zero, v0.7+)
 
+The frontmatter `version` is this constitutional document's revision, not the software package
+version. The package version is owned exclusively by `pyproject.toml`.
+
 ## Authority of this document
 
 This is **Law Zero**: the binding architectural and product authority for v0.7+, locked by

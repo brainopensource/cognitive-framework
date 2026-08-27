@@ -114,9 +114,9 @@ graph. Branch/join/readiness semantics are target architecture (M-7), not curren
 ## 3. The A-B-C-D Foundation
 
 - **`A` — Authority (`AS_BUILT`)**: S0–S12 mediation, selectors, attenuation, typed leases, and fail-closed policy ([`kernel/dispatch.py`](../../vanguard/packages/kernel/dispatch.py)).
-- **`B` — Bundle (`MIXED`, M-3C ACTIVE)**: `/2` and registry contracts exist, while the public runtime still requires convergence to `FrozenComposition -> ActivationPlan -> RunPlan`.
-- **`C` — Corpus (`AS_BUILT CORE`, M-4 BINDING PENDING)**: RF-23/RF-25 are retained green; M-3C must derive the nine-row evidence bundle from canonical sources.
-- **`D` — Digests (`AS_BUILT CORE`, CROSS-BINDING PENDING)**: $D_H \ne D_R \ne D_X$ remains law; activation and foundation evidence must preserve their subjects.
+- **`B` — Bundle (`AS_BUILT`)**: `/2`, registry contracts, and the sole `FrozenComposition -> ActivationPlan -> RunPlan` public path are integrated; later milestone extensions must reuse it.
+- **`C` — Corpus (`AS_BUILT FOUNDATION`)**: M-3C foundation evidence is accepted; M-4's missing RF-95 release bundle is a separate current evidence gate.
+- **`D` — Digests (`AS_BUILT`)**: $D_H \ne D_R \ne D_X$ is implemented and remains binding for every later evidence package.
 
 ---
 

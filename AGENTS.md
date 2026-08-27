@@ -127,9 +127,8 @@ Execution sequence:
 2. **Wave 1 (COMPLETE - GREEN)**: Fail-Closed Trust Spine (bound signed verdicts, single emitter, typed budgets, `mhf.trajectory/1`).
 3. **Wave 2 (COMPLETE - GREEN)**: RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation close M-2.
 4. **M-3C / W-3D (COMPLETE)**: canonical composition, activation, durability, evidence, profiles, and product bootstrap are closed.
-5. **C1 (ACTIVE)**: ADR-0102 resets unsupported closure claims. Dev A owns M-4/M-6 release-path and recursive-runtime repair; Dev B owns baseline forensics and successor generality preparation.
-6. **M-6.5–M-8 (STAGED)**: mechanisms may exist without acceptance. Each retains its named integration, experiment, independent-review, and receipt-backed gate under ADR-0101.
-7. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
+5. **M-4–M-8**: current state, ownership, and authorization live only in the active execution board; mechanism presence never implies acceptance.
+6. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
 
 Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.

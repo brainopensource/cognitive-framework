@@ -30,28 +30,22 @@ Mechanism and acceptance are deliberately separate. Packages use:
 readiness; `EVIDENCE_READY` means the immutable bundle verifies; only `ACCEPTED` closes the gate.
 Tests, merge state, prose, or waiver alone never close a milestone.
 
-## Truthful status at `15fbb7514ec3d8030da5259d2291acdf37c8686d`
+## Status ownership
 
-| Milestone | Mechanism | Runtime integration | Evidence / review | State | Named blocker |
-|---|---|---|---|---|---|
-| M-0–M-3C / W-3D | Implemented | Integrated | Historical accepted gates | **ACCEPTED** | — |
-| M-4 | Evidence runtime, `/2` trajectory, RF-100, product runner implemented | Canonical coding path present | Live-run claim exists; immutable bundle and independent receipt absent | **PACKAGE_READY** | recover or execute one preregistered RF-95 bundle; independent review |
-| M-5a | Event `/2`, AgentView, checkpoints, RF-96/97/99/100 implemented | Integrated | Local tag is contaminated and not remote; no accepted successor baseline | **PACKAGE_READY** | ADR-0102 successor baseline gates |
-| M-5b | SAT pack, exterior daemon evaluator, signed pass/fail test vectors implemented | Material SAT path demonstrated | historical control invalid; RF-86 currently fails | **PACKAGE_READY** | `CONVERGENCE-BASE-v1`, fresh graph-coloring treatment, review |
-| M-6 | Spawn effect, lineage events, result contract and recovery tests implemented | Product binding contains synthetic-success fallback; canonical recursive child path absent | no depth>=3 release bundle/review | **IN_PROGRESS** | WP-A1 implementation and evidence |
-| M-6.5 | controller, guards, projection, paired statistics implemented | optional between-turn seam present | deterministic instrument is invalid/degenerate | **PACKAGE_READY** | stochastic attributable instrument and blocked tasks |
-| M-7 | topology schema/parser/lowering, analyzer, sequential scheduler implemented | run-plan extension not consumed by public runtime | no three-topology runtime bundle or M7-01 decision evidence | **IN_PROGRESS** | runtime integration, monotonic telemetry, M7-01, ADR-0099 |
-| M-8 | skill evaluation/promotion prototypes and memory contract fake implemented | no verified durable memory or durable CAS registry | no sealed held-out lift or real rollback | **NOT_STARTED** | M-7 disposition and WP-A4/WP-B4 contracts |
-| M-9/M-10 | compatibility horizon only | none authorized | none | **NOT_STARTED** | M-8 acceptance |
+Current mechanism, integration, package, evidence, review, and blocker state lives in the single
+machine-checked table in [`sprint_active.md`](sprint_active.md). This file owns stable gates and must
+not duplicate that volatile snapshot.
 
 ## Dependency and merge order
 
 ```mermaid
 flowchart TD
-  C1["C1 truth restoration + M-6 repair"] --> B0["CONVERGENCE-BASE-v1 gate"]
-  B0 --> M5B["M-5b fresh falsifier"]
-  C1 --> M65["M-6.5 valid study"]
-  C1 --> M7["M-7 runtime integration"]
+  C0["C0 authority + clean CI"] --> M4["M-4 accepted evidence"]
+  C0 --> M5A["M-5a baseline disposition"]
+  M5A --> M5B["M-5b fresh falsifier"]
+  M4 --> M6["M-6 real recursion"]
+  M6 --> M65["M-6.5 valid study"]
+  M6 --> M7["M-7 runtime integration"]
   M65 --> M8["M-8 durable memory + governed learning"]
   M7 --> M8
 ```

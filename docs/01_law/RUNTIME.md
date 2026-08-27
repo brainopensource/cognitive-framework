@@ -780,7 +780,7 @@ does not authorize work.
 | Milestone | Content | Gate (proof command) |
 |---|---|---|
 | **M-2 / v0.6.1** | Truthful per-turn trajectories and fresh-process SQLite-WAL continuation | RF-23 and RF-25 green; retained convergence gates green |
-| **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained RF-28–RF-45 evidence; operational closure reopened |
+| **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained accepted RF-28–RF-45 evidence and compatibility anchors |
 | **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
 | **M-4 / v0.7.0** | One useful real coding-agent run with durable replay | RF-95; live model, mediated observe/edit/verify, diff, WAL, trajectory, fresh-process reconstruction |
 | **M-5a/M-5b / v0.7.x** | Event-derived agent then fresh Formal Pack witness | accepted successor baseline; RF-86/RF-98 against `CONVERGENCE-BASE-v1`; trajectory/evidence parity |
@@ -795,9 +795,9 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current gate:** M-3C and W-3D are accepted. Convergence C1 restores M-4 evidence, replaces the
-invalid experimental control, and repairs canonical M-6 recursion. Later work is staged in the
-canonical execution boards. RF-85 continues independently as optional hermetic assurance.
+Current state and authorization live only in
+[`sprint_active.md`](../03_execution/sprint_active.md). RF-85 continues independently as optional
+hermetic assurance and does not alter milestone acceptance.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 

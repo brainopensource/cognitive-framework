@@ -46,6 +46,7 @@ superseded_by: null
 ### Trusted Computing Base (TCB)
 The minimal, domain-blind security core (`vanguard/packages/kernel/`) that enforces capability attenuation, action classification, and budget algebra. Strictly budgeted at $\le 1438$ logical lines of code.
 
-### 6D Economic Resource Tensor
-$$\mathbf{R} = \{\text{usd\_micros}, \text{tokens}, \text{bytes}, \text{charged\_millis}, \text{depth}, \text{turns}\}$$
-Additive dimensions (USD, tokens, bytes, millis) are strictly conserved; structural dimensions (depth, turns) form non-additive ceilings.
+### Resource Budget and Structural Ceilings
+$$\mathbf{C} = \{\text{usd\_micros}, \text{millis}, \text{tokens}, \text{bytes}\}$$
+The four additive dimensions are conserved componentwise. `depth` and `turns` are separate
+non-additive ceilings and cannot be exchanged for cost.

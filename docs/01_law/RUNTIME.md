@@ -322,11 +322,10 @@ Domains MAY define their own projections. The canonical **ledger reducer remains
 domain-specific view is a projection over it, never a second reducer of record and never a second
 source of truth.
 
-> **M-5a migration status.** The semantic event roster and pure `AgentView` projection are now
-> implemented, while runtime checkpoint integration and the complete RF-96/RF-97/RF-99 gate remain
-> in progress. This is a documented migration, not a weakening of the rule above. The historical
-> `M-5-BASE` tag is immutable; the migrated substrate is tagged once as `M-5A-BASE-v2` after all
-> M-5a gates pass.
+> **M-5a migration status.** The semantic event roster, pure `AgentView`, checkpoints, and
+> RF-96/RF-97/RF-99 mechanisms are implemented. Acceptance remains open because the historical
+> `M-5A-BASE-v2` ref is contaminated and unpublished. ADR-0102 requires a reviewed annotated
+> `CONVERGENCE-BASE-v1` with a signed manifest; no historical event or tag is rewritten.
 
 ### 1.6 Physical append order and the logical causal graph
 
@@ -784,10 +783,11 @@ does not authorize work.
 | **M-3 / v0.6.2** | Named graph/lifecycle contracts and atomic `layer0/` deletion | retained RF-28–RF-45 evidence; operational closure reopened |
 | **M-3C / v0.6.2** | One canonical composition/activation path, two domain probes, durable/source-derived evidence preparation | RF-78–RF-84 and G0–G4 |
 | **M-4 / v0.7.0** | One useful real coding-agent run with durable replay | RF-95; live model, mediated observe/edit/verify, diff, WAL, trajectory, fresh-process reconstruction |
-| **M-5 / v0.7.0** | Formal Pack #2 and exact T0 witness memo | RF-86 and RF-52–RF-53; unchanged substrate; trajectory/evidence parity |
+| **M-5a/M-5b / v0.7.x** | Event-derived agent then fresh Formal Pack witness | accepted successor baseline; RF-86/RF-98 against `CONVERGENCE-BASE-v1`; trajectory/evidence parity |
 | **M-6 / v0.8.0** | Generic-dispatch capability-mediated spawn | RF-55–RF-59; attenuated lineage/budget/recovery |
-| **M-7–M-8** | Measured concurrency then declarative topology support | RF-46–RF-48 and RF-65–RF-66; sequential until governance lift |
-| **M-9+** | Exterior post-v1 research | no implementation authority from this law |
+| **M-7** | Three topologies through one runtime and explicit scheduler disposition | M7-01 plus ADR-0099; sequential until governance lift |
+| **M-8** | Verified durable memory and governed composition promotion | ADR-0100; held-out lift, CAS promotion, executed rollback, RF-98 |
+| **M-9/M-10** | Exterior post-MVP research | compatibility only; no implementation authority from this law |
 
 **Standing CI gates for the code programme (Wave 0+, `ADR-0073`, `ADR-0074`):** production
 kernel/runtime/agency/adapters suites as subject of record; `replay-parity` against disk (not
@@ -795,8 +795,9 @@ same-list fold); negative tests for forged verdict, empty ceiling, writer forger
 `generate_types.py --check`; duplication detector; `check_boundaries`; secret scan; JCS vectors.
 Lexical `E-COV` MAY remain as a weak structural lint; it MUST NOT be treated as I-2.
 
-**Current gate:** M-3C and W-3D are closed. M-4 is the active RF-95 product proof; M-5 remains closed
-until RF-95 is satisfied. RF-85 continues independently as optional hermetic assurance.
+**Current gate:** M-3C and W-3D are accepted. Convergence C1 restores M-4 evidence, replaces the
+invalid experimental control, and repairs canonical M-6 recursion. Later work is staged in the
+canonical execution boards. RF-85 continues independently as optional hermetic assurance.
 
 ### 8.1 As-built OPTIMIZATIONs this specification amends the old text to match (cite each)
 

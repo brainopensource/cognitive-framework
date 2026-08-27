@@ -7,7 +7,7 @@ canonical_for:
   - component-graph-static-law
 status: living
 owner: principal-systems-architect
-version: "0.7.1"
+version: "0.8.0"
 last_verified: 2026-08-25
 read_when:
   - changing-manifests-or-plugins
@@ -105,7 +105,9 @@ authority fail before activation.
 re-tags the substrate baseline. **M-5b** adds Math/Formal Deductive Verification only as pack,
 adapter, exterior checker, and tests; its RF-86 proof interval MUST leave
 `vanguard/packages/{domain,ports,kernel,agency/episode,runtime}` semantically unchanged **relative to
-the post-M-5a baseline**. A discovered missing primitive fails the generality proof and returns an
+the accepted successor baseline**. ADR-0102 records the historical `M-5A-BASE-v2` ref as
+contaminated/unpublished; the new treatment compares only to reviewed `CONVERGENCE-BASE-v1`. A
+discovered missing primitive fails the generality proof and returns an
 architectural finding to governance; RF-86 is never weakened to accommodate a domain.
 
 At **M-6**, `agent.spawn` is an ordinary privileged effect addressed by target `D_H`. It does not

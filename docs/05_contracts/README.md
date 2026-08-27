@@ -13,8 +13,8 @@ applies_to:
   - v0.6.1
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.6.1"
-last_verified: 2026-08-23
+version: "0.8.0"
+last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
@@ -39,7 +39,7 @@ matrix when a schema already owns the exact shape.
 | Contract | Schema `$id` | Producer / Writer | Key Invariants & Guarantees |
 |---|---|---|---|
 | [`events.md`](events.md) | `mhf.event/1` | `runtime/ledger_emitter.py` | `AS_BUILT`: schema catalog plus role-owned emission |
-| [`trajectories.md`](trajectories.md) | `mhf.trajectory/1` | `runtime/trajectory.py` | `ACTIVE_REPAIR`: schema exists; RF-23 content/accounting proof is red |
-| [`manifests.md`](manifests.md) | `mhf.manifest/2` | M-3 compose target | `IMPLEMENTED_PENDING_M3_GATE`: Named Component Graph |
+| [`trajectories.md`](trajectories.md) | `mhf.trajectory/1|2` | `runtime/trajectory.py` | `/1` frozen; `/2` writer and dual reader implemented; M-4 release evidence open |
+| [`manifests.md`](manifests.md) | `mhf.manifest/2` | canonical compose path | `AS_BUILT`: Named Component Graph |
 | [`verdicts.md`](verdicts.md) | `mhf.spi_payloads/1` | `adapters/evaluators/daemon.py` | Ed25519 cryptographic signature over canonical JCS bytes; request/nonce bound |
-| [`selectors_and_budgets.md`](selectors_and_budgets.md) | Stdlib Python | `domain/selectors/` | Monotonic capability containment algebra; typed 6D budget dimensions |
+| [`selectors_and_budgets.md`](selectors_and_budgets.md) | Stdlib Python | `domain/selectors/` | Monotonic selector algebra; four additive costs plus depth/turn ceilings |

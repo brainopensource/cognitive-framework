@@ -15,20 +15,20 @@ applies_to:
   - v0.6.2
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.7.1"
-last_verified: 2026-08-23
+version: "0.8.0"
+last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Trajectory Contract (`mhf.trajectory/1`)
+# Trajectory Contract (`mhf.trajectory/1` and `/2`)
 
 > **Schema:** [`schemas/mhf/trajectory.schema.json`](../../schemas/mhf/trajectory.schema.json)  
 > **Status:** Schema and assembler are implemented; RF-23 is green on the canonical packages path.
 
-`mhf.trajectory/1` is frozen. ADR-0096/0097 authorize Dev B to implement
-`mhf.trajectory/2`; readers dual-read `/1|/2` and new production writers single-write `/2`.
+`mhf.trajectory/1` is frozen. `mhf.trajectory/2` is implemented; readers dual-read `/1|/2` and
+new production writers single-write `/2`.
 Historical `/1` bytes and identity are never rewritten.
 
 ## Frozen M-4 `/2` extension contract

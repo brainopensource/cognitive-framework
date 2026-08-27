@@ -7,8 +7,8 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: engineering-director
-version: "0.7.1"
-last_verified: 2026-08-25
+version: "0.8.0"
+last_verified: 2026-08-26
 read_when:
   - resolving-architectural-decisions
   - selecting-an-implementation-bundle
@@ -37,7 +37,8 @@ superseded_by: null
 - 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
 - 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
 - 🌟 [Vision as Law Zero (`0095`)](#vision-as-law-zero-0095) — **`VISION.md` is the constitutional authority for v0.7+**; roadmap reconciled; milestone identifier mapping
-- 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0098`)](#constitutional-evidence-and-two-lane-activation-00960098) — proof-honest evidence, strict schema evolution, Phase-0 closure, M-4 Dev A/Dev B authorization, and the proposed event substrate `/2`
+- 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0098`)](#constitutional-evidence-and-two-lane-activation-00960098) — proof-honest evidence, strict schema evolution, Phase-0 closure, and event substrate `/2`
+- 🧭 [M-8 Contract and 2026 Convergence (`0100`–`0102`)](#m-8-contract-and-2026-convergence-01000102) — durable memory/promotion, receipt-backed acceptance, and baseline succession
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -156,6 +157,19 @@ the narrower historical wordings in ADR-0080 and ADR-0090 without weakening eith
 | `0096` | [`0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md`](0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md) | **Evidence and falsifiability correction:** admissible counter-evidence, causal-history invariants, proof-honest reproducibility, strict `/2` schema evolution, evidence failure/degradation, privacy/capture separation, transitive TCB measurement, and RF-96…RF-100. | accepted v0.4.0 | 2026-08-25 |
 | `0097` | [`0097-phase0-ratification-and-two-lane-activation.md`](0097-phase0-ratification-and-two-lane-activation.md) | **Execution activation:** ratifies the corrected package; authorizes two M-4 Senior lanes; records Linux RF-38…RF-45 qualification; permits M-5b/M-6 parallel work after M-5a; preserves historical `M-5-BASE` and allocates `M-5A-BASE-v2`. | accepted v0.2.0 | 2026-08-25 |
 | `0098` | [`0098-event-substrate-v2-and-semantic-kind-roster.md`](0098-event-substrate-v2-and-semantic-kind-roster.md) | **Event substrate `/2`:** adds the four typed authority fields; folds the eight live legacy kinds into the generated schema and deletes `_V4_ONLY_KINDS`; freezes the deprecated-kind register and exactly five new semantic kinds; keeps goal content out of the ledger; sets the `M-5A-BASE-v2` creation criteria. | accepted v1.0.0 | 2026-08-26 |
+
+---
+
+## M-8 Contract and 2026 Convergence (`0100`–`0102`)
+
+`0099` remains reserved for the scheduler disposition and has no accepted ADR until M7-01 evidence
+exists. Numbering is append-only; reserving it does not authorize concurrency.
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0100` | [`0100-memory-learning-and-composition-lifecycle.md`](0100-memory-learning-and-composition-lifecycle.md) | **M-8 contract:** verified memory authorization, durable category isolation, retrieval provenance, legal hold/GC, immutable compositions, separated authorities, CAS promotion and real rollback. | accepted v1.0.0 | 2026-08-26 |
+| `0101` | [`0101-receipt-backed-evidence-and-acceptance.md`](0101-receipt-backed-evidence-and-acceptance.md) | **Evidence method:** separates facts/artifacts/projections/telemetry/attestations; monotonic evidence and package states; independent receipt-backed acceptance; valid negative-result closure. | accepted v1.0.0 | 2026-08-26 |
+| `0102` | [`0102-convergence-and-baseline-succession.md`](0102-convergence-and-baseline-succession.md) | **Convergence:** records `M-5A-BASE-v2` as contaminated/unpublished, resets unsupported claims, defines `CONVERGENCE-BASE-v1`, and retires parallel Leadership planning. | accepted v1.0.0 | 2026-08-26 |
 
 ---
 

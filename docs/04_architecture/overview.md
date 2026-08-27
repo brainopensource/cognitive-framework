@@ -7,8 +7,8 @@ canonical_for:
   - repository-inventory
 status: living
 owner: senior-principal-systems-engineer
-version: "0.7.0"
-last_verified: 2026-08-25
+version: "0.8.0"
+last_verified: 2026-08-26
 read_when:
   - orienting-in-the-system-architecture
 do_not_read_when:
@@ -57,7 +57,8 @@ Kernel     decides WHETHER authorized  (generic invariants)
 Ledger     records WHAT HAPPENED       (append-only truth)
 ```
 
-These never merge. Topology and scheduler do not exist yet — see the maturity table below.
+These never merge. Topology and scheduler value mechanisms exist, but public runtime integration and
+the ADR-0099 scheduling decision remain open.
 
 ### Composition vs trajectory
 
@@ -77,10 +78,11 @@ graph. Branch/join/readiness semantics are target architecture (M-7), not curren
 | Area | Today | Target |
 |---|---|---|
 | Ledger, cold replay, composition, S0–S12, profiles | implemented | unchanged |
-| Coding product + scientific trajectory capture | M-4 in progress | complete loop with context/compaction/cache provenance |
-| Agent state as projection (`AgentView`) | partly inside `Episode`/`HarnessSession` | M-5a |
-| Runtime domain-blindness | gaps in `entrypoint.py`, `scoring.py`, `autonomous_grant.py` | M-5a migration |
-| Second domain, delegation, meta-control, topology, memory | not implemented | M-5b → M-8 |
+| Coding product + scientific trajectory capture | mechanisms present; RF-95 bundle/review absent | independently accepted M-4 proof |
+| Agent state as projection (`AgentView`) | implemented; successor baseline gate open | accepted M-5a control |
+| Delegation | partial; synthetic fallback, durable identity and budget binding gaps | canonical recursive M-6 runtime |
+| Meta-control/topology | package mechanisms present; experiments/integration open | valid M-6.5 result and M-7 decision |
+| Memory/learning | in-memory prototypes only | ADR-0100 durable authorized M-8 MVP |
 
 ---
 

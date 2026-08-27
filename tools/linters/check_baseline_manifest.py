@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Verify the local Sprint 0 integrity manifest."""
+"""Fail closed until the accepted successor baseline manifest is available.
+
+The legacy Sprint-0 manifest is not an authorized M-5 control. WP-B1 replaces
+this compatibility checker with the full ``aether.baseline/1`` verifier.
+"""
 
 from __future__ import annotations
 
@@ -15,10 +19,10 @@ for _p in (_COMMON, _TOOLS):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from repo_paths import baseline_manifest, repo_root, stale_path_matches
+from repo_paths import repo_root, stale_path_matches
 
 
-MANIFEST = baseline_manifest()
+MANIFEST = repo_root() / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
 
 
 def main() -> int:
@@ -33,11 +37,12 @@ def main() -> int:
     try:
         data = json.loads(MANIFEST.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"BASELINE FAIL: cannot load {MANIFEST}: {exc}")
+        print(f"BASELINE FAIL: accepted successor manifest is absent or invalid: {MANIFEST}: {exc}")
+        print("BASELINE FAIL: WP-B1 must produce and independently verify aether.baseline/1")
         return 1
     failures: list[str] = []
     files = data.get("files")
-    if data.get("schema_version") != "gts.sprint0-baseline-manifest.v1" or not isinstance(files, dict) or not files:
+    if data.get("schema_version") != "aether.baseline/1" or not isinstance(files, dict) or not files:
         print("BASELINE FAIL: malformed manifest")
         return 1
     for name in files:
@@ -55,7 +60,7 @@ def main() -> int:
         print(f"BASELINE FAIL: {failure}")
     if failures:
         return 1
-    print(f"BASELINE PASS: {len(files)} local artifacts match APPROVAL-0002 manifest")
+    print(f"BASELINE PASS: {len(files)} local artifacts match CONVERGENCE-BASE-v1 manifest")
     external_open = data.get("git_tag_status") != "created" or data.get("branch_protection_status") != "verified"
     if external_open:
         print("BASELINE EXTERNAL GATES OPEN: Git tag and/or branch protection are not established")

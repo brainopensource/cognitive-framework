@@ -140,7 +140,7 @@
       <rect x="0" y="195" width="290" height="80" rx="6" fill="#21262d" stroke="#30363d"/>
       <text x="15" y="215" fill="#bc8cff" font-size="11" font-weight="700">S6 GRANT · S7 RESERVE</text>
       <text x="15" y="233" fill="#c9d1d9" font-size="10">• Grant: Single-use, Descriptor-bound Lease</text>
-      <text x="15" y="249" fill="#c9d1d9" font-size="10">• 6D Tensor Reserve: (USD, ms, tokens, bytes)</text>
+      <text x="15" y="249" fill="#c9d1d9" font-size="10">• Additive Reserve: (USD, ms, tokens, bytes)</text>
       <text x="15" y="265" fill="#8b949e" font-size="9">Fail-Closed: Exhausted budget rejects immediately</text>
 
       <!-- Guarded Box: S8, S8a, S9, S10 -->

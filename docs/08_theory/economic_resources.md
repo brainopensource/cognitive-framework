@@ -14,14 +14,14 @@ applies_to:
   - v0.6.1
 implementation_status: AS_BUILT
 owner: cognitive-systems-researcher
-version: "0.6.1"
-last_verified: 2026-08-21
+version: "0.8.0"
+last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# The 6D Economic Resource Tensor
+# Conserved Resource Vector and Structural Ceilings
 
 > **Status:** `AS_BUILT` · Governed by ADR-0074.
 
@@ -29,15 +29,16 @@ superseded_by: null
 
 ## Tensor Structure
 
-Resource allocation across recursive child agent trees is modeled as a 6-dimensional tensor:
+Resource allocation across recursive child lineages is modeled as a four-dimensional additive vector
+plus two independent structural ceilings:
 
-$$\mathbf{R} = \begin{pmatrix} u \\ t \\ b \\ m \\ d \\ k \end{pmatrix} = \begin{pmatrix} \text{usd\_micros} \\ \text{tokens} \\ \text{bytes} \\ \text{charged\_millis} \\ \text{depth} \\ \text{turns} \end{pmatrix}$$
+$$\mathbf{C} = \begin{pmatrix} \text{usd\_micros} \\ \text{millis} \\ \text{tokens} \\ \text{bytes} \end{pmatrix},\qquad depth,turns\in\mathbb{N}_0$$
 
 ### Conservation Laws
 For any root task $P$ spawning subagent tasks $\{C_1, C_2, \dots, C_n\}$:
 
 1. **Additive Invariant**:
-   $$\sum_{i=1}^n \mathbf{R}_{\text{consumed}}^{(C_i)} + \mathbf{R}_{\text{remaining}}^{(P)} = \mathbf{R}_{\text{allocated}}^{(P)} \quad \forall \text{ dimensions } \{u, t, b, m\}$$
+   $$\sum_{i=1}^n \mathbf{C}_{\text{consumed}}^{(C_i)} + \mathbf{C}_{\text{remaining}}^{(P)} = \mathbf{C}_{\text{allocated}}^{(P)}$$
 
 2. **Structural Depth Bound**:
    $$d(C_i) = d(P) + 1 \le d_{\max}$$

@@ -7,7 +7,7 @@ canonical_for:
   - isolation-and-tcb-law
 status: living
 owner: principal-systems-architect
-version: "0.7.0"
+version: "0.8.0"
 last_verified: 2026-08-25
 read_when:
   - changing-capabilities
@@ -53,3 +53,7 @@ here.
 - Unknown capability relations, unbounded child budgets, unsigned approvals, and unverifiable
   evidence fail closed.
 - Adapters and plugins consume ports and wire contracts; they never import the kernel or agency.
+- Persistent memory is an authority boundary from M-8 onward. Every read, write, invalidation,
+  ranking candidate, and artifact dereference MUST verify action, canonical selector, tenant,
+  project, validity interval, and revocation at use time. Authorization filters precede ranking;
+  denial MUST NOT disclose record existence. Legal hold dominates garbage collection (ADR-0100).

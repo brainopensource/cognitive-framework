@@ -12,6 +12,10 @@ jobs:
   vanguard-living-gates:
     name: Living Gates — Packages Lattice, Boundaries, TCB, Links, Secrets
     runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ""
+      DEEPSEEK_API_KEY: ""
+      OPENAI_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,6 +25,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Hermetic provider-key preflight
+        run: python3 tools/linters/check_test_hygiene.py
 
       - name: Install declared Python dependencies
         run: python3 -m pip install -e '.[dev]'
@@ -98,6 +105,9 @@ jobs:
       - name: Stale documentation paths check
         run: python3 tools/linters/check_stale_paths.py
 
+      - name: Canonical execution truth check
+        run: python3 tools/linters/check_execution_truth.py
+
       - name: Falsifier identifier allocation check (RF-72)
         run: python3 tools/linters/check_falsifier_ids.py
 
@@ -105,8 +115,6 @@ jobs:
         run: python3 tools/linters/check_markdown_links.py
 
       - name: Secret scan check
-        env:
-          OPENROUTER_API_KEY: ""
         run: python3 tools/linters/scan_secrets.py
 
       - name: RF-86 frozen substrate gate (M-5 generality)

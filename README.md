@@ -7,8 +7,8 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.7.0"
-last_verified: 2026-08-24
+version: "0.8.0"
+last_verified: 2026-08-26
 supersedes: []
 superseded_by: null
 ---
@@ -36,15 +36,15 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0097`](docs/02_decisions/0097-phase0-ratification-and-two-lane-activation.md) |
-| **Shipped package** | `vanguard-runtime` `0.7.0` (`pyproject.toml`); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Status** | **M-4 Dev A/Dev B active:** evidence Runtime and scientific contracts may start; RF-95 remains serial-last. |
+| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0102`](docs/02_decisions/0102-convergence-and-baseline-succession.md) |
+| **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Status** | **Convergence C1 active:** M-4/M-5a/M-5b evidence remains open; M-6 runtime repair and successor-baseline forensics are the only active packages. |
 | **Roadmap** | M-4 → M-5a event-derived agent → {M-5b generality ∥ M-6 delegation} → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Approved](https://img.shields.io/badge/Active_Sprint-M--4_RF--95-orange.svg)](docs/03_execution/sprint_active.md)
+[![Approved](https://img.shields.io/badge/Active_Sprint-C1_Convergence-orange.svg)](docs/03_execution/sprint_active.md)
 
 ## 1. What exists today vs the locked target
 
@@ -57,17 +57,17 @@ This section is deliberately honest about the gap. The target below is binding a
 | Canonical composition → activation → run | **Works.** One authority (RF-78–RF-84) | unchanged |
 | Capability-mediated effects, typed budgets | **Works.** S0–S12, monotonic attenuation, TCB ≤ 1438 LOC | unchanged |
 | Execution profiles in `D_R` | **Works.** `product`/`local`/`sandboxed`/`hermetic`, fail-closed | + retention/reproducibility axis (M-4) |
-| Coding agent product (`vg code`, resume) | **In progress** (M-4) | useful end-to-end loop |
-| Scientific trajectory capture | **Partial.** Invocations, costs, identities, receipts, outcome | + context/compaction/cache/strategy provenance (M-4) |
-| Agent state as projection | **Not yet.** Part of continuation state lives in `Episode`/`HarnessSession` objects | `AgentView` projection (M-5a) |
-| Second domain (formal pack) | **Not yet** | generality falsifier (M-5b) |
-| `agent.spawn` / recursive delegation | **Inert.** `M6_SPAWN_ACTIVE = False`; no `SpawnAdapter` | nested execution lineages (M-6) |
-| Metacognition / adaptive strategy | **Does not exist** | policy/reducer/plugin (M-6.5) |
-| Topologies, scheduler, concurrency | **Does not exist.** Sequential turn loop (I-11) | versioned topology data + justified concurrency (M-7) |
-| Memory, retrieval, skills, learning | **Does not exist** | projections and plugins (M-8) |
+| Coding agent product (`vg code`, resume) | Mechanism present; RF-95 bundle/review absent | accepted useful end-to-end proof (M-4) |
+| Scientific trajectory capture | `/2`, model I/O and provenance mechanisms present | independently accepted release evidence |
+| Agent state as projection | `AgentView` and checkpoints implemented | accepted successor baseline (M-5a) |
+| Second domain (formal pack) | SAT material path demonstrated; historical control invalid | fresh graph-coloring falsifier after successor baseline (M-5b) |
+| `agent.spawn` / recursive delegation | Partial; synthetic-success fallback and recovery/identity/budget gaps | canonical nested execution lineages (M-6) |
+| Metacognition / adaptive strategy | Mechanisms package-ready; instrument degenerate | valid positive or negative paired study (M-6.5) |
+| Topologies, scheduler, concurrency | Parser/lowering/analyzer present; runtime integration absent; sequential I-11 | three topologies plus ADR-0099 disposition (M-7) |
+| Memory, retrieval, skills, learning | In-memory contract/evaluation prototypes only | verified durable memory, lift, CAS promotion/rollback (M-8) |
 | Hermetic assurance (RF-85) | **Available, optional, claims zero rows** | stays optional |
 
-Nothing in the roadmap columns is claimed to work today.
+Mechanism presence is not milestone acceptance; the active board cites the evidence gaps.
 
 ## 2. Documentation authority
 
@@ -77,8 +77,8 @@ Nothing in the roadmap columns is claimed to work today.
 | 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/01_law/`](docs/01_law/) |
 | 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) |
 | 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` |
-| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) |
-| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) |
+| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md) |
+| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md); [`sprint_upcoming.md`](docs/03_execution/sprint_upcoming.md) is staging |
 | 6 | **Communication** | this README, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
@@ -89,8 +89,8 @@ of its own.
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
 3. [`docs/01_law/`](docs/01_law/) — detailed contracts (`DISPATCH`, `RUNTIME`, `EXTENSIBILITY`, `EVIDENCE`, `MEASUREMENT`, `SECURITY`).
-4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — accepted ADRs through `0097`.
-5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) then [`sprint_active.md`](docs/03_execution/sprint_active.md).
+4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — accepted ADRs through `0102`.
+5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md), then [`sprint_active.md`](docs/03_execution/sprint_active.md).
 6. [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — as-built map, navigational only.
 
 ---
@@ -165,14 +165,14 @@ Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md)
 [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 
 ```text
-M-4  useful coding product + scientific trajectory capture      <- ACTIVE
-M-5a agent as event-derived projection; create immutable M-5A-BASE-v2
-M-5b Formal Pack #2 as generality falsifier (RF-86)  <- parallel after M-5a
-M-6  recursive delegation as nested lineages         <- parallel after M-5a
+M-4  useful coding product + scientific trajectory capture      <- evidence open
+M-5a agent as event-derived projection + accepted successor baseline
+M-5b fresh Formal Pack falsifier against CONVERGENCE-BASE-v1
+M-6  canonical recursive delegation repair                       <- ACTIVE
 M-6.5 adaptive strategy / metacognition as policy-reducer-plugin
 M-7  declarative topologies + justified concurrency
 M-8  memory, retrieval, skills, learning
-M-9  AETHER v1.0 General Agent Framework
+M-9/M-10 compatibility horizon only until M-8 acceptance
 ```
 
 **Blocking is technical, never ceremonial.** Work is blocked only by a named unfinished interface,

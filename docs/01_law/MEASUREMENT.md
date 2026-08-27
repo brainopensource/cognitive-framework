@@ -7,8 +7,8 @@ canonical_for:
   - statistical-verification-contract
 status: living
 owner: principal-systems-architect
-version: "0.7.1"
-last_verified: 2026-08-21
+version: "0.8.0"
+last_verified: 2026-08-26
 read_when:
   - changing-measurement-or-promotion
 do_not_read_when:
@@ -137,5 +137,13 @@ This is the single highest-leverage piece of the apparatus, because it converts 
 Because the harness is composable and the tuple is complete, each of these is a clean one-variable experiment, and none is currently available to anyone: caching on or off against cost per resolved task; single-turn against tool-loop at the same model; a faster index against resolve rate — *does faster search change outcomes, or only latency?*, which determines whether a systems-language investment is justified at all; playbook rigidity across its three settings; a flat agent against composition **at equal total budget**, which asks whether composition pays or is merely more spend; operator isolation against horizon length; consolidated record against full transcript; recall on or off; and model-tier routing across the cost-quality frontier.
 
 > **Restated because it is the rule most often broken:** a change showing a six-point improvement has measured nothing until the A/A floor on that task set is known.
+
+## 5.9 Honest experimental closure
+
+An experiment may close with a positive, null, or harmful result when the preregistered design,
+comparability, A/A floor, stopping rule, attribution, and evidence envelope remain valid. Product
+enablement is a separate decision. Degenerate noise floors, identical arms, undeclared treatment
+differences, contamination, missing attribution, or optional stopping yield `UNDETERMINABLE`; they
+are instrument failures and cannot be relabeled as negative results.
 
 ---

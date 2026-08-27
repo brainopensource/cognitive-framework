@@ -109,7 +109,7 @@
     <text x="35" y="29" fill="#f85149" font-size="14" font-weight="800">T05</text>
     <text x="160" y="29" fill="#f85149" font-size="12" font-weight="700">Micro-Physics</text>
     <text x="330" y="29" fill="#f0f6fc" font-size="13" font-weight="600">Molecules &amp; Bonds</text>
-    <text x="710" y="29" fill="#8b949e" font-size="12">TCB Capability Kernel (S0-S12 Pipeline), 6D Budget Leases, Signed Capability Grants</text>
+    <text x="710" y="29" fill="#8b949e" font-size="12">TCB Kernel (S0-S12), 4 Additive Resources + Structural Ceilings, Signed Grants</text>
   </g>
 
   <!-- Tier 04 -->

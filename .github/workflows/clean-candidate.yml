@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENROUTER_API_KEY: ""
+      DEEPSEEK_API_KEY: ""
+      OPENAI_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +41,7 @@ jobs:
         run: |
           test ! -e .env
           test ! -d node_modules
+          python3 tools/linters/check_test_hygiene.py
           python3 tools/linters/scan_secrets.py
 
       - name: Python unit tests
@@ -48,6 +51,7 @@ jobs:
         run: |
           python3 tools/linters/check_stale_paths.py
           python3 tools/linters/check_markdown_links.py
+          python3 tools/linters/check_execution_truth.py
           python3 tools/linters/check_boundaries.py
           python3 tools/linters/check_tcb_budget.py
           python3 tools/linters/scan_secrets.py

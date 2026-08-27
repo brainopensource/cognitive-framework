@@ -7,8 +7,8 @@ canonical_for:
   - role-based-reading-paths
 status: living
 owner: documentation-architect
-version: "0.7.0"
-last_verified: 2026-08-25
+version: "0.8.0"
+last_verified: 2026-08-26
 read_when:
   - selecting-a-documentation-bundle
   - navigating-the-repository
@@ -52,7 +52,7 @@ Highest first. **In a conflict, the higher document wins.**
                                      │ scheduled by
 ┌────────────────────────────────────▼─────────────────────────────────────┐
 │                        4/5. THE EXECUTION (HOW & NOW)                    │
-│  milestones.md sequences · sprint_active.md authorizes                   │
+│  milestones/backlog sequence · sprint_active authorizes · upcoming stages │
 └────────────────────────────────────┬─────────────────────────────────────┘
                                      │ described by
 ┌────────────────────────────────────▼─────────────────────────────────────┐
@@ -73,8 +73,8 @@ Three binding rules (`ADR-0095`):
 | Tier | Directory / File | Authority | Role & Contents |
 |---|---|---|---|
 | **Tier 1 (Law)** | [`SPEC.md`](SPEC.md) · [`01_law/`](01_law/) | **Normative** | Compact RFC-2119 index plus task-sized law leaves and preserved detailed clauses. |
-| **Tier 2 (Decisions)** | [`02_decisions/`](02_decisions/) | **Binding Decision** | Accepted ADRs (`0069`–`0087`) and the [Canonical RF Allocation Register](02_decisions/INDEX.md#canonical-rf-falsifier-allocation-register). |
-| **Tier 3 (Execution)** | [`03_execution/sprint_active.md`](03_execution/sprint_active.md) · [`03_execution/milestones.md`](03_execution/milestones.md) | **Execution** | Active sprint tasks and macro milestones. |
+| **Tier 2 (Decisions)** | [`02_decisions/`](02_decisions/) | **Binding Decision** | Accepted ADRs through `0102` and the [Canonical RF Allocation Register](02_decisions/INDEX.md#canonical-rf-falsifier-allocation-register). |
+| **Tier 3 (Execution)** | [`03_execution/milestones.md`](03_execution/milestones.md) · [`03_execution/backlog.md`](03_execution/backlog.md) · [`03_execution/sprint_active.md`](03_execution/sprint_active.md) · [`03_execution/sprint_upcoming.md`](03_execution/sprint_upcoming.md) | **Execution** | Stable gates/packages, current authorization, and non-authorizing staging. |
 | **Tier 4 (Architecture)** | [`04_architecture/`](04_architecture/) | **Descriptive** | System topology, C4 models, sequences, state machines, and traceability. |
 | **Tier 5 (Modules)** | [`05_contracts/`](05_contracts/) · [`06_protocols/`](06_protocols/) · [`07_engineering/`](07_engineering/) · [`08_theory/`](08_theory/) | **Descriptive / How-To** | Wire contracts, ports, contributor procedures, and research theory. |
 | **Tier 6 (Diagrams)** | [`09_diagrams/`](09_diagrams/) · [`09_tools/`](09_tools/) | **Frozen / Auxiliary** | Visual and tooling assets; `09_tools/` remains a separate archival decision. |
@@ -116,13 +116,13 @@ Three binding rules (`ADR-0095`):
 1. [`docs/README.md`](README.md) — This document.
 2. [`04_architecture/c4_component.md`](04_architecture/c4_component.md) — Hexagonal production lattice.
 3. [`04_architecture/traceability_matrix.md`](04_architecture/traceability_matrix.md) — Maturity-labelled concept-to-evidence map.
-4. [`02_decisions/INDEX.md`](02_decisions/INDEX.md) — Architecture decision catalog (`0069`–`0087`).
-5. [`03_execution/milestones.md`](03_execution/milestones.md) — Macro gate ladder (M-0 through M-9; `ADR-0095` §4 maps historical identifiers).
+4. [`02_decisions/INDEX.md`](02_decisions/INDEX.md) — Architecture decision catalog through `0102`.
+5. [`03_execution/milestones.md`](03_execution/milestones.md) and [`backlog.md`](03_execution/backlog.md) — M-4 through M-8 gates and packages.
 
 ### 🔬 Cognitive Systems Researcher
 1. [`08_theory/README.md`](08_theory/README.md) — Theory index and maturity ratings.
 2. [`08_theory/active_inference.md`](08_theory/active_inference.md) — Free energy minimization formulations.
-3. [`08_theory/economic_resources.md`](08_theory/economic_resources.md) — 6D resource tensor algebra.
+3. [`08_theory/economic_resources.md`](08_theory/economic_resources.md) — four conserved costs and two structural ceilings.
 4. [`08_theory/preference_and_promotion.md`](08_theory/preference_and_promotion.md) — DPO harvesting and McNemar promotion.
 
 ### 🤖 AI Coding Agent
@@ -156,7 +156,8 @@ explains the current system but never overrides its governing SPEC clause or ADR
 | Normative behavior or invariant | [`SPEC.md`](SPEC.md) or [`01_law/`](01_law/) | Use RFC-2119 language only here |
 | Architectural decision and reversal condition | New append-only ADR under [`02_decisions/`](02_decisions/) | Never silently rewrite an accepted decision |
 | Current work, ownership, and readiness | [`sprint_active.md`](03_execution/sprint_active.md) | Keep only the active wave |
-| Future sequencing and backlog | [`milestones.md`](03_execution/milestones.md) | Does not authorize implementation before dependencies open |
+| Stable sequencing and backlog | [`milestones.md`](03_execution/milestones.md) and [`backlog.md`](03_execution/backlog.md) | Does not authorize implementation before dependencies open |
+| Next-window staging | [`sprint_upcoming.md`](03_execution/sprint_upcoming.md) | Preparation only; never current authorization |
 | As-built explanation and navigation | Existing module under `04_architecture/`–`08_theory/` | Link to law/schema/code; do not duplicate canonical tables |
 | Historical source or proposal | Frozen archive under [`_archive/`]( _archive/) | Preserve original language and content; never cite as execution authority |
 

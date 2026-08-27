@@ -60,7 +60,7 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 |---|---|---|---|---|---|
 | WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; digest-addressed M-4/M-6 bundles produced; independent receipts outstanding |
 | WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; RF-86/RF-98 bundle |
-| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 and WP-B1 `EVIDENCE_READY`; qualified Linux/TS gates | signed CI envelope and separate acceptance receipts |
+| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 ✓ and WP-B1 ✓ `EVIDENCE_READY`; Python 1925/1925 ✓, TS typecheck ✓, boundary/RF-id/execution-truth linters ✓ | **outstanding: independent acceptance receipts** — the producer of a bundle cannot accept it (ADR-0101 §3), so this cannot be closed from inside the producing session |
 
 Both developers work from the same reviewed commit and do not consume unfinished branches. Dev A
 owns runtime/session/delegation integration. Dev B owns baseline/evidence tooling and the pack-local
@@ -92,6 +92,35 @@ fresh falsifier. Shared schema or runtime interfaces are frozen by ADR before us
 5. Only after shared generic repairs and clean review, create and push annotated
    `CONVERGENCE-BASE-v1`; Dev B then completes graph coloring, RF-86/RF-98, signed vectors, and
    independent review inside WP-B1 before C1 closes.
+
+## C1 exit state (2026-08-27)
+
+Developer-side work is complete on both lanes. What remains is not
+implementation:
+
+1. **Independent acceptance receipts for M-4 and M-6.** Structurally cannot be
+   produced by the party that produced the bundles — `accepts()` in
+   `domain/evidence/envelope.py` refuses a self-acceptance, and ADR-0101 §3
+   requires a reviewer distinct from the producer. A named reviewer must
+   countersign `docs/03_execution/evidence/*.json`.
+2. **Qualified Linux AF_UNIX CI receipt** for the convergence subject, still
+   requested externally.
+3. `CONVERGENCE-BASE-v1` remains uncreated, correctly: it is gated on clean
+   gates *and* the independent review above.
+
+Two findings are handed to Leadership rather than fixed in C1, because both
+sit outside WP-A1's authorized surface:
+
+- **The runner does not bind its preregistration.** `preregistration_digest`
+  is empty in the RF-95 trajectory, so the candidate is tied to its frozen
+  document by commit ordering rather than by an in-run digest. Recorded in the
+  M-4 envelope's `detail` rather than hidden. Fixing it means threading
+  `TaskContext.preregistration` in `tools/runners/run_rf95_product_proof.py`.
+- **The agency loop cannot tell "my patch failed" from "my patch already
+  applied".** Candidate 02's ledger shows ~15 re-proposals of an
+  already-applied `patch.apply`, each reconciled `patch context not found`,
+  burning the turn budget on a workspace that was already correct. This lives
+  in the repair/feedback path, not in delegation.
 
 ## Explicit external evidence requests
 

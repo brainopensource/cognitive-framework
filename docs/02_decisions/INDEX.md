@@ -338,6 +338,7 @@ falsifiers use `RF-*`.
 | `RF-96`–`RF-100` | ADR-0096 | Cold reconstruction, transitive multidimensional Trusted Core Budget, Kernel Neutrality Gate, authority provenance, and proof-honest computed reproducibility / M-4 (RF-100 capture and run-close assessment) through M-5b. |
 | `RF-101`–`RF-112` | ADR-0090 + ADR-0101 (`WP-A1`) | Canonical recursion: missing-runner composition refusal, durable derived child identity, collision refusal, componentwise budget reservation against parent remaining, depth/turn/scope lowering, transcript non-leakage, depth>=3 cold fold, crash-boundary undeterminability, settled replay, project isolation, kill-tree append-only, and single-boundary re-entry / M-6 |
 | `RF-113` | ADR-0101 (`WP-A1`) | `aether.evidence/1` envelope integrity: code pinning, tamper detection, checked reviewer independence, and `undeterminable` as a first-class outcome / M-4 and M-6 |
+| `RF-114`–`RF-117` | ADR-0103 (`WP-A2`) | Authority-free strategy directives, controller-off event and digest parity, stale-epoch verdict invariance, and semantic checkpoint stability across retry and approval re-entry / M-6.5 |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

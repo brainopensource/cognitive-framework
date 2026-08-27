@@ -1,5 +1,8 @@
 // Contract & Parser
 export * from "./contract/types.js";
+export * from "./contract/command-envelope.js";
+export * from "./contract/stream-protocol.js";
+export * from "./contract/aether-client.js";
 export * from "./contract/parse.js";
 
 // Adapters & Signer
@@ -8,6 +11,8 @@ export * from "./adapters/transport.js";
 export * from "./adapters/live.js";
 export * from "./adapters/replay.js";
 export * from "./adapters/scenario.js";
+export * from "./adapters/http.js";
+export * from "./adapters/fake.js";
 
 // Application Reducers & Use Cases
 export * from "./application/run-view.js";
@@ -24,3 +29,5 @@ export * from "./application/subscribe-run.js";
 export * from "./application/resume.js";
 export * from "./application/why.js";
 export * from "./application/attach.js";
+export * from "./application/projection-model.js";
+export * from "./application/graph-model.js";

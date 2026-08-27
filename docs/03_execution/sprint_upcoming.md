@@ -21,9 +21,9 @@ This file is preparation, not authorization. Items move to
 
 | Sprint | Order | Package | Owner | Planned state | Entry gate | Exit |
 |:--|---:|---|---|---|---|---|
-| C2 | 1 | WP-A2 stable meta-control observation seam | Dev A | **NOT_STARTED** | WP-A1 merged; progress/checkpoint contract frozen | runtime seam `PACKAGE_READY` |
-| C2 | 2 | WP-B2 stochastic instrument and paired M-6.5 study | Dev B | **NOT_STARTED** | WP-A1 merged; WP-A2 contract and provider/task fixtures reviewed | signed positive/negative evidence |
-| C3 | 3 | WP-A3 sequential topology integration and timing telemetry | Dev A | **NOT_STARTED** | WP-A1 canonical recursion merged | three runtime topologies |
+| C2 | 1 | WP-A2 stable meta-control observation seam | Dev A | **BLOCKED** | WP-A1 merged (`ca683fd`) ✓; progress/checkpoint contract frozen (ADR-0103) ✓; **C1 independent acceptance outstanding** | runtime seam `PACKAGE_READY` |
+| C2 | 2 | WP-B2 stochastic instrument and paired M-6.5 study | Dev B | **NOT_STARTED** | WP-A1 merged ✓; WP-A2 contract frozen (ADR-0103) ✓; provider/task fixtures reviewed | signed positive/negative evidence |
+| C3 | 3 | WP-A3 sequential topology integration and timing telemetry | Dev A | **NOT_STARTED** | WP-A1 canonical recursion merged ✓ | three runtime topologies |
 | C3 | 4 | WP-B3 M7-01 and ADR-0099 evidence package | Dev B | **NOT_STARTED** | WP-A3 topology bundle and telemetry completeness | accepted report; ADR-0099 decision |
 | C4 | 5 | WP-A4 durable authorized memory | Dev A | **NOT_STARTED** | ADR-0099 M-7 disposition; ADR-0100 contract kit frozen | security/recovery evidence |
 | C4 | 6 | WP-B4 governed promotion and rollback | Dev B | **NOT_STARTED** | WP-A4 memory/registry contract; valid M-6.5 disposition | held-out lift and real rollback |

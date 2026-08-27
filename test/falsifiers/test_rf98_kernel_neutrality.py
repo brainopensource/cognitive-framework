@@ -42,6 +42,7 @@ class TheGatePassesOnTheRealTree(unittest.TestCase):
         # Neutrality over a corpus that excludes the new domain proves nothing.
         _, receipt = _run()
         self.assertIn("formal-sat", receipt["structural"]["packs_scanned"])
+        self.assertIn("formal-graph-coloring", receipt["structural"]["packs_scanned"])
 
 
 class TheHistoricalHalfNeverReportsCleanWithoutABaseline(unittest.TestCase):
@@ -101,6 +102,10 @@ class ThePlantedLeakIsDetected(unittest.TestCase):
         import importlib
         module = importlib.import_module("check_kernel_neutrality")
         self.assertIn("sat.witness.write", module.pack_vocabulary()["formal-sat"])
+        self.assertIn(
+            "graph_coloring.witness.write",
+            module.pack_vocabulary()["formal-graph-coloring"],
+        )
 
 
 if __name__ == "__main__":

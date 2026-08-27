@@ -31,7 +31,7 @@ package consumes another developer's unfinished branch.
 |---|---|---|---|---|
 | WP-A1 | M-4/M-6 | Dev A / **EVIDENCE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
 | WP-B1 | M-5a/M-5b | Dev B / **EVIDENCE_READY** | ADR-0101/0102; tooling beside A1, treatment after baseline | baseline + M-5b bundle |
-| WP-A2 | M-6.5 | Dev A / **NOT_STARTED** | A1; before B2 final study | runtime-seam evidence |
+| WP-A2 | M-6.5 | Dev A / **BLOCKED** | A1 merged; ADR-0103 frozen; awaiting C1 independent acceptance | runtime-seam evidence |
 | WP-B2 | M-6.5 | Dev B / **NOT_STARTED** | A1/A2; instrument then study | signed positive/negative disposition |
 | WP-A3 | M-7 | Dev A / **NOT_STARTED** | A1; before B3 runs | three runtime topologies |
 | WP-B3 | M-7 | Dev B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |

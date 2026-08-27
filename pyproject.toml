@@ -28,6 +28,7 @@ classifiers = [
 ]
 
 [project.scripts]
+vanguard = "vanguard.packages.runtime.cli:main"
 vanguard-evaluator = "vanguard.packages.adapters.evaluators.daemon:main"
 vanguard-daemon = "vanguard.packages.runtime.service.server:main"
 vanguard-studio = "vanguard.packages.runtime.service.studio_gateway:main"

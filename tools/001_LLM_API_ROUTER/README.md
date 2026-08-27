@@ -22,7 +22,7 @@ python3 tools/001_LLM_API_ROUTER/llm_switch.py \
 ```bash
 python3 tools/001_LLM_API_ROUTER/llm_switch.py \
   -p openrouter \
-  -m deepseek/deepseek-chat \
+  -m deepseek/deepseek-v4-flash-0731 \
   -msg "write quicksort in Python" \
   --stream
 ```

@@ -86,7 +86,7 @@ class SingleModelRouter:
 class TierEscalationRouter:
     """Routes based on attempt number through a tiered list of models."""
 
-    def __init__(self, tiers: Sequence[str] = ("openrouter/free", "deepseek/deepseek-v4-flash", "openai/gpt-4o")) -> None:
+    def __init__(self, tiers: Sequence[str] = ("openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731")) -> None:
         self.tiers = tuple(tiers) if tiers else ("openrouter/free",)
 
     def route(self, model: str | None = None, attempt: int = 0) -> ModelRoute:
@@ -99,7 +99,7 @@ class TierEscalationRouter:
 class FallbackModelRouter:
     """Routes to primary model on attempt 0, fallback model on higher attempts."""
 
-    def __init__(self, primary: str = "openai/gpt-4o-mini", fallback: str = "openrouter/free") -> None:
+    def __init__(self, primary: str = "deepseek/deepseek-v4-flash-0731", fallback: str = "openrouter/free") -> None:
         self.primary = primary
         self.fallback = fallback
 
@@ -121,10 +121,10 @@ def resolve_model_router(policy: Any) -> Any:
     if isinstance(policy, dict):
         kind = policy.get("kind") or policy.get("strategy")
         if kind == "tier-escalation":
-            tiers = policy.get("tiers") or ("openrouter/free", "deepseek/deepseek-v4-flash", "openai/gpt-4o")
+            tiers = policy.get("tiers") or ("openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731")
             return TierEscalationRouter(tiers)
         if kind in ("fallback", "priority"):
-            primary = policy.get("primary", "openai/gpt-4o-mini")
+            primary = policy.get("primary", "deepseek/deepseek-v4-flash-0731")
             fallback = policy.get("fallback", "openrouter/free")
             return FallbackModelRouter(primary=primary, fallback=fallback)
         model = policy.get("model") or policy.get("primary") or "openrouter/free"

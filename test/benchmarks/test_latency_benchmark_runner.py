@@ -31,7 +31,7 @@ class LatencyBenchmarkRunnerTest(unittest.TestCase):
         self.compat_key = CompatibilityKey(
             benchmark_id="deterministic_cassette_suite",
             split_hash="sha256:split_01",
-            model_fingerprint="openai/gpt-4o-mini",
+            model_fingerprint="deepseek/deepseek-v4-flash-0731",
             sampling_params={"temperature": 0.0, "max_tokens": 64},
             harness_commit="v0.5.0",
         )

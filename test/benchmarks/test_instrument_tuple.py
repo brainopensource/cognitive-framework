@@ -25,7 +25,7 @@ class InstrumentTupleTest(unittest.TestCase):
         self.compat_a = CompatibilityKey(
             benchmark_id="swe_bench_lite",
             split_hash="sha256:split_1",
-            model_fingerprint="openai/gpt-4o-mini",
+            model_fingerprint="deepseek/deepseek-v4-flash-0731",
             sampling_params={"temperature": 0.0, "max_tokens": 256},
             harness_commit="cddaaa33",
             agent_hash="agent_v4",
@@ -83,7 +83,7 @@ class InstrumentTupleTest(unittest.TestCase):
         compat_diff_schema = CompatibilityKey(
             benchmark_id="swe_bench_lite",
             split_hash="sha256:split_1",
-            model_fingerprint="openai/gpt-4o-mini",
+            model_fingerprint="deepseek/deepseek-v4-flash-0731",
             schema_version="vg.3",  # Mismatched schema
         )
         treatment_a = TreatmentDimensions(manifest="vg-code-default")

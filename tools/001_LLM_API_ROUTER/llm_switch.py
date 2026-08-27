@@ -24,7 +24,7 @@ MODEL_ALIASES = {
         "north": "cohere/north-mini-code:free",
         "gemma": "google/gemma-4-26b-a4b-it:free",
         "nemotron": "nvidia/nemotron-3-super-120b-a12b:free",
-        "gpt-oss": "openai/gpt-oss-20b:free",
+        "gpt-oss": "deepseek/deepseek-v4-flash-0731",
         "deepseek-flash": "deepseek/deepseek-v4-flash",
         "deepseek": "deepseek/deepseek-v4-flash",
         "mimo": "xiaomi/mimo-v2.5",
@@ -49,10 +49,10 @@ MODEL_ALIASES = {
         "llama": "llama-3.1-8b-instant",
         "llama-fast": "llama-3.1-8b-instant",
         "llama-3.1": "llama-3.1-8b-instant",
-        "120b": "openai/gpt-oss-120b",
-        "gpt-oss": "openai/gpt-oss-120b",
-        "gpt-oss-120b": "openai/gpt-oss-120b",
-        "powerful": "openai/gpt-oss-120b",
+        "120b": "deepseek/deepseek-v4-flash-0731",
+        "gpt-oss": "deepseek/deepseek-v4-flash-0731",
+        "gpt-oss-120b": "deepseek/deepseek-v4-flash-0731",
+        "powerful": "deepseek/deepseek-v4-flash-0731",
     },
     # Cloudflare Workers AI mappings - FREE PLAN ONLY
     "cloudflare": {
@@ -60,9 +60,9 @@ MODEL_ALIASES = {
         "llama": "@cf/meta/llama-3.1-8b-instruct",
         "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
         # Balanced performance (20B)
-        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
-        "gpt-oss": "@cf/openai/gpt-oss-20b",
-        "20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss-20b": "@cf/deepseek/deepseek-v4-flash-0731",
+        "gpt-oss": "@cf/deepseek/deepseek-v4-flash-0731",
+        "20b": "@cf/deepseek/deepseek-v4-flash-0731",
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
@@ -79,9 +79,9 @@ MODEL_ALIASES = {
         "llama": "@cf/meta/llama-3.1-8b-instruct",
         "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
         # Balanced performance (20B)
-        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
-        "gpt-oss": "@cf/openai/gpt-oss-20b",
-        "20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss-20b": "@cf/deepseek/deepseek-v4-flash-0731",
+        "gpt-oss": "@cf/deepseek/deepseek-v4-flash-0731",
+        "20b": "@cf/deepseek/deepseek-v4-flash-0731",
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
@@ -119,7 +119,7 @@ Examples:
   python3 tools/001_LLM_API_ROUTER/llm_switch.py -p ollama -m "qwen2.5:1.5b" -msg "write fibonacci in python"
 
   # Call OpenRouter using a markdown prompt file:
-  python3 tools/001_LLM_API_ROUTER/llm_switch.py -p openrouter -m deepseek/deepseek-chat -msg tools/001_LLM_API_ROUTER/prompts/default_task.md
+  python3 tools/001_LLM_API_ROUTER/llm_switch.py -p openrouter -m deepseek/deepseek-v4-flash-0731 -msg tools/001_LLM_API_ROUTER/prompts/default_task.md
 
   # Streaming mode to terminal and custom output directory:
   python3 tools/001_LLM_API_ROUTER/llm_switch.py -p ollama -m qwen25 -msg "test" -o ./benchmarks --stream

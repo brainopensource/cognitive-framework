@@ -29,12 +29,12 @@ MODEL_PRICING_MICROS = {
     # Fast & cheap model
     "llama-3.1-8b-instant": {"prompt": 5, "completion": 8},
     # Powerful model with automatic prompt caching (50% discount on cached tokens)
-    "openai/gpt-oss-120b": {"prompt": 100, "completion": 300},
+    "deepseek/deepseek-v4-flash-0731": {"prompt": 100, "completion": 300},
 }
 
 
 class GroqProvider(BaseLLMProvider):
-    def __init__(self, api_key: str = "", base_url: str = "https://api.groq.com/openai/v1") -> None:
+    def __init__(self, api_key: str = "", base_url: str = "https://api.groq.com/deepseek/deepseek-v4-flash-0731") -> None:
         self.api_key = api_key or _load_env_api_key()
         self.base_url = base_url.rstrip("/")
 

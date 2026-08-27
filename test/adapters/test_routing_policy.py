@@ -15,17 +15,17 @@ from vanguard.packages.adapters.models.routing import (
 
 class TestModelRouter(unittest.TestCase):
     def test_single_model_router_resolves_direct(self) -> None:
-        policy = {"kind": "single-model", "model": "openai/gpt-4o-mini"}
+        policy = {"kind": "single-model", "model": "deepseek/deepseek-v4-flash-0731"}
         router = resolve_model_router(policy)
         self.assertIsInstance(router, SingleModelRouter)
         route = router.route()
-        self.assertEqual(route.resolved_model, "openai/gpt-4o-mini")
+        self.assertEqual(route.resolved_model, "deepseek/deepseek-v4-flash-0731")
         self.assertTrue(route.pricing_known)
 
     def test_tier_escalation_router_escalates_by_attempt(self) -> None:
         policy = {
             "kind": "tier-escalation",
-            "tiers": ["openrouter/free", "deepseek/deepseek-v4-flash", "openai/gpt-4o"],
+            "tiers": ["openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731"],
         }
         router = resolve_model_router(policy)
         self.assertIsInstance(router, TierEscalationRouter)
@@ -37,19 +37,19 @@ class TestModelRouter(unittest.TestCase):
         self.assertEqual(route_1.resolved_model, "deepseek/deepseek-v4-flash")
 
         route_2 = router.route(attempt=2)
-        self.assertEqual(route_2.resolved_model, "openai/gpt-4o")
+        self.assertEqual(route_2.resolved_model, "deepseek/deepseek-v4-flash-0731")
 
     def test_fallback_model_router(self) -> None:
         policy = {
             "kind": "fallback",
-            "primary": "openai/gpt-4o-mini",
+            "primary": "deepseek/deepseek-v4-flash-0731",
             "fallback": "openrouter/free",
         }
         router = resolve_model_router(policy)
         self.assertIsInstance(router, FallbackModelRouter)
 
         route_primary = router.route(attempt=0)
-        self.assertEqual(route_primary.resolved_model, "openai/gpt-4o-mini")
+        self.assertEqual(route_primary.resolved_model, "deepseek/deepseek-v4-flash-0731")
 
         route_fallback = router.route(attempt=1)
         self.assertEqual(route_fallback.resolved_model, "openrouter/free")

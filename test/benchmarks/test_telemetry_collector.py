@@ -38,8 +38,8 @@ class TelemetryCollectorTest(unittest.TestCase):
         collector.record_effect_timing(mount_ms=10, probe_ms=5, exec_ms=15, teardown_ms=5)
 
         # Record tokens and cost
-        collector.record_token_usage(prompt_tokens=500, completion_tokens=100, cached_tokens=200, usd_micros=120, model="openai/gpt-4o-mini")
-        collector.record_token_usage(prompt_tokens=600, completion_tokens=150, cached_tokens=300, usd_micros=150, model="openai/gpt-4o-mini")
+        collector.record_token_usage(prompt_tokens=500, completion_tokens=100, cached_tokens=200, usd_micros=120, model="deepseek/deepseek-v4-flash-0731")
+        collector.record_token_usage(prompt_tokens=600, completion_tokens=150, cached_tokens=300, usd_micros=150, model="deepseek/deepseek-v4-flash-0731")
 
         report = collector.build_report()
         self.assertEqual(report.run_id, "test_run_01")

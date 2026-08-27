@@ -33,17 +33,28 @@ from vanguard.packages.ports.environment import (
     EnvironmentSnapshot,
     Observation,
 )
+from vanguard.packages.ports.child_runtime import ChildRunPlan, ChildRunResult
 from vanguard.packages.ports.event_store import EventRange, Result
 from vanguard.packages.runtime.compose import Runtime
 from vanguard.packages.runtime.delegation import (
     ADDITIVE_DIMENSIONS,
     SPAWN_VERB,
     ChildLineage,
+    derive_child_id,
     DelegationResult,
     SpawnAdapter,
 )
 from vanguard.packages.runtime.determinism import FixedClock, SeededRandom
 from vanguard.packages.runtime.root import HarnessSession, SessionPorts, TaskContext
+
+
+class _StubChildRuntime:
+    """Minimal conforming runner for tests that only assert wiring."""
+
+    def run_child(self, plan: ChildRunPlan) -> ChildRunResult:
+        return ChildRunResult(
+            ok=True, outcome="completed", terminal="ok",
+            child_episode_id=plan.child_episode_id)
 
 ROOT = Path(__file__).resolve().parents[2]
 _AT = "2026-08-26T12:00:00.000Z"
@@ -158,6 +169,7 @@ class HarnessSessionDelegationE2E(unittest.TestCase):
                 store=store,
                 random=SeededRandom(seed=42),
                 interactive=False,
+                child_runtime=_StubChildRuntime(),
             )
             task = TaskContext(
                 brief="solve parent task with child delegation",
@@ -182,22 +194,32 @@ class HarnessSessionDelegationE2E(unittest.TestCase):
 
             child_executed = False
 
-            def mock_run_child(lineage: ChildLineage) -> DelegationResult:
-                nonlocal child_executed
-                child_executed = True
-                self.assertEqual(lineage.parent_episode_id, "ep-parent")
-                self.assertEqual(lineage.depth, 1)
-                self.assertIn("fs.read", lineage.authority)
-                return DelegationResult(
-                    ok=True,
-                    outcome="completed",
-                    terminal="ok",
-                    child_episode_id=lineage.child_episode_id,
-                    actual_cost={"tokens": 80, "usd_micros": 250},
-                    turns_used=2,
-                    result_digest="sha256:" + "c" * 64,
-                    detail="child extracted subtask cleanly",
-                )
+            class _RecordingChildRuntime:
+                """A real `ChildRuntimePort`, bound before composition.
+
+                This test used to reach past the binding and assign
+                `spawn_adapter._run_child` after the fact, which only worked
+                because a synthetic runner was already in place to overwrite.
+                With the fallback gone the runner has to be supplied the way
+                production supplies one -- through `SessionPorts`.
+                """
+
+                def run_child(inner, plan: ChildRunPlan) -> ChildRunResult:
+                    nonlocal child_executed
+                    child_executed = True
+                    self.assertEqual(plan.parent_episode_id, "ep-parent")
+                    self.assertEqual(plan.depth, 1)
+                    self.assertIn("fs.read", plan.authority)
+                    return ChildRunResult(
+                        ok=True,
+                        outcome="completed",
+                        terminal="ok",
+                        child_episode_id=plan.child_episode_id,
+                        actual_cost={"tokens": 80, "usd_micros": 250},
+                        turns_used=2,
+                        result_digest="sha256:" + "c" * 64,
+                        detail="child extracted subtask cleanly",
+                    )
 
             ports = SessionPorts(
                 model=ScriptedModel([finish()]),
@@ -206,6 +228,7 @@ class HarnessSessionDelegationE2E(unittest.TestCase):
                 store=store,
                 random=SeededRandom(seed=42),
                 interactive=False,
+                child_runtime=_RecordingChildRuntime(),
             )
             task = TaskContext(
                 brief="parent task",
@@ -216,10 +239,7 @@ class HarnessSessionDelegationE2E(unittest.TestCase):
                 max_turns=5,
             )
             session = HarnessSession(harness, ports, task)
-
-            # Re-inject our mock child runner into the session's SpawnAdapter
             spawn_adapter = session.adapters["agent.spawn"]
-            spawn_adapter._run_child = mock_run_child
 
             # Dispatch an agent.spawn effect through the adapter
             spawn_request = EffectRequest(
@@ -261,14 +281,26 @@ class HarnessSessionDelegationE2E(unittest.TestCase):
             # Verify ledger reduction over cold events
             state = reduce_batch(initial_state(), events)
 
-            # Verify child registered in state.children projection
-            child_id = "ep-parent.c1"
+            # Verify child registered in state.children projection.
+            # The id is *derived*, not counted: a cold reader recomputes it
+            # from the parent episode, the intent key and the project, which
+            # is what makes it survive the restart this test performs. The old
+            # `ep-parent.c1` came from an in-memory counter and would have been
+            # reissued to a different child after any crash.
+            child_id = derive_child_id(
+                "ep-parent", "intent-spawn-subtask-1", task.project_id)
             self.assertIn(child_id, state.children)
             child_view = state.children[child_id]
             self.assertEqual(child_view.status, "closed")
             self.assertEqual(child_view.outcome, "completed")
             self.assertEqual(child_view.terminal, "ok")
             self.assertEqual(child_view.parent_episode_id, "ep-parent")
+            # The reducer now actually folds the cost. It previously read a
+            # `cost` key that no writer emitted, so every settled child in
+            # every ledger folded to `cost=None` -- the conservation record
+            # existed on the wire and nowhere in state.
+            self.assertEqual(dict(child_view.cost),
+                             {"tokens": 80, "usd_micros": 250})
 
             cold_store.close()
 

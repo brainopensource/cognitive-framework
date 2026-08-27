@@ -25,6 +25,7 @@ from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.domain.ledger.reducer import initial_state, reduce_batch
 from vanguard.packages.kernel.attenuation import Constraints, Scope
 from vanguard.packages.kernel.model import EffectRequest, Occurrence
+from vanguard.packages.ports.child_runtime import ChildRunResult
 from vanguard.packages.ports.event_store import EventRange
 from vanguard.packages.runtime.delegation import (
     ADDITIVE_DIMENSIONS,
@@ -91,19 +92,51 @@ def _emitter(store, project="project-m6"):
         role="spawn_adapter")
 
 
-def _adapter(store, *, scope=None, run_child=None, max_depth=4, max_turns=8,
-             use_store=True):
-    return SpawnAdapter(
-        emitter=_emitter(store).spawn_adapter(),
-        parent_scope=scope or _parent_scope(),
-        run_child=run_child or (lambda lineage: DelegationResult(
+#: A parent balance large enough that these tests exercise attenuation and
+#: lineage rather than budget exhaustion. The reservation falsifiers in
+#: `test_rf101_rf112_canonical_recursion.py` vary it deliberately.
+_AMPLE = {"usd_micros": 1_000_000, "millis": 1_000_000, "tokens": 1_000_000,
+          "bytes": 1_000_000, "turns": 64, "depth": 8}
+
+
+class _StubChildRuntime:
+    """A `ChildRuntimePort` that reports a fixed, honest result.
+
+    Explicit in every test that spawns. There is deliberately no default
+    runner anywhere in production (`WP-A1`), so a test that wants a child to
+    succeed has to say so -- which is the difference between an asserted
+    outcome and a manufactured one.
+    """
+
+    def __init__(self, result=None, on_call=None):
+        self._result = result
+        self._on_call = on_call
+        self.plans = []
+
+    def run_child(self, plan):
+        self.plans.append(plan)
+        if self._on_call is not None:
+            return self._on_call(plan)
+        if self._result is not None:
+            return self._result
+        return ChildRunResult(
             ok=True, outcome="completed", terminal="ok",
-            child_episode_id=lineage.child_episode_id,
+            child_episode_id=plan.child_episode_id,
             actual_cost={"tokens": 40, "usd_micros": 120}, turns_used=2,
-            result_digest="sha256:" + "d" * 64)),
+            result_digest="sha256:" + "d" * 64)
+
+
+def _adapter(store, *, scope=None, child_runtime=None, max_depth=4, max_turns=8,
+             use_store=True, remaining=None, project="project-m6"):
+    return SpawnAdapter(
+        emitter=_emitter(store, project).spawn_adapter(),
+        parent_scope=scope or _parent_scope(),
+        child_runtime=child_runtime or _StubChildRuntime(),
         clock=FixedClock(at=_AT, step_ms=1),
         store=store if use_store else None,
         parent_episode_id="ep-parent",
+        project_id=project,
+        remaining_budget=lambda: dict(remaining or _AMPLE),
         max_depth=max_depth,
         max_turns=max_turns,
     )
@@ -213,10 +246,24 @@ class RF57ConservationAndStructuralCeilings(unittest.TestCase):
                                  child_episode_id="c", actual_cost={ceiling: 1})
 
     def test_a_structural_dimension_inside_a_child_budget_is_refused(self) -> None:
-        store = SqliteEventStore(":memory:")
-        adapter = _adapter(store)
-        with self.assertRaises(DelegationContractError):
-            adapter.execute(_request(args={"budget": {"depth": 2}}))
+        """`WP-A1` moved this from "raises" to "denies", which is stricter.
+
+        A raised `DelegationContractError` escaped the adapter into the kernel
+        as an unclassified exception. A malformed *proposal* is not an adapter
+        fault: it is a refusal, and the failure contract names it one
+        ("budget ... uncertainty denies"). The assertions below are therefore a
+        superset of the old one -- refusal, plus the two facts a raise never
+        established: that occurrence is knowable and no lineage was written.
+        """
+        for ceiling in STRUCTURAL_CEILINGS:
+            store = SqliteEventStore(":memory:")
+            outcome = _adapter(store).execute(
+                _request(args={"budget": {ceiling: 2}}))
+            self.assertEqual(outcome.status, "error", ceiling)
+            self.assertEqual(outcome.occurrence, Occurrence.DID_NOT_OCCUR, ceiling)
+            self.assertIn("structural ceiling", outcome.detail or "", ceiling)
+            self.assertNotIn("ChildSpawned", _kinds(store))
+            self.assertNotIn("ChildReturned", _kinds(store))
 
     def test_the_childs_cost_flows_to_the_parents_lease(self) -> None:
         # Conservation is structural: the adapter reports, the Kernel settles.
@@ -263,7 +310,8 @@ class RF58JoinSemantics(unittest.TestCase):
 
     def test_a_run_child_that_returns_a_handle_is_refused(self) -> None:
         store = SqliteEventStore(":memory:")
-        adapter = _adapter(store, run_child=lambda lineage: {"text": "done"})
+        adapter = _adapter(store, child_runtime=_StubChildRuntime(
+            on_call=lambda plan: {"text": "done"}))
         with self.assertRaises(DelegationContractError):
             adapter.execute(_request())
 
@@ -287,11 +335,13 @@ class RF59KillTreeAndRestartRecovery(unittest.TestCase):
     """Review RF-59: the hard one. A crash mid-child is UNDETERMINABLE."""
 
     def test_a_child_that_raises_yields_undeterminable_not_failure(self) -> None:
-        def explode(lineage: ChildLineage) -> DelegationResult:
+        def explode(plan):
             raise RuntimeError("child process died")
 
         store = SqliteEventStore(":memory:")
-        outcome = _adapter(store, run_child=explode).execute(_request())
+        outcome = _adapter(
+            store, child_runtime=_StubChildRuntime(on_call=explode),
+        ).execute(_request())
         # The child may already have patched a file. "failed" would license a
         # retry that double-applies it.
         self.assertEqual(outcome.occurrence, Occurrence.UNDETERMINABLE)
@@ -301,13 +351,15 @@ class RF59KillTreeAndRestartRecovery(unittest.TestCase):
     def test_the_spawn_fact_is_durable_before_the_child_runs(self) -> None:
         seen: list[list[str]] = []
 
-        def observe(lineage: ChildLineage) -> DelegationResult:
+        def observe(plan):
             seen.append(_kinds(store))
-            return DelegationResult(ok=True, outcome="completed", terminal="ok",
-                                    child_episode_id=lineage.child_episode_id)
+            return ChildRunResult(ok=True, outcome="completed", terminal="ok",
+                                  child_episode_id=plan.child_episode_id)
 
         store = SqliteEventStore(":memory:")
-        _adapter(store, run_child=observe).execute(_request())
+        _adapter(
+            store, child_runtime=_StubChildRuntime(on_call=observe),
+        ).execute(_request())
         # Without this ordering the cold path cannot tell a crashed subtree
         # from one that never started.
         self.assertIn("ChildSpawned", seen[0])
@@ -337,17 +389,21 @@ class RF59KillTreeAndRestartRecovery(unittest.TestCase):
     def test_a_settled_subtree_is_replayed_not_re_executed(self) -> None:
         runs: list[str] = []
 
-        def count(lineage: ChildLineage) -> DelegationResult:
-            runs.append(lineage.child_episode_id)
-            return DelegationResult(
+        def count(plan):
+            runs.append(plan.child_episode_id)
+            return ChildRunResult(
                 ok=True, outcome="completed", terminal="ok",
-                child_episode_id=lineage.child_episode_id,
+                child_episode_id=plan.child_episode_id,
                 actual_cost={"tokens": 7})
 
         store = SqliteEventStore(":memory:")
-        first = _adapter(store, run_child=count).execute(_request())
+        first = _adapter(
+            store, child_runtime=_StubChildRuntime(on_call=count),
+        ).execute(_request())
         # A fresh adapter, same durable store, same intent key: the restart.
-        second = _adapter(store, run_child=count).execute(_request())
+        second = _adapter(
+            store, child_runtime=_StubChildRuntime(on_call=count),
+        ).execute(_request())
 
         self.assertEqual(len(runs), 1, "the subtree ran twice across a restart")
         self.assertEqual(dict(second.actual_cost), dict(first.actual_cost))

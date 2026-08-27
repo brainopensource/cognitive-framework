@@ -54,7 +54,15 @@ class BindingContext:
     parent_episode_id: str | None = None
     max_depth: int = 4
     max_turns: int = 10
-    run_child: Any = None
+    #: The M-6 recursion seam (`ports.child_runtime.ChildRuntimePort`).
+    #: `None` is not a default runner -- it is a composition failure for any
+    #: harness that declares `agent.spawn`.
+    child_runtime: Any = None
+    #: Callable, not a snapshot: read at spawn time so siblings see what
+    #: earlier siblings actually spent.
+    remaining_budget: Any = None
+    project_id: str = "project-default"
+    composition_digest: str = ""
     lineage: tuple[str, ...] = ()
     ledger: Any = None
 
@@ -179,8 +187,22 @@ def _sandbox_effector(context: BindingContext) -> Any:
 
 
 def _spawn_effector(context: BindingContext) -> Any:
-    """M-6 mediated delegation adapter binding."""
-    from .delegation import DelegationResult, SpawnAdapter
+    """M-6 mediated delegation adapter binding.
+
+    There is deliberately no fallback runner. This binding used to substitute
+    a lambda that returned `completed` at zero cost whenever nothing was
+    wired, and because `TaskContext` carried no runner field, *that lambda was
+    the production path* -- every unwired `agent.spawn` reported a success
+    that never happened. A composition that declares `agent.spawn` without a
+    `ChildRuntimePort` now fails here, before any ledger fact exists, which is
+    the one point where refusal is still free (`WP-A1`).
+    """
+    from .delegation import SpawnAdapter
+
+    if context.child_runtime is None:
+        raise CompositionError(
+            "composition declares 'agent.spawn' but no ChildRuntimePort is "
+            "bound; refusing to synthesize delegation results")
 
     emitter = context.emitter
     if emitter is None and context.ledger is not None:
@@ -188,18 +210,13 @@ def _spawn_effector(context: BindingContext) -> Any:
     return SpawnAdapter(
         emitter=emitter,
         parent_scope=context.parent_scope,
-        run_child=context.run_child or (
-            lambda lineage: DelegationResult(
-                ok=True,
-                outcome="completed",
-                terminal="ok",
-                child_episode_id=lineage.child_episode_id,
-                result_digest="sha256:" + "0" * 64,
-            )
-        ),
+        child_runtime=context.child_runtime,
         clock=context.clock,
         store=context.store,
         parent_episode_id=context.parent_episode_id or "parent-ep",
+        project_id=context.project_id,
+        composition_digest=context.composition_digest,
+        remaining_budget=context.remaining_budget,
         max_depth=context.max_depth,
         max_turns=context.max_turns,
         lineage=context.lineage,

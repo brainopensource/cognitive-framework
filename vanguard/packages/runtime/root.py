@@ -40,6 +40,8 @@ from .run_plan import RunPlan, RunPlanError, plan_run
 from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
+from .child_runtime import RuntimeChildRunner
+from .delegation import SPAWN_VERB
 from .wiring import (
     BindingContext,
     BindingResolver,
@@ -294,6 +296,16 @@ class Runtime(_ComposedRuntime):
         # composition seam -- rather than rediscovered inside the session.
         if ports.blobs is not None and ports.capture_policy is None:
             ports = replace(ports, capture_policy=resolve_capture_policy(profile))
+        # `M-6`. A composition that can spawn needs something that can run a
+        # child, and the only admissible runner re-enters this same method.
+        # Bound here rather than in `HarnessSession` so recursion stays an
+        # edge of the public boundary and never a second activation authority.
+        if ports.child_runtime is None and SPAWN_VERB in harness.verbs:
+            ports = replace(ports, child_runtime=RuntimeChildRunner(
+                run_composed=cls.run_composed,
+                harness=harness, parent_ports=ports, parent_task=task_context,
+                profile=profile, release=release,
+            ))
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan
         )

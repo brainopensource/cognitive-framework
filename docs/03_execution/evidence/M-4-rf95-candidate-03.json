@@ -1,0 +1,93 @@
+{
+  "artifactRefs": [
+    "/tmp/claude-1000/-home-rocha-Coding-Aether-D-System/bc90bc26-167a-4be6-91c1-6ecbbadd1553/scratchpad/rf95c/.vanguard/events.sqlite3"
+  ],
+  "claim": "RF-95",
+  "detail": "preregistration_digest is empty in the trajectory: the runner does not thread TaskContext.preregistration, so binding rests on commit ordering rather than on an in-run digest. Recorded as a known limitation of this bundle.",
+  "digest": "sha256:aec94c0f75455746ea439747e77e85e768a8a522d52cef42d4a25369553f8b20",
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "materials": [
+    {
+      "digest": "sha256:cba90ae91a6c16d9b557446094bbf5d36012840174399323dcaf2efacaefdb54",
+      "name": "preregistration",
+      "ref": "docs/03_execution/prereg/RF-95-candidate-03.md"
+    },
+    {
+      "digest": "sha256:6fccfafe1098fcf6163bb9bd084b8a106116b0743c240b48a7e1b9ace96c33af",
+      "name": "ledger",
+      "ref": "/tmp/claude-1000/-home-rocha-Coding-Aether-D-System/bc90bc26-167a-4be6-91c1-6ecbbadd1553/scratchpad/rf95c/.vanguard/events.sqlite3"
+    },
+    {
+      "digest": "sha256:3b4ee3deeddb12b3f9868008662d3d41e211bd2cad56059b8760cf1c4c570b32",
+      "name": "terminal_state"
+    },
+    {
+      "digest": "sha256:1caedab102bb3c62889be500cd8f7fa1a9bba77531785b88ac3def6bb4f8644e",
+      "name": "harness"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "branch": "feat_higgs_M4_M8",
+    "commit": "ce1b6a86b7745b3b5111bd84138f207b7ba94d0a",
+    "dirty": true,
+    "eventSchema": "mhf.event/2",
+    "reducer": "sha256:d20ca6c94088fb997e5faa7781264f800fbedc3b366336e8a4ab9c78a1463379",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "2c022840902a26c3fb815ce18bbe89ff2b0526e9"
+  },
+  "producer": {
+    "identity": "dev-a",
+    "role": "producer"
+  },
+  "protocol": "aether.rf95.product-coding-proof/1",
+  "run": {
+    "activationDigest": "sha256:191ee8f654034c94582faf59fcdd8dfb836a3bb6541a4587dfdf71db0e814a9e",
+    "cost": {
+      "bytes": 463688,
+      "measurement_status": {
+        "bytes": {
+          "reason": null,
+          "status": "measured"
+        },
+        "millis": {
+          "reason": null,
+          "status": "measured"
+        },
+        "tokens": {
+          "reason": null,
+          "status": "measured"
+        },
+        "usd_micros": {
+          "reason": "turn_dimension_unavailable",
+          "status": "unavailable"
+        }
+      },
+      "millis": 14,
+      "tokens": 59985,
+      "usd_micros": 0
+    },
+    "episodeId": "episode-rf95-live",
+    "modelRoutes": [
+      {
+        "fingerprint_unavailable_reason": "provider_did_not_report",
+        "model": "deepseek/deepseek-chat",
+        "model_fingerprint": null,
+        "provider": "openrouter",
+        "tier": 1
+      }
+    ],
+    "projectId": "calc-fix",
+    "runDigest": "sha256:2947415f4f92c9aa66fe52048ce49fca7187636b32ff32eec334e47533fa5b9d",
+    "runId": "run-rf95-live"
+  },
+  "schema": "aether.evidence/1",
+  "subject": [
+    "run:run-rf95-live",
+    "episode:episode-rf95-live"
+  ]
+}

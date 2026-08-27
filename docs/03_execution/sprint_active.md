@@ -30,7 +30,11 @@ This is the sole current work authorization. Stable task contracts are in
 - RF-86: **fails** on 111 added protected-substrate lines at the verification subject.
 - RF-98: structural Kernel neutrality and Kernel diff are green against the local tag, but this
   cannot validate the contaminated control.
-- RF-95/M-6 release bundles and independent review receipts: absent from the repository.
+- RF-95/M-6 release bundles: **produced** by WP-A1 in `docs/03_execution/evidence/`.
+  Independent review receipts: still absent — the producer cannot accept its own work.
+- Original RF-95 bundle: searched for and **not recoverable** (git history at `349c7d1`
+  carries only the test and runner). Three preregistered candidates were executed;
+  01 and 02 were `UNDETERMINABLE` on diagnosed instrument defects, 03 passed.
 
 ## Canonical milestone status
 
@@ -41,10 +45,10 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | Milestone | Mechanism / integration truth | Package state | Merge | Gate | Evidence | Blocked on |
 |---|---|---|---|---|---|---|
 | M-0–M-3C/W-3D | Historical mechanisms integrated | **ACCEPTED** | `MERGED` | `ACCEPTED` | accepted ADR/gate lineage | — |
-| M-4 | `/2`, RF-100 and product runner present | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | RF-95 bundle and independent receipt |
+| M-4 | `/2`, RF-100 and product runner present; RF-95 candidate 03 executed and passed | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-4-rf95-candidate-03.json` (`sha256:aec94c0f…`) | independent acceptance receipt |
 | M-5a | AgentView/checkpoints integrated; historical control invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | accepted successor baseline |
 | M-5b | SAT regression path present; clean witness absent | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | successor baseline, fresh graph coloring, RF-86/RF-98, review |
-| M-6 | Spawn contracts exist; product path can synthesize success | **IN_PROGRESS** | `PARTIAL` | `OPEN` | `[]` | canonical child runtime, recovery bundle, review |
+| M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:041c4d62…`) | independent acceptance receipt |
 | M-6.5 | Controller/statistics present; study instrument invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | valid attributable paired study |
 | M-7 | Topology library present; public runtime integration absent | **IN_PROGRESS** | `PARTIAL` | `OPEN` | `[]` | three topologies, monotonic telemetry, M7-01, ADR-0099 |
 | M-8 | In-memory prototypes only | **NOT_STARTED** | `PREPARATION_ONLY` | `OPEN` | `[]` | M-7 disposition, durable authorized memory, lift and rollback |
@@ -54,8 +58,8 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 
 | ID | Milestone | Owner | State | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
-| WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **IN_PROGRESS** | accepted ADR-0101/0102 contracts | tests plus digest-addressed RF-95/M-6 bundles; independent receipts |
-| WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **IN_PROGRESS** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline; graph-coloring vectors; RF-86/RF-98 bundle; independent receipt |
+| WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; digest-addressed M-4/M-6 bundles produced; independent receipts outstanding |
+| WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; RF-86/RF-98 bundle |
 | C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 and WP-B1 `EVIDENCE_READY`; qualified Linux/TS gates | signed CI envelope and separate acceptance receipts |
 
 Both developers work from the same reviewed commit and do not consume unfinished branches. Dev A

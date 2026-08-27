@@ -43,6 +43,7 @@ from ..kernel import (
     Span,
 )
 from ..ports.blob_store import BlobStorePort
+from ..ports.child_runtime import ChildRuntimePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.event_store import EventRange, EventStorePort, Result
@@ -55,6 +56,7 @@ from .compose import (
     TaskContext,
 )
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
+from .budget_view import ADDITIVE_DIMENSIONS, remaining_budget
 from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
@@ -392,6 +394,11 @@ class SessionPorts:
     #: Immutable evidence admitted by B-M65. An acting controller must bind at
     #: least one current record into its durable attribution.
     controller_confidence: tuple[ConfidenceRecord, ...] = ()
+    child_runtime: Any = None
+    #: `M-6`. The runtime that executes child episodes. `None` is legal for a
+    #: composition that never declares `agent.spawn`; for one that does, the
+    #: binding fails closed at composition rather than substituting a fake.
+    child_runtime: ChildRuntimePort | None = None
 
 
 class _SwappablePolicy:
@@ -486,8 +493,11 @@ class HarnessSession:
                     parent_episode_id=task.episode_id,
                     max_depth=self.scope.constraints.max_depth,
                     max_turns=getattr(task, "max_turns", 10),
-                    run_child=getattr(task, "run_child", None),
-                    lineage=getattr(task, "lineage", (task.episode_id,)),
+                    child_runtime=ports.child_runtime,
+                    remaining_budget=self._spawn_remaining_budget,
+                    project_id=task.project_id,
+                    composition_digest=harness.frozen.composition_digest,
+                    lineage=task.lineage or (task.episode_id,),
                     ledger=self.ledger,
                 )
             )
@@ -631,18 +641,42 @@ class HarnessSession:
         return reconstruct_state(envelopes)
 
     def _controller_remaining_budget(self, view: AgentView) -> Mapping[str, int]:
-        remaining = {
-            dimension: max(
-                0,
-                int(self.harness.budget.get(dimension, 0) or 0)
-                - int(view.budget_consumed.get(dimension, 0) or 0),
-            )
-            for dimension in ("usd_micros", "millis", "tokens", "bytes")
-        }
-        remaining["turns"] = max(0, self.task.max_turns - self.turns_consumed())
-        remaining["depth"] = max(
-            0, self.scope.constraints.max_depth - self.scope.depth)
-        return remaining
+        return remaining_budget(
+            harness_budget=self.harness.budget,
+            budget_consumed=view.budget_consumed,
+            max_turns=self.task.max_turns,
+            turns_consumed=self.turns_consumed(),
+            max_depth=self.scope.constraints.max_depth,
+            depth=self.scope.depth,
+        )
+
+    def _spawn_remaining_budget(self) -> Mapping[str, int]:
+        """The same balance, folded from the live ledger at call time.
+
+        Deliberately not a snapshot taken at composition. Siblings spawned in
+        later turns must see what earlier siblings actually spent, or the
+        second child is handed a budget the first one already consumed.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        if not read.ok:
+            # Fail closed. A store we cannot read is not a store that says
+            # "nothing spent"; reporting the full ceiling here would let an
+            # outage fund a child (`unknown is never a pass value`).
+            return {dimension: 0 for dimension in
+                    (*ADDITIVE_DIMENSIONS, "turns", "depth")}
+        envelopes = read.value or ()
+        # An empty episode has genuinely consumed nothing -- distinct from the
+        # unreadable case above, and `fold_agent_view` refuses to fold zero
+        # events rather than inventing a view.
+        consumed = fold_agent_view(None, envelopes).budget_consumed if envelopes else {}
+        return remaining_budget(
+            harness_budget=self.harness.budget,
+            budget_consumed=consumed,
+            max_turns=self.task.max_turns,
+            turns_consumed=self.turns_consumed(),
+            max_depth=self.scope.constraints.max_depth,
+            depth=self.scope.depth,
+        )
 
     def _consult_meta_controller(self) -> ControllerProposal | None:
         """Consult the optional policy plugin from durable between-turn state.
@@ -772,7 +806,8 @@ class HarnessSession:
         request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
-                self.ports.store, request.idempotency_key
+                self.ports.store, request.idempotency_key,
+                project_id=self.task.project_id,
             )
             if settled is not None:
                 occurrence = str(settled.payload.get("occurrence") or "")
@@ -853,7 +888,17 @@ class HarnessSession:
             self.begin_episode()
         else:
             scanner = RecoveryScanner(controller_principal=task.principal)
-            scanner.reconcile_open_intents(ports.store, occurred_at=ports.clock.now())
+            scanner.reconcile_open_intents(
+                ports.store, occurred_at=ports.clock.now(),
+                project_id=task.project_id,
+            )
+            # Open subtrees are adjudicated before the run is declared
+            # recovered, so a resumed parent never re-runs a child whose
+            # occurrence nobody actually knows (`WP-A1`).
+            scanner.reconcile_open_children(
+                ports.store, occurred_at=ports.clock.now(),
+                project_id=task.project_id,
+            )
             self.ledger._seq, self.ledger._prev = self.ledger._load_chain(task.project_id)
             read_events = ports.store.read(EventRange(episode_id=task.episode_id))
             ev_list = list(read_events.value) if read_events.ok and read_events.value else []

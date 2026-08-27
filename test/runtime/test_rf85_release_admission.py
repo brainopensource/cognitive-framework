@@ -89,6 +89,9 @@ class TestRF85ReleaseAdmission(unittest.TestCase):
     def test_undeterminable_recovery_never_becomes_success(self) -> None:
         session = object.__new__(HarnessSession)
         session.ports = SimpleNamespace(store=object())
+        # `WP-A1`: settlement lookup is project-scoped, so an idempotency key
+        # from one project can never answer another project's dispatch.
+        session.task = SimpleNamespace(project_id="project-default")
         session.calls = []
         session.kernel = SimpleNamespace(
             dispatch=lambda *_args, **_kwargs: self.fail("physical effect repeated"))

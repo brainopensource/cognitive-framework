@@ -100,6 +100,10 @@ class TaskContext:
     #: Immutable preregistration values supplied by the trust lane.  Runtime
     #: treats this as a wire mapping and never imports its implementation.
     preregistration: Mapping[str, Any] | None = None
+    #: Ancestor chain, root first. Empty means "this episode is the root", and
+    #: the session substitutes `(episode_id,)`. Carried explicitly so a cold
+    #: reader can rebuild the tree without a live parent object (`RF-59`).
+    lineage: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

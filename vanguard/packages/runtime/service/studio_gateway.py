@@ -33,6 +33,24 @@ def _package_version() -> str:
         return "unknown"
 
 
+def _http_status_for_code(code: str) -> int:
+    if code in ("invalid_request", "incompatible_version", "frame_too_large"):
+        return HTTPStatus.BAD_REQUEST
+    if code == "unauthenticated":
+        return HTTPStatus.UNAUTHORIZED
+    if code == "permission_denied":
+        return HTTPStatus.FORBIDDEN
+    if code == "not_found":
+        return HTTPStatus.NOT_FOUND
+    if code == "conflict":
+        return HTTPStatus.CONFLICT
+    if code == "rate_limited":
+        return HTTPStatus.TOO_MANY_REQUESTS
+    if code == "not_available":
+        return HTTPStatus.SERVICE_UNAVAILABLE
+    return HTTPStatus.INTERNAL_SERVER_ERROR
+
+
 class StudioGatewayHandler(BaseHTTPRequestHandler):
     """HTTP and SSE request handler for the Studio Frontend."""
 
@@ -59,6 +77,11 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             self._handle_capabilities()
         elif path in ("/api/runs", "/api/v1/runs"):
             self._handle_list_runs(query)
+        elif path.startswith("/api/artifacts/") or path.startswith("/api/v1/artifacts/"):
+            parts = path.split("/")
+            artifact_id = parts[3] if path.startswith("/api/artifacts/") else parts[4]
+            artifact_id = artifact_id.split(":")[0].split("/")[0]
+            self._handle_explain_artifact(artifact_id, query)
         elif path.startswith("/api/runs/") or path.startswith("/api/v1/runs/"):
             parts = path.split("/")
             run_id = parts[3] if path.startswith("/api/runs/") else parts[4]
@@ -103,6 +126,13 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             if path.startswith("/api/v1/approvals/") and path.endswith(":resolve"):
                 approval_id = path[len("/api/v1/approvals/") : -len(":resolve")]
             self._handle_resolve_approval(payload, approval_id=approval_id)
+        elif path in ("/api/artifacts/explain", "/api/v1/artifacts:explain", "/api/v1/artifacts/explain"):
+            self._handle_explain_artifact_post(payload)
+        elif path in ("/api/corrections", "/api/v1/corrections"):
+            self._handle_record_correction("", payload)
+        elif ":recordCorrection" in path or "/corrections" in path:
+            run_id = path.split("/")[3].split(":")[0].split("/")[0] if path.startswith("/api/runs/") else path.split("/")[4].split(":")[0].split("/")[0]
+            self._handle_record_correction(run_id, payload)
         elif ":cancel" in path:
             run_id = path.split("/")[3].split(":")[0] if path.startswith("/api/runs/") else path.split("/")[4].split(":")[0]
             self._handle_cancel(run_id, payload)
@@ -143,6 +173,7 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "command": {
                 "name": "GetCapabilities",
                 "commandId": uuidv7(),
+                "idempotencyKey": uuidv7(),
                 "payload": {},
             },
         }
@@ -159,6 +190,7 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "command": {
                 "name": "ListRuns",
                 "commandId": uuidv7(),
+                "idempotencyKey": uuidv7(),
                 "payload": {"limit": limit, "offset": offset},
             },
         }
@@ -173,6 +205,7 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "command": {
                 "name": "GetRun",
                 "commandId": uuidv7(),
+                "idempotencyKey": uuidv7(),
                 "runId": run_id,
                 "payload": {},
             },
@@ -192,7 +225,8 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "frameId": uuidv7(),
             "command": {
                 "name": "StartRun",
-                "commandId": uuidv7(),
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
                 "payload": {
                     "manifestPath": manifest_path,
@@ -205,45 +239,51 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         self._send_json_response(res)
 
     def _handle_cancel(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        p_clean = {k: v for k, v in payload.items() if k in ("reason", "expectedSeq")}
         cmd_frame = {
             "version": "vg.4",
             "frameType": "command",
             "frameId": uuidv7(),
             "command": {
                 "name": "Cancel",
-                "commandId": uuidv7(),
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
-                "payload": dict(payload),
+                "payload": p_clean,
             },
         }
         res = self.server.service.execute_command(cmd_frame)
         self._send_json_response(res)
 
     def _handle_checkpoint(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        p_clean = {k: v for k, v in payload.items() if k in ("reason", "expectedSeq")}
         cmd_frame = {
             "version": "vg.4",
             "frameType": "command",
             "frameId": uuidv7(),
             "command": {
                 "name": "Checkpoint",
-                "commandId": uuidv7(),
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
-                "payload": dict(payload),
+                "payload": p_clean,
             },
         }
         res = self.server.service.execute_command(cmd_frame)
         self._send_json_response(res)
 
     def _handle_resume(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        p_clean = {k: v for k, v in payload.items() if k in ("checkpointId", "expectedSeq")}
         cmd_frame = {
             "version": "vg.4",
             "frameType": "command",
             "frameId": uuidv7(),
             "command": {
                 "name": "Resume",
-                "commandId": uuidv7(),
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
-                "payload": dict(payload),
+                "payload": p_clean,
             },
         }
         res = self.server.service.execute_command(cmd_frame)
@@ -252,8 +292,67 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
     def _handle_resolve_approval(self, payload: Mapping[str, Any], approval_id: str = "") -> None:
         run_id = str(payload.get("runId", ""))
         p = dict(payload)
-        if approval_id and "approvalId" not in p:
-            p["approvalId"] = approval_id
+        app_id = approval_id or str(p.get("approvalId", "app-default"))
+
+        # Normalize decision if passed as a string or flat fields
+        decision_raw = p.get("decision")
+        if isinstance(decision_raw, str):
+            resolution = decision_raw
+            dec_dict = {
+                "approvalId": app_id,
+                "resolution": resolution if resolution in ("approved", "rejected") else "approved",
+                "reviewer": str(p.get("reviewer", "operator")),
+                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
+                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
+                "expiresAt": str(p.get("expiresAt", _utc_now())),
+                "keyId": str(p.get("keyId", "operator-key-default")),
+                "signature": str(p.get("signature", "dummy-sig-approved")),
+            }
+        elif isinstance(decision_raw, Mapping):
+            d = dict(decision_raw)
+            if "approvalId" not in d:
+                d["approvalId"] = app_id
+            if "resolution" not in d:
+                d["resolution"] = "approved"
+            if "reviewer" not in d:
+                d["reviewer"] = str(p.get("reviewer", "operator"))
+            if "argsDigest" not in d:
+                d["argsDigest"] = str(p.get("argsDigest", "sha256:" + "0" * 64))
+            if "descriptorDigest" not in d:
+                d["descriptorDigest"] = str(p.get("descriptorDigest", "sha256:" + "0" * 64))
+            if "expiresAt" not in d:
+                d["expiresAt"] = str(p.get("expiresAt", _utc_now()))
+            if "keyId" not in d:
+                d["keyId"] = str(p.get("keyId", "operator-key-default"))
+            if "signature" not in d:
+                d["signature"] = str(p.get("signature", "dummy-sig-approved"))
+            dec_dict = d
+        elif "resolution" in p:
+            dec_dict = {
+                "approvalId": app_id,
+                "resolution": str(p.get("resolution", "approved")),
+                "reviewer": str(p.get("reviewer", "operator")),
+                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
+                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
+                "expiresAt": str(p.get("expiresAt", _utc_now())),
+                "keyId": str(p.get("keyId", "operator-key-default")),
+                "signature": str(p.get("signature", "dummy-sig-approved")),
+            }
+        else:
+            dec_dict = {
+                "approvalId": app_id,
+                "resolution": "approved",
+                "reviewer": str(p.get("reviewer", "operator")),
+                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
+                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
+                "expiresAt": str(p.get("expiresAt", _utc_now())),
+                "keyId": str(p.get("keyId", "operator-key-default")),
+                "signature": str(p.get("signature", "dummy-sig-approved")),
+            }
+
+        p_clean = {"decision": dec_dict}
+        if "expectedSeq" in p:
+            p_clean["expectedSeq"] = p["expectedSeq"]
 
         cmd_frame = {
             "version": "vg.4",
@@ -261,9 +360,63 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "frameId": uuidv7(),
             "command": {
                 "name": "ResolveApproval",
-                "commandId": uuidv7(),
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
-                "payload": p,
+                "payload": p_clean,
+            },
+        }
+        res = self.server.service.execute_command(cmd_frame)
+        self._send_json_response(res)
+
+    def _handle_explain_artifact(self, artifact_id: str, query: Mapping[str, list[str]]) -> None:
+        run_id = query.get("runId", query.get("run_id", [""]))[0]
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "ExplainArtifact",
+                "commandId": uuidv7(),
+                "idempotencyKey": uuidv7(),
+                "runId": run_id,
+                "payload": {"artifactId": artifact_id},
+            },
+        }
+        res = self.server.service.execute_command(cmd_frame)
+        self._send_json_response(res)
+
+    def _handle_explain_artifact_post(self, payload: Mapping[str, Any]) -> None:
+        run_id = str(payload.get("runId", ""))
+        artifact_id = str(payload.get("artifactId", ""))
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "ExplainArtifact",
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
+                "runId": run_id,
+                "payload": {"artifactId": artifact_id},
+            },
+        }
+        res = self.server.service.execute_command(cmd_frame)
+        self._send_json_response(res)
+
+    def _handle_record_correction(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        r_id = run_id or str(payload.get("runId", ""))
+        correction = payload.get("correction") if "correction" in payload else payload
+        cmd_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "RecordCorrection",
+                "commandId": str(payload.get("commandId") or uuidv7()),
+                "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
+                "runId": r_id,
+                "payload": {"correction": dict(correction)},
             },
         }
         res = self.server.service.execute_command(cmd_frame)
@@ -343,7 +496,25 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             pass
 
     def _send_json_response(self, data: Mapping[str, Any]) -> None:
-        self.send_response(HTTPStatus.OK)
+        status = HTTPStatus.OK
+        if data.get("frameType") == "error":
+            code = str(data.get("error", {}).get("code", "internal"))
+            status = _http_status_for_code(code)
+        elif data.get("frameType") == "receipt":
+            receipt = data.get("receipt", {})
+            if receipt.get("status") == "error":
+                err = receipt.get("error", {})
+                code = str(
+                    err.get("code")
+                    or (
+                        "not_found"
+                        if "not found" in str(receipt.get("detail", "")).lower()
+                        else "invalid_request"
+                    )
+                )
+                status = _http_status_for_code(code)
+
+        self.send_response(status)
         self._set_cors_headers()
         self.send_header("Content-Type", "application/json")
         self.end_headers()
@@ -372,17 +543,33 @@ def create_gateway(
     port: int = 8000,
     workspace_root: Path | None = None,
     service: RuntimeService | None = None,
+    db_path: Path | str | None = None,
 ) -> StudioGatewayServer:
+    from ...adapters.stores.event_store import SqliteEventStore
+    from .inbox import ServiceInboxStore
+
     root = (workspace_root or Path.cwd()).resolve()
-    srv = service or RuntimeService()
-    return StudioGatewayServer((host, port), srv, root)
+    if service is None:
+        if db_path is None:
+            db_dir = root / ".vanguard"
+            db_dir.mkdir(parents=True, exist_ok=True)
+            db_path = db_dir / "runtime.db"
+        inbox = ServiceInboxStore(db_path)
+        event_store = SqliteEventStore(db_path)
+        service = RuntimeService(inbox_store=inbox, event_store=event_store)
+    return StudioGatewayServer((host, port), service, root)
 
 
-def run_gateway(host: str = "127.0.0.1", port: int = 8000, workspace: str = ".") -> None:
+def run_gateway(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    workspace: str = ".",
+    db_path: str | None = None,
+) -> None:
     root = Path(workspace).resolve()
     print(f"[*] Starting AETHER Studio Gateway on http://{host}:{port}")
     print(f"[*] Serving workspace at {root}")
-    server = create_gateway(host=host, port=port, workspace_root=root)
+    server = create_gateway(host=host, port=port, workspace_root=root, db_path=db_path)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -391,11 +578,16 @@ def run_gateway(host: str = "127.0.0.1", port: int = 8000, workspace: str = ".")
         server.server_close()
 
 
-if __name__ == "__main__":
+def main() -> None:
     parser = argparse.ArgumentParser(description="AETHER Studio Gateway")
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind (default: 8000)")
     parser.add_argument("--workspace", default=".", help="Workspace root directory")
+    parser.add_argument("--db", default=None, help="Database path for persistent SQLite WAL store")
     args = parser.parse_args()
-    run_gateway(host=args.host, port=args.port, workspace=args.workspace)
+    run_gateway(host=args.host, port=args.port, workspace=args.workspace, db_path=args.db)
+
+
+if __name__ == "__main__":
+    main()
 

@@ -39,6 +39,14 @@
       "types": "./dist/src/adapters/scenario.d.ts",
       "default": "./dist/src/adapters/scenario.js"
     },
+    "./adapters/http.js": {
+      "types": "./dist/src/adapters/http.d.ts",
+      "default": "./dist/src/adapters/http.js"
+    },
+    "./adapters/fake.js": {
+      "types": "./dist/src/adapters/fake.d.ts",
+      "default": "./dist/src/adapters/fake.js"
+    },
     "./application/run-view.js": {
       "types": "./dist/src/application/run-view.d.ts",
       "default": "./dist/src/application/run-view.js"

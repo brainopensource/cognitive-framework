@@ -28,6 +28,15 @@ from ..governance.approvals import (
     ApprovalFlow,
     OperatorSigner,
 )
+from .contract import (
+    ConflictError,
+    ContractError,
+    NotFoundError,
+    error_code_for_exception,
+    service_error,
+    validate_command,
+    validate_frame_envelope,
+)
 from .inbox import ServiceInboxStore
 
 
@@ -88,7 +97,12 @@ class RuntimeService:
         claims: Sequence[Mapping[str, Any]] = (),
     ) -> None:
         self.store = inbox_store or ServiceInboxStore(":memory:")
-        self.event_store = event_store or SqliteEventStore(":memory:")
+        if event_store is not None:
+            self.event_store = event_store
+        elif inbox_store is not None and inbox_store.db_path != ":memory:":
+            self.event_store = SqliteEventStore(inbox_store.db_path)
+        else:
+            self.event_store = SqliteEventStore(":memory:")
         #: Evidence claims available to `vg why` (`S8-A-05`). Injected rather
         #: than read from disk: the service composes no store of its own.
         self.claims: tuple[Mapping[str, Any], ...] = tuple(claims)
@@ -101,23 +115,52 @@ class RuntimeService:
 
     def execute_command(self, frame: Mapping[str, Any]) -> dict[str, Any]:
         """Execute a validated command frame and return a response frame."""
-        cmd = frame.get("command")
-        if not isinstance(cmd, Mapping):
-            return self._error_frame(
-                frame.get("frameId", uuidv7()),
-                "invalid_frame",
-                "missing or non-object command payload",
-            )
+        # 1. Outer frame envelope validation
+        try:
+            validate_frame_envelope(frame)
+        except ContractError as exc:
+            frame_id = str(frame.get("frameId", uuidv7())) if isinstance(frame, Mapping) else uuidv7()
+            return {
+                "version": "vg.4",
+                "frameType": "error",
+                "frameId": uuidv7(),
+                "inReplyTo": frame_id,
+                "error": service_error(exc.code, exc.message, retryable=exc.retryable),
+            }
 
-        name = str(cmd.get("name", ""))
-        command_id = str(cmd.get("commandId", uuidv7()))
-        idempotency_key = str(cmd.get("idempotencyKey", command_id))
-        run_id = str(cmd.get("runId", ""))
-        actor = str(cmd.get("actor", "operator"))
-        payload = dict(cmd.get("payload", {}))
+        cmd_raw = frame.get("command")
+        frame_id = str(frame.get("frameId", uuidv7()))
+
+        # 2. Command validation
+        try:
+            val_cmd = validate_command(cmd_raw)
+        except ContractError as exc:
+            cmd_id = str(cmd_raw.get("commandId", uuidv7())) if isinstance(cmd_raw, Mapping) else uuidv7()
+            run_id = str(cmd_raw.get("runId", "")) if isinstance(cmd_raw, Mapping) else ""
+            err_receipt = {
+                "commandId": cmd_id,
+                "status": "error",
+                "runId": run_id,
+                "error": service_error(exc.code, exc.message, retryable=exc.retryable),
+                "detail": exc.message,
+            }
+            return {
+                "version": "vg.4",
+                "frameType": "receipt",
+                "frameId": uuidv7(),
+                "inReplyTo": frame_id,
+                "receipt": err_receipt,
+            }
+
+        name = val_cmd.name
+        command_id = val_cmd.command_id
+        idempotency_key = val_cmd.idempotency_key
+        run_id = val_cmd.run_id
+        actor = val_cmd.actor
+        payload = dict(val_cmd.payload)
         now = _utc_now()
 
-        # Check idempotency inbox
+        # 3. Check idempotency inbox
         is_new, prior_receipt = self.store.record_command(
             command_id, idempotency_key, name, run_id, payload, actor=actor, now=now
         )
@@ -126,6 +169,7 @@ class RuntimeService:
                 "version": "vg.4",
                 "frameType": "receipt",
                 "frameId": uuidv7(),
+                "inReplyTo": frame_id,
                 "receipt": prior_receipt,
             }
 
@@ -135,6 +179,7 @@ class RuntimeService:
                 "commandId": command_id,
                 "status": "error",
                 "runId": run_id,
+                "error": service_error("invalid_request", f"unknown command {name!r}", retryable=False),
                 "detail": f"unknown command {name!r}",
             }
             self.store.complete_command(command_id, "error", err_receipt, now=_utc_now())
@@ -142,6 +187,7 @@ class RuntimeService:
                 "version": "vg.4",
                 "frameType": "receipt",
                 "frameId": uuidv7(),
+                "inReplyTo": frame_id,
                 "receipt": err_receipt,
             }
 
@@ -159,13 +205,17 @@ class RuntimeService:
                 "version": "vg.4",
                 "frameType": "receipt",
                 "frameId": uuidv7(),
+                "inReplyTo": frame_id,
                 "receipt": receipt,
             }
         except Exception as exc:
+            code = error_code_for_exception(exc)
+            retryable = getattr(exc, "retryable", code in ("conflict", "rate_limited", "not_available"))
             err_receipt = {
                 "commandId": command_id,
                 "status": "error",
                 "runId": run_id,
+                "error": service_error(code, str(exc), retryable=retryable),
                 "detail": str(exc),
             }
             self.store.complete_command(command_id, "error", err_receipt, now=_utc_now())
@@ -173,6 +223,7 @@ class RuntimeService:
                 "version": "vg.4",
                 "frameType": "receipt",
                 "frameId": uuidv7(),
+                "inReplyTo": frame_id,
                 "receipt": err_receipt,
             }
 
@@ -181,7 +232,7 @@ class RuntimeService:
             expected = int(payload["expectedSeq"])
             current = self.get_latest_seq(run_id)
             if expected != current:
-                raise ValueError(
+                raise ConflictError(
                     f"CAS conflict on run {run_id!r}: expectedSeq {expected} != current sequence {current}"
                 )
 
@@ -201,11 +252,11 @@ class RuntimeService:
         brief = str(payload.get("brief", ""))
 
         if not manifest_path or not brief:
-            raise ValueError("StartRun requires manifestPath and brief")
+            raise ContractError("invalid_request", "StartRun requires manifestPath and brief")
 
         with self._lock:
             if run_id in self._active_runs:
-                raise ValueError(f"run {run_id} is already active")
+                raise ConflictError(f"run {run_id} is already active")
             ctx = ActiveRunContext(
                 run_id=run_id,
                 manifest_path=manifest_path,
@@ -229,8 +280,8 @@ class RuntimeService:
             },
         )
 
-        # Spawn execution thread if runner provided
-        if self._harness_runner is not None:
+        # Spawn execution thread if runner provided or manifest exists
+        if self._harness_runner is not None or (Path(manifest_path).exists() and Path(manifest_path).is_file()):
             t = threading.Thread(
                 target=self._run_worker_thread,
                 args=(ctx, payload),
@@ -252,7 +303,7 @@ class RuntimeService:
     ) -> dict[str, Any]:
         state = self.store.get_run_state(run_id)
         if state is None:
-            raise ValueError(f"run {run_id} not found")
+            raise NotFoundError(f"run {run_id} not found")
         events = self._load_events(run_id, after_seq=0)
         as_of_seq = str(events[-1]["seq"]) if events else "0"
         return {
@@ -426,6 +477,21 @@ class RuntimeService:
                 self.store.set_run_state(
                     run_id, state["manifest_path"], state["repo_path"], "cancelled", now=_utc_now()
                 )
+            else:
+                raise NotFoundError(f"run {run_id} not found")
+
+        now = _utc_now()
+        self.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": actor,
+                "runId": run_id,
+                "payload": {"kind": "RunCancelled", "reason": payload.get("reason", "cancelled by operator")},
+            },
+        )
         return {"runId": run_id, "status": "cancelled"}
 
     def _cmd_RecordCorrection(
@@ -451,14 +517,37 @@ class RuntimeService:
     ) -> dict[str, Any]:
         state = self.store.get_run_state(run_id)
         if state is None:
-            raise ValueError(f"run {run_id} not found")
+            raise NotFoundError(f"run {run_id} not found")
         seq = self.get_latest_seq(run_id)
+        digest_res = self.event_store.digest(run_id)
+        digest = digest_res.value if digest_res.ok and digest_res.value else "sha256:" + "0" * 64
         checkpoint_id = f"chk-{run_id}-{seq}"
+        now = _utc_now()
+
+        self.store.save_checkpoint(checkpoint_id, run_id, seq, digest, state_json=None, now=now)
+
+        self.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": actor,
+                "runId": run_id,
+                "payload": {
+                    "kind": "CheckpointRecorded",
+                    "checkpointId": checkpoint_id,
+                    "seq": str(seq),
+                    "digest": digest,
+                },
+            },
+        )
         return {
             "runId": run_id,
             "status": state["status"],
             "checkpoint": checkpoint_id,
             "asOfSeq": str(seq),
+            "digest": digest,
         }
 
     def _cmd_Resume(
@@ -466,15 +555,39 @@ class RuntimeService:
     ) -> dict[str, Any]:
         state = self.store.get_run_state(run_id)
         if state is None:
-            raise ValueError(f"run {run_id} not found")
-        return {"runId": run_id, "status": "resumed"}
+            raise NotFoundError(f"run {run_id} not found")
+        checkpoint_id = payload.get("checkpointId")
+        if checkpoint_id:
+            chk = self.store.get_checkpoint(str(checkpoint_id))
+            if chk is None:
+                raise NotFoundError(f"checkpoint {checkpoint_id} not found for run {run_id}")
+
+        now = _utc_now()
+        seq = self.get_latest_seq(run_id)
+        self.publish_event(
+            run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": actor,
+                "runId": run_id,
+                "payload": {
+                    "kind": "RunResumed",
+                    "checkpointId": checkpoint_id,
+                    "asOfSeq": str(seq),
+                },
+            },
+        )
+        self.store.set_run_state(run_id, state["manifest_path"], state["repo_path"], "resumed", now=now)
+        return {"runId": run_id, "status": "resumed", "asOfSeq": str(seq)}
 
     def _cmd_ExplainArtifact(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
         artifact_id = str(payload.get("artifactId", ""))
         if not artifact_id:
-            raise ValueError("ExplainArtifact requires artifactId")
+            raise ContractError("invalid_request", "ExplainArtifact requires artifactId")
         explanation = explain_artifact(
             artifact_id,
             events=self._explain_events(run_id),
@@ -506,9 +619,9 @@ class RuntimeService:
     # -- Event Storage & Streaming -------------------------------------------
 
     def _load_events(self, run_id: str, after_seq: int = 0) -> list[dict[str, Any]]:
-        """Read events from canonical EventStore or inbox fallback."""
+        """Read events from canonical EventStore or store fallback."""
         res = self.event_store.read(EventRange(run_id=run_id, after_seq=str(after_seq)))
-        if res.ok and res.value is not None and len(res.value) > 0:
+        if res.ok and res.value:
             return [env.to_dict() for env in res.value]
         return self.store.get_events(run_id, after_seq=after_seq)
 
@@ -517,8 +630,15 @@ class RuntimeService:
     ) -> Iterator[dict[str, Any]]:
         """Yield historical events followed by live events until terminal with gap detection."""
         last_seq = after_seq
+        q: queue.Queue[dict[str, Any] | None] = queue.Queue()
 
-        # 1. Replay historical events from store
+        # 1. Subscribe to live queue first if run is active
+        with self._lock:
+            ctx = self._active_runs.get(run_id)
+            if ctx is not None:
+                ctx.event_subscribers.append(q)
+
+        # 2. Replay historical events from store
         historical = self._load_events(run_id, after_seq=after_seq)
         for evt in historical:
             seq_val = int(evt.get("seq", 0))
@@ -532,14 +652,10 @@ class RuntimeService:
                 "event": evt,
             }
 
-        # 2. Subscribe to live queue if run is active
-        with self._lock:
-            ctx = self._active_runs.get(run_id)
-            if ctx is None:
-                return
-            q: queue.Queue[dict[str, Any] | None] = queue.Queue()
-            ctx.event_subscribers.append(q)
+        if ctx is None:
+            return
 
+        # 3. Stream live queue events, deduplicating against replayed events
         try:
             while True:
                 item = q.get()
@@ -567,6 +683,11 @@ class RuntimeService:
         evt_copy = dict(event_envelope)
         evt_copy["seq"] = str(seq)
 
+        if "occurredAt" not in evt_copy or not evt_copy["occurredAt"]:
+            evt_copy["occurredAt"] = now
+        if "runId" not in evt_copy or not evt_copy["runId"]:
+            evt_copy["runId"] = run_id
+
         # Commit to canonical EventStorePort
         env = _envelope_from_service_event(run_id, evt_copy)
         self.event_store.append([env])
@@ -585,11 +706,86 @@ class RuntimeService:
 
     # -- Internal Execution --------------------------------------------------
 
+    def _handle_approver_callback(self, ctx: ActiveRunContext, challenge: Any) -> Any:
+        ctx.pending_approval = challenge
+        now = _utc_now()
+        self.publish_event(
+            ctx.run_id,
+            {
+                "eventId": uuidv7(),
+                "scope": "run",
+                "occurredAt": now,
+                "principal": "runtime",
+                "runId": ctx.run_id,
+                "payload": {
+                    "kind": "ApprovalRequested",
+                    "approvalId": getattr(challenge, "approval_id", uuidv7()),
+                    "processId": getattr(challenge, "process_id", ""),
+                    "action": getattr(challenge, "action", ""),
+                    "argsDigest": getattr(challenge, "args_digest", ""),
+                    "descriptorDigest": getattr(challenge, "descriptor_digest", ""),
+                    "principal": getattr(challenge, "principal", "operator"),
+                    "expiresAt": getattr(challenge, "expires_at", ""),
+                },
+            },
+        )
+        decision = ctx.approval_response_queue.get()
+        if decision is None:
+            raise RuntimeError("approval aborted: run was cancelled or interrupted")
+        return decision
+
     def _run_worker_thread(self, ctx: ActiveRunContext, payload: Mapping[str, Any]) -> None:
+        run_status = "completed"
         try:
             if self._harness_runner is not None:
                 self._harness_runner(ctx, self)
+            else:
+                from ..compose import TaskContext
+                from ..root import Runtime
+
+                manifest_path = ctx.manifest_path
+                repo_path = ctx.repo_path
+                profile_id = str(payload.get("profileId", "code-default"))
+                model = payload.get("model")
+
+                task_context = TaskContext(
+                    brief=ctx.brief,
+                    repo_path=Path(repo_path),
+                    run_id=ctx.run_id,
+                    episode_id=str(payload.get("episodeId") or uuidv7()),
+                    principal=str(payload.get("actor", "operator")),
+                )
+
+                Runtime.execute_profiled(
+                    manifest_path=manifest_path,
+                    task_context=task_context,
+                    profile_id=profile_id,
+                    model=model,
+                    store=self._evaluation_store,
+                    approver=lambda challenge: self._handle_approver_callback(ctx, challenge),
+                )
+            now = _utc_now()
+            seq = self.get_latest_seq(ctx.run_id)
+            digest_res = self.event_store.digest(ctx.run_id)
+            digest = digest_res.value if digest_res.ok and digest_res.value else ""
+            self.publish_event(
+                ctx.run_id,
+                {
+                    "eventId": uuidv7(),
+                    "scope": "run",
+                    "occurredAt": now,
+                    "principal": "runtime",
+                    "runId": ctx.run_id,
+                    "payload": {
+                        "kind": "RunCompleted",
+                        "finalSeq": str(seq),
+                        "digest": digest,
+                    },
+                },
+            )
+            run_status = "completed"
         except Exception as exc:
+            run_status = "failed"
             now = _utc_now()
             self.publish_event(
                 ctx.run_id,
@@ -603,8 +799,11 @@ class RuntimeService:
                 },
             )
         finally:
+            if ctx.is_cancelled:
+                run_status = "cancelled"
+            ctx.status = run_status
             self.store.set_run_state(
-                ctx.run_id, ctx.manifest_path, ctx.repo_path, "completed", now=_utc_now()
+                ctx.run_id, ctx.manifest_path, ctx.repo_path, run_status, now=_utc_now()
             )
             with self._lock:
                 for sub in ctx.event_subscribers:

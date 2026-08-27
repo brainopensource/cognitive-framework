@@ -1,17 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ColumnarEventStore } from "./store/event-store.js";
-import { initialStudioFold, StudioFoldEngine } from "./store/fold.js";
-import { INITIAL_SESSION_STATE } from "./store/session.js";
-import { CSS_VARIABLES } from "./ui/tokens.js";
+import { FakeRuntimeClient } from "@vanguard/client-core/adapters/fake.js";
+import { HttpRuntimeClient } from "@vanguard/client-core/adapters/http.js";
+import type { RuntimeClient } from "@vanguard/client-core/contract/types.js";
+import { useStudioRuntime } from "./runtime/StudioRuntime.js";
 import { StudioApp } from "./ui/StudioApp.js";
+import { CSS_VARIABLES } from "./ui/tokens.js";
 import type { EventEnvelope } from "./contract/index.js";
+
+const DEMO_RUN_ID = "demo-run";
 
 const base = (seq: string, eventId: string, kind: string, payload: Record<string, unknown>): EventEnvelope => ({
   schemaVersion: "vg.4",
   eventId,
   scope: "episode",
-  runId: "run-meta-dev-01",
+  runId: DEMO_RUN_ID,
   traceId: "trace-meta-01",
   spanId: `span-${seq}`,
   seq,
@@ -111,97 +114,48 @@ const style = document.createElement("style");
 style.textContent = CSS_VARIABLES;
 document.head.appendChild(style);
 
-function DemoObservatory() {
-  const [store] = useState(() => new ColumnarEventStore());
-  const [engine] = useState(() => new StudioFoldEngine());
-  const [mode, setMode] = useState<"live" | "demo">("demo");
-  const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
-  const [demoCount, setDemoCount] = useState(demoEvents.length);
-  const [session, setSession] = useState(INITIAL_SESSION_STATE);
-  const [eventVersion, setEventVersion] = useState(0);
+const urlParams = new URLSearchParams(window.location.search);
+const liveRunIdFromUrl = urlParams.get("runId");
 
-  // Check Backend Health & Connect SSE
-  useEffect(() => {
-    let sse: EventSource | null = null;
+/**
+ * Demo mode is an explicit, user-chosen client (FakeRuntimeClient), never a silent
+ * fallback from a failed live connection: mode only changes via the pill switcher below.
+ */
+function makeDemoClient(): RuntimeClient {
+  return new FakeRuntimeClient({
+    runs: new Map([[DEMO_RUN_ID, { status: "running", events: demoEvents }]]),
+    health: { status: "ok", version: "demo" },
+  });
+}
 
-    const checkHealth = async () => {
-      try {
-        const res = await fetch("/api/health");
-        if (res.ok) {
-          setIsBackendOnline(true);
-          setMode("live");
-          connectSSE();
-        }
-      } catch {
-        setIsBackendOnline(false);
-      }
-    };
+function makeLiveClient(): RuntimeClient {
+  return new HttpRuntimeClient({ baseUrl: "" });
+}
 
-    const connectSSE = () => {
-      try {
-        sse = new EventSource("/api/events/stream");
-        sse.onmessage = (event) => {
-          try {
-            const parsed = JSON.parse(event.data) as EventEnvelope;
-            store.append(parsed);
-            setEventVersion((v) => v + 1);
-          } catch (err) {
-            console.error("SSE parse error", err);
-          }
-        };
-        sse.onerror = () => {
-          console.warn("SSE disconnected, polling fallback...");
-        };
-      } catch (e) {
-        console.error("SSE init failed", e);
-      }
-    };
+function Observatory() {
+  const [mode, setMode] = useState<"live" | "demo">(liveRunIdFromUrl ? "live" : "demo");
+  const [runId, setRunId] = useState(liveRunIdFromUrl ?? DEMO_RUN_ID);
 
-    checkHealth();
+  const client = useMemo(() => (mode === "live" ? makeLiveClient() : makeDemoClient()), [mode]);
+  const runtime = useStudioRuntime({ client, runId });
 
-    return () => {
-      if (sse) sse.close();
-    };
-  }, [store]);
-
-  const rows = useMemo(() => {
-    if (mode === "demo") {
-      return store.appendBatch(demoEvents.slice(0, demoCount));
-    }
-    // Live mode
-    return store.getAllRows();
-  }, [mode, demoCount, store, eventVersion]);
-
-  const liveFold = engine.foldAll(rows);
-  const fold = session.isScrubbing ? engine.foldToSeq(session.selectedSeq, rows) : liveFold;
-
-  const appendNext = () => setDemoCount((value) => Math.min(demoEvents.length, value + 1));
-  const selectSeq = (seq: bigint) =>
-    setSession((value) => ({
-      ...value,
-      selectedSeq: seq,
-      isScrubbing: seq > 0n && seq < BigInt(rows.length),
-    }));
-
-  const resolveApproval = async (approvalId: string, decision: "approve" | "reject") => {
-    if (mode === "live") {
-      try {
-        await fetch("/api/approvals/resolve", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ approvalId, decision }),
-        });
-      } catch (err) {
-        console.error("Failed to submit live approval", err);
-      }
-    } else {
-      setDemoCount((value) => Math.max(value, 11));
-    }
+  const switchToLive = () => {
+    const requested = window.prompt("Run ID to attach to", liveRunIdFromUrl ?? "");
+    if (!requested) return;
+    setRunId(requested);
+    setMode("live");
   };
+
+  const switchToDemo = () => {
+    setRunId(DEMO_RUN_ID);
+    setMode("demo");
+  };
+
+  const isLiveHealthy = mode === "live" && (runtime.connection === "live" || runtime.connection === "complete");
+  const isLiveBroken = mode === "live" && runtime.connection === "interrupted";
 
   return (
     <>
-      {/* Floating Mode Switcher & Stepper Pill */}
       <div
         style={{
           position: "fixed",
@@ -225,52 +179,36 @@ function DemoObservatory() {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: isBackendOnline ? "var(--signal-proof)" : "var(--signal-hold)",
+              background: mode === "demo" ? "var(--signal-flow)" : isLiveHealthy ? "var(--signal-proof)" : "var(--signal-hold)",
               display: "inline-block",
             }}
           />
           <span className="font-mono" style={{ fontSize: 10, fontWeight: 700, color: "var(--text-primary)" }}>
-            {mode === "live" ? "LIVE BACKEND" : "FIXTURE MODE"}
+            {mode === "demo" ? "FIXTURE MODE" : isLiveBroken ? "LIVE — DISCONNECTED" : "LIVE BACKEND"}
           </span>
         </div>
 
         <div style={{ width: 1, height: 16, background: "var(--border-subtle)" }} />
 
         {mode === "demo" ? (
-          <>
-            <button onClick={() => setDemoCount(5)} style={pillButton}>
-              Reset
-            </button>
-            <button onClick={appendNext} disabled={demoCount >= demoEvents.length} style={pillButton}>
-              Advance ({demoCount}/{demoEvents.length})
-            </button>
-          </>
+          <button onClick={switchToLive} style={{ ...pillButton, color: "var(--signal-flow)" }}>
+            Attach Live Run
+          </button>
         ) : (
-          <button
-            onClick={() => setMode("demo")}
-            style={{ ...pillButton, color: "var(--signal-flow)" }}
-          >
+          <button onClick={switchToDemo} style={pillButton}>
             Switch to Demo
           </button>
         )}
 
         <button
-          onClick={() => setSession((value) => ({ ...value, selectedSeq: 0n, isScrubbing: false }))}
+          onClick={() => runtime.onSelectSeq(0n)}
           style={pillButton}
         >
           Live Head
         </button>
       </div>
 
-      <StudioApp
-        fold={fold}
-        rows={rows}
-        latestSeq={liveFold.atSeq}
-        session={session}
-        onSelectSurface={(activeSurface) => setSession((value) => ({ ...value, activeSurface }))}
-        onSelectSeq={selectSeq}
-        onResolveApproval={resolveApproval}
-      />
+      <StudioApp {...runtime} />
     </>
   );
 }
@@ -286,4 +224,4 @@ const pillButton: React.CSSProperties = {
   fontWeight: 600,
 };
 
-createRoot(rootElement).render(<DemoObservatory />);
+createRoot(rootElement).render(<Observatory />);

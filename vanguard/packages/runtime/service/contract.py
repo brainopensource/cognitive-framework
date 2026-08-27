@@ -92,7 +92,7 @@ def error_code_for_exception(exc: Exception) -> str:
     return "internal"
 
 
-# -- Command run-scoping rules (integration_plan.md §4.3) --------------------
+# -- Command run-scoping and payload rules (integration_plan.md §4.3) ---------
 
 RUN_SCOPE_REQUIRED = "required"
 RUN_SCOPE_FORBIDDEN = "forbidden"
@@ -112,9 +112,7 @@ COMMAND_RUN_SCOPE: Mapping[str, str] = {
     "GetCapabilities": RUN_SCOPE_FORBIDDEN,
 }
 
-#: Required payload fields per command, checked shallowly (deep validation of
-#: nested objects such as ``ApprovalDecision`` or ``CorrectionRecord`` stays
-#: with their own readers/handlers).
+#: Required payload fields per command, checked shallowly.
 COMMAND_REQUIRED_PAYLOAD_FIELDS: Mapping[str, Sequence[str]] = {
     "StartRun": ("manifestPath", "repoPath", "brief"),
     "GetRun": (),
@@ -129,6 +127,21 @@ COMMAND_REQUIRED_PAYLOAD_FIELDS: Mapping[str, Sequence[str]] = {
     "GetCapabilities": (),
 }
 
+#: Allowed payload fields per command.
+COMMAND_ALLOWED_PAYLOAD_FIELDS: Mapping[str, frozenset[str]] = {
+    "StartRun": frozenset({"manifestPath", "repoPath", "brief", "profileId", "model", "episodeId", "expectedSeq"}),
+    "GetRun": frozenset({"expectedSeq"}),
+    "ListRuns": frozenset({"limit", "offset"}),
+    "StreamEvents": frozenset({"afterSeq", "limit"}),
+    "Cancel": frozenset({"reason", "expectedSeq"}),
+    "Checkpoint": frozenset({"reason", "expectedSeq"}),
+    "Resume": frozenset({"checkpointId", "expectedSeq"}),
+    "ResolveApproval": frozenset({"decision", "approvalId", "resolution", "expectedSeq"}),
+    "RecordCorrection": frozenset({"correction", "expectedSeq"}),
+    "ExplainArtifact": frozenset({"artifactId", "substrateProfile", "expectedSeq"}),
+    "GetCapabilities": frozenset(),
+}
+
 APPROVAL_DECISION_REQUIRED_FIELDS: Sequence[str] = (
     "approvalId",
     "resolution",
@@ -140,7 +153,21 @@ APPROVAL_DECISION_REQUIRED_FIELDS: Sequence[str] = (
     "signature",
 )
 
+APPROVAL_DECISION_ALLOWED_FIELDS: frozenset[str] = frozenset(
+    {
+        "approvalId",
+        "resolution",
+        "reviewer",
+        "argsDigest",
+        "descriptorDigest",
+        "expiresAt",
+        "keyId",
+        "signature",
+    }
+)
+
 _COMMAND_TOP_LEVEL_FIELDS = frozenset({"name", "commandId", "idempotencyKey", "actor", "runId", "payload"})
+_FRAME_TOP_LEVEL_FIELDS = frozenset({"version", "frameType", "frameId", "command", "inReplyTo"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -161,6 +188,9 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
     Unknown commands and unknown fields fail closed rather than being coerced
     or ignored.
     """
+    if not isinstance(cmd, Mapping):
+        raise ContractError("invalid_request", "command must be an object")
+
     unknown_fields = set(cmd.keys()) - _COMMAND_TOP_LEVEL_FIELDS
     if unknown_fields:
         raise ContractError("invalid_request", f"unknown command field(s): {sorted(unknown_fields)}")
@@ -193,6 +223,13 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
     if not isinstance(payload, Mapping):
         raise ContractError("invalid_request", "payload must be an object")
 
+    allowed_payload = COMMAND_ALLOWED_PAYLOAD_FIELDS.get(name, frozenset())
+    unknown_payload = set(payload.keys()) - allowed_payload
+    if unknown_payload:
+        raise ContractError(
+            "invalid_request", f"unknown payload field(s) for {name}: {sorted(unknown_payload)}"
+        )
+
     missing = [f for f in COMMAND_REQUIRED_PAYLOAD_FIELDS[name] if f not in payload]
     if missing:
         raise ContractError("invalid_request", f"{name} payload missing required field(s): {missing}")
@@ -201,6 +238,11 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
         decision = payload.get("decision")
         if not isinstance(decision, Mapping):
             raise ContractError("invalid_request", "ResolveApproval requires a decision object")
+        unknown_decision = set(decision.keys()) - APPROVAL_DECISION_ALLOWED_FIELDS
+        if unknown_decision:
+            raise ContractError(
+                "invalid_request", f"unknown decision field(s): {sorted(unknown_decision)}"
+            )
         missing_decision = [f for f in APPROVAL_DECISION_REQUIRED_FIELDS if not decision.get(f)]
         if missing_decision:
             raise ContractError(
@@ -208,6 +250,9 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
             )
         if decision.get("resolution") not in ("approved", "rejected"):
             raise ContractError("invalid_request", "decision.resolution must be approved|rejected")
+        sig = decision.get("signature")
+        if not isinstance(sig, str) or not sig:
+            raise ContractError("invalid_request", "decision has invalid signature shape")
 
     return ValidatedCommand(
         name=name,
@@ -223,10 +268,20 @@ def validate_frame_envelope(frame: Any) -> None:
     """Validate the outer ``RuntimeServiceFrame`` shell before touching its payload."""
     if not isinstance(frame, Mapping):
         raise ContractError("invalid_request", "frame must be a JSON object")
+    
+    unknown_frame_fields = set(frame.keys()) - _FRAME_TOP_LEVEL_FIELDS
+    if unknown_frame_fields:
+        raise ContractError("invalid_request", f"unknown frame field(s): {sorted(unknown_frame_fields)}")
+
     if frame.get("version") != "vg.4":
         raise ContractError("incompatible_version", "frame version must be vg.4")
-    if frame.get("frameType") != "command":
+    
+    frame_type = frame.get("frameType")
+    if frame_type not in ("command", "receipt", "event", "error"):
+        raise ContractError("invalid_request", f"unknown frameType {frame_type!r}")
+    if frame_type != "command":
         raise ContractError("invalid_request", "frame frameType must be command")
+    
     frame_id = frame.get("frameId")
     if not isinstance(frame_id, str) or not frame_id:
         raise ContractError("invalid_request", "frame requires non-empty frameId")

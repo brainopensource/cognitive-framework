@@ -40,8 +40,7 @@
 ## 3. Elite Top Models
 
 - openai/gpt-5.6-sol
-- x-ai/grok-4.6
-- anthropic/claude-opus-5
+
 
 ## 4. Local Models
 

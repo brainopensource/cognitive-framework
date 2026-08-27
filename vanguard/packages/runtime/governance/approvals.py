@@ -203,6 +203,11 @@ class OperatorSigner:
             signature=sig_bytes.hex(),
         )
 
+    def sign_bytes(self, data: bytes) -> str:
+        """Sign raw canonical bytes with this operator's Ed25519 private key."""
+        sig_bytes = self._private_key.sign(data)
+        return sig_bytes.hex()
+
 
 class ApprovalAuthority:
     """Runtime-held verification authority. Holds STRICTLY public keys (`GOV-01`, `ADR-0062`)."""
@@ -258,6 +263,10 @@ class ApprovalAuthority:
         else:
             raise TypeError("unsupported public_keys specification")
 
+    @property
+    def verifying_keys(self) -> Mapping[str, ed25519.Ed25519PublicKey]:
+        return dict(self._keys)
+
     def register_public_key(self, key_id: str, key: ed25519.Ed25519PublicKey | bytes) -> None:
         if isinstance(key, ed25519.Ed25519PublicKey):
             self._keys[key_id] = key
@@ -288,6 +297,23 @@ class ApprovalAuthority:
         msg = canonical_bytes(decision.signed_payload())
         try:
             public_key.verify(sig_bytes, msg)
+            return True
+        except InvalidSignature:
+            return False
+
+    def verify_bytes(self, key_id: str, data: bytes, signature_hex: str) -> bool:
+        """Verify raw canonical bytes against a registered Ed25519 public key."""
+        public_key = self._keys.get(key_id)
+        if public_key is None:
+            return False
+        try:
+            sig_bytes = bytes.fromhex(signature_hex)
+            if len(sig_bytes) != 64:
+                return False
+        except (ValueError, TypeError):
+            return False
+        try:
+            public_key.verify(sig_bytes, data)
             return True
         except InvalidSignature:
             return False

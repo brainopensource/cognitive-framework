@@ -143,6 +143,7 @@ class RuntimeServer:
 
     def _process_client_frame(self, conn: socket.socket, frame: Mapping[str, Any]) -> None:
         cmd = frame.get("command")
+        frame_id = frame.get("frameId")
         if isinstance(cmd, Mapping) and cmd.get("name") == "StreamEvents":
             run_id = str(cmd.get("runId", ""))
             payload = cmd.get("payload", {})
@@ -158,7 +159,8 @@ class RuntimeServer:
                     "version": "vg.4",
                     "frameType": "error",
                     "frameId": uuidv7(),
-                    "error": {"code": "streaming_error", "message": str(exc)},
+                    "inReplyTo": frame_id,
+                    "error": {"code": "internal", "message": str(exc), "retryable": False},
                 }
                 self._send_frame(conn, err)
             return
@@ -175,3 +177,43 @@ class RuntimeServer:
             return True
         except OSError:
             return False
+
+
+def main() -> None:
+    import argparse
+    import time
+    from ...adapters.stores.event_store import SqliteEventStore
+    from .inbox import ServiceInboxStore
+
+    parser = argparse.ArgumentParser(description="AETHER Runtime UDS Daemon")
+    parser.add_argument(
+        "--socket",
+        default="/tmp/vanguard-runtime.sock",
+        help="Socket path (default: /tmp/vanguard-runtime.sock)",
+    )
+    parser.add_argument("--db", default=None, help="Database path for persistent SQLite WAL store")
+    parser.add_argument("--workspace", default=".", help="Workspace root directory")
+    args = parser.parse_args()
+
+    root = Path(args.workspace).resolve()
+    db_path = Path(args.db).resolve() if args.db else (root / ".vanguard" / "runtime.db")
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    inbox = ServiceInboxStore(db_path)
+    event_store = SqliteEventStore(db_path)
+    service = RuntimeService(inbox_store=inbox, event_store=event_store)
+    server = RuntimeServer(service, args.socket)
+
+    print(f"[*] Starting AETHER Runtime Daemon on {args.socket}")
+    print(f"[*] Persistent SQLite store at {db_path}")
+    server.start()
+    try:
+        while True:
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        print("\n[*] Shutting down Runtime Daemon...")
+        server.stop()
+
+
+if __name__ == "__main__":
+    main()

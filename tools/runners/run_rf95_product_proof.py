@@ -193,7 +193,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="RF-95 Product Coding Proof Runner")
     parser.add_argument("--dry-run", action="store_true", help="Validate fixture setup and test assertions without live model spend")
     parser.add_argument("--repo-dir", type=str, default="", help="Target repo directory (uses temporary directory by default)")
-    parser.add_argument("--model", type=str, default="anthropic/claude-3.5-sonnet", help="Planner/executor model")
+    # `anthropic/claude-3.5-sonnet` was the default until 2026-08-27, by which
+    # point the route had been retired upstream and every live run died at
+    # turn 0 with `provider returned HTTP 404` -- an `instrument_error`, which
+    # RF-95 must classify UNDETERMINABLE rather than failed. A stale model pin
+    # is therefore not a cosmetic default: it silently converts the product
+    # gate into an un-runnable one. See `docs/03_execution/prereg/`.
+    parser.add_argument("--model", type=str, default="anthropic/claude-sonnet-4.5", help="Planner/executor model")
     parser.add_argument("--keep-run", action="store_true", help="Keep the temporary run directory as an evidence artifact")
     args = parser.parse_args()
 

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ...domain.primitives.primitives import uuidv7
+from .contract import ContractError, validate_command, validate_frame_envelope
 from .service import RuntimeService
 
 MAX_FRAME_BYTES = 1024 * 1024  # 1 MiB
@@ -127,13 +128,18 @@ class RuntimeServer:
                     try:
                         frame = json.loads(line_str)
                     except json.JSONDecodeError as exc:
+                        # `invalid_json` was never part of the canonical ten-code
+                        # vocabulary, so a client switching exhaustively on
+                        # ERROR_CODES could not handle it. A malformed frame is
+                        # an invalid request.
                         err = {
                             "version": "vg.4",
                             "frameType": "error",
                             "frameId": uuidv7(),
                             "error": {
-                                "code": "invalid_json",
+                                "code": "invalid_request",
                                 "message": f"failed to parse NDJSON frame: {exc}",
+                                "retryable": False,
                             },
                         }
                         self._send_frame(conn, err)
@@ -144,10 +150,47 @@ class RuntimeServer:
     def _process_client_frame(self, conn: socket.socket, frame: Mapping[str, Any]) -> None:
         cmd = frame.get("command")
         frame_id = frame.get("frameId")
+
+        # `StreamEvents` used to be special-cased *before* validation, reading
+        # runId and afterSeq straight off an unvalidated frame. Validate first,
+        # then branch: no frame reaches the store without passing ingress.
         if isinstance(cmd, Mapping) and cmd.get("name") == "StreamEvents":
-            run_id = str(cmd.get("runId", ""))
-            payload = cmd.get("payload", {})
-            after_seq = int(payload.get("afterSeq", 0)) if isinstance(payload, Mapping) else 0
+            try:
+                validate_frame_envelope(frame)
+                validated = validate_command(cmd)
+            except ContractError as exc:
+                self._send_frame(conn, {
+                    "version": "vg.4",
+                    "frameType": "error",
+                    "frameId": uuidv7(),
+                    "inReplyTo": frame_id,
+                    "error": {
+                        "code": exc.code,
+                        "message": exc.message,
+                        "retryable": bool(getattr(exc, "retryable", False)),
+                    },
+                })
+                return
+
+            run_id = validated.run_id
+            raw_after = validated.payload.get("afterSeq", 0)
+            try:
+                after_seq = int(raw_after)
+                if after_seq < 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                self._send_frame(conn, {
+                    "version": "vg.4",
+                    "frameType": "error",
+                    "frameId": uuidv7(),
+                    "inReplyTo": frame_id,
+                    "error": {
+                        "code": "invalid_request",
+                        "message": "afterSeq must be a non-negative integer string",
+                        "retryable": False,
+                    },
+                })
+                return
 
             # Stream events until terminal or disconnected
             try:

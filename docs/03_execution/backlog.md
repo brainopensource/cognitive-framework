@@ -37,8 +37,14 @@ package consumes another developer's unfinished branch.
 | WP-B3 | M-7 | Dev B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
 | WP-A4 | M-8 | Dev A / **NOT_STARTED** | M-7 decision, ADR-0100; before B4 | durable authorized memory |
 | WP-B4 | M-8 | Dev B / **NOT_STARTED** | A4, M-6.5 disposition | lift + real rollback |
+| WP-C1 | M-1/M-2/M-4 preservation | Dev A / **IN_PROGRESS** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
 
-Dev A: `WP-A1 -> WP-A2 -> WP-A3 -> WP-A4`. Dev B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.
+Dev A: `WP-A1 -> WP-C1 -> WP-A2 -> WP-A3 -> WP-A4`. Dev B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.
+
+`WP-C1` is a preservation package, not a new milestone. It repairs backend service and
+distribution surface that entered the tree outside the M-4–M-8 packages and that currently
+regresses already-accepted invariants (`I-5`, and the M-2 one-writer anchor). It closes no gate of
+its own; it restores the preconditions the M-7 and M-8 packages assume.
 
 ## WP-A1 — Release evidence and canonical recursion
 
@@ -120,6 +126,19 @@ Dev A: `WP-A1 -> WP-A2 -> WP-A3 -> WP-A4`. Dev B: `WP-B1 -> WP-B2 -> WP-B3 -> WP
 | Contract/algorithm | Manifest binds base, candidate skills/policies, retrieval policy, generator/sources. Seal dev/held-out/adversarial/transfer digests first. Paired evaluation records present/retrieved/invoked/grounded/verified/outcome. Require preregistered lift/CI/exact test/Holm, <=5% baseline-success regression, zero critical security regressions. Promoter verifies report/signature/base/head and SQLite-CASes expected generation. Rollback is signed CAS and must alter served runtime. |
 | Failure/security | Generator cannot read held-out labels/promoter keys; evaluator cannot promote; stale CAS loses; missing transition receipt quarantines; presence-only gain rejects. Evidence binds workload, access log, observations, generations, signatures, restart. |
 | Tests/performance/migration/DoD | Contamination, role/key collapse, attribution, concurrent promoters, every crash boundary, restart, injected regression, signed/behavioral rollback, RF-98/TCB and overhead. At least one composition passes held-out independent review; otherwise M-8 stays open. |
+
+## WP-C1 — Backend service trust spine and canonical event truth
+
+| Concern | Implementation-ready contract |
+|---|---|
+| Objective/rationale | `runtime/service/` and the standalone CLI entered the tree outside the M-4–M-8 packages and regress accepted invariants: the CLI carries a literal operator signing seed and an unconditional auto-approver, the HTTP gateway defaults missing approval signatures, `ResolveApproval` records decisions without consulting `ApprovalAuthority`, and `publish_event` maintains two competing event histories while discarding the canonical append result. Restore `I-5`, the M-2 one-writer anchor, and `I-4`/`I-9` recovery truth without touching Kernel or domain semantics. |
+| Surface/boundary | `runtime/keys.py` (new), `runtime/cli.py`, `runtime/service/{service,server,studio_gateway}.py`, `runtime/checkpoints.py` consumption, `install_vanguard.sh`, `pyproject.toml` scripts. Runtime and Adapter layers only; Kernel and Agency unchanged; TCB budget untouched. Dev A owns service/ledger/recovery hotspots; Dev B owns schema, model routing, and evidence tooling. |
+| Interface/I-O | `load_operator_signer(allow_create)` returns a per-install Ed25519 signer from `~/.vanguard/keys/operator.ed25519` at mode `0600`; absent key or permissive mode fails closed. `ApprovalDecision` parses strictly with no defaulted field. `publish_event` returns a sequence only after canonical commit. `Checkpoint`/`Resume` exchange `CheckpointManager` pointers, not opaque digests. |
+| Algorithm/events | Ingress order is size → parse → envelope → command → authentication → idempotency → authorization → execution → durable receipt. Approval resolution loads the pending `ApprovalRequested` challenge from canonical history, then verifies registered key, signature, expiry, run/approval correspondence, `argsDigest`, and `descriptorDigest` before appending `ApprovalResolved`. Event append allocates sequence and writes inside one canonical transaction; subscribers are notified only after commit. Checkpoint captures a reconstructable `LedgerState`; resume verifies the pinned digest, cold-reconstructs, reconciles open effects, and appends `RunRecovered`. Cancellation appends durable intent, sets a cooperative token the worker observes at turn boundaries, and records a terminal fact or `CancellationUndeterminable`. |
+| Failure/security | No security-relevant field has a default. A verifier that cannot run is `not_available`, never a pass. Missing TTY without an explicit scoped expiring grant denies. CORS is a configured origin allowlist, never `*`; unauthenticated commands are refused; HTTP and UDS share one 1 MiB limit; workspace reads resolve through authorized selectors. Only the ten canonical error codes are emitted. Durable-store failure is a startup error, never an in-memory fallback. |
+| Observability/performance | Bind approval challenge, decision, checkpoint, reconstruction, and cancellation digests. Recovery capability and verification stay distinct fields; a loaded checkpoint is not a verified one. Notification loss after commit is recoverable by cursor resume and never loses a fact. |
+| Tests/falsifiers | Embedded key material absent from the distribution and two installs differing; non-TTY approval denial with no appended fact; missing/foreign/expired/unregistered/unchallenged approval each refused with no fact; unauthenticated and cross-origin gateway refusal; oversized body refusal; `StreamEvents` validated before state access; canonical append failure yielding no sequence and no notification; envelope round-trip preserving tenant, project, lineage, causation, idempotency, trace, and authority provenance; checkpoint reconstructability; resume digest verification and restart; worker-observed cancellation. |
+| Evidence/migration/DoD | No schema version changes. Existing durable stores remain readable; the outbox becomes command-idempotency-only and its event rows stay as history. Rollback is reverting the package. Done when every falsifier above has been observed failing on the unrepaired tree and passing on the repaired one, and the package is reviewed by someone other than its producer. `WP-C1` claims no milestone acceptance. |
 
 ## Review gate
 

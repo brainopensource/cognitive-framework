@@ -10,6 +10,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Sequence
 
 _TOOLS = Path(__file__).resolve().parent
 _COMMON = _TOOLS.parent / "common"

@@ -160,7 +160,8 @@ def verify(repo: Path, db: Path, result: Any) -> tuple[bool, list[str], dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="M-5b formal (SAT) material run")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--model", default="deepseek/deepseek-v4-flash-0731")
+    from vanguard.packages.adapters.models.config import get_default_model
+    parser.add_argument("--model", default=get_default_model())
     parser.add_argument("--repo-dir", default="")
     parser.add_argument("--keep-run", action="store_true")
     args = parser.parse_args()

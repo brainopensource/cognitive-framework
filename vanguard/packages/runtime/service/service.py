@@ -5,10 +5,11 @@ Owning contract: REQ-CLI-002, S6B-SA-001, DEC-6B-012, ADR-0062.
 
 from __future__ import annotations
 
+import json
 import queue
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
@@ -19,6 +20,7 @@ from ...domain.primitives.primitives import uuidv7
 from ...domain.evidence.claim import Claim, ClaimError, parse_claim
 from ...domain.wire.contracts import parse_wire
 from ...ports.event_store import EventRange, EventStorePort, Result
+from ..checkpoints import Checkpoint, CheckpointManager
 from ..evaluation_listener import EvaluationListener
 from ..explain import explain_artifact
 from ..governance.approvals import (
@@ -29,9 +31,14 @@ from ..governance.approvals import (
     OperatorSigner,
 )
 from .contract import (
+    APPROVAL_DECISION_ALLOWED_FIELDS,
+    APPROVAL_DECISION_REQUIRED_FIELDS,
     ConflictError,
     ContractError,
+    NotAvailableError,
     NotFoundError,
+    PermissionDeniedError,
+    UnauthenticatedError,
     error_code_for_exception,
     service_error,
     validate_command,
@@ -40,11 +47,25 @@ from .contract import (
 from .inbox import ServiceInboxStore
 
 
+#: How long `Cancel` waits for a worker to settle before recording the outcome
+#: as undeterminable rather than asserting a terminal state it did not observe.
+CANCELLATION_GRACE_SECONDS = 10.0
+
+
 def _utc_now() -> str:
     return (
         datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.")
         + f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
     )
+
+
+class CancellationRequested(Exception):
+    """Raised inside a worker when the operator cancelled the run.
+
+    Distinct from an ordinary failure: cancellation is an *intended* terminal
+    state and must never be recorded as `failed`, nor an exception recorded as
+    `completed`.
+    """
 
 
 @dataclass
@@ -59,9 +80,22 @@ class ActiveRunContext:
     approval_response_queue: queue.Queue[ApprovalDecision | None] = field(
         default_factory=queue.Queue
     )
-    is_cancelled: bool = False
+    #: Cooperative cancellation token. An `Event` rather than a bool so the
+    #: worker can both poll it at turn boundaries and block on it, and so the
+    #: flag is visible across threads without the caller holding a lock.
+    cancel_event: threading.Event = field(default_factory=threading.Event)
     status: str = "running"
+    resumed_from_digest: str = ""
     lock: threading.Lock = field(default_factory=threading.Lock)
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self.cancel_event.is_set()
+
+    def raise_if_cancelled(self) -> None:
+        """Called by the worker at every turn boundary and before each effect."""
+        if self.cancel_event.is_set():
+            raise CancellationRequested(f"run {self.run_id} was cancelled")
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +129,7 @@ class RuntimeService:
         authority: ApprovalAuthority | None = None,
         harness_runner: Callable[..., Any] | None = None,
         claims: Sequence[Mapping[str, Any]] = (),
+        blobs: Any | None = None,
     ) -> None:
         self.store = inbox_store or ServiceInboxStore(":memory:")
         if event_store is not None:
@@ -110,8 +145,17 @@ class RuntimeService:
         self._harness_runner = harness_runner
         self._active_runs: dict[str, ActiveRunContext] = {}
         self._lock = threading.Lock()
+        #: Serializes sequence allocation and canonical append. Held only across
+        #: the store write, never across subscriber notification, so a slow
+        #: consumer cannot stall the writer.
+        self._write_lock = threading.Lock()
         self._evaluation_store = _ServiceEventStore(self)
         self._evaluation_listener = EvaluationListener(self._evaluation_store)
+        #: Checkpoint/resume need somewhere to put a folded state. Absent a blob
+        #: store the capability is *unavailable* and says so, rather than
+        #: recording an empty checkpoint that resume cannot use.
+        self._blobs = blobs
+        self._checkpoints = CheckpointManager(blobs) if blobs is not None else None
 
     def execute_command(self, frame: Mapping[str, Any]) -> dict[str, Any]:
         """Execute a validated command frame and return a response frame."""
@@ -237,10 +281,11 @@ class RuntimeService:
                 )
 
     def get_latest_seq(self, run_id: str) -> int:
+        """Highest committed sequence for a run, from the canonical store only."""
         res = self.event_store.read(EventRange(run_id=run_id))
         if res.ok and res.value:
             return int(res.value[-1].seq)
-        return self.store.get_latest_seq(run_id)
+        return 0
 
     # -- Command Handlers ----------------------------------------------------
 
@@ -401,32 +446,43 @@ class RuntimeService:
     def _cmd_ResolveApproval(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
-        decision_raw = payload.get("decision")
-        if not isinstance(decision_raw, Mapping):
-            if "approvalId" in payload:
-                decision_raw = payload
-            else:
-                raise ValueError("ResolveApproval requires decision object")
+        """Record a decision only after verifying it against its pending challenge.
 
-        approval_id = str(decision_raw.get("approvalId", ""))
-        resolution = str(decision_raw.get("resolution") or decision_raw.get("decision", "approved"))
-        reviewer = str(decision_raw.get("reviewer", actor))
-        args_digest = str(decision_raw.get("argsDigest", "sha256:" + "0" * 64))
-        descriptor_digest = str(decision_raw.get("descriptorDigest", "sha256:" + "0" * 64))
-        expires_at = str(decision_raw.get("expiresAt", _utc_now()))
-        key_id = str(decision_raw.get("keyId", "operator-key-default"))
-        signature = str(decision_raw.get("signature", ""))
+        The challenge -- not the request body -- is the authority on what is
+        being approved. A decision that arrives without one, or whose signature
+        covers different material, appends no fact at all.
+        """
+        decision = _parse_strict_approval_decision(payload.get("decision"))
+        challenge = self._require_pending_challenge(run_id, decision.approval_id)
 
-        decision = ApprovalDecision(
-            approval_id=approval_id,
-            resolution=resolution,
-            reviewer=reviewer,
-            args_digest=args_digest,
-            descriptor_digest=descriptor_digest,
-            expires_at=expires_at,
-            key_id=key_id,
-            signature=signature,
-        )
+        # Registered key. An unknown key ID is unauthenticated, not merely
+        # invalid: the runtime holds public keys only and cannot mint one.
+        if decision.key_id not in self.authority.verifying_keys:
+            raise UnauthenticatedError(
+                f"approval key {decision.key_id!r} is not registered with this runtime"
+            )
+
+        # Correspondence. The signature binds these digests; if they are not the
+        # challenge's digests then a valid signature authorises something else.
+        for field, got, want in (
+            ("argsDigest", decision.args_digest, challenge.args_digest),
+            ("descriptorDigest", decision.descriptor_digest, challenge.descriptor_digest),
+            ("expiresAt", decision.expires_at, challenge.expires_at),
+        ):
+            if got != want:
+                raise PermissionDeniedError(
+                    f"approval {field} does not bind challenge {decision.approval_id}"
+                )
+
+        now = _utc_now()
+        if now >= challenge.expires_at:
+            raise PermissionDeniedError(f"approval {decision.approval_id} has expired")
+
+        if not self.authority.verify(decision):
+            raise PermissionDeniedError(
+                f"approval {decision.approval_id} signature is not valid for key "
+                f"{decision.key_id!r}"
+            )
 
         with self._lock:
             ctx = self._active_runs.get(run_id)
@@ -462,37 +518,87 @@ class RuntimeService:
     def _cmd_Cancel(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
+        """Request cancellation, wait for the worker to settle, record the truth.
+
+        Cancellation used to set an in-process boolean that the ordinary worker
+        never read, so it could only unblock a waiting approval; a run could --
+        and did -- complete after the service had already recorded it cancelled.
+        The token is now observed by the worker, and the terminal fact is
+        appended by whoever actually settles.
+        """
+        reason = str(payload.get("reason", "cancelled by operator"))
         with self._lock:
             ctx = self._active_runs.get(run_id)
-        if ctx is not None:
-            ctx.is_cancelled = True
-            ctx.status = "cancelled"
-            ctx.approval_response_queue.put(None)
-            self.store.set_run_state(
-                run_id, ctx.manifest_path, ctx.repo_path, "cancelled", now=_utc_now()
-            )
-        else:
-            state = self.store.get_run_state(run_id)
-            if state is not None:
-                self.store.set_run_state(
-                    run_id, state["manifest_path"], state["repo_path"], "cancelled", now=_utc_now()
-                )
-            else:
-                raise NotFoundError(f"run {run_id} not found")
 
-        now = _utc_now()
+        state = self.store.get_run_state(run_id)
+        if ctx is None and state is None:
+            raise NotFoundError(f"run {run_id} not found")
+
+        # 1. Durable intent, before any attempt to interrupt.
         self.publish_event(
             run_id,
             {
                 "eventId": uuidv7(),
                 "scope": "run",
-                "occurredAt": now,
+                "occurredAt": _utc_now(),
                 "principal": actor,
                 "runId": run_id,
-                "payload": {"kind": "RunCancelled", "reason": payload.get("reason", "cancelled by operator")},
+                "payload": {"kind": "CancellationRequested", "reason": reason},
             },
         )
-        return {"runId": run_id, "status": "cancelled"}
+
+        if ctx is None:
+            # Nothing is executing: settle it here and record the terminal fact.
+            self.store.set_run_state(
+                run_id, state["manifest_path"], state["repo_path"], "cancelled",
+                now=_utc_now(),
+            )
+            self.publish_event(
+                run_id,
+                {
+                    "eventId": uuidv7(),
+                    "scope": "run",
+                    "occurredAt": _utc_now(),
+                    "principal": actor,
+                    "runId": run_id,
+                    "payload": {"kind": "RunCancelled", "reason": reason},
+                },
+            )
+            return {"runId": run_id, "status": "cancelled", "settled": True}
+
+        # 2. Cooperative interruption: set the token the worker polls, and
+        #    unblock it if it is parked on an approval.
+        ctx.cancel_event.set()
+        ctx.approval_response_queue.put(None)
+
+        # 3. Wait for the worker to append its own terminal fact.
+        thread = ctx.thread
+        if thread is not None:
+            thread.join(timeout=CANCELLATION_GRACE_SECONDS)
+        settled = thread is None or not thread.is_alive()
+
+        if not settled:
+            # Never claim a terminal state we did not observe.
+            self.publish_event(
+                run_id,
+                {
+                    "eventId": uuidv7(),
+                    "scope": "run",
+                    "occurredAt": _utc_now(),
+                    "principal": actor,
+                    "runId": run_id,
+                    "payload": {
+                        "kind": "CancellationUndeterminable",
+                        "reason": reason,
+                        "detail": (
+                            f"worker did not settle within {CANCELLATION_GRACE_SECONDS}s"
+                        ),
+                    },
+                },
+            )
+            return {"runId": run_id, "status": "cancelling", "settled": False}
+
+        return {"runId": run_id, "status": ctx.status, "settled": True}
 
     def _cmd_RecordCorrection(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
@@ -515,17 +621,41 @@ class RuntimeService:
     def _cmd_Checkpoint(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
+        """Capture reconstructable state through the canonical checkpoint contract.
+
+        The previous implementation stored ``state_json=None`` plus a ledger
+        digest and called that a checkpoint. Nothing could be resumed from it,
+        because nothing was in it -- a pointer to a state that was never
+        captured is a dangling reference with a checkpoint's name on it.
+        """
         state = self.store.get_run_state(run_id)
         if state is None:
             raise NotFoundError(f"run {run_id} not found")
+
+        manager = self._checkpoint_manager()
+        envelopes = self.canonical_envelopes(run_id)
+        reconstruction = manager.reconstruct(envelopes)
+        if reconstruction.state is None:
+            raise NotAvailableError(
+                f"run {run_id!r} has no foldable history to checkpoint"
+            )
+
+        checkpoint = manager.capture(reconstruction.state, required=True)
+        if checkpoint is None:
+            raise NotAvailableError(
+                f"checkpoint capture was not stored for run {run_id!r}; "
+                "retention or blob policy refused it"
+            )
+
         seq = self.get_latest_seq(run_id)
-        digest_res = self.event_store.digest(run_id)
-        digest = digest_res.value if digest_res.ok and digest_res.value else "sha256:" + "0" * 64
         checkpoint_id = f"chk-{run_id}-{seq}"
         now = _utc_now()
+        fact = checkpoint.to_fact()
 
-        self.store.save_checkpoint(checkpoint_id, run_id, seq, digest, state_json=None, now=now)
-
+        self.store.save_checkpoint(
+            checkpoint_id, run_id, seq, checkpoint.state_digest,
+            state_json=json.dumps(fact, sort_keys=True), now=now,
+        )
         self.publish_event(
             run_id,
             {
@@ -538,7 +668,8 @@ class RuntimeService:
                     "kind": "CheckpointRecorded",
                     "checkpointId": checkpoint_id,
                     "seq": str(seq),
-                    "digest": digest,
+                    "digest": checkpoint.state_digest,
+                    "checkpoint": fact,
                 },
             },
         )
@@ -547,24 +678,52 @@ class RuntimeService:
             "status": state["status"],
             "checkpoint": checkpoint_id,
             "asOfSeq": str(seq),
-            "digest": digest,
+            "digest": checkpoint.state_digest,
+            "blobDigest": checkpoint.blob_digest,
+            "eventCount": int(checkpoint.event_count),
         }
 
     def _cmd_Resume(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
+        """Reconstruct from durable history, verify, reconcile, and restart.
+
+        Resume previously emitted ``RunResumed`` and flipped a mutable status
+        row to ``"resumed"``. Nothing was verified, nothing was rebuilt, and no
+        execution restarted -- the run reported a state it had not re-entered.
+        """
         state = self.store.get_run_state(run_id)
         if state is None:
             raise NotFoundError(f"run {run_id} not found")
-        checkpoint_id = payload.get("checkpointId")
-        if checkpoint_id:
-            chk = self.store.get_checkpoint(str(checkpoint_id))
-            if chk is None:
-                raise NotFoundError(f"checkpoint {checkpoint_id} not found for run {run_id}")
 
+        checkpoint_id = payload.get("checkpointId")
+        checkpoint = None
+        if checkpoint_id:
+            row = self.store.get_checkpoint(str(checkpoint_id))
+            if row is None:
+                raise NotFoundError(f"checkpoint {checkpoint_id} not found for run {run_id}")
+            if row.get("run_id") != run_id:
+                raise PermissionDeniedError(
+                    f"checkpoint {checkpoint_id} belongs to another run"
+                )
+            raw_state = row.get("state_json")
+            if not raw_state:
+                raise NotAvailableError(
+                    f"checkpoint {checkpoint_id} holds no reconstructable state"
+                )
+            checkpoint = Checkpoint.from_fact(json.loads(raw_state))
+
+        manager = self._checkpoint_manager()
+        envelopes = self.canonical_envelopes(run_id)
+        # verify=True runs the cold fold as well and compares digests, so a
+        # checkpoint that is not a prefix of this history loses to the events.
+        reconstruction = manager.reconstruct(envelopes, checkpoint=checkpoint, verify=True)
+        if reconstruction.state is None:
+            raise NotAvailableError(f"run {run_id!r} could not be reconstructed")
+
+        open_effects = self._reconcile_open_effects(reconstruction.state)
         now = _utc_now()
-        seq = self.get_latest_seq(run_id)
-        self.publish_event(
+        seq = self.publish_event(
             run_id,
             {
                 "eventId": uuidv7(),
@@ -573,14 +732,96 @@ class RuntimeService:
                 "principal": actor,
                 "runId": run_id,
                 "payload": {
-                    "kind": "RunResumed",
+                    "kind": "RunRecovered",
                     "checkpointId": checkpoint_id,
-                    "asOfSeq": str(seq),
+                    "asOfSeq": str(self.get_latest_seq(run_id)),
+                    "stateDigest": reconstruction.state_digest,
+                    "capability": reconstruction.capability,
+                    "verification": reconstruction.verification,
+                    "eventsReplayed": int(reconstruction.events_replayed),
+                    "openEffects": list(open_effects),
+                    **({"fallbackReason": reconstruction.fallback_reason}
+                       if reconstruction.fallback_reason else {}),
                 },
             },
         )
-        self.store.set_run_state(run_id, state["manifest_path"], state["repo_path"], "resumed", now=now)
-        return {"runId": run_id, "status": "resumed", "asOfSeq": str(seq)}
+
+        restarted = self._restart_from_state(run_id, state, reconstruction)
+        self.store.set_run_state(
+            run_id, state["manifest_path"], state["repo_path"],
+            "running" if restarted else "recovered", now=now,
+        )
+        return {
+            "runId": run_id,
+            "status": "running" if restarted else "recovered",
+            "asOfSeq": str(seq),
+            "stateDigest": reconstruction.state_digest,
+            "capability": reconstruction.capability,
+            "verification": reconstruction.verification,
+            "eventsReplayed": int(reconstruction.events_replayed),
+            "openEffects": list(open_effects),
+            "restarted": restarted,
+        }
+
+    def _checkpoint_manager(self) -> Any:
+        """The service's checkpoint manager, built once against a durable blob store."""
+        if self._checkpoints is None:
+            raise NotAvailableError(
+                "no blob store configured; checkpoint and resume are unavailable"
+            )
+        return self._checkpoints
+
+    @staticmethod
+    def _reconcile_open_effects(state: Any) -> tuple[str, ...]:
+        """Effects that were started but never settled before the interruption.
+
+        Reported, never silently retried: a privileged effect whose outcome is
+        unknown is `UNDETERMINABLE`, and blind re-execution is how an
+        at-least-once transport becomes an at-least-twice side effect.
+        """
+        effects = getattr(state, "effects", None)
+        if not effects:
+            return ()
+        open_ids: list[str] = []
+        for effect_id, record in dict(effects).items():
+            status = str(getattr(record, "status", "") or "").lower()
+            if status in ("started", "intent", "pending", "in_flight"):
+                open_ids.append(str(effect_id))
+        return tuple(sorted(open_ids))
+
+    def _restart_from_state(
+        self, run_id: str, state: Mapping[str, Any], reconstruction: Any
+    ) -> bool:
+        """Re-enter execution from reconstructed state, when execution is possible.
+
+        Returns whether a worker was actually started. A run that cannot be
+        restarted stays `recovered` rather than claiming `running`: the state was
+        rebuilt and that is a real, useful outcome, but it is not execution.
+        """
+        manifest_path = str(state.get("manifest_path", ""))
+        if self._harness_runner is None and not (
+            manifest_path and Path(manifest_path).is_file()
+        ):
+            return False
+
+        with self._lock:
+            if run_id in self._active_runs:
+                raise ConflictError(f"run {run_id} is already active")
+            ctx = ActiveRunContext(
+                run_id=run_id,
+                manifest_path=manifest_path,
+                repo_path=str(state.get("repo_path", ".")),
+                brief=str(state.get("brief", "") or ""),
+                resumed_from_digest=reconstruction.state_digest,
+            )
+            self._active_runs[run_id] = ctx
+
+        thread = threading.Thread(
+            target=self._run_worker_thread, args=(ctx, dict(state)), daemon=True
+        )
+        ctx.thread = thread
+        thread.start()
+        return True
 
     def _cmd_ExplainArtifact(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
@@ -599,6 +840,50 @@ class RuntimeService:
             "artifact": artifact_id,
             "explanation": explanation.to_dict(),
         }
+
+    def _require_pending_challenge(self, run_id: str, approval_id: str) -> ApprovalChallenge:
+        """The unresolved challenge this decision claims to answer.
+
+        Read from durable history rather than from in-process state, so a
+        decision that arrives after a restart is still verified against the
+        challenge that was actually issued -- and a decision naming a challenge
+        nobody issued finds nothing.
+        """
+        pending: dict[str, ApprovalChallenge] = {}
+        for record in self._load_events(run_id):
+            payload = record.get("payload")
+            if not isinstance(payload, Mapping):
+                continue
+            kind = payload.get("kind")
+            if kind == "ApprovalRequested":
+                body = payload.get("challenge") if isinstance(
+                    payload.get("challenge"), Mapping) else payload
+                try:
+                    challenge = ApprovalChallenge(
+                        approval_id=str(body["approvalId"]),
+                        process_id=str(body.get("processId", "")),
+                        action=str(body["action"]),
+                        normalized_diff=str(body.get("normalizedDiff", "")),
+                        args_digest=str(body["argsDigest"]),
+                        descriptor_digest=str(body["descriptorDigest"]),
+                        principal=str(body.get("principal", "operator")),
+                        expires_at=str(body["expiresAt"]),
+                    )
+                except (KeyError, TypeError):
+                    continue
+                pending[challenge.approval_id] = challenge
+            elif kind == "ApprovalResolved":
+                body = payload.get("decision") if isinstance(
+                    payload.get("decision"), Mapping) else payload
+                if isinstance(body, Mapping):
+                    pending.pop(str(body.get("approvalId", "")), None)
+
+        challenge = pending.get(approval_id)
+        if challenge is None:
+            raise NotFoundError(
+                f"no pending approval {approval_id!r} for run {run_id!r}"
+            )
+        return challenge
 
     def _explain_events(self, run_id: str) -> list[Any]:
         """Ledger events for the run, as envelope-shaped objects."""
@@ -619,11 +904,26 @@ class RuntimeService:
     # -- Event Storage & Streaming -------------------------------------------
 
     def _load_events(self, run_id: str, after_seq: int = 0) -> list[dict[str, Any]]:
-        """Read events from canonical EventStore or store fallback."""
+        """Read the canonical history. There is no second history to fall back to.
+
+        The previous fallback to the inbox on an empty canonical result made
+        truth state-dependent: the same query answered from a different store
+        depending on whether the first one happened to be empty.
+        """
         res = self.event_store.read(EventRange(run_id=run_id, after_seq=str(after_seq)))
-        if res.ok and res.value:
-            return [env.to_dict() for env in res.value]
-        return self.store.get_events(run_id, after_seq=after_seq)
+        if not res.ok:
+            raise NotAvailableError(
+                f"canonical event store unavailable for run {run_id!r}: "
+                f"{getattr(res, 'error', 'unknown store error')}"
+            )
+        return [env.to_dict() for env in (res.value or ())]
+
+    def canonical_envelopes(self, run_id: str) -> list[EventEnvelope]:
+        """Ordered canonical envelopes for a run, unmodified."""
+        res = self.event_store.read(EventRange(run_id=run_id))
+        if not res.ok:
+            raise NotAvailableError(f"canonical event store unavailable for run {run_id!r}")
+        return list(res.value or ())
 
     def stream_events(
         self, run_id: str, after_seq: int = 0
@@ -677,32 +977,48 @@ class RuntimeService:
                     ctx.event_subscribers.remove(q)
 
     def publish_event(self, run_id: str, event_envelope: Mapping[str, Any]) -> int:
-        """Write event through canonical EventStore and notify live subscribers."""
+        """Append a service-authored fact to the one canonical history."""
         now = _utc_now()
-        seq = self.store.append_event(run_id, event_envelope, now=now)
-        evt_copy = dict(event_envelope)
-        evt_copy["seq"] = str(seq)
+        evt = dict(event_envelope)
+        if not evt.get("occurredAt"):
+            evt["occurredAt"] = now
+        if not evt.get("runId"):
+            evt["runId"] = run_id
+        return self._append_canonical(run_id, _envelope_from_service_event(run_id, evt))
 
-        if "occurredAt" not in evt_copy or not evt_copy["occurredAt"]:
-            evt_copy["occurredAt"] = now
-        if "runId" not in evt_copy or not evt_copy["runId"]:
-            evt_copy["runId"] = run_id
+    def _append_canonical(self, run_id: str, envelope: EventEnvelope) -> int:
+        """Allocate a sequence and commit, or raise having changed nothing.
 
-        # Commit to canonical EventStorePort
-        env = _envelope_from_service_event(run_id, evt_copy)
-        self.event_store.append([env])
+        Sequence allocation and append happen under one lock and one store, so
+        there is exactly one event truth. Previously the inbox allocated the
+        sequence, the canonical store was written separately, and its `Result`
+        was discarded -- so a canonical failure still returned a sequence and
+        still notified subscribers, who could observe an event that is absent
+        from history. Notification now happens strictly after commit: losing a
+        notification costs a subscriber one cursor resume, while publishing an
+        uncommitted event costs the ledger its meaning.
+        """
+        with self._write_lock:
+            next_seq = self.get_latest_seq(run_id) + 1
+            committed = replace(envelope, seq=str(next_seq))
+            result = self.event_store.append([committed])
+            if not result.ok:
+                raise NotAvailableError(
+                    f"canonical event append failed for run {run_id!r}: "
+                    f"{getattr(result, 'error', 'unknown store error')}"
+                )
 
+        record = committed.to_dict()
         with self._lock:
             ctx = self._active_runs.get(run_id)
             if ctx is not None:
                 for sub in list(ctx.event_subscribers):
-                    sub.put(evt_copy)
+                    sub.put(record)
 
-        payload = event_envelope.get("payload")
-        kind = payload.get("kind") if isinstance(payload, Mapping) else None
-        if kind == "EpisodeCompleted":
-            self._evaluation_listener.process_envelope(env)
-        return seq
+        payload = committed.payload
+        if isinstance(payload, Mapping) and payload.get("kind") == "EpisodeCompleted":
+            self._evaluation_listener.process_envelope(committed)
+        return next_seq
 
     # -- Internal Execution --------------------------------------------------
 
@@ -722,6 +1038,10 @@ class RuntimeService:
                     "approvalId": getattr(challenge, "approval_id", uuidv7()),
                     "processId": getattr(challenge, "process_id", ""),
                     "action": getattr(challenge, "action", ""),
+                    # The material the reviewer's signature will cover. Without
+                    # it a challenge cannot be reconstructed from history, and
+                    # a decision arriving after a restart could not be checked.
+                    "normalizedDiff": getattr(challenge, "normalized_diff", ""),
                     "argsDigest": getattr(challenge, "args_digest", ""),
                     "descriptorDigest": getattr(challenge, "descriptor_digest", ""),
                     "principal": getattr(challenge, "principal", "operator"),
@@ -737,6 +1057,7 @@ class RuntimeService:
     def _run_worker_thread(self, ctx: ActiveRunContext, payload: Mapping[str, Any]) -> None:
         run_status = "completed"
         try:
+            ctx.raise_if_cancelled()
             if self._harness_runner is not None:
                 self._harness_runner(ctx, self)
             else:
@@ -764,6 +1085,7 @@ class RuntimeService:
                     store=self._evaluation_store,
                     approver=lambda challenge: self._handle_approver_callback(ctx, challenge),
                 )
+            ctx.raise_if_cancelled()
             now = _utc_now()
             seq = self.get_latest_seq(ctx.run_id)
             digest_res = self.event_store.digest(ctx.run_id)
@@ -784,23 +1106,41 @@ class RuntimeService:
                 },
             )
             run_status = "completed"
-        except Exception as exc:
-            run_status = "failed"
-            now = _utc_now()
+        except CancellationRequested as exc:
+            # An intended terminal state, not a failure.
+            run_status = "cancelled"
             self.publish_event(
                 ctx.run_id,
                 {
                     "eventId": uuidv7(),
                     "scope": "run",
-                    "occurredAt": now,
+                    "occurredAt": _utc_now(),
                     "principal": "runtime",
                     "runId": ctx.run_id,
-                    "payload": {"kind": "RunFailed", "error": str(exc)},
+                    "payload": {"kind": "RunCancelled", "reason": str(exc)},
+                },
+            )
+        except Exception as exc:
+            # An exception is never a completion.
+            run_status = "cancelled" if ctx.is_cancelled else "failed"
+            kind = "RunCancelled" if ctx.is_cancelled else "RunFailed"
+            body = (
+                {"kind": kind, "reason": f"cancelled during: {exc}"}
+                if ctx.is_cancelled
+                else {"kind": kind, "error": str(exc)}
+            )
+            self.publish_event(
+                ctx.run_id,
+                {
+                    "eventId": uuidv7(),
+                    "scope": "run",
+                    "occurredAt": _utc_now(),
+                    "principal": "runtime",
+                    "runId": ctx.run_id,
+                    "payload": body,
                 },
             )
         finally:
-            if ctx.is_cancelled:
-                run_status = "cancelled"
             ctx.status = run_status
             self.store.set_run_state(
                 ctx.run_id, ctx.manifest_path, ctx.repo_path, run_status, now=_utc_now()
@@ -818,6 +1158,48 @@ class RuntimeService:
             "frameId": frame_id,
             "error": {"code": code, "message": message},
         }
+
+
+def _parse_strict_approval_decision(raw: Any) -> ApprovalDecision:
+    """Parse a wire decision with no defaulted field.
+
+    Every previous default here was a forgery primitive: a caller who omitted
+    ``signature`` got ``"dummy-sig-approved"``, and one who omitted a digest got
+    a zero digest that matched nothing and was checked against nothing. A
+    missing field is now ``invalid_request``.
+    """
+    if not isinstance(raw, Mapping):
+        raise ContractError("invalid_request", "ResolveApproval requires a decision object")
+
+    missing = [f for f in APPROVAL_DECISION_REQUIRED_FIELDS if not str(raw.get(f, "")).strip()]
+    if missing:
+        raise ContractError(
+            "invalid_request",
+            f"approval decision is missing required field(s): {', '.join(sorted(missing))}",
+        )
+    unknown = set(raw) - set(APPROVAL_DECISION_ALLOWED_FIELDS)
+    if unknown:
+        raise ContractError(
+            "invalid_request",
+            f"approval decision has unknown field(s): {', '.join(sorted(unknown))}",
+        )
+
+    resolution = str(raw["resolution"])
+    if resolution not in ("approved", "rejected"):
+        raise ContractError(
+            "invalid_request", f"approval resolution {resolution!r} is not approved|rejected"
+        )
+
+    return ApprovalDecision(
+        approval_id=str(raw["approvalId"]),
+        resolution=resolution,
+        reviewer=str(raw["reviewer"]),
+        args_digest=str(raw["argsDigest"]),
+        descriptor_digest=str(raw["descriptorDigest"]),
+        expires_at=str(raw["expiresAt"]),
+        key_id=str(raw["keyId"]),
+        signature=str(raw["signature"]),
+    )
 
 
 def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> EventEnvelope:
@@ -850,7 +1232,20 @@ def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> Event
 
 
 class _ServiceEventStore(EventStorePort):
-    """EventStorePort wrapping both canonical event store and inbox store."""
+    """The runtime's view of the service's canonical store.
+
+    Envelopes arrive here already canonical -- the runtime's own
+    ``mhf.event/2`` values, carrying tenant, project, lineage, causation,
+    idempotency, trace and authority provenance. They are persisted *unchanged*
+    apart from the service-allocated sequence.
+
+    This previously round-tripped every envelope through
+    ``publish_event -> to_dict -> _envelope_from_service_event``, whose
+    substituted defaults (``tenant-default``, ``owner-platform``,
+    ``trace-service``, ``episode``) silently replaced exactly the fields that
+    make an event attributable. The service is a transport for the runtime's
+    facts, not a second author of them.
+    """
 
     def __init__(self, service: RuntimeService) -> None:
         self._service = service
@@ -858,7 +1253,10 @@ class _ServiceEventStore(EventStorePort):
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
         for envelope in events:
             run_id = envelope.run_id or ""
-            self._service.publish_event(run_id, envelope.to_dict())
+            try:
+                self._service._append_canonical(run_id, envelope)
+            except Exception as exc:  # noqa: BLE001 - reported through Result
+                return Result.fail("unavailable", f"canonical append rejected: {exc}")
         return Result.success(None)
 
     def read(self, range_query: EventRange | None = None) -> Result[Sequence[EventEnvelope]]:

@@ -60,9 +60,9 @@ MODEL_ALIASES = {
         "llama": "@cf/meta/llama-3.1-8b-instruct",
         "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
         # Balanced performance (20B)
-        "gpt-oss-20b": "@cf/deepseek/deepseek-v4-flash-0731",
-        "gpt-oss": "@cf/deepseek/deepseek-v4-flash-0731",
-        "20b": "@cf/deepseek/deepseek-v4-flash-0731",
+        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss": "@cf/openai/gpt-oss-20b",
+        "20b": "@cf/openai/gpt-oss-20b",
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
@@ -79,9 +79,9 @@ MODEL_ALIASES = {
         "llama": "@cf/meta/llama-3.1-8b-instruct",
         "llama-8b": "@cf/meta/llama-3.1-8b-instruct",
         # Balanced performance (20B)
-        "gpt-oss-20b": "@cf/deepseek/deepseek-v4-flash-0731",
-        "gpt-oss": "@cf/deepseek/deepseek-v4-flash-0731",
-        "20b": "@cf/deepseek/deepseek-v4-flash-0731",
+        "gpt-oss-20b": "@cf/openai/gpt-oss-20b",
+        "gpt-oss": "@cf/openai/gpt-oss-20b",
+        "20b": "@cf/openai/gpt-oss-20b",
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",

@@ -67,6 +67,36 @@ class ConflictError(ContractError):
         super().__init__("conflict", message, retryable=True)
 
 
+class UnauthenticatedError(ContractError):
+    """The caller's identity or key could not be established."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__("unauthenticated", message, retryable=False)
+
+
+class PermissionDeniedError(ContractError):
+    """Identity established, but this request is not authorised.
+
+    Distinct from ``UnauthenticatedError`` on purpose: a failed signature over a
+    *registered* key is an authorisation failure and must not read as "log in
+    again", while an unknown key ID never reached authorisation at all.
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__("permission_denied", message, retryable=False)
+
+
+class NotAvailableError(ContractError):
+    """A required capability or verifier is not available.
+
+    Never a pass. A verifier that cannot run leaves the request undecided, and
+    an undecided privileged request fails closed.
+    """
+
+    def __init__(self, message: str) -> None:
+        super().__init__("not_available", message, retryable=True)
+
+
 def service_error(
     code: str, message: str, *, retryable: bool | None = None, detail: str | None = None
 ) -> dict[str, Any]:

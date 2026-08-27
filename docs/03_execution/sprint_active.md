@@ -63,6 +63,7 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; digest-addressed M-4/M-6 bundles produced; independent receipts outstanding |
 | WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **PACKAGE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; M-5b-graph-coloring.json produced; blocked on remote successor tag |
 | WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **EVIDENCE_READY** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle produced |
+| WP-C1 | Backend service trust spine and canonical event truth | Dev A | **IN_PROGRESS** | accepted ADR-0062/0089/0101; no Kernel or schema change | falsifiers for key material, non-TTY approval denial, approval verification, gateway auth/origin/size, `StreamEvents` validation, canonical single-writer append, envelope round-trip fidelity, checkpoint reconstruction, resume restart, worker-observed cancellation |
 | C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 `EVIDENCE_READY`; WP-B1 `PACKAGE_READY`; WP-B2 `EVIDENCE_READY`; complete acceptance is not established | **independent adjudication:** baseline remote tag absent; independent M-4/M-6/M-6.5 acceptance receipts absent; qualified Linux AF_UNIX and remote tag verification outstanding |
 
 
@@ -99,8 +100,13 @@ fresh falsifier. Shared schema or runtime interfaces are frozen by ADR before us
 
 ## C1 exit state (2026-08-27)
 
-Developer-side work is complete on both lanes. What remains is not
-implementation:
+Developer-side work is complete **on the WP-A1 and WP-B1/WP-B2 surfaces**. It is not complete on the
+backend service and distribution surface: `runtime/service/` and the standalone CLI entered the tree
+outside the M-4–M-8 packages and regress already-accepted invariants (`I-5` approval verification,
+the M-2 one-writer anchor, and `I-4`/`I-9` recovery truth). That repair is authorized above as
+`WP-C1` and is in progress; it closes no gate of its own.
+
+Three further items remain outside implementation:
 
 1. **Independent acceptance receipts for M-4 and M-6.** Structurally cannot be
    produced by the party that produced the bundles — `accepts()` in

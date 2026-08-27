@@ -19,7 +19,7 @@ class ModelRoute:
     pricing_as_of: str
     capabilities: tuple[str, ...]
 
-from .config import get_pricing_micros_table
+from .config import get_band_model, get_free_model, get_medium_model, get_pricing_micros_table
 
 MODEL_PRICING_MICROS = get_pricing_micros_table()
 
@@ -86,8 +86,8 @@ class SingleModelRouter:
 class TierEscalationRouter:
     """Routes based on attempt number through a tiered list of models."""
 
-    def __init__(self, tiers: Sequence[str] = ("openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731")) -> None:
-        self.tiers = tuple(tiers) if tiers else ("openrouter/free",)
+    def __init__(self, tiers: Sequence[str] | None = None) -> None:
+        self.tiers = tuple(tiers) if tiers else (get_free_model(), get_medium_model(), get_band_model("high"))
 
     def route(self, model: str | None = None, attempt: int = 0) -> ModelRoute:
         if model:
@@ -99,9 +99,9 @@ class TierEscalationRouter:
 class FallbackModelRouter:
     """Routes to primary model on attempt 0, fallback model on higher attempts."""
 
-    def __init__(self, primary: str = "deepseek/deepseek-v4-flash-0731", fallback: str = "openrouter/free") -> None:
-        self.primary = primary
-        self.fallback = fallback
+    def __init__(self, primary: str | None = None, fallback: str | None = None) -> None:
+        self.primary = primary or get_medium_model()
+        self.fallback = fallback or get_free_model()
 
     def route(self, model: str | None = None, attempt: int = 0) -> ModelRoute:
         if model:
@@ -121,11 +121,11 @@ def resolve_model_router(policy: Any) -> Any:
     if isinstance(policy, dict):
         kind = policy.get("kind") or policy.get("strategy")
         if kind == "tier-escalation":
-            tiers = policy.get("tiers") or ("openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731")
+            tiers = policy.get("tiers") or (get_free_model(), get_medium_model(), get_band_model("high"))
             return TierEscalationRouter(tiers)
         if kind in ("fallback", "priority"):
-            primary = policy.get("primary", "deepseek/deepseek-v4-flash-0731")
-            fallback = policy.get("fallback", "openrouter/free")
+            primary = policy.get("primary") or get_medium_model()
+            fallback = policy.get("fallback") or get_free_model()
             return FallbackModelRouter(primary=primary, fallback=fallback)
         model = policy.get("model") or policy.get("primary") or "openrouter/free"
         return SingleModelRouter(model)

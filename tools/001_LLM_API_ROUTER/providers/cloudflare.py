@@ -41,7 +41,7 @@ MODEL_PRICING_MICROS = {
     # Cloudflare Workers AI - FREE PLAN MODELS
     # All pricing set to 0 for free models (no billing)
     "@cf/meta/llama-3.1-8b-instruct": {"prompt": 0, "completion": 0},
-    "@cf/deepseek/deepseek-v4-flash-0731": {"prompt": 0, "completion": 0},
+    "@cf/openai/gpt-oss-20b": {"prompt": 0, "completion": 0},
     "@cf/zai-org/glm-4.7-flash": {"prompt": 0, "completion": 0},
     "@cf/google/gemma-4-26b-a4b-it": {"prompt": 0, "completion": 0},
     "@cf/nvidia/nemotron-3-120b-a12b": {"prompt": 0, "completion": 0},

@@ -34,7 +34,7 @@ MODEL_PRICING_MICROS = {
 
 
 class GroqProvider(BaseLLMProvider):
-    def __init__(self, api_key: str = "", base_url: str = "https://api.groq.com/deepseek/deepseek-v4-flash-0731") -> None:
+    def __init__(self, api_key: str = "", base_url: str = "https://api.groq.com/openai/v1") -> None:
         self.api_key = api_key or _load_env_api_key()
         self.base_url = base_url.rstrip("/")
 

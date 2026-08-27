@@ -17,12 +17,30 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.metadata import PackageNotFoundError, version as distribution_version
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 from urllib.parse import parse_qs, urlparse
 
 from ...domain.primitives.primitives import uuidv7
 from ..governance.approvals import OperatorSigner
+from .server import MAX_FRAME_BYTES
 from .service import RuntimeService, _utc_now
+
+#: HTTP and UDS carry the same protocol and therefore enforce the same limit.
+#: Two limits for one protocol means the looser transport is the real one.
+MAX_BODY_BYTES = MAX_FRAME_BYTES
+
+#: Workspace reads are mediated: only these suffixes may be dereferenced, and
+#: only inside the resolved workspace root. Everything else goes through
+#: `ExplainArtifact`, which is the audited path.
+WORKSPACE_READ_SUFFIXES = frozenset({
+    ".py", ".ts", ".tsx", ".js", ".jsx", ".json", ".md", ".txt", ".toml",
+    ".yaml", ".yml", ".cfg", ".ini", ".sh", ".sql", ".rs", ".go",
+})
+
+#: Never served, regardless of suffix or location.
+WORKSPACE_READ_DENYLIST = frozenset({
+    ".env", ".env.local", "id_rsa", "id_ed25519", "credentials", ".netrc",
+})
 
 
 def _package_version() -> str:
@@ -57,9 +75,71 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
     server: StudioGatewayServer
 
     def _set_cors_headers(self) -> None:
-        self.send_header("Access-Control-Allow-Origin", "*")
+        """Echo only a configured origin. Never a wildcard.
+
+        This surface resolves approvals and launches runs; a wildcard here lets
+        any page the operator happens to visit drive their runtime.
+        """
+        origin = self.headers.get("Origin", "")
+        if origin and origin in getattr(self.server, "allowed_origins", ()):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Last-Event-ID")
+
+    def _authenticate(self) -> bool:
+        """Resolve the caller, or send a canonical refusal and return False.
+
+        Loopback with no configured tokens stays open for local development;
+        `create_gateway` refuses to bind a non-loopback address in that state,
+        so this cannot become an unauthenticated remote surface.
+        """
+        tokens = getattr(self.server, "auth_tokens", frozenset())
+        if not tokens and getattr(self.server, "is_loopback", lambda: False)():
+            return True
+
+        header = self.headers.get("Authorization", "")
+        presented = header[7:].strip() if header.lower().startswith("bearer ") else ""
+        if presented and presented in tokens:
+            return True
+
+        self._send_error_code(
+            "unauthenticated",
+            "missing or invalid bearer token",
+        )
+        return False
+
+    def _read_body(self) -> bytes | None:
+        """Read a size-capped request body, or refuse and return None.
+
+        The UDS transport has always enforced `MAX_FRAME_BYTES`; the same
+        protocol over HTTP enforced nothing, so one transport could be used to
+        submit frames the other would reject.
+        """
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except (TypeError, ValueError):
+            self._send_error_code("invalid_request", "malformed Content-Length")
+            return None
+        if length < 0:
+            self._send_error_code("invalid_request", "negative Content-Length")
+            return None
+        if length > MAX_BODY_BYTES:
+            self._send_error_code(
+                "frame_too_large", f"body exceeds {MAX_BODY_BYTES} bytes limit")
+            return None
+        return self.rfile.read(length) if length > 0 else b"{}"
+
+    def _send_error_code(self, code: str, message: str) -> None:
+        body = json.dumps({
+            "error": {"code": code, "message": message, "retryable": False}
+        }).encode("utf-8")
+        self.send_response(_http_status_for_code(code))
+        self._set_cors_headers()
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
@@ -70,6 +150,11 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/")
         query = parse_qs(parsed.query)
+
+        # Health is the only unauthenticated route: a liveness probe that
+        # requires a credential cannot report that credentials are misconfigured.
+        if path not in ("/api/health", "/api/v1/health") and not self._authenticate():
+            return
 
         if path in ("/api/health", "/api/v1/health"):
             self._handle_health()
@@ -105,16 +190,20 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
-        content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+        # Order matters: cap, then authenticate, then parse. An unauthenticated
+        # caller must not be able to make the server allocate or parse anything.
+        body = self._read_body()
+        if body is None:
+            return
+        if not self._authenticate():
+            return
         try:
             payload = json.loads(body.decode("utf-8")) if body else {}
-        except json.JSONDecodeError:
-            self.send_response(HTTPStatus.BAD_REQUEST)
-            self._set_cors_headers()
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Invalid JSON body"}).encode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            self._send_error_code("invalid_request", "malformed JSON body")
+            return
+        if not isinstance(payload, Mapping):
+            self._send_error_code("invalid_request", "request body must be a JSON object")
             return
 
         if path in ("/api/runs", "/api/v1/runs", "/api/runs/launch"):
@@ -290,65 +379,33 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
         self._send_json_response(res)
 
     def _handle_resolve_approval(self, payload: Mapping[str, Any], approval_id: str = "") -> None:
+        """Forward a caller-supplied decision verbatim. The gateway signs nothing.
+
+        Every field here was previously defaulted -- a request that omitted
+        ``signature`` was given ``"dummy-sig-approved"`` and recorded as
+        resolved. The gateway is a transport: it may fill in the approval ID
+        already present in the route, and nothing else. Missing fields are the
+        service's to reject.
+        """
         run_id = str(payload.get("runId", ""))
         p = dict(payload)
-        app_id = approval_id or str(p.get("approvalId", "app-default"))
 
-        # Normalize decision if passed as a string or flat fields
         decision_raw = p.get("decision")
-        if isinstance(decision_raw, str):
-            resolution = decision_raw
-            dec_dict = {
-                "approvalId": app_id,
-                "resolution": resolution if resolution in ("approved", "rejected") else "approved",
-                "reviewer": str(p.get("reviewer", "operator")),
-                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
-                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
-                "expiresAt": str(p.get("expiresAt", _utc_now())),
-                "keyId": str(p.get("keyId", "operator-key-default")),
-                "signature": str(p.get("signature", "dummy-sig-approved")),
-            }
-        elif isinstance(decision_raw, Mapping):
-            d = dict(decision_raw)
-            if "approvalId" not in d:
-                d["approvalId"] = app_id
-            if "resolution" not in d:
-                d["resolution"] = "approved"
-            if "reviewer" not in d:
-                d["reviewer"] = str(p.get("reviewer", "operator"))
-            if "argsDigest" not in d:
-                d["argsDigest"] = str(p.get("argsDigest", "sha256:" + "0" * 64))
-            if "descriptorDigest" not in d:
-                d["descriptorDigest"] = str(p.get("descriptorDigest", "sha256:" + "0" * 64))
-            if "expiresAt" not in d:
-                d["expiresAt"] = str(p.get("expiresAt", _utc_now()))
-            if "keyId" not in d:
-                d["keyId"] = str(p.get("keyId", "operator-key-default"))
-            if "signature" not in d:
-                d["signature"] = str(p.get("signature", "dummy-sig-approved"))
-            dec_dict = d
-        elif "resolution" in p:
-            dec_dict = {
-                "approvalId": app_id,
-                "resolution": str(p.get("resolution", "approved")),
-                "reviewer": str(p.get("reviewer", "operator")),
-                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
-                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
-                "expiresAt": str(p.get("expiresAt", _utc_now())),
-                "keyId": str(p.get("keyId", "operator-key-default")),
-                "signature": str(p.get("signature", "dummy-sig-approved")),
-            }
+        if isinstance(decision_raw, Mapping):
+            dec_dict = dict(decision_raw)
         else:
+            # Accept the flat form for convenience, but carry only what was
+            # actually sent. No synthesised digests, expiry, key, or signature.
             dec_dict = {
-                "approvalId": app_id,
-                "resolution": "approved",
-                "reviewer": str(p.get("reviewer", "operator")),
-                "argsDigest": str(p.get("argsDigest", "sha256:" + "0" * 64)),
-                "descriptorDigest": str(p.get("descriptorDigest", "sha256:" + "0" * 64)),
-                "expiresAt": str(p.get("expiresAt", _utc_now())),
-                "keyId": str(p.get("keyId", "operator-key-default")),
-                "signature": str(p.get("signature", "dummy-sig-approved")),
+                key: p[key]
+                for key in (
+                    "approvalId", "resolution", "reviewer", "argsDigest",
+                    "descriptorDigest", "expiresAt", "keyId", "signature",
+                )
+                if key in p
             }
+        if approval_id and "approvalId" not in dec_dict:
+            dec_dict["approvalId"] = approval_id
 
         p_clean = {"decision": dec_dict}
         if "expectedSeq" in p:
@@ -434,6 +491,22 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
 
         workspace_root = self.server.workspace_root.resolve()
         target_path = (workspace_root / file_param).resolve()
+
+        # Selector mediation. Containment alone still exposes every secret a
+        # workspace happens to contain, so the selector is an allowlist of
+        # readable kinds plus an explicit denylist of credential-bearing names.
+        if (
+            target_path.name in WORKSPACE_READ_DENYLIST
+            or target_path.suffix.lower() not in WORKSPACE_READ_SUFFIXES
+            or any(part.startswith(".") and part not in (".", "..")
+                   for part in target_path.relative_to(workspace_root).parts[:-1]
+                   if target_path.is_relative_to(workspace_root))
+        ):
+            self._send_error_code(
+                "permission_denied",
+                f"path {file_param!r} is outside the readable workspace selector",
+            )
+            return
 
         if not target_path.is_relative_to(workspace_root) or not target_path.exists() or not target_path.is_file():
             self.send_response(HTTPStatus.NOT_FOUND)
@@ -531,11 +604,25 @@ class StudioGatewayServer(ThreadingHTTPServer):
         server_address: tuple[str, int],
         service: RuntimeService,
         workspace_root: Path,
+        *,
+        auth_tokens: frozenset[str] = frozenset(),
+        allowed_origins: tuple[str, ...] = (),
     ) -> None:
         super().__init__(server_address, StudioGatewayHandler)
         self.service = service
         self.workspace_root = workspace_root
+        #: Bearer tokens accepted for command routes. Empty means loopback-only
+        #: development; `create_gateway` refuses a non-loopback bind in that case.
+        self.auth_tokens = auth_tokens
+        #: Exact origins echoed back on CORS responses. Never a wildcard: a
+        #: wildcard on a surface that resolves approvals lets any page a
+        #: developer visits drive their runtime.
+        self.allowed_origins = tuple(allowed_origins)
         self.is_running = True
+
+    def is_loopback(self) -> bool:
+        host = self.server_address[0]
+        return host in ("127.0.0.1", "::1", "localhost")
 
 
 def create_gateway(
@@ -544,11 +631,30 @@ def create_gateway(
     workspace_root: Path | None = None,
     service: RuntimeService | None = None,
     db_path: Path | str | None = None,
+    auth_tokens: Sequence[str] = (),
+    allowed_origins: Sequence[str] = (),
 ) -> StudioGatewayServer:
     from ...adapters.stores.event_store import SqliteEventStore
     from .inbox import ServiceInboxStore
 
     root = (workspace_root or Path.cwd()).resolve()
+
+    tokens = frozenset(t for t in auth_tokens if t)
+    if not tokens:
+        env_tokens = os.environ.get("VANGUARD_GATEWAY_TOKENS", "")
+        tokens = frozenset(t.strip() for t in env_tokens.split(",") if t.strip())
+    if not allowed_origins:
+        env_origins = os.environ.get("VANGUARD_GATEWAY_ORIGINS", "")
+        allowed_origins = tuple(o.strip() for o in env_origins.split(",") if o.strip())
+
+    if host not in ("127.0.0.1", "::1", "localhost") and not tokens:
+        # An unauthenticated gateway reachable off-host is a remote command
+        # execution surface. Refuse to start rather than serve it.
+        raise ValueError(
+            f"refusing to bind {host}: a non-loopback gateway requires bearer tokens "
+            "(pass auth_tokens= or set VANGUARD_GATEWAY_TOKENS)"
+        )
+
     if service is None:
         if db_path is None:
             db_dir = root / ".vanguard"
@@ -557,7 +663,10 @@ def create_gateway(
         inbox = ServiceInboxStore(db_path)
         event_store = SqliteEventStore(db_path)
         service = RuntimeService(inbox_store=inbox, event_store=event_store)
-    return StudioGatewayServer((host, port), service, root)
+    return StudioGatewayServer(
+        (host, port), service, root,
+        auth_tokens=tokens, allowed_origins=tuple(allowed_origins),
+    )
 
 
 def run_gateway(
@@ -565,11 +674,18 @@ def run_gateway(
     port: int = 8000,
     workspace: str = ".",
     db_path: str | None = None,
+    auth_tokens: Sequence[str] = (),
+    allowed_origins: Sequence[str] = (),
 ) -> None:
     root = Path(workspace).resolve()
     print(f"[*] Starting AETHER Studio Gateway on http://{host}:{port}")
     print(f"[*] Serving workspace at {root}")
-    server = create_gateway(host=host, port=port, workspace_root=root, db_path=db_path)
+    server = create_gateway(
+        host=host, port=port, workspace_root=root, db_path=db_path,
+        auth_tokens=auth_tokens, allowed_origins=allowed_origins,
+    )
+    if not server.auth_tokens:
+        print("[!] No bearer tokens configured: loopback-only development mode.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

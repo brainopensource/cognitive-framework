@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -289,7 +288,14 @@ def cmd_run(args: argparse.Namespace) -> int:
         return EXIT_TASK_FAILED
 
     _report_result(result)
-    _report_diff(workspace)
+    if (workspace / ".git").exists():
+        # N-06 confines subprocess to the sandbox adapter, and git-backed diff
+        # already belongs to EnvironmentPort (`adapters/environment/git.py`).
+        # The CLI is a client of the runtime, so it points at the command
+        # rather than shelling out around the port. The previous
+        # `os.popen(f"git -C {workspace} diff")` also interpolated a
+        # user-supplied path into a shell.
+        print(f"\nreview changes with: git -C {workspace} diff")
 
     terminal = str(getattr(result.terminal, "value", result.terminal)).lower()
     return EXIT_OK if terminal in ("succeeded", "success", "completed") else EXIT_TASK_FAILED
@@ -311,21 +317,6 @@ def _report_result(result: Any) -> None:
         )
     if telemetry.usd_micros is not None:
         print(f"cost   : ${telemetry.usd_micros / 1_000_000:.4f}")
-
-
-def _report_diff(workspace: Path) -> None:
-    if not (workspace / ".git").exists():
-        return
-    try:
-        completed = subprocess.run(
-            ["git", "-C", str(workspace), "diff"],
-            capture_output=True, text=True, timeout=30, check=False,
-        )
-    except (OSError, subprocess.SubprocessError) as exc:
-        print(f"(could not read git diff: {exc})", file=sys.stderr)
-        return
-    print("-" * 40)
-    print(completed.stdout if completed.stdout.strip() else "(no uncommitted changes)")
 
 
 def _repo_root_of(workspace: Path) -> Path | None:

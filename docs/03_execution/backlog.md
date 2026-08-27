@@ -6,7 +6,7 @@ canonical_for: [m4-m8-work-packages, two-developer-delivery-tracks, package-depe
 status: living
 owner: tech-lead
 version: "1.0.0"
-last_verified: 2026-08-26
+last_verified: 2026-08-27
 subordinate_to: ../../VISION.md
 supersedes: [leadership-backlog-2026-08-25]
 superseded_by: null
@@ -29,10 +29,10 @@ package consumes another developer's unfinished branch.
 
 | ID | Milestone | Owner/state | Depends on; merge order | Acceptance |
 |---|---|---|---|---|
-| WP-A1 | M-4/M-6 | Dev A / **EVIDENCE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
+| WP-A1 | M-4/M-6 | Dev A / **PACKAGE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
 | WP-B1 | M-5a/M-5b | Dev B / **PACKAGE_READY** | ADR-0101/0102; tooling beside A1, treatment after baseline | baseline + M-5b bundle |
 | WP-A2 | M-6.5 | Dev A / **BLOCKED** | A1 merged; ADR-0103 frozen; awaiting C1 independent acceptance | runtime-seam evidence |
-| WP-B2 | M-6.5 | Dev B / **EVIDENCE_READY** | A1/A2; instrument then study | signed positive/negative disposition |
+| WP-B2 | M-6.5 | Dev B / **ACCEPTED** | A1/A2; instrument then study | signed positive/negative disposition |
 | WP-A3 | M-7 | Dev A / **NOT_STARTED** | A1; before B3 runs | three runtime topologies |
 | WP-B3 | M-7 | Dev B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
 | WP-A4 | M-8 | Dev A / **NOT_STARTED** | M-7 decision, ADR-0100; before B4 | durable authorized memory |

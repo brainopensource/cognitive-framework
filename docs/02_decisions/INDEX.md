@@ -162,11 +162,12 @@ the narrower historical wordings in ADR-0080 and ADR-0090 without weakening eith
 
 ## M-8 Contract and 2026 Convergence (`0100`–`0102`)
 
-`0099` remains reserved for the scheduler disposition and has no accepted ADR until M7-01 evidence
-exists. Numbering is append-only; reserving it does not authorize concurrency.
+`0099` records the scheduler disposition after M7-01 evidence. Numbering is append-only; the
+decision does not authorize concurrency.
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
+| `0099` | [`0099-m7-topology-scheduler-disposition.md`](0099-m7-topology-scheduler-disposition.md) | **M-7 disposition:** `SEQUENTIAL_CONFIRMED`; retain topology lowering and telemetry, with no active concurrency authorization. | accepted v1.0.0 | 2026-08-27 |
 | `0100` | [`0100-memory-learning-and-composition-lifecycle.md`](0100-memory-learning-and-composition-lifecycle.md) | **M-8 contract:** verified memory authorization, durable category isolation, retrieval provenance, legal hold/GC, immutable compositions, separated authorities, CAS promotion and real rollback. | accepted v1.0.0 | 2026-08-26 |
 | `0101` | [`0101-receipt-backed-evidence-and-acceptance.md`](0101-receipt-backed-evidence-and-acceptance.md) | **Evidence method:** separates facts/artifacts/projections/telemetry/attestations; monotonic evidence and package states; independent receipt-backed acceptance; valid negative-result closure. | accepted v1.0.0 | 2026-08-26 |
 | `0102` | [`0102-convergence-and-baseline-succession.md`](0102-convergence-and-baseline-succession.md) | **Convergence:** records `M-5A-BASE-v2` as contaminated/unpublished, resets unsupported claims, defines `CONVERGENCE-BASE-v1`, and retires parallel Leadership planning. | accepted v1.0.0 | 2026-08-26 |

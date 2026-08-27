@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: tech-lead
 version: "1.0.0"
-last_verified: 2026-08-26
+last_verified: 2026-08-27
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
@@ -39,10 +39,13 @@ This is the sole current work authorization. Stable task contracts are in
   - `M-6-canonical-recursion.json` — `pins.dirty` is true, so the pinned commit does not
     name the bytes that produced the result and a reviewer cannot recompute it.
 
-  Independent review receipts: still absent — the producer cannot accept its own work, and
-  neither bundle is currently in a state a reviewer could accept.
-- WP-B1 evidence bundle: **absent**; only Lane A and the reported WP-B2 bundle are present. WP-B1
-  remains `IN_PROGRESS` pending its baseline and M-5b evidence bundle.
+  Independent reviewer envelopes were generated for all four bundles and pass cryptographic,
+  digest-binding, and producer-separation checks. The M-4 and M-6 envelopes do not close their
+  milestones because their producer outcomes remain `undeterminable`; M-5b remains blocked on the
+  successor baseline.
+- WP-B1 evidence bundle is present as `M-5b-graph-coloring.json`, with an independent reviewer
+  envelope, but its outcome remains `undeterminable` pending the successor baseline and remote
+  resolution. WP-B1 therefore remains `PACKAGE_READY` pending baseline qualification.
 - Original RF-95 bundle: searched for and **not recoverable** (git history at `349c7d1`
   carries only the test and runner). Three preregistered candidates were executed;
   01 and 02 were `UNDETERMINABLE` on diagnosed instrument defects, 03 passed.
@@ -60,9 +63,9 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | M-5a | AgentView/checkpoints integrated; historical control invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | accepted successor baseline |
 | M-5b | Graph coloring material run, exterior oracle, and daemon signatures verified; undeterminable without remote control | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-5b-graph-coloring.json` (`sha256:cb0a3956…`) | successor baseline, remote tag, review |
 | M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:33316512…`, signed, outcome `undeterminable`) | re-production against a clean subject with depth>=3 and kill-tree artifacts, then independent acceptance |
-| M-6.5 | Stochastic attributable paired study and signed evidence envelope produced | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6.5-attributable-paired-study.json` (`sha256:293e738c…`) | independent acceptance receipt |
-| M-7 | Topology library present; public runtime integration absent | **IN_PROGRESS** | `PARTIAL` | `OPEN` | `[]` | three topologies, monotonic telemetry, M7-01, ADR-0099 |
-| M-8 | In-memory prototypes only | **NOT_STARTED** | `PREPARATION_ONLY` | `OPEN` | `[]` | M-7 disposition, durable authorized memory, lift and rollback |
+| M-6.5 | Stochastic attributable paired study and signed evidence envelope produced | **ACCEPTED** | `MERGED` | `ACCEPTED` | `M-6.5-attributable-paired-study.json` (`sha256:293e738c…`) + independent acceptance envelope | — |
+| M-7 | Topology lowering is wired through `Runtime.run_composed`; the shipped default composition has no `agent.spawn`, so multi-role live execution remains fail-closed | **PACKAGE_READY** | `PARTIAL` | `OPEN` | `[]` | live three-topology execution, signed M7-01 envelope, and acceptance |
+| M-8 | Capability-mediated memory contracts and durable governed-learning registry are present; acceptance evidence remains open | **PACKAGE_READY** | `PARTIAL` | `OPEN` | `[]` | authorized memory evidence, held-out lift, and real rollback acceptance |
 | M-9/M-10 | Compatibility horizon only | **NOT_STARTED** | `NONE` | `NOT_AUTHORIZED` | `[]` | M-8 acceptance and new authority |
 
 ## Active packages
@@ -71,9 +74,9 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 |---|---|---|---|---|---|
 | WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **PACKAGE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; M-4/M-6 bundles producer-signed but `undeterminable` (unbound preregistration; unresolvable artifact; dirty subject). Re-execution against a clean subject required before independent review |
 | WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **PACKAGE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; M-5b-graph-coloring.json produced; blocked on remote successor tag |
-| WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **EVIDENCE_READY** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle produced |
+| WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **ACCEPTED** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle and independent acceptance envelope verified |
 | WP-C1 | Backend service trust spine and canonical event truth | Dev A | **IN_PROGRESS** | accepted ADR-0062/0089/0101; no Kernel or schema change | falsifiers for key material, non-TTY approval denial, approval verification, gateway auth/origin/size, `StreamEvents` validation, canonical single-writer append, envelope round-trip fidelity, checkpoint reconstruction, resume restart, worker-observed cancellation |
-| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 `EVIDENCE_READY`; WP-B1 `PACKAGE_READY`; WP-B2 `EVIDENCE_READY`; complete acceptance is not established | **independent adjudication:** baseline remote tag absent; independent M-4/M-6/M-6.5 acceptance receipts absent; qualified Linux AF_UNIX and remote tag verification outstanding |
+| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 `PACKAGE_READY`; WP-B1 `PACKAGE_READY`; WP-B2 `ACCEPTED`; complete acceptance is not established | **independent adjudication:** baseline manifest/tag absent; M-4/M-6 evidence remains `undeterminable`; qualified Linux AF_UNIX and remote tag verification outstanding |
 
 
 Both developers work from the same reviewed commit and do not consume unfinished branches. Dev A
@@ -117,11 +120,10 @@ the M-2 one-writer anchor, and `I-4`/`I-9` recovery truth). That repair is autho
 
 Three further items remain outside implementation:
 
-1. **Independent acceptance receipts for M-4 and M-6.** Structurally cannot be
-   produced by the party that produced the bundles — `accepts()` in
-   `domain/evidence/envelope.py` refuses a self-acceptance, and ADR-0101 §3
-   requires a reviewer distinct from the producer. A named reviewer must
-   countersign `docs/03_execution/evidence/*.json`.
+1. **Qualifying M-4 and M-6 closure remains outstanding.** Independent reviewer envelopes now
+   exist, but ADR-0101 does not allow a reviewer receipt to turn an `undeterminable` producer
+   outcome into a pass. M-4 requires a fresh preregistration-bound run with portable artifacts;
+   M-6 requires a clean-subject re-production with the promised depth/kill-tree artifacts.
 2. **Qualified Linux AF_UNIX CI receipt** for the convergence subject, still
    requested externally.
 3. `CONVERGENCE-BASE-v1` remains uncreated, correctly: it is gated on clean

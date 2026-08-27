@@ -25,6 +25,8 @@ if str(_ROOT) not in sys.path:
 from repo_paths import repo_root
 from vanguard.packages.domain.evidence.baseline import (
     BASELINE_DISPOSITION_ACCEPTED_CONTROL,
+    BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED,
+    classify_ref_disposition,
     verify_baseline_manifest,
 )
 
@@ -33,6 +35,11 @@ def _local_git(args: Sequence[str], cwd: Path) -> tuple[int, str]:
 
     proc = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
     return proc.returncode, proc.stdout
+
+
+def _local_git_output(args: Sequence[str], cwd: Path) -> str:
+    code, output = _local_git(args, cwd)
+    return output if code == 0 else ""
 
 
 DEFAULT_MANIFEST = repo_root() / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
@@ -78,6 +85,15 @@ def main() -> int:
             f"BASELINE FAIL: malformed JSON in manifest {manifest_path}: {exc}",
             file=sys.stderr,
         )
+        return 1
+
+    git_tag = data.get("git_tag")
+    if isinstance(git_tag, str) and classify_ref_disposition(
+        root,
+        git_tag,
+        git_runner=lambda command: _local_git_output(command, root),
+    ) == BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED:
+        print("BASELINE FAIL: manifest names the contaminated historical ref", file=sys.stderr)
         return 1
 
     result = verify_baseline_manifest(

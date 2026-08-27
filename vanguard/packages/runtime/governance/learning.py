@@ -22,6 +22,10 @@ from ...ports.determinism import ClockPort
 from .approvals import ApprovalAuthority, OperatorSigner
 
 
+class NotAvailableError(RuntimeError):
+    """A required promotion verifier is unavailable; promotion fails closed."""
+
+
 def _default_now(clock: ClockPort | None = None, now: str | None = None) -> str:
     if now:
         return now
@@ -379,11 +383,12 @@ class DurableCompositionRegistry:
         if evidence.report_digest != report.report_digest:
             raise ValueError("evidence report_digest mismatch with evaluation report")
 
-        # Verify signature
-        if self.authority.verifying_keys:
-            signed_bytes = evidence.canonical_bytes()
-            if not self.authority.verify_bytes(evidence.key_id, signed_bytes, evidence.signature):
-                raise PermissionError(f"invalid promoter signature for key {evidence.key_id!r}")
+        # Verify signature. An unavailable verifier is not an implicit pass.
+        if not self.authority.verifying_keys:
+            raise NotAvailableError("promoter signature verifier is unavailable")
+        signed_bytes = evidence.canonical_bytes()
+        if not self.authority.verify_bytes(evidence.key_id, signed_bytes, evidence.signature):
+            raise PermissionError(f"invalid promoter signature for key {evidence.key_id!r}")
 
         with self._lock, self._conn:
             cur = self._conn.cursor()

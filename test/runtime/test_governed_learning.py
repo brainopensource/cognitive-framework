@@ -11,6 +11,7 @@ from vanguard.packages.runtime.governance import (
     CompositionCandidate,
     DurableCompositionRegistry,
     EvaluationReport,
+    NotAvailableError,
     OperatorSigner,
     PromotionEvidence,
     WorkloadSuite,
@@ -45,6 +46,41 @@ class TestGovernedLearning(unittest.TestCase):
         self.assertEqual(cand.base_version, "v1.0.0")
         self.assertTrue(cand.manifest_digest.startswith("sha256:"))
         self.assertEqual(cand.generator_id, "gen-agent-alpha")
+
+    def test_promotion_without_a_verifier_fails_closed(self) -> None:
+        registry = DurableCompositionRegistry(
+            db_path=self.db_path.parent / "unverified.db",
+            initial_version="v1.0.0",
+            initial_manifest={"version": "v1.0.0"},
+            authority=ApprovalAuthority({}),
+        )
+        try:
+            cand = CompositionCandidate.create("v1.0.0", {"version": "v1.1.0"})
+            report = EvaluationReport.create(
+                cand,
+                development_pass_rate=0.90,
+                held_out_pass_rate=0.80,
+                baseline_held_out_pass_rate=0.65,
+                adversarial_pass_rate=0.85,
+                baseline_adversarial_pass_rate=0.85,
+                transfer_pass_rate=0.80,
+                baseline_transfer_pass_rate=0.80,
+            )
+            evidence = PromotionEvidence(
+                candidate_id=cand.candidate_id,
+                base_version="v1.0.0",
+                promoted_version="v1.1.0",
+                expected_generation=0,
+                report_digest=report.report_digest,
+                promoter_id="promoter-1",
+                key_id="missing-key",
+                signature="",
+                created_at="",
+            )
+            with self.assertRaises(NotAvailableError):
+                registry.promote(cand, report, evidence)
+        finally:
+            registry.close()
 
     def test_evaluation_report_promotable_with_held_out_lift(self) -> None:
         cand = CompositionCandidate.create("v1.0.0", {"version": "v1.1.0"})

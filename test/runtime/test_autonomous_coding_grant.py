@@ -25,6 +25,10 @@ class TestAutonomousCodingGrant(unittest.TestCase):
             command_allowlist=("git", "pytest", "python3"),
             max_turns=20,
             max_budget_micros=100_000,
+            # Explicit test identity. There is no default signing key: a shared
+            # literal seed made every grant in every checkout attributable to
+            # the same key, so the signature proved nothing.
+            seed_key=b"\x11" * 32,
         )
         self.assertTrue(grant.grant_id.startswith("grant-"))
         self.assertTrue(len(grant.signature) > 0)
@@ -37,6 +41,7 @@ class TestAutonomousCodingGrant(unittest.TestCase):
             command_allowlist=("git", "pytest", "python3"),
             max_turns=10,
             max_budget_micros=50_000,
+            seed_key=b"\x11" * 32,
         )
 
         # 1. Valid read request within workspace

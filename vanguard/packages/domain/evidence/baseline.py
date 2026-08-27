@@ -14,7 +14,6 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
-import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
@@ -43,6 +42,10 @@ BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED = "CONTAMINATED_UNPUBLISHED"
 BASELINE_DISPOSITION_UNVERIFIED = "UNVERIFIED"
 
 KNOWN_CONTAMINATED_REFS = frozenset({"M-5A-BASE-v2", "1b4ce1a19e5d6ef2fd0575743fa60ecea0055fdd"})
+
+# Process execution stays at the tool boundary.  The domain verifier accepts
+# this narrow injected seam so callers can supply their repository adapter.
+GitRunner = Callable[[Sequence[str], Path], tuple[int, str]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,22 +117,33 @@ class BaselineVerificationResult:
         }
 
 
-def classify_ref_disposition(root: Path | str, ref_name: str) -> str:
-    """Classify a git ref against ADR-0102 criteria."""
+def classify_ref_disposition(
+    root: Path | str,
+    ref_name: str,
+    git_runner: Callable[[Sequence[str]], str] | None = None,
+) -> str:
+    """Classify an explicitly known ref against ADR-0102 criteria.
+
+    Resolution of repository refs belongs to the caller that owns the process
+    boundary. The manifest verifier receives that result through ``git_runner``;
+    this domain helper only classifies the immutable contaminated identities.
+    ``root`` remains in the signature for compatibility with existing callers.
+    When supplied, ``git_runner`` may resolve an otherwise unknown ref without
+    pulling process execution into the domain package.
+    """
+    _ = root
     ref_clean = ref_name.strip()
     if ref_clean in KNOWN_CONTAMINATED_REFS:
         return BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED
-
-    root_path = Path(root)
-    # Check if commit matches 1b4ce1a
-    res = subprocess.run(
-        ["git", "rev-parse", "--verify", "--quiet", f"{ref_clean}^{{commit}}"],
-        cwd=root_path,
-        capture_output=True,
-        text=True,
-    )
-    if res.returncode == 0 and res.stdout.strip().startswith("1b4ce1a"):
+    if ref_clean.startswith("1b4ce1a"):
         return BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED
+    if git_runner is not None:
+        try:
+            resolved = git_runner(("rev-parse", "--verify", "--quiet", f"{ref_clean}^{{commit}}"))
+        except Exception:
+            resolved = ""
+        if resolved.strip().startswith("1b4ce1a"):
+            return BASELINE_DISPOSITION_CONTAMINATED_UNPUBLISHED
 
     return BASELINE_DISPOSITION_UNVERIFIED
 

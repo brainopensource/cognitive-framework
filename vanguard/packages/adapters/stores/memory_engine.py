@@ -16,7 +16,7 @@ from ...domain.wire.types_gen import (
     MemoryQuery,
     MemoryRecord,
 )
-from ...runtime.memory import MemoryAccess, MemoryResult, RetrievalProvenance, validate_retrieval
+from ...ports.memory import MemoryAccess, MemoryResult, RetrievalProvenance, validate_retrieval
 from .blob_store import FileBlobStore
 from ...domain.canonicalisation.digest import digest_of
 

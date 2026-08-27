@@ -563,7 +563,7 @@ class LiveDogfood(unittest.TestCase):
         # a defect in the composition. What the composition must not do is
         # report success it did not achieve.
         self.assertIsNotNone(result.terminal)
-        if result.verdict is not None and result.verdict.passed:
+        if result.verdict is not None and result.verdict.outcome == "claims":
             self.assertTrue(tests_pass(repo))
 
 

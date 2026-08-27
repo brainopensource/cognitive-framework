@@ -7,7 +7,7 @@ canonical_for:
   - repository-anti-sprawl-rules
 status: living
 owner: repository-governance
-version: "0.7.1"
+version: "0.7.3.dev0"
 last_verified: 2026-08-23
 supersedes: []
 superseded_by: null
@@ -127,9 +127,8 @@ Execution sequence:
 2. **Wave 1 (COMPLETE - GREEN)**: Fail-Closed Trust Spine (bound signed verdicts, single emitter, typed budgets, `mhf.trajectory/1`).
 3. **Wave 2 (COMPLETE - GREEN)**: RF-23 truthful trajectories and RF-25 fresh-process SQLite-WAL continuation close M-2.
 4. **M-3C / W-3D (COMPLETE)**: canonical composition, activation, durability, evidence, profiles, and product bootstrap are closed.
-5. **M-4 (ACTIVE)**: ADR-0097 authorizes two Senior lanes: Dev A evidence Runtime/causal capture and Dev B scientific contracts/verification. RF-95 remains serial-last and NO-GO until integrated capture is complete.
-6. **M-5a–M-8 (PLANNED)**: M-5a creates immutable `M-5A-BASE-v2`; M-5b generality and M-6 delegation may then run in parallel; M-6.5, M-7, and M-8 retain their named decision and evidence gates.
-7. **Waves 9+ (POST-v1 RESEARCH)**: retrieval/macro experiments and governed meta-cognition remain exterior, non-authorizing horizons.
+5. **M-4–M-8**: current state, ownership, and authorization live only in the active execution board; mechanism presence never implies acceptance.
+6. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
 
 Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.

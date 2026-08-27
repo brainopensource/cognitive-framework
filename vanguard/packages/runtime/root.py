@@ -37,8 +37,14 @@ from .activation import (
 from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run
+from .topology import lower_topology, parse_topology
+from .scheduler import ReadyOperation, SequentialScheduler
 from .ledger_emitter import LedgerBridge, LedgerEmitter
+from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
+from ..ports.memory import MemoryBinding
+from .child_runtime import RuntimeChildRunner
+from .delegation import SPAWN_VERB
 from .wiring import (
     BindingContext,
     BindingResolver,
@@ -75,6 +81,12 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
         sandbox_mode: str = "rootless",
+        blobs: Any = None,
+        capture_policy: Any = None,
+        meta_controller: Any = None,
+        controller_confidence: tuple[Any, ...] = (),
+        memory: MemoryBinding | None = None,
+        experience: MemoryBinding | None = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -142,6 +154,12 @@ class Runtime(_ComposedRuntime):
             approver=approver,
             approval_key=approval_key,
             interactive=interactive,
+            blobs=blobs,
+            capture_policy=capture_policy,
+            meta_controller=meta_controller,
+            controller_confidence=tuple(controller_confidence),
+            memory=memory,
+            experience=experience,
         )
         try:
             return cls.run_composed(
@@ -169,6 +187,12 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         host_qualifies: bool = True,
         host_facts: Mapping[str, Any] | None = None,
+        blobs: Any = None,
+        capture_policy: Any = None,
+        meta_controller: Any = None,
+        controller_confidence: tuple[Any, ...] = (),
+        memory: MemoryBinding | None = None,
+        experience: MemoryBinding | None = None,
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -202,6 +226,12 @@ class Runtime(_ComposedRuntime):
             approver=approver,
             approval_key=approval_key,
             interactive=interactive,
+            blobs=blobs,
+            capture_policy=capture_policy,
+            meta_controller=meta_controller,
+            controller_confidence=tuple(controller_confidence),
+            memory=memory,
+            experience=experience,
         )
         try:
             return cls.run_composed(
@@ -227,7 +257,8 @@ class Runtime(_ComposedRuntime):
         `profile`, when given, is an `EffectiveExecutionProfile`
         (`runtime/profiles.py`, typically produced by `RuntimeBootstrap`).
         It folds into `RunPlan`/`D_R` alongside `environment`/`store`/
-        `model_route` (`ADR-0089 §Decision 1`, `RF-87`). Omitting it leaves
+        `model_route`; an optional meta-controller is bound there as a separate
+        policy identity (`ADR-0089 §Decision 1`, `RF-87`). Omitting it leaves
         `RunPlan.profile_id` empty — legible for pre-W3D callers during
         migration, but never release/promotion eligible.
         """
@@ -248,6 +279,20 @@ class Runtime(_ComposedRuntime):
                 ports, task_context, preregistration,
                 expected_oracle=(harness.evaluators[0] if harness.evaluators else None))
         activation = plan_activation(harness.frozen)
+        extensions: tuple[Mapping[str, Any], ...] = ()
+        if task_context.topology is not None:
+            topology = parse_topology(task_context.topology)
+            lowered = lower_topology(topology, harness)
+            operations = tuple(
+                ReadyOperation(
+                    operation_id=str(item["operationId"]),
+                    causal_predecessors=tuple(str(x) for x in item.get("causalPredecessors", ())),
+                ) for item in lowered["roleOperations"]
+            )
+            scheduled = SequentialScheduler().decide(operations)
+            if len(scheduled) != len(operations):
+                raise RunPlanError("topology contains operations that are not sequentially schedulable")
+            extensions = (lowered,)
         run_plan = plan_run(
             activation,
             project_id=task_context.project_id,
@@ -264,11 +309,29 @@ class Runtime(_ComposedRuntime):
                 "journal_mode": getattr(selected_store, "journal_mode", "memory"),
             },
             model_route=_model_route_identity(ports.model),
+            meta_controller=_meta_controller_identity(ports.meta_controller),
             oracle=harness.evaluators[0] if harness.evaluators else None,
             root_principal=task_context.principal,
             budget=harness.budget,
             profile=profile,
+            extensions=extensions,
         )
+        # `ADR-0096 §14.5`. The profile is the only thing that knows the
+        # run's retention and capture-required posture, and `RunPlan` carries
+        # only its scalars, so the policy is resolved here -- once, at the one
+        # composition seam -- rather than rediscovered inside the session.
+        if ports.blobs is not None and ports.capture_policy is None:
+            ports = replace(ports, capture_policy=resolve_capture_policy(profile))
+        # `M-6`. A composition that can spawn needs something that can run a
+        # child, and the only admissible runner re-enters this same method.
+        # Bound here rather than in `HarnessSession` so recursion stays an
+        # edge of the public boundary and never a second activation authority.
+        if ports.child_runtime is None and SPAWN_VERB in harness.verbs:
+            ports = replace(ports, child_runtime=RuntimeChildRunner(
+                run_composed=cls.run_composed,
+                harness=harness, parent_ports=ports, parent_task=task_context,
+                profile=profile, release=release,
+            ))
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan
         )
@@ -380,6 +443,20 @@ def _model_route_identity(model: Any) -> Mapping[str, Any]:
     }
 
 
+def _meta_controller_identity(controller: Any) -> Mapping[str, Any]:
+    if controller is None:
+        return {}
+    controller_id = str(getattr(controller, "controller_id", ""))
+    if not controller_id:
+        raise ValueError("a bound meta-controller must declare controller_id")
+    cls = type(controller)
+    return {
+        "controllerId": controller_id,
+        "implementation": f"{cls.__module__}.{cls.__qualname__}",
+        "version": str(getattr(controller, "version", "")),
+    }
+
+
 def _build_component_handle(
     step: ActivationStep,
     *,
@@ -400,6 +477,7 @@ def _build_component_handle(
         "environment": ports.environment,
         "evaluator": ports.verifier,
         "store": ports.store,
+        "meta_controller": ports.meta_controller,
     }
     service = services.get(step.interface)
     if service is None:
@@ -419,7 +497,9 @@ __all__ = [
     "plan_activation",
     "plan_run",
     "EVALUATOR_BINDINGS",
+    "ArtifactWriter",
     "BindingContext",
+    "CapturePolicy",
     "CompositionError",
     "EffectBinding",
     "Harness",
@@ -430,6 +510,7 @@ __all__ = [
     "RunResult",
     "Runtime",
     "SessionPorts",
+    "resolve_capture_policy",
     "TaskContext",
     "_admit_turn_result",
     "_bwrap_path",

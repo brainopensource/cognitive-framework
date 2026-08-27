@@ -56,8 +56,8 @@ Using the **Provider Optimizer** (`tools/001_LLM_API_ROUTER/optimizer.py`) and *
 | Optimization Policy | Target Objective | Tier 1/2 Routing | Tier 3/4 Routing | Tier 5–7 Routing | Cost / 100 Tasks |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Min-Cost** | $0 Direct Spend | `ollama/deepseek-r1:14b` | `ollama/qwen2.5:14b` | `openrouter/free` | **$0.00 USD** |
-| **Min-Tokens** | Minimum Prompt Overhead | `deepseek/deepseek-chat` | `deepseek/deepseek-chat` | `qwen/qwen-2.5-72b-instruct` | **$0.035 USD** |
-| **Balanced (Recommended)** | High Pass Rate + Low Cost | `deepseek/deepseek-chat` | `deepseek/deepseek-chat` | `deepseek/deepseek-chat` | **$0.030 USD** |
+| **Min-Tokens** | Minimum Prompt Overhead | `deepseek/deepseek-v4-flash-0731` | `deepseek/deepseek-v4-flash-0731` | `qwen/qwen-2.5-72b-instruct` | **$0.035 USD** |
+| **Balanced (Recommended)** | High Pass Rate + Low Cost | `deepseek/deepseek-v4-flash-0731` | `deepseek/deepseek-v4-flash-0731` | `deepseek/deepseek-v4-flash-0731` | **$0.030 USD** |
 
 ---
 

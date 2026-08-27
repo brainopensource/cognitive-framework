@@ -10,6 +10,7 @@ DELETE.md
 vanguard_runtime.egg-info/
 tools/003_LLM_ENGINE_DESKTOP/bench_finetune/
 tools/003_LLM_ENGINE_DESKTOP/presets/
+tools/002_LLM_API_MOCK/runs/live_captures/
 logo_v2.png
 logo_v3.png
 logo.png
@@ -17,3 +18,5 @@ logo.png
 delete.md
 vanguard/clients/studio/dist-browser/
 .vanguard/
+tools/005_SWE_VERIFIED_REPO/
+.commandcode/

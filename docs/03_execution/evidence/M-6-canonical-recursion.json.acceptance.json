@@ -1,0 +1,64 @@
+{
+  "artifactRefs": [],
+  "claim": "acceptance:M-6",
+  "digest": "sha256:705fd1b90b690a1f544769e5b58246b25a38f7f82c852858ad9882e3d5a16b2a",
+  "environment": {
+    "reviewerPublicKey": "14apQEIMwInV4MBxsMis5uXkeuED+krKWY2D09W63V8="
+  },
+  "materials": [
+    {
+      "digest": "sha256:9dc2519868016f407eb3d6a074e4d089fb825bf2981a9a62882a30086b9278a4",
+      "name": "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
+      "ref": "test/falsifiers/test_rf101_rf112_canonical_recursion.py"
+    },
+    {
+      "digest": "sha256:bcf4ca8586981ada3d9d4f5eaa0fc0069515e512f71b86c5d50499889a624a55",
+      "name": "vanguard/packages/ports/child_runtime.py",
+      "ref": "vanguard/packages/ports/child_runtime.py"
+    },
+    {
+      "digest": "sha256:feebddf7a6bb01cc3c1fc411394d314a2ab72c2c88b488221eb10223d9b9777e",
+      "name": "vanguard/packages/runtime/child_runtime.py",
+      "ref": "vanguard/packages/runtime/child_runtime.py"
+    },
+    {
+      "digest": "sha256:1b36b897ebd4d8a3ec20da18824fc480d20a287330cca1ce9554667f8350028a",
+      "name": "vanguard/packages/runtime/delegation.py",
+      "ref": "vanguard/packages/runtime/delegation.py"
+    },
+    {
+      "digest": "sha256:0e7f8efe47d871dd2376c7abb692ccfd96cade39fa99231b5d874a5db000a9e2",
+      "name": "vanguard/packages/runtime/ledger/recovery.py",
+      "ref": "vanguard/packages/runtime/ledger/recovery.py"
+    },
+    {
+      "digest": "sha256:de8632d15acf906df2a2ba7fb8913873802635243a1975314b615d57e94a60d3",
+      "name": "vanguard/packages/runtime/wiring.py",
+      "ref": "vanguard/packages/runtime/wiring.py"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "branch": "feat_higgs_M4_M8",
+    "commit": "ce1b6a86b7745b3b5111bd84138f207b7ba94d0a",
+    "dirty": true,
+    "eventSchema": "mhf.event/2",
+    "reducer": "sha256:d20ca6c94088fb997e5faa7781264f800fbedc3b366336e8a4ab9c78a1463379",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "2c022840902a26c3fb815ce18bbe89ff2b0526e9"
+  },
+  "producer": {
+    "identity": "independent-reviewer",
+    "keyId": "independent-reviewer-key",
+    "role": "reviewer"
+  },
+  "protocol": "aether.evidence.acceptance/1",
+  "run": {
+    "acceptedEvidenceDigest": "sha256:333165125dc01e456a2c1c3b5a0a741f01063e77e284c98ee7e8ca0150c40e1e"
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:KjGC42qGO4fXqLBZHuFdpXxCg6SDg1C2w4NCMiK8B3oNEKX08qHVR2wdSkhA7xellip71M+1vzON/LKBXFBHBA==",
+  "subject": [
+    "sha256:333165125dc01e456a2c1c3b5a0a741f01063e77e284c98ee7e8ca0150c40e1e"
+  ]
+}

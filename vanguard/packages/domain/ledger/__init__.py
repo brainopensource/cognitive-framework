@@ -13,6 +13,12 @@ from .events import (
     EventEnvelope,
     parse_event_envelope,
 )
+from .agent_view import (
+    AGENT_VIEW_REDUCER_VERSION,
+    AgentView,
+    AgentViewCheckpoint,
+    fold_agent_view,
+)
 from .reducer import (
     ReducerError,
     compute_state_digest,
@@ -41,6 +47,10 @@ __all__ = [
     "VALID_TRAINABILITIES",
     "VALID_REDACTION_STATUSES",
     "parse_event_envelope",
+    "AGENT_VIEW_REDUCER_VERSION",
+    "AgentView",
+    "AgentViewCheckpoint",
+    "fold_agent_view",
     "LedgerState",
     "EpisodeState",
     "BudgetLeaseState",

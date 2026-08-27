@@ -1,23 +1,21 @@
-"""`ExecutionProfile` — identity-bearing deployment/assurance config (`ADR-0089 §Decision 1,5`).
+"""`ExecutionProfile` — identity-bearing deployment/assurance config (`ADR-0089 §Decision 1,5`, `ADR-0096 §14.5`, `ADR-0097 §1`).
 
-`D_H` says what was composed; `D_R` says what environment it ran in. Before
-W-3D, deployment (`sandbox_mode`) and release-ness (`release: bool`) were
-selected inline in `root.py`/`lab_driver.py` and only partially reached
-`D_R` through `environment`/`store`/`model_route`. `ExecutionProfile`
-consolidates the remaining axes — approval, persistence, evaluation,
-assurance, capture — into one resolved, versioned, digested value that MUST
-enter `RunPlan`/`D_R` (`RF-87`).
+`D_H` says what was composed; `D_R` says what environment it ran in. `ExecutionProfile`
+consolidates containment, approval, persistence, evaluation, assurance, retention, and
+capture into one resolved, versioned, digested value that MUST enter `RunPlan`/`D_R` (`RF-87`).
 
-Three axes are kept explicitly separate and never merged into a single
-scalar `trust_tier`:
-
+Three axes are kept explicitly separate and never merged into a single scalar `trust_tier`:
 * **containment** — what the process backend and workspace access are;
 * **approval** — who authorizes an effect before it runs;
 * **assurance** — what a resulting run is eligible to prove or promote.
 
-The effective ceiling for any run is the monotonic intersection of
-organization ceiling, selected profile, harness ceiling, agent policy, and
-request — an override may only narrow, never widen (`ADR-0089 §4.2`).
+Retention (`digests_only | standard | full`) governs content preservation, but never grants
+capture permission.
+
+Dual-read support:
+- `mhf.execution-profile/1` remains byte-frozen and its historical identity preimage is preserved.
+- `mhf.execution-profile/2` introduces the explicit retention axis, capture.required boolean,
+  and identity-bearing /2 preimage. New production writers single-write /2.
 """
 
 from __future__ import annotations
@@ -36,6 +34,8 @@ __all__ = [
     "resolve_profile",
 ]
 
+VALID_RETENTION = frozenset({"digests_only", "standard", "full"})
+
 
 class ExecutionProfileError(ValueError):
     """A profile request or resolution that must not proceed."""
@@ -52,7 +52,7 @@ class SandboxUnavailable(ExecutionProfileError):
 
 @dataclass(frozen=True, slots=True)
 class ExecutionProfile:
-    """One named, versioned deployment/assurance configuration (`mhf.execution-profile/1`)."""
+    """One named, versioned deployment/assurance configuration (`mhf.execution-profile/1` and `/2`)."""
 
     id: str
     workspace_mode: str  # "in-place" | "sealed"
@@ -68,21 +68,55 @@ class ExecutionProfile:
     capture_content: str = "redacted"  # "redacted" | "full"
     evaluation_absence_reason: str = ""
     network_mode: str = "inherited"
+    retention: str = "standard"  # "digests_only" | "standard" | "full"
+    capture_required: bool = False
+    api_version: str = "mhf.execution-profile/2"
 
     def __post_init__(self) -> None:
+        normalized_retention = self.retention.replace("-", "_")
+        if normalized_retention != self.retention:
+            object.__setattr__(self, "retention", normalized_retention)
+
+        if self.retention not in VALID_RETENTION:
+            raise ExecutionProfileError(f"unknown retention class {self.retention!r}, must be one of {sorted(VALID_RETENTION)}")
         if self.process_backend not in {"host", "platform-sandbox"}:
             raise ExecutionProfileError(f"unknown process backend {self.process_backend!r}")
-        if self.assurance_level == "hermetic" and not self.attestation_required:
-            raise ExecutionProfileError("hermetic assurance requires attestation")
+        if self.assurance_level == "hermetic":
+            if not self.attestation_required:
+                raise ExecutionProfileError("hermetic assurance requires attestation")
+            if self.api_version == "mhf.execution-profile/2" and self.retention != "full":
+                raise ExecutionProfileError("hermetic assurance requires full retention")
         if self.promotion_eligible and self.assurance_level != "hermetic":
             raise ExecutionProfileError("only hermetic assurance may be promotion-eligible")
         if self.evaluation_mode == "none" and not self.evaluation_absence_reason:
             raise ExecutionProfileError("evaluation:none requires an absence_reason")
 
-    def to_dict(self) -> Mapping[str, Any]:
+    def to_dict(self, api_version: str | None = None) -> Mapping[str, Any]:
         """The canonical JSON form; also the `profile_digest` preimage."""
+        version = api_version or self.api_version
+        if version == "mhf.execution-profile/1":
+            return {
+                "api": "mhf.execution-profile/1",
+                "id": self.id,
+                "workspace": {"mode": self.workspace_mode, "access": self.workspace_access},
+                "process": {"backend": self.process_backend, "fallback": "deny"},
+                "network": {"mode": self.network_mode, "allow": []},
+                "approval": {"default": self.approval_default, "rules": []},
+                "persistence": {"mode": self.persistence_mode, "durable": self.persistence_durable},
+                "evaluation": {
+                    "mode": self.evaluation_mode,
+                    **({"absence_reason": self.evaluation_absence_reason} if self.evaluation_mode == "none" else {}),
+                },
+                "assurance": {
+                    "level": self.assurance_level,
+                    "attestation_required": self.attestation_required,
+                    "promotion_eligible": self.promotion_eligible,
+                },
+                "capture": {"content": self.capture_content, "trainability": "prohibited"},
+            }
+
         return {
-            "api": "mhf.execution-profile/1",
+            "api": "mhf.execution-profile/2",
             "id": self.id,
             "workspace": {"mode": self.workspace_mode, "access": self.workspace_access},
             "process": {"backend": self.process_backend, "fallback": "deny"},
@@ -98,8 +132,52 @@ class ExecutionProfile:
                 "attestation_required": self.attestation_required,
                 "promotion_eligible": self.promotion_eligible,
             },
-            "capture": {"content": self.capture_content, "trainability": "prohibited"},
+            "retention": self.retention,
+            "capture": {
+                "content": self.capture_content,
+                "trainability": "prohibited",
+                "required": self.capture_required,
+            },
         }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> ExecutionProfile:
+        """Parse an ExecutionProfile from dict, supporting both /1 and /2 formats."""
+        api = data.get("api", "mhf.execution-profile/2")
+        if api not in {"mhf.execution-profile/1", "mhf.execution-profile/2"}:
+            raise ExecutionProfileError(f"unsupported execution profile api version {api!r}")
+
+        workspace = data.get("workspace", {})
+        process = data.get("process", {})
+        network = data.get("network", {})
+        approval = data.get("approval", {})
+        persistence = data.get("persistence", {})
+        evaluation = data.get("evaluation", {})
+        assurance = data.get("assurance", {})
+        capture = data.get("capture", {})
+
+        retention = data.get("retention", "standard")
+        capture_required = bool(capture.get("required", False))
+
+        return cls(
+            id=data.get("id", ""),
+            workspace_mode=workspace.get("mode", "in-place"),
+            workspace_access=workspace.get("access", "workspace-write"),
+            process_backend=process.get("backend", "host"),
+            approval_default=approval.get("default", "ask"),
+            persistence_mode=persistence.get("mode", "sqlite-wal"),
+            persistence_durable=bool(persistence.get("durable", True)),
+            evaluation_mode=evaluation.get("mode", "none"),
+            evaluation_absence_reason=evaluation.get("absence_reason", ""),
+            assurance_level=assurance.get("level", "recorded"),
+            attestation_required=bool(assurance.get("attestation_required", False)),
+            promotion_eligible=bool(assurance.get("promotion_eligible", False)),
+            capture_content=capture.get("content", "redacted"),
+            network_mode=network.get("mode", "inherited"),
+            retention=retention,
+            capture_required=capture_required,
+            api_version=api,
+        )
 
     @property
     def digest(self) -> str:
@@ -121,6 +199,9 @@ PRESETS: Mapping[str, ExecutionProfile] = {
         assurance_level="recorded",
         attestation_required=False,
         promotion_eligible=False,
+        retention="standard",
+        capture_required=True,
+        api_version="mhf.execution-profile/2",
     ),
     "local": ExecutionProfile(
         id="local",
@@ -135,6 +216,9 @@ PRESETS: Mapping[str, ExecutionProfile] = {
         assurance_level="recorded",
         attestation_required=False,
         promotion_eligible=False,
+        retention="standard",
+        capture_required=False,
+        api_version="mhf.execution-profile/2",
     ),
     "sandboxed": ExecutionProfile(
         id="sandboxed",
@@ -149,6 +233,9 @@ PRESETS: Mapping[str, ExecutionProfile] = {
         assurance_level="recorded",
         attestation_required=False,
         promotion_eligible=False,
+        retention="standard",
+        capture_required=False,
+        api_version="mhf.execution-profile/2",
     ),
     "hermetic": ExecutionProfile(
         id="hermetic",
@@ -162,6 +249,9 @@ PRESETS: Mapping[str, ExecutionProfile] = {
         assurance_level="hermetic",
         attestation_required=True,
         promotion_eligible=True,
+        retention="full",
+        capture_required=True,
+        api_version="mhf.execution-profile/2",
     ),
 }
 
@@ -191,6 +281,8 @@ class EffectiveExecutionProfile:
             "profileDigest": self.digest,
             "assuranceLevel": self.requested.assurance_level,
             "promotionEligible": self.requested.promotion_eligible,
+            "retention": self.requested.retention,
+            "captureRequired": self.requested.capture_required,
         }
 
 
@@ -229,7 +321,18 @@ def _narrow(base: ExecutionProfile, overrides: Mapping[str, Any]) -> ExecutionPr
         raise ExecutionProfileError("an override cannot widen workspace access")
     if overrides.get("process_backend") == "host" and base.process_backend == "platform-sandbox":
         raise ExecutionProfileError("an override cannot widen process backend containment")
-    allowed = {"workspace_access", "approval_default"}
+
+    if "retention" in overrides:
+        ret_order = {"full": 3, "standard": 2, "digests_only": 1, "digests-only": 1}
+        cur_rank = ret_order.get(base.retention, 2)
+        new_rank = ret_order.get(overrides["retention"], 0)
+        if new_rank > cur_rank:
+            raise ExecutionProfileError("an override cannot widen retention")
+
+    if "capture_required" in overrides and not overrides["capture_required"] and base.capture_required:
+        raise ExecutionProfileError("an override cannot weaken capture requirement")
+
+    allowed = {"workspace_access", "approval_default", "retention", "capture_required", "capture_content"}
     unknown = set(overrides) - allowed
     if unknown:
         raise ExecutionProfileError(f"override fields not permitted: {sorted(unknown)}")

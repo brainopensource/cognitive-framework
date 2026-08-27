@@ -7,8 +7,8 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: engineering-director
-version: "0.7.1"
-last_verified: 2026-08-25
+version: "0.7.3.dev0"
+last_verified: 2026-08-26
 read_when:
   - resolving-architectural-decisions
   - selecting-an-implementation-bundle
@@ -37,7 +37,8 @@ superseded_by: null
 - 🔐 [Delegation Digest and Measurement Decisions (`0091`–`0092`)](#delegation-digest-and-measurement-decisions-00910092) — collision-free child state identity, archived-bundle boundary, and measurement-only M7-01
 - 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
 - 🌟 [Vision as Law Zero (`0095`)](#vision-as-law-zero-0095) — **`VISION.md` is the constitutional authority for v0.7+**; roadmap reconciled; milestone identifier mapping
-- 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0097`)](#constitutional-evidence-and-two-lane-activation-00960097) — proof-honest evidence, strict schema evolution, Phase-0 closure, and M-4 Dev A/Dev B authorization
+- 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0098`)](#constitutional-evidence-and-two-lane-activation-00960098) — proof-honest evidence, strict schema evolution, Phase-0 closure, and event substrate `/2`
+- 🧭 [M-8 Contract and 2026 Convergence (`0100`–`0102`)](#m-8-contract-and-2026-convergence-01000102) — durable memory/promotion, receipt-backed acceptance, and baseline succession
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -113,10 +114,12 @@ delegation, binds `runtime.SpawnAdapter` as their sole legal writer, and folds t
 | `0090` | [`0090-mediated-delegation-event-roster.md`](0090-mediated-delegation-event-roster.md) | **Mediated delegation event roster:** `ChildSpawned`/`ChildReturned` allocated; `SpawnAdapter` sole writer; open-until-returned fold with cold reconciliation; cost conservation; derived authority; no `ChildFailed` third kind; no kernel change. | accepted | 2026-08-24 |
 
 **This ADR does not close M-6.** It closes the roster question only. `agent.spawn` remains inert at
-three points (`domain/artifacts/manifest.py` refuses the verb, `runtime/delegation.py` refuses every
-spawn via `M6_SPAWN_ACTIVE = False`, and the verb is on the inert-verb list), so no `ChildSpawned` can
-be emitted by the product. RF-55–RF-59 are allocated by ADR-0080, but their M-6 implementation
-falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
+manifest ingress and the product path until the active M-6 gate enables those seams. RF-55–RF-59
+are implemented as one conjunctive gate: RF-55 grant denial/no child event; RF-56 durable intent,
+idempotent receipt and strict attenuation; RF-57 declared target, four-dimensional conservation and
+depth/turn ceilings; RF-58 explicit evaluator authority plus typed acyclic join; RF-59 sole-writer
+enforcement plus kill-tree recovery as `UNDETERMINABLE` with no silent retry. This register resolves
+the narrower historical wordings in ADR-0080 and ADR-0090 without weakening either decision.
 
 ---
 
@@ -147,12 +150,27 @@ falsifiers do not yet exist. M-6 stays locked behind M-4 and M-5.
 > Vision is realized; it may not contradict a locked Vision concept without an explicit
 > Vision-superseding decision.
 
-## Constitutional Evidence and Two-Lane Activation (`0096`–`0097`)
+## Constitutional Evidence and Two-Lane Activation (`0096`–`0098`)
 
 | ADR | File & Title | Scope & Key Decisions | Status | Accepted |
 |---|---|---|---|---|
 | `0096` | [`0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md`](0096-constitutional-correction-evidence-causal-invariants-and-falsifiers.md) | **Evidence and falsifiability correction:** admissible counter-evidence, causal-history invariants, proof-honest reproducibility, strict `/2` schema evolution, evidence failure/degradation, privacy/capture separation, transitive TCB measurement, and RF-96…RF-100. | accepted v0.4.0 | 2026-08-25 |
 | `0097` | [`0097-phase0-ratification-and-two-lane-activation.md`](0097-phase0-ratification-and-two-lane-activation.md) | **Execution activation:** ratifies the corrected package; authorizes two M-4 Senior lanes; records Linux RF-38…RF-45 qualification; permits M-5b/M-6 parallel work after M-5a; preserves historical `M-5-BASE` and allocates `M-5A-BASE-v2`. | accepted v0.2.0 | 2026-08-25 |
+| `0098` | [`0098-event-substrate-v2-and-semantic-kind-roster.md`](0098-event-substrate-v2-and-semantic-kind-roster.md) | **Event substrate `/2`:** adds the four typed authority fields; folds the eight live legacy kinds into the generated schema and deletes `_V4_ONLY_KINDS`; freezes the deprecated-kind register and exactly five new semantic kinds; keeps goal content out of the ledger; sets the `M-5A-BASE-v2` creation criteria. | accepted v1.0.0 | 2026-08-26 |
+
+---
+
+## M-8 Contract and 2026 Convergence (`0100`–`0102`)
+
+`0099` records the scheduler disposition after M7-01 evidence. Numbering is append-only; the
+decision does not authorize concurrency.
+
+| ADR | File & Title | Scope & Key Decisions | Status | Accepted |
+|---|---|---|---|---|
+| `0099` | [`0099-m7-topology-scheduler-disposition.md`](0099-m7-topology-scheduler-disposition.md) | **M-7 disposition:** `SEQUENTIAL_CONFIRMED`; retain topology lowering and telemetry, with no active concurrency authorization. | accepted v1.0.0 | 2026-08-27 |
+| `0100` | [`0100-memory-learning-and-composition-lifecycle.md`](0100-memory-learning-and-composition-lifecycle.md) | **M-8 contract:** verified memory authorization, durable category isolation, retrieval provenance, legal hold/GC, immutable compositions, separated authorities, CAS promotion and real rollback. | accepted v1.0.0 | 2026-08-26 |
+| `0101` | [`0101-receipt-backed-evidence-and-acceptance.md`](0101-receipt-backed-evidence-and-acceptance.md) | **Evidence method:** separates facts/artifacts/projections/telemetry/attestations; monotonic evidence and package states; independent receipt-backed acceptance; valid negative-result closure. | accepted v1.0.0 | 2026-08-26 |
+| `0102` | [`0102-convergence-and-baseline-succession.md`](0102-convergence-and-baseline-succession.md) | **Convergence:** records `M-5A-BASE-v2` as contaminated/unpublished, resets unsupported claims, defines `CONVERGENCE-BASE-v1`, and retires parallel Leadership planning. | accepted v1.0.0 | 2026-08-26 |
 
 ---
 
@@ -306,7 +324,7 @@ falsifiers use `RF-*`.
 | `RF-38`–`RF-45` | ADR-0081 | Plugin lifecycle parity and NOVA-4 Layer-0 retirement / M-3 |
 | `RF-46`–`RF-48` | ADR-0083 | Pareto profile identity, authority, and reservation / M-3 and M-7 |
 | `RF-52`–`RF-53` | ADR-0084 | Attributable witness memo / M-5 |
-| `RF-55`–`RF-59` | ADR-0080 | Capability-mediated `agent.spawn` / M-6 |
+| `RF-55`–`RF-59` | ADR-0080 + ADR-0090 | Conjunctive mediated-spawn gate: grant/no-child denial; durable idempotent intent and attenuation; declared target plus four-dimensional conservation and structural ceilings; evaluator-authorized typed acyclic join; sole writer plus kill-tree `UNDETERMINABLE` recovery / M-6 |
 | `RF-65`–`RF-66` | ADR-0082 | Advanced topology fitness and the universal-loop challenge / M-8 |
 | `RF-67`–`RF-70` | ADR-0084 | Macro least privilege, dispatch, and exact promotion / M-9–M-10 |
 | `RF-72` | ADR-0082 | Identifier uniqueness linter and this one-time historical alias table / governance |
@@ -319,6 +337,9 @@ falsifiers use `RF-*`.
 | `RF-87`–`RF-94` | ADR-0089 | Execution profile identity, fail-closed assurance, capability qualification, generic entrypoint, shared tools, event streaming, real activation, and single runtime authority / W-3D |
 | `RF-95` | ADR-0094 | Real-model, durable, resumable product coding run / M-4 |
 | `RF-96`–`RF-100` | ADR-0096 | Cold reconstruction, transitive multidimensional Trusted Core Budget, Kernel Neutrality Gate, authority provenance, and proof-honest computed reproducibility / M-4 (RF-100 capture and run-close assessment) through M-5b. |
+| `RF-101`–`RF-112` | ADR-0090 + ADR-0101 (`WP-A1`) | Canonical recursion: missing-runner composition refusal, durable derived child identity, collision refusal, componentwise budget reservation against parent remaining, depth/turn/scope lowering, transcript non-leakage, depth>=3 cold fold, crash-boundary undeterminability, settled replay, project isolation, kill-tree append-only, and single-boundary re-entry / M-6 |
+| `RF-113` | ADR-0101 (`WP-A1`) | `aether.evidence/1` envelope integrity: code pinning, tamper detection, checked reviewer independence, and `undeterminable` as a first-class outcome / M-4 and M-6 |
+| `RF-114`–`RF-117` | ADR-0103 (`WP-A2`) | Authority-free strategy directives, controller-off event and digest parity, stale-epoch verdict invariance, and semantic checkpoint stability across retry and approval re-entry / M-6.5 |
 
 RF-72 requires `tools/linters/check_falsifier_ids.py` to reject duplicate or semantically
 conflicting allocations across accepted ADRs, SPEC, this register, and the active board. The linter

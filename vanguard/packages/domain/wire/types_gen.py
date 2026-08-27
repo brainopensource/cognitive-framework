@@ -64,12 +64,64 @@ class EventKind(str, Enum):
     CHECKPOINT_CREATED = "CheckpointCreated"
     CHILD_SPAWNED = "ChildSpawned"
     CHILD_RETURNED = "ChildReturned"
+    ACTIVATION_CHANGED = "ActivationChanged"
+    ARTIFACT_CREATED = "ArtifactCreated"
+    COMPETENCE_PRIOR_RECORDED = "CompetencePriorRecorded"
+    CONFLICT_DETECTED = "ConflictDetected"
+    EFFECT_PREVIEWED = "EffectPreviewed"
+    EPISODE_STATE_CHANGED = "EpisodeStateChanged"
+    EVIDENCE_CLAIM_PRODUCED = "EvidenceClaimProduced"
+    OBSERVATION_PRODUCED = "ObservationProduced"
+    OBSERVATION_REQUESTED = "ObservationRequested"
+    OPERATOR_INVOKED = "OperatorInvoked"
+    OPERATOR_SELECTED = "OperatorSelected"
+    CORRECTION_RECORDED = "CorrectionRecorded"
+    CANDIDATE_BUILT = "CandidateBuilt"
+    CANDIDATE_ATTESTED = "CandidateAttested"
+    CANARY_PROMOTED = "CanaryPromoted"
+    ROLLBACK_TRIGGERED = "RollbackTriggered"
+    GOAL_DECLARED = "GoalDeclared"
+    PLAN_REVISED = "PlanRevised"
+    STRATEGY_CHANGED = "StrategyChanged"
+    PROGRESS_ASSESSED = "ProgressAssessed"
+    CONTEXT_COMPACTED = "ContextCompacted"
 
 class GateDecision(str, Enum):
     PASS = "PASS"
     RETRY = "RETRY"
     ESCALATE = "ESCALATE"
     ABANDON = "ABANDON"
+
+@dataclass(frozen=True, slots=True)
+class ArtifactCreatedPayload:
+    artifactId: str
+    digest: str
+    role: str
+    schemaId: str
+    sizeBytes: int
+    retentionClass: str
+    stored: bool
+    producedBy: JsonObject
+    refs: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class ArtifactFlow:
+    artifact: str
+    from_: str
+    to: str
+    schemaId: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class ArtifactIndexEntry:
+    artifactId: str
+    digest: str
+    role: str
+    schemaId: str
+    sizeBytes: int
+    retentionClass: str
+    stored: bool
+    producedBy: JsonObject = field(default_factory=dict)
+    refs: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
 class ArtifactRef:
@@ -91,6 +143,16 @@ class BlobRef:
     media_type: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class CheckpointPayload:
+    projectionId: str
+    reducerVersion: str
+    schemaVersions: JsonObject
+    stateDigest: str
+    stateArtifact: str
+    coveredThroughEventId: str
+    coveredThroughSeq: str
+
+@dataclass(frozen=True, slots=True)
 class ClaimRef:
     claim_id: str
 
@@ -109,6 +171,15 @@ class ContextBundle:
     prefix: str
     suffix: str
     token_count: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class ContextCompactedPayload:
+    inputDigest: str
+    outputDigest: str
+    strategy: str | None = None
+    tokensBefore: int | None = None
+    tokensAfter: int | None = None
+    removedTokens: int | None = None
 
 @dataclass(frozen=True, slots=True)
 class EffectContext:
@@ -168,6 +239,34 @@ class EventEnvelope:
     alertable: bool = False
 
 @dataclass(frozen=True, slots=True)
+class EventEnvelopeV2:
+    schema_version: str
+    event_id: str
+    kind: EventKind
+    seq: int
+    occurred_at: str
+    run_id: str
+    principal: str
+    payload: JsonObject
+    digest: str
+    authority_source: str
+    policy_version: str
+    episode_id: str | None = None
+    parent_episode_id: str | None = None
+    project_id: str | None = None
+    principal_id: str | None = None
+    parent_principal_id: str | None = None
+    harness_digest: str | None = None
+    branch_id: str = 'main'
+    prev_digest: str | None = None
+    causation_id: str | None = None
+    correlation_id: str | None = None
+    idempotency_key: str | None = None
+    alertable: bool = False
+    approval_reference: str | None = None
+    capability_grant: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class ExecutionProfile:
     api: object
     id: str
@@ -179,6 +278,26 @@ class ExecutionProfile:
     assurance: JsonObject
     capture: JsonObject
     network: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class ExecutionProfileV2:
+    api: object
+    id: str
+    workspace: JsonObject
+    process: JsonObject
+    approval: JsonObject
+    persistence: JsonObject
+    evaluation: JsonObject
+    assurance: JsonObject
+    retention: str
+    capture: JsonObject
+    network: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class GoalDeclaredPayload:
+    goalDigest: str
+    goalArtifact: str | None = None
+    parentGoalDigest: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class Health:
@@ -221,9 +340,50 @@ class OracleSpec:
     digest: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class PlanRevisedPayload:
+    revision: int
+    planDigest: str
+    previousPlanDigest: str | None = None
+    planArtifact: str | None = None
+    rationaleDigest: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class PluginRef:
     ref: str
     config: JsonObject = field(default_factory=dict)
+
+@dataclass(frozen=True, slots=True)
+class ProgressAssessedPayload:
+    assessment: str
+    signals: JsonObject
+    basis: tuple[str, ...]
+    confidence: float | None = None
+    evidenceDigest: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class ProvenanceClaimPayload:
+    claimKind: str
+    turnIndex: int
+    policy: JsonObject = field(default_factory=dict)
+    inputDigest: str | None = None
+    outputDigest: str | None = None
+    inputArtifacts: tuple[str, ...] = field(default_factory=tuple)
+    outputArtifacts: tuple[str, ...] = field(default_factory=tuple)
+    metrics: JsonObject = field(default_factory=dict)
+    selectedLabels: tuple[str, ...] = field(default_factory=tuple)
+    droppedLabels: tuple[str, ...] = field(default_factory=tuple)
+    elidedLabels: tuple[str, ...] = field(default_factory=tuple)
+    cacheId: str | None = None
+    keyDigest: str | None = None
+    sourceDigest: str | None = None
+    hit: bool | None = None
+    sourceStatus: str | None = None
+    vector: JsonObject = field(default_factory=dict)
+    basis: tuple[str, ...] = field(default_factory=tuple)
+    reducerVersion: str | None = None
+    schemaVersions: JsonObject = field(default_factory=dict)
+    stateReconstructionReceipt: JsonObject = field(default_factory=dict)
+    semanticReplayReceipt: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
 class Reflection:
@@ -262,9 +422,30 @@ class SignedVerdict:
     signed_at: str
 
 @dataclass(frozen=True, slots=True)
+class StrategyChangedPayload:
+    from_: str | None
+    to: str
+    trigger: str
+    controllerId: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class ToolSchema:
     verb: str
     schema: JsonObject
+
+@dataclass(frozen=True, slots=True)
+class TopologyEdge:
+    from_: str
+    to: str
+    relation: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class TopologyRole:
+    id: str
+    policyRef: str
+    scope: JsonObject = field(default_factory=dict)
+    budget: JsonObject = field(default_factory=dict)
+    context: JsonObject = field(default_factory=dict)
 
 @dataclass(frozen=True, slots=True)
 class TrajectoryRef:
@@ -361,6 +542,16 @@ class Receipt:
     artifacts: tuple[ArtifactRef, ...] = field(default_factory=tuple)
 
 @dataclass(frozen=True, slots=True)
+class TopologyArtifact:
+    topologyId: str
+    version: str
+    entryRole: str
+    roles: tuple[TopologyRole, ...]
+    edges: tuple[TopologyEdge, ...]
+    artifactFlows: tuple[ArtifactFlow, ...]
+    api: str | None = None
+
+@dataclass(frozen=True, slots=True)
 class TrajectoryTurn:
     turn: int
     context_digest: str
@@ -370,6 +561,48 @@ class TrajectoryTurn:
     context_ref: str | None = None
     model_route: JsonObject = field(default_factory=dict)
     invocations: tuple[JsonObject, ...] = field(default_factory=tuple)
+
+@dataclass(frozen=True, slots=True)
+class TrajectoryTurnV2:
+    turn: int
+    context_digest: str
+    proposal: JsonObject
+    receipts: tuple[JsonObject, ...]
+    cost: CostVector
+    context_ref: str | None = None
+    model_route: JsonObject = field(default_factory=dict)
+    invocations: tuple[JsonObject, ...] = field(default_factory=tuple)
+    model_input_ref: str | None = None
+    model_output_ref: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class TrajectoryV2:
+    schema: str
+    project_id: str
+    run_id: str
+    episode_id: str
+    principal_id: str
+    harness_digest: str
+    turns: tuple[TrajectoryTurnV2, ...]
+    verdict: JsonObject | None
+    cost: CostVector
+    artifacts: tuple[ArtifactIndexEntry, ...]
+    provenance: JsonObject
+    reproducibility_at_run_close: JsonObject | None
+    parent_episode_id: str | None = None
+    execution_digest: str | None = None
+    run_digest: str | None = None
+    activation_digest: str | None = None
+    task_digest: str | None = None
+    preregistration_digest: str | None = None
+    state_digest: str | None = None
+    event_range: JsonObject | None = None
+    manifest_genome: JsonObject = field(default_factory=dict)
+    model_routes_used: tuple[JsonObject, ...] = field(default_factory=tuple)
+    verdict_absence_reason: str | None = None
+    attribution: JsonObject = field(default_factory=dict)
+    outcome: str | None = None
+    capture: JsonObject | None = None
 
 @dataclass(frozen=True, slots=True)
 class HarnessManifest:
@@ -413,20 +646,28 @@ __all__ = [
     "SinkClass",
     "EventKind",
     "GateDecision",
+    "ArtifactCreatedPayload",
+    "ArtifactFlow",
+    "ArtifactIndexEntry",
     "ArtifactRef",
     "Binding",
     "BlobRef",
+    "CheckpointPayload",
     "ClaimRef",
     "CompactionReport",
     "ConsolidationReport",
     "ContextBundle",
+    "ContextCompactedPayload",
     "EffectContext",
     "EffectFailure",
     "EpisodeOutcome",
     "EpisodeView",
     "EvaluationSubject",
     "EventEnvelope",
+    "EventEnvelopeV2",
     "ExecutionProfile",
+    "ExecutionProfileV2",
+    "GoalDeclaredPayload",
     "Health",
     "MeasurementStatus",
     "MemoryHit",
@@ -434,12 +675,18 @@ __all__ = [
     "MemoryRecord",
     "ModelRoute",
     "OracleSpec",
+    "PlanRevisedPayload",
     "PluginRef",
+    "ProgressAssessedPayload",
+    "ProvenanceClaimPayload",
     "Reflection",
     "Reservation",
     "Selector",
     "SignedVerdict",
+    "StrategyChangedPayload",
     "ToolSchema",
+    "TopologyEdge",
+    "TopologyRole",
     "TrajectoryRef",
     "Capability",
     "Component",
@@ -450,7 +697,10 @@ __all__ = [
     "PluginBindings",
     "Proposal",
     "Receipt",
+    "TopologyArtifact",
     "TrajectoryTurn",
+    "TrajectoryTurnV2",
+    "TrajectoryV2",
     "HarnessManifest",
     "Trajectory",
 ]

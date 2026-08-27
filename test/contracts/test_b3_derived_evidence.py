@@ -30,7 +30,7 @@ def build_canonical_evidence_bundle(
     d_h: str = "sha256:d_h_composition_001",
     d_r: str = "sha256:d_r_runplan_001",
     model_provider: str = "openrouter",
-    model_name: str = "anthropic/claude-3.5-sonnet",
+    model_name: str = "deepseek/deepseek-v4-flash-0731",
     sandbox_uid: int = 10001,
     signature_verified: bool = True,
     wal_mode: str = "wal",

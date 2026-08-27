@@ -9,9 +9,9 @@ canonical_for:
   - long-term-direction
 status: locked
 owner: principal-systems-architect
-version: "0.7.1"
-last_verified: 2026-08-25
-locked_by: ADR-0095+ADR-0096+ADR-0097
+version: "0.7.3.dev0"
+last_verified: 2026-08-26
+locked_by: ADR-0095+ADR-0096+ADR-0097+ADR-0100+ADR-0101+ADR-0102
 read_when:
   - resolving-any-architectural-authority-conflict
   - proposing-a-new-milestone-or-roadmap-change
@@ -23,6 +23,9 @@ superseded_by: null
 ---
 
 # AETHER — Vision (Law Zero, v0.7+)
+
+The frontmatter `version` is this constitutional document's revision, not the software package
+version. The package version is owned exclusively by `pyproject.toml`.
 
 ## Authority of this document
 
@@ -39,8 +42,8 @@ measure, or schedule this Vision.
 | 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
 | 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) | Local architectural decisions; may refine implementation, may **not** contradict locked Vision |
 | 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` | Wire-level realization of the law |
-| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) | Delivery order and exit gates |
-| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) | The only board that authorizes current work |
+| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md) | Delivery gates and stable work packages |
+| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) | The only board that authorizes current work; `sprint_upcoming.md` is staging only |
 | 6 | **Communication** | `README.md`, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/), [`docs/08_theory/`](docs/08_theory/) | Current state and orientation; introduces **no** independent architecture |
 
 Three rules follow from this ladder:
@@ -78,6 +81,10 @@ ADR-0096 and ADR-0097 bind the following interpretations throughout this Vision:
   and promoter authority.
 - Authority provenance and capture/privacy policy are first-class protocol data. Retention never
   grants permission to capture content.
+- Milestone acceptance is monotonic and receipt-backed; mechanism, integration, experiment,
+  independent attestation, and accepted closure are distinct states.
+- Durable memory and promotion remain subordinate capabilities: authorization precedes retrieval,
+  and an immutable composition is promoted or rolled back only by separated authorities.
 
 ---
 
@@ -469,7 +476,7 @@ Essa é a principal justificativa para manter o kernel mínimo: quanto menos com
 
 A documentação da v0.7+ deve refletir essa tese de maneira inequívoca.
 
-O roadmap recomendado começa por **M-4**, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem **M-5a**, formalizando AgentView e agent state como projections event-sourced e estabilizando `M-5A-BASE-v2`. A partir desse baseline, **M-5b** tenta falsificar a generalidade em um segundo domínio enquanto **M-6** implementa recursive delegation por nested lineages em uma lane independente. **M-6.5** introduz adaptive strategy e meta-control como policy/reducer/plugin. **M-7** introduz declarative topologies. **M-8** consolida memory, retrieval, skills e learning. **M-9** integra esses elementos em um AETHER v1.0 General Agent Framework. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.
+O roadmap recomendado começa por **M-4**, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem **M-5a**, formalizando AgentView e agent state como projections event-sourced e estabilizando um baseline experimental imutável, revisado e verificável. **ADR-0102 registra que o ref histórico `M-5A-BASE-v2` não é esse controle e exige `CONVERGENCE-BASE-v1` como sucessor.** A partir do baseline válido, **M-5b** tenta falsificar a generalidade em um segundo domínio enquanto **M-6** implementa recursive delegation por nested lineages em uma lane independente. **M-6.5** introduz adaptive strategy e meta-control como policy/reducer/plugin. **M-7** introduz declarative topologies. **M-8** consolida memory, retrieval, skills e learning. **M-9/M-10** permanecem horizontes de compatibilidade até o aceite independente de M-8. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.
 
 Essa reorganização deve ser refletida em `README`, Product Vision, `SPEC.md`, architecture documentation, protocols, milestone definitions, sprint boards e novos ADRs. ADRs antigos permanecem como provenance histórica; novas decisões supersedem apenas aquilo que realmente mudou.
 

@@ -15,14 +15,14 @@ applies_to:
   - v0.6.1
 implementation_status: AS_BUILT
 owner: principal-systems-architect
-version: "0.6.1"
-last_verified: 2026-08-23
+version: "0.7.3.dev0"
+last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Selector Algebra & 6D Budget Contract
+# Selector Algebra, Additive Budgets, and Structural Ceilings
 
 > **Implementation:** [`resource_selector.py`](../../vanguard/packages/domain/selectors/resource_selector.py) and [`budget.py`](../../vanguard/packages/kernel/budget.py)  
 > **Status:** `AS_BUILT` · Governed by ADR-0074 / ADR-0076.
@@ -31,7 +31,8 @@ superseded_by: null
 
 ## Canonical algebra
 
-The selector partial order and six budget dimensions are defined normatively only in
+The selector partial order, four additive conserved dimensions
+`{usd_micros,millis,tokens,bytes}`, and independent structural ceilings `{depth,turns}` are defined normatively only in
 [`RUNTIME.md` §1.0](../01_law/RUNTIME.md#10-recursive-machine-authority-and-identity-adr-0070-adr-0071-adr-0074) and
 [`DISPATCH.md` §4](../01_law/DISPATCH.md#4-attenuation). ADR-0074 records why additive
 resources and structural ceilings are distinct. This page intentionally does not repeat their matrix.

@@ -1,0 +1,9 @@
+{
+  "api": "mhf.graph-coloring-problem/1",
+  "id": "GC-001-DISORDERED",
+  "k": 3,
+  "vertices": [1, 0, 2],
+  "edges": [
+    [0, 1]
+  ]
+}

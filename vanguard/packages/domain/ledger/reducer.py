@@ -33,6 +33,7 @@ from .state import (
 )
 
 __all__ = [
+    "REDUCER_VERSION",
     "ReducerError",
     "initial_state",
     "reduce_event",
@@ -40,6 +41,15 @@ __all__ = [
     "reconstruct_state",
     "compute_state_digest",
 ]
+
+
+#: The identity of the fold these functions perform (`ADR-0098 Decision 6`).
+#: A checkpoint is a memo of `reduce_batch`, so it is only reusable under the
+#: reducer that produced it; `runtime/checkpoints.py` pins this value and
+#: falls back to a cold fold when it moves. Bump it whenever a change to
+#: `reduce_event` or `LedgerState` would make an existing fold a fold of
+#: different rules -- a stale pin is a wrong answer served fast.
+REDUCER_VERSION = "v1.1.0"
 
 
 class ReducerError(ValueError):
@@ -119,6 +129,11 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
     plugins = dict(state.plugins)
     children = dict(state.children)
     unknown_events = list(state.unknown_events)
+    goals = list(state.goals)
+    plan_revisions = list(state.plan_revisions)
+    strategy_changes = list(state.strategy_changes)
+    progress_assessments = list(state.progress_assessments)
+    context_compactions = list(state.context_compactions)
 
     if kind == "EpisodeStarted":
         episode = EpisodeState(
@@ -500,6 +515,63 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             "description": payload.get("description"),
         })
 
+    elif kind == "GoalDeclared":
+        # Digest and optional verified artifact reference only. A payload that
+        # carried the goal text would put unwithdrawable content in an
+        # append-only store (`ADR-0098 Decision 5`).
+        goals.append({
+            "seq": envelope.seq,
+            "occurredAt": envelope.occurred_at,
+            "goalDigest": payload.get("goalDigest"),
+            "goalArtifact": payload.get("goalArtifact"),
+            "parentGoalDigest": payload.get("parentGoalDigest"),
+        })
+
+    elif kind == "PlanRevised":
+        plan_revisions.append({
+            "seq": envelope.seq,
+            "occurredAt": envelope.occurred_at,
+            "planDigest": payload.get("planDigest"),
+            "previousPlanDigest": payload.get("previousPlanDigest"),
+            "planArtifact": payload.get("planArtifact"),
+            "rationaleDigest": payload.get("rationaleDigest"),
+            "reason": payload.get("reason") or payload.get("rationaleDigest"),
+            "revision": payload.get("revision"),
+        })
+
+    elif kind == "StrategyChanged":
+        strategy_changes.append({
+            "seq": envelope.seq,
+            "occurredAt": envelope.occurred_at,
+            "fromStrategy": payload.get("from") or payload.get("fromStrategy"),
+            "toStrategy": payload.get("to") or payload.get("toStrategy"),
+            "reason": payload.get("trigger") or payload.get("reason"),
+            "controllerId": payload.get("controllerId"),
+        })
+
+    elif kind == "ProgressAssessed":
+        progress_assessments.append({
+            "seq": envelope.seq,
+            "occurredAt": envelope.occurred_at,
+            "assessment": payload.get("assessment"),
+            "signals": payload.get("signals", {}),
+            "basis": payload.get("basis", []),
+            "confidence": payload.get("confidence"),
+            "evidenceDigest": payload.get("evidenceDigest"),
+        })
+
+    elif kind == "ContextCompacted":
+        context_compactions.append({
+            "seq": envelope.seq,
+            "occurredAt": envelope.occurred_at,
+            "strategy": payload.get("strategy"),
+            "inputDigest": payload.get("inputDigest"),
+            "outputDigest": payload.get("outputDigest"),
+            "tokensBefore": payload.get("tokensBefore"),
+            "tokensAfter": payload.get("tokensAfter"),
+            "removedTokens": payload.get("removedTokens"),
+        })
+
     elif kind == "RunRecovered":
         terminal_recovery = {
             "kind": "RunRecovered",
@@ -718,6 +790,11 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         verdicts=verdicts,
         plugins=plugins,
         children=children,
+        goals=tuple(goals),
+        plan_revisions=tuple(plan_revisions),
+        strategy_changes=tuple(strategy_changes),
+        progress_assessments=tuple(progress_assessments),
+        context_compactions=tuple(context_compactions),
         unknown_events=tuple(unknown_events),
     )
 

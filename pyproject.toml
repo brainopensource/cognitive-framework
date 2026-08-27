@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanguard-runtime"
-version = "0.7.0"
-description = "AETHER — Higgs Release (v0.7.0)"
+version = "0.7.3.dev0"
+description = "AETHER — Higgs development line"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -14,6 +14,7 @@ authors = [
 ]
 dependencies = [
     "cryptography>=41",
+    "jsonschema>=4.23.0",
 ]
 
 classifiers = [
@@ -28,7 +29,10 @@ classifiers = [
 ]
 
 [project.scripts]
+vanguard = "vanguard.packages.runtime.cli:main"
 vanguard-evaluator = "vanguard.packages.adapters.evaluators.daemon:main"
+vanguard-daemon = "vanguard.packages.runtime.service.server:main"
+vanguard-studio = "vanguard.packages.runtime.service.studio_gateway:main"
 
 [project.optional-dependencies]
 dev = [

@@ -47,6 +47,24 @@ class BindingContext:
     verb: str
     environment: Any
     repo_path: Path
+    emitter: Any = None
+    parent_scope: Any = None
+    clock: Any = None
+    store: Any = None
+    parent_episode_id: str | None = None
+    max_depth: int = 4
+    max_turns: int = 10
+    #: The M-6 recursion seam (`ports.child_runtime.ChildRuntimePort`).
+    #: `None` is not a default runner -- it is a composition failure for any
+    #: harness that declares `agent.spawn`.
+    child_runtime: Any = None
+    #: Callable, not a snapshot: read at spawn time so siblings see what
+    #: earlier siblings actually spent.
+    remaining_budget: Any = None
+    project_id: str = "project-default"
+    composition_digest: str = ""
+    lineage: tuple[str, ...] = ()
+    ledger: Any = None
 
 class _EnvironmentEffect:
     """`kernel.EffectAdapter` over an `EnvironmentAdapter` (`ICD §4`).
@@ -81,7 +99,16 @@ class _EnvironmentEffect:
             kind = error.kind if error is not None else "instrument_error"
             return AdapterOutcome(
                 "denied" if kind == "denied" else "error",
-                Occurrence.NOT_OCCURRED if kind in {"denied", "invalid_request", "not_found"}
+                # `Occurrence.NOT_OCCURRED` never existed on the enum -- the
+                # members are OCCURRED / DID_NOT_OCCUR / UNDETERMINABLE. Every
+                # denied, malformed or missing-target effect therefore raised
+                # `AttributeError` inside the adapter, which S9 catches and
+                # (correctly, given a raising adapter) records as
+                # UNDETERMINABLE. So a *known* non-occurrence was reported as
+                # unknown: fail-closed, unretryable, and the agent could not
+                # learn that its own diff was malformed. That is what made the
+                # RF-95 episode escalate instead of correcting itself.
+                Occurrence.DID_NOT_OCCUR if kind in {"denied", "invalid_request", "not_found"}
                 else occurred,
                 {"usd_micros": 0},
                 detail=error.message if error is not None else "",
@@ -159,6 +186,43 @@ def _sandbox_effector(context: BindingContext) -> Any:
     return _environment_effector(context)
 
 
+def _spawn_effector(context: BindingContext) -> Any:
+    """M-6 mediated delegation adapter binding.
+
+    There is deliberately no fallback runner. This binding used to substitute
+    a lambda that returned `completed` at zero cost whenever nothing was
+    wired, and because `TaskContext` carried no runner field, *that lambda was
+    the production path* -- every unwired `agent.spawn` reported a success
+    that never happened. A composition that declares `agent.spawn` without a
+    `ChildRuntimePort` now fails here, before any ledger fact exists, which is
+    the one point where refusal is still free (`WP-A1`).
+    """
+    from .delegation import SpawnAdapter
+
+    if context.child_runtime is None:
+        raise CompositionError(
+            "composition declares 'agent.spawn' but no ChildRuntimePort is "
+            "bound; refusing to synthesize delegation results")
+
+    emitter = context.emitter
+    if emitter is None and context.ledger is not None:
+        emitter = context.ledger.spawn_adapter()
+    return SpawnAdapter(
+        emitter=emitter,
+        parent_scope=context.parent_scope,
+        child_runtime=context.child_runtime,
+        clock=context.clock,
+        store=context.store,
+        parent_episode_id=context.parent_episode_id or "parent-ep",
+        project_id=context.project_id,
+        composition_digest=context.composition_digest,
+        remaining_budget=context.remaining_budget,
+        max_depth=context.max_depth,
+        max_turns=context.max_turns,
+        lineage=context.lineage,
+    )
+
+
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
 #: (`01 §2`, open/closed); the dispatcher and the loop never change to
 #: accommodate one.
@@ -169,6 +233,7 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "patch.apply": EffectBinding(_environment_effector, carries_diff=True),
     "fs.patch": EffectBinding(_environment_effector, carries_diff=True),
     "proc.exec": EffectBinding(_sandbox_effector),
+    "agent.spawn": EffectBinding(_spawn_effector),
 }
 
 

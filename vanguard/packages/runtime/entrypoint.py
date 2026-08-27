@@ -11,6 +11,7 @@ from typing import Any, Mapping
 from ..adapters.models.openrouter import OpenRouterModel
 from ..adapters.models.fake import FakeModel
 from ..adapters.models.ollama import OllamaModel
+from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.sandbox.platform import discover_platform
 from .compose import TaskContext
 from .profiles import SandboxUnavailable, resolve_profile
@@ -80,10 +81,16 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         )
     else:
         selected_model = OpenRouterModel(model=planner_model)
+    # A deterministic preview is a hermetic smoke path, not a durable run.
+    # Keep it out of the product profile's default persistent ledger: the
+    # legacy fixed `run-cli` identity would otherwise resume stale approval
+    # events from a previous invocation and exhaust the episode budget.
+    preview_store = SqliteEventStore(":memory:") if fake_backend else None
     result = Runtime.execute_profiled(
         _manifest(command), task,
         profile_id=str(request.get("profile") or "product"),
         model=selected_model,
+        store=preview_store,
         store_path=(str(request["storePath"]) if request.get("storePath") else None),
         interactive=bool(request.get("interactive", True)),
     )

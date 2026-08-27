@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 import subprocess
@@ -64,7 +65,8 @@ class TestF01EnvelopeLineage(unittest.TestCase):
         wire = emitter.emit_kind(
             "TurnStarted", run_id="run-1", principal="agent-1",
             payload={"turn": 1}).to_mhf_dict()
-        self.assertEqual(wire["schema_version"], "mhf.event/1")
+        self.assertEqual(wire["schema_version"], "mhf.event/2")
+        self.assertTrue(wire["authority_source"])
         for field in ("project_id", "principal_id", "parent_principal_id",
                       "parent_episode_id", "harness_digest", "episode_id"):
             self.assertIn(field, wire)
@@ -360,7 +362,7 @@ class TestF11DHCompleteness(unittest.TestCase):
 
 
 class TestF12Trajectory(unittest.TestCase):
-    def test_episode_completed_emits_schema_valid_mhf_trajectory_1(self) -> None:
+    def test_episode_completed_emits_schema_valid_mhf_trajectory(self) -> None:
         """The schema existing on disk is not evidence that anything emits it.
         The end-to-end proof over a live episode is in
         `test/runtime/test_ledger_truth.py`; this pins the assembler's own
@@ -370,18 +372,33 @@ class TestF12Trajectory(unittest.TestCase):
         from vanguard.packages.runtime.root import TaskContext
         from vanguard.packages.runtime.trajectory import assemble_trajectory
 
-        schema = json.loads(
+        schema_v1 = json.loads(
             (ROOT / "schemas" / "mhf" / "trajectory.schema.json").read_text(encoding="utf-8"))
-        trajectory = assemble_trajectory(
+        traj_v1 = assemble_trajectory(
             task=TaskContext(brief="b", repo_path=ROOT, run_id="run-1", episode_id="ep-1"),
             harness_digest="sha256:" + "d" * 64,
             terminal="abandoned",
             receipts=(), contexts=(), events=(), verdict=None,
+            schema_version="mhf.trajectory/1",
         )
-        self.assertEqual(trajectory["schema"], "mhf.trajectory/1")
-        self.assertIsNone(trajectory["verdict"], "an aborted episode still owes a trajectory")
-        for field in schema.get("required", ()):
-            self.assertIn(field, trajectory)
+        self.assertEqual(traj_v1["schema"], "mhf.trajectory/1")
+        self.assertIsNone(traj_v1["verdict"], "an aborted episode still owes a trajectory")
+        for field in schema_v1.get("required", ()):
+            self.assertIn(field, traj_v1)
+
+        schema_v2 = json.loads(
+            (ROOT / "schemas" / "mhf" / "trajectory_v2.schema.json").read_text(encoding="utf-8"))
+        traj_v2 = assemble_trajectory(
+            task=TaskContext(brief="b", repo_path=ROOT, run_id="run-1", episode_id="ep-1"),
+            harness_digest="sha256:" + "d" * 64,
+            terminal="abandoned",
+            receipts=(), contexts=(), events=(), verdict=None,
+            schema_version="mhf.trajectory/2",
+        )
+        self.assertEqual(traj_v2["schema"], "mhf.trajectory/2")
+        self.assertIsNone(traj_v2["verdict"])
+        for field in schema_v2.get("required", ()):
+            self.assertIn(field, traj_v2)
 
 
 class TestF13GeneratedTypes(unittest.TestCase):
@@ -392,6 +409,58 @@ class TestF13GeneratedTypes(unittest.TestCase):
             0,
             msg=(result.stdout or "") + (result.stderr or ""),
         )
+
+
+class TestF13RefsResolvePerDocument(unittest.TestCase):
+    """`--check` only proves the generator agrees with itself.
+
+    It passed while `Proposal.requests` was generated as
+    `tuple[ArtifactCreatedPayload, ...]`, because the generator resolved every
+    `"$ref": "#"` against one global root title — the title of whichever schema
+    file sorted first. Adding `artifact_created.schema.json` moved that title
+    and silently retyped a pre-existing contract. Self-consistency is not
+    correctness, so these assert the resolved *meaning*.
+    """
+
+    def test_a_proposal_carries_effect_requests(self) -> None:
+        from vanguard.packages.domain.wire import types_gen
+
+        source = inspect.getsource(types_gen.Proposal)
+        self.assertIn("requests: tuple[EffectRequest, ...]", source)
+
+    def test_a_document_relative_ref_ignores_sibling_file_order(self) -> None:
+        """The regression, reproduced structurally: a document that sorts
+        before the one holding the `"#"` must not capture its root."""
+        tools = Path(__file__).resolve().parents[2] / "tools"
+        if str(tools) not in sys.path:
+            sys.path.insert(0, str(tools))
+        from codegen.generate_types import render
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "aaa_first.schema.json").write_text(json.dumps({
+                "title": "AaaFirst", "type": "object",
+                "properties": {"name": {"type": "string"}},
+                "required": ["name"],
+            }))
+            (root / "zzz_holder.schema.json").write_text(json.dumps({
+                "title": "ZzzHolder", "type": "object",
+                "properties": {"value": {"type": "string"}},
+                "required": ["value"],
+                "$defs": {
+                    "Wrapper": {
+                        "title": "Wrapper", "type": "object",
+                        "properties": {
+                            "items": {"type": "array", "items": {"$ref": "#"}},
+                        },
+                        "required": ["items"],
+                    },
+                },
+            }))
+            rendered = render(root)
+
+        self.assertIn("items: tuple[ZzzHolder, ...]", rendered)
+        self.assertNotIn("items: tuple[AaaFirst, ...]", rendered)
 
 
 class TestF14DurableIntent(unittest.TestCase):

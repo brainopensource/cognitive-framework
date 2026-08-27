@@ -85,7 +85,8 @@ class InPlaceWrites(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             workspace = Path(tmp) / "task"
             workspace.mkdir()
-            grant = create_autonomous_grant(workspace, allowed_verbs=("patch.apply",))
+            grant = create_autonomous_grant(
+            workspace, allowed_verbs=("patch.apply",), seed_key=b"\x11" * 32)
             class _Inner:
                 def apply(self, req, grant=None):
                     raise AssertionError("escaped apply")

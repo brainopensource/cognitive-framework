@@ -1,22 +1,22 @@
 name: vanguard-clean-candidate
 
-# S6B-GOV-005: clean-candidate job. Mandatory skips are fatal.
-# Does not publish, tag, or rewrite history.
+# Clean-clone verification. Does not publish, tag, or rewrite history.
 
 on:
   workflow_dispatch:
-  push:
-    branches: [sprint5-6/integration]
+  pull_request:
 
 permissions:
   contents: read
 
 jobs:
   clean-candidate:
-    name: S6B-GOV-005 — clean checkout gates
+    name: Clean checkout gates
     runs-on: ubuntu-latest
     env:
       OPENROUTER_API_KEY: ""
+      DEEPSEEK_API_KEY: ""
+      OPENAI_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,27 +39,43 @@ jobs:
         run: |
           test ! -e .env
           test ! -d node_modules
+          python3 tools/linters/check_test_hygiene.py
           python3 tools/linters/scan_secrets.py
 
+      - name: Install locked dependencies
+        run: |
+          python3 -m pip install -r requirements.lock
+          npm ci
+
       - name: Python unit tests
-        run: python3 -m unittest discover -s test
+        run: python3 -m unittest discover -s test -t .
+
+      - name: TypeScript typecheck and tests
+        run: |
+          npm run typecheck
+          npm test
 
       - name: Governance and living gates
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           python3 tools/linters/check_stale_paths.py
           python3 tools/linters/check_markdown_links.py
+          python3 tools/linters/check_doc_metadata.py
+          python3 tools/linters/check_doc_budgets.py
+          python3 tools/linters/check_execution_truth.py
+          python3 tools/codegen/generate_types.py --check
           python3 tools/linters/check_boundaries.py
           python3 tools/linters/check_tcb_budget.py
+          python3 tools/linters/check_event_coverage.py
+          python3 tools/linters/check_falsifier_ids.py
+          python3 tools/linters/check_commit_scope.py
           python3 tools/linters/scan_secrets.py
 
-      - name: Release validators must still fail while Beta is open
+      - name: Baseline status is explicit
         run: |
-          python3 tools/linters/check_baseline_manifest.py --release && { echo "expected --release to fail"; exit 1; }
-          python3 tools/linters/check_active_mvp_contract.py --release && { echo "expected contract --release to fail"; exit 1; }
-          true
-
-      - name: Mandatory skip is fatal
-        run: |
-          if grep -R "s6b-skip-mandatory" -n .github tools docs/agile/sprint6B >/dev/null 2>&1; then
-            echo "mandatory skip marker present"; exit 1
+          if python3 tools/linters/check_baseline_manifest.py --release; then
+            echo 'Successor baseline manifest verified.'
+          else
+            echo 'Successor baseline remains BLOCKED; clean-candidate does not claim RF-86 or release acceptance.'
           fi

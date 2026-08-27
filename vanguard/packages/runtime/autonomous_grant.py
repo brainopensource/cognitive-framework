@@ -70,13 +70,30 @@ def create_autonomous_grant(
     max_budget_micros: int = 500_000,
     network_egress: bool = False,
     reviewer: str = "vanguard-autonomous-operator",
-    seed_key: bytes = b"vanguard-autonomous-operator-seed-key",
+    seed_key: bytes | None = None,
+    signer: OperatorSigner | None = None,
 ) -> AutonomousGrant:
-    """Issue a signed, cryptographically attributable autonomous grant."""
+    """Issue a signed, cryptographically attributable autonomous grant.
+
+    The signing identity must be supplied. A shared literal default -- which
+    this parameter previously carried -- makes every grant in every
+    installation attributable to the same key, which is the opposite of
+    "cryptographically attributable": anyone holding the source could mint a
+    grant indistinguishable from the operator's own.
+
+    Pass `signer` (preferred: the installation's `OperatorSigner`), or
+    `seed_key` for a caller-controlled ephemeral identity.
+    """
+    if signer is None:
+        if seed_key is None:
+            raise ValueError(
+                "create_autonomous_grant requires a signer or an explicit seed_key; "
+                "there is no default signing identity"
+            )
+        signer = OperatorSigner(seed_key)
+
     resolved_ws = Path(workspace_root).resolve().as_posix()
     created_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-
-    signer = OperatorSigner(seed_key)
 
     descriptor = {
         "workspaceRoot": resolved_ws,

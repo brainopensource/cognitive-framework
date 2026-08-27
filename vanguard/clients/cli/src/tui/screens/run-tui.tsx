@@ -7,6 +7,14 @@ import { HelpOverlay } from "../components/help-overlay.js";
 import { PromptBar } from "../components/prompt-bar.js";
 import { StatusBar } from "../components/status-bar.js";
 import { TranscriptPane } from "../components/transcript-pane.js";
+import { Sidebar } from "../components/sidebar.js";
+import { EventTimeline } from "../components/event-timeline.js";
+import { AgentViewPanel } from "../components/agent-view-panel.js";
+import { ContextPanel } from "../components/context-panel.js";
+import { CommandPalette } from "../components/command-palette.js";
+import { GapIndicator } from "../components/gap-indicator.js";
+import { useEventTimeline } from "../hooks/use-event-timeline.js";
+import { useAgentView } from "../hooks/use-agent-view.js";
 import {
   modeAfterPendingApproval,
   shouldDispatchApproval,
@@ -52,6 +60,15 @@ export function RunTui({
   const [cursor, setCursor] = useState(0);
   const [localStatus, setLocalStatus] = useState<string | undefined>(undefined);
   const [why, setWhy] = useState<string | undefined>(undefined);
+  
+  // New layout state
+  const [centerPanel, setCenterPanel] = useState<"transcript" | "timeline">("transcript");
+  const [inspectorView, setInspectorView] = useState<"context" | "tools" | "artifacts" | "agent">("agent");
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  const events = (view as any).events ?? [];
+  const timelineEvents = useEventTimeline(events);
+  const agentViewData = useAgentView(view);
 
   useEffect(() => {
     setMode((current) => modeAfterPendingApproval(current, Boolean(view.pendingApproval)));
@@ -61,6 +78,8 @@ export function RunTui({
   const selected = windowed.rows[0];
 
   useInput((input, key) => {
+    if (showCommandPalette) return; // Handled by CommandPalette itself if it had one, but here we just ignore outside
+
     if (key.ctrl && input === "c") {
       if (activeRunId) void runtime.requestCancel(activeRunId);
       return;
@@ -75,6 +94,12 @@ export function RunTui({
     }
     if (mode === "help") {
       if (key.escape) setMode(previousMode);
+      return;
+    }
+    if (input === "/") {
+      setShowCommandPalette(true);
+      setPreviousMode(mode);
+      setMode("command_palette");
       return;
     }
     if (shouldQuit(mode, input)) {
@@ -133,11 +158,17 @@ export function RunTui({
       setMode("correct");
       return;
     }
-    if (mode === "run") {
+    if (mode === "run" || mode === "timeline" || mode === "inspector") {
       if (key.tab) {
-        setMode("prompt");
+        setCenterPanel(p => p === "transcript" ? "timeline" : "transcript");
+        setMode(centerPanel === "transcript" ? "timeline" : "run");
         return;
       }
+      if (input === "1") setInspectorView("context");
+      if (input === "2") setInspectorView("tools");
+      if (input === "3") setInspectorView("artifacts");
+      if (input === "4") setInspectorView("agent");
+      
       if (input === "j" || key.downArrow || key.pageDown) {
         setCursor((c) => moveTranscriptCursor(c, windowed.total, DEFAULT_TRANSCRIPT_HEIGHT, 1));
         return;
@@ -147,7 +178,7 @@ export function RunTui({
         return;
       }
       if (input === "r") {
-        setBuffer(activeRunId);
+        setBuffer(activeRunId || "");
         setMode("resume");
         return;
       }
@@ -166,17 +197,49 @@ export function RunTui({
         ? "Enter resume run id · empty Enter = invalid_request"
         : view.pendingApproval
           ? (mode === "correct" ? "taxonomy keys" : "y/n/c · ? help")
-          : "Tab prompt · r resume · w why · ctrl+c cancel · ? help · q quit";
+          : "Tab panel · 1-4 inspector · r resume · / command · ? help · q quit";
 
   return (
     <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
       <StatusBar view={view} source={source} lastSeq={lastSeq} lastKind={kind} />
-      <Box flexDirection={stacked ? "column" : "row"}>
-        <TranscriptPane rows={windowed.rows} selected={0} />
-        {mode === "help" ? <HelpOverlay /> : <DetailPane mode={mode} approval={view.pendingApproval} selected={selected} why={why} />}
+      <Box flexDirection={stacked ? "column" : "row"} flexGrow={1}>
+        <Sidebar entries={[{ id: activeRunId || "none", label: "Run " + (activeRunId || ""), kind: "run", selected: true }]} selectedIndex={0} onSelect={() => {}} width={20} />
+        <Box flexDirection="column" flexGrow={1} marginLeft={1}>
+          {centerPanel === "timeline" ? (
+             <EventTimeline events={timelineEvents} height={DEFAULT_TRANSCRIPT_HEIGHT} onSelectEvent={() => {}} />
+          ) : (
+             <TranscriptPane rows={windowed.rows} selected={0} />
+          )}
+        </Box>
+        <Box flexDirection="column" width={40} marginLeft={1}>
+          {mode === "help" ? <HelpOverlay /> : inspectorView === "agent" ? (
+             <AgentViewPanel data={agentViewData} height={DEFAULT_TRANSCRIPT_HEIGHT} />
+          ) : inspectorView === "context" ? (
+             <ContextPanel sources={[]} totalTokens={0} compacted={false} height={DEFAULT_TRANSCRIPT_HEIGHT} />
+          ) : (
+             <DetailPane mode={mode} approval={view.pendingApproval} selected={selected} why={why} />
+          )}
+        </Box>
       </Box>
       <PromptBar mode={mode} buffer={buffer} hints={hints} />
-      <Text dimColor>{repo}</Text>
+      <CommandPalette 
+        visible={showCommandPalette} 
+        availableCommands={["/help", "/quit", "/cancel"]} 
+        onExecute={(cmd) => { 
+          setShowCommandPalette(false); 
+          setMode(previousMode); 
+          if(cmd === "/quit") exit(); 
+          if(cmd === "/cancel" && activeRunId) void runtime.requestCancel(activeRunId);
+        }} 
+        onDismiss={() => { 
+          setShowCommandPalette(false); 
+          setMode(previousMode); 
+        }} 
+      />
+      <Box flexDirection="row">
+        <Text dimColor>{repo}</Text>
+        <GapIndicator isLive={status !== "disconnected"} hasGap={false} reconnecting={status === "reconnecting"} />
+      </Box>
     </Box>
   );
 }

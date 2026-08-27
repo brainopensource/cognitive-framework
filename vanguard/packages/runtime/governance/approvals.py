@@ -203,6 +203,11 @@ class OperatorSigner:
             signature=sig_bytes.hex(),
         )
 
+    def sign_bytes(self, data: bytes) -> str:
+        """Sign raw canonical bytes with this operator's Ed25519 private key."""
+        sig_bytes = self._private_key.sign(data)
+        return sig_bytes.hex()
+
 
 class ApprovalAuthority:
     """Runtime-held verification authority. Holds STRICTLY public keys (`GOV-01`, `ADR-0062`)."""
@@ -258,6 +263,10 @@ class ApprovalAuthority:
         else:
             raise TypeError("unsupported public_keys specification")
 
+    @property
+    def verifying_keys(self) -> Mapping[str, ed25519.Ed25519PublicKey]:
+        return dict(self._keys)
+
     def register_public_key(self, key_id: str, key: ed25519.Ed25519PublicKey | bytes) -> None:
         if isinstance(key, ed25519.Ed25519PublicKey):
             self._keys[key_id] = key
@@ -288,6 +297,23 @@ class ApprovalAuthority:
         msg = canonical_bytes(decision.signed_payload())
         try:
             public_key.verify(sig_bytes, msg)
+            return True
+        except InvalidSignature:
+            return False
+
+    def verify_bytes(self, key_id: str, data: bytes, signature_hex: str) -> bool:
+        """Verify raw canonical bytes against a registered Ed25519 public key."""
+        public_key = self._keys.get(key_id)
+        if public_key is None:
+            return False
+        try:
+            sig_bytes = bytes.fromhex(signature_hex)
+            if len(sig_bytes) != 64:
+                return False
+        except (ValueError, TypeError):
+            return False
+        try:
+            public_key.verify(sig_bytes, data)
             return True
         except InvalidSignature:
             return False
@@ -534,10 +560,37 @@ def normalise_unified_diff(diff: str) -> str:
 
 
 def _diff_from(request: EffectRequest) -> str:
+    """Human-reviewable material for a privileged patch.
+
+    `patch.apply` has always accepted whole-file creation through `content`
+    (`patch-tool.json`: "Full file content for whole-file creation or
+    overwrite"; `wiring.py::_effect_of` maps it to a `write`). This function
+    accepted only `diff`/`patch`, so no whole-file write could ever be put in
+    front of a human -- the challenge could not be built, `_resolve` returned
+    `None`, and the episode escalated. Creating a file was therefore
+    unapprovable in every domain; the formal-SAT pack only surfaced it first,
+    because writing a new artifact is the *normal* move there while coding
+    usually edits a file that already exists.
+
+    The content is rendered as an addition-only unified diff rather than
+    approved as an opaque blob: the reviewer signs the lines that will land,
+    which is strictly more information than a `content` field conveys. The
+    signature still binds the whole descriptor, so rendering cannot widen what
+    was authorised.
+    """
     diff = request.args.get("diff") or request.args.get("patch")
-    if not isinstance(diff, str):
-        raise ApprovalFormatError("privileged patch request must supply diff or patch argument")
-    return normalise_unified_diff(diff)
+    if isinstance(diff, str):
+        return normalise_unified_diff(diff)
+    content = request.args.get("content")
+    path = request.args.get("path")
+    if isinstance(content, str) and isinstance(path, str) and path:
+        body = content.splitlines() or [""]
+        rendered = "\n".join(
+            [f"--- a/{path}", f"+++ b/{path}", f"@@ -0,0 +1,{len(body)} @@"]
+            + [f"+{line}" for line in body])
+        return normalise_unified_diff(rendered)
+    raise ApprovalFormatError(
+        "privileged patch request must supply a diff, patch, or content argument")
 
 
 def _material_digest(normalized_diff: str) -> str:

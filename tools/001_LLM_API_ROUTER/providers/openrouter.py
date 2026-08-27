@@ -32,7 +32,6 @@ MODEL_PRICING_MICROS = {
     "cohere/north-mini-code:free": {"prompt": 0, "completion": 0},
     "google/gemma-4-26b-a4b-it:free": {"prompt": 0, "completion": 0},
     "nvidia/nemotron-3-super-120b-a12b:free": {"prompt": 0, "completion": 0},
-    "openai/gpt-oss-20b:free": {"prompt": 0, "completion": 0},
     # OpenRouter Verified Low-Cost Paid Models
     "deepseek/deepseek-v4-flash": {"prompt": 14, "completion": 28},
     "deepseek/deepseek-v4-flash-0731": {"prompt": 14, "completion": 28},
@@ -44,7 +43,7 @@ MODEL_PRICING_MICROS = {
     "minimax/minimax-m3": {"prompt": 20, "completion": 80},
     # OpenAI & DeepSeek Direct
     "gpt-4o": {"prompt": 250, "completion": 1000},
-    "openai/gpt-4o": {"prompt": 250, "completion": 1000},
+    "openai/gpt-oss-20b:free": {"prompt": 0, "completion": 0},
     "deepseek-reasoner": {"prompt": 55, "completion": 219},
     "deepseek-coder": {"prompt": 14, "completion": 28},
 }

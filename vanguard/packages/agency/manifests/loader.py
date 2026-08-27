@@ -15,9 +15,11 @@ from ...domain.artifacts.manifest import HarnessManifest, NamedManifest, parse_m
 
 try:
     import jsonschema  # type: ignore
-    _HAS_JSONSCHEMA = True
-except ImportError:
-    _HAS_JSONSCHEMA = False
+except ImportError as exc:  # pragma: no cover - exercised in minimal installs
+    jsonschema = None  # type: ignore[assignment]
+    _JSONSCHEMA_IMPORT_ERROR = exc
+else:
+    _JSONSCHEMA_IMPORT_ERROR = None
 
 SCHEMA_PATH = Path(__file__).resolve().parents[3] / "schemas" / "v4" / "harness-manifest.schema.json"
 NAMED_SCHEMA_PATH = Path(__file__).resolve().parents[3] / "schemas" / "mhf" / "manifest_v2.schema.json"
@@ -116,30 +118,33 @@ class ManifestLoader:
         self.base_dir = Path(manifests_base_dir).resolve()
         self._schema_cache: dict[str, Any] | None = None
 
-    def _load_schema(self) -> dict[str, Any] | None:
+    def _load_schema(self) -> dict[str, Any]:
         if self._schema_cache is None and SCHEMA_PATH.exists():
             try:
                 with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
                     self._schema_cache = json.load(f)
-            except Exception:
-                self._schema_cache = None
+            except Exception as exc:
+                raise ManifestLoadError(f"Failed to load manifest schema {SCHEMA_PATH}") from exc
+        if self._schema_cache is None:
+            raise ManifestLoadError(f"Manifest schema is unavailable: {SCHEMA_PATH}")
         return self._schema_cache
 
     def validate_schema(self, raw_manifest: Mapping[str, Any]) -> None:
         """Validate raw manifest dict against harness-manifest.schema.json if available."""
+        if _JSONSCHEMA_IMPORT_ERROR is not None:
+            raise ManifestLoadError("jsonschema is required for fail-closed manifest validation") from _JSONSCHEMA_IMPORT_ERROR
         schema = self._load_schema()
         schema_path = SCHEMA_PATH
         if raw_manifest.get("api") == "mhf.manifest/2":
             schema_path = NAMED_SCHEMA_PATH
             try:
                 schema = json.loads(schema_path.read_text(encoding="utf-8"))
-            except OSError:
-                schema = None
-        if _HAS_JSONSCHEMA and schema:
-            try:
-                jsonschema.validate(instance=dict(raw_manifest), schema=schema)
-            except Exception as exc:
-                raise ManifestLoadError(f"Schema validation failed: {exc}") from exc
+            except OSError as exc:
+                raise ManifestLoadError(f"Named manifest schema is unavailable: {schema_path}") from exc
+        try:
+            jsonschema.validate(instance=dict(raw_manifest), schema=schema)
+        except Exception as exc:
+            raise ManifestLoadError(f"Schema validation failed: {exc}") from exc
 
     def load_named_manifest(self, manifest_path: str | Path, validate: bool = True) -> NamedManifest:
         """Read and validate one `/2` value through the canonical domain reader.

@@ -246,6 +246,19 @@ class EnvironmentPortContract(unittest.TestCase):
                 self.assertFalse(prev_mal.ok)
                 self.assertEqual(prev_mal.error.kind, "invalid_request")
 
+                # A model may omit line ranges, but the hunk marker itself is
+                # still unambiguous. The adapter anchors it to the old-file
+                # context; it must not silently discard the proposed change.
+                bare_header = """--- a/src/hello.py
++++ b/src/hello.py
+@@
+ def hello():
+-    return 'world'
++    return 'vanguard'
+"""
+                bare = env.preview(EffectRequest(verb="patch.apply", action="patch", patch=bare_header))
+                self.assertTrue(bare.ok, getattr(bare, "error", None))
+
                 # Patch conflict (context mismatch)
                 conflict_patch = """--- a/src/hello.py
 +++ b/src/hello.py

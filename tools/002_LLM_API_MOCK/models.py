@@ -2,23 +2,25 @@
 
 from __future__ import annotations
 
-import json
+import sys
 from pathlib import Path
 from typing import Dict, List
 
-MODELS_FILE = Path(__file__).resolve().parent / "models.json"
+# Ensure we can import vanguard if not already in path
+project_root = Path(__file__).resolve().parents[2]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
+from vanguard.packages.adapters.models.config import load_model_registry
 
 def load_models() -> Dict[str, List[str]]:
-    """Load model bands from models.json."""
-    if not MODELS_FILE.is_file():
-        raise FileNotFoundError(f"models.json missing at {MODELS_FILE}")
-    data = json.loads(MODELS_FILE.read_text(encoding="utf-8"))
+    """Load model bands from vanguard model registry."""
+    registry = load_model_registry()
+    data = registry.get("bands", {})
     for band in ("free", "medium", "high", "top"):
         if band not in data or not isinstance(data[band], list):
-            raise ValueError(f"models.json must contain array for band '{band}'")
+            raise ValueError(f"models_registry.json must contain array for band '{band}'")
     return data
-
 
 def models_for_band(band: str) -> List[str]:
     """Return models for a band. Raises RuntimeError if top is requested while empty."""

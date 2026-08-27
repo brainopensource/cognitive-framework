@@ -104,6 +104,11 @@ class LamStore:
             if "scenario_tier" not in existing_cols:
                 conn.execute("ALTER TABLE traces ADD COLUMN scenario_tier INTEGER DEFAULT 1;")
             for col, decl in (
+                ("context_bytes", "INTEGER DEFAULT 0"),
+                ("compression_ratio", "REAL DEFAULT 1.0"),
+                ("memory_turns", "INTEGER DEFAULT 0"),
+                ("skills_used", "TEXT DEFAULT '[]'"),
+                ("harness_version", "TEXT DEFAULT 'v0.4.1'"),
                 ("harness", "TEXT"),
                 ("cascade", "TEXT"),
                 ("episode_id", "TEXT"),

@@ -36,6 +36,27 @@ export function fail<T = never>(code: ClientFailure["code"], message: string, re
   return { ok: false, error: { code, message, retryable } };
 }
 
+const CANONICAL_ERROR_CODES: ReadonlySet<ClientFailure["code"]> = new Set([
+  "invalid_request",
+  "unauthenticated",
+  "permission_denied",
+  "not_found",
+  "conflict",
+  "incompatible_version",
+  "frame_too_large",
+  "rate_limited",
+  "not_available",
+  "internal",
+  "transport_interrupted",
+]);
+
+/** Map an arbitrary wire error code to the canonical vocabulary, never inventing pass/success. */
+export function toClientFailureCode(code: unknown): ClientFailure["code"] {
+  return typeof code === "string" && CANONICAL_ERROR_CODES.has(code as ClientFailure["code"])
+    ? (code as ClientFailure["code"])
+    : "internal";
+}
+
 export function parseEventEnvelope(value: unknown): Result<EventEnvelope> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return fail("invalid_request", "EventEnvelope must be a JSON object");
@@ -92,7 +113,7 @@ export function afterCursor(seq: string, afterSeq?: string): boolean {
 
 export type ParsedDaemonFrame =
   | { frameType: "receipt"; receipt: Record<string, unknown> }
-  | { frameType: "error"; message: string }
+  | { frameType: "error"; message: string; code: ClientFailure["code"]; retryable: boolean }
   | { frameType: "event"; event: EventEnvelope }
   | { frameType: "command"; raw: Record<string, unknown> };
 
@@ -104,11 +125,11 @@ export function parseDaemonFrame(value: unknown): Result<ParsedDaemonFrame> {
   const frameType = source.frameType;
   if (frameType === "error") {
     const err = source.error;
-    const message =
-      err !== null && typeof err === "object" && !Array.isArray(err) && typeof (err as { message?: unknown }).message === "string"
-        ? (err as { message: string }).message
-        : "daemon error frame";
-    return { ok: true, value: { frameType: "error", message } };
+    const errObj = err !== null && typeof err === "object" && !Array.isArray(err) ? (err as Record<string, unknown>) : {};
+    const message = typeof errObj.message === "string" ? errObj.message : "daemon error frame";
+    const code = toClientFailureCode(errObj.code);
+    const retryable = typeof errObj.retryable === "boolean" ? errObj.retryable : false;
+    return { ok: true, value: { frameType: "error", message, code, retryable } };
   }
   if (frameType === "receipt") {
     const receipt = source.receipt;

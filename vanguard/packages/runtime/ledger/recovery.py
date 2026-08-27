@@ -52,6 +52,10 @@ class LedgerReplayState:
     unreconciled_intent: Mapping[str, Any] | None = None
     receipts_count: int = 0
     terminal_event: Mapping[str, Any] | None = None
+    #: `ChildSpawned` with no matching `ChildReturned`. The subtree may have
+    #: mutated the world before the process died, so it is neither a success
+    #: nor a failure until something adjudicates it (`WP-A1`, `F-22`).
+    open_children: tuple[Mapping[str, Any], ...] = ()
 
 
 def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
@@ -67,6 +71,8 @@ def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
     last_intent: Mapping[str, Any] | None = None
     receipts_count = 0
     terminal_event: Mapping[str, Any] | None = None
+    spawned_children: dict[str, Mapping[str, Any]] = {}
+    closed_children: set[str] = set()
 
     for ev in events:
         try:
@@ -92,8 +98,25 @@ def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
             last_intent = None
             if kind in ("Receipt", "EffectCompleted"):
                 receipts_count += 1
+        elif kind == "ChildSpawned":
+            child_id = ev.payload.get("childEpisodeId")
+            if child_id:
+                spawned_children[str(child_id)] = dict(ev.payload)
+        elif kind == "ChildReturned":
+            child_id = ev.payload.get("childEpisodeId")
+            if child_id:
+                closed_children.add(str(child_id))
+
+    open_children = tuple(
+        payload for child_id, payload in spawned_children.items()
+        if child_id not in closed_children
+    )
 
     if status == "active" and last_intent is not None:
+        status = "undeterminable"
+    if status == "active" and open_children:
+        # A subtree that started and never reported is exactly the case the
+        # ordering of the two facts exists to make visible.
         status = "undeterminable"
 
     return LedgerReplayState(
@@ -105,6 +128,7 @@ def replay_ledger_state(events: Sequence[EventEnvelope]) -> LedgerReplayState:
         unreconciled_intent=last_intent,
         receipts_count=receipts_count,
         terminal_event=terminal_event,
+        open_children=open_children,
     )
 
 
@@ -214,9 +238,17 @@ class RecoveryScanner:
         store: EventStorePort,
         *,
         occurred_at: str,
+        project_id: str | None = None,
     ) -> Sequence[EventEnvelope]:
-        """K-47 / F-14: EffectStarted without a terminal effect → undeterminable."""
-        read = store.read(EventRange())
+        """K-47 / F-14: EffectStarted without a terminal effect → undeterminable.
+
+        `project_id` scopes the scan. Without it a shared store lets one
+        project's terminal receipt close another project's open intent, which
+        is the same cross-project idempotency defect `WP-A1` closes in
+        `delegation._already_settled`; the two must stay scoped together or
+        the isolation falsifier passes on one path and fails on the other.
+        """
+        read = store.read(EventRange(project_id=project_id))
         if not read.ok or not read.value:
             return []
         events = list(read.value)
@@ -284,10 +316,106 @@ class RecoveryScanner:
             reconciled.append(out)
         return reconciled
 
+    def reconcile_open_children(
+        self,
+        store: EventStorePort,
+        *,
+        occurred_at: str,
+        project_id: str | None = None,
+    ) -> Sequence[EventEnvelope]:
+        """`WP-A1`: `ChildSpawned` without `ChildReturned` → undeterminable.
+
+        Two design choices are load-bearing here.
+
+        **The kind is `EffectReconciled`, not a child event.** `SpawnAdapter`
+        is the sole legal writer of `ChildSpawned`/`ChildReturned`
+        (`PRIVILEGED_KIND_OWNERS`), and that exclusivity is the ADR-0090
+        claim. Recovery adjudicating a subtree must not require widening it,
+        so recovery speaks in its own already-owned kind and binds the child
+        by `idempotencyKey` and causation instead.
+
+        **The verdict is undeterminable, never failed.** The child may have
+        completed an irreversible effect before the process died. `failed`
+        would license a retry that repeats it; `completed` would invent a
+        result nobody observed.
+        """
+        read = store.read(EventRange(project_id=project_id))
+        if not read.ok or not read.value:
+            return []
+        events = list(read.value)
+        state = replay_ledger_state(events)
+        if not state.open_children:
+            return []
+
+        # An open child already adjudicated in a previous recovery pass stays
+        # adjudicated; reconciliation is idempotent, not cumulative.
+        already: set[str] = set()
+        for ev in events:
+            if (ev.payload.get("kind") or ev.mhf_kind) != "EffectReconciled":
+                continue
+            key = ev.payload.get("idempotencyKey")
+            if key:
+                already.add(str(key))
+
+        spawn_events = {
+            str(ev.payload.get("childEpisodeId")): ev
+            for ev in events
+            if (ev.payload.get("kind") or ev.mhf_kind) == "ChildSpawned"
+        }
+
+        reconciled: list[EventEnvelope] = []
+        for payload in state.open_children:
+            child_id = str(payload.get("childEpisodeId") or "")
+            intent_key = str(payload.get("settledIntentKey") or "")
+            if not child_id or intent_key in already:
+                continue
+            anchor = spawn_events.get(child_id)
+            if anchor is None:  # pragma: no cover -- derived from the same fold
+                continue
+            emitter = LedgerEmitter(
+                store,
+                episode_id=anchor.episode_id or child_id,
+                project_id=anchor.project_id or project_id or "project-default",
+                principal_id=self.controller_principal,
+                harness_digest=anchor.harness_digest or "sha256:" + ("0" * 64),
+                parent_principal_id=anchor.parent_principal_id,
+                parent_episode_id=anchor.parent_episode_id,
+                role="recovery",
+                anchor=anchor,
+            )
+            out = emitter.recovery().emit_kind(
+                "EffectReconciled",
+                run_id=anchor.run_id or "",
+                principal=self.controller_principal,
+                payload={
+                    "kind": "EffectReconciled",
+                    "status": "undeterminable",
+                    "occurrence": "undeterminable",
+                    "childEpisodeId": child_id,
+                    "idempotencyKey": intent_key,
+                    "reason": "process death between ChildSpawned and "
+                              "ChildReturned",
+                },
+                episode_id=anchor.episode_id,
+                occurred_at=occurred_at,
+                causation_id=anchor.event_id,
+            )
+            reconciled.append(out)
+        return reconciled
+
     @staticmethod
-    def settled_effect(store: EventStorePort, idempotency_key: str) -> EventEnvelope | None:
-        """Return the durable terminal receipt for a key, if one already exists."""
-        read = store.read(EventRange())
+    def settled_effect(
+        store: EventStorePort,
+        idempotency_key: str,
+        *,
+        project_id: str | None = None,
+    ) -> EventEnvelope | None:
+        """Return the durable terminal receipt for a key, if one already exists.
+
+        Scoped by project: an idempotency key is unique *within* a project, so
+        an unscoped lookup would let one project replay another's settlement.
+        """
+        read = store.read(EventRange(project_id=project_id))
         if not read.ok or not read.value:
             return None
         for event in reversed(list(read.value)):
@@ -303,13 +431,14 @@ class RecoveryScanner:
     @classmethod
     def continue_idempotent_effect(
         cls, store: EventStorePort, idempotency_key: str, execute: Any,
+        *, project_id: str | None = None,
     ) -> tuple[bool, Any]:
         """Reuse a durable terminal receipt or execute exactly once if unsettled.
 
         The boolean is ``True`` when recovery reused persistence and therefore
         did not invoke the physical effector.
         """
-        settled = cls.settled_effect(store, idempotency_key)
+        settled = cls.settled_effect(store, idempotency_key, project_id=project_id)
         if settled is not None:
             return True, settled
         return False, execute()

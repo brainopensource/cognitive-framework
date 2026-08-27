@@ -1,7 +1,8 @@
-"""Trajectory reader and run comparison tool (M4-04, EVIDENCE.md, ADR-0094).
+"""Trajectory reader and run comparison tool (M4-04, EVIDENCE.md, ADR-0094, ADR-0096 §14, ADR-0097 §1).
 
-Provides reproducible analysis and diffing across trajectory runs, isolating
-every execution variable (D_H, D_R, models, contexts, proposals, costs, outcomes).
+Provides dual-reading for `mhf.trajectory/1` (historical) and `mhf.trajectory/2` (production),
+and reproducible diffing across trajectory runs, isolating every execution variable
+(D_H, D_R, models, contexts, proposals, costs, outcomes, artifacts, provenance, reproducibility).
 """
 
 from __future__ import annotations
@@ -31,7 +32,7 @@ class TrajectoryDiff:
 
 
 class TrajectoryReader:
-    """Reader for mhf.trajectory/1 records from stores, files, or dictionaries."""
+    """Reader for mhf.trajectory/1 and mhf.trajectory/2 records from stores, files, or dictionaries."""
 
     @classmethod
     def load(cls, source: Any) -> dict[str, Any]:
@@ -86,10 +87,11 @@ class TrajectoryReader:
     @classmethod
     def extract_variables(cls, trajectory: Mapping[str, Any]) -> dict[str, Any]:
         """Extract all observable execution variables from a trajectory."""
+        schema = trajectory.get("schema", "mhf.trajectory/1")
         turns = []
         for t in trajectory.get("turns", ()):
             t_dict = dict(t) if isinstance(t, Mapping) else {}
-            turns.append({
+            turn_entry: dict[str, Any] = {
                 "turn": t_dict.get("turn"),
                 "context_digest": t_dict.get("context_digest"),
                 "context_ref": t_dict.get("context_ref"),
@@ -97,14 +99,21 @@ class TrajectoryReader:
                 "receipts": t_dict.get("receipts"),
                 "cost": t_dict.get("cost"),
                 "model_route": t_dict.get("model_route"),
-            })
+            }
+            if schema == "mhf.trajectory/2":
+                turn_entry["model_input_ref"] = t_dict.get("model_input_ref")
+                turn_entry["model_output_ref"] = t_dict.get("model_output_ref")
+            turns.append(turn_entry)
 
-        return {
-            "schema": trajectory.get("schema", "mhf.trajectory/1"),
+        res: dict[str, Any] = {
+            "schema": schema,
             "project_id": trajectory.get("project_id", ""),
             "run_id": trajectory.get("run_id", ""),
             "episode_id": trajectory.get("episode_id", ""),
+            "parent_episode_id": trajectory.get("parent_episode_id"),
+            "principal_id": trajectory.get("principal_id", ""),
             "harness_digest": trajectory.get("harness_digest", ""),
+            "execution_digest": trajectory.get("execution_digest", ""),
             "run_digest": trajectory.get("run_digest", ""),
             "activation_digest": trajectory.get("activation_digest", ""),
             "task_digest": trajectory.get("task_digest", ""),
@@ -119,6 +128,28 @@ class TrajectoryReader:
             "verdict_absence_reason": trajectory.get("verdict_absence_reason"),
         }
 
+        if schema == "mhf.trajectory/2":
+            res["artifacts"] = list(trajectory.get("artifacts", []))
+            res["provenance"] = dict(trajectory.get("provenance", {}))
+            res["reproducibility_at_run_close"] = (
+                dict(trajectory["reproducibility_at_run_close"])
+                if trajectory.get("reproducibility_at_run_close") is not None
+                else None
+            )
+            res["capture"] = (
+                dict(trajectory["capture"])
+                if trajectory.get("capture") is not None
+                else None
+            )
+        else:
+            # Historical /1 representation: explicit absence, no synthesized evidence
+            res["artifacts"] = ()
+            res["provenance"] = None
+            res["reproducibility_at_run_close"] = None
+            res["capture"] = None
+
+        return res
+
 
 def diff_trajectories(left_source: Any, right_source: Any) -> TrajectoryDiff:
     """Diff two trajectories and report every variable that materially differed."""
@@ -132,6 +163,7 @@ def diff_trajectories(left_source: Any, right_source: Any) -> TrajectoryDiff:
     details: dict[str, dict[str, Any]] = {}
 
     scalar_keys = [
+        "schema",
         "harness_digest",
         "run_digest",
         "activation_digest",
@@ -192,6 +224,24 @@ def diff_trajectories(left_source: Any, right_source: Any) -> TrajectoryDiff:
                 "left": t1_i.get("receipts"),
                 "right": t2_i.get("receipts"),
             }
+        if t1_i.get("model_input_ref") != t2_i.get("model_input_ref"):
+            differing.append(f"turns[{i}].model_input_ref")
+            details[f"turns[{i}].model_input_ref"] = {
+                "left": t1_i.get("model_input_ref"),
+                "right": t2_i.get("model_input_ref"),
+            }
+        if t1_i.get("model_output_ref") != t2_i.get("model_output_ref"):
+            differing.append(f"turns[{i}].model_output_ref")
+            details[f"turns[{i}].model_output_ref"] = {
+                "left": t1_i.get("model_output_ref"),
+                "right": t2_i.get("model_output_ref"),
+            }
+
+    # Compare /2 sections
+    for sec in ("artifacts", "provenance", "reproducibility_at_run_close", "capture"):
+        if v1.get(sec) != v2.get(sec):
+            differing.append(sec)
+            details[sec] = {"left": v1.get(sec), "right": v2.get(sec)}
 
     match = len(differing) == 0
     left_id = str(v1.get("run_id") or "left")

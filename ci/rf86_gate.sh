@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# RF-86 — the M-5 generality gate. Run in CI on every commit.
-# Fails if Pack #2 work mutated the frozen substrate.
+# RF-86 — the M-5 generality gate. Run after the ADR-0102 successor exists.
+# Fails closed if the baseline is missing or Pack #2 mutates the frozen substrate.
 #
 # Source: docs/_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/aether-m4-m8/m456/rf86_gate.sh
 # Deltas from the bundle copy (both strengthen the gate; neither weakens an assertion):
 #   1. fail-closed on a missing baseline ref. The bundle version sent `git diff`
-#      stderr to /dev/null, so an absent M-5-BASE tag left `$d` empty and every
+#      stderr to /dev/null, so an absent M-5A-BASE-v2 tag left `$d` empty and every
 #      frozen path reported "ok" -- the gate passed precisely when it could not run.
 #   2. the TCB line is labelled `raw`, and the authoritative logical-LOC linter is
 #      invoked. Printing a raw count against the *logical* 1438 ceiling reads as a
 #      breach (1737 vs 1438) when the ceiling is not in fact exceeded.
 set -uo pipefail
-BASE="${1:-M-5-BASE}"
+BASE="${1:-CONVERGENCE-BASE-v1}"
 FROZEN=(domain kernel ports runtime agency/episode)
 
 if ! git rev-parse --verify --quiet "${BASE}^{commit}" >/dev/null; then

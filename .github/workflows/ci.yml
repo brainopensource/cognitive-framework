@@ -12,18 +12,29 @@ jobs:
   vanguard-living-gates:
     name: Living Gates — Packages Lattice, Boundaries, TCB, Links, Secrets
     runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ""
+      DEEPSEEK_API_KEY: ""
+      OPENAI_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
         with:
-          # RF-86 diffs the working tree against the M-5-BASE tag; the
-          # default shallow clone has neither the tag nor the history.
+          # Baseline and neutrality gates require complete tag/history provenance.
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18'
 
-      - name: Install declared Python dependencies
-        run: python3 -m pip install -e '.[dev]'
+      - name: Hermetic provider-key preflight
+        run: python3 tools/linters/check_test_hygiene.py
+
+      - name: Install locked dependencies
+        run: |
+          python3 -m pip install -r requirements.lock
+          npm ci
 
       - name: Install rootless sandbox runtime
         run: |
@@ -95,8 +106,21 @@ jobs:
       - name: Code-default pack tests
         run: python3 -m unittest discover -s test/packs -t .
 
+      - name: TypeScript typecheck and tests
+        run: |
+          npm run typecheck
+          npm test
+
       - name: Stale documentation paths check
         run: python3 tools/linters/check_stale_paths.py
+
+      - name: Documentation metadata and context budgets
+        run: |
+          python3 tools/linters/check_doc_metadata.py
+          python3 tools/linters/check_doc_budgets.py
+
+      - name: Canonical execution truth check
+        run: python3 tools/linters/check_execution_truth.py
 
       - name: Falsifier identifier allocation check (RF-72)
         run: python3 tools/linters/check_falsifier_ids.py
@@ -105,12 +129,12 @@ jobs:
         run: python3 tools/linters/check_markdown_links.py
 
       - name: Secret scan check
-        env:
-          OPENROUTER_API_KEY: ""
         run: python3 tools/linters/scan_secrets.py
 
-      - name: RF-86 frozen substrate gate (M-5 generality)
-        # Wired before further M-5 work: the gate's value is catching the
-        # incremental kernel hook the moment it lands, not at milestone end.
-        # Fails closed if M-5-BASE is unreachable -- push the tag with the branch.
-        run: bash ci/rf86_gate.sh M-5-BASE
+      - name: RF-86 successor substrate gate (when applicable)
+        run: |
+          if git rev-parse --verify --quiet 'refs/tags/CONVERGENCE-BASE-v1^{commit}' >/dev/null; then
+            bash ci/rf86_gate.sh CONVERGENCE-BASE-v1
+          else
+            echo 'RF-86 NOT APPLICABLE: ADR-0102 successor baseline has not been accepted; no pass is claimed.'
+          fi

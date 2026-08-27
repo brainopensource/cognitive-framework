@@ -1,0 +1,51 @@
+{
+  "artifactRefs": [],
+  "claim": "acceptance:RF-95",
+  "digest": "sha256:565a6ba9a476e65ae0391be872f5bc64e795784e983e8d519ed1d5e3aa534228",
+  "environment": {
+    "reviewerPublicKey": "14apQEIMwInV4MBxsMis5uXkeuED+krKWY2D09W63V8="
+  },
+  "materials": [
+    {
+      "digest": "sha256:cba90ae91a6c16d9b557446094bbf5d36012840174399323dcaf2efacaefdb54",
+      "name": "preregistration",
+      "ref": "docs/03_execution/prereg/RF-95-candidate-03.md"
+    },
+    {
+      "digest": "sha256:6fccfafe1098fcf6163bb9bd084b8a106116b0743c240b48a7e1b9ace96c33af",
+      "name": "ledger"
+    },
+    {
+      "digest": "sha256:3b4ee3deeddb12b3f9868008662d3d41e211bd2cad56059b8760cf1c4c570b32",
+      "name": "terminal_state"
+    },
+    {
+      "digest": "sha256:1caedab102bb3c62889be500cd8f7fa1a9bba77531785b88ac3def6bb4f8644e",
+      "name": "harness"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "branch": "feat_higgs_M4_M8",
+    "commit": "ce1b6a86b7745b3b5111bd84138f207b7ba94d0a",
+    "dirty": true,
+    "eventSchema": "mhf.event/2",
+    "reducer": "sha256:d20ca6c94088fb997e5faa7781264f800fbedc3b366336e8a4ab9c78a1463379",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "2c022840902a26c3fb815ce18bbe89ff2b0526e9"
+  },
+  "producer": {
+    "identity": "independent-reviewer",
+    "keyId": "independent-reviewer-key",
+    "role": "reviewer"
+  },
+  "protocol": "aether.evidence.acceptance/1",
+  "run": {
+    "acceptedEvidenceDigest": "sha256:5a98afeeb1f60208d50e1d7a68ff6d986f114f5917dcb90e0699b8e23da21df6"
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:qrM3nmTzdBNj7P4oOTrceXJCWOzQNNQ6r8CUlQwe2T9N26PxpwGewC+juuYHa7M2PGP7ArlJOtBYJPwpMXlWDg==",
+  "subject": [
+    "sha256:5a98afeeb1f60208d50e1d7a68ff6d986f114f5917dcb90e0699b8e23da21df6"
+  ]
+}

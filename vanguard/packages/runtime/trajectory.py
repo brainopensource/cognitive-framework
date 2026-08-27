@@ -1,4 +1,12 @@
-"""Assemble `mhf.trajectory/1` at episode completion (1.3-D, F-12, RF-23, ADR-0078)."""
+"""Assemble `mhf.trajectory/2` (and historical `/1`) at episode completion (1.3-D, F-12, RF-23, ADR-0078, ADR-0096 §14, ADR-0097 §1).
+
+Production writers single-write `mhf.trajectory/2`, carrying:
+- Complete artifact index (`artifacts`)
+- Context, compaction, and cache provenance (`provenance`)
+- Exact model input/output references per turn
+- Proof-honest `reproducibility_at_run_close`
+- Capture status and policy
+"""
 
 from __future__ import annotations
 
@@ -6,6 +14,10 @@ from typing import Any, Mapping, Sequence
 
 from ..domain.canonicalisation.digest import digest_of
 from ..kernel.model import Event
+from .reproducibility import (
+    ReproducibilityVector,
+    assess_reproducibility,
+)
 
 
 def signed_verdict_object(verdict: Any) -> Mapping[str, Any] | None:
@@ -108,6 +120,20 @@ def _compute_turn_cost(
     }
 
 
+def _zero_controller_cost() -> dict[str, Any]:
+    """A policy-produced proposal made no provider invocation."""
+    return {
+        "usd_micros": 0,
+        "tokens": 0,
+        "bytes": 0,
+        "millis": 0,
+        "measurement_status": {
+            dimension: {"status": "measured", "reason": "no_provider_invocation"}
+            for dimension in ("usd_micros", "tokens", "bytes", "millis")
+        },
+    }
+
+
 def assemble_trajectory(
     *,
     task: Any,
@@ -121,6 +147,14 @@ def assemble_trajectory(
     model: Any = None,
     environment: Any = None,
     run_plan: Any = None,
+    artifact_index: Sequence[Any] | None = None,
+    provenance_claims: Sequence[Mapping[str, Any]] | None = None,
+    context_provenance: Sequence[Mapping[str, Any]] | None = None,
+    compaction_provenance: Sequence[Mapping[str, Any]] | None = None,
+    cache_provenance: Sequence[Mapping[str, Any]] | None = None,
+    reproducibility: ReproducibilityVector | Mapping[str, Any] | None = None,
+    capture_status: Mapping[str, Any] | None = None,
+    schema_version: str = "mhf.trajectory/2",
 ) -> dict[str, Any]:
     turns: list[dict[str, Any]] = []
     proposals = [
@@ -135,13 +169,17 @@ def assemble_trajectory(
         context_digest = digest_of(dict(ctx) if ctx else {"turn": index})
         proposal_payload = dict(proposal.payload) if hasattr(proposal, "payload") and isinstance(proposal.payload, Mapping) else dict(proposal)
 
-        route = _resolve_model_route(model, ctx)
-        route_key = (route["provider"], route["model"])
-        if route_key not in seen_routes:
-            seen_routes.add(route_key)
-            model_routes_used.append({"tier": 1, **route})
+        controller_produced = ctx.get("proposal_source") == "meta_controller"
+        route = None if controller_produced else _resolve_model_route(model, ctx)
+        if route is not None:
+            route_key = (route["provider"], route["model"])
+            if route_key not in seen_routes:
+                seen_routes.add(route_key)
+                model_routes_used.append({"tier": 1, **route})
 
-        turn_cost = _compute_turn_cost(ctx, proposal_payload, route)
+        turn_cost = (
+            _zero_controller_cost()
+            if controller_produced else _compute_turn_cost(ctx, proposal_payload, route))
 
         turn_receipts = []
         if index < len(receipts):
@@ -150,19 +188,21 @@ def assemble_trajectory(
                 "completed", "failed", "rejected", "undeterminable",
             ) else ("completed" if getattr(rec, "outcome", None) == "ok" else "failed")
             turn_receipts.append({
-                "request_digest": getattr(rec, "descriptor_digest", None) or digest_of({"turn": index}),
+                "request_digest": getattr(rec, "descriptor_digest", None) or getattr(rec, "request_digest", None) or digest_of({"turn": index}),
                 "outcome": outcome,
                 "grant_digest": getattr(rec, "grant_digest", None),
                 "lease_id": getattr(rec, "lease_id", None),
+                "stdout_ref": getattr(rec, "stdout_ref", None),
+                "artifact_refs": [getattr(a, "digest", str(a)) for a in getattr(rec, "artifacts", ())] if hasattr(rec, "artifacts") else [],
             })
 
-        turns.append({
+        turn_dict: dict[str, Any] = {
             "turn": index,
             "context_digest": context_digest,
+            "context_ref": ctx.get("context_ref"),
             "proposal": proposal_payload,
             "receipts": turn_receipts,
-            "model_route": route,
-            "invocations": [{
+            "invocations": ([] if controller_produced else [{
                 "tier": 1,
                 "route": route,
                 "usage": {
@@ -170,9 +210,17 @@ def assemble_trajectory(
                     "completion_tokens": ctx.get("completion_tokens"),
                 },
                 "cost": turn_cost,
-            }],
+            }]),
             "cost": turn_cost,
-        })
+        }
+        if route is not None:
+            turn_dict["model_route"] = route
+
+        if schema_version == "mhf.trajectory/2":
+            turn_dict["model_input_ref"] = ctx.get("model_input_ref") or ctx.get("prompt_digest")
+            turn_dict["model_output_ref"] = ctx.get("model_output_ref") or ctx.get("output_digest")
+
+        turns.append(turn_dict)
 
     if not model_routes_used and model is not None:
         default_route = _resolve_model_route(model)
@@ -262,20 +310,102 @@ def assemble_trajectory(
     signed_verdict = signed_verdict_object(verdict)
     verdict_absence_reason = None if signed_verdict is not None else "no_evaluator_bound"
 
+    if schema_version == "mhf.trajectory/1":
+        return {
+            "schema": "mhf.trajectory/1",
+            "project_id": getattr(task, "project_id", "project-default"),
+            "run_id": getattr(task, "run_id", "run-1"),
+            "episode_id": getattr(task, "episode_id", "episode-1"),
+            "parent_episode_id": getattr(task, "parent_episode_id", None),
+            "principal_id": getattr(task, "principal", "agent-1"),
+            "harness_digest": harness_digest,
+            "execution_digest": execution_digest,
+            "state_digest": state_digest,
+            "event_range": event_range,
+            "model_routes_used": model_routes_used,
+            "turns": turns,
+            "verdict": signed_verdict,
+            "verdict_absence_reason": verdict_absence_reason,
+            "cost": total_cost,
+            "outcome": outcome_map.get(terminal_name, "aborted"),
+        }
+
+    # /2 payload assembly
+    # Partition provenance claims if passed as unified list
+    ctx_prov = list(context_provenance or [])
+    cmp_prov = list(compaction_provenance or [])
+    cch_prov = list(cache_provenance or [])
+    extracted_repro = None
+
+    if provenance_claims:
+        for claim in provenance_claims:
+            kind = claim.get("claimKind")
+            if kind == "context_selection":
+                ctx_prov.append(claim)
+            elif kind == "compaction":
+                cmp_prov.append(claim)
+            elif kind == "cache_interaction":
+                cch_prov.append(claim)
+            elif kind == "reproducibility_at_run_close":
+                extracted_repro = claim.get("vector") or claim
+
+    # Prepare artifact index
+    artifacts_list = []
+    if artifact_index:
+        for entry in artifact_index:
+            if hasattr(entry, "to_dict"):
+                artifacts_list.append(entry.to_dict())
+            elif isinstance(entry, Mapping):
+                artifacts_list.append(dict(entry))
+
+    # Prepare reproducibility
+    if reproducibility is not None:
+        if isinstance(reproducibility, ReproducibilityVector):
+            repro_dict = reproducibility.to_dict()
+        elif isinstance(reproducibility, Mapping):
+            repro_dict = dict(reproducibility)
+        else:
+            repro_dict = None
+    elif extracted_repro is not None:
+        repro_dict = dict(extracted_repro)
+    else:
+        profile_obj = getattr(run_plan, "profile", None) or getattr(task, "profile", None)
+        computed_vector = assess_reproducibility(
+            profile=profile_obj,
+            model_route=model_routes_used[0] if model_routes_used else None,
+            environment={"task": getattr(task, "brief", ""), "project_id": getattr(task, "project_id", "")},
+            artifact_index=artifact_index,
+            state_digest=state_digest,
+            run_id=getattr(task, "run_id", "run-1"),
+        )
+        repro_dict = computed_vector.to_dict()
+
+    # Prepare capture status
+    if capture_status is not None:
+        cap_dict = dict(capture_status)
+    else:
+        # `null`, not a synthesised `complete`. A run composed without a
+        # capture subsystem captured nothing, and reporting "complete" for it
+        # would make "we captured everything we were asked to" and "we were
+        # never asked to capture anything" indistinguishable -- the same
+        # fabrication the `/1` reader path is careful to avoid. The `/2`
+        # schema types `capture` as nullable precisely so absence can be
+        # stated rather than invented.
+        cap_dict = None
+
     return {
-        "schema": "mhf.trajectory/1",
+        "schema": "mhf.trajectory/2",
         "project_id": getattr(task, "project_id", "project-default"),
         "run_id": getattr(task, "run_id", "run-1"),
         "episode_id": getattr(task, "episode_id", "episode-1"),
         "parent_episode_id": getattr(task, "parent_episode_id", None),
         "principal_id": getattr(task, "principal", "agent-1"),
         "harness_digest": harness_digest,
-        "activation_digest": getattr(run_plan, "activation_digest", None),
-        "run_digest": execution_digest,
-        "task_digest": getattr(run_plan, "task_digest", None),
-        "preregistration_digest": getattr(
-            run_plan, "preregistration_digest", None),
         "execution_digest": execution_digest,
+        "run_digest": getattr(run_plan, "run_digest", None) or execution_digest,
+        "activation_digest": getattr(run_plan, "activation_digest", None),
+        "task_digest": getattr(run_plan, "task_digest", None),
+        "preregistration_digest": getattr(run_plan, "preregistration_digest", None),
         "state_digest": state_digest,
         "event_range": event_range,
         "model_routes_used": model_routes_used,
@@ -284,6 +414,14 @@ def assemble_trajectory(
         "verdict_absence_reason": verdict_absence_reason,
         "cost": total_cost,
         "outcome": outcome_map.get(terminal_name, "aborted"),
+        "artifacts": artifacts_list,
+        "provenance": {
+            "context": ctx_prov,
+            "compaction": cmp_prov,
+            "cache": cch_prov,
+        },
+        "reproducibility_at_run_close": repro_dict,
+        "capture": cap_dict,
     }
 
 

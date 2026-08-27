@@ -7,8 +7,8 @@ canonical_for:
   - evaluator-verdict-law
 status: living
 owner: principal-systems-architect
-version: "0.7.1"
-last_verified: 2026-08-25
+version: "0.7.3.dev0"
+last_verified: 2026-08-26
 read_when:
   - changing-trajectories-or-costs
   - changing-evaluator-verdicts
@@ -69,10 +69,25 @@ authoritative; traces, spans, and metrics are correlated telemetry, never system
 Without this, later claims such as "metacognition improved performance", "this skill is superior", or
 "this topology works better" are opinion rather than evidence.
 
-> **Current-state gap (M-4 lane).** Trajectory capture today covers invocations, costs, identities,
-> receipts, and outcome. Context-selection, compaction, cache, strategy-change, retrieval, delegation,
-> and topology provenance are **not yet** emitted, and retention is not yet a profile axis. Both are
-> M-4/M-5a migration tasks; the rule above is binding on new instrumentation.
+> **Current state.** M-4 capture mechanisms and trajectory `/2` are implemented. Their release claim
+> remains open because the repository has no immutable RF-95 bundle or independent acceptance
+> receipt. Retrieval and topology provenance remain later integration work.
+
+## Evidence and acceptance states
+
+Causal facts, immutable artifacts, projections, telemetry, and attestations MUST remain separately
+typed and correlated. A package progresses through `NOT_STARTED`, `IN_PROGRESS`, `PACKAGE_READY`,
+`EVIDENCE_READY`, and `ACCEPTED`; `BLOCKED` always names a dependency. The underlying evidence
+obligation progresses `ABSENT -> PRODUCED -> VERIFIED -> INDEPENDENTLY_ACCEPTED`. Only the terminal
+state may close a mandatory gate. A waived review, missing artifact, degraded run, or passing unit
+test is never an acceptance receipt.
+
+An `aether.evidence/1` envelope MUST bind claim/protocol identity, subjects, materials, run identity,
+schema/reducer pins, code/tree/dependency/environment identity, outcome, artifact references,
+producer identity, and signature. Independent acceptance is a separate signed envelope from a
+reviewer distinct from the producer. Canonical bytes determine the digest. Negative scientific
+outcomes are admissible and may satisfy a preregistered experiment; invalid instrumentation remains
+`UNDETERMINABLE`. See ADR-0101.
 
 ## Trajectory accounting
 

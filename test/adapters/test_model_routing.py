@@ -20,7 +20,7 @@ class TestModelRouting(unittest.TestCase):
         self.assertEqual(route.pricing_source, "hardcoded")
 
     def test_known_model(self):
-        route = resolve_route("openai/gpt-4o-mini")
+        route = resolve_route("deepseek/deepseek-v4-flash-0731")
         self.assertTrue(route.pricing_known)
         self.assertEqual(route.prompt_micros_per_1m, 150_000)
         self.assertEqual(route.pricing_source, "hardcoded")
@@ -31,7 +31,7 @@ class TestModelRouting(unittest.TestCase):
         self.assertEqual(route.pricing_source, "unknown")
         
     def test_preflight_check(self):
-        valid_route = resolve_route("openai/gpt-4o")
+        valid_route = resolve_route("deepseek/deepseek-v4-flash-0731")
         res = preflight_check(valid_route)
         self.assertTrue(res.ok)
 

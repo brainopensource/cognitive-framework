@@ -7,8 +7,8 @@ canonical_for:
   - invariant-registry
 status: living
 owner: principal-systems-architect
-version: "0.7.1"
-last_verified: 2026-08-24
+version: "0.7.3.dev0"
+last_verified: 2026-08-26
 read_when:
   - implementing-any-runtime-change
   - resolving-authority-conflicts
@@ -19,7 +19,9 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER Normative Specification — Higgs Release (v0.7.0)
+# AETHER Normative Specification — Higgs Development Line
+
+Active document and software version: `0.7.3.dev0`, sourced from `pyproject.toml`.
 
 ## What AETHER is
 
@@ -49,20 +51,17 @@ historical evidence only.
 
 ## Authority and precedence
 
-0. [`VISION.md`](../VISION.md) is **Law Zero** (`class: charter`, `authority: constitutional`,
-   `status: locked`). It defines architectural identity, ontology, product principles, and long-term
-   direction for v0.7+. This specification and every leaf below it are **subordinate to it**. A
-   conflict between this specification and the locked Vision is resolved in favour of the Vision, and
-   the conflicting clause here MUST be reconciled rather than cited as a counter-authority. The Vision
-   changes only through an explicit Vision-superseding ADR (`ADR-0095`).
+0. [`VISION.md`](../VISION.md) is **Law Zero** (`class: charter`, `authority: constitutional`, `status: locked`). It defines architectural identity, ontology, product principles, and long-term direction for v0.7+. This specification and every leaf is subordinate to it. Conflicts resolve in favour of Vision and MUST be reconciled here, never cited as counter-authority. Vision changes only through an explicit Vision-superseding ADR (`ADR-0095`).
 1. This specification and the six `class: law`, `authority: normative` leaves in
    [`01_law/`](01_law/) form the normative specification. No one leaf has independent precedence;
    a change that affects more than one leaf MUST update every affected clause atomically.
 2. Append-only decisions in [`02_decisions/INDEX.md`](02_decisions/INDEX.md) record rationale and
    amendments; an accepted ADR is binding only when reflected in the law. Sustained material
    counter-evidence triggers review but never implicit amendment.
-3. [`03_execution/sprint_active.md`](03_execution/sprint_active.md) is the sole current work board;
-   [`03_execution/milestones.md`](03_execution/milestones.md) is sequencing, not authorization.
+3. [`03_execution/milestones.md`](03_execution/milestones.md) owns stable gates,
+   [`03_execution/backlog.md`](03_execution/backlog.md) owns stable work packages,
+   [`03_execution/sprint_active.md`](03_execution/sprint_active.md) is the sole current work board,
+   and [`03_execution/sprint_upcoming.md`](03_execution/sprint_upcoming.md) is non-authorizing staging.
 4. Architecture, contracts, protocols, engineering guides, and theory are descriptive or advisory
    and must link back to law rather than restating it.
 5. [`_archive/`]( _archive/) is frozen provenance. It is scanned for links and secrets but excluded
@@ -70,19 +69,12 @@ historical evidence only.
 
 ## Design axioms A-1…A-6
 
-- **A-1 Microkernel:** the S0–S12 effect reference monitor is the bounded TCB; domain, evaluation,
-  scheduling, models, sandboxes, and plugin code remain outside it behind typed boundaries.
-- **A-2 Two authority systems:** capability grants constrain agents; plugin isolation constrains
-  plugin code. Neither system trusts the other's subject.
-- **A-3 Events are truth:** grants, budgets, approvals, lifecycle, evaluation, and spawn effects are
-  durable events. Fresh-process replay, not an in-memory double fold, proves replay parity.
-- **A-4 One schema:** JSON Schema, JCS, and golden vectors are the wire source of truth; generated
-  Python/TypeScript readers replace handwritten mirrors.
-- **A-5 Harness identity:** `D_H` hashes every behavior-affecting composition input. `D_R` adds the
-  runtime/environment/model/oracle identity and `D_X` adds dataset/protocol identity; never collapse
-  the three.
-- **A-6 Asymmetric evolution:** new authority verbs require a bound falsifier and TCB proof; all
-  other evolution lands as packs, plugins, manifests, adapters, policies, or exterior pipelines.
+- **A-1 Microkernel:** the S0–S12 effect reference monitor is the bounded TCB; domain, evaluation, scheduling, models, sandboxes, and plugin code remain outside it behind typed boundaries.
+- **A-2 Two authority systems:** capability grants constrain agents; plugin isolation constrains plugin code. Neither system trusts the other's subject.
+- **A-3 Events are truth:** grants, budgets, approvals, lifecycle, evaluation, and spawn effects are durable events. Fresh-process replay, not an in-memory double fold, proves replay parity.
+- **A-4 One schema:** JSON Schema, JCS, and golden vectors are the wire source of truth; generated Python/TypeScript readers replace handwritten mirrors.
+- **A-5 Harness identity:** `D_H` hashes every behavior-affecting composition input. `D_R` adds runtime/environment/model/oracle identity and `D_X` adds dataset/protocol identity; never collapse them.
+- **A-6 Asymmetric evolution:** new authority verbs require a bound falsifier and TCB proof; all other evolution lands as packs, plugins, manifests, adapters, policies, or exterior pipelines.
 
 ## Invariant registry I-1…I-11
 
@@ -149,6 +141,9 @@ historical evidence only.
   admissible only after a durable `capture_incomplete` fact and makes the run non-evidentiary.
 - Reproducibility distinguishes capability from executed verification. WAL and pins are
   prerequisites; verified values require immutable run-bound receipts.
+- Causal facts, content-addressed artifacts, projections, operational telemetry, and independent
+  attestations are distinct. Package readiness and milestone acceptance are also distinct; only a
+  digest-addressed, independently accepted receipt may close a mandatory gate (ADR-0101).
 - Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; `depth` and `turns`
   are structural ceilings. Goal events carry a digest and optional artifact reference, never raw
   goal text. Retention uses `digests_only|standard|full` and does not authorize content capture.
@@ -160,8 +155,11 @@ historical evidence only.
   adapter; the kernel MUST NOT branch on the verb or know child topology.
 - Scheduler claim TTL/heartbeat is coordination metadata, not budget `millis`. Concurrent physical
   attempts are at-least-once; durable settlement is idempotent/exactly-once per command identity.
-- M-8 topology is declared component/policy data lowered to ordinary scheduling and mediated spawn.
+- M-7 topology is declared component/policy data lowered to ordinary scheduling and mediated spawn.
   A substrate workflow/topology engine requires RF-66 reversal evidence and a successor ADR.
+- M-8 memory access requires verified, scoped, revocation-aware authorization at use time;
+  authorization precedes ranking and artifact dereference. Promotion is a durable CAS over an
+  immutable composition with distinct generator, evaluator, and promoter authorities (ADR-0100).
 - Execution assurance is explicit and identity-bearing: the resolved `ExecutionProfile` MUST enter
   `D_R`; `product`, `local`, `sandboxed`, and `hermetic` are distinct modes. Product execution MAY
   use the host adapter with durable WAL and explicit approvals. An unavailable requested containment
@@ -175,11 +173,10 @@ historical evidence only.
 [`VISION.md`](../VISION.md) is Law Zero; `ADR-0095` locks the architectural thesis and ADR-0097
 refines delivery sequencing without changing that thesis.
 `ADR-0094` remains in force: M-4 is the RF-95 useful, durable coding proof and RF-85 is an optional
-hermetic assurance certification. `M-5A-BASE-v2` is created after **M-5a**, so RF-86
-measures Formal Pack #2 against the event-derived agent semantics rather than against a substrate
-that is about to change. After that baseline, M-5b and M-6 may run in parallel. Prior sequencing in
-ADR-0088/0093/0090 is superseded only where explicitly stated by ADR-0095 and ADR-0097;
-their composition, identity, refusal, and release-baseline content is retained.
+hermetic assurance certification. ADR-0102 records `M-5A-BASE-v2` as a contaminated unpublished
+historical ref, not a valid control. A reviewed, annotated, remotely resolvable
+`CONVERGENCE-BASE-v1` with a signed baseline manifest is the only authorized successor control.
+After that baseline, the fresh M-5b treatment and M-6 evidence work may proceed independently.
 
 ## Milestone compatibility
 
@@ -194,14 +191,14 @@ historical meaning; `ADR-0095` §4 is the authoritative translation table.
 | M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — complete |
 | M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal — complete |
 | M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence — complete |
-| M-4 | v0.7.0 | RF-95: one useful real-model coding run with mediated observe/edit/verify, durable WAL, complete trajectory, fresh-process reconstruction — **plus scientific trajectory capture** |
-| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance for context/cache/compaction; immutable post-window baseline tagged `M-5A-BASE-v2` |
-| M-5b | v0.7.x | RF-86 Formal Pack #2 parity plus RF-52/RF-53 T0 witness, measured against `M-5A-BASE-v2`; may run in parallel with M-6 |
-| M-6 | v0.8.0 | RF-55…RF-59 mediated `agent.spawn` as nested execution lineages through generic S0–S12 dispatch; may run in parallel with M-5b from `M-5A-BASE-v2` |
+| M-4 | v0.7.x | RF-95 useful real-model coding proof, scientific capture, immutable bundle, and independent acceptance |
+| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance, and accepted successor baseline |
+| M-5b | v0.7.x | RF-86/RF-98 fresh non-contaminated Formal Pack witness against `CONVERGENCE-BASE-v1` |
+| M-6 | v0.7.3.dev0 | RF-55…RF-59 canonical recursive child runtime with durable identity, conserved attenuated budgets, recovery evidence, and review |
 | M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
 | M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
-| M-8 | v0.9.x | Memory, retrieval, skills, and learning as projections with held-out evaluation, provenance, and rollback |
-| M-9 | v1.0 | Integrated AETHER v1.0 General Agent Framework |
+| M-8 | v0.9.x | Verified durable memory and composition learning with held-out evaluation, atomic promotion, provenance, and executed rollback |
+| M-9/M-10 | post-MVP | Compatibility horizon only until M-8 is independently accepted |
 
 ## Compatibility anchors for former SPEC sections
 

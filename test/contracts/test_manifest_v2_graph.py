@@ -107,9 +107,10 @@ class NamedManifestGraphContract(unittest.TestCase):
             compose_named(widened, self.graph)
 
         spawn = self.manifest()
-        spawn["capabilities"] = [{"verb": "agent.spawn", "selector": self.selector}]
-        with self.assertRaisesRegex(ManifestError, "agent.spawn not implemented"):
-            compose_named(spawn, self.graph)
+        spawn["capabilities"] = [{"verb": "agent.spawn", "selector": self.selector, "sink": "privileged", "risk": "high"}]
+        composed = compose_named(spawn, self.graph)
+        caps = composed.metadata.get("capabilities", ())
+        self.assertIn("agent.spawn", [c["verb"] for c in caps if isinstance(c, dict)])
 
     def test_profiles_and_reserved_metadata_are_identity_inputs(self) -> None:
         """RF-73: reserved profile/route/guardrail values cannot be identity-inert."""

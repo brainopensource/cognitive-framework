@@ -315,7 +315,7 @@ class OpenRouterModelContract(unittest.TestCase):
         }).encode("utf-8")
 
         port = OpenRouterModel(
-            model="openai/gpt-4o-mini",
+            model="deepseek/deepseek-v4-flash-0731",
             api_key_ref="OPENROUTER_API_KEY",
             transport=_status_transport(200, payload),
             environ={"OPENROUTER_API_KEY": SECRET},
@@ -355,7 +355,7 @@ class OpenRouterModelContract(unittest.TestCase):
         }).encode("utf-8")
 
         port = OpenRouterModel(
-            model="openai/gpt-4o-mini",
+            model="deepseek/deepseek-v4-flash-0731",
             api_key_ref="OPENROUTER_API_KEY",
             transport=_status_transport(200, payload),
             environ={"OPENROUTER_API_KEY": SECRET},

@@ -20,7 +20,7 @@ class TestInstrumentTuple(unittest.TestCase):
         self.valid_k_compat = CompatibilityKey(
             benchmark_id="swe-bench-lite",
             split_hash="sha256:split123",
-            model_fingerprint="fp:claude-3-5-sonnet",
+            model_fingerprint="fp:deepseek/deepseek-v4-flash-0731",
             harness_commit="a1b2c3d4e5f6",
             agent_hash="sha256:agent_vanguard",
             evaluator_image_digest="sha256:evaluator_image_abc",
@@ -61,7 +61,7 @@ class TestInstrumentTuple(unittest.TestCase):
         differing_k_compat = CompatibilityKey(
             benchmark_id="swe-bench-lite",
             split_hash="sha256:split456",  # Different split!
-            model_fingerprint="fp:claude-3-5-sonnet",
+            model_fingerprint="fp:deepseek/deepseek-v4-flash-0731",
             harness_commit="a1b2c3d4e5f6",
             agent_hash="sha256:agent_vanguard",
             evaluator_image_digest="sha256:evaluator_image_abc",
@@ -89,7 +89,7 @@ class TestInstrumentTuple(unittest.TestCase):
         placeholder_k = CompatibilityKey(
             benchmark_id="swe-bench-lite",
             split_hash="sha256:split123",
-            model_fingerprint="fp:claude-3-5-sonnet",
+            model_fingerprint="fp:deepseek/deepseek-v4-flash-0731",
             harness_commit="v0.5.0",  # Placeholder!
             agent_hash="default_agent",  # Placeholder!
             evaluator_image_digest="sha256:evaluator_default",  # Placeholder!

@@ -65,6 +65,18 @@ class ServiceInboxStore:
                 );
                 """
             )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS checkpoints (
+                    checkpoint_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    seq INTEGER NOT NULL,
+                    digest TEXT NOT NULL,
+                    state_json TEXT,
+                    created_at TEXT NOT NULL
+                );
+                """
+            )
 
     def record_command(
         self,
@@ -159,15 +171,33 @@ class ServiceInboxStore:
     def get_events(self, run_id: str, after_seq: int = 0) -> list[dict[str, Any]]:
         with self._conn:
             cur = self._conn.cursor()
-            cur.execute(
-                """
-                SELECT event_json FROM event_outbox
-                WHERE run_id = ? AND seq > ?
-                ORDER BY seq ASC
-                """,
-                (run_id, after_seq),
-            )
-            return [json.loads(row["event_json"]) for row in cur.fetchall()]
+            try:
+                cur.execute(
+                    """
+                    SELECT envelope_json FROM events
+                    WHERE run_id = ? AND seq > ?
+                    ORDER BY seq ASC
+                    """,
+                    (run_id, after_seq),
+                )
+                rows = cur.fetchall()
+                if rows:
+                    return [json.loads(row["envelope_json"]) for row in rows]
+            except sqlite3.OperationalError:
+                pass
+
+            try:
+                cur.execute(
+                    """
+                    SELECT event_json FROM event_outbox
+                    WHERE run_id = ? AND seq > ?
+                    ORDER BY seq ASC
+                    """,
+                    (run_id, after_seq),
+                )
+                return [json.loads(row["event_json"]) for row in cur.fetchall()]
+            except sqlite3.OperationalError:
+                return []
 
     def set_run_state(
         self,
@@ -189,6 +219,20 @@ class ServiceInboxStore:
                 (run_id, manifest_path, repo_path, status, now, now),
             )
 
+    def list_runs(self, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
+        with self._conn:
+            cur = self._conn.cursor()
+            cur.execute(
+                """
+                SELECT run_id, manifest_path, repo_path, status, created_at, updated_at
+                FROM active_runs
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """,
+                (limit, offset),
+            )
+            return [dict(row) for row in cur.fetchall()]
+
     def get_run_state(self, run_id: str) -> dict[str, Any] | None:
         with self._conn:
             cur = self._conn.cursor()
@@ -198,5 +242,63 @@ class ServiceInboxStore:
                 return None
             return dict(row)
 
+    def save_checkpoint(
+        self,
+        checkpoint_id: str,
+        run_id: str,
+        seq: int,
+        digest: str,
+        state_json: str | None = None,
+        now: str = "",
+    ) -> None:
+        with self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO checkpoints (checkpoint_id, run_id, seq, digest, state_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(checkpoint_id) DO UPDATE SET
+                    seq = excluded.seq,
+                    digest = excluded.digest,
+                    state_json = excluded.state_json
+                """,
+                (checkpoint_id, run_id, seq, digest, state_json, now),
+            )
+
+    def get_checkpoint(self, checkpoint_id: str) -> dict[str, Any] | None:
+        with self._conn:
+            cur = self._conn.cursor()
+            cur.execute("SELECT * FROM checkpoints WHERE checkpoint_id = ?", (checkpoint_id,))
+            row = cur.fetchone()
+            if row is None:
+                return None
+            return dict(row)
+
+    def list_checkpoints(self, run_id: str) -> list[dict[str, Any]]:
+        with self._conn:
+            cur = self._conn.cursor()
+            cur.execute(
+                "SELECT * FROM checkpoints WHERE run_id = ? ORDER BY seq DESC",
+                (run_id,),
+            )
+            return [dict(row) for row in cur.fetchall()]
+
+    def get_latest_seq(self, run_id: str) -> int:
+        with self._conn:
+            cur = self._conn.cursor()
+            try:
+                cur.execute("SELECT COALESCE(MAX(seq), 0) FROM events WHERE run_id = ?", (run_id,))
+                row = cur.fetchone()
+                if row and row[0] is not None and row[0] > 0:
+                    return int(row[0])
+            except sqlite3.OperationalError:
+                pass
+            try:
+                cur.execute("SELECT COALESCE(MAX(seq), 0) FROM event_outbox WHERE run_id = ?", (run_id,))
+                row = cur.fetchone()
+                return int(row[0]) if row and row[0] is not None else 0
+            except sqlite3.OperationalError:
+                return 0
+
     def close(self) -> None:
         self._conn.close()
+

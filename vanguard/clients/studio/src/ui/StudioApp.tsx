@@ -1,27 +1,69 @@
 import React, { useEffect, useState } from "react";
 import type { InternedRow } from "../store/event-store.js";
 import type { StudioFold } from "../store/fold.js";
-import type { StudioSessionState } from "../store/session.js";
-import { formatMicrosToUsd, formatDigestShort } from "../store/session.js";
+import type { StudioSessionState, StudioSurface } from "../store/session.js";
+import { formatMicrosToUsd } from "../store/session.js";
 import { EffectInspector } from "./EffectInspector.js";
 import { ApprovalInterceptor } from "./ApprovalInterceptor.js";
 import { TrajectoryWaterfall } from "./TrajectoryWaterfall.js";
 import { EvidenceGrid } from "./EvidenceGrid.js";
-import { CompositionStudioView } from "./CompositionStudioView.js";
-import { ArenaView } from "./ArenaView.js";
-import { AutonomyWatchView } from "./AutonomyWatchView.js";
 import { LedgerExplorerView } from "./LedgerExplorerView.js";
 import { SubstrateMapView } from "./SubstrateMapView.js";
+import { MetaDevelopmentWorkbench } from "./MetaDevelopmentWorkbench.js";
+import { CodingAgentWorkbench } from "./CodingAgentWorkbench.js";
+import { GeneralityLabView } from "./GeneralityLabView.js";
+import { LineageGraphView } from "./LineageGraphView.js";
+import { EvolutionFoundryView } from "./EvolutionFoundryView.js";
+import { VisualHarnessBuilder } from "./VisualHarnessBuilder.js";
+import { ContextCompactionView } from "./ContextCompactionView.js";
+import { FactorialExperimentView } from "./FactorialExperimentView.js";
+import { TopologyEditor } from "./TopologyStudio/TopologyEditor.js";
+import { SkillPipeline } from "./SkillLifecycle/SkillPipeline.js";
+import { ContextExplorer } from "./ContextExplorer/ContextExplorer.js";
+import { GovernanceView } from "./GovernanceView.js";
+import { AgentCatalog } from "./AgentCatalog.js";
+import { AgentBuilderWizard } from "./AgentBuilder/AgentBuilderWizard.js";
+import { ObservatoryView } from "./Observatory/ObservatoryView.js";
+import { RunDiffView } from "./RunDiff/RunDiffView.js";
 
 export type StudioAppProps = {
   readonly fold: StudioFold;
   readonly rows: readonly InternedRow[];
   readonly session: StudioSessionState;
-  readonly onSelectSurface: (surface: StudioSessionState["activeSurface"]) => void;
+  readonly onSelectSurface: (surface: StudioSurface) => void;
   readonly onSelectSeq: (seq: bigint) => void;
   readonly onResolveApproval?: (approvalId: string, decision: "approve" | "reject") => Promise<void>;
   readonly latestSeq?: bigint;
 };
+
+type NavTab = {
+  id: StudioSurface;
+  label: string;
+  icon: string;
+  shortcut: string;
+  desc: string;
+};
+
+const NAV_TABS: NavTab[] = [
+  { id: "coding", label: "Coding IDE", icon: "💻", shortcut: "⌘1", desc: "Interactive Claude Code-style coding agent & surgical diffs" },
+  { id: "builder", label: "Harness Builder", icon: "🛠️", shortcut: "⌘2", desc: "Visual agent composer & manifest generator (mhf.manifest/2)" },
+  { id: "workbench", label: "Kernel Cockpit", icon: "🎛️", shortcut: "⌘3", desc: "M-1 to M-8 milestone stepper & S0-S12 reference monitor" },
+  { id: "context", label: "Context & Cache", icon: "📑", shortcut: "⌘4", desc: "L1-L5 context stack, prompt prefix cache & compactor epochs" },
+  { id: "lineage", label: "Lineage DAG", icon: "🌳", shortcut: "⌘5", desc: "Recursive agent.spawn tree & capability attenuation" },
+  { id: "generality", label: "Generality Lab", icon: "🔬", shortcut: "⌘6", desc: "Multi-domain falsification benchmarks (Code vs Math vs Research)" },
+  { id: "experiments", label: "A/B Experiments", icon: "📊", shortcut: "⌘7", desc: "Factorial trial matrix & McNemar statistical gating (p < 0.05)" },
+  { id: "evolution", label: "Evolution Foundry", icon: "🧬", shortcut: "⌘8", desc: "DPO preference pairs (τ_win vs τ_lose) & skill card synthesizer" },
+  { id: "ledger", label: "WAL Ledger", icon: "🗄️", shortcut: "⌘9", desc: "Single-writer SQLite WAL stream & deterministic state reduction" },
+  { id: "theatre", label: "Turn Theatre", icon: "🎭", shortcut: "⌘0", desc: "Unary turn loop stream & event transcript" },
+  { id: "evidence", label: "Evidence Grid", icon: "🛡️", shortcut: "⌥E", desc: "Cryptographic proof assertions & execution spans" },
+  { id: "topology", label: "Topology Studio", icon: "🕸️", shortcut: "⌥T", desc: "Visual editor for mhf.topology/1 configurations" },
+  { id: "skill", label: "Skill Lifecycle", icon: "🎓", shortcut: "⌥S", desc: "Gated self-improvement pipeline" },
+  { id: "explorer", label: "Context Explorer", icon: "🔍", shortcut: "⌥C", desc: "Unified context and retrieved memory inspection" },
+  { id: "governance", label: "Governance View", icon: "⚖️", shortcut: "⌥G", desc: "Governance audit log and policy compliance checks" },
+  { id: "catalog", label: "Agent Catalog", icon: "📚", shortcut: "⌥A", desc: "Catalog of reusable agent skills and memory" },
+  { id: "observatory", label: "Observatory", icon: "🔭", shortcut: "⌥O", desc: "Real-time stream and metric telemetry" },
+  { id: "rundiff", label: "Run Diff", icon: "🔄", shortcut: "⌥R", desc: "Compare evaluation runs and benchmark deltas" },
+];
 
 export const StudioApp: React.FC<StudioAppProps> = ({
   fold,
@@ -45,15 +87,29 @@ export const StudioApp: React.FC<StudioAppProps> = ({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      const surfaceByKey: Record<string, StudioSessionState["activeSurface"]> = {
-        "1": "theatre", "2": "map", "3": "studio", "4": "effect", "5": "evidence", "6": "arena", "7": "ledger", "8": "watch",
+      const surfaceByKey: Record<string, StudioSurface> = {
+        "1": "coding",
+        "2": "builder",
+        "3": "workbench",
+        "4": "context",
+        "5": "lineage",
+        "6": "generality",
+        "7": "experiments",
+        "8": "evolution",
+        "9": "ledger",
+        "0": "theatre",
       };
       const surface = surfaceByKey[event.key];
-      if (surface) { event.preventDefault(); onSelectSurface(surface); }
+      if (surface) {
+        event.preventDefault();
+        onSelectSurface(surface);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onSelectSurface]);
+
+  const activeTabInfo = NAV_TABS.find((t) => t.id === session.activeSurface) || NAV_TABS[0];
 
   return (
     <div
@@ -70,10 +126,10 @@ export const StudioApp: React.FC<StudioAppProps> = ({
         overflow: "hidden",
       }}
     >
-      {/* Top Header / Run Bar */}
+      {/* Top Header / Breadcrumb & Status */}
       <header
         style={{
-          height: 48,
+          height: 44,
           background: "var(--bg-surface)",
           borderBottom: "1px solid var(--border-subtle)",
           display: "flex",
@@ -82,282 +138,237 @@ export const StudioApp: React.FC<StudioAppProps> = ({
           padding: "0 16px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
-              background: "linear-gradient(135deg, #00d2ff, #3b82f6)",
+              width: 22,
+              height: 22,
+              borderRadius: "var(--radius-sm)",
+              background: "var(--text-primary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontWeight: "bold",
-              fontSize: 12,
+              fontWeight: 900,
+              fontSize: 10,
               color: "#000",
             }}
           >
-            VG
+            Æ
           </div>
-          <span style={{ fontWeight: "bold", fontSize: 13, letterSpacing: "0.5px" }}>AETHER OBSERVATORY</span>
-          <span
-            style={{
-              fontSize: 11,
-              fontFamily: "var(--font-mono)",
-              background: "var(--bg-panel)",
-              padding: "2px 8px",
-              borderRadius: 4,
-              border: "1px solid var(--border-subtle)",
-              color: "var(--signal-flow)",
-            }}
-          >
-            {fold.runId || "run-code-default"}
+          <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: "0.5px" }}>AETHER OBSERVATORY</span>
+          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>/</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--signal-flow)" }}>
+            {activeTabInfo.icon} {activeTabInfo.label}
           </span>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>•</span>
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>
-            Seq: {fold.atSeq.toString()}
-          </span>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>•</span>
-          <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--signal-proof)" }}>
-            Cost: {formatMicrosToUsd(fold.totalCostMicros)}
+          <span className="badge-mono" style={{ color: "var(--text-muted)", fontSize: 9 }}>
+            {fold.runId || "run-live-01"}
           </span>
         </div>
 
-        {/* Surface Navigation Bar (⌘1–⌘9) */}
-        <nav style={{ display: "flex", gap: 4, background: "var(--bg-panel)", padding: 3, borderRadius: 6, border: "1px solid var(--border-subtle)" }}>
-          <button
-            onClick={() => onSelectSurface("theatre")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "theatre" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "theatre" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘1 Theatre
-          </button>
-          <button
-            onClick={() => onSelectSurface("map")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "map" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "map" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘2 Map
-          </button>
-          <button
-            onClick={() => onSelectSurface("studio")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "studio" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "studio" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘3 Studio
-          </button>
-          <button
-            onClick={() => onSelectSurface("effect")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "effect" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "effect" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘4 Effect
-          </button>
-          <button
-            onClick={() => onSelectSurface("evidence")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "evidence" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "evidence" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘5 Evidence
-          </button>
-          <button
-            onClick={() => onSelectSurface("arena")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "arena" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "arena" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘6 Arena
-          </button>
-          <button
-            onClick={() => onSelectSurface("ledger")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "ledger" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "ledger" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘7 Ledger
-          </button>
-          <button
-            onClick={() => onSelectSurface("watch")}
-            style={{
-              padding: "4px 8px",
-              background: session.activeSurface === "watch" ? "var(--bg-card)" : "transparent",
-              color: session.activeSurface === "watch" ? "var(--signal-flow)" : "var(--text-secondary)",
-              border: "none",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-          >
-            ⌘8 Watch
-          </button>
-        </nav>
+        {/* 6D Economic Tensor Telemetry */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="font-mono" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
+            Seq: <strong style={{ color: "var(--text-primary)" }}>{fold.atSeq.toString()}</strong>
+          </div>
+          <span style={{ fontSize: 10, color: "var(--text-faint)" }}>•</span>
+          <div className="font-mono" style={{ fontSize: 10, color: "var(--signal-proof)" }}>
+            USD: <strong>{formatMicrosToUsd(fold.totalCostMicros)}</strong>
+          </div>
+          <span style={{ fontSize: 10, color: "var(--text-faint)" }}>•</span>
+          <div className="font-mono" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
+            Leases: <strong style={{ color: "var(--signal-flow)" }}>{fold.leases.size} active</strong>
+          </div>
+        </div>
       </header>
 
-      {/* Main Surface Viewport */}
-      <main style={{ flex: 1, display: "flex", overflow: "hidden", padding: 16 }}>
-        {session.activeSurface === "theatre" && (
-          <div style={{ flex: 1, display: "grid", gridTemplateColumns: "minmax(210px, 0.8fr) minmax(320px, 2fr) minmax(260px, 1fr)", gap: 16, overflow: "hidden" }}>
-            {/* Left: Turn Spine */}
-            <div style={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ fontSize: 11, fontWeight: "bold", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                Turn Spine (Unary Loop I-11)
-              </div>
-              <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
-                {fold.turns.length === 0 ? <div style={{ padding: 10, color: "var(--text-muted)", fontSize: 12 }}>Turn telemetry unavailable in this event stream.</div> : fold.turns.map((turn) => (
-                  <div key={turn.turnNumber} className="reveal" style={{ padding: 8, background: "var(--bg-card)", borderRadius: 4, border: "1px solid var(--border-subtle)", fontSize: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ fontWeight: "bold", color: "var(--signal-flow)" }}>Turn {turn.turnNumber} ({turn.status})</span><span>{turn.invocations.length} invocations</span></div>
-                    <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4 }}>Cost: {formatMicrosToUsd(turn.totalCostMicros)} • Tokens: {turn.totalTokens}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* Main Body: Far-Left Icon Rail + Focused Viewport */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        {/* Far-Left Vertical Icon Navigation Rail */}
+        <nav
+          style={{
+            width: 56,
+            background: "var(--bg-surface)",
+            borderRight: "1px solid var(--border-subtle)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "8px 0",
+            gap: 6,
+            zIndex: 10,
+          }}
+        >
+          {NAV_TABS.map((tab) => {
+            const isActive = session.activeSurface === tab.id;
+            return (
+              <button
+                key={tab.id}
+                title={`${tab.label} (${tab.shortcut})\n${tab.desc}`}
+                onClick={() => onSelectSurface(tab.id)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "var(--radius-md)",
+                  border: isActive ? "1px solid var(--signal-flow)" : "1px solid transparent",
+                  background: isActive ? "var(--bg-card)" : "transparent",
+                  color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                  fontSize: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  position: "relative",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>{tab.icon}</span>
+                <span style={{ fontSize: 7, fontWeight: 700, color: isActive ? "var(--signal-flow)" : "var(--text-faint)", marginTop: -2 }}>
+                  {tab.shortcut}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
-            {/* Center: Live Transcript & Approvals */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}>
-              <ApprovalInterceptor
-                pendingApproval={fold.pendingApproval}
-                onResolve={onResolveApproval}
-              />
+        {/* Focused Single-Purpose Viewport (Square Canvas) */}
+        <main style={{ flex: 1, display: "flex", overflow: "hidden", padding: 14 }}>
+          {session.activeSurface === "coding" && (
+            <CodingAgentWorkbench fold={fold} onResolveApproval={onResolveApproval} />
+          )}
 
-              <div style={{ flex: 1, background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: 12, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: "bold", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                  Transcript ({rows.length} Events)
+          {session.activeSurface === "builder" && <VisualHarnessBuilder fold={fold} />}
+
+          {session.activeSurface === "workbench" && (
+            <MetaDevelopmentWorkbench
+              fold={fold}
+              session={session}
+              onSelectSurface={onSelectSurface}
+              onResolveApproval={onResolveApproval}
+            />
+          )}
+
+          {session.activeSurface === "context" && <ContextCompactionView fold={fold} />}
+
+          {session.activeSurface === "lineage" && <LineageGraphView fold={fold} />}
+
+          {session.activeSurface === "generality" && <GeneralityLabView fold={fold} />}
+
+          {session.activeSurface === "experiments" && <FactorialExperimentView fold={fold} />}
+
+          {session.activeSurface === "evolution" && <EvolutionFoundryView fold={fold} />}
+
+          {session.activeSurface === "ledger" && (
+            <LedgerExplorerView rows={rows} filterQuery={filterQuery} onFilterChange={setFilterQuery} />
+          )}
+
+          {session.activeSurface === "theatre" && (
+            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "260px 1fr 340px", gap: 12, overflow: "hidden" }}>
+              {/* Turn Spine */}
+              <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                  Turn Spine (Unary Loop)
                 </div>
-
-                {rows.map((r) => {
-                  const env = r.envelope;
-                  const kind = String(env.payload?.kind ?? "unknown");
-                  return (
-                    <div
-                      key={r.index}
-                      onClick={() => {
-                        onSelectSeq(r.seq);
-                        if (env.payload?.descriptor) {
-                          setSelectedEffectDesc(String(env.payload.descriptor));
-                        }
-                      }}
-                      style={{
-                        padding: "6px 10px",
-                        background: r.seq === session.selectedSeq ? "var(--bg-card-hover)" : "var(--bg-card)",
-                        borderRadius: 4,
-                        border: "1px solid var(--border-subtle)",
-                        cursor: "pointer",
-                        fontSize: 12,
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)" }}>
-                        <span style={{ fontFamily: "var(--font-mono)" }}>seq {r.seq.toString()}</span>
-                        <span>{new Date(r.occurredAtMs).toISOString().slice(11, 23)}</span>
-                      </div>
-                      <div style={{ fontWeight: "bold", color: "var(--signal-flow)", marginTop: 2 }}>{kind}</div>
-                      {typeof env.payload?.text === "string" && (
-                        <div style={{ color: "var(--text-secondary)", fontSize: 11, marginTop: 4 }}>
-                          {env.payload.text}
+                <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                  {fold.turns.length === 0 ? (
+                    <div style={{ padding: 10, color: "var(--text-muted)", fontSize: 11 }}>Turn telemetry streaming...</div>
+                  ) : (
+                    fold.turns.map((turn) => (
+                      <div key={turn.turnNumber} style={{ padding: 8, background: "var(--bg-card)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)", fontSize: 11 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ fontWeight: 700, color: "var(--signal-flow)" }}>Turn {turn.turnNumber}</span>
+                          <span style={{ color: "var(--text-secondary)" }}>{turn.invocations.length} inv</span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+                          Cost: {formatMicrosToUsd(turn.totalCostMicros)} • {turn.totalTokens} tok
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Event Transcript & Approvals */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}>
+                <ApprovalInterceptor pendingApproval={fold.pendingApproval} onResolve={onResolveApproval} />
+
+                <div style={{ flex: 1, background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", padding: 12, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                    Causal Event Log ({rows.length} Events)
+                  </div>
+
+                  {rows.map((r) => {
+                    const env = r.envelope;
+                    const kind = String(env.payload?.kind ?? "unknown");
+                    return (
+                      <div
+                        key={r.index}
+                        onClick={() => {
+                          onSelectSeq(r.seq);
+                          if (env.payload?.descriptor) {
+                            setSelectedEffectDesc(String(env.payload.descriptor));
+                          }
+                        }}
+                        style={{
+                          padding: "6px 8px",
+                          background: r.seq === session.selectedSeq ? "var(--bg-card-hover)" : "var(--bg-panel)",
+                          borderRadius: "var(--radius-sm)",
+                          border: "1px solid var(--border-subtle)",
+                          cursor: "pointer",
+                          fontSize: 11,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "var(--text-muted)" }}>
+                          <span className="font-mono">seq {r.seq.toString()}</span>
+                          <span>{new Date(r.occurredAtMs).toISOString().slice(11, 19)}</span>
+                        </div>
+                        <div style={{ fontWeight: 700, color: "var(--signal-flow)", marginTop: 2 }}>{kind}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Effect Inspector */}
+              <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", overflowY: "auto" }}>
+                <EffectInspector effect={activeEffect} />
               </div>
             </div>
+          )}
 
-            {/* Right: Effect Inspector */}
-            <div style={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: 6, overflowY: "auto" }}>
-              <EffectInspector effect={activeEffect} />
+          {session.activeSurface === "evidence" && (
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
+              <EvidenceGrid rows={fold.evidenceRows} />
+              <TrajectoryWaterfall spans={fold.spans} selectedSpanId={selectedSpanId} onSelectSpan={setSelectedSpanId} />
             </div>
-          </div>
-        )}
+          )}
 
-        {session.activeSurface === "map" && <SubstrateMapView fold={fold} />}
-        {session.activeSurface === "studio" && <CompositionStudioView fold={fold} />}
-        {session.activeSurface === "effect" && (
-          <div style={{ flex: 1, background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: 16 }}>
-            <EffectInspector effect={activeEffect} />
-          </div>
-        )}
-        {session.activeSurface === "evidence" && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
-            <EvidenceGrid rows={fold.evidenceRows} />
-            <TrajectoryWaterfall spans={fold.spans} selectedSpanId={selectedSpanId} onSelectSpan={setSelectedSpanId} />
-          </div>
-        )}
-        {session.activeSurface === "arena" && <ArenaView fold={fold} />}
-        {session.activeSurface === "ledger" && (
-          <LedgerExplorerView rows={rows} filterQuery={filterQuery} onFilterChange={setFilterQuery} />
-        )}
-        {session.activeSurface === "watch" && <AutonomyWatchView fold={fold} />}
-      </main>
+          {session.activeSurface === "map" && <SubstrateMapView fold={fold} />}
+          
+          {session.activeSurface === "topology" && <TopologyEditor fold={fold} />}
+          {session.activeSurface === "skill" && <SkillPipeline fold={fold} />}
+          {session.activeSurface === "explorer" && <ContextExplorer fold={fold} />}
+          {session.activeSurface === "governance" && <GovernanceView fold={fold} />}
+          {session.activeSurface === "catalog" && <AgentCatalog />}
+          {session.activeSurface === "observatory" && <ObservatoryView fold={fold} />}
+          {session.activeSurface === "rundiff" && <RunDiffView baselineId="base" treatmentId="treat" />}
+        </main>
+      </div>
 
-      {/* Bottom Ledger Tape (Scrubbable Seq Axis) */}
+      {/* Bottom Causal WAL Scrubber Tape */}
       <footer
         style={{
-          height: 36,
+          height: 34,
           background: "var(--bg-surface)",
           borderTop: "1px solid var(--border-subtle)",
           display: "flex",
           alignItems: "center",
           padding: "0 16px",
-          gap: 16,
-          fontSize: 11,
+          gap: 12,
+          fontSize: 10,
           fontFamily: "var(--font-mono)",
         }}
       >
-        <span style={{ color: "var(--text-muted)" }}>LEDGER TAPE</span>
+        <span style={{ color: "var(--text-muted)" }}>CAUSAL WAL TAPE</span>
         <input
           type="range"
           min="1"
@@ -366,8 +377,8 @@ export const StudioApp: React.FC<StudioAppProps> = ({
           onChange={(e) => onSelectSeq(BigInt(e.target.value))}
           style={{ flex: 1, cursor: "pointer" }}
         />
-        <span style={{ color: "var(--signal-flow)" }}>
-          {session.selectedSeq === 0n || session.selectedSeq >= (latestSeq ?? fold.atSeq) ? "● LIVE" : `⧗ seq ${session.selectedSeq}`}
+        <span style={{ color: "var(--signal-flow)", fontWeight: 700 }}>
+          {session.selectedSeq === 0n || session.selectedSeq >= (latestSeq ?? fold.atSeq) ? "● LIVE HEAD" : `⧗ seq ${session.selectedSeq}`}
         </span>
       </footer>
     </div>

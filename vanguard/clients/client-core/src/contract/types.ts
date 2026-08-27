@@ -1,15 +1,26 @@
 export type ClientContractVersion = "0.1";
 export type StreamSource = "mock" | "replay" | "live";
 
+/**
+ * Canonical vg.4 wire error vocabulary (integration_plan.md §4.5), shared
+ * byte-for-byte with `schemas/v4/runtime-service.schema.json#/$defs/ErrorCode`
+ * and Python's `runtime/service/contract.py:ERROR_CODES`. `transport_interrupted`
+ * is the one client-only addition: a synthetic code for a dropped connection,
+ * never sent by the daemon itself.
+ */
 export type ClientFailure = {
   code:
     | "invalid_request"
+    | "unauthenticated"
+    | "permission_denied"
     | "not_found"
     | "conflict"
+    | "incompatible_version"
+    | "frame_too_large"
+    | "rate_limited"
     | "not_available"
-    | "permission_denied"
-    | "transport_interrupted"
-    | "incompatible_version";
+    | "internal"
+    | "transport_interrupted";
   message: string;
   retryable: boolean;
   details?: Readonly<Record<string, unknown>>;

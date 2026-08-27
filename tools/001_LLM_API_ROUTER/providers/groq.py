@@ -29,7 +29,7 @@ MODEL_PRICING_MICROS = {
     # Fast & cheap model
     "llama-3.1-8b-instant": {"prompt": 5, "completion": 8},
     # Powerful model with automatic prompt caching (50% discount on cached tokens)
-    "openai/gpt-oss-120b": {"prompt": 100, "completion": 300},
+    "deepseek/deepseek-v4-flash-0731": {"prompt": 100, "completion": 300},
 }
 
 

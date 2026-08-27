@@ -286,6 +286,7 @@ class Kernel:
                              "grantDigest": digest_of(grant.payload()) if grant else None,
                              "leaseId": lease.lease_id,
                              "idempotencyKey": request.idempotency_key,
+                             "resource": dict(request.resource),
                              "sinkClass": self._sinks.sink_class(request.action).value})
                 try:
                     self._ledger.append_intent(intent)
@@ -368,9 +369,18 @@ class Kernel:
             self._emit(emitted, request, "EffectReconciled", "unknown",
                        {"descriptorDigest": descriptor, "detail": detail,
                         "occurrence": Occurrence.UNDETERMINABLE.value})
+        elif failure is not FailurePath.OK:
+            # Every started effect must have a determinate terminal settlement.
+            # In particular, adapter validation failures are not successful
+            # effects and must never be represented as EffectCompleted.
+            self._emit(emitted, request, "EffectFailed", failure.name.lower(),
+                       {"descriptorDigest": descriptor,
+                        "resultDigest": outcome.result_digest if outcome else None,
+                        "settlement": dict(settlement), "detail": detail},
+                       alertable=failure in ALERTABLE)
         else:
             self._emit(emitted, request, "EffectCompleted",
-                       "ok" if failure is FailurePath.OK else failure.name.lower(),
+                       "ok",
                        {"descriptorDigest": descriptor,
                         "resultDigest": outcome.result_digest if outcome else None,
                         "settlement": dict(settlement), "detail": detail})

@@ -8,6 +8,8 @@ export * from "./adapters/transport.js";
 export * from "./adapters/live.js";
 export * from "./adapters/replay.js";
 export * from "./adapters/scenario.js";
+export * from "./adapters/http.js";
+export * from "./adapters/fake.js";
 
 // Application Reducers & Use Cases
 export * from "./application/run-view.js";
@@ -24,3 +26,5 @@ export * from "./application/subscribe-run.js";
 export * from "./application/resume.js";
 export * from "./application/why.js";
 export * from "./application/attach.js";
+export * from "./application/projection-model.js";
+export * from "./application/graph-model.js";

@@ -10,19 +10,57 @@ from dataclasses import replace
 from typing import Any, Mapping
 
 from ..domain.canonicalisation.digest import digest_of
-from ..domain.ledger.events import EventEnvelope
+from ..domain.ledger.events import DEPRECATED_KINDS, EventEnvelope, WRITABLE_KINDS
 from ..kernel.model import Event
 from ..ports.event_store import EventRange, EventStorePort
 from .determinism import SystemClock, SystemRandom, event_id
 
 __all__ = [
+    "DeprecatedKindError",
+    "EVENT_SCHEMA_VERSION",
     "LedgerBridge",
     "LedgerEmitter",
     "RoleScopedEmitter",
     "WriterAuthorityError",
     "WRITER_ROLES",
     "PRIVILEGED_KIND_OWNERS",
+    "ROLE_AUTHORITY_SOURCES",
 ]
+
+#: `ADR-0098 Decision 1`. The sole production write version after cutover.
+#: `/1` stays readable forever; nothing writes it except an explicit
+#: pre-baseline rollback via `writer_version`.
+EVENT_SCHEMA_VERSION = "mhf.event/2"
+
+#: `ADR-0098 Decision 2`. What each writer role may legitimately claim as its
+#: authority basis. This is the second half of writer authority:
+#: `PRIVILEGED_KIND_OWNERS` says which kinds a role may write, and this says
+#: what it may claim about *why* -- so an orchestrator cannot append an event
+#: asserting capability authority it never held.
+ROLE_AUTHORITY_SOURCES: Mapping[str, str] = {
+    "kernel": "kernel-capability",
+    "session": "kernel-capability",
+    "scheduler": "scheduler-policy",
+    "registry": "registry-policy",
+    "evaluator_gateway": "evaluator-signature",
+    "approval": "human-approval",
+    "recovery": "recovery-policy",
+    "orchestrator": "orchestrator-policy",
+    # ADR-0080/M-6. `PRIVILEGED_KIND_OWNERS` has named `spawn_adapter` the sole
+    # writer of `ChildSpawned`/`ChildReturned` since ADR-0090, but the role was
+    # absent from `WRITER_ROLES` -- so the only legal writer of those kinds was
+    # a role the emitter refused to construct. Nothing caught it because
+    # `agent.spawn` was inert.
+    "spawn_adapter": "delegation-policy",
+}
+
+#: Roles that may bind a `capabilityGrant`. An orchestrator that named one
+#: would be claiming the Kernel's authority for its own append.
+_CAPABILITY_ROLES = frozenset({"kernel", "session"})
+
+#: Roles that may bind an `approvalReference`.
+_APPROVAL_ROLES = frozenset({"approval", "kernel", "session"})
+
 
 LINEAGE_FIELDS = (
     "project_id",
@@ -74,6 +112,7 @@ WRITER_ROLES = frozenset({
     "recovery",
     "orchestrator",
     "session",  # kernel ∪ scheduler: the HarnessSession composition object
+    "spawn_adapter",  # ADR-0080/M-6 mediated delegation
 })
 
 _SESSION_ROLES = frozenset({"kernel", "scheduler", "session"})
@@ -81,6 +120,15 @@ _SESSION_ROLES = frozenset({"kernel", "scheduler", "session"})
 
 class WriterAuthorityError(PermissionError):
     """A role-scoped facade refused a kind it does not own."""
+
+
+class DeprecatedKindError(WriterAuthorityError):
+    """A deprecated historical kind was offered for a new write.
+
+    `ADR-0098 Decision 4`: these kinds stay readable forever and reject every
+    new write. Reintroduction takes a full kind package, not an exception
+    here.
+    """
 
 
 class LedgerEmitter:
@@ -105,6 +153,8 @@ class LedgerEmitter:
         parent_episode_id: str | None = None,
         role: str = "session",
         anchor: EventEnvelope | None = None,
+        writer_version: str = EVENT_SCHEMA_VERSION,
+        policy_version: str = "1",
     ) -> None:
         if not project_id:
             # 1.2-C: config-declared, never workspace-derived (see
@@ -126,9 +176,20 @@ class LedgerEmitter:
         self._parent_episode_id = parent_episode_id
         self._harness_digest = harness_digest
         self._role = role
+        if writer_version not in ("mhf.event/1", "mhf.event/2"):
+            raise ValueError(f"unknown event writer version {writer_version!r}")
+        # `ADR-0098 Decision 7`: pre-baseline rollback is an explicit switch,
+        # never an inference from what happens to be in the store. Production
+        # writes `/2`; only a caller that says so writes `/1`.
+        self._writer_version = writer_version
+        self._policy_version = policy_version
         if anchor is not None:
             self._seq = int(anchor.seq) + 1
-            if anchor.schema_version == "mhf.event/1":
+            if anchor.schema_version in ("mhf.event/1", "mhf.event/2"):
+                # `ADR-0098 Decision 1`: `prev_digest` continuity is preserved
+                # across mixed chains. Dropping the link at the version
+                # boundary would fork the hash chain exactly where the
+                # migration happened.
                 self._prev = anchor.content_digest or anchor.digest()
             else:
                 self._prev = None
@@ -143,6 +204,9 @@ class LedgerEmitter:
 
     def registry(self) -> RoleScopedEmitter:
         return RoleScopedEmitter(self, "registry")
+
+    def spawn_adapter(self) -> RoleScopedEmitter:
+        return RoleScopedEmitter(self, "spawn_adapter")
 
     def evaluator_gateway(self) -> RoleScopedEmitter:
         return RoleScopedEmitter(self, "evaluator_gateway")
@@ -213,6 +277,10 @@ class LedgerEmitter:
         self.events.append(event)
 
     def _assert_writer(self, writer: str, kind: str) -> None:
+        if kind in DEPRECATED_KINDS:
+            raise DeprecatedKindError(
+                f"{kind!r} is deprecated and readable only; new writes are "
+                "rejected (ADR-0098 Decision 4)")
         owners = PRIVILEGED_KIND_OWNERS.get(kind)
         if owners is None:
             if writer == "orchestrator":
@@ -223,6 +291,31 @@ class LedgerEmitter:
             raise WriterAuthorityError(
                 f"role {writer!r} cannot append privileged kind {kind!r}"
             )
+
+    def _authority_for(self, writer: str, event: Event) -> dict[str, Any]:
+        """Authority provenance derived from the writer role, not the caller.
+
+        `ADR-0098 Decision 2`. The values come from the role actually doing
+        the append, so a payload cannot talk the envelope into claiming an
+        authority basis the writer never held. A role outside the map gets no
+        capability or approval binding rather than a plausible-looking
+        default: `null` means "inapplicable", and inventing one would be the
+        forgery this check exists to prevent.
+        """
+        payload = dict(event.payload)
+        fields: dict[str, Any] = {
+            "authority_source": ROLE_AUTHORITY_SOURCES.get(writer, "unattributed"),
+            "policy_version": self._policy_version,
+            "approval_reference": None,
+            "capability_grant": None,
+        }
+        grant = payload.get("grantId") or payload.get("grant_ref") or payload.get("grantRef")
+        if writer in _CAPABILITY_ROLES and isinstance(grant, str) and grant:
+            fields["capability_grant"] = grant
+        approval = payload.get("approvalId") or payload.get("approvalReference")
+        if writer in _APPROVAL_ROLES and isinstance(approval, str) and approval:
+            fields["approval_reference"] = approval
+        return fields
 
     def _load_chain(self, project_id: str) -> tuple[int, str | None]:
         read = self.store.read(EventRange(project_id=project_id))
@@ -235,7 +328,7 @@ class LedgerEmitter:
         except (TypeError, ValueError):
             seq = 0
         prev = None
-        if last.schema_version == "mhf.event/1":
+        if last.schema_version in ("mhf.event/1", "mhf.event/2"):
             prev = last.content_digest or last.digest()
         return seq + 1, prev
 
@@ -257,8 +350,12 @@ class LedgerEmitter:
         ident = event_id(clock=self._clock, random=self._random)
         payload = {"kind": event.kind, "reason": event.reason,
                    "alertable": bool(event.alertable), **dict(event.payload)}
+        authority = (
+            self._authority_for(writer, event)
+            if self._writer_version == "mhf.event/2" else {}
+        )
         envelope = EventEnvelope(
-            schema_version="mhf.event/1",
+            schema_version=self._writer_version,
             event_id=ident,
             scope="episode",
             seq=str(seq),
@@ -289,6 +386,7 @@ class LedgerEmitter:
             alertable=bool(event.alertable),
             mhf_kind=event.kind,
             mhf_branch_id="main",
+            **authority,
         )
         unsigned = envelope.to_mhf_dict(include_digest=False)
         digest = digest_of(unsigned)

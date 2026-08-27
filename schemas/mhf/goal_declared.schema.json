@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/goal_declared.schema.json",
+  "title": "GoalDeclaredPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["goalDigest"],
+  "properties": {
+    "goalDigest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "goalArtifact": {"type": ["string", "null"], "pattern": "^(sha256:[0-9a-f]{64})?$"},
+    "parentGoalDigest": {"type": ["string", "null"], "pattern": "^(sha256:[0-9a-f]{64})?$"}
+  }
+}

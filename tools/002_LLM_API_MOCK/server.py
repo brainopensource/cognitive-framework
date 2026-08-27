@@ -40,13 +40,13 @@ TIER_ALIASES: dict[str, int] = {
     "openrouter/free": 2,
     "tier-2": 2,
     "mock-tier-2": 2,
-    "deepseek/deepseek-chat": 3,
+    "deepseek/deepseek-v4-flash-0731": 3,
     "google/gemini-2.0-flash-001": 3,
     "qwen/qwen-2.5-72b-instruct": 3,
     "tier-3": 3,
     "mock-tier-3": 3,
-    "anthropic/claude-3.5-sonnet": 4,
-    "openai/gpt-4o": 4,
+    "deepseek/deepseek-v4-pro": 4,
+    "deepseek/deepseek-v4-flash-0731": 4,
     "tier-4": 4,
     "mock-tier-4": 4,
 }
@@ -290,6 +290,8 @@ class LamServerHandler(BaseHTTPRequestHandler):
         if not model_name.startswith("lam/"):
             if model_name in self.engine._by_id:
                 body["model"] = f"lam/{model_name}"
+            elif model_name.startswith(("iq-", "iq_", "tier-", "tier_")):
+                body["model"] = f"lam/{model_name}"
             elif model_name == "" or model_name.startswith("lam"):
                 # Empty or ambiguous lam prefix: use default
                 body["model"] = "lam/t1-calculator"
@@ -302,9 +304,28 @@ class LamServerHandler(BaseHTTPRequestHandler):
                 )
                 return
 
+        # Extract capability IQ level (0..5) from header or payload
+        cap_tier: Optional[int] = None
+        hdr_iq = self.headers.get("X-Mock-IQ") or self.headers.get("X-Mock-Tier")
+        if hdr_iq is not None:
+            try:
+                cap_tier = int(hdr_iq)
+            except ValueError:
+                pass
+        if cap_tier is None and "iq" in body:
+            try:
+                cap_tier = int(body["iq"])
+            except (ValueError, TypeError):
+                pass
+        if cap_tier is None and "capability_tier" in body:
+            try:
+                cap_tier = int(body["capability_tier"])
+            except (ValueError, TypeError):
+                pass
+
         start_t = time.monotonic()
         try:
-            completion = self.engine.complete(body)
+            completion = self.engine.complete(body, capability_tier=cap_tier)
         except KeyError as exc:
             self._send_json(404, {"error": {"message": f"unknown lam scenario: {exc}", "type": "invalid_request_error"}})
             return
@@ -553,4 +574,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

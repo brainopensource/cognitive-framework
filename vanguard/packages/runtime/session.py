@@ -8,6 +8,7 @@ compose a harness and it does not write envelopes except through
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -20,6 +21,10 @@ from ..agency.context import (
     Fragment,
 )
 from ..agency.manifests.discovery import WorkspaceDiscovery
+from ..agency.provenance import NullProvenanceSink, ProvenanceSink
+from ..domain.canonicalisation.digest import digest_of
+from ..domain.ledger.agent_view import AgentView, fold_agent_view
+from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel import (
@@ -38,19 +43,28 @@ from ..kernel import (
     StandardPolicy,
     Span,
 )
+from ..ports.blob_store import BlobStorePort
+from ..ports.child_runtime import ChildRuntimePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
-from ..ports.event_store import EventRange, EventStorePort
+from ..ports.event_store import EventRange, EventStorePort, Result
 from ..ports.index import IndexPort
+from ..ports.meta_controller import MetaController
+from ..ports.memory import MemoryBinding, require_retrieval_provenance
 from .compose import (
     Harness,
     Receipt,
     RunResult,
     TaskContext,
 )
+from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
+from .budget_view import ADDITIVE_DIMENSIONS, remaining_budget
+from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
+from .meta_controller import ControllerProposal, guarded_consult
+from .provenance import RuntimeProvenanceSink, cache_participation
 from .telemetry import RunTelemetry
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
 from .governance.approvals import (
@@ -73,6 +87,78 @@ from .wiring import (
     _span_for,
 )
 
+
+_CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
+    "usd_micros": "usd_micros",
+    "usdMicros": "usd_micros",
+    "millis": "millis",
+    "tokens": "tokens",
+    "bytes": "bytes",
+}
+
+
+def _memory_now(clock: Any) -> datetime:
+    value = clock.now() if hasattr(clock, "now") else clock
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc)
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+        except ValueError as exc:
+            raise PermissionError("memory authorization clock is invalid") from exc
+    raise PermissionError("memory authorization clock is unavailable")
+
+
+def _lower_controller_directive(
+    proposal: ControllerProposal,
+) -> Mapping[str, Any] | None:
+    """Map direct strategy decisions onto existing episode proposals.
+
+    Advisory directives return ``None`` and enter L5 before the provider is
+    called. ``conclude`` follows the ordinary terminal proposal path, while
+    ``delegate`` becomes the already-mediated M-6 effect. This function grants
+    no authority and does not inspect capabilities; the Kernel still decides.
+    """
+    if proposal.kind == "conclude":
+        return {"kind": "finish", "note": str(proposal.payload["reason"])}
+    if proposal.kind != "delegate":
+        return None
+
+    scope = dict(proposal.payload.get("scope") or {})
+    resource = scope.pop(
+        "resource", {"kind": "generic", "uriPattern": "agent://spawn/*"})
+    budget: dict[str, int] = {}
+    for source, target in _CONTROLLER_BUDGET_KEYS.items():
+        amount = scope.pop(source, None)
+        if isinstance(amount, int) and not isinstance(amount, bool) and amount >= 0:
+            budget[target] = amount
+    args: dict[str, Any] = {
+        "brief": str(proposal.payload["brief"]),
+        **scope,
+    }
+    if budget:
+        args["budget"] = budget
+    return {
+        "kind": "effect",
+        "action": "agent.spawn",
+        "resource": dict(resource) if isinstance(resource, Mapping) else {},
+        "args": args,
+        "reservation": budget,
+        "note": str(proposal.payload["reason"]),
+    }
+
+
+def _controller_trigger(proposal: ControllerProposal) -> str:
+    """Bind the closed StrategyChanged payload to confidence by digest."""
+    refs = ",".join(str(item) for item in proposal.attribution["confidenceRefs"])
+    return (
+        f"directive={proposal.kind};"
+        f"reason={proposal.attribution['reasonDigest']};"
+        f"input={proposal.attribution['inputDigest']};"
+        f"confidence={refs}"
+    )
+
+
 class _LayeredOperator:
     """Compiles L1–L5 for each turn and hands the bundle to the real model.
 
@@ -85,13 +171,26 @@ class _LayeredOperator:
 
     def __init__(self, model: Any, compiler: ContextCompiler, *,
                  recorder: CompetencePriorRecorder | None = None,
-                 task: TaskContext) -> None:
+                 task: TaskContext,
+                 clock: Any,
+                 artifacts: ArtifactWriter | None = None,
+                 provenance: ProvenanceSink | None = None,
+                 meta_controller: Callable[[], ControllerProposal | None] | None = None,
+                 memory: MemoryBinding | None = None) -> None:
         self._model = model
         self._compiler = compiler
         self._recorder = recorder
         self._task = task
+        self._clock = clock
         self._dialogue: list[Fragment] = []
         self.contexts: list[Mapping[str, Any]] = []
+        # `None` is the legacy no-capture composition (`blobs=None`). It is a
+        # first-class state, not a degraded one: a session with no artifact
+        # store captures nothing and therefore claims nothing.
+        self._artifacts = artifacts
+        self._provenance = provenance
+        self._meta_controller = meta_controller
+        self._memory = memory
 
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
@@ -101,8 +200,32 @@ class _LayeredOperator:
 
     def propose(self, view: Mapping[str, Any], tools: Sequence[Mapping[str, Any]],
                 sampling: Mapping[str, Any]) -> Any:
+        directive = self._meta_controller() if self._meta_controller is not None else None
+        if directive is not None:
+            lowered = _lower_controller_directive(directive)
+            if lowered is not None:
+                # Keep turns aligned without claiming the policy decision was
+                # a provider invocation. Trajectory assembly recognises this
+                # marker and reports an empty invocation list and zero cost.
+                self.contexts.append({
+                    "proposal_source": "meta_controller",
+                    "controller_id": directive.attribution["controllerId"],
+                    "directive_kind": directive.kind,
+                    "controller_input_digest": directive.attribution["inputDigest"],
+                    "confidence_refs": tuple(directive.attribution["confidenceRefs"]),
+                })
+                return Result.success(dict(lowered))
+            self.note(
+                label=f"strategy-{directive.kind}-{len(self.contexts)}",
+                source=f"meta-controller:{directive.attribution['controllerId']}",
+                text=(f"Strategy directive: {directive.kind}. "
+                      f"Reason: {directive.payload['reason']}"),
+            )
+        memory_fragments, memory_digest = self._memory_fragments()
         compiled: CompiledContext = self._compiler.compile(
-            brief=self._task.brief, dialogue=tuple(self._dialogue))
+            brief=self._task.brief,
+            dialogue=tuple(self._dialogue) + memory_fragments,
+        )
         if self._recorder is not None and self._task.competence_prior is not None:
             # Before turn 1 reaches the provider (`S5-SA-002`). The recorder
             # refuses a second prior for the same episode, so a later segment
@@ -114,6 +237,8 @@ class _LayeredOperator:
         # The provider contract is `messages` / digests / layers. The engine's
         # flat view is compiled into L5; it is not a second wire dialect.
         bundle = dict(compiled.bundle())
+        if memory_digest:
+            bundle["memoryRetrievalDigest"] = memory_digest
         digest = view.get("lastReceiptDigest")
         if digest:
             token = (
@@ -125,8 +250,53 @@ class _LayeredOperator:
             bundle["messages"] = tuple(messages)
             bundle["lastReceiptDigest"] = digest
         self.contexts.append(bundle)
+        # 0-based, matching `turn`/`turnIndex` in the frozen cross-lane
+        # fixture and in `mhf.trajectory/1`'s existing turn numbering.
+        turn = len(self.contexts) - 1
+
+        # Context/compaction provenance, then the exact provider input. All
+        # of it before the call, because after the call the only honest thing
+        # to say about a prompt is what it *was*.
+        self._record_selection(compiled, turn)
+        input_ref = self._capture(
+            "prompt", bundle, turn=turn,
+            labels={"promptDigest": compiled.digest,
+                    "prefixDigest": compiled.prefix_digest})
+
         answer = self._model.propose(bundle, tools, sampling)
+
+        # `ADR-0096 §14.1`: the raw structured response, immediately on
+        # return and before anything below reinterprets it. The `usage` and
+        # `resolved_model` folding further down rewrites what this run
+        # *believes* about the call; capturing after it would record the
+        # belief rather than the response.
         value = getattr(answer, "value", None)
+        raw = value if value is not None else answer
+        output_ref = self._capture("model_output", raw, turn=turn)
+        # The trajectory `/2` writer reads per-turn exact-I/O references off
+        # the context record (`trajectory.py`), so the refs are stamped here
+        # rather than rediscovered later by matching digests back to turns.
+        if input_ref is not None or output_ref is not None:
+            stamped = dict(self.contexts[-1])
+            if input_ref is not None and input_ref.digest:
+                stamped["model_input_ref"] = input_ref.digest
+            if output_ref is not None and output_ref.digest:
+                stamped["model_output_ref"] = output_ref.digest
+            self.contexts[-1] = stamped
+
+        if self._provenance is not None and hasattr(self._provenance, "record_model_io"):
+            policy = (self._artifacts.policy.identity()
+                      if self._artifacts is not None else {})
+            self._provenance.record_model_io(
+                route=_route_of(self._model), input_ref=input_ref,
+                output_ref=output_ref, capture_policy=policy, turn=turn)
+            # Only when the provider itself reported cache participation. A
+            # live call that touched no cache emits nothing (`14.1` capture is
+            # about what happened, not about what the composition could do).
+            self._provenance.record_cache(
+                reported=cache_participation(value), turn=turn,
+                source_digest=output_ref.digest if output_ref else "")
+
         if isinstance(value, Mapping):
             usage = value.get("usage")
             if isinstance(usage, Mapping):
@@ -146,6 +316,90 @@ class _LayeredOperator:
                 self.contexts[-1] = measured
         return answer
 
+    def _memory_fragments(self) -> tuple[tuple[Fragment, ...], str]:
+        """Retrieve authorized context immediately before compiling a turn."""
+        if self._memory is None:
+            return (), ""
+        access = self._memory.authorize("read", now=_memory_now(self._clock))
+        result = self._memory.port.recall(
+            self._memory.query, access, self._memory.limit)
+        selected = require_retrieval_provenance(result)
+        if selected and len(result.texts) != len(selected):
+            raise PermissionError("memory result has no complete materialized context")
+        fragments = tuple(
+            Fragment(
+                source=f"memory:{result.provenance.policy_identity}",
+                label=f"memory:{record_id}",
+                text=text,
+            )
+            for record_id, text in zip(selected, result.texts)
+            if isinstance(text, str) and text
+        )
+        if len(fragments) != len(selected):
+            raise PermissionError("memory result contains invalid context text")
+        return fragments, result.provenance.digest() if selected else ""
+
+    # -- capture helpers ---------------------------------------------------
+
+    def _capture(self, role: str, payload: Any, *, turn: int,
+                 labels: Mapping[str, Any] | None = None) -> Any:
+        """Hand bytes to the writer, or do nothing on the legacy path.
+
+        Nothing is caught here. `EvidenceCaptureRequiredError` and
+        `EvidenceLedgerAppendError` are fatal by `ADR-0096 §14.2` and must
+        reach the caller through the generic Agency protocol; swallowing them
+        would leave the turn running with evidence it does not have.
+        """
+        if self._artifacts is None:
+            return None
+        return self._artifacts.capture(role, payload, turn=turn, labels=labels)
+
+    def _record_selection(self, compiled: CompiledContext, turn: int) -> None:
+        """Context-selection and compaction provenance for one turn.
+
+        The compiler stays pure: it is *asked* for its identity here rather
+        than handed a sink, so no prompt can be assembled differently on the
+        run where provenance was enabled.
+        """
+        if self._provenance is None or not hasattr(self._provenance, "record_context_selection"):
+            return
+        identity = self._compiler.selection_identity()
+        selected = [block.label for block in compiled.blocks]
+        # Per-layer token counts, not a layer tally: `L5` growing while `L1`
+        # holds still is the signal a cache-cost regression looks like, and a
+        # single integer erases it.
+        layer_counts: dict[str, int] = {}
+        for block in compiled.blocks:
+            key = block.layer.value
+            layer_counts[key] = layer_counts.get(key, 0) + block.token_estimate
+        self._provenance.record_context_selection(
+            identity=identity,
+            candidate_digest=compiled.candidate_digest,
+            selected_digest=compiled.digest,
+            prefix_digest=compiled.prefix_digest,
+            selected=selected, dropped=compiled.dropped, elided=compiled.elided,
+            tokens=compiled.total_tokens, layer_counts=layer_counts, turn=turn)
+        self._provenance.record_compaction(
+            identity=identity,
+            input_digest=compiled.candidate_digest,
+            output_digest=compiled.digest,
+            dropped=compiled.dropped, elided=compiled.elided,
+            tokens_before=compiled.candidate_tokens,
+            tokens_after=compiled.total_tokens, turn=turn)
+
+
+def _route_of(model: Any) -> Mapping[str, Any]:
+    """Which provider/model this call actually went to.
+
+    Small and identity-only: a route that carried credentials or headers
+    would put them in an append-only store.
+    """
+    return {
+        "adapter": type(model).__name__,
+        "provider": str(getattr(model, "provider", "")),
+        "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
+        "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,6 +424,31 @@ class SessionPorts:
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
     interactive: bool = True
+    #: `ADR-0096 §14`. `None` is the legacy no-capture composition and stays
+    #: legal indefinitely: a session with no artifact store emits no
+    #: artifact facts and makes no evidence claim it cannot support. Binding
+    #: one turns capture on for this session and nothing else about it.
+    blobs: BlobStorePort | None = None
+    #: The resolved capture/redaction/sensitivity/retention policy. `None`
+    #: resolves from `profile` at composition, or to the conservative default
+    #: (`standard` retention, optional capture, redaction on).
+    capture_policy: CapturePolicy | None = None
+    #: `A-M65`. Disabled by default. The controller receives projections and
+    #: confidence values only; the runtime retains every authority-bearing
+    #: collaborator.
+    meta_controller: MetaController | None = None
+    #: Immutable evidence admitted by B-M65. An acting controller must bind at
+    #: least one current record into its durable attribution.
+    controller_confidence: tuple[ConfidenceRecord, ...] = ()
+    #: Optional point-of-use authorized retrieval for L5 context.
+    memory: MemoryBinding | None = None
+    #: Optional point-of-use authorized experience sink on successful runs.
+    experience: MemoryBinding | None = None
+    child_runtime: Any = None
+    #: `M-6`. The runtime that executes child episodes. `None` is legal for a
+    #: composition that never declares `agent.spawn`; for one that does, the
+    #: binding fails closed at composition rather than substituting a fake.
+    child_runtime: ChildRuntimePort | None = None
 
 
 class _SwappablePolicy:
@@ -250,9 +529,28 @@ class HarnessSession:
             role="session",
         )
 
+        self.scope = _scope_for(harness)
         self.adapters = {
             verb: harness.bindings[verb].factory(
-                BindingContext(verb=verb, environment=ports.environment, repo_path=repo))
+                BindingContext(
+                    verb=verb,
+                    environment=ports.environment,
+                    repo_path=repo,
+                    emitter=self.ledger.spawn_adapter() if verb == "agent.spawn" else None,
+                    parent_scope=self.scope,
+                    clock=ports.clock,
+                    store=ports.store,
+                    parent_episode_id=task.episode_id,
+                    max_depth=self.scope.constraints.max_depth,
+                    max_turns=getattr(task, "max_turns", 10),
+                    child_runtime=ports.child_runtime,
+                    remaining_budget=self._spawn_remaining_budget,
+                    project_id=task.project_id,
+                    composition_digest=harness.frozen.composition_digest,
+                    lineage=task.lineage or (task.episode_id,),
+                    ledger=self.ledger,
+                )
+            )
             for verb in harness.verbs
         }
         # `W11-A`. The index is bound only when the pack declares it. A
@@ -268,7 +566,6 @@ class HarnessSession:
                 "an IndexPort was supplied but the manifest declares no index "
                 "component; bind it in the pack or do not pass it")
 
-        self.scope = _scope_for(harness)
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
                           _ceiling_resources(harness), max_depth=4)])
@@ -329,9 +626,48 @@ class HarnessSession:
             skill_cards=harness.skill_cards,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
+        # `ADR-0096 §14`. One optional seam, resolved once: either this
+        # session captures evidence or it does not. There is no second
+        # composition root and no per-call switch -- a capture path that could
+        # be enabled halfway through a run would produce a trajectory whose
+        # gaps mean nothing.
+        self.artifacts: ArtifactWriter | None = None
+        self.provenance: ProvenanceSink = NullProvenanceSink()
+        if ports.blobs is not None:
+            self.capture_policy = ports.capture_policy or resolve_capture_policy(
+                getattr(run_plan, "profile", None))
+            self.artifacts = ArtifactWriter(
+                ports.blobs, self.ledger,
+                policy=self.capture_policy,
+                run_id=task.run_id, principal=task.principal,
+                episode_id=task.episode_id)
+            self.provenance = RuntimeProvenanceSink(
+                self.ledger, run_id=task.run_id, principal=task.principal,
+                episode_id=task.episode_id)
+            # `ADR-0098 Decision 6`. The checkpoint rides the same optional
+            # seam as capture, because it is written through the same writer:
+            # a session with nowhere to put bytes has nowhere to put a
+            # checkpoint either, and cold folding is the correct behaviour
+            # there rather than a degraded one.
+            self.checkpoints = CheckpointManager(
+                ports.blobs, artifacts=self.artifacts)
+        else:
+            self.capture_policy = ports.capture_policy
+            self.checkpoints: CheckpointManager | None = None
+        self.last_checkpoint: Checkpoint | None = None
+
         self.operator = _LayeredOperator(
             ports.model, compiler, task=task,
-            recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger))
+            clock=ports.clock,
+            recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger),
+            artifacts=self.artifacts,
+            provenance=self.provenance if self.artifacts is not None else None,
+            meta_controller=(
+                self._consult_meta_controller
+                if ports.meta_controller is not None else None
+            ),
+            memory=ports.memory,
+        )
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -357,6 +693,152 @@ class HarnessSession:
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
 
+    def _controller_remaining_budget(self, view: AgentView) -> Mapping[str, int]:
+        return remaining_budget(
+            harness_budget=self.harness.budget,
+            budget_consumed=view.budget_consumed,
+            max_turns=self.task.max_turns,
+            turns_consumed=self.turns_consumed(),
+            max_depth=self.scope.constraints.max_depth,
+            depth=self.scope.depth,
+        )
+
+    def _spawn_remaining_budget(self) -> Mapping[str, int]:
+        """The same balance, folded from the live ledger at call time.
+
+        Deliberately not a snapshot taken at composition. Siblings spawned in
+        later turns must see what earlier siblings actually spent, or the
+        second child is handed a budget the first one already consumed.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        if not read.ok:
+            # Fail closed. A store we cannot read is not a store that says
+            # "nothing spent"; reporting the full ceiling here would let an
+            # outage fund a child (`unknown is never a pass value`).
+            return {dimension: 0 for dimension in
+                    (*ADDITIVE_DIMENSIONS, "turns", "depth")}
+        envelopes = read.value or ()
+        # An empty episode has genuinely consumed nothing -- distinct from the
+        # unreadable case above, and `fold_agent_view` refuses to fold zero
+        # events rather than inventing a view.
+        consumed = fold_agent_view(None, envelopes).budget_consumed if envelopes else {}
+        return remaining_budget(
+            harness_budget=self.harness.budget,
+            budget_consumed=consumed,
+            max_turns=self.task.max_turns,
+            turns_consumed=self.turns_consumed(),
+            max_depth=self.scope.constraints.max_depth,
+            depth=self.scope.depth,
+        )
+
+    def _consult_meta_controller(self) -> ControllerProposal | None:
+        """Consult the optional policy plugin from durable between-turn state.
+
+        The first provider turn has no prior proposal and is intentionally not
+        a consultation point. Thereafter the controller sees only pure M-5a
+        projections and B-M65 confidence records. It never receives this
+        session, its ports, the model, the store, the emitter, or the Kernel.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        envelopes = tuple(read.value) if read.ok and read.value is not None else ()
+        if not any(
+            (event.payload.get("kind") or event.mhf_kind) == "ProposalProduced"
+            for event in envelopes
+        ):
+            return None
+        view: AgentView = fold_agent_view(None, envelopes)
+        progress: ProgressView = fold_progress(
+            {"payload": dict(event.payload)} for event in envelopes)
+        proposal = guarded_consult(
+            self.ports.meta_controller,
+            view,
+            progress,
+            self.ports.controller_confidence,
+            remaining_budget=self._controller_remaining_budget(view),
+        )
+        if proposal is None:
+            return None
+        if not self.ports.controller_confidence:
+            raise ValueError("an acting meta-controller requires confidence evidence")
+        if proposal.attribution["controllerId"] != self.ports.meta_controller.controller_id:
+            raise ValueError("controller directive identity does not match its binding")
+
+        self.ledger.emit_kind(
+            "StrategyChanged",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            payload={
+                "from": view.strategy,
+                "to": proposal.kind,
+                "trigger": _controller_trigger(proposal),
+                "controllerId": proposal.attribution["controllerId"],
+            },
+            episode_id=self.task.episode_id,
+        )
+        if proposal.kind == "revise_plan":
+            previous = (
+                view.plan_revisions[-1].get("planDigest")
+                if view.plan_revisions else None
+            )
+            plan_digest = digest_of({
+                "controllerId": proposal.attribution["controllerId"],
+                "directive": proposal.kind,
+                "brief": proposal.payload.get("brief"),
+                "reasonDigest": proposal.attribution["reasonDigest"],
+                "previousPlanDigest": previous,
+            })
+            payload: dict[str, Any] = {
+                "revision": len(view.plan_revisions) + 1,
+                "planDigest": plan_digest,
+                "rationaleDigest": proposal.attribution["reasonDigest"],
+            }
+            if isinstance(previous, str) and previous:
+                payload["previousPlanDigest"] = previous
+            self.ledger.orchestrator().emit_kind(
+                "PlanRevised",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                payload=payload,
+                episode_id=self.task.episode_id,
+            )
+        return proposal
+
+    def checkpoint(self, *, turn: int | None = None) -> Checkpoint | None:
+        """Memoise the current fold, if this session can store one.
+
+        Returns `None` rather than raising when there is no store, no
+        authorisation, or no retention for it. A checkpoint is a cache: the
+        events remain the truth and the cold fold remains available, so an
+        unwritten checkpoint costs time and never correctness.
+        """
+        if self.checkpoints is None:
+            return None
+        self.last_checkpoint = self.checkpoints.capture(
+            self.ledger_state(), turn=turn)
+        return self.last_checkpoint
+
+    def reconstruct(self, *, verify: bool = False) -> Reconstruction:
+        """Rebuild episode state, using a checkpoint only once it has proven itself.
+
+        Every validation failure falls back to the full cold fold and records
+        why (`runtime/checkpoints.py`). `verification="verified"` is reachable
+        only with `verify=True`, which executes the parity comparison -- `C-04`
+        separates capability from proof and this is where that separation is
+        actually enforced on the runtime path.
+        """
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        envelopes = list(read.value) if read.ok and read.value is not None else []
+        if self.checkpoints is None:
+            if not envelopes:
+                return Reconstruction(state=None, capability="none")
+            return Reconstruction(
+                state=reconstruct_state(envelopes),
+                capability="full_cold",
+                events_replayed=len(envelopes),
+            )
+        return self.checkpoints.reconstruct(
+            envelopes, checkpoint=self.last_checkpoint, verify=verify)
+
     def turns_consumed(self) -> int:
         """Turns this episode has already spent, counted from the ledger.
 
@@ -374,9 +856,11 @@ class HarnessSession:
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
+        request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
-                self.ports.store, request.idempotency_key
+                self.ports.store, request.idempotency_key,
+                project_id=self.task.project_id,
             )
             if settled is not None:
                 occurrence = str(settled.payload.get("occurrence") or "")
@@ -457,7 +941,17 @@ class HarnessSession:
             self.begin_episode()
         else:
             scanner = RecoveryScanner(controller_principal=task.principal)
-            scanner.reconcile_open_intents(ports.store, occurred_at=ports.clock.now())
+            scanner.reconcile_open_intents(
+                ports.store, occurred_at=ports.clock.now(),
+                project_id=task.project_id,
+            )
+            # Open subtrees are adjudicated before the run is declared
+            # recovered, so a resumed parent never re-runs a child whose
+            # occurrence nobody actually knows (`WP-A1`).
+            scanner.reconcile_open_children(
+                ports.store, occurred_at=ports.clock.now(),
+                project_id=task.project_id,
+            )
             self.ledger._seq, self.ledger._prev = self.ledger._load_chain(task.project_id)
             read_events = ports.store.read(EventRange(episode_id=task.episode_id))
             ev_list = list(read_events.value) if read_events.ok and read_events.value else []
@@ -521,6 +1015,15 @@ class HarnessSession:
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
+        if terminal is RunTermination.COMPLETED and ports.experience is not None:
+            try:
+                self._emit_experience_fact(receipts)
+            except Exception as exc:
+                # A successful episode cannot silently become an unrecorded
+                # learning input. Preserve the failure as the run outcome.
+                terminal = RunTermination.INSTRUMENT_ERROR
+                detail = f"experience emission failed: {exc}"
+
         verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
         read_all = ports.store.read(EventRange(episode_id=task.episode_id))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
@@ -540,28 +1043,19 @@ class HarnessSession:
                 },
             )
 
-        from ..domain.ledger.events import EventEnvelope
-        from ..domain.ledger.reducer import reduce_event
-        pending_env = EventEnvelope(
-            schema_version="mhf.event/1",
-            event_id="pending-terminal",
-            scope="episode",
-            seq=str(self.ledger._seq),
-            occurred_at=delayed.pending.at,
-            recorded_at=delayed.pending.at,
-            principal=task.principal,
-            principal_role="episode",
-            tenant_id="tenant-default",
-            owner_id="owner-platform",
-            confidentiality="internal",
-            retention_class="extended",
-            trainability="prohibited",
-            redaction_status="none",
-            payload=delayed.pending.payload,
-            run_id=task.run_id,
-            episode_id=task.episode_id,
-        )
-        final_state_digest = compute_state_digest(reduce_event(self.ledger_state(), pending_env))
+        # The digest of the state this trajectory *describes*: the fold of
+        # exactly the events named by `event_range`, which stops before the
+        # terminal event that carries the trajectory.
+        #
+        # It cannot include the terminal event. That event's payload contains
+        # this trajectory, which contains this digest, so a digest computed
+        # over a state containing it is self-referential and no fresh process
+        # can ever reproduce it. The previous value folded the pending
+        # `EpisodeCompleted` in and was then overwritten a few lines later by a
+        # third value, so the recorded digest matched no fold of the durable
+        # log at all -- reconstruction had nothing honest to verify against
+        # (`C-04`: a claim no receipt can confirm).
+        final_state_digest = compute_state_digest(self.ledger_state())
 
         trajectory = assemble_trajectory(
             task=task,
@@ -575,10 +1069,9 @@ class HarnessSession:
             model=self.ports.model,
             environment=self.ports.environment,
             run_plan=self.run_plan,
+            **self._capture_evidence(),
         )
         delayed.flush(trajectory)
-        if isinstance(trajectory, dict):
-            trajectory["state_digest"] = self.state_digest()
         ports.environment.dispose()
         result = RunResult(
             harness=harness.harness,
@@ -592,7 +1085,11 @@ class HarnessSession:
             gene_digests=dict(harness.gene_digests),
             telemetry=self._telemetry(),
             instrument_error=self._instrument_error(),
-            state_digest=self.state_digest(),
+            # The same value the trajectory binds (`RF-23`), and the one a
+            # fresh process can reproduce by folding the declared
+            # `event_range`. Re-reading the ledger here would fold the terminal
+            # event back in and reintroduce the self-reference D9 removed.
+            state_digest=final_state_digest,
             trajectory=trajectory,
             run_digest=getattr(self.run_plan, "run_digest", ""),
             activation_digest=getattr(self.run_plan, "activation_digest", ""),
@@ -605,6 +1102,47 @@ class HarnessSession:
         return result
 
     # -- what the instrument reads ----------------------------------------
+
+    def _emit_experience_fact(self, receipts: Sequence[Receipt]) -> str:
+        """Persist a minimal causal success fact through the injected port."""
+        binding = self.ports.experience
+        if binding is None:  # pragma: no cover - guarded by the caller
+            raise PermissionError("experience memory binding is unavailable")
+        access = binding.authorize("write", now=_memory_now(self.ports.clock))
+        value = {
+            "category": "experience",
+            "kind": "episode_outcome",
+            "text": f"Episode {self.task.episode_id} completed successfully.",
+            "causal": {
+                "runId": self.task.run_id,
+                "episodeId": self.task.episode_id,
+                "compositionDigest": self.harness.composition_digest,
+                "receiptDigests": tuple(receipt.descriptor_digest for receipt in receipts),
+            },
+        }
+        record_id = binding.port.write(value, access)
+        if not isinstance(record_id, str) or not record_id:
+            raise PermissionError("experience memory did not return a record identity")
+        return record_id
+
+    def _capture_evidence(self) -> dict[str, Any]:
+        """What this run actually captured, for the `mhf.trajectory/2` writer.
+
+        Empty on the legacy path, and deliberately so: `assemble_trajectory`
+        renders an absent artifact index and a null capture status rather than
+        synthesising a complete one, so a run that captured nothing says that
+        instead of claiming it captured everything it was asked to.
+        """
+        if self.artifacts is None:
+            return {}
+        provenance = self.provenance.trajectory_provenance()
+        return {
+            "artifact_index": list(self.artifacts.index_entries()),
+            "context_provenance": provenance["context"],
+            "compaction_provenance": provenance["compaction"],
+            "cache_provenance": provenance["cache"],
+            "capture_status": self.artifacts.capture_state(),
+        }
 
     def _telemetry(self) -> RunTelemetry:
         """Integer telemetry, with absence preserved (`S9-A-02`).
@@ -776,3 +1314,50 @@ def _resolve(flow: ApprovalFlow,
     if not isinstance(answer, ApprovalDecision) or not can_verify:
         return None
     return flow.verify(challenge, answer, request, now=clock.now())
+
+
+def _with_diff_headers(request: EffectRequest) -> EffectRequest:
+    """Name the file a headerless hunk is already addressed to, once, at the seam.
+
+    A model routinely emits a bare `@@` hunk and carries the target in `path`.
+    That diff is unambiguous in context but not on its own, and two layers
+    downstream rejected it for opposite-looking reasons: the approval flow
+    refused to build a challenge at all (`normalise_unified_diff` -- a
+    signature over a diff with no filename is a signature over an ambiguity),
+    so the episode escalated before any effect started; and the applier could
+    not tell which file to open.
+
+    This is the runtime seam, which is where it belongs. Unified diffs are
+    coding-domain knowledge, so `agency` must not carry it (`ADR-0060`: the
+    generic engine names no domain verb) and the kernel must not either. Doing
+    it *here*, before `Kernel.dispatch`, is also what keeps the layers honest
+    about each other: the descriptor digest, the bytes the approver signs and
+    the bytes the environment writes are then all computed over the same text.
+    Patching it further downstream would leave the human approving one thing
+    and the environment applying another -- precisely the binding `K-15`
+    re-verifies at resumption.
+    """
+    args = getattr(request, "args", None)
+    if not isinstance(args, Mapping):
+        return request
+    diff = args.get("diff") or args.get("patch")
+    path = args.get("path")
+    if not isinstance(diff, str) or not isinstance(path, str) or not path:
+        return request
+    if not diff.lstrip().startswith("@@"):
+        return request
+    for line in diff.splitlines():
+        if line.startswith("--- ") or line.startswith("diff --" + "git "):
+            return request
+    headed = f"--- a/{path}\n+++ b/{path}\n{diff}"
+    updated = dict(args)
+    for key in ("diff", "patch"):
+        if key in updated:
+            updated[key] = headed
+    try:
+        return replace(request, args=updated)
+    except TypeError:
+        # Not a dataclass: a caller passed a request-shaped double. Leaving it
+        # untouched is correct -- normalisation is a convenience for real
+        # proposals, never a precondition of dispatch.
+        return request

@@ -22,9 +22,14 @@ class RF92DurableEventStreamFalsifier(unittest.TestCase):
         envelope = {"payload": {"kind": "TurnStarted", "runId": run_id}}
         seq = service.publish_event(run_id, envelope)
         live = subscriber.get_nowait()
-        replay = service.store.get_events(run_id)
+        # Replay comes from the canonical store, which is the *sole* durable
+        # history this falsifier is about. It previously read the inbox outbox
+        # -- the competing second history WP-C1 removed -- so it could pass
+        # while the canonical append had failed.
+        replay = service._load_events(run_id)
 
         self.assertEqual(live["seq"], str(seq))
+        self.assertEqual(len(replay), 1)
         self.assertEqual(str(replay[0]["seq"]), live["seq"])
         self.assertEqual(live["payload"], replay[0]["payload"])
 

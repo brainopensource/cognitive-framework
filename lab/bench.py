@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Paired McNemar comparison of two harness packs from lam.sqlite traces.
+"""Benchmark tools: paired McNemar comparison and pre-M-5a append/fold baseline (M4-05, SPEC §10).
 
 CLI:
   python3 lab/bench.py --pack-a vg-code-default --pack-b vg-code-claude-shaped --db lam.sqlite
+  python3 lab/bench.py --append-fold --out benchmarks/baseline_m4.json
 """
 
 from __future__ import annotations
@@ -10,10 +11,18 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import platform
 import sqlite3
 import sys
+import tempfile
+import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def mcnemar(b: int, c: int) -> dict[str, Any]:
@@ -108,6 +117,108 @@ def compare_packs(db_path: Path | str, pack_a: str, pack_b: str) -> dict[str, An
     return result
 
 
+def bench_append_fold(
+    event_counts: Sequence[int] = (1000, 10000),
+    *,
+    runs: int = 3,
+) -> dict[str, Any]:
+    """Measure WAL append throughput and cold fold micro-seconds per event on deterministic fixtures."""
+    from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+    from vanguard.packages.domain.canonicalisation.digest import digest_of
+    from vanguard.packages.domain.ledger.events import EventEnvelope
+    from vanguard.packages.domain.ledger.reducer import compute_state_digest, reconstruct_state
+    from vanguard.packages.ports.event_store import EventRange
+
+    results: dict[str, Any] = {}
+    for count in event_counts:
+        append_rates: list[float] = []
+        fold_rates: list[float] = []
+        fold_micros_per_event: list[float] = []
+        state_digests: list[str] = []
+
+        envelopes: list[EventEnvelope] = []
+        for i in range(count):
+            envelopes.append(
+                EventEnvelope(
+                    schema_version="mhf.event/1",
+                    event_id=f"evt-{i:06d}",
+                    scope="episode",
+                    seq=str(i),
+                    occurred_at="2026-08-25T12:00:00.000Z",
+                    recorded_at="2026-08-25T12:00:00.000Z",
+                    principal="agent-bench",
+                    principal_role="episode",
+                    tenant_id="tenant-default",
+                    owner_id="owner-platform",
+                    confidentiality="internal",
+                    retention_class="standard",
+                    trainability="prohibited",
+                    redaction_status="none",
+                    run_id="run-bench-001",
+                    episode_id="ep-bench-001",
+                    trace_id="trace-bench",
+                    span_id=f"span-{i}",
+                    payload={"kind": "TurnStarted" if i % 2 == 0 else "EffectStarted", "turn": i // 2},
+                )
+            )
+
+        for _ in range(runs):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                db_path = Path(tmpdir) / "bench_events.sqlite3"
+                store = SqliteEventStore(db_path)
+
+                t0 = time.perf_counter()
+                store.append(envelopes)
+                t_append = time.perf_counter() - t0
+                append_rate = count / t_append if t_append > 0 else 0.0
+                append_rates.append(append_rate)
+                store.close()
+
+                store_cold = SqliteEventStore(db_path)
+                t1 = time.perf_counter()
+                read_res = store_cold.read(EventRange(episode_id="ep-bench-001"))
+                read_envelopes = tuple(read_res.value or ())
+                reduced_state = reconstruct_state(read_envelopes)
+                digest = compute_state_digest(reduced_state)
+                t_fold = time.perf_counter() - t1
+                store_cold.close()
+
+                fold_rate = count / t_fold if t_fold > 0 else 0.0
+                micros_per_event = (t_fold * 1_000_000) / count if count > 0 else 0.0
+                fold_rates.append(fold_rate)
+                fold_micros_per_event.append(micros_per_event)
+                state_digests.append(digest)
+
+        assert len(set(state_digests)) == 1, "Non-deterministic fold state digests across benchmark runs"
+
+        results[f"{count}_events"] = {
+            "event_count": count,
+            "runs": runs,
+            "state_digest": state_digests[0],
+            "append_events_per_sec_mean": sum(append_rates) / len(append_rates),
+            "append_events_per_sec_max": max(append_rates),
+            "fold_events_per_sec_mean": sum(fold_rates) / len(fold_rates),
+            "fold_events_per_sec_max": max(fold_rates),
+            "fold_micros_per_event_mean": sum(fold_micros_per_event) / len(fold_micros_per_event),
+            "fold_micros_per_event_min": min(fold_micros_per_event),
+        }
+
+    report: dict[str, Any] = {
+        "benchmark": "bench_append_fold",
+        "milestone": "M-4",
+        "timestamp": "2026-08-25T12:00:00.000Z",
+        "command": "python3 lab/bench.py --append-fold --out benchmarks/baseline_m4.json",
+        "environment": {
+            "platform": platform.platform(),
+            "python_version": platform.python_version(),
+            "cpu_count": os.cpu_count(),
+        },
+        "results": results,
+    }
+    report["report_digest"] = digest_of(report)
+    return report
+
+
 def format_report(result: dict[str, Any]) -> str:
     lines = [
         f"pack-a: {result['pack_a']}",
@@ -129,12 +240,29 @@ def format_report(result: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pack-a", required=True, help="Baseline manifest pack name")
-    parser.add_argument("--pack-b", required=True, help="Comparison manifest pack name")
+    parser.add_argument("--pack-a", help="Baseline manifest pack name")
+    parser.add_argument("--pack-b", help="Comparison manifest pack name")
     parser.add_argument("--db", default="lam.sqlite", help="Path to sqlite traces db")
     parser.add_argument("--prereg", help="Path to pre-registration JSON file")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of text report")
+    parser.add_argument("--append-fold", action="store_true", help="Run deterministic append/fold benchmark baseline")
+    parser.add_argument("--out", help="Path to save benchmark JSON output")
     args = parser.parse_args(argv)
+
+    if args.append_fold:
+        report = bench_append_fold()
+        report_json = json.dumps(report, indent=2)
+        if args.out:
+            out_p = Path(args.out)
+            out_p.parent.mkdir(parents=True, exist_ok=True)
+            out_p.write_text(report_json + "\n", encoding="utf-8")
+            print(f"wrote benchmark baseline to {out_p}")
+        else:
+            print(report_json)
+        return 0
+
+    if not args.pack_a or not args.pack_b:
+        parser.error("--pack-a and --pack-b are required when not running --append-fold")
 
     prereg_meta = None
     if args.prereg:

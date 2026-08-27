@@ -28,6 +28,8 @@ Prompt for Dev A (WP-A1 — Canonical recursion / M-4 + M-6):
 ▎
 ▎ Execute Sprint C1, package WP-A1, exactly as specified in backlog.md §WP-A1 and sprint_active.md "Immediate execution order" item 1. Objective: restore RF-95 and replace the synthetic delegation success path (volatile IDs, unconserved parent balance, callback-only execution) with real recursive runtime capability. Kernel/Agency semantics must not change. Implement: immutable SpawnIntent/ChildRunPlan/ChildRuntimePort; child_id=H(parent_episode_id, idempotency_key); attenuated action/selector scope; per-dimension budget reservation against parent remaining; depth/turn lowering; ChildSpawned/ChildReturned events via Runtime.run_composed; settlement/refund; replay-safe reconciliation (UNDETERMINABLE on open/unknown). Cover all required falsifiers listed in the contract table (missing runner, restart-stable ID, collision, each budget dimension, depth/turn/scope widening, transcript leakage, depth≥3 cold fold, crash boundaries, settled replay, project isolation, kill-tree, RF-98). Do not fabricate the RF-95 evidence bundle — verify a recovered original or preregister exactly one new candidate. Deliver digest-addressed aether.evidence/1 bundles for M-4 and M-6 separately. If anything in the contract is ambiguous against the actual code you read, stop and report the discrepancy rather than guessing. Report back as task -> code -> test -> evidence -> blocker. Do not start WP-A2/M-6.5, WP-A3/M-7, or any M-8/M-9/M-10 work.
 
+
+
 ---
 
 

@@ -17,7 +17,14 @@ export type StudioSurface =
   | "effect"
   | "arena"
   | "watch"
-  | "brain";
+  | "brain"
+  | "topology"
+  | "skill"
+  | "explorer"
+  | "governance"
+  | "catalog"
+  | "observatory"
+  | "rundiff";
 
 export type StudioSessionState = {
   readonly activeSurface: StudioSurface;

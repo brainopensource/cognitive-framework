@@ -8,7 +8,7 @@ type LineageNode = {
   role: string;
   goal: string;
   depth: number;
-  status: "running" | "completed" | "interrupted" | "escalated";
+  status: "running" | "completed" | "interrupted" | "escalated" | "recovery" | "orphan";
   budgetAllocated: { tokens: number; usdMicros: number };
   budgetConsumed: { tokens: number; usdMicros: number };
   allowedActions: string[];
@@ -189,6 +189,21 @@ export const LineageGraphView: React.FC<{ readonly fold: StudioFold }> = ({ fold
 
           <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: 8 }}>
             <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+              Budget Waterfall (Parent -&gt; Child Conservation)
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 4 }}>
+              Allocated: {selectedLineage.budgetAllocated.tokens} tokens
+            </div>
+            <div style={{ width: "100%", background: "var(--bg-panel)", height: 8, borderRadius: 4, overflow: "hidden" }}>
+               <div style={{ width: `${Math.min(100, (selectedLineage.budgetConsumed.tokens / selectedLineage.budgetAllocated.tokens) * 100)}%`, background: "var(--signal-flow)", height: "100%" }} />
+            </div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+              Consumed: {selectedLineage.budgetConsumed.tokens} tokens
+            </div>
+          </div>
+
+          <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: 8 }}>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>
               Sealed Action Membership
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -201,14 +216,15 @@ export const LineageGraphView: React.FC<{ readonly fold: StudioFold }> = ({ fold
           </div>
 
           {selectedLineage.outputArtifactRef && (
-            <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: 8 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>
-                Returned Value-Only Artifact
-              </div>
-              <div className="font-mono" style={{ fontSize: 10, color: "var(--signal-flow)", background: "var(--bg-panel)", padding: 6, borderRadius: "var(--radius-sm)" }}>
-                {selectedLineage.outputArtifactRef}
-              </div>
-            </div>
+             <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: 8 }}>
+               <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>
+                 Parent-Child Artifact Flow Edge
+               </div>
+               <div className="font-mono" style={{ fontSize: 10, color: "var(--signal-flow)", background: "var(--bg-panel)", padding: 6, borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: 8 }}>
+                 <span>↑ Returns to Parent:</span>
+                 {selectedLineage.outputArtifactRef}
+               </div>
+             </div>
           )}
         </div>
       </div>

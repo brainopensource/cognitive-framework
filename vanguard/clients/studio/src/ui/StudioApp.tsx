@@ -17,6 +17,14 @@ import { EvolutionFoundryView } from "./EvolutionFoundryView.js";
 import { VisualHarnessBuilder } from "./VisualHarnessBuilder.js";
 import { ContextCompactionView } from "./ContextCompactionView.js";
 import { FactorialExperimentView } from "./FactorialExperimentView.js";
+import { TopologyEditor } from "./TopologyStudio/TopologyEditor.js";
+import { SkillPipeline } from "./SkillLifecycle/SkillPipeline.js";
+import { ContextExplorer } from "./ContextExplorer/ContextExplorer.js";
+import { GovernanceView } from "./GovernanceView.js";
+import { AgentCatalog } from "./AgentCatalog.js";
+import { AgentBuilderWizard } from "./AgentBuilder/AgentBuilderWizard.js";
+import { ObservatoryView } from "./Observatory/ObservatoryView.js";
+import { RunDiffView } from "./RunDiff/RunDiffView.js";
 
 export type StudioAppProps = {
   readonly fold: StudioFold;
@@ -48,6 +56,13 @@ const NAV_TABS: NavTab[] = [
   { id: "ledger", label: "WAL Ledger", icon: "🗄️", shortcut: "⌘9", desc: "Single-writer SQLite WAL stream & deterministic state reduction" },
   { id: "theatre", label: "Turn Theatre", icon: "🎭", shortcut: "⌘0", desc: "Unary turn loop stream & event transcript" },
   { id: "evidence", label: "Evidence Grid", icon: "🛡️", shortcut: "⌥E", desc: "Cryptographic proof assertions & execution spans" },
+  { id: "topology", label: "Topology Studio", icon: "🕸️", shortcut: "⌥T", desc: "Visual editor for mhf.topology/1 configurations" },
+  { id: "skill", label: "Skill Lifecycle", icon: "🎓", shortcut: "⌥S", desc: "Gated self-improvement pipeline" },
+  { id: "explorer", label: "Context Explorer", icon: "🔍", shortcut: "⌥C", desc: "Unified context and retrieved memory inspection" },
+  { id: "governance", label: "Governance View", icon: "⚖️", shortcut: "⌥G", desc: "Governance audit log and policy compliance checks" },
+  { id: "catalog", label: "Agent Catalog", icon: "📚", shortcut: "⌥A", desc: "Catalog of reusable agent skills and memory" },
+  { id: "observatory", label: "Observatory", icon: "🔭", shortcut: "⌥O", desc: "Real-time stream and metric telemetry" },
+  { id: "rundiff", label: "Run Diff", icon: "🔄", shortcut: "⌥R", desc: "Compare evaluation runs and benchmark deltas" },
 ];
 
 export const StudioApp: React.FC<StudioAppProps> = ({
@@ -328,6 +343,14 @@ export const StudioApp: React.FC<StudioAppProps> = ({
           )}
 
           {session.activeSurface === "map" && <SubstrateMapView fold={fold} />}
+          
+          {session.activeSurface === "topology" && <TopologyEditor fold={fold} />}
+          {session.activeSurface === "skill" && <SkillPipeline fold={fold} />}
+          {session.activeSurface === "explorer" && <ContextExplorer fold={fold} />}
+          {session.activeSurface === "governance" && <GovernanceView fold={fold} />}
+          {session.activeSurface === "catalog" && <AgentCatalog />}
+          {session.activeSurface === "observatory" && <ObservatoryView fold={fold} />}
+          {session.activeSurface === "rundiff" && <RunDiffView baselineId="base" treatmentId="treat" />}
         </main>
       </div>
 

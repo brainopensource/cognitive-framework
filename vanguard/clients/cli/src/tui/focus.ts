@@ -1,6 +1,6 @@
 import type { Result } from "@vanguard/client-core";
 
-export type TuiMode = "prompt" | "approval" | "correct" | "help" | "run" | "resume";
+export type TuiMode = "prompt" | "approval" | "correct" | "help" | "run" | "resume" | "command_palette" | "timeline" | "inspector";
 
 export const HELP_TEXT = [
   "vg keys",

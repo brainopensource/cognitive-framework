@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""Fail closed until the accepted successor baseline manifest is available.
+"""Fail closed until the accepted successor baseline manifest is available and verified (ADR-0102).
 
-The legacy Sprint-0 manifest is not an authorized M-5 control. WP-B1 replaces
-this compatibility checker with the full ``aether.baseline/1`` verifier.
+WP-B1 provides the full ``aether.baseline/1`` verifier.
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from pathlib import Path
@@ -19,54 +17,88 @@ for _p in (_COMMON, _TOOLS):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from repo_paths import repo_root, stale_path_matches
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from repo_paths import repo_root
+from vanguard.packages.domain.evidence.baseline import (
+    BASELINE_DISPOSITION_ACCEPTED_CONTROL,
+    verify_baseline_manifest,
+)
+
+def _local_git(args: Sequence[str], cwd: Path) -> tuple[int, str]:
+    import subprocess
+
+    proc = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+    return proc.returncode, proc.stdout
 
 
-MANIFEST = repo_root() / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
+DEFAULT_MANIFEST = repo_root() / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Verify an aether.baseline/1 manifest.")
     parser.add_argument(
-        "--release",
+        "--manifest",
+        type=Path,
+        default=DEFAULT_MANIFEST,
+        help="Path to baseline manifest JSON file.",
+    )
+    parser.add_argument(
+        "--skip-remote",
         action="store_true",
-        help="Fail unless git tag and branch protection are verified (R10).",
+        help="Skip remote git ls-remote verification (for local/offline testing).",
+    )
+    parser.add_argument(
+        "--remote",
+        default="origin",
+        help="Configured remote name to check (default: origin).",
     )
     args = parser.parse_args()
     root = repo_root()
+    manifest_path = args.manifest
+
+    if not manifest_path.is_file():
+        print(
+            f"BASELINE FAIL: accepted successor manifest is absent: {manifest_path}",
+            file=sys.stderr,
+        )
+        print(
+            "BASELINE FAIL: CONVERGENCE-BASE-v1 must be created, pushed, and verified with aether.baseline/1",
+            file=sys.stderr,
+        )
+        return 1
+
     try:
-        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        print(f"BASELINE FAIL: accepted successor manifest is absent or invalid: {MANIFEST}: {exc}")
-        print("BASELINE FAIL: WP-B1 must produce and independently verify aether.baseline/1")
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(
+            f"BASELINE FAIL: malformed JSON in manifest {manifest_path}: {exc}",
+            file=sys.stderr,
+        )
         return 1
-    failures: list[str] = []
-    files = data.get("files")
-    if data.get("schema_version") != "aether.baseline/1" or not isinstance(files, dict) or not files:
-        print("BASELINE FAIL: malformed manifest")
+
+    result = verify_baseline_manifest(
+        data,
+        root,
+        skip_remote=args.skip_remote,
+        remote_name=args.remote,
+        git_runner=_local_git,
+    )
+
+    if not result.valid:
+        print(
+            f"BASELINE FAIL: manifest verification failed (disposition: {result.disposition})",
+            file=sys.stderr,
+        )
+        for reason in result.rejection_reasons:
+            print(f"  - {reason}", file=sys.stderr)
         return 1
-    for name in files:
-        if stale_path_matches(name):
-            failures.append(f"stale path in manifest key: {name}")
-    for name, expected in sorted(files.items()):
-        path = root / name
-        if not path.is_file():
-            failures.append(f"missing {name}")
-            continue
-        actual = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-        if actual != expected:
-            failures.append(f"digest drift {name}: expected={expected} actual={actual}")
-    for failure in failures:
-        print(f"BASELINE FAIL: {failure}")
-    if failures:
-        return 1
-    print(f"BASELINE PASS: {len(files)} local artifacts match CONVERGENCE-BASE-v1 manifest")
-    external_open = data.get("git_tag_status") != "created" or data.get("branch_protection_status") != "verified"
-    if external_open:
-        print("BASELINE EXTERNAL GATES OPEN: Git tag and/or branch protection are not established")
-        if args.release:
-            print("BASELINE FAIL: --release requires verified git tag and branch protection")
-            return 1
+
+    print(
+        f"BASELINE PASS: manifest verified ({result.disposition}): {result.details.get('baseline_id')}"
+    )
     return 0
 
 

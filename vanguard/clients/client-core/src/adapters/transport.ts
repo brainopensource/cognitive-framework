@@ -1,7 +1,7 @@
 import { createConnection, type Socket } from "node:net";
 import { createInterface } from "node:readline";
 import { randomUUID } from "node:crypto";
-import { fail, parseDaemonLine, parseJsonlLine } from "../contract/parse.js";
+import { fail, parseDaemonLine, parseJsonlLine, toClientFailureCode } from "../contract/parse.js";
 import type { EventCursor, Result, StreamItem } from "../contract/types.js";
 
 export function resolveSocketPath(explicit?: string): string {
@@ -124,7 +124,7 @@ export class SocketTransport implements RuntimeTransport {
             return;
           }
           if (frame.value.frameType === "error") {
-            resolve(fail("invalid_request", frame.value.message, false));
+            resolve(fail(frame.value.code, frame.value.message, frame.value.retryable));
             return;
           }
           if (frame.value.frameType !== "receipt") {
@@ -133,7 +133,12 @@ export class SocketTransport implements RuntimeTransport {
           }
           const receipt = frame.value.receipt;
           if (receipt.status === "error") {
-            resolve(fail("invalid_request", String(receipt.detail ?? "command failed"), false));
+            const errBody = receipt.error;
+            const errObj = errBody !== null && typeof errBody === "object" ? (errBody as Record<string, unknown>) : {};
+            const code = toClientFailureCode(errObj.code);
+            const message = typeof errObj.message === "string" ? errObj.message : String(receipt.detail ?? "command failed");
+            const retryable = typeof errObj.retryable === "boolean" ? errObj.retryable : false;
+            resolve(fail(code, message, retryable));
             return;
           }
           resolve({ ok: true, value: (receipt.result ?? receipt) as T });

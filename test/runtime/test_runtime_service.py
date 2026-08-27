@@ -163,6 +163,200 @@ class TestRuntimeService(unittest.TestCase):
         self.assertEqual(res.get("frameType"), "receipt")
         self.assertEqual(res.get("receipt", {}).get("result", {}).get("status"), "cancelled")
 
+    def test_list_runs_and_get_run(self) -> None:
+        start_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "StartRun",
+                "commandId": "cmd-start-list",
+                "idempotencyKey": "idem-start-list",
+                "runId": "run-list-1",
+                "actor": "operator",
+                "payload": {
+                    "manifestPath": "manifest.json",
+                    "repoPath": ".",
+                    "brief": "list test",
+                },
+            },
+        }
+        self._client_send(start_frame)
+
+        # List runs
+        list_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "ListRuns",
+                "commandId": "cmd-list-1",
+                "idempotencyKey": "idem-list-1",
+                "runId": "",
+                "actor": "operator",
+                "payload": {"limit": 10, "offset": 0},
+            },
+        }
+        res_list = self._client_send(list_frame)
+        self.assertEqual(res_list.get("frameType"), "receipt")
+        runs = res_list.get("receipt", {}).get("result", {}).get("runs", [])
+        self.assertTrue(any(r.get("run_id") == "run-list-1" for r in runs))
+
+        # Get run
+        get_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "GetRun",
+                "commandId": "cmd-get-1",
+                "idempotencyKey": "idem-get-1",
+                "runId": "run-list-1",
+                "actor": "operator",
+                "payload": {},
+            },
+        }
+        res_get = self._client_send(get_frame)
+        self.assertEqual(res_get.get("frameType"), "receipt")
+        snap = res_get.get("receipt", {}).get("result", {})
+        self.assertEqual(snap.get("runId"), "run-list-1")
+        self.assertEqual(snap.get("status"), "running")
+        self.assertGreaterEqual(snap.get("eventCount", 0), 1)
+
+    def test_get_capabilities_reports_matrix_and_degraded_features(self) -> None:
+        cap_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "GetCapabilities",
+                "commandId": "cmd-cap-1",
+                "idempotencyKey": "idem-cap-1",
+                "runId": "",
+                "actor": "operator",
+                "payload": {},
+            },
+        }
+        res = self._client_send(cap_frame)
+        self.assertEqual(res.get("frameType"), "receipt")
+        caps = res.get("receipt", {}).get("result", {}).get("capabilities", {})
+        self.assertEqual(caps.get("run.start", {}).get("implementation"), "available")
+        self.assertEqual(caps.get("run.stream", {}).get("implementation"), "available")
+        self.assertEqual(caps.get("topology.execute", {}).get("authorization"), "disabled")
+        self.assertEqual(caps.get("memory.retrieve", {}).get("authorization"), "disabled")
+
+    def test_checkpoint_and_resume(self) -> None:
+        start_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "StartRun",
+                "commandId": "cmd-start-chk",
+                "idempotencyKey": "idem-start-chk",
+                "runId": "run-chk-1",
+                "actor": "operator",
+                "payload": {
+                    "manifestPath": "manifest.json",
+                    "repoPath": ".",
+                    "brief": "checkpoint test",
+                },
+            },
+        }
+        self._client_send(start_frame)
+
+        # Checkpoint
+        chk_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "Checkpoint",
+                "commandId": "cmd-chk-1",
+                "idempotencyKey": "idem-chk-1",
+                "runId": "run-chk-1",
+                "actor": "operator",
+                "payload": {},
+            },
+        }
+        res_chk = self._client_send(chk_frame)
+        self.assertEqual(res_chk.get("receipt", {}).get("status"), "completed")
+        self.assertTrue(res_chk.get("receipt", {}).get("result", {}).get("checkpoint"))
+
+        # Resume
+        res_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "Resume",
+                "commandId": "cmd-res-1",
+                "idempotencyKey": "idem-res-1",
+                "runId": "run-chk-1",
+                "actor": "operator",
+                "payload": {},
+            },
+        }
+        res_resume = self._client_send(res_frame)
+        self.assertEqual(res_resume.get("receipt", {}).get("status"), "completed")
+        self.assertEqual(res_resume.get("receipt", {}).get("result", {}).get("status"), "resumed")
+
+    def test_cas_expected_seq_conflict(self) -> None:
+        start_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "StartRun",
+                "commandId": "cmd-start-cas",
+                "idempotencyKey": "idem-start-cas",
+                "runId": "run-cas-1",
+                "actor": "operator",
+                "payload": {
+                    "manifestPath": "manifest.json",
+                    "repoPath": ".",
+                    "brief": "cas test",
+                },
+            },
+        }
+        self._client_send(start_frame)
+
+        # Checkpoint with conflicting expectedSeq
+        bad_cas_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "Checkpoint",
+                "commandId": "cmd-chk-bad-cas",
+                "idempotencyKey": "idem-chk-bad-cas",
+                "runId": "run-cas-1",
+                "actor": "operator",
+                "payload": {"expectedSeq": 999},
+            },
+        }
+        res = self._client_send(bad_cas_frame)
+        self.assertEqual(res.get("receipt", {}).get("status"), "error")
+        self.assertIn("CAS conflict", res.get("receipt", {}).get("detail", ""))
+
+    def test_unknown_command_fails_closed(self) -> None:
+        unknown_frame = {
+            "version": "vg.4",
+            "frameType": "command",
+            "frameId": uuidv7(),
+            "command": {
+                "name": "NonExistentCommand",
+                "commandId": "cmd-unknown",
+                "idempotencyKey": "idem-unknown",
+                "runId": "run-any",
+                "actor": "operator",
+                "payload": {},
+            },
+        }
+        res = self._client_send(unknown_frame)
+        self.assertEqual(res.get("receipt", {}).get("status"), "error")
+        self.assertIn("unknown command", res.get("receipt", {}).get("detail", ""))
+
 
 if __name__ == "__main__":
     unittest.main()

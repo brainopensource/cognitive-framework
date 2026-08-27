@@ -1,8 +1,5 @@
 // Contract & Parser
 export * from "./contract/types.js";
-export * from "./contract/command-envelope.js";
-export * from "./contract/stream-protocol.js";
-export * from "./contract/aether-client.js";
 export * from "./contract/parse.js";
 
 // Adapters & Signer

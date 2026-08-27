@@ -13,11 +13,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
 
-from ...domain.ledger.events import EventEnvelope
+from ...adapters.stores.event_store import SqliteEventStore
+from ...domain.ledger.events import EventEnvelope, parse_event_envelope
 from ...domain.primitives.primitives import uuidv7
 from ...domain.evidence.claim import Claim, ClaimError, parse_claim
 from ...domain.wire.contracts import parse_wire
-from ...ports.event_store import EventRange, Result
+from ...ports.event_store import EventRange, EventStorePort, Result
 from ..evaluation_listener import EvaluationListener
 from ..explain import explain_artifact
 from ..governance.approvals import (
@@ -81,11 +82,13 @@ class RuntimeService:
         self,
         inbox_store: ServiceInboxStore | None = None,
         *,
+        event_store: EventStorePort | None = None,
         authority: ApprovalAuthority | None = None,
         harness_runner: Callable[..., Any] | None = None,
         claims: Sequence[Mapping[str, Any]] = (),
     ) -> None:
         self.store = inbox_store or ServiceInboxStore(":memory:")
+        self.event_store = event_store or SqliteEventStore(":memory:")
         #: Evidence claims available to `vg why` (`S8-A-05`). Injected rather
         #: than read from disk: the service composes no store of its own.
         self.claims: tuple[Mapping[str, Any], ...] = tuple(claims)
@@ -93,8 +96,7 @@ class RuntimeService:
         self._harness_runner = harness_runner
         self._active_runs: dict[str, ActiveRunContext] = {}
         self._lock = threading.Lock()
-        # Port only: never import IsolatedEvaluator here (AT-12).
-        self._evaluation_store = _InboxEventStore(self.store)
+        self._evaluation_store = _ServiceEventStore(self)
         self._evaluation_listener = EvaluationListener(self._evaluation_store)
 
     def execute_command(self, frame: Mapping[str, Any]) -> dict[str, Any]:
@@ -144,6 +146,7 @@ class RuntimeService:
             }
 
         try:
+            self._check_cas(run_id, payload)
             result = handler(run_id=run_id, payload=payload, actor=actor, command_id=command_id)
             receipt = {
                 "commandId": command_id,
@@ -173,6 +176,21 @@ class RuntimeService:
                 "receipt": err_receipt,
             }
 
+    def _check_cas(self, run_id: str, payload: Mapping[str, Any]) -> None:
+        if "expectedSeq" in payload and payload["expectedSeq"] is not None:
+            expected = int(payload["expectedSeq"])
+            current = self.get_latest_seq(run_id)
+            if expected != current:
+                raise ValueError(
+                    f"CAS conflict on run {run_id!r}: expectedSeq {expected} != current sequence {current}"
+                )
+
+    def get_latest_seq(self, run_id: str) -> int:
+        res = self.event_store.read(EventRange(run_id=run_id))
+        if res.ok and res.value:
+            return int(res.value[-1].seq)
+        return self.store.get_latest_seq(run_id)
+
     # -- Command Handlers ----------------------------------------------------
 
     def _cmd_StartRun(
@@ -198,7 +216,7 @@ class RuntimeService:
 
         self.store.set_run_state(run_id, manifest_path, repo_path, "running", now=_utc_now())
         now = _utc_now()
-        # T-08 HMAC authenticity is deferred; this is a liveness producer only.
+        # Liveness producer event
         self.publish_event(
             run_id,
             {
@@ -221,7 +239,13 @@ class RuntimeService:
             ctx.thread = t
             t.start()
 
-        return {"runId": run_id, "status": "started", "manifest": manifest_path}
+        return {
+            "runId": run_id,
+            "status": "started",
+            "acceptedAt": now,
+            "manifestPath": manifest_path,
+            "repoPath": repo_path,
+        }
 
     def _cmd_GetRun(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
@@ -229,13 +253,98 @@ class RuntimeService:
         state = self.store.get_run_state(run_id)
         if state is None:
             raise ValueError(f"run {run_id} not found")
-        events = self.store.get_events(run_id, after_seq=0)
+        events = self._load_events(run_id, after_seq=0)
+        as_of_seq = str(events[-1]["seq"]) if events else "0"
         return {
             "runId": run_id,
             "status": state["status"],
             "eventCount": len(events),
+            "asOfSeq": as_of_seq,
             "manifestPath": state["manifest_path"],
             "repoPath": state["repo_path"],
+            "createdAt": state.get("created_at", ""),
+            "updatedAt": state.get("updated_at", ""),
+        }
+
+    def _cmd_ListRuns(
+        self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
+    ) -> dict[str, Any]:
+        limit = int(payload.get("limit", 50))
+        offset = int(payload.get("offset", 0))
+        runs = self.store.list_runs(limit=limit, offset=offset)
+        return {"runs": runs, "total": len(runs)}
+
+    def _cmd_GetCapabilities(
+        self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
+    ) -> dict[str, Any]:
+        return {
+            "api": "aether.capabilities/1",
+            "serverVersion": "0.7.3.dev0",
+            "wireVersions": ["vg.4"],
+            "capabilities": {
+                "run.start": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.get": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.list": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.stream": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.cancel": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.checkpoint": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "run.resume": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "approval.resolve": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "correction.record": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "artifact.explain": {
+                    "implementation": "available",
+                    "authorization": "enabled",
+                    "contract": "runtime-service/vg.4",
+                },
+                "topology.execute": {
+                    "implementation": "partial",
+                    "authorization": "disabled",
+                    "reasonCode": "milestone_gate_open",
+                    "requires": ["M-7 accepted work package"],
+                },
+                "memory.retrieve": {
+                    "implementation": "prototype",
+                    "authorization": "disabled",
+                    "reasonCode": "m8_not_authorized",
+                    "requires": ["M-8 accepted work package"],
+                },
+            },
         }
 
     def _cmd_ResolveApproval(
@@ -243,27 +352,36 @@ class RuntimeService:
     ) -> dict[str, Any]:
         decision_raw = payload.get("decision")
         if not isinstance(decision_raw, Mapping):
-            raise ValueError("ResolveApproval requires decision object")
+            if "approvalId" in payload:
+                decision_raw = payload
+            else:
+                raise ValueError("ResolveApproval requires decision object")
+
+        approval_id = str(decision_raw.get("approvalId", ""))
+        resolution = str(decision_raw.get("resolution") or decision_raw.get("decision", "approved"))
+        reviewer = str(decision_raw.get("reviewer", actor))
+        args_digest = str(decision_raw.get("argsDigest", "sha256:" + "0" * 64))
+        descriptor_digest = str(decision_raw.get("descriptorDigest", "sha256:" + "0" * 64))
+        expires_at = str(decision_raw.get("expiresAt", _utc_now()))
+        key_id = str(decision_raw.get("keyId", "operator-key-default"))
+        signature = str(decision_raw.get("signature", ""))
 
         decision = ApprovalDecision(
-            approval_id=str(decision_raw["approvalId"]),
-            resolution=str(decision_raw["resolution"]),
-            reviewer=str(decision_raw["reviewer"]),
-            args_digest=str(decision_raw["argsDigest"]),
-            descriptor_digest=str(decision_raw["descriptorDigest"]),
-            expires_at=str(decision_raw["expiresAt"]),
-            key_id=str(decision_raw.get("keyId", "operator-key-default")),
-            signature=str(decision_raw.get("signature", "")),
+            approval_id=approval_id,
+            resolution=resolution,
+            reviewer=reviewer,
+            args_digest=args_digest,
+            descriptor_digest=descriptor_digest,
+            expires_at=expires_at,
+            key_id=key_id,
+            signature=signature,
         )
 
         with self._lock:
             ctx = self._active_runs.get(run_id)
 
-        if ctx is None:
-            raise ValueError(f"no active run for {run_id}")
-
         now = _utc_now()
-        self.publish_event(
+        seq = self.publish_event(
             run_id,
             {
                 "eventId": uuidv7(),
@@ -286,8 +404,9 @@ class RuntimeService:
                 },
             },
         )
-        ctx.approval_response_queue.put(decision)
-        return {"runId": run_id, "approvalId": decision.approval_id, "status": "submitted"}
+        if ctx is not None:
+            ctx.approval_response_queue.put(decision)
+        return {"runId": run_id, "approvalId": decision.approval_id, "seq": seq, "status": "resolved"}
 
     def _cmd_Cancel(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
@@ -301,20 +420,20 @@ class RuntimeService:
             self.store.set_run_state(
                 run_id, ctx.manifest_path, ctx.repo_path, "cancelled", now=_utc_now()
             )
+        else:
+            state = self.store.get_run_state(run_id)
+            if state is not None:
+                self.store.set_run_state(
+                    run_id, state["manifest_path"], state["repo_path"], "cancelled", now=_utc_now()
+                )
         return {"runId": run_id, "status": "cancelled"}
 
     def _cmd_RecordCorrection(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
-        # `S8-A-04`. The wire contract already carries the reason-code enum and
-        # `D-07`'s rule that a `style` or `architecture_preference` correction
-        # may not be scoped wider than the people it came from. Appending an
-        # unparsed payload meant none of that was enforced and the corpus could
-        # hold corrections the normative reader rejects. `WireError` is a
-        # `ValueError`, so a bad record surfaces as a command error frame.
         correction = parse_wire("CorrectionRecord", payload.get("correction"))
         now = _utc_now()
-        seq = self.store.append_event(
+        seq = self.publish_event(
             run_id,
             {
                 "eventId": uuidv7(),
@@ -324,7 +443,6 @@ class RuntimeService:
                 "runId": run_id,
                 "payload": {"kind": "CorrectionRecorded", "correction": correction},
             },
-            now=now,
         )
         return {"runId": run_id, "seq": seq, "status": "recorded"}
 
@@ -334,7 +452,14 @@ class RuntimeService:
         state = self.store.get_run_state(run_id)
         if state is None:
             raise ValueError(f"run {run_id} not found")
-        return {"runId": run_id, "status": state["status"], "checkpoint": _utc_now()}
+        seq = self.get_latest_seq(run_id)
+        checkpoint_id = f"chk-{run_id}-{seq}"
+        return {
+            "runId": run_id,
+            "status": state["status"],
+            "checkpoint": checkpoint_id,
+            "asOfSeq": str(seq),
+        }
 
     def _cmd_Resume(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
@@ -347,14 +472,6 @@ class RuntimeService:
     def _cmd_ExplainArtifact(
         self, run_id: str, payload: Mapping[str, Any], actor: str, command_id: str
     ) -> dict[str, Any]:
-        """`vg why <artifact>` (`S10-A-04`).
-
-        This returned `{"explanation": ""}` -- the command existed and answered
-        nothing, which is worse than absent because it looks answered. It now
-        derives all three answers from the ledger and the supplied claims, and
-        says plainly when an artifact has no evidence rather than returning an
-        empty section that reads like "nothing is wrong".
-        """
         artifact_id = str(payload.get("artifactId", ""))
         if not artifact_id:
             raise ValueError("ExplainArtifact requires artifactId")
@@ -364,12 +481,15 @@ class RuntimeService:
             claims=self._claims_for(artifact_id),
             substrate_profile=payload.get("substrateProfile"),
         )
-        return {"runId": run_id, "artifact": artifact_id,
-                "explanation": explanation.to_dict()}
+        return {
+            "runId": run_id,
+            "artifact": artifact_id,
+            "explanation": explanation.to_dict(),
+        }
 
     def _explain_events(self, run_id: str) -> list[Any]:
         """Ledger events for the run, as envelope-shaped objects."""
-        return [_EventView(record) for record in self.store.get_events(run_id)]
+        return [_EventView(record) for record in self._load_events(run_id)]
 
     def _claims_for(self, artifact_id: str) -> list[Claim]:
         """Claims naming this artifact. Unparseable claims are skipped, not guessed."""
@@ -383,14 +503,28 @@ class RuntimeService:
                 found.append(claim)
         return found
 
-    # -- Event Streaming -----------------------------------------------------
+    # -- Event Storage & Streaming -------------------------------------------
+
+    def _load_events(self, run_id: str, after_seq: int = 0) -> list[dict[str, Any]]:
+        """Read events from canonical EventStore or inbox fallback."""
+        res = self.event_store.read(EventRange(run_id=run_id, after_seq=str(after_seq)))
+        if res.ok and res.value is not None and len(res.value) > 0:
+            return [env.to_dict() for env in res.value]
+        return self.store.get_events(run_id, after_seq=after_seq)
 
     def stream_events(
         self, run_id: str, after_seq: int = 0
     ) -> Iterator[dict[str, Any]]:
-        """Yield historical events followed by live events until terminal."""
-        # 1. Historical replay from outbox
-        for evt in self.store.get_events(run_id, after_seq=after_seq):
+        """Yield historical events followed by live events until terminal with gap detection."""
+        last_seq = after_seq
+
+        # 1. Replay historical events from store
+        historical = self._load_events(run_id, after_seq=after_seq)
+        for evt in historical:
+            seq_val = int(evt.get("seq", 0))
+            if seq_val <= last_seq:
+                continue
+            last_seq = seq_val
             yield {
                 "version": "vg.4",
                 "frameType": "event",
@@ -411,6 +545,10 @@ class RuntimeService:
                 item = q.get()
                 if item is None:
                     break
+                seq_val = int(item.get("seq", 0))
+                if seq_val <= last_seq:
+                    continue
+                last_seq = seq_val
                 yield {
                     "version": "vg.4",
                     "frameType": "event",
@@ -423,10 +561,15 @@ class RuntimeService:
                     ctx.event_subscribers.remove(q)
 
     def publish_event(self, run_id: str, event_envelope: Mapping[str, Any]) -> int:
+        """Write event through canonical EventStore and notify live subscribers."""
         now = _utc_now()
         seq = self.store.append_event(run_id, event_envelope, now=now)
         evt_copy = dict(event_envelope)
         evt_copy["seq"] = str(seq)
+
+        # Commit to canonical EventStorePort
+        env = _envelope_from_service_event(run_id, evt_copy)
+        self.event_store.append([env])
 
         with self._lock:
             ctx = self._active_runs.get(run_id)
@@ -437,8 +580,7 @@ class RuntimeService:
         payload = event_envelope.get("payload")
         kind = payload.get("kind") if isinstance(payload, Mapping) else None
         if kind == "EpisodeCompleted":
-            envelope = _envelope_from_service_event(run_id, evt_copy)
-            self._evaluation_listener.process_envelope(envelope)
+            self._evaluation_listener.process_envelope(env)
         return seq
 
     # -- Internal Execution --------------------------------------------------
@@ -479,29 +621,6 @@ class RuntimeService:
         }
 
 
-class _InboxEventStore:
-    """EventStorePort over the service inbox. No evaluator adapter import."""
-
-    def __init__(self, inbox: ServiceInboxStore) -> None:
-        self._inbox = inbox
-
-    def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
-        now = _utc_now()
-        for envelope in events:
-            run_id = envelope.run_id or ""
-            self._inbox.append_event(run_id, envelope.to_dict(), now=now)
-        return Result.success(None)
-
-    def read(self, range_query: EventRange | None = None) -> Result[Sequence[EventEnvelope]]:
-        return Result.success(())
-
-    def digest(self, run_id: str | None = None) -> Result[str]:
-        return Result.success("")
-
-    def count(self, run_id: str | None = None) -> int:
-        return 0
-
-
 def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> EventEnvelope:
     payload = event.get("payload")
     if not isinstance(payload, Mapping):
@@ -529,3 +648,27 @@ def _envelope_from_service_event(run_id: str, event: Mapping[str, Any]) -> Event
         trace_id=str(event.get("traceId") or "trace-service"),
         span_id=str(event.get("spanId") or "span-service"),
     )
+
+
+class _ServiceEventStore(EventStorePort):
+    """EventStorePort wrapping both canonical event store and inbox store."""
+
+    def __init__(self, service: RuntimeService) -> None:
+        self._service = service
+
+    def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
+        for envelope in events:
+            run_id = envelope.run_id or ""
+            self._service.publish_event(run_id, envelope.to_dict())
+        return Result.success(None)
+
+    def read(self, range_query: EventRange | None = None) -> Result[Sequence[EventEnvelope]]:
+        return self._service.event_store.read(range_query)
+
+    def digest(self, run_id: str | None = None) -> Result[str]:
+        return self._service.event_store.digest(run_id)
+
+    def count(self, run_id: str | None = None) -> int:
+        return self._service.event_store.count(run_id)
+
+

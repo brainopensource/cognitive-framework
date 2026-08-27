@@ -189,6 +189,20 @@ class ServiceInboxStore:
                 (run_id, manifest_path, repo_path, status, now, now),
             )
 
+    def list_runs(self, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
+        with self._conn:
+            cur = self._conn.cursor()
+            cur.execute(
+                """
+                SELECT run_id, manifest_path, repo_path, status, created_at, updated_at
+                FROM active_runs
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """,
+                (limit, offset),
+            )
+            return [dict(row) for row in cur.fetchall()]
+
     def get_run_state(self, run_id: str) -> dict[str, Any] | None:
         with self._conn:
             cur = self._conn.cursor()
@@ -198,5 +212,13 @@ class ServiceInboxStore:
                 return None
             return dict(row)
 
+    def get_latest_seq(self, run_id: str) -> int:
+        with self._conn:
+            cur = self._conn.cursor()
+            cur.execute("SELECT COALESCE(MAX(seq), 0) FROM event_outbox WHERE run_id = ?", (run_id,))
+            row = cur.fetchone()
+            return int(row[0]) if row else 0
+
     def close(self) -> None:
         self._conn.close()
+

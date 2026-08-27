@@ -44,14 +44,12 @@ TIER_ALIASES = {
     "tier-2": 2,
     "mock-tier-2": 2,
     # Tier 3: Strong Flash / Mid
-    "deepseek/deepseek-chat": 3,
-    "google/gemini-2.0-flash-001": 3,
-    "qwen/qwen-2.5-72b-instruct": 3,
+    "deepseek/deepseek-v4-flash-0731": 3,
     "tier-3": 3,
     "mock-tier-3": 3,
     # Tier 4: Frontier SOTA
-    "anthropic/claude-3.5-sonnet": 4,
-    "openai/gpt-4o": 4,
+    "deepseek/deepseek-v4-flash-0731": 4,
+    "z-ai/glm-5.3-flash": 4,
     "tier-4": 4,
     "mock-tier-4": 4,
 }

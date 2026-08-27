@@ -24,7 +24,6 @@
     "tencent/hy3-preview",
     "qwen/qwen3-next-80b-a3b-thinking",
     "upstage/solar-pro-3"
-
   ],
   "high": [
     "openai/gpt-5.6-luna",
@@ -32,7 +31,6 @@
     "xiaomi/mimo-v2.5-pro",
     "minimax/minimax-m3",
     "z-ai/glm-5.2"
-    
   ],
   "testing": [
     "openrouter/free",

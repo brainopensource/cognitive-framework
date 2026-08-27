@@ -22,6 +22,12 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from benchmarks.swe_bench.challenges import CHALLENGES
 from vanguard.packages.adapters.models.env_loader import load_api_key
+from vanguard.packages.runtime.compose import TaskContext
+from vanguard.packages.runtime.root import Runtime
+from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
+from vanguard.packages.runtime.governance.approvals import OperatorSigner
+from vanguard.packages.adapters.models.openrouter import OpenRouterModel
+from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 
 
 def setup_challenge(challenge_id: str, scratch_dir: Path) -> None:
@@ -88,28 +94,47 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
     try:
         setup_challenge(challenge_id, scratch_dir)
         
-        # Prepare request for entrypoint
-        req = {
-            "command": "code",
-            "brief": f"Please complete the task defined in TASK.md.",
-            "workspace": str(scratch_dir),
-            "plannerModel": model,
-            "profile": "product",
-            "interactive": False,
-        }
+        api_key = os.environ.get("OPENROUTER_API_KEY", "")
         
+        task = TaskContext(
+            brief=challenge.brief,
+            repo_path=scratch_dir,
+            run_id=f"run-{challenge_id}",
+            episode_id=f"episode-{challenge_id}",
+            project_id="swe-challenge",
+            max_turns=20,
+        )
+        
+        seed_key = b"vanguard-autonomous-operator-seed-key"
+        grant = create_autonomous_grant(
+            scratch_dir,
+            allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
+            max_turns=20,
+            max_attempts=1,
+            seed_key=seed_key,
+        )
+        signer = OperatorSigner(seed_key)
+        model_obj = OpenRouterModel(model=model, stream=False, environ={"OPENROUTER_API_KEY": api_key})
+        manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
+        db_path = scratch_dir / ".vanguard" / "events.sqlite3"
+        blob_path = scratch_dir / ".vanguard" / "blobs"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        blob_path.mkdir(parents=True, exist_ok=True)
+
         print(f"Running Vanguard engine with model {model}...")
         t0 = time.time()
         
-        proc = subprocess.Popen(
-            [sys.executable, "-m", "vanguard.packages.runtime.entrypoint", "--stdin-json"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=sys.stderr,
-            text=True,
-            cwd=_REPO_ROOT
+        result = Runtime.execute_profiled(
+            manifest_path,
+            task,
+            profile_id="product",
+            model=model_obj,
+            store_path=str(db_path),
+            blobs=FileBlobStore(blob_path),
+            interactive=True,
+            approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+            approval_key=signer.public_bytes,
         )
-        out, _ = proc.communicate(json.dumps(req) + "\n")
         
         elapsed = time.time() - t0
         
@@ -117,16 +142,10 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
         turns = 0
         tokens = 0
         cost = 0
-        if out:
-            try:
-                result_data = json.loads(out.strip().splitlines()[-1])
-                res = result_data.get("result", {})
-                turns = res.get("turns", 0)
-                tokens = res.get("promptTokens") or 0
-                tokens += res.get("completionTokens") or 0
-                cost = res.get("spentUsdMicros") or 0
-            except Exception as e:
-                print(f"Failed to parse output: {e}", file=sys.stderr)
+        if result and getattr(result, "telemetry", None):
+            turns = getattr(result.telemetry, "turns", 0)
+            tokens = getattr(result.telemetry, "total_tokens", None) or 0
+            cost = getattr(result.telemetry, "usd_micros", None) or 0
 
         print("Evaluating oracle...")
         passed = evaluate_oracle(challenge_id, scratch_dir)

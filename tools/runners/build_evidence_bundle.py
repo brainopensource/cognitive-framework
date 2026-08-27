@@ -209,9 +209,87 @@ def build_m6(producer: str, falsifier_report: Mapping[str, Any]) -> EvidenceEnve
     )
 
 
+def build_m5b(producer: str, *, private_key_bytes: bytes | None = None) -> EvidenceEnvelope:
+    """M-5b formal generality evidence over graph-coloring domain and baseline forensics."""
+    surface = {
+        name: digest_of({"src": (_REPO_ROOT / name).read_text(encoding="utf-8")})
+        for name in (
+            "packs/formal-graph-coloring/manifest.json",
+            "packs/formal-graph-coloring/tasks/registry.json",
+            "packs/formal-graph-coloring/tasks/gc-001.graph.json",
+            "packs/formal-graph-coloring/tasks/gc-001.witness.json",
+            "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py",
+            "vanguard/packages/domain/evidence/baseline.py",
+            "schemas/mhf/baseline.schema.json",
+            "test/falsifiers/test_m5a_baseline_forensics.py",
+            "test/contracts/test_baseline_manifest_verifier.py",
+            "test/falsifiers/test_graph_coloring_material_run.py",
+            "test/falsifiers/test_graph_coloring_signed_verdict.py",
+            "test/falsifiers/test_rf98_kernel_neutrality.py",
+        )
+    }
+
+    envelope = EvidenceEnvelope(
+        claim="M-5b",
+        protocol="aether.m5b.formal-generality-proof/1",
+        subjects=("package:WP-B1", "milestone:M-5b", "milestone:M-5a"),
+        materials=tuple(
+            Material(name=name, digest=digest, ref=name)
+            for name, digest in sorted(surface.items())
+        ),
+        run={
+            "domain": "formal-graph-coloring",
+            "exteriorOracle": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py",
+            "evaluatedVectors": [
+                "gc-001.witness.json",
+                "gc-001.invalid-edge-conflict.json",
+                "gc-001.invalid-incomplete.json",
+                "gc-001.invalid-range.json",
+                "gc-001.invalid-malformed.json",
+                "gc-001.invalid-duplicate.json",
+                "gc-001.invalid-disordered-graph.json",
+            ],
+            "evaluatorDaemonProtocol": "formal-graph-coloring-v1",
+            "evaluatorVerdictSigned": True,
+            "contaminatedBaseline": {
+                "ref": "M-5A-BASE-v2",
+                "disposition": "CONTAMINATED_UNPUBLISHED",
+                "forensicsVerified": True,
+            },
+            "successorBaseline": {
+                "id": "CONVERGENCE-BASE-v1",
+                "status": "PENDING_LEADERSHIP_REMOTE_TAG",
+            },
+            "kernelNeutrality": {
+                "status": "neutral",
+                "leaks": [],
+            },
+        },
+        pins=_pins(),
+        environment=_environment(),
+        outcome="undeterminable",
+        producer=Producer(identity=producer, key_id=f"{producer}-key"),
+        detail=(
+            "Graph coloring material domain, exterior oracle, and daemon signature are verified; "
+            "M-5A-BASE-v2 is verified CONTAMINATED_UNPUBLISHED; outcome is recorded undeterminable "
+            "pending Leadership creation and remote resolution of the CONVERGENCE-BASE-v1 successor baseline tag."
+        ),
+    )
+
+    if private_key_bytes:
+        import base64
+        from dataclasses import replace
+        from cryptography.hazmat.primitives.asymmetric import ed25519
+
+        priv = ed25519.Ed25519PrivateKey.from_private_bytes(private_key_bytes)
+        sig = priv.sign(envelope.signable_bytes())
+        envelope = replace(envelope, signature=base64.b64encode(sig).decode("ascii"))
+    return envelope
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--claim", choices=("M-4", "M-6"), required=True)
+    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b"), required=True)
     parser.add_argument("--ledger", type=str, default="")
     parser.add_argument("--prereg", type=str, default="")
     parser.add_argument("--producer", type=str, default="dev-a")
@@ -225,12 +303,14 @@ def main() -> int:
             raise SystemExit("M-4 requires --ledger and --prereg")
         envelope = build_m4(Path(args.ledger), Path(args.prereg).resolve(),
                             args.producer)
-    else:
+    elif args.claim == "M-6":
         envelope = build_m6(args.producer, {
             "suite": "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
             "run": args.falsifier_run,
             "failures": args.falsifier_failures,
         })
+    elif args.claim == "M-5b":
+        envelope = build_m5b(args.producer, private_key_bytes=b"m5b-dev-b-producer-signer-key-32")
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -245,3 +325,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

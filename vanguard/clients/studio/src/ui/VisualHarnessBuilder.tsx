@@ -23,7 +23,8 @@ type HarnessConfig = {
 };
 
 const AVAILABLE_MODELS = [
-  { id: "anthropic/claude-3-7-sonnet", name: "Claude 3.7 Sonnet (Frontier Reasoning)", local: false },
+  { id: "openrouter/free", name: "OpenRouter Free (Default Route)", local: false },
+  { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash (Low-Cost Paid)", local: false },
   { id: "deepseek/deepseek-r1", name: "DeepSeek R1 (Open Weights Reasoning)", local: false },
   { id: "ollama/qwen2.5-coder:14b", name: "Ollama Qwen 2.5 Coder 14B (Sub-100ms Local Reflex)", local: true },
   { id: "cassette/recorded-fixture", name: "Cassette Replay Double (Hermetic Zero-Cost)", local: true },
@@ -45,7 +46,7 @@ export const VisualHarnessBuilder: React.FC<{ readonly fold: StudioFold }> = ({ 
     name: "vg-coding-autonomous",
     version: "0.7.2",
     description: "Autonomous coding harness with surgical diffs and exterior test evaluation.",
-    model: "anthropic/claude-3-7-sonnet",
+    model: "openrouter/free",
     temperature: 0.2,
     maxTokens: 32000,
     reasoningEffort: "high",

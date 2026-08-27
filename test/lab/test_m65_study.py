@@ -190,16 +190,10 @@ class HolmBonferroniControlsTheFamily(unittest.TestCase):
                          {"a": True, "b": True, "c": True})
 
     def test_a_failure_stops_the_step_down(self) -> None:
-        # Holm is a step-down procedure: the first hypothesis that fails its
-        # threshold stops the procedure, and every larger p-value fails with
-        # it -- even one that would have cleared plain alpha on its own.
         self.assertEqual(holm_bonferroni({"a": 0.04, "b": 0.03}),
                          {"b": False, "a": False})
 
     def test_the_step_down_is_more_powerful_than_plain_bonferroni(self) -> None:
-        # p=0.04 would fail Bonferroni's 0.05/2 = 0.025 outright; under Holm
-        # it is tested against 0.05 once the stricter hypothesis has been
-        # rejected. That extra power is the reason for choosing Holm.
         self.assertEqual(holm_bonferroni({"a": 0.04, "b": 0.001}),
                          {"b": True, "a": True})
 
@@ -208,5 +202,107 @@ class HolmBonferroniControlsTheFamily(unittest.TestCase):
         self.assertEqual(holm_bonferroni({"only": 0.051}), {"only": False})
 
 
+class TheRegressionBudgetIsEnforced(unittest.TestCase):
+    def test_regression_beyond_budget_ceiling_is_flagged(self) -> None:
+        from lab.m65_study import RegressionBudget
+
+        floor = _floor(40)
+        # Baseline won 30 tasks, treatment won only 10 (20 baseline-only drops = 50% regression)
+        base = _runs("off", [True] * 30 + [False] * 10)
+        treat = _runs("on", [False] * 30 + [True] * 10, directives=2)
+        budget = RegressionBudget(max_baseline_success_drop=0.0)
+        report = run_study(base, treat, family=FAMILY, baseline_tuple=BASE_TUPLE,
+                           treatment_tuple=TREAT_TUPLE, noise_floor=floor,
+                           regression_budget=budget)
+        self.assertEqual(report.verdict, "regression")
+        self.assertIn("regressed on baseline success", report.rationale)
+        self.assertFalse(report.controller_enabled_by_default)
+
+
+class PerturbationKeyBindsSemanticCheckpoints(unittest.TestCase):
+    def test_perturbation_key_binds_semantic_checkpoint_ref_never_turn_index(self) -> None:
+        from lab.m65_study import perturbation_key
+        from vanguard.packages.domain.ledger.progress import SemanticCheckpointRef
+
+        cp1 = SemanticCheckpointRef(run_id="r1", episode_id="ep1", epoch=0, attempt=0)
+        cp2 = SemanticCheckpointRef(run_id="r1", episode_id="ep1", epoch=0, attempt=1)
+
+        key1 = perturbation_key("sha256:task", 42, cp1, attempt_ordinal=0)
+        key2 = perturbation_key("sha256:task", 42, cp2, attempt_ordinal=1)
+        self.assertNotEqual(key1, key2)
+
+        # Same key is 100% deterministic replay
+        key1_again = perturbation_key("sha256:task", 42, cp1, attempt_ordinal=0)
+        self.assertEqual(key1, key1_again)
+
+    def test_semantic_checkpoint_ref_rejects_negative_epoch_or_attempt(self) -> None:
+        from vanguard.packages.domain.ledger.progress import SemanticCheckpointRef
+
+        with self.assertRaises(ValueError):
+            SemanticCheckpointRef(run_id="r", episode_id="ep", epoch=-1, attempt=0)
+        with self.assertRaises(ValueError):
+            SemanticCheckpointRef(run_id="r", episode_id="ep", epoch=0, attempt=-1)
+        with self.assertRaises(ValueError):
+            SemanticCheckpointRef(run_id="", episode_id="ep")
+
+
+class TheStochasticStudyMeetsAllMilestoneRequirements(unittest.TestCase):
+    def test_benchmark_task_suite_has_at_least_20_tasks_and_4_block_types(self) -> None:
+        from lab.m65_tasks import generate_m65_task_suite
+        from vanguard.packages.adapters.models.stochastic import RECOVERABLE_BLOCK_TYPES
+
+        suite = generate_m65_task_suite(24)
+        self.assertGreaterEqual(len(suite), 20)
+        block_types = {t.block_type for t in suite}
+        self.assertEqual(block_types, RECOVERABLE_BLOCK_TYPES)
+        self.assertGreaterEqual(len(block_types), 4)
+
+        for task in suite:
+            self.assertTrue(task.digest().startswith("sha256:"))
+
+    def test_full_stochastic_study_executes_at_least_60_pairs_with_valid_floor(self) -> None:
+        from lab.m65_study import execute_stochastic_m65_study
+
+        report, floor = execute_stochastic_m65_study()
+        self.assertGreaterEqual(floor.pairs, 60)
+        self.assertFalse(floor.preliminary)
+        self.assertGreater(floor.discordance_rate, 0.0)
+        self.assertLess(floor.discordance_rate, 1.0)
+        self.assertGreater(floor.success_rate, 0.0)
+        self.assertLess(floor.success_rate, 1.0)
+
+        # Verification of study report
+        self.assertIn(report.verdict, {"improvement", "no_effect", "regression"})
+        self.assertIn("turns", report.effect_intervals)
+        self.assertIn("repeat_loops", report.effect_intervals)
+        self.assertIn("wasted_loops", report.effect_intervals)
+        self.assertIn("cost_usd_micros", report.effect_intervals)
+        self.assertIn("latency_millis", report.effect_intervals)
+
+
+class EvidenceEnvelopeIsSignedAndAttributable(unittest.TestCase):
+    def test_evidence_envelope_builds_and_signs_properly(self) -> None:
+        from lab.m65_study import build_m65_evidence_envelope, execute_stochastic_m65_study
+        from vanguard.packages.domain.evidence.envelope import parse_envelope
+        from vanguard.packages.runtime.governance.approvals import OperatorSigner
+
+        report, _ = execute_stochastic_m65_study()
+        signer = OperatorSigner(b"m65-unit-test-signing-key")
+        envelope = build_m65_evidence_envelope(report, signer=signer)
+
+        self.assertEqual(envelope.claim, "M-6.5")
+        self.assertEqual(envelope.protocol, "aether.m65.attributable-paired-study/1")
+        self.assertIn("package:WP-B2", envelope.subjects)
+        self.assertTrue(envelope.signature)
+        self.assertTrue(len(envelope.signature) >= 64)
+
+        # Roundtrip parse
+        wire = envelope.to_wire()
+        parsed = parse_envelope(wire)
+        self.assertEqual(parsed.digest(), envelope.digest())
+        self.assertEqual(parsed.signature, envelope.signature)
+
+
 if __name__ == "__main__":
     unittest.main()
+

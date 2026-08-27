@@ -13,6 +13,19 @@ _LAZY = {
     "ModelInvocation": ".invocation", "ProposalTranslator": ".invocation",
     "LamModelAdapter": ".lam",
     "OllamaModel": ".ollama",
+    "StochasticModelAdapter": ".stochastic",
+    "perturbation_key": ".stochastic",
+    "RECOVERABLE_BLOCK_TYPES": ".stochastic",
+    "get_default_model": ".config",
+    "get_default_paid_model": ".config",
+    "get_free_model": ".config",
+    "get_medium_model": ".config",
+    "get_high_model": ".config",
+    "get_testing_model": ".config",
+    "get_band_models": ".config",
+    "get_pricing_micros_table": ".config",
+    "get_pricing_usd_table": ".config",
+    "load_model_registry": ".config",
 }
 
 def __getattr__(name):
@@ -33,5 +46,7 @@ if TYPE_CHECKING:                    # keep static analysis and IDEs working
     from .invocation import ModelInvocation, ProposalTranslator
     from .lam import LamModelAdapter
     from .ollama import OllamaModel
+    from .stochastic import RECOVERABLE_BLOCK_TYPES, StochasticModelAdapter, perturbation_key
+
 
 __all__ = list(_LAZY)

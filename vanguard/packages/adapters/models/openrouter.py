@@ -41,62 +41,12 @@ __all__ = [
 
 DEFAULT_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_KEY_REF = "OPENROUTER_API_KEY"
-DEFAULT_MODEL = "openai/gpt-4o-mini"
+from .config import get_pricing_usd_table, get_pricing_micros_table, get_default_model
 
-# Pricing per 1,000,000 tokens (USD): (prompt_per_1m, completion_per_1m, cached_prompt_per_1m)
-MODEL_PRICING: dict[str, tuple[float, float, float]] = {
-    # OpenRouter Verified Free Models ($0.00)
-    "openrouter/free": (0.0, 0.0, 0.0),
-    "inclusionai/ling-3.0-tiny:free": (0.0, 0.0, 0.0),
-    "poolside/laguna-s-2.1:free": (0.0, 0.0, 0.0),
-    "cohere/north-mini-code:free": (0.0, 0.0, 0.0),
-    "google/gemma-4-26b-a4b-it:free": (0.0, 0.0, 0.0),
-    "nvidia/nemotron-3-super-120b-a12b:free": (0.0, 0.0, 0.0),
-    "openai/gpt-oss-20b:free": (0.0, 0.0, 0.0),
-    # OpenRouter Verified Low-Cost Paid Models
-    "deepseek/deepseek-v4-flash": (0.14, 0.28, 0.014),
-    "deepseek/deepseek-v4-flash-0731": (0.14, 0.28, 0.014),
-    "xiaomi/mimo-v2.5": (0.10, 0.30, 0.01),
-    # OpenRouter Frontier Cloud Models
-    "z-ai/glm-5.2": (0.35, 1.40, 0.035),
-    "openai/gpt-5.6-luna": (1.00, 4.00, 0.25),
-    "deepseek/deepseek-v4-pro": (0.45, 1.80, 0.045),
-    "minimax/minimax-m3": (0.20, 0.80, 0.02),
-    # OpenAI & DeepSeek Direct
-    "openai/gpt-4o-mini": (0.15, 0.60, 0.075),
-    "gpt-4o": (2.50, 10.00, 1.25),
-    "openai/gpt-4o": (2.50, 10.00, 1.25),
-    "deepseek-reasoner": (0.55, 2.19, 0.14),
-    "deepseek-coder": (0.14, 0.28, 0.014),
-}
+DEFAULT_MODEL = get_default_model()
+MODEL_PRICING = get_pricing_usd_table()
+MODEL_PRICING_MICROS = get_pricing_micros_table()
 DEFAULT_MODEL_PRICING: tuple[float, float, float] = (0.14, 0.28, 0.014)
-
-# Integer USD micros per 1,000,000 tokens: (prompt_micros_per_1m, completion_micros_per_1m, cached_prompt_micros_per_1m)
-MODEL_PRICING_MICROS: dict[str, tuple[int, int, int]] = {
-    # OpenRouter Verified Free Models ($0.00)
-    "openrouter/free": (0, 0, 0),
-    "inclusionai/ling-3.0-tiny:free": (0, 0, 0),
-    "poolside/laguna-s-2.1:free": (0, 0, 0),
-    "cohere/north-mini-code:free": (0, 0, 0),
-    "google/gemma-4-26b-a4b-it:free": (0, 0, 0),
-    "nvidia/nemotron-3-super-120b-a12b:free": (0, 0, 0),
-    "openai/gpt-oss-20b:free": (0, 0, 0),
-    # OpenRouter Verified Low-Cost Paid Models
-    "deepseek/deepseek-v4-flash": (140_000, 280_000, 14_000),
-    "deepseek/deepseek-v4-flash-0731": (140_000, 280_000, 14_000),
-    "xiaomi/mimo-v2.5": (100_000, 300_000, 10_000),
-    # OpenRouter Frontier Cloud Models
-    "z-ai/glm-5.2": (350_000, 1_400_000, 35_000),
-    "openai/gpt-5.6-luna": (1_000_000, 4_000_000, 250_000),
-    "deepseek/deepseek-v4-pro": (450_000, 1_800_000, 45_000),
-    "minimax/minimax-m3": (200_000, 800_000, 20_000),
-    # OpenAI & DeepSeek Direct
-    "openai/gpt-4o-mini": (150_000, 600_000, 75_000),
-    "gpt-4o": (2_500_000, 10_000_000, 1_250_000),
-    "openai/gpt-4o": (2_500_000, 10_000_000, 1_250_000),
-    "deepseek-reasoner": (550_000, 2_190_000, 140_000),
-    "deepseek-coder": (140_000, 280_000, 14_000),
-}
 DEFAULT_MODEL_PRICING_MICROS: tuple[int, int, int] = (140_000, 280_000, 14_000)
 
 

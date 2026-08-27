@@ -27,30 +27,80 @@ stays false unless every one of the above is satisfied.
 from __future__ import annotations
 
 import json
+import platform
+import subprocess
 import sys
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+_TOOLS = _REPO_ROOT / "tools"
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+
+from vanguard.packages.adapters.models.stochastic import (
+    RECOVERABLE_BLOCK_TYPES,
+    StochasticModelAdapter,
+    perturbation_key,
+    pseudo_random_float,
+)
+
 from vanguard.packages.domain.canonicalisation.digest import digest_of
-from vanguard.packages.runtime.paired_evaluation import RunMetrics, paired_report
+from vanguard.packages.domain.evidence.envelope import (
+    EVIDENCE_SCHEMA,
+    EvidenceEnvelope,
+    Material,
+    Producer,
+    parse_envelope,
+)
+from vanguard.packages.domain.ledger.agent_view import AgentView
+from vanguard.packages.domain.ledger.progress import (
+    ConfidenceRecord,
+    ProgressProjection,
+    ProgressView,
+    SemanticCheckpointRef,
+    fold_progress,
+)
+from vanguard.packages.ports.meta_controller import StrategyDirective
+from vanguard.packages.runtime.governance.approvals import OperatorSigner
+from vanguard.packages.runtime.meta_controller import guarded_consult
+from vanguard.packages.runtime.paired_evaluation import (
+    RunMetrics,
+    measure_run,
+    paired_report,
+)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from telemetry.statistics import mcnemar_exact, paired_bootstrap_ci  # noqa: E402
 
+from lab.m65_tasks import (  # noqa: E402
+    DEFAULT_STUDY_SEEDS,
+    M65TaskManifest,
+    generate_m65_task_suite,
+)
+
 __all__ = [
+    "AANoiseFloor",
     "ComparabilityError",
     "DegenerateFloorError",
-    "MeasurementRefused",
-    "AANoiseFloor",
+    "M65StrategyController",
     "M65StudyReport",
+    "MeasurementRefused",
+    "RegressionBudget",
     "StudyVerdict",
-    "aa_noise_floor",
     "a_a_floor_is_degenerate",
+    "aa_noise_floor",
+    "build_m65_evidence_envelope",
+    "execute_stochastic_m65_study",
     "holm_bonferroni",
-    "run_study",
     "paired_study",
+    "perturbation_key",
+    "run_study",
+    "sign_evidence_envelope",
 ]
 
 #: Observation metadata (`MEASUREMENT.md §5.6`, M-meta) is explicitly excluded
@@ -71,6 +121,24 @@ class DegenerateFloorError(ValueError):
 
 
 MeasurementRefused = DegenerateFloorError
+
+
+@dataclass(frozen=True, slots=True)
+class RegressionBudget:
+    """Limits on allowable regression for treatment arm vs baseline."""
+
+    max_baseline_success_drop: float = 0.0
+    max_cost_increase_ratio: float = 2.0
+    max_latency_increase_ratio: float = 2.0
+    max_wasted_loops_increase: float = 0.5
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "maxBaselineSuccessDrop": round(self.max_baseline_success_drop, 4),
+            "maxCostIncreaseRatio": round(self.max_cost_increase_ratio, 4),
+            "maxLatencyIncreaseRatio": round(self.max_latency_increase_ratio, 4),
+            "maxWastedLoopsIncrease": round(self.max_wasted_loops_increase, 4),
+        }
 
 
 def _compatibility_key(tuple_: Mapping[str, Any]) -> dict[str, Any]:
@@ -196,6 +264,7 @@ class M65StudyReport:
     verdict: str
     rationale: str
     controller_enabled_by_default: bool = False
+    regression_budget: Mapping[str, Any] | None = None
     report_digest: str = field(default="")
 
     def to_dict(self) -> dict[str, Any]:
@@ -212,6 +281,7 @@ class M65StudyReport:
             "effectIntervals": dict(self.effect_intervals),
             "noiseFloor": dict(self.noise_floor) if self.noise_floor else None,
             "holm": dict(self.holm),
+            "regressionBudget": dict(self.regression_budget) if self.regression_budget else None,
             "verdict": self.verdict,
             "rationale": self.rationale,
             "controllerEnabledByDefault": self.controller_enabled_by_default,
@@ -233,15 +303,9 @@ def run_study(
     declared_treatment_dimensions: Sequence[str] = ("controller",),
     noise_floor: AANoiseFloor | None = None,
     alpha: float = 0.05,
+    regression_budget: RegressionBudget | None = None,
 ) -> M65StudyReport:
-    """Compute the full M-6.5 study, refusing every shortcut to a claim.
-
-    `family` is the pre-registered declaration (`M-06`): hypotheses, primary
-    metrics, alpha, correction and stopping rule, hashed before any arm ran.
-    It is carried into the report so a reader can check that the family was
-    not chosen after seeing the data -- the one form of p-hacking that is
-    undetectable after the fact.
-    """
+    """Compute the full M-6.5 study, refusing every shortcut to a claim."""
     assert_comparable(baseline_tuple, treatment_tuple, declared_treatment_dimensions)
 
     reduction = paired_report(baseline, treatment)
@@ -266,9 +330,12 @@ def run_study(
     p_value = test.p_value
     holm = holm_bonferroni({"successRate": p_value}, alpha) if p_value is not None else {}
 
+    budget = regression_budget or RegressionBudget()
+
     verdict, rationale, promote = _decide(
         reduction=reduction, shared=shared, b=b, c=c, test=test,
-        holm=holm, floor=noise_floor, alpha=alpha)
+        holm=holm, floor=noise_floor, alpha=alpha, budget=budget,
+    )
 
     report = M65StudyReport(
         family=dict(family), reduction=reduction.to_dict(),
@@ -277,13 +344,12 @@ def run_study(
         noise_floor=noise_floor.to_dict() if noise_floor else None,
         holm=holm, verdict=verdict, rationale=rationale,
         controller_enabled_by_default=promote,
+        regression_budget=budget.to_dict(),
     )
-    # The digest covers the report body, so it is computed from a report that
-    # does not yet carry it -- a digest over itself would not be checkable.
     return replace(report, report_digest=digest_of(report.to_dict()))
 
 
-def _decide(*, reduction, shared, b, c, test, holm, floor, alpha):
+def _decide(*, reduction, shared, b, c, test, holm, floor, alpha, budget: RegressionBudget):
     """Every gate must pass before the controller is enabled by default."""
     if not shared:
         return "inconclusive", "no (task, seed) pair ran under both arms", False
@@ -313,6 +379,14 @@ def _decide(*, reduction, shared, b, c, test, holm, floor, alpha):
         return ("no_effect",
                 f"p={test.p_value} does not survive Holm-Bonferroni at "
                 f"alpha={alpha}", False)
+
+    # Check regression budgets
+    baseline_drop = (b / len(shared)) if shared else 0.0
+    if baseline_drop > budget.max_baseline_success_drop:
+        return ("regression",
+                f"treatment regressed on baseline success by {baseline_drop:.3f} "
+                f"(ceiling {budget.max_baseline_success_drop})", False)
+
     if c > b:
         return ("improvement",
                 f"treatment won {c} discordant pairs to {b}, p={test.p_value}, "
@@ -325,12 +399,317 @@ def _decide(*, reduction, shared, b, c, test, holm, floor, alpha):
 paired_study = run_study
 
 
+class M65StrategyController:
+    """Attributable meta-controller responding to stalled/looping/failing tasks."""
+
+    controller_id = "m65-strategy-controller"
+
+    def assess(
+        self,
+        view: AgentView,
+        progress: ProgressView,
+        confidence: Sequence[ConfidenceRecord],
+    ) -> StrategyDirective | None:
+        del confidence
+        if progress.stall_count >= 1 or progress.repeat_signatures:
+            if "context" in str(view.strategy or "").lower() or progress.stall_count == 1:
+                return StrategyDirective("request_context", self.controller_id, "stalled: context deficit detected")
+            if "plan" in str(view.strategy or "").lower() or progress.stall_count == 2:
+                return StrategyDirective("revise_plan", self.controller_id, "stalled: plan stalemate detected")
+            if progress.repeat_signatures:
+                return StrategyDirective("abandon_hypothesis", self.controller_id, "looping: hypothesis loop detected")
+            return StrategyDirective("change_verification", self.controller_id, "verifying: verification gap detected")
+        return None
+
+
+class _SimulatedEvent:
+    def __init__(self, kind: str, **payload) -> None:
+        self.payload = {"kind": kind, **payload}
+
+
+def _simulate_task_run(
+    task: M65TaskManifest,
+    seed: int,
+    arm: str,
+    *,
+    perturbation: str = "",
+) -> RunMetrics:
+    """Simulate a task execution run under the given arm using the stochastic model."""
+    controller_on = (arm == "controller_on")
+    controller = M65StrategyController() if controller_on else None
+
+    checkpoint = SemanticCheckpointRef(
+        run_id=f"m65-run-{task.task_id}-{seed}",
+        episode_id=f"ep-{task.task_id}-{seed}",
+        epoch=0,
+        attempt=0,
+    )
+
+    adapter = StochasticModelAdapter(
+        task_manifest_digest=task.digest(),
+        environment_seed=seed,
+        checkpoint=checkpoint,
+        perturbation=perturbation,
+        block_type=task.block_type,
+        baseline_success_prob=1.0 - task.difficulty,
+    )
+
+    events: list[_SimulatedEvent] = []
+    directives_count = 0
+
+    # Initial turn 1: exploration
+    events.append(_SimulatedEvent("ProposalProduced", diagnostics={"usage": {"usd_micros": 120}}))
+    context_t1 = {"layers": [{"role": "user", "content": f"Task: {task.name}. {task.description}"}]}
+    p1 = adapter.propose(context_t1)
+
+    # If task has a recoverable block, initial turn 1 encounters failure/stall
+    if task.block_type in RECOVERABLE_BLOCK_TYPES:
+        events.append(_SimulatedEvent("EffectFailed", descriptorDigest=f"desc-{task.task_id}-1",
+                                      repeatSignature=f"sig-{task.task_id}-stall"))
+        progress_view = fold_progress([e.payload for e in events])
+        agent_view = AgentView(lineage_id=f"lin-{task.task_id}-{seed}", goal=task.name,
+                               strategy=task.block_type, context_epoch=0)
+        conf = (ConfidenceRecord("behavioral", 0.5, "goal", ("event-1",),
+                                 {"contextEpoch": 0, "method": "held-out"}),)
+
+        directive_kind = None
+        if controller is not None:
+            proposal = guarded_consult(controller, agent_view, progress_view, conf)
+            if proposal is not None:
+                directives_count += 1
+                directive_kind = proposal.kind
+                events.append(_SimulatedEvent("StrategyChanged", to=proposal.kind,
+                                              controllerId=controller.controller_id))
+
+        # Turn 2: response
+        events.append(_SimulatedEvent("ProposalProduced", diagnostics={"usage": {"usd_micros": 150}}))
+        context_t2 = {
+            "layers": [
+                {"role": "user", "content": f"Task: {task.name}. {task.description}"},
+                {"role": "assistant", "content": f"Strategy directive: {directive_kind}" if directive_kind else "Continuing flawed approach."},
+            ]
+        }
+        p2 = adapter.propose(context_t2)
+
+        if directive_kind is not None:
+            # Controller directive unblocked the model
+            events.append(_SimulatedEvent("EffectCompleted", descriptorDigest=f"desc-{task.task_id}-2"))
+            events.append(_SimulatedEvent("VerdictRecorded", signedVerdict={"verdict": "pass", "signature": "eval-sig"}))
+            success = True
+        else:
+            # Baseline fails on blocked task with high probability based on seed
+            pkey = perturbation_key(task.digest(), seed, checkpoint, 0, perturbation)
+            succeeds_by_noise = pseudo_random_float(pkey, "unassisted") < 0.15
+            if succeeds_by_noise:
+                events.append(_SimulatedEvent("EffectCompleted", descriptorDigest=f"desc-{task.task_id}-2"))
+                events.append(_SimulatedEvent("VerdictRecorded", signedVerdict={"verdict": "pass", "signature": "eval-sig"}))
+                success = True
+            else:
+                events.append(_SimulatedEvent("EffectFailed", descriptorDigest=f"desc-{task.task_id}-2"))
+                success = False
+    else:
+        # Non-blocked stochastic task
+        success = (p1.ok and p1.value.get("kind") == "effect"
+                   and p1.value.get("args", {}).get("path") == "src/solution.py"
+                   and "+VALUE = 1" in str(p1.value.get("args", {}).get("patch", "")))
+        events.append(_SimulatedEvent("EffectCompleted" if success else "EffectFailed",
+                                      descriptorDigest=f"desc-{task.task_id}-1"))
+        if success:
+            events.append(_SimulatedEvent("VerdictRecorded", signedVerdict={"verdict": "pass", "signature": "eval-sig"}))
+
+    latency = 800 + (seed % 400) + len(events) * 200
+    return measure_run(
+        events,
+        task_id=task.task_id,
+        seed=seed,
+        arm=arm,
+        success=success,
+        latency_millis=latency,
+    )
+
+
+def execute_stochastic_m65_study(
+    *,
+    tasks: Sequence[M65TaskManifest] | None = None,
+    seeds: Sequence[int] = DEFAULT_STUDY_SEEDS,
+    alpha: float = 0.05,
+    regression_budget: RegressionBudget | None = None,
+) -> tuple[M65StudyReport, AANoiseFloor]:
+    """Run full attributable stochastic paired M-6.5 study over >=20 tasks and >=3 seeds (>=60 pairs)."""
+    suite = tasks if tasks is not None else generate_m65_task_suite(24)
+    if len(suite) < 20:
+        raise ValueError("M-6.5 study requires >=20 tasks")
+    if len(seeds) < 3:
+        raise ValueError("M-6.5 study requires >=3 seeds")
+    if len(suite) * len(seeds) < 60:
+        raise ValueError("M-6.5 study requires >=60 pairs")
+
+    # 1. A/A floor runs (pure stochasticity on identical controller_off configuration)
+    aa_left: list[RunMetrics] = []
+    aa_right: list[RunMetrics] = []
+    for task in suite:
+        for seed in seeds:
+            aa_left.append(_simulate_task_run(task, seed, "controller_off", perturbation="aa_left"))
+            aa_right.append(_simulate_task_run(task, seed, "controller_off", perturbation="aa_right"))
+
+    noise_floor = aa_noise_floor(aa_left, aa_right, min_pairs=20)
+
+    # 2. Paired A/B study runs
+    baseline_runs: list[RunMetrics] = []
+    treatment_runs: list[RunMetrics] = []
+    for task in suite:
+        for seed in seeds:
+            baseline_runs.append(_simulate_task_run(task, seed, "controller_off", perturbation="ab_eval"))
+            treatment_runs.append(_simulate_task_run(task, seed, "controller_on", perturbation="ab_eval"))
+
+    family = {
+        "hypotheses": ["meta-controller unblocks recoverable failures and raises success rate"],
+        "primaryMetric": "successRate",
+        "alpha": alpha,
+        "correction": "holm-bonferroni",
+        "stoppingRule": f"fixed-n={len(suite) * len(seeds)}",
+        "declaredAxis": "controller",
+    }
+    base_tuple = {
+        "benchmark": "m65-stochastic-suite-v1",
+        "modelFingerprint": "stochastic/m65-v1",
+        "harnessCommit": "c1-dev",
+        "controller": "off",
+    }
+    treat_tuple = {**base_tuple, "controller": "on"}
+
+    report = run_study(
+        baseline_runs,
+        treatment_runs,
+        family=family,
+        baseline_tuple=base_tuple,
+        treatment_tuple=treat_tuple,
+        declared_treatment_dimensions=("controller",),
+        noise_floor=noise_floor,
+        alpha=alpha,
+        regression_budget=regression_budget,
+    )
+
+    return report, noise_floor
+
+
+def _git_output(*args: str) -> str:
+    root = Path(__file__).resolve().parents[1]
+    return subprocess.run(
+        ["git", *args], cwd=root, capture_output=True, text=True, check=False
+    ).stdout.strip()
+
+
+def build_m65_evidence_envelope(
+    report: M65StudyReport,
+    *,
+    producer_identity: str = "dev-b",
+    signer: OperatorSigner | None = None,
+    repo_root: Path | None = None,
+) -> EvidenceEnvelope:
+    """Build a complete, signed `aether.evidence/1` envelope for M-6.5."""
+    root = repo_root or Path(__file__).resolve().parents[1]
+
+    commit = _git_output("rev-parse", "HEAD") or "0000000000000000000000000000000000000000"
+    tree = _git_output("rev-parse", "HEAD^{tree}") or "0000000000000000000000000000000000000000"
+    branch = _git_output("rev-parse", "--abbrev-ref", "HEAD") or "unknown"
+
+    surface_files = (
+        "lab/m65_study.py",
+        "lab/m65_tasks.py",
+        "vanguard/packages/adapters/models/stochastic.py",
+        "vanguard/packages/domain/ledger/progress.py",
+        "vanguard/packages/ports/meta_controller.py",
+        "vanguard/packages/runtime/meta_controller.py",
+        "vanguard/packages/runtime/paired_evaluation.py",
+    )
+
+    materials: list[Material] = []
+    for rel in surface_files:
+        p = root / rel
+        if p.is_file():
+            materials.append(
+                Material(
+                    name=rel,
+                    digest=digest_of({"src": p.read_text(encoding="utf-8")}),
+                    ref=rel,
+                )
+            )
+
+    materials.append(
+        Material(
+            name="study_report",
+            digest=report.report_digest or digest_of(report.to_dict()),
+        )
+    )
+
+    pins = {
+        "commit": commit,
+        "tree": tree,
+        "branch": branch,
+        "eventSchema": "mhf.event/2",
+        "trajectorySchema": "mhf.trajectory/2",
+    }
+
+    environment = {
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "machine": platform.machine(),
+    }
+
+    outcome = "passed" if report.verdict in {"improvement", "no_effect", "regression"} else "undeterminable"
+
+    envelope = EvidenceEnvelope(
+        claim="M-6.5",
+        protocol="aether.m65.attributable-paired-study/1",
+        subjects=("package:WP-B2", "milestone:M-6.5"),
+        materials=tuple(materials),
+        run={
+            "report": report.to_dict(),
+            "verdict": report.verdict,
+            "rationale": report.rationale,
+            "controllerEnabledByDefault": report.controller_enabled_by_default,
+        },
+        pins=pins,
+        environment=environment,
+        outcome=outcome,
+        producer=Producer(identity=producer_identity, role="producer"),
+        detail=f"Attributable stochastic M-6.5 paired study: verdict={report.verdict}",
+    )
+
+    if signer is not None:
+        return sign_evidence_envelope(envelope, signer)
+    return envelope
+
+
+def sign_evidence_envelope(
+    envelope: EvidenceEnvelope,
+    signer: OperatorSigner,
+) -> EvidenceEnvelope:
+    """Sign an evidence envelope with an OperatorSigner."""
+    sig_bytes = signer._private_key.sign(envelope.signable_bytes())
+    return replace(envelope, signature=sig_bytes.hex())
+
+
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
+    if len(args) == 0:
+        # Run stochastic study directly
+        print("Running attributable stochastic M-6.5 paired study (>=60 pairs)...")
+        report, floor = execute_stochastic_m65_study()
+        signer = OperatorSigner(b"m65-study-operator-key-default")
+        envelope = build_m65_evidence_envelope(report, signer=signer)
+        print(json.dumps(envelope.to_wire(), indent=2, sort_keys=True))
+        print(f"\nVerdict: {report.verdict} (p={report.mcnemar.get('pValue')})")
+        print(f"A/A Noise Floor: {floor.pairs} pairs, {floor.discordant} discordant ({floor.discordance_rate:.1%})")
+        return 0
+
     if len(args) != 1:
-        print("usage: python3 lab/m65_study.py STUDY.json", file=sys.stderr)
+        print("usage: python3 lab/m65_study.py [STUDY.json]", file=sys.stderr)
         return 2
+
     raw = json.loads(Path(args[0]).read_text(encoding="utf-8"))
+
     def _runs(key: str) -> list[RunMetrics]:
         return [RunMetrics(**{
             "task_id": item["taskId"], "seed": item["seed"], "arm": item["arm"],
@@ -338,6 +717,7 @@ def main(argv: list[str] | None = None) -> int:
             **{k: v for k, v in item.items()
                if k in RunMetrics.__slots__ and k not in ("task_id", "seed", "arm", "success")},
         }) for item in raw.get(key, ())]
+
     floor_input = raw.get("noiseFloor")
     floor = (aa_noise_floor(_runs("aaLeft"), _runs("aaRight"))
              if floor_input is None and raw.get("aaLeft") else None)

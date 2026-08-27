@@ -32,6 +32,8 @@ This is the sole current work authorization. Stable task contracts are in
   cannot validate the contaminated control.
 - RF-95/M-6 release bundles: **produced** by WP-A1 in `docs/03_execution/evidence/`.
   Independent review receipts: still absent — the producer cannot accept its own work.
+- WP-B1 evidence bundle: **absent**; only the Lane A bundles are present. WP-B1 is returned to
+  `IN_PROGRESS` pending its baseline and M-5b evidence bundle.
 - Original RF-95 bundle: searched for and **not recoverable** (git history at `349c7d1`
   carries only the test and runner). Three preregistered candidates were executed;
   01 and 02 were `UNDETERMINABLE` on diagnosed instrument defects, 03 passed.
@@ -49,7 +51,7 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | M-5a | AgentView/checkpoints integrated; historical control invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | accepted successor baseline |
 | M-5b | SAT regression path present; clean witness absent | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | successor baseline, fresh graph coloring, RF-86/RF-98, review |
 | M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:041c4d62…`) | independent acceptance receipt |
-| M-6.5 | Controller/statistics present; study instrument invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | valid attributable paired study |
+| M-6.5 | Stochastic attributable paired study and signed evidence envelope produced | **EVIDENCE_READY** | `MERGED` | `OPEN` | `M-6.5-attributable-paired-study.json` (`sha256:293e738c…`) | independent acceptance receipt |
 | M-7 | Topology library present; public runtime integration absent | **IN_PROGRESS** | `PARTIAL` | `OPEN` | `[]` | three topologies, monotonic telemetry, M7-01, ADR-0099 |
 | M-8 | In-memory prototypes only | **NOT_STARTED** | `PREPARATION_ONLY` | `OPEN` | `[]` | M-7 disposition, durable authorized memory, lift and rollback |
 | M-9/M-10 | Compatibility horizon only | **NOT_STARTED** | `NONE` | `NOT_AUTHORIZED` | `[]` | M-8 acceptance and new authority |
@@ -59,8 +61,10 @@ were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncomm
 | ID | Milestone | Owner | State | Dependencies | Acceptance evidence |
 |---|---|---|---|---|---|
 | WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; digest-addressed M-4/M-6 bundles produced; independent receipts outstanding |
-| WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **EVIDENCE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; RF-86/RF-98 bundle |
-| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 ✓ and WP-B1 ✓ `EVIDENCE_READY`; Python 1925/1925 ✓, TS typecheck ✓, boundary/RF-id/execution-truth linters ✓ | **outstanding: independent acceptance receipts** — the producer of a bundle cannot accept it (ADR-0101 §3), so this cannot be closed from inside the producing session |
+| WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **IN_PROGRESS** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; RF-86/RF-98 bundle |
+| WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **EVIDENCE_READY** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle produced |
+| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 `EVIDENCE_READY`; WP-B1 `IN_PROGRESS`; Python mechanism checks pass, but complete acceptance is not established | **independent adjudication 2026-08-27:** WP-B1 bundle absent; baseline manifest/tag absent; independent acceptance receipts absent; client-core/CLI TypeScript tests fail; qualified Linux AF_UNIX and remote tag verification outstanding |
+
 
 Both developers work from the same reviewed commit and do not consume unfinished branches. Dev A
 owns runtime/session/delegation integration. Dev B owns baseline/evidence tooling and the pack-local

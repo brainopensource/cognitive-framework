@@ -168,9 +168,18 @@ class RF113TheShippedBundlesAreWellFormed(unittest.TestCase):
         self.assertEqual(envelope.claim, "M-6")
         self.assertTrue(envelope.materials)
 
+    def test_the_m65_bundle_parses_and_verifies_its_digest(self) -> None:
+        envelope = self._load("M-6.5-attributable-paired-study.json")
+        self.assertEqual(envelope.claim, "M-6.5")
+        self.assertEqual(envelope.protocol, "aether.m65.attributable-paired-study/1")
+        self.assertTrue(envelope.materials)
+        self.assertTrue(envelope.signature)
+        self.assertIn(envelope.outcome, OUTCOMES)
+
+
     def test_neither_bundle_claims_independent_acceptance(self) -> None:
         """Producing evidence is not accepting it. Both stay unaccepted."""
-        for name in ("M-4-rf95-candidate-03.json", "M-6-canonical-recursion.json"):
+        for name in ("M-4-rf95-candidate-03.json", "M-6-canonical-recursion.json", "M-6.5-attributable-paired-study.json"):
             envelope = self._load(name)
             self.assertEqual(envelope.producer.role, "producer", name)
             self.assertFalse(accepts(envelope, envelope), name)
@@ -178,3 +187,4 @@ class RF113TheShippedBundlesAreWellFormed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

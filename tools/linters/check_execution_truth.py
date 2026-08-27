@@ -50,7 +50,7 @@ def validate() -> list[str]:
     ids = ACTIVE_ROW.findall(active)
     if len(ids) != len(set(ids)):
         errors.append("sprint_active.md contains duplicate active package IDs")
-    if set(ids) != {"WP-A1", "WP-B1", "C1-GATE"}:
+    if set(ids) != {"WP-A1", "WP-B1", "WP-B2", "C1-GATE"}:
         errors.append(f"sprint_active.md active IDs drifted: {sorted(ids)}")
     if "**NOT_STARTED**" in active:
         # Milestone truth includes later non-started milestones; active package rows may not.

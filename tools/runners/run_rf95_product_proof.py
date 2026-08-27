@@ -199,7 +199,8 @@ def main() -> int:
     # RF-95 must classify UNDETERMINABLE rather than failed. A stale model pin
     # is therefore not a cosmetic default: it silently converts the product
     # gate into an un-runnable one. See `docs/03_execution/prereg/`.
-    parser.add_argument("--model", type=str, default="anthropic/claude-sonnet-4.5", help="Planner/executor model")
+    from vanguard.packages.adapters.models.config import get_default_model
+    parser.add_argument("--model", type=str, default=get_default_model(), help="Planner/executor model")
     parser.add_argument("--keep-run", action="store_true", help="Keep the temporary run directory as an evidence artifact")
     args = parser.parse_args()
 

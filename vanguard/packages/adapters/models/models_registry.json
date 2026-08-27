@@ -1,0 +1,66 @@
+{
+  "default_model": "openrouter/free",
+  "default_paid_model": "deepseek/deepseek-v4-flash-0731",
+  "bands": {
+    "free": [
+      "openrouter/free",
+      "z-ai/glm-5.2:free",
+      "minimax/minimax-m3:free",
+      "thinkingmachines/inkling-small:free",
+      "minimax/minimax-m2.7:free",
+      "thinkingmachines/inkling:free",
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "google/gemma-4-31b-it:free",
+      "google/gemma-4-26b-a4b-it:free",
+      "cohere/north-mini-code:free",
+      "poolside/laguna-s-2.1:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "nvidia/nemotron-3.5-lightning:free",
+      "openai/gpt-oss-20b:free",
+      "inclusionai/ling-3.0-tiny:free"
+    ],
+    "medium": [
+      "deepseek/deepseek-v4-flash-0731",
+      "z-ai/glm-5.3-flash",
+      "xiaomi/mimo-v2.5",
+      "qwen/qwen3-coder-next",
+      "tencent/hy3-preview",
+      "qwen/qwen3-next-80b-a3b-thinking",
+      "upstage/solar-pro-3"
+    ],
+    "high": [
+      "openai/gpt-5.6-luna",
+      "deepseek/deepseek-v4-pro",
+      "xiaomi/mimo-v2.5-pro",
+      "minimax/minimax-m3",
+      "z-ai/glm-5.2"
+    ],
+    "testing": [
+      "openrouter/free",
+      "deepseek/deepseek-v4-flash-0731"
+    ],
+    "top": []
+  },
+  "pricing_micros": {
+    "openrouter/free": {"prompt": 0, "completion": 0, "cached": 0},
+    "inclusionai/ling-3.0-tiny:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "poolside/laguna-s-2.1:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "cohere/north-mini-code:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "google/gemma-4-26b-a4b-it:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "nvidia/nemotron-3-super-120b-a12b:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "nvidia/nemotron-3.5-lightning:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "openai/gpt-oss-20b:free": {"prompt": 0, "completion": 0, "cached": 0},
+    "deepseek/deepseek-v4-flash": {"prompt": 140000, "completion": 280000, "cached": 14000},
+    "deepseek/deepseek-v4-flash-0731": {"prompt": 140000, "completion": 280000, "cached": 14000},
+    "xiaomi/mimo-v2.5": {"prompt": 100000, "completion": 300000, "cached": 10000},
+    "z-ai/glm-5.2": {"prompt": 350000, "completion": 1400000, "cached": 35000},
+    "openai/gpt-5.6-luna": {"prompt": 1000000, "completion": 4000000, "cached": 250000},
+    "deepseek/deepseek-v4-pro": {"prompt": 450000, "completion": 1800000, "cached": 45000},
+    "minimax/minimax-m3": {"prompt": 200000, "completion": 800000, "cached": 20000},
+    "openai/gpt-4o-mini": {"prompt": 150000, "completion": 600000, "cached": 75000},
+    "gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
+    "openai/gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
+    "deepseek-reasoner": {"prompt": 550000, "completion": 2190000, "cached": 140000},
+    "deepseek-coder": {"prompt": 140000, "completion": 280000, "cached": 14000}
+  }
+}

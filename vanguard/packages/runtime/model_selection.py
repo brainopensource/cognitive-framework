@@ -161,7 +161,7 @@ def select_model(
         if paid_allowed:
             if not model_name:
                 allowed = list(free_models() if free_models is not None else _free_band())
-                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+                name = allowed[0] if allowed else _get_default_paid_model()
             else:
                 name = model_name
             return SelectedModel(port=choice, model=OpenRouterModel(model=name),
@@ -189,7 +189,7 @@ def select_model(
         if paid_allowed:
             if not model_name:
                 allowed = list(free_models() if free_models is not None else _free_band())
-                name = allowed[0] if allowed else "deepseek/deepseek-chat"
+                name = allowed[0] if allowed else _get_default_paid_model()
             else:
                 name = model_name
             return SelectedModel(port="router", model=OpenRouterModel(model=name),
@@ -252,17 +252,11 @@ def _resolve_tag(wanted: str, installed: Sequence[str]) -> str | None:
     return matches[0] if matches else None
 
 
+from ..adapters.models.config import get_band_models, get_default_paid_model, get_default_model
+
 def _free_band() -> Sequence[str]:
-    """Read the free band from the LAM registry. Never the `top` band."""
-    import sys
-    from pathlib import Path
+    """Read the free band from the models registry. Never the `top` band."""
+    return get_band_models("free")
 
-    tools = Path(__file__).resolve().parents[3] / "tools" / "002_LLM_API_MOCK"
-    if str(tools) not in sys.path:
-        sys.path.insert(0, str(tools))
-    try:
-        from models import models_for_band  # type: ignore
-
-        return list(models_for_band(FREE_BAND))
-    except Exception:
-        return []
+def _get_default_paid_model() -> str:
+    return get_default_paid_model()

@@ -42,6 +42,7 @@ from .scheduler import ReadyOperation, SequentialScheduler
 from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
+from ..ports.memory import MemoryBinding
 from .child_runtime import RuntimeChildRunner
 from .delegation import SPAWN_VERB
 from .wiring import (
@@ -84,6 +85,8 @@ class Runtime(_ComposedRuntime):
         capture_policy: Any = None,
         meta_controller: Any = None,
         controller_confidence: tuple[Any, ...] = (),
+        memory: MemoryBinding | None = None,
+        experience: MemoryBinding | None = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -155,6 +158,8 @@ class Runtime(_ComposedRuntime):
             capture_policy=capture_policy,
             meta_controller=meta_controller,
             controller_confidence=tuple(controller_confidence),
+            memory=memory,
+            experience=experience,
         )
         try:
             return cls.run_composed(
@@ -186,6 +191,8 @@ class Runtime(_ComposedRuntime):
         capture_policy: Any = None,
         meta_controller: Any = None,
         controller_confidence: tuple[Any, ...] = (),
+        memory: MemoryBinding | None = None,
+        experience: MemoryBinding | None = None,
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -223,6 +230,8 @@ class Runtime(_ComposedRuntime):
             capture_policy=capture_policy,
             meta_controller=meta_controller,
             controller_confidence=tuple(controller_confidence),
+            memory=memory,
+            experience=experience,
         )
         try:
             return cls.run_composed(

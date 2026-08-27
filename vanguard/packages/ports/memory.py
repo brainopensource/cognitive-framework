@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
 import hmac
-from typing import Any, Mapping, Protocol
+from typing import Any, Callable, Mapping, Protocol
 
 from ..domain.canonicalisation.digest import digest_of
 
 __all__ = [
     "MemoryAccess",
     "MemoryAuthorizationPort",
+    "MemoryBinding",
     "MemoryResult",
     "RetrievalProvenance",
     "require_retrieval_provenance",
@@ -39,7 +40,7 @@ class MemoryAccess:
     revocation_epoch: int = 0
     verification_receipt: str = ""
 
-    def permitted(self) -> bool:
+    def permitted(self, now: datetime | None = None) -> bool:
         if not (self.grant_ref and self.tenant and self.project and self.issuer and self.subject):
             return False
         if self.revoked or not self.verification_receipt or not self.actions:
@@ -48,7 +49,7 @@ class MemoryAccess:
             return False
         try:
             expiry = datetime.fromisoformat(self.expires_at.replace("Z", "+00:00"))
-            if expiry <= datetime.now(timezone.utc):
+            if now is not None and expiry <= now.astimezone(timezone.utc):
                 return False
         except ValueError:
             return False
@@ -67,6 +68,8 @@ class MemoryAuthorizationPort:
     def verify(self, grant: Mapping[str, Any], signature: str, *, action: str,
                tenant: str, project: str, selector: Mapping[str, Any],
                now: datetime | None = None) -> MemoryAccess:
+        if now is None:
+            raise PermissionError("memory authorization requires an injected clock")
         required = ("grantRef", "issuer", "subject", "tenant", "project", "actions",
                     "purpose", "expiresAt", "revocationEpoch", "selector")
         if any(not grant.get(name) and name != "revocationEpoch" for name in required):
@@ -107,6 +110,43 @@ class MemoryAuthorizationPort:
 
 
 @dataclass(frozen=True, slots=True)
+class MemoryBinding:
+    """A runtime-injected memory port plus its point-of-use lease inputs."""
+
+    port: Any
+    authorization: MemoryAuthorizationPort | None = None
+    grant: Mapping[str, Any] | None = None
+    signature: str = ""
+    access: MemoryAccess | None = None
+    tenant: str = ""
+    project: str = ""
+    selector: Mapping[str, Any] = field(default_factory=dict)
+    query: str = ""
+    limit: int = 20
+
+    def authorize(self, action: str, *, now: datetime | None = None) -> MemoryAccess:
+        """Verify a fresh signed lease, or admit an already verified lease."""
+        selector = dict(self.selector or {})
+        if self.authorization is not None:
+            if self.grant is None or not self.signature:
+                raise PermissionError("memory authorization inputs are incomplete")
+            return self.authorization.verify(
+                self.grant,
+                self.signature,
+                action=action,
+                tenant=self.tenant,
+                project=self.project,
+                selector=selector,
+                now=now,
+            )
+        if self.access is None or not self.access.permitted(now) or action not in self.access.actions:
+            raise PermissionError("memory capability denied or verifier unavailable")
+        if selector and dict(self.access.selector) != selector:
+            raise PermissionError("memory authorization selector mismatch")
+        return self.access
+
+
+@dataclass(frozen=True, slots=True)
 class RetrievalProvenance:
     query_digest: str
     policy_identity: str
@@ -128,6 +168,7 @@ class RetrievalProvenance:
 class MemoryResult:
     record_ids: tuple[str, ...]
     provenance: RetrievalProvenance
+    texts: tuple[str, ...] = ()
 
 
 def require_retrieval_provenance(result: MemoryResult) -> tuple[str, ...]:

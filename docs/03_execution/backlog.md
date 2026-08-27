@@ -37,7 +37,7 @@ package consumes another developer's unfinished branch.
 | WP-B3 | M-7 | Dev B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
 | WP-A4 | M-8 | Dev A / **NOT_STARTED** | M-7 decision, ADR-0100; before B4 | durable authorized memory |
 | WP-B4 | M-8 | Dev B / **NOT_STARTED** | A4, M-6.5 disposition | lift + real rollback |
-| WP-C1 | M-1/M-2/M-4 preservation | Dev A / **IN_PROGRESS** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
+| WP-C1 | M-1/M-2/M-4 preservation | Dev A / **PACKAGE_READY** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
 
 Dev A: `WP-A1 -> WP-C1 -> WP-A2 -> WP-A3 -> WP-A4`. Dev B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.
 

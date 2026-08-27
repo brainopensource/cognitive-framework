@@ -446,8 +446,8 @@ class DurableCompositionRegistry:
 
             return evidence.promoted_version
 
-    def rollback(self, target_version: str | None = None) -> str:
-        """Roll back registry to the previous known-good head version (or specified ancestor)."""
+    def restore(self, target_version: str | None = None) -> str:
+        """Restore the registry head to a known composition ancestor."""
         with self._lock, self._conn:
             cur = self._conn.cursor()
             cur.execute("SELECT current_version, generation FROM registry_head WHERE id = 1;")
@@ -485,6 +485,10 @@ class DurableCompositionRegistry:
                 raise ValueError("concurrent rollback race detected: CAS update failed")
 
             return target_version
+
+    def rollback(self, target_version: str | None = None) -> str:
+        """Compatibility name for :meth:`restore`."""
+        return self.restore(target_version)
 
     def close(self) -> None:
         with self._lock:

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import json
 from pathlib import Path
+import subprocess
+import sys
 
 from vanguard.packages.runtime.governance import (
     ApprovalAuthority,
@@ -34,6 +37,23 @@ class TestGovernedLearning(unittest.TestCase):
     def tearDown(self) -> None:
         self.registry.close()
         self._tempdir.cleanup()
+
+    def _fresh_current(self) -> dict[str, object]:
+        reader = (
+            "import json, sys; "
+            "from vanguard.packages.runtime.governance import DurableCompositionRegistry; "
+            "r = DurableCompositionRegistry(db_path=sys.argv[1]); "
+            "print(json.dumps({'version': r.current_version, "
+            "'manifest': r.get_composition(r.current_version)['manifest']})); "
+            "r.close()"
+        )
+        completed = subprocess.run(
+            [sys.executable, "-c", reader, str(self.db_path)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return json.loads(completed.stdout)
 
     def test_candidate_creation_and_digest(self) -> None:
         cand = CompositionCandidate.create(
@@ -269,7 +289,7 @@ class TestGovernedLearning(unittest.TestCase):
             self.registry.promote(cand2, report2, evidence2)
         self.assertIn("conflict", str(ctx.exception).lower())
 
-    def test_rollback_restores_previous_known_good(self) -> None:
+    def test_restore_restores_previous_behavior_in_a_fresh_process(self) -> None:
         cand = CompositionCandidate.create("v1.0.0", {"version": "v1.1.0", "injected": "regression"})
         report = EvaluationReport.create(
             cand,
@@ -308,10 +328,21 @@ class TestGovernedLearning(unittest.TestCase):
         self.registry.promote(cand, report, evidence)
         self.assertEqual(self.registry.current_version, "v1.1.0")
 
-        # Injected regression detected in production -> rollback
-        restored = self.registry.rollback()
+        # A fresh runtime observes the promoted regression.
+        promoted = self._fresh_current()
+        self.assertEqual(promoted["version"], "v1.1.0")
+        self.assertEqual(promoted["manifest"]["injected"], "regression")
+
+        # Injected regression detected in production -> restore the parent.
+        restored = self.registry.restore()
         self.assertEqual(restored, "v1.0.0")
         self.assertEqual(self.registry.current_version, "v1.0.0")
+
+        # A second fresh runtime proves behavior, not merely the head pointer,
+        # is back to the prior known-good composition.
+        recovered = self._fresh_current()
+        self.assertEqual(recovered["version"], "v1.0.0")
+        self.assertEqual(recovered["manifest"], {"version": "v1.0.0", "plugins": ["core"]})
 
     def test_restart_recovery_from_sqlite_wal(self) -> None:
         cand = CompositionCandidate.create("v1.0.0", {"version": "v1.2.0"})

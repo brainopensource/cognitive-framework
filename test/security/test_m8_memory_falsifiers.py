@@ -39,20 +39,20 @@ class M8MemoryFalsifiers(unittest.TestCase):
         authority = MemoryAuthorizationPort(self.key)
         grant, sig = self.grant()
         with self.assertRaises(PermissionError):
-            authority.verify(grant, sig, action="read", tenant="t2", project="p1", selector={"category": "knowledge"})
+            authority.verify(grant, sig, action="read", tenant="t2", project="p1", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
         with self.assertRaises(PermissionError):
-            authority.verify(grant, sig, action="read", tenant="t1", project="p2", selector={"category": "knowledge"})
+            authority.verify(grant, sig, action="read", tenant="t1", project="p2", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
         with self.assertRaises(PermissionError):
-            authority.verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "skills"})
+            authority.verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "skills"}, now=datetime.now(timezone.utc))
 
     def test_expired_and_revoked_grants_fail_at_use_time(self):
         expired, sig = self.grant(expiry=(datetime.now(timezone.utc) - timedelta(seconds=1)).isoformat())
         with self.assertRaises(PermissionError):
-            MemoryAuthorizationPort(self.key).verify(expired, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"})
+            MemoryAuthorizationPort(self.key).verify(expired, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
         grant, sig = self.grant()
         authority = MemoryAuthorizationPort(self.key, revoked_epochs={"grant-1": 1})
         with self.assertRaises(PermissionError):
-            authority.verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"})
+            authority.verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
 
     def test_ranker_receives_only_authorized_candidates(self):
         seen = []
@@ -60,11 +60,11 @@ class M8MemoryFalsifiers(unittest.TestCase):
             seen.extend(candidates)
             return candidates
         grant, sig = self.grant()
-        access = MemoryAuthorizationPort(self.key).verify(grant, sig, action="write", tenant="t1", project="p1", selector={"category": "knowledge"})
+        access = MemoryAuthorizationPort(self.key).verify(grant, sig, action="write", tenant="t1", project="p1", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
         with tempfile.TemporaryDirectory() as tmp:
             store = DurableMemoryPort(Path(tmp), "knowledge", ranker=ranker)
             store.write({"text": "authorized"}, access)
-            read = MemoryAuthorizationPort(self.key).verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"})
+            read = MemoryAuthorizationPort(self.key).verify(grant, sig, action="read", tenant="t1", project="p1", selector={"category": "knowledge"}, now=datetime.now(timezone.utc))
             store.recall("authorized", read)
         self.assertEqual(len(seen), 1)
         self.assertEqual(seen[0][0].split(":", 1)[0], "knowledge")

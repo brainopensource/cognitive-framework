@@ -176,7 +176,8 @@ class DurableMemoryPort:
             selected_ids=tuple(r for r, _, _ in selected), dropped_ids=tuple(r for r, _, _ in dropped),
             cache_identity=None, context_selection_digest=None, redacted=False,
         )
-        return MemoryResult(tuple(r for r, _, _ in selected), provenance)
+        return MemoryResult(tuple(r for r, _, _ in selected), provenance,
+                            tuple(text for _, text, _ in selected))
 
     def invalidate(self, record_id: str, access: MemoryAccess) -> None:
         self._authorized(access, self.category, "invalidate")

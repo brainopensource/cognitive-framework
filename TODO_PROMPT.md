@@ -2191,3 +2191,49 @@ and two milestones of honest engineering.
 
 *End of guide. This document authorizes nothing. Work is authorized only by
 [`docs/03_execution/sprint_active.md`](../../03_execution/sprint_active.md).*
+
+
+# Final Task 
+
+### The Final Step to Fully Close M-8: Fix the 3 Remaining Security Edge Cases
+
+  Dev A and Dev B have delivered the entire turn-loop integration, clock verification, and 585 runtime tests are passing. To close M-8 with 100%
+  mathematical rigor, only 3 specific security checks remain:
+
+    flowchart TD
+        S1["1. Remove recall() fail-open disjunct in runtime/memory.py (Dev A)"] --> G["2. Run 585+ Tests & 8 Linters"]
+        S2["2. Enforce Generator ≠ Evaluator ≠ Promoter in learning.py (Dev B)"] --> G
+        S3["3. Require signed PromotionEvidence on rollback (Dev B)"] --> G
+        G --> EV["3. Run Evidence Bundles & Countersign"]
+        EV --> MVP["4. Declare M-8 BETA MVP ACCEPTED"]
+        MVP --> M9["5. Open M-9/M-10 Post-MVP Horizon"]
+  ──────
+  ### Prompt for Dev A & Dev B (The Final 15-Minute Sweep)
+
+    # ROLE: Dev A & Dev B — Close Final M-8 Security Edge Cases
+
+    ### 1. Dev A — Fix Memory Retrieval Fail-Open Disjunct
+    - In memory.py:
+      - Remove `or (access.grant_ref and access.tenant and access.project and not access.revoked)`.
+      - Enforce that `recall()`, `write()`, and `invalidate()` require `access.permitted()` to be strictly `True`.
+      - Extend `test_fake_nonempty_grant_fails_closed` in test_m8_memory_falsifiers.py to assert `recall()` fails closed.
+
+    ### 2. Dev B — Enforce Role Separation & Signed Rollback
+    - In learning.py:
+      - In `promote()`, enforce `candidate.generator_id != report.evaluator_id != evidence.promoter_id` (raise `PermissionError` on collision).
+  Add a test asserting collision refusal.
+      - In `restore()` / `rollback()`, require a valid, signed `PromotionEvidence` parameter verified against `ApprovalAuthority`. Unsigned
+  rollback must fail closed.
+
+    ### 3. Verify Complete Green Gate
+    ```bash
+    python3 -m unittest discover -s test/runtime -v
+    python3 -m unittest discover -s test/security -v
+    for l in check_boundaries check_tcb_budget scan_secrets check_domain_blindness \
+             check_isolation_policy check_execution_truth check_markdown_links check_stale_paths; do
+        python3 tools/linters/$l.py || exit 1
+    done
+
+
+    Once this sweep completes, **all M-8 security properties and invariants are 100% closed**, and we can transition to independent evidence
+  signing and the post-MVP roadmap!

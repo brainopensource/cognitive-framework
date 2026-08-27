@@ -16,6 +16,7 @@ from ..ports.memory import (
     KnowledgePort,
     MemoryAccess,
     MemoryAuthorizationPort,
+    MemoryBinding,
     MemoryResult,
     ProjectMemoryPort,
     RetrievalProvenance,
@@ -24,7 +25,7 @@ from ..ports.memory import (
     validate_retrieval,
 )
 
-__all__ = ["MemoryAccess", "MemoryAuthorizationPort", "RetrievalProvenance", "MemoryResult", "require_retrieval_provenance", "KnowledgePort", "ExperiencePort", "ProjectMemoryPort", "SkillLibrary", "InMemoryMemoryPort"]
+__all__ = ["MemoryAccess", "MemoryAuthorizationPort", "MemoryBinding", "RetrievalProvenance", "MemoryResult", "require_retrieval_provenance", "KnowledgePort", "ExperiencePort", "ProjectMemoryPort", "SkillLibrary", "InMemoryMemoryPort"]
 
 
 class InMemoryMemoryPort:
@@ -68,7 +69,8 @@ class InMemoryMemoryPort:
                                          "m8-reference-policy/1", sources,
                                          tuple(item[0] for item in selected), tuple(item[0] for item in dropped),
                                          None, None, False)
-        return MemoryResult(tuple(item[0] for item in selected), provenance)
+        return MemoryResult(tuple(item[0] for item in selected), provenance,
+                            tuple(item[1] for item in selected))
 
     def invalidate(self, record_id: str, access: MemoryAccess) -> None:
         if not access.permitted():

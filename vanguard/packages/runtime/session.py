@@ -8,6 +8,7 @@ compose a harness and it does not write envelopes except through
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -49,6 +50,7 @@ from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.event_store import EventRange, EventStorePort, Result
 from ..ports.index import IndexPort
 from ..ports.meta_controller import MetaController
+from ..ports.memory import MemoryBinding, require_retrieval_provenance
 from .compose import (
     Harness,
     Receipt,
@@ -93,6 +95,18 @@ _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "tokens": "tokens",
     "bytes": "bytes",
 }
+
+
+def _memory_now(clock: Any) -> datetime:
+    value = clock.now() if hasattr(clock, "now") else clock
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc)
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+        except ValueError as exc:
+            raise PermissionError("memory authorization clock is invalid") from exc
+    raise PermissionError("memory authorization clock is unavailable")
 
 
 def _lower_controller_directive(
@@ -158,13 +172,16 @@ class _LayeredOperator:
     def __init__(self, model: Any, compiler: ContextCompiler, *,
                  recorder: CompetencePriorRecorder | None = None,
                  task: TaskContext,
+                 clock: Any,
                  artifacts: ArtifactWriter | None = None,
                  provenance: ProvenanceSink | None = None,
-                 meta_controller: Callable[[], ControllerProposal | None] | None = None) -> None:
+                 meta_controller: Callable[[], ControllerProposal | None] | None = None,
+                 memory: MemoryBinding | None = None) -> None:
         self._model = model
         self._compiler = compiler
         self._recorder = recorder
         self._task = task
+        self._clock = clock
         self._dialogue: list[Fragment] = []
         self.contexts: list[Mapping[str, Any]] = []
         # `None` is the legacy no-capture composition (`blobs=None`). It is a
@@ -173,6 +190,7 @@ class _LayeredOperator:
         self._artifacts = artifacts
         self._provenance = provenance
         self._meta_controller = meta_controller
+        self._memory = memory
 
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
@@ -203,8 +221,11 @@ class _LayeredOperator:
                 text=(f"Strategy directive: {directive.kind}. "
                       f"Reason: {directive.payload['reason']}"),
             )
+        memory_fragments, memory_digest = self._memory_fragments()
         compiled: CompiledContext = self._compiler.compile(
-            brief=self._task.brief, dialogue=tuple(self._dialogue))
+            brief=self._task.brief,
+            dialogue=tuple(self._dialogue) + memory_fragments,
+        )
         if self._recorder is not None and self._task.competence_prior is not None:
             # Before turn 1 reaches the provider (`S5-SA-002`). The recorder
             # refuses a second prior for the same episode, so a later segment
@@ -216,6 +237,8 @@ class _LayeredOperator:
         # The provider contract is `messages` / digests / layers. The engine's
         # flat view is compiled into L5; it is not a second wire dialect.
         bundle = dict(compiled.bundle())
+        if memory_digest:
+            bundle["memoryRetrievalDigest"] = memory_digest
         digest = view.get("lastReceiptDigest")
         if digest:
             token = (
@@ -292,6 +315,29 @@ class _LayeredOperator:
                     measured["model_fingerprint"] = fingerprint
                 self.contexts[-1] = measured
         return answer
+
+    def _memory_fragments(self) -> tuple[tuple[Fragment, ...], str]:
+        """Retrieve authorized context immediately before compiling a turn."""
+        if self._memory is None:
+            return (), ""
+        access = self._memory.authorize("read", now=_memory_now(self._clock))
+        result = self._memory.port.recall(
+            self._memory.query, access, self._memory.limit)
+        selected = require_retrieval_provenance(result)
+        if selected and len(result.texts) != len(selected):
+            raise PermissionError("memory result has no complete materialized context")
+        fragments = tuple(
+            Fragment(
+                source=f"memory:{result.provenance.policy_identity}",
+                label=f"memory:{record_id}",
+                text=text,
+            )
+            for record_id, text in zip(selected, result.texts)
+            if isinstance(text, str) and text
+        )
+        if len(fragments) != len(selected):
+            raise PermissionError("memory result contains invalid context text")
+        return fragments, result.provenance.digest() if selected else ""
 
     # -- capture helpers ---------------------------------------------------
 
@@ -394,6 +440,10 @@ class SessionPorts:
     #: Immutable evidence admitted by B-M65. An acting controller must bind at
     #: least one current record into its durable attribution.
     controller_confidence: tuple[ConfidenceRecord, ...] = ()
+    #: Optional point-of-use authorized retrieval for L5 context.
+    memory: MemoryBinding | None = None
+    #: Optional point-of-use authorized experience sink on successful runs.
+    experience: MemoryBinding | None = None
     child_runtime: Any = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
@@ -608,13 +658,16 @@ class HarnessSession:
 
         self.operator = _LayeredOperator(
             ports.model, compiler, task=task,
+            clock=ports.clock,
             recorder=CompetencePriorRecorder(clock=ports.clock, events=self.ledger),
             artifacts=self.artifacts,
             provenance=self.provenance if self.artifacts is not None else None,
             meta_controller=(
                 self._consult_meta_controller
                 if ports.meta_controller is not None else None
-            ))
+            ),
+            memory=ports.memory,
+        )
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -962,6 +1015,15 @@ class HarnessSession:
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
+        if terminal is RunTermination.COMPLETED and ports.experience is not None:
+            try:
+                self._emit_experience_fact(receipts)
+            except Exception as exc:
+                # A successful episode cannot silently become an unrecorded
+                # learning input. Preserve the failure as the run outcome.
+                terminal = RunTermination.INSTRUMENT_ERROR
+                detail = f"experience emission failed: {exc}"
+
         verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
         read_all = ports.store.read(EventRange(episode_id=task.episode_id))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
@@ -1040,6 +1102,28 @@ class HarnessSession:
         return result
 
     # -- what the instrument reads ----------------------------------------
+
+    def _emit_experience_fact(self, receipts: Sequence[Receipt]) -> str:
+        """Persist a minimal causal success fact through the injected port."""
+        binding = self.ports.experience
+        if binding is None:  # pragma: no cover - guarded by the caller
+            raise PermissionError("experience memory binding is unavailable")
+        access = binding.authorize("write", now=_memory_now(self.ports.clock))
+        value = {
+            "category": "experience",
+            "kind": "episode_outcome",
+            "text": f"Episode {self.task.episode_id} completed successfully.",
+            "causal": {
+                "runId": self.task.run_id,
+                "episodeId": self.task.episode_id,
+                "compositionDigest": self.harness.composition_digest,
+                "receiptDigests": tuple(receipt.descriptor_digest for receipt in receipts),
+            },
+        }
+        record_id = binding.port.write(value, access)
+        if not isinstance(record_id, str) or not record_id:
+            raise PermissionError("experience memory did not return a record identity")
+        return record_id
 
     def _capture_evidence(self) -> dict[str, Any]:
         """What this run actually captured, for the `mhf.trajectory/2` writer.

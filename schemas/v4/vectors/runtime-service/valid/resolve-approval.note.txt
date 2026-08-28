@@ -1,0 +1,4 @@
+The signed decision body is the sole shape ResolveApproval accepts. All eight
+decision fields are required, and `signature` is the 128-hex Ed25519 form both
+signers emit: an unsigned, partially-bound, or structurally impossible
+decision is refused before it can reach the verifier.

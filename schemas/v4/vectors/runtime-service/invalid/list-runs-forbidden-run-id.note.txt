@@ -1,0 +1,2 @@
+ListRuns is collection-scoped. A non-empty runId means the caller expected
+scoping the command does not perform, so it fails rather than over-returning.

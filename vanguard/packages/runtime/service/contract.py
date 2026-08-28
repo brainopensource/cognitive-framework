@@ -7,16 +7,21 @@ cross-file JSON-Schema ``$ref`` resolution (the ``referencing`` package that
 ``jsonschema`` needs for that is not present in every environment this runs
 in). ``ERROR_CODES`` is the single vocabulary shared, byte-for-byte, with
 ``@vanguard/client-core``'s ``ClientFailure.code`` (TypeScript) and the
-``ErrorCode`` enum in the schema file. A shared corpus of golden/negative
-vectors proves the two implementations agree (see
-``test/runtime/test_contract_vectors.py`` and
-``client-core/test/contract-vectors.test.ts``).
+``ErrorCode`` enum in the schema file. The tables below are the
+Python half of a single frozen contract: they are checked field-for-field
+against ``schemas/v4/runtime-service.schema.json`` by
+``test/contracts/test_runtime_service_contract_parity.py``, so the mirror
+cannot drift from the schema. A shared corpus of golden/negative vectors under
+``schemas/v4/vectors/runtime-service/`` proves the Python and TypeScript
+readers agree (see ``test/contracts/test_runtime_service_vectors.py`` and
+``client-core/test/runtime-service-vectors.test.ts``).
 
 Owning contract: ADR-0101, ADR-0103, docs/_archive/reviews/frontend/integration_plan.md §4.
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
@@ -162,15 +167,43 @@ COMMAND_ALLOWED_PAYLOAD_FIELDS: Mapping[str, frozenset[str]] = {
     "StartRun": frozenset({"manifestPath", "repoPath", "brief", "profileId", "model", "episodeId", "expectedSeq"}),
     "GetRun": frozenset({"expectedSeq"}),
     "ListRuns": frozenset({"limit", "offset"}),
-    "StreamEvents": frozenset({"afterSeq", "limit"}),
+    "StreamEvents": frozenset({"afterSeq"}),
     "Cancel": frozenset({"reason", "expectedSeq"}),
     "Checkpoint": frozenset({"reason", "expectedSeq"}),
     "Resume": frozenset({"checkpointId", "expectedSeq"}),
-    "ResolveApproval": frozenset({"decision", "approvalId", "resolution", "expectedSeq"}),
+    "ResolveApproval": frozenset({"decision", "expectedSeq"}),
     "RecordCorrection": frozenset({"correction", "expectedSeq"}),
     "ExplainArtifact": frozenset({"artifactId", "substrateProfile", "expectedSeq"}),
     "GetCapabilities": frozenset(),
 }
+
+#: Payload fields whose *value* shape ingress must check, not merely their name.
+#: Both are sequence guards (``$defs/SeqGuard``): a JSON integer, or the CT-06
+#: decimal-string form, because a run sequence may exceed 2^53-1. Validating the
+#: name alone let a malformed guard through to ``int()`` deep in the service,
+#: where it surfaced as ``internal`` -- an operator-supplied value must never
+#: report as a substrate fault.
+_SEQ_GUARD_FIELDS: frozenset[str] = frozenset({"expectedSeq", "afterSeq"})
+
+
+def _check_seq_guard(command: str, field: str, value: Any) -> None:
+    """Reject anything that is not a non-negative sequence number."""
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        raise ContractError(
+            "invalid_request",
+            f"{command} payload {field} must be a non-negative integer or decimal string",
+        )
+    if isinstance(value, str):
+        if not value.isdigit() or (len(value) > 1 and value.startswith("0")):
+            raise ContractError(
+                "invalid_request",
+                f"{command} payload {field} must be a canonical decimal string",
+            )
+    elif value < 0:
+        raise ContractError(
+            "invalid_request", f"{command} payload {field} must not be negative"
+        )
+
 
 APPROVAL_DECISION_REQUIRED_FIELDS: Sequence[str] = (
     "approvalId",
@@ -182,6 +215,14 @@ APPROVAL_DECISION_REQUIRED_FIELDS: Sequence[str] = (
     "keyId",
     "signature",
 )
+
+#: Ed25519 signatures are 64 bytes rendered as lowercase-or-uppercase hex by
+#: both signers (``governance/approvals.py`` ``.hex()`` and client-core's
+#: ``signer.ts`` ``toString("hex")``), and ``approval-decision.schema.json``
+#: has always required that shape. Accepting any non-empty string here let a
+#: structurally impossible signature reach the verifier.
+_SIGNATURE_RE = re.compile(r"^[0-9a-fA-F]{128}$")
+
 
 APPROVAL_DECISION_ALLOWED_FIELDS: frozenset[str] = frozenset(
     {
@@ -197,7 +238,10 @@ APPROVAL_DECISION_ALLOWED_FIELDS: frozenset[str] = frozenset(
 )
 
 _COMMAND_TOP_LEVEL_FIELDS = frozenset({"name", "commandId", "idempotencyKey", "actor", "runId", "payload"})
-_FRAME_TOP_LEVEL_FIELDS = frozenset({"version", "frameType", "frameId", "command", "inReplyTo"})
+#: Inbound command frames carry no ``inReplyTo``: it is an outbound-only
+#: correlation field on receipt/event/error frames, and ``CommandFrame`` in
+#: the schema forbids it. Accepting it here widened ingress for no reader.
+_FRAME_TOP_LEVEL_FIELDS = frozenset({"version", "frameType", "frameId", "command"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -260,6 +304,9 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
             "invalid_request", f"unknown payload field(s) for {name}: {sorted(unknown_payload)}"
         )
 
+    for field in _SEQ_GUARD_FIELDS & set(payload):
+        _check_seq_guard(name, field, payload[field])
+
     missing = [f for f in COMMAND_REQUIRED_PAYLOAD_FIELDS[name] if f not in payload]
     if missing:
         raise ContractError("invalid_request", f"{name} payload missing required field(s): {missing}")
@@ -281,8 +328,11 @@ def validate_command(cmd: Mapping[str, Any]) -> ValidatedCommand:
         if decision.get("resolution") not in ("approved", "rejected"):
             raise ContractError("invalid_request", "decision.resolution must be approved|rejected")
         sig = decision.get("signature")
-        if not isinstance(sig, str) or not sig:
-            raise ContractError("invalid_request", "decision has invalid signature shape")
+        if not isinstance(sig, str) or not _SIGNATURE_RE.match(sig):
+            raise ContractError(
+                "invalid_request",
+                "decision signature must be a 128-character hex Ed25519 signature",
+            )
 
     return ValidatedCommand(
         name=name,

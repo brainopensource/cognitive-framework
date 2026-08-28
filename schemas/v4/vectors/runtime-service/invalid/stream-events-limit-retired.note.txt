@@ -1,0 +1,2 @@
+The Python mirror accepted StreamEvents.limit; server.py never read it, so an
+operator asking for a bounded stream silently got an unbounded one. Refused now.

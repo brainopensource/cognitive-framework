@@ -1,0 +1,1 @@
+{"version":"vg.4","frameType":"command","frameId":"018f3a2b-7c4d-7e1f-9a2b-000000000001","command":{"name":"StreamEvents","commandId":"018f3a2b-7c4d-7e1f-9a2b-0000000000a1","idempotencyKey":"idem-0001","actor":"operator","runId":"run-01890abc-7c4d-7e1f-9a2b-3c4d5e6f7a8c","payload":{"afterSeq":"128"}}}

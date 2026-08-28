@@ -57,6 +57,13 @@
       "additionalProperties": false
     },
 
+    "SeqGuard": {
+      "$comment": "Optimistic-concurrency guard on a run's current sequence. A mismatch is a `conflict`, never a silent overwrite. Accepts a JSON integer or the CT-06 decimal-string form used by afterSeq, because a run sequence may exceed 2^53-1.",
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "$ref": "primitives.schema.json#/$defs/IntString" }
+      ]
+    },
     "ErrorCode": {
       "$comment": "Canonical vocabulary shared byte-for-byte with client-core ClientFailure.code (TS) and service/contract.py ERROR_CODES (Python).",
       "enum": [
@@ -99,29 +106,8 @@
     },
 
     "ApprovalDecision": {
-      "$comment": "Canonical signed decision body, RFC 8785/JCS-signed by the operator's Ed25519 key. Sole shape ResolveApproval accepts on every transport.",
-      "type": "object",
-      "required": [
-        "approvalId",
-        "resolution",
-        "reviewer",
-        "argsDigest",
-        "descriptorDigest",
-        "expiresAt",
-        "keyId",
-        "signature"
-      ],
-      "properties": {
-        "approvalId": { "$ref": "primitives.schema.json#/$defs/ApprovalId" },
-        "resolution": { "enum": ["approved", "rejected"] },
-        "reviewer": { "type": "string", "minLength": 1 },
-        "argsDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
-        "descriptorDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
-        "expiresAt": { "$ref": "primitives.schema.json#/$defs/Timestamp" },
-        "keyId": { "type": "string", "minLength": 1 },
-        "signature": { "type": "string", "minLength": 1 }
-      },
-      "additionalProperties": false
+      "$comment": "Sole authority: approval-decision.schema.json. This slot inlined a near-copy whose `signature` was `minLength: 1` while the standalone schema requires the 128-hex Ed25519 form both signers actually emit (governance/approvals.py `.hex()`, client-core signer.ts `toString(\"hex\")`). The weaker of two copies guarded ingress, so the copy is retired in favour of the reference.",
+      "$ref": "approval-decision.schema.json"
     },
 
     "Command": {
@@ -156,7 +142,17 @@
             "manifestPath": { "type": "string", "minLength": 1 },
             "repoPath": { "type": "string", "minLength": 1 },
             "brief": { "type": "string", "minLength": 1 },
-            "profileId": { "type": "string", "minLength": 1 }
+            "profileId": { "type": "string", "minLength": 1 },
+            "model": {
+              "$comment": "Model route ID for this run. Authority-bearing: it selects the route and therefore the pricing/accounting vector.",
+              "type": "string",
+              "minLength": 1
+            },
+            "episodeId": {
+              "$comment": "Caller-supplied episode identity. The service mints a UUIDv7 when absent.",
+              "$ref": "primitives.schema.json#/$defs/Identifier"
+            },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
           },
           "additionalProperties": false
         }
@@ -172,7 +168,13 @@
         "idempotencyKey": { "type": "string", "minLength": 1 },
         "actor": { "type": "string" },
         "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
-        "payload": { "type": "object", "additionalProperties": false }
+        "payload": {
+          "type": "object",
+          "properties": {
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
@@ -189,8 +191,12 @@
         "payload": {
           "type": "object",
           "properties": {
-            "cursor": { "type": "string" },
-            "limit": { "type": "integer", "minimum": 1, "maximum": 500 }
+            "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
+            "offset": {
+              "$comment": "Offset paging. `cursor` was specified here but never implemented, never emitted by any client, and never written to the wire; the served implementation has always paged by limit/offset.",
+              "type": "integer",
+              "minimum": 0
+            }
           },
           "additionalProperties": false
         }
@@ -227,7 +233,10 @@
         "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
         "payload": {
           "type": "object",
-          "properties": { "reason": { "type": "string" } },
+          "properties": {
+            "reason": { "type": "string" },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
+          },
           "additionalProperties": false
         }
       },
@@ -242,7 +251,14 @@
         "idempotencyKey": { "type": "string", "minLength": 1 },
         "actor": { "type": "string" },
         "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
-        "payload": { "type": "object", "additionalProperties": false }
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reason": { "type": "string" },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
@@ -257,7 +273,10 @@
         "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
         "payload": {
           "type": "object",
-          "properties": { "checkpointId": { "type": "string" } },
+          "properties": {
+            "checkpointId": { "type": "string" },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
+          },
           "additionalProperties": false
         }
       },
@@ -275,7 +294,10 @@
         "payload": {
           "type": "object",
           "required": ["decision"],
-          "properties": { "decision": { "$ref": "#/$defs/ApprovalDecision" } },
+          "properties": {
+            "decision": { "$ref": "#/$defs/ApprovalDecision" },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
+          },
           "additionalProperties": false
         }
       },
@@ -297,7 +319,8 @@
             "correction": {
               "$comment": "Deep-validated by the CorrectionRecord wire reader (parse_wire), not re-specified here.",
               "type": "object"
-            }
+            },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
           },
           "additionalProperties": false
         }
@@ -319,7 +342,8 @@
           "required": ["artifactId"],
           "properties": {
             "artifactId": { "$ref": "primitives.schema.json#/$defs/ArtifactId" },
-            "substrateProfile": { "type": "string" }
+            "substrateProfile": { "type": "string" },
+            "expectedSeq": { "$ref": "#/$defs/SeqGuard" }
           },
           "additionalProperties": false
         }

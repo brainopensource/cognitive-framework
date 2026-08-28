@@ -34,7 +34,23 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT / "tools" / "linters") not in sys.path:
     sys.path.insert(0, str(_ROOT / "tools" / "linters"))
 
+import verify_evidence  # noqa: E402
 from verify_evidence import FAILED, PASSED, UNDETERMINABLE, verify_bundle  # noqa: E402
+
+
+def _sign(body: dict, key: ed25519.Ed25519PrivateKey) -> dict:
+    """Sign an envelope body the way its producer or reviewer would."""
+    envelope = parse_envelope({**body, "signature": ""})
+    signature = key.sign(canonical_bytes(envelope.body()))
+    return {**body, "signature": "ed25519:" + base64.b64encode(signature).decode("ascii")}
+
+
+def _public(key: ed25519.Ed25519PrivateKey) -> str:
+    return base64.b64encode(
+        key.public_key().public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+    ).decode("ascii")
 
 
 def _bundle(outcome: str = "passed", **overrides) -> dict:
@@ -96,7 +112,29 @@ def _acceptance(subject_digest: str, key: ed25519.Ed25519PrivateKey, **overrides
 class VerifierFailsClosed(unittest.TestCase):
     def setUp(self) -> None:
         self.key = ed25519.Ed25519PrivateKey.generate()
+        self.producer_key = ed25519.Ed25519PrivateKey.generate()
         self.tmp = Path(self.enterContext(__import__("tempfile").TemporaryDirectory()))
+        # The verifier trusts keys its own lane registered, so a test that wants
+        # a clean bundle to pass must register the keys that bundle is signed
+        # with. Nothing here is read from the envelopes under test.
+        trust_root = self.tmp / "trust_root.json"
+        trust_root.write_text(json.dumps({
+            "schema": "aether.evidence.trust-root/1",
+            "producers": {
+                "producer-key": {"identity": "dev-b", "publicKey": _public(self.producer_key)},
+            },
+            "reviewers": {
+                "reviewer-key": {
+                    "identity": "independent-reviewer", "publicKey": _public(self.key),
+                },
+            },
+        }), encoding="utf-8")
+        self._patch_trust_root(trust_root)
+
+    def _patch_trust_root(self, path: Path) -> None:
+        original = verify_evidence.TRUST_ROOT_PATH
+        verify_evidence.TRUST_ROOT_PATH = path
+        self.addCleanup(setattr, verify_evidence, "TRUST_ROOT_PATH", original)
 
     def _write(self, bundle: dict, acceptance: dict | None) -> Path:
         path = self.tmp / "TEST-01.json"
@@ -108,6 +146,8 @@ class VerifierFailsClosed(unittest.TestCase):
         return path
 
     def _verify(self, bundle: dict, acceptance: dict | None = "auto"):
+        if bundle.get("signature") == "producer-signature":
+            bundle = _sign(bundle, self.producer_key)
         if acceptance == "auto":
             digest = parse_envelope(bundle).digest()
             acceptance = _acceptance(digest, self.key)
@@ -210,6 +250,130 @@ class VerifierFailsClosed(unittest.TestCase):
         verdict = self._verify(bundle)
         self.assertEqual(verdict.outcome, UNDETERMINABLE)
         self.assertNotEqual(verdict.outcome, FAILED)
+
+    # -- B-O10-02: the trust root, not the document, names the authority ---
+
+    def test_an_acceptance_signed_by_an_unregistered_reviewer_is_undeterminable(self) -> None:
+        """Minting a fresh keypair per bundle must not manufacture a reviewer.
+
+        The self-supplied ``reviewerPublicKey`` verifies perfectly against its
+        own signature, which is exactly why it cannot be the authority: anyone
+        who can write the acceptance can also generate the key that signs it.
+        """
+        bundle = _bundle()
+        signed = _sign(bundle, self.producer_key)
+        digest = parse_envelope(signed).digest()
+        stranger = ed25519.Ed25519PrivateKey.generate()
+        acceptance = _acceptance(
+            digest, stranger,
+            producer={
+                "identity": "order9-independent-verifier",
+                "role": "reviewer",
+                "keyId": "freshly-minted-reviewer",
+            },
+        )
+        verdict = verify_bundle(self._write(signed, acceptance))
+        self.assertEqual(verdict.outcome, UNDETERMINABLE)
+        self.assertTrue(
+            any("not registered in the verifier trust root" in u
+                for u in verdict.unresolved), verdict.unresolved,
+        )
+
+    def test_a_registered_reviewer_id_signed_by_another_key_is_refused(self) -> None:
+        """Claiming a registered keyId while signing with a different key."""
+        bundle = _bundle()
+        signed = _sign(bundle, self.producer_key)
+        digest = parse_envelope(signed).digest()
+        impostor = ed25519.Ed25519PrivateKey.generate()
+        acceptance = _acceptance(digest, impostor)  # keyId stays 'reviewer-key'
+        verdict = verify_bundle(self._write(signed, acceptance))
+        self.assertEqual(verdict.outcome, FAILED)
+        self.assertTrue(
+            any("not the one registered" in f or "does not verify" in f
+                for f in verdict.failures), verdict.failures,
+        )
+
+    def test_an_unregistered_producer_key_is_undeterminable(self) -> None:
+        bundle = _bundle()
+        bundle["producer"] = {"identity": "dev-b", "role": "producer", "keyId": "unknown-key"}
+        verdict = self._verify(_sign(bundle, self.producer_key))
+        self.assertEqual(verdict.outcome, UNDETERMINABLE)
+        self.assertTrue(
+            any("is not registered" in u for u in verdict.unresolved), verdict.unresolved,
+        )
+
+    def test_a_forged_producer_signature_is_refused(self) -> None:
+        """A present-but-wrong producer signature is decidably negative."""
+        bundle = _bundle()
+        bundle = _sign(bundle, ed25519.Ed25519PrivateKey.generate())
+        verdict = verify_bundle(self._write(
+            bundle, _acceptance(parse_envelope(bundle).digest(), self.key)))
+        self.assertEqual(verdict.outcome, FAILED)
+        self.assertTrue(
+            any(f.startswith("producer signature does not verify") for f in verdict.failures),
+            verdict.failures,
+        )
+
+    # -- B-O10-03: bundle-local bytes may satisfy outputs, never sources ---
+
+    def test_a_source_material_cannot_be_satisfied_from_beside_the_bundle(self) -> None:
+        """The substitution the artifactRoot fence exists to stop.
+
+        Resolving source refs at the pinned commit is what ties evidence to the
+        code that ran. If any relative ref could also resolve from the bundle
+        directory, a producer could drop a hand-written ``root.py`` next to the
+        envelope and satisfy a runtime material the pinned commit never had.
+        """
+        payload = b"# not the runtime that ran\n"
+        planted = self.tmp / "vanguard" / "packages" / "runtime"
+        planted.mkdir(parents=True)
+        (planted / "root.py").write_bytes(payload)
+        import hashlib
+        bundle = _bundle()
+        bundle["pins"] = {**bundle["pins"], "artifactRoot": "artifacts/TEST-01"}
+        bundle["materials"] = [{
+            "name": "runtime",
+            "ref": "vanguard/packages/runtime/root.py",
+            "digest": "sha256:" + hashlib.sha256(payload).hexdigest(),
+        }]
+        verdict = self._verify(bundle)
+        self.assertEqual(verdict.outcome, UNDETERMINABLE)
+        self.assertTrue(
+            any("does not resolve at pinned commit" in u for u in verdict.unresolved),
+            verdict.unresolved,
+        )
+
+    def test_a_run_output_under_the_artifact_root_does_resolve(self) -> None:
+        """Fenced, not closed: portable outputs still verify from the bundle."""
+        import hashlib
+        payload = b'{"failures": 0}\n'
+        artifacts = self.tmp / "artifacts" / "TEST-01"
+        artifacts.mkdir(parents=True)
+        (artifacts / "report.json").write_bytes(payload)
+        bundle = _bundle()
+        bundle["pins"] = {**bundle["pins"], "artifactRoot": "artifacts/TEST-01"}
+        bundle["materials"] = [{
+            "name": "report",
+            "ref": "artifacts/TEST-01/report.json",
+            "digest": "sha256:" + hashlib.sha256(payload).hexdigest(),
+        }]
+        verdict = self._verify(bundle)
+        self.assertEqual(verdict.outcome, PASSED, verdict.failures + verdict.unresolved)
+
+    def test_a_bundle_declaring_no_artifact_root_resolves_nothing_locally(self) -> None:
+        import hashlib
+        payload = b'{"failures": 0}\n'
+        artifacts = self.tmp / "artifacts" / "TEST-01"
+        artifacts.mkdir(parents=True)
+        (artifacts / "report.json").write_bytes(payload)
+        bundle = _bundle()
+        bundle["materials"] = [{
+            "name": "report",
+            "ref": "artifacts/TEST-01/report.json",
+            "digest": "sha256:" + hashlib.sha256(payload).hexdigest(),
+        }]
+        verdict = self._verify(bundle)
+        self.assertEqual(verdict.outcome, UNDETERMINABLE)
 
     def test_a_clean_fully_bound_bundle_passes(self) -> None:
         """Fail-closed, not closed to everything."""

@@ -43,15 +43,29 @@ class Order9EvidenceProducerTests(unittest.TestCase):
                 material.digest for material in envelope.materials
                 if material.name == "runtime"))
 
-    def test_evidence_local_resolver_rejects_escape_and_absolute_paths(self) -> None:
+    def test_evidence_local_resolver_is_fenced_to_the_declared_artifact_root(self) -> None:
+        """Bundle-local bytes satisfy run outputs only, never source materials.
+
+        Lane B narrowed this resolver in Order 10: an unfenced version would
+        let a file dropped beside the bundle stand in for a runtime module or
+        schema the pinned commit never contained.
+        """
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bundle = root / "bundle.json"
             bundle.write_text("{}", encoding="utf-8")
-            (root / "inside.bin").write_bytes(b"inside")
-            self.assertEqual(_bytes_at_evidence(bundle, "inside.bin"), b"inside")
-            self.assertIsNone(_bytes_at_evidence(bundle, "../outside.bin"))
-            self.assertIsNone(_bytes_at_evidence(bundle, str(root / "inside.bin")))
+            artifacts = root / "artifacts" / "M-6"
+            artifacts.mkdir(parents=True)
+            (artifacts / "inside.bin").write_bytes(b"inside")
+            (root / "beside.bin").write_bytes(b"beside")
+            fence = "artifacts/M-6"
+            self.assertEqual(
+                _bytes_at_evidence(bundle, "artifacts/M-6/inside.bin", fence), b"inside")
+            self.assertIsNone(_bytes_at_evidence(bundle, "beside.bin", fence))
+            self.assertIsNone(_bytes_at_evidence(bundle, "artifacts/M-6/inside.bin", ""))
+            self.assertIsNone(_bytes_at_evidence(bundle, "../outside.bin", fence))
+            self.assertIsNone(
+                _bytes_at_evidence(bundle, str(artifacts / "inside.bin"), fence))
 
 
 if __name__ == "__main__":

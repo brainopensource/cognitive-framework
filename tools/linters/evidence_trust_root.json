@@ -1,0 +1,27 @@
+{
+  "schema": "aether.evidence.trust-root/1",
+  "note": "Reviewer and producer keys this verifier will accept. A key that is not listed here is not an authority: an envelope signed by it is undeterminable, never passed. Registration is a deliberate Lane B act; a key that first appears inside the document it authenticates proves nothing, because anyone able to write the document can also mint the key.",
+  "reviewers": {
+    "independent-reviewer-key": {
+      "identity": "independent-reviewer",
+      "publicKey": "14apQEIMwInV4MBxsMis5uXkeuED+krKWY2D09W63V8=",
+      "registeredAt": "08c0847",
+      "registeredBy": "lane-b",
+      "note": "Established acceptance authority; in use across the M-4, M-5b, M-6 and M-6.5 acceptances that predate this trust root."
+    }
+  },
+  "producers": {
+    "dev-a-operator": {
+      "identity": "dev-a",
+      "publicKey": null,
+      "registeredAt": "662c80d",
+      "note": "Identity is known; no Ed25519 public key has been published, so this producer's envelope signatures cannot be re-derived. Signature checks are undeterminable until a key is registered here."
+    },
+    "dev-b-key": {
+      "identity": "dev-b",
+      "publicKey": null,
+      "registeredAt": "662c80d",
+      "note": "Identity is known; no published key. Same disposition as dev-a-operator."
+    }
+  }
+}

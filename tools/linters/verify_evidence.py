@@ -47,6 +47,11 @@ from vanguard.packages.domain.evidence.envelope import (
     parse_envelope,
 )
 
+#: Where the accepted signing authorities live. A test or an operator may point
+#: this elsewhere, but never at a path a producer writes: the whole value of the
+#: registry is that adding an authority is a change to the verifying lane.
+TRUST_ROOT_PATH = Path(__file__).resolve().with_name("evidence_trust_root.json")
+
 PASSED = "passed"
 FAILED = "failed"
 UNDETERMINABLE = "undeterminable"
@@ -115,25 +120,66 @@ def _bytes_at_commit(commit: str, ref: str) -> bytes | None:
     return result.stdout if result.returncode == 0 else None
 
 
-def _bytes_at_evidence(produced_path: Path, ref: str) -> bytes | None:
-    """Resolve only relative, evidence-bundle-local artifact references.
+def _bytes_at_evidence(
+    produced_path: Path, ref: str, artifact_root: str = "",
+) -> bytes | None:
+    """Resolve a run output that travels with the bundle, and nothing else.
 
     A producer may run in a temporary workspace, but an evidence envelope may
     only publish bytes that travel with it.  Absolute paths and paths escaping
     the bundle directory are deliberately unresolvable; looking at today's
     checkout would reintroduce the contamination bug this verifier exists to
     prevent.
+
+    Resolution is confined to the bundle's declared ``pins.artifactRoot``.
+    Without that fence a producer could satisfy any *source* material -- a
+    runtime module, a schema, a falsifier suite -- by dropping a same-named
+    file beside the bundle, which is precisely the substitution that resolving
+    source refs at the pinned commit exists to prevent.  A bundle that declares
+    no artifact root has no portable outputs, so nothing resolves this way.
     """
+    if not artifact_root:
+        return None
     candidate = Path(ref)
     if candidate.is_absolute():
         return None
     root = produced_path.parent.resolve()
     try:
+        fence = (root / Path(artifact_root)).resolve()
+        fence.relative_to(root)
         resolved = (root / candidate).resolve()
-        resolved.relative_to(root)
+        resolved.relative_to(fence)
     except ValueError:
         return None
     return resolved.read_bytes() if resolved.is_file() else None
+
+
+def _trust_root() -> dict:
+    """Keys this verifier accepts as authorities, loaded from Lane B's registry.
+
+    The registry lives beside the verifier, not inside the evidence directory a
+    producer writes into, so adding an authority is a visible change to the
+    verifying lane's own surface rather than a side effect of publishing a
+    bundle.
+    """
+    try:
+        return json.loads(TRUST_ROOT_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _registered_key(kind: str, key_id: str) -> tuple[bool, str | None]:
+    """Return ``(is_registered, public_key_b64)`` for a signing key.
+
+    A registered key with no published public key is *known but uncheckable*;
+    the caller must report that as undeterminable rather than as either a pass
+    or a forgery.
+    """
+    entry = (_trust_root().get(kind) or {}).get(key_id)
+    if entry is None:
+        return False, None
+    public = entry.get("publicKey")
+    return True, public if isinstance(public, str) and public else None
 
 
 def _verify_signature(envelope, public_key_b64: str | None) -> str | None:
@@ -189,6 +235,31 @@ def verify_bundle(produced_path: Path) -> Verdict:
     if not produced.signature:
         verdict.outcome = FAILED
         verdict.failures.append("producer envelope is unsigned")
+    else:
+        # A signature nobody can re-derive is not a weaker signature; it is an
+        # unavailable verifier, and an unavailable verifier never implies a
+        # pass. The repair is publishing the producer key, not trusting the
+        # bytes because they are present.
+        producer_key_id = produced.producer.key_id
+        registered, producer_public = _registered_key("producers", producer_key_id)
+        if not registered:
+            verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
+            verdict.unresolved.append(
+                f"producer key {producer_key_id or '(none)'!r} is not registered in "
+                f"the verifier trust root; the envelope signature cannot be "
+                f"attributed to a known producer"
+            )
+        elif producer_public is None:
+            verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
+            verdict.unresolved.append(
+                f"producer key {producer_key_id!r} publishes no public key; the "
+                f"envelope signature is present but cannot be re-derived"
+            )
+        else:
+            reason = _verify_signature(produced, producer_public)
+            if reason:
+                verdict.outcome = FAILED
+                verdict.failures.append(f"producer {reason}")
 
     # -- reproducibility pins --------------------------------------------
     pins = dict(produced.pins or {})
@@ -227,7 +298,9 @@ def verify_bundle(produced_path: Path) -> Verdict:
         data = _bytes_at_commit(commit, ref)
         if data is None:
             try:
-                data = _bytes_at_evidence(produced_path, ref)
+                data = _bytes_at_evidence(
+                    produced_path, ref, str(pins.get("artifactRoot") or "")
+                )
             except OSError:
                 data = None
         if data is None:
@@ -336,14 +409,35 @@ def verify_bundle(produced_path: Path) -> Verdict:
         verdict.outcome = FAILED
         verdict.failures.append(f"acceptance: {defect}")
 
-    reviewer_key = acceptance.environment.get("reviewerPublicKey")
-    if not isinstance(reviewer_key, str) or not reviewer_key:
+    # The reviewer's key is taken from Lane B's registry, never from the
+    # acceptance itself. A key that first appears inside the document it
+    # authenticates establishes nothing: whoever can write the document can
+    # mint the keypair, and two distinct identity strings signed by two
+    # freshly minted keys are one authority wearing two names.
+    claimed_key = acceptance.environment.get("reviewerPublicKey")
+    reviewer_key_id = acceptance.producer.key_id
+    registered, reviewer_key = _registered_key("reviewers", reviewer_key_id)
+    if not registered:
         verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
         verdict.unresolved.append(
-            "acceptance carries no reviewer public key; the signature is "
-            "present but nothing binds it to a known reviewer"
+            f"reviewer key {reviewer_key_id or '(none)'!r} is not registered in the "
+            f"verifier trust root; this acceptance is signed by an unvetted "
+            f"authority and cannot be treated as independent"
+        )
+    elif reviewer_key is None:
+        verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
+        verdict.unresolved.append(
+            f"reviewer key {reviewer_key_id!r} publishes no public key; the "
+            f"acceptance signature cannot be re-derived"
         )
     else:
+        if isinstance(claimed_key, str) and claimed_key and claimed_key != reviewer_key:
+            verdict.outcome = FAILED
+            verdict.failures.append(
+                f"acceptance carries a reviewer public key that is not the one "
+                f"registered for {reviewer_key_id!r}; the signer is not the "
+                f"registered reviewer"
+            )
         reason = _verify_signature(acceptance, reviewer_key)
         if reason:
             verdict.outcome = FAILED
@@ -374,7 +468,13 @@ def main() -> int:
                         help="verify only bundles whose filename starts with this")
     parser.add_argument("--json", action="store_true",
                         help="emit machine-readable verdicts")
+    parser.add_argument("--trust-root", type=Path, default=None,
+                        help="registry of accepted producer/reviewer keys")
     args = parser.parse_args()
+
+    if args.trust_root is not None:
+        global TRUST_ROOT_PATH
+        TRUST_ROOT_PATH = args.trust_root.resolve()
 
     verdicts = [
         v for v in verify_all(args.evidence_dir)

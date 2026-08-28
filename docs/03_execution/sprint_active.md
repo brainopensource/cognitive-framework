@@ -34,7 +34,7 @@ no person, committee, or process approval is an entry dependency.
 | Lane | Package | Contract | Baseline | State | Completion predicate | Next |
 |---|---|---|---|---|---|---|
 | Lane A | WP-A4 | `1.0.0` | `5f5f1c6` | **PACKAGE_READY** | `tests_pass AND m6_order9_evidence_verified AND rf95_order9_evidence_verified AND portable_artifacts AND clean_subject` | RF-95 live rerun with external provider reachability |
-| Lane B | WP-B2 | `1.0.0` | `3e8b081` | **PACKAGE_READY** | `evidence_verifier_falsifiers_pass AND acceptance_authority_is_registered_outside_the_document AND producer_signatures_are_re_derivable AND m6_verified_green_from_a_clean_subject` | WP-B3 (blocked on M-4 re-execution and on Lane A registering a producer key) |
+| Lane B | WP-B2 | `1.0.0` | `3e8b081` | **PACKAGE_READY** | `evidence_verifier_falsifiers_pass AND acceptance_authority_is_registered_outside_the_document AND producer_signatures_are_re_derivable AND m6_verified_green_from_a_clean_subject` | WP-B3 (blocked on M-4 re-execution; `dev-a-evidence-1` is now registered) |
 
 ## Package state ledger
 
@@ -98,11 +98,19 @@ Milestone acceptance is derived from digest-addressed evidence, not package pres
 
 ### Verified milestone evidence
 
+Verdicts below are `tools/linters/verify_evidence.py --json` output over
+`docs/03_execution/evidence/`, not summaries of test runs. A milestone with no
+published bundle has no verdict, however green its suites are.
+
 | Milestone | Verifier verdict | Bundle |
 |---|---|---|
-| M-6 | `passed` | `M-6-canonical-recursion-order10` — 57 falsifiers in a fresh process, depth 3, kill-tree; clean subject `3e8b081`, signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`. Supersedes `M-6-canonical-recursion` and `-order9`, both of which stay on record as `undeterminable`. |
-| M-4 | `failed` | `M-4-rf95-candidate-05` is substantively sound — clean subject, materials resolve, cold reconstruction present — and fails only on an unverifiable producer signature and an unregistered reviewer key. Rebuilding it through `publish_evidence.py` with a registered key verifies green. |
-| M-5b, M-6.5 | `undeterminable` | Materials record no digest scheme, so their integrity cannot be re-derived. Re-emitting through the current builder closes this without re-running the studies. |
+| M-6 | `passed` | `M-6-canonical-recursion-order10` — 57 falsifiers in a fresh process, depth 3, kill-tree; clean subject `3e8b081`, signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`. Supersedes `M-6-canonical-recursion` and `-order9`, which stay on record. |
+| M-4 | `failed` | `M-4-rf95-candidate-05` is substantively sound — clean subject `ced2117`, materials resolve, cold reconstruction present — and fails only on a raw-hex producer signature and an acceptance whose reviewer public key is not the one registered for `independent-reviewer-key`. Its successor `candidate-06` is not yet published; `dev-a-evidence-1` is registered for it. candidate-05 is preserved unmodified. |
+| M-5b | `failed` | `M-5b-graph-coloring` records an acceptance claiming `passed` over an `undeterminable` subject. Its materials also record no digest scheme. The builder now emits `raw-sha256`; a labelled successor is gated on `CONVERGENCE-BASE-v1`. |
+| M-6.5 | `undeterminable` | `M-6.5-attributable-paired-study` materials record no digest scheme and the study report carries no ref. The builder now emits `raw-sha256` with a portable report ref, and re-emits the stored study without re-running it. |
+| M-5a | no bundle | `CONVERGENCE-BASE-v1` is absent. `prepare_convergence_baseline.py` produces a candidate (55 schema pins, 4 reducer pins, 3 protected subtrees) that declares `CANDIDATE_NOT_A_BASELINE` and leaves `commit_sha`, `tag_object_sha`, `tree_digest` unresolved. Only an annotated, remotely resolvable tag can supply them. |
+| M-7 | no bundle | Suites are green (39 tests) and role operations now execute as real M-6 children via `runtime.root._TopologyModel`. A locally built bundle reports `undeterminable`: multi-role lineages settle `abandoned` performing no effects, so declared role-to-role artifact flows are lowered but never exercised. |
+| M-8 | no bundle | Suites are green (59 tests, 34 markers, none unmet). A locally built bundle reports `passed` and is blocked only by a dirty subject; it needs a clean committed tree to publish. |
 
 ## Delivery rules
 

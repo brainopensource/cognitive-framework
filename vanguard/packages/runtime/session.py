@@ -444,7 +444,6 @@ class SessionPorts:
     memory: MemoryBinding | None = None
     #: Optional point-of-use authorized experience sink on successful runs.
     experience: MemoryBinding | None = None
-    child_runtime: Any = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -598,6 +597,11 @@ class HarnessSession:
         discovered_env = discovery.render_environment_text()
         base_env = _environment_map(ports.environment, harness)
         env_parts = [base_env]
+        if task.artifact_refs:
+            env_parts.append(
+                "=== Topology Artifact References ===\n" + "\n".join(
+                    f"- {ref['artifact']}: {ref['digest']}"
+                    for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
         if self.index is not None:
@@ -1009,9 +1013,13 @@ class HarnessSession:
             # `K-14`: the approved request re-enters at S1, not at S6, and the
             # model is not asked to re-propose what a human already approved.
             self.policy.bind(authorization)
-            self.dispatch(request, requested_scope=self.scope,
-                          reservation=_reservation_for(harness.budget,
-                                                       harness.effect_budget))
+            approved_dispatch = self.dispatch(
+                request, requested_scope=self.scope,
+                reservation=_reservation_for(harness.budget,
+                                             harness.effect_budget))
+            observer = getattr(self.operator._model, "observe_dispatch", None)
+            if callable(observer):
+                observer(approved_dispatch)
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
@@ -1224,6 +1232,9 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
+    observer = getattr(operator._model, "observe_dispatch", None)
+    if callable(observer):
+        observer(result)
     if outcome is None:
         # Approval suspension is not an observation of an executed effect.
         # Do not let a control-plane challenge advance a workload scenario.

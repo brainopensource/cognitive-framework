@@ -164,6 +164,26 @@ class EvidenceIsAdditive(unittest.TestCase):
             self.assertEqual(existing.read_text(encoding="utf-8"), "{}")
 
 
+class MachineReadableOutputIsActuallyMachineReadable(unittest.TestCase):
+    """B-O12-03: `--json` stdout parses.
+
+    The verifier used to append its human summary line after the JSON array, so
+    the one consumer the flag exists for could not read its own output. A gate
+    nobody can parse is a gate nobody runs.
+    """
+
+    def test_json_stdout_is_valid_json_and_summary_goes_to_stderr(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "tools/linters/verify_evidence.py", "--json"],
+            cwd=_ROOT, capture_output=True, text=True, check=False,
+        )
+        verdicts = json.loads(result.stdout)
+        self.assertTrue(verdicts)
+        for verdict in verdicts:
+            self.assertIn("verifiedOutcome", verdict)
+        self.assertIn("EVIDENCE VERIFIER", result.stderr)
+
+
 class TheTrustRootIsWellFormed(unittest.TestCase):
     def test_every_registered_key_is_a_usable_ed25519_public_key(self) -> None:
         root = json.loads(verify_evidence.TRUST_ROOT_PATH.read_text(encoding="utf-8"))

@@ -32,7 +32,7 @@ try:
     )
     from .challenges import CHALLENGES, setup_challenge_workspace, evaluate_challenge_oracle
     from .engine import IntelligentMachineEngine, ExecutionReport
-    from .llm_client import OpenRouterClient, MockLLMClient
+    from .llm_client import OpenRouterClient, OllamaClient, MockLLMClient
     from .catalog import RunCatalog, RunReceipt
     from .dashboard_exporter import export_html_dashboard
 except ImportError:
@@ -50,7 +50,7 @@ except ImportError:
     )
     from challenges import CHALLENGES, setup_challenge_workspace, evaluate_challenge_oracle
     from engine import IntelligentMachineEngine, ExecutionReport
-    from llm_client import OpenRouterClient, MockLLMClient
+    from llm_client import OpenRouterClient, OllamaClient, MockLLMClient
     from catalog import RunCatalog, RunReceipt
     from dashboard_exporter import export_html_dashboard
 
@@ -278,9 +278,10 @@ def main() -> int:
     parser.add_argument("--challenge", default="tier1_lru_cache", choices=list(CHALLENGES.keys()))
     parser.add_argument("--preset", default=None, help="Preset configuration name (e.g. v1.0_baseline_react, v2.3_compound_full)")
     parser.add_argument("--override", default="", help="Comma-separated parameter overrides (e.g. 'use_code_graph=True,max_turns=10')")
-    parser.add_argument("--model", default="openrouter/free", help="Model name on OpenRouter")
+    parser.add_argument("--model", default="openrouter/free", help="Model name on OpenRouter or Ollama")
     parser.add_argument("--repeats", type=int, default=1, help="Number of repeated trials for statistical variance reduction")
     parser.add_argument("--mock", action="store_true", help="Use offline Mock LLM client")
+    parser.add_argument("--ollama", action="store_true", help="Use local Ollama instance on Windows/WSL2 (http://localhost:11434)")
     parser.add_argument("--history", action="store_true", help="Display historical run catalog table")
     args = parser.parse_args()
 
@@ -290,7 +291,12 @@ def main() -> int:
         print("\n" + compare_historical_runs(catalog, challenge_id=args.challenge) + "\n")
         return 0
 
-    client = MockLLMClient() if args.mock else OpenRouterClient()
+    if args.mock:
+        client = MockLLMClient()
+    elif args.ollama or any(m in args.model for m in ("qwen", "deepseek-coder", "codestral", "llama3.2", "granite")):
+        client = OllamaClient()
+    else:
+        client = OpenRouterClient()
 
     if args.preset:
         base_cfg = get_preset(args.preset)

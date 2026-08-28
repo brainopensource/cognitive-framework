@@ -498,9 +498,14 @@ def main() -> int:
                 print(f"    UNDET  {unresolved}")
 
     passed = sum(1 for v in verdicts if v.outcome == PASSED)
-    print(
-        f"\nEVIDENCE VERIFIER: {passed}/{len(verdicts)} bundles verify as passed"
-    )
+    summary = f"EVIDENCE VERIFIER: {passed}/{len(verdicts)} bundles verify as passed"
+    if args.json:
+        # stdout must stay parseable when --json is asked for; a human summary
+        # appended after the array made the output invalid JSON, so the one
+        # consumer the flag exists for could not read it.
+        print(summary, file=sys.stderr)
+    else:
+        print(f"\n{summary}")
     return 0 if verdicts and all(v.outcome == PASSED for v in verdicts) else 1
 
 

@@ -12,7 +12,9 @@ Invariants:
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import tempfile
 import threading
 from pathlib import Path
 from typing import Any, Optional, Sequence, Union
@@ -354,6 +356,103 @@ class SqliteEventStore(EventStorePort):
             else:
                 cur.execute("SELECT COUNT(*) FROM events;")
             return int(cur.fetchone()[0])
+
+    def integrity_check(self) -> Result[dict[str, Any]]:
+        """Verify SQLite integrity and every stored envelope digest.
+
+        SQLite's own check does not validate the content-addressed envelope
+        bytes.  Release and recovery tooling need both answers, and a corrupt
+        database must be reported as a typed failure rather than reconstructed
+        from a partial read.
+        """
+        with self._lock:
+            try:
+                sqlite_result = str(
+                    self._conn.execute("PRAGMA integrity_check").fetchone()[0]
+                )
+                rows = self._conn.execute(
+                    "SELECT envelope_json, envelope_digest FROM events ORDER BY global_id ASC"
+                ).fetchall()
+                invalid = 0
+                for row in rows:
+                    envelope = parse_event_envelope(json.loads(row[0]))
+                    if envelope.digest() != str(row[1]):
+                        invalid += 1
+                report = {
+                    "sqlite": sqlite_result,
+                    "envelopes": len(rows),
+                    "invalid_envelopes": invalid,
+                    "ok": sqlite_result.lower() == "ok" and invalid == 0,
+                }
+                return Result.success(report)
+            except Exception as exc:
+                return Result.fail("instrument_error", f"integrity check failed: {exc}")
+
+    def backup(self, destination: str | Path) -> Path:
+        """Create an atomic SQLite backup after a verified checkpoint.
+
+        The destination must not already exist.  This makes an accidental
+        overwrite impossible and gives release tooling a recoverable artifact
+        whose bytes can be independently checked before restore.
+        """
+        target = Path(destination)
+        if target.exists():
+            raise FileExistsError(f"backup destination already exists: {target}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.", dir=target.parent))
+        staged_db = staging / "events.sqlite3"
+        try:
+            with self._lock:
+                if self.db_path != ":memory:":
+                    self._conn.execute("PRAGMA wal_checkpoint(FULL)")
+                with sqlite3.connect(str(staged_db)) as backup_conn:
+                    self._conn.backup(backup_conn)
+            os.replace(staged_db, target)
+            staging.rmdir()
+            return target
+        except Exception:
+            if staging.exists():
+                for child in staging.iterdir():
+                    child.unlink(missing_ok=True)
+                staging.rmdir()
+            raise
+
+    @classmethod
+    def restore_backup(
+        cls, backup: str | Path, destination: str | Path,
+        *, synchronous: str = "FULL",
+    ) -> "SqliteEventStore":
+        """Restore a verified backup into a new file-backed event store."""
+        source, target = Path(backup), Path(destination)
+        if not source.is_file():
+            raise ValueError(f"event-store backup is missing: {source}")
+        if target.exists():
+            raise FileExistsError(f"restore destination already exists: {target}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.", dir=target.parent))
+        staged_db = staging / "events.sqlite3"
+        try:
+            with sqlite3.connect(str(source)) as source_conn:
+                check = str(source_conn.execute("PRAGMA integrity_check").fetchone()[0])
+                if check.lower() != "ok":
+                    raise ValueError(f"event-store backup failed integrity check: {check}")
+                with sqlite3.connect(str(staged_db)) as target_conn:
+                    source_conn.backup(target_conn)
+            os.replace(staged_db, target)
+            staging.rmdir()
+            restored = cls(target, synchronous=synchronous)
+            report = restored.integrity_check()
+            if not report.ok or not report.value or not report.value["ok"]:
+                restored.close()
+                target.unlink(missing_ok=True)
+                raise ValueError("restored event store failed envelope integrity check")
+            return restored
+        except Exception:
+            if staging.exists():
+                for child in staging.iterdir():
+                    child.unlink(missing_ok=True)
+                staging.rmdir()
+            raise
 
     def close(self) -> None:
         """Close SQLite connection."""

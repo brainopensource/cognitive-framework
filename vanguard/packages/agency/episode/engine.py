@@ -325,6 +325,10 @@ class EpisodeEngine:
                     request = self._to_effect_request(episode, proposal, accumulated)
                     outcome = self._spawn_dispatcher(request)
                     dispatches.append(outcome)
+                    if receipt_labeller is not None:
+                        label = receipt_labeller(episode.turn_count, outcome)
+                        if label is not None:
+                            accumulated = accumulated + (label,)
                     spawn_res = SpawnResult(
                         ok=outcome.failure is FailurePath.OK,
                         payload=(outcome.outcome.result_digest

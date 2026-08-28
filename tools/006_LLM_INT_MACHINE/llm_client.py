@@ -1,4 +1,8 @@
-"""OpenRouter LLM client and Fake/Mock test double for 006_LLM_INT_MACHINE."""
+"""OpenRouter and Local Ollama LLM client for 006_LLM_INT_MACHINE.
+
+Supports OpenRouter cloud models as well as local Ollama instances running on
+Windows host / WSL2 / localhost with zero token cost.
+"""
 
 from __future__ import annotations
 import json
@@ -47,12 +51,18 @@ PRICING_PER_1M: dict[str, tuple[float, float]] = {
     "deepseek/deepseek-r1": (0.55, 2.19),
     "anthropic/claude-3.7-sonnet": (3.00, 15.00),
     "anthropic/claude-3.5-haiku": (0.80, 4.00),
+    "ollama:": (0.0, 0.0),
+    "qwen": (0.0, 0.0),
+    "deepseek-coder": (0.0, 0.0),
+    "llama": (0.0, 0.0),
+    "granite": (0.0, 0.0),
+    "codestral": (0.0, 0.0),
 }
 
 
 def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
     for prefix, (p_rate, c_rate) in PRICING_PER_1M.items():
-        if prefix in model:
+        if prefix in model.lower():
             return (prompt_tokens * p_rate + completion_tokens * c_rate) / 1_000_000.0
     return 0.0
 
@@ -152,6 +162,103 @@ class OpenRouterClient:
         self.cumulative_usage.cached_tokens += cached_t
         self.cumulative_usage.total_tokens += prompt_t + compl_t
         self.cumulative_usage.cost_usd += cost
+        self.cumulative_usage.latency_seconds += duration
+
+        return LLMResponse(
+            content=content,
+            tool_calls=tool_calls,
+            usage=metrics,
+            raw_response=data,
+        )
+
+
+class OllamaClient:
+    """Connects to local Ollama instance (localhost:11434) with zero token cost."""
+
+    def __init__(self, host_url: str = "http://localhost:11434/v1") -> None:
+        self.base_url = host_url
+        self.total_calls: int = 0
+        self.cumulative_usage = LLMUsageMetrics()
+
+    def complete(
+        self,
+        messages: Sequence[Mapping[str, Any]],
+        tools: Sequence[Mapping[str, Any]] | None = None,
+        model: str = "qwen2.5-coder:7b-instruct-q5_K_M",
+        temperature: float = 0.0,
+        max_tokens: int = 4096,
+        timeout: int = 120,
+    ) -> LLMResponse:
+        # Strip any 'ollama/' prefix if present
+        clean_model = model.replace("ollama/", "").replace("ollama:", "")
+        
+        payload: dict[str, Any] = {
+            "model": clean_model,
+            "messages": list(messages),
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        if tools:
+            payload["tools"] = list(tools)
+
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            f"{self.base_url}/chat/completions",
+            data=req_data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+
+        start_time = time.perf_counter()
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                resp_bytes = resp.read()
+                data = json.loads(resp_bytes.decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode("utf-8", errors="replace")
+            if "does not support tools" in err_body and tools:
+                # Fallback without native tools schema
+                payload_fallback = dict(payload)
+                del payload_fallback["tools"]
+                req_fallback = urllib.request.Request(
+                    f"{self.base_url}/chat/completions",
+                    data=json.dumps(payload_fallback).encode("utf-8"),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(req_fallback, timeout=timeout) as resp:
+                    resp_bytes = resp.read()
+                    data = json.loads(resp_bytes.decode("utf-8"))
+            else:
+                raise RuntimeError(f"Ollama Error: {err_body}") from e
+        except Exception as e:
+            raise RuntimeError(f"Ollama Connection Error ({self.base_url}): {str(e)}") from e
+
+        duration = time.perf_counter() - start_time
+        self.total_calls += 1
+
+        choice = data.get("choices", [{}])[0]
+        message = choice.get("message", {})
+        content = message.get("content") or ""
+        tool_calls = message.get("tool_calls") or []
+
+        raw_usage = data.get("usage", {})
+        prompt_t = raw_usage.get("prompt_tokens", 0)
+        compl_t = raw_usage.get("completion_tokens", 0)
+
+        metrics = LLMUsageMetrics(
+            prompt_tokens=prompt_t,
+            completion_tokens=compl_t,
+            cached_tokens=0,
+            total_tokens=prompt_t + compl_t,
+            latency_seconds=duration,
+            cost_usd=0.0,
+            model_name=clean_model,
+        )
+
+        self.cumulative_usage.prompt_tokens += prompt_t
+        self.cumulative_usage.completion_tokens += compl_t
+        self.cumulative_usage.total_tokens += prompt_t + compl_t
         self.cumulative_usage.latency_seconds += duration
 
         return LLMResponse(

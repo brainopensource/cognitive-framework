@@ -68,32 +68,57 @@ class AReportOnlySupportsWhatItObserved(unittest.TestCase):
             _report_passed(body, ("a",))
 
 
-class M7CannotCloseItsUnbuiltExecutionClause(unittest.TestCase):
-    """`milestones.md` M-7 requires the topologies to *execute*, not merely lower.
+#: The marker no suite can set today: multi-role lineages settle `abandoned`
+#: with no receipts, so declared artifact flows are never exercised.
+_UNSETTABLE = "artifact_flows_exercised"
 
-    `run_composed` parses, lowers and sequentially schedules `roleOperations`,
-    but never runs them as M-6 children. Until that exists, M-7 must not report
-    `passed` however green the lowering suites are.
+
+class M7CannotCloseItsUnexercisedArtifactFlows(unittest.TestCase):
+    """M-7 requires more than lowering, and more than spawning.
+
+    Role execution is real now -- roles run as M-6 children. What is still
+    unobserved is the declared role-to-role artifact flow, because no role
+    lineage performs an effect. M-7 must not report `passed` on the strength of
+    everything else.
     """
 
-    def test_a_fully_green_suite_still_cannot_close_m7(self) -> None:
-        report = _report({name: True for name in M7_MARKERS})
-        envelope = build_m7("dev-b", report, evidence_root=Path(self.enterContext(
-            __import__("tempfile").TemporaryDirectory())))
+    def _build(self, markers):
+        return build_m7("dev-b", _report(markers), evidence_root=Path(
+            self.enterContext(__import__("tempfile").TemporaryDirectory())))
+
+    def test_every_settable_marker_green_still_cannot_close_m7(self) -> None:
+        markers = {name: True for name in M7_MARKERS}
+        markers[_UNSETTABLE] = False
+        envelope = self._build(markers)
         self.assertEqual(envelope.outcome, "undeterminable")
-        self.assertIn("role operations", envelope.detail)
-        self.assertFalse(envelope.run["roleOperationsExecuted"])
+        self.assertIn("artifact flow", envelope.detail)
+        self.assertFalse(envelope.run["artifactFlowsExercised"])
+
+    def test_role_execution_is_recorded_as_achieved(self) -> None:
+        """The bundle must not keep reporting a gap Lane A already closed."""
+        markers = {name: True for name in M7_MARKERS}
+        markers[_UNSETTABLE] = False
+        self.assertTrue(self._build(markers).run["roleOperationsExecuted"])
+
+    def test_losing_role_execution_reopens_m7(self) -> None:
+        markers = {name: True for name in M7_MARKERS}
+        markers["role_operations_executed"] = False
+        self.assertEqual(self._build(markers).outcome, "undeterminable")
+
+    def test_losing_sequential_execution_reopens_m7(self) -> None:
+        """ADR-0099 is SEQUENTIAL_CONFIRMED; overlap would contradict it."""
+        markers = {name: True for name in M7_MARKERS}
+        markers["sequential_not_overlapped"] = False
+        self.assertEqual(self._build(markers).outcome, "undeterminable")
 
     def test_the_unmet_clause_is_named_in_the_bundle(self) -> None:
-        report = _report({name: True for name in M7_MARKERS})
-        envelope = build_m7("dev-b", report, evidence_root=Path(self.enterContext(
-            __import__("tempfile").TemporaryDirectory())))
-        self.assertIn("execute", str(envelope.run["unobservedClause"]))
+        markers = {name: True for name in M7_MARKERS}
+        markers[_UNSETTABLE] = False
+        self.assertIn("artifact flows", str(self._build(markers)
+                                            .run["unobservedClause"]))
 
     def test_every_material_declares_a_re_derivable_scheme(self) -> None:
-        report = _report({name: True for name in M7_MARKERS})
-        envelope = build_m7("dev-b", report, evidence_root=Path(self.enterContext(
-            __import__("tempfile").TemporaryDirectory())))
+        envelope = self._build({name: True for name in M7_MARKERS})
         self.assertTrue(envelope.materials)
         for material in envelope.materials:
             with self.subTest(material=material.name):

@@ -396,6 +396,8 @@ class _TopologyModel:
         }
         self._topology_digest = str(lowered.get("topologyDigest", ""))
         self._cursor = 0
+        self._flow_digests: dict[str, str] = {}
+        self._last_role: str | None = None
 
     def __getattr__(self, name: str) -> Any:
         # Preserve provider identity and optional adapter metadata used by
@@ -449,20 +451,50 @@ class _TopologyModel:
                 "topology requires a declared agent.spawn resource selector",
             )
 
+        # Topology scope is routing data, never a source of authority.  The
+        # child may request only selectors already declared by the parent
+        # composition; the SpawnAdapter applies the real attenuation check.
+        # The spawn selector itself is deliberately omitted from the role's
+        # working scope, so a role cannot recursively manufacture topology
+        # children.
+        role_resources: list[Mapping[str, Any]] = []
+        for raw_selector in self._harness.capability_ceiling:
+            try:
+                selector = json.loads(raw_selector)
+            except (TypeError, ValueError):
+                continue
+            if (isinstance(selector, Mapping)
+                    and selector != resource
+                    and selector not in role_resources):
+                role_resources.append(dict(selector))
+
         role_context = json.dumps({
             "role": role_id,
             "policyRef": template.get("policyRef", ""),
             "context": template.get("context", {}),
             "causalPredecessors": operation.get("causalPredecessors", ()),
+            "artifactRefs": [
+                {"artifact": artifact, "digest": self._flow_digests[artifact]}
+                for artifact in operation.get("inputArtifacts", ())
+                if artifact in self._flow_digests
+            ],
         }, sort_keys=True, separators=(",", ":"))
+        artifact_refs = tuple(
+            {"artifact": artifact, "digest": self._flow_digests[artifact]}
+            for artifact in operation.get("inputArtifacts", ())
+            if artifact in self._flow_digests)
         args: dict[str, Any] = {
             "brief": f"{self._brief}\n\nExecute topology role {role_id}. "
                      f"Routing context: {role_context}",
             "authority": [verb for verb in self._harness.verbs
                           if verb != SPAWN_VERB],
+            "resources": role_resources,
             "budget": budget,
             "maxTurns": max_turns,
         }
+        if artifact_refs:
+            args["artifactRefs"] = list(artifact_refs)
+        self._last_role = role_id
         return Result.success({
             "kind": "effect",
             "action": SPAWN_VERB,
@@ -472,6 +504,29 @@ class _TopologyModel:
             "idempotencyKey": f"topology:{self._topology_digest}:{role_id}",
             "note": f"execute lowered topology role {role_id}",
         })
+
+    def observe_dispatch(self, result: Any) -> None:
+        """Bind a settled child result to the next declared artifact flow.
+
+        Only the persisted child result digest crosses the role boundary. The
+        transcript, handles and child ports remain private to the child.
+        """
+        if self._last_role is None:
+            return
+        outcome = getattr(result, "outcome", None)
+        digest = getattr(outcome, "result_digest", None) if outcome is not None else None
+        if not isinstance(digest, str) or not digest.startswith("sha256:"):
+            for event in getattr(result, "events", ()) or ():
+                payload = getattr(event, "payload", {}) or {}
+                candidate = payload.get("resultDigest")
+                if isinstance(candidate, str) and candidate.startswith("sha256:"):
+                    digest = candidate
+                    break
+        if not isinstance(digest, str) or not digest.startswith("sha256:"):
+            return
+        operation = self._operations[self._cursor - 1]
+        for artifact in operation.get("outputArtifacts", ()):
+            self._flow_digests[str(artifact)] = digest
 
 
 def _validate_release_inputs(

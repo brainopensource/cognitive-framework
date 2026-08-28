@@ -141,12 +141,13 @@ class SpawnIntent:
     principal: str
     idempotency_key: str
     requested_actions: frozenset[str]
-    requested_resources: tuple[str, ...]
+    requested_resources: tuple[Mapping[str, Any], ...]
     requested_budget: Mapping[str, int]
     requested_turns: int | None
     child_depth: int
     goal_digest: str
     goal_artifact: str | None = None
+    artifact_refs: tuple[Mapping[str, str], ...] = ()
     brief: str = ""
 
     @classmethod
@@ -170,8 +171,14 @@ class SpawnIntent:
         actions = frozenset(str(verb) for verb in requested)
 
         raw_resources = args.get("resources")
-        resources = (tuple(str(r) for r in raw_resources)
-                     if raw_resources else tuple(parent_resources))
+        if raw_resources:
+            if not isinstance(raw_resources, (list, tuple)) or not all(
+                    isinstance(resource, Mapping) for resource in raw_resources):
+                raise DelegationContractError("resources must be a list of selectors")
+            resources = tuple(dict(resource) for resource in raw_resources)
+        else:
+            resources = tuple(dict(resource) for resource in parent_resources
+                              if isinstance(resource, Mapping))
 
         budget: dict[str, int] = {}
         for dimension, amount in (args.get("budget") or {}).items():
@@ -200,6 +207,23 @@ class SpawnIntent:
             requested_turns = None
 
         goal_artifact = args.get("goalArtifact")
+        raw_refs = args.get("artifactRefs") or ()
+        if not isinstance(raw_refs, (list, tuple)):
+            raise DelegationContractError("artifactRefs must be a list")
+        artifact_refs: list[Mapping[str, str]] = []
+        for index, raw_ref in enumerate(raw_refs):
+            if not isinstance(raw_ref, Mapping):
+                raise DelegationContractError(
+                    f"artifactRefs[{index}] must be an object")
+            artifact = raw_ref.get("artifact")
+            digest = raw_ref.get("digest")
+            if not isinstance(artifact, str) or not artifact:
+                raise DelegationContractError(
+                    f"artifactRefs[{index}].artifact is required")
+            if not isinstance(digest, str) or not digest.startswith("sha256:"):
+                raise DelegationContractError(
+                    f"artifactRefs[{index}].digest must be a sha256 reference")
+            artifact_refs.append({"artifact": artifact, "digest": digest})
 
         return cls(
             parent_episode_id=parent_episode_id,
@@ -214,6 +238,8 @@ class SpawnIntent:
             child_depth=int(request.depth) + 1,
             goal_digest=goal_digest,
             goal_artifact=goal_artifact if isinstance(goal_artifact, str) else None,
+            artifact_refs=tuple(sorted(
+                artifact_refs, key=lambda ref: (ref["artifact"], ref["digest"]))),
             brief=brief,
         )
 
@@ -244,6 +270,7 @@ class ChildLineage:
     max_turns: int
     settled_intent_key: str
     goal_artifact: str | None = None
+    artifact_refs: tuple[Mapping[str, str], ...] = ()
     project_id: str = ""
 
     @classmethod
@@ -267,6 +294,7 @@ class ChildLineage:
             max_turns=plan.max_turns,
             settled_intent_key=plan.idempotency_key,
             goal_artifact=plan.goal_artifact,
+            artifact_refs=plan.artifact_refs,
             project_id=plan.project_id,
         )
 
@@ -295,6 +323,8 @@ class ChildLineage:
             payload["projectId"] = self.project_id
         if self.goal_artifact:
             payload["goalArtifact"] = self.goal_artifact
+        if self.artifact_refs:
+            payload["artifactRefs"] = [dict(ref) for ref in self.artifact_refs]
         return payload
 
 
@@ -516,6 +546,7 @@ class SpawnAdapter:
                 lineage=self._lineage,
                 idempotency_key=intent.idempotency_key,
                 goal_artifact=intent.goal_artifact,
+                artifact_refs=intent.artifact_refs,
                 constraints={
                     "expires_at": granted.constraints.expires_at,
                     "max_uses": granted.constraints.max_uses,

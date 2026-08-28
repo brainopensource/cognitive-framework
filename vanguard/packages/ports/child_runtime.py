@@ -93,6 +93,9 @@ class ChildRunPlan:
     lineage: tuple[str, ...]
     idempotency_key: str
     goal_artifact: str | None = None
+    #: Topology inputs are references only. Content never crosses the child
+    #: boundary as part of a plan.
+    artifact_refs: tuple[Mapping[str, str], ...] = field(default_factory=tuple)
     #: The already-attenuated constraint ceiling.  It is runtime input only;
     #: the durable child fact carries the identity and additive budget, not a
     #: live authority object.
@@ -124,6 +127,16 @@ class ChildRunPlan:
                 raise ChildContractError(
                     f"unknown budget dimension {dimension!r}; the additive set "
                     f"is exactly {CHILD_ADDITIVE_DIMENSIONS}")
+        for index, ref in enumerate(self.artifact_refs):
+            if not isinstance(ref, Mapping):
+                raise ChildContractError(
+                    f"artifact_refs[{index}] must be a reference object")
+            if (not isinstance(ref.get("artifact"), str)
+                    or not ref.get("artifact")
+                    or not isinstance(ref.get("digest"), str)
+                    or not ref.get("digest", "").startswith("sha256:")):
+                raise ChildContractError(
+                    f"artifact_refs[{index}] must contain an artifact and sha256 digest")
 
     def to_wire(self) -> dict[str, Any]:
         """Canonical camelCase form. Digests and identities only, never prose.
@@ -152,6 +165,8 @@ class ChildRunPlan:
         }
         if self.goal_artifact:
             payload["goalArtifact"] = self.goal_artifact
+        if self.artifact_refs:
+            payload["artifactRefs"] = [dict(ref) for ref in self.artifact_refs]
         return payload
 
 

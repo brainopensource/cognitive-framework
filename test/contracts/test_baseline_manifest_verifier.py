@@ -303,3 +303,55 @@ class BaselineManifestVerifierContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ACandidateIsNeverABaseline(unittest.TestCase):
+    """B-O12-02: `prepare_convergence_baseline.py` cannot mint a control.
+
+    The tool computes every pin derivable from the tree, and deliberately
+    leaves the git-derived fields unresolved. It performs no git operation, so
+    a lane that can run it still cannot manufacture the annotated, remotely
+    resolvable tag `CONVERGENCE-BASE-v1` requires. That separation is the whole
+    guarantee: if running a script could produce a baseline, the baseline would
+    prove nothing about the tree it claims to control.
+    """
+
+    def _candidate(self):
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[2]
+        directory = self.enterContext(tempfile.TemporaryDirectory())
+        key = Path(directory) / "creator.key"
+        subprocess.run(
+            [sys.executable, str(root / "tools/runners/keygen_evidence_key.py"),
+             "--key-id", "baseline-test", "--out", str(key)],
+            check=True, capture_output=True)
+        out = Path(directory) / "candidate.json"
+        result = subprocess.run(
+            [sys.executable, str(root / "tools/runners/prepare_convergence_baseline.py"),
+             "--creator-key", str(key), "--out", str(out)],
+            check=False, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return json.loads(out.read_text(encoding="utf-8")), result.stdout
+
+    def test_the_candidate_declares_it_is_not_a_baseline(self) -> None:
+        wire, _ = self._candidate()
+        self.assertEqual(wire["candidate"]["status"], "CANDIDATE_NOT_A_BASELINE")
+
+    def test_the_git_derived_fields_stay_unresolved(self) -> None:
+        """Only a real annotated tag can supply these."""
+        wire, _ = self._candidate()
+        unresolved = set(wire["candidate"]["unresolvedFields"])
+        self.assertEqual(unresolved, {"commit_sha", "tag_object_sha", "tree_digest"})
+
+    def test_the_reviewer_signature_is_absent_not_self_supplied(self) -> None:
+        """The creator must not be able to countersign its own control."""
+        wire, _ = self._candidate()
+        self.assertEqual(wire["candidate"]["reviewerSignature"], "ABSENT")
+
+    def test_the_tool_reports_that_it_ran_no_git_operation(self) -> None:
+        _, stdout = self._candidate()
+        self.assertIn("no git operation was performed", stdout)

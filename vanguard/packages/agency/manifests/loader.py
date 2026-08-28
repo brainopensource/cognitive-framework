@@ -257,6 +257,16 @@ class ManifestLoader:
             else:
                 pack_path = (self.base_dir / pack_path).resolve()
 
+        # The installed-wheel CLI and callers that already resolved a package
+        # resource naturally pass ``.../manifest.json``.  Accepting that form
+        # here keeps file and pack-directory ingress equivalent without
+        # guessing a checkout root or requiring PYTHONPATH.
+        if pack_path.is_file():
+            if pack_path.name != "manifest.json":
+                raise ManifestLoadError(
+                    f"manifest path must name manifest.json: {pack_path}")
+            pack_path = pack_path.parent
+
         if not pack_path.exists() or not pack_path.is_dir():
             raise ManifestLoadError(f"Manifest pack directory does not exist: {pack_path}")
 

@@ -565,17 +565,20 @@ def build_m7(
 ) -> EvidenceEnvelope:
     """M-7: three topologies through one runtime, plus the ADR-0099 disposition.
 
-    One clause of M-7 is not yet demonstrable. `milestones.md` requires that the
-    three topologies *execute* through one public path, and `run_composed`
-    currently parses the topology, lowers it and computes a sequential order,
-    but never runs the lowered role operations as real M-6 children -- the only
-    consumers of `roleOperations` are the scheduler check and the tests.
+    Role execution is now real: `_TopologyModel` emits each lowered role as an
+    ordinary `agent.spawn` proposal, so roles run as M-6 children through the
+    same session, kernel, grant, lease, child runtime and ledger. The suites
+    assert that against the ledger -- children bound to the root episode, one
+    per role, in causal order, non-overlapping, cold-reconstructible, and never
+    granted the spawn verb.
 
-    So `role_operations_executed` is a required marker that no suite can set
-    today, and this bundle reports `undeterminable`. That is the honest answer:
-    the lowering is verified, the disposition is recorded, and the execution
-    clause is unobserved. Reporting `passed` on the strength of the other
-    clauses would convert an unbuilt capability into a closed milestone.
+    One narrower clause remains unobserved. Under a multi-role topology the root
+    model is the topology bridge, which only proposes spawns, and each role
+    lineage settles `abandoned` having performed no effects. So the declared
+    role-to-role *artifact flows* are lowered but never exercised, and
+    `artifact_flows_exercised` is a required marker no suite can set. This
+    bundle therefore still reports `undeterminable` -- for a far narrower reason
+    than before, and one the report names precisely.
     """
     return _suite_bundle(
         claim="M-7",
@@ -594,26 +597,22 @@ def build_m7(
             "adr_0099": "docs/02_decisions/0099-m7-topology-scheduler-disposition.md",
         },
         report=falsifier_report,
-        required_markers=(
-            "three_topologies", "one_runtime_shape", "distinct_structures",
-            "lowering_is_not_concurrency", "cycles_rejected", "authority_rejected",
-            "unreachable_role_visible", "missing_resource_named",
-            "independence_measured", "m701_live_path", "recorded_timestamps",
-            "unobserved_not_invented", "analysis_only", "digest_stable",
-            # Not settable by any current suite: see the docstring.
-            "role_operations_executed",
-        ),
+        # Every marker is required, including `artifact_flows_exercised`, which
+        # no suite can set today. See the docstring.
+        required_markers=tuple(_M7_REQUIRED_MARKERS),
         run={
             "schedulerDisposition": "SEQUENTIAL_CONFIRMED",
             "adr": "ADR-0099",
             "concurrencyAuthorized": False,
             "m701MeasuredOn": "live canonical Runtime.execute_harness run",
             "topologies": ["direct", "planner-executor-reviewer", "fork-read-merge"],
-            "roleOperationsExecuted": False,
+            "roleOperationsExecuted": True,
+            "roleExecutionBridge": "runtime.root._TopologyModel -> agent.spawn",
+            "artifactFlowsExercised": False,
             "unobservedClause": (
-                "milestones.md M-7 requires the three topologies to execute "
-                "through one public path; run_composed lowers and schedules "
-                "roleOperations but does not execute them as M-6 children"
+                "roles execute as M-6 children, but multi-role lineages settle "
+                "'abandoned' performing no effects, so the declared role-to-role "
+                "artifact flows are lowered and never exercised"
             ),
         },
         producer=producer,
@@ -621,13 +620,26 @@ def build_m7(
         subject_root=subject_root,
         evidence_root=evidence_root,
         detail=(
-            "Topology lowering, fail-closed rejection and the ADR-0099 "
-            "SEQUENTIAL_CONFIRMED disposition are verified, and M7-01 "
-            "independence is measured on a live canonical run. Outcome is "
-            "undeterminable because role operations are lowered but never "
-            "executed as M-6 children, so the execution clause is unobserved."
+            "Topology lowering, fail-closed rejection, the ADR-0099 "
+            "SEQUENTIAL_CONFIRMED disposition and live M7-01 independence are "
+            "verified, and role operations now execute as real M-6 children "
+            "bound to the root episode in causal order. Outcome is "
+            "undeterminable because multi-role lineages perform no effects, so "
+            "declared role-to-role artifact flows are never exercised."
         ),
     )
+
+
+#: Imported from the proof runners so builder and runner cannot drift: a
+#: marker the runner stopped emitting must fail the build, not be skipped.
+def _required_markers(module_name: str) -> tuple[str, ...]:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    module = __import__(module_name)
+    return tuple(sorted(module.MARKERS))
+
+
+_M7_REQUIRED_MARKERS = _required_markers("run_m7_topology_proof")
+_M8_REQUIRED_MARKERS = _required_markers("run_m8_governed_learning_proof")
 
 
 def build_m8(
@@ -662,11 +674,9 @@ def build_m8(
             "adr_0100": "docs/02_decisions/0100-memory-learning-and-composition-lifecycle.md",
         },
         report=falsifier_report,
-        required_markers=(
-            "authorities_distinct", "held_out_is_real", "presence_is_not_use",
-            "promotion_binds_decision", "rollback_executed",
-            "reproducibility_recomputed", "no_premature_event_kinds",
-        ),
+        # Every marker is required: M-8's predicate is a conjunction, and a
+        # property that stopped being exercised is not a property that holds.
+        required_markers=tuple(_M8_REQUIRED_MARKERS),
         run={
             "adr": "ADR-0100",
             "authorizationBeforeRanking": True,

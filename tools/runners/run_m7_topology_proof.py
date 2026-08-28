@@ -25,6 +25,7 @@ from falsifier_proof import ROOT, emit, run_suite  # noqa: E402
 MODULES = (
     "test.falsifiers.test_m7_topology_and_independence",
     "test.falsifiers.test_m701_recorded_workload",
+    "test.falsifiers.test_m7_topology_execution",
 )
 
 #: Report field -> the test name whose presence proves the behaviour ran.
@@ -43,6 +44,23 @@ MARKERS = {
     "unobserved_not_invented": "test_unobserved_cache_and_wal_metrics_are_not_invented",
     "analysis_only": "test_the_report_stays_analysis_only_and_digest_stable",
     "digest_stable": "test_the_report_over_a_fixed_seed_run_is_digest_stable",
+
+    # -- execution, not merely lowering (Lane A landed the topology bridge) --
+    "forms_execute": "test_all_three_forms_complete_through_the_one_public_path",
+    "role_operations_executed": "test_role_operations_execute_as_m6_children",
+    "children_bound_to_root": "test_every_child_is_bound_to_the_root_episode",
+    "roles_run_once": "test_each_role_runs_exactly_once",
+    "causal_order_honoured": "test_children_are_spawned_in_causal_predecessor_order",
+    "intent_keys_topology_bound": "test_each_intent_key_is_bound_to_the_topology_digest",
+    "sequential_not_overlapped": "test_execution_is_sequential_not_overlapped",
+    "cold_reconstructs_tree": "test_the_ledger_reconstructs_the_whole_tree_cold",
+    "children_never_get_spawn": "test_children_never_receive_the_spawn_verb",
+    "direct_form_does_real_work": "test_the_direct_form_does_real_work_through_the_canonical_path",
+
+    # Not settable by any suite today: multi-role lineages settle `abandoned`
+    # with no receipts, so declared artifact flows are never exercised. This is
+    # the one clause standing between M-7 and `passed`.
+    "artifact_flows_exercised": "test_artifact_flows_are_exercised_between_roles",
 }
 
 

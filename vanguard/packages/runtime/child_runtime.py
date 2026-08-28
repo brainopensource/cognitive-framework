@@ -151,6 +151,7 @@ class RuntimeChildRunner:
             parent_episode_id=plan.parent_episode_id,
             preregistration=self._parent_task.preregistration,
             lineage=tuple(plan.lineage) + (plan.child_episode_id,),
+            artifact_refs=plan.artifact_refs,
             scope_override=Scope(
                 actions=frozenset(plan.authority),
                 resources=tuple(plan.resources),

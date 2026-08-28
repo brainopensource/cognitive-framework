@@ -131,6 +131,25 @@ injection, security and performance qualification, reproducible packaging, soak 
 envelope. Publication is mechanically authorized only by `./ci/release_qualify.sh` exiting `0` for the exact
 candidate with a subject-matching envelope.
 
+### Backend release gates and their external actions
+
+These are gates, not status. None is claimed here; each is a condition some
+receipt must satisfy before the milestone above it can close.
+
+| Gate | Satisfied by | Currently outstanding |
+|---|---|---|
+| Clean subject | A bundle pinning a committed tree with `dirty: false` | Evidence built from a working tree cannot publish; needs a commit |
+| Signed evidence | `ed25519:<base64>` over the canonical body, re-derivable from a key registered in `tools/linters/evidence_trust_root.json` | — |
+| Baseline tag | Annotated, remotely resolvable `CONVERGENCE-BASE-v1` plus a countersigned `aether.baseline/1` manifest (ADR-0102) | Tag absent; `prepare_convergence_baseline.py` emits only a candidate and runs no git |
+| M-8 acceptance | An M-8 bundle and independent acceptance that both verify `passed` | No M-8 bundle is published |
+| M-9 beta qualification | Packaged CLI/API/TUI/Studio, plugin lifecycle, health/readiness, two real workflows, restart/resume, offline-after-install, all from reproducible artifacts | Not authorized until M-8 verifies `passed` |
+| M-10 release qualification | `./ci/release_qualify.sh` exiting `0` for the exact candidate | Script does not exist |
+| Exact-subject envelope | A signed release envelope whose subject digest equals the candidate's | Depends on the two gates above |
+
+Publication, tag creation, and history operations are release actions performed
+outside the coding lanes. A lane may prepare and verify every input to a gate
+without being able to close it, and preparing an input is never acceptance.
+
 ## M-1 through M-3 compatibility anchors
 
 All new work preserves S0–S12 authority, typed four-dimensional additive budgets, depth/turn

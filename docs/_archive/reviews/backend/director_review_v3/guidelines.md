@@ -92,7 +92,28 @@ CI workflows, Python and TypeScript implementations, tests, and local executable
 The commands were diagnostic only. No production, test, configuration, or canonical documentation
 file was intentionally changed. The test-mutated SQLite fixture was restored.
 
-### 2.2 Audited-commit versus current-HEAD distinction
+### 2.2 Failure forensics and packaging consequence
+
+The 17 Python errors are one causal defect, but the repair must not be reduced to a source-tree
+path tweak. In `vanguard/packages/agency/manifests/loader.py`, `SCHEMA_PATH` and
+`NAMED_SCHEMA_PATH` use `Path(__file__).resolve().parents[3]`. From that module, `parents[3]`
+resolves to `vanguard/`, producing nonexistent `vanguard/schemas/v4/...` and
+`vanguard/schemas/mhf/...` paths. The schemas are currently at repository root. Git history traces
+the faulty arithmetic to `60a1c14`; it survived the M-3 sequence through `545ea36`.
+
+Changing `parents[3]` to `parents[4]` would make a source checkout green, but it would not solve the
+product defect: an installed wheel has no repository root and the current package discovery does
+not place root `schemas/` beside the installed module. The definitive repair is to package the
+canonical schema resources and resolve them through `importlib.resources` (or an equivalently
+explicit installed-resource API), with source-editable and wheel-install tests. Missing or invalid
+resources must still fail closed. This is simultaneously the immediate M-3 regression and the
+first concrete M-9 packaging blocker.
+
+The two pricing failures are a separate source-of-truth drift: routing prices changed without
+updating accounting vectors. The repair must bind the routing table and expected cost vectors to
+one generated or mechanically checked source, rather than merely changing two assertions.
+
+### 2.3 Audited-commit versus current-HEAD distinction
 
 The v2 Director reports audited `624d80f`. The active board cites verification subject
 `15fbb751...`. The approved `TODO_PROMPT.md` describes an intermediate state before Waves 5B–9.
@@ -139,7 +160,7 @@ tests. Therefore:
 | M-6 delegation | Implemented mechanism, evidence open | Real `ChildRuntimePort`, durable IDs and attenuation code exist; clean-subject depth/kill-tree bundle is missing |
 | M-6.5 meta-control | Implemented and evidence-accepted under current board | Signed paired-study and acceptance envelope exist; enablement must remain profile-scoped |
 | M-7 topology | Partial | Parser/lowering/authority rejection and `RunPlan.extensions` are integrated, but `run_composed` only lowers and computes an order; it does not execute the declared role operations as real M-6 children. ADR-0099 correctly chooses `SEQUENTIAL_CONFIRMED` |
-| M-8 memory | Partial with a live fail-open defect | Signed memory leases and durable adapter exist, but `InMemoryMemoryPort.write/recall` still accept the legacy nonempty-string disjunct; GC deletes metadata only and CAS sweep/backup/restore evidence is incomplete |
+| M-8 memory | Partial contract layer; production adapter missing; live fake is fail-open | Signed memory leases and port contracts exist, but there is **no adapter implementing the M-8 category ports under `adapters/stores/`**. `InMemoryMemoryPort` is the only implementation and explicitly identifies itself as a non-production compatibility fake; its `write/recall` methods still accept the legacy nonempty-string disjunct. The legacy `memory_engine.py` is not an implementation of those ports. Durable scoped metadata, CAS-backed content, indexing, lifecycle recovery, causal integration, CAS sweep, backup, and restore are therefore M-8 implementation work, not residual hardening |
 | M-8 governed learning | Partial/duplicated | `governance/learning.py`, `skill_evaluation.py`, and `skill_lifecycle.py` overlap. One path enforces separated signed promotion; `DurableCompositionRegistry.restore/rollback` accepts no signed rollback evidence |
 | Backend service trust repairs | Mostly implemented | Per-install keys, non-TTY denial, strict approval decision, gateway auth/origin/body limits, canonical append, cancellation and checkpoint work landed after the approved guide |
 | `vg.4` contract | Contradictory | JSON Schema rejects fields that handwritten `contract.py` permits (`model`, `episodeId`, `expectedSeq`, `offset`); docstring cites nonexistent cross-language vector tests |
@@ -302,6 +323,32 @@ Every package begins with an executable packet containing:
 
 If any item is missing, the lane owner chooses the operational default from Section 9 and records
 it in the package commit/board row; no external decision is requested.
+
+### 6.4 One-time removal of the obsolete approval layer
+
+Before the first implementation package is activated, Lane A performs one bounded governance
+cleanup in the canonical execution triad. This is not a review or a new gate; it deletes gates that
+cannot terminate under the two-lane program:
+
+1. remove `C1-GATE` as an execution dependency and replace it with the exact automated predicates
+   for subject identity, signature validity, artifact portability, falsifier results, and clean
+   pins;
+2. remove `Leadership`, `Director`, and `Dev C` from ownership and escalation tables; reassign every
+   technical result to Lane A or Lane B using Section 7;
+3. remove mandatory independent **human** review from task and milestone transitions. Preserve
+   cryptographic producer/verifier separation through distinct automation identities;
+4. append the necessary successor ADR rather than mutating immutable ADR-0101. The successor states
+   that automated independent verification satisfies evidence separation and that no human
+   countersignature is a development dependency;
+5. replace every `pending CEO/Tech Lead/Leadership decision` with the owner, selection rule, and
+   fallback in Section 9; and
+6. keep product-time operator approval for privileged effects intact. It is part of AETHER's
+   security model, not the abolished development approval layer.
+
+Completion is mechanical: repository searches find no active package whose owner or entry
+predicate names `Leadership`, `Dev C`, mandatory human review, or Project Owner authorization, and
+the execution-truth linter accepts the resulting board. This single cleanup unblocks the currently
+artificially gated M-4/M-5/M-6/M-7/M-8 flow without weakening any technical falsifier.
 
 ## 7. Complete lane ownership model
 
@@ -679,7 +726,10 @@ not a human gate.
 #### A-M8 — Durable storage, retrieval integration, and served registry
 
 - **Objective/baseline:** complete production durability around Lane B contracts and remove all
-  compatibility fakes from product wiring.
+  compatibility fakes from product wiring. At audited HEAD there is no adapter implementing the
+  M-8 category ports: `InMemoryMemoryPort` is the only implementation, while
+  `adapters/stores/memory_engine.py` is a separate legacy API. This package therefore builds the
+  production memory path; it does not merely harden an existing durable adapter.
 - **Files/symbols:** memory SQLite/CAS adapter, blob/index stores, session context integration,
   durable composition registry, backup/restore/GC.
 - **Contracts/schemas:** authorized memory context, four categories, retrieval receipt, immutable
@@ -792,8 +842,9 @@ not a human gate.
 - **Security/compatibility/rollback:** threat-model tests, dependency/license/secret scans,
   least-privilege container, key rotation/revocation, tenant isolation; rollback to beta artifact and
   compatible store snapshot.
-- **Completion/next:** final release matrix in Section 11 passes from clean artifacts; tag and publish
-  `v0.9.0`; next is a separately authorized v1.0 roadmap.
+- **Completion/next:** implement and run `ci/release_qualify.sh` from a clean candidate; exit `0`
+  and a subject-matching signed envelope authorize the mechanical tag/publish of `v0.9.0`. Any
+  nonzero stage repairs forward; next is a separately authorized v1.0 roadmap.
 
 #### B-M10 — Final compatibility, security, and release validation
 
@@ -815,7 +866,8 @@ not a human gate.
 - **Security/compatibility/rollback:** release signer and verifier keys separate; compromised plugin,
   forged grant, cross-tenant query, corrupt WAL/index and stale CAS scenarios deny/recover.
 - **Completion/next:** exact release envelope is `passed`, artifacts install and operate, version is
-  `0.9.0` everywhere; roadmap terminates successfully.
+  `0.9.0` everywhere, and the envelope is accepted as input by `ci/release_qualify.sh`; roadmap
+  terminates successfully only when the command exits `0`.
 
 ## 9. Autonomous decision model
 
@@ -919,7 +971,47 @@ providers are not per-commit gates.
 - reference-host performance distributions and 24-hour soak;
 - reproducible artifact manifest and automated independent release envelope.
 
-### 11.5 Defect and experiment policy
+### 11.5 Single mechanical release trigger
+
+Lane A must implement `ci/release_qualify.sh` during A-M10 as the sole release qualification
+entrypoint. It runs from a clean checkout against already-built or locally reproducible candidate
+artifacts, creates all scratch state outside the repository, and returns only an authoritative
+process result: exit `0` means every required check below passed for the exact bound candidate;
+nonzero means the release is not qualified. The script must not download optional dependencies,
+consult a human, accept waivers, retry flaky checks into success, or infer success from pre-existing
+reports.
+
+It must, in deterministic order:
+
+1. verify clean tree, candidate commit/tag, lockfiles, schema digests, artifact hashes, signatures,
+   SBOM, toolchain versions, and verifier identity;
+2. build the wheel, sdist, npm/client artifacts, and deployment image twice and compare normalized
+   content manifests;
+3. install into clean Python/Node environments without a repository checkout and inspect packaged
+   schemas, packs, migrations, UI assets, and entrypoints;
+4. run the architectural/security linters, Python suites, every root-gated TypeScript workspace,
+   cross-language schema vectors, and the essential E2E scenarios in Section 11.3;
+5. create beta-version stores, upgrade them, cold-fold/replay/resume them, back up and restore them,
+   and prove unsupported versions refuse without mutation;
+6. run the bounded crash, corrupt-index/WAL, disk-full, stale-CAS, forged-grant, cross-tenant,
+   plugin, gateway, cancellation, and rollback falsifiers;
+7. verify declared-host performance distributions and the release soak receipt; and
+8. emit one signed release envelope binding all inputs, artifacts, checks, migrations, SLO results,
+   and raw evidence digests.
+
+The final release predicate is therefore:
+
+```text
+clean candidate + ./ci/release_qualify.sh exit 0 + envelope subject == candidate
+    => tag and publish v0.9.0
+otherwise
+    => assign the first failing stage to its permanent owner and repair forward
+```
+
+No prose declaration, milestone percentage, or person can substitute for this command. The script
+itself is tested with deliberately broken artifacts so every stage is proven capable of failing.
+
+### 11.6 Defect and experiment policy
 
 - Regression introduced by one lane: that lane fixes it immediately.
 - Contract mismatch: Lane B owns the correction; Lane A uses the last frozen contract meanwhile.
@@ -1045,46 +1137,95 @@ Every future package must use all fields below; omit none.
 | Completion | machine-evaluable expression; no human approval |
 | Next | exact next package and input artifact it consumes |
 
+### 15.1 Worked exemplar — A-M3-01 package-safe manifest schemas
+
+This filled package is normative for the required level of specificity. Future packets may be
+shorter only when a field is genuinely inapplicable and says why.
+
+| Field | Filled package |
+|---|---|
+| Identity | `A-M3-01`; M-3 repair wave; Lane A; consumes the canonical manifest resource map frozen by B-M3; baseline `c3dc123`; first implementation repair after the approval-layer cleanup |
+| Objective | `ManifestLoader` loads and validates both supported manifest schemas from a source checkout, editable install, and installed wheel. The current 17 errors disappear without weakening fail-closed validation. Excludes schema-shape changes, which remain B-M3 work |
+| Baseline | `SCHEMA_PATH` and `NAMED_SCHEMA_PATH` use `parents[3]`, resolve under nonexistent `vanguard/schemas`, and break every manifest load. `parents[4]` would repair only checkout execution. Root schemas and packs are not proven wheel resources |
+| Ownership | May change `vanguard/packages/agency/manifests/loader.py`, Lane-A packaging/resource declarations, and Lane-A install tests. May add an adapter-private resource resolver if required. Must not edit `schemas/**`, generated wire types, manifest semantics, Kernel code, or B-owned contract vectors |
+| Contracts | Consumes exact B-M3 resource names/digests for `schemas/v4/harness-manifest.schema.json` and `schemas/mhf/manifest_v2.schema.json`, the legacy-ingress policy, and the current `ManifestLoadError` behavior. Produces no new wire schema |
+| Inputs | Valid/invalid legacy and named manifests, missing-resource wheel fixture, malformed-schema fixture, editable checkout, built wheel, Python 3.10 and 3.12 clean environments |
+| Outputs | Packaged canonical schema resources; resource lookup independent of current working directory and repository layout; validated manifest or typed `ManifestLoadError`; build-content assertion proving both resources ship |
+| Pseudocode | `select schema ID → resolve package resource through importlib.resources → read bounded bytes → parse JSON → verify pinned resource identity if configured → validate manifest → return normalized result`; on unavailable/unreadable/malformed resource, raise before activation or first event. A source-only compatibility fallback may exist only for editable installs and must resolve the same bytes |
+| Invariants | Runtime remains the composition seam; validation never becomes optional; legacy bytes normalize only at ingress; schema content is B-owned; no `parents[N]`, current-directory, environment-variable, network, or silent empty-schema fallback |
+| Errors | Missing/unreadable resource, malformed JSON, unresolved `$ref`, unsupported schema ID, or validation failure maps to the existing typed manifest error with a stable reason code. All are fatal before occurrence; none appends an execution event |
+| Migration | No ledger or manifest-byte migration. Installed resource relocation is a packaging change. Existing authored manifests remain readable under the declared compatibility matrix |
+| Telemetry | Optional startup counter/timing for selected schema ID and resource package, with no raw manifest data. Failure telemetry is non-authoritative and cannot convert denial into acceptance |
+| Performance | Resource parsing occurs once per process/schema and is cached immutably. Focused benchmark must show no material activation regression; correctness and package independence dominate micro-optimization |
+| Security | Resource identity is package-bound; no user-controlled arbitrary path; no network fetch; maximum resource and manifest sizes enforced; malformed or absent schema fails closed |
+| Compatibility | Dual-read the declared legacy/current manifest forms. A wheel, sdist install, editable install, and checkout must produce semantically identical validation. Old manifest bytes are never rewritten |
+| Rollback | Revert the resource-resolver/package commit together. Do not roll back to skipped validation or repository-relative lookup. A failed new artifact remains unpublished and the previous green artifact stays served |
+| Verification | Focused manifest loader/gene/reconstruction/tableworld suites; package-content inspection; wheel install in a fresh temporary environment; execute from a working directory outside the checkout; boundary, codegen, and secret checks; negative missing/malformed-resource fixtures |
+| Completion | `17 manifest errors == 0 AND focused failures == 0 AND checkout_digest == wheel_digest AND missing_resource_fixture fails closed AND built wheel contains both canonical resources`; recorded commands exit `0` with no tracked-file mutation |
+| Next | Emits the green resource/package commit consumed by A-M4 evidence execution and A-M9 clean-install work; B-M3 separately continues schema/catalog convergence against the same resource map |
+
+Minimum executable command shape for this package (exact module names may be updated by the packet
+to match the final test placement):
+
+```bash
+python3 -m unittest discover -s test/agency -t .
+python3 -m unittest discover -s test/contracts -t .
+python3 -m unittest test.adapters.test_tableworld
+python3 tools/linters/check_boundaries.py
+python3 tools/codegen/generate_types.py --check
+python3 -m build
+python3 -m unittest test.packaging.test_installed_manifest_resources
+```
+
+The package must also assert post-check repository cleanliness because the current full suite has
+demonstrated that a passing or failing test can mutate tracked `lam.sqlite` state.
+
 ## 16. Final ordered TODO
 
 | Order | Owner | Result | Dependencies |
 |---:|---|---|---|
-| 1 | B | Freeze canonical manifest and `vg.4` schemas; generated shared readers/vectors | HEAD |
-| 2 | A | Repair schema resource resolution and packaging; eliminate 17 Python errors | 1 |
-| 3 | A | Fix two pricing expectations at the source-of-truth boundary; stop tests mutating tracked SQLite | 2 |
-| 4 | A | Make CLI, client-core and Studio all root-gated; resolve 3 failing CLI test files | 1 |
-| 5 | A | Build/install wheel with schemas, packs and UI assets; replace checkout installer | 2, 4 |
-| 6 | B | Remove memory fake fail-open disjunct and consolidate canonical memory/promotion APIs | 1 |
-| 7 | A | Require signed durable rollback and complete CAS/backup/restore/GC implementation | 6 |
-| 8 | A | Produce clean RF-95 and M-6 bundles with portable artifacts | 2, 3, 5 |
-| 9 | B | Automated verifier accepts/rejects M-4/M-6; preserve M-6.5 disposition | 8 |
-| 10 | A | Freeze local then remote `CONVERGENCE-BASE-v1` without moving old tag | 2–5, 9 |
-| 11 | B | Re-run graph coloring RF-86/RF-98 against valid successor | 10 |
-| 12 | A | Execute real M-7 role operations through M-6 child runtime, sequentially | 8 |
-| 13 | B | Reproduce M7-01 on live topology bundles; retain ADR-0099 sequential default | 12 |
-| 14 | A | Complete durable authorized memory integration and lifecycle recovery | 6, 7, 13 |
-| 15 | B | Run sealed skill/composition evaluation, separated promotion and signed behavioral rollback | 11, 14 |
-| 16 | A | Unify versions/config, package CLI/API/TUI/Studio/plugins and ship `0.9.0b1` candidate | 9–15 |
-| 17 | B | Qualify three real workflows and full public contract/plugin lifecycle from installed artifacts | 16 |
-| 18 | A | Implement migrations, deployment profiles, backup/recovery, SLOs and soak/fault hardening | 16, 17 |
-| 19 | B | Run final security/compatibility/migration/performance release verifier | 18 |
-| 20 | A | Build reproducibly, sign, tag and publish AETHER `v0.9.0` | 19 passed |
+| 1 | A | Remove `C1-GATE`, Leadership/Dev C ownership, and mandatory human acceptance from active execution; add successor ADR mechanizing independent verification | HEAD |
+| 2 | B | Freeze canonical manifest and `vg.4` schemas; generated shared readers/vectors | 1 |
+| 3 | A | Repair package-resource resolution—not merely `parents[3]`—and eliminate 17 Python errors in checkout and installed-wheel modes | 2 |
+| 4 | A/B by owned source | Converge model pricing and accounting vectors on one checked source; stop tests mutating tracked SQLite | 3 |
+| 5 | A | Make CLI, client-core and Studio all root-gated; resolve 3 failing CLI test files | 2 |
+| 6 | A | Build/install wheel with schemas, packs and UI assets; replace checkout installer | 3, 5 |
+| 7 | B | Remove memory fake fail-open disjunct and consolidate canonical memory/promotion APIs | 2 |
+| 8 | A | Build the missing durable M-8 category-port adapter; require signed rollback; complete CAS/index/backup/restore/GC implementation | 7 |
+| 9 | A | Produce clean RF-95 and M-6 bundles with portable artifacts | 3, 4, 6 |
+| 10 | B | Automated verifier accepts/rejects M-4/M-6; preserve M-6.5 disposition | 9 |
+| 11 | A | Freeze local then remote `CONVERGENCE-BASE-v1` without moving old tag | 3–6, 10 |
+| 12 | B | Re-run graph coloring RF-86/RF-98 against valid successor | 11 |
+| 13 | A | Execute real M-7 role operations through M-6 child runtime, sequentially | 9 |
+| 14 | B | Reproduce M7-01 on live topology bundles; retain ADR-0099 sequential default | 13 |
+| 15 | A | Complete durable authorized memory turn integration and lifecycle recovery | 8, 14 |
+| 16 | B | Run sealed skill/composition evaluation, separated promotion and signed behavioral rollback | 12, 15 |
+| 17 | A | Unify versions/config, package CLI/API/TUI/Studio/plugins and ship `0.9.0b1` candidate | 10–16 |
+| 18 | B | Qualify three real workflows and full public contract/plugin lifecycle from installed artifacts | 17 |
+| 19 | A | Implement migrations, deployment profiles, backup/recovery, SLOs and soak/fault hardening | 17, 18 |
+| 20 | B | Implement/run final security, compatibility, migration, performance and release-envelope verifier | 19 |
+| 21 | A | Implement and run `ci/release_qualify.sh`; on exit `0`, reproducibly sign, tag, and publish AETHER `v0.9.0` | 20 passed |
 
 ## 17. Immediate next steps
 
-1. Start B-M3 and A-M3 concurrently only where files are disjoint: Lane B freezes schema/vector
+1. Perform the one-time Section 6.4 cleanup: remove `C1-GATE`, nonexistent roles, and mandatory
+   human acceptance from active execution while preserving automated verifier identity separation
+   and product-time security approvals.
+2. Start B-M3 and A-M3 concurrently only where files are disjoint: Lane B freezes schema/vector
    truth; Lane A prepares resource/package resolution and consumes the frozen result.
-2. Repair the full Python and TypeScript gates before producing new milestone evidence. Record the
+3. Repair the full Python and TypeScript gates before producing new milestone evidence. Record the
    current known-red baseline exactly: 2 Python failures, 17 Python errors, 3 failing CLI test files.
-3. Treat the approved `TODO_PROMPT.md` as historical design input after extracting still-live items:
+4. Treat the approved `TODO_PROMPT.md` as historical design input after extracting still-live items:
    its final memory fail-open and unsigned rollback findings remain real; many earlier P0 findings
    have already been implemented.
-4. Replace current Dev A/Dev B/Leadership wording in the canonical execution board with Lane A/Lane
+5. Replace current Dev A/Dev B/Leadership wording in the canonical execution board with Lane A/Lane
    B and mechanical completion predicates when the implementation plans are created.
-5. Amend the canonical milestone/version documents once, before M-9 work, to encode
+6. Amend the canonical milestone/version documents once, before M-9 work, to encode
    `M-9=0.9.0b1` and `M-10=0.9.0`; do not use v1.0 for this program.
-6. Hand both lanes their first generated work-package views at the same green integration commit and
-   allow continuous execution through Order 20 without further Project Owner review.
+7. Hand both lanes their first generated work-package views at the same green integration commit and
+   allow continuous execution through Order 21 without further Project Owner review.
+8. Make `ci/release_qualify.sh` the final non-negotiable mechanical release trigger; do not publish
+   `v0.9.0` from a checklist, percentage, or manually interpreted report.
 
 ## 18. Final conclusion
 
@@ -1094,7 +1235,7 @@ new product milestones. Lane A owns the operational truth and deliverable; Lane 
 and falsifiability of that truth. Frozen boundaries, exclusive writers, deterministic defaults,
 fixtures, self-review, and mechanical integration replace daily supervision and approval gates.
 
-When Order 20 completes, AETHER v0.9 is not merely a repository with advanced mechanisms. It is a
+When Order 21 completes, AETHER v0.9 is not merely a repository with advanced mechanisms. It is a
 reproducibly buildable, installable, resumable, capability-mediated, multi-workflow product with
 durable memory, governed learning, signed rollback, supported migrations, operational evidence,
 and a final release that can be verified from its shipped artifacts.

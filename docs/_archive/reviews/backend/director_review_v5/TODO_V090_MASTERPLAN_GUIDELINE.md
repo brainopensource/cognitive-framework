@@ -1,278 +1,286 @@
-# Vanguard / AETHER 0.9.x — Final Backend Evolution Plan
-
-## Decision
-
-**Preserve and productize the existing substrate; do not rewrite it.**
-
-The reviewed subject is `feat/vanguard-0.9.0b1-beta-evolution` at
-`df20131fc1361f2e847fb6db41d0a61f506d345d`. That branch adds review material
-but no new 0.9 backend implementation relative to `main`; the package version
-remains `0.7.3.dev0`.
-
-Vanguard already has the difficult foundations: a bounded domain-blind Kernel,
-typed capability attenuation and budgets, durable causal facts, replayable
-projections, content-addressed artifacts, canonical composition, recursive
-delegation, and a fail-closed security/evidence model. The 0.9 problem is not
-that foundation. It is the gap between tested mechanisms and a coherent,
-installable, inspectable product path.
-
-The public model should remain simple:
-
-```text
-Observe -> Decide -> Authorize -> Execute -> Record
-```
-
-The Kernel may retain S0-S12 internally. No new workflow engine, alternate
-agent runtime, LEX/LIM production dependency, general orchestration layer,
-MCTS, CEGIS, or speculative scheduler is authorized by this plan.
-
-## Verified starting facts
-
-- The bounded lattice holds: `domain <- ports <- kernel <- agency <- runtime -> adapters`.
-- The Kernel is 1,373 logical LOC under the enforced 1,438 LOC limit.
-- The full standard-library suite ran 2,150 tests: 2,140 passed, 9 skipped,
-  and one failed solely because execution-board package states disagree.
-- The evidence verifier reports six passing bundles. M-4 has an
-  organizational-independence caveat; M-5a lacks `CONVERGENCE-BASE-v1`; M-5b's
-  historical bundle fails verification. M-6, M-6.5, M-7, and M-8 have current
-  mechanically passing successors.
-- Therefore, code presence, a passing test, a mechanically passing bundle, and
-  formal milestone/release acceptance remain separate facts.
-
-## Architecture to preserve
-
-Keep these boundaries and invariants unchanged unless a successor decision and
-falsifier justify change:
-
-1. The domain-blind Kernel, monotonic capability attenuation, descriptor-bound
-   grants, and integer budget accounting.
-2. `mhf.event/2` as the production writer format, append-only facts, CAS
-   artifacts, and projections/checkpoints as derived state rather than truth.
-3. Durable pre-effect intent before an external effect can start.
-4. The sole new-product execution route:
-
-   ```text
-   Runtime.execute_profiled
-     -> RuntimeBootstrap.build
-     -> Runtime.compose
-     -> Runtime.run_composed
-     -> HarnessSession / EpisodeEngine / Kernel.dispatch
-   ```
-
-5. Recursive children re-entering `Runtime.run_composed`, and M-7's current
-   `SEQUENTIAL_CONFIRMED` scheduler disposition.
-
-## What must be corrected
-
-### Product ingress and configuration
-
-The highest-priority defects are configuration and reachability, not new agent
-algorithms.
-
-- `runtime/service/service.py` defaults `profileId` to `code-default`, a
-  harness name rather than a valid execution profile. Require a valid profile
-  at ingress or default explicitly to `product`; validate before a worker
-  thread is created.
-- `runtime/cli.py` directly constructs `OpenRouterModel` and rejects absent
-  provider credentials even for a local/offline workflow. Move model choice to
-  one typed model-selection configuration resolved by the bootstrap. A wire
-  request must name a route/adapter policy, never carry a raw Python model.
-- The CLI, JSON entrypoint, and service must share command semantics. The CLI
-  is a client of the service/projection contract; it must not recreate ledger,
-  reducer, recovery, or authority behavior.
-- Distinguish package version from protocol versions such as `vg.4`; do not
-  replace wire-version literals as though they were release versions.
-
-### Claimed capabilities not yet product-integrated
-
-Durable memory, governed composition promotion/rollback, metacontrol, and
-topology have meaningful code and falsifier coverage, but are mostly injected
-into `Runtime.execute_*` rather than selected by profile, manifest, CLI, or
-service contract. They are not yet general user-facing product capabilities.
-
-For each, either:
-
-1. add an explicit configuration, authority, provenance, and operational
-   surface; or
-2. label it experimental and exclude it from beta product claims.
-
-### Generality proof
-
-`vg-table-default` is the right minimal second-domain falsifier. Its binding
-provider resolves table verbs, but `TableWorldEnvironment` does not satisfy the
-runtime environment contract. Complete the real contract in the adapter and
-prove an end-to-end table run; do not leak table semantics into Kernel, Domain,
-or Agency. Existing Git, sandboxed, and fake environment adapters remain
-reference implementations of the shared contract.
-
-## Horizon 0 — truth and release hygiene
-
-Do this before assigning a beta state.
-
-1. Reconcile `docs/03_execution/backlog.md` and
-   `docs/03_execution/sprint_active.md` from raw verifier receipts and actual
-   predicates, not by blindly copying either table. Make
-   `test/tools/test_check_execution_truth.py` pass.
-2. Maintain one machine-derived milestone/evidence view from the existing
-   verifier; preserve failed and undeterminable bundles as immutable history.
-3. Do not call M-5a accepted until the required annotated remotely resolvable
-   `CONVERGENCE-BASE-v1` and signed baseline manifest exist.
-4. Do not call M-5b accepted until the successor graph-coloring experiment
-   verifies against that baseline.
-5. Obtain genuinely organizationally independent review where the evidence
-   protocol requires it. Key distinction alone cannot prove operational
-   independence.
-
-**Definition of done:** the full test suite and execution-truth linter are
-green; published status, receipt predicates, and verifier results agree; no
-milestone claim is inferred from source presence.
-
-## Horizon 1 — 0.9.0b1 product vertical slice
-
-### H1.1 One valid execution configuration
-
-**Files:** `runtime/service/service.py`, `runtime/bootstrap.py`,
-`runtime/profiles.py`, `runtime/model_selection.py`, `runtime/cli.py`, and
-wire/service-contract tests.
-
-Implement a single typed input that resolves a profile, model route, state
-directory, and optional offline adapter before execution. Validate invalid
-profile/model combinations synchronously and fail closed. Preserve the
-effective resolved configuration in the run plan/provenance.
-
-**Definition of done:**
-
-- a default service start uses a valid profile;
-- remote execution fails clearly without credentials;
-- explicit local/offline execution uses a deterministic fake or cassette
-  adapter without network or provider credentials;
-- CLI, entrypoint, and service agree on the same configuration semantics.
-
-### H1.2 Operational CLI and service parity
-
-Add thin `resume`, `status`, `events`, and `artifacts` commands. They use the
-canonical service/projection APIs and respect the existing authorization and
-artifact access rules.
-
-**Definition of done:** an installed binary can initialize a workspace, run a
-deterministic local composition, show status and causal events, list artifacts,
-be interrupted, restart, resume from durable SQLite-WAL state, and produce a
-verifiable terminal result.
-
-### H1.3 Second domain and reference workflows
-
-Complete `TableWorldEnvironment` against the actual environment port contract,
-including profile, observation, preview/apply semantics, reconciliation,
-compensation, and disposal as appropriate for the domain. Add an end-to-end
-`vg-table-default` test using real runtime composition and receipts.
-
-Register and test `vg-code-explain` as a read-only reference workflow. A
-workflow is a useful proof only when it creates a verified, user-visible
-artifact or result through the canonical product path.
-
-**Definition of done:** coding, read-only explanation, and one non-coding
-domain all execute through the same runtime with no Kernel changes.
-
-### H1.4 Product-integrate or demote M-8/M-6.5 facilities
-
-For memory, begin with a narrow manifest/profile declaration:
-
-```text
-resolved profile + declared memory policy
-  -> verified scoped memory authority
-  -> DurableMemoryPort binding
-  -> retrieval provenance admitted to context
-  -> ledger/artifact facts
-```
-
-Do not expose learning/promotion by default. Promotion requires distinct
-generator, evaluator, and promoter authority, sealed held-out evaluation, a
-durable CAS registry, and a behavior-restoring rollback. If these do not fit
-the beta vertical slice, retain their tests but label the feature experimental.
-
-### H1.5 Installable beta qualification
-
-Add clean-environment wheel/install tests for package resources, manifests,
-schemas, migrations, state directories, offline execution, recovery, and
-resume. Release version changes occur here, after—not before—the product
-vertical slice is green.
-
-Run a real process-kill/restart/resume test; replay-only tests do not prove
-operational continuation. Reproduce any claimed sparse/hermetic M-7 failure
-on a clean environment before treating it as a release blocker.
-
-**Beta exit criteria:** every H1 definition of done passes from installed
-artifacts; release identity is internally consistent; M-5a/M-5b and reviewer
-requirements are handled according to the authoritative acceptance rules, not
-waived in prose.
-
-## Horizon 2 — simplify only after freezing 0.9.0b1
-
-Freeze a qualified beta as the behavioral reference before refactoring.
-Refactor tests compare normalized causal event meaning, projection state,
-artifact digests, composition identity, and evaluator verdict—not raw event
-IDs, timestamps, or other intentionally variable bytes.
-
-1. Make `execute_profiled -> RuntimeBootstrap -> run_composed` the only path
-   for new callers. Retain `execute_harness` only as a migration/test facade
-   until every caller moves.
-2. Unify model resolution and manifest-path normalization at their ingress
-   boundaries.
-3. Split `HarnessSession` into focused lifecycle, turn/approval,
-   capture/checkpoint, and terminal/evaluation collaborators while preserving
-   public compatibility imports.
-4. Split service command handling from transport/lifecycle code without
-   changing the wire contract.
-5. Separate immutable composition verification from the lifecycle of an
-   executable plugin. A static prompt/policy artifact should not be modeled
-   as a running process merely for lifecycle accounting.
-
-**Definition of done:** normalized regression fixtures remain equivalent;
-security, boundary, TCB, replay, and evidence checks pass; no refactor changes
-the selected beta behaviors without an explicit new contract.
-
-## Experiments that require proof before adoption
-
-These are valuable hypotheses, not committed defaults.
-
-### Turn-boundary ledger batching
-
-Measure batching with `durability.commit = per-event | per-turn` compatibility
-modes. `EffectStarted` intent must remain durably committed before the
-external effect begins. Require injected-crash, recovery, replay, budget, and
-evidence compatibility tests plus representative latency/throughput data
-before changing the default.
-
-### Lifecycle verbosity
-
-Measure `capture.lifecycle = full | summary` only after separating static
-composition facts from executable plugin lifecycle. Retain enough granular
-facts to attribute a real component fault. Schema/reducer/evidence migration
-is required before a summary format can be authoritative.
-
-### Concurrent shared-lineage execution
-
-M-7 remains sequential. The current SQLite store safely turns competing
-same-project sequence allocation into conflict; it is not a concurrent writer
-protocol. Add transactional allocation or a dedicated writer only after a
-measured workflow proves value, then prove causal ordering, budget
-conservation, recovery, and state equivalence under contention.
-
-### Advanced agent techniques
-
-MCTS, CEGIS, SBFL, mutation testing, vector retrieval, sophisticated
-compaction, and parallel scheduling require a preregistered product or
-evaluation hypothesis with a baseline and a success/failure decision rule.
-They are optional evaluators or research packs, never new Kernel semantics.
-
-## Final direction
-
-The strongest path to a SOTA product is disciplined integration, not a larger
-architecture: make one execution path trustworthy and pleasant to use; prove
-it on coding, explanation, and a second domain; make durable state inspectable
-and resumable; then simplify the runtime against that frozen behavior.
-
-Vanguard's advantage is not that it contains every possible agent technique.
-It is that future techniques can be introduced as measured compositions over
-causal facts, bounded authority, reproducible artifacts, and external
-evaluation without rewriting the trusted core.
+# TODO_V090_MASTERPLAN_GUIDELINE
+
+## Purpose
+
+Use `VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md` as the authoritative technical assessment and implementation direction for Vanguard / AETHER 0.9.x.
+
+This guideline does **not** replace, summarize, duplicate, or reinterpret that plan.
+
+Its only purpose is to define the **development operating model** used to execute the plan with maximum engineering velocity and minimum process overhead.
+
+If this guideline and the Evolution Plan appear to conflict:
+
+- the Evolution Plan remains authoritative for technical findings, architecture, defects, refactors, simplifications, product gaps, and implementation direction;
+- this guideline is authoritative for team structure, autonomy, workflow, validation cadence, and development process.
+
+---
+
+## 1. Operating principle
+
+The project will be executed by two Senior Developers working in parallel.
+
+The default loop is:
+
+**Understand → Decide → Implement → Test → Fix if needed → Integrate → Continue**
+
+Normal engineering work must not stop for ceremony, approval, or documentary process.
+
+Git history, branches, commits, tests, diffs, and pull requests provide sufficient reversibility for ordinary development.
+
+A reversible engineering decision must not be treated as an irreversible organizational event.
+
+---
+
+## 2. Dev A — Principal Developer
+
+Dev A is the principal technical authority for the implementation.
+
+Dev A has full autonomy to:
+
+- make architecture and implementation decisions;
+- resolve ambiguity;
+- change sequencing;
+- modify contracts when technically justified;
+- refactor or simplify code;
+- remove obsolete code or documentation;
+- change tests and validation strategy;
+- perform migrations;
+- update implementation documentation;
+- resolve conflicts between code and documentation;
+- redistribute work between lanes;
+- integrate completed work;
+- decide when engineering evidence is sufficient to continue.
+
+Dev A does not wait for external leadership approval for normal engineering decisions.
+
+Dev A may use up to approximately **1,000,000 OpenRouter tokens** for focused engineering work, including agent execution tests, model comparisons, benchmarks, workflow validation, context experiments, evaluator experiments, regression diagnosis, and implementation validation.
+
+The budget should be used to resolve concrete engineering uncertainty, not for repetitive analysis.
+
+---
+
+## 3. Dev B — Senior Implementation Developer
+
+Dev B is a Senior Developer responsible for substantial coding work in parallel with Dev A.
+
+Dev B follows:
+
+- `VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md`;
+- current code;
+- current contracts;
+- current specifications;
+- assigned implementation objectives.
+
+Dev B has broad autonomy over implementation details and should resolve routine technical decisions independently.
+
+Dev B should primarily spend time on implementation, integration, debugging, tests, fixes, and product-facing backend work.
+
+Dev B must not wait for Dev A when the answer can be determined safely from code, tests, interfaces, specifications, or normal Senior engineering judgment.
+
+Dev B may use OpenRouter only with zero-cost/free models unless explicitly authorized otherwise.
+
+---
+
+## 4. Parallel execution
+
+Work must be divided into two lanes that can progress independently for long periods.
+
+The exact split must be derived from the Evolution Plan and actual code coupling.
+
+General preference:
+
+- Dev A owns foundational, cross-cutting, architecture-sensitive, runtime-critical, and integration-sensitive work.
+- Dev B owns substantial parallel implementation and product-facing work behind stable contracts.
+
+This division is intentionally flexible.
+
+Dev A may move tasks between lanes whenever doing so improves throughput.
+
+Shared interfaces, schemas, ports, and contracts should be stabilized early enough to avoid unnecessary blocking between Dev A and Dev B.
+
+Artificial dependencies between lanes must not be created.
+
+---
+
+## 5. What is explicitly NOT a development gate
+
+The following must not block ordinary implementation unless they expose a real technical problem:
+
+- independent reviewer approval;
+- leadership approval;
+- countersignatures;
+- evidence ceremonies;
+- milestone acceptance ceremonies;
+- repeated architecture ratification;
+- mandatory external review;
+- formal scientific acceptance;
+- documentary status synchronization;
+- mandatory full-suite execution after every change;
+- requirement to freeze or formally qualify every intermediate phase before continuing;
+- approval chains between Dev A and Dev B.
+
+Scientific evidence, formal release evidence, independent review, or stronger qualification may still be produced when useful or when required for a specific external claim.
+
+They are not prerequisites for ordinary coding progress.
+
+---
+
+## 6. Testing rule
+
+Both developers validate their own work.
+
+Use the smallest test set that provides sufficient confidence for the change being made.
+
+Developers may freely run unit, integration, falsifier, regression, replay/recovery, end-to-end, and benchmark tests, including redundant tests when additional confidence is valuable.
+
+During normal implementation, prefer focused tests relevant to the changed subsystem.
+
+Broader suites should be run at meaningful integration points and near release closure.
+
+Tests are engineering tools, not organizational gates.
+
+A failure blocks forward progress only when it demonstrates a real issue such as incorrect runtime behavior, violated invariant, broken shared contract, security failure, causal or event-integrity failure, persistence or recovery failure, incompatible migration, or a genuine dependency between unfinished components.
+
+If a test is obsolete, redundant, or tests superseded behavior, fix, replace, consolidate, or remove it.
+
+---
+
+## 7. Pull requests and integration
+
+Branches and pull requests are integration mechanisms, not permission mechanisms.
+
+Each developer may produce coherent PRs containing substantial completed work.
+
+Prefer PRs that are:
+
+- large enough to represent meaningful progress;
+- small enough to understand and debug;
+- accompanied by the tests relevant to the change.
+
+Avoid both dozens of tiny process-driven PRs and massive unrelated changes that are difficult to integrate.
+
+Dev A controls final integration sequencing and resolves conflicts between the lanes.
+
+---
+
+## 8. Documentation during implementation
+
+Do not duplicate the Evolution Plan.
+
+Do not create new architecture reports unless implementation exposes a genuinely new architectural issue.
+
+Update documentation only when necessary to keep the active repository aligned with the code.
+
+Execution documents should remain concise.
+
+The main execution files are:
+
+- `docs/03_execution/milestones.md`
+- `docs/03_execution/backlog.md`
+- `docs/03_execution/sprint_active.md`
+- `docs/03_execution/sprint_upcoming.md`
+
+They should contain only:
+
+- remaining work;
+- Dev A / Dev B ownership;
+- real dependencies;
+- concise Definition of Done;
+- relevant validation;
+- current status.
+
+The Evolution Plan explains **what must change and why**.
+
+The execution documents explain **who is doing what, in what order, what is active, and when it is done**.
+
+Do not copy technical analysis from the Evolution Plan into these files.
+
+---
+
+## 9. Obsolete methodology and documentation
+
+Historical process must not pollute the active development context.
+
+When execution begins, remove or consolidate obsolete operational material that no longer helps implement Vanguard 0.9.x.
+
+Examples include:
+
+- superseded leadership workflows;
+- obsolete development methodologies;
+- approval-gate documents;
+- duplicated TODO plans;
+- stale sprint documents;
+- old planning reports that are no longer authoritative;
+- redundant execution-status documents.
+
+Git history is the historical archive.
+
+Do not preserve obsolete active documentation merely because it may be useful someday.
+
+If historical information is needed later, retrieve it from Git.
+
+Do not remove current technical contracts, still-valid architectural decisions, schemas, specifications, or compatibility requirements merely for cleanliness.
+
+Technical cleanup must remain evidence-based.
+
+---
+
+## 10. Decision authority
+
+When the Evolution Plan leaves an implementation detail open:
+
+1. Dev A may decide immediately.
+2. Dev B may decide independently when the choice is local and does not alter a shared contract or foundational invariant.
+3. If evidence later proves the decision wrong, correct it and continue.
+
+No additional governance process is required.
+
+The repository is reversible.
+
+---
+
+## 11. Completion rule
+
+Continue implementation until the technical work defined by `VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md` is complete.
+
+Do not stop after planning documents are updated.
+
+Do not treat documentation completion as product completion.
+
+Do not create new gates between implementation blocks unless a real technical dependency exists.
+
+The project is finished when the required backend behavior, simplification, refactoring, integration, product capabilities, packaging, and validation defined by the Evolution Plan are implemented and working.
+
+---
+
+## Final rule
+
+**The Evolution Plan defines the technical work. This guideline defines how Dev A and Dev B execute it.**
+
+Optimize the development process for:
+
+- autonomy;
+- parallelism;
+- engineering judgment;
+- fast feedback;
+- reversible decisions;
+- sufficient validation;
+- minimal coordination overhead;
+- completion of the working product.
+
+Do not optimize for ceremony.
+
+
+## Quick Notes Todos
+| Task                                       | Complexidade | Motivo                                               | Perfil ideal                  |
+| ------------------------------------------ | -----------: | ---------------------------------------------------- | ----------------------------- |
+| Limpar docs, backlog, milestones e versão  |       20/100 | Baixo risco técnico; mostly consistency              | Dev Senior                    |
+| Unificar bootstrap, config, CLI e service  |       55/100 | Vários entrypoints e semântica duplicada             | Staff Engineer                |
+| Packaging + install limpo + state dir      |       40/100 | Trabalho de integração previsível                    | Dev Senior                    |
+| Recovery real: kill, restart, resume       |       70/100 | Persistência, idempotência e causalidade             | Staff Engineer                |
+| Coding + Explainer agents úteis            |       60/100 | Integra runtime, tools, context e artifacts          | Senior Agentic Engineer       |
+| Plugins + composição multi-agent           |       70/100 | Authority, lifecycle e isolamento                    | Staff / Agentic Systems       |
+| Refactor runtime/session/service           |       75/100 | Alto risco de regressão semântica                    | Principal / Architect         |
+| Eventos, SQLite, checkpoints, concorrência |       85/100 | Causalidade, ordering, performance e recovery juntos | Principal Distributed Systems |
+| Catálogo Research/RAG/Planner-Critic       |       65/100 | Mais composição que ciência nova                     | Senior AI Agentic Engineer    |
+| Fechamento 0.9.x completo                  |       60/100 | Integração ampla, mas foundations já existem         | Dev A + Dev B                 |

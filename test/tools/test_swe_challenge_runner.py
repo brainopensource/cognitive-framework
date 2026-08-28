@@ -5,13 +5,21 @@ from __future__ import annotations
 import tempfile
 import unittest
 import hashlib
+import signal
+import subprocess
+from unittest.mock import patch
+import json
 from pathlib import Path
 
 from tools.runners.run_swe_challenge import (
     SMOKE_CHALLENGES,
+    WORKER_PROTOCOL,
+    TaskContext,
+    _decode_worker_payload,
     _benchmark_identity,
     _changed_files,
     _diagnose_result,
+    _execute_runtime_in_child,
     _execution_deadline,
     _enrich_result,
     _snapshot_digest,
@@ -21,6 +29,51 @@ from tools.runners.run_swe_challenge import (
 
 
 class SweChallengeRunnerTests(unittest.TestCase):
+    def test_worker_protocol_decodes_runtime_truth(self) -> None:
+        payload = {
+            "protocol": WORKER_PROTOCOL,
+            "terminal": "completed",
+            "detail": "done",
+            "instrument_error": "",
+            "telemetry": {
+                "turns": 2,
+                "prompt_tokens": 11,
+                "completion_tokens": 7,
+                "usd_micros": 13,
+            },
+            "trajectory": {"run_id": "run-1"},
+        }
+        outcome = _decode_worker_payload(json.dumps(payload))
+        self.assertEqual(outcome.terminal, "completed")
+        self.assertEqual(outcome.telemetry.total_tokens, 18)
+        self.assertEqual(outcome.trajectory, {"run_id": "run-1"})
+
+    def test_worker_protocol_rejects_non_json_output(self) -> None:
+        outcome = _decode_worker_payload("provider log, not protocol JSON")
+        self.assertEqual(outcome.terminal, "instrument_error")
+        self.assertEqual(outcome.instrument_error, "worker_invalid_json")
+
+    def test_parent_kills_hung_worker_and_returns_typed_instrument_error(self) -> None:
+        class HangingWorker:
+            pid = 123456789
+            returncode = None
+
+            def communicate(self, *args: object, **kwargs: object) -> tuple[str, str]:
+                if "timeout" in kwargs:
+                    raise subprocess.TimeoutExpired("worker", 0.01)
+                return "", ""
+
+        with tempfile.TemporaryDirectory() as temp, patch(
+            "tools.runners.run_swe_challenge.subprocess.Popen", return_value=HangingWorker()
+        ), patch("tools.runners.run_swe_challenge.os.killpg") as killpg:
+            task = TaskContext(brief="test", repo_path=Path(temp))
+            outcome = _execute_runtime_in_child(
+                task, "test/model", Path(temp) / "events.sqlite3", Path(temp) / "blobs", 0.01,
+            )
+        self.assertEqual(outcome.terminal, "instrument_error")
+        self.assertEqual(outcome.instrument_error, "worker_timeout")
+        killpg.assert_called_once_with(123456789, signal.SIGKILL)
+
     def test_execution_deadline_rejects_non_positive_values(self) -> None:
         with self.assertRaises(ValueError):
             with _execution_deadline(0):

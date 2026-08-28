@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+from dataclasses import dataclass
 import difflib
 import hashlib
 import json
@@ -20,7 +21,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
@@ -56,6 +57,262 @@ SMOKE_CHALLENGES = (
 BENCHMARK_MAX_RETRIES = 1
 BENCHMARK_REQUEST_TIMEOUT_SECONDS = 15.0
 BENCHMARK_RUN_TIMEOUT_SECONDS = 300.0
+WORKER_PROTOCOL = "vanguard.swe-worker/1"
+
+
+@dataclass(frozen=True)
+class _WorkerTelemetry:
+    """JSON-safe subset of runtime telemetry returned across the worker IPC."""
+
+    turns: int = 0
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    usd_micros: int | None = None
+
+    @property
+    def total_tokens(self) -> int | None:
+        if self.prompt_tokens is None or self.completion_tokens is None:
+            return None
+        return self.prompt_tokens + self.completion_tokens
+
+
+@dataclass(frozen=True)
+class _WorkerOutcome:
+    """Small result DTO; runtime objects never cross the process boundary."""
+
+    terminal: str
+    detail: str = ""
+    instrument_error: str = ""
+    telemetry: _WorkerTelemetry = _WorkerTelemetry()
+    trajectory: dict[str, Any] | None = None
+
+
+def _runtime_result_payload(result: Any) -> dict[str, Any]:
+    """Reduce a RunResult to the stable, JSON-only worker protocol."""
+    terminal = getattr(result, "terminal", None)
+    terminal_value = getattr(terminal, "value", str(terminal)).lower()
+    telemetry = getattr(result, "telemetry", None)
+    telemetry_payload = {
+        "turns": getattr(telemetry, "turns", 0),
+        "prompt_tokens": getattr(telemetry, "prompt_tokens", None),
+        "completion_tokens": getattr(telemetry, "completion_tokens", None),
+        "usd_micros": getattr(telemetry, "usd_micros", None),
+    }
+    trajectory = getattr(result, "trajectory", None)
+    if not isinstance(trajectory, dict):
+        trajectory = None
+    payload = {
+        "protocol": WORKER_PROTOCOL,
+        "terminal": terminal_value,
+        "detail": str(getattr(result, "detail", "")),
+        "instrument_error": str(getattr(result, "instrument_error", "") or ""),
+        "telemetry": telemetry_payload,
+        "trajectory": trajectory,
+    }
+    # Refuse to smuggle Python objects or NaN values over the wire. The caller
+    # classifies an unserialisable runtime result as an instrument failure.
+    json.dumps(payload, allow_nan=False)
+    return payload
+
+
+def _runtime_worker(config: Mapping[str, Any]) -> dict[str, Any]:
+    """Construct and execute one runtime episode inside the child process."""
+    repo_path = Path(str(config["repo_path"])).resolve()
+    store_path = Path(str(config["store_path"])).resolve()
+    blob_path = Path(str(config["blob_path"])).resolve()
+    task = TaskContext(
+        brief=str(config["brief"]),
+        repo_path=repo_path,
+        run_id=str(config["run_id"]),
+        episode_id=str(config["episode_id"]),
+        project_id=str(config["project_id"]),
+        max_turns=int(config["max_turns"]),
+    )
+    seed_key = secrets.token_bytes(32)
+    grant = create_autonomous_grant(
+        repo_path,
+        allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
+        max_turns=task.max_turns,
+        max_attempts=1,
+        seed_key=seed_key,
+    )
+    signer = OperatorSigner(seed_key)
+    model = OpenRouterModel(
+        model=str(config["model"]),
+        stream=False,
+        # The secret remains in the child's inherited environment and is not
+        # placed in the IPC payload, command line, report, or exception text.
+        environ={"OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY", "")},
+        max_retries=BENCHMARK_MAX_RETRIES,
+        request_timeout=BENCHMARK_REQUEST_TIMEOUT_SECONDS,
+    )
+    manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
+    store_path.parent.mkdir(parents=True, exist_ok=True)
+    blob_path.mkdir(parents=True, exist_ok=True)
+    result = Runtime.execute_profiled(
+        manifest_path,
+        task,
+        profile_id="product",
+        model=model,
+        store_path=str(store_path),
+        blobs=FileBlobStore(blob_path),
+        interactive=True,
+        approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+        approval_key=signer.public_bytes,
+    )
+    return _runtime_result_payload(result)
+
+
+def _instrument_worker_failure(kind: str, detail: str) -> _WorkerOutcome:
+    """Create an explicit non-measurement outcome for parent-side failures."""
+    return _WorkerOutcome(
+        terminal="instrument_error",
+        detail=detail,
+        instrument_error=kind,
+    )
+
+
+def _decode_worker_payload(raw: str) -> _WorkerOutcome:
+    """Decode the child response, failing closed on protocol drift/noise."""
+    candidates = [line for line in raw.splitlines() if line.strip()]
+    if not candidates:
+        return _instrument_worker_failure("worker_empty_output", "worker returned no JSON")
+    try:
+        payload = json.loads(candidates[-1])
+    except (TypeError, json.JSONDecodeError):
+        return _instrument_worker_failure("worker_invalid_json", "worker returned invalid JSON")
+    if not isinstance(payload, Mapping) or payload.get("protocol") != WORKER_PROTOCOL:
+        return _instrument_worker_failure("worker_protocol_error", "worker protocol mismatch")
+    telemetry_raw = payload.get("telemetry")
+    if not isinstance(telemetry_raw, Mapping):
+        return _instrument_worker_failure("worker_protocol_error", "worker telemetry is not an object")
+
+    def integer_or_none(name: str) -> int | None:
+        value = telemetry_raw.get(name)
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f"worker telemetry field {name} is not an integer")
+        return value
+
+    try:
+        turns = integer_or_none("turns")
+        if turns is None:
+            turns = 0
+        telemetry = _WorkerTelemetry(
+            turns=turns,
+            prompt_tokens=integer_or_none("prompt_tokens"),
+            completion_tokens=integer_or_none("completion_tokens"),
+            usd_micros=integer_or_none("usd_micros"),
+        )
+    except ValueError as exc:
+        return _instrument_worker_failure("worker_protocol_error", str(exc))
+    terminal = payload.get("terminal")
+    if not isinstance(terminal, str) or not terminal:
+        return _instrument_worker_failure("worker_protocol_error", "worker terminal is invalid")
+    trajectory = payload.get("trajectory")
+    if trajectory is not None and not isinstance(trajectory, dict):
+        return _instrument_worker_failure("worker_protocol_error", "worker trajectory is invalid")
+    return _WorkerOutcome(
+        terminal=terminal,
+        detail=str(payload.get("detail", "")),
+        instrument_error=str(payload.get("instrument_error", "") or ""),
+        telemetry=telemetry,
+        trajectory=trajectory,
+    )
+
+
+def _kill_worker(process: subprocess.Popen[str]) -> None:
+    """Kill the worker and every process it spawned for proc.exec."""
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+            return
+        except (ProcessLookupError, OSError):
+            pass
+    try:
+        process.kill()
+    except ProcessLookupError:
+        pass
+
+
+def _execute_runtime_in_child(
+    task: TaskContext,
+    model: str,
+    store_path: Path,
+    blob_path: Path,
+    run_timeout: float,
+) -> _WorkerOutcome:
+    """Run the benchmark episode behind a killable OS process boundary.
+
+    A signal alarm cannot interrupt every blocked native/TLS read and cannot
+    reliably clean up descendants. The parent owns the hard deadline, kills
+    the worker process group, drains its pipes, and returns a typed outcome.
+    """
+    if run_timeout <= 0:
+        raise ValueError("run timeout must be positive")
+    config = {
+        "repo_path": str(Path(task.repo_path).resolve()),
+        "store_path": str(store_path.resolve()),
+        "blob_path": str(blob_path.resolve()),
+        "brief": task.brief,
+        "run_id": task.run_id,
+        "episode_id": task.episode_id,
+        "project_id": task.project_id,
+        "max_turns": task.max_turns,
+        "model": model,
+    }
+    try:
+        process = subprocess.Popen(
+            [sys.executable, "-m", "tools.runners.run_swe_challenge", "--worker"],
+            cwd=_REPO_ROOT,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            env=os.environ.copy(),
+            start_new_session=(os.name == "posix"),
+        )
+    except OSError as exc:
+        return _instrument_worker_failure("worker_spawn_error", type(exc).__name__)
+    try:
+        stdout, _stderr = process.communicate(
+            json.dumps(config, sort_keys=True), timeout=run_timeout,
+        )
+    except subprocess.TimeoutExpired:
+        _kill_worker(process)
+        stdout, _stderr = process.communicate()
+        # This is the authoritative parent-side timeout record. It is later
+        # emitted in the report as instrument_error JSON, never as a task fail.
+        return _instrument_worker_failure(
+            "worker_timeout", f"child process exceeded {run_timeout:.1f}s deadline",
+        )
+    if process.returncode != 0:
+        return _instrument_worker_failure(
+            "worker_exit_error", f"child process exited with status {process.returncode}",
+        )
+    return _decode_worker_payload(stdout)
+
+
+def _worker_main() -> int:
+    """Child entrypoint; always emits one JSON protocol record."""
+    try:
+        config = json.load(sys.stdin)
+        if not isinstance(config, Mapping):
+            raise ValueError("worker config must be an object")
+        payload = _runtime_worker(config)
+    except Exception as exc:
+        payload = {
+            "protocol": WORKER_PROTOCOL,
+            "terminal": "instrument_error",
+            "detail": f"worker raised {type(exc).__name__}",
+            "instrument_error": "runtime_exception",
+            "telemetry": {"turns": 0},
+            "trajectory": None,
+        }
+    sys.stdout.write(json.dumps(payload, sort_keys=True, allow_nan=False) + "\n")
+    sys.stdout.flush()
+    return 0
 
 
 @contextmanager
@@ -198,6 +455,12 @@ def _benchmark_identity(challenge_id: str, scratch_dir: Path,
             "request_timeout_seconds": BENCHMARK_REQUEST_TIMEOUT_SECONDS,
             "max_retries": BENCHMARK_MAX_RETRIES,
         },
+        "runtime_boundary": {
+            "kind": "child_process",
+            "protocol": WORKER_PROTOCOL,
+            "deadline_owner": "parent",
+            "kill_scope": "worker_process_group",
+        },
         "contamination": {
             "source": "greenfield-preregistered",
             "status": "declared_clean",
@@ -282,8 +545,6 @@ def run_challenge(
     try:
         baseline = setup_challenge(challenge_id, scratch_dir)
         
-        api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        
         task = TaskContext(
             brief=challenge.brief,
             repo_path=scratch_dir,
@@ -293,24 +554,6 @@ def run_challenge(
             max_turns=20,
         )
         
-        # Run-scoped ephemeral identity; see run_rf95_product_proof.py.
-        seed_key = secrets.token_bytes(32)
-        grant = create_autonomous_grant(
-            scratch_dir,
-            allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
-            max_turns=20,
-            max_attempts=1,
-            seed_key=seed_key,
-        )
-        signer = OperatorSigner(seed_key)
-        model_obj = OpenRouterModel(
-            model=model,
-            stream=False,
-            environ={"OPENROUTER_API_KEY": api_key},
-            max_retries=BENCHMARK_MAX_RETRIES,
-            request_timeout=BENCHMARK_REQUEST_TIMEOUT_SECONDS,
-        )
-        manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
         db_path = scratch_dir / ".vanguard" / "events.sqlite3"
         blob_path = scratch_dir / ".vanguard" / "blobs"
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -318,27 +561,7 @@ def run_challenge(
 
         print(f"Running Vanguard engine with model {model}...")
         t0 = time.time()
-        
-        runtime_exception: str | None = None
-        try:
-            with _execution_deadline(run_timeout):
-                result = Runtime.execute_profiled(
-                    manifest_path,
-                    task,
-                    profile_id="product",
-                    model=model_obj,
-                    store_path=str(db_path),
-                    blobs=FileBlobStore(blob_path),
-                    interactive=True,
-                    approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-                    approval_key=signer.public_bytes,
-                )
-        except Exception as exc:
-            # Preserve the row as an instrument failure. Record only the
-            # exception class; adapter-level transport details own redaction.
-            result = None
-            runtime_exception = type(exc).__name__
-        
+        result = _execute_runtime_in_child(task, model, db_path, blob_path, run_timeout)
         elapsed = time.time() - t0
         
         # Parse result
@@ -374,11 +597,6 @@ def run_challenge(
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
             "benchmark_identity": _benchmark_identity(challenge_id, scratch_dir, baseline, model),
-            **({
-                "terminal": "instrument_error",
-                "terminal_detail": f"runtime raised {runtime_exception}",
-                "instrument_error": "runtime_exception",
-            } if runtime_exception else {}),
         }, result)
     finally:
         if not keep_dir:
@@ -414,8 +632,6 @@ def run_verified_challenge(
             
         baseline = _snapshot_tree(scratch_dir)
         
-        api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        
         task = TaskContext(
             brief=brief if brief else f"Fix {instance_id}",
             repo_path=scratch_dir,
@@ -425,24 +641,6 @@ def run_verified_challenge(
             max_turns=20,
         )
         
-        # Run-scoped ephemeral identity; see run_rf95_product_proof.py.
-        seed_key = secrets.token_bytes(32)
-        grant = create_autonomous_grant(
-            scratch_dir,
-            allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
-            max_turns=20,
-            max_attempts=1,
-            seed_key=seed_key,
-        )
-        signer = OperatorSigner(seed_key)
-        model_obj = OpenRouterModel(
-            model=model,
-            stream=False,
-            environ={"OPENROUTER_API_KEY": api_key},
-            max_retries=BENCHMARK_MAX_RETRIES,
-            request_timeout=BENCHMARK_REQUEST_TIMEOUT_SECONDS,
-        )
-        manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
         db_path = scratch_dir / ".vanguard" / "events.sqlite3"
         blob_path = scratch_dir / ".vanguard" / "blobs"
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -450,25 +648,7 @@ def run_verified_challenge(
 
         print(f"Running Vanguard engine with model {model}...")
         t0 = time.time()
-        
-        runtime_exception: str | None = None
-        try:
-            with _execution_deadline(run_timeout):
-                result = Runtime.execute_profiled(
-                    manifest_path,
-                    task,
-                    profile_id="product",
-                    model=model_obj,
-                    store_path=str(db_path),
-                    blobs=FileBlobStore(blob_path),
-                    interactive=True,
-                    approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-                    approval_key=signer.public_bytes,
-                )
-        except Exception as exc:
-            result = None
-            runtime_exception = type(exc).__name__
-        
+        result = _execute_runtime_in_child(task, model, db_path, blob_path, run_timeout)
         elapsed = time.time() - t0
         
         turns = 0
@@ -559,11 +739,6 @@ if __name__ == "__main__":
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
             "benchmark_identity": _benchmark_identity(instance_id, scratch_dir, baseline, model),
-            **({
-                "terminal": "instrument_error",
-                "terminal_detail": f"runtime raised {runtime_exception}",
-                "instrument_error": "runtime_exception",
-            } if runtime_exception else {}),
         }, result)
     finally:
         if not keep_dir:
@@ -588,9 +763,13 @@ def main() -> int:
         "--run-timeout", type=float, default=BENCHMARK_RUN_TIMEOUT_SECONDS,
         help="Maximum seconds for one runtime episode (default: 300)",
     )
+    parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--report", type=str, default=None,
                         help="Write an immutable JSON measurement report (must not already exist)")
     args = parser.parse_args()
+
+    if args.worker:
+        return _worker_main()
 
     # Load API key
     res = load_api_key(_REPO_ROOT)

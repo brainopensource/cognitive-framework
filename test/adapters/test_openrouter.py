@@ -134,6 +134,10 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertFalse(hasattr(port, "api_key"))
         self.assertNotIn(SECRET, vars(port).values())
 
+    def test_request_timeout_must_be_positive(self) -> None:
+        with self.assertRaises(ValueError):
+            OpenRouterModel(request_timeout=0)
+
     def test_trust_spine_sources_do_not_import_openrouter(self) -> None:
         self.assertEqual(_trust_openrouter_imports(), [])
 

@@ -70,16 +70,28 @@ def _set_response_socket_timeout(response: Any, timeout: float) -> None:
     an episode forever.  Test doubles and non-socket responses are deliberately
     ignored because their own read implementation owns its timing.
     """
-    try:
-        raw = getattr(getattr(response, "fp", None), "raw", None)
-        sock = getattr(raw, "_sock", None)
-        setter = getattr(sock, "settimeout", None)
-        if callable(setter):
-            setter(timeout)
-    except (AttributeError, OSError, TypeError, ValueError):
-        # This is only a best-effort tightening of urllib's timeout contract;
-        # failure to introspect a compatible response must not mask its body.
-        return
+    pending = [response]
+    visited: set[int] = set()
+    while pending:
+        current = pending.pop()
+        if current is None or id(current) in visited:
+            continue
+        visited.add(id(current))
+        try:
+            setter = getattr(current, "settimeout", None)
+            if callable(setter):
+                setter(timeout)
+        except (OSError, TypeError, ValueError):
+            pass
+        # urllib/http.client versions differ in whether the socket is exposed
+        # through fp.raw._sock, fp._sock, or an SSL/connection wrapper.
+        for name in ("fp", "raw", "_sock", "_sslobj", "_connection"):
+            try:
+                nested = getattr(current, name, None)
+            except (AttributeError, OSError):
+                nested = None
+            if nested is not None and id(nested) not in visited:
+                pending.append(nested)
 
 
 def estimate_tokens(text: str) -> int:

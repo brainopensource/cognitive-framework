@@ -33,7 +33,7 @@ no person, committee, or process approval is an entry dependency.
 
 | Lane | Package | Contract | Baseline | State | Completion predicate | Next |
 |---|---|---|---|---|---|---|
-| Lane A | WP-A4 | `1.0.0` | `3b923c3` | **PACKAGE_READY** | `tests_pass AND durable_memory_and_signed_rollback_verified AND scoped_recovery_backup_gc_verified AND tree_clean` | Order 9 |
+| Lane A | WP-A4 | `1.0.0` | `5f5f1c6` | **PACKAGE_READY** | `tests_pass AND m6_order9_evidence_verified AND rf95_order9_evidence_verified AND portable_artifacts AND clean_subject` | RF-95 live rerun with external provider reachability |
 | Lane B | WP-B2 | `1.0.0` | `861dc6c` | **PACKAGE_READY** | `frozen_contract_data_ships_whole AND canonicalisation_triples_verify_from_installed_wheel AND evidence_verifier_falsifiers_pass` | WP-B3 (blocked on Lane A Order 9) |
 
 ## Package state ledger

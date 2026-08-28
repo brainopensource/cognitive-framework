@@ -1,0 +1,220 @@
+{
+  "activation_digest": "sha256:191ee8f654034c94582faf59fcdd8dfb836a3bb6541a4587dfdf71db0e814a9e",
+  "capture": "complete",
+  "cost": {
+    "bytes": 0,
+    "measurement_status": {
+      "bytes": {
+        "reason": null,
+        "status": "measured"
+      },
+      "millis": {
+        "reason": null,
+        "status": "measured"
+      },
+      "tokens": {
+        "reason": null,
+        "status": "measured"
+      },
+      "usd_micros": {
+        "reason": null,
+        "status": "measured"
+      }
+    },
+    "millis": 0,
+    "tokens": 0,
+    "usd_micros": 0
+  },
+  "declared_state_digest": "sha256:1a0694a61ea55d0eecf0d912b720689eeabe093f56d8cb2f273a074fb9471d68",
+  "durable": true,
+  "episode_id": "episode-rf95-live",
+  "event_count": 78,
+  "harness_digest": "sha256:1caedab102bb3c62889be500cd8f7fa1a9bba77531785b88ac3def6bb4f8644e",
+  "journal_mode": "wal",
+  "ledger_digest": "sha256:79501c24efc2654b7bf8b6a2afc93836969619bac1aa3145b5799935ae912309",
+  "model_routes": [
+    {
+      "fingerprint_unavailable_reason": "provider_did_not_report",
+      "model": "deepseek/deepseek-chat",
+      "model_fingerprint": null,
+      "provider": "openrouter",
+      "tier": 1
+    }
+  ],
+  "outcome": "aborted",
+  "preregistration_digest": "sha256:7b2e34a5843b15297173c71ce264ff74b7abe7085928a6c64b921c8deda9f1c8",
+  "project_id": "calc-fix",
+  "recomputed_state_digest": "sha256:1a0694a61ea55d0eecf0d912b720689eeabe093f56d8cb2f273a074fb9471d68",
+  "reconstructed": true,
+  "run_digest": "sha256:865b03819aa9393516b946d377c4c0436c3a30ace86961869f868af48d237dc4",
+  "run_id": "run-rf95-live",
+  "trajectory": {
+    "activation_digest": "sha256:191ee8f654034c94582faf59fcdd8dfb836a3bb6541a4587dfdf71db0e814a9e",
+    "artifacts": [
+      {
+        "artifactId": "run-rf95-live:prompt:1",
+        "digest": "sha256:978d67ad14e173d33975a3a5dc34025f0ffa66f012fa114e1b41b05e9a0d5286",
+        "producedBy": {
+          "component": "runtime.artifact-writer",
+          "policy_id": "runtime.capture-policy/product",
+          "policy_version": "1"
+        },
+        "refs": {
+          "turn": "0"
+        },
+        "retentionClass": "standard",
+        "role": "prompt",
+        "schemaId": "mhf.prompt/1",
+        "sizeBytes": 30989,
+        "stored": true
+      },
+      {
+        "artifactId": "run-rf95-live:model_output:2",
+        "digest": "sha256:f8ce404134c6d2e6e0cfa2de67d1806bfdd87da23e072fd739a654b743fd0f47",
+        "producedBy": {
+          "component": "runtime.artifact-writer",
+          "policy_id": "runtime.capture-policy/product",
+          "policy_version": "1"
+        },
+        "refs": {
+          "turn": "0"
+        },
+        "retentionClass": "standard",
+        "role": "model_output",
+        "schemaId": "mhf.model-output/1",
+        "sizeBytes": 196,
+        "stored": true
+      }
+    ],
+    "capture": {
+      "policy_id": "runtime.capture-policy/product",
+      "policy_version": "1",
+      "required": true,
+      "status": "complete"
+    },
+    "cost": {
+      "bytes": 0,
+      "measurement_status": {
+        "bytes": {
+          "reason": null,
+          "status": "measured"
+        },
+        "millis": {
+          "reason": null,
+          "status": "measured"
+        },
+        "tokens": {
+          "reason": null,
+          "status": "measured"
+        },
+        "usd_micros": {
+          "reason": null,
+          "status": "measured"
+        }
+      },
+      "millis": 0,
+      "tokens": 0,
+      "usd_micros": 0
+    },
+    "episode_id": "episode-rf95-live",
+    "event_range": {
+      "count": 53,
+      "first_seq": 0,
+      "last_seq": 52
+    },
+    "execution_digest": "sha256:865b03819aa9393516b946d377c4c0436c3a30ace86961869f868af48d237dc4",
+    "harness_digest": "sha256:1caedab102bb3c62889be500cd8f7fa1a9bba77531785b88ac3def6bb4f8644e",
+    "model_routes_used": [
+      {
+        "fingerprint_unavailable_reason": "provider_did_not_report",
+        "model": "deepseek/deepseek-chat",
+        "model_fingerprint": null,
+        "provider": "openrouter",
+        "tier": 1
+      }
+    ],
+    "outcome": "aborted",
+    "parent_episode_id": null,
+    "preregistration_digest": "sha256:7b2e34a5843b15297173c71ce264ff74b7abe7085928a6c64b921c8deda9f1c8",
+    "principal_id": "agent-1",
+    "project_id": "calc-fix",
+    "provenance": {
+      "cache": [],
+      "compaction": [],
+      "context": [
+        {
+          "claimKind": "context_selection",
+          "droppedLabels": [],
+          "elidedLabels": [],
+          "inputArtifacts": [],
+          "inputDigest": "sha256:10d6ada5927d90a0f79d29d235e961f638e0f2e8ce38f67fd7cb880d3b35f220",
+          "metrics": {
+            "layerCounts": {
+              "L1": 264,
+              "L2": 1752,
+              "L3": 170,
+              "L4": 33
+            },
+            "tokenCount": 2219
+          },
+          "outputArtifacts": [],
+          "outputDigest": "sha256:10d6ada5927d90a0f79d29d235e961f638e0f2e8ce38f67fd7cb880d3b35f220",
+          "policy": {
+            "id": "agency.context-compiler/RecencyWindowStrategy",
+            "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135",
+            "version": "1"
+          },
+          "selectedLabels": [
+            "system-core",
+            "tool-schemas",
+            "environment-map",
+            "brief"
+          ],
+          "turnIndex": 0
+        }
+      ]
+    },
+    "reproducibility_at_run_close": {
+      "assessed_at": "1970-01-01T00:00:00.000Z",
+      "basis": [
+        "wal_durable:full_cold",
+        "state_reconstruction:unverified",
+        "pins_incomplete:unpinned",
+        "semantic_replay:unverified",
+        "provider_openrouter:available",
+        "retention_standard:partial",
+        "env_declared:declared",
+        "model_attributed:attributed"
+      ],
+      "reducer_version": "v1.1.0",
+      "schema_versions": {
+        "mhf.event": "1",
+        "mhf.execution-profile": "2",
+        "mhf.trajectory": "2"
+      },
+      "values": {
+        "artifact_retention": "partial",
+        "environment_capture": "declared",
+        "external_reexecution": "available",
+        "provider_model_identity": "attributed",
+        "semantic_replay": {
+          "capability": "unpinned",
+          "verification": "unverified"
+        },
+        "state_reconstruction": {
+          "capability": "full_cold",
+          "verification": "unverified"
+        }
+      }
+    },
+    "run_digest": "sha256:865b03819aa9393516b946d377c4c0436c3a30ace86961869f868af48d237dc4",
+    "run_id": "run-rf95-live",
+    "schema": "mhf.trajectory/2",
+    "state_digest": "sha256:1a0694a61ea55d0eecf0d912b720689eeabe093f56d8cb2f273a074fb9471d68",
+    "task_digest": "sha256:a1cdc6ba49ed3f85310cdac7bd59355f8531d0fd74e41bd5662d8654afbb2edd",
+    "turns": [],
+    "verdict": null,
+    "verdict_absence_reason": "no_evaluator_bound"
+  },
+  "trajectory_schema": "mhf.trajectory/2"
+}

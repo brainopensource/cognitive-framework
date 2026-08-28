@@ -20,9 +20,19 @@ class TestModelRouting(unittest.TestCase):
         self.assertEqual(route.pricing_source, "hardcoded")
 
     def test_known_model(self):
-        route = resolve_route("deepseek/deepseek-v4-flash-0731")
+        # Prices come from models_registry.json, the single source (Order 4).
+        # This test used to assert 150_000 against a registry entry of 140_000:
+        # a restated price drifts the moment the registry moves, so the
+        # expectation is derived rather than copied.
+        from vanguard.packages.adapters.models.config import get_pricing_micros_table
+
+        model = "deepseek/deepseek-v4-flash-0731"
+        prompt, completion, cached = get_pricing_micros_table()[model]
+        route = resolve_route(model)
         self.assertTrue(route.pricing_known)
-        self.assertEqual(route.prompt_micros_per_1m, 150_000)
+        self.assertEqual(route.prompt_micros_per_1m, prompt)
+        self.assertEqual(route.completion_micros_per_1m, completion)
+        self.assertEqual(route.cached_micros_per_1m, cached)
         self.assertEqual(route.pricing_source, "hardcoded")
 
     def test_unknown_model(self):

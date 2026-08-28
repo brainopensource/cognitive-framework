@@ -329,15 +329,21 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(usage["cached_tokens"], 400)
         self.assertEqual(usage["total_tokens"], 1200)
 
-        # Cost check:
-        # gpt-4o-mini pricing: prompt $0.15/1M, completion $0.60/1M, cached $0.075/1M
-        # uncached prompt = 600 * 0.15 / 1M = $0.000090
-        # cached prompt = 400 * 0.075 / 1M = $0.000030
-        # completion = 200 * 0.60 / 1M = $0.000120
-        # total = $0.000240
-        expected_cost = 0.00024
-        self.assertAlmostEqual(usage["cost_usd"], expected_cost, places=6)
-        self.assertAlmostEqual(result.value["cost_usd"], expected_cost, places=6)
+        # Cost is derived from models_registry.json, the single pricing source
+        # (Order 4), through the same formula the accounting vectors pin in
+        # test/contracts/test_model_accounting_vectors.py. These lines used to
+        # hardcode $0.000240 computed from gpt-4o-mini rates while the request
+        # above routes to deepseek -- a restated price that had drifted off the
+        # model it claimed to describe.
+        from test.contracts.test_model_accounting_vectors import accounted_micros
+
+        expected_micros = accounted_micros(
+            "deepseek/deepseek-v4-flash-0731", prompt=1000, completion=200, cached=400
+        )
+        expected_cost = round(expected_micros / 1_000_000.0, 8)
+        self.assertEqual(usage["usd_micros"], expected_micros)
+        self.assertAlmostEqual(usage["cost_usd"], expected_cost, places=8)
+        self.assertAlmostEqual(result.value["cost_usd"], expected_cost, places=8)
 
     def test_fallback_token_estimation_when_provider_omits_usage(self) -> None:
         payload = json.dumps({

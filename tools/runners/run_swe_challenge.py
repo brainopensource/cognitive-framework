@@ -7,6 +7,8 @@ Executes SWE challenges against the Vanguard coding engine.
 from __future__ import annotations
 
 import argparse
+import difflib
+import hashlib
 import json
 import os
 import secrets
@@ -31,8 +33,33 @@ from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 
 
-def setup_challenge(challenge_id: str, scratch_dir: Path) -> None:
-    """Set up the challenge files and initialize a git repo."""
+def _snapshot_tree(root: Path) -> dict[str, bytes]:
+    """Return the immutable baseline file map used for patch accounting.
+
+    Benchmark runs must not depend on Git being installed or on repository
+    metadata.  A content-addressed snapshot also makes the evaluated subject
+    explicit and portable to an empty environment.
+    """
+    snapshot: dict[str, bytes] = {}
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.name == "oracle_test.py":
+            continue
+        rel = path.relative_to(root).as_posix()
+        snapshot[rel] = path.read_bytes()
+    return snapshot
+
+
+def _snapshot_digest(snapshot: dict[str, bytes]) -> str:
+    manifest = {
+        path: hashlib.sha256(content).hexdigest()
+        for path, content in sorted(snapshot.items())
+    }
+    body = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+    return "sha256:" + hashlib.sha256(body).hexdigest()
+
+
+def setup_challenge(challenge_id: str, scratch_dir: Path) -> dict[str, str]:
+    """Set up a challenge and return its content-addressed baseline."""
     challenge = CHALLENGES[challenge_id]
     
     # Write files
@@ -45,16 +72,7 @@ def setup_challenge(challenge_id: str, scratch_dir: Path) -> None:
     task_path = scratch_dir / "TASK.md"
     task_path.write_text(f"# {challenge.title}\n\n{challenge.brief}\n", encoding="utf-8")
     
-    # Initialize Git to track diffs
-    subprocess.run(["git", "init"], cwd=scratch_dir, capture_output=True, check=True)
-    subprocess.run(["git", "add", "."], cwd=scratch_dir, capture_output=True, check=True)
-    subprocess.run(
-        ["git", "commit", "-m", "init"],
-        cwd=scratch_dir,
-        capture_output=True,
-        check=True,
-        env={**os.environ, "GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@test.com", "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@test.com"}
-    )
+    return _snapshot_tree(scratch_dir)
 
 
 def evaluate_oracle(challenge_id: str, scratch_dir: Path) -> bool:
@@ -73,17 +91,76 @@ def evaluate_oracle(challenge_id: str, scratch_dir: Path) -> bool:
     return res.returncode == 0
 
 
-def get_diff_size(scratch_dir: Path) -> int:
-    """Get the size of the git diff in lines."""
-    res = subprocess.run(
-        ["git", "diff"],
-        cwd=scratch_dir,
-        capture_output=True,
-        text=True,
-        check=True
+def _changed_files(scratch_dir: Path, baseline: dict[str, bytes]) -> list[str]:
+    current = _snapshot_tree(scratch_dir)
+    return sorted(
+        path for path in set(baseline) | set(current)
+        if baseline.get(path) != current.get(path)
     )
-    diff = res.stdout
-    return len(diff.splitlines())
+
+
+def get_diff_size(scratch_dir: Path, baseline: dict[str, bytes]) -> int:
+    """Count changed patch lines against the captured subject snapshot."""
+    total = 0
+    for rel in _changed_files(scratch_dir, baseline):
+        before = baseline.get(rel, b"").decode("utf-8", errors="replace")
+        after = ""
+        path = scratch_dir / rel
+        if path.is_file():
+            after = path.read_bytes().decode("utf-8", errors="replace")
+        total += len(list(difflib.unified_diff(
+            before.splitlines(), after.splitlines(),
+            fromfile=f"a/{rel}", tofile=f"b/{rel}", lineterm="")))
+    return total
+
+
+def _benchmark_identity(challenge_id: str, scratch_dir: Path,
+                        baseline: dict[str, bytes], model: str) -> dict[str, Any]:
+    challenge = CHALLENGES.get(challenge_id)
+    return {
+        "benchmark": "vanguard-swe-challenge/1",
+        "task_id": challenge_id,
+        "tier": challenge.tier if challenge else "VERIFIED",
+        "kind": challenge.kind if challenge else "repository-instance",
+        "subject_digest": _snapshot_digest(baseline),
+        "source_manifest": {
+            path: hashlib.sha256(baseline[path]).hexdigest()
+            for path in sorted(baseline)
+        },
+        "model_requested": model,
+        "provider": "openrouter",
+        "contamination": {"source": "greenfield-preregistered", "excluded": False},
+    }
+
+
+def _enrich_result(result_row: dict[str, Any], runtime_result: Any) -> dict[str, Any]:
+    """Bind returned provider identity and runtime truth to the benchmark row."""
+    trajectory = getattr(runtime_result, "trajectory", None)
+    if isinstance(trajectory, dict):
+        routes = trajectory.get("model_routes_used")
+        if isinstance(routes, list):
+            result_row["model_routes_used"] = routes
+        for key in ("execution_digest", "state_digest", "run_id", "episode_id"):
+            if key in trajectory:
+                result_row[key] = trajectory[key]
+    return result_row
+
+
+def _write_report(path: str, results: list[dict[str, Any]]) -> None:
+    """Write one immutable JSON report; never replace a prior measurement."""
+    destination = Path(path).expanduser()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema": "vanguard.swe-report/1",
+        "results": results,
+        "summary": {
+            "count": len(results),
+            "passed": sum(1 for row in results if row["passed"]),
+        },
+    }
+    with destination.open("x", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
 
 
 def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, Any]:
@@ -93,7 +170,7 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
     print(f"Setting up {challenge_id} in {scratch_dir}...")
     
     try:
-        setup_challenge(challenge_id, scratch_dir)
+        baseline = setup_challenge(challenge_id, scratch_dir)
         
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
         
@@ -151,9 +228,9 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
 
         print("Evaluating oracle...")
         passed = evaluate_oracle(challenge_id, scratch_dir)
-        diff_size = get_diff_size(scratch_dir)
+        diff_size = get_diff_size(scratch_dir, baseline)
         
-        return {
+        return _enrich_result({
             "challenge": challenge_id,
             "tier": challenge.tier,
             "passed": passed,
@@ -163,7 +240,8 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             "cost_micros": cost,
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
-        }
+            "benchmark_identity": _benchmark_identity(challenge_id, scratch_dir, baseline, model),
+        }, result)
     finally:
         if not keep_dir:
             shutil.rmtree(scratch_dir, ignore_errors=True)
@@ -191,16 +269,7 @@ def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict
             task_path = scratch_dir / "TASK.md"
             task_path.write_text(f"# {instance_id}\n\n{brief}\n", encoding="utf-8")
             
-        # Init Git
-        subprocess.run(["git", "init"], cwd=scratch_dir, capture_output=True, check=True)
-        subprocess.run(["git", "add", "."], cwd=scratch_dir, capture_output=True, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", "init"],
-            cwd=scratch_dir,
-            capture_output=True,
-            check=True,
-            env={**os.environ, "GIT_AUTHOR_NAME": "Test", "GIT_AUTHOR_EMAIL": "test@test.com", "GIT_COMMITTER_NAME": "Test", "GIT_COMMITTER_EMAIL": "test@test.com"}
-        )
+        baseline = _snapshot_tree(scratch_dir)
         
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
         
@@ -305,16 +374,18 @@ if __name__ == "__main__":
         else:
             print(f"No oracle defined for {instance_id}")
 
-        diff_size = get_diff_size(scratch_dir)
-        print("\n=== GIT DIFF ===")
-        res_diff = subprocess.run(["git", "diff"], cwd=scratch_dir, capture_output=True, text=True)
-        print(res_diff.stdout)
+        diff_size = get_diff_size(scratch_dir, baseline)
+        print("\n=== CONTENT SNAPSHOT ===")
+        print(json.dumps({
+            "subject_digest": _snapshot_digest(baseline),
+            "changed_files": _changed_files(scratch_dir, baseline),
+        }, sort_keys=True))
         
         print("\n=== TELEMETRY ===")
         if result and getattr(result, "telemetry", None):
             print(result.telemetry)
             
-        return {
+        return _enrich_result({
             "challenge": instance_id,
             "tier": "VERIFIED",
             "passed": passed,
@@ -324,7 +395,8 @@ if __name__ == "__main__":
             "cost_micros": cost,
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
-        }
+            "benchmark_identity": _benchmark_identity(instance_id, scratch_dir, baseline, model),
+        }, result)
     finally:
         if not keep_dir:
             shutil.rmtree(scratch_dir, ignore_errors=True)
@@ -342,6 +414,8 @@ def main() -> int:
 
     parser.add_argument("--model", type=str, default=get_default_model(), help="Model to use")
     parser.add_argument("--keep-dir", action="store_true", help="Keep temporary scratch directories")
+    parser.add_argument("--report", type=str, default=None,
+                        help="Write an immutable JSON measurement report (must not already exist)")
     args = parser.parse_args()
 
     # Load API key
@@ -403,6 +477,13 @@ def main() -> int:
         print("\nScratch directories kept:")
         for r in results:
             print(f"  {r['challenge']}: {r['scratch_dir']}")
+
+    if args.report:
+        try:
+            _write_report(args.report, results)
+        except FileExistsError:
+            print(f"Refusing to overwrite existing report: {args.report}", file=sys.stderr)
+            return 2
 
     return 0 if passed_count == len(results) else 1
 

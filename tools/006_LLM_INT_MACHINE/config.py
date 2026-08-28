@@ -86,6 +86,27 @@ class HarnessConfig:
     use_cluster_mcts: bool = False
     cluster_mcts_samples: int = 16
     
+    # Feature 21: Autonomous Claude-Style Clean-Slate Subagent Sandbox (v5.0)
+    use_subagent_sandboxing: bool = False
+
+    # Feature 22: Lightweight Prompting & XML Tool Fallback for Small/Free Models
+    use_lightweight_prompt: bool = False
+
+    # Multi-Model Hierarchical Routing Settings (v5.0)
+    planner_model: str = ""
+    worker_model: str = ""
+    qa_model: str = ""
+    enable_hierarchical_routing: bool = False
+    
+    def resolve_planner(self) -> str:
+        return self.planner_model or self.model
+
+    def resolve_worker(self) -> str:
+        return self.worker_model or self.model
+
+    def resolve_qa(self) -> str:
+        return self.qa_model or self.worker_model or self.model
+
     # Execution & Model Settings
     model: str = "openrouter/free"
     temperature: float = 0.0
@@ -443,6 +464,60 @@ CONFIG_V4_5_SOTA_100_APEX = HarnessConfig(
     max_turns=25,
 )
 
+
+CONFIG_V5_0_HIERARCHICAL_APEX = HarnessConfig(
+    config_name="v5.0_hierarchical_apex",
+    version_tag="5.0.0",
+    model="deepseek/deepseek-v4-flash-0731",
+    planner_model="deepseek/deepseek-v4-pro-0813",
+    worker_model="deepseek/deepseek-v4-flash-0731",
+    qa_model="minimax/minimax-m3:free",
+    enable_hierarchical_routing=True,
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_time_travel_debugger=True,
+    use_dynamic_skills=True,
+    use_arena_tournament=True,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    use_mcts_search=True,
+    use_subagent_sandboxing=True,
+    use_rlvr_logging=True,
+    max_turns=25,
+    max_cost_usd=0.25,
+)
+
+CONFIG_V5_1_FREE_TIER = HarnessConfig(
+    config_name="v5.1_free_tier",
+    version_tag="5.1.0",
+    model="minimax/minimax-m3:free",
+    planner_model="z-ai/glm-5.2:free",
+    worker_model="minimax/minimax-m3:free",
+    qa_model="poolside/laguna-s-2.1:free",
+    enable_hierarchical_routing=True,
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_sbfl_localization=True,
+    use_lightweight_prompt=True,
+    use_cegis_verification=True,
+    max_turns=20,
+    max_cost_usd=0.0,
+)
+
 # Backwards-compatibility aliases
 CONFIG_BASELINE_REACT = CONFIG_V1_0_BASELINE
 CONFIG_VANGUARD_CORE = CONFIG_V1_1_VANGUARD_CORE
@@ -465,6 +540,12 @@ PRESET_REGISTRY: dict[str, HarnessConfig] = {
     "v4.3_timetravel_replay": CONFIG_V4_3_TIMETRAVEL_REPLAY,
     "v4.4_hermes_skills": CONFIG_V4_4_HERMES_SKILLS,
     "v4.5_sota_100_apex": CONFIG_V4_5_SOTA_100_APEX,
+    "v5.0_hierarchical_apex": CONFIG_V5_0_HIERARCHICAL_APEX,
+    "v5.1_free_tier": CONFIG_V5_1_FREE_TIER,
+    "v5.0": CONFIG_V5_0_HIERARCHICAL_APEX,
+    "v5.1": CONFIG_V5_1_FREE_TIER,
+    "hierarchical": CONFIG_V5_0_HIERARCHICAL_APEX,
+    "free_tier": CONFIG_V5_1_FREE_TIER,
     # Aliases
     "baseline": CONFIG_V1_0_BASELINE,
     "vanguard_core": CONFIG_V1_1_VANGUARD_CORE,

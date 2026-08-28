@@ -31,9 +31,11 @@ from vanguard.packages.runtime.skill_evaluation import (
     HeldOutEvaluator,
     PromoterSigner,
     PromotionRefused,
+    RollbackRefused,
     SignedSkillPromoter,
     TrajectorySkillGenerator,
     promote_and_register,
+    rollback_and_register,
     verify_promotion_evidence,
 )
 from vanguard.packages.runtime.skill_lifecycle import CompositionRegistry
@@ -266,6 +268,24 @@ class PromotionEvidenceBindsWhatWasDecided(unittest.TestCase):
             evidence, candidate, report, moved, promoter.signer.public_bytes))
 
 
+def _signed_rollback(promoter, base: str, target: str):
+    """Rollback evidence signed by the promotion authority.
+
+    `registry.rollback()` takes no evidence and is refused: moving the served
+    version is the same authority promotion exercises, so it carries the same
+    proof (guidelines.md 9.2).
+    """
+    from vanguard.packages.runtime.skill_evaluation import sign_rollback
+
+    return sign_rollback(
+        promoter.signer,
+        promoter_id="promoter-under-test",
+        base_version=base,
+        target_version=target,
+        reason="injected regression observed on held-out tasks",
+    )
+
+
 class RollbackIsExecutableNotDocumented(unittest.TestCase):
     def test_a_promotion_can_be_rolled_back_to_the_prior_composition(self) -> None:
         candidate, report, detail, promoter = _pipeline()
@@ -275,7 +295,11 @@ class RollbackIsExecutableNotDocumented(unittest.TestCase):
         self.assertEqual(promote_and_register(
             registry, evidence, report, candidate, detail,
             promoter.signer.public_bytes), NEXT)
-        self.assertEqual(registry.rollback(), BASE)
+        self.assertEqual(
+            rollback_and_register(
+                registry, _signed_rollback(promoter, NEXT, BASE),
+                promoter.signer.public_bytes),
+            BASE)
 
     def test_fabricated_nonempty_signature_cannot_reach_the_registry(self) -> None:
         import dataclasses
@@ -310,14 +334,57 @@ class RollbackIsExecutableNotDocumented(unittest.TestCase):
                   and injected(task, BASE).get("passed") is True]
         self.assertEqual(broken, ["H7", "H8", "H9"])
 
-        self.assertEqual(registry.rollback(), BASE)
+        self.assertEqual(
+            rollback_and_register(
+                registry, _signed_rollback(promoter, NEXT, BASE),
+                promoter.signer.public_bytes),
+            BASE)
         still_broken = [task for task in broken
                         if not injected(task, registry.current).get("passed")]
         self.assertEqual(still_broken, [])
 
     def test_a_registry_with_nothing_promoted_cannot_roll_back(self) -> None:
+        _, _, _, promoter = _pipeline()
         with self.assertRaises(ValueError):
+            rollback_and_register(
+                CompositionRegistry(BASE), _signed_rollback(promoter, BASE, NEXT),
+                promoter.signer.public_bytes)
+
+    def test_an_unsigned_rollback_is_refused_outright(self) -> None:
+        """The pointer move that used to work."""
+        with self.assertRaises(PermissionError):
             CompositionRegistry(BASE).rollback()
+
+    def test_a_forged_rollback_signature_cannot_move_the_served_version(self) -> None:
+        candidate, report, detail, promoter = _pipeline()
+        registry = CompositionRegistry(BASE)
+        promote_and_register(
+            registry,
+            promoter.promote(candidate, report, detail,
+                             previous_version=BASE, promoted_version=NEXT),
+            report, candidate, detail, promoter.signer.public_bytes)
+
+        forged = {**_signed_rollback(promoter, NEXT, BASE), "signature": "not-a-signature"}
+        with self.assertRaises(RollbackRefused):
+            rollback_and_register(registry, forged, promoter.signer.public_bytes)
+        self.assertEqual(registry.current, NEXT)
+
+    def test_rollback_evidence_cannot_be_replayed_against_a_moved_head(self) -> None:
+        """Evidence binds the version it was signed against, not only the target."""
+        candidate, report, detail, promoter = _pipeline()
+        registry = CompositionRegistry(BASE)
+        promote_and_register(
+            registry,
+            promoter.promote(candidate, report, detail,
+                             previous_version=BASE, promoted_version=NEXT),
+            report, candidate, detail, promoter.signer.public_bytes)
+
+        # Signed while NEXT was served, but replayed after rolling back to BASE.
+        captured = _signed_rollback(promoter, NEXT, BASE)
+        rollback_and_register(registry, captured, promoter.signer.public_bytes)
+        self.assertEqual(registry.current, BASE)
+        with self.assertRaises(RollbackRefused):
+            rollback_and_register(registry, captured, promoter.signer.public_bytes)
 
     def test_promotion_on_a_stale_base_version_is_refused(self) -> None:
         candidate, report, detail, promoter = _pipeline()

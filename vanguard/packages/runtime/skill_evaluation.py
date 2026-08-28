@@ -55,6 +55,11 @@ __all__ = [
     "EvaluationWorkload",
     "HeldOutEvaluator",
     "PromotionRefused",
+    "RollbackRefused",
+    "rollback_body",
+    "sign_rollback",
+    "verify_rollback_evidence",
+    "rollback_and_register",
     "PromoterSigner",
     "SignedSkillPromoter",
     "SkillEvaluationDetail",
@@ -74,6 +79,10 @@ DEFAULT_REGRESSION_BUDGET = 0.02
 
 class AuthoritySeparationError(PermissionError):
     """A single authority tried to occupy two of the three lifecycle roles."""
+
+
+class RollbackRefused(ValueError):
+    """A rollback was attempted without signed, bound authority."""
 
 
 class PromotionRefused(ValueError):
@@ -517,3 +526,97 @@ def promote_and_register(
     ):
         raise PromotionRefused("promotion signature or evidence binding is invalid")
     return registry._apply_verified(evidence, report)
+
+
+# -- Rollback -- the same authority, in the opposite direction ---------------
+#
+# Rollback changes which composition is served, so it is a promotion-grade
+# authority decision and carries promotion-grade proof. The registry's plain
+# `rollback()` was an unauthenticated pointer move: any holder of the registry
+# could revert the served version with no signature and nothing bound to what
+# it was reverting from or to. guidelines.md 9.2 closes the decision -- signed
+# bound evidence, or refuse.
+
+
+def rollback_body(
+    *,
+    promoter_id: str,
+    base_version: str,
+    target_version: str,
+    reason: str,
+) -> dict[str, Any]:
+    """The canonical signed body. Binds both endpoints, not just the target.
+
+    Binding `base_version` is what stops a signature captured for one rollback
+    being replayed later against a different served version.
+    """
+    if not base_version or not target_version:
+        raise ValueError("rollback must bind both the base and target versions")
+    if base_version == target_version:
+        raise ValueError("rollback base and target versions must differ")
+    if not reason:
+        raise ValueError("rollback must record a reason")
+    return {
+        "kind": "composition-rollback/1",
+        "promoterId": promoter_id,
+        "baseVersion": base_version,
+        "targetVersion": target_version,
+        "reason": reason,
+    }
+
+
+def sign_rollback(
+    signer: PromoterSigner,
+    *,
+    promoter_id: str,
+    base_version: str,
+    target_version: str,
+    reason: str,
+) -> Mapping[str, Any]:
+    """Produce signed rollback evidence. Only the promotion authority may."""
+    body = rollback_body(
+        promoter_id=promoter_id,
+        base_version=base_version,
+        target_version=target_version,
+        reason=reason,
+    )
+    return {**body, "keyId": signer.key_id, "signature": signer.sign(body)}
+
+
+def verify_rollback_evidence(evidence: Mapping[str, Any], public_key: bytes) -> bool:
+    """Re-check a rollback signature without holding the promoter's key."""
+    try:
+        body = rollback_body(
+            promoter_id=str(evidence["promoterId"]),
+            base_version=str(evidence["baseVersion"]),
+            target_version=str(evidence["targetVersion"]),
+            reason=str(evidence["reason"]),
+        )
+    except (KeyError, ValueError):
+        return False
+    signature = evidence.get("signature")
+    if not isinstance(signature, str) or not signature:
+        return False
+    try:
+        key = ed25519.Ed25519PublicKey.from_public_bytes(public_key)
+        key.verify(base64.b64decode(signature.encode("ascii")), canonical_bytes(body))
+    except Exception:
+        return False
+    return True
+
+
+def rollback_and_register(
+    registry: CompositionRegistry,
+    evidence: Mapping[str, Any],
+    public_key: bytes,
+) -> str:
+    """Verify signed rollback evidence, then move the served version."""
+    if not verify_rollback_evidence(evidence, public_key):
+        raise RollbackRefused("rollback signature or evidence binding is invalid")
+    if str(evidence["baseVersion"]) != registry.current:
+        raise RollbackRefused(
+            f"rollback evidence was signed against "
+            f"{evidence['baseVersion']!r} but the served version is "
+            f"{registry.current!r}"
+        )
+    return registry._rollback_verified(str(evidence["targetVersion"]))

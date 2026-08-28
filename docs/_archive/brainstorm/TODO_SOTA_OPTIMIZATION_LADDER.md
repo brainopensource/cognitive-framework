@@ -56,8 +56,12 @@ We completed the multi-tier benchmark suite expansion and live empirical evaluat
 | ──────────────────── | ─────────────────────────── | ────────────────── | ────── | ───── | ────── | ─────────── | ─────────── |
 | tier1_lru_cache (90%)| deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   4   |  7,702 |  $0.00091   |   37.29s    |
 | tier3_token_bucket90 | deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   5   | 10,030 |  $0.00113   |   24.59s    |
-| tier6_raft_consensus9| deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   3   |  4,702 |  $0.00052 🏆|   11.18s 🏆 |
 | tier8_ast_compiler90 | deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |  12   | 30,372 |  $0.00337   |   59.99s    |
+| ──────────────────── | ─────────────────────────── | ────────────────── | ────── | ───── | ────── | ─────────── | ─────────── |
+| tier1_lru_cache 100% | deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   4   |  7,843 |  $0.00091   |   24.72s    |
+| tier3_token_bucket100| deepseek/deepseek-v4-flash  | v4.0_cegis_smt     |  PASS  |   5   |  9,742 |  $0.00111   |   14.84s    |
+| tier6_raft_consensus1| deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   5   |  9,838 |  $0.00109   |   19.99s    |
+| tier8_ast_compiler100| deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   5   |  9,473 |  $0.00110 🏆|   18.54s 🏆 |
 +----------------------+-----------------------------+--------------------+--------+-------+--------+-------------+-------------+
 ```
 

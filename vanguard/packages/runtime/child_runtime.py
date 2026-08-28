@@ -130,6 +130,9 @@ class RuntimeChildRunner:
             # The child's own children run through this same runner, which is
             # what makes depth >= 3 real rather than simulated.
             child_runtime=self,
+            # The parent owns the adapter and must keep it alive for the next
+            # causally-ready sibling. A child may use it, never dispose it.
+            environment_owner=False,
         )
 
     def _lower(self, plan: ChildRunPlan) -> TaskContext:
@@ -188,9 +191,21 @@ class RuntimeChildRunner:
         outcome = TERMINAL_OUTCOMES.get(terminal, "undeterminable")
 
         cost = self._measured_cost(plan, result)
-        evidence_refs = tuple(
+        evidence_refs = [
             ref for ref in (result.run_digest, result.activation_digest) if ref
-        )
+        ]
+        # Minimal ChildRuntimePort contract doubles may expose only the
+        # historical RunResult fields.  Missing trajectory means no captured
+        # artifact references, never an invented one.
+        trajectory = getattr(result, "trajectory", None)
+        if isinstance(trajectory, Mapping):
+            for artifact in trajectory.get("artifacts", ()) or ():
+                if not isinstance(artifact, Mapping):
+                    continue
+                digest = artifact.get("digest")
+                if (artifact.get("stored") is True and isinstance(digest, str)
+                        and digest.startswith("sha256:") and digest not in evidence_refs):
+                    evidence_refs.append(digest)
 
         return ChildRunResult(
             ok=outcome == "completed",
@@ -200,7 +215,7 @@ class RuntimeChildRunner:
             actual_cost=cost,
             turns_used=len(result.receipts),
             result_digest=result.state_digest or None,
-            evidence_refs=evidence_refs,
+            evidence_refs=tuple(evidence_refs),
             detail=result.detail or "",
         )
 

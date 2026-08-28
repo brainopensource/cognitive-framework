@@ -128,14 +128,14 @@ class ContentionAndCacheBoundTheAvailableWin(unittest.TestCase):
 class ThreeTopologiesShareOneRuntime(unittest.TestCase):
     def test_all_three_lower_through_the_same_shape(self) -> None:
         report = three_topology_report(list(VALID_TOPOLOGIES))
-        self.assertEqual(report["count"], 3)
-        self.assertEqual(report["runnable"], 3)
+        self.assertEqual(report["count"], 4)
+        self.assertEqual(report["runnable"], 4)
         self.assertTrue(report["sharedLoweringShape"])
         self.assertTrue(report["distinctDigests"])
 
     def test_they_remain_three_structures_not_three_names_for_one(self) -> None:
         digests = {parse_topology(raw).digest() for raw in VALID_TOPOLOGIES}
-        self.assertEqual(len(digests), 3)
+        self.assertEqual(len(digests), 4)
 
     def test_lowering_activates_nothing_concurrent(self) -> None:
         report = three_topology_report(list(VALID_TOPOLOGIES))

@@ -345,6 +345,10 @@ class DelegationResult:
     actual_cost: Mapping[str, int] = field(default_factory=dict)
     result_digest: str | None = None
     turns_used: int = 0
+    #: Durable artifact/event references returned by the child.  These are
+    #: deliberately references only; content never crosses the delegation
+    #: boundary inline.
+    evidence_refs: tuple[str, ...] = ()
     detail: str = ""
     #: Binds the fact to the intent that caused it. The reducer already checks
     #: this against `ChildSpawned`; the check was dead because nothing wrote it.
@@ -372,6 +376,7 @@ class DelegationResult:
             actual_cost=dict(result.actual_cost),
             result_digest=result.result_digest,
             turns_used=result.turns_used,
+            evidence_refs=tuple(result.evidence_refs),
             detail=result.detail,
         )
 
@@ -393,6 +398,8 @@ class DelegationResult:
             **({"settledIntentKey": self.settled_intent_key}
                if self.settled_intent_key else {}),
             **({"resultDigest": self.result_digest} if self.result_digest else {}),
+            **({"evidenceRefs": list(self.evidence_refs)}
+               if self.evidence_refs else {}),
             **({"detail": self.detail} if self.detail else {}),
         }
 
@@ -610,7 +617,13 @@ class SpawnAdapter:
             # additive conservation across the tree -- there is exactly one
             # accountant, and it is not this adapter.
             actual_cost=dict(result.actual_cost),
-            result_digest=result.result_digest,
+            # `result_digest` is the generic effect-output slot.  For a
+            # delegated child, expose the last durable evidence reference as
+            # the topology handoff hint while the full child state digest and
+            # all evidence refs remain in `ChildReturned` below.  The topology
+            # bridge accepts it only after checking the configured CAS.
+            result_digest=(result.evidence_refs[-1]
+                           if result.evidence_refs else result.result_digest),
         )
 
     # -- internals --------------------------------------------------------
@@ -708,7 +721,9 @@ class SpawnAdapter:
                     status="ok" if outcome == "completed" else "error",
                     occurrence=Occurrence.OCCURRED,
                     actual_cost=dict(payload.get("cost") or {}),
-                    result_digest=payload.get("resultDigest"),
+                    result_digest=(tuple(payload.get("evidenceRefs") or ())[-1]
+                                   if payload.get("evidenceRefs")
+                                   else payload.get("resultDigest")),
                 )
         # Recovery may already have adjudicated this open subtree. If it did,
         # replay its verdict rather than re-running: the child may have

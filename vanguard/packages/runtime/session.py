@@ -7,6 +7,7 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -176,8 +177,13 @@ class _LayeredOperator:
                  artifacts: ArtifactWriter | None = None,
                  provenance: ProvenanceSink | None = None,
                  meta_controller: Callable[[], ControllerProposal | None] | None = None,
-                 memory: MemoryBinding | None = None) -> None:
+                 memory: MemoryBinding | None = None,
+                 capabilities: Sequence[Mapping[str, Any]] = ()) -> None:
         self._model = model
+        configure_capabilities = getattr(model, "configure_capabilities", None)
+        if callable(configure_capabilities):
+            configure_capabilities(tuple(
+                dict(item) for item in capabilities if isinstance(item, Mapping)))
         self._compiler = compiler
         self._recorder = recorder
         self._task = task
@@ -448,6 +454,9 @@ class SessionPorts:
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
     child_runtime: ChildRuntimePort | None = None
+    #: Child episodes share the parent's environment lifetime. Only the root
+    #: composition owns and disposes the concrete environment adapter.
+    environment_owner: bool = True
 
 
 class _SwappablePolicy:
@@ -577,7 +586,14 @@ class HarnessSession:
             # TODO(S8-B-04): this literal is the last composition value the
             # manifest does not own. It is replaced by the approval-threshold
             # manifest component; Lane B lands that, not this sprint.
-            approval_required_above="low",
+            # A sealed child scope is the already-approved delegation grant:
+            # the parent approval covers the complete attenuated request, and
+            # the child cannot widen that sealed membership. Requiring a
+            # second interactive approval here would make every delegated
+            # high-risk role fail in benchmark mode, despite the parent having
+            # explicitly authorized the bounded child plan. Unsealed runs
+            # retain the normal benchmark/interactive approval rule.
+            approval_required_above=(None if self.scope.sealed else "low"),
             risk_of=harness.risk_of,
         ))
 
@@ -671,6 +687,11 @@ class HarnessSession:
                 if ports.meta_controller is not None else None
             ),
             memory=ports.memory,
+            capabilities=tuple(
+                {"verb": capability.verb,
+                 "selector": capability.selector}
+                for capability in harness.frozen.capabilities
+            ),
         )
 
         # Ed25519 verify keys are injected by the operator. The root never mints
@@ -1080,7 +1101,8 @@ class HarnessSession:
             **self._capture_evidence(),
         )
         delayed.flush(trajectory)
-        ports.environment.dispose()
+        if ports.environment_owner:
+            ports.environment.dispose()
         result = RunResult(
             harness=harness.harness,
             composition_digest=harness.composition_digest,
@@ -1232,7 +1254,12 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
-    observer = getattr(operator._model, "observe_dispatch", None)
+    # The callback is also used by small operator doubles in the composition
+    # contract tests.  Access the wrapped model itself first; looking up
+    # ``operator._model`` as an attribute of the model is an accidental
+    # second dereference and breaks operators that are not layered wrappers.
+    model = getattr(operator, "_model", operator)
+    observer = getattr(model, "observe_dispatch", None)
     if callable(observer):
         observer(result)
     if outcome is None:

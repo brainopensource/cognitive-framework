@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: documentation-architect
 version: "0.7.3.dev0"
-last_verified: 2026-08-26
+last_verified: 2026-08-28
 supersedes: []
 superseded_by: null
 ---
@@ -66,7 +66,7 @@ This section is deliberately honest about the gap. The target below is binding a
 | Canonical composition → activation → run | **Works.** One authority (RF-78–RF-84) | unchanged |
 | Capability-mediated effects, typed budgets | **Works.** S0–S12, monotonic attenuation, TCB ≤ 1438 LOC | unchanged |
 | Execution profiles in `D_R` | **Works.** `product`/`local`/`sandboxed`/`hermetic`, fail-closed | + retention/reproducibility axis (M-4) |
-| Coding agent product (`vg code`, resume) | Mechanism present; RF-95 bundle/review absent | accepted useful end-to-end proof (M-4) |
+| Coding agent product (`vg code`, resume) | **RF-95 verified `passed`** (`M-4-rf95-candidate-07`); acceptance is operator-attested, not yet from an organizationally independent reviewer | accepted useful end-to-end proof with a genuinely separate reviewer (M-4) |
 | Scientific trajectory capture | `/2`, model I/O and provenance mechanisms present | independently accepted release evidence |
 | Agent state as projection | `AgentView` and checkpoints implemented | accepted successor baseline (M-5a) |
 | Second domain (formal pack) | SAT material path demonstrated; historical control invalid | fresh graph-coloring falsifier after successor baseline (M-5b) |
@@ -80,7 +80,9 @@ Mechanism presence is not milestone acceptance; the active board cites the evide
 
 ### Immediate delivery order
 
-1. Publish and independently verify M-4 `candidate-06`.
+1. ~~Publish and independently verify M-4 `candidate-06`~~ done as `candidate-07` (verifies `passed`);
+   obtain a genuinely independent reviewer signature to close the remaining organizational-independence
+   gap.
 2. Publish annotated remote `CONVERGENCE-BASE-v1`, then re-emit M-5b.
 3. Re-emit the corrected M-6.5 study without reinterpreting its undeterminable predecessor.
 4. Make M-7 multi-role children perform real effects and exchange artifacts by digest.

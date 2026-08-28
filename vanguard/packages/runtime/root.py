@@ -307,7 +307,7 @@ class Runtime(_ComposedRuntime):
                 # the existing RuntimeChildRunner. Child calls delegate to
                 # the supplied model, so role work remains normal agent work.
                 ports = replace(ports, model=_TopologyModel(
-                    ports.model, task_context, lowered, harness))
+                    ports.model, task_context, lowered, harness, ports.blobs))
         run_plan = plan_run(
             activation,
             project_id=task_context.project_id,
@@ -384,11 +384,13 @@ class _TopologyModel:
     """
 
     def __init__(self, model: Any, task: TaskContext,
-                 lowered: Mapping[str, Any], harness: Harness) -> None:
+                 lowered: Mapping[str, Any], harness: Harness,
+                 blobs: Any = None) -> None:
         self._model = model
         self._root_episode = task.episode_id
         self._brief = task.brief
         self._harness = harness
+        self._blobs = blobs
         self._operations = tuple(lowered.get("roleOperations", ()))
         self._roles = {
             str(item["role"]): item
@@ -422,7 +424,6 @@ class _TopologyModel:
             })
 
         operation = self._operations[self._cursor]
-        self._cursor += 1
         role_id = str(operation["role"])
         template = self._roles[role_id]
         budget = {
@@ -483,6 +484,16 @@ class _TopologyModel:
             {"artifact": artifact, "digest": self._flow_digests[artifact]}
             for artifact in operation.get("inputArtifacts", ())
             if artifact in self._flow_digests)
+        missing_artifacts = tuple(
+            str(artifact) for artifact in operation.get("inputArtifacts", ())
+            if str(artifact) not in self._flow_digests)
+        if missing_artifacts:
+            return Result.fail(
+                "instrument_error",
+                "required topology artifacts are unavailable: "
+                + ", ".join(missing_artifacts),
+            )
+        self._cursor += 1
         args: dict[str, Any] = {
             "brief": f"{self._brief}\n\nExecute topology role {role_id}. "
                      f"Routing context: {role_context}",
@@ -513,15 +524,10 @@ class _TopologyModel:
         """
         if self._last_role is None:
             return
-        outcome = getattr(result, "outcome", None)
-        digest = getattr(outcome, "result_digest", None) if outcome is not None else None
-        if not isinstance(digest, str) or not digest.startswith("sha256:"):
-            for event in getattr(result, "events", ()) or ():
-                payload = getattr(event, "payload", {}) or {}
-                candidate = payload.get("resultDigest")
-                if isinstance(candidate, str) and candidate.startswith("sha256:"):
-                    digest = candidate
-                    break
+        hint = getattr(getattr(result, "outcome", None), "result_digest", None)
+        digest = (hint if isinstance(hint, str) and hint.startswith("sha256:")
+                  and self._blobs is not None and self._blobs.has(hint)
+                  else None)
         if not isinstance(digest, str) or not digest.startswith("sha256:"):
             return
         operation = self._operations[self._cursor - 1]

@@ -12,6 +12,7 @@ from ..adapters.models.openrouter import OpenRouterModel
 from ..adapters.models.fake import FakeModel
 from ..adapters.models.ollama import OllamaModel
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
 from .compose import TaskContext
 from .profiles import SandboxUnavailable, resolve_profile
@@ -86,13 +87,22 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     # legacy fixed `run-cli` identity would otherwise resume stale approval
     # events from a previous invocation and exhaust the episode budget.
     preview_store = SqliteEventStore(":memory:") if fake_backend else None
+    configured_store_path = (
+        Path(str(request["storePath"])) if request.get("storePath") else
+        task.repo_path / ".vanguard" / "events.sqlite3"
+    )
+    # Product runs and explicit previews use a real content-addressed store;
+    # topology artifact edges must never point at ephemeral process state.
+    # The fake model remains an explicit preview choice, but its captured
+    # material is still kept in the same installation state directory.
     result = Runtime.execute_profiled(
         _manifest(command), task,
         profile_id=str(request.get("profile") or "product"),
         model=selected_model,
         store=preview_store,
-        store_path=(str(request["storePath"]) if request.get("storePath") else None),
+        store_path=(str(configured_store_path) if not fake_backend else None),
         interactive=bool(request.get("interactive", True)),
+        blobs=FileBlobStore(configured_store_path.parent / "blobs"),
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))
     outcome = "completed" if terminal in {"completed", "abstained"} else terminal

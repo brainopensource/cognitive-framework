@@ -6,6 +6,7 @@ context/observation messages determine the next scenario turn.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -51,10 +52,23 @@ class LamModelAdapter:
         self,
         model_name: str = "lam/t1-calculator",
         scenario_dir: str | Path | None = None,
+        capabilities: Sequence[Mapping[str, Any]] = (),
     ) -> None:
         self.model_name = model_name
+        self._capabilities = _normalise_capabilities(capabilities)
         root = Path(scenario_dir) if scenario_dir else _TOOLS / "scenarios"
         self._engine = LamEngine.from_directory(root) if LamEngine is not None and root.is_dir() else None
+
+    def configure_capabilities(self, capabilities: Sequence[Mapping[str, Any]]) -> None:
+        """Bind manifest selectors before the first provider proposal.
+
+        A pack may declare a capability without shipping a separate provider
+        tool-schema component.  Keeping the selector in the manifest is still
+        authoritative; this hook lets the deterministic adapter pass that
+        declaration to the common translator instead of manufacturing a
+        generic resource from argument shape.
+        """
+        self._capabilities = _normalise_capabilities(capabilities)
 
     def propose(
         self,
@@ -104,7 +118,9 @@ class LamModelAdapter:
             "pricing_known": True,
             "usd_micros": 0,
         }
-        return ProposalTranslator.translate(raw_proposal, tool_schemas=tools, aliases=_DEFAULT_LAM_ALIASES)
+        return ProposalTranslator.translate(
+            raw_proposal, tool_schemas=tools, aliases=_DEFAULT_LAM_ALIASES,
+            capabilities=self._capabilities)
 
 
 def _messages_from_context(context: ContextBundle) -> list[dict[str, str]]:
@@ -136,3 +152,21 @@ def _messages_from_context(context: ContextBundle) -> list[dict[str, str]]:
                 messages.append({"role": str(message.get("role", "user")), "content": str(message.get("content", ""))})
         return messages
     return [{"role": "user", "content": str(context)}]
+
+
+def _normalise_capabilities(
+    capabilities: Sequence[Mapping[str, Any]],
+) -> tuple[Mapping[str, Any], ...]:
+    rows: list[Mapping[str, Any]] = []
+    for item in capabilities:
+        if not isinstance(item, Mapping):
+            continue
+        selector = item.get("selector")
+        if isinstance(selector, str):
+            try:
+                selector = json.loads(selector)
+            except (TypeError, ValueError):
+                continue
+        if isinstance(selector, Mapping) and isinstance(item.get("verb"), str):
+            rows.append({"verb": item["verb"], "selector": dict(selector)})
+    return tuple(rows)

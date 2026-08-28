@@ -31,8 +31,10 @@ from test.falsifiers.canonical_fixtures import (  # noqa: E402
 from test.fixtures.m7_topologies import (  # noqa: E402
     CRITIC_REVISER,
     DIRECT,
+    FORK_READ_MERGE,
     PLANNER_EXECUTOR,
 )
+from vanguard.packages.adapters.stores.blob_store import FileBlobStore  # noqa: E402
 from vanguard.packages.adapters.models.lam import LamModelAdapter  # noqa: E402
 from vanguard.packages.agency import RunTermination  # noqa: E402
 from vanguard.packages.ports.event_store import Result  # noqa: E402
@@ -46,7 +48,8 @@ from vanguard.packages.runtime.topology import parse_topology  # noqa: E402
 #: nothing and must still complete through the very same path.
 FORMS = (("direct", DIRECT, 0),
          ("planner-executor", PLANNER_EXECUTOR, 2),
-         ("critic-reviser", CRITIC_REVISER, 3))
+         ("critic-reviser", CRITIC_REVISER, 3),
+         ("fork-read-merge", FORK_READ_MERGE, 4))
 
 
 class _Verifier:
@@ -83,6 +86,13 @@ def _run_topology(topology, base: Path):
         approver=lambda challenge: signer.approve(challenge, reviewer="operator"),
         approval_key=signer.public_bytes,
         verifier=_Verifier(),
+        # The host used for this mechanism falsifier does not provide a
+        # qualifying rootless bwrap perimeter.  Host-dev is explicit and is
+        # never release-eligible; production qualification remains a separate
+        # rootless prerequisite.  The CAS is the real file-backed adapter so
+        # artifact flow is still exercised through durable references.
+        sandbox_mode="host-dev",
+        blobs=FileBlobStore(base / "blobs"),
     )
 
 
@@ -203,21 +213,8 @@ class ExecutionHonoursTheDeclaredStructure(unittest.TestCase):
         self.assertTrue(spawned)
 
 
-class WhatRoleExecutionDoesAndDoesNotYetShow(unittest.TestCase):
-    """M7-EXEC-02: the boundary of the current execution claim.
-
-    Recording this boundary is the point. `run_composed` now really does spawn
-    each lowered role as an M-6 child, and the degenerate `direct` form does
-    real work through the canonical path. But under a multi-role topology the
-    root model is replaced by the topology bridge, which only emits spawn
-    proposals -- so the root performs no effects, and each role lineage settles
-    `abandoned` having performed none either.
-
-    That means role-to-role *artifact flows* are declared and lowered but never
-    exercised. M-7's evidence must say so: a milestone that claimed honoured
-    artifact flows on the strength of these runs would be claiming a behaviour
-    no fact in the ledger supports.
-    """
+class RoleExecutionProducesEvidence(unittest.TestCase):
+    """M7-EXEC-02: role work and artifact flow are observable in the ledger."""
 
     def test_the_direct_form_does_real_work_through_the_canonical_path(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -226,25 +223,25 @@ class WhatRoleExecutionDoesAndDoesNotYetShow(unittest.TestCase):
         self.assertEqual([receipt.verb for receipt in result.receipts],
                          ["fs.read", "patch.apply", "proc.exec"])
 
-    def test_multi_role_lineages_currently_perform_no_effects(self) -> None:
-        """Pins the gap. If a role ever does real work this test must be
-        rewritten -- and M-7's `artifact_flows_exercised` marker can be set."""
+    def test_multi_role_lineages_perform_real_effects(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             result = _run_topology(PLANNER_EXECUTOR, Path(directory))
-        self.assertEqual([receipt.verb for receipt in result.receipts], [])
         outcomes = {event.payload.get("outcome")
                     for event in result.events if event.kind == "ChildReturned"}
-        self.assertEqual(outcomes, {"abandoned"})
+        self.assertEqual(outcomes, {"completed"})
+        completed = [event for event in result.events if event.kind == "EffectCompleted"]
+        self.assertGreaterEqual(len(completed), 2)
 
-    def test_no_artifact_flow_fact_is_recorded_for_a_declared_flow(self) -> None:
-        """`critic-reviser` declares draft and critique flows; nothing carries
-        them, so no fact should pretend otherwise."""
+    def test_artifact_flow_facts_are_recorded_for_declared_flows(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             result = _run_topology(CRITIC_REVISER, Path(directory))
         self.assertTrue(CRITIC_REVISER["artifactFlows"])
         produced = [event for event in result.events
                     if event.kind == "ArtifactCreated"]
-        self.assertEqual(produced, [])
+        self.assertGreaterEqual(len(produced), 6)
+        returned = [event for event in result.events
+                    if event.kind == "ChildReturned"]
+        self.assertTrue(all(event.payload.get("evidenceRefs") for event in returned))
 
 
 class TopologyDataCarriesNoAuthority(unittest.TestCase):

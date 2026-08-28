@@ -68,36 +68,26 @@ class AReportOnlySupportsWhatItObserved(unittest.TestCase):
             _report_passed(body, ("a",))
 
 
-#: The marker no suite can set today: multi-role lineages settle `abandoned`
-#: with no receipts, so declared artifact flows are never exercised.
 _UNSETTABLE = "artifact_flows_exercised"
 
 
-class M7CannotCloseItsUnexercisedArtifactFlows(unittest.TestCase):
-    """M-7 requires more than lowering, and more than spawning.
-
-    Role execution is real now -- roles run as M-6 children. What is still
-    unobserved is the declared role-to-role artifact flow, because no role
-    lineage performs an effect. M-7 must not report `passed` on the strength of
-    everything else.
-    """
+class M7RequiresObservedArtifactFlows(unittest.TestCase):
+    """M-7 requires the ledger-backed artifact-flow observation."""
 
     def _build(self, markers):
         return build_m7("dev-b", _report(markers), evidence_root=Path(
             self.enterContext(__import__("tempfile").TemporaryDirectory())))
 
-    def test_every_settable_marker_green_still_cannot_close_m7(self) -> None:
+    def test_every_required_marker_green_supports_m7(self) -> None:
         markers = {name: True for name in M7_MARKERS}
-        markers[_UNSETTABLE] = False
         envelope = self._build(markers)
-        self.assertEqual(envelope.outcome, "undeterminable")
+        self.assertEqual(envelope.outcome, "passed")
         self.assertIn("artifact flow", envelope.detail)
-        self.assertFalse(envelope.run["artifactFlowsExercised"])
+        self.assertTrue(envelope.run["artifactFlowsExercised"])
 
     def test_role_execution_is_recorded_as_achieved(self) -> None:
-        """The bundle must not keep reporting a gap Lane A already closed."""
+        """The bundle records the real child execution bridge."""
         markers = {name: True for name in M7_MARKERS}
-        markers[_UNSETTABLE] = False
         self.assertTrue(self._build(markers).run["roleOperationsExecuted"])
 
     def test_losing_role_execution_reopens_m7(self) -> None:
@@ -114,8 +104,9 @@ class M7CannotCloseItsUnexercisedArtifactFlows(unittest.TestCase):
     def test_the_unmet_clause_is_named_in_the_bundle(self) -> None:
         markers = {name: True for name in M7_MARKERS}
         markers[_UNSETTABLE] = False
-        self.assertIn("artifact flows", str(self._build(markers)
-                                            .run["unobservedClause"]))
+        envelope = self._build(markers)
+        self.assertEqual(envelope.outcome, "undeterminable")
+        self.assertIn("artifact flow", str(envelope.run["artifactFlowBinding"]))
 
     def test_every_material_declares_a_re_derivable_scheme(self) -> None:
         envelope = self._build({name: True for name in M7_MARKERS})

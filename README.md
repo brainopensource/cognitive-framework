@@ -13,7 +13,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Higgs Development (`0.7.3.dev0`)
+# AETHER — Higgs Development (Preparing for `0.9.x`)
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 

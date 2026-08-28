@@ -708,7 +708,55 @@ class OpenRouterModel:
             retryable=True,
         )
 
+    #: A well-formed HTTP 200 with no text and no tool call is a real,
+    #: occasionally-observed provider behavior -- seen live against
+    #: `deepseek/deepseek-v4-flash-0731` after several turns of otherwise
+    #: normal tool use -- not evidence the model will repeat it. Bounded and
+    #: named so it cannot silently become an unlimited loop against a model
+    #: that genuinely never produces content.
+    _EMPTY_PROPOSAL_MESSAGE = "proposal must contain text or a tool call"
+    _EMPTY_PROPOSAL_RETRIES = 1
+
     def _complete(
+        self,
+        context: ContextBundle,
+        tools: ToolSchemas,
+        sampling: Sampling,
+    ) -> Result[Proposal]:
+        """Re-ask once on a genuinely empty completion before failing the episode.
+
+        `_complete_once` already retries transport-level failures (429/5xx,
+        connection errors). This is a different, adapter-observed failure
+        class: the request succeeds and the provider returns a schema-valid
+        response that simply carries no content. Previously that reached
+        `EpisodeEngine` as an immediate `INSTRUMENT_ERROR`, terminating the
+        whole episode on one empty completion (SWE-harness smoke runs hit
+        this reliably). The retried attempt's own usage is billed and
+        accounted normally on success; the discarded first attempt's tokens
+        are not merged in, matching the existing behaviour when transport
+        retries are exhausted without a usable response.
+        """
+        result = self._complete_once(context, tools, sampling)
+        if result.ok:
+            return result
+        error = result.error
+        if (
+            self._EMPTY_PROPOSAL_RETRIES <= 0
+            or error is None
+            or error.kind != "instrument_error"
+            or error.message != self._EMPTY_PROPOSAL_MESSAGE
+        ):
+            return result
+        for _ in range(self._EMPTY_PROPOSAL_RETRIES):
+            result = self._complete_once(context, tools, sampling)
+            if result.ok or (
+                result.error is None
+                or result.error.message != self._EMPTY_PROPOSAL_MESSAGE
+            ):
+                return result
+        return result
+
+    def _complete_once(
         self,
         context: ContextBundle,
         tools: ToolSchemas,

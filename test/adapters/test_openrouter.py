@@ -170,6 +170,70 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertAlmostEqual(sleep_durations[0], 0.1)
         self.assertAlmostEqual(sleep_durations[1], 0.2)
 
+    def test_empty_completion_is_retried_once_before_failing_the_episode(self) -> None:
+        calls = []
+
+        def empty_then_real_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            if len(calls) == 1:
+                return 200, json.dumps({
+                    "choices": [{"message": {"role": "assistant", "content": ""}}],
+                    "usage": {"prompt_tokens": 40, "completion_tokens": 0, "total_tokens": 40},
+                }).encode("utf-8")
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "recovered!"}}],
+                "usage": {"prompt_tokens": 40, "completion_tokens": 5, "total_tokens": 45},
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=empty_then_real_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "recovered!")
+        self.assertEqual(len(calls), 2)
+
+    def test_empty_completion_fails_closed_once_retries_are_exhausted(self) -> None:
+        calls = []
+
+        def always_empty_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": ""}}],
+                "usage": {"prompt_tokens": 40, "completion_tokens": 0, "total_tokens": 40},
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=always_empty_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertEqual(result.error.message, "proposal must contain text or a tool call")
+        # One original attempt plus the bounded retry, never more.
+        self.assertEqual(len(calls), 2)
+
+    def test_a_different_instrument_error_is_never_retried_as_empty_completion(self) -> None:
+        calls = []
+
+        def not_json_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            return 200, b"not json at all"
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=not_json_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.message, "provider response was not JSON")
+        self.assertEqual(len(calls), 1)
+
     def test_503_service_unavailable_triggers_backoff_and_recovers(self) -> None:
         calls = []
         sleep_durations = []

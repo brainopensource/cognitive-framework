@@ -28,12 +28,15 @@ What this tool deliberately does **not** do:
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import shutil
 import sys
 from pathlib import Path
 from typing import Any
+
+from cryptography.hazmat.primitives import serialization
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
@@ -45,15 +48,15 @@ from vanguard.packages.domain.evidence.envelope import (  # noqa: E402
     Producer,
     parse_envelope,
 )
-from vanguard.packages.runtime.governance.approvals import (  # noqa: E402
-    ApprovalAuthority,
-    OperatorSigner,
-)
-from vanguard.packages.runtime.keys import (  # noqa: E402
-    KeyMaterialError,
-    default_key_path,
-    load_operator_signer,
-)
+# The signing implementation and the key loader are shared with the builder;
+# the signature rule is imported from the verifier itself, so this tool cannot
+# self-verify under a laxer rule than the gate applies.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(_REPO_ROOT / "tools" / "linters"))
+
+from build_evidence_bundle import sign_envelope  # noqa: E402
+from keygen_evidence_key import load_key  # noqa: E402
+from verify_evidence import verify_signature_reason  # noqa: E402
 
 #: Where relocated artifacts live. Inside the repository, so a reviewer who has
 #: the tree has the bytes.
@@ -194,6 +197,8 @@ def main() -> int:
     parser.add_argument("bundle", help="path to the evidence JSON")
     parser.add_argument("--identity", default="dev-a", help="producer identity")
     parser.add_argument("--key-id", default="", help="key id recorded in the envelope")
+    parser.add_argument("--producer-key", required=True,
+                        help="path to the Ed25519 producer key (outside the repo)")
     parser.add_argument("--relocate", action="store_true",
                         help="copy non-portable materials into the repository")
     parser.add_argument("--outcome", default=None,
@@ -213,32 +218,36 @@ def main() -> int:
             envelope, bundle_path.stem, dry_run=args.dry_run,
             mark_unresolvable=args.mark_unresolvable)
 
+    key_path = Path(args.producer_key).expanduser()
     try:
-        signer = load_operator_signer(allow_create=False)
-    except KeyMaterialError as exc:
+        private = load_key(key_path)
+    except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
-        print(f"       expected key at {default_key_path()}", file=sys.stderr)
+        print(f"       expected an Ed25519 key at {key_path}", file=sys.stderr)
+        print("       generate one with tools/runners/keygen_evidence_key.py",
+              file=sys.stderr)
         return 3
 
     key_id = args.key_id or f"{args.identity}-operator"
-    signer = OperatorSigner(signer_private_bytes(signer), key_id=key_id)
     unsigned = rebuild(
         envelope, identity=args.identity, key_id=key_id,
         outcome=args.outcome, detail=args.detail,
     )
-    signature = signer.sign_bytes(unsigned.signable_bytes())
-    signed = EvidenceEnvelope(
-        claim=unsigned.claim, protocol=unsigned.protocol, subjects=unsigned.subjects,
-        materials=unsigned.materials, run=unsigned.run, pins=unsigned.pins,
-        environment=unsigned.environment, outcome=unsigned.outcome,
-        producer=unsigned.producer, artifact_refs=unsigned.artifact_refs,
-        detail=unsigned.detail, signature=signature,
-    )
+    # One signing implementation, shared with the builder: `ed25519:<base64>`
+    # over the canonical body. A hex signature names no algorithm, so the
+    # verifier refuses it rather than guessing -- which is why every bundle
+    # this tool signed before now reads as `failed`.
+    signed = sign_envelope(unsigned, key_path, key_id)
 
     # Verify what we just wrote, against the same public key a reviewer would use.
-    authority = ApprovalAuthority({key_id: signer.public_bytes})
-    if not authority.verify_bytes(key_id, signed.signable_bytes(), signature):
-        print("ERROR: self-verification of the new signature failed", file=sys.stderr)
+    public_b64 = base64.b64encode(
+        private.public_key().public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    ).decode("ascii")
+    reason = verify_signature_reason(signed, public_b64)
+    if reason:
+        print(f"ERROR: self-verification of the new signature failed: {reason}",
+              file=sys.stderr)
         return 1
 
     for note in notes:
@@ -246,7 +255,7 @@ def main() -> int:
     print(f"  outcome  : {signed.outcome}")
     print(f"  digest   : {signed.digest()}")
     print(f"  producer : {signed.producer.identity} ({key_id})")
-    print(f"  publicKey: {signer.public_bytes.hex()}")
+    print(f"  publicKey: {public_b64}")
 
     if args.dry_run:
         print("DRY RUN: nothing written")
@@ -254,21 +263,14 @@ def main() -> int:
 
     bundle_path.write_text(
         json.dumps(signed.to_wire(), sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    print(f"signed {bundle_path.relative_to(_REPO_ROOT)}")
+    try:
+        shown = bundle_path.relative_to(_REPO_ROOT)
+    except ValueError:
+        shown = bundle_path  # a bundle staged outside the repo is still signable
+    print(f"signed {shown}")
     print("NOTE: this is a PRODUCER signature. Independent acceptance is a "
           "separate envelope by a different identity and is not created here.")
     return 0
-
-
-def signer_private_bytes(signer: OperatorSigner) -> bytes:
-    """Re-export the loaded seed so the envelope key id can be set explicitly."""
-    from cryptography.hazmat.primitives import serialization
-
-    return signer._private_key.private_bytes(  # noqa: SLF001 - same-process re-key
-        encoding=serialization.Encoding.Raw,
-        format=serialization.PrivateFormat.Raw,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
 
 
 if __name__ == "__main__":

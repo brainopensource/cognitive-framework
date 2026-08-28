@@ -50,8 +50,13 @@ def _git(*args: str, cwd: Path = _ROOT) -> str:
 
 def publish(args: argparse.Namespace) -> int:
     commit = _git("rev-parse", args.commit)
-    bundle_name = (f"M-6-canonical-recursion-{args.label}" if args.claim == "M-6"
-                   else f"M-4-rf95-{args.label}")
+    stems = {
+        "M-6": "M-6-canonical-recursion",
+        "M-4": "M-4-rf95",
+        "M-5b": "M-5b-graph-coloring",
+        "M-6.5": "M-6.5-attributable-paired-study",
+    }
+    bundle_name = f"{stems[args.claim]}-{args.label}"
     destination = EVIDENCE_DIR / f"{bundle_name}.json"
     if destination.exists():
         # Publishing over a bundle destroys the earlier claim and invalidates
@@ -91,6 +96,15 @@ def publish(args: argparse.Namespace) -> int:
                       str(subject / "tools" / "runners" / "run_m6_recursive_proof.py"),
                       "--root", str(subject), "--out", str(report)])
                 build += ["--report", str(report), "--label", args.label]
+            elif args.claim == "M-5b":
+                pass  # the surface is the subject worktree; nothing else to pass
+            elif args.claim == "M-6.5":
+                # The accepted study is re-emitted, never re-run: a study rerun
+                # to repair its packaging is a different study.
+                if not args.from_bundle:
+                    raise SystemExit("--claim M-6.5 requires --from-bundle")
+                build += ["--from-bundle",
+                          str(Path(args.from_bundle).expanduser().resolve())]
             else:
                 # M-4 rests on a product run that already happened: its ledger
                 # and preregistration are inputs here, not something this runner
@@ -133,7 +147,10 @@ def publish(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--claim", default="M-6", choices=("M-6", "M-4"))
+    parser.add_argument("--claim", default="M-6",
+                        choices=("M-6", "M-4", "M-5b", "M-6.5"))
+    parser.add_argument("--from-bundle", default="",
+                        help="M-6.5: existing bundle whose study report is re-emitted")
     parser.add_argument("--ledger", default="", help="M-4: event store from the run")
     parser.add_argument("--prereg", default="", help="M-4: preregistration file")
     parser.add_argument("--workload", default="", help="M-4: workload descriptor")

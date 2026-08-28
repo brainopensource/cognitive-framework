@@ -1,0 +1,120 @@
+{
+  "ast_errors_prevented": 0,
+  "cached_tokens": 10240,
+  "challenge_id": "tier2_semver_parser",
+  "config_hash": "9c760b992e4995c7",
+  "config_name": "v2.0_sbfl_graph",
+  "config_snapshot": {
+    "config_hash": "9c760b992e4995c7",
+    "config_name": "v2.0_sbfl_graph",
+    "head_lines": 25,
+    "max_api_calls": 50,
+    "max_cost_usd": 0.3,
+    "max_output_lines": 80,
+    "max_turns": 12,
+    "mcts_branching_factor": 3,
+    "mcts_exploration_c": 1.414,
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "mutation_threshold": 0.8,
+    "seed": 42,
+    "tail_lines": 50,
+    "temperature": 0.0,
+    "timeout_per_command_sec": 30,
+    "token_ceiling": 64000,
+    "use_ast_preflight": true,
+    "use_code_graph": true,
+    "use_dead_ends_tracking": true,
+    "use_dialogue_compaction": true,
+    "use_l1_l5_prefix_stability": true,
+    "use_mcts_search": false,
+    "use_mutation_testing": false,
+    "use_paged_output": true,
+    "use_reproduce_first": true,
+    "use_sbfl_localization": true,
+    "use_speculative_rollback": true,
+    "version_tag": "2.0.0"
+  },
+  "duration_seconds": 31.243674151999585,
+  "error_message": "",
+  "git_diff_lines": 31,
+  "kpi_metrics": {
+    "apiy_interception_yield": 0.0,
+    "ast_errors_prevented": 0,
+    "cached_tokens": 10240,
+    "cedr_context_growth_rate": 2298.3,
+    "cpac_cost_per_assertion_usd": 0.00189,
+    "deae_dead_end_avoidance_eff": 1.0,
+    "duration_seconds": 31.243674151999585,
+    "etur_utilization_rate": 0.839,
+    "fl_top1_hit": false,
+    "fl_top5_hit": false,
+    "git_diff_lines": 31,
+    "mps_model_pareto_score": 24197.5,
+    "passed_assertions": 1,
+    "pcsr_cache_ratio": 63.6,
+    "pmsi_mutation_score": 1.0,
+    "scv_self_correction_velocity": 0.143,
+    "sior_subprocess_io_ratio": 0.004,
+    "spdi_surgical_density": 1.0,
+    "tbei_token_burn_efficiency": 74.1,
+    "total_cost_usd": 0.0018896,
+    "total_tokens": 16088,
+    "ttfr_time_to_repro_sec": 0.0,
+    "turns_taken": 7
+  },
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mutation_score": 1.0,
+  "pareto_score": 24197.5,
+  "run_id": "run_20260828_053655_tier2_semver_parser_v2.0_sbfl_graph_deepseek_deepseek_v4_flash_0731",
+  "seed": 42,
+  "success": true,
+  "timestamp_utc": "2026-08-28T05:37:24.259398+00:00",
+  "total_cost_usd": 0.0018896,
+  "total_tokens": 16088,
+  "turn_events": [
+    {
+      "content": "",
+      "tokens": 1168,
+      "tool_calls": 2,
+      "turn": 1
+    },
+    {
+      "content": "",
+      "tokens": 1325,
+      "tool_calls": 4,
+      "turn": 2
+    },
+    {
+      "content": "I'll start by examining the codebase and",
+      "tokens": 3019,
+      "tool_calls": 2,
+      "turn": 3
+    },
+    {
+      "content": "Let me examine the current implementation and write a test",
+      "tokens": 2596,
+      "tool_calls": 1,
+      "turn": 4
+    },
+    {
+      "content": "",
+      "tokens": 2234,
+      "tool_calls": 1,
+      "turn": 5
+    },
+    {
+      "content": "Let me run from",
+      "tokens": 2565,
+      "tool_calls": 1,
+      "turn": 6
+    },
+    {
+      "content": "The bug is confirmed. `alpha.2 < alpha.10` returns `False` due to lexical string comparison. Let me fix the comparator",
+      "tokens": 3181,
+      "tool_calls": 1,
+      "turn": 7
+    }
+  ],
+  "turns_taken": 7,
+  "version_tag": "2.0.0"
+}

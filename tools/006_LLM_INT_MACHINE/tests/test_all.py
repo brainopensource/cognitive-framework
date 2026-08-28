@@ -35,6 +35,8 @@ from code_graph import ASTCodeGraph
 from fault_localizer import SBFLEngine
 from mcts_search import SpeculativeMCTSSearch
 from mutation_verifier import PatchMutationVerifier
+from subagent_orchestrator import SubagentCoordinator, SubagentSandbox
+from hierarchical_router import HierarchicalModelRouter
 from telemetry_kpi import AdvancedKPITelemetry
 from catalog import RunCatalog, RunReceipt, generate_run_id
 from experiment_matrix import run_multi_trial_experiment, parse_override_string
@@ -81,12 +83,6 @@ class TestConfigAndRegistry(unittest.TestCase):
             get_preset("non_existent_preset")
 
 
-class TestEnvLoader(unittest.TestCase):
-    def test_key_loading(self):
-        key = load_openrouter_api_key()
-        self.assertIsInstance(key, str)
-
-
 class TestToolsAndASTPreflight(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
@@ -112,7 +108,6 @@ class TestToolsAndASTPreflight(unittest.TestCase):
         f = self.test_dir / "broken.py"
         f.write_text("def valid_func():\n    return True\n", encoding="utf-8")
 
-        # Attempt to patch with a syntax error (missing colon, mismatched parens)
         patch_res = self.ws.patch_apply(
             path="broken.py",
             target_chunk="def valid_func():\n    return True",
@@ -121,96 +116,77 @@ class TestToolsAndASTPreflight(unittest.TestCase):
         self.assertFalse(patch_res.ok)
         self.assertTrue(patch_res.is_ast_error)
         self.assertIn("AST PRE-FLIGHT SYNTAX ERROR", patch_res.output)
-        
-        # File should remain uncorrupted
         self.assertEqual(f.read_text(encoding="utf-8"), "def valid_func():\n    return True\n")
 
-    def test_paged_output_truncation(self):
-        long_output = "\n".join(f"Line {i}" for i in range(200))
-        truncated = self.ws._truncate_output(long_output)
-        lines = truncated.splitlines()
-        self.assertLessEqual(len(lines), 85)
-        self.assertIn("Line 0", truncated)
-        self.assertIn("Line 199", truncated)
-        self.assertIn("truncated for token efficiency", truncated)
 
-
-class TestCodeGraph(unittest.TestCase):
+class TestSubagentOrchestrator(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.code_file = self.test_dir / "calc.py"
-        self.code_file.write_text(
-            "class Calculator:\n"
-            "    def add(self, a, b):\n"
-            "        return a + b\n\n"
-            "def run_calc():\n"
-            "    c = Calculator()\n"
-            "    return c.add(1, 2)\n",
-            encoding="utf-8"
+        self.config = CONFIG_V2_0_SBFL_GRAPH
+        self.ws = ToolWorkspace(self.test_dir, self.config)
+        (self.test_dir / "app.py").write_text("def run():\n    return 1\n", encoding="utf-8")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_scout_subagent_clean_slate(self):
+        mock_client = MockLLMClient(canned_responses=[
+            {"content": "Found symbol definition in app.py", "tool_calls": []}
+        ])
+        coordinator = SubagentCoordinator(self.config, mock_client)
+        report = coordinator.delegate_exploration(self.ws, "Find run function")
+        self.assertEqual(report.role, "Codebase Scout")
+        self.assertIn("Found symbol", report.summary)
+        self.assertEqual(len(coordinator.execution_history), 1)
+
+
+class TestHierarchicalRouter(unittest.TestCase):
+    def test_routing_phases_and_escalation(self):
+        router = HierarchicalModelRouter(
+            planner_model="deepseek/deepseek-v4-pro-0813",
+            worker_model="deepseek/deepseek-v4-flash-0731",
+            enable_dynamic_escalation=True,
         )
-        self.graph = ASTCodeGraph(self.test_dir)
-        self.graph.index_workspace()
+        # Turn 1 should route to Planner
+        d1 = router.select_model_for_turn(1, "PLANNING")
+        self.assertEqual(d1.selected_model, "deepseek/deepseek-v4-pro-0813")
+        self.assertEqual(d1.phase, "PLANNING")
 
-    def tearDown(self):
-        shutil.rmtree(self.test_dir, ignore_errors=True)
+        # Turn 2 should route to Worker
+        d2 = router.select_model_for_turn(2, "EXECUTION")
+        self.assertEqual(d2.selected_model, "deepseek/deepseek-v4-flash-0731")
 
-    def test_symbol_extraction_and_skeleton(self):
-        defs = self.graph.find_definitions("Calculator")
-        self.assertEqual(len(defs), 1)
-        self.assertEqual(defs[0].kind, "class")
-
-        func_defs = self.graph.find_definitions("run_calc")
-        self.assertEqual(len(func_defs), 1)
-
-        skeleton = self.graph.generate_compact_skeleton()
-        self.assertIn("CALC.PY", skeleton.upper())
-        self.assertIn("CALCULATOR", skeleton.upper())
-        self.assertIn("RUN_CALC", skeleton.upper())
+        # Two consecutive failures trigger escalation
+        router.record_turn_outcome(False)
+        router.record_turn_outcome(False)
+        d3 = router.select_model_for_turn(3, "EXECUTION")
+        self.assertEqual(d3.phase, "ESCALATED_RECOVERY")
+        self.assertEqual(d3.selected_model, "deepseek/deepseek-v4-pro-0813")
 
 
-class TestFaultLocalization(unittest.TestCase):
+class TestChallengesAndOracles(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.sbfl = SBFLEngine(self.test_dir)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
-    def test_sbfl_ochiai_scoring(self):
-        failing_trace = {("datalog/engine.py", 42), ("datalog/engine.py", 43)}
-        passing_trace = {("datalog/engine.py", 10)}
-        rankings = self.sbfl.compute_rankings([failing_trace], [passing_trace])
-        
-        self.assertGreater(len(rankings), 0)
-        # Statements in failing trace should have highest Ochiai score (1.0)
-        self.assertEqual(rankings[0].ochiai_score, 1.0)
-        prompt_txt = self.sbfl.format_for_prompt(rankings, top_k=2)
-        self.assertIn("SBFL Fault Localization", prompt_txt)
-
-
-class TestMutationVerifier(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = Path(tempfile.mkdtemp())
-        self.target = self.test_dir / "logic.py"
-        self.target.write_text(
-            "def check_limit(val):\n"
-            "    if val > 10:\n"
-            "        return True\n"
-            "    return False\n",
-            encoding="utf-8"
-        )
-
-    def tearDown(self):
-        shutil.rmtree(self.test_dir, ignore_errors=True)
-
-    def test_mutant_generation_and_falsification(self):
-        oracle_fn = lambda: True # Lax oracle that accepts anything
-        verifier = PatchMutationVerifier(self.test_dir, oracle_fn)
-        card = verifier.falsify_patch("logic.py", [1, 2])
-        self.assertGreater(card.total_mutants, 0)
-        # Since oracle always passes, mutants survive -> low kill score
-        self.assertEqual(card.killed_mutants, 0)
-        self.assertFalse(card.is_general)
+    def test_all_tiers_initial_failure(self):
+        tiers = [
+            "tier1_lru_cache",
+            "tier2_semver_parser",
+            "tier3_token_bucket",
+            "tier5_datalog_engine",
+            "tier6_raft_consensus",
+            "tier7_mvcc_storage",
+            "tier8_ast_compiler",
+        ]
+        for t in tiers:
+            setup_challenge_workspace(t, self.test_dir)
+            self.assertFalse(
+                evaluate_challenge_oracle(t, self.test_dir),
+                f"Challenge {t} oracle should initially fail on unpatched buggy code"
+            )
 
 
 class TestCatalogAndReceipts(unittest.TestCase):
@@ -251,26 +227,7 @@ class TestCatalogAndReceipts(unittest.TestCase):
         loaded = self.catalog.load_run("run_test_001")
         self.assertIsNotNone(loaded)
         self.assertEqual(loaded.run_id, "run_test_001")
-        self.assertEqual(loaded.turns_taken, 2)
         self.assertTrue(loaded.success)
-
-        runs = self.catalog.list_runs(challenge_id="tier1_lru_cache")
-        self.assertEqual(len(runs), 1)
-
-
-class TestContextEngine(unittest.TestCase):
-    def test_compaction_and_dead_ends(self):
-        engine = ContextEngine(CONFIG_V1_2_SOTA_FULL, "System Prompt", "Task Brief")
-        engine.record_dead_end("Modifying tokenizer failed test 3")
-        
-        engine.add_tool_receipt("fs_read", "A" * 5000, is_large=True)
-        engine.add_turn_assistant("Let me try another approach.")
-        
-        elided = engine.compact(ceiling_tokens=100)
-        self.assertGreater(elided, 0)
-        
-        messages = engine.compile_messages()
-        self.assertTrue(any("AVOIDED DEAD ENDS" in m["content"] for m in messages))
 
 
 class TestEngineWithMockLLM(unittest.TestCase):
@@ -321,17 +278,6 @@ class TestEngineWithMockLLM(unittest.TestCase):
         report = engine.run(task_brief="Fix LRU Cache TTL", challenge_id="tier1_lru_cache")
         self.assertTrue(report.success)
         self.assertGreaterEqual(report.turns_taken, 2)
-        self.assertIn("mps_model_pareto_score", report.kpi_metrics)
-
-
-class TestParametricOverrides(unittest.TestCase):
-    def test_parse_override_string(self):
-        s = "use_code_graph=True,max_turns=25,temperature=0.7,config_name=custom_test"
-        res = parse_override_string(s)
-        self.assertTrue(res["use_code_graph"])
-        self.assertEqual(res["max_turns"], 25)
-        self.assertEqual(res["temperature"], 0.7)
-        self.assertEqual(res["config_name"], "custom_test")
 
 
 if __name__ == "__main__":

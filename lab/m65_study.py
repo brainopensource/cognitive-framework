@@ -26,7 +26,9 @@ stays false unless every one of the above is satisfied.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import platform
 import subprocess
 import sys
@@ -65,7 +67,6 @@ from vanguard.packages.domain.ledger.progress import (
     fold_progress,
 )
 from vanguard.packages.ports.meta_controller import StrategyDirective
-from vanguard.packages.runtime.governance.approvals import OperatorSigner
 from vanguard.packages.runtime.meta_controller import guarded_consult
 from vanguard.packages.runtime.paired_evaluation import (
     RunMetrics,
@@ -288,6 +289,33 @@ class M65StudyReport:
         }
         body["reportDigest"] = self.report_digest or digest_of(body)
         return body
+
+    @classmethod
+    def from_dict(cls, body: Mapping[str, Any]) -> "M65StudyReport":
+        """Rebuild a report from its own serialised form.
+
+        Re-emitting evidence must never mean re-running the experiment: a study
+        rerun to repair its packaging is a different study, and silently
+        substituting it would be exactly the retrospective evidence creation the
+        milestone forbids. The stored report is the study; this reads it back.
+        """
+        discordant = body.get("discordant") or {}
+        return cls(
+            family=body.get("family") or {},
+            reduction=body.get("reduction") or {},
+            discordant_baseline_only=int(discordant.get("baselineOnly", 0)),
+            discordant_treatment_only=int(discordant.get("treatmentOnly", 0)),
+            mcnemar=body.get("mcnemar") or {},
+            effect_intervals=body.get("effectIntervals") or {},
+            noise_floor=body.get("noiseFloor"),
+            holm=body.get("holm") or {},
+            verdict=str(body.get("verdict", "")),
+            rationale=str(body.get("rationale", "")),
+            controller_enabled_by_default=bool(
+                body.get("controllerEnabledByDefault", False)),
+            regression_budget=body.get("regressionBudget"),
+            report_digest=str(body.get("reportDigest", "")),
+        )
 
 
 StudyVerdict = M65StudyReport
@@ -600,11 +628,22 @@ def _git_output(*args: str) -> str:
     ).stdout.strip()
 
 
+#: Portable run outputs live under this directory beside the bundle. The
+#: verifier resolves evidence-local refs only inside the declared artifact root.
+ARTIFACT_ROOT_NAME = "artifacts/M-6.5-attributable-paired-study"
+
+
+def _sha256_bytes(data: bytes) -> str:
+    return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
 def build_m65_evidence_envelope(
     report: M65StudyReport,
     *,
     producer_identity: str = "dev-b",
-    signer: OperatorSigner | None = None,
+    signing_key: Path | None = None,
+    key_id: str = "dev-b-evidence-1",
+    artifact_root: Path | None = None,
     repo_root: Path | None = None,
 ) -> EvidenceEnvelope:
     """Build a complete, signed `aether.evidence/1` envelope for M-6.5."""
@@ -624,22 +663,39 @@ def build_m65_evidence_envelope(
         "vanguard/packages/runtime/paired_evaluation.py",
     )
 
+    # Raw sha256 over the file bytes, declared via `scheme`. The previous
+    # `digest_of({"src": ...})` convention is one no verifier re-derives, so
+    # every material read as `undeterminable` -- an inability to observe the
+    # study, not a negative result about it.
     materials: list[Material] = []
     for rel in surface_files:
-        p = root / rel
-        if p.is_file():
+        source = root / rel
+        if source.is_file():
             materials.append(
                 Material(
                     name=rel,
-                    digest=digest_of({"src": p.read_text(encoding="utf-8")}),
+                    digest=_sha256_bytes(source.read_bytes()),
                     ref=rel,
+                    scheme="raw-sha256",
                 )
             )
 
+    # The report is a run output, not source: it did not exist at the pinned
+    # commit, so it travels with the bundle under the artifact root and is
+    # referenced there. A digest with no ref names bytes nobody can locate.
+    report_bytes = (
+        json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    report_ref = f"{ARTIFACT_ROOT_NAME}/study-report.json"
+    if artifact_root is not None:
+        artifact_root.mkdir(parents=True, exist_ok=True)
+        (artifact_root / "study-report.json").write_bytes(report_bytes)
     materials.append(
         Material(
             name="study_report",
-            digest=report.report_digest or digest_of(report.to_dict()),
+            digest=_sha256_bytes(report_bytes),
+            ref=report_ref,
+            scheme="raw-sha256",
         )
     )
 
@@ -647,6 +703,7 @@ def build_m65_evidence_envelope(
         "commit": commit,
         "tree": tree,
         "branch": branch,
+        "artifactRoot": ARTIFACT_ROOT_NAME,
         "eventSchema": "mhf.event/2",
         "trajectorySchema": "mhf.trajectory/2",
     }
@@ -673,22 +730,32 @@ def build_m65_evidence_envelope(
         pins=pins,
         environment=environment,
         outcome=outcome,
-        producer=Producer(identity=producer_identity, role="producer"),
+        producer=Producer(identity=producer_identity, key_id=key_id,
+                          role="producer"),
         detail=f"Attributable stochastic M-6.5 paired study: verdict={report.verdict}",
     )
 
-    if signer is not None:
-        return sign_evidence_envelope(envelope, signer)
+    if signing_key is not None:
+        return sign_evidence_envelope(envelope, signing_key, key_id)
     return envelope
 
 
 def sign_evidence_envelope(
     envelope: EvidenceEnvelope,
-    signer: OperatorSigner,
+    signing_key: Path,
+    key_id: str = "dev-b-evidence-1",
 ) -> EvidenceEnvelope:
-    """Sign an evidence envelope with an OperatorSigner."""
-    sig_bytes = signer._private_key.sign(envelope.signable_bytes())
-    return replace(envelope, signature=sig_bytes.hex())
+    """Sign an evidence envelope with a registered Ed25519 producer key.
+
+    Delegates to the builder's single signing implementation, which emits
+    `ed25519:<base64>`. A bare hex signature names no algorithm and the
+    independent verifier refuses it, so a study signed that way could never
+    close its own milestone however sound the experiment was.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools" / "runners"))
+    from build_evidence_bundle import sign_envelope
+
+    return sign_envelope(envelope, Path(signing_key).expanduser(), key_id)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -697,8 +764,16 @@ def main(argv: list[str] | None = None) -> int:
         # Run stochastic study directly
         print("Running attributable stochastic M-6.5 paired study (>=60 pairs)...")
         report, floor = execute_stochastic_m65_study()
-        signer = OperatorSigner(b"m65-study-operator-key-default")
-        envelope = build_m65_evidence_envelope(report, signer=signer)
+        # Deliberately unsigned unless a real key is named. Signing with a
+        # constant seed compiled into this file would produce a signature
+        # anyone could forge, which reads as authority while proving nothing;
+        # an unsigned envelope at least fails honestly at the gate.
+        key = os.environ.get("AETHER_M65_SIGNING_KEY", "")
+        envelope = build_m65_evidence_envelope(
+            report, signing_key=Path(key) if key else None)
+        if not key:
+            print("NOTE: unsigned -- set AETHER_M65_SIGNING_KEY to a registered "
+                  "producer key to emit a verifiable envelope.", file=sys.stderr)
         print(json.dumps(envelope.to_wire(), indent=2, sort_keys=True))
         print(f"\nVerdict: {report.verdict} (p={report.mcnemar.get('pValue')})")
         print(f"A/A Noise Floor: {floor.pairs} pairs, {floor.discordant} discordant ({floor.discordance_rate:.1%})")

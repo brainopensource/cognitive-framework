@@ -375,6 +375,72 @@ class VerifierFailsClosed(unittest.TestCase):
         verdict = self._verify(bundle)
         self.assertEqual(verdict.outcome, UNDETERMINABLE)
 
+    # -- the digest scheme is what makes tampering decidable ---------------
+
+    def _material_bundle(self, payload: bytes, digest: str, **material) -> dict:
+        """A bundle whose single material resolves under the artifact root."""
+        artifacts = self.tmp / "artifacts" / "TEST-01"
+        artifacts.mkdir(parents=True, exist_ok=True)
+        (artifacts / "report.json").write_bytes(payload)
+        bundle = _bundle()
+        bundle["pins"] = {**bundle["pins"], "artifactRoot": "artifacts/TEST-01"}
+        bundle["materials"] = [{
+            "name": "report",
+            "ref": "artifacts/TEST-01/report.json",
+            "digest": digest,
+            **material,
+        }]
+        return bundle
+
+    def test_a_tampered_material_under_a_declared_scheme_is_a_decidable_failure(self) -> None:
+        """Declaring `scheme` is what turns a mismatch into a negative.
+
+        The bundle says exactly how it hashed, so a verifier that re-derives a
+        different value knows the bytes changed -- it is not guessing at an
+        unfamiliar convention. That is the whole reason the field exists.
+        """
+        import hashlib
+        claimed = "sha256:" + hashlib.sha256(b'{"failures": 0}\n').hexdigest()
+        verdict = self._verify(self._material_bundle(
+            b'{"failures": 99}\n', claimed, scheme="raw-sha256"))
+        self.assertEqual(verdict.outcome, FAILED)
+        self.assertTrue(
+            any("digest mismatch" in f and "raw-sha256" in f for f in verdict.failures),
+            verdict.failures,
+        )
+
+    def test_a_material_with_no_scheme_is_undeterminable_never_passed(self) -> None:
+        """Without `scheme`, a mismatch is unreadable -- and unreadable is not a pass.
+
+        The verifier cannot tell a changed material from a hashing convention it
+        does not implement, so it must decline to decide. The repair is to
+        record the scheme, not to loosen the comparison.
+        """
+        verdict = self._verify(self._material_bundle(
+            b'{"failures": 0}\n', "sha256:" + "0" * 64))
+        self.assertEqual(verdict.outcome, UNDETERMINABLE)
+        self.assertEqual(verdict.failures, [])
+        self.assertTrue(
+            any("records no digest scheme" in u for u in verdict.unresolved),
+            verdict.unresolved,
+        )
+
+    def test_a_raw_hex_producer_signature_is_refused_not_accepted(self) -> None:
+        """The historical hex format names no algorithm, so it cannot be checked.
+
+        Every bundle signed before the producer tooling was fixed carries a bare
+        hex signature. Guessing that it is Ed25519 over the canonical body would
+        make the prefix decorative; refusing it is what forced the re-emission.
+        """
+        signed = _sign(_bundle(), self.producer_key)
+        raw = base64.b64decode(signed["signature"].removeprefix("ed25519:"))
+        verdict = self._verify({**signed, "signature": raw.hex()})
+        self.assertEqual(verdict.outcome, FAILED)
+        self.assertTrue(
+            any("unsupported signature format" in f for f in verdict.failures),
+            verdict.failures,
+        )
+
     def test_a_clean_fully_bound_bundle_passes(self) -> None:
         """Fail-closed, not closed to everything."""
         verdict = self._verify(_bundle())

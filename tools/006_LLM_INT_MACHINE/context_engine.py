@@ -1,4 +1,4 @@
-"""Context compilation, prefix caching stability, and dialogue compaction for 006_LLM_INT_MACHINE."""
+"""Context compilation, prefix caching stability, dialogue compaction, and dynamic tool pruning for 006_LLM_INT_MACHINE."""
 
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -7,8 +7,10 @@ from typing import Any, Mapping, Sequence
 
 try:
     from .config import HarnessConfig
+    from .tools import TOOL_DEFINITIONS
 except ImportError:
     from config import HarnessConfig
+    from tools import TOOL_DEFINITIONS
 
 
 class ContextLayer(str, Enum):
@@ -93,6 +95,17 @@ class ContextEngine:
     def record_dead_end(self, reason: str) -> None:
         if self.config.use_dead_ends_tracking:
             self.structured_record.dead_ends.append(reason)
+
+    def get_filtered_tools(self, phase: str = "ALL") -> list[dict[str, Any]]:
+        """Filters tool schemas based on the active turn phase to reduce prompt overhead."""
+        if phase == "LOCALIZATION":
+            allowed = {"fs_search", "fs_read", "fs_list", "code_find_definitions", "code_find_callers", "code_repo_skeleton"}
+        elif phase == "EXECUTION":
+            allowed = {"fs_read", "patch_apply", "proc_exec"}
+        else:
+            return list(TOOL_DEFINITIONS)
+            
+        return [t for t in TOOL_DEFINITIONS if t.get("function", {}).get("name") in allowed]
 
     def compact(self, ceiling_tokens: int | None = None) -> int:
         ceiling = ceiling_tokens or self.config.token_ceiling

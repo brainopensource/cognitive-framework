@@ -1,7 +1,8 @@
 """The Main Autonomous Turn Engine for 006_LLM_INT_MACHINE.
 
 Coordinates context compilation, tool execution, SBFL localization, MCTS search,
-mutation verification, KPI telemetry computation, and catalog run persistence.
+mutation verification, subagent sandboxing, hierarchical model routing, KPI telemetry computation,
+and catalog run persistence.
 """
 
 from __future__ import annotations
@@ -23,6 +24,8 @@ try:
     from .fault_localizer import SBFLEngine
     from .mcts_search import SpeculativeMCTSSearch
     from .mutation_verifier import PatchMutationVerifier
+    from .subagent_orchestrator import SubagentCoordinator, SubagentReport
+    from .hierarchical_router import HierarchicalModelRouter
     from .telemetry_kpi import AdvancedKPITelemetry
     from .catalog import RunCatalog, RunReceipt, generate_run_id
 except ImportError:
@@ -34,6 +37,8 @@ except ImportError:
     from fault_localizer import SBFLEngine
     from mcts_search import SpeculativeMCTSSearch
     from mutation_verifier import PatchMutationVerifier
+    from subagent_orchestrator import SubagentCoordinator, SubagentReport
+    from hierarchical_router import HierarchicalModelRouter
     from telemetry_kpi import AdvancedKPITelemetry
     from catalog import RunCatalog, RunReceipt, generate_run_id
 
@@ -61,6 +66,7 @@ class ExecutionReport:
     error_message: str = ""
     kpi_metrics: dict[str, Any] = field(default_factory=dict)
     turns_detail: list[dict[str, Any]] = field(default_factory=list)
+    subagent_reports: list[dict[str, Any]] = field(default_factory=list)
 
 
 DEFAULT_SYSTEM_PROMPT = """You are an expert autonomous software engineer solving a code defect.
@@ -100,6 +106,8 @@ class IntelligentMachineEngine:
             branching_factor=config.mcts_branching_factor,
             c_puct=config.mcts_exploration_c
         )
+        self.subagent_coordinator = SubagentCoordinator(self.config, self.client)
+        self.router = HierarchicalModelRouter(planner_model=config.model, worker_model=config.model)
 
     def _extract_fallback_tool_calls(self, content: str) -> list[dict[str, Any]]:
         calls: list[dict[str, Any]] = []
@@ -165,14 +173,19 @@ class IntelligentMachineEngine:
                 report.error_message = "Max API calls reached."
                 break
 
+            # Select routing model for this turn
+            phase = "LOCALIZATION" if turn_idx == 1 else "EXECUTION"
+            decision = self.router.select_model_for_turn(turn_idx, phase)
+            active_tools = context.get_filtered_tools(phase=phase if turn_idx == 1 else "ALL")
+
             messages = context.compile_messages()
             
             try:
                 resp: LLMResponse = self.client.complete(
                     messages=messages,
-                    tools=TOOL_DEFINITIONS,
-                    model=self.config.model,
-                    temperature=self.config.temperature,
+                    tools=active_tools,
+                    model=decision.selected_model,
+                    temperature=decision.temperature,
                 )
             except Exception as e:
                 report.error_message = f"LLM API Error on turn {turn_idx}: {str(e)}"
@@ -192,6 +205,8 @@ class IntelligentMachineEngine:
 
             turn_info = {
                 "turn": turn_idx,
+                "model": decision.selected_model,
+                "phase": decision.phase,
                 "content": resp.content[:200] if resp.content else "",
                 "tool_calls": len(tool_calls),
                 "tokens": resp.usage.total_tokens,
@@ -205,10 +220,12 @@ class IntelligentMachineEngine:
             if not tool_calls:
                 if self.oracle_fn and self.oracle_fn(self.workspace_dir):
                     report.success = True
+                    self.router.record_turn_outcome(True)
                     break
                 elif "complete" in resp.content.lower() or "fixed" in resp.content.lower() or turn_idx > 3:
                     if self.oracle_fn and self.oracle_fn(self.workspace_dir):
                         report.success = True
+                        self.router.record_turn_outcome(True)
                         break
 
             # Execute tool calls
@@ -238,7 +255,10 @@ class IntelligentMachineEngine:
 
             if self.oracle_fn and self.oracle_fn(self.workspace_dir):
                 report.success = True
+                self.router.record_turn_outcome(True)
                 break
+            else:
+                self.router.record_turn_outcome(False)
 
         # Check if oracle passed at the end
         if self.oracle_fn and self.oracle_fn(self.workspace_dir):
@@ -248,6 +268,12 @@ class IntelligentMachineEngine:
         report.ast_errors_prevented = self.workspace.ast_errors_caught
         report.reproducer_created = self.reproducer.state.repro_file_created
         report.git_diff_lines = self._get_git_diff_lines()
+
+        # Collect subagent reports
+        report.subagent_reports = [
+            {"id": s.subagent_id, "role": s.role, "summary": s.summary, "tokens": s.tokens_consumed}
+            for s in self.subagent_coordinator.execution_history
+        ]
 
         # If mutation testing is enabled and run succeeded, compute mutation score
         if self.config.use_mutation_testing and report.success:

@@ -32,7 +32,7 @@ from vanguard.packages.domain.evidence.envelope import (  # noqa: E402
     parse_envelope,
 )
 import verify_evidence  # noqa: E402
-from verify_evidence import _verify_signature  # noqa: E402
+from verify_evidence import verify_signature_reason  # noqa: E402
 
 
 def _envelope() -> EvidenceEnvelope:
@@ -72,7 +72,7 @@ class SignaturesAreIndependentlyReDerivable(unittest.TestCase):
             signed = sign_envelope(_envelope(), path, "producer-1")
             self.assertTrue(signed.signature.startswith("ed25519:"))
             self.assertEqual(signed.producer.key_id, "producer-1")
-            self.assertIsNone(_verify_signature(signed, public))
+            self.assertIsNone(verify_signature_reason(signed, public))
 
     def test_an_unprefixed_signature_is_refused_rather_than_guessed(self) -> None:
         """The 128-hex shape the committed bundles carry names no algorithm."""
@@ -80,7 +80,7 @@ class SignaturesAreIndependentlyReDerivable(unittest.TestCase):
             path, public = generate("producer", Path(directory) / "p.key")
             signed = sign_envelope(_envelope(), path, "producer-1")
             bare = signed.signature.removeprefix("ed25519:")
-            reason = _verify_signature(
+            reason = verify_signature_reason(
                 parse_envelope({**signed.to_wire(), "signature": bare}), public)
             self.assertIsNotNone(reason)
             self.assertIn("unsupported signature format", reason)
@@ -90,7 +90,62 @@ class SignaturesAreIndependentlyReDerivable(unittest.TestCase):
             path, _ = generate("producer", Path(directory) / "p.key")
             signed = sign_envelope(_envelope(), path, "producer-1")
             stranger = public_b64(ed25519.Ed25519PrivateKey.generate())
-            self.assertIsNotNone(_verify_signature(signed, stranger))
+            self.assertIsNotNone(verify_signature_reason(signed, stranger))
+
+
+class EverySigningPathEmitsTheSameFormat(unittest.TestCase):
+    """No producer path may emit a signature the gate cannot read.
+
+    The builder was fixed first, but `sign_evidence_bundle.py` and
+    `lab/m65_study.py` kept signing with `OperatorSigner`, whose `sign_bytes`
+    returns bare hex. Both tools self-verified happily against their own hex
+    convention while every bundle they produced read as `failed` at the gate.
+    A single correct implementation is not enough; what matters is that no
+    second one survives.
+    """
+
+    def _sign_and_check(self, signed: EvidenceEnvelope, key) -> None:
+        self.assertTrue(
+            signed.signature.startswith("ed25519:"),
+            f"signature names no algorithm: {signed.signature[:24]!r}",
+        )
+        self.assertIsNone(verify_signature_reason(signed, public_b64(key)))
+
+    def test_the_builder_signs_re_derivably(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path, _ = generate("builder-key", Path(directory) / "k.key")
+            signed = sign_envelope(_envelope(), path, "builder-key")
+            self._sign_and_check(signed, load_key(path))
+
+    def test_the_study_signs_re_derivably(self) -> None:
+        from lab.m65_study import sign_evidence_envelope
+
+        with tempfile.TemporaryDirectory() as directory:
+            path, _ = generate("study-key", Path(directory) / "k.key")
+            signed = sign_evidence_envelope(_envelope(), path, "study-key")
+            self._sign_and_check(signed, load_key(path))
+
+    def test_the_standalone_signer_signs_re_derivably(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory)
+            path, _ = generate("signer-key", work / "k.key")
+            bundle = work / "TEST-01.json"
+            bundle.write_text(
+                json.dumps(_envelope().to_wire()), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "tools/runners/sign_evidence_bundle.py",
+                 str(bundle), "--identity", "dev-b", "--key-id", "signer-key",
+                 "--producer-key", str(path)],
+                cwd=_ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            signed = parse_envelope(json.loads(bundle.read_text(encoding="utf-8")))
+            self._sign_and_check(signed, load_key(path))
+
+    def test_the_study_will_not_sign_with_a_key_baked_into_its_source(self) -> None:
+        """A constant seed in the tree is forgeable by anyone who can read it."""
+        source = (_ROOT / "lab" / "m65_study.py").read_text(encoding="utf-8")
+        self.assertNotIn("m65-study-operator-key-default", source)
 
 
 class EvidenceIsAdditive(unittest.TestCase):

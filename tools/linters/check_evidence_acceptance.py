@@ -20,7 +20,6 @@ than a gate that means something.
 from __future__ import annotations
 
 import argparse
-import base64
 import json
 import subprocess
 import sys
@@ -30,15 +29,17 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric import ed25519
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from verify_evidence import PASSED, _registered_key, verify_bundle  # noqa: E402
+from verify_evidence import (  # noqa: E402
+    PASSED,
+    _registered_key,
+    verify_bundle,
+    verify_signature_reason,
+)
 
-from vanguard.packages.domain.canonicalisation.jcs import canonical_bytes
 from vanguard.packages.domain.evidence.envelope import acceptance_defects, parse_envelope
 
 
@@ -96,14 +97,14 @@ def verify_acceptance(produced_path: Path, acceptance_path: Path) -> list[str]:
         errors.append(
             f"reviewer key {acceptance.producer.key_id or '(none)'!r} is not registered "
             f"in the verifier trust root")
-    elif not acceptance.signature.startswith("ed25519:"):
-        errors.append("unsupported acceptance signature format")
     else:
-        try:
-            public = ed25519.Ed25519PublicKey.from_public_bytes(base64.b64decode(encoded_key, validate=True))
-            public.verify(base64.b64decode(acceptance.signature.removeprefix("ed25519:"), validate=True), canonical_bytes(acceptance.body()))
-        except (ValueError, InvalidSignature) as exc:
-            errors.append(f"reviewer signature invalid: {exc}")
+        # One implementation of the signature rule, shared with the verifier.
+        # A second copy here could drift from the gate it is supposed to mirror,
+        # and a signature format the two disagree about is exactly the gap a
+        # forged bundle would be published through.
+        reason = verify_signature_reason(acceptance, encoded_key)
+        if reason:
+            errors.append(f"reviewer signature invalid: {reason}")
     return errors
 
 

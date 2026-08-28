@@ -182,8 +182,13 @@ def _registered_key(kind: str, key_id: str) -> tuple[bool, str | None]:
     return True, public if isinstance(public, str) and public else None
 
 
-def _verify_signature(envelope, public_key_b64: str | None) -> str | None:
-    """Return a failure reason, or None when the signature verifies."""
+def verify_signature_reason(envelope, public_key_b64: str | None) -> str | None:
+    """Return a failure reason, or None when the signature verifies.
+
+    Public because the acceptance gate must apply *this* rule rather than its
+    own copy of it: two implementations of "what counts as a signature" can
+    drift, and the gap between them is where an unverifiable bundle gets in.
+    """
     signature = envelope.signature
     if not signature:
         return "envelope is unsigned"
@@ -256,7 +261,7 @@ def verify_bundle(produced_path: Path) -> Verdict:
                 f"envelope signature is present but cannot be re-derived"
             )
         else:
-            reason = _verify_signature(produced, producer_public)
+            reason = verify_signature_reason(produced, producer_public)
             if reason:
                 verdict.outcome = FAILED
                 verdict.failures.append(f"producer {reason}")
@@ -439,7 +444,7 @@ def verify_bundle(produced_path: Path) -> Verdict:
                 f"registered for {reviewer_key_id!r}; the signer is not the "
                 f"registered reviewer"
             )
-        reason = _verify_signature(acceptance, reviewer_key)
+        reason = verify_signature_reason(acceptance, reviewer_key)
         if reason:
             verdict.outcome = FAILED
             verdict.failures.append(f"acceptance {reason}")

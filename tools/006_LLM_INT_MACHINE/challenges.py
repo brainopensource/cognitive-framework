@@ -1,6 +1,6 @@
-"""Standalone benchmark challenges for 006_LLM_INT_MACHINE.
+"""Standalone multi-tier benchmark challenges for 006_LLM_INT_MACHINE.
 
-Includes Tier 1, Tier 3, and Tier 5 SWE-bench challenges with zero hints in the brief
+Includes Tier 1 through Tier 8 SWE-bench challenges with zero hints in the brief
 and isolated verification oracles.
 """
 
@@ -104,6 +104,126 @@ CHALLENGES: dict[str, BenchmarkChallenge] = {
         ),
     ),
 
+    "tier2_semver_parser": BenchmarkChallenge(
+        challenge_id="tier2_semver_parser",
+        tier=2,
+        title="Strict Semantic Versioning 2.0 Parser & Numeric Identifier Comparator",
+        brief=(
+            "Fix the SemVer comparator in `semver/parser.py` and `semver/version.py`. "
+            "According to SemVer 2.0.0 specification (Clause 11), pre-release identifiers consisting of only digits "
+            "must be compared numerically rather than as lexical strings (e.g., `1.0.0-alpha.2` < `1.0.0-alpha.10`). "
+            "Build metadata (`+build.1`) must be parsed but ignored during version precedence comparisons."
+        ),
+        files={
+            "semver/__init__.py": "from .version import Version\n__all__ = ['Version']\n",
+            "semver/version.py": (
+                "from dataclasses import dataclass\n"
+                "from typing import Tuple, Optional\n\n"
+                "@dataclass(frozen=True)\n"
+                "class Version:\n"
+                "    major: int\n"
+                "    minor: int\n"
+                "    patch: int\n"
+                "    prerelease: Tuple[str, ...] = ()\n"
+                "    build: Tuple[str, ...] = ()\n\n"
+                "    def __lt__(self, other: 'Version') -> bool:\n"
+                "        if (self.major, self.minor, self.patch) != (other.major, other.minor, other.patch):\n"
+                "            return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)\n"
+                "        if not self.prerelease and other.prerelease:\n"
+                "            return False\n"
+                "        if self.prerelease and not other.prerelease:\n"
+                "            return True\n"
+                "        # BUG: Lexical string comparison on prerelease tuples fails numeric ordering\n"
+                "        return self.prerelease < other.prerelease\n\n"
+                "    def __eq__(self, other: object) -> bool:\n"
+                "        if not isinstance(other, Version):\n"
+                "            return False\n"
+                "        return (self.major, self.minor, self.patch, self.prerelease) == (other.major, other.minor, other.patch, other.prerelease)\n"
+            ),
+            "semver/parser.py": (
+                "import re\n"
+                "from .version import Version\n\n"
+                "def parse_version(v_str: str) -> Version:\n"
+                "    pattern = r'^(\\d+)\\.(\\d+)\\.(\\d+)(?:-([0-9A-Za-z.-]+))?(?:\\+([0-9A-Za-z.-]+))?$'\n"
+                "    m = re.match(pattern, v_str.strip())\n"
+                "    if not m:\n"
+                "        raise ValueError(f'Invalid SemVer: {v_str}')\n"
+                "    major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))\n"
+                "    prerelease = tuple(m.group(4).split('.')) if m.group(4) else ()\n"
+                "    build = tuple(m.group(5).split('.')) if m.group(5) else ()\n"
+                "    return Version(major, minor, patch, prerelease, build)\n"
+            ),
+        },
+        oracle_test_code=(
+            "import unittest\n"
+            "from semver.parser import parse_version\n\n"
+            "class TestSemVerComparator(unittest.TestCase):\n"
+            "    def test_numeric_prerelease_and_build_metadata(self):\n"
+            "        v_alpha2 = parse_version('1.0.0-alpha.2')\n"
+            "        v_alpha10 = parse_version('1.0.0-alpha.10')\n"
+            "        self.assertTrue(v_alpha2 < v_alpha10, 'alpha.2 must be strictly less than alpha.10 numerically')\n"
+            "        \n"
+            "        v1 = parse_version('1.0.0-alpha+001')\n"
+            "        v2 = parse_version('1.0.0-alpha+002')\n"
+            "        self.assertEqual(v1, v2, 'Build metadata must not affect version equality')\n"
+            "        self.assertFalse(v1 < v2)\n\n"
+            "if __name__ == '__main__':\n"
+            "    unittest.main()\n"
+        ),
+    ),
+
+    "tier3_token_bucket": BenchmarkChallenge(
+        challenge_id="tier3_token_bucket",
+        tier=3,
+        title="Thread-Safe Distributed Token Bucket Rate Limiter",
+        brief=(
+            "Fix the token refill calculation in `ratelimit/bucket.py`. "
+            "Tokens must replenish smoothly using floating-point fractional time elapsed instead of integer truncation. "
+            "`consume()` must be thread-safe and return True only when sufficient tokens are available."
+        ),
+        files={
+            "ratelimit/__init__.py": "from .bucket import TokenBucket\n__all__ = ['TokenBucket']\n",
+            "ratelimit/bucket.py": (
+                "import time\n"
+                "import threading\n\n"
+                "class TokenBucket:\n"
+                "    def __init__(self, capacity: float, refill_rate_per_sec: float):\n"
+                "        self.capacity = float(capacity)\n"
+                "        self.rate = float(refill_rate_per_sec)\n"
+                "        self.tokens = float(capacity)\n"
+                "        self.last_refill = time.monotonic()\n"
+                "        self._lock = threading.Lock()\n\n"
+                "    def _refill(self, now: float) -> None:\n"
+                "        elapsed = now - self.last_refill\n"
+                "        # BUG: Truncates elapsed time to int, starving fast sub-second consumers\n"
+                "        added_tokens = int(elapsed) * self.rate\n"
+                "        self.tokens = min(self.capacity, self.tokens + added_tokens)\n"
+                "        self.last_refill = now\n\n"
+                "    def consume(self, amount: float = 1.0) -> bool:\n"
+                "        with self._lock:\n"
+                "            now = time.monotonic()\n"
+                "            self._refill(now)\n"
+                "            if self.tokens >= amount:\n"
+                "                self.tokens -= amount\n"
+                "                return True\n"
+                "            return False\n"
+            ),
+        },
+        oracle_test_code=(
+            "import unittest, time\n"
+            "from ratelimit.bucket import TokenBucket\n\n"
+            "class TestTokenBucket(unittest.TestCase):\n"
+            "    def test_smooth_fractional_refill(self):\n"
+            "        bucket = TokenBucket(capacity=10.0, refill_rate_per_sec=20.0)\n"
+            "        self.assertTrue(bucket.consume(10.0), 'Initial burst should succeed')\n"
+            "        self.assertFalse(bucket.consume(1.0), 'Empty bucket should reject immediate request')\n"
+            "        time.sleep(0.06)\n"
+            "        self.assertTrue(bucket.consume(1.0), 'Fractional refill should permit 1 token after 60ms')\n\n"
+            "if __name__ == '__main__':\n"
+            "    unittest.main()\n"
+        ),
+    ),
+
     "tier5_datalog_engine": BenchmarkChallenge(
         challenge_id="tier5_datalog_engine",
         tier=5,
@@ -191,7 +311,6 @@ CHALLENGES: dict[str, BenchmarkChallenge] = {
                 "        for fact in facts:\n"
                 "            unified = unify_atom(first, fact, env)\n"
                 "            if unified is not None:\n"
-                "                # BUG: Passes original 'env' instead of new 'unified' bindings\n"
                 "                results.extend(self._eval_body(rest, facts, env))\n"
                 "        return results\n"
             ),
@@ -203,17 +322,14 @@ CHALLENGES: dict[str, BenchmarkChallenge] = {
             "class TestDatalogEngine(unittest.TestCase):\n"
             "    def test_transitive_closure_multi_clause(self):\n"
             "        engine = DatalogEngine()\n"
-            "        # Facts: parent(alice, bob), parent(bob, charlie), parent(charlie, david)\n"
             "        engine.add_fact(Atom('parent', (Term('alice', False), Term('bob', False))))\n"
             "        engine.add_fact(Atom('parent', (Term('bob', False), Term('charlie', False))))\n"
             "        engine.add_fact(Atom('parent', (Term('charlie', False), Term('david', False))))\n"
             "        \n"
-            "        # Rule 1: ancestor(X, Y) :- parent(X, Y)\n"
             "        engine.add_rule(Rule(\n"
             "            head=Atom('ancestor', (Term('X', True), Term('Y', True))),\n"
             "            body=(Atom('parent', (Term('X', True), Term('Y', True))),)\n"
             "        ))\n"
-            "        # Rule 2: ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z)\n"
             "        engine.add_rule(Rule(\n"
             "            head=Atom('ancestor', (Term('X', True), Term('Z', True))),\n"
             "            body=(\n"
@@ -224,6 +340,216 @@ CHALLENGES: dict[str, BenchmarkChallenge] = {
             "        derived = engine.evaluate()\n"
             "        expected_ancestor = Atom('ancestor', (Term('alice', False), Term('david', False)))\n"
             "        self.assertIn(expected_ancestor, derived, 'Should deduce ancestor(alice, david)')\n\n"
+            "if __name__ == '__main__':\n"
+            "    unittest.main()\n"
+        ),
+    ),
+
+    "tier6_raft_consensus": BenchmarkChallenge(
+        challenge_id="tier6_raft_consensus",
+        tier=6,
+        title="Distributed Raft Consensus Protocol: Split-Vote & Term Election State Machine",
+        brief=(
+            "Fix the Raft election term management and vote tallying in `raft/node.py` and `raft/election.py`. "
+            "When starting an election, a candidate must increment `current_term`, vote for itself, and collect votes. "
+            "If a node receives an RPC with `term > current_term`, it must transition to Follower and update its term."
+        ),
+        files={
+            "raft/__init__.py": "from .node import RaftNode, NodeRole\n__all__ = ['RaftNode', 'NodeRole']\n",
+            "raft/election.py": (
+                "from dataclasses import dataclass\n"
+                "from typing import Optional\n\n"
+                "@dataclass\n"
+                "class RequestVoteArgs:\n"
+                "    term: int\n"
+                "    candidate_id: str\n"
+                "    last_log_index: int\n"
+                "    last_log_term: int\n\n"
+                "@dataclass\n"
+                "class RequestVoteReply:\n"
+                "    term: int\n"
+                "    vote_granted: bool\n"
+            ),
+            "raft/node.py": (
+                "from enum import Enum\n"
+                "from typing import Optional, Set\n"
+                "from .election import RequestVoteArgs, RequestVoteReply\n\n"
+                "class NodeRole(Enum):\n"
+                "    FOLLOWER = 'follower'\n"
+                "    CANDIDATE = 'candidate'\n"
+                "    LEADER = 'leader'\n\n"
+                "class RaftNode:\n"
+                "    def __init__(self, node_id: str, peers: list[str]):\n"
+                "        self.node_id = node_id\n"
+                "        self.peers = peers\n"
+                "        self.current_term = 0\n"
+                "        self.voted_for: Optional[str] = None\n"
+                "        self.role = NodeRole.FOLLOWER\n"
+                "        self.votes_received: Set[str] = set()\n\n"
+                "    def start_election(self) -> None:\n"
+                "        self.role = NodeRole.CANDIDATE\n"
+                "        # BUG: Fails to increment current_term before requesting votes\n"
+                "        self.voted_for = self.node_id\n"
+                "        self.votes_received = {self.node_id}\n\n"
+                "    def handle_request_vote(self, args: RequestVoteArgs) -> RequestVoteReply:\n"
+                "        if args.term > self.current_term:\n"
+                "            self.current_term = args.term\n"
+                "            self.role = NodeRole.FOLLOWER\n"
+                "            self.voted_for = None\n\n"
+                "        can_vote = (self.voted_for is None or self.voted_for == args.candidate_id)\n"
+                "        if args.term == self.current_term and can_vote:\n"
+                "            self.voted_for = args.candidate_id\n"
+                "            return RequestVoteReply(term=self.current_term, vote_granted=True)\n"
+                "        return RequestVoteReply(term=self.current_term, vote_granted=False)\n\n"
+                "    def check_election_quorum(self) -> bool:\n"
+                "        total_nodes = len(self.peers) + 1\n"
+                "        quorum = (total_nodes // 2) + 1\n"
+                "        if len(self.votes_received) >= quorum and self.role == NodeRole.CANDIDATE:\n"
+                "            self.role = NodeRole.LEADER\n"
+                "            return True\n"
+                "        return False\n"
+            ),
+        },
+        oracle_test_code=(
+            "import unittest\n"
+            "from raft.node import RaftNode, NodeRole\n"
+            "from raft.election import RequestVoteArgs\n\n"
+            "class TestRaftConsensus(unittest.TestCase):\n"
+            "    def test_election_term_increment_and_quorum(self):\n"
+            "        n1 = RaftNode('n1', peers=['n2', 'n3'])\n"
+            "        self.assertEqual(n1.current_term, 0)\n"
+            "        n1.start_election()\n"
+            "        self.assertEqual(n1.current_term, 1, 'Starting election must increment current_term to 1')\n"
+            "        self.assertEqual(n1.role, NodeRole.CANDIDATE)\n"
+            "        \n"
+            "        # n2 votes for n1\n"
+            "        n1.votes_received.add('n2')\n"
+            "        self.assertTrue(n1.check_election_quorum(), '2/3 votes must achieve quorum and elect leader')\n"
+            "        self.assertEqual(n1.role, NodeRole.LEADER)\n\n"
+            "if __name__ == '__main__':\n"
+            "    unittest.main()\n"
+        ),
+    ),
+
+    "tier7_mvcc_storage": BenchmarkChallenge(
+        challenge_id="tier7_mvcc_storage",
+        tier=7,
+        title="Multi-Version Concurrency Control (MVCC) Transactional Storage Engine",
+        brief=(
+            "Fix the snapshot isolation and version chain traversal in `mvcc/engine.py` and `mvcc/transaction.py`. "
+            "A transaction must only read the latest version of a record committed before its `read_timestamp`."
+        ),
+        files={
+            "mvcc/__init__.py": "from .engine import MVCCStorage\n__all__ = ['MVCCStorage']\n",
+            "mvcc/version.py": (
+                "from dataclasses import dataclass\n"
+                "from typing import Any, Optional\n\n"
+                "@dataclass\n"
+                "class RecordVersion:\n"
+                "    value: Any\n"
+                "    created_txn_id: int\n"
+                "    deleted_txn_id: Optional[int] = None\n"
+                "    prev: Optional['RecordVersion'] = None\n"
+            ),
+            "mvcc/engine.py": (
+                "from typing import Dict, Optional, Any\n"
+                "from .version import RecordVersion\n\n"
+                "class MVCCStorage:\n"
+                "    def __init__(self):\n"
+                "        self._records: Dict[str, RecordVersion] = {}\n"
+                "        self._txn_counter = 0\n"
+                "        self._committed_txns: set[int] = set()\n\n"
+                "    def begin_transaction(self) -> int:\n"
+                "        self._txn_counter += 1\n"
+                "        return self._txn_counter\n\n"
+                "    def commit_transaction(self, txn_id: int) -> None:\n"
+                "        self._committed_txns.add(txn_id)\n\n"
+                "    def write(self, key: str, value: Any, txn_id: int) -> None:\n"
+                "        prev_ver = self._records.get(key)\n"
+                "        new_ver = RecordVersion(value=value, created_txn_id=txn_id, prev=prev_ver)\n"
+                "        self._records[key] = new_ver\n\n"
+                "    def read(self, key: str, txn_read_ts: int) -> Optional[Any]:\n"
+                "        ver = self._records.get(key)\n"
+                "        while ver is not None:\n"
+                "            # BUG: Reads uncommitted version if created_txn_id <= txn_read_ts\n"
+                "            if ver.created_txn_id <= txn_read_ts:\n"
+                "                return ver.value\n"
+                "            ver = ver.prev\n"
+                "        return None\n"
+            ),
+        },
+        oracle_test_code=(
+            "import unittest\n"
+            "from mvcc.engine import MVCCStorage\n\n"
+            "class TestMVCCSnapshotIsolation(unittest.TestCase):\n"
+            "    def test_uncommitted_read_isolation(self):\n"
+            "        store = MVCCStorage()\n"
+            "        t1 = store.begin_transaction()\n"
+            "        store.write('balance', 100, t1)\n"
+            "        store.commit_transaction(t1)\n"
+            "        \n"
+            "        t2 = store.begin_transaction()\n"
+            "        store.write('balance', 200, t2) # Uncommitted write in t2\n"
+            "        \n"
+            "        t3 = store.begin_transaction() # t3 reads snapshot\n"
+            "        val = store.read('balance', txn_read_ts=t3)\n"
+            "        self.assertEqual(val, 100, 't3 must read committed version 100, not uncommitted 200 from t2')\n\n"
+            "if __name__ == '__main__':\n"
+            "    unittest.main()\n"
+        ),
+    ),
+
+    "tier8_ast_compiler": BenchmarkChallenge(
+        challenge_id="tier8_ast_compiler",
+        tier=8,
+        title="Multi-Pass AST Optimizing Compiler: Common Subexpression Elimination (CSE)",
+        brief=(
+            "Fix the Common Subexpression Elimination pass in `compiler/optimizer.py`. "
+            "Expressions containing side-effecting function calls (e.g. `print()`, `rand()`) must not be eliminated or cached."
+        ),
+        files={
+            "compiler/__init__.py": "from .optimizer import ASTOptimizer\n__all__ = ['ASTOptimizer']\n",
+            "compiler/ast_nodes.py": (
+                "from dataclasses import dataclass\n"
+                "from typing import Sequence\n\n"
+                "@dataclass\n"
+                "class ExprNode:\n"
+                "    op: str\n"
+                "    args: tuple[str, ...]\n"
+                "    is_pure: bool = True\n"
+            ),
+            "compiler/optimizer.py": (
+                "from typing import Dict, List\n"
+                "from .ast_nodes import ExprNode\n\n"
+                "class ASTOptimizer:\n"
+                "    def optimize_cse(self, instructions: List[ExprNode]) -> List[ExprNode]:\n"
+                "        seen_exprs: Dict[tuple[str, tuple[str, ...]], ExprNode] = {}\n"
+                "        optimized: List[ExprNode] = []\n"
+                "        for expr in instructions:\n"
+                "            key = (expr.op, expr.args)\n"
+                "            # BUG: Eliminates non-pure expressions indiscriminately\n"
+                "            if key in seen_exprs:\n"
+                "                continue\n"
+                "            seen_exprs[key] = expr\n"
+                "            optimized.append(expr)\n"
+                "        return optimized\n"
+            ),
+        },
+        oracle_test_code=(
+            "import unittest\n"
+            "from compiler.ast_nodes import ExprNode\n"
+            "from compiler.optimizer import ASTOptimizer\n\n"
+            "class TestASTOptimizer(unittest.TestCase):\n"
+            "    def test_cse_preserves_side_effects(self):\n"
+            "        opt = ASTOptimizer()\n"
+            "        pure_1 = ExprNode(op='add', args=('x', 'y'), is_pure=True)\n"
+            "        pure_2 = ExprNode(op='add', args=('x', 'y'), is_pure=True)\n"
+            "        impure_1 = ExprNode(op='call', args=('rand',), is_pure=False)\n"
+            "        impure_2 = ExprNode(op='call', args=('rand',), is_pure=False)\n"
+            "        \n"
+            "        result = opt.optimize_cse([pure_1, pure_2, impure_1, impure_2])\n"
+            "        self.assertEqual(len(result), 3, 'Pure duplicate should be removed, but impure duplicate preserved')\n"
+            "        self.assertEqual([r.op for r in result], ['add', 'call', 'call'])\n\n"
             "if __name__ == '__main__':\n"
             "    unittest.main()\n"
         ),

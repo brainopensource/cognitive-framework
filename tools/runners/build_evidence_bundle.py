@@ -30,7 +30,6 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from tools.runners.keygen_evidence_key import load_key  # noqa: E402
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore  # noqa: E402
-from vanguard.packages.domain.canonicalisation.digest import digest_of  # noqa: E402
 from vanguard.packages.domain.evidence.envelope import (  # noqa: E402
     EvidenceEnvelope,
     Material,
@@ -366,10 +365,21 @@ def build_m6(
     )
 
 
-def build_m5b(producer: str) -> EvidenceEnvelope:
-    """M-5b formal generality evidence over graph-coloring domain and baseline forensics."""
+def build_m5b(producer: str, *, subject_root: Path = _REPO_ROOT) -> EvidenceEnvelope:
+    """M-5b formal generality evidence over graph-coloring domain and baseline forensics.
+
+    Materials are hashed from ``subject_root`` -- the pinned worktree, not the
+    current checkout. Hashing the checkout while pinning a worktree commit would
+    bind the claim to bytes the pinned tree never contained, which is the
+    substitution the verifier's artifact fence exists to prevent.
+
+    Digests are raw sha256 over the file bytes and say so via ``scheme``. The
+    previous ``digest_of({"src": ...})`` convention is one no verifier
+    re-derives, so every material resolved as `undeterminable` -- not a negative
+    result about the study, but an inability to observe it at all.
+    """
     surface = {
-        name: digest_of({"src": (_REPO_ROOT / name).read_text(encoding="utf-8")})
+        name: _sha256_file(subject_root / name)
         for name in (
             "packs/formal-graph-coloring/manifest.json",
             "packs/formal-graph-coloring/tasks/registry.json",
@@ -391,7 +401,7 @@ def build_m5b(producer: str) -> EvidenceEnvelope:
         protocol="aether.m5b.formal-generality-proof/1",
         subjects=("package:WP-B1", "milestone:M-5b", "milestone:M-5a"),
         materials=tuple(
-            Material(name=name, digest=digest, ref=name)
+            Material(name=name, digest=digest, ref=name, scheme="raw-sha256")
             for name, digest in sorted(surface.items())
         ),
         run={
@@ -422,7 +432,7 @@ def build_m5b(producer: str) -> EvidenceEnvelope:
                 "leaks": [],
             },
         },
-        pins=_pins(),
+        pins=_pins(subject_root),
         environment=_environment(),
         outcome="undeterminable",
         producer=Producer(identity=producer, key_id=f"{producer}-key"),
@@ -434,6 +444,31 @@ def build_m5b(producer: str) -> EvidenceEnvelope:
     )
 
     return envelope
+
+
+def build_m65(
+    producer: str, source_bundle: Path, *,
+    subject_root: Path = _REPO_ROOT, evidence_root: Path | None = None,
+) -> EvidenceEnvelope:
+    """Re-emit M-6.5 from an existing study report, without re-running it.
+
+    The study itself was accepted; what failed was observability -- materials
+    hashed under a convention no verifier re-derives, and a report with no ref.
+    Re-running the experiment to repair packaging would substitute a *different*
+    study for the accepted one, so the stored report is read back verbatim.
+    """
+    sys.path.insert(0, str(_REPO_ROOT))
+    from lab.m65_study import M65StudyReport, build_m65_evidence_envelope
+
+    wire = json.loads(source_bundle.read_text(encoding="utf-8"))
+    report = M65StudyReport.from_dict(wire["run"]["report"])
+    artifacts = None
+    if evidence_root is not None:
+        artifacts = evidence_root / "artifacts" / "M-6.5-attributable-paired-study"
+    return build_m65_evidence_envelope(
+        report, producer_identity=producer, repo_root=subject_root,
+        artifact_root=artifacts,
+    )
 
 
 def sign_envelope(
@@ -464,7 +499,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cold-verify", type=str, default="",
                         help="internal fresh-process ledger reconstruction mode")
-    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b"), default="")
+    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b", "M-6.5"),
+                        default="")
     parser.add_argument("--ledger", type=str, default="")
     parser.add_argument("--prereg", type=str, default="")
     parser.add_argument("--subject-root", type=str, default=str(_REPO_ROOT))
@@ -473,6 +509,8 @@ def main() -> int:
     parser.add_argument("--artifact-name", type=str, default="",
                         help="candidate-specific artifact directory name")
     parser.add_argument("--report", type=str, default="")
+    parser.add_argument("--from-bundle", type=str, default="",
+                        help="M-6.5: existing bundle whose study report is re-emitted")
     parser.add_argument("--producer", type=str, default="dev-a")
     parser.add_argument("--out", type=str, default="")
     parser.add_argument("--label", type=str, default="order9",
@@ -511,7 +549,15 @@ def main() -> int:
         envelope = build_m6(args.producer, report, subject_root=subject_root,
                             evidence_root=evidence_root, label=args.label)
     elif args.claim == "M-5b":
-        envelope = build_m5b(args.producer)
+        envelope = build_m5b(args.producer, subject_root=subject_root)
+    elif args.claim == "M-6.5":
+        if not args.from_bundle:
+            raise SystemExit(
+                "M-6.5 requires --from-bundle: the accepted study is re-emitted, "
+                "never re-run")
+        envelope = build_m65(
+            args.producer, Path(args.from_bundle).resolve(),
+            subject_root=subject_root, evidence_root=evidence_root)
 
     if args.producer_key:
         envelope = sign_envelope(

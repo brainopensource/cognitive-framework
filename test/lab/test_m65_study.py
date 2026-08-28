@@ -282,19 +282,33 @@ class TheStochasticStudyMeetsAllMilestoneRequirements(unittest.TestCase):
 
 class EvidenceEnvelopeIsSignedAndAttributable(unittest.TestCase):
     def test_evidence_envelope_builds_and_signs_properly(self) -> None:
+        import tempfile
+        from pathlib import Path as _Path
+
         from lab.m65_study import build_m65_evidence_envelope, execute_stochastic_m65_study
         from vanguard.packages.domain.evidence.envelope import parse_envelope
-        from vanguard.packages.runtime.governance.approvals import OperatorSigner
+        from tools.runners.keygen_evidence_key import generate, public_b64, load_key
 
         report, _ = execute_stochastic_m65_study()
-        signer = OperatorSigner(b"m65-unit-test-signing-key")
-        envelope = build_m65_evidence_envelope(report, signer=signer)
+        directory = self.enterContext(tempfile.TemporaryDirectory())
+        key_path, _ = generate("m65-unit-test", _Path(directory) / "k.key")
+        envelope = build_m65_evidence_envelope(
+            report, signing_key=key_path, key_id="m65-unit-test")
 
         self.assertEqual(envelope.claim, "M-6.5")
         self.assertEqual(envelope.protocol, "aether.m65.attributable-paired-study/1")
         self.assertIn("package:WP-B2", envelope.subjects)
-        self.assertTrue(envelope.signature)
-        self.assertTrue(len(envelope.signature) >= 64)
+        # The contract is not "a long string": it is a signature the independent
+        # verifier can re-derive. A bare hex blob satisfies the length check and
+        # still fails the gate, which is how the old signing path went unnoticed.
+        import sys as _sys
+        _root = _Path(__file__).resolve().parents[2]
+        _sys.path.insert(0, str(_root / "tools" / "linters"))
+        from verify_evidence import verify_signature_reason
+
+        self.assertTrue(envelope.signature.startswith("ed25519:"))
+        self.assertIsNone(
+            verify_signature_reason(envelope, public_b64(load_key(key_path))))
 
         # Roundtrip parse
         wire = envelope.to_wire()

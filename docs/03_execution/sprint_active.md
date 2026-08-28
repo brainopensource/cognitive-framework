@@ -34,7 +34,7 @@ no person, committee, or process approval is an entry dependency.
 | Lane | Package | Contract | Baseline | State | Completion predicate | Next |
 |---|---|---|---|---|---|---|
 | Lane A | WP-A4 | `1.0.0` | `5f5f1c6` | **PACKAGE_READY** | `tests_pass AND m6_order9_evidence_verified AND rf95_order9_evidence_verified AND portable_artifacts AND clean_subject` | RF-95 live rerun with external provider reachability |
-| Lane B | WP-B2 | `1.0.0` | `662c80d` | **PACKAGE_READY** | `frozen_contract_data_ships_whole AND canonicalisation_triples_verify_from_installed_wheel AND evidence_verifier_falsifiers_pass AND order9_bundles_verified_by_independent_instrument AND acceptance_authority_is_registered_outside_the_document` | WP-B3 (blocked on M-4 re-execution and a registered acceptance authority) |
+| Lane B | WP-B2 | `1.0.0` | `3e8b081` | **PACKAGE_READY** | `evidence_verifier_falsifiers_pass AND acceptance_authority_is_registered_outside_the_document AND producer_signatures_are_re_derivable AND m6_verified_green_from_a_clean_subject` | WP-B3 (blocked on M-4 re-execution and on Lane A registering a producer key) |
 
 ## Package state ledger
 
@@ -52,6 +52,36 @@ The ledger mirrors the stable backlog and makes state drift mechanically detecta
 | WP-B4 | Lane B | **NOT_STARTED** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
 | WP-C1 | Lane A | **PACKAGE_READY** | `adr_0062 AND adr_0089 AND adr_0101` | `trust_spine_and_single_writer_receipts_resolve` |
 
+## Evidence signing and acceptance protocol
+
+Every bundle is judged by `tools/linters/verify_evidence.py`, which re-derives
+each judgement from bytes and answers `passed`, `failed` or `undeterminable`.
+The three are not interchangeable, and `undeterminable` never satisfies a
+predicate.
+
+- **Keys live outside the repository.** `tools/runners/keygen_evidence_key.py`
+  writes a 0600 Ed25519 key under `~/.aether/keys/` and prints its public half.
+  A key readable from the tree is not an authority.
+- **Authorities are registered, not self-declared.**
+  `tools/linters/evidence_trust_root.json` names every accepted producer and
+  reviewer key. A key that first appears inside the document it authenticates
+  proves nothing, so an unregistered signer is `undeterminable` and a registered
+  key id signed by a different key `failed`.
+- **Signatures are `ed25519:<base64>`.** An unprefixed signature names no
+  algorithm; the verifier refuses formats it cannot identify rather than
+  guessing.
+- **Materials declare their digest scheme.** Without `scheme`, a re-derived
+  mismatch cannot be told from an unknown hashing convention, so it can only be
+  `undeterminable`. With it, tampering is a decidable failure.
+- **Evidence is additive.** Bundles are never overwritten; a re-execution is
+  published under a new label. `check_evidence_acceptance.py` marks the earlier
+  bundle *superseded* only when the successor verifies green and pins a
+  descendant commit.
+- **One command does all of it:** `tools/runners/publish_evidence.py` builds
+  from a throwaway worktree at a pinned commit so the subject stays clean,
+  signs, has a registered reviewer accept, and re-verifies before anything
+  lands.
+
 ## Milestone predicates
 
 Milestone acceptance is derived from digest-addressed evidence, not package presence or process status.
@@ -65,6 +95,14 @@ Milestone acceptance is derived from digest-addressed evidence, not package pres
 | M-6.5 | `valid_paired_study_disposition_verified` |
 | M-7 | `three_topologies_verified AND adr_0099_disposition_verified` |
 | M-8 | `durable_memory_and_signed_rollback_verified` |
+
+### Verified milestone evidence
+
+| Milestone | Verifier verdict | Bundle |
+|---|---|---|
+| M-6 | `passed` | `M-6-canonical-recursion-order10` — 57 falsifiers in a fresh process, depth 3, kill-tree; clean subject `3e8b081`, signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`. Supersedes `M-6-canonical-recursion` and `-order9`, both of which stay on record as `undeterminable`. |
+| M-4 | `failed` | `M-4-rf95-candidate-05` is substantively sound — clean subject, materials resolve, cold reconstruction present — and fails only on an unverifiable producer signature and an unregistered reviewer key. Rebuilding it through `publish_evidence.py` with a registered key verifies green. |
+| M-5b, M-6.5 | `undeterminable` | Materials record no digest scheme, so their integrity cannot be re-derived. Re-emitting through the current builder closes this without re-running the studies. |
 
 ## Delivery rules
 

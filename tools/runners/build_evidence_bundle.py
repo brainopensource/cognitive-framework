@@ -148,7 +148,8 @@ def _copy_material(
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(path.read_bytes())
             ref = destination.relative_to(evidence_root.resolve()).as_posix()
-    return Material(name=name, digest=_sha256_file(path), ref=ref)
+    return Material(name=name, digest=_sha256_file(path), ref=ref,
+                    scheme="raw-sha256")
 
 
 def _write_json_material(path: Path, value: Any) -> None:
@@ -325,10 +326,12 @@ def build_m6(
     report_path = artifact_dir / "falsifier-report.json"
     _write_json_material(report_path, falsifier_report)
     materials = tuple(
-        Material(name=name, digest=digest, ref=surface_paths[name])
+        Material(name=name, digest=digest, ref=surface_paths[name],
+                 scheme="raw-sha256")
         for name, digest in sorted(surface.items())
     ) + (Material(name="falsifier_report", digest=_sha256_file(report_path),
-                  ref=f"artifacts/{bundle_name}/falsifier-report.json"),)
+                  ref=f"artifacts/{bundle_name}/falsifier-report.json",
+                  scheme="raw-sha256"),)
     pins = _pins(subject_root)
     pins.update({
         "runtimeDigest": _sha256_file(subject_root / "vanguard/packages/runtime/root.py"),

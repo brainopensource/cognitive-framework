@@ -78,7 +78,7 @@ def build_repo() -> Path:
     return path
 
 
-def tests_pass(repo: Path) -> bool:
+def repo_tests_pass(repo: Path) -> bool:
     completed = subprocess.run(
         ["python3", "-m", "unittest", "discover", "-s", str(repo), "-t", str(repo)],
         capture_output=True,
@@ -108,7 +108,7 @@ class SuiteVerifier:
 
     def evaluate(self, run_ref, protocol):
         self.calls.append(run_ref)
-        green = tests_pass(self._repo)
+        green = repo_tests_pass(self._repo)
         return Result.success(
             Verdict(
                 outcome="claims",
@@ -192,7 +192,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         result = self._execute_pack("vg-code-default", script)
         self.assertEqual(result.harness, "vg-code-default")
         self.assertEqual(result.terminal, RunTermination.COMPLETED)
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
         self.assertTrue(result.verdict.claims[0]["holds"])
 
     def test_vg_code_claude_shaped_cassette(self) -> None:
@@ -216,7 +216,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         result = self._execute_pack("vg-code-claude-shaped", script)
         self.assertEqual(result.harness, "vg-code-claude-shaped")
         self.assertEqual(result.terminal, RunTermination.COMPLETED)
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
         self.assertTrue(result.verdict.claims[0]["holds"])
 
     def test_vg_code_opencode_shaped_cassette(self) -> None:
@@ -240,7 +240,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         result = self._execute_pack("vg-code-opencode-shaped", script)
         self.assertEqual(result.harness, "vg-code-opencode-shaped")
         self.assertEqual(result.terminal, RunTermination.COMPLETED)
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
         self.assertTrue(result.verdict.claims[0]["holds"])
 
     def test_vg_code_swe_mini_cassette(self) -> None:
@@ -264,7 +264,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         result = self._execute_pack("vg-code-swe-mini", script)
         self.assertEqual(result.harness, "vg-code-swe-mini")
         self.assertEqual(result.terminal, RunTermination.COMPLETED)
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
         self.assertTrue(result.verdict.claims[0]["holds"])
 
     def test_vg_shell_only_cassette(self) -> None:
@@ -284,7 +284,7 @@ class ReconstructionPacksIntegration(unittest.TestCase):
         result = self._execute_pack("vg-shell-only", script)
         self.assertEqual(result.harness, "vg-shell-only")
         self.assertEqual(result.terminal, RunTermination.COMPLETED)
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
         self.assertTrue(result.verdict.claims[0]["holds"])
 
 

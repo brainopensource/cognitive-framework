@@ -65,12 +65,20 @@ class Material:
 
     `digest` is the identity; `ref` says where the bytes live. A material
     without a digest is a filename, and a filename is not evidence.
+
+    `scheme` names how the digest was computed. Without it a verifier that
+    re-derives a different value cannot tell a changed material from a hashing
+    convention it does not know, so it must answer `undeterminable` -- and
+    `undeterminable` never satisfies a predicate. Declaring the scheme is what
+    turns a mismatch into a decidable negative. The field is optional so that
+    envelopes written before it remain readable.
     """
 
     name: str
     digest: str
     ref: str = ""
     media_type: str = ""
+    scheme: str = ""
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -85,6 +93,8 @@ class Material:
             wire["ref"] = self.ref
         if self.media_type:
             wire["mediaType"] = self.media_type
+        if self.scheme:
+            wire["scheme"] = self.scheme
         return wire
 
 
@@ -205,6 +215,7 @@ def parse_envelope(wire: Mapping[str, Any]) -> EvidenceEnvelope:
                 digest=str(m.get("digest") or ""),
                 ref=str(m.get("ref") or ""),
                 media_type=str(m.get("mediaType") or ""),
+                scheme=str(m.get("scheme") or ""),
             )
             for m in (wire.get("materials") or ())
         ),

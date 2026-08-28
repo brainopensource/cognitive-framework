@@ -52,13 +52,32 @@ class SupersessionRequiresAGreenDescendant(unittest.TestCase):
         }
 
     def test_an_open_milestone_is_not_superseded_by_anything(self) -> None:
-        """M-4 and M-5b have no green successor, so they stay failures."""
+        """M-5b has no green successor yet, so it stays a failure.
+
+        M-4 moved out of this set once `candidate-07` verified `passed` and
+        pinned a commit descended from every earlier candidate; see
+        `test_m4_candidates_are_superseded_by_the_verified_candidate` below.
+        """
         for name in self.superseded:
-            if name.startswith(("M-4", "M-5b")):
+            if name.startswith("M-5b"):
                 with self.subTest(bundle=name):
                     self.assertEqual(
                         self.superseded[name], "-",
                         f"{name} must not be excused while its milestone is open")
+
+    def test_m4_candidates_are_superseded_by_the_verified_candidate(self) -> None:
+        """The M-4 chain is only excused because candidate-07 actually verifies."""
+        successor = EVIDENCE / "M-4-rf95-candidate-07.json"
+        if not successor.is_file():
+            self.skipTest("M-4-rf95-candidate-07 bundle is absent")
+        for name in ("M-4-rf95-candidate-03.json", "M-4-rf95-candidate-05.json",
+                     "M-4-rf95-order9.json"):
+            if name not in self.superseded:
+                continue
+            with self.subTest(bundle=name):
+                self.assertEqual(
+                    self.superseded[name], successor.name,
+                    f"{name} must be excused only by the verified green successor")
 
     def test_a_bundle_never_supersedes_itself(self) -> None:
         for name, successor in self.superseded.items():

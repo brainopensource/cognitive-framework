@@ -392,7 +392,12 @@ def main() -> int:
         # half is printed and enters the evidence, which is what makes the
         # authorisation checkable by a reviewer.
         seed_key = secrets.token_bytes(32)
-        signer = OperatorSigner(seed_key, key_id="rf95-run-operator")
+        # ``execute_profiled`` receives the raw public key and therefore
+        # registers it under ApprovalAuthority's default key id.  Keep the
+        # decision key id aligned with that registration; otherwise a valid
+        # operator signature is treated as an unknown-key approval and the
+        # episode escalates before applying the model's patch.
+        signer = OperatorSigner(seed_key)
         grant = create_autonomous_grant(
             repo_path,
             allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),

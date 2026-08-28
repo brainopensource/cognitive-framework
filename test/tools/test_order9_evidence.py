@@ -8,6 +8,11 @@ from pathlib import Path
 
 from tools.runners.build_evidence_bundle import build_m6
 from tools.linters.verify_evidence import _bytes_at_evidence
+from vanguard.packages.runtime.governance.approvals import (
+    ApprovalAuthority,
+    ApprovalChallenge,
+    OperatorSigner,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -39,9 +44,25 @@ class Order9EvidenceProducerTests(unittest.TestCase):
                 material for material in envelope.materials
                 if material.name == "workload")
             self.assertTrue(report_material.ref.startswith("artifacts/"))
-            self.assertEqual(envelope.pins["runtimeDigest"], next(
+        self.assertEqual(envelope.pins["runtimeDigest"], next(
                 material.digest for material in envelope.materials
                 if material.name == "runtime"))
+
+    def test_rf95_run_signer_matches_raw_public_key_authority(self) -> None:
+        """The profiled runner's ephemeral signer must be verifiable by bytes."""
+        signer = OperatorSigner(b"rf95-approval-regression")
+        challenge = ApprovalChallenge(
+            approval_id="approval-1",
+            process_id="episode-1",
+            action="patch.apply",
+            normalized_diff="--- a/src/calc.py\n+++ b/src/calc.py\n",
+            args_digest="sha256:" + "a" * 64,
+            descriptor_digest="sha256:" + "b" * 64,
+            principal="operator",
+            expires_at="2099-12-31T23:59:59.000Z",
+        )
+        decision = signer.approve(challenge, reviewer="operator")
+        self.assertTrue(ApprovalAuthority(signer.public_bytes).verify(decision))
 
     def test_evidence_local_resolver_is_fenced_to_the_declared_artifact_root(self) -> None:
         """Bundle-local bytes satisfy run outputs only, never source materials.

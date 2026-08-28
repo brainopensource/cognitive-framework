@@ -53,6 +53,11 @@ We completed the multi-tier benchmark suite expansion and live empirical evaluat
 | tier7_mvcc_storage   | xiaomi/mimo-v2.5-pro        | v2.0_sbfl_graph    |  PASS  |   8   | 21,922 |  $0.00733   |  117.40s    |
 | ──────────────────── | ─────────────────────────── | ────────────────── | ────── | ───── | ────── | ─────────── | ─────────── |
 | tier8_ast_compiler   | deepseek/deepseek-v4-flash  | v2.0_sbfl_graph    |  PASS  |   5   |  7,754 |  $0.00086   |   14.49s    |
+| ──────────────────── | ─────────────────────────── | ────────────────── | ────── | ───── | ────── | ─────────── | ─────────── |
+| tier1_lru_cache (90%)| deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   4   |  7,702 |  $0.00091   |   37.29s    |
+| tier3_token_bucket90 | deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   5   | 10,030 |  $0.00113   |   24.59s    |
+| tier6_raft_consensus9| deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |   3   |  4,702 |  $0.00052 🏆|   11.18s 🏆 |
+| tier8_ast_compiler90 | deepseek/deepseek-v4-flash  | v3.2_rlvr_sota_90  |  PASS  |  12   | 30,372 |  $0.00337   |   59.99s    |
 +----------------------+-----------------------------+--------------------+--------+-------+--------+-------------+-------------+
 ```
 

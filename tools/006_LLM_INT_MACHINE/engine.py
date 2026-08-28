@@ -23,9 +23,11 @@ try:
     from .tools import ToolWorkspace, TOOL_DEFINITIONS, ToolExecutionResult
     from .fault_localizer import SBFLEngine
     from .mcts_search import SpeculativeMCTSSearch
-    from .mutation_verifier import PatchMutationVerifier
     from .subagent_orchestrator import SubagentCoordinator, SubagentReport
     from .hierarchical_router import HierarchicalModelRouter
+    from .causal_slicing import CausalFaultLocalizer, CausalStatementRank
+    from .adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
+    from .rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
     from .telemetry_kpi import AdvancedKPITelemetry
     from .catalog import RunCatalog, RunReceipt, generate_run_id
 except ImportError:
@@ -39,6 +41,9 @@ except ImportError:
     from mutation_verifier import PatchMutationVerifier
     from subagent_orchestrator import SubagentCoordinator, SubagentReport
     from hierarchical_router import HierarchicalModelRouter
+    from causal_slicing import CausalFaultLocalizer, CausalStatementRank
+    from adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
+    from rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
     from telemetry_kpi import AdvancedKPITelemetry
     from catalog import RunCatalog, RunReceipt, generate_run_id
 
@@ -101,6 +106,9 @@ class IntelligentMachineEngine:
             self.workspace_dir,
             lambda: self.oracle_fn(self.workspace_dir) if self.oracle_fn else True
         )
+        self.causal_localizer = CausalFaultLocalizer(self.workspace_dir)
+        self.adversarial_fuzzer = AdversarialInvariantFuzzer(self.workspace_dir)
+        self.rlvr_engine = RLVREngine()
         self.mcts = SpeculativeMCTSSearch(
             self.workspace,
             branching_factor=config.mcts_branching_factor,
@@ -135,18 +143,31 @@ class IntelligentMachineEngine:
         start_time = time.perf_counter()
         run_id = generate_run_id(challenge_id, self.config.config_name, self.config.model)
         
-        # If SBFL is enabled, execute pre-flight fault localization
-        sbfl_notes = ""
-        if self.config.use_sbfl_localization and self.oracle_fn:
+        # If RLVR logging is active, start episode
+        if self.config.use_rlvr_logging:
+            self.rlvr_engine.start_episode(
+                trajectory_id=run_id,
+                challenge_id=challenge_id,
+                model_name=self.config.model,
+                config_name=self.config.config_name,
+            )
+
+        # Fault Localization (CausalRepair or SBFL Ochiai)
+        localization_notes = ""
+        if (self.config.use_causal_slicing or self.config.use_sbfl_localization) and self.oracle_fn:
             try:
                 failed_run, failing_trace = self.sbfl.record_execution(lambda: not self.oracle_fn(self.workspace_dir))
                 if failing_trace:
-                    rankings = self.sbfl.compute_rankings([failing_trace], [])
-                    sbfl_notes = "\n" + self.sbfl.format_for_prompt(rankings, top_k=5)
+                    if self.config.use_causal_slicing:
+                        c_ranks = self.causal_localizer.compute_causal_rankings([failing_trace], [])
+                        localization_notes = "\n" + self.causal_localizer.format_causal_prompt_injection(c_ranks, top_k=5)
+                    else:
+                        rankings = self.sbfl.compute_rankings([failing_trace], [])
+                        localization_notes = "\n" + self.sbfl.format_for_prompt(rankings, top_k=5)
             except Exception:
                 pass
 
-        enhanced_brief = task_brief + sbfl_notes
+        enhanced_brief = task_brief + localization_notes
         context = ContextEngine(self.config, DEFAULT_SYSTEM_PROMPT, enhanced_brief)
         
         report = ExecutionReport(
@@ -276,12 +297,24 @@ class IntelligentMachineEngine:
         ]
 
         # If mutation testing is enabled and run succeeded, compute mutation score
-        if self.config.use_mutation_testing and report.success:
+        # Feature 13: Adversarial Invariant Fuzzing & QA Synthesis
+        if self.config.use_adversarial_fuzzing and report.success:
             try:
-                diff_files = self._get_modified_files()
-                for df in diff_files:
-                    m_res = self.mutation_verifier.falsify_patch(df)
-                    report.mutation_score = m_res.mutation_score
+                fuzz_rep = self.adversarial_fuzzer.verify_patch_robustness()
+                report.kpi_metrics["adversarial_robustness"] = fuzz_rep.robustness_score
+            except Exception:
+                pass
+
+        # Feature 14: Finalize RLVR Episode Trajectory
+        if self.config.use_rlvr_logging:
+            try:
+                self.rlvr_engine.finalize_episode(
+                    trajectory_id=run_id,
+                    final_oracle_passed=report.success,
+                    mutation_score=report.mutation_score,
+                    total_cost_usd=report.total_cost_usd,
+                    total_tokens=report.total_tokens,
+                )
             except Exception:
                 pass
 

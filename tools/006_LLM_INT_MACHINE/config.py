@@ -57,6 +57,15 @@ class HarnessConfig:
     # Feature 11: Line-Level Mutation Falsification Engine (v2.2)
     use_mutation_testing: bool = False
     mutation_threshold: float = 0.80
+
+    # Feature 12: Causal Counterfactual Dual-Slicing (v3.0 - Pillar 2)
+    use_causal_slicing: bool = False
+
+    # Feature 13: Adversarial Invariant Fuzzing & QA Synthesis (v3.1 - Pillar 3)
+    use_adversarial_fuzzing: bool = False
+
+    # Feature 14: Agent-RLVR & SWE-RL Verifiable Trajectory Logging (v3.2 - Pillar 4)
+    use_rlvr_logging: bool = False
     
     # Execution & Model Settings
     model: str = "openrouter/free"
@@ -215,6 +224,69 @@ CONFIG_V2_3_COMPOUND_FULL = HarnessConfig(
     max_turns=15,
 )
 
+CONFIG_V3_0_CAUSAL_MCTS = HarnessConfig(
+    config_name="v3.0_causal_mcts",
+    version_tag="3.0.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    mcts_branching_factor=4,
+    use_mutation_testing=True,
+    mutation_threshold=0.80,
+    max_turns=15,
+)
+
+CONFIG_V3_1_ADVERSARIAL_APEX = HarnessConfig(
+    config_name="v3.1_adversarial_apex",
+    version_tag="3.1.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    mcts_branching_factor=6,
+    use_mutation_testing=True,
+    mutation_threshold=0.85,
+    use_adversarial_fuzzing=True,
+    max_turns=18,
+)
+
+CONFIG_V3_2_RLVR_SOTA_90 = HarnessConfig(
+    config_name="v3.2_rlvr_sota_90",
+    version_tag="3.2.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    mcts_branching_factor=8,
+    use_mutation_testing=True,
+    mutation_threshold=0.85,
+    use_adversarial_fuzzing=True,
+    use_rlvr_logging=True,
+    max_turns=20,
+)
+
 # Backwards-compatibility aliases
 CONFIG_BASELINE_REACT = CONFIG_V1_0_BASELINE
 CONFIG_VANGUARD_CORE = CONFIG_V1_1_VANGUARD_CORE
@@ -228,11 +300,16 @@ PRESET_REGISTRY: dict[str, HarnessConfig] = {
     "v2.1_mcts_speculative": CONFIG_V2_1_MCTS_SPECULATIVE,
     "v2.2_mutation_robust": CONFIG_V2_2_MUTATION_ROBUST,
     "v2.3_compound_full": CONFIG_V2_3_COMPOUND_FULL,
+    "v3.0_causal_mcts": CONFIG_V3_0_CAUSAL_MCTS,
+    "v3.1_adversarial_apex": CONFIG_V3_1_ADVERSARIAL_APEX,
+    "v3.2_rlvr_sota_90": CONFIG_V3_2_RLVR_SOTA_90,
     # Aliases
     "baseline": CONFIG_V1_0_BASELINE,
     "vanguard_core": CONFIG_V1_1_VANGUARD_CORE,
     "sota_full": CONFIG_V1_2_SOTA_FULL,
     "compound": CONFIG_V2_3_COMPOUND_FULL,
+    "sota_90": CONFIG_V3_2_RLVR_SOTA_90,
+    "apex": CONFIG_V3_1_ADVERSARIAL_APEX,
 }
 
 

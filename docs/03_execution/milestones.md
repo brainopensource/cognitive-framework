@@ -8,13 +8,13 @@ canonical_for:
 status: living
 owner: repository-governance
 version: "0.7.3.dev0"
-last_verified: 2026-08-27
+last_verified: 2026-08-28
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Macro Milestones — AETHER M-4 through M-8
+# Macro Milestones — AETHER M-4 through M-10
 
 This file owns stable outcomes, dependencies, and acceptance gates. Current authorization and status
 live only in [`sprint_active.md`](sprint_active.md); stable work-package detail lives in
@@ -48,6 +48,8 @@ flowchart TD
   M6 --> M7["M-7 runtime integration"]
   M65 --> M8["M-8 durable memory + governed learning"]
   M7 --> M8
+  M8 --> M9["M-9 operational beta"]
+  M9 --> M10["M-10 qualified release"]
 ```
 
 Within a window, each lane reaches `PACKAGE_READY` against frozen contracts and fixtures.
@@ -105,6 +107,11 @@ fork/read/merge topologies execute through one public path; disabled topology pr
 parity. Existing causal selectors are used. Correlated monotonic timing is telemetry, never a
 mutated event or budget dimension. M7-01 measures independence/completeness, then ADR-0099 records
 bounded read concurrency or `SEQUENTIAL_CONFIRMED`. Concurrency is optional; the decision is not.
+Topology declarations and lowered role order are not execution evidence. Each ready role MUST run as
+an ordinary M-6 child, settle from persisted facts, and exchange dependency context only through
+authorized artifact references or digests. At least one shipped production-safe composition MUST
+exercise each required multi-role topology. A role that performs no effect and settles `abandoned`
+does not satisfy role execution or artifact-flow acceptance markers.
 
 ### M-8 — durable memory and governed learning MVP
 
@@ -143,7 +150,7 @@ receipt must satisfy before the milestone above it can close.
 | Baseline tag | Annotated, remotely resolvable `CONVERGENCE-BASE-v1` plus a countersigned `aether.baseline/1` manifest (ADR-0102) | Tag absent; `prepare_convergence_baseline.py` emits only a candidate and runs no git |
 | M-8 acceptance | An M-8 bundle and independent acceptance that both verify `passed` | No M-8 bundle is published |
 | M-9 beta qualification | Packaged CLI/API/TUI/Studio, plugin lifecycle, health/readiness, two real workflows, restart/resume, offline-after-install, all from reproducible artifacts | Not authorized until M-8 verifies `passed` |
-| M-10 release qualification | `./ci/release_qualify.sh` exiting `0` for the exact candidate | Script does not exist |
+| M-10 release qualification | `./ci/release_qualify.sh` exiting `0` for the exact candidate | Tooling exists; the exact candidate, complete qualification inputs, and subject-matching envelope remain outstanding |
 | Exact-subject envelope | A signed release envelope whose subject digest equals the candidate's | Depends on the two gates above |
 
 Publication, tag creation, and history operations are release actions performed
@@ -164,3 +171,17 @@ The pre-M-9 boundary reserves low-cost seams: immutable run-plan extensions, aut
 composition manifests, evidence envelopes, and exterior candidate generators. Distributed scheduling, topology
 search, continuous-learning services, model training, causal self-model frameworks, and a second runtime remain
 out of scope unless a later measured need receives its own successor decision.
+
+## Competitive qualification boundary
+
+SWE-Bench Pro and similar external benchmarks are product measurements, not milestone acceptance
+substitutes. A competitive claim requires a preregistered task set, immutable harness manifest,
+fixed sandbox and evaluator, exact model/provider identity, cost and timeout ceilings, contamination
+controls, confidence intervals, and an independent rerun. Development MAY use staged smoke and paired
+subsets, but the sealed set MUST NOT be repeatedly tuned against. A target such as `pass@1 > 60%` is
+an experimental objective until its exact evidence independently verifies.
+
+Research systems outside `vanguard/packages/`, including `tools/006_LLM_INT_MACHINE/`, remain separate
+experimental subjects. They MUST NOT be modified by Vanguard delivery work or imported as a second
+runtime. A preset, workflow, manifest, or technique observed there MAY enter Vanguard only as an
+independently identified treatment with invariant-preserving evidence against the current baseline.

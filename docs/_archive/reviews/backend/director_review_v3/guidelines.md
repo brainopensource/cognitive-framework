@@ -13,6 +13,53 @@ audited_head: c3dc123
 
 # AETHER v0.9 Autonomous Two-Lane Delivery Method
 
+> **Current execution addendum — 2026-08-28.** This archived review remains non-authorizing and its
+> older repository observations are historical. The addendum below is an owner-requested navigation
+> aid aligned to the current SPEC and execution boards; receipts in `sprint_active.md`, not this
+> review, determine status or acceptance.
+
+## 0. Current close-out directive
+
+The project closes through one evidence-gated chain:
+
+1. Preserve M-1 through M-3 continuously; do not reimplement the kernel, create another ledger
+   writer, bypass `Runtime.run_composed`, or weaken installed-wheel/profile/evaluator guarantees.
+2. Close evidence in dependency order: M-4 `candidate-06`; annotated remote
+   `CONVERGENCE-BASE-v1`; M-5b successor; corrected M-6.5 successor; clean-subject M-8 bundle and
+   independent exact-digest acceptance. Historical failed or undeterminable bundles remain immutable.
+3. Complete M-7 mechanism by executing each ready topology role as an ordinary M-6 child that
+   performs real effects and exchanges authorized artifacts by digest. An effect-free `abandoned`
+   child, a lowered declaration, or a transient projection does not earn an execution marker.
+4. Move M-9 to active work only after M-8 acceptance. Deliver isolated wheel/sdist installation,
+   unified version/configuration, CLI/service parity, restart/resume, inspection, offline operation,
+   and verified plugin lifecycle as `0.9.0b1`.
+5. Qualify M-10 `0.9.0` with supported migrations, backup/restore, corruption and kill-boundary
+   recovery, deployment profiles, soak/security/performance checks, reproducible packages, and a
+   signed release envelope whose subject is the exact candidate.
+6. Run SWE-Bench Pro as a separate measured product program. Target `pass@1 > 60%` only on a
+   preregistered sealed set under a fixed harness, evaluator, sandbox, model/provider policy, cost,
+   and timeout. Do not infer superiority over another product from incomparable public scores.
+
+### Immediate parallel lanes
+
+- **Evidence lane:** re-emit M-4; prepare/resolve M-5a; re-emit M-5b and M-6.5; publish and
+  independently accept M-8. Signing, review, and acceptance identities remain separate.
+- **Runtime lane:** repair M-7 settlement and artifact flow; keep sequential scheduling as the
+  reference; continuously rerun M-1–M-3 preservation and installed-wheel falsifiers.
+- **Release staging lane:** prepare M-9/M-10 test fixtures and non-authorizing qualification inputs,
+  but do not activate M-9 implementation before the M-8 predicate becomes true.
+- **Measurement lane:** compare direct, repository-map, targeted-test, planner/executor/reviewer,
+  fork/read/merge, bounded-retry, controller, memory, and model-routing treatments one variable at a
+  time. Use 10–15 smoke, 30–50 paired development, 100–200 qualification, then one sealed run.
+
+Every live-model run records the exact model response identity, provider, pricing snapshot, tokens,
+cost, latency, tool calls, retries, patch size, evaluator, and failure class. Random free-model routing
+is smoke-only; reproducible comparisons pin a specific model endpoint and fail closed on drift.
+
+`tools/006_LLM_INT_MACHINE/` is a valuable independent research engine. This plan does not modify it,
+depend on it, or collapse it into Vanguard. A workflow, preset, manifest, or technique learned from it
+must first be an isolated Vanguard treatment with invariant-preserving evidence before adoption.
+
 ## 1. Executive verdict
 
 AETHER does not need a new architecture. It needs a disciplined completion program around the

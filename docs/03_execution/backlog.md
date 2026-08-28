@@ -6,7 +6,7 @@ canonical_for: [m4-m8-work-packages, two-developer-delivery-tracks, package-depe
 status: living
 owner: tech-lead
 version: "1.0.0"
-last_verified: 2026-08-27
+last_verified: 2026-08-28
 subordinate_to: ../../VISION.md
 supersedes: [leadership-backlog-2026-08-25]
 superseded_by: null
@@ -31,12 +31,12 @@ package consumes another developer's unfinished branch.
 |---|---|---|---|---|
 | WP-A1 | M-4/M-6 | Lane A / **PACKAGE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
 | WP-B1 | M-5a/M-5b | Lane B / **PACKAGE_READY** | ADR-0101/0102; tooling beside A1, treatment after baseline | baseline + M-5b bundle |
-| WP-A2 | M-6.5 | Lane A / **BLOCKED** | A1 merged; ADR-0103 frozen; WP-C1 package predicate unresolved | runtime-seam evidence |
-| WP-B2 | M-6.5 | Lane B / **ACCEPTED** | A1/A2; instrument then study | signed positive/negative disposition |
-| WP-A3 | M-7 | Lane A / **NOT_STARTED** | A1; before B3 runs | three runtime topologies |
+| WP-A2 | M-6.5 | Lane A / **PACKAGE_READY** | A1 merged; ADR-0103 frozen; WP-C1 package predicate resolved | runtime-seam evidence |
+| WP-B2 | M-6.5 | Lane B / **BLOCKED** | A1/A2; current published study is undeterminable | signed positive/negative disposition |
+| WP-A3 | M-7 | Lane A / **IN_PROGRESS** | A1; before B3 runs | three runtime topologies with real effects and artifact flow |
 | WP-B3 | M-7 | Lane B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
-| WP-A4 | M-8 | Lane A / **NOT_STARTED** | M-7 decision, ADR-0100; before B4 | durable authorized memory |
-| WP-B4 | M-8 | Lane B / **NOT_STARTED** | A4, M-6.5 disposition | lift + real rollback |
+| WP-A4 | M-8 | Lane A / **PACKAGE_READY** | ADR-0099/0100 mechanism complete; evidence dependencies remain | durable authorized memory receipts |
+| WP-B4 | M-8 | Lane B / **PACKAGE_READY** | A4 mechanism; acceptance waits for valid M-6.5/M-7 dispositions | lift + real rollback evidence |
 | WP-C1 | M-1/M-2/M-4 preservation | Lane A / **PACKAGE_READY** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
 
 Lane A: `WP-A1 -> WP-C1 -> WP-A2 -> WP-A3 -> WP-A4`. Lane B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.

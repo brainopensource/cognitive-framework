@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.7.3.dev0"
-last_verified: 2026-08-27
+last_verified: 2026-08-28
 read_when:
   - implementing-any-runtime-change
   - resolving-authority-conflicts
@@ -167,6 +167,21 @@ historical evidence only.
 - The runtime bootstrap is the sole production seam for concrete adapter construction. Plugin
   activation MUST materialize a service/handle or fail; lifecycle metadata without a callable service
   is not production activation.
+- Topology readiness MUST be derived from settled causal predecessors. A ready role MUST execute as
+  an ordinary mediated M-6 child through the public runtime, and dependency context MUST cross role
+  boundaries only as authorized content-addressed references. Declared operations, lowered order,
+  transient model output, or an effect-free abandoned child MUST NOT count as executed topology work.
+- M-9 implementation MUST remain non-authorizing until M-8 has a producer-verifiable bundle and an
+  independent acceptance envelope over the exact digest. M-10 release qualification MUST consume a
+  qualified M-9 artifact and MUST bind its signed envelope to the exact source, wheel, sdist, schema,
+  migration, runtime, reducer, dependency, profile, and qualification identities.
+- External benchmark results MUST remain measurement evidence rather than runtime authority. A
+  comparative claim MUST pin the task set, repositories, sandbox, evaluator, harness, model/provider,
+  budgets, timeout, and contamination policy. Random model routing MUST NOT be used for a reproducible
+  comparison, and repeated tuning against a sealed evaluation set MUST invalidate the claim.
+- `tools/006_LLM_INT_MACHINE/` is a separate research subject. Vanguard production code MUST NOT
+  depend on it, mutate it, or treat its mechanisms as accepted Vanguard architecture. Transfer of a
+  technique requires an explicit isolated treatment, preserved invariants, and accepted evidence.
 
 ## v0.7+ concept lock
 

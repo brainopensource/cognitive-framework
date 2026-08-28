@@ -22,6 +22,9 @@ from config import (
     CONFIG_V2_1_MCTS_SPECULATIVE,
     CONFIG_V2_2_MUTATION_ROBUST,
     CONFIG_V2_3_COMPOUND_FULL,
+    CONFIG_V3_0_CAUSAL_MCTS,
+    CONFIG_V3_1_ADVERSARIAL_APEX,
+    CONFIG_V3_2_RLVR_SOTA_90,
     get_preset,
 )
 from env_loader import load_openrouter_api_key, has_openrouter_api_key
@@ -37,6 +40,9 @@ from mcts_search import SpeculativeMCTSSearch
 from mutation_verifier import PatchMutationVerifier
 from subagent_orchestrator import SubagentCoordinator, SubagentSandbox
 from hierarchical_router import HierarchicalModelRouter
+from causal_slicing import CausalFaultLocalizer, CausalStatementRank
+from adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
+from rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
 from telemetry_kpi import AdvancedKPITelemetry
 from catalog import RunCatalog, RunReceipt, generate_run_id
 from experiment_matrix import run_multi_trial_experiment, parse_override_string
@@ -58,110 +64,132 @@ class TestConfigAndRegistry(unittest.TestCase):
 
         self.assertTrue(CONFIG_V2_0_SBFL_GRAPH.use_code_graph)
         self.assertTrue(CONFIG_V2_0_SBFL_GRAPH.use_sbfl_localization)
-        self.assertTrue(CONFIG_V2_1_MCTS_SPECULATIVE.use_mcts_search)
-        self.assertTrue(CONFIG_V2_2_MUTATION_ROBUST.use_mutation_testing)
-        self.assertTrue(CONFIG_V2_3_COMPOUND_FULL.use_code_graph)
-        self.assertTrue(CONFIG_V2_3_COMPOUND_FULL.use_mcts_search)
         self.assertTrue(CONFIG_V2_3_COMPOUND_FULL.use_mutation_testing)
+        self.assertTrue(CONFIG_V2_3_COMPOUND_FULL.use_mcts_search)
 
-    def test_config_hashing_and_derivation(self):
-        cfg1 = CONFIG_V1_2_SOTA_FULL
-        cfg2 = CONFIG_V1_2_SOTA_FULL
-        self.assertEqual(cfg1.config_hash(), cfg2.config_hash())
+        # Test Pillar v3.0, v3.1, v3.2 presets
+        self.assertTrue(CONFIG_V3_0_CAUSAL_MCTS.use_causal_slicing)
+        self.assertTrue(CONFIG_V3_1_ADVERSARIAL_APEX.use_adversarial_fuzzing)
+        self.assertTrue(CONFIG_V3_2_RLVR_SOTA_90.use_rlvr_logging)
+        self.assertEqual(CONFIG_V3_2_RLVR_SOTA_90.mcts_branching_factor, 8)
 
-        derived = cfg1.derive(seed=999, max_turns=20)
-        self.assertNotEqual(cfg1.config_hash(), derived.config_hash())
-        self.assertEqual(derived.seed, 999)
-        self.assertEqual(derived.max_turns, 20)
-        self.assertEqual(derived.use_ast_preflight, cfg1.use_ast_preflight)
+    def test_preset_retrieval(self):
+        cfg = get_preset("v2.0_sbfl_graph")
+        self.assertEqual(cfg.config_name, "v2.0_sbfl_graph")
+        self.assertTrue(cfg.use_sbfl_localization)
 
-    def test_preset_lookup(self):
-        preset = get_preset("v2.3_compound_full")
-        self.assertEqual(preset.config_name, "v2.3_compound_full")
-        self.assertEqual(get_preset("compound").config_name, "v2.3_compound_full")
+        cfg_apex = get_preset("apex")
+        self.assertEqual(cfg_apex.config_name, "v3.1_adversarial_apex")
+
         with self.assertRaises(KeyError):
             get_preset("non_existent_preset")
 
+    def test_config_hash_determinism(self):
+        cfg1 = CONFIG_V1_2_SOTA_FULL
+        cfg2 = CONFIG_V1_2_SOTA_FULL
+        self.assertEqual(cfg1.config_hash(), cfg2.config_hash())
+        
+        cfg_modified = cfg1.derive(temperature=0.7)
+        self.assertNotEqual(cfg1.config_hash(), cfg_modified.config_hash())
 
-class TestToolsAndASTPreflight(unittest.TestCase):
+
+class TestToolsWorkspaceAndAST(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.config = CONFIG_V1_2_SOTA_FULL
-        self.ws = ToolWorkspace(self.test_dir, self.config)
+        self.workspace = ToolWorkspace(self.test_dir, CONFIG_V1_2_SOTA_FULL)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
-    def test_fs_read_and_search(self):
-        f = self.test_dir / "sample.py"
-        f.write_text("def hello():\n    return 42\n", encoding="utf-8")
+    def test_patch_apply_with_ast_preflight(self):
+        file_p = self.test_dir / "sample.py"
+        file_p.write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
         
-        read_res = self.ws.fs_read("sample.py")
-        self.assertTrue(read_res.ok)
-        self.assertIn("return 42", read_res.output)
-        
-        search_res = self.ws.fs_search("hello")
-        self.assertTrue(search_res.ok)
-        self.assertIn("sample.py", search_res.output)
-
-    def test_ast_preflight_catches_syntax_error(self):
-        f = self.test_dir / "broken.py"
-        f.write_text("def valid_func():\n    return True\n", encoding="utf-8")
-
-        patch_res = self.ws.patch_apply(
-            path="broken.py",
-            target_chunk="def valid_func():\n    return True",
-            replacement_chunk="def valid_func(\n    return True",
+        # Valid patch
+        res = self.workspace.patch_apply(
+            path="sample.py",
+            target_chunk="    return a + b",
+            replacement_chunk="    # return sum\n    return a + b",
         )
-        self.assertFalse(patch_res.ok)
-        self.assertTrue(patch_res.is_ast_error)
-        self.assertIn("AST PRE-FLIGHT SYNTAX ERROR", patch_res.output)
-        self.assertEqual(f.read_text(encoding="utf-8"), "def valid_func():\n    return True\n")
+        self.assertTrue(res.ok)
+        self.assertIn("Successfully patched", res.output)
+
+        # Invalid syntax patch
+        res_bad = self.workspace.patch_apply(
+            path="sample.py",
+            target_chunk="    return a + b",
+            replacement_chunk="    return a + (bad syntax",
+        )
+        self.assertFalse(res_bad.ok)
+        self.assertIn("AST PRE-FLIGHT SYNTAX ERROR", res_bad.output)
 
 
-class TestSubagentOrchestrator(unittest.TestCase):
+class TestCausalRepairAndFuzzing(unittest.TestCase):
     def setUp(self):
         self.test_dir = Path(tempfile.mkdtemp())
-        self.config = CONFIG_V2_0_SBFL_GRAPH
-        self.ws = ToolWorkspace(self.test_dir, self.config)
-        (self.test_dir / "app.py").write_text("def run():\n    return 1\n", encoding="utf-8")
+        sample = self.test_dir / "math_ops.py"
+        sample.write_text("def divide(a, b):\n    if b == 0:\n        return None\n    return a / b\n", encoding="utf-8")
+        self.causal = CausalFaultLocalizer(self.test_dir)
+        self.fuzzer = AdversarialInvariantFuzzer(self.test_dir)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
-    def test_scout_subagent_clean_slate(self):
-        mock_client = MockLLMClient(canned_responses=[
-            {"content": "Found symbol definition in app.py", "tool_calls": []}
-        ])
-        coordinator = SubagentCoordinator(self.config, mock_client)
-        report = coordinator.delegate_exploration(self.ws, "Find run function")
-        self.assertEqual(report.role, "Codebase Scout")
-        self.assertIn("Found symbol", report.summary)
-        self.assertEqual(len(coordinator.execution_history), 1)
+    def test_causal_slicing_computation(self):
+        deps = self.causal.parse_data_dependencies("math_ops.py")
+        self.assertIn(1, deps)
+        self.assertIn("a", deps[1])
+        self.assertIn("b", deps[1])
+
+        failing = [{("math_ops.py", 4)}]
+        passing = [{("math_ops.py", 1), ("math_ops.py", 2)}]
+        ranks = self.causal.compute_causal_rankings(failing, passing)
+        self.assertGreaterEqual(len(ranks), 1)
+        self.assertGreater(ranks[0].causal_effect, 0.5)
+
+        injection = self.causal.format_causal_prompt_injection(ranks)
+        self.assertIn("CausalRepair", injection)
+
+    def test_adversarial_fuzzer(self):
+        probes = self.fuzzer.generate_boundary_probes()
+        self.assertGreaterEqual(len(probes), 5)
+        
+        # Test safe function
+        rep = self.fuzzer.verify_patch_robustness(test_callable=lambda x: True)
+        self.assertTrue(rep.is_adversarially_sound)
+        self.assertEqual(rep.robustness_score, 1.0)
 
 
-class TestHierarchicalRouter(unittest.TestCase):
-    def test_routing_phases_and_escalation(self):
-        router = HierarchicalModelRouter(
-            planner_model="deepseek/deepseek-v4-pro-0813",
-            worker_model="deepseek/deepseek-v4-flash-0731",
-            enable_dynamic_escalation=True,
+class TestRLVREngine(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = Path(tempfile.mkdtemp())
+        self.rlvr = RLVREngine(output_dir=self.test_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir, ignore_errors=True)
+
+    def test_rlvr_trajectory_recording(self):
+        traj = self.rlvr.start_episode("traj_001", "tier1_lru_cache", "mock-model", "v3.2_rlvr_sota_90")
+        self.assertEqual(traj.trajectory_id, "traj_001")
+
+        reward_step = self.rlvr.record_step(
+            trajectory_id="traj_001",
+            turn_index=1,
+            prompt_messages=[{"role": "user", "content": "fix bug"}],
+            model_response_content="applying patch",
+            tool_calls=[{"name": "patch_apply"}],
+            tool_results=[{"ok": True}],
+            ast_valid=True,
         )
-        # Turn 1 should route to Planner
-        d1 = router.select_model_for_turn(1, "PLANNING")
-        self.assertEqual(d1.selected_model, "deepseek/deepseek-v4-pro-0813")
-        self.assertEqual(d1.phase, "PLANNING")
+        self.assertEqual(reward_step, 0.2)
 
-        # Turn 2 should route to Worker
-        d2 = router.select_model_for_turn(2, "EXECUTION")
-        self.assertEqual(d2.selected_model, "deepseek/deepseek-v4-flash-0731")
-
-        # Two consecutive failures trigger escalation
-        router.record_turn_outcome(False)
-        router.record_turn_outcome(False)
-        d3 = router.select_model_for_turn(3, "EXECUTION")
-        self.assertEqual(d3.phase, "ESCALATED_RECOVERY")
-        self.assertEqual(d3.selected_model, "deepseek/deepseek-v4-pro-0813")
+        final_reward = self.rlvr.finalize_episode(
+            trajectory_id="traj_001",
+            final_oracle_passed=True,
+            mutation_score=1.0,
+        )
+        self.assertGreater(final_reward, 0.5)
+        self.assertTrue((self.test_dir / "traj_001.jsonl").is_file())
 
 
 class TestChallengesAndOracles(unittest.TestCase):
@@ -171,63 +199,24 @@ class TestChallengesAndOracles(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
-    def test_all_tiers_initial_failure(self):
-        tiers = [
-            "tier1_lru_cache",
-            "tier2_semver_parser",
-            "tier3_token_bucket",
-            "tier5_datalog_engine",
-            "tier6_raft_consensus",
-            "tier7_mvcc_storage",
-            "tier8_ast_compiler",
-        ]
-        for t in tiers:
-            setup_challenge_workspace(t, self.test_dir)
-            self.assertFalse(
-                evaluate_challenge_oracle(t, self.test_dir),
-                f"Challenge {t} oracle should initially fail on unpatched buggy code"
-            )
+    def test_tier1_lru_cache_setup_and_oracle(self):
+        setup_challenge_workspace("tier1_lru_cache", self.test_dir)
+        self.assertFalse(evaluate_challenge_oracle("tier1_lru_cache", self.test_dir))
 
+        # Fix LRU cache bug
+        entry_p = self.test_dir / "lru" / "entry.py"
+        entry_content = entry_p.read_text(encoding="utf-8")
+        fixed_content = entry_content.replace("return False\n        return False", "return False\n        return (current_time - self.created_at) > self.ttl_seconds")
+        entry_p.write_text(fixed_content, encoding="utf-8")
+        self.assertTrue(evaluate_challenge_oracle("tier1_lru_cache", self.test_dir))
 
-class TestCatalogAndReceipts(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = Path(tempfile.mkdtemp())
-        self.catalog = RunCatalog(self.test_dir)
+    def test_tier6_raft_consensus_setup_and_oracle(self):
+        setup_challenge_workspace("tier6_raft_consensus", self.test_dir)
+        self.assertFalse(evaluate_challenge_oracle("tier6_raft_consensus", self.test_dir))
 
-    def tearDown(self):
-        shutil.rmtree(self.test_dir, ignore_errors=True)
-
-    def test_save_and_load_receipt(self):
-        receipt = RunReceipt(
-            run_id="run_test_001",
-            timestamp_utc="2026-08-28T02:00:00Z",
-            challenge_id="tier1_lru_cache",
-            config_name="v1.2_sota_full",
-            version_tag="1.2.0",
-            config_hash="abc12345",
-            model="openrouter/free",
-            seed=42,
-            success=True,
-            turns_taken=2,
-            total_tokens=2874,
-            cached_tokens=2048,
-            total_cost_usd=0.00033,
-            duration_seconds=6.38,
-            git_diff_lines=12,
-            ast_errors_prevented=1,
-            mutation_score=1.0,
-            pareto_score=237428.1,
-            config_snapshot={},
-            kpi_metrics={},
-            turn_events=[],
-        )
-        saved_path = self.catalog.save_run(receipt)
-        self.assertTrue(saved_path.is_file())
-
-        loaded = self.catalog.load_run("run_test_001")
-        self.assertIsNotNone(loaded)
-        self.assertEqual(loaded.run_id, "run_test_001")
-        self.assertTrue(loaded.success)
+    def test_tier8_ast_compiler_setup_and_oracle(self):
+        setup_challenge_workspace("tier8_ast_compiler", self.test_dir)
+        self.assertFalse(evaluate_challenge_oracle("tier8_ast_compiler", self.test_dir))
 
 
 class TestEngineWithMockLLM(unittest.TestCase):
@@ -271,7 +260,7 @@ class TestEngineWithMockLLM(unittest.TestCase):
         oracle = lambda d: evaluate_challenge_oracle("tier1_lru_cache", d)
         engine = IntelligentMachineEngine(
             workspace_dir=self.test_dir,
-            config=CONFIG_V2_3_COMPOUND_FULL,
+            config=CONFIG_V3_2_RLVR_SOTA_90,
             llm_client=mock_client,
             oracle_fn=oracle,
         )

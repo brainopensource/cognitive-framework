@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: repository-governance
 version: "1.1.0"
-last_verified: 2026-08-27
+last_verified: 2026-08-28
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
@@ -33,8 +33,8 @@ no person, committee, or process approval is an entry dependency.
 
 | Lane | Package | Contract | Baseline | State | Completion predicate | Next |
 |---|---|---|---|---|---|---|
-| Lane A | WP-A4 | `1.0.0` | `5f5f1c6` | **PACKAGE_READY** | `tests_pass AND m6_order9_evidence_verified AND rf95_order9_evidence_verified AND portable_artifacts AND clean_subject` | RF-95 live rerun with external provider reachability |
-| Lane B | WP-B2 | `1.0.0` | `3e8b081` | **PACKAGE_READY** | `evidence_verifier_falsifiers_pass AND acceptance_authority_is_registered_outside_the_document AND producer_signatures_are_re_derivable AND m6_verified_green_from_a_clean_subject` | WP-B3 (blocked on M-4 re-execution; `dev-a-evidence-1` is now registered) |
+| Lane A | WP-A3 | `1.0.0` | `3e8b081` | **IN_PROGRESS** | `three_topology_receipts_resolve AND role_operations_execute_real_effects AND artifact_flows_resolve_from_persisted_receipts` | Repair abandoned multi-role lineages; publish M-7 evidence only after real artifact flow |
+| Lane B | WP-B4 | `1.0.0` | exact bundle subjects | **PACKAGE_READY** | `m4_candidate_06_verified AND convergence_base_v1_verified AND m5b_successor_verified AND m65_successor_disposition_verified AND m8_independently_accepted` | Close evidence dependencies in order; never reinterpret failed/undeterminable bundles |
 
 ## Package state ledger
 
@@ -44,12 +44,12 @@ The ledger mirrors the stable backlog and makes state drift mechanically detecta
 |---|---|---|---|---|
 | WP-A1 | Lane A | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `rf95_and_rf101_to_rf113_receipts_resolve` |
 | WP-B1 | Lane B | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `baseline_vectors_and_contract_receipts_resolve` |
-| WP-A2 | Lane A | **BLOCKED** | `wp_a1_merged AND adr_0103_frozen AND wp_c1_predicate` | `runtime_seam_receipt_resolves` |
-| WP-B2 | Lane B | **ACCEPTED** | `wp_a1 AND wp_a2 AND study_receipt` | `signed_study_disposition_resolves` |
-| WP-A3 | Lane A | **NOT_STARTED** | `wp_a1_merged` | `three_topology_receipts_resolve` |
+| WP-A2 | Lane A | **PACKAGE_READY** | `wp_a1_merged AND adr_0103_frozen AND wp_c1_predicate` | `runtime_seam_receipt_resolves` |
+| WP-B2 | Lane B | **BLOCKED** | `wp_a1 AND wp_a2 AND study_receipt` | `signed_study_disposition_resolves` |
+| WP-A3 | Lane A | **IN_PROGRESS** | `wp_a1_merged` | `three_topology_receipts_resolve` |
 | WP-B3 | Lane B | **NOT_STARTED** | `wp_a3_receipt` | `m701_receipt_and_scheduler_decision_resolve` |
-| WP-A4 | Lane A | **NOT_STARTED** | `adr_0099 AND adr_0100` | `durable_memory_receipts_resolve` |
-| WP-B4 | Lane B | **NOT_STARTED** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
+| WP-A4 | Lane A | **PACKAGE_READY** | `adr_0099 AND adr_0100` | `durable_memory_receipts_resolve` |
+| WP-B4 | Lane B | **PACKAGE_READY** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
 | WP-C1 | Lane A | **PACKAGE_READY** | `adr_0062 AND adr_0089 AND adr_0101` | `trust_spine_and_single_writer_receipts_resolve` |
 
 ## Evidence signing and acceptance protocol
@@ -95,6 +95,30 @@ Milestone acceptance is derived from digest-addressed evidence, not package pres
 | M-6.5 | `valid_paired_study_disposition_verified` |
 | M-7 | `three_topologies_verified AND adr_0099_disposition_verified` |
 | M-8 | `durable_memory_and_signed_rollback_verified` |
+
+## Active critical path
+
+Mechanism work and evidence close-out proceed in parallel, but the following gates remain ordered:
+
+1. Re-emit M-4 `candidate-06` over an exact clean subject with `dev-a-evidence-1`, then obtain an
+   acceptance from a different registered reviewer over that exact digest.
+2. Externally create and publish the annotated, remotely resolvable `CONVERGENCE-BASE-v1`; run the
+   fail-closed baseline builder to pin its tag object, commit, tree, schemas, reducers, runtime, and
+   protected materials using `raw-sha256`.
+3. Re-emit M-5b against that successor baseline. Preserve every historical failed bundle.
+4. Re-emit the stored M-6.5 study with portable references and an explicit digest scheme after M-4
+   verifies. A valid positive or negative result closes the study; the current undeterminable bundle
+   does not.
+5. Complete M-7 by making planner/executor/reviewer and fork/read/merge children perform real effects
+   and exchange authorized artifacts by digest through ordinary M-6 spawn. Lowered declarations or
+   empty abandoned lineages do not satisfy the predicate.
+6. Publish M-8 from a clean immutable subject, sign it, independently accept the exact bundle digest,
+   and verify it again in a fresh process. Green tests or a locally built bundle are not acceptance.
+7. Only after M-8 is independently accepted may M-9 move from staging to this board. M-10 follows a
+   qualified M-9 beta and closes only on exact-subject release proof.
+
+The external Git operations in steps 1, 2, and 6 are release-owner actions. Coding lanes prepare and
+verify their inputs but never simulate commits, tags, remote resolution, or clean-subject identity.
 
 ### Verified milestone evidence
 

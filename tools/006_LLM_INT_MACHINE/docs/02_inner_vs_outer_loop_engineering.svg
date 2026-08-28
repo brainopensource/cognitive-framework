@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 850" width="100%" height="100%" style="background:#0d1117; font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="gradHeader2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0883e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#388bfd" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="gradOuter" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1f242c"/>
+      <stop offset="100%" stop-color="#12161c"/>
+    </linearGradient>
+    <linearGradient id="gradInner" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a2332"/>
+      <stop offset="100%" stop-color="#0f1724"/>
+    </linearGradient>
+    <filter id="shadow2" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f0883e"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#3fb950"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f85149"/>
+    </marker>
+  </defs>
+
+  <!-- Title Banner -->
+  <rect x="30" y="20" width="1340" height="70" rx="12" fill="url(#gradHeader2)" stroke="#30363d" stroke-width="1"/>
+  <text x="60" y="52" fill="#f0883e" font-size="22" font-weight="bold">HARNESS ENGINEERING: DUAL-LOOP ARCHITECTURE</text>
+  <text x="60" y="74" fill="#8b949e" font-size="13">Separation of Concerns: Outer Deliberative Reasoning Loop vs. Inner High-Throughput Deterministic Loop</text>
+
+  <!-- Outer Loop Container -->
+  <g transform="translate(40, 110)">
+    <rect width="1320" height="690" rx="16" fill="url(#gradOuter)" stroke="#f0883e" stroke-width="2" stroke-dasharray="8 4" filter="url(#shadow2)"/>
+    <rect width="400" height="36" rx="8" fill="#f0883e" fill-opacity="0.15" transform="translate(20, 15)"/>
+    <text x="35" y="39" fill="#f0883e" font-size="15" font-weight="bold">OUTER LOOP: DELIBERATIVE REASONING (System 2)</text>
+    <text x="440" y="38" fill="#8b949e" font-size="12">Runs on Turn Boundaries • Supervisor Planning • MCTS Multi-Branch • Reflection &amp; Compaction</text>
+
+    <!-- Outer Loop Component 1: Supervisor POMDP Planner -->
+    <g transform="translate(40, 70)">
+      <rect width="360" height="150" rx="10" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+      <text x="20" y="30" fill="#e3b341" font-size="14" font-weight="bold">1. Supervisor POMDP Planner</text>
+      <text x="20" y="55" fill="#8b949e" font-size="11">• Formulates High-Level Architecture Hypothesis</text>
+      <text x="20" y="75" fill="#8b949e" font-size="11">• Assigns Sub-Goals to Worker Subagents</text>
+      <text x="20" y="95" fill="#8b949e" font-size="11">• Selects Operational Strategy (Direct / MCTS)</text>
+      <rect x="20" y="110" width="320" height="26" rx="4" fill="#21262d"/>
+      <text x="30" y="127" fill="#3fb950" font-size="11" font-weight="bold">Invoked on Turn 1 &amp; Escalations</text>
+    </g>
+
+    <!-- Outer Loop Component 2: Claude Code Subagents -->
+    <g transform="translate(480, 70)">
+      <rect width="360" height="150" rx="10" fill="#161b22" stroke="#8957e5" stroke-width="1.5"/>
+      <text x="20" y="30" fill="#a371f7" font-size="14" font-weight="bold">2. Isolated Subagent Sandboxes</text>
+      <text x="20" y="55" fill="#8b949e" font-size="11">• Codebase Scout (Multi-file search)</text>
+      <text x="20" y="75" fill="#8b949e" font-size="11">• QA Invariant Verifier (Edge-case testing)</text>
+      <text x="20" y="95" fill="#8b949e" font-size="11">• Compact 3-Line Summary Returned to Parent</text>
+      <rect x="20" y="110" width="320" height="26" rx="4" fill="#21262d"/>
+      <text x="30" y="127" fill="#a371f7" font-size="11" font-weight="bold">Zero Parent Context Pollution</text>
+    </g>
+
+    <!-- Outer Loop Component 3: Speculative MCTS -->
+    <g transform="translate(920, 70)">
+      <rect width="360" height="150" rx="10" fill="#161b22" stroke="#388bfd" stroke-width="1.5"/>
+      <text x="20" y="30" fill="#58a6ff" font-size="14" font-weight="bold">3. Speculative MCTS Tree Search</text>
+      <text x="20" y="55" fill="#8b949e" font-size="11">• Samples K=3 Independent Repair Hypotheses</text>
+      <text x="20" y="75" fill="#8b949e" font-size="11">• Ephemeral Git Checkpointing (mcts_branch_N)</text>
+      <text x="20" y="95" fill="#8b949e" font-size="11">• Automatic Rollback on Failing Trajectory</text>
+      <rect x="20" y="110" width="320" height="26" rx="4" fill="#21262d"/>
+      <text x="30" y="127" fill="#58a6ff" font-size="11" font-weight="bold">Prevents Greedy Local Minima Traps</text>
+    </g>
+
+    <!-- INNER LOOP EMBEDDED BOX -->
+    <g transform="translate(40, 250)">
+      <rect width="1240" height="300" rx="14" fill="url(#gradInner)" stroke="#58a6ff" stroke-width="2"/>
+      <rect width="420" height="34" rx="8" fill="#1f6feb" fill-opacity="0.2" transform="translate(20, 15)"/>
+      <text x="35" y="38" fill="#58a6ff" font-size="14" font-weight="bold">INNER LOOP: HIGH-THROUGHPUT EXECUTION (System 1)</text>
+      <text x="460" y="38" fill="#8b949e" font-size="11">Microsecond Deterministic Tools • In-Process AST Parsing • Sandboxed Test Tracing</text>
+
+      <!-- Step 1: Tool Call Generation -->
+      <g transform="translate(30, 70)">
+        <rect width="210" height="190" rx="8" fill="#161b22" stroke="#30363d"/>
+        <circle cx="30" cy="30" r="14" fill="#1f6feb"/>
+        <text x="26" y="35" fill="#fff" font-size="12" font-weight="bold">1</text>
+        <text x="55" y="35" fill="#f0f6fc" font-size="13" font-weight="bold">Worker Action</text>
+        
+        <text x="15" y="70" fill="#8b949e" font-size="11">• Worker Model (Flash/7B)</text>
+        <text x="15" y="90" fill="#8b949e" font-size="11">• Emits JSON Tool Call</text>
+        <text x="15" y="110" fill="#8b949e" font-size="11">• Dynamic Tool Filtered</text>
+        <text x="15" y="130" fill="#3fb950" font-size="10" font-weight="bold">Latency: 0.8s – 1.5s</text>
+        
+        <rect x="15" y="150" width="180" height="26" rx="4" fill="#21262d"/>
+        <text x="25" y="167" fill="#58a6ff" font-size="10">patch_apply / proc_exec</text>
+      </g>
+
+      <!-- Step 2: AST Preflight -->
+      <g transform="translate(280, 70)">
+        <rect width="210" height="190" rx="8" fill="#161b22" stroke="#da3633" stroke-width="1.5"/>
+        <circle cx="30" cy="30" r="14" fill="#da3633"/>
+        <text x="26" y="35" fill="#fff" font-size="12" font-weight="bold">2</text>
+        <text x="55" y="35" fill="#f0f6fc" font-size="13" font-weight="bold">AST Pre-Flight</text>
+        
+        <text x="15" y="70" fill="#8b949e" font-size="11">• In-Memory Syntax Check</text>
+        <text x="15" y="90" fill="#f85149" font-size="11" font-family="monospace">ast.parse(code)</text>
+        <text x="15" y="110" fill="#8b949e" font-size="11">• Zero Disk Mutation</text>
+        <text x="15" y="130" fill="#3fb950" font-size="10" font-weight="bold">Latency: 0.2ms ⚡</text>
+        
+        <rect x="15" y="150" width="180" height="26" rx="4" fill="#21262d"/>
+        <text x="25" y="167" fill="#f85149" font-size="10">Fails Fast on Syntax Bug</text>
+      </g>
+
+      <!-- Step 3: Surgical Patch Application -->
+      <g transform="translate(530, 70)">
+        <rect width="210" height="190" rx="8" fill="#161b22" stroke="#30363d"/>
+        <circle cx="30" cy="30" r="14" fill="#8957e5"/>
+        <text x="26" y="35" fill="#fff" font-size="12" font-weight="bold">3</text>
+        <text x="55" y="35" fill="#f0f6fc" font-size="13" font-weight="bold">Disk Patching</text>
+        
+        <text x="15" y="70" fill="#8b949e" font-size="11">• Exact Chunk Match</text>
+        <text x="15" y="90" fill="#8b949e" font-size="11">• Atomic Write to Disk</text>
+        <text x="15" y="110" fill="#8b949e" font-size="11">• Preserves Line Endings</text>
+        <text x="15" y="130" fill="#3fb950" font-size="10" font-weight="bold">Latency: 1.0ms</text>
+        
+        <rect x="15" y="150" width="180" height="26" rx="4" fill="#21262d"/>
+        <text x="25" y="167" fill="#a371f7" font-size="10">Target File Updated</text>
+      </g>
+
+      <!-- Step 4: Subprocess Test Execution -->
+      <g transform="translate(780, 70)">
+        <rect width="210" height="190" rx="8" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+        <circle cx="30" cy="30" r="14" fill="#d29922"/>
+        <text x="26" y="35" fill="#fff" font-size="12" font-weight="bold">4</text>
+        <text x="55" y="35" fill="#f0f6fc" font-size="13" font-weight="bold">Pytest Runner</text>
+        
+        <text x="15" y="70" fill="#8b949e" font-size="11">• Sandboxed Subprocess</text>
+        <text x="15" y="90" fill="#8b949e" font-size="11">• Head/Tail Log Paging</text>
+        <text x="15" y="110" fill="#8b949e" font-size="11">• Captures Returncode</text>
+        <text x="15" y="130" fill="#3fb950" font-size="10" font-weight="bold">Latency: 150ms – 2s</text>
+        
+        <rect x="15" y="150" width="180" height="26" rx="4" fill="#21262d"/>
+        <text x="25" y="167" fill="#e3b341" font-size="10">Pass / Fail Evaluated</text>
+      </g>
+
+      <!-- Step 5: Mutation Verification -->
+      <g transform="translate(1010, 70)">
+        <rect width="200" height="190" rx="8" fill="#161b22" stroke="#2ea043" stroke-width="1.5"/>
+        <circle cx="30" cy="30" r="14" fill="#2ea043"/>
+        <text x="26" y="35" fill="#fff" font-size="12" font-weight="bold">5</text>
+        <text x="55" y="35" fill="#f0f6fc" font-size="13" font-weight="bold">Mutation Falsify</text>
+        
+        <text x="15" y="70" fill="#8b949e" font-size="11">• 5 Mutants Synthesized</text>
+        <text x="15" y="90" fill="#8b949e" font-size="11">• Mutation Score &gt;= 0.80</text>
+        <text x="15" y="110" fill="#8b949e" font-size="11">• Kills Tautological Fixes</text>
+        <text x="15" y="130" fill="#3fb950" font-size="10" font-weight="bold">Latency: 50ms</text>
+        
+        <rect x="15" y="150" width="170" height="26" rx="4" fill="#21262d"/>
+        <text x="25" y="167" fill="#3fb950" font-size="10">Ground-Truth Proof</text>
+      </g>
+
+      <!-- Inner Arrows -->
+      <path d="M 240 165 L 280 165" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+      <path d="M 490 165 L 530 165" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+      <path d="M 740 165 L 780 165" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+      <path d="M 990 165 L 1010 165" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowBlue)"/>
+    </g>
+
+    <!-- Outer Feedback & Escalation Channels -->
+    <g transform="translate(40, 570)">
+      <rect width="580" height="95" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+      <text x="20" y="25" fill="#3fb950" font-size="12" font-weight="bold">🟢 SUCCESS PATH: Ground-Truth Pass</text>
+      <text x="20" y="48" fill="#8b949e" font-size="11">• Test suite passes &amp; Mutation score &gt;= 0.80</text>
+      <text x="20" y="68" fill="#8b949e" font-size="11">• Generates signed SHA-256 Run Receipt &amp; closes turn loop (3–5 turns)</text>
+    </g>
+
+    <g transform="translate(660, 570)">
+      <rect width="620" height="95" rx="8" fill="#161b22" stroke="#f85149" stroke-width="1"/>
+      <text x="20" y="25" fill="#f85149" font-size="12" font-weight="bold">🔴 FAILURE &amp; ESCALATION PATH: Dead-End Avoidance</text>
+      <text x="20" y="48" fill="#8b949e" font-size="11">• 2 consecutive failures trigger Supervisor re-planning</text>
+      <text x="20" y="68" fill="#8b949e" font-size="11">• MCTS rolls back git state; Structured Compaction preserves "Avoided Dead-Ends"</text>
+    </g>
+  </g>
+</svg>

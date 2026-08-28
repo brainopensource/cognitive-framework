@@ -34,7 +34,7 @@ class Order9EvidenceProducerTests(unittest.TestCase):
             envelope = build_m6(
                 "dev-a", report, subject_root=ROOT, evidence_root=evidence_root)
             names = {material.name for material in envelope.materials}
-            self.assertTrue({"runtime", "pack", "configuration", "falsifier_report"} <= names)
+            self.assertTrue({"runtime", "pack", "configuration", "workload"} <= names)
             report_material = next(
                 material for material in envelope.materials
                 if material.name == "falsifier_report")

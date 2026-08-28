@@ -320,7 +320,7 @@ def build_m6(
     materials = tuple(
         Material(name=name, digest=digest, ref=surface_paths[name])
         for name, digest in sorted(surface.items())
-    ) + (Material(name="falsifier_report", digest=_sha256_file(report_path),
+    ) + (Material(name="workload", digest=_sha256_file(report_path),
                   ref="artifacts/M-6-canonical-recursion-order9/falsifier-report.json"),)
     pins = _pins(subject_root)
     pins.update({

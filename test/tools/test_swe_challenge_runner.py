@@ -145,6 +145,9 @@ class SweChallengeRunnerTests(unittest.TestCase):
             self.assertEqual(identity["provider"], "openrouter")
             self.assertEqual(identity["source_manifest"]["ring/buffer.py"],
                              hashlib.sha256(baseline["ring/buffer.py"]).hexdigest())
+            self.assertEqual(identity["runtime_boundary"]["kind"], "child_process")
+            self.assertEqual(identity["runtime_boundary"]["deadline_owner"], "parent")
+            self.assertEqual(identity["run_timeout_seconds"], 300.0)
 
 
 if __name__ == "__main__":

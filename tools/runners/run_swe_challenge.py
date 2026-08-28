@@ -437,7 +437,8 @@ def get_diff_size(scratch_dir: Path, baseline: dict[str, bytes]) -> int:
 
 
 def _benchmark_identity(challenge_id: str, scratch_dir: Path,
-                        baseline: dict[str, bytes], model: str) -> dict[str, Any]:
+                        baseline: dict[str, bytes], model: str,
+                        run_timeout: float = BENCHMARK_RUN_TIMEOUT_SECONDS) -> dict[str, Any]:
     challenge = CHALLENGES.get(challenge_id)
     return {
         "benchmark": "vanguard-swe-challenge/1",
@@ -455,6 +456,7 @@ def _benchmark_identity(challenge_id: str, scratch_dir: Path,
             "request_timeout_seconds": BENCHMARK_REQUEST_TIMEOUT_SECONDS,
             "max_retries": BENCHMARK_MAX_RETRIES,
         },
+        "run_timeout_seconds": run_timeout,
         "runtime_boundary": {
             "kind": "child_process",
             "protocol": WORKER_PROTOCOL,
@@ -596,7 +598,9 @@ def run_challenge(
             "cost_micros": cost,
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
-            "benchmark_identity": _benchmark_identity(challenge_id, scratch_dir, baseline, model),
+            "benchmark_identity": _benchmark_identity(
+                challenge_id, scratch_dir, baseline, model, run_timeout,
+            ),
         }, result)
     finally:
         if not keep_dir:
@@ -738,7 +742,9 @@ if __name__ == "__main__":
             "cost_micros": cost,
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
-            "benchmark_identity": _benchmark_identity(instance_id, scratch_dir, baseline, model),
+            "benchmark_identity": _benchmark_identity(
+                instance_id, scratch_dir, baseline, model, run_timeout,
+            ),
         }, result)
     finally:
         if not keep_dir:

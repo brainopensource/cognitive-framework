@@ -57,9 +57,8 @@ MARKERS = {
     "children_never_get_spawn": "test_children_never_receive_the_spawn_verb",
     "direct_form_does_real_work": "test_the_direct_form_does_real_work_through_the_canonical_path",
 
-    # Not settable by any suite today: multi-role lineages settle `abandoned`
-    # with no receipts, so declared artifact flows are never exercised. This is
-    # the one clause standing between M-7 and `passed`.
+    # This marker is tied to the ledger-backed artifact-flow assertion, not to
+    # topology lowering or a counter supplied by the caller.
     "artifact_flows_exercised": "test_artifact_flows_are_exercised_between_roles",
 }
 

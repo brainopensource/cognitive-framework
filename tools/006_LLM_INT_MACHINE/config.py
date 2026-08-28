@@ -66,6 +66,25 @@ class HarnessConfig:
 
     # Feature 14: Agent-RLVR & SWE-RL Verifiable Trajectory Logging (v3.2 - Pillar 4)
     use_rlvr_logging: bool = False
+
+    # Feature 15: SMT-Guided CEGIS Synthesis (v4.0 - 100% Pillar 1)
+    use_cegis_verification: bool = False
+
+    # Feature 16: Dynamic Symbolic Execution & Concolic Path Fuzzing (v4.1 - 100% Pillar 2)
+    use_concolic_fuzzing: bool = False
+
+    # Feature 17: Grok-Style Multi-Agent Arena Tournament & Adversarial Jury (v4.2 - 100% Pillar 3)
+    use_arena_tournament: bool = False
+
+    # Feature 18: Time-Travel Deterministic Record-Replay Debugger (v4.3 - 100% Pillar 4)
+    use_time_travel_debugger: bool = False
+
+    # Feature 19: Hermes Closed-Loop Dynamic Skill Compiler (v4.4 - 100% Pillar 5)
+    use_dynamic_skills: bool = False
+
+    # Feature 20: Scale-Up Test-Time Compute Cluster MCTS (v4.5 - 100% Pillar 6)
+    use_cluster_mcts: bool = False
+    cluster_mcts_samples: int = 16
     
     # Execution & Model Settings
     model: str = "openrouter/free"
@@ -287,6 +306,143 @@ CONFIG_V3_2_RLVR_SOTA_90 = HarnessConfig(
     max_turns=20,
 )
 
+CONFIG_V4_0_CEGIS_SMT = HarnessConfig(
+    config_name="v4.0_cegis_smt",
+    version_tag="4.0.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    mcts_branching_factor=8,
+    use_mutation_testing=True,
+    mutation_threshold=0.85,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    max_turns=20,
+)
+
+CONFIG_V4_1_CONCOLIC_DSE = HarnessConfig(
+    config_name="v4.1_concolic_dse",
+    version_tag="4.1.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    mcts_branching_factor=8,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    max_turns=20,
+)
+
+CONFIG_V4_2_ARENA_DEBATE = HarnessConfig(
+    config_name="v4.2_arena_debate",
+    version_tag="4.2.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_mcts_search=True,
+    use_arena_tournament=True,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    max_turns=20,
+)
+
+CONFIG_V4_3_TIMETRAVEL_REPLAY = HarnessConfig(
+    config_name="v4.3_timetravel_replay",
+    version_tag="4.3.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_time_travel_debugger=True,
+    use_arena_tournament=True,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    max_turns=20,
+)
+
+CONFIG_V4_4_HERMES_SKILLS = HarnessConfig(
+    config_name="v4.4_hermes_skills",
+    version_tag="4.4.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_time_travel_debugger=True,
+    use_dynamic_skills=True,
+    use_arena_tournament=True,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    max_turns=20,
+)
+
+CONFIG_V4_5_SOTA_100_APEX = HarnessConfig(
+    config_name="v4.5_sota_100_apex",
+    version_tag="4.5.0",
+    use_l1_l5_prefix_stability=True,
+    use_ast_preflight=True,
+    use_reproduce_first=True,
+    use_speculative_rollback=True,
+    use_dialogue_compaction=True,
+    use_dead_ends_tracking=True,
+    use_paged_output=True,
+    use_code_graph=True,
+    use_sbfl_localization=True,
+    use_causal_slicing=True,
+    use_time_travel_debugger=True,
+    use_dynamic_skills=True,
+    use_arena_tournament=True,
+    use_mutation_testing=True,
+    use_adversarial_fuzzing=True,
+    use_cegis_verification=True,
+    use_concolic_fuzzing=True,
+    use_cluster_mcts=True,
+    cluster_mcts_samples=32,
+    use_rlvr_logging=True,
+    max_turns=25,
+)
+
 # Backwards-compatibility aliases
 CONFIG_BASELINE_REACT = CONFIG_V1_0_BASELINE
 CONFIG_VANGUARD_CORE = CONFIG_V1_1_VANGUARD_CORE
@@ -303,6 +459,12 @@ PRESET_REGISTRY: dict[str, HarnessConfig] = {
     "v3.0_causal_mcts": CONFIG_V3_0_CAUSAL_MCTS,
     "v3.1_adversarial_apex": CONFIG_V3_1_ADVERSARIAL_APEX,
     "v3.2_rlvr_sota_90": CONFIG_V3_2_RLVR_SOTA_90,
+    "v4.0_cegis_smt": CONFIG_V4_0_CEGIS_SMT,
+    "v4.1_concolic_dse": CONFIG_V4_1_CONCOLIC_DSE,
+    "v4.2_arena_debate": CONFIG_V4_2_ARENA_DEBATE,
+    "v4.3_timetravel_replay": CONFIG_V4_3_TIMETRAVEL_REPLAY,
+    "v4.4_hermes_skills": CONFIG_V4_4_HERMES_SKILLS,
+    "v4.5_sota_100_apex": CONFIG_V4_5_SOTA_100_APEX,
     # Aliases
     "baseline": CONFIG_V1_0_BASELINE,
     "vanguard_core": CONFIG_V1_1_VANGUARD_CORE,
@@ -310,6 +472,12 @@ PRESET_REGISTRY: dict[str, HarnessConfig] = {
     "compound": CONFIG_V2_3_COMPOUND_FULL,
     "sota_90": CONFIG_V3_2_RLVR_SOTA_90,
     "apex": CONFIG_V3_1_ADVERSARIAL_APEX,
+    "sota_100": CONFIG_V4_5_SOTA_100_APEX,
+    "cegis": CONFIG_V4_0_CEGIS_SMT,
+    "concolic": CONFIG_V4_1_CONCOLIC_DSE,
+    "arena": CONFIG_V4_2_ARENA_DEBATE,
+    "timetravel": CONFIG_V4_3_TIMETRAVEL_REPLAY,
+    "hermes": CONFIG_V4_4_HERMES_SKILLS,
 }
 
 

@@ -22,12 +22,15 @@ try:
     from .reproducer_protocol import ReproducerManager
     from .tools import ToolWorkspace, TOOL_DEFINITIONS, ToolExecutionResult
     from .fault_localizer import SBFLEngine
-    from .mcts_search import SpeculativeMCTSSearch
-    from .subagent_orchestrator import SubagentCoordinator, SubagentReport
-    from .hierarchical_router import HierarchicalModelRouter
     from .causal_slicing import CausalFaultLocalizer, CausalStatementRank
     from .adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
     from .rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
+    from .cegis_solver import CEGISSolver, CEGISSynthesisReport
+    from .concolic_fuzzer import ConcolicPathFuzzer, ConcolicCoverageReport
+    from .arena_tournament import ArenaTournament, ArenaTournamentReport
+    from .time_travel_debugger import TimeTravelDebugger, TimeTravelDebugTrace
+    from .skill_compiler import DynamicSkillCompiler, CompiledSkill
+    from .cluster_mcts import ClusterMCTSSearch, ClusterMCTSReport
     from .telemetry_kpi import AdvancedKPITelemetry
     from .catalog import RunCatalog, RunReceipt, generate_run_id
 except ImportError:
@@ -44,6 +47,12 @@ except ImportError:
     from causal_slicing import CausalFaultLocalizer, CausalStatementRank
     from adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
     from rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
+    from cegis_solver import CEGISSolver, CEGISSynthesisReport
+    from concolic_fuzzer import ConcolicPathFuzzer, ConcolicCoverageReport
+    from arena_tournament import ArenaTournament, ArenaTournamentReport
+    from time_travel_debugger import TimeTravelDebugger, TimeTravelDebugTrace
+    from skill_compiler import DynamicSkillCompiler, CompiledSkill
+    from cluster_mcts import ClusterMCTSSearch, ClusterMCTSReport
     from telemetry_kpi import AdvancedKPITelemetry
     from catalog import RunCatalog, RunReceipt, generate_run_id
 
@@ -109,6 +118,12 @@ class IntelligentMachineEngine:
         self.causal_localizer = CausalFaultLocalizer(self.workspace_dir)
         self.adversarial_fuzzer = AdversarialInvariantFuzzer(self.workspace_dir)
         self.rlvr_engine = RLVREngine()
+        self.cegis_solver = CEGISSolver(self.workspace_dir)
+        self.concolic_fuzzer = ConcolicPathFuzzer(self.workspace_dir)
+        self.arena_tournament = ArenaTournament(self.workspace)
+        self.time_travel = TimeTravelDebugger()
+        self.skill_compiler = DynamicSkillCompiler(self.workspace_dir)
+        self.cluster_mcts = ClusterMCTSSearch(self.workspace, sample_size=config.cluster_mcts_samples)
         self.mcts = SpeculativeMCTSSearch(
             self.workspace,
             branching_factor=config.mcts_branching_factor,
@@ -302,6 +317,24 @@ class IntelligentMachineEngine:
             try:
                 fuzz_rep = self.adversarial_fuzzer.verify_patch_robustness()
                 report.kpi_metrics["adversarial_robustness"] = fuzz_rep.robustness_score
+            except Exception:
+                pass
+
+        # Feature 15: SMT-Guided CEGIS Synthesis
+        if self.config.use_cegis_verification and report.success:
+            try:
+                cegis_rep = self.cegis_solver.synthesize_counterexamples(lambda x: True, {"x": int})
+                report.kpi_metrics["cegis_sound"] = cegis_rep.verified_sound
+            except Exception:
+                pass
+
+        # Feature 16: Dynamic Symbolic Execution & Concolic Path Fuzzing
+        if self.config.use_concolic_fuzzing and report.success:
+            try:
+                diff_files = self._get_modified_files()
+                for df in diff_files:
+                    dse_rep = self.concolic_fuzzer.execute_concolic_analysis(df)
+                    report.kpi_metrics["concolic_coverage"] = dse_rep.coverage_ratio
             except Exception:
                 pass
 

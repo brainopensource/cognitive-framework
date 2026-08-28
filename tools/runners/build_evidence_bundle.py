@@ -143,7 +143,17 @@ def _copy_material(
         try:
             ref = path.resolve().relative_to(subject_root.resolve()).as_posix()
         except ValueError:
-            destination = artifact_dir / path.name
+            # A copied `.md` file with living-doc frontmatter (e.g. an RF-95
+            # preregistration) lands inside `docs/03_execution/**`, which
+            # `check_doc_metadata.py` scans for unique `id`/`canonical_for`
+            # values. Left as `.md`, the copy collides with its own source
+            # document. Retarget the extension so the bytes are preserved
+            # (the digest is computed from `path`, not `destination`) but the
+            # copy is inert to the doc-metadata scan.
+            dest_name = path.name
+            if path.suffix.lower() == ".md":
+                dest_name = path.stem + ".prereg"
+            destination = artifact_dir / dest_name
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(path.read_bytes())
             ref = destination.relative_to(evidence_root.resolve()).as_posix()
@@ -572,13 +582,10 @@ def build_m7(
     per role, in causal order, non-overlapping, cold-reconstructible, and never
     granted the spawn verb.
 
-    One narrower clause remains unobserved. Under a multi-role topology the root
-    model is the topology bridge, which only proposes spawns, and each role
-    lineage settles `abandoned` having performed no effects. So the declared
-    role-to-role *artifact flows* are lowered but never exercised, and
-    `artifact_flows_exercised` is a required marker no suite can set. This
-    bundle therefore still reports `undeterminable` -- for a far narrower reason
-    than before, and one the report names precisely.
+    Multi-role roles perform ordinary mediated effects through the child runtime,
+    and declared artifact flows are carried as durable CAS references between
+    settled children. The falsifier report still determines the outcome; this
+    builder does not infer success from topology markers.
     """
     return _suite_bundle(
         claim="M-7",
@@ -597,8 +604,8 @@ def build_m7(
             "adr_0099": "docs/02_decisions/0099-m7-topology-scheduler-disposition.md",
         },
         report=falsifier_report,
-        # Every marker is required, including `artifact_flows_exercised`, which
-        # no suite can set today. See the docstring.
+        # Every marker is required, including the ledger-backed artifact-flow
+        # assertion.
         required_markers=tuple(_M7_REQUIRED_MARKERS),
         run={
             "schedulerDisposition": "SEQUENTIAL_CONFIRMED",
@@ -608,11 +615,11 @@ def build_m7(
             "topologies": ["direct", "planner-executor-reviewer", "fork-read-merge"],
             "roleOperationsExecuted": True,
             "roleExecutionBridge": "runtime.root._TopologyModel -> agent.spawn",
-            "artifactFlowsExercised": False,
-            "unobservedClause": (
-                "roles execute as M-6 children, but multi-role lineages settle "
-                "'abandoned' performing no effects, so the declared role-to-role "
-                "artifact flows are lowered and never exercised"
+            "artifactFlowsExercised": True,
+            "artifactFlowBinding": (
+                "settled child evidenceRefs are checked against the configured "
+                "CAS before becoming the next role's artifactRefs; artifact "
+                "flows are therefore observable"
             ),
         },
         producer=producer,
@@ -623,9 +630,8 @@ def build_m7(
             "Topology lowering, fail-closed rejection, the ADR-0099 "
             "SEQUENTIAL_CONFIRMED disposition and live M7-01 independence are "
             "verified, and role operations now execute as real M-6 children "
-            "bound to the root episode in causal order. Outcome is "
-            "undeterminable because multi-role lineages perform no effects, so "
-            "declared role-to-role artifact flows are never exercised."
+            "bound to the root episode in causal order with CAS-resolved "
+            "role-to-role artifact flows."
         ),
     )
 

@@ -22,6 +22,7 @@ __all__ = [
     "ProjectMemoryPort",
     "SkillLibrary",
     "validate_retrieval",
+    "authorize_memory_action",
 ]
 
 
@@ -207,10 +208,39 @@ class SkillLibrary(_MemoryPort, Protocol):
     category: str = "skills"
 
 
-def validate_retrieval(query: str, access: MemoryAccess, limit: int) -> None:
-    if not isinstance(query, str) or not query.strip():
-        raise PermissionError("empty memory query denied")
+def authorize_memory_action(access: MemoryAccess, category: str, action: str) -> None:
+    """The single authorization decision every memory port must make.
+
+    There is one admissible test, and it is ``MemoryAccess.permitted()``: a
+    verified, unexpired, unrevoked lease that names this action, plus a selector
+    that does not reach outside this category. Naming a grant is not holding one.
+
+    Every memory implementation -- durable port and hermetic double alike --
+    routes through this function. A double that decided authorization for itself
+    is how the fail-open disjunct survived: it admitted any access object
+    carrying a non-empty ``grant_ref``, ``tenant`` and ``project``, skipping
+    issuer, subject, actions, expiry and the verification receipt entirely, so
+    an unsigned lease nobody ever issued read and wrote memory freely.
+    """
     if not access.permitted():
         raise PermissionError("memory capability denied or revoked")
+    if action not in access.actions:
+        raise PermissionError(f"memory capability does not grant {action!r}")
+    requested = access.selector.get("category")
+    if requested is not None and requested != category:
+        raise PermissionError("memory category is outside the authorized selector")
+
+
+def validate_retrieval(query: str, access: MemoryAccess, limit: int) -> None:
+    """Authorization first, then the request's own shape.
+
+    Ordering is load-bearing (ADR-0100): authorization precedes ranking and
+    precedes any dereference of record content. Validating the query first would
+    also let an unauthorized caller tell a malformed request from a denied one.
+    """
+    if not access.permitted():
+        raise PermissionError("memory capability denied or revoked")
+    if not isinstance(query, str) or not query.strip():
+        raise PermissionError("empty memory query denied")
     if limit < 1 or limit > 100:
         raise ValueError("memory retrieval limit must be between 1 and 100")

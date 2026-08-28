@@ -16,7 +16,13 @@ from ...domain.wire.types_gen import (
     MemoryQuery,
     MemoryRecord,
 )
-from ...ports.memory import MemoryAccess, MemoryResult, RetrievalProvenance, validate_retrieval
+from ...ports.memory import (
+    MemoryAccess,
+    MemoryResult,
+    RetrievalProvenance,
+    authorize_memory_action,
+    validate_retrieval,
+)
 from .blob_store import FileBlobStore
 from ...domain.canonicalisation.digest import digest_of
 
@@ -113,13 +119,7 @@ class DurableMemoryPort:
         self._fact_emitter = fact_emitter
         self._ranker = ranker
 
-    @staticmethod
-    def _authorized(access: MemoryAccess, category: str, action: str) -> None:
-        if not access.permitted() or action not in access.actions:
-            raise PermissionError("memory capability denied or revoked")
-        requested = access.selector.get("category")
-        if requested is not None and requested != category:
-            raise PermissionError("memory category is outside the authorized selector")
+    _authorized = staticmethod(authorize_memory_action)
 
     def write(self, value: Mapping[str, Any], access: MemoryAccess) -> str:
         self._authorized(access, self.category, "write")

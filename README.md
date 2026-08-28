@@ -90,9 +90,10 @@ Mechanism presence is not milestone acceptance; the active board cites the evide
 6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`.
 7. Run SWE-Bench optimization as a separate preregistered measurement program.
 
-`tools/006_LLM_INT_MACHINE/` is a separate research engine and is not modified or imported into the
-Vanguard runtime. Techniques observed there enter Vanguard only through isolated, evidence-backed
-experiments.
+LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may assist
+development and research. They never provide Vanguard runtime or acceptance authority; adopted
+techniques must be independently implemented behind Vanguard interfaces and verified by tests,
+falsifiers, and the normal evidence gates.
 
 ## 2. Documentation authority
 

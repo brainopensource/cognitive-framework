@@ -10,10 +10,12 @@ from __future__ import annotations
 import json
 import os
 import random
+import threading
 import time
 import urllib.error
 import urllib.request
 from codecs import getincrementaldecoder
+from contextlib import contextmanager
 from typing import Any, Callable, Iterable, Iterator, Mapping, Sequence
 
 from ...ports.event_store import Result
@@ -92,6 +94,28 @@ def _set_response_socket_timeout(response: Any, timeout: float) -> None:
                 nested = None
             if nested is not None and id(nested) not in visited:
                 pending.append(nested)
+
+
+@contextmanager
+def _response_read_deadline(response: Any, timeout: float):
+    """Close a provider response if a body read outlives its deadline.
+
+    Some urllib/TLS combinations do not propagate a socket timeout to a
+    chunked body after headers arrive. A daemon timer is an independent
+    enforcement path: closing the response unblocks the read and lets the
+    adapter classify the interruption as a retryable instrument failure.
+    """
+    closer = getattr(response, "close", None)
+    if not callable(closer):
+        yield
+        return
+    timer = threading.Timer(timeout, closer)
+    timer.daemon = True
+    timer.start()
+    try:
+        yield
+    finally:
+        timer.cancel()
 
 
 def estimate_tokens(text: str) -> int:
@@ -196,7 +220,9 @@ def _http_post(
         with urllib.request.urlopen(request, timeout=timeout) as response:
             _set_response_socket_timeout(response, timeout)
             resp_headers = {k.lower(): v for k, v in response.headers.items()}
-            return int(response.status), resp_headers, response.read()
+            with _response_read_deadline(response, timeout):
+                raw = response.read()
+            return int(response.status), resp_headers, raw
     except urllib.error.HTTPError as exc:
         resp_headers = (
             {k.lower(): v for k, v in exc.headers.items()}
@@ -230,7 +256,8 @@ def _http_stream(
     def chunks() -> Iterator[bytes]:
         with response:
             while True:
-                chunk = response.read(8_192)
+                with _response_read_deadline(response, timeout):
+                    chunk = response.read(8_192)
                 if not chunk:
                     return
                 yield chunk

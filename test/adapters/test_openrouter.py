@@ -11,6 +11,7 @@ import ast
 import json
 import os
 import socket
+import threading
 import unittest
 import urllib.error
 from pathlib import Path
@@ -20,6 +21,7 @@ from vanguard.packages.adapters.models.cassette import Cassette
 from vanguard.packages.adapters.models.openrouter import (
     OpenRouterModel,
     OpenRouterModelAdapter,
+    _response_read_deadline,
     _set_response_socket_timeout,
     calculate_cost,
     calculate_cost_micros,
@@ -94,6 +96,16 @@ class OpenRouterModelContract(unittest.TestCase):
     def test_non_socket_provider_response_keeps_typed_path(self) -> None:
         # Test doubles commonly expose no urllib socket internals.
         _set_response_socket_timeout(object(), 7.5)
+
+    def test_provider_body_deadline_closes_a_stalled_response(self) -> None:
+        closed = threading.Event()
+
+        class Response:
+            def close(self) -> None:
+                closed.set()
+
+        with _response_read_deadline(Response(), 0.01):
+            self.assertTrue(closed.wait(1.0))
 
     def test_cassette_replay_does_not_touch_the_network(self) -> None:
         cassette = Cassette()

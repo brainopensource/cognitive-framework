@@ -11,6 +11,8 @@ from tools.runners.run_swe_challenge import (
     SMOKE_CHALLENGES,
     _benchmark_identity,
     _changed_files,
+    _diagnose_result,
+    _execution_deadline,
     _enrich_result,
     _snapshot_digest,
     get_diff_size,
@@ -19,11 +21,42 @@ from tools.runners.run_swe_challenge import (
 
 
 class SweChallengeRunnerTests(unittest.TestCase):
+    def test_execution_deadline_rejects_non_positive_values(self) -> None:
+        with self.assertRaises(ValueError):
+            with _execution_deadline(0):
+                pass
+
+    def test_execution_deadline_interrupts_a_stuck_operation(self) -> None:
+        with self.assertRaises(TimeoutError):
+            with _execution_deadline(0.01):
+                while True:
+                    pass
+
     def test_missing_runtime_result_is_an_instrument_failure(self) -> None:
         row = _enrich_result({"passed": False}, None)
         self.assertEqual(row["terminal"], "instrument_error")
         self.assertEqual(row["instrument_error"], "runtime_result_missing")
         self.assertFalse(row["passed"])
+
+    def test_completed_episode_without_patch_has_explicit_task_diagnosis(self) -> None:
+        self.assertEqual(
+            _diagnose_result(True, [], True),
+            "completed_without_source_patch",
+        )
+
+    def test_diagnosis_distinguishes_terminal_and_oracle_failures(self) -> None:
+        self.assertEqual(
+            _diagnose_result(False, [], False),
+            "terminal_not_completed",
+        )
+        self.assertEqual(
+            _diagnose_result(True, ["src/module.py"], False),
+            "source_patch_failed_oracle",
+        )
+        self.assertEqual(
+            _diagnose_result(True, ["src/module.py"], True),
+            "completed_patch_passed_oracle",
+        )
 
     def test_smoke_set_is_fixed_and_diverse(self) -> None:
         self.assertEqual(len(SMOKE_CHALLENGES), 12)

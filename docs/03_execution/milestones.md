@@ -181,7 +181,8 @@ controls, confidence intervals, and an independent rerun. Development MAY use st
 subsets, but the sealed set MUST NOT be repeatedly tuned against. A target such as `pass@1 > 60%` is
 an experimental objective until its exact evidence independently verifies.
 
-Research systems outside `vanguard/packages/`, including `tools/006_LLM_INT_MACHINE/`, remain separate
-experimental subjects. They MUST NOT be modified by Vanguard delivery work or imported as a second
-runtime. A preset, workflow, manifest, or technique observed there MAY enter Vanguard only as an
-independently identified treatment with invariant-preserving evidence against the current baseline.
+Research systems outside `vanguard/packages/`, including LIM and LEX, may be used as development
+assistants and experimental subjects. They MUST NOT become a second Vanguard runtime or acceptance
+authority. A preset, workflow, manifest, or technique used in Vanguard MUST be independently
+implemented behind the existing interfaces and supported by invariant-preserving evidence against
+the current baseline.

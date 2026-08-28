@@ -179,9 +179,13 @@ historical evidence only.
   comparative claim MUST pin the task set, repositories, sandbox, evaluator, harness, model/provider,
   budgets, timeout, and contamination policy. Random model routing MUST NOT be used for a reproducible
   comparison, and repeated tuning against a sealed evaluation set MUST invalidate the claim.
-- `tools/006_LLM_INT_MACHINE/` is a separate research subject. Vanguard production code MUST NOT
-  depend on it, mutate it, or treat its mechanisms as accepted Vanguard architecture. Transfer of a
-  technique requires an explicit isolated treatment, preserved invariants, and accepted evidence.
+- LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) MAY be used
+  as development and research assistants for Vanguard work. They are not Vanguard runtime,
+  authority, evaluator, or acceptance paths. Their outputs MUST remain advisory until a technique
+  is independently implemented behind Vanguard interfaces, preserves the kernel, capability,
+  budget, event, isolation, and evidence invariants, and passes focused falsifiers. Production
+  code MUST NOT import an external engine as a second runtime, and benchmark claims MUST use the
+  normal pinned measurement and independent-verification process.
 
 ## v0.7+ concept lock
 

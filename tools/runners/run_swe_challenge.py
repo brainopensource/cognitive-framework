@@ -7,12 +7,14 @@ Executes SWE challenges against the Vanguard coding engine.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import difflib
 import hashlib
 import json
 import os
 import secrets
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -53,6 +55,40 @@ SMOKE_CHALLENGES = (
 # provider or network is unavailable.
 BENCHMARK_MAX_RETRIES = 1
 BENCHMARK_REQUEST_TIMEOUT_SECONDS = 15.0
+BENCHMARK_RUN_TIMEOUT_SECONDS = 300.0
+
+
+@contextmanager
+def _execution_deadline(seconds: float):
+    """Bound one benchmark episode, including non-HTTP runtime work.
+
+    The model adapter bounds socket operations, but an episode can also wait
+    in a child/runtime boundary or a provider iterator.  A benchmark driver
+    must emit a typed instrument result instead of hanging indefinitely.  The
+    POSIX timer is intentionally scoped to this process-local runner and is a
+    no-op on platforms without ``SIGALRM``.
+    """
+    if seconds <= 0:
+        raise ValueError("run timeout must be positive")
+    if not hasattr(signal, "SIGALRM") or not hasattr(signal, "setitimer"):
+        yield
+        return
+
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.getitimer(signal.ITIMER_REAL)
+
+    def raise_timeout(_signum: int, _frame: Any) -> None:
+        raise TimeoutError(f"benchmark episode exceeded {seconds:.1f}s deadline")
+
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0] > 0:
+            signal.setitimer(signal.ITIMER_REAL, *previous_timer)
 
 
 def _snapshot_tree(root: Path) -> dict[str, bytes]:
@@ -194,6 +230,27 @@ def _enrich_result(result_row: dict[str, Any], runtime_result: Any) -> dict[str,
     return result_row
 
 
+def _diagnose_result(
+    completed: bool,
+    changed_files: list[str],
+    oracle_passed: bool,
+) -> str:
+    """Explain why the patch/oracle gate did or did not pass.
+
+    A completed episode is runtime evidence only.  In particular, a model can
+    terminate normally after deciding that no edit is needed; that must remain
+    a task failure, but it is materially different from an instrument failure
+    or an oracle-rejected patch.
+    """
+    if not completed:
+        return "terminal_not_completed"
+    if not changed_files:
+        return "completed_without_source_patch"
+    if not oracle_passed:
+        return "source_patch_failed_oracle"
+    return "completed_patch_passed_oracle"
+
+
 def _write_report(path: str, results: list[dict[str, Any]]) -> None:
     """Write one immutable JSON report; never replace a prior measurement."""
     destination = Path(path).expanduser()
@@ -211,7 +268,12 @@ def _write_report(path: str, results: list[dict[str, Any]]) -> None:
         handle.write("\n")
 
 
-def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, Any]:
+def run_challenge(
+    challenge_id: str,
+    model: str,
+    keep_dir: bool,
+    run_timeout: float = BENCHMARK_RUN_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
     """Run a single SWE challenge."""
     challenge = CHALLENGES[challenge_id]
     scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_swe_{challenge_id}_"))
@@ -259,17 +321,18 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
         
         runtime_exception: str | None = None
         try:
-            result = Runtime.execute_profiled(
-                manifest_path,
-                task,
-                profile_id="product",
-                model=model_obj,
-                store_path=str(db_path),
-                blobs=FileBlobStore(blob_path),
-                interactive=True,
-                approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-                approval_key=signer.public_bytes,
-            )
+            with _execution_deadline(run_timeout):
+                result = Runtime.execute_profiled(
+                    manifest_path,
+                    task,
+                    profile_id="product",
+                    model=model_obj,
+                    store_path=str(db_path),
+                    blobs=FileBlobStore(blob_path),
+                    interactive=True,
+                    approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+                    approval_key=signer.public_bytes,
+                )
         except Exception as exc:
             # Preserve the row as an instrument failure. Record only the
             # exception class; adapter-level transport details own redaction.
@@ -303,6 +366,7 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             "passed": passed,
             "oracle_passed": oracle_passed,
             "changed_files": changed_files,
+            "diagnosis": _diagnose_result(completed, changed_files, oracle_passed),
             "elapsed": elapsed,
             "turns": turns,
             "tokens": tokens,
@@ -321,7 +385,12 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             shutil.rmtree(scratch_dir, ignore_errors=True)
 
 
-def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict[str, Any]:
+def run_verified_challenge(
+    instance_id: str,
+    model: str,
+    keep_dir: bool,
+    run_timeout: float = BENCHMARK_RUN_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
     """Run a real SWE-bench Verified instance."""
     verified_repo = _REPO_ROOT / "tools/005_SWE_VERIFIED_REPO" / instance_id
     if not verified_repo.exists():
@@ -384,17 +453,18 @@ def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict
         
         runtime_exception: str | None = None
         try:
-            result = Runtime.execute_profiled(
-                manifest_path,
-                task,
-                profile_id="product",
-                model=model_obj,
-                store_path=str(db_path),
-                blobs=FileBlobStore(blob_path),
-                interactive=True,
-                approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-                approval_key=signer.public_bytes,
-            )
+            with _execution_deadline(run_timeout):
+                result = Runtime.execute_profiled(
+                    manifest_path,
+                    task,
+                    profile_id="product",
+                    model=model_obj,
+                    store_path=str(db_path),
+                    blobs=FileBlobStore(blob_path),
+                    interactive=True,
+                    approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+                    approval_key=signer.public_bytes,
+                )
         except Exception as exc:
             result = None
             runtime_exception = type(exc).__name__
@@ -481,6 +551,7 @@ if __name__ == "__main__":
             "passed": passed,
             "oracle_passed": oracle_passed,
             "changed_files": changed_files,
+            "diagnosis": _diagnose_result(completed, changed_files, oracle_passed),
             "elapsed": elapsed,
             "turns": turns,
             "tokens": tokens,
@@ -513,6 +584,10 @@ def main() -> int:
 
     parser.add_argument("--model", type=str, default=get_default_model(), help="Model to use")
     parser.add_argument("--keep-dir", action="store_true", help="Keep temporary scratch directories")
+    parser.add_argument(
+        "--run-timeout", type=float, default=BENCHMARK_RUN_TIMEOUT_SECONDS,
+        help="Maximum seconds for one runtime episode (default: 300)",
+    )
     parser.add_argument("--report", type=str, default=None,
                         help="Write an immutable JSON measurement report (must not already exist)")
     args = parser.parse_args()
@@ -528,7 +603,9 @@ def main() -> int:
     
     if args.verified:
         print(f"\n{'=' * 60}\nRunning VERIFIED {args.verified}...\n{'=' * 60}")
-        res_data = run_verified_challenge(args.verified, args.model, args.keep_dir)
+        res_data = run_verified_challenge(
+            args.verified, args.model, args.keep_dir, args.run_timeout,
+        )
         results.append(res_data)
     else:
         # Determine which challenges to run
@@ -563,7 +640,7 @@ def main() -> int:
         
         for cid in to_run:
             print(f"\n{'=' * 60}\nRunning {cid}...\n{'=' * 60}")
-            res_data = run_challenge(cid, args.model, args.keep_dir)
+            res_data = run_challenge(cid, args.model, args.keep_dir, args.run_timeout)
             results.append(res_data)
 
     # Print summary report

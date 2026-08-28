@@ -2256,9 +2256,11 @@ NON-NEGOTIABLE SCOPE
 
 - Focus on Vanguard backend runtime, agency, adapters, persistence, packaging, CLI/service backend, plugins, tests, evidence-producing tools, and M-9 release tooling.
 - Do not edit frontend clients or TypeScript/React/Ink code.
-- Never modify, move, delete, reformat, import, or depend on:
-  tools/006_LLM_INT_MACHINE/**
-- That directory is a separate research engine. It may be read only for ideas. Any borrowed technique must first be an isolated Vanguard treatment with evidence.
+- LIM (`tools/006_LLM_INT_MACHINE/**`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may be used
+  as development assistants for diagnosis, review, and bounded coding. Their output is advisory;
+  no external engine may become a second runtime, authority, evaluator, or acceptance path. Any
+  adopted technique must be independently implemented behind Vanguard interfaces and pass the
+  ordinary invariant, falsifier, security, and evidence gates.
 - Do not create a second runtime.
 - Do not bypass Runtime.run_composed.
 - Do not use topology-specific execution engines.
@@ -2786,7 +2788,8 @@ Report:
 - external commit/tag/key/reviewer gates;
 - M-9 artifact identities;
 - M-10 plan only;
-- confirmation that no frontend or tools/006_LLM_INT_MACHINE file changed.
+- confirmation of any LIM/LEX use, with proof that no external engine became runtime or acceptance
+  authority and that all resulting Vanguard changes passed the required gates.
 
 ## Prompt for Dev B — Verification, Evidence, and M-9 Qualification
 
@@ -2810,9 +2813,10 @@ NON-NEGOTIABLE SCOPE
 - Never fabricate a clean subject, commit, tag, remote tag resolution, model execution, artifact, or signature.
 - Do not modify Vanguard runtime implementation unless a contract/falsifier defect is directly in Lane B scope.
 - Do not edit frontend clients.
-- Never modify, move, delete, import, or depend on:
-  tools/006_LLM_INT_MACHINE/**
-- You may read that directory only as an independent research reference.
+- LIM (`tools/006_LLM_INT_MACHINE/**`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may be used
+  as advisory development and research assistants. They must not supply Vanguard runtime,
+  evaluator, or acceptance authority; any adopted technique must be independently implemented and
+  falsified behind Vanguard interfaces.
 - Do not run Git commands or scripts that internally invoke Git.
 - Do not implement M-10.
 
@@ -3292,4 +3296,5 @@ Report:
 - M-9 package and evidence digests;
 - benchmark results with costs and confidence intervals;
 - M-10 verification plan only;
-- confirmation that no frontend or tools/006_LLM_INT_MACHINE file changed.
+- confirmation of any LIM/LEX use and evidence that Vanguard remained the sole runtime and authority
+  path.

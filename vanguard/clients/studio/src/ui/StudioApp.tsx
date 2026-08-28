@@ -77,6 +77,9 @@ export const StudioApp: React.FC<StudioAppProps> = ({
   const [selectedEffectDesc, setSelectedEffectDesc] = useState<string | undefined>();
   const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>();
   const [filterQuery, setFilterQuery] = useState<string>("");
+  const [showCommandPalette, setShowCommandPalette] = useState<boolean>(false);
+  const [paletteQuery, setPaletteQuery] = useState<string>("");
+  const [paletteIndex, setPaletteIndex] = useState<number>(0);
 
   const activeEffect = selectedEffectDesc
     ? fold.effects.get(selectedEffectDesc)
@@ -86,6 +89,21 @@ export const StudioApp: React.FC<StudioAppProps> = ({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+        setPaletteQuery("");
+        setPaletteIndex(0);
+        return;
+      }
+      if (showCommandPalette) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          setShowCommandPalette(false);
+          return;
+        }
+        return;
+      }
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       const surfaceByKey: Record<string, StudioSurface> = {
         "1": "coding",
@@ -107,7 +125,7 @@ export const StudioApp: React.FC<StudioAppProps> = ({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onSelectSurface]);
+  }, [onSelectSurface, showCommandPalette]);
 
   const activeTabInfo = NAV_TABS.find((t) => t.id === session.activeSurface) || NAV_TABS[0];
 
@@ -167,6 +185,30 @@ export const StudioApp: React.FC<StudioAppProps> = ({
 
         {/* 6D Economic Tensor Telemetry */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={() => {
+              setShowCommandPalette(true);
+              setPaletteQuery("");
+              setPaletteIndex(0);
+            }}
+            style={{
+              padding: "4px 8px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-medium)",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--text-secondary)",
+              fontSize: 10,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span>⌘K</span>
+            <span>Palette</span>
+          </button>
+          <span style={{ fontSize: 10, color: "var(--text-faint)" }}>•</span>
           <div className="font-mono" style={{ fontSize: 10, color: "var(--text-secondary)" }}>
             Seq: <strong style={{ color: "var(--text-primary)" }}>{fold.atSeq.toString()}</strong>
           </div>
@@ -381,6 +423,127 @@ export const StudioApp: React.FC<StudioAppProps> = ({
           {session.selectedSeq === 0n || session.selectedSeq >= (latestSeq ?? fold.atSeq) ? "● LIVE HEAD" : `⧗ seq ${session.selectedSeq}`}
         </span>
       </footer>
+
+      {/* Interactive Command Palette Modal (⌘K / Ctrl+K) */}
+      {showCommandPalette && (
+        <div
+          onClick={() => setShowCommandPalette(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(6px)",
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            paddingTop: "12vh",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 540,
+              maxHeight: "65vh",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-medium)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-elevation)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ color: "var(--signal-flow)", fontSize: 14 }}>🔍</span>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Type a surface (e.g. coding, generality, diff, audit)..."
+                value={paletteQuery}
+                onChange={(e) => {
+                  setPaletteQuery(e.target.value);
+                  setPaletteIndex(0);
+                }}
+                onKeyDown={(e) => {
+                  const filtered = NAV_TABS.filter(
+                    (t) =>
+                      t.label.toLowerCase().includes(paletteQuery.toLowerCase()) ||
+                      t.desc.toLowerCase().includes(paletteQuery.toLowerCase())
+                  );
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setPaletteIndex((i) => (i + 1) % Math.max(1, filtered.length));
+                  } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setPaletteIndex((i) => (i - 1 + filtered.length) % Math.max(1, filtered.length));
+                  } else if (e.key === "Enter" && filtered[paletteIndex]) {
+                    e.preventDefault();
+                    onSelectSurface(filtered[paletteIndex].id);
+                    setShowCommandPalette(false);
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "var(--text-primary)",
+                  fontSize: 13,
+                  fontFamily: "var(--font-sans)",
+                }}
+              />
+              <span className="badge-mono" style={{ fontSize: 9, color: "var(--text-muted)" }}>
+                ESC to close
+              </span>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
+              {NAV_TABS.filter(
+                (t) =>
+                  t.label.toLowerCase().includes(paletteQuery.toLowerCase()) ||
+                  t.desc.toLowerCase().includes(paletteQuery.toLowerCase())
+              ).map((tab, idx) => {
+                const isSelected = idx === paletteIndex;
+                return (
+                  <div
+                    key={tab.id}
+                    onClick={() => {
+                      onSelectSurface(tab.id);
+                      setShowCommandPalette(false);
+                    }}
+                    onMouseEnter={() => setPaletteIndex(idx)}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: "var(--radius-sm)",
+                      background: isSelected ? "var(--bg-card)" : "transparent",
+                      border: isSelected ? "1px solid var(--signal-flow)" : "1px solid transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 16 }}>{tab.icon}</span>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 12, color: "var(--text-primary)" }}>{tab.label}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-secondary)" }}>{tab.desc}</div>
+                      </div>
+                    </div>
+                    <span className="badge-mono" style={{ color: "var(--text-muted)", fontSize: 9 }}>
+                      {tab.shortcut}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

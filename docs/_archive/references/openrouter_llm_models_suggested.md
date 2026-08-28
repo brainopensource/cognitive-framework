@@ -17,6 +17,7 @@
 
 - deepseek/deepseek-v4-flash-0731 (v2 coding)
 - deepseek/deepseek-v4-flash (v2 0423)
+- z-ai/glm-5.3-flash
 - openai/gpt-5.6-luna
 - qwen/qwen3.8-27b
 - stepfun/step-3.7-flash

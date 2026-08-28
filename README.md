@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: documentation-architect
 version: "0.7.3.dev0"
-last_verified: 2026-08-26
+last_verified: 2026-08-28
 supersedes: []
 superseded_by: null
 ---
@@ -29,7 +29,14 @@ promotion evidence are **optional assurance profiles** — real capabilities, no
 
 The architectural authority is [`VISION.md`](VISION.md) (Law Zero, `ADR-0095`).
 
-AETHER is an event-sourced general agentic computation substrate — a domain-blind ~1,373-LOC kernel enforcing S0–S12 capability dispatch and typed budgets, a durable SQLite-WAL ledger where state is a fold over causal facts and any process can reopen and continue, and above it composition, mediated recursive delegation, declarative topologies, authorized durable memory and governed CAS promotion, all as derived capabilities rather than new cores — with the backend mechanism roughly 90% built and the real remaining work being three fail-open defects plus independent evidence receipts for M-4 through M-8. Next, nothing happens on M-9/M-10 until M-8 is independently accepted — that's the standing prohibition, and the seams they'll need (immutable run-plan extensions, authorized memory ports, immutable composition manifests, evidence envelopes, exterior candidate generators) already exist as byproducts of doing M-7 and M-8 correctly; after M-8 acceptance and a fresh authorization, M-9 becomes the v1.0 integration and transfer release — frozen public protocol with a compatibility policy, a third non-coding workload proving generality beyond code and formal, long-run recovery, operational SLOs, installer and independent-user qualification — and M-10 stays post-1.0 research into causal self-models and architecture evolution, admissible only on measured superiority over simpler methods and governed through the same generator/evaluator/promoter path, with anything beyond that (distributed scheduling, topology search, continuous learning) requiring its own falsifier and successor ADR rather than inheriting authority from this roadmap.
+AETHER is an event-sourced general agentic computation substrate: a bounded domain-blind kernel
+enforces S0–S12 dispatch and typed budgets; a SQLite-WAL ledger makes state a fold over causal facts;
+and composition, recursive delegation, declarative topologies, authorized durable memory, and governed
+learning remain higher-layer capabilities rather than new cores. M-1 through M-3 are preservation
+anchors and M-6 has accepted recursion evidence. The current delivery path is to close M-4/M-5/M-6.5
+evidence, make M-7 roles perform real artifact-producing work, independently accept M-8, then qualify
+the installable M-9 `0.9.0b1` beta and M-10 `0.9.0` release. Mechanism presence and green tests never
+substitute for exact-subject independently accepted receipts.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -41,7 +48,7 @@ observe → propose → authorize → effect → receipt → evaluate
 | **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0103`](docs/02_decisions/0103-progress-projection-and-checkpoint-contract.md) and [`0099`](docs/02_decisions/0099-m7-topology-scheduler-disposition.md) |
 | **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Current status** | [`sprint_active.md`](docs/03_execution/sprint_active.md) is the sole current-state source; status is not duplicated here. |
-| **Roadmap** | M-4 → M-5a event-derived agent → {M-5b generality ∥ M-6 delegation} → M-6.5 adaptive strategy → M-7 topologies & justified concurrency → M-8 memory/skills/learning → M-9 v1.0 |
+| **Roadmap** | M-4 → M-5a → {M-5b ∥ accepted M-6} → M-6.5 → M-7 → M-8 → M-9 `0.9.0b1` → M-10 `0.9.0` |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
@@ -59,17 +66,34 @@ This section is deliberately honest about the gap. The target below is binding a
 | Canonical composition → activation → run | **Works.** One authority (RF-78–RF-84) | unchanged |
 | Capability-mediated effects, typed budgets | **Works.** S0–S12, monotonic attenuation, TCB ≤ 1438 LOC | unchanged |
 | Execution profiles in `D_R` | **Works.** `product`/`local`/`sandboxed`/`hermetic`, fail-closed | + retention/reproducibility axis (M-4) |
-| Coding agent product (`vg code`, resume) | Mechanism present; RF-95 bundle/review absent | accepted useful end-to-end proof (M-4) |
+| Coding agent product (`vg code`, resume) | **RF-95 verified `passed`** (`M-4-rf95-candidate-07`); acceptance is operator-attested, not yet from an organizationally independent reviewer | accepted useful end-to-end proof with a genuinely separate reviewer (M-4) |
 | Scientific trajectory capture | `/2`, model I/O and provenance mechanisms present | independently accepted release evidence |
 | Agent state as projection | `AgentView` and checkpoints implemented | accepted successor baseline (M-5a) |
 | Second domain (formal pack) | SAT material path demonstrated; historical control invalid | fresh graph-coloring falsifier after successor baseline (M-5b) |
-| `agent.spawn` / recursive delegation | Partial; synthetic-success fallback and recovery/identity/budget gaps | canonical nested execution lineages (M-6) |
-| Metacognition / adaptive strategy | **Accepted.** Verified paired study and independent acceptance envelope | valid positive or negative paired study (M-6.5) |
-| Topologies, scheduler, concurrency | Lowering integrated into `Runtime.run_composed`; ADR-0099 recorded | three topologies plus ADR-0099 disposition (M-7) |
+| `agent.spawn` / recursive delegation | Mechanism and accepted depth-3/recovery/budget evidence present | preserve canonical nested execution lineages (M-6) |
+| Metacognition / adaptive strategy | Mechanism present; published study is `undeterminable` | valid positive or negative paired study (M-6.5) |
+| Topologies, scheduler, concurrency | Roles lower and spawn through `Runtime.run_composed`; multi-role effects/artifact flow remain open | three real artifact-producing topologies plus ADR-0099 disposition (M-7) |
 | Memory, retrieval, skills, learning | Durable memory ports, CAS storage, and governed learning engine implemented | verified durable memory, lift, CAS promotion/rollback (M-8) |
 | Hermetic assurance (RF-85) | **Available, optional, claims zero rows** | stays optional |
 
 Mechanism presence is not milestone acceptance; the active board cites the evidence gaps.
+
+### Immediate delivery order
+
+1. ~~Publish and independently verify M-4 `candidate-06`~~ done as `candidate-07` (verifies `passed`);
+   obtain a genuinely independent reviewer signature to close the remaining organizational-independence
+   gap.
+2. Publish annotated remote `CONVERGENCE-BASE-v1`, then re-emit M-5b.
+3. Re-emit the corrected M-6.5 study without reinterpreting its undeterminable predecessor.
+4. Make M-7 multi-role children perform real effects and exchange artifacts by digest.
+5. Publish and independently accept M-8 from an immutable clean subject.
+6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`.
+7. Run SWE-Bench optimization as a separate preregistered measurement program.
+
+LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may assist
+development and research. They never provide Vanguard runtime or acceptance authority; adopted
+techniques must be independently implemented behind Vanguard interfaces and verified by tests,
+falsifiers, and the normal evidence gates.
 
 ## 2. Documentation authority
 

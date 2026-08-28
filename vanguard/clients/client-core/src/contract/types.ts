@@ -140,6 +140,16 @@ export type ApprovalDecision = {
   signature: string;
 };
 
+export interface SignerPort {
+  readonly keyId: string;
+  readonly principal?: string;
+  signChallenge(
+    challenge: ApprovalChallenge,
+    resolution?: "approved" | "rejected",
+    reviewer?: string
+  ): Promise<ApprovalDecision> | ApprovalDecision;
+}
+
 export interface RuntimeClient {
   startRun(request: StartRunRequest, signal?: AbortSignal): Promise<Result<RunRef>>;
   streamEvents(cursor: EventCursor, signal?: AbortSignal): AsyncIterable<Result<StreamItem>>;

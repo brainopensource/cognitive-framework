@@ -2,7 +2,7 @@ import { generateKeyPairSync, sign, type KeyObject, createPrivateKey } from "nod
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import type { ApprovalChallenge, ApprovalDecision } from "../contract/types.js";
+import type { ApprovalChallenge, ApprovalDecision, SignerPort } from "../contract/types.js";
 
 export function jcsCanonicalize(value: unknown): string {
   if (value === null || typeof value !== "object") {
@@ -23,9 +23,10 @@ export function defaultKeyDir(): string {
   return join(homedir(), ".vanguard", "keys");
 }
 
-export class OperatorSigner {
+export class OperatorSigner implements SignerPort {
   private readonly privateKey: KeyObject;
   public readonly keyId: string;
+  public readonly principal: string = "operator";
 
   constructor(privateKeyPemOrKey?: KeyObject | string, keyId: string = "operator-key-default") {
     this.keyId = keyId;

@@ -6,155 +6,159 @@ canonical_for:
   - active-sprint-tasks
   - current-milestone-gates
 status: living
-owner: tech-lead
-version: "1.0.0"
-last_verified: 2026-08-27
+owner: repository-governance
+version: "1.2.0"
+last_verified: 2026-08-28
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
 ---
 
-# Active Sprint C1 — Truth Restoration and Recursive Runtime Repair
+# Active Delivery Board — AETHER v0.9
 
-This is the sole current work authorization. Stable task contracts are in
-[`backlog.md`](backlog.md); later or dependency-blocked work is in
-[`sprint_upcoming.md`](sprint_upcoming.md). Status uses ADR-0101 only.
+This is the sole current execution board. Stable task contracts are in
+[`backlog.md`](backlog.md); later or dependency-qualified work is in
+[`sprint_upcoming.md`](sprint_upcoming.md). Package and evidence states use ADR-0101.
 
 ## Verified baseline
 
 - Branch: `feat_higgs_M4_M8`.
-- Verification subject before convergence edits:
-  `15fbb7514ec3d8030da5259d2291acdf37c8686d`.
-- `M-5A-BASE-v2`: local lightweight ref at `1b4ce1a...`; absent from the configured remote;
-  contains successor treatment code; disposition `CONTAMINATED_UNPUBLISHED` (ADR-0102).
-- RF-86: **fails** on 111 added protected-substrate lines at the verification subject.
-- RF-98: structural Kernel neutrality and Kernel diff are green against the local tag, but this
-  cannot validate the contaminated control.
-- RF-95/M-6 release bundles: **produced** by WP-A1 in `docs/03_execution/evidence/`, and now
-  **producer-signed** (`dev-a-operator`). Both record `undeterminable`, not `passed`:
-  - `M-4-rf95-candidate-03.json` — the run did not bind its preregistration (empty
-    `preregistration_digest`), and its ledger artifact lived in a volatile temporary
-    directory whose bytes no longer match the recorded digest, so the material is
-    unresolvable. The runner now threads preregistration and can export portable artifacts.
-  - `M-6-canonical-recursion.json` — `pins.dirty` is true, so the pinned commit does not
-    name the bytes that produced the result and a reviewer cannot recompute it.
+- Baseline commit: `43731e4`.
+- Contract dataset: `aether.work-package/1`, backlog version `1.0.0`.
 
-  Independent reviewer envelopes were generated for all four bundles and pass cryptographic,
-  digest-binding, and producer-separation checks. The M-4 and M-6 envelopes do not close their
-  milestones because their producer outcomes remain `undeterminable`; M-5b remains blocked on the
-  successor baseline.
-- WP-B1 evidence bundle is present as `M-5b-graph-coloring.json`, with an independent reviewer
-  envelope, but its outcome remains `undeterminable` pending the successor baseline and remote
-  resolution. WP-B1 therefore remains `PACKAGE_READY` pending baseline qualification.
-- Original RF-95 bundle: searched for and **not recoverable** (git history at `349c7d1`
-  carries only the test and runner). Three preregistered candidates were executed;
-  01 and 02 were `UNDETERMINABLE` on diagnosed instrument defects, 03 passed.
+## Current Lane A and Lane B packages
 
-## Canonical milestone status
+Each lane has one current package. A package advances when its predicates are true;
+no person, committee, or process approval is an entry dependency.
 
-This is the sole current milestone-status table. `Merge` records mechanism presence only; `Gate`
-records acceptance independently. Empty `Evidence` means no qualifying repository receipt. All rows
-were verified against `15fbb7514ec3d8030da5259d2291acdf37c8686d` plus the uncommitted convergence diff.
-
-| Milestone | Mechanism / integration truth | Package state | Merge | Gate | Evidence | Blocked on |
+| Lane | Package | Contract | Baseline | State | Completion predicate | Next |
 |---|---|---|---|---|---|---|
-| M-0–M-3C/W-3D | Historical mechanisms integrated | **ACCEPTED** | `MERGED` | `ACCEPTED` | accepted ADR/gate lineage | — |
-| M-4 | `/2`, RF-100 and product runner present; RF-95 candidate 03 executed and passed its five conditions | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-4-rf95-candidate-03.json` (`sha256:5a98afee…`, signed, outcome `undeterminable`) | re-executed candidate under the preregistration-binding runner, then independent acceptance |
-| M-5a | AgentView/checkpoints integrated; historical control invalid | **PACKAGE_READY** | `MERGED` | `OPEN` | `[]` | accepted successor baseline |
-| M-5b | Graph coloring material run, exterior oracle, and daemon signatures verified; undeterminable without remote control | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-5b-graph-coloring.json` (`sha256:cb0a3956…`) | successor baseline, remote tag, review |
-| M-6 | Synthetic success removed; real `ChildRuntimePort` re-enters `run_composed`; durable derived identity; componentwise reservation; open-subtree reconciliation | **PACKAGE_READY** | `MERGED` | `OPEN` | `M-6-canonical-recursion.json` (`sha256:33316512…`, signed, outcome `undeterminable`) | re-production against a clean subject with depth>=3 and kill-tree artifacts, then independent acceptance |
-| M-6.5 | Stochastic attributable paired study and signed evidence envelope produced | **ACCEPTED** | `MERGED` | `ACCEPTED` | `M-6.5-attributable-paired-study.json` (`sha256:293e738c…`) + independent acceptance envelope | — |
-| M-7 | Topology lowering is wired through `Runtime.run_composed`; the shipped default composition has no `agent.spawn`, so multi-role live execution remains fail-closed | **PACKAGE_READY** | `PARTIAL` | `OPEN` | `[]` | live three-topology execution, signed M7-01 envelope, and acceptance |
-| M-8 | Capability-mediated memory contracts, turn-loop retrieval, causal experience emission, and durable governed-learning restore are present; acceptance evidence remains open | **PACKAGE_READY** | `PARTIAL` | `OPEN` | `[]` | authorized memory evidence and held-out lift acceptance |
-| M-9/M-10 | Compatibility horizon only | **NOT_STARTED** | `NONE` | `NOT_AUTHORIZED` | `[]` | M-8 acceptance and new authority |
+| Lane A | WP-A3 | `1.0.0` | `3e8b081` | **IN_PROGRESS** | `three_topology_receipts_resolve AND role_operations_execute_real_effects AND artifact_flows_resolve_from_persisted_receipts` | Repair abandoned multi-role lineages; publish M-7 evidence only after real artifact flow |
+| Lane B | WP-B4 | `1.0.0` | exact bundle subjects | **PACKAGE_READY** | `m4_verified` (**done**, `candidate-07`, operator-attested not org-independent) `AND convergence_base_v1_verified AND m5b_successor_verified AND m65_successor_disposition_verified AND m8_independently_accepted` | Close remaining evidence dependencies in order; never reinterpret failed/undeterminable bundles |
 
-## Active packages
+## Package state ledger
 
-| ID | Milestone | Owner | State | Dependencies | Acceptance evidence |
-|---|---|---|---|---|---|
-| WP-A1 | M-4/M-6 release path and canonical recursive child runtime | Dev A | **PACKAGE_READY** | accepted ADR-0101/0102 contracts | RF-101…RF-113 green; M-4/M-6 bundles producer-signed but `undeterminable` (unbound preregistration; unresolvable artifact; dirty subject). Re-execution against a clean subject required before independent review |
-| WP-B1 | Baseline forensics, successor control, and fresh M-5b generality package | Dev B | **PACKAGE_READY** | accepted ADR-0101/0102 contracts; treatment starts only after successor tag | verified baseline verifier, graph-coloring vectors; signed material run; M-5b-graph-coloring.json produced; blocked on remote successor tag |
-| WP-B2 | M-6.5 attributable stochastic study and evidence bundle | Dev B | **ACCEPTED** | accepted ADR-0103/backlog contracts | RF-114…RF-117 green; stochastic ModelPort adapter; >=60 pairs; valid A/A floor; signed M-6.5 evidence bundle and independent acceptance envelope verified |
-| WP-C1 | Backend service trust spine and canonical event truth | Dev A | **PACKAGE_READY** | accepted ADR-0062/0089/0101; no Kernel or schema change | falsifiers for key material, non-TTY approval denial, approval verification, gateway auth/origin/size, `StreamEvents` validation, canonical single-writer append, envelope round-trip fidelity, checkpoint reconstruction, resume restart, worker-observed cancellation |
-| C1-GATE | Convergence CI and independent package review | Leadership | **BLOCKED** | WP-A1 `PACKAGE_READY`; WP-B1 `PACKAGE_READY`; WP-B2 `ACCEPTED`; WP-C1 `PACKAGE_READY`; complete acceptance is not established | **independent adjudication:** baseline manifest/tag absent; M-4/M-6 evidence remains `undeterminable`; qualified Linux AF_UNIX and remote tag verification outstanding |
+The ledger mirrors the stable backlog and makes state drift mechanically detectable.
+
+| Package | Lane | State | Entry predicate | Completion predicate |
+|---|---|---|---|---|
+| WP-A1 | Lane A | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `rf95_and_rf101_to_rf113_receipts_resolve` |
+| WP-B1 | Lane B | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `baseline_vectors_and_contract_receipts_resolve` |
+| WP-A2 | Lane A | **PACKAGE_READY** | `wp_a1_merged AND adr_0103_frozen AND wp_c1_predicate` | `runtime_seam_receipt_resolves` |
+| WP-B2 | Lane B | **EVIDENCE_READY** | `wp_a1 AND wp_a2 AND study_receipt` | `signed_study_disposition_resolves` |
+| WP-A3 | Lane A | **EVIDENCE_READY** | `wp_a1_merged` | `three_topology_receipts_resolve` |
+| WP-B3 | Lane B | **EVIDENCE_READY** | `wp_a3_receipt` | `m701_receipt_and_scheduler_decision_resolve` |
+| WP-A4 | Lane A | **EVIDENCE_READY** | `adr_0099 AND adr_0100` | `durable_memory_receipts_resolve` |
+| WP-B4 | Lane B | **EVIDENCE_READY** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
+| WP-C1 | Lane A | **PACKAGE_READY** | `adr_0062 AND adr_0089 AND adr_0101` | `trust_spine_and_single_writer_receipts_resolve` |
+
+## Evidence signing and acceptance protocol
+
+Every bundle is judged by `tools/linters/verify_evidence.py`, which re-derives
+each judgement from bytes and answers `passed`, `failed` or `undeterminable`.
+The three are not interchangeable, and `undeterminable` never satisfies a
+predicate.
+
+- **Keys live outside the repository.** `tools/runners/keygen_evidence_key.py`
+  writes a 0600 Ed25519 key under `~/.aether/keys/` and prints its public half.
+  A key readable from the tree is not an authority.
+- **Authorities are registered, not self-declared.**
+  `tools/linters/evidence_trust_root.json` names every accepted producer and
+  reviewer key. A key that first appears inside the document it authenticates
+  proves nothing, so an unregistered signer is `undeterminable` and a registered
+  key id signed by a different key `failed`.
+- **Signatures are `ed25519:<base64>`.** An unprefixed signature names no
+  algorithm; the verifier refuses formats it cannot identify rather than
+  guessing.
+- **Materials declare their digest scheme.** Without `scheme`, a re-derived
+  mismatch cannot be told from an unknown hashing convention, so it can only be
+  `undeterminable`. With it, tampering is a decidable failure.
+- **Evidence is additive.** Bundles are never overwritten; a re-execution is
+  published under a new label. `check_evidence_acceptance.py` marks the earlier
+  bundle *superseded* only when the successor verifies green and pins a
+  descendant commit.
+- **One command does all of it:** `tools/runners/publish_evidence.py` builds
+  from a throwaway worktree at a pinned commit so the subject stays clean,
+  signs, has a registered reviewer accept, and re-verifies before anything
+  lands.
+
+## Milestone predicates
+
+Milestone acceptance is derived from digest-addressed evidence, not package presence or process status.
+
+| Milestone | Required predicate |
+|---|---|
+| M-4 | `rf95_evidence_verified AND rf95_envelope_independently_verified` |
+| M-5a | `agent_view_replay_verified AND convergence_base_v1_verified` |
+| M-5b | `graph_coloring_rf86_rf98_verified_against_successor_base` |
+| M-6 | `depth_3_recovery_and_budget_conservation_verified` |
+| M-6.5 | `valid_paired_study_disposition_verified` |
+| M-7 | `three_topologies_verified AND adr_0099_disposition_verified` |
+| M-8 | `durable_memory_and_signed_rollback_verified` |
+
+## Active critical path
+
+Mechanism work and evidence close-out proceed in parallel, but the following gates remain ordered:
+
+1. ~~Re-emit M-4 `candidate-06`~~ **done as `candidate-07`** — `candidate-06` (`z-ai/glm-5.2:free`)
+   hit two consecutive `instrument_error` (HTTP 429) turn-0 aborts and never reached the agent
+   loop; `candidate-07` reran the identical fixture/task/verifier over the paid
+   `deepseek/deepseek-v4-flash-0731` route, produced the required diff, passed tests, and
+   `tools/linters/verify_evidence.py` returns `passed` for the signed-and-accepted bundle. See the
+   independence caveat below the verdict table: producer (`dev-a-evidence-1`) and reviewer
+   (`aether-evidence-reviewer-1`) keys were both held by the same operator for this run, so
+   acceptance is mechanically valid but not yet organizationally independent.
+2. Externally create and publish the annotated, remotely resolvable `CONVERGENCE-BASE-v1`; run the
+   fail-closed baseline builder to pin its tag object, commit, tree, schemas, reducers, runtime, and
+   protected materials using `raw-sha256`.
+3. Re-emit M-5b against that successor baseline. Preserve every historical failed bundle.
+4. Re-emit the stored M-6.5 study with portable references and an explicit digest scheme now that
+   M-4 verifies. A valid positive or negative result closes the study; the current undeterminable
+   bundle does not.
+5. Complete M-7 by making planner/executor/reviewer and fork/read/merge children perform real effects
+   and exchange authorized artifacts by digest through ordinary M-6 spawn. Lowered declarations or
+   empty abandoned lineages do not satisfy the predicate.
+6. Publish M-8 from a clean immutable subject, sign it, independently accept the exact bundle digest,
+   and verify it again in a fresh process. Green tests or a locally built bundle are not acceptance.
+7. Only after M-8 is independently accepted may M-9 move from staging to this board. M-10 follows a
+   qualified M-9 beta and closes only on exact-subject release proof.
+
+The external Git operations in steps 2 and 6 are release-owner actions. Coding lanes prepare and
+verify their inputs but never simulate commits, tags, remote resolution, or clean-subject identity.
+Step 1's commit/signing was performed by the requesting operator directly, not simulated; the open
+item it leaves is a genuinely separate reviewer identity, not a mechanical gap.
+
+### Verified milestone evidence
+
+Verdicts below are `tools/linters/verify_evidence.py --json` output over
+`docs/03_execution/evidence/`, not summaries of test runs. A milestone with no
+published bundle has no verdict, however green its suites are.
+
+| Milestone | Verifier verdict | Bundle |
+|---|---|---|
+| M-6 | `passed` | `M-6-canonical-recursion-order10` — 57 falsifiers in a fresh process, depth 3, kill-tree; clean subject `3e8b081`, signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`. Supersedes `M-6-canonical-recursion` and `-order9`, which stay on record. |
+| M-4 | `passed` | `M-4-rf95-candidate-07` — clean subject `7a3adb1`, live run over `deepseek/deepseek-v4-flash-0731`, real diff (`return a * b`), passing tests, file-backed WAL, complete `mhf.trajectory/2`, matching cold reconstruction; signed `dev-a-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. **Caveat**: the producer and reviewer keys were controlled by the same operator for this run (see `RF-95-candidate-06.md`/`-07.md` honesty notes) — mechanically independent, not yet organizationally independent; a distinct reviewer identity re-signing the same digest would close that gap without rerunning anything. `candidate-05` (`failed`: raw-hex signature, mismatched reviewer key) and `candidate-06` (two `instrument_error` HTTP 429 aborts on `z-ai/glm-5.2:free`, never reached the agent loop) are preserved unmodified. |
+| M-5b | `failed` | `M-5b-graph-coloring` records an acceptance claiming `passed` over an `undeterminable` subject. Its materials also record no digest scheme. The builder now emits `raw-sha256`; a labelled successor is gated on `CONVERGENCE-BASE-v1`. |
+| M-6.5 | `passed` | `M-6.5-attributable-paired-study-order13` — 32 paired trials with portable report references and `raw-sha256` digests; signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
+| M-5a | no bundle | `CONVERGENCE-BASE-v1` is absent. `prepare_convergence_baseline.py` produces a candidate (55 schema pins, 4 reducer pins, 3 protected subtrees) that declares `CANDIDATE_NOT_A_BASELINE` and leaves `commit_sha`, `tag_object_sha`, `tree_digest` unresolved. Only an annotated, remotely resolvable tag can supply them. |
+| M-7 | `passed` | `M-7-topology-order12` — 40 tests, all 25 markers true; direct, planner/executor/reviewer, and fork/read/merge run as real M-6 children with CAS artifact flow; signed `dev-a-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
+| M-8 | `passed` | `M-8-durable-memory-order12` — 59 tests, all 34 markers true; authorization-before-ranking, CAS composition registry, verified rollback in fresh process; signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
+
+## Delivery rules
+
+- Lane A owns runtime, execution, persistence, clients, packaging, deployment, and release surfaces;
+  Lane B owns contracts, projections, evaluation, falsifiers, and promotion semantics.
+- Each lane keeps WIP=1 and edits only its owned surfaces. Contract changes are consumed only after a
+  frozen producer commit.
+- Product-time operator approvals for privileged effects remain part of the security model. They are
+  distinct from development workflow state and are checked by the runtime at use time.
+- Unknown, absent, invalid, or undeterminable evidence never satisfies a predicate. A valid negative
+  experiment selects its declared fallback.
+- The release predicate is `./ci/release_qualify.sh == 0` with a signed envelope whose subject exactly
+  matches the candidate; otherwise the first failing stage is repaired forward.
+
+## Historical package context
 
 
-Both developers work from the same reviewed commit and do not consume unfinished branches. Dev A
-owns runtime/session/delegation integration. Dev B owns baseline/evidence tooling and the pack-local
-fresh falsifier. Shared schema or runtime interfaces are frozen by ADR before use.
-
-## Director developer control
-
-| Sprint | Milestone | Task ID | Owner | Task name | One-phrase assignment |
-|:--|:--|:--|:--|:--|:--|
-| C1 | M-4/M-6 | WP-A1 | Dev A · Main Senior | Canonical recursion | Fully deliver RF-95 and canonical fail-closed child execution with durable identity, attenuated conserved budgets, recovery, tests, and evidence. |
-| C1 | M-5a/M-5b | WP-B1 | Dev B · Senior | Clean generality proof | Fully deliver the baseline verifier and accepted `CONVERGENCE-BASE-v1`, then implement and prove the fresh pack-local graph-coloring falsifier without touching Dev A runtime code. |
-
-### Leadership helper
-
-- Start: “Dev A, execute C1 WP-A1 for M-4/M-6”; “Dev B, execute C1 WP-B1 for M-5a/M-5b.”
-- Checkpoint: ask each developer for `task -> code -> test -> evidence -> blocker`, then update only this board.
-- Merge: review Dev A's runtime package and Dev B's baseline tooling independently; open `C1-GATE` only when both are `EVIDENCE_READY`.
-- Next: after C1 acceptance, assign A2/B2 for M-6.5, then A3/B3 for M-7, then A4/B4 for M-8.
-
-## Immediate execution order
-
-1. Dev A removes the synthetic spawn result, introduces the required child-runtime interface,
-   durable child identity, parent-bound componentwise budgets, and recovery/kill-tree tests.
-2. Dev B records the contaminated-tag forensics in machine-verifiable test fixtures, implements the
-   signed successor-baseline manifest verifier, and freezes the graph-coloring preregistration.
-3. Leadership attempts recovery of original RF-95/M-6 artifacts by digest. If absent, it authorizes
-   exactly one new RF-95 candidate after preregistration; no historical claim is reconstructed.
-4. Run clean declared-dependency Python/TypeScript/static/UDS gates and obtain independent review.
-5. Only after shared generic repairs and clean review, create and push annotated
-   `CONVERGENCE-BASE-v1`; Dev B then completes graph coloring, RF-86/RF-98, signed vectors, and
-   independent review inside WP-B1 before C1 closes.
-
-## C1 exit state (2026-08-27)
-
-Developer-side work is complete **on the WP-A1 and WP-B1/WP-B2 surfaces**. It is not complete on the
-backend service and distribution surface: `runtime/service/` and the standalone CLI entered the tree
-outside the M-4–M-8 packages and regress already-accepted invariants (`I-5` approval verification,
-the M-2 one-writer anchor, and `I-4`/`I-9` recovery truth). That repair is authorized above as
-`WP-C1` and is in progress; it closes no gate of its own.
-
-Three further items remain outside implementation:
-
-1. **Qualifying M-4 and M-6 closure remains outstanding.** Independent reviewer envelopes now
-   exist, but ADR-0101 does not allow a reviewer receipt to turn an `undeterminable` producer
-   outcome into a pass. M-4 requires a fresh preregistration-bound run with portable artifacts;
-   M-6 requires a clean-subject re-production with the promised depth/kill-tree artifacts.
-2. **Qualified Linux AF_UNIX CI receipt** for the convergence subject, still
-   requested externally.
-3. `CONVERGENCE-BASE-v1` remains uncreated, correctly: it is gated on clean
-   gates *and* the independent review above.
-
-Two findings are handed to Leadership rather than fixed in C1, because both
-sit outside WP-A1's authorized surface:
-
-- **The runner does not bind its preregistration.** `preregistration_digest`
-  is empty in the RF-95 trajectory, so the candidate is tied to its frozen
-  document by commit ordering rather than by an in-run digest. Recorded in the
-  M-4 envelope's `detail` rather than hidden. Fixing it means threading
-  `TaskContext.preregistration` in `tools/runners/run_rf95_product_proof.py`.
-- **The agency loop cannot tell "my patch failed" from "my patch already
-  applied".** Candidate 02's ledger shows ~15 re-proposals of an
-  already-applied `patch.apply`, each reconciled `patch context not found`,
-  burning the turn budget on a workspace that was already correct. This lives
-  in the repair/feedback path, not in delegation.
-
-## Explicit external evidence requests
-
-- Original `M-5A-BASE-v2` tag object/annotation/target and review receipt, if any. Do not recreate it.
-- Original RF-95 and M-6 evidence bundles, artifact digests, protocol/environment identities, and
-  independent review receipts, if any.
-- Qualified Linux AF_UNIX and clean TypeScript CI receipts for the convergence subject.
-
-## Prohibited scope
-
-- No movement, recreation, or validation-by-prose of `M-5A-BASE-v2`.
-- No successor tag before clean gates and independent review.
-- No broad M-6.5/M-7/M-8 feature implementation in C1.
-- No M-9/M-10 feature or scaffold.
-- No Kernel/domain semantics for spawn, topology, strategy, memory, or learning.
-- No receiptless `ACCEPTED`, test weakening, manual evidence repair, or unknown-as-pass value.
+The historical activation instructions are superseded by the current package
+ledger above. Their stable contracts remain in [`backlog.md`](backlog.md).

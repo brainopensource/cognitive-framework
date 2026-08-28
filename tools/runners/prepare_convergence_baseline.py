@@ -42,10 +42,11 @@ from vanguard.packages.domain.evidence.baseline import (  # noqa: E402
     BASELINE_SCHEMA_VERSION,
     create_signed_baseline_manifest,
 )
-from vanguard.packages.runtime.keys import (  # noqa: E402
-    KeyMaterialError,
-    load_operator_signer,
-)
+from cryptography.hazmat.primitives import serialization  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from keygen_evidence_key import load_key  # noqa: E402
 
 #: Placeholder for a field only a git operation can supply. Chosen so it can
 #: never be mistaken for a real object id and so the verifier rejects it.
@@ -209,6 +210,8 @@ def main() -> int:
                         help="key id of the independent reviewer who must countersign")
     parser.add_argument("--reviewer-public-key", default="",
                         help="base64 Ed25519 public key of that reviewer")
+    parser.add_argument("--creator-key", default="",
+                        help="path to the Ed25519 creator key (outside the repo)")
     parser.add_argument(
         "--out",
         default=str(_REPO_ROOT / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.candidate.json"),
@@ -217,9 +220,17 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        signer = load_operator_signer(allow_create=False)
-    except KeyMaterialError as exc:
+        creator_private_key = load_key(
+            Path(args.creator_key).expanduser()).private_bytes(
+                serialization.Encoding.Raw,
+                serialization.PrivateFormat.Raw,
+                serialization.NoEncryption())
+    except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
+        print(f"       expected an Ed25519 key at {args.creator_key}",
+              file=sys.stderr)
+        print("       generate one with tools/runners/keygen_evidence_key.py",
+              file=sys.stderr)
         return 3
 
     reviewer_public_key = args.reviewer_public_key
@@ -233,8 +244,6 @@ def main() -> int:
         print("NOTE: no reviewer public key supplied; the reviewer slot is a "
               "non-verifying placeholder and must be filled before review.")
 
-    from tools.runners.sign_evidence_bundle import signer_private_bytes  # noqa: E402
-
     wire = build_candidate(
         _REPO_ROOT,
         baseline_id=args.baseline_id,
@@ -242,7 +251,7 @@ def main() -> int:
         commit_sha=args.commit_sha,
         tree_digest=args.tree_digest,
         creator_key_id=f"{args.creator_identity}-operator",
-        creator_private_key=signer_private_bytes(signer),
+        creator_private_key=creator_private_key,
         reviewer_key_id=args.reviewer_key_id,
         reviewer_public_key=reviewer_public_key,
     )
@@ -253,7 +262,11 @@ def main() -> int:
         json.dumps(wire, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
     candidate = wire["candidate"]
-    print(f"wrote {out_path.relative_to(_REPO_ROOT)}")
+    try:
+        shown = out_path.relative_to(_REPO_ROOT)
+    except ValueError:
+        shown = out_path  # a candidate staged outside the repo is still valid
+    print(f"wrote {shown}")
     print(f"  status            : {candidate['status']}")
     print(f"  package version   : {wire['package_version']}")
     print(f"  dependency lock   : {candidate['dependencyLockFile']}")

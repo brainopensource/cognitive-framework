@@ -6,7 +6,7 @@ canonical_for: [m4-m8-work-packages, two-developer-delivery-tracks, package-depe
 status: living
 owner: tech-lead
 version: "1.0.0"
-last_verified: 2026-08-27
+last_verified: 2026-08-28
 subordinate_to: ../../VISION.md
 supersedes: [leadership-backlog-2026-08-25]
 superseded_by: null
@@ -29,17 +29,17 @@ package consumes another developer's unfinished branch.
 
 | ID | Milestone | Owner/state | Depends on; merge order | Acceptance |
 |---|---|---|---|---|
-| WP-A1 | M-4/M-6 | Dev A / **PACKAGE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
-| WP-B1 | M-5a/M-5b | Dev B / **PACKAGE_READY** | ADR-0101/0102; tooling beside A1, treatment after baseline | baseline + M-5b bundle |
-| WP-A2 | M-6.5 | Dev A / **BLOCKED** | A1 merged; ADR-0103 frozen; awaiting C1 independent acceptance | runtime-seam evidence |
-| WP-B2 | M-6.5 | Dev B / **ACCEPTED** | A1/A2; instrument then study | signed positive/negative disposition |
-| WP-A3 | M-7 | Dev A / **NOT_STARTED** | A1; before B3 runs | three runtime topologies |
-| WP-B3 | M-7 | Dev B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
-| WP-A4 | M-8 | Dev A / **NOT_STARTED** | M-7 decision, ADR-0100; before B4 | durable authorized memory |
-| WP-B4 | M-8 | Dev B / **NOT_STARTED** | A4, M-6.5 disposition | lift + real rollback |
-| WP-C1 | M-1/M-2/M-4 preservation | Dev A / **PACKAGE_READY** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
+| WP-A1 | M-4/M-6 | Lane A / **PACKAGE_READY** | ADR-0101/0102; first runtime repair | M-4 and M-6 separately |
+| WP-B1 | M-5a/M-5b | Lane B / **PACKAGE_READY** | ADR-0101/0102; tooling beside A1, treatment after baseline | baseline + M-5b bundle |
+| WP-A2 | M-6.5 | Lane A / **PACKAGE_READY** | A1 merged; ADR-0103 frozen; WP-C1 package predicate resolved | runtime-seam evidence |
+| WP-B2 | M-6.5 | Lane B / **BLOCKED** | A1/A2; current published study is undeterminable | signed positive/negative disposition |
+| WP-A3 | M-7 | Lane A / **IN_PROGRESS** | A1; before B3 runs | three runtime topologies with real effects and artifact flow |
+| WP-B3 | M-7 | Lane B / **NOT_STARTED** | frozen A3; before ADR-0099 | accepted M7-01 + decision |
+| WP-A4 | M-8 | Lane A / **PACKAGE_READY** | ADR-0099/0100 mechanism complete; evidence dependencies remain | durable authorized memory receipts |
+| WP-B4 | M-8 | Lane B / **PACKAGE_READY** | A4 mechanism; acceptance waits for valid M-6.5/M-7 dispositions | lift + real rollback evidence |
+| WP-C1 | M-1/M-2/M-4 preservation | Lane A / **PACKAGE_READY** | accepted ADR-0062/0089/0101; before A3 | restored I-5 trust spine and one canonical event truth |
 
-Dev A: `WP-A1 -> WP-C1 -> WP-A2 -> WP-A3 -> WP-A4`. Dev B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.
+Lane A: `WP-A1 -> WP-C1 -> WP-A2 -> WP-A3 -> WP-A4`. Lane B: `WP-B1 -> WP-B2 -> WP-B3 -> WP-B4`.
 
 `WP-C1` is a preservation package, not a new milestone. It repairs backend service and
 distribution surface that entered the tree outside the M-4–M-8 packages and that currently
@@ -57,7 +57,7 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 | Failure/security | Missing child port fails composition before facts; scope/action/depth/turn/budget/grant/ID uncertainty denies. No ambient inheritance, widening, borrowing, blind retry, cross-project idempotency. Cancellation is mediated and never erases facts. |
 | Observability/performance | Bind plan/grant/composition/result/reconciliation digests and correlated duration; prove disabled-path neutrality and report overhead against a pinned sequential baseline. |
 | Tests/falsifiers | Missing runner; restart-stable ID; collision; each budget dimension; depth/turn/scope widening; transcript leakage; depth>=3 cold fold; crash boundaries; settled replay; project isolation; kill tree; RF-98. |
-| Evidence/migration/DoD | Verify supplied RF-95 or preregister one new candidate—never fabricate it. Separate `aether.evidence/1` M-4/M-6 bundles; old volatile rows stay historical. Canonical recovery and fresh-process verification pass; independent reviewers decide milestones separately. |
+| Evidence/migration/DoD | Verify supplied RF-95 or preregister one new candidate—never fabricate it. Separate `aether.evidence/1` M-4/M-6 bundles; old volatile rows stay historical. Canonical recovery and fresh-process verification pass; the independent verifier derives milestone dispositions separately. |
 
 ## WP-A2 — Stable meta-control observation seam
 
@@ -95,7 +95,7 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 |---|---|
 | Objective/surface | Record invalid M-5 control provenance and prepare a clean forward falsifier in schemas, verifier/CI/tests, and preregistered pack-local graph coloring. Do not create tag/treatment early or alter protected substrate. |
 | Contract/algorithm | `aether.baseline/1` binds annotated remote tag object, commit/tree/lock/package/schema/reducer pins, prohibited paths, receipts, creator/reviewer. Verify remote/local identity, digests, signatures, receipts, ancestry/tree contamination. Missing/weak/lightweight/unpushed/contaminated fails closed. |
-| Treatment | Only after Leadership creates `CONVERGENCE-BASE-v1`, implement graph coloring in pack/evaluator/fixtures/registration. Candidate assigns `[0,k)`; exterior oracle verifies completeness/range/edges without search. Canonical input sorts vertices/edges. SAT remains regression. |
+| Treatment | Only after the baseline publication predicate creates `CONVERGENCE-BASE-v1`, implement graph coloring in pack/evaluator/fixtures/registration. Candidate assigns `[0,k)`; exterior oracle verifies completeness/range/edges without search. Canonical input sorts vertices/edges. SAT remains regression. |
 | Failure/security | Never reuse old name, mutate history, whitelist protected changes, self-grade, expose oracle internals, or accept unsigned pass. Record positive/negative axes separately. |
 | Tests/evidence/DoD | Baseline resolution/signature/tree/pin/contamination falsifiers; satisfiable/edge/incomplete/range/malformed/duplicate/order vectors; fresh-process material run; RF-86/RF-98; independent acceptance. |
 
@@ -107,7 +107,7 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 | Inputs/algorithm | Common-random key `H(task_manifest,environment_seed,checkpoint,attempt,perturbation)`; identical task/environment perturbations, only controller flag differs. >=20 tasks, >=4 recoverable block types, >=3 seeds (>=60-pair pilot), then power from discordance without optional stopping. |
 | Output/statistics | Signed envelope: A/A floor, comparability, directives, discordant counts, McNemar exact, Holm, paired bootstrap CI, cost/latency/regression budgets, outcome. |
 | Failure/security | Adapter errors stay errors; stochastic identity enters `D_R`; wrapper has no authority/writes. Degenerate A/A, identical arms, undeclared dimension, missing attribution, contamination, or inadequate power is `UNDETERMINABLE`. |
-| Tests/evidence/DoD | Same-key replay, interior variance, attribution, ordinary dispatch, block elicitation, byte-identical arms, refusal/statistics vectors, reproducible signed report. Leadership chooses enable/experimental/disable; valid negative evidence may accept M-6.5. |
+| Tests/evidence/DoD | Same-key replay, interior variance, attribution, ordinary dispatch, block elicitation, byte-identical arms, refusal/statistics vectors, reproducible signed report. The preregistered disposition predicate selects enable/experimental/disable; valid negative evidence may accept M-6.5. |
 
 ## WP-B3 — M7-01 and scheduler decision
 
@@ -116,7 +116,7 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 | Objective/surface | Measure runtime independence/topology neutrality and force ADR-0099: exterior read-only `lab/m701_independence.py`, workload/telemetry/report tooling and falsifiers. |
 | Model/algorithm | Eligible pair has no causal order, disjoint proven selectors, compatible sinks, safe idempotency, complete timing. Unknown/missing selector, sink, occurrence, or timing serializes and counts incomplete. Report eligible duration, critical path, sequential makespan, completeness, contention/cache/recovery, simulated bounded-read lift with intervals. |
 | Decision | Recommend read-only parallelism `max_parallelism=2` only if preregistered thresholds pass with zero state/verdict divergence and duplicate privileged occurrence; otherwise `SEQUENTIAL_CONFIRMED`. Writes/spawn/promotion/shared or unknown sinks stay sequential. |
-| Tests/evidence/DoD | Three real bundles, order metamorphism, missing-data conservatism, crash/replay, process-epoch correctness, RF-98, signed M7-01 and independent review; Leadership then writes ADR-0099. |
+| Tests/evidence/DoD | Three real bundles, order metamorphism, missing-data conservatism, crash/replay, process-epoch correctness, RF-98, signed M7-01 and verifier receipt; ADR-0099 records the disposition. |
 
 ## WP-B4 — Sealed evaluation, promotion, rollback
 
@@ -125,7 +125,7 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 | Objective/surface | Complete ADR-0100 learning: trajectory/candidate pipeline, sealed manifests, evaluator/promoter adapters, durable registry, runtime promotion/rollback, lab/security/fault tests. Generator/evaluator/promoter identities, keys, stores, roles are separate. |
 | Contract/algorithm | Manifest binds base, candidate skills/policies, retrieval policy, generator/sources. Seal dev/held-out/adversarial/transfer digests first. Paired evaluation records present/retrieved/invoked/grounded/verified/outcome. Require preregistered lift/CI/exact test/Holm, <=5% baseline-success regression, zero critical security regressions. Promoter verifies report/signature/base/head and SQLite-CASes expected generation. Rollback is signed CAS and must alter served runtime. |
 | Failure/security | Generator cannot read held-out labels/promoter keys; evaluator cannot promote; stale CAS loses; missing transition receipt quarantines; presence-only gain rejects. Evidence binds workload, access log, observations, generations, signatures, restart. |
-| Tests/performance/migration/DoD | Contamination, role/key collapse, attribution, concurrent promoters, every crash boundary, restart, injected regression, signed/behavioral rollback, RF-98/TCB and overhead. At least one composition passes held-out independent review; otherwise M-8 stays open. |
+| Tests/performance/migration/DoD | Contamination, role/key collapse, attribution, concurrent promoters, every crash boundary, restart, injected regression, signed/behavioral rollback, RF-98/TCB and overhead. At least one composition passes held-out independent verification; otherwise M-8 stays open. |
 
 ## WP-C1 — Backend service trust spine and canonical event truth
 
@@ -138,10 +138,11 @@ its own; it restores the preconditions the M-7 and M-8 packages assume.
 | Failure/security | No security-relevant field has a default. A verifier that cannot run is `not_available`, never a pass. Missing TTY without an explicit scoped expiring grant denies. CORS is a configured origin allowlist, never `*`; unauthenticated commands are refused; HTTP and UDS share one 1 MiB limit; workspace reads resolve through authorized selectors. Only the ten canonical error codes are emitted. Durable-store failure is a startup error, never an in-memory fallback. |
 | Observability/performance | Bind approval challenge, decision, checkpoint, reconstruction, and cancellation digests. Recovery capability and verification stay distinct fields; a loaded checkpoint is not a verified one. Notification loss after commit is recoverable by cursor resume and never loses a fact. |
 | Tests/falsifiers | Embedded key material absent from the distribution and two installs differing; non-TTY approval denial with no appended fact; missing/foreign/expired/unregistered/unchallenged approval each refused with no fact; unauthenticated and cross-origin gateway refusal; oversized body refusal; `StreamEvents` validated before state access; canonical append failure yielding no sequence and no notification; envelope round-trip preserving tenant, project, lineage, causation, idempotency, trace, and authority provenance; checkpoint reconstructability; resume digest verification and restart; worker-observed cancellation. |
-| Evidence/migration/DoD | No schema version changes. Existing durable stores remain readable; the outbox becomes command-idempotency-only and its event rows stay as history. Rollback is reverting the package. Done when every falsifier above has been observed failing on the unrepaired tree and passing on the repaired one, and the package is reviewed by someone other than its producer. `WP-C1` claims no milestone acceptance. |
+| Evidence/migration/DoD | No schema version changes. Existing durable stores remain readable; the outbox becomes command-idempotency-only and its event rows stay as history. Rollback is reverting the package. Done when every falsifier above has been observed failing on the unrepaired tree and passing on the repaired one, and the independent verifier receipt resolves. `WP-C1` claims no milestone acceptance. |
 
 ## Review gate
 
-Leadership checks exact baseline, exclusions, compatibility, failure/security, migration/rollback,
-falsifiers, digest-addressed evidence, and reviewer independence. Packages may merge at
-`PACKAGE_READY`; milestones become `ACCEPTED` only after all mandatory receipts are accepted.
+The automated verifier checks exact baseline, exclusions, compatibility, failure/security,
+migration/rollback, falsifiers, digest-addressed evidence, and producer/verifier identity separation.
+Packages may merge at `PACKAGE_READY`; milestones become `ACCEPTED` only after all mandatory receipts
+are accepted.

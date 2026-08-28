@@ -85,7 +85,26 @@ class CompositionRegistry:
             "unsigned registry promotion is forbidden; use promote_and_register")
 
     def rollback(self) -> str:
-        if len(self._history) < 2: raise ValueError("no promoted composition to roll back")
+        """Refused: rollback moves the served version and must be signed.
+
+        This registry has no verifier and no key, so it cannot establish the
+        authority a rollback needs. Its ``promote`` already refuses for the same
+        reason. An unsigned pointer move here would be a way around the signed
+        path, not a lighter-weight version of it, so it fails closed and names
+        the canonical route (guidelines.md 9.2, rollback authorization).
+        """
+        raise PermissionError(
+            "unsigned registry rollback is forbidden; use "
+            "governance.DurableCompositionRegistry.restore with signed "
+            "RollbackEvidence"
+        )
+
+    def _rollback_verified(self, target_version: str) -> str:
+        """Apply a rollback a concrete promoter has already verified."""
+        if len(self._history) < 2:
+            raise ValueError("no promoted composition to roll back")
+        if self._history[-2] != target_version:
+            raise ValueError("rollback target is not the immediate predecessor")
         self._history.pop()
         self._current = self._history[-1]
         return self._current

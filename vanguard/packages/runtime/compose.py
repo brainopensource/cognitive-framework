@@ -106,6 +106,11 @@ class TaskContext:
     lineage: tuple[str, ...] = ()
     #: Optional authority-free M-7 topology routing data.
     topology: Mapping[str, Any] | None = None
+    #: Runtime-only attenuated child scope.  Public callers leave this unset;
+    #: the child runner supplies it after Kernel attenuation.
+    scope_override: Any = None
+    #: Authority-free references admitted by a mediated topology edge.
+    artifact_refs: tuple[Mapping[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

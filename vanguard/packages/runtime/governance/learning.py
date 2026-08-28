@@ -222,6 +222,56 @@ class PromotionEvidence:
             "expectedGeneration": self.expected_generation,
             "reportDigest": self.report_digest,
             "promoterId": self.promoter_id,
+            "keyId": self.key_id,
+        }
+        return canonicalise(payload).encode("utf-8")
+
+
+@dataclass(frozen=True, slots=True)
+class RollbackEvidence:
+    """Cryptographically signed rollback authorization.
+
+    Rollback changes which composition is *served*. That is the same authority
+    promotion exercises, in the opposite direction, so it carries the same
+    proof. Before this existed, ``restore()`` was an unsigned pointer move: any
+    caller holding the registry could silently revert the served version with no
+    signature, no authority, and no evidence bound to what it was reverting from
+    or to. The CAS guard prevented a lost update; it never established a right.
+
+    ``guidelines.md`` §9.2 closes this decision: an unsigned pointer move is not
+    an option, the security invariant requires signed bound evidence, and the
+    fallback when it cannot be verified is to refuse the rollback.
+    """
+
+    base_version: str
+    target_version: str
+    expected_generation: int
+    reason: str
+    promoter_id: str
+    key_id: str
+    signature: str
+    created_at: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "baseVersion": self.base_version,
+            "targetVersion": self.target_version,
+            "expectedGeneration": self.expected_generation,
+            "reason": self.reason,
+            "promoterId": self.promoter_id,
+            "keyId": self.key_id,
+            "signature": self.signature,
+            "createdAt": self.created_at,
+        }
+
+    def canonical_bytes(self) -> bytes:
+        payload = {
+            "baseVersion": self.base_version,
+            "targetVersion": self.target_version,
+            "expectedGeneration": self.expected_generation,
+            "reason": self.reason,
+            "promoterId": self.promoter_id,
+            "keyId": self.key_id,
         }
         return canonicalise(payload).encode("utf-8")
 
@@ -252,6 +302,14 @@ class PromoterProtocol(Protocol):
         promoted_version: str,
         expected_generation: int,
     ) -> PromotionEvidence: ...
+
+    def sign_rollback(
+        self,
+        base_version: str,
+        target_version: str,
+        expected_generation: int,
+        reason: str,
+    ) -> RollbackEvidence: ...
 
 
 class DurableCompositionRegistry:
@@ -299,6 +357,20 @@ class DurableCompositionRegistry:
                     current_version TEXT NOT NULL,
                     generation INTEGER NOT NULL,
                     updated_at TEXT NOT NULL
+                );
+                """
+            )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS registry_transitions (
+                    transition_id TEXT PRIMARY KEY,
+                    transition_kind TEXT NOT NULL,
+                    from_version TEXT NOT NULL,
+                    to_version TEXT NOT NULL,
+                    generation INTEGER NOT NULL,
+                    evidence_json TEXT NOT NULL,
+                    transition_digest TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL
                 );
                 """
             )
@@ -382,6 +454,14 @@ class DurableCompositionRegistry:
             )
         if evidence.report_digest != report.report_digest:
             raise ValueError("evidence report_digest mismatch with evaluation report")
+        if evidence.candidate_id != candidate.candidate_id:
+            raise ValueError("evidence candidate_id mismatch with candidate")
+        if candidate.base_version != evidence.base_version:
+            raise ValueError("candidate base_version mismatch with evidence")
+        if candidate.manifest_digest != digest_of(dict(candidate.manifest)):
+            raise ValueError("candidate manifest digest is invalid")
+        if not evidence.promoter_id or not evidence.key_id:
+            raise PermissionError("promotion evidence authority is incomplete")
 
         # Verify signature. An unavailable verifier is not an implicit pass.
         if not self.authority.verifying_keys:
@@ -444,10 +524,53 @@ class DurableCompositionRegistry:
             if cur.rowcount != 1:
                 raise ValueError("concurrent promotion race detected: CAS update failed")
 
+            transition = {
+                "kind": "promotion",
+                "from": current_ver,
+                "to": evidence.promoted_version,
+                "generation": next_gen,
+                "evidence": evidence.to_dict(),
+            }
+            transition_digest = digest_of(transition)
+            cur.execute(
+                "INSERT INTO registry_transitions VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                (f"transition:{transition_digest[7:]}", "promotion", current_ver,
+                 evidence.promoted_version, next_gen, evidence_json, transition_digest, now),
+            )
+
             return evidence.promoted_version
 
-    def restore(self, target_version: str | None = None) -> str:
-        """Restore the registry head to a known composition ancestor."""
+    def restore(self, evidence: RollbackEvidence) -> str:
+        """Restore the registry head to a known ancestor, under signed authority.
+
+        Symmetric with :meth:`promote`: the evidence is verified against the
+        promoter's registered key before the served version moves, an
+        unavailable verifier is refused rather than treated as a pass, and the
+        generation the signer bound is the one the CAS update requires -- so a
+        signature cannot be replayed against a registry that has since advanced.
+        """
+        if not isinstance(evidence, RollbackEvidence):
+            raise PermissionError(
+                "rollback requires signed RollbackEvidence; an unsigned pointer "
+                "move is not an authorization (guidelines.md 9.2)"
+            )
+        if not evidence.target_version:
+            raise ValueError("rollback evidence must name a target version")
+        if not evidence.base_version or not evidence.promoter_id or not evidence.key_id:
+            raise PermissionError("rollback evidence authority is incomplete")
+
+        # An unavailable verifier leaves the request undecided, and an undecided
+        # privileged request fails closed. Never an implicit pass.
+        if not self.authority.verifying_keys:
+            raise NotAvailableError("rollback signature verifier is unavailable")
+        if not self.authority.verify_bytes(
+            evidence.key_id, evidence.canonical_bytes(), evidence.signature
+        ):
+            raise PermissionError(
+                f"invalid rollback signature for key {evidence.key_id!r}"
+            )
+
+        target_version: str | None = evidence.target_version
         with self._lock, self._conn:
             cur = self._conn.cursor()
             cur.execute("SELECT current_version, generation FROM registry_head WHERE id = 1;")
@@ -457,6 +580,17 @@ class DurableCompositionRegistry:
 
             current_ver = str(row["current_version"])
             current_gen = int(row["generation"])
+
+            if evidence.base_version != current_ver:
+                raise PermissionError(
+                    f"rollback evidence was signed against {evidence.base_version!r} "
+                    f"but the served version is {current_ver!r}"
+                )
+            if evidence.expected_generation != current_gen:
+                raise PermissionError(
+                    f"rollback evidence was signed for generation "
+                    f"{evidence.expected_generation} but the registry is at {current_gen}"
+                )
 
             if target_version is None:
                 # Find parent of current version
@@ -471,6 +605,19 @@ class DurableCompositionRegistry:
                 if cur.fetchone() is None:
                     raise ValueError(f"rollback target version {target_version!r} not found in history")
 
+            # A rollback can only move to a prior known-good ancestor.  This
+            # prevents signed evidence from selecting an unrelated historical
+            # or future composition and makes the served behavior transition
+            # auditable as a true rollback.
+            ancestor = current_ver
+            while ancestor != target_version:
+                parent = cur.execute(
+                    "SELECT parent_version FROM compositions WHERE version = ?;", (ancestor,)
+                ).fetchone()
+                if parent is None or not parent["parent_version"]:
+                    raise ValueError("rollback target is not a prior composition ancestor")
+                ancestor = str(parent["parent_version"])
+
             now = _default_now(self.clock)
             next_gen = current_gen + 1
             cur.execute(
@@ -484,11 +631,33 @@ class DurableCompositionRegistry:
             if cur.rowcount != 1:
                 raise ValueError("concurrent rollback race detected: CAS update failed")
 
+            transition = {
+                "kind": "rollback",
+                "from": current_ver,
+                "to": target_version,
+                "generation": next_gen,
+                "evidence": evidence.to_dict(),
+            }
+            transition_digest = digest_of(transition)
+            cur.execute(
+                "INSERT INTO registry_transitions VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                (f"transition:{transition_digest[7:]}", "rollback", current_ver,
+                 target_version, next_gen, json.dumps(evidence.to_dict()), transition_digest, now),
+            )
+
             return target_version
 
-    def rollback(self, target_version: str | None = None) -> str:
-        """Compatibility name for :meth:`restore`."""
-        return self.restore(target_version)
+    def rollback(self, evidence: RollbackEvidence) -> str:
+        """Compatibility name for :meth:`restore`. Same signed authority."""
+        return self.restore(evidence)
+
+    def list_transitions(self) -> list[dict[str, Any]]:
+        """Return durable promotion/rollback receipts in causal order."""
+        with self._lock, self._conn:
+            rows = self._conn.execute(
+                "SELECT * FROM registry_transitions ORDER BY generation, transition_id"
+            ).fetchall()
+            return [dict(row) for row in rows]
 
     def close(self) -> None:
         with self._lock:

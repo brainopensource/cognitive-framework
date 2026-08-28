@@ -7,6 +7,7 @@ composition path, one runtime authority, one writer, one evaluator table.
 
 from __future__ import annotations
 
+import json
 import tempfile
 import shutil
 from dataclasses import replace
@@ -43,6 +44,7 @@ from .ledger_emitter import LedgerBridge, LedgerEmitter
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .session import HarnessSession, SessionPorts, _admit_turn_result
 from ..ports.memory import MemoryBinding
+from ..ports.event_store import Result
 from .child_runtime import RuntimeChildRunner
 from .delegation import SPAWN_VERB
 from .wiring import (
@@ -289,10 +291,23 @@ class Runtime(_ComposedRuntime):
                     causal_predecessors=tuple(str(x) for x in item.get("causalPredecessors", ())),
                 ) for item in lowered["roleOperations"]
             )
-            scheduled = SequentialScheduler().decide(operations)
-            if len(scheduled) != len(operations):
-                raise RunPlanError("topology contains operations that are not sequentially schedulable")
+            settled: frozenset[str] = frozenset()
+            while len(settled) < len(operations):
+                scheduled = SequentialScheduler().decide(operations, settled)
+                if not scheduled:
+                    raise RunPlanError(
+                        "topology contains operations that are not sequentially schedulable"
+                    )
+                settled = settled | frozenset(item.operation_id for item in scheduled)
             extensions = (lowered,)
+            if len(operations) > 1:
+                # Topology is an execution plan, not a second model/runtime.
+                # The root episode emits one ordinary spawn proposal per
+                # lowered role; Session routes it through Kernel.dispatch and
+                # the existing RuntimeChildRunner. Child calls delegate to
+                # the supplied model, so role work remains normal agent work.
+                ports = replace(ports, model=_TopologyModel(
+                    ports.model, task_context, lowered, harness, ports.blobs))
         run_plan = plan_run(
             activation,
             project_id=task_context.project_id,
@@ -356,6 +371,168 @@ class Runtime(_ComposedRuntime):
             run_plan=run_plan, result=result, store=selected_store,
         ) if policy.collects_foundation_evidence else None
         return replace(result, foundation_evidence=bundle)
+
+
+class _TopologyModel:
+    """Turn a lowered topology into ordinary, sequential spawn proposals.
+
+    Topology lowering is deliberately data-only.  This small model decorator
+    is the execution bridge: it emits the next role as a normal
+    ``agent.spawn`` proposal, so the session, kernel, grant, lease, child
+    runtime and ledger remain exactly the same as for a model-originated
+    delegation.  Child episodes delegate to the wrapped model unchanged.
+    """
+
+    def __init__(self, model: Any, task: TaskContext,
+                 lowered: Mapping[str, Any], harness: Harness,
+                 blobs: Any = None) -> None:
+        self._model = model
+        self._root_episode = task.episode_id
+        self._brief = task.brief
+        self._harness = harness
+        self._blobs = blobs
+        self._operations = tuple(lowered.get("roleOperations", ()))
+        self._roles = {
+            str(item["role"]): item
+            for item in lowered.get("lineageTemplates", ())
+        }
+        self._topology_digest = str(lowered.get("topologyDigest", ""))
+        self._cursor = 0
+        self._flow_digests: dict[str, str] = {}
+        self._last_role: str | None = None
+
+    def __getattr__(self, name: str) -> Any:
+        # Preserve provider identity and optional adapter metadata used by
+        # release admission and trajectory assembly.
+        return getattr(self._model, name)
+
+    def to_dict(self) -> Mapping[str, Any]:
+        delegate = getattr(self._model, "to_dict", None)
+        return delegate() if callable(delegate) else {}
+
+    @property
+    def child_model(self) -> Any:
+        """The provider children use after the root emits a role request."""
+        return self._model
+
+    def propose(self, context: Mapping[str, Any], tools: Any,
+                sampling: Mapping[str, Any]) -> Any:
+        if self._cursor >= len(self._operations):
+            return Result.success({
+                "kind": "finish",
+                "note": "all lowered topology roles completed",
+            })
+
+        operation = self._operations[self._cursor]
+        role_id = str(operation["role"])
+        template = self._roles[role_id]
+        budget = {
+            dimension: int(amount)
+            for dimension, amount in dict(template.get("budget", {})).items()
+            if dimension in {"usd_micros", "millis", "tokens", "bytes"}
+        }
+        max_turns = int(template.get("budget", {}).get(
+            "maxTurns", template.get("budget", {}).get("turns", 1)))
+        max_turns = max(max_turns, 1)
+        # The generic selector is declared by the manifest for agent.spawn;
+        # it is selected from that declaration, never fabricated as authority.
+        resource: Mapping[str, Any] | None = None
+        for selector in self._harness.capability_ceiling:
+            try:
+                candidate = json.loads(selector)
+            except (TypeError, ValueError):
+                continue
+            if (candidate.get("kind") == "generic"
+                    and str(candidate.get("uriPattern", "")).startswith("agent://spawn/")):
+                resource = candidate
+                break
+        if resource is None:
+            return Result.fail(
+                "instrument_error",
+                "topology requires a declared agent.spawn resource selector",
+            )
+
+        # Topology scope is routing data, never a source of authority.  The
+        # child may request only selectors already declared by the parent
+        # composition; the SpawnAdapter applies the real attenuation check.
+        # The spawn selector itself is deliberately omitted from the role's
+        # working scope, so a role cannot recursively manufacture topology
+        # children.
+        role_resources: list[Mapping[str, Any]] = []
+        for raw_selector in self._harness.capability_ceiling:
+            try:
+                selector = json.loads(raw_selector)
+            except (TypeError, ValueError):
+                continue
+            if (isinstance(selector, Mapping)
+                    and selector != resource
+                    and selector not in role_resources):
+                role_resources.append(dict(selector))
+
+        role_context = json.dumps({
+            "role": role_id,
+            "policyRef": template.get("policyRef", ""),
+            "context": template.get("context", {}),
+            "causalPredecessors": operation.get("causalPredecessors", ()),
+            "artifactRefs": [
+                {"artifact": artifact, "digest": self._flow_digests[artifact]}
+                for artifact in operation.get("inputArtifacts", ())
+                if artifact in self._flow_digests
+            ],
+        }, sort_keys=True, separators=(",", ":"))
+        artifact_refs = tuple(
+            {"artifact": artifact, "digest": self._flow_digests[artifact]}
+            for artifact in operation.get("inputArtifacts", ())
+            if artifact in self._flow_digests)
+        missing_artifacts = tuple(
+            str(artifact) for artifact in operation.get("inputArtifacts", ())
+            if str(artifact) not in self._flow_digests)
+        if missing_artifacts:
+            return Result.fail(
+                "instrument_error",
+                "required topology artifacts are unavailable: "
+                + ", ".join(missing_artifacts),
+            )
+        self._cursor += 1
+        args: dict[str, Any] = {
+            "brief": f"{self._brief}\n\nExecute topology role {role_id}. "
+                     f"Routing context: {role_context}",
+            "authority": [verb for verb in self._harness.verbs
+                          if verb != SPAWN_VERB],
+            "resources": role_resources,
+            "budget": budget,
+            "maxTurns": max_turns,
+        }
+        if artifact_refs:
+            args["artifactRefs"] = list(artifact_refs)
+        self._last_role = role_id
+        return Result.success({
+            "kind": "effect",
+            "action": SPAWN_VERB,
+            "resource": dict(resource),
+            "args": args,
+            "reservation": dict(budget),
+            "idempotencyKey": f"topology:{self._topology_digest}:{role_id}",
+            "note": f"execute lowered topology role {role_id}",
+        })
+
+    def observe_dispatch(self, result: Any) -> None:
+        """Bind a settled child result to the next declared artifact flow.
+
+        Only the persisted child result digest crosses the role boundary. The
+        transcript, handles and child ports remain private to the child.
+        """
+        if self._last_role is None:
+            return
+        hint = getattr(getattr(result, "outcome", None), "result_digest", None)
+        digest = (hint if isinstance(hint, str) and hint.startswith("sha256:")
+                  and self._blobs is not None and self._blobs.has(hint)
+                  else None)
+        if not isinstance(digest, str) or not digest.startswith("sha256:"):
+            return
+        operation = self._operations[self._cursor - 1]
+        for artifact in operation.get("outputArtifacts", ()):
+            self._flow_digests[str(artifact)] = digest
 
 
 def _validate_release_inputs(

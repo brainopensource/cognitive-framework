@@ -249,7 +249,7 @@ def export_rf95_artifacts(
         "digest": f"sha256:{hashlib.sha256(traj_bytes).hexdigest()}",
     }
 
-    diff_source = repo_path / "calculator.py"
+    diff_source = repo_path / "src" / "calc.py"
     if diff_source.is_file():
         dest_subject = target / "calculator.py"
         shutil.copy2(diff_source, dest_subject)
@@ -392,7 +392,12 @@ def main() -> int:
         # half is printed and enters the evidence, which is what makes the
         # authorisation checkable by a reviewer.
         seed_key = secrets.token_bytes(32)
-        signer = OperatorSigner(seed_key, key_id="rf95-run-operator")
+        # ``execute_profiled`` receives the raw public key and therefore
+        # registers it under ApprovalAuthority's default key id.  Keep the
+        # decision key id aligned with that registration; otherwise a valid
+        # operator signature is treated as an unknown-key approval and the
+        # episode escalates before applying the model's patch.
+        signer = OperatorSigner(seed_key)
         grant = create_autonomous_grant(
             repo_path,
             allowed_verbs=("fs.read", "fs.search", "patch.apply", "proc.exec"),
@@ -416,6 +421,14 @@ def main() -> int:
                 challenge, reviewer=grant.reviewer),
             approval_key=signer.public_bytes,
         )
+
+        # Close through the store's durability boundary before any artifact
+        # copy.  SQLite may still hold committed WAL frames in the live
+        # connection; exporting only the main database would silently drop
+        # those events.
+        close_store = getattr(result.store, "close", None)
+        if callable(close_store):
+            close_store()
 
         ok, failures = verify_rf95_evidence(
             repo_path, db_path, blob_path, result, result.trajectory or {})

@@ -418,6 +418,12 @@ def lower_topology(
         "causalPredecessors": tuple(
             f"role:{source}" for source in sorted(parents[role_id])),
         "ordinal": ordinal,
+        "inputArtifacts": tuple(sorted(
+            str(flow["artifact"]) for flow in topology.artifact_flows
+            if str(flow["to"]) == role_id)),
+        "outputArtifacts": tuple(sorted(
+            str(flow["artifact"]) for flow in topology.artifact_flows
+            if str(flow["from"]) == role_id)),
     } for ordinal, role_id in enumerate(order))
     extension = RunPlanExtension(
         topology_digest=topology.digest(),

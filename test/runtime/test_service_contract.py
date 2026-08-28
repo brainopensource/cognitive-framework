@@ -28,7 +28,10 @@ def _decision(**overrides: object) -> dict[str, object]:
         "descriptorDigest": "sha256:" + "b" * 64,
         "expiresAt": "2026-08-27T12:00:00.000Z",
         "keyId": "operator-key-default",
-        "signature": "deadbeef",
+        # A structurally real Ed25519 signature: 64 bytes as 128 hex characters,
+        # the shape both signers emit and approval-decision.schema.json has always
+        # required. "deadbeef" only passed while ingress checked non-emptiness.
+        "signature": "de" * 64,
     }
     base.update(overrides)
     return base

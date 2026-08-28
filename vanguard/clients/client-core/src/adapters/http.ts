@@ -14,6 +14,7 @@ import type {
   RuntimeClient,
   StartRunRequest,
   StreamItem,
+  SignerPort,
 } from "../contract/types.js";
 import { OperatorSigner } from "./signer.js";
 
@@ -22,7 +23,7 @@ export type HttpTransportOptions = {
   retryAttempts?: number;
   retryBaseMs?: number;
   headers?: Record<string, string>;
-  signer?: OperatorSigner;
+  signer?: SignerPort;
 };
 
 /** Shape every RuntimeService command route returns via `_send_json_response(execute_command(...))`. */
@@ -57,7 +58,7 @@ export class HttpRuntimeClient implements RuntimeClient {
   private readonly retryAttempts: number;
   private readonly retryBaseMs: number;
   private readonly headers: Record<string, string>;
-  private readonly signer: OperatorSigner | undefined;
+  private readonly signer: SignerPort | undefined;
   private currentRunId = "";
   private lastChallenge: ApprovalChallenge | undefined;
 
@@ -306,11 +307,14 @@ export class HttpRuntimeClient implements RuntimeClient {
       return fail("not_available", "approval challenge digests are empty (Joint J4)", false);
     }
     try {
-      const signer = this.signer ?? OperatorSigner.loadOrCreate();
-      const decision = signer.signChallenge(
+      const signer = this.signer ?? (typeof window === "undefined" ? OperatorSigner.loadOrCreate() : undefined);
+      if (!signer) {
+        return fail("not_available", "no cryptographic signer configured for browser context", false);
+      }
+      const decision = await signer.signChallenge(
         challenge,
         request.decision === "approve" ? "approved" : "rejected",
-        "operator"
+        signer.principal ?? "operator"
       );
       const response = await this.fetchWithRetry(`${this.baseUrl}/api/approvals/resolve`, {
         method: "POST",

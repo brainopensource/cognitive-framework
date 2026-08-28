@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from dataclasses import replace
 import json
 from pathlib import Path
 import subprocess
@@ -17,6 +18,7 @@ from vanguard.packages.runtime.governance import (
     NotAvailableError,
     OperatorSigner,
     PromotionEvidence,
+    RollbackEvidence,
     WorkloadSuite,
 )
 
@@ -334,7 +336,23 @@ class TestGovernedLearning(unittest.TestCase):
         self.assertEqual(promoted["manifest"]["injected"], "regression")
 
         # Injected regression detected in production -> restore the parent.
-        restored = self.registry.restore()
+        # Rollback moves the served version, so it carries the same signed
+        # authority promotion does. `restore()` used to take no evidence at all.
+        rollback_draft = RollbackEvidence(
+            base_version="v1.1.0",
+            target_version="v1.0.0",
+            expected_generation=self.registry.get_current()[1],
+            reason="injected regression detected in production",
+            promoter_id="promoter-1",
+            key_id=self.signer.key_id,
+            signature="",
+            created_at="",
+        )
+        rollback_evidence = replace(
+            rollback_draft,
+            signature=self.signer.sign_bytes(rollback_draft.canonical_bytes()),
+        )
+        restored = self.registry.restore(rollback_evidence)
         self.assertEqual(restored, "v1.0.0")
         self.assertEqual(self.registry.current_version, "v1.0.0")
 

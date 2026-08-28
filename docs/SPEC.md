@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.7.3.dev0"
-last_verified: 2026-08-26
+last_verified: 2026-08-28
 read_when:
   - implementing-any-runtime-change
   - resolving-authority-conflicts
@@ -112,7 +112,7 @@ historical evidence only.
 - The runtime never executes a dynamic control-flow DAG *as a substrate authority*. `mhf.manifest/2`
   is a static composition graph declaring the space of possibilities; the trajectory recorded in the
   ledger is the emergent causal graph of what was actually used. The turn loop stays unary and
-  sequential (I-11) until M-7 measurement and an explicit Director lift. Multi-agent behavior is
+  sequential (I-11) until M-7 measurement and an explicit scheduler disposition. Multi-agent behavior is
   mediated delegation (`agent.spawn`, M-6) or a composed plugin — never a second engine.
 - **An agent is not a persistent privileged object.** `Agent = Identity + Policy + Event-Derived
   Projection + Execution Boundary`. Runtime objects MAY hold transient optimization state, but no
@@ -167,6 +167,25 @@ historical evidence only.
 - The runtime bootstrap is the sole production seam for concrete adapter construction. Plugin
   activation MUST materialize a service/handle or fail; lifecycle metadata without a callable service
   is not production activation.
+- Topology readiness MUST be derived from settled causal predecessors. A ready role MUST execute as
+  an ordinary mediated M-6 child through the public runtime, and dependency context MUST cross role
+  boundaries only as authorized content-addressed references. Declared operations, lowered order,
+  transient model output, or an effect-free abandoned child MUST NOT count as executed topology work.
+- M-9 implementation MUST remain non-authorizing until M-8 has a producer-verifiable bundle and an
+  independent acceptance envelope over the exact digest. M-10 release qualification MUST consume a
+  qualified M-9 artifact and MUST bind its signed envelope to the exact source, wheel, sdist, schema,
+  migration, runtime, reducer, dependency, profile, and qualification identities.
+- External benchmark results MUST remain measurement evidence rather than runtime authority. A
+  comparative claim MUST pin the task set, repositories, sandbox, evaluator, harness, model/provider,
+  budgets, timeout, and contamination policy. Random model routing MUST NOT be used for a reproducible
+  comparison, and repeated tuning against a sealed evaluation set MUST invalidate the claim.
+- LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) MAY be used
+  as development and research assistants for Vanguard work. They are not Vanguard runtime,
+  authority, evaluator, or acceptance paths. Their outputs MUST remain advisory until a technique
+  is independently implemented behind Vanguard interfaces, preserves the kernel, capability,
+  budget, event, isolation, and evidence invariants, and passes focused falsifiers. Production
+  code MUST NOT import an external engine as a second runtime, and benchmark claims MUST use the
+  normal pinned measurement and independent-verification process.
 
 ## v0.7+ concept lock
 
@@ -198,7 +217,8 @@ historical meaning; `ADR-0095` §4 is the authoritative translation table.
 | M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
 | M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
 | M-8 | v0.9.x | Verified durable memory and composition learning with held-out evaluation, atomic promotion, provenance, and executed rollback |
-| M-9/M-10 | post-MVP | Compatibility horizon only until M-8 is independently accepted |
+| M-9 | 0.9.0b1 | Installable operational beta with unified clients/configuration, plugins, health, workflows, and restart/resume |
+| M-10 | 0.9.0 | Reliability, migrations, backup/restore, security/performance qualification, reproducible artifacts, and signed release proof |
 
 ## Compatibility anchors for former SPEC sections
 

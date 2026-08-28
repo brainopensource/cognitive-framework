@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FakeRuntimeClient } from "@vanguard/client-core/adapters/fake.js";
 import { HttpRuntimeClient } from "@vanguard/client-core/adapters/http.js";
+import { WebCryptoSigner } from "@vanguard/client-core/adapters/web-signer.js";
 import type { RuntimeClient } from "@vanguard/client-core/contract/types.js";
 import { useStudioRuntime } from "./runtime/StudioRuntime.js";
 import { StudioApp } from "./ui/StudioApp.js";
@@ -128,8 +129,11 @@ function makeDemoClient(): RuntimeClient {
   });
 }
 
+const webSigner = new WebCryptoSigner("web-operator-key", "operator:web");
+void webSigner.initialize();
+
 function makeLiveClient(): RuntimeClient {
-  return new HttpRuntimeClient({ baseUrl: "" });
+  return new HttpRuntimeClient({ baseUrl: "", signer: webSigner });
 }
 
 function Observatory() {

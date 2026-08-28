@@ -41,8 +41,19 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["vanguard*"]
+include = ["vanguard*", "schemas*", "packs*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.yml", "*.md"]
+# `.jcs` and `.digest` are the other two thirds of the REQ-SCHEMA-001
+# canonicalisation triples. Without them a wheel ships the inputs and none
+# of the canonical forms or digests to check them against.
+"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf", "*.html", "*.js", "*.css", "*.map", "*.svg", "*.jcs", "*.digest"]
+
+[tool.pytest.ini_options]
+# "The suite" must mean one thing. Bare `pytest` at the repo root otherwise
+# collects tools/** and the fixture projects under test/runtime/fixtures, whose
+# imports fail outside their own environments -- 19 collection errors that say
+# nothing about this codebase.
+testpaths = ["test"]
+norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_modules"]

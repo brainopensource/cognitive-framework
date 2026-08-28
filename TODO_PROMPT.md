@@ -2235,5 +2235,1066 @@ and two milestones of honest engineering.
     done
 
 
-    Once this sweep completes, **all M-8 security properties and invariants are 100% closed**, and we can transition to independent evidence
-  signing and the post-MVP roadmap!
+    Once this sweep completes, **all M-8 security properties and invariants are 100% closed**, and we can transition to independent evidence signing and the post-MVP roadmap!
+
+
+
+# FINAL PLAN V2
+
+## Prompt for Dev A — Runtime, Product, and M-9 Delivery
+
+Act as Lane A Staff/Principal Engineer for Vanguard/AETHER.
+
+MISSION
+
+Complete all reachable backend implementation necessary to preserve M-1–M-3 and fully deliver M-4 through M-9. Stop after M-9 qualification. For M-10, inspect gaps and
+provide a plan only—do not implement M-10 release features unless they are strictly required to make M-9 truthful.
+
+Work autonomously. Do not ask for approval or reviewers. Do not claim a milestone from code, prose, tests, bundle construction, or mechanism presence alone.
+
+NON-NEGOTIABLE SCOPE
+
+- Focus on Vanguard backend runtime, agency, adapters, persistence, packaging, CLI/service backend, plugins, tests, evidence-producing tools, and M-9 release tooling.
+- Do not edit frontend clients or TypeScript/React/Ink code.
+- LIM (`tools/006_LLM_INT_MACHINE/**`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may be used
+  as development assistants for diagnosis, review, and bounded coding. Their output is advisory;
+  no external engine may become a second runtime, authority, evaluator, or acceptance path. Any
+  adopted technique must be independently implemented behind Vanguard interfaces and pass the
+  ordinary invariant, falsifier, security, and evidence gates.
+- Do not create a second runtime.
+- Do not bypass Runtime.run_composed.
+- Do not use topology-specific execution engines.
+- Do not weaken falsifiers, evidence gates, security boundaries, or fail-closed behavior.
+- Do not overwrite historical evidence bundles.
+- Do not edit milestone acceptance claims. Dev B owns independent evidence reconciliation.
+- Do not implement M-10. Produce an exact M-10 implementation plan after M-9 is qualified.
+- Do not run Git commands or scripts that invoke Git. Represent commits, tags, clean subjects, and remote resolution as explicit external prerequisites.
+
+READ FIRST
+
+Read completely, in this order:
+
+1. AGENTS.md
+2. README.md
+3. VISION.md
+4. docs/SPEC.md
+5. docs/01_law/RUNTIME.md
+6. docs/01_law/DISPATCH.md
+7. docs/01_law/EXTENSIBILITY.md
+8. docs/01_law/EVIDENCE.md
+9. docs/01_law/MEASUREMENT.md
+10. docs/01_law/SECURITY.md
+11. docs/02_decisions/INDEX.md
+12. Accepted ADRs relevant to M-4 through M-9, especially ADR-0094 through ADR-0103
+13. docs/03_execution/milestones.md
+14. docs/03_execution/backlog.md
+15. docs/03_execution/sprint_active.md
+16. docs/03_execution/sprint_upcoming.md
+17. TODO_PROMPT.md as advisory material only
+18. GLM_masterplan_review.md as advisory material only
+19. docs/_archive/reviews/backend/director_review_v3/guidelines.md as a non-authorizing review
+
+Authority order is VISION → SPEC/law → accepted ADRs → milestones/backlog → sprint_active. Archived reviews and planning prose cannot authorize or close a milestone.
+
+FIRST ACTION: CURRENT-SUBJECT AUDIT
+
+Without Git:
+
+1. Identify the package/runtime version and Python environment.
+2. Run the complete Python suite.
+3. Run the M-4 through M-8 builders/runners/verifiers without publishing.
+4. Run:
+    - boundaries;
+    - TCB budget;
+    - domain blindness;
+    - secrets;
+    - isolation;
+    - execution truth;
+    - event coverage;
+    - stale paths;
+    - fixture hygiene;
+    - package-resource tests;
+    - installed-wheel tests;
+    - recovery and cold-replay tests.
+5. Classify every result as:
+    - mechanism test;
+    - integration test;
+    - evidence build;
+    - producer verification;
+    - independent acceptance;
+    - external prerequisite.
+6. Do not change code until the current failures and their owning paths are identified.
+
+M-1 THROUGH M-3: PRESERVE, DO NOT REIMPLEMENT
+
+Continuously preserve:
+
+- S0–S12 kernel dispatch;
+- JCS identity;
+- four additive budget dimensions:
+  usd_micros, millis, tokens, bytes;
+- structural depth and turn ceilings;
+- monotonic capability attenuation;
+- D_H, D_R, and D_X identity separation;
+- one project ledger writer;
+- strict monotonic WAL sequencing;
+- event-sourced state and fresh-process continuation;
+- fail-closed product/local/sandboxed/hermetic profiles;
+- evaluator isolation and signed execution truth;
+- canonical composition and Runtime.run_composed;
+- package-resource resolution from installed wheel/sdist;
+- hexagonal dependency direction.
+
+After every implementation area, rerun focused M-1–M-3 preservation tests.
+
+M-4: PREPARE CANDIDATE-06
+
+Inspect the existing RF-95 candidate-05 materials and candidate-06 tooling.
+
+Required behavior:
+
+- Preserve candidate-05 byte-for-byte.
+- Build candidate-06 as a new immutable label.
+- Bind:
+  - exact source subject supplied externally;
+  - runtime identity;
+  - execution profile;
+  - model and provider identity;
+  - trajectory;
+  - WAL;
+  - artifacts;
+  - workspace patch;
+  - task verifier;
+  - cold reconstruction.
+- Emit the canonical Ed25519 signature format expected by verification.
+- Use dev-a-evidence-1 only as the registered producer identity.
+- Do not create reviewer acceptance.
+- Do not rerun the model task unless persisted candidate-05 materials cannot truthfully reconstruct the result.
+
+Pseudocode:
+
+materials = load_persisted_rf95_materials(candidate_05)
+assert materials_are_complete_and_resolvable(materials)
+
+subject = require_external_clean_subject()
+body = build_rf95_bundle(
+    label="M-4-rf95-candidate-06",
+    subject=subject,
+    trajectory=cold_reconstruct(materials.wal),
+    artifacts=resolve_all(materials.artifacts),
+    execution_identity=derive_D_R(materials),
+)
+assert body.claim is derived from receipts
+signature = producer_sign(canonicalize(body), "dev-a-evidence-1")
+write_new_bundle(body, signature)
+verify_locally_without_accepting()
+
+M-5A: PREPARE SUCCESSOR BASELINE
+
+Complete local preparation and fail-closed verification for:
+
+CONVERGENCE-BASE-v1
+
+External prerequisite:
+
+An owner must create and publish an annotated remote tag named CONVERGENCE-BASE-v1 over the approved clean successor subject. Do not create, move, or simulate this tag.
+
+The local builder must require and pin:
+
+- annotated tag-object SHA;
+- referenced commit SHA;
+- tree digest;
+- exact source manifest;
+- event-schema digests;
+- reducer identities;
+- runtime identity;
+- protected subtree digests;
+- contamination exclusions;
+- raw-sha256 digest scheme.
+
+Pseudocode:
+
+tag = resolve_remote_annotated_tag("CONVERGENCE-BASE-v1")
+if tag.missing or tag.lightweight or not tag.remote_resolvable:
+    fail_closed("CANDIDATE_NOT_A_BASELINE")
+
+pins = {
+    tag_object_sha,
+    commit_sha,
+    tree_digest,
+    source_manifest_digest,
+    schema_manifest_digest,
+    reducer_identity_digest,
+    runtime_identity_digest,
+    protected_subtree_digests,
+}
+assert no_contamination(pins)
+emit_unsigned_or_producer_signed_baseline_candidate(pins)
+
+M-5B: PREPARE FRESH GENERALITY SUCCESSOR
+
+After CONVERGENCE-BASE-v1 resolves:
+
+- Build a newly labelled graph-coloring bundle.
+- Never use M-5A-BASE-v2 as the control.
+- Exercise positive, negative, malformed, incomplete, range, and serialization-permutation vectors through Runtime.execute_harness.
+- Bind RF-86 and RF-98 comparisons to CONVERGENCE-BASE-v1.
+- Package all materials using raw-sha256.
+- Leave independent acceptance to Dev B.
+
+M-6: PRESERVE ACCEPTED RECURSION
+
+Audit and keep green:
+
+- vanguard/packages/runtime/root.py
+- vanguard/packages/runtime/child_runtime.py
+- vanguard/packages/runtime/delegation.py
+- vanguard/packages/runtime/session.py
+- vanguard/packages/runtime/ledger_emitter.py
+- vanguard/packages/agency/episode/engine.py
+- vanguard/packages/agency/episode/state.py
+- vanguard/packages/ports/child_runtime.py
+
+Required invariants:
+
+- every child uses the public runtime;
+- topology and model delegation share agent.spawn;
+- deterministic child identity;
+- durable spawn intent before execution;
+- attenuated action/resource/constraint scope;
+- monotonic depth and turn limits;
+- conserved additive budgets;
+- persisted-envelope cost reconstruction;
+- one monotonic project WAL chain;
+- no blind retry of settled children;
+- open children recover as undeterminable;
+- truthful cancellation and kill-tree;
+- no transcript, handle, ambient authority, or unverified success crosses the boundary.
+
+M-6.5: PRESERVE THE CONTROLLER SEAM
+
+Complete only runtime defects necessary to support truthful re-emission:
+
+- controller remains authority-free;
+- controller runs only between turns;
+- controller-off parity;
+- no capability mutation;
+- no budget mutation;
+- semantic checkpoint freshness;
+- bounded directives;
+- deterministic no-op fallback;
+- profile-scoped enablement;
+- rollback to controller-off.
+
+Do not declare the stored undeterminable study accepted.
+
+M-7: COMPLETE REAL TOPOLOGY EXECUTION
+
+This is the primary remaining runtime implementation.
+
+Inspect and edit where necessary:
+
+- vanguard/packages/runtime/root.py
+- vanguard/packages/runtime/child_runtime.py
+- vanguard/packages/runtime/delegation.py
+- vanguard/packages/runtime/session.py
+- vanguard/packages/runtime/ledger_emitter.py
+- vanguard/packages/agency/topology/**
+- vanguard/packages/agency/episode/**
+- vanguard/packages/ports/child_runtime.py
+- relevant packs/manifests and backend tests
+
+Do not introduce a second scheduler or topology runtime.
+
+Implement the sequential reference loop:
+
+while topology_not_settled:
+    state = cold_fold_or_refold(project_ledger)
+
+    ready_roles = deterministic_roles_where(
+        predecessors_are_settled(state)
+        and required_artifacts_are_authorized_and_resolvable(state)
+        and role_is_not_already_settled(state)
+    )
+
+    if not ready_roles:
+        return typed_blocked_or_failed_state(state)
+
+    role = first_by_canonical_role_order(ready_roles)
+
+    child_request = derive_child_request(
+        parent=root_episode,
+        idempotency_key=H(topology_digest, role_id, attempt_identity),
+        scope=attenuate(root_scope, role_declared_requirements),
+        resources=artifact_refs_from_predecessors(role),
+        budgets=reserve_componentwise(parent_remaining),
+    )
+
+    persist_spawn_intent(child_request)
+    result = public_child_runtime.spawn(child_request)
+    persist_role_settlement(result)
+    refold_before_next_role()
+
+Required product behavior:
+
+- direct topology parity;
+- planner/executor/reviewer topology;
+- fork/read/merge topology;
+- every valid repository topology fixture;
+- at least one production-safe shipped backend composition that can run multi-role topology;
+- root receives only explicitly configured agent.spawn;
+- role children do not automatically receive agent.spawn;
+- planner produces a durable artifact;
+- executor receives the planner artifact by digest/reference;
+- reviewer receives patch/test artifacts by digest/reference;
+- merge receives only declared predecessor artifacts;
+- topology declarations never grant authority;
+- missing/corrupt/unauthorized artifacts fail closed;
+- settled children are not retried;
+- open children recover as undeterminable;
+- cold reconstruction reproduces ordering and result;
+- each role emits independently inspectable runtime receipts;
+- abandoned effect-free children do not earn execution markers.
+
+Add focused falsifiers for:
+
+- real planner/executor/reviewer work;
+- real fork/read/merge work;
+- causal readiness;
+- deterministic role order;
+- exactly one child per role;
+- non-overlapping sequential execution;
+- resource/action attenuation;
+- artifact production and consumption;
+- root-only spawn grant;
+- crash after spawn intent;
+- crash after child effect but before return;
+- settled-subtree replay;
+- cold reconstruction;
+- topology-disabled parity.
+
+Run the M-7 falsifier runner. Do not force markers.
+
+M-8: PREPARE CLEAN-SUBJECT EVIDENCE
+
+Verify production wiring never selects InMemoryMemoryPort or legacy fail-open paths.
+
+Audit:
+
+- durable scoped memory adapters;
+- SQLite migrations;
+- CAS/blob storage;
+- metadata/index transactions;
+- authorization-before-ranking;
+- category and tenant isolation;
+- expiry, revocation, retention, legal hold, and GC;
+- typed degraded states;
+- backup/restore and corruption recovery;
+- retrieval provenance in model context;
+- durable composition CAS;
+- separated generator/evaluator/promoter authority;
+- signed rollback;
+- restoration of prior composition;
+- replay protection and no self-promotion.
+
+Run all M-8 tests and the M-8 runner.
+
+Build, but do not independently accept, a new M-8 bundle from the exact clean subject supplied by the external release workflow. Green tests or a local dirty-subject
+bundle do not close M-8.
+
+M-9 AUTHORIZATION GATE
+
+M-9 implementation may begin only after Dev B reports that:
+
+- the M-8 producer bundle verifies passed;
+- an independent acceptance envelope verifies passed;
+- the acceptance subject exactly equals the M-8 bundle digest;
+- the active sprint board authorizes M-9.
+
+Until then, inspect and prepare tests only. Do not activate M-9 product work.
+
+M-9: FULL OPERATIONAL BETA
+
+Once authorized, deliver 0.9.0b1.
+
+Primary backend surfaces may include:
+
+- pyproject.toml and package metadata;
+- vanguard/__init__.py;
+- vanguard/packages/runtime/cli.py;
+- vanguard/packages/runtime/service/**
+- vanguard/packages/runtime/wiring.py;
+- vanguard/packages/runtime/compose.py;
+- vanguard/packages/runtime/configuration.py or canonical equivalent;
+- vanguard/packages/runtime/plugins/**
+- vanguard/packages/adapters/**
+- schemas and packaged assets;
+- backend installer/uninstaller tooling;
+- ci/backend beta qualification tooling;
+- Python tests.
+
+Do not edit frontend clients.
+
+Packaging requirements:
+
+- one canonical version source;
+- wheel and sdist built in isolated environments;
+- installation into empty temporary environments;
+- operation outside the repository checkout;
+- no PYTHONPATH dependency;
+- packaged schemas, manifests, migrations, and resources;
+- reproducible package-content manifests;
+- offline-after-install with cassette/fake/local adapters;
+- explicit state directory;
+- clean initialization;
+- safe uninstall preserving user data unless explicit deletion is requested.
+
+Runtime/product requirements:
+
+- CLI and service use the same configuration and runtime composition;
+- start, stop, resume, inspect events, and inspect artifacts;
+- durable episode identity across restart;
+- health distinct from readiness;
+- readiness verifies store, migrations, runtime profile, evaluator, model adapter, plugin integrity, and resources;
+- diagnostics use typed degraded states and redact secrets;
+- no silent in-memory fallback;
+- no checkout-relative resources.
+
+Plugin lifecycle requirements:
+
+- discovery;
+- schema validation;
+- digest/signature verification;
+- compatibility check;
+- explicit activation;
+- authority ceiling;
+- health and readiness;
+- controlled shutdown;
+- upgrade;
+- rollback;
+- disable/remove;
+- quarantine after verification or corruption failures.
+
+Pseudocode:
+
+candidate = discover_plugin(path)
+
+verified = verify_plugin(
+    manifest_schema=candidate.manifest,
+    content_digest=candidate.digest,
+    signature=candidate.signature,
+    runtime_compatibility=current_runtime,
+)
+
+if not verified:
+    quarantine(candidate)
+    return typed_plugin_failure()
+
+requested_scope = parse_declared_scope(candidate)
+effective_scope = attenuate(configured_plugin_ceiling, requested_scope)
+
+if requested_scope != effective_scope and requires_unavailable_authority(candidate):
+    fail_closed()
+
+service = activate_through_runtime_bootstrap(candidate, effective_scope)
+if service is None:
+    fail_closed("activation_without_service")
+
+persist_plugin_activation_receipt(candidate, effective_scope, service.identity)
+
+M-9 qualification scenarios:
+
+1. Build wheel and sdist twice and compare normalized content manifests.
+2. Install each into a clean environment outside the checkout.
+3. Initialize clean state.
+4. Run an offline coding workflow.
+5. Run a formal/general workload.
+6. Run a multi-role topology workflow.
+7. Exercise authorized memory retrieval with provenance.
+8. Kill and resume a run.
+9. Inspect events and artifacts.
+10. Install, activate, disable, upgrade, rollback, and remove a plugin.
+11. Backup and restore into a fresh installation.
+12. Uninstall without unexpected data loss.
+13. Verify all backend health/readiness/diagnostic paths.
+14. Run the complete Python suite and all mandatory linters.
+
+M-9 is complete only when its exact installed artifacts pass qualification and Dev B independently verifies the beta evidence.
+
+SWE-BENCH PREPARATION
+
+Build only the backend harness capabilities needed for reproducible M-9 evaluation:
+
+- immutable benchmark manifest;
+- exact task/repository/container pins;
+- model/provider identity capture;
+- token, cost, latency, retry, patch, and tool telemetry;
+- contamination checks;
+- direct, planner/executor/reviewer, and fork/read/merge presets;
+- repository/symbol map;
+- targeted test selection;
+- bounded retry based on typed failure;
+- artifact-preserving context compaction;
+- budget-aware model escalation.
+
+Do not optimize against the sealed evaluation set.
+
+Do not use openrouter/free for comparative runs because it may select different models. Pin a specific free or paid model endpoint and record the actual returned model/
+provider identity and pricing snapshot.
+
+M-10: PLAN ONLY
+
+After M-9 qualification, inspect M-10 requirements and produce a plan covering:
+
+- supported migrations and downgrade refusal;
+- backup/restore under load;
+- corruption and interrupted-migration recovery;
+- fault injection;
+- bounded soak;
+- performance and security qualification;
+- reproducible release artifacts;
+- exact-subject signed release envelope;
+- external Git/tag/publication prerequisites.
+
+Do not implement or claim M-10.
+
+VERIFICATION
+
+After each area, run focused tests. At the end run:
+
+- full Python suite;
+- runtime, agency, recursion, topology, memory, registry, recovery, package, CLI/service, and plugin tests;
+- boundaries;
+- TCB;
+- secrets;
+- domain blindness;
+- isolation;
+- execution truth;
+- event coverage;
+- stale paths;
+- fixture hygiene;
+- installed-wheel and empty-environment tests;
+- M-4 through M-9 evidence verifiers without self-acceptance.
+
+FINAL REPORT
+
+Report:
+
+- exact changed backend paths;
+- tests run and pass counts;
+- failures and typed causes;
+- evidence bundles prepared;
+- milestones mechanically accepted versus still open;
+- external commit/tag/key/reviewer gates;
+- M-9 artifact identities;
+- M-10 plan only;
+- confirmation of any LIM/LEX use, with proof that no external engine became runtime or acceptance
+  authority and that all resulting Vanguard changes passed the required gates.
+
+## Prompt for Dev B — Verification, Evidence, and M-9 Qualification
+
+Act as Lane B Staff/Principal Verification Engineer for Vanguard/AETHER.
+
+MISSION
+
+Independently falsify, verify, and close the evidence chain required to deliver M-4 through M-9 while continuously protecting M-1 through M-3 and accepted M-6 behavior.
+Dev A owns runtime implementation; you own contracts, evidence truth, falsifiers, independent acceptance, benchmark integrity, and final M-9 qualification.
+
+Stop after independently qualifying M-9. For M-10, produce a verification and acceptance plan only. Do not implement M-10.
+
+NON-NEGOTIABLE SCOPE
+
+- Never claim acceptance from mechanism presence, test success, a locally built bundle, prose, or a producer signature alone.
+- Never accept a bundle produced by the same identity.
+- Never overwrite historical evidence.
+- failed, undeterminable, passed, and accepted are distinct.
+- Never reinterpret an undeterminable study as positive or negative.
+- Never weaken a falsifier to make a marker pass.
+- Never fabricate a clean subject, commit, tag, remote tag resolution, model execution, artifact, or signature.
+- Do not modify Vanguard runtime implementation unless a contract/falsifier defect is directly in Lane B scope.
+- Do not edit frontend clients.
+- LIM (`tools/006_LLM_INT_MACHINE/**`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may be used
+  as advisory development and research assistants. They must not supply Vanguard runtime,
+  evaluator, or acceptance authority; any adopted technique must be independently implemented and
+  falsified behind Vanguard interfaces.
+- Do not run Git commands or scripts that internally invoke Git.
+- Do not implement M-10.
+
+READ FIRST
+
+Read completely:
+
+1. AGENTS.md
+2. README.md
+3. VISION.md
+4. docs/SPEC.md
+5. docs/01_law/EVIDENCE.md
+6. docs/01_law/MEASUREMENT.md
+7. docs/01_law/RUNTIME.md
+8. docs/01_law/SECURITY.md
+9. docs/01_law/EXTENSIBILITY.md
+10. docs/02_decisions/INDEX.md
+11. Accepted ADRs relevant to M-4 through M-9, especially ADR-0094 through ADR-0103
+12. docs/03_execution/milestones.md
+13. docs/03_execution/backlog.md
+14. docs/03_execution/sprint_active.md
+15. docs/03_execution/sprint_upcoming.md
+16. Existing M-4 through M-8 evidence bundles and schemas
+17. Existing evidence builders, runners, trust roots, and acceptance linters
+18. TODO_PROMPT.md only as advisory material
+19. GLM_masterplan_review.md only as advisory material
+20. docs/_archive/reviews/backend/director_review_v3/guidelines.md only as historical review plus current navigation addendum
+
+FIRST ACTION: INDEPENDENT TRUTH AUDIT
+
+Without changing evidence:
+
+1. Run every evidence verifier over every published M-4 through M-8 bundle.
+2. Record passed, failed, or undeterminable exactly as returned.
+3. Verify producer keys against the trust root.
+4. Verify reviewer keys independently.
+5. Verify acceptance subjects equal produced bundle digests.
+6. Verify material digest schemes and re-derive every resolvable material.
+7. Run execution-truth and evidence-acceptance linters.
+8. Run the complete Python suite and all named falsifier runners.
+9. Produce a dependency ledger:
+    - accepted;
+    - package ready;
+    - evidence ready;
+    - failed;
+    - undeterminable;
+    - blocked on external action.
+
+M-1 THROUGH M-3: CONTINUOUS FALSIFICATION
+
+Keep independent tests for:
+
+- forged or attenuated capability violations;
+- all four additive budget dimensions;
+- JCS and identity drift;
+- second ledger writer;
+- event sequence discontinuity;
+- in-memory-only continuation;
+- package-resource checkout dependence;
+- permissive profile fallback;
+- evaluator bypass;
+- adapter importing kernel or agency;
+- runtime/configuration identity mismatch;
+- execution evidence that claims unexecuted effects.
+
+M-4: INDEPENDENTLY VERIFY CANDIDATE-06
+
+Wait for Dev A’s candidate-06.
+
+Verification algorithm:
+
+bundle = load_new_label("M-4-rf95-candidate-06")
+assert bundle != candidate_05
+assert candidate_05_bytes_unchanged()
+
+assert verify_registered_producer(bundle)
+assert rederive_all_material_digests(bundle)
+assert exact_subject_is_externally_resolvable(bundle)
+assert cold_reconstruct(bundle.wal) == bundle.claimed_terminal_state
+assert diff_is_nonempty_and_correct(bundle)
+assert task_verifier_passes(bundle)
+assert trajectory_is_complete(bundle)
+assert model_and_provider_are_attributable(bundle)
+
+acceptance = independent_sign(
+    subject=bundle.digest(),
+    outcome="passed",
+    reviewer=registered_reviewer_distinct_from_producer,
+)
+assert verify_acceptance(acceptance, bundle)
+publish_new_acceptance_without_overwriting_history()
+
+If any fact is absent or cannot be re-derived, return failed or undeterminable according to the schema. Do not repair Dev A’s evidence silently.
+
+M-5A: VERIFY CONVERGENCE-BASE-v1
+
+External owner action is required: an annotated remotely resolvable CONVERGENCE-BASE-v1.
+
+Verify:
+
+- tag exists remotely;
+- tag is annotated, not lightweight;
+- tag object SHA resolves;
+- referenced commit resolves;
+- tree digest matches;
+- source manifest is exact;
+- schemas are pinned;
+- reducers are pinned;
+- runtime identity is pinned;
+- protected subtrees match;
+- no contamination from post-baseline treatment;
+- digest scheme is raw-sha256;
+- countersigned baseline manifest is exact-subject bound.
+
+Negative tests:
+
+- absent tag;
+- local-only tag;
+- lightweight tag;
+- moved tag;
+- unresolved commit;
+- wrong tree;
+- changed schema;
+- changed reducer;
+- changed protected subtree;
+- missing digest scheme;
+- self-acceptance.
+
+M-5B: VERIFY FRESH GENERALITY
+
+After M-5a passes:
+
+- Verify the successor bundle uses CONVERGENCE-BASE-v1.
+- Reject M-5A-BASE-v2.
+- Re-run graph-coloring positive and negative vectors.
+- Verify malformed, incomplete, range, and serialization-permutation behavior.
+- Verify Runtime.execute_harness is used.
+- Verify RF-86 and RF-98.
+- Verify no protected substrate semantic change contaminates the treatment.
+- Independently accept only the exact successor bundle digest.
+
+M-6: PRESERVE ACCEPTED EVIDENCE
+
+Do not re-open M-6 unless a regression appears.
+
+Continuously run falsifiers for:
+
+- real depth-3 recursion;
+- deterministic child IDs;
+- spawn intent before execution;
+- action/resource/constraint attenuation;
+- monotonic depth/turn ceilings;
+- all four additive budget dimensions;
+- persisted-envelope cost reconstruction;
+- parent/child sequence continuity;
+- crash between ChildSpawned and ChildReturned;
+- settled-subtree replay;
+- open-child undeterminable recovery;
+- cancellation and kill-tree;
+- topology-generated child execution;
+- no transcript/handle/ambient authority leakage.
+
+M-6.5: RE-EMIT AND DISPOSE VALIDLY
+
+Wait for the corrected portable study materials.
+
+Required validation:
+
+- raw-sha256 is declared;
+- study report reference resolves;
+- controller presence is the only treatment axis;
+- controller-off parity holds;
+- perturbations bind to semantic checkpoints;
+- A/A is non-degenerate;
+- no capability or budget mutation;
+- directives are bounded;
+- no-op fallback works;
+- profile activation is explicit;
+- rollback selects controller-off;
+- McNemar exact, Holm correction, paired intervals, attribution, and regression budgets are correctly computed.
+
+A valid positive result may authorize only named profiles.
+A valid negative result closes the experiment with controller-off.
+Invalid comparability remains undeterminable.
+Never reuse the old undeterminable acceptance claim.
+
+M-7: FALSIFY REAL TOPOLOGY EXECUTION
+
+Coordinate with Dev A using frozen fixtures and receipt contracts.
+
+Markers must be earned from persisted runtime facts.
+
+Required tests:
+
+1. Direct topology equals topology-disabled baseline.
+2. Planner/executor/reviewer creates exactly one child per role.
+3. Planner performs a real inspectable effect.
+4. Planner output is persisted as an artifact.
+5. Executor receives the planner artifact by authorized digest.
+6. Executor produces patch/test artifacts.
+7. Reviewer receives those artifacts by digest.
+8. Fork/read branches perform real effects.
+9. Merge consumes only declared settled predecessors.
+10. Role order is deterministic.
+11. Sequential executions do not overlap.
+12. Topology data cannot grant capabilities.
+13. Root-only spawn remains enforced.
+14. Child resources/actions are attenuated.
+15. Missing artifact prevents readiness or produces typed failure.
+16. Corrupt artifact fails closed.
+17. Unauthorized artifact fails closed.
+18. Crash after spawn intent reconstructs open work as undeterminable.
+19. Crash after effect but before return does not blindly retry.
+20. Settled subtrees do not execute again.
+21. Cold reconstruction returns the same topology result.
+22. All shipped valid fixtures execute.
+23. Independent receipts identify each role operation.
+24. Effect-free abandoned children do not satisfy role_operations_executed.
+
+Pseudocode for evidence derivation:
+
+events = cold_load_project_events()
+topology = project_topology(events)
+
+for role in topology.roles:
+    spawn = require_one_persisted_spawn(role)
+    settlement = require_one_persisted_settlement(role)
+    effects = persisted_child_effects(spawn.child_id)
+
+    assert effects.nonempty
+    assert effects.all_authorized_by_attenuated_scope
+    assert settlement.derived_from(effects)
+
+for edge in topology.dependencies:
+    producer_artifact = persisted_output(edge.from_role)
+    consumer_input = persisted_input_ref(edge.to_role)
+    assert consumer_input.digest == producer_artifact.digest
+
+assert canonical_order(events) == expected_role_order
+assert cold_reconstruct(events) == reported_result
+
+Run the M-7 falsifier runner. Do not manually set role_operations_executed or artifact-flow markers.
+
+M-8: INDEPENDENT ACCEPTANCE
+
+Wait for Dev A’s exact clean-subject M-8 bundle.
+
+Verify all required areas:
+
+- authorized scoped memory;
+- tenant isolation;
+- category isolation;
+- expiry;
+- revocation;
+- retention;
+- legal hold;
+- GC;
+- SQLite migrations;
+- metadata/index transaction atomicity;
+- CAS/blob integrity;
+- typed degraded states;
+- backup and restore;
+- corruption detection and recovery;
+- retrieval provenance entering model context;
+- no InMemoryMemoryPort in product wiring;
+- no fail-open legacy path;
+- composition CAS;
+- generator/evaluator/promoter separation;
+- no self-promotion;
+- sealed held-out workloads;
+- signed rollback;
+- previous-composition restoration;
+- replay protection;
+- crash/restart/race/isolation tests.
+
+Acceptance algorithm:
+
+produced = verify_m8_bundle()
+if produced.verdict != "passed":
+    stop_with_exact_verdict()
+
+assert producer_identity != reviewer_identity
+assert subject_is_clean_and_externally_resolvable(produced)
+assert all_34_markers_derived_from_named_tests(produced)
+assert all_materials_rederived(produced)
+
+acceptance = sign_acceptance(
+    reviewer=registered_independent_reviewer,
+    subject=produced.digest(),
+    outcome="passed",
+)
+assert verify_acceptance(acceptance, produced)
+
+Only after this passes may the active board authorize M-9.
+
+M-9: CONTRACT AND PRODUCT QUALIFICATION
+
+Dev A implements M-9. Lane B freezes and tests the public beta contracts.
+
+Verify from installed artifacts, never from checkout imports:
+
+- one canonical version;
+- supported Python versions;
+- wheel and sdist package contents;
+- schema/resource/migration inclusion;
+- empty-environment installation;
+- no PYTHONPATH dependence;
+- initialization;
+- offline-after-install workflow;
+- CLI/service configuration parity;
+- start/stop/resume;
+- event/artifact inspection;
+- health/readiness distinction;
+- typed diagnostics;
+- plugin discovery and validation;
+- plugin digest/signature verification;
+- compatibility negotiation;
+- explicit activation;
+- capability ceiling;
+- health/readiness;
+- controlled shutdown;
+- disable/remove;
+- upgrade/rollback;
+- quarantine;
+- backup/restore into a new installation;
+- safe uninstall.
+
+Required malicious/negative fixtures:
+
+- unsigned plugin;
+- bad digest;
+- expired signature;
+- incompatible runtime version;
+- undeclared resource;
+- attempted capability minting;
+- activation returning no service;
+- corrupted package resource;
+- missing migration;
+- unsupported schema;
+- non-loopback unauthenticated service;
+- secret-bearing diagnostic;
+- checkout-dependent import;
+- silent in-memory storage fallback;
+- failed resume with false success.
+
+M-9 beta evidence must bind:
+
+- source subject;
+- wheel digest;
+- sdist digest;
+- package-content manifest;
+- Python/platform identity;
+- dependency lock;
+- schemas and migrations;
+- runtime/reducer identities;
+- configuration/profile;
+- plugin fixtures;
+- workflow results;
+- restart/resume result;
+- backup/restore result;
+- all verifier outputs.
+
+Independently accept the exact M-9 bundle only if installation and operation succeed from the exact artifacts.
+
+SWE-BENCH MEASUREMENT PROGRAM
+
+Prepare and run development-stage measurements without delaying correctness gates.
+
+Evaluation ladder:
+
+- Smoke: 10–15 tasks, zero harness failures required.
+- Development: 30–50 paired tasks.
+- Qualification: 100–200 tasks after M-9 qualification.
+- Sealed: full official set only after preregistration.
+
+Compare one variable at a time:
+
+1. Direct baseline.
+2. Direct plus repository/symbol map.
+3. Direct plus targeted tests.
+4. Planner/executor/reviewer.
+5. Fork/read/merge.
+6. Typed failure classifier plus bounded retry.
+7. Controller off versus authorized controller.
+8. Memory off versus authorized retrieval.
+9. Cheap scout plus strong executor.
+10. Strong model throughout.
+
+Every run pins:
+
+- task set;
+- repository revisions;
+- sandbox image;
+- evaluator;
+- runtime;
+- prompts;
+- topology;
+- tool policy;
+- context policy;
+- budgets;
+- timeout;
+- model ID;
+- returned model identity;
+- provider;
+- price snapshot.
+
+Report:
+
+- pass@1;
+- bootstrap confidence interval;
+- total and per-task cost;
+- wall time;
+- tokens;
+- tool calls;
+- retries;
+- patch size;
+- test-selection precision;
+- failure categories;
+- contamination status.
+
+Do not use openrouter/free in comparative runs because its selected model may vary. Specific free variants may be used only when exact model identity is pinned and
+returned identity is verified.
+
+Treat greater than 60% pass@1 as an experimental target, not a milestone. Do not claim superiority over Claude Code or Codex unless the task set, evaluator, resource
+limits, intervention policy, and evaluation date are equivalent.
+
+M-10: PLAN ONLY
+
+After M-9 is independently accepted, produce a verification plan for:
+
+- migration matrix;
+- downgrade refusal;
+- backup/restore under load;
+- interrupted migration;
+- WAL/blob/index corruption;
+- process kill boundaries;
+- soak duration and SLOs;
+- security/adversarial qualification;
+- reproducible package comparison;
+- SBOM and release artifact validation;
+- exact-subject signed release envelope;
+- independent release acceptance;
+- external Git/tag/publication actions.
+
+Do not implement or claim M-10.
+
+FINAL VERIFICATION
+
+Run:
+
+- complete Python suite;
+- M-1–M-9 focused suites;
+- all evidence verifiers;
+- evidence-acceptance gate;
+- boundaries;
+- TCB budget;
+- secrets;
+- domain blindness;
+- isolation;
+- execution truth;
+- event coverage;
+- stale paths;
+- fixture hygiene;
+- package-resource tests;
+- clean-install tests;
+- recursion, topology, memory, recovery, plugin, and service tests.
+
+FINAL REPORT
+
+Report:
+
+- exact verification and contract paths changed;
+- tests and counts;
+- failed and undeterminable evidence;
+- independently accepted evidence;
+- exact open external prerequisites;
+- M-9 package and evidence digests;
+- benchmark results with costs and confidence intervals;
+- M-10 verification plan only;
+- confirmation of any LIM/LEX use and evidence that Vanguard remained the sole runtime and authority
+  path.

@@ -119,7 +119,7 @@ def build_repo() -> Path:
     return path
 
 
-def tests_pass(repo: Path) -> bool:
+def repo_tests_pass(repo: Path) -> bool:
     """Run the repository's own tests. The verifier is a process, not a claim."""
     completed = subprocess.run(
         ["python3", "-m", "unittest", "discover", "-s", str(repo), "-t", str(repo)],
@@ -190,7 +190,7 @@ class SuiteVerifier:
 
     def evaluate(self, run_ref, protocol):
         self.calls.append(run_ref)
-        green = tests_pass(self._repo)
+        green = repo_tests_pass(self._repo)
         return Result.success(Verdict(
             outcome="claims",
             claims=({"claim": "tests_green", "holds": green,
@@ -352,7 +352,7 @@ class DogfoodGate(unittest.TestCase):
     def test_the_repository_starts_broken(self) -> None:
         """`M6`: a gate that cannot fail is not a gate. If the suite is green
         before the run, every assertion below passes for the wrong reason."""
-        self.assertFalse(tests_pass(self.repo))
+        self.assertFalse(repo_tests_pass(self.repo))
 
     def test_the_agent_observes_the_file_before_patching_it(self) -> None:
         result = self.execute()
@@ -405,7 +405,7 @@ class DogfoodGate(unittest.TestCase):
         result = self.execute(approver=lambda challenge: False)
 
         self.assertEqual((self.repo / "calc.py").read_text(encoding="utf-8"), BUGGY_SOURCE)
-        self.assertFalse(tests_pass(self.repo))
+        self.assertFalse(repo_tests_pass(self.repo))
         self.assertIsNot(result.terminal, RunTermination.COMPLETED)
 
     def test_an_absent_approver_is_a_refusal_not_a_default_allow(self) -> None:
@@ -433,7 +433,7 @@ class DogfoodGate(unittest.TestCase):
     def test_the_suite_is_green_after_the_run(self) -> None:
         self.execute()
 
-        self.assertTrue(tests_pass(self.repo))
+        self.assertTrue(repo_tests_pass(self.repo))
 
     def test_the_verdict_comes_from_outside_the_episode(self) -> None:
         """`ICD §3`, `M5`: the episode terminates; it does not grade itself."""
@@ -564,7 +564,7 @@ class LiveDogfood(unittest.TestCase):
         # report success it did not achieve.
         self.assertIsNotNone(result.terminal)
         if result.verdict is not None and result.verdict.outcome == "claims":
-            self.assertTrue(tests_pass(repo))
+            self.assertTrue(repo_tests_pass(repo))
 
 
 if __name__ == "__main__":

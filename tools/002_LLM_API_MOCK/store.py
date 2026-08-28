@@ -3,17 +3,26 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+#: The checked-in corpus. It is a tracked fixture, so anything that writes to it
+#: turns a test run into a working-tree change. Set ``LAM_DB_PATH`` to redirect
+#: the default -- the test suite points it at a scratch copy.
 DEFAULT_DB_PATH = Path(__file__).resolve().parent / "lam.sqlite"
 
 
+def default_db_path() -> Path:
+    override = os.environ.get("LAM_DB_PATH")
+    return Path(override) if override else DEFAULT_DB_PATH
+
+
 class LamStore:
-    def __init__(self, db_path: Path | str = DEFAULT_DB_PATH) -> None:
-        self.db_path = Path(db_path)
+    def __init__(self, db_path: Path | str | None = None) -> None:
+        self.db_path = Path(db_path) if db_path is not None else default_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 

@@ -1,0 +1,25 @@
+RF-95 beta candidate 05 preregistration
+
+Status: frozen for one beta validation attempt.
+Authority: user-authorized Dev A execution.
+Frozen at: 2026-08-28T00:00:00Z
+
+Subject: the clean committed checkout used for this run, pinned by the
+producer evidence bundle to its exact commit and tree.
+Composition: vanguard/packages/agency/manifests/vg-code-default/manifest.json
+Profile: product (sqlite-wal persistence)
+Fixture: the runner's canonical calculator fixture and unchanged task.
+Provider: OpenRouter, live and attributable.
+Model route: deepseek/deepseek-chat.
+
+The run passes only if the live attributable model completes the canonical
+composition, performs the required observation, authorized mutation, and
+mediated process verification, produces the required non-empty diff, passes
+the task tests, records a complete mhf.trajectory/2 in SQLite-WAL, and a
+fresh process reconstructs the same terminal state. A fake, scripted,
+cassette, stitched, manually repaired, contaminated, or unavailable run is
+not a pass; unavailable provider attempts are recorded as undeterminable.
+
+No historical artifact, synthetic receipt, test mutation, or unavailable
+verifier may satisfy this candidate. Independent acceptance must be emitted
+by a verifier identity distinct from the producer.

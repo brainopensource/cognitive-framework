@@ -36,6 +36,7 @@ from ..canonicalisation.jcs import canonical_bytes
 __all__ = [
     "EVIDENCE_SCHEMA",
     "OUTCOMES",
+    "acceptance_defects",
     "EvidenceEnvelope",
     "EvidenceEnvelopeError",
     "Material",
@@ -64,12 +65,20 @@ class Material:
 
     `digest` is the identity; `ref` says where the bytes live. A material
     without a digest is a filename, and a filename is not evidence.
+
+    `scheme` names how the digest was computed. Without it a verifier that
+    re-derives a different value cannot tell a changed material from a hashing
+    convention it does not know, so it must answer `undeterminable` -- and
+    `undeterminable` never satisfies a predicate. Declaring the scheme is what
+    turns a mismatch into a decidable negative. The field is optional so that
+    envelopes written before it remain readable.
     """
 
     name: str
     digest: str
     ref: str = ""
     media_type: str = ""
+    scheme: str = ""
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -84,6 +93,8 @@ class Material:
             wire["ref"] = self.ref
         if self.media_type:
             wire["mediaType"] = self.media_type
+        if self.scheme:
+            wire["scheme"] = self.scheme
         return wire
 
 
@@ -204,6 +215,7 @@ def parse_envelope(wire: Mapping[str, Any]) -> EvidenceEnvelope:
                 digest=str(m.get("digest") or ""),
                 ref=str(m.get("ref") or ""),
                 media_type=str(m.get("mediaType") or ""),
+                scheme=str(m.get("scheme") or ""),
             )
             for m in (wire.get("materials") or ())
         ),
@@ -236,10 +248,47 @@ def accepts(
     has reviewed nothing, and an acceptance whose subject digest has drifted
     is accepting a different artifact than the one on the table.
     """
+    return not acceptance_defects(acceptance, produced)
+
+
+def acceptance_defects(
+    acceptance: EvidenceEnvelope, produced: EvidenceEnvelope,
+) -> list[str]:
+    """Every reason `acceptance` fails to accept `produced`, named individually.
+
+    A single boolean cannot tell a reviewer who signed their own work from one
+    who accepted a bundle nobody can reproduce, and those call for different
+    repairs.
+    """
+    defects: list[str] = []
     if acceptance.producer.identity == produced.producer.identity:
-        return False
+        defects.append(
+            f"reviewer identity {acceptance.producer.identity!r} is the producer's; "
+            f"a producer cannot accept their own evidence"
+        )
+    if acceptance.producer.key_id and (
+        acceptance.producer.key_id == produced.producer.key_id
+    ):
+        defects.append(
+            f"reviewer signs with the producer's key {acceptance.producer.key_id!r}; "
+            f"separate identities sharing one key are not separate authorities"
+        )
     if acceptance.outcome != "passed":
-        return False
+        defects.append(f"acceptance outcome is {acceptance.outcome!r}, not 'passed'")
     if produced.digest() not in acceptance.subjects:
-        return False
-    return True
+        defects.append(
+            "acceptance subject does not include the produced bundle's digest; "
+            "it accepts a different artifact than the one on the table"
+        )
+    # An acceptance reports a review of a result; it does not replace the
+    # result. Accepting `passed` over a subject whose own outcome is
+    # `undeterminable` or `failed` would let a signature convert unknown into
+    # true, which is the one thing ADR-0101's three-valued outcome exists to
+    # prevent. Reviewing an unreproducible bundle honestly yields
+    # `undeterminable`, and `undeterminable` never satisfies a predicate.
+    if produced.outcome != "passed":
+        defects.append(
+            f"subject bundle's own outcome is {produced.outcome!r}; an acceptance "
+            f"may not report an outcome its subject does not support"
+        )
+    return defects

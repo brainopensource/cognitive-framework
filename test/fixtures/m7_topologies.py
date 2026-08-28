@@ -26,6 +26,7 @@ __all__ = [
     "CRITIC_REVISER",
     "CYCLIC",
     "DIRECT",
+    "FORK_READ_MERGE",
     "MISSING_RESOURCE",
     "PLANNER_EXECUTOR",
     "SAFE_READ_WORKLOAD",
@@ -63,8 +64,30 @@ CRITIC_REVISER: dict[str, Any] = {
                       {"artifact": "critique", "from": "critic", "to": "reviser"}],
 }
 
+#: A fan-out/fan-in topology.  The two readers are independent in the
+#: declaration, but the reference runtime still executes them one at a time;
+#: the merge waits for both durable inputs.  This exercises the same artifact
+#: reference boundary as planner/executor with more than one predecessor.
+FORK_READ_MERGE: dict[str, Any] = {
+    "topologyId": "fork-read-merge", "version": "1.0.0",
+    "entryRole": "fork",
+    "roles": [_role("fork"), _role("read-left"), _role("read-right"), _role("merge")],
+    "edges": [
+        {"from": "fork", "to": "read-left"},
+        {"from": "fork", "to": "read-right"},
+        {"from": "read-left", "to": "merge"},
+        {"from": "read-right", "to": "merge"},
+    ],
+    "artifactFlows": [
+        {"artifact": "left-input", "from": "fork", "to": "read-left"},
+        {"artifact": "right-input", "from": "fork", "to": "read-right"},
+        {"artifact": "left-result", "from": "read-left", "to": "merge"},
+        {"artifact": "right-result", "from": "read-right", "to": "merge"},
+    ],
+}
+
 #: Three topologies, one runtime: the M-7 exit gate's subject.
-VALID_TOPOLOGIES = (DIRECT, PLANNER_EXECUTOR, CRITIC_REVISER)
+VALID_TOPOLOGIES = (DIRECT, PLANNER_EXECUTOR, CRITIC_REVISER, FORK_READ_MERGE)
 
 #: Invalid: `reviser` delegates back to `author`. A cycle is not a loop the
 #: scheduler can unroll -- it is a structure with no terminal condition.

@@ -7,6 +7,7 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -176,8 +177,13 @@ class _LayeredOperator:
                  artifacts: ArtifactWriter | None = None,
                  provenance: ProvenanceSink | None = None,
                  meta_controller: Callable[[], ControllerProposal | None] | None = None,
-                 memory: MemoryBinding | None = None) -> None:
+                 memory: MemoryBinding | None = None,
+                 capabilities: Sequence[Mapping[str, Any]] = ()) -> None:
         self._model = model
+        configure_capabilities = getattr(model, "configure_capabilities", None)
+        if callable(configure_capabilities):
+            configure_capabilities(tuple(
+                dict(item) for item in capabilities if isinstance(item, Mapping)))
         self._compiler = compiler
         self._recorder = recorder
         self._task = task
@@ -444,11 +450,13 @@ class SessionPorts:
     memory: MemoryBinding | None = None
     #: Optional point-of-use authorized experience sink on successful runs.
     experience: MemoryBinding | None = None
-    child_runtime: Any = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
     child_runtime: ChildRuntimePort | None = None
+    #: Child episodes share the parent's environment lifetime. Only the root
+    #: composition owns and disposes the concrete environment adapter.
+    environment_owner: bool = True
 
 
 class _SwappablePolicy:
@@ -529,7 +537,7 @@ class HarnessSession:
             role="session",
         )
 
-        self.scope = _scope_for(harness)
+        self.scope = task.scope_override or _scope_for(harness)
         self.adapters = {
             verb: harness.bindings[verb].factory(
                 BindingContext(
@@ -578,7 +586,14 @@ class HarnessSession:
             # TODO(S8-B-04): this literal is the last composition value the
             # manifest does not own. It is replaced by the approval-threshold
             # manifest component; Lane B lands that, not this sprint.
-            approval_required_above="low",
+            # A sealed child scope is the already-approved delegation grant:
+            # the parent approval covers the complete attenuated request, and
+            # the child cannot widen that sealed membership. Requiring a
+            # second interactive approval here would make every delegated
+            # high-risk role fail in benchmark mode, despite the parent having
+            # explicitly authorized the bounded child plan. Unsealed runs
+            # retain the normal benchmark/interactive approval rule.
+            approval_required_above=(None if self.scope.sealed else "low"),
             risk_of=harness.risk_of,
         ))
 
@@ -598,6 +613,11 @@ class HarnessSession:
         discovered_env = discovery.render_environment_text()
         base_env = _environment_map(ports.environment, harness)
         env_parts = [base_env]
+        if task.artifact_refs:
+            env_parts.append(
+                "=== Topology Artifact References ===\n" + "\n".join(
+                    f"- {ref['artifact']}: {ref['digest']}"
+                    for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
         if self.index is not None:
@@ -667,6 +687,11 @@ class HarnessSession:
                 if ports.meta_controller is not None else None
             ),
             memory=ports.memory,
+            capabilities=tuple(
+                {"verb": capability.verb,
+                 "selector": capability.selector}
+                for capability in harness.frozen.capabilities
+            ),
         )
 
         # Ed25519 verify keys are injected by the operator. The root never mints
@@ -988,7 +1013,7 @@ class HarnessSession:
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining)
+                max_turns=remaining, spawn_dispatcher=self.dispatch)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -1009,9 +1034,13 @@ class HarnessSession:
             # `K-14`: the approved request re-enters at S1, not at S6, and the
             # model is not asked to re-propose what a human already approved.
             self.policy.bind(authorization)
-            self.dispatch(request, requested_scope=self.scope,
-                          reservation=_reservation_for(harness.budget,
-                                                       harness.effect_budget))
+            approved_dispatch = self.dispatch(
+                request, requested_scope=self.scope,
+                reservation=_reservation_for(harness.budget,
+                                             harness.effect_budget))
+            observer = getattr(self.operator._model, "observe_dispatch", None)
+            if callable(observer):
+                observer(approved_dispatch)
             _record(receipts, self.operator, self.calls, admit_context=True)
             authorization = None
 
@@ -1072,7 +1101,8 @@ class HarnessSession:
             **self._capture_evidence(),
         )
         delayed.flush(trajectory)
-        ports.environment.dispose()
+        if ports.environment_owner:
+            ports.environment.dispose()
         result = RunResult(
             harness=harness.harness,
             composition_digest=harness.composition_digest,
@@ -1224,6 +1254,14 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
+    # The callback is also used by small operator doubles in the composition
+    # contract tests.  Access the wrapped model itself first; looking up
+    # ``operator._model`` as an attribute of the model is an accidental
+    # second dereference and breaks operators that are not layered wrappers.
+    model = getattr(operator, "_model", operator)
+    observer = getattr(model, "observe_dispatch", None)
+    if callable(observer):
+        observer(result)
     if outcome is None:
         # Approval suspension is not an observation of an executed effect.
         # Do not let a control-plane challenge advance a workload scenario.

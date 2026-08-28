@@ -534,7 +534,10 @@ def create_server(
     engine = LamEngine.from_directory(sc_dir) if sc_dir.is_dir() else None
 
     cassette = Cassette.load(cassette_path) if cassette_path and cassette_path.is_file() else None
-    recorder = MockRecorder(record_db) if record_db else MockRecorder(_DIR / "lam.sqlite")
+    # LAM_DB_PATH keeps a test run from writing to the tracked corpus; see
+    # store.default_db_path().
+    default_db = Path(os.environ.get("LAM_DB_PATH") or (_DIR / "lam.sqlite"))
+    recorder = MockRecorder(record_db) if record_db else MockRecorder(default_db)
     upstream = upstream_url or os.environ.get("LAM_UPSTREAM")
 
     LamServerHandler.engine = engine
@@ -551,7 +554,9 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8787, help="Port to listen on (default: 8787)")
     parser.add_argument("--scenarios", type=Path, default=_DIR / "scenarios", help="Path to scenarios directory")
     parser.add_argument("--cassette", type=Path, default=None, help="Path to cassette file for replay")
-    parser.add_argument("--record-db", type=Path, default=_DIR / "lam.sqlite", help="Path to SQLite DB for provenance")
+    parser.add_argument("--record-db", type=Path,
+                        default=Path(os.environ.get("LAM_DB_PATH") or (_DIR / "lam.sqlite")),
+                        help="Path to SQLite DB for provenance")
     parser.add_argument("--upstream", type=str, default=None, help="Upstream Ollama host URL for live proxy")
 
     args = parser.parse_args()

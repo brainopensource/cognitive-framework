@@ -10,10 +10,12 @@ from __future__ import annotations
 import json
 import os
 import random
+import threading
 import time
 import urllib.error
 import urllib.request
 from codecs import getincrementaldecoder
+from contextlib import contextmanager
 from typing import Any, Callable, Iterable, Iterator, Mapping, Sequence
 
 from ...ports.event_store import Result
@@ -58,6 +60,62 @@ StreamTransport = Callable[
     [str, dict[str, str], bytes],
     tuple[int, Mapping[str, str], Iterable[bytes]],
 ]
+
+
+def _set_response_socket_timeout(response: Any, timeout: float) -> None:
+    """Bound body reads as well as connection setup to the request timeout.
+
+    ``urllib`` applies ``timeout`` while opening a connection, but some
+    response implementations leave the underlying socket without that bound
+    once headers have arrived.  A stalled provider body must become a typed
+    adapter failure so the runtime can retry or fail closed; it must not hold
+    an episode forever.  Test doubles and non-socket responses are deliberately
+    ignored because their own read implementation owns its timing.
+    """
+    pending = [response]
+    visited: set[int] = set()
+    while pending:
+        current = pending.pop()
+        if current is None or id(current) in visited:
+            continue
+        visited.add(id(current))
+        try:
+            setter = getattr(current, "settimeout", None)
+            if callable(setter):
+                setter(timeout)
+        except (OSError, TypeError, ValueError):
+            pass
+        # urllib/http.client versions differ in whether the socket is exposed
+        # through fp.raw._sock, fp._sock, or an SSL/connection wrapper.
+        for name in ("fp", "raw", "_sock", "_sslobj", "_connection"):
+            try:
+                nested = getattr(current, name, None)
+            except (AttributeError, OSError):
+                nested = None
+            if nested is not None and id(nested) not in visited:
+                pending.append(nested)
+
+
+@contextmanager
+def _response_read_deadline(response: Any, timeout: float):
+    """Close a provider response if a body read outlives its deadline.
+
+    Some urllib/TLS combinations do not propagate a socket timeout to a
+    chunked body after headers arrive. A daemon timer is an independent
+    enforcement path: closing the response unblocks the read and lets the
+    adapter classify the interruption as a retryable instrument failure.
+    """
+    closer = getattr(response, "close", None)
+    if not callable(closer):
+        yield
+        return
+    timer = threading.Timer(timeout, closer)
+    timer.daemon = True
+    timer.start()
+    try:
+        yield
+    finally:
+        timer.cancel()
 
 
 def estimate_tokens(text: str) -> int:
@@ -160,8 +218,11 @@ def _http_post(
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
+            _set_response_socket_timeout(response, timeout)
             resp_headers = {k.lower(): v for k, v in response.headers.items()}
-            return int(response.status), resp_headers, response.read()
+            with _response_read_deadline(response, timeout):
+                raw = response.read()
+            return int(response.status), resp_headers, raw
     except urllib.error.HTTPError as exc:
         resp_headers = (
             {k.lower(): v for k, v in exc.headers.items()}
@@ -190,11 +251,13 @@ def _http_stream(
         return int(exc.code), resp_headers, (exc.read() or b"",)
 
     resp_headers = {k.lower(): v for k, v in response.headers.items()}
+    _set_response_socket_timeout(response, timeout)
 
     def chunks() -> Iterator[bytes]:
         with response:
             while True:
-                chunk = response.read(8_192)
+                with _response_read_deadline(response, timeout):
+                    chunk = response.read(8_192)
                 if not chunk:
                     return
                 yield chunk
@@ -489,6 +552,7 @@ class OpenRouterModel:
         pricing_table: Mapping[str, tuple[float, float, float]] | None = None,
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
+        request_timeout: float = 30.0,
         monotonic: Callable[[], float] = time.monotonic,
         provider: str = "openrouter",
     ) -> None:
@@ -508,6 +572,9 @@ class OpenRouterModel:
         self._pricing_table = pricing_table
         self._pricing_micros_table = pricing_micros_table
         self._stream = stream
+        if request_timeout <= 0:
+            raise ValueError("request_timeout must be positive")
+        self._request_timeout = float(request_timeout)
         self._monotonic = monotonic
         self._player = (
             CassettePlayer(cassette, match_mode="tape")
@@ -555,7 +622,12 @@ class OpenRouterModel:
         payload: bytes,
         secret: str,
     ) -> tuple[int, Mapping[str, str], bytes] | Result[Proposal]:
-        transport = self._transport or _http_post
+        transport = self._transport
+        if transport is None:
+            def transport(url: str, request_headers: dict[str, str], body: bytes):
+                return _http_post(
+                    url, request_headers, body, timeout=self._request_timeout
+                )
         attempts = 0
         max_retries = self._max_retries
         retry_statuses = {429, 500, 502, 503, 504}
@@ -644,7 +716,12 @@ class OpenRouterModel:
         secret: str,
     ) -> tuple[int, Mapping[str, str], Iterable[bytes]] | Result[Proposal]:
         """Open an SSE response; retry only before any provider delta exists."""
-        transport = self._stream_transport or _http_stream
+        transport = self._stream_transport
+        if transport is None:
+            def transport(url: str, request_headers: dict[str, str], body: bytes):
+                return _http_stream(
+                    url, request_headers, body, timeout=self._request_timeout
+                )
         attempts = 0
         retry_statuses = {429, 500, 502, 503, 504}
         while attempts <= self._max_retries:
@@ -684,7 +761,55 @@ class OpenRouterModel:
             retryable=True,
         )
 
+    #: A well-formed HTTP 200 with no text and no tool call is a real,
+    #: occasionally-observed provider behavior -- seen live against
+    #: `deepseek/deepseek-v4-flash-0731` after several turns of otherwise
+    #: normal tool use -- not evidence the model will repeat it. Bounded and
+    #: named so it cannot silently become an unlimited loop against a model
+    #: that genuinely never produces content.
+    _EMPTY_PROPOSAL_MESSAGE = "proposal must contain text or a tool call"
+    _EMPTY_PROPOSAL_RETRIES = 1
+
     def _complete(
+        self,
+        context: ContextBundle,
+        tools: ToolSchemas,
+        sampling: Sampling,
+    ) -> Result[Proposal]:
+        """Re-ask once on a genuinely empty completion before failing the episode.
+
+        `_complete_once` already retries transport-level failures (429/5xx,
+        connection errors). This is a different, adapter-observed failure
+        class: the request succeeds and the provider returns a schema-valid
+        response that simply carries no content. Previously that reached
+        `EpisodeEngine` as an immediate `INSTRUMENT_ERROR`, terminating the
+        whole episode on one empty completion (SWE-harness smoke runs hit
+        this reliably). The retried attempt's own usage is billed and
+        accounted normally on success; the discarded first attempt's tokens
+        are not merged in, matching the existing behaviour when transport
+        retries are exhausted without a usable response.
+        """
+        result = self._complete_once(context, tools, sampling)
+        if result.ok:
+            return result
+        error = result.error
+        if (
+            self._EMPTY_PROPOSAL_RETRIES <= 0
+            or error is None
+            or error.kind != "instrument_error"
+            or error.message != self._EMPTY_PROPOSAL_MESSAGE
+        ):
+            return result
+        for _ in range(self._EMPTY_PROPOSAL_RETRIES):
+            result = self._complete_once(context, tools, sampling)
+            if result.ok or (
+                result.error is None
+                or result.error.message != self._EMPTY_PROPOSAL_MESSAGE
+            ):
+                return result
+        return result
+
+    def _complete_once(
         self,
         context: ContextBundle,
         tools: ToolSchemas,

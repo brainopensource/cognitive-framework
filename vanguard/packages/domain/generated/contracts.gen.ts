@@ -313,19 +313,330 @@ export function isResourceSelector(v: unknown): v is ResourceSelector {
   return typeof v === 'object' && v !== null;
 }
 
-export interface RuntimeServiceFrame {
-  readonly version: 'vg.4';
-  readonly frameType: 'command' | 'receipt' | 'event' | 'error';
-  readonly frameId: string;
-  readonly command?: Readonly<Record<string, unknown>>;
-  readonly receipt?: Readonly<Record<string, unknown>>;
-  readonly event?: EventEnvelope;
-  readonly error?: Readonly<Record<string, unknown>>;
+export type ErrorCode =
+  | 'invalid_request'
+  | 'unauthenticated'
+  | 'permission_denied'
+  | 'not_found'
+  | 'conflict'
+  | 'incompatible_version'
+  | 'frame_too_large'
+  | 'rate_limited'
+  | 'not_available'
+  | 'internal';
+
+export interface ServiceError {
+  readonly code: ErrorCode;
+  readonly message: string;
+  readonly retryable: boolean;
+  readonly correlationId?: string;
+  readonly detail?: string;
 }
+
+export function isServiceError(v: unknown): v is ServiceError {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface CommandReceipt {
+  readonly commandId: string;
+  readonly status: 'completed' | 'error';
+  readonly runId?: RunId;
+  readonly result?: Readonly<Record<string, unknown>>;
+  readonly error?: ServiceError;
+  readonly detail?: string;
+}
+
+export function isCommandReceipt(v: unknown): v is CommandReceipt {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface StartRunCommand {
+  readonly name: 'StartRun';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+export function isStartRunCommand(v: unknown): v is StartRunCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface GetRunCommand {
+  readonly name: 'GetRun';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isGetRunCommand(v: unknown): v is GetRunCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ListRunsCommand {
+  readonly name: 'ListRuns';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId?: '';
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isListRunsCommand(v: unknown): v is ListRunsCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface StreamEventsCommand {
+  readonly name: 'StreamEvents';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isStreamEventsCommand(v: unknown): v is StreamEventsCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface CancelCommand {
+  readonly name: 'Cancel';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isCancelCommand(v: unknown): v is CancelCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface CheckpointCommand {
+  readonly name: 'Checkpoint';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isCheckpointCommand(v: unknown): v is CheckpointCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ResumeCommand {
+  readonly name: 'Resume';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isResumeCommand(v: unknown): v is ResumeCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ResolveApprovalCommand {
+  readonly name: 'ResolveApproval';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+export function isResolveApprovalCommand(v: unknown): v is ResolveApprovalCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface RecordCorrectionCommand {
+  readonly name: 'RecordCorrection';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId: RunId;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+export function isRecordCorrectionCommand(v: unknown): v is RecordCorrectionCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ExplainArtifactCommand {
+  readonly name: 'ExplainArtifact';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId?: RunId;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+export function isExplainArtifactCommand(v: unknown): v is ExplainArtifactCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface GetCapabilitiesCommand {
+  readonly name: 'GetCapabilities';
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly actor?: string;
+  readonly runId?: '';
+  readonly payload?: Readonly<Record<string, unknown>>;
+}
+
+export function isGetCapabilitiesCommand(v: unknown): v is GetCapabilitiesCommand {
+  return typeof v === 'object' && v !== null;
+}
+
+export type Command =
+  | StartRunCommand
+  | GetRunCommand
+  | ListRunsCommand
+  | StreamEventsCommand
+  | CancelCommand
+  | CheckpointCommand
+  | ResumeCommand
+  | ResolveApprovalCommand
+  | RecordCorrectionCommand
+  | ExplainArtifactCommand
+  | GetCapabilitiesCommand;
+
+export interface CommandFrame {
+  readonly version: 'vg.4';
+  readonly frameType: 'command';
+  readonly frameId: string;
+  readonly command: Command;
+}
+
+export function isCommandFrame(v: unknown): v is CommandFrame {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ReceiptFrame {
+  readonly version: 'vg.4';
+  readonly frameType: 'receipt';
+  readonly frameId: string;
+  readonly inReplyTo?: string;
+  readonly receipt: CommandReceipt;
+}
+
+export function isReceiptFrame(v: unknown): v is ReceiptFrame {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface EventFrame {
+  readonly version: 'vg.4';
+  readonly frameType: 'event';
+  readonly frameId: string;
+  readonly event: EventEnvelope;
+}
+
+export function isEventFrame(v: unknown): v is EventFrame {
+  return typeof v === 'object' && v !== null;
+}
+
+export interface ErrorFrame {
+  readonly version: 'vg.4';
+  readonly frameType: 'error';
+  readonly frameId: string;
+  readonly inReplyTo?: string;
+  readonly error: ServiceError;
+}
+
+export function isErrorFrame(v: unknown): v is ErrorFrame {
+  return typeof v === 'object' && v !== null;
+}
+
+export type RuntimeServiceFrame =
+  | CommandFrame
+  | ReceiptFrame
+  | EventFrame
+  | ErrorFrame;
 
 export function isRuntimeServiceFrame(v: unknown): v is RuntimeServiceFrame {
   return typeof v === 'object' && v !== null;
 }
+
+export type RuntimeServiceCommandName =
+  | 'StartRun'
+  | 'GetRun'
+  | 'ListRuns'
+  | 'StreamEvents'
+  | 'Cancel'
+  | 'Checkpoint'
+  | 'Resume'
+  | 'ResolveApproval'
+  | 'RecordCorrection'
+  | 'ExplainArtifact'
+  | 'GetCapabilities';
+
+export const RUNTIME_SERVICE_ERROR_CODES = [
+  'invalid_request',
+  'unauthenticated',
+  'permission_denied',
+  'not_found',
+  'conflict',
+  'incompatible_version',
+  'frame_too_large',
+  'rate_limited',
+  'not_available',
+  'internal',
+] as const;
+
+export const RUNTIME_SERVICE_COMMAND_RUN_SCOPE = {
+  StartRun: 'required',
+  GetRun: 'required',
+  ListRuns: 'forbidden',
+  StreamEvents: 'required',
+  Cancel: 'required',
+  Checkpoint: 'required',
+  Resume: 'required',
+  ResolveApproval: 'required',
+  RecordCorrection: 'required',
+  ExplainArtifact: 'optional',
+  GetCapabilities: 'forbidden',
+} as const;
+
+export const RUNTIME_SERVICE_COMMAND_ALLOWED_PAYLOAD_FIELDS = {
+  StartRun: ['brief', 'episodeId', 'expectedSeq', 'manifestPath', 'model', 'profileId', 'repoPath'],
+  GetRun: ['expectedSeq'],
+  ListRuns: ['limit', 'offset'],
+  StreamEvents: ['afterSeq'],
+  Cancel: ['expectedSeq', 'reason'],
+  Checkpoint: ['expectedSeq', 'reason'],
+  Resume: ['checkpointId', 'expectedSeq'],
+  ResolveApproval: ['decision', 'expectedSeq'],
+  RecordCorrection: ['correction', 'expectedSeq'],
+  ExplainArtifact: ['artifactId', 'expectedSeq', 'substrateProfile'],
+  GetCapabilities: [],
+} as const;
+
+export const RUNTIME_SERVICE_COMMAND_REQUIRED_PAYLOAD_FIELDS = {
+  StartRun: ['manifestPath', 'repoPath', 'brief'],
+  GetRun: [],
+  ListRuns: [],
+  StreamEvents: [],
+  Cancel: [],
+  Checkpoint: [],
+  Resume: [],
+  ResolveApproval: ['decision'],
+  RecordCorrection: ['correction'],
+  ExplainArtifact: ['artifactId'],
+  GetCapabilities: [],
+} as const;
+
+// Payload fields whose value shape ingress must check, not merely their name:
+// a JSON integer, or the CT-06 decimal string, because a run sequence may
+// exceed 2^53-1.
+export const RUNTIME_SERVICE_SEQ_GUARD_FIELDS = [
+  'afterSeq',
+  'expectedSeq',
+] as const;
 
 export interface WorkerProtocol {
   readonly version: 'vg.4';

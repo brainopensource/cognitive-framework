@@ -146,7 +146,21 @@ class RootlessSandboxRunner:
             
         duration_millis = int((time.monotonic() - start_time) * 1000)
         code = 124 if "timed out" in stderr.decode("utf-8", "ignore") else process.returncode
-        return _Invocation(code, stdout, stderr, truncated, duration_millis, started=True)
+        # Popen succeeding only proves that the launcher process started.  A
+        # bubblewrap namespace setup failure (for example a restricted WSL
+        # NETLINK_ROUTE operation) must not be interpreted as a child command
+        # failure or, worse, as a successful security probe.  Preserve the
+        # distinction so every probe becomes ``perimeter-startup-failed`` and
+        # the worker remains fail-closed.
+        launcher_failed = (
+            code != 0
+            and not stdout
+            and stderr.lstrip().startswith(b"bwrap:")
+        )
+        return _Invocation(
+            code, stdout, stderr, truncated, duration_millis,
+            started=not launcher_failed,
+        )
 
     @staticmethod
     def _observed(invocation: _Invocation, denied_when_nonzero: bool) -> tuple[str, bool]:
@@ -281,4 +295,3 @@ class RootlessSandboxRunner:
                 containment=report,
             )
         )
-

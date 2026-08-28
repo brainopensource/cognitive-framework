@@ -13,6 +13,37 @@ from vanguard.packages.runtime.scheduler import ReadyOperation, SequentialSchedu
 from vanguard.packages.runtime.topology import TopologyError, parse_topology
 
 
+def _authorized_access(tenant: str, project: str, *, actions=("read", "write", "invalidate")):
+    """Mint a verified memory lease the way the runtime does at point of use."""
+    from datetime import datetime, timedelta, timezone
+    import hashlib
+    import hmac
+
+    from vanguard.packages.domain.canonicalisation.digest import digest_of
+    from vanguard.packages.ports.memory import MemoryAuthorizationPort
+
+    key = b"seam-test-memory-key"
+    selector = {"kind": "project"}
+    now = datetime.now(timezone.utc)
+    grant = {
+        "grantRef": f"grant-{tenant}-{project}",
+        "issuer": "runtime",
+        "subject": "agent-under-test",
+        "tenant": tenant,
+        "project": project,
+        "actions": list(actions),
+        "purpose": "seam-test",
+        "expiresAt": (now + timedelta(hours=1)).isoformat().replace("+00:00", "Z"),
+        "revocationEpoch": 1,
+        "selector": selector,
+    }
+    signature = hmac.new(key, digest_of(grant).encode("ascii"), hashlib.sha256).hexdigest()
+    return MemoryAuthorizationPort(key).verify(
+        grant, signature, action="write", tenant=tenant, project=project,
+        selector=selector, now=now,
+    )
+
+
 class SeamsTests(unittest.TestCase):
     def test_controller_is_opt_in_and_attributed(self) -> None:
         self.assertIsNone(consult(None, AgentView("a"), ProgressView()))
@@ -38,8 +69,13 @@ class SeamsTests(unittest.TestCase):
         self.assertEqual(safe_read_only_group(()), ())
 
     def test_memory_isolation_provenance_and_lifecycle_rollback(self) -> None:
-        access = MemoryAccess("grant", {"kind": "project"}, "tenant", "p1")
-        other = MemoryAccess("grant", {"kind": "project"}, "tenant", "p2")
+        # These leases are minted through MemoryAuthorizationPort rather than
+        # hand-built. The hand-built form -- MemoryAccess("grant", ..., "tenant",
+        # "p1") with no issuer, subject, actions, expiry or verification receipt
+        # -- used to be admitted by a fail-open disjunct in InMemoryMemoryPort.
+        # It is refused now, so the seam exercises a real authorization.
+        access = _authorized_access("tenant", "p1")
+        other = _authorized_access("tenant", "p2")
         memory = InMemoryMemoryPort("knowledge")
         rid = memory.write({"text": "shared fact"}, access)
         self.assertEqual(memory.recall("fact", other).record_ids, ())

@@ -1096,6 +1096,11 @@ class RuntimeService:
                     profile_id=profile_id,
                     model=model,
                     store=self._evaluation_store,
+                    # The service already owns the durable CAS beside its
+                    # event store.  Pass that same store through the public
+                    # runtime so topology children can hand off only
+                    # resolvable artifact references.
+                    blobs=self._blobs,
                     approver=lambda challenge: self._handle_approver_callback(ctx, challenge),
                 )
             ctx.raise_if_cancelled()
@@ -1335,5 +1340,4 @@ class _ServiceEventStore(EventStorePort):
 
     def count(self, run_id: str | None = None) -> int:
         return self._service.event_store.count(run_id)
-
 

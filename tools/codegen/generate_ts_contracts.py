@@ -133,6 +133,129 @@ def _generate_interface(title: str, schema: dict) -> str:
     
     return "\n".join(lines)
 
+def _generate_runtime_service(schema: dict) -> str:
+    """Emit the vg.4 RuntimeService frame union and its frozen command tables.
+
+    The generic object emitter cannot express this schema: its root is a
+    discriminated ``oneOf`` with no properties of its own, so it produced an
+    empty ``RuntimeServiceFrame`` and the seven real fields were hand-edited
+    back into the generated file -- a hand-written mirror inside the file that
+    bans them (SPEC A-4), which the next codegen run would have silently erased.
+
+    The tables emitted here are the TypeScript half of the same contract
+    ``vanguard/packages/runtime/service/contract.py`` states in Python. Both
+    are derived from this schema, and
+    ``test/contracts/test_runtime_service_contract_parity.py`` proves neither
+    has drifted from it.
+    """
+    defs = schema["$defs"]
+    frames = [ref["$ref"].rsplit("/", 1)[-1] for ref in schema["oneOf"]]
+    commands = [
+        ref["$ref"].rsplit("/", 1)[-1][: -len("Command")]
+        for ref in defs["Command"]["oneOf"]
+    ]
+    lines: list[str] = []
+
+    # Supporting $defs the frame interfaces reference. Without these the
+    # generated module does not compile, which is how the hand-edited
+    # RuntimeServiceFrame went unnoticed: nothing ever type-checked it.
+    lines.append(
+        "export type ErrorCode =\n  | "
+        + "\n  | ".join(f"'{c}'" for c in defs["ErrorCode"]["enum"])
+        + ";\n"
+    )
+    # ApprovalDecision is deliberately absent: it is a bare $ref to
+    # approval-decision.schema.json, which the generic emitter already covers.
+    for name in ("ServiceError", "CommandReceipt"):
+        lines.append(_generate_interface(name, defs[name]))
+    for name in commands:
+        lines.append(_generate_interface(name + "Command", defs[name + "Command"]))
+    lines.append(
+        "export type Command =\n  | "
+        + "\n  | ".join(f"{c}Command" for c in commands)
+        + ";\n"
+    )
+
+    for frame in frames:
+        lines.append(_generate_interface(frame, defs[frame]))
+    lines.append(
+        "export type RuntimeServiceFrame =\n  | "
+        + "\n  | ".join(frames)
+        + ";\n"
+    )
+    lines.append("export function isRuntimeServiceFrame(v: unknown): v is RuntimeServiceFrame {")
+    lines.append("  return typeof v === 'object' && v !== null;")
+    lines.append("}\n")
+
+    lines.append(
+        "export type RuntimeServiceCommandName =\n  | "
+        + "\n  | ".join(f"'{c}'" for c in commands)
+        + ";\n"
+    )
+
+    codes = defs["ErrorCode"]["enum"]
+    lines.append(
+        "export const RUNTIME_SERVICE_ERROR_CODES = [\n"
+        + "".join(f"  '{c}',\n" for c in codes)
+        + "] as const;\n"
+    )
+
+    scope_rows, allowed_rows, required_rows = [], [], []
+    for name in commands:
+        body = defs[name + "Command"]
+        run_id = body["properties"]["runId"]
+        if run_id.get("const") == "":
+            scope = "forbidden"
+        elif "runId" in body.get("required", []):
+            scope = "required"
+        else:
+            scope = "optional"
+        scope_rows.append(f"  {name}: '{scope}',")
+
+        payload = body["properties"]["payload"]
+        allowed = sorted(payload.get("properties", {}))
+        required = list(payload.get("required", []))
+        allowed_rows.append(f"  {name}: [{', '.join(repr(f) for f in allowed)}],".replace('"', "'"))
+        required_rows.append(f"  {name}: [{', '.join(repr(f) for f in required)}],".replace('"', "'"))
+
+    lines.append(
+        "export const RUNTIME_SERVICE_COMMAND_RUN_SCOPE = {\n"
+        + "\n".join(scope_rows)
+        + "\n} as const;\n"
+    )
+    lines.append(
+        "export const RUNTIME_SERVICE_COMMAND_ALLOWED_PAYLOAD_FIELDS = {\n"
+        + "\n".join(allowed_rows)
+        + "\n} as const;\n"
+    )
+    lines.append(
+        "export const RUNTIME_SERVICE_COMMAND_REQUIRED_PAYLOAD_FIELDS = {\n"
+        + "\n".join(required_rows)
+        + "\n} as const;\n"
+    )
+
+    seq_fields = sorted(
+        {
+            field
+            for name in commands
+            for field, node in defs[name + "Command"]["properties"]["payload"]
+            .get("properties", {})
+            .items()
+            if node.get("$ref") == "#/$defs/SeqGuard"
+        }
+        | {"afterSeq"}
+    )
+    lines.append(
+        "// Payload fields whose value shape ingress must check, not merely their name:\n"
+        "// a JSON integer, or the CT-06 decimal string, because a run sequence may\n"
+        "// exceed 2^53-1.\n"
+        "export const RUNTIME_SERVICE_SEQ_GUARD_FIELDS = [\n"
+        + "".join(f"  '{f}',\n" for f in seq_fields)
+        + "] as const;\n"
+    )
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
@@ -166,6 +289,9 @@ def main():
     for s in schemas:
         title = s.get("title")
         if not title or title == "Vanguard v4 primitives":
+            continue
+        if s["_path"] == "runtime-service.schema.json":
+            chunks.append(_generate_runtime_service(s))
             continue
         chunks.append(_generate_interface(title, s))
         

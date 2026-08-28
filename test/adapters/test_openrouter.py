@@ -11,6 +11,7 @@ import ast
 import json
 import os
 import socket
+import threading
 import unittest
 import urllib.error
 from pathlib import Path
@@ -20,6 +21,8 @@ from vanguard.packages.adapters.models.cassette import Cassette
 from vanguard.packages.adapters.models.openrouter import (
     OpenRouterModel,
     OpenRouterModelAdapter,
+    _response_read_deadline,
+    _set_response_socket_timeout,
     calculate_cost,
     calculate_cost_micros,
     estimate_context_tokens,
@@ -73,6 +76,37 @@ def _trust_openrouter_imports() -> list[str]:
 
 
 class OpenRouterModelContract(unittest.TestCase):
+    def test_provider_response_socket_read_is_time_bounded(self) -> None:
+        class Socket:
+            def __init__(self) -> None:
+                self.timeout = None
+
+            def settimeout(self, value: float) -> None:
+                self.timeout = value
+
+        sock = Socket()
+        response = type(
+            "Response",
+            (),
+            {"fp": type("File", (), {"raw": type("Raw", (), {"_sock": sock})()})()},
+        )()
+        _set_response_socket_timeout(response, 7.5)
+        self.assertEqual(sock.timeout, 7.5)
+
+    def test_non_socket_provider_response_keeps_typed_path(self) -> None:
+        # Test doubles commonly expose no urllib socket internals.
+        _set_response_socket_timeout(object(), 7.5)
+
+    def test_provider_body_deadline_closes_a_stalled_response(self) -> None:
+        closed = threading.Event()
+
+        class Response:
+            def close(self) -> None:
+                closed.set()
+
+        with _response_read_deadline(Response(), 0.01):
+            self.assertTrue(closed.wait(1.0))
+
     def test_cassette_replay_does_not_touch_the_network(self) -> None:
         cassette = Cassette()
         cassette.add_record(CONTEXT, TOOLS, SAMPLING, PROPOSAL)
@@ -112,6 +146,10 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertFalse(hasattr(port, "api_key"))
         self.assertNotIn(SECRET, vars(port).values())
 
+    def test_request_timeout_must_be_positive(self) -> None:
+        with self.assertRaises(ValueError):
+            OpenRouterModel(request_timeout=0)
+
     def test_trust_spine_sources_do_not_import_openrouter(self) -> None:
         self.assertEqual(_trust_openrouter_imports(), [])
 
@@ -147,6 +185,70 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(len(sleep_durations), 2)
         self.assertAlmostEqual(sleep_durations[0], 0.1)
         self.assertAlmostEqual(sleep_durations[1], 0.2)
+
+    def test_empty_completion_is_retried_once_before_failing_the_episode(self) -> None:
+        calls = []
+
+        def empty_then_real_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            if len(calls) == 1:
+                return 200, json.dumps({
+                    "choices": [{"message": {"role": "assistant", "content": ""}}],
+                    "usage": {"prompt_tokens": 40, "completion_tokens": 0, "total_tokens": 40},
+                }).encode("utf-8")
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": "recovered!"}}],
+                "usage": {"prompt_tokens": 40, "completion_tokens": 5, "total_tokens": 45},
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=empty_then_real_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "recovered!")
+        self.assertEqual(len(calls), 2)
+
+    def test_empty_completion_fails_closed_once_retries_are_exhausted(self) -> None:
+        calls = []
+
+        def always_empty_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            return 200, json.dumps({
+                "choices": [{"message": {"role": "assistant", "content": ""}}],
+                "usage": {"prompt_tokens": 40, "completion_tokens": 0, "total_tokens": 40},
+            }).encode("utf-8")
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=always_empty_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "instrument_error")
+        self.assertEqual(result.error.message, "proposal must contain text or a tool call")
+        # One original attempt plus the bounded retry, never more.
+        self.assertEqual(len(calls), 2)
+
+    def test_a_different_instrument_error_is_never_retried_as_empty_completion(self) -> None:
+        calls = []
+
+        def not_json_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+            calls.append(len(calls) + 1)
+            return 200, b"not json at all"
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=not_json_transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.message, "provider response was not JSON")
+        self.assertEqual(len(calls), 1)
 
     def test_503_service_unavailable_triggers_backoff_and_recovers(self) -> None:
         calls = []
@@ -329,15 +431,21 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(usage["cached_tokens"], 400)
         self.assertEqual(usage["total_tokens"], 1200)
 
-        # Cost check:
-        # gpt-4o-mini pricing: prompt $0.15/1M, completion $0.60/1M, cached $0.075/1M
-        # uncached prompt = 600 * 0.15 / 1M = $0.000090
-        # cached prompt = 400 * 0.075 / 1M = $0.000030
-        # completion = 200 * 0.60 / 1M = $0.000120
-        # total = $0.000240
-        expected_cost = 0.00024
-        self.assertAlmostEqual(usage["cost_usd"], expected_cost, places=6)
-        self.assertAlmostEqual(result.value["cost_usd"], expected_cost, places=6)
+        # Cost is derived from models_registry.json, the single pricing source
+        # (Order 4), through the same formula the accounting vectors pin in
+        # test/contracts/test_model_accounting_vectors.py. These lines used to
+        # hardcode $0.000240 computed from gpt-4o-mini rates while the request
+        # above routes to deepseek -- a restated price that had drifted off the
+        # model it claimed to describe.
+        from test.contracts.test_model_accounting_vectors import accounted_micros
+
+        expected_micros = accounted_micros(
+            "deepseek/deepseek-v4-flash-0731", prompt=1000, completion=200, cached=400
+        )
+        expected_cost = round(expected_micros / 1_000_000.0, 8)
+        self.assertEqual(usage["usd_micros"], expected_micros)
+        self.assertAlmostEqual(usage["cost_usd"], expected_cost, places=8)
+        self.assertAlmostEqual(result.value["cost_usd"], expected_cost, places=8)
 
     def test_fallback_token_estimation_when_provider_omits_usage(self) -> None:
         payload = json.dumps({

@@ -21,6 +21,7 @@ from ..ports.memory import (
     ProjectMemoryPort,
     RetrievalProvenance,
     SkillLibrary,
+    authorize_memory_action,
     require_retrieval_provenance,
     validate_retrieval,
 )
@@ -29,7 +30,16 @@ __all__ = ["MemoryAccess", "MemoryAuthorizationPort", "MemoryBinding", "Retrieva
 
 
 class InMemoryMemoryPort:
-    """Hermetic reference implementation for contract tests and experiments."""
+    """Hermetic reference implementation for contract tests and experiments.
+
+    It is a double, not a relaxation. Every authorization decision is delegated
+    to :func:`authorize_memory_action` and :func:`validate_retrieval` -- the same
+    functions the durable ``MemoryEngine`` uses -- so this class cannot admit an
+    access object the production path would refuse. That property is what
+    ``test/security/test_m8_memory_fake_parity.py`` checks directly, because the
+    fail-open disjunct removed here lived precisely in the gap between a double
+    that decided authorization for itself and an engine that did not.
+    """
 
     def __init__(self, category: str) -> None:
         if category not in {"knowledge", "experience", "project", "skills"}:
@@ -39,9 +49,7 @@ class InMemoryMemoryPort:
         self._next = 0
 
     def write(self, value: Mapping[str, Any], access: MemoryAccess) -> str:
-        # This class is an explicitly non-production compatibility fake.
-        if not ((access.permitted()) or (access.grant_ref and access.tenant and access.project and not access.revoked)):
-            raise PermissionError("memory capability denied or revoked")
+        authorize_memory_action(access, self.category, "write")
         if value.get("category", self.category) != self.category:
             raise ValueError("memory category mismatch")
         self._next += 1
@@ -51,12 +59,9 @@ class InMemoryMemoryPort:
         return record_id
 
     def recall(self, query: str, access: MemoryAccess, limit: int = 20) -> MemoryResult:
-        if not isinstance(query, str) or not query.strip():
-            raise PermissionError("empty memory query denied")
-        if not (access.permitted() or (access.grant_ref and access.tenant and access.project and not access.revoked)):
-            raise PermissionError("memory capability denied or revoked")
-        if limit < 1 or limit > 100:
-            raise ValueError("memory retrieval limit must be between 1 and 100")
+        authorize_memory_action(access, self.category, "read")
+        validate_retrieval(query, access, limit)
+        # Authorization is complete. Only now may records be ranked or read.
         matches = [(rid, text, metadata) for rid, (text, metadata, invalidated) in self._records.items()
                    if not invalidated and metadata.get("tenant") == access.tenant
                    and metadata.get("project") == access.project and query.lower() in text.lower()]
@@ -73,8 +78,7 @@ class InMemoryMemoryPort:
                             tuple(item[1] for item in selected))
 
     def invalidate(self, record_id: str, access: MemoryAccess) -> None:
-        if not access.permitted():
-            raise PermissionError("memory capability denied or revoked")
+        authorize_memory_action(access, self.category, "invalidate")
         record = self._records.get(record_id)
         if record is None or record[1].get("tenant") != access.tenant or record[1].get("project") != access.project:
             raise PermissionError("memory record is outside the project scope")

@@ -22,6 +22,7 @@ from .learning import (
     NotAvailableError,
     PromoterProtocol,
     PromotionEvidence,
+    RollbackEvidence,
     WorkloadSuite,
 )
 
@@ -47,6 +48,7 @@ __all__ = [
     "ProcessInstance",
     "PromoterProtocol",
     "PromotionEvidence",
+    "RollbackEvidence",
     "Transition",
     "WorkloadSuite",
     "normalise_unified_diff",

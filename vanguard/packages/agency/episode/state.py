@@ -93,6 +93,7 @@ class Proposal:
     args: Mapping[str, Any] = field(default_factory=dict)
     reservation: Mapping[str, int] = field(default_factory=dict)
     note: str = ""
+    idempotency_key: str | None = None
 
     @property
     def descriptor(self) -> str:
@@ -131,6 +132,7 @@ def parse_proposal(value: Any) -> Proposal:
             action=str(value.get("action") or "spawn"),
             args=dict(args),
             note=str(value.get("note", "")),
+            idempotency_key=_proposal_idempotency_key(value, args),
         )
 
     if kind is not ProposalKind.EFFECT:
@@ -158,7 +160,30 @@ def parse_proposal(value: Any) -> Proposal:
         args=dict(args),
         reservation={str(k): int(v) for k, v in reservation.items()},
         note=str(value.get("note", "")),
+        idempotency_key=_proposal_idempotency_key(value, args),
     )
+
+
+def _proposal_idempotency_key(
+    value: Mapping[str, Any], args: Mapping[str, Any],
+) -> str | None:
+    """Read the stable effect identity without inventing one.
+
+    Spawn is a durable subtree boundary, so its request must carry the same
+    identity through proposal parsing and the kernel.  The top-level spelling
+    is canonical; the argument spelling is retained for compatibility with
+    older model cassettes and is never generated here.
+    """
+    key = value.get("idempotencyKey")
+    if key is None:
+        key = value.get("idempotency_key")
+    if key is None:
+        key = args.get("idempotencyKey") or args.get("idempotency_key")
+    if key is None:
+        return None
+    if not isinstance(key, str) or not key:
+        raise ProposalMalformed("idempotencyKey must be a non-empty string")
+    return key
 
 
 @dataclass(frozen=True, slots=True)

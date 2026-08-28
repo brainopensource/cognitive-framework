@@ -6,9 +6,9 @@ canonical_for:
   - macro-milestones-ladder
   - milestone-gates
 status: living
-owner: engineering-director
+owner: repository-governance
 version: "0.7.3.dev0"
-last_verified: 2026-08-26
+last_verified: 2026-08-27
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null
@@ -50,9 +50,9 @@ flowchart TD
   M7 --> M8
 ```
 
-Within a window, each developer reaches `PACKAGE_READY` against frozen contracts and fixtures.
+Within a window, each lane reaches `PACKAGE_READY` against frozen contracts and fixtures.
 Integration follows the producer-before-consumer order in the backlog; acceptance follows only after
-the integrated evidence bundle and independent review.
+the integrated evidence bundle and an independent verifier receipt.
 
 ## Stable milestone contracts
 
@@ -61,7 +61,7 @@ the integrated evidence bundle and independent review.
 One preregistered candidate must execute through canonical composition and mediated tools using a
 live attributable provider; produce a non-empty correct diff and passing task verifier; persist a
 file-backed WAL and complete `mhf.trajectory/2`; cold-reconstruct the same terminal state; resolve
-every required artifact; and receive independent review. If the reported historical bundle cannot
+every required artifact; and receive an independent verifier receipt. If the reported historical bundle cannot
 be recovered, execute exactly one new candidate under a new preregistration. No stitched traces,
 manual repairs, fake/cassette replacement, or retrospective evidence creation qualify.
 
@@ -77,7 +77,7 @@ annotated remote `CONVERGENCE-BASE-v1` and signed baseline manifest defined by A
 After the successor baseline, add a deterministic graph-coloring pack and exterior verifier without
 protected substrate semantic changes. Positive, negative, malformed, incomplete, range, and
 serialization-permutation vectors run through `Runtime.execute_harness`. RF-86/RF-98 compare the
-post-baseline treatment to `CONVERGENCE-BASE-v1`; an independent reviewer accepts the bundle. The
+post-baseline treatment to `CONVERGENCE-BASE-v1`; an independent verifier accepts the bundle. The
 existing SAT path remains regression evidence and cannot substitute for the fresh control.
 
 ### M-6 — mediated recursive delegation
@@ -86,7 +86,7 @@ Remove synthetic success; require a real `ChildRuntimePort` bound to the sole pu
 child identity durably from parent episode plus idempotency key; enforce componentwise child budget
 reservation against parent remaining budget and independently attenuate scope/depth/turns; persist
 intent before launch; reconcile open subtrees without blind retry; and prove cancellation/kill-tree
-behavior. A depth>=3 cold-reconstructible signed bundle and independent review are required.
+behavior. A depth>=3 cold-reconstructible signed bundle and independent verifier receipt are required.
 
 ### M-6.5 — measured adaptive strategy
 
@@ -113,7 +113,23 @@ append/index semantics, authorization-before-ranking, retrieval provenance reach
 revocation, recovery, retention/GC/legal hold, and isolation. Use a durable CAS composition registry
 with distinct generator/evaluator/promoter authorities, sealed workloads, measured held-out lift,
 and an executed rollback restoring the prior composition behavior. Acceptance requires security,
-recovery, performance, RF-98, TCB, and independent evidence gates. M-8 is the MVP boundary.
+recovery, performance, RF-98, TCB, and independent verifier evidence gates. M-8 is the MVP boundary.
+
+## M-9 and M-10 release sequence
+
+### M-9 — operational beta (`0.9.0b1`)
+
+M-9 delivers the installable single-host beta: unified configuration and versions, packaged CLI/API/TUI/Studio,
+plugin lifecycle, health/readiness, two real workflows, restart/resume, and offline-after-install operation from
+reproducible artifacts. It consumes accepted M-1 through M-8 evidence and does not add a second runtime or weaken
+the security and causal-truth invariants.
+
+### M-10 — final release (`0.9.0`)
+
+M-10 hardens the beta with supported migrations, verified backup/restore, deployment profiles, recovery and fault
+injection, security and performance qualification, reproducible packaging, soak testing, and the signed release
+envelope. Publication is mechanically authorized only by `./ci/release_qualify.sh` exiting `0` for the exact
+candidate with a subject-matching envelope.
 
 ## M-1 through M-3 compatibility anchors
 
@@ -123,9 +139,9 @@ one compose/activate/run seam, and optional identity-bearing assurance profiles.
 one of these anchors needs an explicit successor ADR and falsifier; implementation inconvenience is
 not authority.
 
-## M-9/M-10 compatibility boundary
+## Pre-M-9 compatibility boundary
 
-Reserve only low-cost seams: immutable run-plan extensions, authorized memory ports, immutable
-composition manifests, evidence envelopes, and exterior candidate generators. Do not implement
-distributed scheduling, topology search, continuous-learning services, model training, causal
-self-model frameworks, or a second runtime before M-8 acceptance and measured need.
+The pre-M-9 boundary reserves low-cost seams: immutable run-plan extensions, authorized memory ports, immutable
+composition manifests, evidence envelopes, and exterior candidate generators. Distributed scheduling, topology
+search, continuous-learning services, model training, causal self-model frameworks, and a second runtime remain
+out of scope unless a later measured need receives its own successor decision.

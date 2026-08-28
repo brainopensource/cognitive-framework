@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: principal-systems-architect
 version: "0.7.3.dev0"
-last_verified: 2026-08-26
+last_verified: 2026-08-27
 read_when:
   - implementing-any-runtime-change
   - resolving-authority-conflicts
@@ -112,7 +112,7 @@ historical evidence only.
 - The runtime never executes a dynamic control-flow DAG *as a substrate authority*. `mhf.manifest/2`
   is a static composition graph declaring the space of possibilities; the trajectory recorded in the
   ledger is the emergent causal graph of what was actually used. The turn loop stays unary and
-  sequential (I-11) until M-7 measurement and an explicit Director lift. Multi-agent behavior is
+  sequential (I-11) until M-7 measurement and an explicit scheduler disposition. Multi-agent behavior is
   mediated delegation (`agent.spawn`, M-6) or a composed plugin — never a second engine.
 - **An agent is not a persistent privileged object.** `Agent = Identity + Policy + Event-Derived
   Projection + Execution Boundary`. Runtime objects MAY hold transient optimization state, but no
@@ -198,7 +198,8 @@ historical meaning; `ADR-0095` §4 is the authoritative translation table.
 | M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
 | M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
 | M-8 | v0.9.x | Verified durable memory and composition learning with held-out evaluation, atomic promotion, provenance, and executed rollback |
-| M-9/M-10 | post-MVP | Compatibility horizon only until M-8 is independently accepted |
+| M-9 | 0.9.0b1 | Installable operational beta with unified clients/configuration, plugins, health, workflows, and restart/resume |
+| M-10 | 0.9.0 | Reliability, migrations, backup/restore, security/performance qualification, reproducible artifacts, and signed release proof |
 
 ## Compatibility anchors for former SPEC sections
 

@@ -37,7 +37,7 @@ class Order9EvidenceProducerTests(unittest.TestCase):
             self.assertTrue({"runtime", "pack", "configuration", "workload"} <= names)
             report_material = next(
                 material for material in envelope.materials
-                if material.name == "falsifier_report")
+                if material.name == "workload")
             self.assertTrue(report_material.ref.startswith("artifacts/"))
             self.assertEqual(envelope.pins["runtimeDigest"], next(
                 material.digest for material in envelope.materials

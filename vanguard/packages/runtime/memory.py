@@ -59,8 +59,8 @@ class InMemoryMemoryPort:
         return record_id
 
     def recall(self, query: str, access: MemoryAccess, limit: int = 20) -> MemoryResult:
-        validate_retrieval(query, access, limit)
         authorize_memory_action(access, self.category, "read")
+        validate_retrieval(query, access, limit)
         # Authorization is complete. Only now may records be ranked or read.
         matches = [(rid, text, metadata) for rid, (text, metadata, invalidated) in self._records.items()
                    if not invalidated and metadata.get("tenant") == access.tenant

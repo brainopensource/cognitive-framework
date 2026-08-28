@@ -222,6 +222,7 @@ class PromotionEvidence:
             "expectedGeneration": self.expected_generation,
             "reportDigest": self.report_digest,
             "promoterId": self.promoter_id,
+            "keyId": self.key_id,
         }
         return canonicalise(payload).encode("utf-8")
 
@@ -270,6 +271,7 @@ class RollbackEvidence:
             "expectedGeneration": self.expected_generation,
             "reason": self.reason,
             "promoterId": self.promoter_id,
+            "keyId": self.key_id,
         }
         return canonicalise(payload).encode("utf-8")
 
@@ -358,6 +360,20 @@ class DurableCompositionRegistry:
                 );
                 """
             )
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS registry_transitions (
+                    transition_id TEXT PRIMARY KEY,
+                    transition_kind TEXT NOT NULL,
+                    from_version TEXT NOT NULL,
+                    to_version TEXT NOT NULL,
+                    generation INTEGER NOT NULL,
+                    evidence_json TEXT NOT NULL,
+                    transition_digest TEXT NOT NULL UNIQUE,
+                    created_at TEXT NOT NULL
+                );
+                """
+            )
             cur = self._conn.cursor()
             cur.execute("SELECT current_version, generation FROM registry_head WHERE id = 1;")
             row = cur.fetchone()
@@ -438,6 +454,14 @@ class DurableCompositionRegistry:
             )
         if evidence.report_digest != report.report_digest:
             raise ValueError("evidence report_digest mismatch with evaluation report")
+        if evidence.candidate_id != candidate.candidate_id:
+            raise ValueError("evidence candidate_id mismatch with candidate")
+        if candidate.base_version != evidence.base_version:
+            raise ValueError("candidate base_version mismatch with evidence")
+        if candidate.manifest_digest != digest_of(dict(candidate.manifest)):
+            raise ValueError("candidate manifest digest is invalid")
+        if not evidence.promoter_id or not evidence.key_id:
+            raise PermissionError("promotion evidence authority is incomplete")
 
         # Verify signature. An unavailable verifier is not an implicit pass.
         if not self.authority.verifying_keys:
@@ -500,6 +524,20 @@ class DurableCompositionRegistry:
             if cur.rowcount != 1:
                 raise ValueError("concurrent promotion race detected: CAS update failed")
 
+            transition = {
+                "kind": "promotion",
+                "from": current_ver,
+                "to": evidence.promoted_version,
+                "generation": next_gen,
+                "evidence": evidence.to_dict(),
+            }
+            transition_digest = digest_of(transition)
+            cur.execute(
+                "INSERT INTO registry_transitions VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                (f"transition:{transition_digest[7:]}", "promotion", current_ver,
+                 evidence.promoted_version, next_gen, evidence_json, transition_digest, now),
+            )
+
             return evidence.promoted_version
 
     def restore(self, evidence: RollbackEvidence) -> str:
@@ -518,6 +556,8 @@ class DurableCompositionRegistry:
             )
         if not evidence.target_version:
             raise ValueError("rollback evidence must name a target version")
+        if not evidence.base_version or not evidence.promoter_id or not evidence.key_id:
+            raise PermissionError("rollback evidence authority is incomplete")
 
         # An unavailable verifier leaves the request undecided, and an undecided
         # privileged request fails closed. Never an implicit pass.
@@ -565,6 +605,19 @@ class DurableCompositionRegistry:
                 if cur.fetchone() is None:
                     raise ValueError(f"rollback target version {target_version!r} not found in history")
 
+            # A rollback can only move to a prior known-good ancestor.  This
+            # prevents signed evidence from selecting an unrelated historical
+            # or future composition and makes the served behavior transition
+            # auditable as a true rollback.
+            ancestor = current_ver
+            while ancestor != target_version:
+                parent = cur.execute(
+                    "SELECT parent_version FROM compositions WHERE version = ?;", (ancestor,)
+                ).fetchone()
+                if parent is None or not parent["parent_version"]:
+                    raise ValueError("rollback target is not a prior composition ancestor")
+                ancestor = str(parent["parent_version"])
+
             now = _default_now(self.clock)
             next_gen = current_gen + 1
             cur.execute(
@@ -578,11 +631,33 @@ class DurableCompositionRegistry:
             if cur.rowcount != 1:
                 raise ValueError("concurrent rollback race detected: CAS update failed")
 
+            transition = {
+                "kind": "rollback",
+                "from": current_ver,
+                "to": target_version,
+                "generation": next_gen,
+                "evidence": evidence.to_dict(),
+            }
+            transition_digest = digest_of(transition)
+            cur.execute(
+                "INSERT INTO registry_transitions VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+                (f"transition:{transition_digest[7:]}", "rollback", current_ver,
+                 target_version, next_gen, json.dumps(evidence.to_dict()), transition_digest, now),
+            )
+
             return target_version
 
     def rollback(self, evidence: RollbackEvidence) -> str:
         """Compatibility name for :meth:`restore`. Same signed authority."""
         return self.restore(evidence)
+
+    def list_transitions(self) -> list[dict[str, Any]]:
+        """Return durable promotion/rollback receipts in causal order."""
+        with self._lock, self._conn:
+            rows = self._conn.execute(
+                "SELECT * FROM registry_transitions ORDER BY generation, transition_id"
+            ).fetchall()
+            return [dict(row) for row in rows]
 
     def close(self) -> None:
         with self._lock:

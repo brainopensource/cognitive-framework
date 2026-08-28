@@ -60,6 +60,28 @@ StreamTransport = Callable[
 ]
 
 
+def _set_response_socket_timeout(response: Any, timeout: float) -> None:
+    """Bound body reads as well as connection setup to the request timeout.
+
+    ``urllib`` applies ``timeout`` while opening a connection, but some
+    response implementations leave the underlying socket without that bound
+    once headers have arrived.  A stalled provider body must become a typed
+    adapter failure so the runtime can retry or fail closed; it must not hold
+    an episode forever.  Test doubles and non-socket responses are deliberately
+    ignored because their own read implementation owns its timing.
+    """
+    try:
+        raw = getattr(getattr(response, "fp", None), "raw", None)
+        sock = getattr(raw, "_sock", None)
+        setter = getattr(sock, "settimeout", None)
+        if callable(setter):
+            setter(timeout)
+    except (AttributeError, OSError, TypeError, ValueError):
+        # This is only a best-effort tightening of urllib's timeout contract;
+        # failure to introspect a compatible response must not mask its body.
+        return
+
+
 def estimate_tokens(text: str) -> int:
     """Estimate token count for a text string using character heuristics (~4 chars/token)."""
     if not text:
@@ -160,6 +182,7 @@ def _http_post(
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
+            _set_response_socket_timeout(response, timeout)
             resp_headers = {k.lower(): v for k, v in response.headers.items()}
             return int(response.status), resp_headers, response.read()
     except urllib.error.HTTPError as exc:
@@ -190,6 +213,7 @@ def _http_stream(
         return int(exc.code), resp_headers, (exc.read() or b"",)
 
     resp_headers = {k.lower(): v for k, v in response.headers.items()}
+    _set_response_socket_timeout(response, timeout)
 
     def chunks() -> Iterator[bytes]:
         with response:

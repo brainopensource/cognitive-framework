@@ -56,11 +56,14 @@ PRICING_PER_1M: dict[str, tuple[float, float]] = {
     "deepseek-coder": (0.0, 0.0),
     "llama": (0.0, 0.0),
     "granite": (0.0, 0.0),
-    "codestral": (0.0, 0.0),
+    "poolside/laguna-s-2.1:free": (0.0, 0.0),
+    "inclusionai/ling-3.0-tiny:free": (0.0, 0.0),
 }
 
 
 def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
+    if ":free" in model.lower() or "free" in model.lower():
+        return 0.0
     for prefix, (p_rate, c_rate) in PRICING_PER_1M.items():
         if prefix in model.lower():
             return (prompt_tokens * p_rate + completion_tokens * c_rate) / 1_000_000.0
@@ -81,7 +84,7 @@ class OpenRouterClient:
         model: str = "openrouter/free",
         temperature: float = 0.0,
         max_tokens: int = 4096,
-        timeout: int = 60,
+        timeout: int = 25,
     ) -> LLMResponse:
         if not self._api_key:
             raise ValueError("OPENROUTER_API_KEY is not set or empty.")
@@ -110,7 +113,7 @@ class OpenRouterClient:
         )
 
         start_time = time.perf_counter()
-        retries = 3
+        retries = 2
         last_err = None
 
         for attempt in range(retries):
@@ -123,13 +126,13 @@ class OpenRouterClient:
                 err_body = e.read().decode("utf-8", errors="replace")
                 last_err = f"HTTP {e.code}: {err_body}"
                 if e.code in (429, 502, 503, 504) and attempt < retries - 1:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(1.0 * (attempt + 1))
                     continue
                 raise RuntimeError(f"OpenRouter API Error: {last_err}") from e
             except Exception as e:
                 last_err = str(e)
                 if attempt < retries - 1:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(1.0 * (attempt + 1))
                     continue
                 raise RuntimeError(f"OpenRouter Connection Error: {last_err}") from e
 

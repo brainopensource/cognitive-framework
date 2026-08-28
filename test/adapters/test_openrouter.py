@@ -20,6 +20,7 @@ from vanguard.packages.adapters.models.cassette import Cassette
 from vanguard.packages.adapters.models.openrouter import (
     OpenRouterModel,
     OpenRouterModelAdapter,
+    _set_response_socket_timeout,
     calculate_cost,
     calculate_cost_micros,
     estimate_context_tokens,
@@ -73,6 +74,27 @@ def _trust_openrouter_imports() -> list[str]:
 
 
 class OpenRouterModelContract(unittest.TestCase):
+    def test_provider_response_socket_read_is_time_bounded(self) -> None:
+        class Socket:
+            def __init__(self) -> None:
+                self.timeout = None
+
+            def settimeout(self, value: float) -> None:
+                self.timeout = value
+
+        sock = Socket()
+        response = type(
+            "Response",
+            (),
+            {"fp": type("File", (), {"raw": type("Raw", (), {"_sock": sock})()})()},
+        )()
+        _set_response_socket_timeout(response, 7.5)
+        self.assertEqual(sock.timeout, 7.5)
+
+    def test_non_socket_provider_response_keeps_typed_path(self) -> None:
+        # Test doubles commonly expose no urllib socket internals.
+        _set_response_socket_timeout(object(), 7.5)
+
     def test_cassette_replay_does_not_touch_the_network(self) -> None:
         cassette = Cassette()
         cassette.add_record(CONTEXT, TOOLS, SAMPLING, PROPOSAL)

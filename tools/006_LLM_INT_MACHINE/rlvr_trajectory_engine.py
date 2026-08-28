@@ -43,7 +43,7 @@ class RLVREngine:
     """Records, evaluates, and exports fine-tuning datasets formatted for RLVR / GRPO algorithms."""
 
     def __init__(self, output_dir: Path | None = None):
-        self.out_dir = output_dir or Path("tools/006_LLM_INT_MACHINE/runs/rlvr_trajectories")
+        self.out_dir = output_dir or (Path(__file__).parent / "runs" / "rlvr_trajectories")
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self.active_episodes: dict[str, RLVREpisodeTrajectory] = {}
 

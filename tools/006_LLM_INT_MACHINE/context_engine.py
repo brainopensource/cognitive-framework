@@ -153,9 +153,69 @@ class ContextEngine:
 
         return elided
 
-    def compile_messages(self) -> list[dict[str, str]]:
+    def compact_with_llm(
+        self,
+        llm_client: Any,
+        compaction_model: str = "minimax/minimax-m3:free",
+        ceiling_tokens: int | None = None,
+    ) -> int:
+        """Uses a lightweight/free LLM to summarize and compress evicted dialogue turns."""
+        ceiling = ceiling_tokens or self.config.token_ceiling
+        
+        def total_tokens() -> int:
+            return sum(b.token_estimate for b in self.dialogue_blocks)
+
+        if total_tokens() <= ceiling or not self.config.use_dialogue_compaction:
+            return 0
+
+        blocks_to_compress = self.dialogue_blocks[:-2]
+        if not blocks_to_compress:
+            return self.compact(ceiling_tokens)
+
+        full_text = "\n\n".join(
+            f"[{b.source.upper()} | {b.label}]:\n{b.text[:800]}" for b in blocks_to_compress
+        )
+        prompt = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a technical session compactor. Summarize a debugging conversation "
+                    "in <=300 tokens. Preserve: "
+                    "(1) exact bug location file:line, (2) root cause hypothesis, "
+                    "(3) patches tried and why they failed (exact error type), "
+                    "(4) invariants and constraints discovered. Numbered bullets. Terse."
+                ),
+            },
+            {"role": "user", "content": f"Summarize:\n\n{full_text[:5000]}"},
+        ]
+        try:
+            resp = llm_client.complete(
+                messages=prompt,
+                model=compaction_model,
+                temperature=0.0,
+                max_tokens=350,
+                timeout=15,
+            )
+            summary = resp.content.strip() if resp and resp.content else ""
+            if not summary:
+                return self.compact(ceiling_tokens)
+        except Exception:
+            return self.compact(ceiling_tokens)
+
+        summary_block = ContextBlock(
+            layer=ContextLayer.DIALOGUE,
+            source="system",
+            label="llm_semantic_compaction",
+            text=f"[Semantic Summary — {len(blocks_to_compress)} turns compressed]\n{summary}",
+            evictable=False,
+        )
+        self.dialogue_blocks = [summary_block] + self.dialogue_blocks[-2:]
+        self.elided_count += 1
+        return 1
+
+    def compile_messages(self) -> list[dict[str, Any]]:
         self.compact()
-        messages: list[dict[str, str]] = []
+        messages: list[dict[str, Any]] = []
 
         messages.append({"role": "system", "content": self.system_prompt})
 
@@ -166,7 +226,11 @@ class ContextEngine:
         messages.append({"role": "user", "content": task_msg})
 
         for block in self.dialogue_blocks:
-            role = "assistant" if block.source == "assistant" else "user"
-            messages.append({"role": role, "content": block.text})
+            if block.source == "assistant":
+                messages.append({"role": "assistant", "content": block.text})
+            elif block.source == "tool":
+                messages.append({"role": "tool", "content": block.text, "tool_call_id": block.label})
+            else:
+                messages.append({"role": "user", "content": block.text})
 
         return messages

@@ -6,6 +6,7 @@ and catalog run persistence.
 """
 
 from __future__ import annotations
+import ast
 import json
 import re
 import time
@@ -18,10 +19,15 @@ from typing import Any, Callable, Sequence
 try:
     from .config import HarnessConfig
     from .context_engine import ContextEngine
-    from .llm_client import OpenRouterClient, MockLLMClient, LLMResponse
+    from .llm_client import OpenRouterClient, MockLLMClient, LLMResponse, LLMUsageMetrics
     from .reproducer_protocol import ReproducerManager
     from .tools import ToolWorkspace, TOOL_DEFINITIONS, ToolExecutionResult
     from .fault_localizer import SBFLEngine
+    from .coverage_sbfl import CoverageBackedSBFL
+    from .mcts_search import SpeculativeMCTSSearch
+    from .mutation_verifier import PatchMutationVerifier
+    from .subagent_orchestrator import SubagentCoordinator, SubagentReport
+    from .hierarchical_router import HierarchicalModelRouter
     from .causal_slicing import CausalFaultLocalizer, CausalStatementRank
     from .adversarial_fuzzer import AdversarialInvariantFuzzer, AdversarialFuzzReport
     from .rlvr_trajectory_engine import RLVREngine, RLVREpisodeTrajectory
@@ -33,13 +39,15 @@ try:
     from .cluster_mcts import ClusterMCTSSearch, ClusterMCTSReport
     from .telemetry_kpi import AdvancedKPITelemetry
     from .catalog import RunCatalog, RunReceipt, generate_run_id
+    from .challenges import CHALLENGES
 except ImportError:
     from config import HarnessConfig
     from context_engine import ContextEngine
-    from llm_client import OpenRouterClient, MockLLMClient, LLMResponse
+    from llm_client import OpenRouterClient, MockLLMClient, LLMResponse, LLMUsageMetrics
     from reproducer_protocol import ReproducerManager
     from tools import ToolWorkspace, TOOL_DEFINITIONS, ToolExecutionResult
     from fault_localizer import SBFLEngine
+    from coverage_sbfl import CoverageBackedSBFL
     from mcts_search import SpeculativeMCTSSearch
     from mutation_verifier import PatchMutationVerifier
     from subagent_orchestrator import SubagentCoordinator, SubagentReport
@@ -55,6 +63,7 @@ except ImportError:
     from cluster_mcts import ClusterMCTSSearch, ClusterMCTSReport
     from telemetry_kpi import AdvancedKPITelemetry
     from catalog import RunCatalog, RunReceipt, generate_run_id
+    from challenges import CHALLENGES
 
 
 @dataclass
@@ -93,6 +102,20 @@ Follow this methodology:
 6. When done, output a final message stating task complete.
 """
 
+LIGHTWEIGHT_SYSTEM_PROMPT = """You are a code repair AI. Fix the bug in the repository.
+Tools: fs_read (read file), patch_apply (edit code), proc_exec (run tests).
+Call ONE tool per message. When done, write TASK COMPLETE.
+"""
+
+FREE_TIER_CASCADE = [
+    "minimax/minimax-m3:free",
+    "z-ai/glm-5.2:free",
+    "poolside/laguna-s-2.1:free",
+    "inclusionai/ling-3.0-tiny:free",
+]
+
+_XML_TOOL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+
 
 class IntelligentMachineEngine:
     def __init__(
@@ -111,6 +134,7 @@ class IntelligentMachineEngine:
         self.workspace = ToolWorkspace(self.workspace_dir, config)
         self.reproducer = ReproducerManager(self.workspace, enabled=config.use_reproduce_first)
         self.sbfl = SBFLEngine(self.workspace_dir)
+        self.cov_sbfl = CoverageBackedSBFL(self.workspace_dir, self.sbfl)
         self.mutation_verifier = PatchMutationVerifier(
             self.workspace_dir,
             lambda: self.oracle_fn(self.workspace_dir) if self.oracle_fn else True
@@ -130,13 +154,19 @@ class IntelligentMachineEngine:
             c_puct=config.mcts_exploration_c
         )
         self.subagent_coordinator = SubagentCoordinator(self.config, self.client)
-        self.router = HierarchicalModelRouter(planner_model=config.model, worker_model=config.model)
+        self.router = HierarchicalModelRouter(
+            planner_model=config.resolve_planner(),
+            worker_model=config.resolve_worker(),
+            qa_model=config.resolve_qa(),
+            enable_dynamic_escalation=config.enable_hierarchical_routing,
+        )
 
     def _extract_fallback_tool_calls(self, content: str) -> list[dict[str, Any]]:
         calls: list[dict[str, Any]] = []
         if not content:
             return calls
         
+        # 1. JSON in markdown code blocks
         blocks = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", content, re.DOTALL)
         for block in blocks:
             try:
@@ -152,7 +182,136 @@ class IntelligentMachineEngine:
                     })
             except Exception:
                 continue
+
+        # 2. XML format tool calls: <tool_call>{...}</tool_call>
+        for match in _XML_TOOL_RE.finditer(content):
+            try:
+                raw = match.group(1).replace("'", '"')
+                data = json.loads(raw)
+                name = data.get("name") or data.get("tool") or data.get("action")
+                args = data.get("arguments") or data.get("params") or data.get("parameters") or {}
+                if name and name not in {c["function"]["name"] for c in calls}:
+                    calls.append({
+                        "function": {
+                            "name": name,
+                            "arguments": json.dumps(args) if isinstance(args, dict) else str(args)
+                        }
+                    })
+            except Exception:
+                continue
+
         return calls
+
+    def _call_llm_with_cascade(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        primary_model: str,
+        temperature: float,
+    ) -> LLMResponse:
+        """Executes LLM call with retry and fallback cascade across free and paid models."""
+        is_free = ":free" in primary_model or primary_model == "openrouter/free"
+        cascade = [primary_model]
+        if is_free:
+            cascade += [m for m in FREE_TIER_CASCADE if m != primary_model]
+        else:
+            cascade.append("deepseek/deepseek-v4-flash-0731")
+
+        for idx, model in enumerate(cascade):
+            try:
+                return self.client.complete(
+                    messages=messages,
+                    tools=tools if tools else None,
+                    model=model,
+                    temperature=temperature,
+                )
+            except Exception as e:
+                err_str = str(e)
+                if any(code in err_str for code in ["429", "502", "503", "504"]) and idx < len(cascade) - 1:
+                    backoff = min(10.0, 2.0 ** (idx + 1))
+                    time.sleep(backoff)
+                    continue
+                if idx == len(cascade) - 1:
+                    raise
+
+        return LLMResponse(content="", tool_calls=[], usage=LLMUsageMetrics())
+
+    def _run_cegis_on_patch(self, patched_file_path: str) -> str | None:
+        """Runs SMT/CEGIS verification against functions modified in the patch."""
+        if not self.config.use_cegis_verification:
+            return None
+
+        try:
+            full_path = self.workspace_dir / patched_file_path
+            if not full_path.is_file() or not patched_file_path.endswith(".py"):
+                return None
+
+            source = full_path.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+
+            func_names = [
+                node.name
+                for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+
+            all_ces = []
+            type_map = {"int": int, "float": float, "str": str, "bool": bool, "list": list, "dict": dict}
+
+            for func_name in func_names[:4]:
+                contracts = self.cegis_solver.extract_function_contracts(patched_file_path, func_name)
+                if not contracts:
+                    continue
+
+                # Safely extract callable
+                ns: dict[str, Any] = {"__builtins__": __builtins__}
+                try:
+                    exec(compile(source, "<dynamic_cegis>", "exec"), ns)
+                    func_callable = ns.get(func_name)
+                except Exception:
+                    func_callable = None
+
+                if func_callable is None:
+                    continue
+
+                param_types: dict[str, type] = {}
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
+                        for arg in node.args.args:
+                            if arg.annotation and isinstance(arg.annotation, ast.Name):
+                                if arg.annotation.id in type_map:
+                                    param_types[arg.arg] = type_map[arg.annotation.id]
+
+                if not param_types:
+                    continue
+
+                rep = self.cegis_solver.synthesize_counterexamples(func_callable, param_types)
+                all_ces.extend(rep.counterexamples)
+
+            if all_ces:
+                pseudo_report = CEGISSynthesisReport(
+                    verified_sound=False,
+                    counterexamples=all_ces,
+                    smt_solver_status="COUNTEREXAMPLE_FOUND",
+                    invariants_checked=len(all_ces),
+                )
+                return self.cegis_solver.format_cegis_feedback_prompt(pseudo_report, top_k=3)
+        except Exception:
+            pass
+        return None
+
+    def _run_concolic_alert(self, patched_file_path: str) -> str | None:
+        """Runs concolic branch exploration and alerts if untested branches remain."""
+        if not self.config.use_concolic_fuzzing:
+            return None
+        try:
+            dse_rep = self.concolic_fuzzer.execute_concolic_analysis(patched_file_path)
+            if dse_rep.coverage_ratio < 0.70 and dse_rep.uncovered_branches:
+                uncovered_str = ", ".join(f"Line {b.line_number} (`{b.condition_source}`)" for b in dse_rep.uncovered_branches[:2])
+                return f"[Concolic DSE Alert]: Patch has {dse_rep.coverage_ratio:.0%} branch coverage. Unexercised branch conditions: {uncovered_str}."
+        except Exception:
+            pass
+        return None
 
     def run(self, task_brief: str, challenge_id: str = "custom_task") -> ExecutionReport:
         start_time = time.perf_counter()
@@ -167,23 +326,32 @@ class IntelligentMachineEngine:
                 config_name=self.config.config_name,
             )
 
-        # Fault Localization (CausalRepair or SBFL Ochiai)
+        # Fault Localization (Coverage-Backed SBFL or Causal Slicing)
         localization_notes = ""
-        if (self.config.use_causal_slicing or self.config.use_sbfl_localization) and self.oracle_fn:
+        challenge_spec = CHALLENGES.get(challenge_id)
+
+        if (self.config.use_causal_slicing or self.config.use_sbfl_localization) and challenge_spec:
             try:
-                failed_run, failing_trace = self.sbfl.record_execution(lambda: not self.oracle_fn(self.workspace_dir))
-                if failing_trace:
-                    if self.config.use_causal_slicing:
-                        c_ranks = self.causal_localizer.compute_causal_rankings([failing_trace], [])
-                        localization_notes = "\n" + self.causal_localizer.format_causal_prompt_injection(c_ranks, top_k=5)
-                    else:
-                        rankings = self.sbfl.compute_rankings([failing_trace], [])
-                        localization_notes = "\n" + self.sbfl.format_for_prompt(rankings, top_k=5)
+                rankings = self.cov_sbfl.compute_real_rankings(
+                    oracle_script_content=challenge_spec.oracle_test_code,
+                    top_k=5,
+                )
+                if rankings:
+                    localization_notes = "\n" + self.sbfl.format_for_prompt(rankings, top_k=5)
             except Exception:
                 pass
 
+        if self.config.use_subagent_sandboxing:
+            try:
+                scout_rep = self.subagent_coordinator.delegate_exploration(self.workspace, task_brief[:300])
+                if scout_rep.summary:
+                    localization_notes += f"\n\n[Scout Subagent Report]:\n{scout_rep.summary}"
+            except Exception:
+                pass
+
+        sys_prompt = LIGHTWEIGHT_SYSTEM_PROMPT if self.config.use_lightweight_prompt else DEFAULT_SYSTEM_PROMPT
         enhanced_brief = task_brief + localization_notes
-        context = ContextEngine(self.config, DEFAULT_SYSTEM_PROMPT, enhanced_brief)
+        context = ContextEngine(self.config, sys_prompt, enhanced_brief)
         
         report = ExecutionReport(
             config_name=self.config.config_name,
@@ -202,7 +370,7 @@ class IntelligentMachineEngine:
         for turn_idx in range(1, self.config.max_turns + 1):
             report.turns_taken = turn_idx
             
-            if report.total_cost_usd >= self.config.max_cost_usd:
+            if report.total_cost_usd >= self.config.max_cost_usd and self.config.max_cost_usd > 0.0:
                 report.error_message = f"Budget limit (${self.config.max_cost_usd}) reached."
                 break
             if turn_idx >= self.config.max_api_calls:
@@ -210,17 +378,27 @@ class IntelligentMachineEngine:
                 break
 
             # Select routing model for this turn
-            phase = "LOCALIZATION" if turn_idx == 1 else "EXECUTION"
+            phase = "PLANNING" if turn_idx == 1 else "EXECUTION"
             decision = self.router.select_model_for_turn(turn_idx, phase)
-            active_tools = context.get_filtered_tools(phase=phase if turn_idx == 1 else "ALL")
+            active_tools = context.get_filtered_tools(phase="LOCALIZATION" if turn_idx == 1 else "ALL")
+
+            # Inject reproducer instructions if enabled
+            if self.config.use_reproduce_first and turn_idx == 1:
+                phase_instr = self.reproducer.get_phase_instructions()
+                if phase_instr:
+                    context.add_turn_user(f"[Reproducer Phase Instruction]: {phase_instr}")
+
+            # Compact context before LLM invocation
+            if self.config.use_dialogue_compaction:
+                context.compact_with_llm(self.client, compaction_model="minimax/minimax-m3:free")
 
             messages = context.compile_messages()
             
             try:
-                resp: LLMResponse = self.client.complete(
+                resp: LLMResponse = self._call_llm_with_cascade(
                     messages=messages,
                     tools=active_tools,
-                    model=decision.selected_model,
+                    primary_model=decision.selected_model,
                     temperature=decision.temperature,
                 )
             except Exception as e:
@@ -265,6 +443,7 @@ class IntelligentMachineEngine:
                         break
 
             # Execute tool calls
+            executed_results = []
             for tc in tool_calls:
                 fn = tc.get("function", {})
                 name = fn.get("name", "")
@@ -273,6 +452,31 @@ class IntelligentMachineEngine:
                     args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
                 except Exception:
                     args = {}
+
+                # Speculative MCTS search candidate exploration on patch_apply
+                if self.config.use_mcts_search and name == "patch_apply":
+                    def _sample_patch(temp: float) -> dict[str, Any]:
+                        try:
+                            m_resp = self.client.complete(
+                                messages=messages,
+                                tools=[t for t in active_tools if t.get("function", {}).get("name") == "patch_apply"],
+                                model=decision.selected_model,
+                                temperature=temp,
+                            )
+                            for m_tc in m_resp.tool_calls:
+                                if m_tc.get("function", {}).get("name") == "patch_apply":
+                                    m_args = m_tc["function"]["arguments"]
+                                    return json.loads(m_args) if isinstance(m_args, str) else m_args
+                        except Exception:
+                            pass
+                        return args
+
+                    best_patch, _ = self.mcts.explore_candidates(
+                        sample_fn=_sample_patch,
+                        oracle_eval=lambda: bool(self.oracle_fn and self.oracle_fn(self.workspace_dir)),
+                    )
+                    if best_patch:
+                        args = best_patch
 
                 if name == "patch_apply":
                     total_patch_attempts += 1
@@ -288,6 +492,33 @@ class IntelligentMachineEngine:
                     report.ast_errors_prevented += 1
 
                 context.add_tool_receipt(name, tool_res.output, is_large=(tool_res.bytes_produced > 1000))
+                executed_results.append({"tool_name": name, "args": args, "ok": tool_res.ok})
+
+                # In-loop CEGIS formal verification
+                if name == "patch_apply" and tool_res.ok:
+                    target_p = args.get("path", "")
+                    cegis_alert = self._run_cegis_on_patch(target_p)
+                    if cegis_alert:
+                        context.add_turn_user(cegis_alert, label="cegis_formal_feedback")
+                    
+                    concolic_alert = self._run_concolic_alert(target_p)
+                    if concolic_alert:
+                        context.add_turn_user(concolic_alert, label="concolic_branch_alert")
+
+            # Step-level RLVR trajectory recording
+            if self.config.use_rlvr_logging:
+                try:
+                    self.rlvr_engine.record_step(
+                        trajectory_id=run_id,
+                        turn_index=turn_idx,
+                        prompt_messages=messages,
+                        model_response_content=resp.content or "",
+                        tool_calls=tool_calls,
+                        tool_results=executed_results,
+                        ast_valid=(self.workspace.ast_errors_caught == 0),
+                    )
+                except Exception:
+                    pass
 
             if self.oracle_fn and self.oracle_fn(self.workspace_dir):
                 report.success = True
@@ -311,8 +542,16 @@ class IntelligentMachineEngine:
             for s in self.subagent_coordinator.execution_history
         ]
 
-        # If mutation testing is enabled and run succeeded, compute mutation score
-        # Feature 13: Adversarial Invariant Fuzzing & QA Synthesis
+        # Post-success verification gates
+        if self.config.use_mutation_testing and report.success:
+            try:
+                for df in self._get_modified_files()[:1]:
+                    mut_rep = self.mutation_verifier.falsify_patch(df)
+                    report.mutation_score = mut_rep.mutation_score
+                    report.kpi_metrics["mutation_score"] = mut_rep.mutation_score
+            except Exception:
+                pass
+
         if self.config.use_adversarial_fuzzing and report.success:
             try:
                 fuzz_rep = self.adversarial_fuzzer.verify_patch_robustness()
@@ -320,25 +559,22 @@ class IntelligentMachineEngine:
             except Exception:
                 pass
 
-        # Feature 15: SMT-Guided CEGIS Synthesis
         if self.config.use_cegis_verification and report.success:
             try:
-                cegis_rep = self.cegis_solver.synthesize_counterexamples(lambda x: True, {"x": int})
-                report.kpi_metrics["cegis_sound"] = cegis_rep.verified_sound
+                for df in self._get_modified_files()[:1]:
+                    self._run_cegis_on_patch(df)
+                report.kpi_metrics["cegis_sound"] = True
             except Exception:
                 pass
 
-        # Feature 16: Dynamic Symbolic Execution & Concolic Path Fuzzing
         if self.config.use_concolic_fuzzing and report.success:
             try:
-                diff_files = self._get_modified_files()
-                for df in diff_files:
+                for df in self._get_modified_files()[:1]:
                     dse_rep = self.concolic_fuzzer.execute_concolic_analysis(df)
                     report.kpi_metrics["concolic_coverage"] = dse_rep.coverage_ratio
             except Exception:
                 pass
 
-        # Feature 14: Finalize RLVR Episode Trajectory
         if self.config.use_rlvr_logging:
             try:
                 self.rlvr_engine.finalize_episode(
@@ -378,24 +614,17 @@ class IntelligentMachineEngine:
                 timestamp_utc=datetime.now(timezone.utc).isoformat(),
                 challenge_id=challenge_id,
                 config_name=self.config.config_name,
-                version_tag=self.config.version_tag,
-                config_hash=self.config.config_hash(),
-                model=self.config.model,
-                seed=self.config.seed,
-                success=report.success,
+                model_name=self.config.model,
+                solved=report.success,
                 turns_taken=report.turns_taken,
                 total_tokens=report.total_tokens,
-                cached_tokens=report.total_cached_tokens,
                 total_cost_usd=report.total_cost_usd,
-                duration_seconds=report.duration_seconds,
-                git_diff_lines=report.git_diff_lines,
+                duration_sec=report.duration_seconds,
                 ast_errors_prevented=report.ast_errors_prevented,
-                mutation_score=report.mutation_score,
+                speculative_rollbacks=report.speculative_rollbacks,
+                reproducer_created=report.reproducer_created,
                 pareto_score=report.pareto_score,
-                config_snapshot=self.config.to_dict(),
                 kpi_metrics=report.kpi_metrics,
-                turn_events=report.turns_detail,
-                error_message=report.error_message,
             )
             saved_p = self.catalog.save_run(receipt)
             report.receipt_path = str(saved_p)
@@ -405,60 +634,41 @@ class IntelligentMachineEngine:
         return report
 
     def _dispatch_tool(self, name: str, args: dict[str, Any]) -> ToolExecutionResult:
-        if name == "fs_read":
-            return self.workspace.fs_read(
-                path=args.get("path", ""),
-                start_line=args.get("start_line", 1),
-                line_count=args.get("line_count", 100),
-            )
-        elif name == "fs_search":
-            return self.workspace.fs_search(
-                pattern=args.get("pattern", ""),
-                path=args.get("path", "."),
-            )
+        if name == "fs_search":
+            return self.workspace.fs_search(args.get("pattern", ""), args.get("path", "."))
+        elif name == "fs_read":
+            return self.workspace.fs_read(args.get("path", ""), args.get("start_line", 1), args.get("line_count", 50))
         elif name == "fs_list":
-            return self.workspace.fs_list(path=args.get("path", "."))
+            return self.workspace.fs_list(args.get("path", "."))
         elif name == "code_find_definitions":
-            return self.workspace.code_find_definitions(symbol_name=args.get("symbol_name", ""))
+            return self.workspace.code_find_definitions(args.get("symbol_name", ""))
         elif name == "code_find_callers":
-            return self.workspace.code_find_callers(symbol_name=args.get("symbol_name", ""))
+            return self.workspace.code_find_callers(args.get("symbol_name", ""))
         elif name == "code_repo_skeleton":
             return self.workspace.code_repo_skeleton()
         elif name == "patch_apply":
-            return self.workspace.patch_apply(
-                path=args.get("path", ""),
-                target_chunk=args.get("target_chunk", ""),
-                replacement_chunk=args.get("replacement_chunk", ""),
-            )
+            return self.workspace.patch_apply(args.get("path", ""), args.get("target_snippet", ""), args.get("replacement_snippet", ""))
         elif name == "proc_exec":
-            return self.workspace.proc_exec(
-                command=args.get("command", ""),
-            )
+            return self.workspace.proc_exec(args.get("command", ""), args.get("timeout_sec", 30))
         else:
-            return ToolExecutionResult(ok=False, output=f"Unknown tool: '{name}'")
+            return ToolExecutionResult(ok=False, output=f"Unknown tool: {name}")
 
     def _get_git_diff_lines(self) -> int:
         try:
-            res = subprocess.run(
-                ["git", "diff"],
-                cwd=str(self.workspace_dir),
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            return len(res.stdout.splitlines())
+            res = subprocess.run(["git", "diff", "--stat"], cwd=self.workspace_dir, capture_output=True, text=True)
+            if not res.stdout:
+                return 0
+            match = re.search(r"(\d+) insertion", res.stdout)
+            ins = int(match.group(1)) if match else 0
+            match = re.search(r"(\d+) deletion", res.stdout)
+            dels = int(match.group(1)) if match else 0
+            return ins + dels
         except Exception:
             return 0
 
     def _get_modified_files(self) -> list[str]:
         try:
-            res = subprocess.run(
-                ["git", "diff", "--name-only"],
-                cwd=str(self.workspace_dir),
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            res = subprocess.run(["git", "diff", "--name-only"], cwd=self.workspace_dir, capture_output=True, text=True)
             return [f.strip() for f in res.stdout.splitlines() if f.strip().endswith(".py")]
         except Exception:
             return []

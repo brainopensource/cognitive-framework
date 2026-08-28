@@ -32,6 +32,21 @@ from vanguard.packages.runtime.governance.approvals import OperatorSigner
 from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 
+SMOKE_CHALLENGES = (
+    "tier1_lru_ttl_cache",
+    "tier1_version_semver_parser",
+    "tier2_event_bus",
+    "tier2_fsm_workflow_engine",
+    "tier2_retry_exponential_backoff",
+    "tier3_token_bucket",
+    "tier3_connection_pool",
+    "tier4_dag_resolver",
+    "tier4_stream_window_aggregator",
+    "tier5_datalog_engine",
+    "tier6_raft_state_machine",
+    "tier7_greenfield_kv_lsm_tree",
+)
+
 
 def _snapshot_tree(root: Path) -> dict[str, bytes]:
     """Return the immutable baseline file map used for patch accounting.
@@ -45,6 +60,13 @@ def _snapshot_tree(root: Path) -> dict[str, bytes]:
         if not path.is_file() or path.name == "oracle_test.py":
             continue
         rel = path.relative_to(root).as_posix()
+        # Runtime state and CAS artifacts are evidence outputs, not the
+        # submitted source patch.  Including SQLite/WAL bytes here made a
+        # zero-turn run look like a very large code change.
+        if ".vanguard" in Path(rel).parts or "__pycache__" in Path(rel).parts:
+            continue
+        if path.suffix == ".pyc":
+            continue
         snapshot[rel] = path.read_bytes()
     return snapshot
 
@@ -58,7 +80,7 @@ def _snapshot_digest(snapshot: dict[str, bytes]) -> str:
     return "sha256:" + hashlib.sha256(body).hexdigest()
 
 
-def setup_challenge(challenge_id: str, scratch_dir: Path) -> dict[str, str]:
+def setup_challenge(challenge_id: str, scratch_dir: Path) -> dict[str, bytes]:
     """Set up a challenge and return its content-addressed baseline."""
     challenge = CHALLENGES[challenge_id]
     
@@ -129,12 +151,27 @@ def _benchmark_identity(challenge_id: str, scratch_dir: Path,
         },
         "model_requested": model,
         "provider": "openrouter",
-        "contamination": {"source": "greenfield-preregistered", "excluded": False},
+        "contamination": {
+            "source": "greenfield-preregistered",
+            "status": "declared_clean",
+            "excluded": False,
+        },
     }
 
 
 def _enrich_result(result_row: dict[str, Any], runtime_result: Any) -> dict[str, Any]:
     """Bind returned provider identity and runtime truth to the benchmark row."""
+    terminal = getattr(runtime_result, "terminal", None)
+    if terminal is None:
+        # An exception or missing runtime result is an instrument failure, not
+        # an implicit success and not a synthetic completed trajectory.
+        result_row.setdefault("terminal", "instrument_error")
+        result_row.setdefault("terminal_detail", "runtime returned no terminal state")
+        result_row.setdefault("instrument_error", "runtime_result_missing")
+    else:
+        result_row["terminal"] = getattr(terminal, "value", str(terminal)).lower()
+        result_row["terminal_detail"] = str(getattr(runtime_result, "detail", ""))
+        result_row["instrument_error"] = str(getattr(runtime_result, "instrument_error", "") or "")
     trajectory = getattr(runtime_result, "trajectory", None)
     if isinstance(trajectory, dict):
         routes = trajectory.get("model_routes_used")
@@ -203,37 +240,52 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
         print(f"Running Vanguard engine with model {model}...")
         t0 = time.time()
         
-        result = Runtime.execute_profiled(
-            manifest_path,
-            task,
-            profile_id="product",
-            model=model_obj,
-            store_path=str(db_path),
-            blobs=FileBlobStore(blob_path),
-            interactive=True,
-            approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-            approval_key=signer.public_bytes,
-        )
+        runtime_exception: str | None = None
+        try:
+            result = Runtime.execute_profiled(
+                manifest_path,
+                task,
+                profile_id="product",
+                model=model_obj,
+                store_path=str(db_path),
+                blobs=FileBlobStore(blob_path),
+                interactive=True,
+                approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+                approval_key=signer.public_bytes,
+            )
+        except Exception as exc:
+            # Preserve the row as an instrument failure. Record only the
+            # exception class; adapter-level transport details own redaction.
+            result = None
+            runtime_exception = type(exc).__name__
         
         elapsed = time.time() - t0
         
         # Parse result
         turns = 0
-        tokens = 0
-        cost = 0
+        tokens = None
+        cost = None
         if result and getattr(result, "telemetry", None):
             turns = getattr(result.telemetry, "turns", 0)
-            tokens = getattr(result.telemetry, "total_tokens", None) or 0
-            cost = getattr(result.telemetry, "usd_micros", None) or 0
+            tokens = getattr(result.telemetry, "total_tokens", None)
+            cost = getattr(result.telemetry, "usd_micros", None)
 
         print("Evaluating oracle...")
-        passed = evaluate_oracle(challenge_id, scratch_dir)
+        oracle_passed = evaluate_oracle(challenge_id, scratch_dir)
+        changed_files = _changed_files(scratch_dir, baseline)
+        terminal = getattr(result, "terminal", None)
+        completed = getattr(terminal, "value", str(terminal)).lower() == "completed"
+        # A passing oracle over the unmodified fixture is not a coding-agent
+        # success.  Require a completed canonical run and a real source patch.
+        passed = completed and bool(changed_files) and oracle_passed
         diff_size = get_diff_size(scratch_dir, baseline)
         
         return _enrich_result({
             "challenge": challenge_id,
             "tier": challenge.tier,
             "passed": passed,
+            "oracle_passed": oracle_passed,
+            "changed_files": changed_files,
             "elapsed": elapsed,
             "turns": turns,
             "tokens": tokens,
@@ -241,6 +293,11 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
             "benchmark_identity": _benchmark_identity(challenge_id, scratch_dir, baseline, model),
+            **({
+                "terminal": "instrument_error",
+                "terminal_detail": f"runtime raised {runtime_exception}",
+                "instrument_error": "runtime_exception",
+            } if runtime_exception else {}),
         }, result)
     finally:
         if not keep_dir:
@@ -302,27 +359,32 @@ def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict
         print(f"Running Vanguard engine with model {model}...")
         t0 = time.time()
         
-        result = Runtime.execute_profiled(
-            manifest_path,
-            task,
-            profile_id="product",
-            model=model_obj,
-            store_path=str(db_path),
-            blobs=FileBlobStore(blob_path),
-            interactive=True,
-            approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
-            approval_key=signer.public_bytes,
-        )
+        runtime_exception: str | None = None
+        try:
+            result = Runtime.execute_profiled(
+                manifest_path,
+                task,
+                profile_id="product",
+                model=model_obj,
+                store_path=str(db_path),
+                blobs=FileBlobStore(blob_path),
+                interactive=True,
+                approver=lambda challenge: signer.approve(challenge, reviewer=grant.reviewer),
+                approval_key=signer.public_bytes,
+            )
+        except Exception as exc:
+            result = None
+            runtime_exception = type(exc).__name__
         
         elapsed = time.time() - t0
         
         turns = 0
-        tokens = 0
-        cost = 0
+        tokens = None
+        cost = None
         if result and getattr(result, "telemetry", None):
             turns = getattr(result.telemetry, "turns", 0)
-            tokens = getattr(result.telemetry, "total_tokens", None) or 0
-            cost = getattr(result.telemetry, "usd_micros", None) or 0
+            tokens = getattr(result.telemetry, "total_tokens", None)
+            cost = getattr(result.telemetry, "usd_micros", None)
 
         # Evaluate oracle
         passed = False
@@ -374,6 +436,11 @@ if __name__ == "__main__":
         else:
             print(f"No oracle defined for {instance_id}")
 
+        oracle_passed = passed
+        changed_files = _changed_files(scratch_dir, baseline)
+        terminal = getattr(result, "terminal", None)
+        completed = getattr(terminal, "value", str(terminal)).lower() == "completed"
+        passed = completed and bool(changed_files) and oracle_passed
         diff_size = get_diff_size(scratch_dir, baseline)
         print("\n=== CONTENT SNAPSHOT ===")
         print(json.dumps({
@@ -389,6 +456,8 @@ if __name__ == "__main__":
             "challenge": instance_id,
             "tier": "VERIFIED",
             "passed": passed,
+            "oracle_passed": oracle_passed,
+            "changed_files": changed_files,
             "elapsed": elapsed,
             "turns": turns,
             "tokens": tokens,
@@ -396,6 +465,11 @@ if __name__ == "__main__":
             "diff_size": diff_size,
             "scratch_dir": str(scratch_dir),
             "benchmark_identity": _benchmark_identity(instance_id, scratch_dir, baseline, model),
+            **({
+                "terminal": "instrument_error",
+                "terminal_detail": f"runtime raised {runtime_exception}",
+                "instrument_error": "runtime_exception",
+            } if runtime_exception else {}),
         }, result)
     finally:
         if not keep_dir:
@@ -406,6 +480,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run SWE challenges against Vanguard.")
     parser.add_argument("--challenge", type=str, help="Specific challenge ID to run")
     parser.add_argument("--tiers", type=str, help="Comma-separated list of tiers to run (e.g. 1,2,3)")
+    parser.add_argument("--smoke", action="store_true",
+                        help="Run the fixed 12-task preregistered smoke set")
     parser.add_argument("--verified", type=str, default=None, help="Run a real SWE-bench Verified instance from tools/005_SWE_VERIFIED_REPO (e.g. pallets__flask-5014, psf__requests-1142)")
     # Resolved from the registry rather than hardcoded: a literal here is a
     # second source of `D_R` model identity that drifts from the registry the
@@ -434,6 +510,10 @@ def main() -> int:
     else:
         # Determine which challenges to run
         to_run = []
+        selectors = sum(bool(value) for value in (args.challenge, args.tiers, args.smoke))
+        if selectors > 1:
+            print("Error: choose only one of --challenge, --tiers, or --smoke", file=sys.stderr)
+            return 1
         if args.challenge:
             if args.challenge not in CHALLENGES:
                 print(f"Error: Unknown challenge {args.challenge}", file=sys.stderr)
@@ -446,8 +526,10 @@ def main() -> int:
                 print("Error: --tiers must be a comma-separated list of integers", file=sys.stderr)
                 return 1
             to_run = [c for c, obj in CHALLENGES.items() if obj.tier in tiers]
+        elif args.smoke:
+            to_run = list(SMOKE_CHALLENGES)
         else:
-            print("Error: Must specify either --challenge, --tiers, or --verified", file=sys.stderr)
+            print("Error: Must specify --challenge, --tiers, --smoke, or --verified", file=sys.stderr)
             return 1
     
         if not to_run:
@@ -467,7 +549,12 @@ def main() -> int:
     print("-" * 80)
     for r in results:
         score = "PASS" if r["passed"] else "FAIL"
-        print(f"{r['challenge']:<35} | {str(r['tier']):<8} | {score:<6} | {r['elapsed']:<8.1f} | {r['turns']:<6} | {r['tokens']:<8} | {r['cost_micros']:<9} | {r['diff_size']:<6}")
+        print(
+            f"{r['challenge']:<35} | {str(r['tier']):<8} | {score:<6} | "
+            f"{r['elapsed']:<8.1f} | {str(r['turns']):<6} | "
+            f"{str(r['tokens']):<8} | {str(r['cost_micros']):<9} | "
+            f"{str(r['diff_size']):<6}"
+        )
     
     passed_count = sum(1 for r in results if r["passed"])
     print("=" * 80)

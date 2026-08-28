@@ -16,7 +16,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from vanguard.packages.domain.canonicalisation.jcs import canonical_bytes
-from vanguard.packages.domain.evidence.envelope import accepts, parse_envelope
+from vanguard.packages.domain.evidence.envelope import acceptance_defects, parse_envelope
 
 
 def verify_acceptance(produced_path: Path, acceptance_path: Path) -> list[str]:
@@ -30,8 +30,7 @@ def verify_acceptance(produced_path: Path, acceptance_path: Path) -> list[str]:
         errors.append("producer envelope is unsigned")
     if not acceptance.signature:
         errors.append("acceptance envelope is unsigned")
-    if not accepts(acceptance, produced):
-        errors.append("acceptance is not independent, passed, or digest-bound")
+    errors.extend(acceptance_defects(acceptance, produced))
     if acceptance.protocol != "aether.evidence.acceptance/1":
         errors.append("wrong acceptance protocol")
     encoded_key = acceptance.environment.get("reviewerPublicKey")

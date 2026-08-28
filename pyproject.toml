@@ -45,4 +45,7 @@ include = ["vanguard*", "schemas*", "packs*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf", "*.html", "*.js", "*.css", "*.map", "*.svg"]
+# `.jcs` and `.digest` are the other two thirds of the REQ-SCHEMA-001
+# canonicalisation triples. Without them a wheel ships the inputs and none
+# of the canonical forms or digests to check them against.
+"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf", "*.html", "*.js", "*.css", "*.map", "*.svg", "*.jcs", "*.digest"]

@@ -45,4 +45,4 @@ include = ["vanguard*", "schemas*", "packs*"]
 namespaces = true
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf"]
+"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf", "*.html", "*.js", "*.css", "*.map", "*.svg"]

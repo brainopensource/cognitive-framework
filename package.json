@@ -7,7 +7,12 @@
   ],
   "scripts": {
     "vg": "npm --workspace @vanguard/cli run vg --",
-    "typecheck": "npm --workspace @vanguard/cli run typecheck",
-    "test": "npm --workspace @vanguard/cli test"
+    "build": "npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+    "build:client-core": "npm --workspace @vanguard/client-core run build",
+    "build:cli": "npm --workspace @vanguard/cli run build",
+    "build:studio": "npm --workspace @vanguard/studio run build",
+    "build:studio-browser": "npm --workspace @vanguard/studio run build:browser",
+    "typecheck": "npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
+    "test": "npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test"
   }
 }

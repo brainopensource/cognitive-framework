@@ -513,6 +513,7 @@ class OpenRouterModel:
         pricing_table: Mapping[str, tuple[float, float, float]] | None = None,
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
+        request_timeout: float = 30.0,
         monotonic: Callable[[], float] = time.monotonic,
         provider: str = "openrouter",
     ) -> None:
@@ -532,6 +533,9 @@ class OpenRouterModel:
         self._pricing_table = pricing_table
         self._pricing_micros_table = pricing_micros_table
         self._stream = stream
+        if request_timeout <= 0:
+            raise ValueError("request_timeout must be positive")
+        self._request_timeout = float(request_timeout)
         self._monotonic = monotonic
         self._player = (
             CassettePlayer(cassette, match_mode="tape")
@@ -579,7 +583,12 @@ class OpenRouterModel:
         payload: bytes,
         secret: str,
     ) -> tuple[int, Mapping[str, str], bytes] | Result[Proposal]:
-        transport = self._transport or _http_post
+        transport = self._transport
+        if transport is None:
+            def transport(url: str, request_headers: dict[str, str], body: bytes):
+                return _http_post(
+                    url, request_headers, body, timeout=self._request_timeout
+                )
         attempts = 0
         max_retries = self._max_retries
         retry_statuses = {429, 500, 502, 503, 504}
@@ -668,7 +677,12 @@ class OpenRouterModel:
         secret: str,
     ) -> tuple[int, Mapping[str, str], Iterable[bytes]] | Result[Proposal]:
         """Open an SSE response; retry only before any provider delta exists."""
-        transport = self._stream_transport or _http_stream
+        transport = self._stream_transport
+        if transport is None:
+            def transport(url: str, request_headers: dict[str, str], body: bytes):
+                return _http_stream(
+                    url, request_headers, body, timeout=self._request_timeout
+                )
         attempts = 0
         retry_statuses = {429, 500, 502, 503, 504}
         while attempts <= self._max_retries:

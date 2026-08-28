@@ -1,0 +1,52 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-m",
+    "unittest",
+    "test.falsifiers.test_m7_topology_and_independence",
+    "test.falsifiers.test_m701_recorded_workload",
+    "test.falsifiers.test_m7_topology_execution",
+    "-v"
+  ],
+  "cwd": ".",
+  "failures": 0,
+  "fresh_process": true,
+  "markers": {
+    "analysis_only": true,
+    "artifact_flows_exercised": true,
+    "authority_rejected": true,
+    "causal_order_honoured": true,
+    "children_bound_to_root": true,
+    "children_never_get_spawn": true,
+    "cold_reconstructs_tree": true,
+    "cycles_rejected": true,
+    "digest_stable": true,
+    "direct_form_does_real_work": true,
+    "distinct_structures": true,
+    "forms_execute": true,
+    "independence_measured": true,
+    "intent_keys_topology_bound": true,
+    "lowering_is_not_concurrency": true,
+    "m701_live_path": true,
+    "missing_resource_named": true,
+    "one_runtime_shape": true,
+    "recorded_timestamps": true,
+    "role_operations_executed": true,
+    "roles_run_once": true,
+    "sequential_not_overlapped": true,
+    "three_topologies": true,
+    "unobserved_not_invented": true,
+    "unreachable_role_visible": true
+  },
+  "modules": [
+    "test.falsifiers.test_m7_topology_and_independence",
+    "test.falsifiers.test_m701_recorded_workload",
+    "test.falsifiers.test_m7_topology_execution"
+  ],
+  "output_digest": "sha256:81b4aa074ac8ef3ab887d2876b92e445589faba4d9113b2a0c19400048da50b5",
+  "returncode": 0,
+  "schema": "aether.m7-falsifier-report/1",
+  "stderr_digest": "sha256:81b4aa074ac8ef3ab887d2876b92e445589faba4d9113b2a0c19400048da50b5",
+  "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tests": 40
+}

@@ -104,3 +104,25 @@ We completed the multi-tier benchmark suite expansion and live empirical evaluat
 - [x] **Noise Reduction via Repeats**: Multi-run statistical repeats ($\mu \pm \sigma$) supported.
 - [x] **15 Mathematical KPIs**: Computed and recorded in JCS receipts in `tools/006_LLM_INT_MACHINE/runs/`.
 - [x] **Interactive Dashboard**: Exported to `benchmark_dashboard.html`.
+
+
+---
+
+## 4. Phase 5 Multi-Model Hierarchical & SWE-Bench Pro Multi-File Empirical Results (2026-08-28)
+
+```text
++===================================================================================================================================+
+|                                    PHASE 5 EXPANDED MULTI-FILE & HIERARCHICAL MATRIX (2026-08-28)                                  |
++--------------------------+-----------------------------+-----------------------+--------+-------+--------+-------------+----------+
+| Benchmark Challenge      | Model Identifier            | Harness Preset        | Solved | Turns | Tokens | Cost ($USD) | Latency  |
++--------------------------+-----------------------------+-----------------------+--------+-------+--------+-------------+----------+
+| tier1_lru_cache          | deepseek/deepseek-v4-flash  | v5.0_hierarchical_apex|  PASS  |   9   | 27,220 |  $0.00304   | 113.06s  |
+| tier4_plugin_registry    | deepseek/deepseek-v4-flash  | v5.0_hierarchical_apex|  PASS  |   4   |  8,366 |  $0.00093 🏆|  21.49s 🏆|
+| tier4_async_event_bus    | deepseek/deepseek-v4-flash  | v5.0_hierarchical_apex|  PASS  |   7   | 17,573 |  $0.00209   | 120.42s  |
+| tier3_token_bucket       | deepseek/deepseek-v4-flash  | v5.0_hierarchical_apex|  PASS  |  12   | 36,770 |  $0.00420   | 106.54s  |
+| tier3_token_bucket (Free)| minimax/minimax-m3:free     | v5.1_free_tier        |  FAIL  |   7   |  9,372 |  $0.00000 🆓| 139.60s  |
+| tier3_token_bucket (Free)| z-ai/glm-5.2:free           | v5.1_free_tier        |  FAIL  |   8   | 13,574 |  $0.00000 🆓| 101.93s  |
++--------------------------+-----------------------------+-----------------------+--------+-------+--------+-------------+----------+
+| TOTAL SWEEP CONSUMPTION: $0.01026 USD consumed of $0.30000 USD cap (Headroom: $0.28974 USD / 96.6% remaining)                     |
++===================================================================================================================================+
+```

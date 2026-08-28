@@ -47,6 +47,13 @@ SMOKE_CHALLENGES = (
     "tier7_greenfield_kv_lsm_tree",
 )
 
+# A benchmark instrument must have a finite provider budget.  One initial
+# request plus one retry at a bounded transport timeout gives the evaluator a
+# deterministic upper bound and preserves a typed instrument_error when the
+# provider or network is unavailable.
+BENCHMARK_MAX_RETRIES = 1
+BENCHMARK_REQUEST_TIMEOUT_SECONDS = 15.0
+
 
 def _snapshot_tree(root: Path) -> dict[str, bytes]:
     """Return the immutable baseline file map used for patch accounting.
@@ -151,6 +158,10 @@ def _benchmark_identity(challenge_id: str, scratch_dir: Path,
         },
         "model_requested": model,
         "provider": "openrouter",
+        "transport_policy": {
+            "request_timeout_seconds": BENCHMARK_REQUEST_TIMEOUT_SECONDS,
+            "max_retries": BENCHMARK_MAX_RETRIES,
+        },
         "contamination": {
             "source": "greenfield-preregistered",
             "status": "declared_clean",
@@ -230,7 +241,13 @@ def run_challenge(challenge_id: str, model: str, keep_dir: bool) -> dict[str, An
             seed_key=seed_key,
         )
         signer = OperatorSigner(seed_key)
-        model_obj = OpenRouterModel(model=model, stream=False, environ={"OPENROUTER_API_KEY": api_key})
+        model_obj = OpenRouterModel(
+            model=model,
+            stream=False,
+            environ={"OPENROUTER_API_KEY": api_key},
+            max_retries=BENCHMARK_MAX_RETRIES,
+            request_timeout=BENCHMARK_REQUEST_TIMEOUT_SECONDS,
+        )
         manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
         db_path = scratch_dir / ".vanguard" / "events.sqlite3"
         blob_path = scratch_dir / ".vanguard" / "blobs"
@@ -349,7 +366,13 @@ def run_verified_challenge(instance_id: str, model: str, keep_dir: bool) -> dict
             seed_key=seed_key,
         )
         signer = OperatorSigner(seed_key)
-        model_obj = OpenRouterModel(model=model, stream=False, environ={"OPENROUTER_API_KEY": api_key})
+        model_obj = OpenRouterModel(
+            model=model,
+            stream=False,
+            environ={"OPENROUTER_API_KEY": api_key},
+            max_retries=BENCHMARK_MAX_RETRIES,
+            request_timeout=BENCHMARK_REQUEST_TIMEOUT_SECONDS,
+        )
         manifest_path = _REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json"
         db_path = scratch_dir / ".vanguard" / "events.sqlite3"
         blob_path = scratch_dir / ".vanguard" / "blobs"

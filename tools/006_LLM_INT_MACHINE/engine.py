@@ -647,7 +647,9 @@ class IntelligentMachineEngine:
         elif name == "code_repo_skeleton":
             return self.workspace.code_repo_skeleton()
         elif name == "patch_apply":
-            return self.workspace.patch_apply(args.get("path", ""), args.get("target_snippet", ""), args.get("replacement_snippet", ""))
+            t_chunk = args.get("target_chunk") or args.get("target_snippet") or ""
+            r_chunk = args.get("replacement_chunk") or args.get("replacement_snippet") or ""
+            return self.workspace.patch_apply(args.get("path", ""), t_chunk, r_chunk)
         elif name == "proc_exec":
             return self.workspace.proc_exec(args.get("command", ""), args.get("timeout_sec", 30))
         else:

@@ -19,10 +19,26 @@ class FsToolkit:
         self._root = Path(workspace)
 
     def verbs(self) -> Mapping[str, ToolSchema]:
-        schema: dict[str, object] = {"type": "object", "properties": {"path": {"type": "string"}}}
+        read_schema: dict[str, object] = {
+            "type": "object",
+            "properties": {"path": {"type": "string"}},
+            "required": ["path"],
+        }
+        # `execute()` has always read `request.args["pattern"]` for fs.search;
+        # the exposed schema only ever declared `path`, so a model had no
+        # contract-level hint that a search needs a term at all -- it could
+        # only discover this by guessing or by the field going silently unused.
+        search_schema: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string"},
+                "pattern": {"type": "string"},
+            },
+            "required": ["pattern"],
+        }
         return {
-            "fs.read": ToolSchema(verb="fs.read", schema=schema),
-            "fs.search": ToolSchema(verb="fs.search", schema=schema),
+            "fs.read": ToolSchema(verb="fs.read", schema=read_schema),
+            "fs.search": ToolSchema(verb="fs.search", schema=search_schema),
         }
 
     def execute(self, request: EffectRequest, ctx: EffectContext) -> Result[Receipt]:

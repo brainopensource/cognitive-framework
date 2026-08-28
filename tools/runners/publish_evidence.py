@@ -132,20 +132,37 @@ def publish(args: argparse.Namespace) -> int:
                               str(Path(args.workload).expanduser().resolve())]
             _run(build, cwd=_ROOT)
 
-            _run([sys.executable, "tools/runners/accept_evidence.py", str(bundle),
-                  "--reviewer", args.reviewer,
-                  "--key", str(Path(args.reviewer_key).expanduser()),
-                  "--key-id", args.reviewer_key_id], cwd=_ROOT)
-
             EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
             shutil.copy2(bundle, destination)
-            shutil.copy2(bundle.with_name(bundle.name + ".acceptance.json"),
-                         destination.with_name(destination.name + ".acceptance.json"))
-            artifacts = evidence_out / "artifacts" / bundle_name
+            if not args.producer_only:
+                _run([sys.executable, "tools/runners/accept_evidence.py", str(bundle),
+                      "--reviewer", args.reviewer,
+                      "--key", str(Path(args.reviewer_key).expanduser()),
+                      "--key-id", args.reviewer_key_id], cwd=_ROOT)
+                shutil.copy2(bundle.with_name(bundle.name + ".acceptance.json"),
+                             destination.with_name(destination.name + ".acceptance.json"))
+            # M-6.5's builder deliberately uses one stable artifactRoot so a
+            # successor can re-emit the same study without changing its
+            # portable report reference. Other claims use their immutable
+            # bundle label as the artifact root.
+            artifact_label = (
+                "M-6.5-attributable-paired-study"
+                if args.claim == "M-6.5" else bundle_name
+            )
+            artifacts = evidence_out / "artifacts" / artifact_label
             if artifacts.is_dir():
-                shutil.copytree(artifacts, EVIDENCE_DIR / "artifacts" / bundle_name)
+                artifact_destination = EVIDENCE_DIR / "artifacts" / artifact_label
+                if artifact_destination.exists():
+                    raise SystemExit(
+                        f"refusing to overwrite existing evidence artifacts {artifact_destination}"
+                    )
+                shutil.copytree(artifacts, artifact_destination)
         finally:
             _run(["git", "-C", str(_ROOT), "worktree", "remove", "--force", str(subject)])
+
+    if args.producer_only:
+        print(f"producer bundle written to {destination}; independent acceptance is pending")
+        return 0
 
     # The gate, not a self-report: the same verifier that decides the milestone.
     verdict = subprocess.run(
@@ -172,9 +189,16 @@ def main() -> int:
     parser.add_argument("--producer-key", required=True)
     parser.add_argument("--key-id", required=True)
     parser.add_argument("--reviewer", default="aether-evidence-reviewer")
-    parser.add_argument("--reviewer-key", required=True)
-    parser.add_argument("--reviewer-key-id", required=True)
-    return publish(parser.parse_args())
+    parser.add_argument("--reviewer-key", default="")
+    parser.add_argument("--reviewer-key-id", default="")
+    parser.add_argument(
+        "--producer-only", action="store_true",
+        help="publish only the producer bundle; leave acceptance to another identity",
+    )
+    args = parser.parse_args()
+    if not args.producer_only and (not args.reviewer_key or not args.reviewer_key_id):
+        parser.error("--reviewer-key and --reviewer-key-id are required unless --producer-only is set")
+    return publish(args)
 
 
 if __name__ == "__main__":

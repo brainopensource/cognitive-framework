@@ -12,10 +12,21 @@ await build({
   outfile: "dist-browser/browser.js",
   sourcemap: true,
   jsx: "automatic",
-  // client-core's OperatorSigner (node:crypto/fs/os/path) is reachable statically from
-  // HttpRuntimeClient but is not yet browser-compatible (tracked gap: no WebCrypto signer
-  // for Studio). Externalizing keeps the bundle buildable; calling resolveApproval without
-  // an injected signer will still fail at runtime until a browser signer exists.
-  external: ["node:crypto", "node:fs", "node:os", "node:path"],
+  // Externalize Node.js built-ins so browser bundle remains pure client-side.
+  // Browser runtime uses WebCryptoSigner and HttpRuntimeClient (Fetch/SSE).
+  external: [
+    "node:crypto",
+    "node:fs",
+    "node:fs/promises",
+    "node:os",
+    "node:path",
+    "node:net",
+    "node:readline",
+    "node:child_process",
+    "node:url",
+    "node:events",
+    "node:stream",
+    "node:util",
+  ],
 });
 console.log("AETHER Observatory browser build ready at dist-browser/");

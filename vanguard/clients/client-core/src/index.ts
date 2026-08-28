@@ -4,6 +4,7 @@ export * from "./contract/parse.js";
 
 // Adapters & Signer
 export * from "./adapters/signer.js";
+export * from "./adapters/web-signer.js";
 export * from "./adapters/transport.js";
 export * from "./adapters/live.js";
 export * from "./adapters/replay.js";
@@ -28,3 +29,4 @@ export * from "./application/why.js";
 export * from "./application/attach.js";
 export * from "./application/projection-model.js";
 export * from "./application/graph-model.js";
+export * from "./application/mcnemar.js";

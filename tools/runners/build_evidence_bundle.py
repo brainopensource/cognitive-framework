@@ -186,6 +186,7 @@ def build_m4(
     passed = (
         facts["reconstructed"]
         and uses_live_provider
+        and facts["outcome"] == "completed"
         and facts["capture"] == "complete"
         and facts["trajectory_schema"] == "mhf.trajectory/2"
         and facts["durable"]
@@ -442,7 +443,7 @@ def main() -> int:
     parser.add_argument("--workload", type=str, default="")
     parser.add_argument("--report", type=str, default="")
     parser.add_argument("--producer", type=str, default="dev-a")
-    parser.add_argument("--out", type=str, required=True)
+    parser.add_argument("--out", type=str, default="")
     args = parser.parse_args()
 
     if args.cold_verify:
@@ -451,6 +452,8 @@ def main() -> int:
 
     if not args.claim:
         raise SystemExit("--claim is required unless --cold-verify is used")
+    if not args.out:
+        raise SystemExit("--out is required when building an evidence bundle")
 
     subject_root = Path(args.subject_root).resolve()
     evidence_root = Path(args.evidence_root).resolve() if args.evidence_root else None

@@ -83,7 +83,7 @@ class ChildRunPlan:
     composition_digest: str
     goal_digest: str
     authority: tuple[str, ...]
-    resources: tuple[str, ...]
+    resources: tuple[Mapping[str, Any], ...]
     depth: int
     max_depth: int
     max_turns: int
@@ -93,6 +93,13 @@ class ChildRunPlan:
     lineage: tuple[str, ...]
     idempotency_key: str
     goal_artifact: str | None = None
+    #: The already-attenuated constraint ceiling.  It is runtime input only;
+    #: the durable child fact carries the identity and additive budget, not a
+    #: live authority object.
+    constraints: Mapping[str, Any] = field(default_factory=dict)
+    #: Transient execution input. It is intentionally omitted from `to_wire()`
+    #: and therefore never enters the append-only child lineage fact.
+    brief: str = ""
 
     def __post_init__(self) -> None:
         if not self.child_episode_id or not self.parent_episode_id:

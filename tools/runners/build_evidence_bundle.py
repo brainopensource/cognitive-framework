@@ -23,7 +23,7 @@ import subprocess
 import sys
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
@@ -365,6 +365,93 @@ def build_m6(
     )
 
 
+def _report_passed(report: Mapping[str, Any], required: Sequence[str]) -> bool:
+    """A suite report supports a claim only if it ran clean and covered it.
+
+    Exit status alone is not enough: a suite that stopped exercising a required
+    behaviour still exits zero. `required` names the markers the milestone rests
+    on, so dropped coverage degrades the claim instead of silently closing it.
+    """
+    if not isinstance(report.get("returncode"), int):
+        raise ValueError("a falsifier report must contain the subprocess returncode")
+    markers = report.get("markers") or {}
+    return (
+        report.get("returncode") == 0
+        and int(report.get("tests", 0)) > 0
+        and int(report.get("failures", 1)) == 0
+        and bool(report.get("fresh_process"))
+        and all(bool(markers.get(name)) for name in required)
+    )
+
+
+def _suite_bundle(
+    *,
+    claim: str,
+    protocol: str,
+    subjects: tuple[str, ...],
+    surface_paths: Mapping[str, str],
+    report: Mapping[str, Any],
+    required_markers: Sequence[str],
+    run: Mapping[str, Any],
+    producer: str,
+    bundle_name: str,
+    subject_root: Path,
+    evidence_root: Path | None,
+    outcome_override: str = "",
+    detail: str = "",
+) -> EvidenceEnvelope:
+    """Bind a falsifier-suite observation to the source surface it exercised.
+
+    Shared by M-7 and M-8 because their evidence has the same shape: a fresh
+    process ran a suite over a pinned surface, and the report travels with the
+    bundle as a portable artifact. Only the surface, markers and run facts
+    differ, so only those are parameters.
+    """
+    surface = {name: _sha256_file(subject_root / path)
+               for name, path in surface_paths.items()}
+    if evidence_root is None:
+        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+    evidence_root = evidence_root.resolve()
+    artifact_dir = evidence_root / "artifacts" / bundle_name
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    report_path = artifact_dir / "falsifier-report.json"
+    _write_json_material(report_path, report)
+
+    materials = tuple(
+        Material(name=name, digest=digest, ref=surface_paths[name],
+                 scheme="raw-sha256")
+        for name, digest in sorted(surface.items())
+    ) + (Material(name="falsifier_report", digest=_sha256_file(report_path),
+                  ref=f"artifacts/{bundle_name}/falsifier-report.json",
+                  scheme="raw-sha256"),)
+
+    pins = _pins(subject_root)
+    pins.update({
+        "runtimeDigest": _sha256_file(subject_root / "vanguard/packages/runtime/root.py"),
+        "reportDigest": _sha256_file(report_path),
+        "artifactRoot": f"artifacts/{bundle_name}",
+    })
+    if "pack" in surface:
+        pins["packDigest"] = surface["pack"]
+    if "configuration" in surface:
+        pins["configurationDigest"] = surface["configuration"]
+
+    passed = _report_passed(report, required_markers)
+    return EvidenceEnvelope(
+        claim=claim,
+        protocol=protocol,
+        subjects=subjects,
+        materials=materials,
+        run={**dict(run), "falsifiers": report},
+        pins=pins,
+        environment=_environment(),
+        outcome=outcome_override or ("passed" if passed else "undeterminable"),
+        producer=Producer(identity=producer, key_id=f"{producer}-operator"),
+        artifact_refs=(f"artifacts/{bundle_name}",),
+        detail=detail,
+    )
+
+
 def build_m5b(producer: str, *, subject_root: Path = _REPO_ROOT) -> EvidenceEnvelope:
     """M-5b formal generality evidence over graph-coloring domain and baseline forensics.
 
@@ -471,6 +558,130 @@ def build_m65(
     )
 
 
+def build_m7(
+    producer: str, falsifier_report: Mapping[str, Any], *,
+    subject_root: Path = _REPO_ROOT, evidence_root: Path | None = None,
+    label: str = "order11",
+) -> EvidenceEnvelope:
+    """M-7: three topologies through one runtime, plus the ADR-0099 disposition.
+
+    One clause of M-7 is not yet demonstrable. `milestones.md` requires that the
+    three topologies *execute* through one public path, and `run_composed`
+    currently parses the topology, lowers it and computes a sequential order,
+    but never runs the lowered role operations as real M-6 children -- the only
+    consumers of `roleOperations` are the scheduler check and the tests.
+
+    So `role_operations_executed` is a required marker that no suite can set
+    today, and this bundle reports `undeterminable`. That is the honest answer:
+    the lowering is verified, the disposition is recorded, and the execution
+    clause is unobserved. Reporting `passed` on the strength of the other
+    clauses would convert an unbuilt capability into a closed milestone.
+    """
+    return _suite_bundle(
+        claim="M-7",
+        protocol="aether.m7.topology-and-scheduler-disposition/1",
+        subjects=("package:WP-A3", "package:WP-B3", "milestone:M-7"),
+        surface_paths={
+            "runtime": "vanguard/packages/runtime/root.py",
+            "topology": "vanguard/packages/runtime/topology.py",
+            "run_plan": "vanguard/packages/runtime/run_plan.py",
+            "independence": "lab/m701_independence.py",
+            "topology_analysis": "lab/topology_analysis.py",
+            "schema_topology": "schemas/mhf/topology.schema.json",
+            "falsifier_suite": "test/falsifiers/test_m7_topology_and_independence.py",
+            "m701_suite": "test/falsifiers/test_m701_recorded_workload.py",
+            "pack": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+            "adr_0099": "docs/02_decisions/0099-m7-topology-scheduler-disposition.md",
+        },
+        report=falsifier_report,
+        required_markers=(
+            "three_topologies", "one_runtime_shape", "distinct_structures",
+            "lowering_is_not_concurrency", "cycles_rejected", "authority_rejected",
+            "unreachable_role_visible", "missing_resource_named",
+            "independence_measured", "m701_live_path", "recorded_timestamps",
+            "unobserved_not_invented", "analysis_only", "digest_stable",
+            # Not settable by any current suite: see the docstring.
+            "role_operations_executed",
+        ),
+        run={
+            "schedulerDisposition": "SEQUENTIAL_CONFIRMED",
+            "adr": "ADR-0099",
+            "concurrencyAuthorized": False,
+            "m701MeasuredOn": "live canonical Runtime.execute_harness run",
+            "topologies": ["direct", "planner-executor-reviewer", "fork-read-merge"],
+            "roleOperationsExecuted": False,
+            "unobservedClause": (
+                "milestones.md M-7 requires the three topologies to execute "
+                "through one public path; run_composed lowers and schedules "
+                "roleOperations but does not execute them as M-6 children"
+            ),
+        },
+        producer=producer,
+        bundle_name=f"M-7-topology-{label}",
+        subject_root=subject_root,
+        evidence_root=evidence_root,
+        detail=(
+            "Topology lowering, fail-closed rejection and the ADR-0099 "
+            "SEQUENTIAL_CONFIRMED disposition are verified, and M7-01 "
+            "independence is measured on a live canonical run. Outcome is "
+            "undeterminable because role operations are lowered but never "
+            "executed as M-6 children, so the execution clause is unobserved."
+        ),
+    )
+
+
+def build_m8(
+    producer: str, falsifier_report: Mapping[str, Any], *,
+    subject_root: Path = _REPO_ROOT, evidence_root: Path | None = None,
+    label: str = "order11",
+) -> EvidenceEnvelope:
+    """M-8: durable authorized memory, signed promotion, executed rollback.
+
+    Both halves of `durable_memory_and_signed_rollback_verified` are covered by
+    running suites: authorization before ranking and CAS-backed durability on
+    one side, distinct generator/evaluator/promoter authorities with a rollback
+    that is executed rather than described on the other.
+    """
+    return _suite_bundle(
+        claim="M-8",
+        protocol="aether.m8.durable-memory-and-governed-learning/1",
+        subjects=("package:WP-A4", "package:WP-B4", "milestone:M-8"),
+        surface_paths={
+            "runtime": "vanguard/packages/runtime/root.py",
+            "memory_port": "vanguard/packages/ports/memory.py",
+            "memory_runtime": "vanguard/packages/runtime/memory.py",
+            "memory_engine": "vanguard/packages/adapters/stores/memory_engine.py",
+            "learning": "vanguard/packages/runtime/governance/learning.py",
+            "skill_evaluation": "vanguard/packages/runtime/skill_evaluation.py",
+            "skill_lifecycle": "vanguard/packages/runtime/skill_lifecycle.py",
+            "lifecycle_suite": "test/falsifiers/test_m8_skill_lifecycle.py",
+            "memory_falsifiers": "test/security/test_m8_memory_falsifiers.py",
+            "memory_parity": "test/security/test_m8_memory_fake_parity.py",
+            "durable_memory_suite": "test/adapters/test_durable_memory_port.py",
+            "governed_learning_suite": "test/runtime/test_governed_learning.py",
+            "adr_0100": "docs/02_decisions/0100-memory-learning-and-composition-lifecycle.md",
+        },
+        report=falsifier_report,
+        required_markers=(
+            "authorities_distinct", "held_out_is_real", "presence_is_not_use",
+            "promotion_binds_decision", "rollback_executed",
+            "reproducibility_recomputed", "no_premature_event_kinds",
+        ),
+        run={
+            "adr": "ADR-0100",
+            "authorizationBeforeRanking": True,
+            "durableStore": "DurableMemoryPort (SQLite-WAL + CAS)",
+            "compositionRegistry": "DurableCompositionRegistry",
+            "rollback": "signed RollbackEvidence, generation-bound, executed",
+            "distinctAuthorities": ["generator", "evaluator", "promoter"],
+        },
+        producer=producer,
+        bundle_name=f"M-8-durable-memory-{label}",
+        subject_root=subject_root,
+        evidence_root=evidence_root,
+    )
+
+
 def sign_envelope(
     envelope: EvidenceEnvelope, key_path: Path, key_id: str,
 ) -> EvidenceEnvelope:
@@ -499,7 +710,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cold-verify", type=str, default="",
                         help="internal fresh-process ledger reconstruction mode")
-    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b", "M-6.5"),
+    parser.add_argument("--claim",
+                        choices=("M-4", "M-6", "M-5b", "M-6.5", "M-7", "M-8"),
                         default="")
     parser.add_argument("--ledger", type=str, default="")
     parser.add_argument("--prereg", type=str, default="")
@@ -550,6 +762,15 @@ def main() -> int:
                             evidence_root=evidence_root, label=args.label)
     elif args.claim == "M-5b":
         envelope = build_m5b(args.producer, subject_root=subject_root)
+    elif args.claim in ("M-7", "M-8"):
+        if not args.report:
+            raise SystemExit(
+                f"{args.claim} requires --report from the falsifier subprocess; "
+                f"caller-supplied counters are not an observation")
+        report = json.loads(Path(args.report).read_text(encoding="utf-8"))
+        builder = build_m7 if args.claim == "M-7" else build_m8
+        envelope = builder(args.producer, report, subject_root=subject_root,
+                           evidence_root=evidence_root, label=args.label)
     elif args.claim == "M-6.5":
         if not args.from_bundle:
             raise SystemExit(

@@ -35,6 +35,13 @@
       "publicKey": "MdssqA2PqR2vu4TYBmxOhu0Jt+8oiLstduqZR7/JSmw=",
       "registeredAt": "61d0d89",
       "note": "Lane B producer key. Distinct identity and key from every reviewer entry above."
+    },
+    "dev-a-evidence-1": {
+      "identity": "dev-a",
+      "publicKey": "G+vymuPXnikMp/TlxcFhUuDQ57dM44o3MNpj/oieZDg=",
+      "registeredAt": "b494dee",
+      "registeredBy": "lane-b",
+      "note": "Lane A producer key for the RF-95 candidate-06 re-execution. Supplied out-of-band by Lane A as a public key only; no private key for it exists in this repository. Registered here before the evidence it signs was published, which is the whole point: a key that first appears inside the document it authenticates proves nothing."
     }
   }
 }

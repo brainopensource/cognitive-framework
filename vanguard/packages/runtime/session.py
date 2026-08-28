@@ -529,7 +529,7 @@ class HarnessSession:
             role="session",
         )
 
-        self.scope = _scope_for(harness)
+        self.scope = task.scope_override or _scope_for(harness)
         self.adapters = {
             verb: harness.bindings[verb].factory(
                 BindingContext(
@@ -988,7 +988,7 @@ class HarnessSession:
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining)
+                max_turns=remaining, spawn_dispatcher=self.dispatch)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,

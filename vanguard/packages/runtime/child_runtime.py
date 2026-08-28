@@ -30,7 +30,9 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any, Callable, Mapping
 
+from ..kernel.attenuation import Constraints, Scope
 from ..ports.child_runtime import ChildRunPlan, ChildRunResult
+from ..ports.event_store import EventRange
 from .compose import Harness, RunResult, TaskContext
 
 __all__ = ["RuntimeChildRunner", "TERMINAL_OUTCOMES"]
@@ -114,6 +116,11 @@ class RuntimeChildRunner:
         """
         return replace(
             self._parent_ports,
+            # A topology decorator owns only the root routing decision.  A
+            # child is an ordinary runtime episode and must use the supplied
+            # provider, not emit the root's next topology role recursively.
+            model=getattr(self._parent_ports.model, "child_model",
+                          self._parent_ports.model),
             # A child may not prompt a human on the parent's behalf.
             interactive=False,
             # Strategy authority is not inherited. Binding a controller for a
@@ -133,7 +140,7 @@ class RuntimeChildRunner:
         through the ordinary mediated path, under its own attenuated grant.
         """
         return TaskContext(
-            brief="",
+            brief=plan.brief,
             repo_path=self._parent_task.repo_path,
             run_id=plan.run_id,
             episode_id=plan.child_episode_id,
@@ -144,6 +151,28 @@ class RuntimeChildRunner:
             parent_episode_id=plan.parent_episode_id,
             preregistration=self._parent_task.preregistration,
             lineage=tuple(plan.lineage) + (plan.child_episode_id,),
+            scope_override=Scope(
+                actions=frozenset(plan.authority),
+                resources=tuple(plan.resources),
+                constraints=Constraints(
+                    expires_at=str(plan.constraints.get("expires_at", "2099-01-01T00:00:00.000Z")),
+                    max_uses=int(plan.constraints.get("max_uses", 0)),
+                    budget_usd_micros=int(plan.constraints.get("budget_usd_micros", 0)),
+                    max_bytes=(
+                        int(plan.constraints["max_bytes"])
+                        if plan.constraints.get("max_bytes") is not None else None
+                    ),
+                    max_effects=(
+                        int(plan.constraints["max_effects"])
+                        if plan.constraints.get("max_effects") is not None else None
+                    ),
+                    risk_ceiling=str(plan.constraints.get("risk_ceiling", "low")),
+                    max_depth=int(plan.constraints.get("max_depth", plan.max_depth)),
+                    network_policy=str(plan.constraints.get("network_policy", "deny")),
+                ),
+                depth=plan.depth,
+                sealed=True,
+            ),
         )
 
     def _project(self, plan: ChildRunPlan, result: RunResult) -> ChildRunResult:
@@ -157,7 +186,7 @@ class RuntimeChildRunner:
         terminal = getattr(result.terminal, "value", str(result.terminal))
         outcome = TERMINAL_OUTCOMES.get(terminal, "undeterminable")
 
-        cost = self._measured_cost(result)
+        cost = self._measured_cost(plan, result)
         evidence_refs = tuple(
             ref for ref in (result.run_digest, result.activation_digest) if ref
         )
@@ -174,7 +203,8 @@ class RuntimeChildRunner:
             detail=result.detail or "",
         )
 
-    def _measured_cost(self, result: RunResult) -> Mapping[str, int]:
+    def _measured_cost(self, plan: ChildRunPlan,
+                       result: RunResult) -> Mapping[str, int]:
         """What the child actually spent, folded from its own facts.
 
         Read from the ledger rather than estimated. `_ZERO_COST` is prohibited
@@ -184,8 +214,27 @@ class RuntimeChildRunner:
         from ..domain.ledger.agent_view import fold_agent_view
         from ..ports.child_runtime import CHILD_ADDITIVE_DIMENSIONS
 
-        consumed = (fold_agent_view(None, result.events).budget_consumed
-                    if result.events else {})
+        # ``RunResult.events`` is the in-process ``Event`` projection and has
+        # no durable sequence.  Cost reduction is an evidence operation, so
+        # read the child's persisted envelopes from its shared store instead
+        # of feeding the projection to the cold reducer.
+        store = getattr(result, "store", None)
+        if store is None:
+            # Minimal ChildRuntimePort test doubles may return only the
+            # projection.  They carry no measurable ledger and therefore
+            # report no measured cost; production RunResult always has a
+            # store and takes the fail-closed branch below.
+            envelopes = tuple(
+                event for event in getattr(result, "events", ())
+                if hasattr(event, "seq")
+            )
+            consumed = (fold_agent_view(None, envelopes).budget_consumed
+                        if envelopes else {})
+        else:
+            read = store.read(EventRange(episode_id=plan.child_episode_id))
+            if not read.ok or read.value is None:
+                raise RuntimeError("child ledger is unreadable; cost is unknown")
+            consumed = fold_agent_view(None, tuple(read.value)).budget_consumed
         return {
             dimension: int(consumed.get(dimension, 0) or 0)
             for dimension in CHILD_ADDITIVE_DIMENSIONS

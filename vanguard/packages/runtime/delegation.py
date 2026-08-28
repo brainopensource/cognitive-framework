@@ -147,6 +147,7 @@ class SpawnIntent:
     child_depth: int
     goal_digest: str
     goal_artifact: str | None = None
+    brief: str = ""
 
     @classmethod
     def parse(
@@ -183,10 +184,12 @@ class SpawnIntent:
                     f"unknown budget dimension {dimension!r}")
             budget[dimension] = int(amount)
 
+        brief = args.get("brief", "")
+        if not isinstance(brief, str):
+            raise DelegationContractError("spawn brief must be a string")
         goal_digest = str(args.get("goalDigest") or "")
         if not goal_digest:
-            brief = args.get("brief")
-            if not isinstance(brief, str) or not brief:
+            if not brief:
                 raise DelegationContractError(
                     "spawn requires a goalDigest or a brief")
             # `C-06`: the ledger gets the identity, never the prose.
@@ -211,6 +214,7 @@ class SpawnIntent:
             child_depth=int(request.depth) + 1,
             goal_digest=goal_digest,
             goal_artifact=goal_artifact if isinstance(goal_artifact, str) else None,
+            brief=brief,
         )
 
     def child_id(self) -> str:
@@ -512,6 +516,17 @@ class SpawnAdapter:
                 lineage=self._lineage,
                 idempotency_key=intent.idempotency_key,
                 goal_artifact=intent.goal_artifact,
+                constraints={
+                    "expires_at": granted.constraints.expires_at,
+                    "max_uses": granted.constraints.max_uses,
+                    "budget_usd_micros": granted.constraints.budget_usd_micros,
+                    "max_bytes": granted.constraints.max_bytes,
+                    "max_effects": granted.constraints.max_effects,
+                    "risk_ceiling": granted.constraints.risk_ceiling,
+                    "max_depth": granted.constraints.max_depth,
+                    "network_policy": granted.constraints.network_policy,
+                },
+                brief=intent.brief,
             )
         except Exception as exc:  # noqa: BLE001 -- plan validation is a refusal
             return self._denied(f"invalid child plan: {exc}")
@@ -543,6 +558,10 @@ class SpawnAdapter:
             raise DelegationContractError(
                 "a ChildRuntimePort must return a ChildRunResult; a raw handle "
                 "or transcript is not a delegation contract")
+
+        refresh_chain = getattr(self._emitter, "refresh_chain", None)
+        if callable(refresh_chain):
+            refresh_chain()
 
         result = DelegationResult.from_child_result(child_result)
         result = replace(result, settled_intent_key=plan.idempotency_key)

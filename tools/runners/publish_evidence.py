@@ -55,6 +55,8 @@ def publish(args: argparse.Namespace) -> int:
         "M-4": "M-4-rf95",
         "M-5b": "M-5b-graph-coloring",
         "M-6.5": "M-6.5-attributable-paired-study",
+        "M-7": "M-7-topology",
+        "M-8": "M-8-durable-memory",
     }
     bundle_name = f"{stems[args.claim]}-{args.label}"
     destination = EVIDENCE_DIR / f"{bundle_name}.json"
@@ -94,6 +96,16 @@ def publish(args: argparse.Namespace) -> int:
                 report = stage / "report.json"
                 _run([sys.executable,
                       str(subject / "tools" / "runners" / "run_m6_recursive_proof.py"),
+                      "--root", str(subject), "--out", str(report)])
+                build += ["--report", str(report), "--label", args.label]
+            elif args.claim in ("M-7", "M-8"):
+                # The falsifier subprocess is the only thing that decides the
+                # outcome, and it runs from the worktree: these suites are the
+                # subject's own code, not tooling.
+                runner = ("run_m7_topology_proof.py" if args.claim == "M-7"
+                          else "run_m8_governed_learning_proof.py")
+                report = stage / "report.json"
+                _run([sys.executable, str(subject / "tools" / "runners" / runner),
                       "--root", str(subject), "--out", str(report)])
                 build += ["--report", str(report), "--label", args.label]
             elif args.claim == "M-5b":
@@ -148,7 +160,7 @@ def publish(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--claim", default="M-6",
-                        choices=("M-6", "M-4", "M-5b", "M-6.5"))
+                        choices=("M-6", "M-4", "M-5b", "M-6.5", "M-7", "M-8"))
     parser.add_argument("--from-bundle", default="",
                         help="M-6.5: existing bundle whose study report is re-emitted")
     parser.add_argument("--ledger", default="", help="M-4: event store from the run")

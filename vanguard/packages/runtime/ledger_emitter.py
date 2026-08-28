@@ -414,6 +414,11 @@ class RoleScopedEmitter:
     def events(self) -> list[Event]:
         return self._inner.events
 
+    def refresh_chain(self) -> None:
+        """Adopt the latest sequence after a nested runtime returns."""
+        self._inner._seq, self._inner._prev = self._inner._load_chain(
+            self._inner._project_id)
+
     def append_intent(self, event: Event) -> None:
         self._inner._remember(event)
         self._inner._write(event, role="intent", writer=self._role, swallow=False)

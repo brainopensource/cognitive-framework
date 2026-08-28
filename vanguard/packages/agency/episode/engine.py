@@ -196,6 +196,7 @@ class EpisodeEngine:
         sink_class: SinkClass = SinkClass.PRIVILEGED,
         parent_lease: str | None = None,
         attenuated: bool = False,
+        spawn_dispatcher: Any = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -210,6 +211,10 @@ class EpisodeEngine:
         self._no_progress_limit = no_progress_limit
         self._sink_class = sink_class
         self._parent_lease = parent_lease
+        # Runtime injects this callback for the production path.  Direct
+        # agency tests keep the historical in-process child seam until their
+        # caller explicitly supplies the mediated dispatcher.
+        self._spawn_dispatcher = spawn_dispatcher
 
     # ------------------------------------------------------------------
 
@@ -316,15 +321,29 @@ class EpisodeEngine:
                     continue
 
                 child_brief = str(proposal.args.get("brief") or proposal.note or "")
-                spawn_res = self.spawn(
-                    child_scope=child_scope,
-                    brief=child_brief,
-                    episode_id=f"{episode.episode_id}.child.{episode.turn_count}",
-                    run_id=episode.run_id,
-                    principal=episode.principal,
-                    parent_episode_id=episode.episode_id,
-                    parent_lease=self._parent_lease,
-                )
+                if self._spawn_dispatcher is not None:
+                    request = self._to_effect_request(episode, proposal, accumulated)
+                    outcome = self._spawn_dispatcher(request)
+                    dispatches.append(outcome)
+                    spawn_res = SpawnResult(
+                        ok=outcome.failure is FailurePath.OK,
+                        payload=(outcome.outcome.result_digest
+                                 if outcome.outcome is not None else None),
+                        terminal=(RunTermination.COMPLETED
+                                  if outcome.failure is FailurePath.OK
+                                  else RunTermination.ABANDONED),
+                        detail=outcome.detail,
+                    )
+                else:
+                    spawn_res = self.spawn(
+                        child_scope=child_scope,
+                        brief=child_brief,
+                        episode_id=f"{episode.episode_id}.child.{episode.turn_count}",
+                        run_id=episode.run_id,
+                        principal=episode.principal,
+                        parent_episode_id=episode.episode_id,
+                        parent_lease=self._parent_lease,
+                    )
                 if spawn_res.return_spans:
                     accumulated = Accumulation(accumulated).extend(spawn_res.return_spans).spans
                 turn = Turn(
@@ -557,8 +576,11 @@ class EpisodeEngine:
         resource = dict(proposal.resource)
         if not resource and self._scope.resources:
             resource = dict(self._scope.resources[0])
+        action = proposal.action
+        if action in ("spawn", "agency.spawn"):
+            action = "agent.spawn"
         return EffectRequest(
-            action=proposal.action,
+            action=action,
             resource=resource,
             args=dict(proposal.args),
             principal=episode.principal,
@@ -567,6 +589,7 @@ class EpisodeEngine:
             justifying_spans=tuple(spans),
             parent_lease=self._parent_lease,
             declared_sink_class=self._sink_class,
+            idempotency_key=proposal.idempotency_key,
         )
 
     def _reservation(self, proposal: Proposal) -> Reservation:

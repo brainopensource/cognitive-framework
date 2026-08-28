@@ -40,7 +40,6 @@ PRICING_PER_1M: dict[str, tuple[float, float]] = {
     "stealth/ox-alpha": (0.0, 0.0),
     "google/gemini-2.0-flash-exp:free": (0.0, 0.0),
     "meta-llama/llama-3.3-70b-instruct:free": (0.0, 0.0),
-    "deepseek/deepseek-chat": (0.14, 0.28),
     "deepseek/deepseek-v4-flash-0731": (0.10, 0.20),
     "deepseek/deepseek-r1": (0.55, 2.19),
     "anthropic/claude-3.7-sonnet": (3.00, 15.00),

@@ -16,16 +16,19 @@ from a different producer, and this tool cannot write it.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Mapping
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
+from tools.runners.keygen_evidence_key import load_key  # noqa: E402
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore  # noqa: E402
 from vanguard.packages.domain.canonicalisation.digest import digest_of  # noqa: E402
 from vanguard.packages.domain.evidence.envelope import (  # noqa: E402
@@ -175,6 +178,7 @@ def build_m4(
     subject_root: Path = _REPO_ROOT,
     evidence_root: Path | None = None,
     workload: Path | None = None,
+    artifact_name: str = "M-4-rf95-order9",
 ) -> EvidenceEnvelope:
     facts = cold_verify(db_path)
     fresh = _fresh_cold_verify(db_path)
@@ -209,7 +213,7 @@ def build_m4(
     if evidence_root is None:
         evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
     evidence_root = evidence_root.resolve()
-    artifact_dir = evidence_root / "artifacts" / "M-4-rf95-order9"
+    artifact_dir = evidence_root / "artifacts" / artifact_name
     artifact_dir.mkdir(parents=True, exist_ok=True)
     _write_json_material(artifact_dir / "trajectory.json", facts["trajectory"])
     _write_json_material(artifact_dir / "cold-reconstruction.json", fresh)
@@ -250,7 +254,7 @@ def build_m4(
         "configurationDigest": next(m.digest for m in materials if m.name == "configuration"),
         "schemaDigests": {m.name: m.digest for m in materials if m.name.startswith("schema_")},
         "workloadDigest": next(m.digest for m in materials if m.name == "workload"),
-        "artifactRoot": "artifacts/M-4-rf95-order9",
+        "artifactRoot": f"artifacts/{artifact_name}",
     })
 
     return EvidenceEnvelope(
@@ -273,7 +277,7 @@ def build_m4(
         environment=_environment(),
         outcome="passed" if passed else "undeterminable",
         producer=Producer(identity=producer, key_id=f"{producer}-operator"),
-        artifact_refs=("artifacts/M-4-rf95-order9",),
+        artifact_refs=(f"artifacts/{artifact_name}",),
         detail=detail,
     )
 
@@ -284,6 +288,7 @@ def build_m6(
     *,
     subject_root: Path = _REPO_ROOT,
     evidence_root: Path | None = None,
+    label: str = "order9",
 ) -> EvidenceEnvelope:
     """M-6 rests on falsifiers plus source identity, not on a single run."""
     surface_paths = {
@@ -314,15 +319,16 @@ def build_m6(
     if evidence_root is None:
         evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
     evidence_root = evidence_root.resolve()
-    artifact_dir = evidence_root / "artifacts" / "M-6-canonical-recursion-order9"
+    bundle_name = f"M-6-canonical-recursion-{label}"
+    artifact_dir = evidence_root / "artifacts" / bundle_name
     artifact_dir.mkdir(parents=True, exist_ok=True)
     report_path = artifact_dir / "falsifier-report.json"
     _write_json_material(report_path, falsifier_report)
     materials = tuple(
         Material(name=name, digest=digest, ref=surface_paths[name])
         for name, digest in sorted(surface.items())
-    ) + (Material(name="workload", digest=_sha256_file(report_path),
-                  ref="artifacts/M-6-canonical-recursion-order9/falsifier-report.json"),)
+    ) + (Material(name="falsifier_report", digest=_sha256_file(report_path),
+                  ref=f"artifacts/{bundle_name}/falsifier-report.json"),)
     pins = _pins(subject_root)
     pins.update({
         "runtimeDigest": _sha256_file(subject_root / "vanguard/packages/runtime/root.py"),
@@ -332,8 +338,12 @@ def build_m6(
             "schema_event": surface["schema_event"],
             "schema_trajectory": surface["schema_trajectory"],
         },
-        "workloadDigest": _sha256_file(report_path),
-        "artifactRoot": "artifacts/M-6-canonical-recursion-order9",
+        # The report is an *output*, so it is pinned as reportDigest. Pinning it
+        # as workloadDigest made the pin self-referential: a run output always
+        # matches itself, so the pin could never catch a mis-bound workload.
+        # M-6's workload is the falsifier suite, already pinned as a material.
+        "reportDigest": _sha256_file(report_path),
+        "artifactRoot": f"artifacts/{bundle_name}",
     })
     return EvidenceEnvelope(
         claim="M-6",
@@ -349,11 +359,11 @@ def build_m6(
         environment=_environment(),
         outcome="passed" if passed else "undeterminable",
         producer=Producer(identity=producer, key_id=f"{producer}-operator"),
-        artifact_refs=("artifacts/M-6-canonical-recursion-order9",),
+        artifact_refs=(f"artifacts/{bundle_name}",),
     )
 
 
-def build_m5b(producer: str, *, private_key_bytes: bytes | None = None) -> EvidenceEnvelope:
+def build_m5b(producer: str) -> EvidenceEnvelope:
     """M-5b formal generality evidence over graph-coloring domain and baseline forensics."""
     surface = {
         name: digest_of({"src": (_REPO_ROOT / name).read_text(encoding="utf-8")})
@@ -420,15 +430,31 @@ def build_m5b(producer: str, *, private_key_bytes: bytes | None = None) -> Evide
         ),
     )
 
-    if private_key_bytes:
-        import base64
-        from dataclasses import replace
-        from cryptography.hazmat.primitives.asymmetric import ed25519
-
-        priv = ed25519.Ed25519PrivateKey.from_private_bytes(private_key_bytes)
-        sig = priv.sign(envelope.signable_bytes())
-        envelope = replace(envelope, signature=base64.b64encode(sig).decode("ascii"))
     return envelope
+
+
+def sign_envelope(
+    envelope: EvidenceEnvelope, key_path: Path, key_id: str,
+) -> EvidenceEnvelope:
+    """Attach an Ed25519 signature the independent verifier can re-derive.
+
+    The key is read from a path outside the repository -- never a literal in
+    this file. A signing key committed beside the evidence lets anyone mint a
+    bundle in the producer's name, which is the opposite of what signing the
+    bundle is for.
+
+    The ``ed25519:`` prefix is part of the contract: an unprefixed signature
+    names no algorithm, and the verifier refuses formats it cannot identify
+    rather than guessing.
+    """
+    private = load_key(key_path)
+    producer = replace(envelope.producer, key_id=key_id or envelope.producer.key_id)
+    envelope = replace(envelope, producer=producer)
+    signature = private.sign(envelope.signable_bytes())
+    return replace(
+        envelope,
+        signature="ed25519:" + base64.b64encode(signature).decode("ascii"),
+    )
 
 
 def main() -> int:
@@ -441,9 +467,17 @@ def main() -> int:
     parser.add_argument("--subject-root", type=str, default=str(_REPO_ROOT))
     parser.add_argument("--evidence-root", type=str, default="")
     parser.add_argument("--workload", type=str, default="")
+    parser.add_argument("--artifact-name", type=str, default="",
+                        help="candidate-specific artifact directory name")
     parser.add_argument("--report", type=str, default="")
     parser.add_argument("--producer", type=str, default="dev-a")
     parser.add_argument("--out", type=str, default="")
+    parser.add_argument("--label", type=str, default="order9",
+                        help="successor label for an M-6 bundle and its artifact root")
+    parser.add_argument("--producer-key", type=str, default="",
+                        help="path to the producer's Ed25519 private key")
+    parser.add_argument("--key-id", type=str, default="",
+                        help="key id this signature is registered under")
     args = parser.parse_args()
 
     if args.cold_verify:
@@ -465,17 +499,32 @@ def main() -> int:
             Path(args.ledger).resolve(), Path(args.prereg).resolve(), args.producer,
             subject_root=subject_root, evidence_root=evidence_root,
             workload=Path(args.workload).resolve() if args.workload else None,
+            artifact_name=args.artifact_name or "M-4-rf95-order9",
         )
     elif args.claim == "M-6":
         if not args.report:
             raise SystemExit("M-6 requires --report from the falsifier subprocess")
         report = json.loads(Path(args.report).read_text(encoding="utf-8"))
         envelope = build_m6(args.producer, report, subject_root=subject_root,
-                            evidence_root=evidence_root)
+                            evidence_root=evidence_root, label=args.label)
     elif args.claim == "M-5b":
-        envelope = build_m5b(args.producer, private_key_bytes=b"m5b-dev-b-producer-signer-key-32")
+        envelope = build_m5b(args.producer)
+
+    if args.producer_key:
+        envelope = sign_envelope(
+            envelope, Path(args.producer_key).expanduser(), args.key_id)
+    else:
+        print("NOTE: unsigned bundle; an unsigned or unverifiable envelope is "
+              "undeterminable, never passed. Pass --producer-key.")
 
     out = Path(args.out)
+    if out.exists():
+        # Evidence is additive. Overwriting a bundle destroys the record of what
+        # was claimed before and silently invalidates any acceptance bound to
+        # its digest; publish a successor instead.
+        raise SystemExit(
+            f"refusing to overwrite existing evidence bundle {out}; "
+            f"publish a successor bundle instead")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(envelope.to_wire(), indent=2, sort_keys=True) + "\n",
                    encoding="utf-8")

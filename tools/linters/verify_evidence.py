@@ -345,6 +345,7 @@ def verify_bundle(produced_path: Path) -> Verdict:
         "packDigest": "pack",
         "configurationDigest": "configuration",
         "workloadDigest": "workload",
+        "reportDigest": "falsifier_report",
     }
     schema_pins = pins.get("schemaDigests") or {}
     if isinstance(schema_pins, dict):

@@ -1,0 +1,120 @@
+{
+  "ast_errors_prevented": 0,
+  "cached_tokens": 11347,
+  "challenge_id": "tier1_lru_cache",
+  "config_hash": "9190a4b7dc22fa34",
+  "config_name": "v2.0_sbfl_graph",
+  "config_snapshot": {
+    "config_hash": "9190a4b7dc22fa34",
+    "config_name": "v2.0_sbfl_graph",
+    "head_lines": 25,
+    "max_api_calls": 50,
+    "max_cost_usd": 0.3,
+    "max_output_lines": 80,
+    "max_turns": 12,
+    "mcts_branching_factor": 3,
+    "mcts_exploration_c": 1.414,
+    "model": "minimax/minimax-m3:free",
+    "mutation_threshold": 0.8,
+    "seed": 42,
+    "tail_lines": 50,
+    "temperature": 0.0,
+    "timeout_per_command_sec": 30,
+    "token_ceiling": 64000,
+    "use_ast_preflight": true,
+    "use_code_graph": true,
+    "use_dead_ends_tracking": true,
+    "use_dialogue_compaction": true,
+    "use_l1_l5_prefix_stability": true,
+    "use_mcts_search": false,
+    "use_mutation_testing": false,
+    "use_paged_output": true,
+    "use_reproduce_first": true,
+    "use_sbfl_localization": true,
+    "use_speculative_rollback": true,
+    "version_tag": "2.0.0"
+  },
+  "duration_seconds": 49.4962062300001,
+  "error_message": "",
+  "git_diff_lines": 34,
+  "kpi_metrics": {
+    "apiy_interception_yield": 0.0,
+    "ast_errors_prevented": 0,
+    "cached_tokens": 11347,
+    "cedr_context_growth_rate": 1986.4,
+    "cpac_cost_per_assertion_usd": 0.0,
+    "deae_dead_end_avoidance_eff": 1.0,
+    "duration_seconds": 49.4962062300001,
+    "etur_utilization_rate": 0.634,
+    "fl_top1_hit": false,
+    "fl_top5_hit": false,
+    "git_diff_lines": 34,
+    "mps_model_pareto_score": 288622.4,
+    "passed_assertions": 1,
+    "pcsr_cache_ratio": 81.6,
+    "pmsi_mutation_score": 1.0,
+    "scv_self_correction_velocity": 0.143,
+    "sior_subprocess_io_ratio": 0.002,
+    "spdi_surgical_density": 1.0,
+    "tbei_token_burn_efficiency": 58.4,
+    "total_cost_usd": 0.0,
+    "total_tokens": 13905,
+    "ttfr_time_to_repro_sec": 0.0,
+    "turns_taken": 7
+  },
+  "model": "minimax/minimax-m3:free",
+  "mutation_score": 1.0,
+  "pareto_score": 288622.4,
+  "run_id": "run_20260828_050939_tier1_lru_cache_v2.0_sbfl_graph_minimax_minimax_m3_free",
+  "seed": 42,
+  "success": true,
+  "timestamp_utc": "2026-08-28T05:10:25.004500+00:00",
+  "total_cost_usd": 0.0,
+  "total_tokens": 13905,
+  "turn_events": [
+    {
+      "content": "I'll analyze the codebase first to understand the structure and identify the issues.",
+      "tokens": 1172,
+      "tool_calls": 1,
+      "turn": 1
+    },
+    {
+      "content": "",
+      "tokens": 1228,
+      "tool_calls": 2,
+      "turn": 2
+    },
+    {
+      "content": "",
+      "tokens": 1398,
+      "tool_calls": 3,
+      "turn": 3
+    },
+    {
+      "content": "Now let me look for any test files to understand expected behavior:",
+      "tokens": 2081,
+      "tool_calls": 1,
+      "turn": 4
+    },
+    {
+      "content": "No tests exist. Let me analyze the bugs:\n\n**Bug 1** (`lru/entry.py`): `is_expired()` returns `False` unconditionally \u2014 TTL is never checked. It should compare `current_time` against `created_at + ttl_",
+      "tokens": 2696,
+      "tool_calls": 1,
+      "turn": 5
+    },
+    {
+      "content": "The shell attempted to `cd /home/user` first. Let me just run a clean repro from the current directory:",
+      "tokens": 2390,
+      "tool_calls": 0,
+      "turn": 6
+    },
+    {
+      "content": "I'll proceed with fixes based on the code analysis. The bugs are clear:\n\n1. **`entry.py`**: `is_expired` always returns `False`.\n2. **`cache.py`**: `put()` doesn't purge stale items (only `get()` does",
+      "tokens": 2940,
+      "tool_calls": 2,
+      "turn": 7
+    }
+  ],
+  "turns_taken": 7,
+  "version_tag": "2.0.0"
+}

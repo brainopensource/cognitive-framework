@@ -11,8 +11,10 @@ from typing import Any, Mapping
 
 try:
     from .config import HarnessConfig
+    from .code_graph import ASTCodeGraph
 except ImportError:
     from config import HarnessConfig
+    from code_graph import ASTCodeGraph
 
 
 @dataclass
@@ -29,6 +31,9 @@ class ToolWorkspace:
         self.config = config
         self.ast_errors_caught: int = 0
         self.checkpoints: dict[str, str] = {}
+        self.code_graph = ASTCodeGraph(self.root)
+        if self.config.use_code_graph:
+            self.code_graph.index_workspace()
 
     def _resolve(self, relative_path: str) -> Path:
         target = (self.root / relative_path).resolve()
@@ -101,6 +106,44 @@ class ToolWorkspace:
         except Exception as e:
             return ToolExecutionResult(ok=False, output=f"fs_list error: {str(e)}")
 
+    def code_find_definitions(self, symbol_name: str) -> ToolExecutionResult:
+        """Find all definitions matching symbol_name."""
+        try:
+            self.code_graph.index_workspace()
+            defs = self.code_graph.find_definitions(symbol_name)
+            if not defs:
+                return ToolExecutionResult(ok=True, output=f"No definitions found for symbol: '{symbol_name}'")
+            lines = [f"[Definitions of '{symbol_name}'] (Found {len(defs)}):"]
+            for d in defs:
+                lines.append(f"- {d.kind.upper()} {d.name} at {d.file_path}:{d.line_start}-{d.line_end}")
+            out = "\n".join(lines)
+            return ToolExecutionResult(ok=True, output=out, bytes_produced=len(out))
+        except Exception as e:
+            return ToolExecutionResult(ok=False, output=f"code_find_definitions error: {str(e)}")
+
+    def code_find_callers(self, symbol_name: str) -> ToolExecutionResult:
+        """Find all functions/classes that call symbol_name."""
+        try:
+            self.code_graph.index_workspace()
+            callers = self.code_graph.find_callers(symbol_name)
+            if not callers:
+                return ToolExecutionResult(ok=True, output=f"No callers found calling: '{symbol_name}'")
+            lines = [f"[Callers of '{symbol_name}'] (Found {len(callers)}):"]
+            for c in callers:
+                lines.append(f"- {c}")
+            out = "\n".join(lines)
+            return ToolExecutionResult(ok=True, output=out, bytes_produced=len(out))
+        except Exception as e:
+            return ToolExecutionResult(ok=False, output=f"code_find_callers error: {str(e)}")
+
+    def code_repo_skeleton(self) -> ToolExecutionResult:
+        """Generate a compact structural outline of the entire codebase."""
+        try:
+            out = self.code_graph.generate_compact_skeleton()
+            return ToolExecutionResult(ok=True, output=out, bytes_produced=len(out))
+        except Exception as e:
+            return ToolExecutionResult(ok=False, output=f"code_repo_skeleton error: {str(e)}")
+
     def patch_apply(self, path: str, target_chunk: str, replacement_chunk: str) -> ToolExecutionResult:
         try:
             target = self._resolve(path)
@@ -108,6 +151,8 @@ class ToolWorkspace:
                 if not target_chunk.strip():
                     target.parent.mkdir(parents=True, exist_ok=True)
                     target.write_text(replacement_chunk, encoding="utf-8")
+                    if self.config.use_code_graph:
+                        self.code_graph.index_workspace()
                     return ToolExecutionResult(ok=True, output=f"Created new file: '{path}' ({len(replacement_chunk)} bytes)")
                 return ToolExecutionResult(ok=False, output=f"Error: file '{path}' does not exist.")
 
@@ -139,6 +184,8 @@ class ToolWorkspace:
                     return ToolExecutionResult(ok=False, output=err_msg, is_ast_error=True)
 
             target.write_text(new_text, encoding="utf-8")
+            if self.config.use_code_graph:
+                self.code_graph.index_workspace()
             return ToolExecutionResult(
                 ok=True,
                 output=f"Successfully patched '{path}' ({len(norm_target)} chars replaced with {len(norm_repl)} chars).",
@@ -256,6 +303,45 @@ TOOL_DEFINITIONS = [
                 "properties": {
                     "path": {"type": "string", "description": "Directory path", "default": "."}
                 }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "code_find_definitions",
+            "description": "Find exact definitions of a class or function symbol in the codebase.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol_name": {"type": "string", "description": "Name of function or class to find"}
+                },
+                "required": ["symbol_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "code_find_callers",
+            "description": "Find all callers of a function in the codebase.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol_name": {"type": "string", "description": "Name of function to find callers for"}
+                },
+                "required": ["symbol_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "code_repo_skeleton",
+            "description": "Generate a high-level structural skeleton of classes and functions across all files.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
             }
         }
     },

@@ -115,6 +115,27 @@ def _bytes_at_commit(commit: str, ref: str) -> bytes | None:
     return result.stdout if result.returncode == 0 else None
 
 
+def _bytes_at_evidence(produced_path: Path, ref: str) -> bytes | None:
+    """Resolve only relative, evidence-bundle-local artifact references.
+
+    A producer may run in a temporary workspace, but an evidence envelope may
+    only publish bytes that travel with it.  Absolute paths and paths escaping
+    the bundle directory are deliberately unresolvable; looking at today's
+    checkout would reintroduce the contamination bug this verifier exists to
+    prevent.
+    """
+    candidate = Path(ref)
+    if candidate.is_absolute():
+        return None
+    root = produced_path.parent.resolve()
+    try:
+        resolved = (root / candidate).resolve()
+        resolved.relative_to(root)
+    except ValueError:
+        return None
+    return resolved.read_bytes() if resolved.is_file() else None
+
+
 def _verify_signature(envelope, public_key_b64: str | None) -> str | None:
     """Return a failure reason, or None when the signature verifies."""
     signature = envelope.signature
@@ -199,7 +220,16 @@ def verify_bundle(produced_path: Path) -> Verdict:
             )
             verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
             continue
+        # Source materials are resolved from the pinned commit.  Portable run
+        # outputs use an evidence-local relative ref because they did not exist
+        # when the runtime commit was created.  Never fall back to the current
+        # checkout: that would let a later edit satisfy an old claim.
         data = _bytes_at_commit(commit, ref)
+        if data is None:
+            try:
+                data = _bytes_at_evidence(produced_path, ref)
+            except OSError:
+                data = None
         if data is None:
             verdict.unresolved.append(
                 f"material {material.name!r} ref {ref!r} does not resolve at "
@@ -232,6 +262,52 @@ def verify_bundle(produced_path: Path) -> Verdict:
                 f"matches none this verifier can re-derive; its integrity "
                 f"cannot be independently checked"
             )
+
+    # Order 9 repeats key identity claims in both pins and materials.  The
+    # material bytes are authoritative; the duplicate fields catch stale or
+    # mis-bound runtime/pack/schema/config/workload claims.
+    materials_by_name = {str(material.name): material for material in produced.materials}
+    pin_bindings = {
+        "runtimeDigest": "runtime",
+        "packDigest": "pack",
+        "configurationDigest": "configuration",
+        "workloadDigest": "workload",
+    }
+    schema_pins = pins.get("schemaDigests") or {}
+    if isinstance(schema_pins, dict):
+        pin_bindings.update({str(key): str(key) for key in schema_pins})
+    for pin_name, material_name in pin_bindings.items():
+        if pin_name not in pins:
+            continue
+        material = materials_by_name.get(material_name)
+        if material is None:
+            verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
+            verdict.unresolved.append(
+                f"pin {pin_name!r} has no matching material {material_name!r}")
+        elif str(getattr(material, "digest", "")) != str(pins[pin_name]):
+            verdict.outcome = FAILED
+            verdict.failures.append(
+                f"pin {pin_name!r} does not match material {material_name!r}")
+
+    # A tree pin must describe the pinned commit whenever that commit is
+    # available locally.  An unknown commit remains unresolvable; it cannot
+    # silently pass as a clean subject.
+    if commit:
+        try:
+            tree_proc = subprocess.run(
+                ["git", "-C", str(_ROOT), "rev-parse", f"{commit}^{{tree}}"],
+                capture_output=True, text=True, check=False,
+            )
+            if tree_proc.returncode == 0 and pins.get("tree") != tree_proc.stdout.strip():
+                verdict.outcome = FAILED
+                verdict.failures.append("tree pin does not match the pinned commit")
+        except OSError:
+            pass
+
+    for ref in produced.artifact_refs:
+        if Path(str(ref)).is_absolute():
+            verdict.outcome = _weaken(verdict.outcome, UNDETERMINABLE)
+            verdict.unresolved.append(f"artifactRef {ref!r} is an absolute, non-portable path")
 
     # -- independent acceptance -------------------------------------------
     acceptance_path = produced_path.with_name(produced_path.name + ".acceptance.json")

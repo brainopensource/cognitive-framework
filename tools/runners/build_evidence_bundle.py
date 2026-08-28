@@ -16,6 +16,7 @@ from a different producer, and this tool cannot write it.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -39,25 +40,31 @@ from vanguard.packages.domain.ledger.reducer import (  # noqa: E402
 from vanguard.packages.ports.event_store import EventRange  # noqa: E402
 
 
-def _git(*args: str) -> str:
+def _git(*args: str, cwd: Path = _REPO_ROOT) -> str:
     return subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True, check=False
+        ["git", *args], cwd=cwd, capture_output=True, text=True, check=False
     ).stdout.strip()
 
 
-def _pins() -> dict[str, Any]:
+def _sha256_bytes(data: bytes) -> str:
+    return "sha256:" + hashlib.sha256(data).hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
+    return _sha256_bytes(path.read_bytes())
+
+
+def _pins(root: Path = _REPO_ROOT) -> dict[str, Any]:
     """Code identity. `commit` and `tree` are mandatory in the envelope."""
     return {
-        "commit": _git("rev-parse", "HEAD"),
-        "tree": _git("rev-parse", "HEAD^{tree}"),
-        "branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
-        "dirty": bool(_git("status", "--porcelain")),
+        "commit": _git("rev-parse", "HEAD", cwd=root),
+        "tree": _git("rev-parse", "HEAD^{tree}", cwd=root),
+        "branch": _git("rev-parse", "--abbrev-ref", "HEAD", cwd=root),
+        "dirty": bool(_git("status", "--porcelain", cwd=root)),
         "eventSchema": "mhf.event/2",
         "trajectorySchema": "mhf.trajectory/2",
-        "reducer": digest_of({
-            "src": (_REPO_ROOT / "vanguard/packages/domain/ledger/reducer.py"
-                    ).read_text(encoding="utf-8")
-        }),
+        "runtime": _sha256_file(root / "vanguard/packages/runtime/root.py"),
+        "reducer": _sha256_file(root / "vanguard/packages/domain/ledger/reducer.py"),
     }
 
 
@@ -93,14 +100,17 @@ def cold_verify(db_path: Path) -> dict[str, Any]:
     index = events.index(terminal_event)
     recomputed = compute_state_digest(reconstruct_state(events[:index]))
     declared = trajectory.get("state_digest") or ""
+    journal_mode = getattr(store, "journal_mode", "")
+    durable = bool(getattr(store, "durable", False))
+    store.close()
 
     return {
         "declared_state_digest": declared,
         "recomputed_state_digest": recomputed,
         "reconstructed": bool(declared) and recomputed == declared,
         "event_count": len(events),
-        "journal_mode": getattr(store, "journal_mode", ""),
-        "durable": bool(getattr(store, "durable", False)),
+        "journal_mode": journal_mode,
+        "durable": durable,
         "outcome": trajectory.get("outcome"),
         "trajectory_schema": trajectory.get("schema"),
         "capture": (trajectory.get("capture") or {}).get("status"),
@@ -113,11 +123,61 @@ def cold_verify(db_path: Path) -> dict[str, Any]:
         "run_digest": trajectory.get("run_digest"),
         "activation_digest": trajectory.get("activation_digest"),
         "cost": trajectory.get("cost") or {},
+        "trajectory": trajectory,
+        "ledger_digest": _sha256_file(db_path),
     }
 
 
-def build_m4(db_path: Path, prereg: Path, producer: str) -> EvidenceEnvelope:
+def _copy_material(
+    *, name: str, path: Path, evidence_root: Path, subject_root: Path,
+    artifact_dir: Path,
+) -> Material:
+    """Create a raw-sha256 material with a ref a fresh verifier can resolve."""
+    if not path.is_file():
+        raise ValueError(f"material {name!r} does not exist: {path}")
+    try:
+        ref = path.resolve().relative_to(evidence_root.resolve()).as_posix()
+    except ValueError:
+        try:
+            ref = path.resolve().relative_to(subject_root.resolve()).as_posix()
+        except ValueError:
+            destination = artifact_dir / path.name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(path.read_bytes())
+            ref = destination.relative_to(evidence_root.resolve()).as_posix()
+    return Material(name=name, digest=_sha256_file(path), ref=ref)
+
+
+def _write_json_material(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+
+
+def _fresh_cold_verify(db_path: Path) -> dict[str, Any]:
+    """Run the cold fold in a distinct Python process."""
+    proc = subprocess.run(
+        [sys.executable, __file__, "--cold-verify", str(db_path)],
+        cwd=_REPO_ROOT, capture_output=True, text=True, check=False,
+    )
+    if proc.returncode != 0:
+        raise ValueError(f"fresh-process reconstruction failed: {proc.stderr.strip()}")
+    try:
+        return json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"fresh-process reconstruction returned invalid JSON: {exc}") from exc
+
+
+def build_m4(
+    db_path: Path,
+    prereg: Path,
+    producer: str,
+    *,
+    subject_root: Path = _REPO_ROOT,
+    evidence_root: Path | None = None,
+    workload: Path | None = None,
+) -> EvidenceEnvelope:
     facts = cold_verify(db_path)
+    fresh = _fresh_cold_verify(db_path)
 
     uses_live_provider = any(
         r.get("provider") and r.get("model")
@@ -129,6 +189,8 @@ def build_m4(db_path: Path, prereg: Path, producer: str) -> EvidenceEnvelope:
         and facts["capture"] == "complete"
         and facts["trajectory_schema"] == "mhf.trajectory/2"
         and facts["durable"]
+        and fresh.get("reconstructed") is True
+        and facts["preregistration_digest"] == _sha256_file(prereg)
     )
 
     detail = ""
@@ -143,20 +205,58 @@ def build_m4(db_path: Path, prereg: Path, producer: str) -> EvidenceEnvelope:
             "limitation of this bundle."
         )
 
+    if evidence_root is None:
+        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+    evidence_root = evidence_root.resolve()
+    artifact_dir = evidence_root / "artifacts" / "M-4-rf95-order9"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    _write_json_material(artifact_dir / "trajectory.json", facts["trajectory"])
+    _write_json_material(artifact_dir / "cold-reconstruction.json", fresh)
+    workload_path = workload
+    if workload_path is None:
+        workload_path = artifact_dir / "workload.json"
+        _write_json_material(workload_path, {
+            "runId": facts["run_id"], "projectId": facts["project_id"],
+            "taskDigest": facts["trajectory"].get("task_digest"),
+        })
+    materials = [
+        _copy_material(name="preregistration", path=prereg, evidence_root=evidence_root,
+                       subject_root=subject_root, artifact_dir=artifact_dir),
+        _copy_material(name="ledger", path=db_path, evidence_root=evidence_root,
+                       subject_root=subject_root, artifact_dir=artifact_dir),
+        _copy_material(name="trajectory", path=artifact_dir / "trajectory.json",
+                       evidence_root=evidence_root, subject_root=subject_root, artifact_dir=artifact_dir),
+        _copy_material(name="cold_reconstruction", path=artifact_dir / "cold-reconstruction.json",
+                       evidence_root=evidence_root, subject_root=subject_root, artifact_dir=artifact_dir),
+        _copy_material(name="workload", path=workload_path, evidence_root=evidence_root,
+                       subject_root=subject_root, artifact_dir=artifact_dir),
+    ]
+    source_paths = {
+        "runtime": subject_root / "vanguard/packages/runtime/root.py",
+        "pack": subject_root / "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+        "configuration": subject_root / "vanguard/packages/agency/manifests/vg-code-default/budget-policy.json",
+        "schema_event": subject_root / "schemas/mhf/event_envelope_v2.schema.json",
+        "schema_trajectory": subject_root / "schemas/mhf/trajectory_v2.schema.json",
+    }
+    for name, path in source_paths.items():
+        if path.is_file():
+            materials.append(_copy_material(name=name, path=path, evidence_root=evidence_root,
+                                            subject_root=subject_root, artifact_dir=artifact_dir))
+    pins = _pins(subject_root)
+    pins.update({
+        "runtimeDigest": next(m.digest for m in materials if m.name == "runtime"),
+        "packDigest": next(m.digest for m in materials if m.name == "pack"),
+        "configurationDigest": next(m.digest for m in materials if m.name == "configuration"),
+        "schemaDigests": {m.name: m.digest for m in materials if m.name.startswith("schema_")},
+        "workloadDigest": next(m.digest for m in materials if m.name == "workload"),
+        "artifactRoot": "artifacts/M-4-rf95-order9",
+    })
+
     return EvidenceEnvelope(
         claim="RF-95",
         protocol="aether.rf95.product-coding-proof/1",
         subjects=(f"run:{facts['run_id']}", f"episode:{facts['episode_id']}"),
-        materials=(
-            Material(name="preregistration",
-                     digest=digest_of({"text": prereg.read_text(encoding="utf-8")}),
-                     ref=str(prereg.relative_to(_REPO_ROOT))),
-            Material(name="ledger", digest=digest_of({"path": str(db_path),
-                                                      "events": facts["event_count"]}),
-                     ref=str(db_path)),
-            Material(name="terminal_state", digest=facts["recomputed_state_digest"]),
-            Material(name="harness", digest=facts["harness_digest"] or "sha256:0"),
-        ),
+        materials=tuple(materials),
         run={
             "runId": facts["run_id"],
             "episodeId": facts["episode_id"],
@@ -165,47 +265,90 @@ def build_m4(db_path: Path, prereg: Path, producer: str) -> EvidenceEnvelope:
             "activationDigest": facts["activation_digest"],
             "modelRoutes": facts["model_routes"],
             "cost": facts["cost"],
+            "freshProcess": fresh,
+            "providerEvidence": "live-attributable" if uses_live_provider else "missing",
         },
-        pins=_pins(),
+        pins=pins,
         environment=_environment(),
-        outcome="passed" if passed else "failed",
-        producer=Producer(identity=producer),
-        artifact_refs=(str(db_path),),
+        outcome="passed" if passed else "undeterminable",
+        producer=Producer(identity=producer, key_id=f"{producer}-operator"),
+        artifact_refs=("artifacts/M-4-rf95-order9",),
         detail=detail,
     )
 
 
-def build_m6(producer: str, falsifier_report: Mapping[str, Any]) -> EvidenceEnvelope:
+def build_m6(
+    producer: str,
+    falsifier_report: Mapping[str, Any],
+    *,
+    subject_root: Path = _REPO_ROOT,
+    evidence_root: Path | None = None,
+) -> EvidenceEnvelope:
     """M-6 rests on falsifiers plus source identity, not on a single run."""
-    surface = {
-        name: digest_of({"src": (_REPO_ROOT / name).read_text(encoding="utf-8")})
-        for name in (
-            "vanguard/packages/ports/child_runtime.py",
-            "vanguard/packages/runtime/child_runtime.py",
-            "vanguard/packages/runtime/delegation.py",
-            "vanguard/packages/runtime/wiring.py",
-            "vanguard/packages/runtime/ledger/recovery.py",
-            "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
-        )
+    surface_paths = {
+        "runtime": "vanguard/packages/runtime/root.py",
+        "child_port": "vanguard/packages/ports/child_runtime.py",
+        "child_runtime": "vanguard/packages/runtime/child_runtime.py",
+        "delegation": "vanguard/packages/runtime/delegation.py",
+        "wiring": "vanguard/packages/runtime/wiring.py",
+        "recovery": "vanguard/packages/runtime/ledger/recovery.py",
+        "falsifier_suite": "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
+        "pack": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+        "configuration": "vanguard/packages/agency/manifests/vg-code-default/budget-policy.json",
+        "schema_event": "schemas/mhf/event_envelope_v2.schema.json",
+        "schema_trajectory": "schemas/mhf/trajectory_v2.schema.json",
     }
-    passed = falsifier_report.get("failures", 1) == 0 and falsifier_report.get("run", 0) > 0
+    surface = {name: _sha256_file(subject_root / path)
+               for name, path in surface_paths.items()}
+    if not isinstance(falsifier_report.get("returncode"), int):
+        raise ValueError("M-6 report must contain the subprocess returncode")
+    passed = (
+        falsifier_report.get("returncode") == 0
+        and int(falsifier_report.get("tests", 0)) > 0
+        and int(falsifier_report.get("failures", 1)) == 0
+        and bool(falsifier_report.get("fresh_process"))
+        and bool(falsifier_report.get("depth_3"))
+        and bool(falsifier_report.get("kill_tree"))
+    )
+    if evidence_root is None:
+        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+    evidence_root = evidence_root.resolve()
+    artifact_dir = evidence_root / "artifacts" / "M-6-canonical-recursion-order9"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    report_path = artifact_dir / "falsifier-report.json"
+    _write_json_material(report_path, falsifier_report)
+    materials = tuple(
+        Material(name=name, digest=digest, ref=surface_paths[name])
+        for name, digest in sorted(surface.items())
+    ) + (Material(name="falsifier_report", digest=_sha256_file(report_path),
+                  ref="artifacts/M-6-canonical-recursion-order9/falsifier-report.json"),)
+    pins = _pins(subject_root)
+    pins.update({
+        "runtimeDigest": _sha256_file(subject_root / "vanguard/packages/runtime/root.py"),
+        "packDigest": surface["pack"],
+        "configurationDigest": surface["configuration"],
+        "schemaDigests": {
+            "schema_event": surface["schema_event"],
+            "schema_trajectory": surface["schema_trajectory"],
+        },
+        "workloadDigest": _sha256_file(report_path),
+        "artifactRoot": "artifacts/M-6-canonical-recursion-order9",
+    })
     return EvidenceEnvelope(
         claim="M-6",
         protocol="aether.m6.canonical-recursion/1",
         subjects=("package:WP-A1", "milestone:M-6"),
-        materials=tuple(
-            Material(name=name, digest=digest, ref=name)
-            for name, digest in sorted(surface.items())
-        ),
+        materials=materials,
         run={
             "falsifiers": falsifier_report,
             "syntheticSuccessRemoved": True,
             "childIdScheme": "aether.child_id/1",
         },
-        pins=_pins(),
+        pins=pins,
         environment=_environment(),
-        outcome="passed" if passed else "failed",
-        producer=Producer(identity=producer),
+        outcome="passed" if passed else "undeterminable",
+        producer=Producer(identity=producer, key_id=f"{producer}-operator"),
+        artifact_refs=("artifacts/M-6-canonical-recursion-order9",),
     )
 
 
@@ -289,26 +432,43 @@ def build_m5b(producer: str, *, private_key_bytes: bytes | None = None) -> Evide
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b"), required=True)
+    parser.add_argument("--cold-verify", type=str, default="",
+                        help="internal fresh-process ledger reconstruction mode")
+    parser.add_argument("--claim", choices=("M-4", "M-6", "M-5b"), default="")
     parser.add_argument("--ledger", type=str, default="")
     parser.add_argument("--prereg", type=str, default="")
+    parser.add_argument("--subject-root", type=str, default=str(_REPO_ROOT))
+    parser.add_argument("--evidence-root", type=str, default="")
+    parser.add_argument("--workload", type=str, default="")
+    parser.add_argument("--report", type=str, default="")
     parser.add_argument("--producer", type=str, default="dev-a")
-    parser.add_argument("--falsifier-run", type=int, default=0)
-    parser.add_argument("--falsifier-failures", type=int, default=1)
     parser.add_argument("--out", type=str, required=True)
     args = parser.parse_args()
+
+    if args.cold_verify:
+        print(json.dumps(cold_verify(Path(args.cold_verify).resolve()), sort_keys=True))
+        return 0
+
+    if not args.claim:
+        raise SystemExit("--claim is required unless --cold-verify is used")
+
+    subject_root = Path(args.subject_root).resolve()
+    evidence_root = Path(args.evidence_root).resolve() if args.evidence_root else None
 
     if args.claim == "M-4":
         if not args.ledger or not args.prereg:
             raise SystemExit("M-4 requires --ledger and --prereg")
-        envelope = build_m4(Path(args.ledger), Path(args.prereg).resolve(),
-                            args.producer)
+        envelope = build_m4(
+            Path(args.ledger).resolve(), Path(args.prereg).resolve(), args.producer,
+            subject_root=subject_root, evidence_root=evidence_root,
+            workload=Path(args.workload).resolve() if args.workload else None,
+        )
     elif args.claim == "M-6":
-        envelope = build_m6(args.producer, {
-            "suite": "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
-            "run": args.falsifier_run,
-            "failures": args.falsifier_failures,
-        })
+        if not args.report:
+            raise SystemExit("M-6 requires --report from the falsifier subprocess")
+        report = json.loads(Path(args.report).read_text(encoding="utf-8"))
+        envelope = build_m6(args.producer, report, subject_root=subject_root,
+                            evidence_root=evidence_root)
     elif args.claim == "M-5b":
         envelope = build_m5b(args.producer, private_key_bytes=b"m5b-dev-b-producer-signer-key-32")
 
@@ -325,4 +485,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

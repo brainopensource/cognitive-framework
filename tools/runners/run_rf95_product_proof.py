@@ -249,7 +249,7 @@ def export_rf95_artifacts(
         "digest": f"sha256:{hashlib.sha256(traj_bytes).hexdigest()}",
     }
 
-    diff_source = repo_path / "calculator.py"
+    diff_source = repo_path / "src" / "calc.py"
     if diff_source.is_file():
         dest_subject = target / "calculator.py"
         shutil.copy2(diff_source, dest_subject)
@@ -416,6 +416,14 @@ def main() -> int:
                 challenge, reviewer=grant.reviewer),
             approval_key=signer.public_bytes,
         )
+
+        # Close through the store's durability boundary before any artifact
+        # copy.  SQLite may still hold committed WAL frames in the live
+        # connection; exporting only the main database would silently drop
+        # those events.
+        close_store = getattr(result.store, "close", None)
+        if callable(close_store):
+            close_store()
 
         ok, failures = verify_rf95_evidence(
             repo_path, db_path, blob_path, result, result.trajectory or {})

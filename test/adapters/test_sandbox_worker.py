@@ -80,7 +80,9 @@ class TestSandboxWorker(unittest.TestCase):
         )
         res = worker.execute(op)
         self.assertTrue(res.ok)
-        self.assertEqual(runner.commands[0], ("grep", "-rn", "--", "TODO", "src/"))
+        self.assertEqual(runner.commands[0], (
+            "grep", "-rn", "--exclude-dir=.vanguard", "--exclude-dir=.git",
+            "--exclude-dir=__pycache__", "--", "TODO", "src/"))
 
     def test_fs_write_creates_contained_parent_directories(self) -> None:
         runner = FakeSandboxRunner()

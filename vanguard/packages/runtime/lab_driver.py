@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..ports.event_store import Result as PortResult
 from .mock_episode_tape import (
@@ -100,6 +101,7 @@ def run_lab_task(
     tiers: Sequence[str] | None = None,
     sandbox_mode: str = "rootless",
     allow_paid: bool = False,
+    state_dir: Path | str | None = None,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -213,7 +215,12 @@ def run_lab_task(
         departures.append("auto_approved_writes")
 
     harness = harness_preview
-    store = SqliteEventStore(":memory:")
+    resolved_state = Path(state_dir) if state_dir is not None else None
+    if resolved_state is not None:
+        resolved_state.mkdir(parents=True, exist_ok=True)
+    store = SqliteEventStore(
+        resolved_state / "events.sqlite3" if resolved_state is not None else ":memory:")
+    blobs = FileBlobStore(resolved_state / "blobs") if resolved_state is not None else None
     # The task states its own goal (`TASK.md`); the harness telling the model
     # what the task is would be a different experiment.
     brief = brief_from_task_dir(task_path) or brief
@@ -232,6 +239,7 @@ def run_lab_task(
                 _environment_for(task_path, cleanup_roots, sandbox_mode=sandbox_mode),
                 grant),
             clock=SystemClock(), store=store,
+            blobs=blobs,
             index=FileRepoIndex() if harness.index_component is not None else None,
             interactive=interactive,
             approver=approver, approval_key=approval_key)

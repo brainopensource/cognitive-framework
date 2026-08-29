@@ -175,6 +175,26 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual(bodies[0]["reasoning"], {"effort": "none"})
 
+    def test_explicit_completion_ceiling_is_not_silently_widened(self) -> None:
+        bodies = []
+
+        def transport(url, headers, body):
+            del url, headers
+            bodies.append(json.loads(body))
+            return 200, json.dumps({
+                "choices": [{"message": {"content": "ok"}}],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+            }).encode()
+
+        result = OpenRouterModel(
+            transport=transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=False,
+        ).propose(CONTEXT, TOOLS, {"maxTokens": 8})
+
+        self.assertTrue(result.ok)
+        self.assertEqual(bodies[0]["max_tokens"], 8)
+
     def test_trust_spine_sources_do_not_import_openrouter(self) -> None:
         self.assertEqual(_trust_openrouter_imports(), [])
 
@@ -685,6 +705,26 @@ class OpenRouterModelContract(unittest.TestCase):
         result = port.propose(CONTEXT, TOOLS, SAMPLING)
         self.assertFalse(result.ok)
         self.assertEqual(result.error.kind, "instrument_error")
+
+    def test_deepseek_dsml_tool_call_is_translated(self) -> None:
+        body = (
+            '<｜DSML｜tool_calls><｜DSML｜invoke name="read">'
+            '<｜DSML｜parameter name="path" string="true">calc.py'
+            '</｜DSML｜parameter></｜DSML｜invoke></｜DSML｜tool_calls>'
+        )
+        response = json.dumps({
+            "choices": [{"message": {"content": body}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+        }).encode()
+        result = OpenRouterModel(
+            transport=_status_transport(200, response),
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=False,
+        ).propose(CONTEXT, TOOLS, {})
+
+        self.assertTrue(result.ok, result.error)
+        self.assertEqual(result.value["action"], "fs.read")
+        self.assertEqual(result.value["args"], {"path": "calc.py"})
 
     def test_unknown_model_pricing_marked_explicitly(self) -> None:
         payload = json.dumps({

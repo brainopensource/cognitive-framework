@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 MANIFESTS = ROOT / "vanguard/packages/agency/manifests"
 ARTIFACTS = ROOT / "benchmarks/frontier_v090/artifacts"
+RUNS = ROOT / "benchmarks/frontier_v090/runs"
 MODEL = "deepseek/deepseek-v4-flash-0731"
 PRESETS = (
     ("Coding", "vg-code-v090-react-control", ("Easy", "Medium", "Hard"), ("CODE-E", "CODE-M", "CODE-H")),
@@ -148,6 +149,7 @@ def runtime_executor(preset: str, *, model_name: str = MODEL):
             interactive=False, isolate=False, approve_writes=True,
             allow_paid=True, max_turns=8, max_attempts=2,
             brief=challenge.brief, sandbox_mode="host-dev",
+            state_dir=workspace / ".vanguard",
         )
         return ExecutionTelemetry(
             terminal=str(result.get("outcome", "instrument_error")),
@@ -165,7 +167,8 @@ def live_sample() -> dict[str, Any]:
     tasks = ("tier1_lru_ttl_cache", "tier2_web_reactive_signals")
     presets = ("vg-code-v090-react-control", "vg-code-v090-claude-shaped")
     return {"schema": "aether.frontier-benchmark-live-sample/1", "rows": [
-        run_row(task, preset, runtime_executor(preset), timeout=120, non_empirical=False)
+        run_row(task, preset, runtime_executor(preset), timeout=120,
+                non_empirical=False, workspace_root=RUNS)
         for task, preset in zip(tasks, presets)
     ], "non_empirical": False}
 
@@ -180,7 +183,8 @@ def live_canary() -> dict[str, Any]:
     )
     return {"schema": "aether.frontier-benchmark-canary/1", "non_empirical": False,
             "rows": [run_row(task, preset, runtime_executor(preset), timeout=180,
-                              non_empirical=False) for task, preset in cases]}
+                              non_empirical=False, workspace_root=RUNS)
+                     for task, preset in cases]}
 
 
 def live_27() -> dict[str, Any]:
@@ -203,7 +207,7 @@ def live_27() -> dict[str, Any]:
             continue
         task_id = task_for_slot[row.challenge]
         result = run_row(task_id, row.preset, runtime_executor(row.preset),
-                         timeout=180, non_empirical=False)
+                         timeout=180, non_empirical=False, workspace_root=RUNS)
         usage = result.get("usage", {})
         token_total += sum(int(usage.get(k) or 0) for k in ("prompt_tokens", "completion_tokens"))
         result.update({"run_id": row.run_id, "ordinal": row.ordinal,

@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import ExitStack
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -148,10 +149,17 @@ def _evaluate(challenge: SWEProChallenge, workspace: Path, timeout: float) -> di
 
 
 def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: float = 30.0,
-            non_empirical: bool = True) -> dict[str, object]:
+            non_empirical: bool = True,
+            workspace_root: Path | None = None) -> dict[str, object]:
     challenge = CHALLENGES[challenge_id]
-    with tempfile.TemporaryDirectory(prefix="v090-agent-") as temp:
-        workspace = Path(temp)
+    with ExitStack() as stack:
+        if workspace_root is None:
+            workspace = Path(stack.enter_context(
+                tempfile.TemporaryDirectory(prefix="v090-agent-")))
+        else:
+            workspace_root.mkdir(parents=True, exist_ok=True)
+            workspace = Path(tempfile.mkdtemp(
+                prefix=f"{challenge_id}-{preset}-", dir=workspace_root))
         _materialize_public(challenge, workspace)
         public_files = snapshot(workspace)
         oracle_digest = digest_bytes(challenge.oracle_code.encode())

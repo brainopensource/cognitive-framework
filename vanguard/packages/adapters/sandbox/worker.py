@@ -170,7 +170,13 @@ class WorkerProtocol:
             path = pathlib.Path(path_str)
             if path.is_absolute() or ".." in path.parts:
                 return Result.fail("invalid_path", "Path must be relative and not traverse")
-            argv = ["grep", "-rn", "--", pattern, path_str]
+            argv = [
+                "grep", "-rn",
+                "--exclude-dir=.vanguard",
+                "--exclude-dir=.git",
+                "--exclude-dir=__pycache__",
+                "--", pattern, path_str,
+            ]
 
         elif operation.operation == "fs.write":
             path_str = operation.args.get("path")

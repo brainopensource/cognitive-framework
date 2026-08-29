@@ -6,6 +6,7 @@ delegating to ContextCompiler while preserving strict prefix stability.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence
 
@@ -14,6 +15,7 @@ from ..agency.context import (
     CompiledContext,
     ContextCompiler,
     Fragment,
+    Layer,
 )
 from ..agency.provenance import ProvenanceSink
 from ..ports.memory import MemoryBinding, require_retrieval_provenance
@@ -69,6 +71,39 @@ class PromptAssembler:
         """Admit one turn's outcome to L5 dialogue history."""
         self._dialogue.append(Fragment(source=source, label=label, text=text, evictable=evictable))
 
+    def tool_call(
+        self,
+        *,
+        turn: int,
+        name: str,
+        args: Mapping[str, Any],
+        thought: str = "",
+    ) -> None:
+        """Admit the assistant half of a provider tool exchange to L5.
+
+        Keeping this as an ordinary fragment means the existing context
+        ceiling and compaction policy account for tool arguments too. The
+        structured wire role is reconstructed only after compilation, at the
+        provider boundary.
+        """
+        payload = json.dumps(
+            {
+                "call_id": f"call_{turn}",
+                "name": name,
+                "args": dict(args),
+                "thought": thought,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        )
+        self.note(
+            label=f"tool-call-{turn}",
+            source="assistant_tool_call",
+            text=payload,
+            evictable=False,
+        )
+
     def memory_fragments(self) -> tuple[tuple[Fragment, ...], str]:
         """Retrieve authorized memory context immediately before compiling a turn."""
         if self._memory is None:
@@ -113,6 +148,46 @@ class PromptAssembler:
             )
 
         bundle = dict(compiled.bundle())
+        # L5 is a mutation layer, not a dialogue role. Render ordinary L5
+        # notes as user messages while preserving assistant/tool alternation
+        # for mediated effects. The prior implementation flattened every L5
+        # fragment into one user message, leaving tool results orphaned from
+        # the assistant calls that produced them.
+        messages = [
+            {"role": message["role"], "content": message["content"]}
+            for message in compiled.messages()
+            if message["layer"] != "L5"
+        ]
+        for block in compiled.layer_blocks(Layer.DIALOGUE):
+            if block.source == "assistant_tool_call":
+                try:
+                    step = json.loads(block.text)
+                except (TypeError, json.JSONDecodeError):
+                    messages.append({"role": "user", "content": block.text})
+                    continue
+                messages.append({
+                    "role": "assistant",
+                    "content": step.get("thought") or None,
+                    "tool_calls": [{
+                        "id": step.get("call_id", "call_0"),
+                        "type": "function",
+                        "function": {
+                            "name": step.get("name", ""),
+                            "arguments": json.dumps(
+                                step.get("args", {}), sort_keys=True,
+                                separators=(",", ":"), ensure_ascii=False),
+                        },
+                    }],
+                })
+            elif block.source == "tool_result":
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": f"call_{block.label.removeprefix('tool-result-')}",
+                    "content": block.text,
+                })
+            else:
+                messages.append({"role": "user", "content": block.text})
+        bundle["messages"] = tuple(messages)
         if memory_digest:
             bundle["memoryRetrievalDigest"] = memory_digest
 

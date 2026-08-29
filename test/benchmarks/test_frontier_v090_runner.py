@@ -35,6 +35,18 @@ class FrontierV090RunnerTests(unittest.TestCase):
         self.assertEqual(row["terminal"], "NO_PATCH")
         self.assertFalse(any("oracle" in path.lower() for path in observed))
 
+    def test_persistent_workspace_keeps_runtime_logs_inside_requested_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+
+            row = run_row(SUBSET[0], "test", lambda *_: ExecutionTelemetry(
+                "completed", "no-op"), workspace_root=root)
+
+            self.assertEqual(row["terminal"], "NO_PATCH")
+            workspaces = list(root.iterdir())
+            self.assertEqual(len(workspaces), 1)
+            self.assertTrue((workspaces[0] / "TASK.md").is_file())
+
     def test_easy_known_good_patch_passes_exterior_oracle(self) -> None:
         def repair(workspace: Path, challenge: object) -> ExecutionTelemetry:
             del challenge

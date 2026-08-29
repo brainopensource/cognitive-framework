@@ -286,7 +286,6 @@ class EpisodeEngine:
                 break
 
             self._emit_proposal(episode, proposal, diagnostics=diagnostics)
-
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
             if terminal is not None:

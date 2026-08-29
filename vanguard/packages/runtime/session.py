@@ -257,6 +257,25 @@ class _LayeredOperator:
         answer = self._model.propose(bundle, tools, sampling)
         value = getattr(answer, "value", None)
         raw = value if value is not None else answer
+        if isinstance(value, Mapping) and value.get("kind") == "effect":
+            action = value.get("action")
+            args = value.get("args")
+            if isinstance(action, str) and isinstance(args, Mapping):
+                # Provider APIs require the declared function name in replayed
+                # assistant messages, while the canonical proposal carries
+                # the manifest verb. Resolve that from the same schemas
+                # supplied to the model for this turn.
+                tool_name = next(
+                    (str(tool.get("name")) for tool in tools
+                     if tool.get("verb") == action and tool.get("name")),
+                    action,
+                )
+                self._assembler.tool_call(
+                    turn=turn,
+                    name=tool_name,
+                    args=args,
+                    thought=str(value.get("text") or value.get("note") or ""),
+                )
         output_ref = self._capture("model_output", raw, turn=turn)
 
         self.contexts[-1] = self._handler.handle(

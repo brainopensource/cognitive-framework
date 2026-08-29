@@ -514,6 +514,20 @@ class DogfoodGate(unittest.TestCase):
         self.assertEqual([message["layer"] for message in self.operator.contexts[0]["layers"]][:2],
                          ["L1", "L2"])
 
+    def test_tool_history_preserves_assistant_and_tool_roles(self) -> None:
+        """A later turn sees the call that produced each tool receipt."""
+        self.execute()
+
+        messages = self.operator.contexts[1]["messages"]
+        assistant = next(message for message in messages
+                         if message["role"] == "assistant")
+        tool = next(message for message in messages if message["role"] == "tool")
+        call = assistant["tool_calls"][0]
+        self.assertEqual(call["function"]["name"], "read")
+        self.assertEqual(tool["tool_call_id"], call["id"])
+        self.assertIn("calc.py", call["function"]["arguments"])
+        self.assertIn("tool result turn=0", tool["content"])
+
     def test_events_persist_to_the_store_not_just_to_memory(self) -> None:
         """`REQ-DOG-001`: all events persisted to ledger. An in-process list is
         not a ledger — a crash after the run must leave the trace behind."""

@@ -229,7 +229,13 @@ def _http_post(
             if hasattr(exc, "headers") and exc.headers
             else {}
         )
-        return int(exc.code), resp_headers, exc.read() or b""
+        body = b""
+        if getattr(exc, "fp", None) is not None:
+            try:
+                body = exc.read() or b""
+            except Exception:
+                body = b""
+        return int(exc.code), resp_headers, body
 
 
 def _http_stream(
@@ -248,7 +254,13 @@ def _http_stream(
             if hasattr(exc, "headers") and exc.headers
             else {}
         )
-        return int(exc.code), resp_headers, (exc.read() or b"",)
+        body = b""
+        if getattr(exc, "fp", None) is not None:
+            try:
+                body = exc.read() or b""
+            except Exception:
+                body = b""
+        return int(exc.code), resp_headers, (body,)
 
     resp_headers = {k.lower(): v for k, v in response.headers.items()}
     _set_response_socket_timeout(response, timeout)
@@ -273,7 +285,19 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
     if "messages" in context:
-        return [dict(item) for item in context["messages"]]
+        raw_list = [dict(item) for item in context["messages"]]
+        merged: list[dict[str, Any]] = []
+        for msg in raw_list:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if merged and merged[-1]["role"] == "system" and role == "system":
+                merged[-1]["content"] += "\n\n" + str(content)
+            else:
+                preserved = dict(msg)
+                preserved["role"] = role
+                preserved["content"] = content if content is None else str(content)
+                merged.append(preserved)
+        return merged
     messages: list[dict[str, Any]] = []
     system = context.get("system")
     if isinstance(system, str) and system:
@@ -287,6 +311,18 @@ def _messages(context: ContextBundle) -> list[dict[str, Any]]:
             messages.append({"role": "user", "content": item})
         elif isinstance(item, Mapping):
             messages.append(dict(item))
+    for step in context.get("history_steps") or ():
+        if not isinstance(step, Mapping):
+            continue
+        if step.get("type") == "assistant_tool_call":
+            messages.append({"role": "assistant", "content": step.get("thought"),
+                             "tool_calls": [{"id": step.get("call_id", "call_0"),
+                                             "type": "function", "function": {
+                                                 "name": step.get("action", ""),
+                                                 "arguments": json.dumps(step.get("args", {}), sort_keys=True)}}]})
+        elif step.get("type") == "tool_response":
+            messages.append({"role": "tool", "tool_call_id": step.get("call_id", "call_0"),
+                             "content": str(step.get("result_text", ""))})
     if not messages:
         messages.append({"role": "user", "content": ""})
     return messages
@@ -305,6 +341,36 @@ def _tools_payload(tools: ToolSchemas) -> list[dict[str, Any]]:
             }
         )
     return payload
+
+
+def _extract_dsml_tool_calls(text: str) -> tuple[str, list[dict[str, Any]]]:
+    """Extract tool calls emitted via DeepSeek DSML markup tags."""
+    import re
+    invoke_rx = re.compile(
+        r'<[｜|]DSML[｜|]invoke\s+name=["\']([^"\']+)["\']>(.*?)</[｜|]DSML[｜|]invoke>',
+        re.DOTALL,
+    )
+    param_rx = re.compile(
+        r'<[｜|]DSML[｜|]parameter\s+name=["\']([^"\']+)["\'][^>]*>(.*?)</[｜|]DSML[｜|]parameter>',
+        re.DOTALL,
+    )
+    calls: list[dict[str, Any]] = []
+    for idx, match in enumerate(invoke_rx.finditer(text)):
+        name = match.group(1).strip()
+        body = match.group(2)
+        args: dict[str, Any] = {}
+        for pmatch in param_rx.finditer(body):
+            pname = pmatch.group(1).strip()
+            pval = pmatch.group(2).strip()
+            args[pname] = pval
+        calls.append({
+            "id": f"call_dsml_{idx + 1}",
+            "name": name,
+            "arguments": args,
+        })
+    clean_text = invoke_rx.sub("", text)
+    clean_text = re.sub(r'</?[｜|]DSML[｜|][^>]*>', '', clean_text).strip()
+    return clean_text, calls
 
 
 def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -337,9 +403,13 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
         arguments: Any = function.get("arguments", {})
         if isinstance(arguments, str):
             try:
-                arguments = json.loads(arguments)
-            except json.JSONDecodeError:
-                return None
+                arguments = json.loads(arguments, strict=False)
+            except Exception:
+                try:
+                    import ast
+                    arguments = ast.literal_eval(arguments)
+                except Exception:
+                    return None
         if not isinstance(arguments, Mapping):
             return None
         name = function.get("name")
@@ -353,6 +423,11 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
                 "arguments": dict(arguments),
             }
         )
+    if not tool_calls and text and ("DSML" in text or "invoke" in text):
+        clean_text, dsml_calls = _extract_dsml_tool_calls(text)
+        if dsml_calls:
+            tool_calls.extend(dsml_calls)
+            text = clean_text
     return {"text": text, "toolCalls": tool_calls}
 
 
@@ -527,9 +602,13 @@ def _parse_sse_stream(
         if not call["id"] or not call["name"] or not call["arguments_str"]:
             return None, None, 0
         try:
-            arguments = json.loads(call["arguments_str"])
-        except json.JSONDecodeError:
-            return None, None, 0
+            arguments = json.loads(call["arguments_str"], strict=False)
+        except Exception:
+            try:
+                import ast
+                arguments = ast.literal_eval(call["arguments_str"])
+            except Exception:
+                return None, None, 0
         if not isinstance(arguments, Mapping):
             return None, None, 0
         tool_calls_list.append({
@@ -539,6 +618,11 @@ def _parse_sse_stream(
         })
 
     proposal_text = "".join(text_parts)
+    if not tool_calls_list and proposal_text and ("DSML" in proposal_text or "invoke" in proposal_text):
+        clean_text, dsml_calls = _extract_dsml_tool_calls(proposal_text)
+        if dsml_calls:
+            tool_calls_list.extend(dsml_calls)
+            proposal_text = clean_text
     if not proposal_text and not tool_calls_list:
         return None, None, 0
     return {"text": proposal_text, "toolCalls": tool_calls_list}, raw_usage, ttft_millis
@@ -863,7 +947,7 @@ class OpenRouterModel:
             # before a tool call, producing an empty proposal and burning a
             # turn.  Keep the bound explicit while leaving callers free to
             # narrow it through the sampling contract.
-            "max_tokens": sampling.get("maxTokens", 1024),
+            "max_tokens": sampling.get("maxTokens", 4096),
         }
         if self._reasoning_effort is not None:
             body_obj["reasoning"] = {"effort": self._reasoning_effort}

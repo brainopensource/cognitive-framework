@@ -723,7 +723,7 @@
   "model_routes_used": [
     {
       "fingerprint_unavailable_reason": "provider_did_not_report",
-      "model": "deepseek/deepseek-v4-flash-0731",
+      "model": "deepseek/deepseek-chat",
       "model_fingerprint": null,
       "provider": "openrouter",
       "tier": 1
@@ -1522,7 +1522,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -1537,7 +1537,7 @@
       "model_output_ref": "sha256:d96953e082de5bc2ed4691539d43c0584b579451c4e4801ef76642ce569f8014",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -1548,7 +1548,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 27,
@@ -1556,7 +1556,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 3811,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 3838,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -1636,7 +1636,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -1651,7 +1651,7 @@
       "model_output_ref": "sha256:b2488e714a4524aba2facd53bc321ba5cafc608b7cc9f6d9b85493b3821bc144",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -1662,7 +1662,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 21,
@@ -1670,7 +1670,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 3881,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 3902,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -1750,7 +1750,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -1765,7 +1765,7 @@
       "model_output_ref": "sha256:2fbc49e40b6c30bf08d33f1ea7dfdac687f026173a1dca040a18cee3ff94d362",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -1776,7 +1776,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 92,
@@ -1784,7 +1784,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 3987,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4079,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -1864,7 +1864,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -1879,7 +1879,7 @@
       "model_output_ref": "sha256:4d1282e41c1583c68fd70ea2fbc16e2020d0cebb3cd14a5cf1d45ceaac8c6fab",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -1890,7 +1890,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 146,
@@ -1898,7 +1898,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 3982,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4128,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -1978,7 +1978,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -1993,7 +1993,7 @@
       "model_output_ref": "sha256:86f34b0762452fdc218d82ac2751b2e96045ccd7c0a339c4a3ecb3d0c141312f",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2004,7 +2004,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 39,
@@ -2012,7 +2012,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4596,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4635,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2083,7 +2083,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2098,7 +2098,7 @@
       "model_output_ref": "sha256:ec3662d9ada85768c3ed6163b6e60e79c1fed5e09a4eb5a089222d747b33bb3f",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2109,7 +2109,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 138,
@@ -2117,7 +2117,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4806,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2188,7 +2188,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2203,7 +2203,7 @@
       "model_output_ref": "sha256:4af0bff42b133fe44660173f04f5008fb7e5fb639fd5ff573184ced8f9780dec",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2214,7 +2214,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 154,
@@ -2222,7 +2222,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4822,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2293,7 +2293,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2308,7 +2308,7 @@
       "model_output_ref": "sha256:1d2eb1d10ed3d66a2789fab027395447c511a12dffde0597d305fb761cee32b5",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2319,7 +2319,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 142,
@@ -2327,7 +2327,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4810,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2398,7 +2398,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2413,7 +2413,7 @@
       "model_output_ref": "sha256:6260937be98e543e00f693c4f620509880103981413a21eb940aeffa3a9c74b6",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2424,7 +2424,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 145,
@@ -2432,7 +2432,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4813,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2503,7 +2503,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2518,7 +2518,7 @@
       "model_output_ref": "sha256:ca7cc8af2732950d9f192976730a6509b2c6c65bbe469fc79b810e41aad32dc2",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2529,7 +2529,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 155,
@@ -2537,7 +2537,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4055,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4210,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2608,7 +2608,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2623,7 +2623,7 @@
       "model_output_ref": "sha256:7cdcd7c0b42a1f01f7a19f5232f1fdc958ea1cf509cf85489ab0eb7062f42a27",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2634,7 +2634,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 143,
@@ -2642,7 +2642,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4811,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2713,7 +2713,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2728,7 +2728,7 @@
       "model_output_ref": "sha256:4d4d8e9810866764c9625c354f509199e90f753fbf58d3e3637ab0a5492ebc1b",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2739,7 +2739,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 109,
@@ -2747,7 +2747,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4777,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2818,7 +2818,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2833,7 +2833,7 @@
       "model_output_ref": "sha256:e4c59c2313d4af747660d1e3d551eea4137fc5e46f486d1cfcdfecf173f3e410",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2844,7 +2844,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 98,
@@ -2852,7 +2852,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4766,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -2923,7 +2923,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -2938,7 +2938,7 @@
       "model_output_ref": "sha256:598e88217496c2fa6749cde4a3d62998272b2030cd696fa56f672add2f9d1f50",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -2949,7 +2949,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 104,
@@ -2957,7 +2957,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4772,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3028,7 +3028,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3043,7 +3043,7 @@
       "model_output_ref": "sha256:1d2bcc564a6170afb0c8abaa7a11efab65f3a40394c2bb8dc67f1cd52d449299",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3054,7 +3054,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 91,
@@ -3062,7 +3062,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4759,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3133,7 +3133,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3148,7 +3148,7 @@
       "model_output_ref": "sha256:33b9c6886dd22061ccb406bad552ef191ee4d3813be15fb98a1dfaeab38bb16d",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3159,7 +3159,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 97,
@@ -3167,7 +3167,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4765,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3238,7 +3238,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3253,7 +3253,7 @@
       "model_output_ref": "sha256:e4c59c2313d4af747660d1e3d551eea4137fc5e46f486d1cfcdfecf173f3e410",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3264,7 +3264,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 98,
@@ -3272,7 +3272,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4766,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3343,7 +3343,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3358,7 +3358,7 @@
       "model_output_ref": "sha256:1d2bcc564a6170afb0c8abaa7a11efab65f3a40394c2bb8dc67f1cd52d449299",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3369,7 +3369,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 91,
@@ -3377,7 +3377,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4759,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3448,7 +3448,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3463,7 +3463,7 @@
       "model_output_ref": "sha256:07650390b3ee7b9fd6400a34dc18cdc79669ba442bc07caf58662f7176f0850e",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3474,7 +3474,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 150,
@@ -3482,7 +3482,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4668,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4818,
             "ttft_millis": 0,
             "usd_micros": 0
@@ -3553,7 +3553,7 @@
           },
           "route": {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-v4-flash-0731",
+            "model": "deepseek/deepseek-chat",
             "model_fingerprint": null,
             "provider": "openrouter"
           },
@@ -3568,7 +3568,7 @@
       "model_output_ref": "sha256:6e48d5b50c4ffcc2dbb5db98d6b800bcc003119cab454cac75e2c8a966c54583",
       "model_route": {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-v4-flash-0731",
+        "model": "deepseek/deepseek-chat",
         "model_fingerprint": null,
         "provider": "openrouter"
       },
@@ -3579,7 +3579,7 @@
           "cost_usd": 0.0,
           "pricing_known": false,
           "pricing_source": "unknown",
-          "resolved_model": "deepseek/deepseek-v4-flash-0731",
+          "resolved_model": "deepseek/deepseek-chat",
           "usage": {
             "cached_tokens": 0,
             "completion_tokens": 124,
@@ -3587,7 +3587,7 @@
             "pricing_known": false,
             "pricing_source": "unknown",
             "prompt_tokens": 4095,
-            "resolved_model": "deepseek/deepseek-v4-flash-0731",
+            "resolved_model": "deepseek/deepseek-chat",
             "total_tokens": 4219,
             "ttft_millis": 0,
             "usd_micros": 0

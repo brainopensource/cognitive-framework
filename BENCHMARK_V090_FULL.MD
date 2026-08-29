@@ -1192,6 +1192,12 @@ Required generic capability cannot be composed through existing framework.
 
 ## Run lifecycle pseudocode
 
+**MANDATORY: RUN `MAKE CLEAN-BENCHMARK-CACHE` FROM THE FRESH BENCHMARK WORKSPACE BEFORE EVERY BENCHMARK ROW. NEVER REUSE PYTHON BYTECODE CACHE STATE BETWEEN ROWS. CACHE CLEANUP MUST HAPPEN BEFORE THE SUBJECT SNAPSHOT.**
+
+The benchmark driver must invoke `make clean-benchmark-cache` for each newly
+provisioned workspace and record the command result in that row's evidence. The
+target removes only `__pycache__`, `.pyc`, and `.pyo` artifacts.
+
 ```python
 def execute_preregistered_run(spec):
     assert framework_digest() == prereg.framework_digest

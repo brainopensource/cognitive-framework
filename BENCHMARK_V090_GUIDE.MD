@@ -347,6 +347,11 @@
 
   Phase 4 — deterministic unpaid dry run
 
+  **MANDATORY: RUN `MAKE CLEAN-BENCHMARK-CACHE` FROM THE FRESH BENCHMARK WORKSPACE BEFORE EVERY BENCHMARK ROW. NEVER REUSE PYTHON BYTECODE CACHE STATE BETWEEN ROWS. CACHE CLEANUP MUST HAPPEN BEFORE THE SUBJECT SNAPSHOT.**
+
+  Make the benchmark driver invoke `make clean-benchmark-cache` for every newly provisioned workspace and record the command result in each row's evidence. This target removes only
+  `__pycache__`, `.pyc`, and `.pyo` artifacts.
+
   Use deterministic cassette or fake-model infrastructure solely to validate orchestration.
 
   Do not call these scores empirical.

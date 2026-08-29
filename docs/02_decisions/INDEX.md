@@ -7,7 +7,7 @@ canonical_for:
   - canonical-rf-falsifier-allocation-register
 status: living
 owner: repository-governance
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-27
 read_when:
   - resolving-architectural-decisions

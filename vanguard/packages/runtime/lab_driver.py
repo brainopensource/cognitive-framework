@@ -105,6 +105,7 @@ def run_lab_task(
     sandbox_mode: str = "rootless",
     allow_paid: bool = False,
     state_dir: Path | str | None = None,
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -149,6 +150,7 @@ def run_lab_task(
             models=models,
             tape=tape,
             allow_paid=allow_paid,
+            reasoning_effort=reasoning_effort,
         )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.

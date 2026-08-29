@@ -75,6 +75,7 @@ def select_model(
     free_models: Callable[[], Sequence[str]] | None = None,
     env: Any = None,
     allow_paid: bool = False,
+    reasoning_effort: str | None = None,
 ) -> SelectedModel:
     """Return a labelled `ModelPort`, or raise `ModelUnavailable`.
 
@@ -178,7 +179,7 @@ def select_model(
             return SelectedModel(
                 port=choice,
                 model=OpenRouterModel(
-                    model=name, models=models, stream=False, reasoning_effort="none"),
+                    model=name, models=models, stream=True, reasoning_effort=reasoning_effort),
                 label=f"{choice}:{name}",
             )
 
@@ -194,7 +195,7 @@ def select_model(
         return SelectedModel(
             port=choice,
             model=OpenRouterModel(
-                model=name, models=models, stream=False, reasoning_effort="none"),
+                model=name, models=models, stream=True, reasoning_effort=reasoning_effort),
             label=f"{choice}:{name}",
         )
 

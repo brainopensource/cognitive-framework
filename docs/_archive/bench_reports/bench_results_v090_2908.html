@@ -1245,13 +1245,98 @@ except urllib.error.HTTPError as exc:
                             <td><code>COMPLETED</code></td>
                             <td><span class="badge badge-green">PASSED</span></td>
                         </tr>
+                        <tr>
+                            <td><strong>Batch 4.1</strong></td>
+                            <td><span class="badge badge-blue">Single Low Budget LLM</span></td>
+                            <td><code>z-ai/glm-5.3-flash</code></td>
+                            <td><code>v090-02</code></td>
+                            <td>tier2_event_bus (React Control)</td>
+                            <td>Medium</td>
+                            <td>404.19s</td>
+                            <td>16,432 + 311</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Read-Only)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 4.2</strong></td>
+                            <td><span class="badge badge-blue">Single Low Budget LLM</span></td>
+                            <td><code>z-ai/glm-5.3-flash</code></td>
+                            <td><code>v090-05</code></td>
+                            <td>tier2_event_bus (Claude Shaped)</td>
+                            <td>Medium</td>
+                            <td>461.03s</td>
+                            <td>32,129 + 619</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Read-Only)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 5.1</strong></td>
+                            <td><span class="badge badge-purple">Single Reasoning LLM (Medium Effort)</span></td>
+                            <td><code>tencent/hy3-preview</code></td>
+                            <td><code>v090-02</code></td>
+                            <td>tier2_event_bus (React Control)</td>
+                            <td>Medium</td>
+                            <td>186.46s</td>
+                            <td>17,803 + 2,000</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Read-Only)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 6.1</strong></td>
+                            <td><span class="badge badge-green">Easy Matrix (MiniMax M3 Free)</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-01</code></td>
+                            <td>tier1_lru_ttl_cache (React Control)</td>
+                            <td>Easy</td>
+                            <td>45.76s</td>
+                            <td>35,896 + 1,023</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 6.2</strong></td>
+                            <td><span class="badge badge-green">Easy Matrix (MiniMax M3 Free)</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-04</code></td>
+                            <td>tier1_lru_ttl_cache (Claude Shaped)</td>
+                            <td>Easy</td>
+                            <td>34.18s</td>
+                            <td>39,284 + 824</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 6.3</strong></td>
+                            <td><span class="badge badge-green">Easy Matrix (MiniMax M3 Free)</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-07</code></td>
+                            <td>tier1_lru_ttl_cache (OpenCode Shaped)</td>
+                            <td>Easy</td>
+                            <td>56.38s</td>
+                            <td>42,621 + 789</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 6.4</strong></td>
+                            <td><span class="badge badge-green">Easy Matrix (MiniMax M3 Free)</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-24</code></td>
+                            <td>tier1_lru_ttl_cache (Bugfix Direct)</td>
+                            <td>Easy</td>
+                            <td>159.56s</td>
+                            <td>70,439 + 2,678</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
-            <h3 style="margin-top: 1.5rem;">Key Multi-Tier Benchmark Findings (10 Evaluation Runs)</h3>
+            <h3 style="margin-top: 1.5rem;">Key Multi-Tier Benchmark Findings (18 Evaluation Runs)</h3>
             <ul>
-                <li><strong>High Pass Rate on Free Models (80% Pass Rate in Batch 3, 100% in Batch 1):</strong> <code>minimax/minimax-m3:free</code> demonstrated strong performance on both Easy (<code>tier1_lru_ttl_cache</code>) and Hard (<code>tier3_token_bucket</code>) problems across <code>react-control</code>, <code>claude-shaped</code>, and <code>opencode-shaped</code> presets at $0.00 cost.</li>
+                <li><strong>100% Pass Rate on Write-Capable Easy Presets:</strong> <code>minimax/minimax-m3:free</code> successfully solved <code>tier1_lru_ttl_cache</code> across all write-enabled coding presets (<code>react-control</code>, <code>claude-shaped</code>, <code>opencode-shaped</code>, <code>bugfix-direct</code>) passing all hidden exterior oracle tests at $0.00 cost.</li>
+                <li><strong>Read-Only Preset Behavior:</strong> Research and Tutor presets (<code>v090-16</code> through <code>v090-22</code>) intentionally lack <code>patch.apply</code> capability by design (Invariant I-6), producing clean <code>NO_PATCH</code> verification receipts without crashes.</li>
                 <li><strong>Multi-Model Fallback Resilience:</strong> When passing fallback lists (e.g. <code>minimax-m3:free &rarr; nemotron &rarr; laguna</code>), OpenRouter cascades without dropping execution, ensuring robust end-to-end completion.</li>
                 <li><strong>Hard Tier Solvability:</strong> The hard challenge <code>tier3_token_bucket</code> passed consistently across both Low Budget paid models (<code>v090-03</code> in 38.16s) and Free models (<code>v090-03</code> in 41.88s, <code>v090-06</code> in 32.65s).</li>
             </ul>

@@ -231,7 +231,7 @@ def dry_run(*, force: bool = False) -> dict[str, Any]:
     return {"preregistration": prereg_path, "report": report_path, "rows": len(evidence)}
 
 
-def runtime_executor(preset: str, *, model_name: str = MODEL, models: Sequence[str] | None = None):
+def runtime_executor(preset: str, *, model_name: str = MODEL, models: Sequence[str] | None = None, reasoning_effort: str | None = None):
     """Bind a clean-runner row to the real preset-selecting runtime lab.
 
     The callback receives ``PublicChallenge`` from ``runner.run_row``; the
@@ -255,6 +255,7 @@ def runtime_executor(preset: str, *, model_name: str = MODEL, models: Sequence[s
             allow_paid=True, max_turns=8, max_attempts=2,
             brief=challenge.brief, sandbox_mode="host-dev",
             state_dir=workspace / ".vanguard",
+            reasoning_effort=reasoning_effort,
         )
         return ExecutionTelemetry(
             terminal=str(result.get("outcome", "instrument_error")),
@@ -299,6 +300,7 @@ def live_filtered(
     classes: Sequence[str] | None = None,
     presets: Sequence[str] | None = None,
     models: Sequence[str] | None = None,
+    reasoning_effort: str | None = None,
     timeout: float = 180.0,
 ) -> dict[str, Any]:
     """Execute filtered benchmark rows through the preset-selecting bridge."""
@@ -352,7 +354,7 @@ def live_filtered(
         task_id = task_for_slot[row.challenge]
         print(f"\n--- Running [{row.run_id}] {row.class_name} {row.difficulty} ({row.challenge}: {task_id}) with {row.preset} ---")
         t_row_start = time.perf_counter()
-        result = run_row(task_id, row.preset, runtime_executor(row.preset, models=models),
+        result = run_row(task_id, row.preset, runtime_executor(row.preset, models=models, reasoning_effort=reasoning_effort),
                          timeout=timeout, non_empirical=False, workspace_root=RUNS)
         elapsed_s = time.perf_counter() - t_row_start
         usage = result.get("usage", {})
@@ -386,6 +388,7 @@ def main() -> int:
     parser.add_argument("--class-name", "-c", nargs="+", choices=("Coding", "Tutor", "Research", "Bugfix", "coding", "tutor", "research", "bugfix"), default=None, help="Filter by agent class")
     parser.add_argument("--preset", "-p", nargs="+", default=None, help="Filter by preset name")
     parser.add_argument("--models", "-m", nargs="+", default=None, help="List of models with fallback")
+    parser.add_argument("--reasoning-effort", default=None, choices=("none", "low", "medium", "high"), help="Reasoning effort level")
     parser.add_argument("--challenge", default=None, help="Directly run one specific SWE challenge ID (e.g. tier2_event_bus)")
     parser.add_argument("--timeout", type=float, default=180.0, help="Per-row timeout in seconds (default: 180)")
     parser.add_argument("--out", "-o", default=None, help="Custom JSON report output file path")
@@ -419,7 +422,7 @@ def main() -> int:
             preset = args.preset[0] if args.preset else "vg-code-v090-react-control"
             from benchmarks.frontier_v090.runner import run_row
             print(f"Running challenge {args.challenge} with preset {preset}...")
-            res = run_row(args.challenge, preset, runtime_executor(preset, models=args.models), timeout=args.timeout, non_empirical=False, workspace_root=RUNS)
+            res = run_row(args.challenge, preset, runtime_executor(preset, models=args.models, reasoning_effort=args.reasoning_effort), timeout=args.timeout, non_empirical=False, workspace_root=RUNS)
             print(json.dumps(res, indent=2, sort_keys=True))
             return 0
 
@@ -429,6 +432,7 @@ def main() -> int:
             classes=args.class_name,
             presets=args.preset,
             models=args.models,
+            reasoning_effort=args.reasoning_effort,
             timeout=args.timeout,
         )
         if args.out:

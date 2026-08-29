@@ -45,11 +45,11 @@ The ledger mirrors the stable backlog and makes state drift mechanically detecta
 | WP-A1 | Lane A | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `rf95_and_rf101_to_rf113_receipts_resolve` |
 | WP-B1 | Lane B | **PACKAGE_READY** | `adr_0101 AND adr_0102` | `baseline_vectors_and_contract_receipts_resolve` |
 | WP-A2 | Lane A | **PACKAGE_READY** | `wp_a1_merged AND adr_0103_frozen AND wp_c1_predicate` | `runtime_seam_receipt_resolves` |
-| WP-B2 | Lane B | **EVIDENCE_READY** | `wp_a1 AND wp_a2 AND study_receipt` | `signed_study_disposition_resolves` |
-| WP-A3 | Lane A | **EVIDENCE_READY** | `wp_a1_merged` | `three_topology_receipts_resolve` |
+| WP-B2 | Lane B | **BLOCKED** | `wp_a1 AND wp_a2 AND study_receipt` | `signed_study_disposition_resolves` |
+| WP-A3 | Lane A | **IN_PROGRESS** | `wp_a1_merged` | `three_topology_receipts_resolve` |
 | WP-B3 | Lane B | **EVIDENCE_READY** | `wp_a3_receipt` | `m701_receipt_and_scheduler_decision_resolve` |
-| WP-A4 | Lane A | **EVIDENCE_READY** | `adr_0099 AND adr_0100` | `durable_memory_receipts_resolve` |
-| WP-B4 | Lane B | **EVIDENCE_READY** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
+| WP-A4 | Lane A | **PACKAGE_READY** | `adr_0099 AND adr_0100` | `durable_memory_receipts_resolve` |
+| WP-B4 | Lane B | **PACKAGE_READY** | `wp_a4 AND m65_disposition` | `held_out_and_rollback_receipts_resolve` |
 | WP-C1 | Lane A | **PACKAGE_READY** | `adr_0062 AND adr_0089 AND adr_0101` | `trust_spine_and_single_writer_receipts_resolve` |
 
 ## Evidence signing and acceptance protocol

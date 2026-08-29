@@ -63,6 +63,7 @@ class RuntimeBootstrap:
         model: Any = None,
         store: Any = None,
         store_path: Path | None = None,
+        state_dir: Path | str | None = None,
         clock: ClockPort | None = None,
         host_qualifies: bool = True,
         host_facts: Mapping[str, Any] | None = None,
@@ -81,8 +82,14 @@ class RuntimeBootstrap:
         if store is not None:
             selected_store = store
         elif profile.requested.persistence_mode == "sqlite-wal":
-            db_path = Path(store_path) if store_path is not None else repo / ".vanguard" / "events.sqlite3"
-            db_path.parent.mkdir(parents=True, exist_ok=True)
+            from .state_contract import ensure_state_directory, resolve_state_directory
+            if store_path is not None:
+                db_path = Path(store_path).resolve()
+                ensure_state_directory(db_path.parent, durability_mode="sqlite-wal")
+            else:
+                resolved_state = resolve_state_directory(repo, state_dir=state_dir)
+                ensure_state_directory(resolved_state, durability_mode="sqlite-wal")
+                db_path = resolved_state / "events.sqlite3"
             selected_store = SqliteEventStore(db_path)
         else:
             selected_store = SqliteEventStore(":memory:")
@@ -117,16 +124,14 @@ class RuntimeBootstrap:
         selected_model = model
         if selected_model is None:
             import os
+            from .model_selection import select_model
             model_port = os.environ.get("VANGUARD_MODEL_PORT")
             if model_port:
-                from .model_selection import select_model
                 selected_model = select_model(model_port).model
-            elif profile.requested.id == "local":
-                from ..adapters.models.fake import FakeModel
-                selected_model = FakeModel([])
+            elif profile.requested.id in {"local", "ci"}:
+                selected_model = select_model("fake").model
             else:
-                from ..adapters.models.openrouter import OpenRouterModel
-                selected_model = OpenRouterModel()
+                selected_model = select_model("openrouter").model
 
         if selected_model is None:
             raise RuntimeError(f"no model adapter could be selected or resolved for profile {profile_id!r}")

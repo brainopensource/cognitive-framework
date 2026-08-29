@@ -241,8 +241,19 @@ class Runtime:
         path = cls._manifest_file(manifest_path)
         directory = path.parent
         try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
+            content_text = path.read_text(encoding="utf-8")
+            if path.suffix.lower() in {".yaml", ".yml"}:
+                import yaml
+                raw = yaml.safe_load(content_text)
+            else:
+                try:
+                    raw = json.loads(content_text)
+                except json.JSONDecodeError:
+                    import yaml
+                    raw = yaml.safe_load(content_text)
+        except OSError as exc:
+            raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
+        except Exception as exc:
             raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
 
         try:
@@ -341,7 +352,12 @@ class Runtime:
             if candidate.exists():
                 path = candidate
         if path.is_dir():
-            path = path / "manifest.json"
+            for candidate in ("manifest.json", "manifest.yaml", "manifest.yml", "harness.yaml", "harness.json"):
+                if (path / candidate).is_file():
+                    path = path / candidate
+                    break
+            else:
+                path = path / "manifest.json"
         return path
 
     @staticmethod

@@ -356,5 +356,5 @@ meaning.
 - [`DEFERRED_REJECTED.md`](DEFERRED_REJECTED.md) — Comprehensive register of capabilities deferred to later phases or rejected with rationale.
 - [`DRIFT_REGISTER_v045.md`](DRIFT_REGISTER_v045.md) — Forensic register of historical drifts identified and resolved.
 - [`SPEC.md`](../SPEC.md) — Living normative specification (Vanguard Meta-Harness Framework).
-- [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — historical substrate generality analysis.
-- [`004_V061_ALIGNMENT_ROADMAP.md`](../_archive/reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — historical v0.6.1 alignment roadmap.
+- [`005_V061_SUBSTRATE_GENERALITY_REVIEW.md`](../_archive/reviews/backend/director_review_v0/PRINCIPAL_STAFF_ENGINEER_REVIEW/005_V061_SUBSTRATE_GENERALITY_REVIEW.md) — historical substrate generality analysis.
+- [`004_V061_ALIGNMENT_ROADMAP.md`](../_archive/reviews/backend/director_review_v0/PRINCIPAL_STAFF_ENGINEER_REVIEW/004_V061_ALIGNMENT_ROADMAP.md) — historical v0.6.1 alignment roadmap.

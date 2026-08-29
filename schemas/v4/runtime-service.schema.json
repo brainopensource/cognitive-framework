@@ -336,7 +336,13 @@
         "commandId": { "type": "string", "minLength": 1 },
         "idempotencyKey": { "type": "string", "minLength": 1 },
         "actor": { "type": "string" },
-        "runId": { "$ref": "primitives.schema.json#/$defs/RunId" },
+        "runId": {
+          "$comment": "Run-scope optional: the field is always sent on the wire, blank when the caller has no run in mind.",
+          "anyOf": [
+            { "$ref": "primitives.schema.json#/$defs/RunId" },
+            { "const": "" }
+          ]
+        },
         "payload": {
           "type": "object",
           "required": ["artifactId"],

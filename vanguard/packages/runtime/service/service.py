@@ -46,6 +46,11 @@ from .contract import (
 )
 from .inbox import ServiceInboxStore
 
+try:
+    from vanguard import __version__
+except ImportError:  # pragma: no cover
+    __version__ = "0.9.0b1"
+
 
 #: How long `Cancel` waits for a worker to settle before recording the outcome
 #: as undeterminable rather than asserting a terminal state it did not observe.
@@ -376,7 +381,7 @@ class RuntimeService:
     ) -> dict[str, Any]:
         return {
             "api": "aether.capabilities/1",
-            "serverVersion": "0.7.3.dev0",
+            "serverVersion": __version__,
             "wireVersions": ["vg.4"],
             "capabilities": {
                 "run.start": {

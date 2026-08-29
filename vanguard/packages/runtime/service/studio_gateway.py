@@ -48,7 +48,11 @@ def _package_version() -> str:
     try:
         return distribution_version("vanguard-runtime")
     except PackageNotFoundError:
-        return "unknown"
+        try:
+            from vanguard import __version__
+            return __version__
+        except ImportError:
+            return "0.9.0b1"
 
 
 def _http_status_for_code(code: str) -> int:

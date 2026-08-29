@@ -255,6 +255,12 @@ PRESETS: Mapping[str, ExecutionProfile] = {
     ),
 }
 
+_ALIASES: Mapping[str, str] = {
+    "standard": "product",
+    "ci": "local",
+    "fast": "local",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class EffectiveExecutionProfile:
@@ -301,8 +307,9 @@ def resolve_profile(
     explicitly (typically `local`, with its own approval) rather than
     receive a silent substitution (`RF-88`).
     """
+    resolved_id = _ALIASES.get(profile_id, profile_id)
     try:
-        base = PRESETS[profile_id]
+        base = PRESETS[resolved_id]
     except KeyError:
         raise ExecutionProfileError(f"unknown execution profile {profile_id!r}") from None
     if overrides:

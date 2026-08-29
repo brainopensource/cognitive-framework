@@ -169,85 +169,107 @@ def run_single_harness_task(
             }
 
 
+def _load_openrouter_key() -> str | None:
+    """Load OpenRouter API key from environment or .env file."""
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if key and not key.startswith("your_"):
+        return key
+    env_file = ROOT / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("OPENROUTER_API_KEY="):
+                val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                if val and not val.startswith("your_"):
+                    return val
+    return None
+
+
 def query_model_with_fallback(model: str, messages: list[dict], tools: list[dict] | None = None) -> dict[str, Any]:
-    """Execute completion against model evaluator with precise pricing from models_registry."""
+    """Execute live completion against OpenRouter API with real network latency and telemetry."""
+    import urllib.request
+    import urllib.error
+
+    api_key = _load_openrouter_key()
+    if not api_key:
+        return {
+            "model": model,
+            "error": "No OPENROUTER_API_KEY found in environment or .env",
+            "content": "",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "usd_micros": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 0.0,
+            "is_live": False,
+        }
+
     start_t = time.perf_counter()
-    prompt = messages[-1]["content"].lower()
-    
-    # Model pricing table from vanguard/packages/adapters/models/models_registry.json
-    pricing = {
-        "openrouter/free": {"input_per_m": 0.0, "output_per_m": 0.0, "base_ms": 45.0},
-        "minimax/minimax-m3:free": {"input_per_m": 0.0, "output_per_m": 0.0, "base_ms": 38.0},
-        "nvidia/nemotron-3-super-120b-a12b:free": {"input_per_m": 0.0, "output_per_m": 0.0, "base_ms": 52.0},
-        "poolside/laguna-s-2.1:free": {"input_per_m": 0.0, "output_per_m": 0.0, "base_ms": 35.0},
-        "deepseek/deepseek-v4-flash": {"input_per_m": 0.14, "output_per_m": 0.28, "base_ms": 28.0},
-        "xiaomi/mimo-v2.5": {"input_per_m": 0.10, "output_per_m": 0.20, "base_ms": 22.0},
-        "openai/gpt-5.6-luna": {"input_per_m": 1.25, "output_per_m": 5.00, "base_ms": 65.0},
+    payload = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": 300,
+        "temperature": 0.0,
     }
-    spec = pricing.get(model, {"input_per_m": 0.14, "output_per_m": 0.28, "base_ms": 30.0})
+    if tools:
+        payload["tools"] = tools
 
-    if "attenuation" in prompt or "attenuat" in prompt:
-        content = (
-            "The Vanguard Kernel implements monotonic capability attenuation in `attenuation.py`. "
-            "The function `monotonic_attenuate()` enforces that child permissions are a strict subset "
-            "of parent grants, failing closed (Invariant I-2) if an escalated capability or widening "
-            "selector is requested."
-        )
-    elif "sqlite" in prompt or "durability" in prompt:
-        content = (
-            "SqliteEventStore guarantees write-ahead logging (WAL) persistence, optimistic concurrency "
-            "via monotonic sequence counters (`seq`), and SHA-256 CAS Merkle DAG hashing for tamper detection "
-            "and crash-safe replay."
-        )
-    elif "compaction" in prompt:
-        content = (
-            "Structured context compaction in `compaction.py` applies recency windowing and structured "
-            "consolidation records. It evicts raw historical turns while strictly preserving explicit dead-ends, "
-            "active constraints, and remaining token budgets."
-        )
-    elif "cacheentry" in prompt or "ttl" in prompt or "expiry" in prompt:
-        content = (
-            "Defect Diagnosis: In CacheEntry, is_expired() always returns False, causing stale cache items "
-            "to never be evicted.\n\n"
-            "Corrected Fix:\n"
-            "```python\n"
-            "def is_expired(self, current_time: float) -> bool:\n"
-            "    if self.ttl_seconds is None:\n"
-            "        return False\n"
-            "    return (current_time - self.created_at) >= self.ttl_seconds\n"
-            "```"
-        )
-    elif "lock" in prompt or "concurrency" in prompt or "race" in prompt:
-        content = (
-            "Defect Diagnosis: Unprotected check-then-act race condition in get_or_set without lock acquisition.\n\n"
-            "Corrected Fix:\n"
-            "```python\n"
-            "def get_or_set(key, val):\n"
-            "    with lock:\n"
-            "        if key not in db:\n"
-            "            db[key] = val\n"
-            "        return db[key]\n"
-            "```"
-        )
-    else:
-        content = f"Technical evaluation for {prompt[:40]}... Analyzed invariants and verified symbols."
+    req = urllib.request.Request(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://vanguard.ai",
+            "X-Title": "Vanguard-Benchmark-Matrix",
+        },
+        data=json.dumps(payload).encode("utf-8"),
+    )
 
-    p_tokens = len(messages[-1]["content"]) // 4 + 48
-    c_tokens = len(content) // 4 + 24
-    cost_usd = round((p_tokens * spec["input_per_m"] + c_tokens * spec["output_per_m"]) / 1_000_000.0, 6)
-    wall_ms = round((time.perf_counter() - start_t) * 1000.0 + spec["base_ms"], 2)
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            elapsed_ms = (time.perf_counter() - start_t) * 1000.0
+            data = json.loads(resp.read().decode("utf-8"))
+            usage = data.get("usage", {})
+            p_tokens = int(usage.get("prompt_tokens", 0) or 0)
+            c_tokens = int(usage.get("completion_tokens", 0) or 0)
+            t_tokens = int(usage.get("total_tokens", p_tokens + c_tokens) or (p_tokens + c_tokens))
+            raw_cost = usage.get("cost", 0.0) or 0.0
+            usd_micros = int(raw_cost * 1_000_000)
 
-    return {
-        "content": content,
-        "tool_calls": [],
-        "prompt_tokens": p_tokens,
-        "completion_tokens": c_tokens,
-        "total_tokens": p_tokens + c_tokens,
-        "cost_usd": cost_usd,
-        "wall_ms": wall_ms,
-        "status": "success",
-        "engine": "vanguard_evaluator_engine",
-    }
+            choices = data.get("choices", [])
+            content = ""
+            if choices and "message" in choices[0]:
+                content = choices[0]["message"].get("content", "") or ""
+
+            return {
+                "model": data.get("model", model),
+                "requested_model": model,
+                "content": content,
+                "prompt_tokens": p_tokens,
+                "completion_tokens": c_tokens,
+                "total_tokens": t_tokens,
+                "usd_micros": usd_micros,
+                "cost_usd": round(raw_cost, 6),
+                "latency_ms": round(elapsed_ms, 2),
+                "is_live": True,
+                "raw_response_id": data.get("id", ""),
+            }
+    except Exception as exc:
+        elapsed_ms = (time.perf_counter() - start_t) * 1000.0
+        return {
+            "model": model,
+            "requested_model": model,
+            "error": str(exc),
+            "content": "",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "usd_micros": 0,
+            "cost_usd": 0.0,
+            "latency_ms": round(elapsed_ms, 2),
+            "is_live": False,
+        }
 
 
 def run_rag_tutor_benchmark(models: list[str]) -> list[dict[str, Any]]:
@@ -284,38 +306,43 @@ def run_rag_tutor_benchmark(models: list[str]) -> list[dict[str, Any]]:
                     {"role": "user", "content": q["prompt"]}
                 ]
             )
-            if res.get("status") == "success":
+            if "error" not in res and res.get("content"):
                 content = res.get("content", "").lower()
                 hits = sum(1 for sym in q["ground_truth_symbols"] if sym.lower() in content)
                 fidelity_score = round(hits / len(q["ground_truth_symbols"]), 2)
                 results.append({
                     "harness": "vg-code-explain (RAG Tutor)",
                     "model": m,
+                    "actual_model": res.get("model", m),
                     "query_id": q["query_id"],
                     "topic": q["topic"],
                     "fidelity_score": fidelity_score,
                     "symbols_found": f"{hits}/{len(q['ground_truth_symbols'])}",
-                    "wall_ms": res.get("wall_ms", 0),
+                    "wall_ms": res.get("latency_ms", 0),
                     "prompt_tokens": res.get("prompt_tokens", 0),
                     "completion_tokens": res.get("completion_tokens", 0),
                     "total_tokens": res.get("total_tokens", 0),
                     "cost_usd": res.get("cost_usd", 0.0),
                     "status": "PASSED" if fidelity_score >= 0.5 else "PARTIAL",
+                    "is_live": res.get("is_live", False),
+                    "response_snippet": res.get("content", "")[:120].strip().replace("\n", " "),
                 })
             else:
                 results.append({
                     "harness": "vg-code-explain (RAG Tutor)",
                     "model": m,
+                    "actual_model": res.get("model", m),
                     "query_id": q["query_id"],
                     "topic": q["topic"],
                     "fidelity_score": 0.0,
                     "symbols_found": "0/0",
-                    "wall_ms": res.get("wall_ms", 0),
+                    "wall_ms": res.get("latency_ms", 0),
                     "prompt_tokens": 0,
                     "completion_tokens": 0,
                     "total_tokens": 0,
                     "cost_usd": 0.0,
                     "status": f"FAILED ({res.get('error')})",
+                    "is_live": False,
                 })
     return results
 
@@ -364,41 +391,46 @@ def run_codefix_critic_benchmark(models: list[str]) -> list[dict[str, Any]]:
                     {"role": "user", "content": f"Review and fix this code:\n\n{c['snippet']}"}
                 ]
             )
-            if res.get("status") == "success":
+            if "error" not in res and res.get("content"):
                 content = res.get("content", "").lower()
-                detected_defect = c["defect_pattern"].lower() in content or "bug" in content or "false" in content or "race" in content
-                provided_fix = ("return" in content and "ttl" in content) or ("lock" in content)
+                detected_defect = c["defect_pattern"].lower() in content or "bug" in content or "false" in content or "race" in content or "lock" in content
+                provided_fix = ("return" in content and "ttl" in content) or ("created_at" in content) or ("with lock" in content or "lock" in content)
                 score = 1.0 if (detected_defect and provided_fix) else 0.5 if detected_defect else 0.0
                 results.append({
                     "harness": "vg-code-critic-reviser (CodeFix)",
                     "model": m,
+                    "actual_model": res.get("model", m),
                     "case_id": c["case_id"],
                     "title": c["title"],
                     "score": score,
                     "defect_diagnosed": detected_defect,
                     "fix_generated": provided_fix,
-                    "wall_ms": res.get("wall_ms", 0),
+                    "wall_ms": res.get("latency_ms", 0),
                     "prompt_tokens": res.get("prompt_tokens", 0),
                     "completion_tokens": res.get("completion_tokens", 0),
                     "total_tokens": res.get("total_tokens", 0),
                     "cost_usd": res.get("cost_usd", 0.0),
                     "status": "PASSED" if score == 1.0 else "PARTIAL",
+                    "is_live": res.get("is_live", False),
+                    "response_snippet": res.get("content", "")[:120].strip().replace("\n", " "),
                 })
             else:
                 results.append({
                     "harness": "vg-code-critic-reviser (CodeFix)",
                     "model": m,
+                    "actual_model": res.get("model", m),
                     "case_id": c["case_id"],
                     "title": c["title"],
                     "score": 0.0,
                     "defect_diagnosed": False,
                     "fix_generated": False,
-                    "wall_ms": res.get("wall_ms", 0),
+                    "wall_ms": res.get("latency_ms", 0),
                     "prompt_tokens": 0,
                     "completion_tokens": 0,
                     "total_tokens": 0,
                     "cost_usd": 0.0,
                     "status": f"FAILED ({res.get('error')})",
+                    "is_live": False,
                 })
     return results
 
@@ -486,12 +518,12 @@ def main() -> None:
     print("VANGUARD AGENTIC HARNESS & MULTI-MODEL BENCHMARK MATRIX")
     print("=" * 100)
 
-    # Models selected for comparison
+    # Models selected for live OpenRouter API comparison (2 Free, 2 Paid)
     eval_models = [
-        "openrouter/free",
-        "minimax/minimax-m3:free",
         "nvidia/nemotron-3-super-120b-a12b:free",
-        "deepseek/deepseek-v4-flash",
+        "nvidia/nemotron-3.5-lightning:free",
+        "openai/gpt-4o-mini",
+        "deepseek/deepseek-chat",
     ]
 
     print("\n--- 1. EVALUATING AGENTIC CODING HARNESSES (SWE-Bench Verified Pro Challenges) ---")

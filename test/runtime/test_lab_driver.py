@@ -86,6 +86,15 @@ class InPlaceWrites(unittest.TestCase):
         self.assertIsNotNone(result.get("grantId"))
         self.assertIn("auto_approved_writes", result["labDepartures"])
 
+    def test_lab_signer_key_id_is_bound_to_its_public_key(self) -> None:
+        from vanguard.packages.runtime.governance.approvals import (
+            ApprovalAuthority, OperatorSigner,
+        )
+
+        signer = OperatorSigner(b"\x22" * 32, key_id="lab-operator")
+        authority = ApprovalAuthority({signer.key_id: signer.public_bytes})
+        self.assertIn("lab-operator", authority.verifying_keys)
+
     def test_interactive_in_place_mints_and_enforces_workspace(self) -> None:
         from vanguard.packages.ports.environment import EffectRequest
         from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant

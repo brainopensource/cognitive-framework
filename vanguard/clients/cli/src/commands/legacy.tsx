@@ -26,7 +26,7 @@ function codingRequestFromParsed(
     question: parsed.question,
     runId: parsed.runId,
     resumeFrom: parsed.resumeFrom,
-    plannerModel: parsed.plannerModel ?? parsed.model ?? "openrouter/free",
+    plannerModel: parsed.plannerModel ?? parsed.model ?? "default",
     modelPort: parsed.modelPort,
     storePath: parsed.storePath,
     profile: parsed.profile ?? "product",

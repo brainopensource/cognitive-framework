@@ -168,6 +168,25 @@ class SandboxedEnvironmentAdapter:
     def preview(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectPreview]:
         if self._direct_filesystem and (req.verb in {"patch.apply", "fs.patch", "fs.write"} or req.action in {"patch", "write"}):
             return self._filesystem.preview(req, grant)
+        if req.action == "write":
+            path = req.args.get("path")
+            content = req.args.get("content")
+            if not isinstance(path, str) or not isinstance(content, str):
+                return Result.fail("invalid_request", "fs.write requires path and content")
+            op = WorkerRequest(
+                operation="fs.write",
+                args={"path": path, "content": content, "dry_run": True},
+                working_directory=req.working_directory or ".",
+                timeout_seconds=30.0,
+                max_output_bytes=10 * 1024 * 1024,
+            )
+            res = self.worker.execute(op)
+            if not res.ok:
+                return Result.fail(res.error.kind, res.error.message)
+            return Result.success(EffectPreview(
+                diff=res.value.stdout,
+                stat={"exit_code": res.value.exit_code},
+            ))
         if req.verb == "patch.apply" or req.action == "patch":
             patch = req.patch or req.args.get("patch")
             if not patch:
@@ -190,6 +209,29 @@ class SandboxedEnvironmentAdapter:
     def apply(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectReceipt]:
         if self._direct_filesystem and (req.verb in {"patch.apply", "fs.patch", "fs.write"} or req.action in {"patch", "write"}):
             return self._filesystem.apply(req, grant)
+        if req.action == "write":
+            path = req.args.get("path")
+            content = req.args.get("content")
+            if not isinstance(path, str) or not isinstance(content, str):
+                return Result.fail("invalid_request", "fs.write requires path and content")
+            op = WorkerRequest(
+                operation="fs.write",
+                args={"path": path, "content": content},
+                working_directory=req.working_directory or ".",
+                timeout_seconds=30.0,
+                max_output_bytes=10 * 1024 * 1024,
+            )
+            res = self.worker.execute(op)
+            if not res.ok:
+                return Result.fail(res.error.kind, res.error.message)
+            return Result.success(EffectReceipt(
+                descriptor_digest=_descriptor_digest(req),
+                outcome="ok" if res.value.exit_code == 0 else "failed",
+                observed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                result_digest=res.value.stdout_digest,
+                exit_code=res.value.exit_code,
+                output=res.value.stdout + res.value.stderr,
+            ))
         if req.verb == "patch.apply" or req.action == "patch":
             patch = req.patch or req.args.get("patch")
             if not patch:
@@ -248,7 +290,7 @@ class SandboxedEnvironmentAdapter:
                 )
             )
 
-        elif req.verb == "fs.write" or req.action == "write":
+        elif req.verb == "fs.write":
             path = req.args.get("path")
             content = req.args.get("content")
             if not isinstance(path, str) or not isinstance(content, str):

@@ -192,7 +192,7 @@ def run_lab_task(
         max_turns = min(max_turns, grant.max_turns)
         max_attempts = min(max_attempts, grant.max_attempts)
         approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
-        approval_key = signer.public_bytes
+        approval_key = {signer.key_id: signer.public_bytes}
     elif approve_writes:
         from .governance.approvals import OperatorSigner
         from .autonomous_grant import create_autonomous_grant
@@ -208,7 +208,7 @@ def run_lab_task(
         max_turns = min(max_turns, grant.max_turns)
         max_attempts = min(max_attempts, grant.max_attempts)
         approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
-        approval_key = signer.public_bytes
+        approval_key = {signer.key_id: signer.public_bytes}
         interactive = True
         departures.append("auto_approved_writes")
 

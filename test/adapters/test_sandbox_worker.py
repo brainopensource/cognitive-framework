@@ -82,6 +82,28 @@ class TestSandboxWorker(unittest.TestCase):
         self.assertTrue(res.ok)
         self.assertEqual(runner.commands[0], ("grep", "-rn", "--", "TODO", "src/"))
 
+    def test_fs_write_creates_contained_parent_directories(self) -> None:
+        runner = FakeSandboxRunner()
+        worker = WorkerProtocol(runner)
+        result = worker.execute(WorkerOperation(
+            operation="fs.write",
+            args={"path": "app/server.py", "content": "value = 1\n"},
+        ))
+        self.assertTrue(result.ok)
+        command = runner.commands[0]
+        self.assertEqual(command[:2], ("/usr/bin/python3", "-c"))
+        self.assertIn("os.makedirs", command[2])
+        self.assertEqual(command[3:], ("app/server.py", "value = 1\n"))
+
+    def test_fs_write_still_rejects_parent_traversal(self) -> None:
+        worker = WorkerProtocol(FakeSandboxRunner())
+        result = worker.execute(WorkerOperation(
+            operation="fs.write",
+            args={"path": "../outside.py", "content": "bad"},
+        ))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "invalid_path")
+
     def test_execute_patch_apply(self) -> None:
         runner = FakeSandboxRunner()
         worker = WorkerProtocol(runner)

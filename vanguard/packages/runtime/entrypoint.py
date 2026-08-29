@@ -73,7 +73,7 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         planner_model = str(request.get("plannerModel") or "")
         selected_model = select_model(
             model_port,
-            model_name=planner_model if planner_model and planner_model != "openrouter/free" else None,
+            model_name=planner_model if planner_model and planner_model not in {"free", "default", "openrouter/free"} else None,
             timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0) if request.get("modelTimeoutSeconds") else None,
             allow_paid=bool(request.get("allowPaid", False)),
         ).model

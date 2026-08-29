@@ -26,8 +26,10 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 LAM_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(LAM_DIR.parents[1]))
+from vanguard.packages.adapters.models.config import get_default_model
 DEFAULT_CHALLENGE_ROOT = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
-DEFAULT_MODEL = "deepseek/deepseek-v4-flash"
+DEFAULT_MODEL = get_default_model()
 DEFAULT_MAX_CALLS = 60
 DEFAULT_MAX_USD = 0.10
 

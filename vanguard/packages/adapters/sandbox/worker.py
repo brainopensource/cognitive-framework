@@ -36,6 +36,9 @@ _SAFE_WRITE = (
     "target=os.path.realpath(os.path.join('/workspace',rel));"
     "ok=target == root or target.startswith(root + os.sep);"
     "(not bad and ok) or (_ for _ in ()).throw(RuntimeError('unsafe workspace path'));"
+    "os.makedirs(os.path.dirname(target),mode=0o755,exist_ok=True);"
+    "target=os.path.realpath(os.path.join('/workspace',rel));"
+    "target.startswith(root + os.sep) or (_ for _ in ()).throw(RuntimeError('unsafe workspace path'));"
     "fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_TRUNC|os.O_NOFOLLOW,0o644);"
     "os.write(fd,sys.argv[2].encode('utf-8'));os.close(fd)"
 )

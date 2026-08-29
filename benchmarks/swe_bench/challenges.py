@@ -270,12 +270,12 @@ CHALLENGES: dict[str, SWEProChallenge] = {
             "        single = bus.subscribe('order.*.created', lambda t, p: res.append(p))\n"
             "        bus.publish('order.us.created', 25)\n"
             "        bus.publish('order.us.east.created', 26)\n"
-            "        self.assertEqual(res, [10, 20, 25, 25])\n"
+            "        self.assertEqual(res, [10, 20, 25, 25, 26])\n"
             "        single.unsubscribe()\n"
             "        s1.unsubscribe()\n"
             "        self.assertEqual(len(bus._subs), 0)\n"
             "        bus.publish('order.created', 30)\n"
-            "        self.assertEqual(res, [10, 20])\n\n"
+            "        self.assertEqual(res, [10, 20, 25, 25, 26])\n\n"
             "if __name__ == '__main__': unittest.main()\n"
         ),
     ),

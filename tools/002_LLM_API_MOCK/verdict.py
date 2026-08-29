@@ -54,7 +54,8 @@ from pathlib import Path
 root = Path(".").resolve()
 found = 0
 errors = 0
-for path in sorted(root.rglob("test*.py")):
+test_files = sorted(set(root.rglob("test*.py")) | set(root.rglob("*test*.py")) | set(root.rglob("*_test.py")))
+for path in test_files:
     if not path.is_file():
         continue
     ns = {"__name__": path.stem, "__file__": str(path)}
@@ -82,6 +83,20 @@ def pytest_passed(workspace: Path) -> bool:
 
     env = dict(os.environ)
     env["PYTHONPATH"] = str(workspace)
+    try:
+        pytest_res = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q"],
+            cwd=workspace,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            env=env,
+        )
+        if pytest_res.returncode == 0:
+            return True
+    except Exception:
+        pass
+
     completed = subprocess.run(
         [sys.executable, "-c", _RUNNER],
         cwd=workspace,

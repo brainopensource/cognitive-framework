@@ -112,6 +112,12 @@ def simulate_all() -> list[dict[str, Any]]:
 
 def _execute(workspace: Path, call: dict[str, Any]) -> str:
     name = call["function"]["name"]
+    name_map = {
+        "read": "view_file", "read_file": "view_file", "view": "view_file",
+        "patch": "edit_file", "write_file": "edit_file", "edit": "edit_file", "apply_diff": "edit_file",
+        "test": "run_command", "exec": "run_command", "bash": "run_command",
+    }
+    name = name_map.get(name, name)
     raw_args = call["function"].get("arguments") or {}
     if isinstance(raw_args, str):
         args = json.loads(raw_args)
@@ -125,15 +131,23 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
         return path.read_text(encoding="utf-8")
     if name == "edit_file":
         rel_path = args.get("path") or args.get("file") or args.get("filename") or ""
+        diff = args.get("diff") or args.get("patch")
+        if not rel_path and diff:
+            for line in str(diff).splitlines():
+                if line.startswith("--- a/") or line.startswith("+++ b/"):
+                    rel_path = line[6:].strip()
+                    break
+                elif line.startswith("--- ") or line.startswith("+++ "):
+                    rel_path = line[4:].strip().lstrip("a/").lstrip("b/")
+                    break
         if not rel_path:
             return json.dumps({"status": "error", "message": "missing path"})
         path = workspace / rel_path
         if path.is_dir():
             return json.dumps({"status": "error", "message": f"{rel_path} is a directory"})
         path.parent.mkdir(parents=True, exist_ok=True)
-        target = args.get("target") or ""
-        replacement = args.get("replacement") or ""
-        diff = args.get("diff")
+        target = args.get("target") or args.get("old_str") or ""
+        replacement = args.get("replacement") or args.get("content") or args.get("new_str") or args.get("code") or ""
         if diff and not target and not replacement:
             text = path.read_text(encoding="utf-8") if path.exists() else ""
             removals = [line[1:] for line in diff.splitlines() if line.startswith("-") and not line.startswith("---")]
@@ -151,7 +165,26 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
         if target not in text:
             return json.dumps({"status": "error", "message": "target not found"})
         path.write_text(text.replace(target, replacement, 1), encoding="utf-8")
-        return json.dumps({"status": "success", "message": f"replaced 1 occurrence in {args['path']}"})
+        return json.dumps({"status": "success", "message": f"replaced 1 occurrence in {rel_path}"})
+    if name in {"list_dir", "ls", "fs.list"}:
+        rel_path = args.get("path") or args.get("dir") or "."
+        path = workspace / rel_path
+        if not path.is_dir():
+            return f"error: not a directory: {rel_path}"
+        entries = sorted([p.name + ("/" if p.is_dir() else "") for p in path.iterdir()])
+        return "\n".join(entries)
+    if name in {"grep_file", "grep", "grep_search", "fs.search"}:
+        pattern = args.get("pattern") or args.get("query") or ""
+        hits = []
+        for p in workspace.rglob("*"):
+            if p.is_file():
+                try:
+                    text = p.read_text(encoding="utf-8")
+                    if pattern in text:
+                        hits.append(str(p.relative_to(workspace)))
+                except Exception:
+                    pass
+        return "\n".join(hits)
     if name == "run_command":
         cmd = args.get("command")
         if not cmd and isinstance(args.get("argv"), (list, tuple)):

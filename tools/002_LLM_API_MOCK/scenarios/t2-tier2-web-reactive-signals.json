@@ -23,10 +23,57 @@
       "tool_messages_seen": 0
     },
     {
-      "content": "Verified SWE challenge solution for Fine-Grained Reactive Signals and Dynamic Dependency Graph (tier2_web_reactive_signals).",
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"from typing import Any, Callable, Set\\n\\n_CURRENT_EFFECT: Any = None\\n_BATCH_QUEUE: Set[Any] = set()\\n_IS_BATCHING: bool = False\\n\\ndef get_current_effect():\\n    return _CURRENT_EFFECT\\n\\ndef set_current_effect(effect):\\n    global _CURRENT_EFFECT\\n    _CURRENT_EFFECT = effect\\n\\ndef get_is_batching():\\n    return _IS_BATCHING\\n\\ndef set_is_batching(val: bool):\\n    global _IS_BATCHING\\n    _IS_BATCHING = val\\n\\ndef queue_batch_effect(effect):\\n    _BATCH_QUEUE.add(effect)\\n\\ndef flush_batch_effects():\\n    effects = list(_BATCH_QUEUE)\\n    _BATCH_QUEUE.clear()\\n    for eff in effects:\\n        eff.run()\\n\\nclass Signal:\\n    def __init__(self, value: Any):\\n        self._value = value\\n        self.subscribers: Set[Any] = set()\\n\\n    def get(self) -> Any:\\n        eff = get_current_effect()\\n        if eff is not None:\\n            self.subscribers.add(eff)\\n            eff.dependencies.add(self)\\n        return self._value\\n\\n    def set(self, new_value: Any) -> None:\\n        if self._value != new_value:\\n            self._value = new_value\\n            subs = list(self.subscribers)\\n            if get_is_batching():\\n                for sub in subs:\\n                    queue_batch_effect(sub)\\n            else:\\n                for sub in subs:\\n                    sub.run()\\n\\ndef create_signal(initial: Any):\\n    s = Signal(initial)\\n    return s.get, s.set\\n\\ndef create_computed(fn: Callable[[], Any]):\\n    val_getter, val_setter = create_signal(None)\\n    from .effect import create_effect\\n    def update():\\n        val_setter(fn())\\n    create_effect(update)\\n    return val_getter\\n\", \"path\": \"reactive/signal.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        },
+        {
+          "function": {
+            "arguments": "{\"content\": \"from typing import Callable, Set, Any\\nfrom .signal import get_current_effect, set_current_effect\\n\\nclass Effect:\\n    def __init__(self, fn: Callable[[], None]):\\n        self.fn = fn\\n        self.dependencies: Set[Any] = set()\\n        self.run()\\n\\n    def run(self) -> None:\\n        for dep in list(self.dependencies):\\n            dep.subscribers.discard(self)\\n        self.dependencies.clear()\\n\\n        prev = get_current_effect()\\n        set_current_effect(self)\\n        try:\\n            self.fn()\\n        finally:\\n            set_current_effect(prev)\\n\\ndef create_effect(fn: Callable[[], None]):\\n    return Effect(fn)\\n\", \"path\": \"reactive/effect.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        },
+        {
+          "function": {
+            "arguments": "{\"content\": \"from typing import Callable\\nfrom .signal import get_is_batching, set_is_batching, flush_batch_effects\\n\\ndef batch(fn: Callable[[], None]) -> None:\\n    was_batching = get_is_batching()\\n    set_is_batching(True)\\n    try:\\n        fn()\\n    finally:\\n        set_is_batching(was_batching)\\n        if not was_batching:\\n            flush_batch_effects()\\n\", \"path\": \"reactive/batch.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        },
+        {
+          "function": {
+            "arguments": "{\"content\": \"from .signal import create_signal, create_computed\\nfrom .effect import create_effect\\nfrom .batch import batch\\n__all__ = ['create_signal', 'create_computed', 'create_effect', 'batch']\\n\", \"path\": \"reactive/__init__.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 5
+    },
+    {
+      "content": "Task completed and verified for Fine-Grained Reactive Signals and Dynamic Dependency Graph (tier2_web_reactive_signals). All test suites pass (OK).",
       "finish_reason": "stop",
       "tool_calls": [],
-      "tool_messages_seen": 1
+      "tool_messages_seen": 6
     }
   ],
   "workspace": {

@@ -284,47 +284,59 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
-    if "messages" in context and isinstance(context["messages"], list):
+    if isinstance(context, Mapping) and "messages" in context and isinstance(context["messages"], list):
         return [dict(item) for item in context["messages"]]
 
     messages: list[dict[str, Any]] = []
-    system = context.get("system")
+
+    system = getattr(context, "system", None) or (context.get("system") if isinstance(context, Mapping) else None)
     if isinstance(system, str) and system:
         messages.append({"role": "system", "content": system})
 
-    for block in context.get("blocks") or ():
-        if isinstance(block, Mapping):
-            layer = block.get("layer")
-            label = block.get("label", "")
-            content = str(block.get("content") or block.get("text") or "")
-            role = block.get("role")
+    blocks = getattr(context, "blocks", None)
+    if blocks is None and isinstance(context, Mapping):
+        blocks = context.get("blocks")
 
-            if layer == "L1" or label == "system-core":
-                if not any(m.get("role") == "system" for m in messages):
-                    messages.append({"role": "system", "content": content})
-                else:
-                    for m in messages:
-                        if m.get("role") == "system":
-                            if content not in m["content"]:
-                                m["content"] += "\n\n" + content
-                            break
-            elif layer == "L5" and role in {"assistant", "tool"}:
-                msg_entry: dict[str, Any] = {"role": role, "content": content}
-                if "tool_calls" in block:
-                    msg_entry["tool_calls"] = block["tool_calls"]
-                if "tool_call_id" in block:
-                    msg_entry["tool_call_id"] = block["tool_call_id"]
-                messages.append(msg_entry)
+    for block in (blocks or ()):
+        layer = getattr(block, "layer", None) or (block.get("layer") if isinstance(block, Mapping) else None)
+        if hasattr(layer, "value"):
+            layer = layer.value
+        label = getattr(block, "label", None) or (block.get("label", "") if isinstance(block, Mapping) else "")
+        content = getattr(block, "text", None) or getattr(block, "content", None) or (block.get("text") or block.get("content", "") if isinstance(block, Mapping) else "")
+        content_str = str(content or "")
+        role = getattr(block, "role", None) or (block.get("role") if isinstance(block, Mapping) else None)
+
+        if layer == "L1" or label == "system-core":
+            if not any(m.get("role") == "system" for m in messages):
+                messages.append({"role": "system", "content": content_str})
             else:
-                messages.append({"role": "user", "content": f"[{label}] {content}" if label else content})
+                for m in messages:
+                    if m.get("role") == "system":
+                        if content_str not in m["content"]:
+                            m["content"] += "\n\n" + content_str
+                        break
+        elif layer == "L5" and role in {"assistant", "tool"}:
+            msg_entry: dict[str, Any] = {"role": role, "content": content_str}
+            tool_calls = getattr(block, "tool_calls", None) or (block.get("tool_calls") if isinstance(block, Mapping) else None)
+            if tool_calls:
+                msg_entry["tool_calls"] = tool_calls
+            tool_call_id = getattr(block, "tool_call_id", None) or (block.get("tool_call_id") if isinstance(block, Mapping) else None)
+            if tool_call_id:
+                msg_entry["tool_call_id"] = tool_call_id
+            messages.append(msg_entry)
+        else:
+            if content_str:
+                messages.append({"role": "user", "content": f"[{label}] {content_str}" if label else content_str})
 
-    for item in context.get("history") or ():
+    history = getattr(context, "history", None) or (context.get("history") if isinstance(context, Mapping) else None)
+    for item in (history or ()):
         if isinstance(item, str):
             messages.append({"role": "user", "content": item})
         elif isinstance(item, Mapping):
             messages.append(dict(item))
 
-    for step in context.get("history_steps") or ():
+    history_steps = getattr(context, "history_steps", None) or (context.get("history_steps") if isinstance(context, Mapping) else None)
+    for step in (history_steps or ()):
         if not isinstance(step, Mapping):
             continue
         if step.get("type") == "assistant_tool_call":
@@ -338,7 +350,7 @@ def _messages(context: ContextBundle) -> list[dict[str, Any]]:
                              "content": str(step.get("result_text", ""))})
 
     if not messages:
-        messages.append({"role": "user", "content": ""})
+        messages.append({"role": "user", "content": "Please inspect the task and proceed."})
     return messages
 
 

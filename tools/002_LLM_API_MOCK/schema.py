@@ -28,7 +28,7 @@ def validate_scenario(raw: Mapping[str, Any], allowed_atoms: Sequence[str] = ALL
     if not SCENARIO_ID_PATTERN.match(scenario_id):
         raise ValueError(f"Scenario id '{scenario_id}' must match pattern '^t[0-10]-'")
 
-    effective_atoms = CALIBRATION_ATOMS if scenario_id.startswith("t0-") else allowed_atoms
+    effective_atoms = (ALLOWED_ATOMS + CALIBRATION_ATOMS) if scenario_id.startswith("t0-") else allowed_atoms
 
     tier = raw.get("tier")
     if tier is not None:

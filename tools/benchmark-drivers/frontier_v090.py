@@ -243,13 +243,13 @@ def runtime_executor(preset: str, *, model_name: str | None = None, models: Sequ
     from vanguard.packages.runtime.lab_driver import run_lab_task
     from vanguard.packages.adapters.models.env_loader import load_api_key
 
-    res_key = load_api_key(ROOT)
-    if res_key.ok and not os.environ.get("OPENROUTER_API_KEY"):
-        os.environ["OPENROUTER_API_KEY"] = res_key.value
-
     effective_model = model_name or (models[0] if models else MODEL)
 
     def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
+        res_key = load_api_key(ROOT)
+        if res_key.ok:
+            os.environ["OPENROUTER_API_KEY"] = res_key.value
+
         result = run_lab_task(
             preset, workspace, model_port="openrouter", model_name=effective_model,
             models=models,

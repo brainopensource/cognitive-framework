@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguard v0.9 Benchmark Technical Audit & Forensic Post-Mortem</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #121826;
+            --bg-card: #1a2234;
+            --bg-card-hover: #222d44;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-cyan: #39c5bb;
+            --accent-green: #3fb950;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --border-color: #30363d;
+            --border-subtle: #21262d;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            background: linear-gradient(135deg, #24141e 0%, #161b26 100%);
+            border: 1px solid var(--accent-red);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 24px rgba(248,81,73,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow), var(--accent-red));
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ff7b72;
+        }
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .meta-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+        .badge-red { color: var(--accent-red); border-color: rgba(248,81,73,0.4); background: rgba(248,81,73,0.15); }
+        .badge-yellow { color: var(--accent-yellow); border-color: rgba(210,153,34,0.4); background: rgba(210,153,34,0.15); }
+        .badge-blue { color: var(--accent-blue); border-color: rgba(88,166,255,0.4); background: rgba(88,166,255,0.15); }
+        .badge-green { color: var(--accent-green); border-color: rgba(63,185,80,0.4); background: rgba(63,185,80,0.15); }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .kpi-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .kpi-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .section-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.75rem;
+        }
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.5rem 0;
+            color: var(--accent-cyan);
+        }
+        p, li {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-box {
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        .alert-danger {
+            background-color: rgba(248,81,73,0.12);
+            border-color: var(--accent-red);
+            color: #ff7b72;
+        }
+        .alert-warning {
+            background-color: rgba(210,153,34,0.12);
+            border-color: var(--accent-yellow);
+            color: #e3b341;
+        }
+        .alert-info {
+            background-color: rgba(88,166,255,0.12);
+            border-color: var(--accent-blue);
+            color: #79c0ff;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        tr:hover td {
+            background-color: var(--bg-card-hover);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.5rem;
+        }
+        .code-box {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.85rem;
+            color: #79c0ff;
+            white-space: pre-wrap;
+        }
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vanguard v0.9 Benchmark Technical Audit & Forensic Post-Mortem</h1>
+            <div class="subtitle">Official Engineering Post-Mortem on Legacy Runner Contamination, Synthetic Telemetry Fallbacks, and Calibration Plan</div>
+            <div class="meta-badges">
+                <span class="badge badge-red">AUDIT VERDICT: EXPERIMENT INVALID (RUNNER CONTAMINATION)</span>
+                <span class="badge badge-yellow">Target Model: deepseek/deepseek-v4-flash-0731</span>
+                <span class="badge badge-blue">Framework: Vanguard v0.9.0b1</span>
+                <span class="badge badge-red">Oracle Contamination: CONFIRMED (16 PASSES INVALIDATED)</span>
+                <span class="badge badge-blue">Audit Date: 2026-08-29</span>
+            </div>
+        </header>
+
+        <!-- KPI Metrics -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Audit Scientific Verdict</div>
+                <div class="kpi-value" style="color: var(--accent-red);">INVALID</div>
+                <div class="kpi-desc">Runner pipeline failure, not agent leaderboard</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Live Runs Executed</div>
+                <div class="kpi-value" style="color: var(--accent-yellow);">27 / 27</div>
+                <div class="kpi-desc">24 Abandoned (Default), 3 Instrument Error</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Contaminated Passes</div>
+                <div class="kpi-value" style="color: var(--accent-red);">16 / 27</div>
+                <div class="kpi-desc">Rejected: test_oracle.py exposed in workspace</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Cost Telemetry Status</div>
+                <div class="kpi-value" style="color: var(--accent-yellow);">$0.00675</div>
+                <div class="kpi-desc">Synthetic: 27 &times; $0.00025 fallback constant</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Event Ledger Captured</div>
+                <div class="kpi-value" style="color: var(--accent-red);">0 Events</div>
+                <div class="kpi-desc">Unwired trajectory; no attributable logs</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">TCB Core Size</div>
+                <div class="kpi-value" style="color: var(--accent-green);">1,384 LOC</div>
+                <div class="kpi-desc">Threshold &le; 1,438 LOC (TCB budget green)</div>
+            </div>
+        </div>
+
+        <!-- Section 1: Executive Audit Findings -->
+        <div class="section-card">
+            <h2>1. Executive Verdict & Core Takeaways</h2>
+            <div class="alert-box alert-danger">
+                <strong>THE EXPERIMENT DID NOT BENCHMARK THE COMPARATIVE QUALITY OF THE 11 AGENTS.</strong><br>
+                It primarily benchmarked a contaminated legacy runner, provider/protocol integration defects, and synthetic telemetry fallbacks. No statistically or causally defensible ranking among presets can be produced from this dataset.
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <h3>Why the Results Are Scientifically Invalid</h3>
+                    <ul>
+                        <li><strong>Oracle Leakage:</strong> The legacy helper copied <code>test_oracle.py</code> directly into the agent-visible workspace (<code>agentic_harness_matrix_benchmark.py:57</code>). The 16 passes are contaminated.</li>
+                        <li><strong>Synthetic Fallbacks:</strong> Missing metrics were replaced by fake constants: 120 prompt tokens, 85 completion tokens, 250 &micro;USD per run ($0.00025 &times; 27 = $0.00675), and 1,024 raw event bytes.</li>
+                        <li><strong>24 "Abandoned" Runs:</strong> Represents runner/reporting default on single-turn limits, not evidence of poor agent cognitive capacity.</li>
+                        <li><strong>Zero Event Trajectories:</strong> The framework's event-sourcing ledger was unwired, producing 0 durable events per row.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Immediate Strategic Priority</h3>
+                    <div class="code-box">
+PRINCIPLE: MEASUREMENT INTEGRITY BEFORE ALGORITHMIC SOPHISTICATION.
+
+1. Do NOT tune prompts, increase turns, or add MCTS yet.
+2. First make every run hidden, attributable, cost-honest, and replayable.
+3. Fix the benchmark controller and evaluator container isolation.
+4. Validate on a small 3–6 challenge subset (Easy, Medium, Hard) before full 27 runs.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Detailed Root-Cause Forensic Breakdown -->
+        <div class="section-card">
+            <h2>2. The 4 Root-Cause Forensic Failures</h2>
+            
+            <div class="grid-2">
+                <div>
+                    <h3>1. Oracle Workspace Exposure</h3>
+                    <p>The benchmark's foundational principle is that the evaluator must remain exterior and blind. Placing <code>test_oracle.py</code> inside the repository meant search tools and context compilers could read expected assertions directly, destroying statistical independence.</p>
+
+                    <h3>2. Synthetic Telemetry Fallbacks</h3>
+                    <p>When telemetry was missing, the legacy helper substituted default constants. This corrupted storage-amplification measurements and produced an artificial total cost ($0.00675) that did not reflect actual OpenRouter API charges.</p>
+                </div>
+                <div>
+                    <h3>3. Treatment Dilution Across Presets</h3>
+                    <p>Several manifests were thin prompt recombinations with identical tool sets. LIM lacked actual SBFL/CEGIS implementations; Research V2 lacked web tools; Tutor V1 used the minimal prompt. The nominal independent variable ("agent architecture") was weak or absent.</p>
+
+                    <h3>4. Skunkworks Prototype Limitations</h3>
+                    <p>The unit-level skunkworks test was an explicitly prompted transcription demo running via <code>exec()</code> outside Vanguard runtime. It proved model transcription feasibility, but did not validate Vanguard kernel, dispatch, or agent loop execution.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Archived 27-Row Telemetry (Raw Defect Evidence) -->
+        <div class="section-card">
+            <h2>3. Archived 27-Row Live Run Ledger (Raw Defect Evidence)</h2>
+            <div class="alert-box alert-warning">
+                <strong>HISTORICAL ARTIFACT NOTICE:</strong> The following table contains raw data from <code>benchmarks/frontier_v090/artifacts/live_27_attempts.json</code>. All rows are preserved strictly as defect evidence.
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Run ID</th>
+                            <th>Class</th>
+                            <th>Harness Preset</th>
+                            <th>Tier</th>
+                            <th>Task</th>
+                            <th>Tokens (P / C / Total)</th>
+                            <th>Cost (USD)</th>
+                            <th>Latency</th>
+                            <th>Terminal State</th>
+                            <th>Oracle Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td><strong>v090-01</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>21,402 / 861 / <strong>22,263</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>9.74s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-02</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Medium</td>
+                            <td>tier2_event_bus</td>
+                            <td>8,624 / 979 / <strong>9,603</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>26.81s</td>
+                            <td><span class="badge badge-red">instrument_error</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-03</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Hard</td>
+                            <td>tier3_token_bucket</td>
+                            <td>19,255 / 1,865 / <strong>21,120</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>32.28s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-04</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>14,199 / 509 / <strong>14,708</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>7.33s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-05</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Medium</td>
+                            <td>tier2_event_bus</td>
+                            <td>17,641 / 727 / <strong>18,368</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.54s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-06</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Hard</td>
+                            <td>tier3_token_bucket</td>
+                            <td>17,013 / 1,393 / <strong>18,406</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.24s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-07</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>18,134 / 772 / <strong>18,906</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.88s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-08</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Medium</td>
+                            <td>tier2_event_bus</td>
+                            <td>17,689 / 776 / <strong>18,465</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>8.55s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-09</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Hard</td>
+                            <td>tier3_token_bucket</td>
+                            <td>16,983 / 1,325 / <strong>18,308</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.12s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-10</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>21,825 / 1,216 / <strong>23,041</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.87s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-11</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Medium</td>
+                            <td>tier2_event_bus</td>
+                            <td>20,007 / 825 / <strong>20,832</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>9.10s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-12</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Hard</td>
+                            <td>tier3_token_bucket</td>
+                            <td>20,835 / 2,333 / <strong>23,168</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>17.05s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-13</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>19,558 / 1,100 / <strong>20,658</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>10.62s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-14</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Medium</td>
+                            <td>tier2_event_bus</td>
+                            <td>19,390 / 689 / <strong>20,079</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>8.57s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-15</strong></td>
+                            <td>Coding</td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Hard</td>
+                            <td>tier3_token_bucket</td>
+                            <td>18,584 / 1,729 / <strong>20,313</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>15.83s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-16</strong></td>
+                            <td>Tutor</td>
+                            <td><code>vg-tutor-v090-v1-read-search</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>14,343 / 1,378 / <strong>15,721</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>13.63s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-17</strong></td>
+                            <td>Tutor</td>
+                            <td><code>vg-tutor-v090-v1-read-search</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>12,527 / 855 / <strong>13,382</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>9.70s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-18</strong></td>
+                            <td>Tutor</td>
+                            <td><code>vg-tutor-v090-v2-evidence-graph</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>14,437 / 954 / <strong>15,391</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>15.20s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-19</strong></td>
+                            <td>Tutor</td>
+                            <td><code>vg-tutor-v090-v2-evidence-graph</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>12,300 / 739 / <strong>13,039</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>8.64s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-20</strong></td>
+                            <td>Research</td>
+                            <td><code>vg-research-v090-v1-local</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>13,650 / 1,148 / <strong>14,798</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>11.07s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-21</strong></td>
+                            <td>Research</td>
+                            <td><code>vg-research-v090-v1-local</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>8,008 / 696 / <strong>8,704</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>20.39s</td>
+                            <td><span class="badge badge-red">instrument_error</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-22</strong></td>
+                            <td>Research</td>
+                            <td><code>vg-research-v090-v2-web-corroborated</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>14,361 / 1,116 / <strong>15,477</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>10.57s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-23</strong></td>
+                            <td>Research</td>
+                            <td><code>vg-research-v090-v2-web-corroborated</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>11,599 / 1,457 / <strong>13,056</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>12.93s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-24</strong></td>
+                            <td>Bugfix</td>
+                            <td><code>vg-bugfix-v090-v1-direct</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>19,526 / 1,579 / <strong>21,105</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>27.14s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-25</strong></td>
+                            <td>Bugfix</td>
+                            <td><code>vg-bugfix-v090-v1-direct</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>19,077 / 1,275 / <strong>20,352</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>20.02s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-26</strong></td>
+                            <td>Bugfix</td>
+                            <td><code>vg-bugfix-v090-v2-reproduce-verify</code></td>
+                            <td>Easy</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>18,958 / 842 / <strong>19,800</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>12.94s</td>
+                            <td><span class="badge badge-yellow">abandoned</span></td>
+                            <td><span class="badge badge-red">FAIL</span></td>
+                        </tr>
+    
+                        <tr>
+                            <td><strong>v090-27</strong></td>
+                            <td>Bugfix</td>
+                            <td><code>vg-bugfix-v090-v2-reproduce-verify</code></td>
+                            <td>Hard</td>
+                            <td>tier2_event_bus</td>
+                            <td>5,115 / 189 / <strong>5,304</strong></td>
+                            <td>$0.00025 (Fallback)</td>
+                            <td>31.44s</td>
+                            <td><span class="badge badge-red">instrument_error</span></td>
+                            <td><span class="badge badge-red">CONTAMINATED (Pass)</span></td>
+                        </tr>
+    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 4: Calibration Plan & Next Steps -->
+        <div class="section-card">
+            <h2>4. Remediation Plan & 3–6 Challenge Mini-Validation Gate</h2>
+            <p>Before launching the full 27-row matrix again, the benchmark pipeline must be repaired and validated against a small calibration subset.</p>
+
+            <div class="grid-2">
+                <div>
+                    <h3>Required Pipeline Fixes</h3>
+                    <ul>
+                        <li><strong>Exterior Evaluator:</strong> Patch-only transfer; evaluator runs in separate UID/container without copying test files into the agent workspace.</li>
+                        <li><strong>DeepSeek Normalizer:</strong> Handle empty content, native tool calls, reasoning tokens, and stream errors.</li>
+                        <li><strong>Event Ledger Wiring:</strong> Ensure every proposal, grant, tool result, and denial is durably recorded in SQLite-WAL.</li>
+                        <li><strong>Honest Cost Tracking:</strong> Record provider-reported cost; label unknown costs explicitly.</li>
+                        <li><strong>Real Preset Implementations:</strong> Wire actual distinct tools (LEX surgical patch, LIM mutation verifier, Research web fetch, Tutor index).</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Calibration Exit Gates (3–6 Challenges)</h3>
+                    <ul>
+                        <li><strong>Oracle Invisibility:</strong> <code>test_oracle.py</code> confirmed absent from agent workspace.</li>
+                        <li><strong>Baseline Failure:</strong> Unpatched fixture confirmed failing before agent execution.</li>
+                        <li><strong>No-Op Rejection:</strong> Empty patch produces verified exterior FAIL.</li>
+                        <li><strong>Trajectory Capture:</strong> Non-empty event stream recorded in SQLite-WAL.</li>
+                        <li><strong>True Cost Accounting:</strong> Verified provider pricing without synthetic fallbacks.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AETHER / Vanguard Technical Post-Mortem &bull; Forensic Benchmark Audit &bull; 2026-08-29</p>
+        </footer>
+    </div>
+</body>
+</html>

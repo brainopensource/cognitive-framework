@@ -19,6 +19,8 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 MANIFESTS = ROOT / "vanguard/packages/agency/manifests"
 ARTIFACTS = ROOT / "benchmarks/frontier_v090/artifacts"
 MODEL = "deepseek/deepseek-v4-flash-0731"
@@ -156,14 +158,18 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preregister", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--validate-subset", action="store_true")
     args = parser.parse_args()
-    if not (args.preregister or args.dry_run):
-        parser.error("choose --preregister or --dry-run")
+    if not (args.preregister or args.dry_run or args.validate_subset):
+        parser.error("choose --preregister, --dry-run, or --validate-subset")
     if args.preregister:
         print(json.dumps(preregistration(), indent=2, sort_keys=True))
     if args.dry_run:
         result = dry_run()
         print(f"dry-run complete: {result['rows']} rows; non-empirical")
+    if args.validate_subset:
+        from benchmarks.frontier_v090.runner import validate_subset
+        print(json.dumps(validate_subset(), indent=2, sort_keys=True))
     return 0
 
 

@@ -1,0 +1,51 @@
+{
+  "ast_preflight": {
+    "valid_pass": true,
+    "invalid_intercepted": true
+  },
+  "sbfl_ochiai": {
+    "top_line": 10,
+    "score": 1.0,
+    "localized": true
+  },
+  "anti_thrashing": {
+    "loop_prevented": true,
+    "terminal_state": "CIRCUIT_BROKEN"
+  },
+  "radix_prefix_cache": {
+    "prefix_stable": true,
+    "prefix_hash": "dffd7d445694e92c"
+  },
+  "live_solve": {
+    "status": "PASS_VERIFIED",
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "ast_preflight": "Valid AST parsed in 0.387ms",
+    "oracle_verdict": "GREEN",
+    "tokens": {
+      "prompt_tokens": 329,
+      "completion_tokens": 211,
+      "total_tokens": 540,
+      "cost": 3.3795e-05,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 3.3795e-05,
+        "upstream_inference_prompt_cost": 1.4805e-05,
+        "upstream_inference_completions_cost": 1.899e-05
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 55,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "cost_usd": 3.3795e-05,
+    "latency_ms": 1879.052110001794,
+    "extracted_code_lines": 21
+  }
+}

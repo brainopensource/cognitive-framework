@@ -183,7 +183,7 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
             "INSTRUMENT_ERROR" if not verdict["instrument_valid"] else "FAILED_ORACLE"
         )
         reason = "completed_patch_passed_oracle" if terminal == "COMPLETED" else str(verdict["reason"])
-        return _row(identity, terminal, reason, verdict, telemetry, public_files, after)
+        return _row(identity, terminal, reason, verdict, telemetry, public_files, after, non_empirical)
 
 
 def _row(identity: Mapping[str, object], terminal: str, reason: str,

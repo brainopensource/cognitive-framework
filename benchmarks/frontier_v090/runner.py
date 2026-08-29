@@ -79,7 +79,30 @@ class ExecutionTelemetry:
     trajectory_digest: str | None = None
 
 
-Executor = Callable[[Path, SWEProChallenge], ExecutionTelemetry]
+@dataclass(frozen=True)
+class PublicChallenge:
+    """Model-facing challenge projection; evaluator material is excluded."""
+
+    challenge_id: str
+    tier: int
+    title: str
+    kind: str
+    brief: str
+    files: Mapping[str, str]
+
+
+Executor = Callable[[Path, PublicChallenge], ExecutionTelemetry]
+
+
+def _public_challenge(challenge: SWEProChallenge) -> PublicChallenge:
+    return PublicChallenge(
+        challenge_id=challenge.challenge_id,
+        tier=challenge.tier,
+        title=challenge.title,
+        kind=challenge.kind,
+        brief=challenge.brief,
+        files=dict(challenge.files),
+    )
 
 
 def _materialize_public(challenge: SWEProChallenge, root: Path) -> None:
@@ -124,7 +147,8 @@ def _evaluate(challenge: SWEProChallenge, workspace: Path, timeout: float) -> di
         }
 
 
-def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: float = 30.0) -> dict[str, object]:
+def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: float = 30.0,
+            non_empirical: bool = True) -> dict[str, object]:
     challenge = CHALLENGES[challenge_id]
     with tempfile.TemporaryDirectory(prefix="v090-agent-") as temp:
         workspace = Path(temp)
@@ -143,15 +167,17 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
             "preset": preset,
         }
         if not baseline["instrument_valid"]:
-            return _row(identity, "INSTRUMENT_ERROR", "baseline_evaluator_invalid", baseline, None, public_files, public_files)
+            return _row(identity, "INSTRUMENT_ERROR", "baseline_evaluator_invalid", baseline, None, public_files, public_files, non_empirical)
         if baseline["result"]:
-            return _row(identity, "DATASET_INVALID", "baseline_already_passes", baseline, None, public_files, public_files)
+            return _row(identity, "DATASET_INVALID", "baseline_already_passes", baseline, None, public_files, public_files, non_empirical)
 
-        telemetry = executor(workspace, challenge)
+        # The executor receives only the public projection.  The sealed oracle
+        # remains available solely to the exterior evaluator below.
+        telemetry = executor(workspace, _public_challenge(challenge))
         after = snapshot(workspace)
         changed = sorted(path for path in set(public_files) | set(after) if public_files.get(path) != after.get(path))
         if not changed:
-            return _row(identity, "NO_PATCH", "completed_without_source_patch", baseline, telemetry, public_files, after)
+            return _row(identity, "NO_PATCH", "completed_without_source_patch", baseline, telemetry, public_files, after, non_empirical)
         verdict = _evaluate(challenge, workspace, timeout)
         terminal = "COMPLETED" if verdict["instrument_valid"] and verdict["result"] else (
             "INSTRUMENT_ERROR" if not verdict["instrument_valid"] else "FAILED_ORACLE"
@@ -162,7 +188,7 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
 
 def _row(identity: Mapping[str, object], terminal: str, reason: str,
          oracle: Mapping[str, object], telemetry: ExecutionTelemetry | None,
-         before: Mapping[str, str], after: Mapping[str, str]) -> dict[str, object]:
+         before: Mapping[str, str], after: Mapping[str, str], non_empirical: bool = True) -> dict[str, object]:
     changed = sorted(path for path in set(before) | set(after) if before.get(path) != after.get(path))
     usage = {
         "prompt_tokens": telemetry.prompt_tokens if telemetry else None,
@@ -176,13 +202,13 @@ def _row(identity: Mapping[str, object], terminal: str, reason: str,
         "changed_files": changed, "before_digest": canonical_digest(before),
         "after_digest": canonical_digest(after), "oracle": dict(oracle), "usage": usage,
         "trajectory_digest": telemetry.trajectory_digest if telemetry else None,
-        "non_empirical": True,
+        "non_empirical": non_empirical,
     }
     body["row_digest"] = evidence_digest(body)
     return body
 
 
-def noop_executor(workspace: Path, challenge: SWEProChallenge) -> ExecutionTelemetry:
+def noop_executor(workspace: Path, challenge: PublicChallenge) -> ExecutionTelemetry:
     del workspace, challenge
     return ExecutionTelemetry("completed", "calibration_noop")
 

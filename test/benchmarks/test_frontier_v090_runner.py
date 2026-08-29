@@ -27,7 +27,7 @@ class FrontierV090RunnerTests(unittest.TestCase):
         observed: list[str] = []
 
         def inspect(workspace: Path, challenge: object) -> ExecutionTelemetry:
-            del challenge
+            self.assertFalse(hasattr(challenge, "oracle_code"))
             observed.extend(path.relative_to(workspace).as_posix() for path in workspace.rglob("*"))
             return ExecutionTelemetry("completed", "inspection")
 

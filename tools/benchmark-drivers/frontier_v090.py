@@ -125,6 +125,77 @@ def compose_check(preset: str) -> None:
     ManifestLoader(MANIFESTS).load_pack(preset)
 
 
+def runtime_executor(preset: str, *, model_name: str = MODEL):
+    """Bind a clean-runner row to the real preset-selecting runtime lab.
+
+    The callback receives ``PublicChallenge`` from ``runner.run_row``; the
+    lab sees only the copied public workspace and TASK.md.  ``pack_name`` is
+    deliberately passed through to ``run_lab_task`` so no child path can
+    silently fall back to ``vg-code-default``.
+    """
+    from benchmarks.frontier_v090.runner import ExecutionTelemetry
+    from vanguard.packages.runtime.lab_driver import run_lab_task
+
+    def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
+        result = run_lab_task(
+            preset, workspace, model_port="openrouter", model_name=model_name,
+            interactive=False, isolate=False, approve_writes=True,
+            allow_paid=True, max_turns=8, max_attempts=2,
+            brief=challenge.brief, sandbox_mode="host-dev",
+        )
+        return ExecutionTelemetry(
+            terminal=str(result.get("outcome", "instrument_error")),
+            terminal_reason=str(result.get("detail", "")),
+            prompt_tokens=result.get("promptTokens"),
+            completion_tokens=result.get("completionTokens"),
+            trajectory_digest=None,
+        )
+    return execute
+
+
+def live_sample() -> dict[str, Any]:
+    """Run two representative live rows through the clean bridge."""
+    from benchmarks.frontier_v090.runner import run_row
+    tasks = ("tier1_lru_ttl_cache", "tier2_web_reactive_signals")
+    presets = ("vg-code-v090-react-control", "vg-code-v090-claude-shaped")
+    return {"schema": "aether.frontier-benchmark-live-sample/1", "rows": [
+        run_row(task, preset, runtime_executor(preset), timeout=120, non_empirical=False)
+        for task, preset in zip(tasks, presets)
+    ], "non_empirical": False}
+
+
+def live_27() -> dict[str, Any]:
+    """Execute the locked 27-row matrix through the preset-selecting bridge."""
+    from benchmarks.frontier_v090.runner import run_row
+    task_for_slot = {
+        "CODE-E": "tier1_lru_ttl_cache", "CODE-M": "tier2_event_bus",
+        "CODE-H": "tier3_token_bucket", "BUG-E": "tier1_lru_ttl_cache",
+        "BUG-H": "tier2_event_bus", "TUTOR-E": "tier1_lru_ttl_cache",
+        "TUTOR-H": "tier2_event_bus", "RESEARCH-E": "tier1_lru_ttl_cache",
+        "RESEARCH-H": "tier2_event_bus",
+    }
+    results = []
+    token_total = 0
+    for row in rows():
+        if token_total >= 950_000:
+            results.append({"run_id": row.run_id, "preset": row.preset,
+                            "terminal": "BUDGET_EXHAUSTED", "reason": "GLOBAL_TOKEN_GUARD",
+                            "non_empirical": False})
+            continue
+        task_id = task_for_slot[row.challenge]
+        result = run_row(task_id, row.preset, runtime_executor(row.preset),
+                         timeout=180, non_empirical=False)
+        usage = result.get("usage", {})
+        token_total += sum(int(usage.get(k) or 0) for k in ("prompt_tokens", "completion_tokens"))
+        result.update({"run_id": row.run_id, "ordinal": row.ordinal,
+                       "class_name": row.class_name, "difficulty": row.difficulty,
+                       "challenge_slot": row.challenge})
+        results.append(result)
+    return {"schema": "aether.frontier-benchmark-live-report/2", "model": MODEL,
+            "provider": "openrouter", "non_empirical": False,
+            "total_tokens_observed": token_total, "rows": results}
+
+
 def dry_run() -> dict[str, Any]:
     registration = preregistration()
     prereg_path = ARTIFACTS / "preregistration.json"
@@ -159,9 +230,11 @@ def main() -> int:
     parser.add_argument("--preregister", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--validate-subset", action="store_true")
+    parser.add_argument("--live-sample", action="store_true")
+    parser.add_argument("--live-27", action="store_true")
     args = parser.parse_args()
-    if not (args.preregister or args.dry_run or args.validate_subset):
-        parser.error("choose --preregister, --dry-run, or --validate-subset")
+    if not (args.preregister or args.dry_run or args.validate_subset or args.live_sample or args.live_27):
+        parser.error("choose a benchmark operation")
     if args.preregister:
         print(json.dumps(preregistration(), indent=2, sort_keys=True))
     if args.dry_run:
@@ -170,6 +243,15 @@ def main() -> int:
     if args.validate_subset:
         from benchmarks.frontier_v090.runner import validate_subset
         print(json.dumps(validate_subset(), indent=2, sort_keys=True))
+    if args.live_sample:
+        print(json.dumps(live_sample(), indent=2, sort_keys=True))
+    if args.live_27:
+        report = live_27()
+        path = ARTIFACTS / "live_27_clean_report.json"
+        if path.exists():
+            raise RuntimeError("refusing to overwrite existing live report")
+        path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(f"live 27 complete: {len(report['rows'])} rows; tokens={report['total_tokens_observed']}")
     return 0
 
 

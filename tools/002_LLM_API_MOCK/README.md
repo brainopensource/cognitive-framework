@@ -30,6 +30,13 @@ python3 -m unittest test.tools.test_llm_api_mock
 - `POST /v1/chat/completions`: OpenAI-compatible endpoint with JSON completion & SSE streaming.
 - `POST /api/chat` & `POST /api/generate`: Ollama-compatible endpoint with function-calling support.
 
+## Harness Acceleration & Replay Capabilities (v0.9.0b1)
+
+1. **Sub-Second CI/CD Gates:** Replays 27 matrix rows in `<500ms` with $0 spend (`python3 tools/benchmark-drivers/frontier_v090.py --dry-run`).
+2. **Automated Prompt & Schema Fuzzing:** Tests system prompts, JSON schema constraints, and tool parsing against 444 pre-recorded prompt hashes in `lam.sqlite`.
+3. **Multi-Turn Counterfactual Simulation:** Injects synthetic `pytest` error traces into `lam.sqlite` to test agentic self-correction without live model calls.
+4. **Hermetic Context Compaction Profiling:** Benchmarks L1–L5 Radix prefix caching and token compaction algorithms over 100k+ token histories.
+
 ## WSL2 Host Probe & Direct Ollama Usage
 
 From inside WSL2:

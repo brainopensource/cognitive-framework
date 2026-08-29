@@ -235,7 +235,7 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
             root = Path(tmp)
             created: list[Path] = []
 
-            def make_dir(*, prefix: str) -> str:
+            def make_dir(*, prefix: str = "", **kwargs: Any) -> str:
                 directory = root / f"{prefix}{len(created)}"
                 directory.mkdir()
                 created.append(directory)

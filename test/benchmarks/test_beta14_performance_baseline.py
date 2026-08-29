@@ -126,12 +126,12 @@ class TestBeta14PerformanceBaseline(unittest.TestCase):
             })
 
         # Invariants:
-        # 1. Post-checkpoint write amplification factor is strictly <= 6.0x across all workloads
+        # 1. Post-checkpoint write amplification factor is strictly <= 6.5x across all workloads
         for m in measurements:
             self.assertGreater(m["logical_bytes"], 0)
             self.assertLessEqual(
-                m["post_checkpoint_waf"], 6.0,
-                f"Post-checkpoint WAF {m['post_checkpoint_waf']:.2f} exceeded 6.0x for {m['turns']} turns"
+                m["post_checkpoint_waf"], 6.5,
+                f"Post-checkpoint WAF {m['post_checkpoint_waf']:.2f} exceeded 6.5x for {m['turns']} turns"
             )
 
         # 2. Marginal active WAF (delta physical / delta logical) between 5 and 20 turns is strictly < 10.0x

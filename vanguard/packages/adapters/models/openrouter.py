@@ -963,6 +963,12 @@ class OpenRouterModel:
         if tool_payload:
             body_obj["tools"] = tool_payload
             body_obj["parallel_tool_calls"] = False
+            tool_choice = sampling.get("toolChoice") or sampling.get("tool_choice")
+            if tool_choice is not None:
+                if isinstance(tool_choice, str):
+                    body_obj["tool_choice"] = tool_choice
+                elif isinstance(tool_choice, Mapping):
+                    body_obj["tool_choice"] = dict(tool_choice)
         payload = json.dumps(body_obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         headers = {
             "Content-Type": "application/json",

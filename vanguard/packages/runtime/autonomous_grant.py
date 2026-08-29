@@ -177,8 +177,17 @@ def validate_grant_request(
 
     # Check command binary allowlist
     if verb == "proc.exec" and command_argv:
-        binary = Path(command_argv[0]).name
-        if binary not in grant.command_allowlist:
-            return False, f"command_disallowed:{binary}"
+        if isinstance(command_argv, str):
+            try:
+                import shlex
+                parsed_argv = shlex.split(command_argv)
+            except Exception:
+                parsed_argv = command_argv.split()
+        else:
+            parsed_argv = [str(x) for x in command_argv]
+        if parsed_argv:
+            binary = Path(parsed_argv[0]).name
+            if binary not in grant.command_allowlist:
+                return False, f"command_disallowed:{binary}"
 
     return True, "ok"

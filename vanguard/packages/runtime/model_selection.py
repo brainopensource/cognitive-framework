@@ -176,10 +176,12 @@ def select_model(
                 name = allowed[0] if allowed else _get_default_paid_model()
             else:
                 name = model_name
+            stream_choice = False if "deepseek" in (name or "") else True
+            effort_choice = reasoning_effort or ("none" if "deepseek" in (name or "") else None)
             return SelectedModel(
                 port=choice,
                 model=OpenRouterModel(
-                    model=name, models=models, stream=True, reasoning_effort=reasoning_effort),
+                    model=name, models=models, stream=stream_choice, reasoning_effort=effort_choice),
                 label=f"{choice}:{name}",
             )
 
@@ -192,10 +194,12 @@ def select_model(
         name = model_name or allowed[0]
         if name not in allowed:
             raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
+        stream_choice = False if "deepseek" in (name or "") else True
+        effort_choice = reasoning_effort or ("none" if "deepseek" in (name or "") else None)
         return SelectedModel(
             port=choice,
             model=OpenRouterModel(
-                model=name, models=models, stream=True, reasoning_effort=reasoning_effort),
+                model=name, models=models, stream=stream_choice, reasoning_effort=effort_choice),
             label=f"{choice}:{name}",
         )
 

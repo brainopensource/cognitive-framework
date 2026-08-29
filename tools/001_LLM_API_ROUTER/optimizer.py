@@ -42,7 +42,7 @@ class ProviderOptimizer:
         if policy_clean == "min-cost" or budget_remaining_usd <= 0.0:
             if scenario_tier <= 2:
                 return {"provider": "ollama", "model": "llama3.2:3b", "reason": "Zero-cost local GPU execution"}
-                return {"provider": "openrouter", "model": self.free_model, "reason": "Zero-cost cloud free tier"}
+            return {"provider": "openrouter", "model": self.free_model, "reason": "Zero-cost cloud free tier"}
 
         if policy_clean == "min-tokens":
             if scenario_tier <= 2:

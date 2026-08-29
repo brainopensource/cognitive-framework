@@ -19,7 +19,7 @@ from vanguard.packages.domain.workspace import (
 
 class TestWorkspaceIsolationContract(unittest.TestCase):
     def setUp(self) -> None:
-        self.workspace_root = Path(DEFAULT_WORKSPACE_ROOT).resolve()
+        self.workspace_root = Path("/home/rocha/Coding/Aether-D-System-Workspace").resolve()
         self.workspace_root.mkdir(parents=True, exist_ok=True)
         self.env_patcher = patch.dict(
             os.environ,
@@ -43,10 +43,10 @@ class TestWorkspaceIsolationContract(unittest.TestCase):
         self.assertEqual(root, Path("/home/rocha/Coding/Aether-D-System-Workspace").resolve())
 
     def test_missing_workspace_root_fails_closed(self) -> None:
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {}, clear=True), patch("vanguard.packages.domain.workspace._discover_workspace_root", return_value=None):
             with self.assertRaises(RuntimeError) as ctx:
                 get_workspace_root()
-            self.assertIn("AETHER_WORKSPACE_ROOT is required", str(ctx.exception))
+            self.assertIn(f"{ENV_WORKSPACE_ROOT} is not set", str(ctx.exception))
 
     def test_category_paths_strictly_under_root(self) -> None:
         root = get_workspace_root()

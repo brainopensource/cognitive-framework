@@ -7,8 +7,8 @@ canonical_for:
   - current-milestone-gates
 status: living
 owner: repository-governance
-version: "1.2.0"
-last_verified: 2026-08-28
+version: "1.2.1"
+last_verified: 2026-08-29
 subordinate_to: ../../VISION.md
 supersedes: []
 superseded_by: null

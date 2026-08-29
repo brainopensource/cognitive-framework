@@ -25,7 +25,7 @@ class TestProviderOptimizer(unittest.TestCase):
             scenario_tier=3, policy="min-cost", calibration_passed=True
         )
         self.assertEqual(rec_t3["provider"], "openrouter")
-        self.assertEqual(rec_t3["model"], "openrouter/free")
+        self.assertEqual(rec_t3["model"], self.optimizer.free_model)
 
     def test_balanced_policy_escalation(self) -> None:
         rec1 = self.optimizer.recommend_provider(scenario_tier=1, policy="balanced")
@@ -35,7 +35,7 @@ class TestProviderOptimizer(unittest.TestCase):
             scenario_tier=5, policy="balanced", calibration_passed=True
         )
         self.assertEqual(rec5["provider"], "openrouter")
-        self.assertEqual(rec5["model"], "google/gemini-3.7-flash")
+        self.assertEqual(rec5["model"], self.optimizer.paid_model)
 
 
 if __name__ == "__main__":

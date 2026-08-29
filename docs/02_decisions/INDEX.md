@@ -174,6 +174,7 @@ decision does not authorize concurrency.
 | `0103` | [`0103-progress-projection-and-checkpoint-contract.md`](0103-progress-projection-and-checkpoint-contract.md) | **M-6.5 observation seam:** freezes derived progress projection, semantic checkpoint identity, authority-free directives, and controller-off parity. | accepted v1.0.0 | 2026-08-27 |
 | `0104` | [`0104-automated-verifier-identity-separation.md`](0104-automated-verifier-identity-separation.md) | **Delivery governance:** replaces active process approval dependencies with two-lane ownership, exact package predicates, and distinct automated verifier identity. | accepted v1.0.0 | 2026-08-27 |
 | `0105` | [`0105-governor-thread-safety-without-concurrency-authorization.md`](0105-governor-thread-safety-without-concurrency-authorization.md) | **Kernel defensive concurrency protection:** serializes check-then-act budget accounting in kernel Governor without expanding domain authority. | accepted v1.0.0 | 2026-08-28 |
+| `0106` | [`0106-deterministic-transform-algebra-and-protocol-recovery.md`](0106-deterministic-transform-algebra-and-protocol-recovery.md) | **Transform Algebra & Protocol Recovery:** pure artifact transform contracts, bounded protocol recovery state machine, state-dependent tool policy, and workflow topology /2 seam. | accepted v1.0.0 | 2026-08-29 |
 
 ---
 

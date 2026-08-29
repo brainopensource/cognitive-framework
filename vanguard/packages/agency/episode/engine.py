@@ -43,6 +43,11 @@ from ...kernel import (
     Trust,
     attenuate,
 )
+from .protocol_recovery import (
+    ProtocolRecoveryState,
+    RecoveryDecision,
+    recover_proposal,
+)
 from .state import (
     TERMINAL_FOR_KIND,
     Episode,
@@ -244,6 +249,7 @@ class EpisodeEngine:
                           principal=principal, brief=brief, depth=depth)
         dispatches: list[Any] = []
         accumulated: tuple[Span, ...] = tuple(spans)
+        recovery_state = ProtocolRecoveryState()
 
         while not episode.is_terminal:
             if is_cancelled is not None and is_cancelled():
@@ -281,9 +287,37 @@ class EpisodeEngine:
             try:
                 proposal = parse_proposal(raw_value)
             except ProposalMalformed as exc:
-                episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
-                self._emit_terminal(episode, "instrument_error", str(exc), diagnostics=diagnostics)
-                break
+                decision, recovery_state = recover_proposal(
+                    raw_value,
+                    recovery_state,
+                    allowed_tools=tuple(getattr(self, "_tools", ()) or ()),
+                )
+                if decision.status == "accept" and decision.proposal is not None:
+                    proposal = decision.proposal
+                elif decision.status == "retry_model":
+                    turn = Turn(
+                        index=episode.turn_count,
+                        state_digest=episode.state_digest(),
+                        proposal_descriptor=digest_of({
+                            "recovery_retry": decision.retry_reason,
+                            "feedback": dict(decision.retry_feedback),
+                        }),
+                        receipt_digest=None,
+                        progress_signal=f"recovery_{decision.retry_reason}",
+                    )
+                    repeats = episode.repeats(turn, limit=self._no_progress_limit)
+                    episode = episode.with_turn(turn)
+                    if repeats:
+                        episode = episode.terminated(
+                            RunTermination.ABANDONED,
+                            f"no progress over {self._no_progress_limit} turns",
+                        )
+                        break
+                    continue
+                else:
+                    episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
+                    self._emit_terminal(episode, "instrument_error", str(exc), diagnostics=diagnostics)
+                    break
 
             self._emit_proposal(episode, proposal, diagnostics=diagnostics)
             # -- a non-effect proposal reduces straight to a terminal ----

@@ -183,10 +183,13 @@ class ApplicationService:
 
         if model is None:
             if model_port:
-                selected_model = select_model(
-                    model_port,
-                    model_name=planner_model,
-                ).model
+                if isinstance(model_port, str):
+                    selected_model = select_model(
+                        model_port,
+                        model_name=planner_model,
+                    ).model
+                else:
+                    selected_model = model_port
             elif profile_id in {"local", "ci", "fast"}:
                 from ..adapters.models.fake import FakeModel
                 selected_model = FakeModel([{"kind": "finish", "note": "local preview"}])
@@ -509,3 +512,152 @@ class ApplicationService:
             checks=tuple(checks),
             version=__version__,
         )
+
+    def record_cassette(
+        self,
+        run_id: str,
+        output_path: Path | str,
+        *,
+        state_dir: Path | str | None = None,
+    ) -> Path:
+        """Extract recorded model interactions from run artifacts and compile to a Cassette JSON (EVO-13)."""
+        from ..adapters.models.cassette import Cassette
+
+        resolved_state = resolve_state_directory(self.workspace, state_dir=state_dir)
+        events_path = resolved_state / "events.sqlite3"
+        if not events_path.exists():
+            events_path = resolved_state / "events.db"
+        blobs_path = resolved_state / "blobs"
+
+        if not events_path.exists():
+            raise FileNotFoundError(f"No events database found at {events_path}")
+
+        store = SqliteEventStore(events_path)
+        blobs = FileBlobStore(blobs_path) if blobs_path.exists() else None
+
+        res = store.read(EventRange(run_id=run_id))
+        if not res.ok or not res.value:
+            raise ValueError(f"Run {run_id} contains no recorded events")
+
+        cassette = Cassette()
+        # Collect model_io claims and artifact pairs
+        for env in res.value:
+            payload = env.payload if isinstance(env.payload, Mapping) else {}
+            # Check model_io claim
+            if payload.get("kind") == "EvidenceClaimProduced" and payload.get("reason") == "model_io":
+                val = payload.get("value", {})
+                in_dig = val.get("inputDigest")
+                out_dig = val.get("outputDigest")
+                if blobs and in_dig and out_dig:
+                    in_res = blobs.get(in_dig)
+                    out_res = blobs.get(out_dig)
+                    in_bytes = in_res.value if hasattr(in_res, "value") else in_res
+                    out_bytes = out_res.value if hasattr(out_res, "value") else out_res
+                    if in_bytes and out_bytes:
+                        try:
+                            prompt_json = json.loads(in_bytes.decode("utf-8"))
+                            output_json = json.loads(out_bytes.decode("utf-8"))
+                            cassette.add_record(
+                                context=prompt_json,
+                                tools=prompt_json.get("tools", []),
+                                sampling=prompt_json.get("sampling", {}),
+                                proposal=output_json,
+                                recorded_at=env.occurred_at,
+                            )
+                            continue
+                        except Exception:
+                            pass
+
+            if payload.get("kind") == "TurnCompleted":
+                context = payload.get("context", {})
+                input_ref = context.get("model_input_ref")
+                output_ref = context.get("model_output_ref")
+                if blobs and input_ref and output_ref:
+                    in_res = blobs.get(input_ref)
+                    out_res = blobs.get(output_ref)
+                    in_bytes = in_res.value if hasattr(in_res, "value") else in_res
+                    out_bytes = out_res.value if hasattr(out_res, "value") else out_res
+                    if in_bytes and out_bytes:
+                        try:
+                            prompt_json = json.loads(in_bytes.decode("utf-8"))
+                            output_json = json.loads(out_bytes.decode("utf-8"))
+                            cassette.add_record(
+                                context=prompt_json,
+                                tools=prompt_json.get("tools", []),
+                                sampling=prompt_json.get("sampling", {}),
+                                proposal=output_json,
+                                recorded_at=env.occurred_at,
+                            )
+                            continue
+                        except Exception:
+                            pass
+                if "proposal" in payload:
+                    cassette.add_record(
+                        context={"brief": payload.get("brief", "")},
+                        tools=[],
+                        sampling={},
+                        proposal=payload["proposal"],
+                        recorded_at=env.occurred_at,
+                    )
+
+        out_p = Path(output_path).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(cassette.to_json(), encoding="utf-8")
+        return out_p
+
+    def export_diagnostic_bundle(
+        self,
+        output_path: Path | str,
+        *,
+        profile_id: str = "product",
+        state_dir: Path | str | None = None,
+    ) -> Path:
+        """Export a scrubbed, secret-free diagnostic bundle (.zip) for support and debugging (EVO-15)."""
+        import platform
+        import re
+        import zipfile
+
+        out_p = Path(output_path).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+
+        diag = self.doctor(profile_id=profile_id, state_dir=state_dir)
+        resolved_state = resolve_state_directory(self.workspace, state_dir=state_dir)
+
+        system_info = {
+            "platform": platform.platform(),
+            "python_version": sys.version,
+            "architecture": list(platform.architecture()),
+            "processor": platform.processor(),
+            "vanguard_version": diag.version,
+            "workspace": str(self.workspace),
+        }
+
+        state_metrics: dict[str, Any] = {"state_dir": str(resolved_state), "exists": resolved_state.exists()}
+        if resolved_state.exists():
+            events_file = resolved_state / "events.db"
+            state_metrics["events_db_size_bytes"] = events_file.stat().st_size if events_file.exists() else 0
+            blobs_dir = resolved_state / "blobs"
+            if blobs_dir.exists():
+                blobs = list(blobs_dir.rglob("*"))
+                state_metrics["blob_count"] = sum(1 for b in blobs if b.is_file())
+            else:
+                state_metrics["blob_count"] = 0
+
+        with zipfile.ZipFile(out_p, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("system_info.json", json.dumps(system_info, indent=2))
+            zf.writestr("doctor_report.json", json.dumps(diag.to_dict(), indent=2))
+            zf.writestr("state_metrics.json", json.dumps(state_metrics, indent=2))
+
+            logs_dir = resolved_state / "logs"
+            if logs_dir.exists() and logs_dir.is_dir():
+                for log_file in logs_dir.glob("*.log"):
+                    try:
+                        content = log_file.read_text(encoding="utf-8", errors="replace")
+                        scrubbed = re.sub(r"(sk-[A-Za-z0-9_-]{20,})", "[REDACTED_API_KEY]", content)
+                        scrubbed = re.sub(r"(Bearer\s+[A-Za-z0-9._-]{20,})", "Bearer [REDACTED_TOKEN]", scrubbed)
+                        zf.writestr(f"logs/{log_file.name}", scrubbed)
+                    except Exception:
+                        pass
+
+        return out_p
+

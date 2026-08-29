@@ -71,6 +71,10 @@ def _run_fast(name: str):
         return bb.bench_nested_agent_execution(repeats=1)
     if name == "storage_amplification_1000_events":
         return bb.bench_storage_amplification(n_events=20)
+    if name == "multi_agent_token_overhead":
+        return bb.bench_multi_agent_token_overhead(repeats=1)
+    if name == "recovery_latency":
+        return bb.bench_recovery_latency(repeats=1)
     raise AssertionError(f"smoke test does not know benchmark {name!r} -- add a fast variant above")
 
 

@@ -206,6 +206,10 @@ class _LayeredOperator:
         self._artifacts = artifacts
         self._meta_controller = meta_controller
 
+    @property
+    def _compiler(self) -> ContextCompiler:
+        return self._assembler.compiler
+
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
         (`VG-03 §10.2`) — anything else destroys the cached prefix."""

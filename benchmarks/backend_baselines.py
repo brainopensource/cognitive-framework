@@ -437,6 +437,10 @@ app.resume(run_id={_json.dumps(run_id)}, profile_id="local", model=model,
           state_dir=Path({_json.dumps(str(state_dir))}))
 """
 
+    import os as _os
+    subprocess_env = dict(_os.environ)
+    subprocess_env["PYTHONPATH"] = str(ROOT) + _os.pathsep + subprocess_env.get("PYTHONPATH", "")
+
     recovery_samples: list[float] = []
     uninterrupted_samples: list[float] = []
     with tempfile.TemporaryDirectory() as d:
@@ -451,17 +455,16 @@ app.resume(run_id={_json.dumps(run_id)}, profile_id="local", model=model,
             script = workspace / f"_worker_{i}.py"
             script.write_text(_worker_script(state_dir, run_id), encoding="utf-8")
 
-            kill_start = time.perf_counter()
-            proc = _subprocess.run(["python3", str(script)], cwd=str(workspace),
-                                   capture_output=True, text=True, timeout=30)
+            proc = _subprocess.run([sys.executable, str(script)], cwd=str(workspace),
+                                   env=subprocess_env, capture_output=True, text=True, timeout=30)
             if proc.returncode != -9:
                 continue  # watchdog raced and missed; skip this sample rather than mismeasure
 
             resume_script = workspace / f"_resume_{i}.py"
             resume_script.write_text(_resume_script(state_dir, run_id), encoding="utf-8")
             resume_start = time.perf_counter()
-            _subprocess.run(["python3", str(resume_script)], cwd=str(workspace),
-                            capture_output=True, text=True, check=True, timeout=30)
+            _subprocess.run([sys.executable, str(resume_script)], cwd=str(workspace),
+                            env=subprocess_env, capture_output=True, text=True, check=True, timeout=30)
             recovery_samples.append((time.perf_counter() - resume_start) * 1000.0)
 
         from vanguard.packages.adapters.models.fake import FakeModel
@@ -496,14 +499,6 @@ app.resume(run_id={_json.dumps(run_id)}, profile_id="local", model=model,
         ),
         "note": "resume_after_kill_ms times only the fresh resume process; the killed process's own wall time is separate and not comparable to a full uninterrupted run",
     }
-
-
-def _application_service_local():
-    from vanguard.packages.runtime.app_service import ApplicationService
-    return ApplicationService
-
-
-ApplicationServiceLocal = _application_service_local()
 
 
 BENCHMARKS: dict[str, Callable[[], Any]] = {

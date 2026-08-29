@@ -99,6 +99,21 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     """Report truthful capability state. Never repairs anything silently."""
     workspace = find_workspace_root(Path(args.workspace).resolve())
     app = ApplicationService(workspace=workspace)
+
+    export_path = getattr(args, "export_bundle", None)
+    if export_path:
+        try:
+            bundle_out = app.export_diagnostic_bundle(
+                output_path=export_path,
+                profile_id=getattr(args, "profile", "product"),
+                state_dir=getattr(args, "state_dir", None),
+            )
+            print(f"Diagnostic bundle written to: {bundle_out}")
+            return EXIT_OK
+        except Exception as exc:
+            print(f"error exporting diagnostic bundle: {exc}", file=sys.stderr)
+            return EXIT_TASK_FAILED
+
     report = app.doctor(profile_id=getattr(args, "profile", "product"), state_dir=getattr(args, "state_dir", None))
 
     rows: list[tuple[str, str, str]] = []
@@ -240,6 +255,51 @@ def cmd_artifacts(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_cassette_record(args: argparse.Namespace) -> int:
+    """Record a cassette from run artifacts."""
+    workspace = find_workspace_root(Path(args.workspace).resolve())
+    app = ApplicationService(workspace=workspace)
+    try:
+        out_path = app.record_cassette(
+            run_id=args.run_id,
+            output_path=args.out,
+            state_dir=getattr(args, "state_dir", None),
+        )
+        print(f"Cassette written to: {out_path}")
+        return EXIT_OK
+    except Exception as exc:
+        print(f"error recording cassette: {exc}", file=sys.stderr)
+        return EXIT_TASK_FAILED
+
+
+def cmd_cassette_replay(args: argparse.Namespace) -> int:
+    """Replay a task against a recorded cassette deterministically."""
+    from ..adapters.models.cassette import Cassette, CassettePlayer
+
+    workspace = find_workspace_root(Path(args.workspace).resolve())
+    cassette_path = Path(args.cassette).resolve()
+    if not cassette_path.exists():
+        print(f"error: cassette file {cassette_path} does not exist", file=sys.stderr)
+        return EXIT_USAGE
+
+    try:
+        cassette = Cassette.from_json(cassette_path.read_text(encoding="utf-8"))
+        player = CassettePlayer(cassette)
+        app = ApplicationService(workspace=workspace)
+        res = app.run(
+            brief=args.brief,
+            model_port=player,
+            profile_id=getattr(args, "profile", "local"),
+            state_dir=getattr(args, "state_dir", None),
+            interactive=False,
+        )
+        print(f"Replay completed: outcome={res.outcome} turns={res.turns}")
+        return EXIT_OK if res.outcome == "completed" else EXIT_TASK_FAILED
+    except Exception as exc:
+        print(f"error replaying cassette: {exc}", file=sys.stderr)
+        return EXIT_TASK_FAILED
+
+
 # -- entrypoint --------------------------------------------------------------
 
 
@@ -260,7 +320,25 @@ def build_parser() -> argparse.ArgumentParser:
     doctor = sub.add_parser("doctor", help="report truthful capability state")
     doctor.add_argument("-w", "--workspace", default=".")
     doctor.add_argument("--profile", default="product", help="execution profile to qualify")
+    doctor.add_argument("--export-bundle", default=None, help="export diagnostic bundle .zip")
     doctor.set_defaults(handler=cmd_doctor)
+
+    # cassette
+    cassette = sub.add_parser("cassette", help="record or replay deterministic model cassettes")
+    cassette_sub = cassette.add_subparsers(dest="cassette_command")
+
+    cas_rec = cassette_sub.add_parser("record", help="record a cassette from run artifacts")
+    cas_rec.add_argument("run_id", help="run identifier to extract model I/O from")
+    cas_rec.add_argument("-o", "--out", required=True, help="output cassette JSON path")
+    cas_rec.add_argument("-w", "--workspace", default=".")
+    cas_rec.set_defaults(handler=cmd_cassette_record)
+
+    cas_rep = cassette_sub.add_parser("replay", help="replay a task against a cassette deterministically")
+    cas_rep.add_argument("cassette", help="path to cassette JSON file")
+    cas_rep.add_argument("-b", "--brief", required=True, help="task brief to execute")
+    cas_rep.add_argument("-w", "--workspace", default=".")
+    cas_rep.add_argument("--profile", default="local", help="execution profile")
+    cas_rep.set_defaults(handler=cmd_cassette_replay)
 
     # run
     run = sub.add_parser("run", help="execute a task through the canonical runtime")

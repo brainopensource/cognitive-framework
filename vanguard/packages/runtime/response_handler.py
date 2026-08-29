@@ -18,17 +18,17 @@ __all__ = [
 
 
 def _route_of(model: Any) -> Mapping[str, Any]:
-    """Discover route metadata from a model adapter."""
-    route_fn = getattr(model, "route", None)
-    if callable(route_fn):
-        try:
-            res = route_fn()
-            if isinstance(res, Mapping):
-                return res
-        except Exception:
-            pass
-    model_name = getattr(model, "_model", getattr(model, "model", "unknown"))
-    return {"model": str(model_name)}
+    """Which provider/model this call actually went to.
+
+    Small and identity-only: a route that carried credentials or headers
+    would put them in an append-only store.
+    """
+    return {
+        "adapter": type(model).__name__,
+        "provider": str(getattr(model, "provider", "")),
+        "model": str(getattr(model, "model", getattr(model, "model_name", getattr(model, "_model", "")))),
+        "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
+    }
 
 
 class ResponseHandler:

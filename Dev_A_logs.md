@@ -271,3 +271,73 @@ collaborators. This is real remaining work, not finished.
 
 Next: EVO-00 (benchmark suite expansion -- multi-agent token overhead and
 recovery latency), building on `benchmarks/backend_baselines.py`.
+
+---
+
+## Wave 7 — EVO-00: benchmark suite expansion
+
+Added two real (not fabricated) measurements to `benchmarks/backend_baselines.py`:
+
+- `multi_agent_token_overhead`: isolates pure coordination cost from work
+  cost. A single agent doing one effect directly (`Runtime.execute_profiled`,
+  `FakeModel` tape carrying explicit `"usage": {"prompt_tokens", "completion_tokens"}`
+  blocks -- exactly the field `_LayeredOperator.propose` reads in production)
+  vs. a coordinator that only plans/delegates and never touches the work
+  itself. Measured via the `compute_run_telemetry` pure function extracted
+  in Wave 6 (EVO-06), read back through `RunResult.telemetry.total_tokens`.
+  Result on this box: coordinator-only cost is ~0.71x of direct-execution
+  cost -- a real, reproducible ratio, not an assumed one.
+- `recovery_latency`: reuses the exact BETA-12 kill/resume mechanism (a
+  watchdog thread inside the worker subprocess self-delivers real `SIGKILL`
+  the instant the first effect settles) and times it, plus a genuinely
+  uninterrupted comparison run of the identical tape. Hit a real bug while
+  wiring this: the worker/resume subprocesses were spawned as bare `"python3"`
+  with no `PYTHONPATH`, so they immediately failed on `import vanguard` and
+  the "watchdog never got to fire" skip-logic silently absorbed every sample
+  (0/5 captured, no error surfaced). Fixed by using `sys.executable` and
+  explicitly forwarding `PYTHONPATH=<repo root>` — 5/5 samples captured
+  after the fix.
+
+Extended `test/tools/test_backend_baselines_smoke.py` to cover both new
+benchmarks. Regenerated `benchmarks/backend_baselines.json` (all 12
+benchmarks now). Full suite: 2217 passed, 8 skipped, 0 failed (mine). Two
+pre-existing failures not mine: the known `test_package_archive_completeness`,
+plus a new `test_evo02_profile_configuration.py` (Dev B's declared EVO-02
+lane) -- not investigated, not touched.
+
+Next: EVO-07/EVO-08 (async multi-agent scheduling, plugin sandbox isolation)
+per the lane resync, or continuing EVO-06's remaining collaborator
+extractions if time allows.
+
+---
+
+## Wave 8 — EVO-08: plugin sandbox isolation (rlimit enforcement gap)
+
+Audited existing plugin isolation coverage before adding anything:
+`PluginIsolationBroker`/`registry/worker.py`/`registry/sandbox.py` already
+had solid coverage (FSM transitions, UDS JSON-RPC, stdout containment,
+SIGKILL/SIGSEGV crash containment, idempotent reap) in
+`test/registry/test_plugin_isolation.py`. Found one real gap:
+`test_child_reports_enforced_rlimits` only checks that `getrlimit()` inside
+the child echoes back the values `setrlimit()` was given -- it never proves
+the OS actually refuses a child that exceeds them. A broker that silently
+dropped `apply_rlimits()` from the preexec path would still pass that test.
+
+Added `RlimitsAreActuallyEnforcedNotOnlyReported` (1 test): forks a real
+child process via `multiprocessing.get_context("fork")`, applies
+`SandboxLimits(max_open_files=8)` through the actual production
+`apply_rlimits()` (`registry/sandbox.py`), and has the child try to open 20
+file descriptors. Asserts the child was refused partway through with a real
+`OSError` -- not that it self-reported success. Verified stable across 5
+repeated runs (fork-based tests can be timing-sensitive; this one isn't,
+since the ceiling is hit deterministically by the 9th open regardless of
+scheduling).
+
+Full suite: 2220 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures as before, unchanged.
+
+Given the size of this session already, pausing the autonomous wave loop
+here to give the user a comprehensive status checkpoint rather than pushing
+further into EVO-07 (async multi-agent scheduling) without a check-in --
+that item is large (concurrent lineage execution, no-global-lock scheduling)
+and deserves its own focused pass.

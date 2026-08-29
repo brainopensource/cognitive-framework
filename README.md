@@ -7,7 +7,7 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-28
 supersedes: []
 superseded_by: null

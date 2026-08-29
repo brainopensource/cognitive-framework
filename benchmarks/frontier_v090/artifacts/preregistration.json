@@ -1,0 +1,341 @@
+{
+  "authority": "non-authorizing",
+  "framework_digest": "sha256:b3e5228bd19c85a0a1350763cc6eff674f85f123ab36968ad80886b0cb4685dc",
+  "global_cost_usd": 0.5,
+  "global_token_ceiling": 1000000,
+  "manifest_ids": [
+    "vg-code-v090-react-control",
+    "vg-code-v090-claude-shaped",
+    "vg-code-v090-opencode-shaped",
+    "vg-code-v090-lex-surgical",
+    "vg-code-v090-lim-falsifier",
+    "vg-tutor-v090-v1-read-search",
+    "vg-tutor-v090-v2-evidence-graph",
+    "vg-research-v090-v1-local",
+    "vg-research-v090-v2-web-corroborated",
+    "vg-bugfix-v090-v1-direct",
+    "vg-bugfix-v090-v2-reproduce-verify"
+  ],
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "non_goals": [
+    "no provider calls during dry-run",
+    "no empirical scores from cassette/fake runs"
+  ],
+  "planned_measurements": 27,
+  "preregistration_digest": "sha256:3c7b2aa7c5408689f94792dcd127f4fe6a68878d5b541fd718c1ec8cc28578c0",
+  "provider": "openrouter",
+  "randomization": {
+    "algorithm": "python-random-shuffle",
+    "seed": 90090
+  },
+  "retry_policy": {
+    "max_attempts": 2
+  },
+  "rows": [
+    {
+      "challenge": "CODE-E",
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 4,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-claude-shaped",
+      "run_id": "v090-04",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "BUG-H",
+      "class_name": "Bugfix",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 25,
+      "planned_score": "TBD",
+      "preset": "vg-bugfix-v090-v1-direct",
+      "run_id": "v090-25",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "RESEARCH-E",
+      "class_name": "Research",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 20,
+      "planned_score": "TBD",
+      "preset": "vg-research-v090-v1-local",
+      "run_id": "v090-20",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-E",
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 10,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lex-surgical",
+      "run_id": "v090-10",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-M",
+      "class_name": "Coding",
+      "difficulty": "Medium",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 8,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-opencode-shaped",
+      "run_id": "v090-08",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-E",
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 13,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lim-falsifier",
+      "run_id": "v090-13",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "RESEARCH-H",
+      "class_name": "Research",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 21,
+      "planned_score": "TBD",
+      "preset": "vg-research-v090-v1-local",
+      "run_id": "v090-21",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-H",
+      "class_name": "Coding",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 3,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-react-control",
+      "run_id": "v090-03",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "RESEARCH-E",
+      "class_name": "Research",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 22,
+      "planned_score": "TBD",
+      "preset": "vg-research-v090-v2-web-corroborated",
+      "run_id": "v090-22",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-E",
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 1,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-react-control",
+      "run_id": "v090-01",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-M",
+      "class_name": "Coding",
+      "difficulty": "Medium",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 11,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lex-surgical",
+      "run_id": "v090-11",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-M",
+      "class_name": "Coding",
+      "difficulty": "Medium",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 5,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-claude-shaped",
+      "run_id": "v090-05",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "TUTOR-H",
+      "class_name": "Tutor",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 19,
+      "planned_score": "TBD",
+      "preset": "vg-tutor-v090-v2-evidence-graph",
+      "run_id": "v090-19",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "TUTOR-E",
+      "class_name": "Tutor",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 16,
+      "planned_score": "TBD",
+      "preset": "vg-tutor-v090-v1-read-search",
+      "run_id": "v090-16",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-H",
+      "class_name": "Coding",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 12,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lex-surgical",
+      "run_id": "v090-12",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "BUG-E",
+      "class_name": "Bugfix",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 26,
+      "planned_score": "TBD",
+      "preset": "vg-bugfix-v090-v2-reproduce-verify",
+      "run_id": "v090-26",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-E",
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 7,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-opencode-shaped",
+      "run_id": "v090-07",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "BUG-E",
+      "class_name": "Bugfix",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 24,
+      "planned_score": "TBD",
+      "preset": "vg-bugfix-v090-v1-direct",
+      "run_id": "v090-24",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "RESEARCH-H",
+      "class_name": "Research",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 23,
+      "planned_score": "TBD",
+      "preset": "vg-research-v090-v2-web-corroborated",
+      "run_id": "v090-23",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-H",
+      "class_name": "Coding",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 9,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-opencode-shaped",
+      "run_id": "v090-09",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "TUTOR-E",
+      "class_name": "Tutor",
+      "difficulty": "Easy",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 18,
+      "planned_score": "TBD",
+      "preset": "vg-tutor-v090-v2-evidence-graph",
+      "run_id": "v090-18",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "TUTOR-H",
+      "class_name": "Tutor",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 17,
+      "planned_score": "TBD",
+      "preset": "vg-tutor-v090-v1-read-search",
+      "run_id": "v090-17",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-M",
+      "class_name": "Coding",
+      "difficulty": "Medium",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 2,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-react-control",
+      "run_id": "v090-02",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-H",
+      "class_name": "Coding",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 6,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-claude-shaped",
+      "run_id": "v090-06",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "BUG-H",
+      "class_name": "Bugfix",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 27,
+      "planned_score": "TBD",
+      "preset": "vg-bugfix-v090-v2-reproduce-verify",
+      "run_id": "v090-27",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-M",
+      "class_name": "Coding",
+      "difficulty": "Medium",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 14,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lim-falsifier",
+      "run_id": "v090-14",
+      "status": "PLANNED"
+    },
+    {
+      "challenge": "CODE-H",
+      "class_name": "Coding",
+      "difficulty": "Hard",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "ordinal": 15,
+      "planned_score": "TBD",
+      "preset": "vg-code-v090-lim-falsifier",
+      "run_id": "v090-15",
+      "status": "PLANNED"
+    }
+  ],
+  "schema": "aether.frontier-benchmark-preregistration/1",
+  "score_schema": "aether.frontier-benchmark/1",
+  "status": "proposed",
+  "stop_tokens": 950000,
+  "streaming": true,
+  "subject_digest": "sha256:9b784105f549ebb9ebe457813cad6e8610f98743b41784d4d68258b4fb8f1480",
+  "temperature": 0,
+  "timeout_seconds": 1800
+}

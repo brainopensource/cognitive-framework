@@ -1,0 +1,37 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier7_greenfield_bytecode_vm",
+  "id": "t7-tier7-greenfield-bytecode-vm",
+  "tier": 7,
+  "title": "SWE-bench: Greenfield Stack-Based Bytecode Virtual Machine",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"vm/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "content": "Verified SWE challenge solution for Greenfield Stack-Based Bytecode Virtual Machine (tier7_greenfield_bytecode_vm).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 1
+    }
+  ],
+  "workspace": {
+    "oracle_test.py": "import unittest\nfrom vm.interpreter import BytecodeVM\n\nclass TestVM(unittest.TestCase):\n    def test_arithmetic(self):\n        vm = BytecodeVM()\n        # (3 + 4) * 2 = 14\n        prog = [('PUSH', 3), ('PUSH', 4), ('ADD',), ('PUSH', 2), ('MUL',), ('HALT',)]\n        self.assertEqual(vm.execute(prog), 14)\n\nif __name__ == '__main__': unittest.main()\n",
+    "vm/__init__.py": "from .interpreter import BytecodeVM\n__all__ = ['BytecodeVM']\n",
+    "vm/interpreter.py": "class BytecodeVM:\n    def __init__(self):\n        self.stack = []\n\n    def execute(self, bytecode: list[tuple[str, ...]]) -> int:\n        pc = 0\n        while pc < len(bytecode):\n            op = bytecode[pc]\n            cmd = op[0]\n            if cmd == 'PUSH':\n                self.stack.append(op[1])\n            elif cmd == 'POP':\n                self.stack.pop()\n            elif cmd == 'ADD':\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a + b)\n            elif cmd == 'SUB':\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a - b)\n            elif cmd == 'MUL':\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a * b)\n            elif cmd == 'HALT':\n                break\n            pc += 1\n        return self.stack[-1] if self.stack else 0\n"
+  }
+}

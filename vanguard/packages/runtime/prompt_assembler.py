@@ -199,6 +199,24 @@ class PromptAssembler:
             bundle["messages"] = tuple(messages)
             bundle["lastReceiptDigest"] = digest
 
+        # Bounded protocol-recovery feedback (`ADR-0106 §3`): the turn
+        # immediately after a retry must tell the model *what* was wrong and
+        # *what* to do instead, or the provider repeats the identical
+        # malformed output until the no-progress bound abandons the run.
+        feedback = view.get("recoveryFeedback")
+        if feedback:
+            try:
+                rendered = json.dumps(dict(feedback), sort_keys=True)[:800]
+            except (TypeError, ValueError):
+                rendered = str(feedback)[:800]
+            messages = list(bundle.get("messages") or ())
+            messages.append({
+                "role": "user",
+                "content": f"[protocol-recovery] {rendered}",
+            })
+            bundle["messages"] = tuple(messages)
+            bundle["recoveryFeedback"] = dict(feedback)
+
         self.record_selection_provenance(compiled, turn)
         return bundle, compiled
 

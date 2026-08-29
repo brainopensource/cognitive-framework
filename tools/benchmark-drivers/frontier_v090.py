@@ -231,7 +231,7 @@ def dry_run(*, force: bool = False) -> dict[str, Any]:
     return {"preregistration": prereg_path, "report": report_path, "rows": len(evidence)}
 
 
-def runtime_executor(preset: str, *, model_name: str = MODEL, models: Sequence[str] | None = None, reasoning_effort: str | None = None):
+def runtime_executor(preset: str, *, model_name: str | None = None, models: Sequence[str] | None = None, reasoning_effort: str | None = None):
     """Bind a clean-runner row to the real preset-selecting runtime lab.
 
     The callback receives ``PublicChallenge`` from ``runner.run_row``; the
@@ -247,9 +247,11 @@ def runtime_executor(preset: str, *, model_name: str = MODEL, models: Sequence[s
     if res_key.ok and not os.environ.get("OPENROUTER_API_KEY"):
         os.environ["OPENROUTER_API_KEY"] = res_key.value
 
+    effective_model = model_name or (models[0] if models else MODEL)
+
     def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
         result = run_lab_task(
-            preset, workspace, model_port="openrouter", model_name=model_name,
+            preset, workspace, model_port="openrouter", model_name=effective_model,
             models=models,
             interactive=False, isolate=False, approve_writes=True,
             allow_paid=True, max_turns=8, max_attempts=2,
@@ -370,9 +372,14 @@ def live_filtered(
             "total_tokens_observed": token_total, "rows": results}
 
 
-def live_27() -> dict[str, Any]:
+def live_27(
+    *,
+    models: Sequence[str] | None = None,
+    reasoning_effort: str | None = None,
+    timeout: float = 180.0,
+) -> dict[str, Any]:
     """Execute the locked 27-row matrix through the preset-selecting bridge."""
-    return live_filtered()
+    return live_filtered(models=models, reasoning_effort=reasoning_effort, timeout=timeout)
 
 
 def main() -> int:
@@ -411,7 +418,7 @@ def main() -> int:
     if args.live_canary:
         print(json.dumps(live_canary(), indent=2, sort_keys=True))
     if args.live_27:
-        report = live_27()
+        report = live_27(models=args.models, reasoning_effort=args.reasoning_effort, timeout=args.timeout)
         path = Path(args.out) if args.out else (ARTIFACTS / "live_27_clean_report_v3.json")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -118,12 +118,18 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
     else:
         args = raw_args
     if name == "view_file":
-        path = workspace / args["path"]
+        rel_path = args.get("path") or args.get("file") or args.get("filename") or ""
+        path = workspace / rel_path
         if not path.is_file():
-            return f"error: not found: {args['path']}"
+            return f"error: not found: {rel_path}"
         return path.read_text(encoding="utf-8")
     if name == "edit_file":
-        path = workspace / args["path"]
+        rel_path = args.get("path") or args.get("file") or args.get("filename") or ""
+        if not rel_path:
+            return json.dumps({"status": "error", "message": "missing path"})
+        path = workspace / rel_path
+        if path.is_dir():
+            return json.dumps({"status": "error", "message": f"{rel_path} is a directory"})
         path.parent.mkdir(parents=True, exist_ok=True)
         target = args.get("target") or ""
         replacement = args.get("replacement") or ""
@@ -137,10 +143,10 @@ def _execute(workspace: Path, call: dict[str, Any]) -> str:
                 replacement = "\n".join(additions)
             elif additions:
                 path.write_text("\n".join(additions) + "\n", encoding="utf-8")
-                return json.dumps({"status": "success", "message": f"wrote {args['path']}"})
+                return json.dumps({"status": "success", "message": f"wrote {rel_path}"})
         if not path.exists() or target == "":
             path.write_text(replacement, encoding="utf-8")
-            return json.dumps({"status": "success", "message": f"wrote {args['path']}"})
+            return json.dumps({"status": "success", "message": f"wrote {rel_path}"})
         text = path.read_text(encoding="utf-8")
         if target not in text:
             return json.dumps({"status": "error", "message": "target not found"})

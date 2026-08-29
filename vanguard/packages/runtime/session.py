@@ -68,6 +68,7 @@ from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
 from .evidence_capture import capture_evidence as _capture_evidence_pure
 from .prompt_assembler import PromptAssembler
+from .protocol_pipeline import default_protocol_pipeline
 from .response_handler import ResponseHandler
 from .telemetry import RunTelemetry, compute_run_telemetry, instrument_error as _telemetry_instrument_error
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
@@ -389,6 +390,21 @@ class _SwappablePolicy:
 
     def authorize(self, request: EffectRequest, **kwargs: Any) -> Any:
         return self._current.authorize(request, **kwargs)
+
+
+def _preset_mode_for(harness_id: str) -> str | None:
+    """Derive the tool-policy preset intent from the manifest id (`ADR-0106 §4`).
+
+    Presets declare intent; the resolver intersects it with adapter
+    capability. Research and explanation presets are read-only judgement
+    flows and declare `auto`; every other harness declares the coding
+    phase ladder. Unrecognised ids still map to the coding default because
+    the ladder degrades to kernel authority when retries exhaust.
+    """
+    identifier = str(harness_id or "").lower()
+    if "research" in identifier or "explain" in identifier or "tutor" in identifier:
+        return "research"
+    return "code"
 
 
 class HarnessSession:
@@ -917,10 +933,15 @@ class HarnessSession:
                 detail = f"max_turns ({task.max_turns}) exhausted across approval"
                 break
             self.policy.bind(authorization)
+            decoders, patch_detector, truncation_detector = default_protocol_pipeline()
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining, spawn_dispatcher=self.dispatch)
+                max_turns=remaining, spawn_dispatcher=self.dispatch,
+                preset_mode=_preset_mode_for(harness.harness),
+                protocol_decoders=decoders,
+                patch_detector=patch_detector,
+                truncation_detector=truncation_detector)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,

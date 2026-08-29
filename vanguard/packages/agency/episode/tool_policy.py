@@ -55,3 +55,26 @@ def resolve_tool_policy(
         )
 
     return ToolPolicy(mode="required")
+
+
+#: The phase ladder lives here, not in the engine: `ADR-0060` requires the
+#: episode loop to name no domain verb. Which attempted effects advance the
+#: workflow phase is preset policy, exactly like the allowed sets above.
+_VERIFY_TRIGGERS = frozenset({"patch.apply"})
+_EDIT_TRIGGERS = frozenset({"fs.read", "fs.search"})
+
+
+def derive_phase(seen_verbs: Sequence[str] | frozenset[str] | set[str]) -> str:
+    """Map attempted effect verbs onto the workflow phase ladder.
+
+    Phase advances only from *attempted* effects, never from model prose. A
+    denied dispatch still advances the phase: it proves the workflow moved
+    past the earlier phase, and verify-phase allowances must stay reachable
+    after a patch attempt regardless of its outcome.
+    """
+    seen = set(seen_verbs)
+    if seen & _VERIFY_TRIGGERS:
+        return "verify"
+    if seen & _EDIT_TRIGGERS:
+        return "edit"
+    return "inspect"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanguard-runtime"
-version = "0.7.3.dev0"
+version = "0.9.0b1"
 description = "AETHER — Higgs development line"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -57,3 +57,4 @@ namespaces = true
 # nothing about this codebase.
 testpaths = ["test"]
 norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_modules"]
+addopts = "--basetemp=/home/rocha/Coding/Aether-D-System-Workspace/tmp/pytest"

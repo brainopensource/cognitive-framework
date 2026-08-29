@@ -229,7 +229,13 @@ def _http_post(
             if hasattr(exc, "headers") and exc.headers
             else {}
         )
-        return int(exc.code), resp_headers, exc.read() or b""
+        body = b""
+        if getattr(exc, "fp", None) is not None:
+            try:
+                body = exc.read() or b""
+            except Exception:
+                body = b""
+        return int(exc.code), resp_headers, body
 
 
 def _http_stream(
@@ -248,7 +254,13 @@ def _http_stream(
             if hasattr(exc, "headers") and exc.headers
             else {}
         )
-        return int(exc.code), resp_headers, (exc.read() or b"",)
+        body = b""
+        if getattr(exc, "fp", None) is not None:
+            try:
+                body = exc.read() or b""
+            except Exception:
+                body = b""
+        return int(exc.code), resp_headers, (body,)
 
     resp_headers = {k.lower(): v for k, v in response.headers.items()}
     _set_response_socket_timeout(response, timeout)
@@ -272,23 +284,73 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
-    if "messages" in context:
+    if isinstance(context, Mapping) and "messages" in context and isinstance(context["messages"], list):
         return [dict(item) for item in context["messages"]]
+
     messages: list[dict[str, Any]] = []
-    system = context.get("system")
+
+    system = getattr(context, "system", None) or (context.get("system") if isinstance(context, Mapping) else None)
     if isinstance(system, str) and system:
         messages.append({"role": "system", "content": system})
-    for block in context.get("blocks") or ():
-        label = block.get("label", "")
-        content = block.get("content", "")
-        messages.append({"role": "user", "content": f"[{label}] {content}"})
-    for item in context.get("history") or ():
+
+    blocks = getattr(context, "blocks", None)
+    if blocks is None and isinstance(context, Mapping):
+        blocks = context.get("blocks")
+
+    for block in (blocks or ()):
+        layer = getattr(block, "layer", None) or (block.get("layer") if isinstance(block, Mapping) else None)
+        if hasattr(layer, "value"):
+            layer = layer.value
+        label = getattr(block, "label", None) or (block.get("label", "") if isinstance(block, Mapping) else "")
+        content = getattr(block, "text", None) or getattr(block, "content", None) or (block.get("text") or block.get("content", "") if isinstance(block, Mapping) else "")
+        content_str = str(content or "")
+        role = getattr(block, "role", None) or (block.get("role") if isinstance(block, Mapping) else None)
+
+        if layer == "L1" or label == "system-core":
+            if not any(m.get("role") == "system" for m in messages):
+                messages.append({"role": "system", "content": content_str})
+            else:
+                for m in messages:
+                    if m.get("role") == "system":
+                        if content_str not in m["content"]:
+                            m["content"] += "\n\n" + content_str
+                        break
+        elif layer == "L5" and role in {"assistant", "tool"}:
+            msg_entry: dict[str, Any] = {"role": role, "content": content_str}
+            tool_calls = getattr(block, "tool_calls", None) or (block.get("tool_calls") if isinstance(block, Mapping) else None)
+            if tool_calls:
+                msg_entry["tool_calls"] = tool_calls
+            tool_call_id = getattr(block, "tool_call_id", None) or (block.get("tool_call_id") if isinstance(block, Mapping) else None)
+            if tool_call_id:
+                msg_entry["tool_call_id"] = tool_call_id
+            messages.append(msg_entry)
+        else:
+            if content_str:
+                messages.append({"role": "user", "content": f"[{label}] {content_str}" if label else content_str})
+
+    history = getattr(context, "history", None) or (context.get("history") if isinstance(context, Mapping) else None)
+    for item in (history or ()):
         if isinstance(item, str):
             messages.append({"role": "user", "content": item})
         elif isinstance(item, Mapping):
             messages.append(dict(item))
+
+    history_steps = getattr(context, "history_steps", None) or (context.get("history_steps") if isinstance(context, Mapping) else None)
+    for step in (history_steps or ()):
+        if not isinstance(step, Mapping):
+            continue
+        if step.get("type") == "assistant_tool_call":
+            messages.append({"role": "assistant", "content": step.get("thought") or "",
+                             "tool_calls": [{"id": step.get("call_id", "call_0"),
+                                             "type": "function", "function": {
+                                                 "name": step.get("action", ""),
+                                                 "arguments": json.dumps(step.get("args", {}), sort_keys=True)}}]})
+        elif step.get("type") == "tool_response":
+            messages.append({"role": "tool", "tool_call_id": step.get("call_id", "call_0"),
+                             "content": str(step.get("result_text", ""))})
+
     if not messages:
-        messages.append({"role": "user", "content": ""})
+        messages.append({"role": "user", "content": "Please inspect the task and proceed."})
     return messages
 
 
@@ -305,6 +367,36 @@ def _tools_payload(tools: ToolSchemas) -> list[dict[str, Any]]:
             }
         )
     return payload
+
+
+def _extract_dsml_tool_calls(text: str) -> tuple[str, list[dict[str, Any]]]:
+    """Extract tool calls emitted via DeepSeek DSML markup tags."""
+    import re
+    invoke_rx = re.compile(
+        r'<[｜|]DSML[｜|]invoke\s+name=["\']([^"\']+)["\']>(.*?)</[｜|]DSML[｜|]invoke>',
+        re.DOTALL,
+    )
+    param_rx = re.compile(
+        r'<[｜|]DSML[｜|]parameter\s+name=["\']([^"\']+)["\'][^>]*>(.*?)</[｜|]DSML[｜|]parameter>',
+        re.DOTALL,
+    )
+    calls: list[dict[str, Any]] = []
+    for idx, match in enumerate(invoke_rx.finditer(text)):
+        name = match.group(1).strip()
+        body = match.group(2)
+        args: dict[str, Any] = {}
+        for pmatch in param_rx.finditer(body):
+            pname = pmatch.group(1).strip()
+            pval = pmatch.group(2).strip()
+            args[pname] = pval
+        calls.append({
+            "id": f"call_dsml_{idx + 1}",
+            "name": name,
+            "arguments": args,
+        })
+    clean_text = invoke_rx.sub("", text)
+    clean_text = re.sub(r'</?[｜|]DSML[｜|][^>]*>', '', clean_text).strip()
+    return clean_text, calls
 
 
 def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -338,7 +430,7 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
         if isinstance(arguments, str):
             try:
                 arguments = json.loads(arguments)
-            except json.JSONDecodeError:
+            except Exception:
                 return None
         if not isinstance(arguments, Mapping):
             return None
@@ -353,6 +445,11 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
                 "arguments": dict(arguments),
             }
         )
+    if not tool_calls and text and ("DSML" in text or "invoke" in text):
+        clean_text, dsml_calls = _extract_dsml_tool_calls(text)
+        if dsml_calls:
+            tool_calls.extend(dsml_calls)
+            text = clean_text
     return {"text": text, "toolCalls": tool_calls}
 
 
@@ -379,6 +476,7 @@ def _parse_sse_stream(
     raw_usage: dict[str, Any] | None = None
     first_token_time: float | None = None
     done = False
+    terminal_choice = False
     buffer = ""
     decoder = getincrementaldecoder("utf-8")("strict")
 
@@ -388,7 +486,7 @@ def _parse_sse_stream(
             first_token_time = monotonic()
 
     def accept_event(event: str) -> bool:
-        nonlocal done, raw_usage
+        nonlocal done, raw_usage, terminal_choice
         data_lines = [line[5:].lstrip(" ") for line in event.splitlines()
                       if line.startswith("data:")]
         if not data_lines:
@@ -421,6 +519,11 @@ def _parse_sse_stream(
         delta = choice.get("delta", {})
         if not isinstance(delta, Mapping):
             return False
+        finish_reason = choice.get("finish_reason")
+        if finish_reason is not None:
+            if not isinstance(finish_reason, str) or not finish_reason:
+                return False
+            terminal_choice = True
         content = delta.get("content")
         if content is not None:
             if not isinstance(content, str):
@@ -499,7 +602,15 @@ def _parse_sse_stream(
                 break
         if not done:
             decoder.decode(b"", final=True)
-            return None, None, 0
+            # OpenRouter-compatible providers sometimes close the SSE body
+            # immediately after a terminal choice instead of sending the
+            # optional `[DONE]` sentinel. A finish_reason is an explicit
+            # protocol terminator; EOF without one remains truncated.
+            if buffer.strip():
+                if not accept_event(buffer):
+                    return None, None, 0
+            if not terminal_choice:
+                return None, None, 0
     except (UnicodeDecodeError, OSError, ValueError):
         return None, None, 0
 
@@ -513,9 +624,13 @@ def _parse_sse_stream(
         if not call["id"] or not call["name"] or not call["arguments_str"]:
             return None, None, 0
         try:
-            arguments = json.loads(call["arguments_str"])
-        except json.JSONDecodeError:
-            return None, None, 0
+            arguments = json.loads(call["arguments_str"], strict=False)
+        except Exception:
+            try:
+                import ast
+                arguments = ast.literal_eval(call["arguments_str"])
+            except Exception:
+                return None, None, 0
         if not isinstance(arguments, Mapping):
             return None, None, 0
         tool_calls_list.append({
@@ -525,6 +640,11 @@ def _parse_sse_stream(
         })
 
     proposal_text = "".join(text_parts)
+    if not tool_calls_list and proposal_text and ("DSML" in proposal_text or "invoke" in proposal_text):
+        clean_text, dsml_calls = _extract_dsml_tool_calls(proposal_text)
+        if dsml_calls:
+            tool_calls_list.extend(dsml_calls)
+            proposal_text = clean_text
     if not proposal_text and not tool_calls_list:
         return None, None, 0
     return {"text": proposal_text, "toolCalls": tool_calls_list}, raw_usage, ttft_millis
@@ -539,6 +659,7 @@ class OpenRouterModel:
         api_key_ref: str = DEFAULT_KEY_REF,
         endpoint: str = DEFAULT_ENDPOINT,
         model: str = DEFAULT_MODEL,
+        models: Sequence[str] | None = None,
         cassette: Cassette | None = None,
         mode: str = "live",
         transport: Transport | None = None,
@@ -552,13 +673,18 @@ class OpenRouterModel:
         pricing_table: Mapping[str, tuple[float, float, float]] | None = None,
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
+        reasoning_effort: str | None = None,
         request_timeout: float = 30.0,
         monotonic: Callable[[], float] = time.monotonic,
         provider: str = "openrouter",
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
+        # Policy-facing factories resolve and authorize identifiers. The
+        # adapter still represents unknown routes so accounting can report
+        # `pricing_known=false` instead of inventing a price.
         self._model = model
+        self._models = list(models) if models is not None else None
         self._mode = mode
         self._provider = provider
         self._transport = transport
@@ -572,6 +698,7 @@ class OpenRouterModel:
         self._pricing_table = pricing_table
         self._pricing_micros_table = pricing_micros_table
         self._stream = stream
+        self._reasoning_effort = reasoning_effort
         if request_timeout <= 0:
             raise ValueError("request_timeout must be positive")
         self._request_timeout = float(request_timeout)
@@ -768,6 +895,9 @@ class OpenRouterModel:
     #: named so it cannot silently become an unlimited loop against a model
     #: that genuinely never produces content.
     _EMPTY_PROPOSAL_MESSAGE = "proposal must contain text or a tool call"
+    _MALFORMED_STREAM_MESSAGE = (
+        "provider streaming response was malformed, truncated, or empty"
+    )
     _EMPTY_PROPOSAL_RETRIES = 1
 
     def _complete(
@@ -797,14 +927,20 @@ class OpenRouterModel:
             self._EMPTY_PROPOSAL_RETRIES <= 0
             or error is None
             or error.kind != "instrument_error"
-            or error.message != self._EMPTY_PROPOSAL_MESSAGE
+            or error.message not in {
+                self._EMPTY_PROPOSAL_MESSAGE,
+                self._MALFORMED_STREAM_MESSAGE,
+            }
         ):
             return result
         for _ in range(self._EMPTY_PROPOSAL_RETRIES):
             result = self._complete_once(context, tools, sampling)
             if result.ok or (
                 result.error is None
-                or result.error.message != self._EMPTY_PROPOSAL_MESSAGE
+                or result.error.message not in {
+                    self._EMPTY_PROPOSAL_MESSAGE,
+                    self._MALFORMED_STREAM_MESSAGE,
+                }
             ):
                 return result
         return result
@@ -826,8 +962,9 @@ class OpenRouterModel:
                 kind="instrument_error",
                 message=f"secret reference {self.api_key_ref} is unset",
             )
+        target_model = self._models[0] if self._models else route.resolved_model
         body_obj: dict[str, Any] = {
-            "model": route.resolved_model,
+            "model": target_model,
             "messages": _messages(context),
             "temperature": sampling.get("temperature", 0.0),
             # Reasoning-capable routes can spend the first tokens on hidden
@@ -835,8 +972,12 @@ class OpenRouterModel:
             # before a tool call, producing an empty proposal and burning a
             # turn.  Keep the bound explicit while leaving callers free to
             # narrow it through the sampling contract.
-            "max_tokens": sampling.get("maxTokens", 1024),
+            "max_tokens": sampling.get("maxTokens", 4096),
         }
+        if self._models:
+            body_obj["models"] = list(self._models)
+        if self._reasoning_effort is not None:
+            body_obj["reasoning"] = {"effort": self._reasoning_effort}
         if self._stream:
             body_obj["stream"] = True
             body_obj["stream_options"] = {"include_usage": True}
@@ -844,6 +985,12 @@ class OpenRouterModel:
         if tool_payload:
             body_obj["tools"] = tool_payload
             body_obj["parallel_tool_calls"] = False
+            tool_choice = sampling.get("toolChoice") or sampling.get("tool_choice")
+            if tool_choice is not None:
+                if isinstance(tool_choice, str):
+                    body_obj["tool_choice"] = tool_choice
+                elif isinstance(tool_choice, Mapping):
+                    body_obj["tool_choice"] = dict(tool_choice)
         payload = json.dumps(body_obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         headers = {
             "Content-Type": "application/json",

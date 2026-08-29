@@ -1,8 +1,9 @@
-.PHONY: clean clean-py clean-js clean-build clean-test clean-cache clean-wsl clean-all help
+.PHONY: clean clean-py clean-benchmark-cache clean-js clean-build clean-test clean-cache clean-wsl clean-all help
 
 help:
 	@echo "Repository Cleanup Targets:"
 	@echo "  make clean-py       - Remove Python cache & artifacts (__pycache__, *.pyc, .pytest_cache, etc)"
+	@echo "  make clean-benchmark-cache - Remove only Python bytecode caches between benchmark rows"
 	@echo "  make clean-js       - Remove JavaScript cache & artifacts (node_modules, .next, dist, build)"
 	@echo "  make clean-build    - Remove build artifacts & dist folders"
 	@echo "  make clean-test     - Remove test cache & coverage reports (.pytest_cache, .coverage, htmlcov)"
@@ -14,6 +15,12 @@ help:
 	@echo "Usage: make clean-py  OR  make clean-all"
 
 ## Python cleanup
+clean-benchmark-cache:
+	@echo "🧹 Cleaning benchmark Python bytecode caches..."
+	find . -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
+	find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true
+	@echo "✅ Benchmark bytecode cache cleanup complete"
+
 clean-py:
 	@echo "🧹 Cleaning Python cache & artifacts..."
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

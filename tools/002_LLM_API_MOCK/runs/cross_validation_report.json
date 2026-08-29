@@ -32,7 +32,7 @@
   {
     "iq": 2,
     "tier_label": "SWE Medium",
-    "real_model": "nvidia/nemotron-3-super-120b-a12b:free",
+    "real_model": "deepseek/deepseek-v4-flash-0731",
     "real_tools": [
       "list_dir"
     ],

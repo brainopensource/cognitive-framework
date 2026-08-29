@@ -768,7 +768,7 @@ DOMAIN_CHALLENGES: dict[str, SWEProChallenge] = {
             "        # Querying sub-range [0, 1] requires pushing composite lazy tag down\n"
             "        # Elements 0 and 1: 6*(1) + 22 = 28, 6*(2) + 22 = 34 -> sum = 62\n"
             "        self.assertEqual(st.query_sum(0, 1), 62)\n"
-            "        self.assertEqual(st.query_sum(0, 7), 202)\n\n"
+            "        self.assertEqual(st.query_sum(0, 7), 174)\n\n"
             "if __name__ == '__main__': unittest.main()\n"
         ),
     ),

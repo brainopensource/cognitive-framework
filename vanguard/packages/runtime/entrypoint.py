@@ -64,24 +64,19 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         max_turns=int(request.get("maxTurnsPerEpisode") or 40),
     )
     # The client-side deterministic smoke backend is an explicit, non-release
-    # choice.  It must reach the same Runtime path without touching a provider;
-    # it is never promotion-eligible evidence.
     fake_backend = request.get("fakeBackend")
-    model_port = str(request.get("modelPort") or "").strip().lower()
-    planner_model = str(request.get("plannerModel") or "openrouter/free")
-    if isinstance(fake_backend, str) and fake_backend:
+    from .model_selection import select_model
+    if fake_backend:
         selected_model = FakeModel([{"kind": "finish", "note": "deterministic preview"}])
-    elif model_port == "lam":
-        from .model_selection import select_model
-        selected_model = select_model("lam", model_name=planner_model if planner_model != "openrouter/free" else None).model
-    elif model_port == "ollama":
-        selected_model = OllamaModel(
-            model=planner_model,
-            endpoint=os.environ.get("VANGUARD_OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/chat"),
-            timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0),
-        )
     else:
-        selected_model = OpenRouterModel(model=planner_model)
+        model_port = str(request.get("modelPort") or "openrouter").strip().lower()
+        planner_model = str(request.get("plannerModel") or "")
+        selected_model = select_model(
+            model_port,
+            model_name=planner_model if planner_model and planner_model not in {"free", "default", "openrouter/free"} else None,
+            timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0) if request.get("modelTimeoutSeconds") else None,
+            allow_paid=bool(request.get("allowPaid", False)),
+        ).model
     # A deterministic preview is a hermetic smoke path, not a durable run.
     # Keep it out of the product profile's default persistent ledger: the
     # legacy fixed `run-cli` identity would otherwise resume stale approval

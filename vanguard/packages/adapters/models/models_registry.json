@@ -1,15 +1,27 @@
 {
-  "default_model": "openrouter/free",
+  "schema": "aether.model-policy/1",
+  "default_model": "deepseek/deepseek-v4-flash-0731",
   "default_paid_model": "deepseek/deepseek-v4-flash-0731",
-  "band_fallbacks": {
-    "free": "openrouter/free",
-    "medium": "deepseek/deepseek-v4-flash-0731",
-    "high": "openai/gpt-5.6-luna",
-    "testing": "openrouter/free",
-    "top": "openai/gpt-5.6-luna"
+  "active_tiers": [1, 2, 3],
+  "offline_defaults": {
+    "ollama": "deepseek-r1"
   },
-  "bands": {
-    "free": [
+  "aliases": {
+    "default": "deepseek/deepseek-v4-flash-0731",
+    "paid": "deepseek/deepseek-v4-flash-0731",
+    "free": "openrouter/free",
+    "testing": "openrouter/free",
+    "tier1": "openrouter/free",
+    "tier2": "deepseek/deepseek-v4-flash-0731",
+    "tier3": "openai/gpt-5.6-luna",
+    "fast": "deepseek/deepseek-v4-flash-0731",
+    "smart": "deepseek/deepseek-v4-flash-0731",
+    "coding": "deepseek/deepseek-v4-flash-0731",
+    "research": "deepseek/deepseek-v4-flash-0731",
+    "openrouter/free": "openrouter/free"
+  },
+  "tiers": {
+    "1": [
       "openrouter/free",
       "z-ai/glm-5.2:free",
       "minimax/minimax-m3:free",
@@ -26,7 +38,7 @@
       "openai/gpt-oss-20b:free",
       "inclusionai/ling-3.0-tiny:free"
     ],
-    "medium": [
+    "2": [
       "deepseek/deepseek-v4-flash-0731",
       "z-ai/glm-5.3-flash",
       "xiaomi/mimo-v2.5",
@@ -35,18 +47,14 @@
       "qwen/qwen3-next-80b-a3b-thinking",
       "upstage/solar-pro-3"
     ],
-    "high": [
+    "3": [
       "openai/gpt-5.6-luna",
       "deepseek/deepseek-v4-pro",
       "xiaomi/mimo-v2.5-pro",
       "minimax/minimax-m3",
       "z-ai/glm-5.2"
     ],
-    "testing": [
-      "openrouter/free",
-      "deepseek/deepseek-v4-flash-0731"
-    ],
-    "top": []
+    "4": []
   },
   "pricing_micros": {
     "openrouter/free": {"prompt": 0, "completion": 0, "cached": 0},
@@ -64,11 +72,6 @@
     "z-ai/glm-5.2": {"prompt": 350000, "completion": 1400000, "cached": 35000},
     "openai/gpt-5.6-luna": {"prompt": 1000000, "completion": 4000000, "cached": 250000},
     "deepseek/deepseek-v4-pro": {"prompt": 450000, "completion": 1800000, "cached": 45000},
-    "minimax/minimax-m3": {"prompt": 200000, "completion": 800000, "cached": 20000},
-    "openai/gpt-4o-mini": {"prompt": 150000, "completion": 600000, "cached": 75000},
-    "gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
-    "openai/gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
-    "deepseek-reasoner": {"prompt": 550000, "completion": 2190000, "cached": 140000},
-    "deepseek-coder": {"prompt": 140000, "completion": 280000, "cached": 14000}
+    "minimax/minimax-m3": {"prompt": 200000, "completion": 800000, "cached": 20000}
   }
 }

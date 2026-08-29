@@ -3,22 +3,17 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from vanguard.packages.adapters.models.config import get_band_models, get_default_paid_model, get_pricing_micros_table
 
 
 class ProviderOptimizer:
     def __init__(self) -> None:
-        self.pricing_micros = {
-            "lam": 0,
-            "ollama": 0,
-            "openrouter/free": 0,
-            "cohere/north-mini-code:free": 0,
-            "nvidia/nemotron-3.5-lightning:free": 0,
-            "deepseek/deepseek-v4-flash-0731": 500,
-            "google/gemma-4-26b-a4b-it": 600,
-            "openai/gpt-5.6-luna": 2500,
-            "deepseek/deepseek-v4-pro-0813": 3000,
-            "google/gemini-3.7-flash": 1500,
-        }
+        self.pricing_micros = {"lam": 0, "ollama": 0, **get_pricing_micros_table()}
+        self.free_model = get_band_models("free")[0]
+        self.paid_model = get_default_paid_model()
 
     def recommend_provider(
         self,
@@ -47,12 +42,12 @@ class ProviderOptimizer:
         if policy_clean == "min-cost" or budget_remaining_usd <= 0.0:
             if scenario_tier <= 2:
                 return {"provider": "ollama", "model": "llama3.2:3b", "reason": "Zero-cost local GPU execution"}
-            return {"provider": "openrouter", "model": "openrouter/free", "reason": "Zero-cost cloud free tier"}
+            return {"provider": "openrouter", "model": self.free_model, "reason": "Zero-cost cloud free tier"}
 
         if policy_clean == "min-tokens":
             if scenario_tier <= 2:
                 return {"provider": "ollama", "model": "qwen2.5:1.5b", "reason": "Minimal prompt overhead"}
-            return {"provider": "openrouter", "model": "deepseek/deepseek-v4-flash-0731", "reason": "High token efficiency"}
+            return {"provider": "openrouter", "model": self.paid_model, "reason": "Configured token-efficient model"}
 
         # Default: Balanced Policy
         if scenario_tier <= 2:
@@ -60,6 +55,6 @@ class ProviderOptimizer:
         elif scenario_tier <= 3:
             return {"provider": "openrouter", "model": "cohere/north-mini-code:free", "reason": "Cloud Light Free balance"}
         elif scenario_tier <= 4:
-            return {"provider": "openrouter", "model": "deepseek/deepseek-v4-flash-0731", "reason": "Cloud Mid-Tier balance"}
+            return {"provider": "openrouter", "model": self.paid_model, "reason": "Configured cloud balance"}
         else:
-            return {"provider": "openrouter", "model": "google/gemini-3.7-flash", "reason": "Frontier SOTA balance"}
+            return {"provider": "openrouter", "model": self.paid_model, "reason": "Configured highest enabled tier"}

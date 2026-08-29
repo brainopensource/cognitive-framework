@@ -66,7 +66,7 @@ Explain code structure, control flow, design decisions, and potential issues cle
   turns: [
     {
       turn: 1,
-      model: 'deepseek/deepseek-v4-flash',
+      model: 'default',
       action: 'fs.read',
       args: { path: 'calc.py' },
       status: 'executed',
@@ -75,7 +75,7 @@ Explain code structure, control flow, design decisions, and potential issues cle
     },
     {
       turn: 2,
-      model: 'deepseek/deepseek-v4-flash',
+      model: 'default',
       action: 'patch.apply',
       args: { path: 'calc.py', diff: '@@ -10,3 +10,3 @@\n- return a - b\n+ return a + b' },
       status: 'approval_required',
@@ -271,7 +271,7 @@ function renderLiveTurns() {
     </div>
     <div class="p-3 bg-panel border border-border rounded">
       <span class="text-sky-400">[00:00:02] ModelInvoked:</span>
-      <span class="text-gray-300">Prompting <code>deepseek/deepseek-v4-flash</code> with L1-L5 compiled context.</span>
+      <span class="text-gray-300">Prompting the configured model from the Vanguard registry with L1-L5 compiled context.</span>
     </div>
     <div class="p-3 bg-panel border border-border rounded">
       <span class="text-amber-400">[00:00:03] S5_ApprovalRequired:</span>

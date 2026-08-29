@@ -7,7 +7,7 @@ canonical_for:
   - role-based-reading-paths
 status: living
 owner: documentation-architect
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-26
 read_when:
   - selecting-a-documentation-bundle
@@ -168,9 +168,9 @@ default is to update an existing owner rather than create another summary.
 
 The final v0.6.1 architecture review used two frozen provenance anchors:
 
-- [`001 — ALFA decision briefing`](_archive/reviews/archive/proposals/001_alfa_review_full_decision.md)
+- [`001 — ALFA decision briefing`](_archive/reviews/backend/director_review_v0/proposals/001_alfa_review_full_decision.md)
   records the Director-facing synthesis and corrections applied to the proposal set.
-- [`006 — Fi Tier S+ master proposal`](_archive/reviews/archive/proposals/006_fi_review_full_gptsol_proposal.md)
+- [`006 — Fi Tier S+ master proposal`](_archive/reviews/backend/director_review_v0/proposals/006_fi_review_full_gptsol_proposal.md)
   preserves the detailed source architecture, algorithms, risks, and proposed falsifiers.
 
 They are useful for completeness audits only. The accepted ADR mapping in

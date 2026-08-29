@@ -10,26 +10,16 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-FREE = [
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "nvidia/nemotron-3.5-lightning:free",
-    "cohere/north-mini-code:free",
-]
+import sys
+from pathlib import Path
 
-MEDIUM = [
-    "openai/gpt-5.6-luna",
-    "deepseek/deepseek-v4-flash-0731",
-    "xiaomi/mimo-v2.5",
-]
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from vanguard.packages.adapters.models.config import get_band_models
 
-HIGH = [
-    "google/gemini-3.7-flash",
-    "deepseek/deepseek-v4-pro-0813",
-    "z-ai/glm-5.2",
-]
-
-# Not named in the request — do not guess flagship ids against a $0.50 cap.
-TOP_UNSPECIFIED = []
+FREE = list(get_band_models("free"))
+MEDIUM = list(get_band_models("medium"))
+HIGH = list(get_band_models("high"))
+TOP_UNSPECIFIED = list(get_band_models("top"))
 
 TIER_PROBES = {
     1: "Fix in one line: def add(a,b): return a-b  # should add. Reply with the corrected function only.",

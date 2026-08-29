@@ -17,8 +17,12 @@ REGISTRY_FILENAME = "models_registry.json"
 
 
 class ModelRegistry(TypedDict, total=False):
+    schema: str
     default_model: str
     default_paid_model: str
+    active_tiers: List[int]
+    aliases: Dict[str, str]
+    tiers: Dict[str, List[str]]
     bands: Dict[str, List[str]]
     band_fallbacks: Dict[str, str]
     pricing_micros: Dict[str, Dict[str, int]]
@@ -26,6 +30,10 @@ class ModelRegistry(TypedDict, total=False):
 
 class ModelRegistryError(RuntimeError):
     """Raised when the unified model registry is missing, invalid or incomplete."""
+
+
+class ModelPolicyError(ModelRegistryError, ValueError):
+    """Raised when code requests a model outside the enabled tier policy."""
 
 
 _REGISTRY_CACHE: ModelRegistry | None = None
@@ -64,7 +72,12 @@ def load_model_registry(path: Path | None = None) -> ModelRegistry:
     # invent a model name outside the JSON source of truth.
     _require(data, "default_model")
     _require(data, "default_paid_model")
-    _require(data, "bands")
+    tiers = _require(data, "tiers")
+    active = _require(data, "active_tiers")
+    if not isinstance(active, list) or any(t not in (1, 2, 3) for t in active):
+        raise ModelRegistryError("active_tiers must contain only enabled tiers 1, 2, or 3")
+    if not isinstance(tiers.get("4"), list) or tiers["4"]:
+        raise ModelRegistryError("tier 4 must exist and be empty")
 
     if path is None:
         _REGISTRY_CACHE = data
@@ -79,9 +92,18 @@ def get_default_paid_model() -> str:
     return str(load_model_registry()["default_paid_model"])
 
 
+def get_offline_default(provider: str) -> str:
+    defaults = load_model_registry().get("offline_defaults", {})
+    try:
+        return str(defaults[provider])
+    except KeyError:
+        raise ModelRegistryError(f"no offline default is configured for {provider!r}") from None
+
+
 def get_band_models(band: str) -> tuple[str, ...]:
-    bands: dict[str, list[str]] = load_model_registry()["bands"]
-    return tuple(bands.get(band, ()))
+    tier_by_band = {"free": "1", "medium": "2", "high": "3", "top": "4", "testing": "1"}
+    registry = load_model_registry()
+    return tuple(registry["tiers"].get(tier_by_band.get(band, band), ()))
 
 
 def get_band_model(band: str, index: int = 0) -> str:
@@ -112,6 +134,38 @@ def get_high_model(index: int = 0) -> str:
 
 def get_testing_model(index: int = 0) -> str:
     return get_band_model("testing", index)
+
+
+def get_active_tiers() -> tuple[int, ...]:
+    return tuple(load_model_registry()["active_tiers"])
+
+
+def get_allowed_models() -> frozenset[str]:
+    registry = load_model_registry()
+    return frozenset(
+        model for tier in get_active_tiers()
+        for model in registry["tiers"].get(str(tier), ())
+    )
+
+
+def resolve_model(model: str | None) -> str:
+    """Resolve an alias and reject every disabled or unknown live model."""
+    registry = load_model_registry()
+    requested = (model or registry["default_model"]).strip()
+    resolved = registry.get("aliases", {}).get(requested, requested)
+    if resolved not in get_allowed_models():
+        raise ModelPolicyError(
+            f"model {requested!r} is not enabled; configured tiers are {get_active_tiers()}"
+        )
+    return resolved
+
+
+def is_allowed_model(model: str | None) -> bool:
+    try:
+        resolve_model(model)
+    except (ModelRegistryError, ValueError):
+        return False
+    return True
 
 
 def get_pricing_micros_table() -> dict[str, tuple[int, int, int]]:

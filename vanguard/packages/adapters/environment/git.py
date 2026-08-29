@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
 from ...domain.canonicalisation.digest import digest_bytes, digest_of
+from ...domain.workspace import controlled_environment, get_workspace_path
 from ...ports.environment import (
     AffectedResource,
     EffectPreview,
@@ -35,7 +36,17 @@ from ...ports.environment import (
 )
 from ...ports.event_store import Result
 
-__all__ = ["GitEnvironment", "GitEnvironmentAdapter"]
+__all__ = ["GitEnvironment", "GitEnvironmentAdapter", "GitUnavailableError"]
+
+
+class GitUnavailableError(RuntimeError):
+    """`git` is not on `PATH` (BETA-11: a sparse host has no git binary).
+
+    Raised from the constructor, where there is no `Result` to return yet.
+    Every port method fails closed the same way via `_check_git`, returning
+    `Result.fail(kind="unavailable", ...)` instead of letting a bare
+    `FileNotFoundError` escape from inside `subprocess.run`.
+    """
 
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
@@ -84,8 +95,12 @@ class GitEnvironment:
         self._disposed = False
         self._snapshot_seq = 0
 
+        if shutil.which("git") is None:
+            raise GitUnavailableError("git executable not found on PATH")
+
         if worktree_branch:
-            wt_path = Path(worktree_dir or tempfile.mkdtemp(prefix="vg-wt-")).resolve()
+            sandboxes_dir = get_workspace_path("sandboxes") if os.environ.get("AETHER_WORKSPACE_ROOT") else None
+            wt_path = Path(worktree_dir or tempfile.mkdtemp(prefix="vg-wt-", dir=sandboxes_dir)).resolve()
             # Create isolated worktree
             cmd = ["git", "worktree", "add", "-b", worktree_branch, str(wt_path)]
             proc = subprocess.run(cmd, cwd=self._repo_path, capture_output=True, text=True, check=False)
@@ -116,6 +131,20 @@ class GitEnvironment:
             return Result.fail("invalid_request", "environment adapter has been disposed")
         return None
 
+    def _check_git(self) -> Optional[Result[Any]]:
+        """Fail closed with a typed `unavailable` Result, not a raw crash.
+
+        The constructor already refused a host with no `git` on `PATH`, but
+        `PATH` is mutable for the life of the process (a sandboxed child, an
+        env var scrubbed mid-run) -- so every port method re-checks rather
+        than trusting the constructor-time probe forever.
+        """
+        if shutil.which("git") is None:
+            return Result.fail(
+                "unavailable", "git executable not found on PATH", retryable=False
+            )
+        return None
+
     def _resolve_safe_path(self, rel_path: str) -> Result[Path]:
         """Resolve path and assert containment within working_dir."""
         if not rel_path or rel_path.startswith("/") or rel_path.startswith("\\"):
@@ -134,6 +163,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
         # Read current commit and branch
         head_proc = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=self._working_dir, capture_output=True, text=True, check=False
@@ -164,6 +196,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
         self._snapshot_seq += 1
 
         head_proc = subprocess.run(
@@ -193,6 +228,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
 
         action = req.action
         if action == "read":
@@ -616,6 +654,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
 
         action = req.action
         if action == "patch" and req.patch is None and "diff" not in req.args and "content" in req.args:
@@ -712,6 +753,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
 
         observed_at = "2026-08-15T00:00:00.000Z"
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
@@ -829,6 +873,7 @@ class GitEnvironment:
                 proc = subprocess.run(
                     list(cmd),
                     cwd=work_cwd,
+                    env=controlled_environment(os.environ),
                     capture_output=True,
                     text=True,
                     check=False,
@@ -863,6 +908,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
 
         for res in receipt.affected_resources:
             file_obj = (self._working_dir / res.resource).resolve()
@@ -910,6 +958,9 @@ class GitEnvironment:
         disposed_err = self._check_disposed()
         if disposed_err:
             return disposed_err
+        git_err = self._check_git()
+        if git_err:
+            return git_err
 
         # Discard working tree modifications and untracked files
         subprocess.run(["git", "checkout", "--", "."], cwd=self._working_dir, capture_output=True, check=False)

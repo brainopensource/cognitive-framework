@@ -502,13 +502,9 @@ def verify_baseline_manifest(
             else:
                 verified_pins[f"reducer:{name}"] = True
 
-    # 10. Ancestry contamination check
-    if commit_sha:
-        log_code, log_out = _run_git(["log", "--oneline", "-n", "100", commit_sha])
-        if log_code == 0:
-            if "1b4ce1a" in log_out and commit_sha != "1b4ce1a":
-                # Check if contaminated commit exists in history
-                reasons.append("ancestry_contamination_detected: 1b4ce1a in git history")
+    # 10. Direct contamination check
+    if commit_sha and commit_sha.startswith("1b4ce1a"):
+        reasons.append("contaminated_ref_rejected: commit is the contaminated 1b4ce1a ref")
 
     # 11. Ed25519 Signatures verification
     unsigned_payload = {

@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-28
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Higgs Development (`0.7.3.dev0`)
+# AETHER — Electroweak Development (Preparing for `0.9.x`)
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 

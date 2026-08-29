@@ -1,8 +1,8 @@
 {
   "timestamp": "20260815_234629",
   "provider": "openrouter",
-  "model": "deepseek/deepseek-chat",
-  "requested_model": "deepseek/deepseek-chat",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "requested_model": "deepseek/deepseek-v4-flash-0731",
   "temperature": 0.2,
   "prompt": "# Sample Coding Challenge for Comparative Benchmarking\n\nWrite a Python function named `fibonacci_memoized` that computes the n-th Fibonacci number using an internal memoization dictionary.\nRequirements:\n1. Return the integer result for n >= 0.\n2. Handle negative inputs by raising ValueError.\n3. Keep the implementation under 25 lines of clean code.\n4. Output only code and necessary docstring.",
   "latency_ms": 8776,

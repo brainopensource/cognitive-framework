@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier4_lcb_lazy_segment_tree",
+  "id": "t4-tier4-lcb-lazy-segment-tree",
+  "tier": 4,
+  "title": "SWE-bench: Dynamic Lazy Segment Tree with Range Affine Transformations",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"segtree/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"from __future__ import annotations\\nfrom typing import Sequence\\n\\nMOD = 1_000_000_007\\n\\nclass LazySegmentTree:\\n    def __init__(self, initial_values: Sequence[int]):\\n        self.n = len(initial_values)\\n        self.tree = [0] * (4 * self.n)\\n        self.lazy_mul = [1] * (4 * self.n)\\n        self.lazy_add = [0] * (4 * self.n)\\n        if self.n > 0:\\n            self._build(initial_values, 1, 0, self.n - 1)\\n\\n    def _build(self, arr: Sequence[int], node: int, start: int, end: int) -> None:\\n        if start == end:\\n            self.tree[node] = arr[start] % MOD\\n            return\\n        mid = (start + end) // 2\\n        self._build(arr, 2 * node, start, mid)\\n        self._build(arr, 2 * node + 1, mid + 1, end)\\n        self.tree[node] = (self.tree[2 * node] + self.tree[2 * node + 1]) % MOD\\n\\n    def _apply_tag(self, node: int, start: int, end: int, mul: int, add: int) -> None:\\n        length = (end - start + 1)\\n        self.tree[node] = (self.tree[node] * mul + add * length) % MOD\\n        self.lazy_mul[node] = (self.lazy_mul[node] * mul) % MOD\\n        self.lazy_add[node] = (self.lazy_add[node] * mul + add) % MOD\\n\\n    def _push(self, node: int, start: int, end: int) -> None:\\n        if self.lazy_mul[node] == 1 and self.lazy_add[node] == 0:\\n            return\\n        mid = (start + end) // 2\\n        self._apply_tag(2 * node, start, mid, self.lazy_mul[node], self.lazy_add[node])\\n        self._apply_tag(2 * node + 1, mid + 1, end, self.lazy_mul[node], self.lazy_add[node])\\n        self.lazy_mul[node] = 1\\n        self.lazy_add[node] = 0\\n\\n    def apply_affine(self, l: int, r: int, a: int, b: int) -> None:\\n        self._update(1, 0, self.n - 1, l, r, a % MOD, b % MOD)\\n\\n    def apply_add(self, l: int, r: int, v: int) -> None:\\n        self.apply_affine(l, r, 1, v)\\n\\n    def _update(self, node: int, start: int, end: int, l: int, r: int, a: int, b: int) -> None:\\n        if r < start or end < l:\\n            return\\n        if l <= start and end <= r:\\n            self._apply_tag(node, start, end, a, b)\\n            return\\n        self._push(node, start, end)\\n        mid = (start + end) // 2\\n        self._update(2 * node, start, mid, l, r, a, b)\\n        self._update(2 * node + 1, mid + 1, end, l, r, a, b)\\n        self.tree[node] = (self.tree[2 * node] + self.tree[2 * node + 1]) % MOD\\n\\n    def query_sum(self, l: int, r: int) -> int:\\n        return self._query(1, 0, self.n - 1, l, r)\\n\\n    def _query(self, node: int, start: int, end: int, l: int, r: int) -> int:\\n        if r < start or end < l:\\n            return 0\\n        if l <= start and end <= r:\\n            return self.tree[node]\\n        self._push(node, start, end)\\n        mid = (start + end) // 2\\n        left_sum = self._query(2 * node, start, mid, l, r)\\n        right_sum = self._query(2 * node + 1, mid + 1, end, l, r)\\n        return (left_sum + right_sum) % MOD\\n\", \"path\": \"segtree/tree.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Dynamic Lazy Segment Tree with Range Affine Transformations (tier4_lcb_lazy_segment_tree). All test suites pass (OK).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "oracle_test.py": "import unittest\nfrom segtree.tree import LazySegmentTree\n\nclass TestLazySegmentTree(unittest.TestCase):\n    def test_range_affine_composition(self):\n        arr = [1, 2, 3, 4, 5, 6, 7, 8]\n        st = LazySegmentTree(arr)\n        self.assertEqual(st.query_sum(0, 7), 36)\n        # First update on [0, 3]: x -> 2*x + 5\n        st.apply_affine(0, 3, 2, 5)\n        # Second update on [0, 3]: x -> 3*x + 7 (composing lazy tag on node [0, 3])\n        # Correct composite tag: x -> 3*(2*x + 5) + 7 = 6*x + 22\n        st.apply_affine(0, 3, 3, 7)\n        # Querying sub-range [0, 1] requires pushing composite lazy tag down\n        # Elements 0 and 1: 6*(1) + 22 = 28, 6*(2) + 22 = 34 -> sum = 62\n        self.assertEqual(st.query_sum(0, 1), 62)\n        self.assertEqual(st.query_sum(0, 7), 174)\n\nif __name__ == '__main__': unittest.main()\n",
+    "segtree/__init__.py": "from .tree import LazySegmentTree\n__all__ = ['LazySegmentTree']\n",
+    "segtree/tree.py": "from __future__ import annotations\nfrom typing import Sequence\n\nMOD = 1_000_000_007\n\nclass LazySegmentTree:\n    def __init__(self, initial_values: Sequence[int]):\n        self.n = len(initial_values)\n        self.tree = [0] * (4 * self.n)\n        # Lazy tags: (mul, add) representing f(x) = (mul * x + add) % MOD\n        self.lazy_mul = [1] * (4 * self.n)\n        self.lazy_add = [0] * (4 * self.n)\n        if self.n > 0:\n            self._build(initial_values, 1, 0, self.n - 1)\n\n    def _build(self, arr: Sequence[int], node: int, start: int, end: int) -> None:\n        if start == end:\n            self.tree[node] = arr[start] % MOD\n            return\n        mid = (start + end) // 2\n        self._build(arr, 2 * node, start, mid)\n        self._build(arr, 2 * node + 1, mid + 1, end)\n        self.tree[node] = (self.tree[2 * node] + self.tree[2 * node + 1]) % MOD\n\n    def _apply_tag(self, node: int, start: int, end: int, mul: int, add: int) -> None:\n        length = (end - start + 1)\n        self.tree[node] = (self.tree[node] * mul + add * length) % MOD\n        # BUG: Incorrect composition order of pending lazy tags\n        self.lazy_mul[node] = (self.lazy_mul[node] * mul) % MOD\n        self.lazy_add[node] = (self.lazy_add[node] + add) % MOD  # Missing multiplication by mul\n\n    def _push(self, node: int, start: int, end: int) -> None:\n        if self.lazy_mul[node] == 1 and self.lazy_add[node] == 0:\n            return\n        mid = (start + end) // 2\n        self._apply_tag(2 * node, start, mid, self.lazy_mul[node], self.lazy_add[node])\n        self._apply_tag(2 * node + 1, mid + 1, end, self.lazy_mul[node], self.lazy_add[node])\n        self.lazy_mul[node] = 1\n        self.lazy_add[node] = 0\n\n    def apply_affine(self, l: int, r: int, a: int, b: int) -> None:\n        self._update(1, 0, self.n - 1, l, r, a % MOD, b % MOD)\n\n    def apply_add(self, l: int, r: int, v: int) -> None:\n        self.apply_affine(l, r, 1, v)\n\n    def _update(self, node: int, start: int, end: int, l: int, r: int, a: int, b: int) -> None:\n        if r < start or end < l:\n            return\n        if l <= start and end <= r:\n            self._apply_tag(node, start, end, a, b)\n            return\n        self._push(node, start, end)\n        mid = (start + end) // 2\n        self._update(2 * node, start, mid, l, r, a, b)\n        self._update(2 * node + 1, mid + 1, end, l, r, a, b)\n        self.tree[node] = (self.tree[2 * node] + self.tree[2 * node + 1]) % MOD\n\n    def query_sum(self, l: int, r: int) -> int:\n        return self._query(1, 0, self.n - 1, l, r)\n\n    def _query(self, node: int, start: int, end: int, l: int, r: int) -> int:\n        if r < start or end < l:\n            return 0\n        if l <= start and end <= r:\n            return self.tree[node]\n        self._push(node, start, end)\n        mid = (start + end) // 2\n        left_sum = self._query(2 * node, start, mid, l, r)\n        right_sum = self._query(2 * node + 1, mid + 1, end, l, r)\n        return (left_sum + right_sum) % MOD\n"
+  }
+}

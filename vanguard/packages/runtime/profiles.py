@@ -32,6 +32,7 @@ __all__ = [
     "EffectiveExecutionProfile",
     "PRESETS",
     "resolve_profile",
+    "load_custom_profile",
 ]
 
 VALID_RETENTION = frozenset({"digests_only", "standard", "full"})
@@ -255,6 +256,12 @@ PRESETS: Mapping[str, ExecutionProfile] = {
     ),
 }
 
+_ALIASES: Mapping[str, str] = {
+    "standard": "product",
+    "ci": "local",
+    "fast": "local",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class EffectiveExecutionProfile:
@@ -301,8 +308,9 @@ def resolve_profile(
     explicitly (typically `local`, with its own approval) rather than
     receive a silent substitution (`RF-88`).
     """
+    resolved_id = _ALIASES.get(profile_id, profile_id)
     try:
-        base = PRESETS[profile_id]
+        base = PRESETS[resolved_id]
     except KeyError:
         raise ExecutionProfileError(f"unknown execution profile {profile_id!r}") from None
     if overrides:
@@ -332,10 +340,87 @@ def _narrow(base: ExecutionProfile, overrides: Mapping[str, Any]) -> ExecutionPr
     if "capture_required" in overrides and not overrides["capture_required"] and base.capture_required:
         raise ExecutionProfileError("an override cannot weaken capture requirement")
 
-    allowed = {"workspace_access", "approval_default", "retention", "capture_required", "capture_content"}
+    allowed = {
+        "id", "workspace_mode", "workspace_access", "process_backend",
+        "approval_default", "retention", "capture_required", "capture_content",
+    }
     unknown = set(overrides) - allowed
     if unknown:
         raise ExecutionProfileError(f"override fields not permitted: {sorted(unknown)}")
     fields = {f: getattr(base, f) for f in base.__dataclass_fields__}
     fields.update(overrides)
     return ExecutionProfile(**fields)
+
+
+def load_custom_profile(
+    path_or_dict: Path | str | Mapping[str, Any],
+    base_preset: str = "local",
+) -> ExecutionProfile:
+    """Load a custom profile override from YAML, JSON, or dict and merge on top of a base preset (EVO-02).
+
+    Invariants:
+    - Custom configurations cannot widen process containment or workspace access.
+    - Cannot disable fail-closed policies or weaken capture requirements.
+    - Fails closed with ExecutionProfileError on invalid syntax or security widening.
+    """
+    import json
+    from pathlib import Path
+
+    if isinstance(path_or_dict, Mapping):
+        data = dict(path_or_dict)
+    elif isinstance(path_or_dict, (str, Path)):
+        p = Path(path_or_dict).resolve()
+        if not p.exists():
+            raise ExecutionProfileError(f"Profile configuration file does not exist: {p}")
+        text = p.read_text(encoding="utf-8")
+        if p.suffix in {".yaml", ".yml"}:
+            try:
+                import yaml
+                data = yaml.safe_load(text) or {}
+            except Exception as exc:
+                raise ExecutionProfileError(f"Failed to parse YAML profile config {p}: {exc}") from exc
+        else:
+            try:
+                data = json.loads(text) or {}
+            except Exception as exc:
+                raise ExecutionProfileError(f"Failed to parse JSON profile config {p}: {exc}") from exc
+    else:
+        raise ExecutionProfileError(f"path_or_dict must be Path, str, or Mapping, got {type(path_or_dict).__name__}")
+
+    # Determine base preset
+    preset_name = data.pop("base", data.pop("preset", data.pop("base_preset", base_preset)))
+    resolved_preset_name = _ALIASES.get(preset_name, preset_name)
+    if resolved_preset_name not in PRESETS:
+        raise ExecutionProfileError(f"unknown execution profile preset {preset_name!r}")
+
+    base_profile = PRESETS[resolved_preset_name]
+
+    # Flatten nested sections if present
+    overrides: dict[str, Any] = {}
+    if "workspace" in data and isinstance(data["workspace"], Mapping):
+        ws = data.pop("workspace")
+        if "access" in ws:
+            overrides["workspace_access"] = ws["access"]
+        if "mode" in ws:
+            overrides["workspace_mode"] = ws["mode"]
+    if "process" in data and isinstance(data["process"], Mapping):
+        pr = data.pop("process")
+        if "backend" in pr:
+            overrides["process_backend"] = pr["backend"]
+    if "approval" in data and isinstance(data["approval"], Mapping):
+        ap = data.pop("approval")
+        if "default" in ap:
+            overrides["approval_default"] = ap["default"]
+    if "capture" in data and isinstance(data["capture"], Mapping):
+        cp = data.pop("capture")
+        if "required" in cp:
+            overrides["capture_required"] = cp["required"]
+        if "content" in cp:
+            overrides["capture_content"] = cp["content"]
+
+    overrides.update(data)
+
+    if "approval_default" in overrides and overrides["approval_default"] not in {"allow", "ask", "deny"}:
+        raise ExecutionProfileError(f"invalid approval default: {overrides['approval_default']!r}")
+
+    return _narrow(base_profile, overrides)

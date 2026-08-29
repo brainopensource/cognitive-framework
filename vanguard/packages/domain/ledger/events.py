@@ -107,7 +107,20 @@ _UUIDV7_RE = re.compile(
 
 @dataclass(frozen=True, slots=True)
 class EventEnvelope:
-    """Normative EventEnvelope according to VG-04 §12.1."""
+    """Normative EventEnvelope according to VG-04 §12.1.
+
+    EVO-05: this is the one logical domain event model -- every reducer,
+    store, session, and kernel emission path constructs and consumes this
+    class, never anything else. `wire/types_gen.py` also generates an
+    `EventEnvelope`/`EventEnvelopeV2` pair from the same-named JSON schemas
+    (`schemas/mhf/event_envelope*.schema.json`); those exist so the schema
+    files have a generated shape to validate against and so non-Python
+    readers have one contract to codegen from, not as an alternative
+    business object. Nothing in this tree constructs or consumes them
+    directly (`test/contracts/test_evo05_one_event_representation.py`
+    enforces that), and no import of them should be added without collapsing
+    it back into this class or explaining why not.
+    """
 
     schema_version: str
     event_id: str

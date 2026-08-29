@@ -25,6 +25,7 @@
       "risk": "low"
     }
   ],
+  "evaluators": [],
   "budgetPolicy": "vg-code-default/budget-policy.json",
   "undeletable": false
 }

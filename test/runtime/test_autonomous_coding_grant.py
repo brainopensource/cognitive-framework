@@ -54,6 +54,19 @@ class TestAutonomousCodingGrant(unittest.TestCase):
         )
         self.assertTrue(ok)
 
+        # Model tools use workspace-relative paths. Resolve them against the
+        # grant root, never against the Vanguard process working directory.
+        for relative in ("app.py", ".", "src/module.py"):
+            with self.subTest(relative=relative):
+                ok, reason = validate_grant_request(
+                    grant, verb="fs.read", target_path=relative)
+                self.assertTrue(ok, reason)
+
+        ok, reason = validate_grant_request(
+            grant, verb="fs.read", target_path="../outside.py")
+        self.assertFalse(ok)
+        self.assertTrue(reason.startswith("workspace_path_escape_denied"))
+
         # 2. Denied verb (not in allowed list)
         ok, reason = validate_grant_request(
             grant,

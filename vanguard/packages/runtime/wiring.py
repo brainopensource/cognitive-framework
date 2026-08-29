@@ -498,8 +498,13 @@ def _environment_map(environment: Any, harness: Harness) -> str:
     if not profile.ok or profile.value is None:
         return f"harness={harness.harness}"
     value = profile.value
-    return (f"harness={harness.harness} environment={value.environment_id} "
-            f"kind={value.kind} root={value.root} "
+    # Models operate in the capability namespace, whose stable filesystem root
+    # is /workspace. Exposing the host/staging path here taught live models to
+    # repeat that path in tool calls; the proposal translator then correctly
+    # rejected it because it is outside /workspace. Keep host identity in
+    # receipts/telemetry, not in untrusted model-visible context.
+    return (f"harness={harness.harness} environment=workspace "
+            f"kind={value.kind} root=/workspace "
             f"capabilities={','.join(sorted(harness.verbs))}")
 
 
@@ -533,4 +538,3 @@ def _evaluator_from_manifest(harness: Harness, repo: Path) -> Any | None:
         expected_verdict_key_id=key_id,
         expected_verdict_public_key=public_key,
     )
-

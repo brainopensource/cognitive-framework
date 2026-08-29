@@ -201,6 +201,11 @@ class Harness:
     #: itself (`format_skill_index`), not pre-rendered here.
     skill_cards: tuple[SkillCard, ...] = ()
     capability_ceiling: tuple[str, ...] = ()
+    #: `ADR-0106 §4`. Tool-policy preset intent declared by the manifest via
+    #: an optional `tool-policy.json` (`{"mode": "phased", "preset": "code"}`).
+    #: `None` keeps the episode loop ungated: presets declare intent, never
+    #: inferred by the runtime (`ADR-0060`).
+    tool_policy_preset: str | None = None
 
     @property
     def composition_digest(self) -> str:
@@ -241,8 +246,19 @@ class Runtime:
         path = cls._manifest_file(manifest_path)
         directory = path.parent
         try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
+            content_text = path.read_text(encoding="utf-8")
+            if path.suffix.lower() in {".yaml", ".yml"}:
+                import yaml
+                raw = yaml.safe_load(content_text)
+            else:
+                try:
+                    raw = json.loads(content_text)
+                except json.JSONDecodeError:
+                    import yaml
+                    raw = yaml.safe_load(content_text)
+        except OSError as exc:
+            raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
+        except Exception as exc:
             raise CompositionError(f"manifest does not load: {path}: {exc}") from exc
 
         try:
@@ -324,9 +340,32 @@ class Runtime:
             gene_digests=gene_digests,
             skill_cards=skill_cards,
             capability_ceiling=canonical.ceiling,
+            tool_policy_preset=cls._tool_policy_preset(directory),
         )
 
     # -- composition internals -------------------------------------------
+
+    @staticmethod
+    def _tool_policy_preset(directory: Path) -> str | None:
+        """Read the optional manifest-level tool-policy declaration.
+
+        Absent, malformed, or non-phased declarations all compose to `None`:
+        the ungated generic loop. Only an explicit `{"mode": "phased"}`
+        declaration opts a preset into the state-dependent phase ladder.
+        """
+        declaration = directory / "tool-policy.json"
+        if not declaration.is_file():
+            return None
+        try:
+            declared = json.loads(declaration.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        if not isinstance(declared, Mapping):
+            return None
+        if declared.get("mode") != "phased":
+            return None
+        preset = declared.get("preset")
+        return str(preset) if preset else None
 
     @staticmethod
     def _manifest_file(manifest_path: str | Path) -> Path:
@@ -341,7 +380,12 @@ class Runtime:
             if candidate.exists():
                 path = candidate
         if path.is_dir():
-            path = path / "manifest.json"
+            for candidate in ("manifest.json", "manifest.yaml", "manifest.yml", "harness.yaml", "harness.json"):
+                if (path / candidate).is_file():
+                    path = path / candidate
+                    break
+            else:
+                path = path / "manifest.json"
         return path
 
     @staticmethod

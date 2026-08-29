@@ -17,6 +17,7 @@ __all__ = ["DIRECTIVE_KINDS", "MetaController", "StrategyDirective"]
 DIRECTIVE_KINDS = frozenset({
     "revise_plan", "request_context", "abandon_hypothesis",
     "change_verification", "delegate", "conclude",
+    "accept", "reject", "retry", "redirect", "fork", "stop",
 })
 
 

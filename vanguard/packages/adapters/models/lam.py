@@ -136,7 +136,8 @@ def _messages_from_context(context: ContextBundle) -> list[dict[str, str]]:
             fragments = layer.get("fragments")
             if role == "tool" and isinstance(fragments, Sequence):
                 for fragment in fragments:
-                    if isinstance(fragment, Mapping):
+                    if (isinstance(fragment, Mapping)
+                            and not str(fragment.get("label", "")).startswith("tool-call-")):
                         messages.append({"role": "tool", "content": str(fragment.get("content", ""))})
                 continue
             messages.append({"role": role, "content": str(layer.get("content", ""))})

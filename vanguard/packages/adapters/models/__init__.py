@@ -26,6 +26,8 @@ _LAZY = {
     "get_pricing_micros_table": ".config",
     "get_pricing_usd_table": ".config",
     "load_model_registry": ".config",
+    "create_model": ".factory",
+    "ModelResolutionError": ".factory",
 }
 
 def __getattr__(name):
@@ -47,6 +49,7 @@ if TYPE_CHECKING:                    # keep static analysis and IDEs working
     from .lam import LamModelAdapter
     from .ollama import OllamaModel
     from .stochastic import RECOVERABLE_BLOCK_TYPES, StochasticModelAdapter, perturbation_key
+    from .factory import ModelResolutionError, create_model
 
 
 __all__ = list(_LAZY)

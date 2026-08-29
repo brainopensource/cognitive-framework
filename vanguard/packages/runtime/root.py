@@ -20,6 +20,12 @@ from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
 from ..domain.canonicalisation.digest import digest_of
+from .workspace import (
+    controlled_environment,
+    get_workspace_path,
+    get_workspace_root,
+    validate_workspace_path,
+)
 from .compose import (
     Harness,
     Receipt,
@@ -96,6 +102,19 @@ class Runtime(_ComposedRuntime):
         everything": `K-17` fails approval closed there, because a run that
         blocks for a human has unbounded wall-clock *and* a human contributing
         to the measured outcome.
+
+        **EVO-02: retired from every production path.** No product code
+        calls this anymore -- `ApplicationService`, the CLI, and the service
+        daemon all go through `execute_profiled`/`RuntimeBootstrap`, the sole
+        concrete-adapter construction authority (`ADR-0089 §Decision 2`).
+        This method survives only because falsifier coverage (the M7
+        topology suite) deliberately exercises its `sandbox_mode="host-dev"`
+        escape hatch -- a host without a qualifying rootless perimeter, which
+        `execute_profiled`'s `local`/`product` profiles also reach via
+        `RuntimeBootstrap`, but changing which entrypoint an already-signed
+        evidence bundle's pinned material digest points at is a change to
+        that evidence, not a refactor, so it is left alone here. New product
+        code must call `execute_profiled`, never this.
         """
         harness = cls.compose(manifest_path, episode_id=task_context.episode_id,
                               bindings=bindings)
@@ -126,7 +145,7 @@ class Runtime(_ComposedRuntime):
             # without bubblewrap is a failure of this rootless run, not of
             # the harness, so the probe lives here and not behind `compose`.
             bwrap = _bwrap_path()
-            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
+            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-", dir=get_workspace_path("sandboxes")))
             sealed_bundle = sealed_dir / "bundle"
             sealed_bundle.write_bytes(
                 b"sealed evaluator mount is intentionally unavailable to worker\n")
@@ -696,4 +715,8 @@ __all__ = [
     "_reservation_for",
     "_sandbox_effector",
     "_span_for",
+    "controlled_environment",
+    "get_workspace_path",
+    "get_workspace_root",
+    "validate_workspace_path",
 ]

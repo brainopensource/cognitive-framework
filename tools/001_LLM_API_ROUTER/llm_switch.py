@@ -66,8 +66,6 @@ MODEL_ALIASES = {
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
-        "nemotron": "@cf/nvidia/nemotron-3-120b-a12b",
-        "nemotron-120b": "@cf/nvidia/nemotron-3-120b-a12b",
         "glm": "@cf/zai-org/glm-4.7-flash",
         "glm-flash": "@cf/zai-org/glm-4.7-flash",
         # Default to fast model
@@ -85,8 +83,6 @@ MODEL_ALIASES = {
         # Powerful models (26B+)
         "gemma": "@cf/google/gemma-4-26b-a4b-it",
         "gemma-26b": "@cf/google/gemma-4-26b-a4b-it",
-        "nemotron": "@cf/nvidia/nemotron-3-120b-a12b",
-        "nemotron-120b": "@cf/nvidia/nemotron-3-120b-a12b",
         "glm": "@cf/zai-org/glm-4.7-flash",
         "glm-flash": "@cf/zai-org/glm-4.7-flash",
         # Default to fast model

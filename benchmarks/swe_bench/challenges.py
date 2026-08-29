@@ -238,7 +238,8 @@ CHALLENGES: dict[str, SWEProChallenge] = {
                 "        self.callback = callback\n"
                 "        self.active = True\n\n"
                 "    def unsubscribe(self) -> None:\n"
-                "        self.active = False\n\n"
+                "        self.active = False\n"
+                "        self.bus._subs = [s for s in self.bus._subs if s is not self]\n\n"
                 "class EventBus:\n"
                 "    def __init__(self):\n"
                 "        self._subs: list[Subscription] = []\n\n"
@@ -262,11 +263,19 @@ CHALLENGES: dict[str, SWEProChallenge] = {
             "    def test_pub_sub(self):\n"
             "        bus = EventBus()\n"
             "        res = []\n"
-            "        s1 = bus.subscribe('order.*', lambda t, p: res.append(p))\n"
-            "        bus.publish('order.create', 10)\n"
+            "        s1 = bus.subscribe('order.**.created', lambda t, p: res.append(p))\n"
+            "        bus.publish('order.created', 10)\n"
+            "        bus.publish('order.us.east.created', 20)\n"
+            "        self.assertEqual(res, [10, 20])\n"
+            "        single = bus.subscribe('order.*.created', lambda t, p: res.append(p))\n"
+            "        bus.publish('order.us.created', 25)\n"
+            "        bus.publish('order.us.east.created', 26)\n"
+            "        self.assertEqual(res, [10, 20, 25, 25, 26])\n"
+            "        single.unsubscribe()\n"
             "        s1.unsubscribe()\n"
-            "        bus.publish('order.create', 20)\n"
-            "        self.assertEqual(res, [10])\n\n"
+            "        self.assertEqual(len(bus._subs), 0)\n"
+            "        bus.publish('order.created', 30)\n"
+            "        self.assertEqual(res, [10, 20, 25, 25, 26])\n\n"
             "if __name__ == '__main__': unittest.main()\n"
         ),
     ),
@@ -368,7 +377,7 @@ CHALLENGES: dict[str, SWEProChallenge] = {
         kind="bugfix",
         brief=(
             "Fix the concurrency and refill drift bug in `ratelimit/bucket.py`. Replenish tokens "
-            "using monotonic elapsed time, clamp to max_burst, and prevent race conditions."
+            "using monotonic elapsed time, clamp to max_burst, raise ValueError on non-positive tokens, and prevent race conditions."
         ),
         files={
             "ratelimit/__init__.py": "from .bucket import TokenBucket\n__all__ = ['TokenBucket']\n",
@@ -381,7 +390,7 @@ CHALLENGES: dict[str, SWEProChallenge] = {
                 "        self.tokens = float(max_burst)\n"
                 "        self.last_update = time.monotonic()\n"
                 "        self._lock = threading.Lock()\n\n"
-                "    def consume(self, tokens: int = 1) -> bool:\n"
+                "    def consume(self, tokens: float = 1) -> bool:\n"
                 "        with self._lock:\n"
                 "            now = time.monotonic()\n"
                 "            elapsed = now - self.last_update\n"
@@ -399,10 +408,12 @@ CHALLENGES: dict[str, SWEProChallenge] = {
             "class TestTokenBucket(unittest.TestCase):\n"
             "    def test_bucket(self):\n"
             "        tb = TokenBucket(10.0, 2)\n"
-            "        self.assertTrue(tb.consume(2))\n"
-            "        self.assertFalse(tb.consume(1))\n"
-            "        time.sleep(0.12)\n"
-            "        self.assertTrue(tb.consume(1))\n\n"
+            "        self.assertTrue(tb.consume(1.5))\n"
+            "        self.assertFalse(tb.consume(1.0))\n"
+            "        with self.assertRaises(ValueError):\n"
+            "            tb.consume(0)\n"
+            "        time.sleep(0.06)\n"
+            "        self.assertTrue(tb.consume(0.5))\n\n"
             "if __name__ == '__main__': unittest.main()\n"
         ),
     ),
@@ -521,7 +532,7 @@ CHALLENGES: dict[str, SWEProChallenge] = {
         kind="bugfix",
         brief=(
             "Fix topological sorting and cycle detection in `dag/resolver.py` and `dag/cycle.py`. "
-            "Must return deterministic order and raise `CircularDependencyError` on cycles."
+            "Must return deterministic order and raise `CircularDependencyError` with a `.cycle` list attribute containing the detected cycle."
         ),
         files={
             "dag/__init__.py": "from .resolver import DependencyResolver, CircularDependencyError\n__all__ = ['DependencyResolver', 'CircularDependencyError']\n",
@@ -555,10 +566,16 @@ CHALLENGES: dict[str, SWEProChallenge] = {
             "import unittest\n"
             "from dag.resolver import DependencyResolver, CircularDependencyError\n\n"
             "class TestDAG(unittest.TestCase):\n"
-            "    def test_dag(self):\n"
+            "    def test_dag_ordering(self):\n"
             "        deps = {'a': ['b'], 'b': ['c'], 'c': []}\n"
             "        r = DependencyResolver(deps).resolve()\n"
             "        self.assertEqual(r, ['a', 'b', 'c'])\n\n"
+            "    def test_cycle_trace(self):\n"
+            "        deps = {'a': ['b'], 'b': ['c'], 'c': ['a']}\n"
+            "        with self.assertRaises(CircularDependencyError) as ctx:\n"
+            "            DependencyResolver(deps).resolve()\n"
+            "        self.assertTrue(hasattr(ctx.exception, 'cycle'))\n"
+            "        self.assertTrue(len(ctx.exception.cycle) >= 3)\n\n"
             "if __name__ == '__main__': unittest.main()\n"
         ),
     ),
@@ -1024,4 +1041,3 @@ try:
     CHALLENGES.update(DOMAIN_CHALLENGES)
 except ImportError:
     pass
-

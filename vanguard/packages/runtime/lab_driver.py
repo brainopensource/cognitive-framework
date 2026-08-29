@@ -46,6 +46,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..ports.event_store import Result as PortResult
 from .mock_episode_tape import (
@@ -59,6 +60,8 @@ from .outcome_labels import classify_instrument_error
 from .repair import StopReason, drive_until_green
 from .root import Runtime, SessionPorts, TaskContext
 from .session_log import session_log
+from .state_contract import ensure_state_directory
+from .workspace import get_workspace_path, validate_workspace_path
 
 DEFAULT_BRIEF = ("Inspect the workspace, make the failing suite pass, and run "
                  "the tests through the allowlisted process verb.")
@@ -87,6 +90,7 @@ def run_lab_task(
     *,
     model_port: str = "mock",
     model_name: str | None = None,
+    models: Sequence[str] | None = None,
     tape: Sequence[Any] = (),
     interactive: bool = False,
     max_turns: int = 8,
@@ -100,6 +104,8 @@ def run_lab_task(
     tiers: Sequence[str] | None = None,
     sandbox_mode: str = "rootless",
     allow_paid: bool = False,
+    state_dir: Path | str | None = None,
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     """Compose, run, and report from the ledger. Never from a literal."""
 
@@ -133,7 +139,7 @@ def run_lab_task(
     # the first arm did, which is the quietest way to fake a result.
     cleanup_roots: list[Path] = []
     if isolate:
-        staging = Path(tempfile.mkdtemp(prefix="vg-lab-ws-"))
+        staging = Path(tempfile.mkdtemp(prefix="vg-lab-ws-", dir=get_workspace_path("tmp")))
         cleanup_roots.append(staging)
         task_path = Path(shutil.copytree(task_path, staging / task_path.name))
 
@@ -141,8 +147,10 @@ def run_lab_task(
         selected = select_model(
             model_port,
             model_name=model_name or (tiers[0] if tier_escalation and tiers else None),
+            models=models,
             tape=tape,
             allow_paid=allow_paid,
+            reasoning_effort=reasoning_effort,
         )
     except ModelUnavailable as unavailable:
         # Fail closed with a named reason. Not a skip, not a pass.
@@ -192,18 +200,39 @@ def run_lab_task(
         max_turns = min(max_turns, grant.max_turns)
         max_attempts = min(max_attempts, grant.max_attempts)
         approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
-        approval_key = signer.public_bytes
+        approval_key = {signer.key_id: signer.public_bytes}
     elif approve_writes:
         from .governance.approvals import OperatorSigner
+        from .autonomous_grant import create_autonomous_grant
 
         signer = OperatorSigner(secrets.token_bytes(32), key_id="lab-operator")
-        approver = lambda challenge: signer.approve(challenge, reviewer="lab-operator")
-        approval_key = signer.public_bytes
+        grant = create_autonomous_grant(
+            task_path,
+            allowed_verbs=tuple(harness_preview.verbs),
+            max_turns=max_turns,
+            max_attempts=max_attempts,
+            signer=signer,
+        )
+        max_turns = min(max_turns, grant.max_turns)
+        max_attempts = min(max_attempts, grant.max_attempts)
+        approver = lambda challenge: signer.approve(challenge, reviewer=grant.reviewer)
+        approval_key = {signer.key_id: signer.public_bytes}
         interactive = True
         departures.append("auto_approved_writes")
 
     harness = harness_preview
-    store = SqliteEventStore(":memory:")
+    resolved_state: Path | None = None
+    if state_dir is not None:
+        resolved_state = validate_workspace_path(state_dir)
+        ensure_state_directory(resolved_state)
+    elif model_port != "mock":
+        run_identifier = f"lab-run-{secrets.token_hex(6)}"
+        resolved_state = get_workspace_path("state", run_identifier)
+        ensure_state_directory(resolved_state)
+
+    store = SqliteEventStore(
+        resolved_state / "events.sqlite3" if resolved_state is not None else ":memory:")
+    blobs = FileBlobStore(resolved_state / "blobs") if resolved_state is not None else None
     # The task states its own goal (`TASK.md`); the harness telling the model
     # what the task is would be a different experiment.
     brief = brief_from_task_dir(task_path) or brief
@@ -222,6 +251,7 @@ def run_lab_task(
                 _environment_for(task_path, cleanup_roots, sandbox_mode=sandbox_mode),
                 grant),
             clock=SystemClock(), store=store,
+            blobs=blobs,
             index=FileRepoIndex() if harness.index_component is not None else None,
             interactive=interactive,
             approver=approver, approval_key=approval_key)
@@ -442,7 +472,7 @@ def _environment_for(
     from .root import _bwrap_path
 
     repo = task_path.resolve()
-    sealed_dir = Path(tempfile.mkdtemp(prefix="vg-lab-sealed-"))
+    sealed_dir = Path(tempfile.mkdtemp(prefix="vg-lab-sealed-", dir=get_workspace_path("sandboxes")))
     if cleanup_roots is not None:
         cleanup_roots.append(sealed_dir)
     sealed_bundle = sealed_dir / "bundle"

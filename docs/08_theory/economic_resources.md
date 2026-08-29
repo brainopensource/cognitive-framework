@@ -14,7 +14,7 @@ applies_to:
   - v0.6.1
 implementation_status: AS_BUILT
 owner: cognitive-systems-researcher
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []

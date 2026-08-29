@@ -19,15 +19,20 @@ class ModelRoute:
     pricing_as_of: str
     capabilities: tuple[str, ...]
 
-from .config import get_band_model, get_free_model, get_medium_model, get_pricing_micros_table
+from .config import get_band_model, get_free_model, get_medium_model, get_pricing_micros_table, resolve_model
 
 MODEL_PRICING_MICROS = get_pricing_micros_table()
 
 
 def resolve_route(model: str) -> ModelRoute:
+    requested = model
+    try:
+        model = resolve_model(model)
+    except Exception:
+        pass
     if model == "openrouter/free" or model.endswith(":free"):
         return ModelRoute(
-            requested_model=model,
+            requested_model=requested,
             resolved_model=model,
             pricing_known=True,
             prompt_micros_per_1m=0,
@@ -41,7 +46,7 @@ def resolve_route(model: str) -> ModelRoute:
     if model in MODEL_PRICING_MICROS:
         prompt, completion, cached = MODEL_PRICING_MICROS[model]
         return ModelRoute(
-            requested_model=model,
+            requested_model=requested,
             resolved_model=model,
             pricing_known=True,
             prompt_micros_per_1m=prompt,
@@ -53,7 +58,7 @@ def resolve_route(model: str) -> ModelRoute:
         )
     
     return ModelRoute(
-        requested_model=model,
+        requested_model=requested,
         resolved_model=model,
         pricing_known=False,
         prompt_micros_per_1m=0,
@@ -75,8 +80,8 @@ def preflight_check(route: ModelRoute) -> Result[None]:
 class SingleModelRouter:
     """Routes always to a configured single model or default."""
 
-    def __init__(self, model_name: str = "openrouter/free") -> None:
-        self.model_name = model_name
+    def __init__(self, model_name: str | None = None) -> None:
+        self.model_name = model_name or get_medium_model()
 
     def route(self, model: str | None = None, attempt: int = 0) -> ModelRoute:
         target = model or self.model_name

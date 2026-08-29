@@ -64,13 +64,21 @@ def cited_ids(paths: Iterable[Path]) -> dict[int, set[str]]:
     return cited
 
 
+def citation_files() -> tuple[Path, ...]:
+    return (
+        _ROOT / "docs/SPEC.md",
+        _ROOT / "docs/03_execution/sprint_active.md",
+        *sorted((_ROOT / "docs/02_decisions").glob("[0-9][0-9][0-9][0-9]-*.md")),
+    )
+
+
 def check() -> list[str]:
     register_text = _REGISTER.read_text(encoding="utf-8")
     allocated, errors = allocations(register_text)
     if not allocated:
         errors.append("the canonical register contains no RF-* allocation rows")
         return errors
-    for number, paths in sorted(cited_ids(_CITATION_FILES).items()):
+    for number, paths in sorted(cited_ids(citation_files()).items()):
         if number not in allocated:
             errors.append(
                 f"RF-{number} is cited but unallocated: {', '.join(sorted(paths))}"

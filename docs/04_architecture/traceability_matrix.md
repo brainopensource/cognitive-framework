@@ -15,7 +15,7 @@ applies_to:
   - v0.7.x
 implementation_status: MIXED_VERIFIED_PER_ROW
 owner: principal-systems-architect
-version: "0.7.3.dev0"
+version: "0.9.0b1"
 last_verified: 2026-08-26
 subordinate_to: ../../VISION.md
 supersedes: []

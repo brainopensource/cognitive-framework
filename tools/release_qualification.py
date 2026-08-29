@@ -38,6 +38,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from vanguard.packages.domain.workspace import get_workspace_path
+
 from vanguard import __version__
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.adapters.stores.memory_engine import DurableMemoryPort
@@ -136,7 +138,7 @@ def _check_profiles() -> list[str]:
 
 def _check_event_store() -> list[str]:
     errors: list[str] = []
-    with tempfile.TemporaryDirectory(prefix="aether-release-store-") as temp:
+    with tempfile.TemporaryDirectory(prefix="aether-release-store-", dir=get_workspace_path("tmp")) as temp:
         root = Path(temp)
         store = SqliteEventStore(root / "events.sqlite3")
         report = store.integrity_check()
@@ -151,7 +153,7 @@ def _check_event_store() -> list[str]:
 
 def _check_memory_store() -> list[str]:
     errors: list[str] = []
-    with tempfile.TemporaryDirectory(prefix="aether-release-memory-") as temp:
+    with tempfile.TemporaryDirectory(prefix="aether-release-memory-", dir=get_workspace_path("tmp")) as temp:
         root = Path(temp)
         memory = DurableMemoryPort(root, "knowledge")
         health = memory.health()

@@ -43,6 +43,12 @@ from ...kernel import (
     Trust,
     attenuate,
 )
+from .protocol_recovery import (
+    ProtocolRecoveryState,
+    RecoveryDecision,
+    recover_proposal,
+)
+from .tool_policy import derive_phase, resolve_tool_policy
 from .state import (
     TERMINAL_FOR_KIND,
     Episode,
@@ -197,6 +203,10 @@ class EpisodeEngine:
         parent_lease: str | None = None,
         attenuated: bool = False,
         spawn_dispatcher: Any = None,
+        preset_mode: str | None = None,
+        protocol_decoders: Sequence[Any] = (),
+        patch_detector: Any = None,
+        truncation_detector: Any = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -215,6 +225,17 @@ class EpisodeEngine:
         # agency tests keep the historical in-process child seam until their
         # caller explicitly supplies the mediated dispatcher.
         self._spawn_dispatcher = spawn_dispatcher
+        #: Preset intent forwarded to the tool-policy resolver (`ADR-0106 §4`).
+        #: `None` keeps the engine generic (no phase gating) — the phase
+        #: ladder is preset semantics and must be explicitly declared by the
+        #: composition root, never assumed by the loop (`ADR-0060`).
+        self._preset_mode = preset_mode
+        #: Injected dialect-decoding pipeline (`ADR-0106 §3`). Agency never
+        #: imports pack middleware directly; the composition root supplies
+        #: the decoders, keeping the dependency direction intact.
+        self._protocol_decoders = tuple(protocol_decoders)
+        self._patch_detector = patch_detector
+        self._truncation_detector = truncation_detector
 
     # ------------------------------------------------------------------
 
@@ -244,6 +265,58 @@ class EpisodeEngine:
                           principal=principal, brief=brief, depth=depth)
         dispatches: list[Any] = []
         accumulated: tuple[Span, ...] = tuple(spans)
+        recovery_state = ProtocolRecoveryState()
+        recovery_feedback: dict[str, Any] | None = None
+        sampling_override: dict[str, Any] | None = None
+        seen_verbs: set[str] = set()
+        for span in accumulated:
+            span_verb = getattr(span, "verb", None) or getattr(span, "action", None)
+            if span_verb:
+                seen_verbs.add(str(span_verb))
+        declared_tool_names = {
+            str(tool.get("verb") or tool.get("name"))
+            for tool in self._tools
+            if isinstance(tool, Mapping) and (tool.get("verb") or tool.get("name"))
+        }
+        allowed_tool_names = tuple(sorted(declared_tool_names))
+
+        def _apply_retry(decision: RecoveryDecision, *,
+                         base_sampling: Mapping[str, Any]) -> bool:
+            """Record one bounded recovery retry turn.
+
+            Returns False when the retry itself shows no progress; the caller
+            must then break out of the loop with the terminated episode.
+            """
+            nonlocal episode, recovery_feedback, sampling_override
+            turn = Turn(
+                index=episode.turn_count,
+                state_digest=episode.state_digest(),
+                proposal_descriptor=digest_of({
+                    "recovery_retry": decision.retry_reason,
+                    "feedback": dict(decision.retry_feedback),
+                }),
+                receipt_digest=None,
+                progress_signal=f"recovery_{decision.retry_reason}",
+            )
+            if episode.repeats(turn, limit=self._no_progress_limit):
+                episode = episode.terminated(
+                    RunTermination.ABANDONED,
+                    f"no progress over {self._no_progress_limit} turns",
+                )
+                return False
+            episode = episode.with_turn(turn)
+            # The retry must be observable by the next model request, or the
+            # provider repeats the identical malformed output until the
+            # no-progress bound abandons the run (`ADR-0106 §3`).
+            recovery_feedback = {
+                **dict(decision.retry_feedback),
+                "reason": decision.retry_reason,
+            }
+            if decision.continuation:
+                base_tokens = int(base_sampling.get("maxTokens", 4096) or 4096)
+                if 0 < base_tokens < 8192:
+                    sampling_override = {**base_sampling, "maxTokens": base_tokens * 2}
+            return True
 
         while not episode.is_terminal:
             if is_cancelled is not None and is_cancelled():
@@ -257,11 +330,27 @@ class EpisodeEngine:
                 break
 
             # -- observe ------------------------------------------------
-            view = self._view(episode)
+            # State-dependent phase (`ADR-0106 §4`), only for presets that
+            # declared one; the generic engine stays ungated (`ADR-0060`).
+            if self._preset_mode is not None:
+                phase = derive_phase(seen_verbs)
+                policy = resolve_tool_policy(phase, preset_mode=self._preset_mode)
+            else:
+                phase, policy = "inspect", None
+            offered_tools = self._tools
+            turn_sampling = dict(sampling_override or self._sampling)
+            if policy is not None and policy.mode == "required" and policy.allowed:
+                filtered = tuple(
+                    tool for tool in self._tools
+                    if str(tool.get("verb") or tool.get("name") or "") in policy.allowed)
+                if filtered:
+                    offered_tools = filtered
+                turn_sampling["toolChoice"] = "required"
+            view = self._view(episode, recovery_feedback=recovery_feedback)
 
             # -- propose ------------------------------------------------
             try:
-                result = self._model.propose(view, self._tools, self._sampling)
+                result = self._model.propose(view, offered_tools, turn_sampling)
             except Exception as exc:
                 # `ICD §4`: a provider failure is a typed value. A provider
                 # that raises anyway is still an instrument error, never a
@@ -281,12 +370,59 @@ class EpisodeEngine:
             try:
                 proposal = parse_proposal(raw_value)
             except ProposalMalformed as exc:
-                episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
-                self._emit_terminal(episode, "instrument_error", str(exc), diagnostics=diagnostics)
-                break
+                decision, recovery_state = recover_proposal(
+                    raw_value,
+                    recovery_state,
+                    allowed_tools=allowed_tool_names,
+                    decoders=self._protocol_decoders,
+                    patch_detector=self._patch_detector,
+                    truncation_detector=self._truncation_detector,
+                )
+                if decision.status == "accept" and decision.proposal is not None:
+                    proposal = decision.proposal
+                elif decision.status == "retry_model":
+                    if not _apply_retry(decision, base_sampling=turn_sampling):
+                        break
+                    continue
+                else:
+                    episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, str(exc))
+                    self._emit_terminal(episode, "instrument_error", str(exc), diagnostics=diagnostics)
+                    break
+
+            # A recovery-fed turn was observed by this request; clear it so
+            # only the turn immediately after a retry carries feedback.
+            recovery_feedback = None
+            sampling_override = None
+
+            # -- state-dependent tool policy at the request boundary -----
+            # (`ADR-0106 §4`). Only actions the harness itself declares are
+            # phase-constrained; anything else remains a kernel authority
+            # matter (I4/I12). Bounded: once protocol retries are exhausted
+            # the proposal proceeds and the kernel fail-closes, so this gate
+            # cannot deadlock the episode.
+            if (policy is not None
+                    and proposal.kind == ProposalKind.EFFECT
+                    and policy.mode == "required" and policy.allowed
+                    and proposal.action in declared_tool_names
+                    and proposal.action not in policy.allowed
+                    and recovery_state.protocol_retries < recovery_state.max_protocol_retries):
+                recovery_state = recovery_state.with_protocol_retry()
+                if not _apply_retry(
+                    RecoveryDecision(
+                        status="retry_model",
+                        retry_reason="DISALLOWED_TOOL_PHASE",
+                        retry_feedback={
+                            "allowed_tools": list(policy.allowed),
+                            "requested": proposal.action,
+                            "phase": phase,
+                        },
+                    ),
+                    base_sampling=turn_sampling,
+                ):
+                    break
+                continue
 
             self._emit_proposal(episode, proposal, diagnostics=diagnostics)
-
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
             if terminal is not None:
@@ -426,6 +562,11 @@ class EpisodeEngine:
                 reservation=self._reservation(proposal),
             )
             dispatches.append(outcome)
+            # The phase advances from an *attempted* effect (`ADR-0106 §4`):
+            # a denied dispatch still proves the workflow moved past the
+            # earlier phase, and verify-phase allowances (proc.exec) must be
+            # reachable after a patch attempt regardless of its outcome.
+            seen_verbs.add(str(proposal.action))
 
             if receipt_labeller is not None:
                 label = receipt_labeller(episode.turn_count, outcome)
@@ -459,9 +600,10 @@ class EpisodeEngine:
 
     # ------------------------------------------------------------------
 
-    def _view(self, episode: Episode) -> Mapping[str, Any]:
+    def _view(self, episode: Episode, *,
+              recovery_feedback: Mapping[str, Any] | None = None) -> Mapping[str, Any]:
         """The materialised view a turn observes. Nothing else is readable."""
-        return {
+        view: dict[str, Any] = {
             "episodeId": episode.episode_id,
             "runId": episode.run_id,
             "brief": episode.brief,
@@ -472,6 +614,9 @@ class EpisodeEngine:
             "lastProgressSignal": (episode.turns[-1].progress_signal
                                    if episode.turns else None),
         }
+        if recovery_feedback is not None:
+            view["recoveryFeedback"] = dict(recovery_feedback)
+        return view
 
     def _emit_terminal(self, episode: Episode, outcome: str, detail: str,
                        diagnostics: Mapping[str, Any] | None = None) -> None:

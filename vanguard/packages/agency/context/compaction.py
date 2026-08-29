@@ -218,10 +218,19 @@ class StructuredConsolidateStrategy:
             dialogue.insert(0, summary_block)
             elided.append("structured_record")
 
+            # If inserting summary_block pushed total over ceiling, drop remaining un-consolidated blocks
+            while total() > ceiling and len(dialogue) > 1:
+                b = dialogue.pop(1)
+                dropped.append(b.label)
+
         while total() > ceiling and notes:
             dropped.append(notes.pop(0).label)
 
         return elided, dropped
+
+
+class UnknownCompactionStrategyError(ValueError):
+    """Raised when an unknown compaction strategy is requested (EVO-13 fail-closed)."""
 
 
 COMPACTION_REGISTRY: dict[str, CompactionStrategy] = {
@@ -237,7 +246,10 @@ COMPACTION_REGISTRY: dict[str, CompactionStrategy] = {
 def resolve_compaction_strategy(
     policy: Mapping[str, Any] | str | None,
 ) -> tuple[CompactionStrategy, Mapping[str, Any]]:
-    """Resolve compaction strategy and options from manifest context_policy dict or name."""
+    """Resolve compaction strategy and options from manifest context_policy dict or name.
+
+    Fails closed if the strategy identifier is unknown.
+    """
     if policy is None:
         return COMPACTION_REGISTRY["recency-window"], {}
 
@@ -252,5 +264,7 @@ def resolve_compaction_strategy(
 
     strategy = COMPACTION_REGISTRY.get(kind)
     if strategy is None:
-        strategy = COMPACTION_REGISTRY["recency-window"]
+        raise UnknownCompactionStrategyError(
+            f"unknown compaction strategy {kind!r}; registered: {sorted(COMPACTION_REGISTRY)}"
+        )
     return strategy, options

@@ -44,7 +44,6 @@ MODEL_PRICING_MICROS = {
     "@cf/openai/gpt-oss-20b": {"prompt": 0, "completion": 0},
     "@cf/zai-org/glm-4.7-flash": {"prompt": 0, "completion": 0},
     "@cf/google/gemma-4-26b-a4b-it": {"prompt": 0, "completion": 0},
-    "@cf/nvidia/nemotron-3-120b-a12b": {"prompt": 0, "completion": 0},
 }
 
 

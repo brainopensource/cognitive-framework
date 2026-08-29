@@ -164,16 +164,30 @@ def validate_grant_request(
     # Check path containment
     if target_path is not None:
         try:
-            resolved_target = Path(target_path).resolve()
             resolved_ws = Path(grant.workspace_root).resolve()
+            candidate = Path(target_path)
+            resolved_target = (
+                candidate.resolve()
+                if candidate.is_absolute()
+                else (resolved_ws / candidate).resolve()
+            )
             resolved_target.relative_to(resolved_ws)
         except ValueError:
             return False, f"workspace_path_escape_denied:{target_path}"
 
     # Check command binary allowlist
     if verb == "proc.exec" and command_argv:
-        binary = Path(command_argv[0]).name
-        if binary not in grant.command_allowlist:
-            return False, f"command_disallowed:{binary}"
+        if isinstance(command_argv, str):
+            try:
+                import shlex
+                parsed_argv = shlex.split(command_argv)
+            except Exception:
+                parsed_argv = command_argv.split()
+        else:
+            parsed_argv = [str(x) for x in command_argv]
+        if parsed_argv:
+            binary = Path(parsed_argv[0]).name
+            if binary not in grant.command_allowlist:
+                return False, f"command_disallowed:{binary}"
 
     return True, "ok"

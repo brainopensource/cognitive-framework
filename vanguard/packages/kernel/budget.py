@@ -16,6 +16,7 @@ Money is integer micro-units and durations are integer milliseconds
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Mapping
@@ -93,6 +94,14 @@ class Governor:
         self._held: dict[str, int] = {key: 0 for key in ceilings}
         self._leases: dict[str, Lease] = {}
         self._counter = 0
+        # EVO-07/EVO-14: a caller may dispatch through one shared Governor
+        # from more than one thread. `reserve` is check-then-act on `_held`;
+        # unlocked, two threads can both pass the ceiling check on stale
+        # `remaining()` reads and both commit, oversubscribing the ceiling
+        # -- exactly the budget-conservation violation concurrency must not
+        # introduce. See ADR-0105: defensive thread safety, not a
+        # concurrency authorization (ADR-0099 remains SEQUENTIAL_CONFIRMED).
+        self._lock = threading.Lock()
 
     # -- accounting -------------------------------------------------------
 
@@ -119,6 +128,11 @@ class Governor:
     def reserve(self, run_id: str, reservation: Reservation,
                 parent_lease_id: str | None = None) -> Lease:
         """S7 RESERVE. Raises `BudgetDenied` for `F-12` and `F-13`."""
+        with self._lock:
+            return self._reserve_locked(run_id, reservation, parent_lease_id)
+
+    def _reserve_locked(self, run_id: str, reservation: Reservation,
+                        parent_lease_id: str | None) -> Lease:
         if parent_lease_id is not None:
             parent = self._leases.get(parent_lease_id)
             if parent is None or parent.state is not LeaseState.OPEN:
@@ -160,6 +174,10 @@ class Governor:
         when negative**. A negative settlement is an overrun that has been
         charged, not a refund that was skipped.
         """
+        with self._lock:
+            return self._commit_locked(lease, actual)
+
+    def _commit_locked(self, lease: Lease, actual: Mapping[str, int]) -> Mapping[str, int]:
         if lease.state is not LeaseState.OPEN:
             raise BudgetDenied("lease", 0, 0, "commit_on_closed_lease")
         settlement: dict[str, int] = {}
@@ -183,13 +201,15 @@ class Governor:
         Releasing an uncommitted lease returns the whole reservation: the
         effect never ran, so nothing was spent.
         """
-        if lease.state is LeaseState.RELEASED:
-            return
-        if lease.state is LeaseState.OPEN:
-            for dimension, amount in lease.reserved.items():
-                self._held[dimension] = self._held.get(dimension, 0) - amount
-        lease.state = LeaseState.RELEASED
+        with self._lock:
+            if lease.state is LeaseState.RELEASED:
+                return
+            if lease.state is LeaseState.OPEN:
+                for dimension, amount in lease.reserved.items():
+                    self._held[dimension] = self._held.get(dimension, 0) - amount
+            lease.state = LeaseState.RELEASED
 
     def is_open(self, lease_id: str) -> bool:
-        lease = self._leases.get(lease_id)
-        return lease is not None and lease.state is LeaseState.OPEN
+        with self._lock:
+            lease = self._leases.get(lease_id)
+            return lease is not None and lease.state is LeaseState.OPEN

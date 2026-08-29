@@ -28,6 +28,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from benchmarks.swe_bench.challenges import CHALLENGES
 from vanguard.packages.adapters.models.env_loader import load_api_key
+from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.root import Runtime
 from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
@@ -54,8 +55,8 @@ SMOKE_CHALLENGES = (
 # request plus one retry at a bounded transport timeout gives the evaluator a
 # deterministic upper bound and preserves a typed instrument_error when the
 # provider or network is unavailable.
-BENCHMARK_MAX_RETRIES = 1
-BENCHMARK_REQUEST_TIMEOUT_SECONDS = 15.0
+BENCHMARK_MAX_RETRIES = 2
+BENCHMARK_REQUEST_TIMEOUT_SECONDS = 45.0
 BENCHMARK_RUN_TIMEOUT_SECONDS = 300.0
 WORKER_PROTOCOL = "vanguard.swe-worker/1"
 
@@ -139,7 +140,7 @@ def _runtime_worker(config: Mapping[str, Any]) -> dict[str, Any]:
     signer = OperatorSigner(seed_key)
     model = OpenRouterModel(
         model=str(config["model"]),
-        stream=False,
+        stream=True,
         # The secret remains in the child's inherited environment and is not
         # placed in the IPC payload, command line, report, or exception text.
         environ={"OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY", "")},
@@ -541,7 +542,7 @@ def run_challenge(
 ) -> dict[str, Any]:
     """Run a single SWE challenge."""
     challenge = CHALLENGES[challenge_id]
-    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_swe_{challenge_id}_"))
+    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_swe_{challenge_id}_", dir=get_workspace_path("benchmarks")))
     print(f"Setting up {challenge_id} in {scratch_dir}...")
     
     try:
@@ -618,7 +619,7 @@ def run_verified_challenge(
     if not verified_repo.exists():
         raise ValueError(f"Verified repo {verified_repo} does not exist.")
         
-    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_verified_{instance_id}_"))
+    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_verified_{instance_id}_", dir=get_workspace_path("benchmarks")))
     print(f"Setting up {instance_id} in {scratch_dir}...")
     
     try:

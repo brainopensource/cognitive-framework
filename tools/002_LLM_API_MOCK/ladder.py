@@ -22,6 +22,7 @@ from models import load_models, models_for_band
 from schema import ALLOWED_ATOMS
 from simulate import SYSTEM, _execute, simulate_scenario
 from verdict import evidence_label, pytest_passed
+from vanguard.packages.domain.workspace import get_workspace_path
 
 
 def load_api_key_secure() -> str:
@@ -186,7 +187,7 @@ def run_ladder(
         workspace_files = raw_sc.get("workspace", {})
         tier = raw_sc.get("tier", 1)
 
-    workspace = Path(tempfile.mkdtemp(prefix=f"live-ladder-{clean_scenario_id}-"))
+    workspace = Path(tempfile.mkdtemp(prefix=f"live-ladder-{clean_scenario_id}-", dir=get_workspace_path("benchmarks")))
     for rel, text in workspace_files.items():
         p = workspace / rel
         p.parent.mkdir(parents=True, exist_ok=True)

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence, TextIO, Union
 
 from ...domain.canonicalisation.digest import digest_of
@@ -109,8 +110,16 @@ class Cassette:
 class CassetteRecorder:
     """Records interactions with a live ModelProvider to a Cassette."""
 
-    def __init__(self, cassette: Optional[Cassette] = None) -> None:
+    def __init__(
+        self,
+        cassette: Optional[Cassette] = None,
+        *,
+        delegate: Any = None,
+        output_path: Path | str | None = None,
+    ) -> None:
         self.cassette = cassette or Cassette()
+        self.delegate = delegate
+        self.output_path = Path(output_path) if output_path is not None else None
 
     def record_interaction(
         self,
@@ -120,7 +129,24 @@ class CassetteRecorder:
         proposal: Mapping[str, Any],
         recorded_at: str = "2026-08-15T00:00:00.000Z",
     ) -> CassetteRecord:
-        return self.cassette.add_record(context, tools, sampling, proposal, recorded_at)
+        record = self.cassette.add_record(context, tools, sampling, proposal, recorded_at)
+        if self.output_path is not None:
+            self.output_path.parent.mkdir(parents=True, exist_ok=True)
+            self.output_path.write_text(self.cassette.to_json(), encoding="utf-8")
+        return record
+
+    def propose(
+        self,
+        context: Mapping[str, Any],
+        tools: Sequence[Mapping[str, Any]],
+        sampling: Mapping[str, Any],
+    ) -> Result[Mapping[str, Any]]:
+        if self.delegate is None:
+            return Result.fail(kind="instrument_error", message="CassetteRecorder has no delegate model")
+        result = self.delegate.propose(context, tools, sampling)
+        if result.ok and result.value is not None:
+            self.record_interaction(context, tools, sampling, result.value)
+        return result
 
 
 class CassettePlayer:

@@ -71,9 +71,31 @@ rec = opt.recommend_provider(scenario_tier=3, policy="balanced")
 
 ---
 
-## 5. Persistence, Telemetry & Analyzer Tools
+---
 
-- **SQLite Database:** [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite)
+## 6. Accelerated Agentic Harness Development Features (v0.9.0b1)
+
+### A. Sub-Second CI/CD Regression Gates ($0 API Cost)
+- **Mechanism:** Integrates `tools/002_LLM_API_MOCK` directly into CI/CD pipelines via `python3 tools/benchmark-drivers/frontier_v090.py --dry-run` and `simulate.py`.
+- **Performance:** Runs all 27 matrix rows in **<500ms**, catching kernel breaking changes, TCB budget leaks, or manifest capability regressions without network access or provider tokens.
+
+### B. Automated Prompt & Invariant Fuzzing
+- **Mechanism:** Evaluates system prompt mutations, tool schema adjustments, and role formatting against recorded prompt SHA-256 digests in `lam.sqlite`.
+- **Benefit:** Validates JSON schema parser robustness, DSML fallback tags, and capability attenuation algebra instantly without waiting for slow multi-second LLM generations.
+
+### C. Multi-Turn Counterfactual Simulation & Self-Correction Testing
+- **Mechanism:** Injects synthetic `pytest` stderr failure traces and AST syntax errors into multi-turn step sequences in `lam.sqlite`.
+- **Benefit:** Tests whether Vanguard's agentic turn loop (`EpisodeEngine`) correctly captures error tracebacks, formats alternating causal L5 history (`role: "assistant"`, `role: "tool"`), and emits refined patch proposals on subsequent turns.
+
+### D. Hermetic Memory & Context Compaction Profiling
+- **Mechanism:** Replays long 20-turn trajectories (100k+ token histories) through `vanguard/packages/agency/context/compiler.py`.
+- **Benefit:** Benchmarks context-window eviction algorithms, token counting accuracy (Radix L1–L5 cache breakpoints), and LRU memory compaction overhead under zero-latency conditions (<2ms/turn).
+
+---
+
+## 7. Persistence, Telemetry & Analyzer Tools
+
+- **SQLite Database:** [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite) (444 recorded mock calls / gold traces)
 - **Harness Analyzer Report Generator:**
 ```bash
 python3 -c "

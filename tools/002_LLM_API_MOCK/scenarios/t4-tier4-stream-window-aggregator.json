@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier4_stream_window_aggregator",
+  "id": "t4-tier4-stream-window-aggregator",
+  "tier": 4,
+  "title": "SWE-bench: Sliding Time-Window Metrics Aggregator",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"metrics/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"from .window import SlidingWindow\\n__all__ = ['SlidingWindow']\\n\", \"path\": \"metrics/__init__.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Sliding Time-Window Metrics Aggregator (tier4_stream_window_aggregator). All test suites pass (OK).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "metrics/__init__.py": "from .window import SlidingWindow\n__all__ = ['SlidingWindow']\n",
+    "metrics/window.py": "import time\n\nclass SlidingWindow:\n    def __init__(self, window_seconds: float):\n        self.window = window_seconds\n        self._entries: list[tuple[float, float]] = []\n\n    def record(self, val: float, ts: float | None = None) -> None:\n        now = ts if ts is not None else time.monotonic()\n        self._entries.append((now, val))\n        self._purge(now)\n\n    def _purge(self, now: float) -> None:\n        cutoff = now - self.window\n        self._entries = [e for e in self._entries if e[0] >= cutoff]\n\n    def mean(self, now: float | None = None) -> float:\n        self._purge(now if now is not None else time.monotonic())\n        if not self._entries: return 0.0\n        return sum(e[1] for e in self._entries) / len(self._entries)\n",
+    "oracle_test.py": "import unittest\nfrom metrics.window import SlidingWindow\n\nclass TestWindow(unittest.TestCase):\n    def test_sliding(self):\n        sw = SlidingWindow(10.0)\n        sw.record(10.0, ts=1.0)\n        sw.record(20.0, ts=5.0)\n        self.assertEqual(sw.mean(ts := 6.0), 15.0)\n        self.assertEqual(sw.mean(ts := 12.0), 20.0)\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

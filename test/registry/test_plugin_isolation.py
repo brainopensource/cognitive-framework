@@ -170,5 +170,56 @@ class PluginIsolationTests(unittest.TestCase):
         self.broker.terminate(cell)
 
 
+class RlimitsAreActuallyEnforcedNotOnlyReported(unittest.TestCase):
+    """EVO-08: `test_child_reports_enforced_rlimits` above only checks that
+    `getrlimit()` echoes back the values `setrlimit()` was given -- it never
+    checks that the OS actually refuses a child that exceeds them. A broker
+    that silently dropped `apply_rlimits()` from the child preexec path would
+    still pass that test. This proves the ceiling by hitting it: a child with
+    `max_open_files=8` is asked to open 20 file descriptors and must fail
+    partway through with `OSError` (`EMFILE`), not succeed at all 20.
+    """
+
+    def test_a_child_that_exceeds_its_open_file_ceiling_is_refused_by_the_os(self) -> None:
+        import multiprocessing
+
+        from vanguard.packages.runtime.registry.sandbox import SandboxLimits, apply_rlimits
+
+        def _child(conn, nofile: int) -> None:
+            apply_rlimits(SandboxLimits(
+                cpu_seconds=5, address_space_bytes=256 * 1024 * 1024,
+                max_open_files=nofile, max_processes=32,
+            ))
+            opened = []
+            try:
+                for _ in range(nofile + 12):
+                    opened.append(open(os.devnull, "rb"))
+            except OSError as exc:
+                conn.send({"opened": len(opened), "errno": exc.errno})
+            else:
+                conn.send({"opened": len(opened), "errno": None})
+            finally:
+                for f in opened:
+                    f.close()
+                conn.close()
+
+        ctx = multiprocessing.get_context("fork")
+        parent_conn, child_conn = ctx.Pipe()
+        nofile = 8
+        proc = ctx.Process(target=_child, args=(child_conn, nofile))
+        proc.start()
+        child_conn.close()
+        self.assertTrue(parent_conn.poll(timeout=5), "child did not report back")
+        result = parent_conn.recv()
+        proc.join(timeout=5)
+
+        self.assertIsNotNone(result["errno"], "the child opened every fd it asked for -- the ceiling was not enforced")
+        # A handful of fds (stdio, the pipe itself) are already open before
+        # the loop starts, so the child hits the wall before nofile *new*
+        # opens -- the real assertion is "strictly fewer than it tried,"
+        # which is only possible if the OS actually refused one.
+        self.assertLess(result["opened"], nofile + 12)
+
+
 if __name__ == "__main__":
     unittest.main()

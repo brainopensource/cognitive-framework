@@ -26,7 +26,29 @@ from ...ports.event_store import EventRange, EventStorePort, PortFailure, Result
 __all__ = [
     "InMemoryEventStore",
     "SqliteEventStore",
+    "EventStoreCorruptError",
+    "EventStoreIncompatibleError",
 ]
+
+
+class EventStoreCorruptError(RuntimeError):
+    """The database file exists but is not a readable SQLite database (BETA-07).
+
+    Raised instead of letting a raw `sqlite3.DatabaseError` escape the
+    constructor: a corrupt store is a fail-closed condition the caller must
+    handle explicitly (e.g. refuse to start, or offer cold-fold recovery from
+    the ledger elsewhere), never a crash with no typed identity.
+    """
+
+
+class EventStoreIncompatibleError(RuntimeError):
+    """The database's schema is newer than this build understands (BETA-07).
+
+    `user_version` ahead of `_SCHEMA_VERSION` means a later Vanguard build
+    wrote this store. There is no destructive implicit downgrade: opening it
+    with an older build fails closed rather than silently reinterpreting
+    unknown columns.
+    """
 
 
 class InMemoryEventStore(EventStorePort):
@@ -147,16 +169,30 @@ class InMemoryEventStore(EventStorePort):
 class SqliteEventStore(EventStorePort):
     """Embedded transactional EventStore with Write-Ahead Logging (WAL) and crash safety (CT-40)."""
 
+    #: Bumped whenever `_MIGRATIONS` gains a step. Stored in `PRAGMA user_version`
+    #: so a fresh open can tell "never initialized" (0), "needs N more steps"
+    #: (0 < version < current), and "written by a newer build" (version > current)
+    #: apart, without inferring any of that from column presence.
+    _SCHEMA_VERSION = 1
+
     def __init__(self, db_path: Union[str, Path] = ":memory:", synchronous: str = "FULL") -> None:
         self.db_path = str(db_path)
         self._synchronous = synchronous
         self._lock = threading.RLock()
-        self._conn = sqlite3.connect(
-            self.db_path,
-            check_same_thread=False,
-            isolation_level=None,  # Manual transaction management
-        )
-        self._init_db()
+        try:
+            self._conn = sqlite3.connect(
+                self.db_path,
+                check_same_thread=False,
+                isolation_level=None,  # Manual transaction management
+            )
+            self._init_db()
+        except sqlite3.DatabaseError as exc:
+            # Covers "file is not a database" and header/page corruption alike:
+            # sqlite3 raises the same exception class for both, and neither is
+            # a state this constructor can repair.
+            raise EventStoreCorruptError(
+                f"{self.db_path!r} is not a readable SQLite database: {exc}"
+            ) from exc
 
     def _init_db(self) -> None:
         with self._lock:
@@ -165,37 +201,61 @@ class SqliteEventStore(EventStorePort):
                 cur.execute("PRAGMA journal_mode = WAL;")
             cur.execute(f"PRAGMA synchronous = {self._synchronous};")
             cur.execute("PRAGMA foreign_keys = ON;")
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS events (
-                    global_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    event_id TEXT UNIQUE NOT NULL,
-                    seq INTEGER NOT NULL,
-                    seq_str TEXT NOT NULL,
-                    run_id TEXT,
-                    episode_id TEXT,
-                    project_id TEXT,
-                    scope TEXT NOT NULL,
-                    occurred_at TEXT NOT NULL,
-                    recorded_at TEXT NOT NULL,
-                    principal TEXT NOT NULL,
-                    tenant_id TEXT NOT NULL,
-                    owner_id TEXT NOT NULL,
-                    confidentiality TEXT NOT NULL,
-                    retention_class TEXT NOT NULL,
-                    trainability TEXT NOT NULL,
-                    redaction_status TEXT NOT NULL,
-                    envelope_json TEXT NOT NULL,
-                    envelope_digest TEXT NOT NULL
-                );
-                """)
 
-            columns = {row[1] for row in cur.execute("PRAGMA table_info(events);").fetchall()}
-            if "project_id" not in columns:
-                cur.execute("ALTER TABLE events ADD COLUMN project_id TEXT;")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_events_run_seq ON events(run_id, seq);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_events_scope ON events(scope);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_events_episode ON events(episode_id);")
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_events_project_seq ON events(project_id, seq);")
+            version = int(cur.execute("PRAGMA user_version;").fetchone()[0])
+            if version > self._SCHEMA_VERSION:
+                raise EventStoreIncompatibleError(
+                    f"{self.db_path!r} has schema version {version}, newer than the "
+                    f"{self._SCHEMA_VERSION} this build understands; refusing to open it"
+                )
+            for step in self._MIGRATIONS[version:]:
+                step(cur)
+            cur.execute(f"PRAGMA user_version = {self._SCHEMA_VERSION};")
+
+    @staticmethod
+    def _migration_0_initial_schema(cur: sqlite3.Cursor) -> None:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS events (
+                global_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT UNIQUE NOT NULL,
+                seq INTEGER NOT NULL,
+                seq_str TEXT NOT NULL,
+                run_id TEXT,
+                episode_id TEXT,
+                project_id TEXT,
+                scope TEXT NOT NULL,
+                occurred_at TEXT NOT NULL,
+                recorded_at TEXT NOT NULL,
+                principal TEXT NOT NULL,
+                tenant_id TEXT NOT NULL,
+                owner_id TEXT NOT NULL,
+                confidentiality TEXT NOT NULL,
+                retention_class TEXT NOT NULL,
+                trainability TEXT NOT NULL,
+                redaction_status TEXT NOT NULL,
+                envelope_json TEXT NOT NULL,
+                envelope_digest TEXT NOT NULL
+            );
+            """)
+
+        # Pre-dates `PRAGMA user_version` tracking: a store created by an
+        # older build has this table but may be missing `project_id`. Kept
+        # column-guarded (rather than folded into a version bump) so an
+        # already-migrated-by-column-check database still opens at version 0
+        # without re-running a no-op ALTER.
+        columns = {row[1] for row in cur.execute("PRAGMA table_info(events);").fetchall()}
+        if "project_id" not in columns:
+            cur.execute("ALTER TABLE events ADD COLUMN project_id TEXT;")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_events_run_seq ON events(run_id, seq);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_events_scope ON events(scope);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_events_episode ON events(episode_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_events_project_seq ON events(project_id, seq);")
+
+    #: Ordered migration steps; step `i` takes a database at version `i` to
+    #: version `i + 1`. `_init_db` runs `_MIGRATIONS[version:]` and stamps
+    #: `_SCHEMA_VERSION` on completion, so adding a migration means appending
+    #: here and incrementing `_SCHEMA_VERSION` -- never rewriting a past step.
+    _MIGRATIONS: tuple[Any, ...] = (_migration_0_initial_schema,)
 
     @property
     def journal_mode(self) -> str:
@@ -208,49 +268,74 @@ class SqliteEventStore(EventStorePort):
         return self.db_path != ":memory:" and self.journal_mode == "wal"
 
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
-        """Atomically append an ordered sequence of event envelopes within a transaction."""
+        """Atomically append an ordered sequence of event envelopes within a transaction.
+
+        EVO-10: monotonicity used to cost one `SELECT ... ORDER BY seq DESC
+        LIMIT 1` per *event*, even when a batch holds many events for the
+        same run/project. `BEGIN IMMEDIATE` below already takes the write
+        lock before this method reads or writes anything, so no concurrent
+        writer can move a grouping key's last seq out from under this
+        transaction -- each distinct key's last-committed seq is fetched at
+        most once per `append()` call and tracked in-memory for the rest of
+        the batch, cutting N lookups to (at most) the number of distinct
+        run/project keys actually present, with identical rejection
+        semantics.
+        """
         if not events:
             return Result.success(None)
 
         with self._lock:
             cur = self._conn.cursor()
+            last_seq_cache: dict[tuple[str, str], int] = {}
             try:
                 cur.execute("BEGIN IMMEDIATE;")
 
                 for event in events:
                     seq_int = int(event.seq)
                     if event.project_id:
-                        cur.execute(
-                            "SELECT seq FROM events WHERE project_id = ? ORDER BY seq DESC LIMIT 1;",
-                            (event.project_id,),
-                        )
-                        row = cur.fetchone()
-                        if row is not None and seq_int <= row[0]:
+                        cache_key = ("project", event.project_id)
+                        if cache_key not in last_seq_cache:
+                            cur.execute(
+                                "SELECT seq FROM events WHERE project_id = ? ORDER BY seq DESC LIMIT 1;",
+                                (event.project_id,),
+                            )
+                            row = cur.fetchone()
+                            if row is not None:
+                                last_seq_cache[cache_key] = row[0]
+                        prior = last_seq_cache.get(cache_key)
+                        if prior is not None and seq_int <= prior:
                             cur.execute("ROLLBACK;")
                             return Result.fail(
                                 kind="conflict",
                                 message=(
                                     f"Non-monotonic sequence in project {event.project_id!r}: "
                                     f"event {event.event_id} has seq {event.seq} ({seq_int}) "
-                                    f"<= prior seq {row[0]}"
+                                    f"<= prior seq {prior}"
                                 ),
                             )
+                        last_seq_cache[cache_key] = seq_int
                     else:
                         r_id = event.run_id or "__global__"
-                        cur.execute(
-                            "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
-                            (event.run_id, r_id),
-                        )
-                        row = cur.fetchone()
-                        if row is not None and seq_int <= row[0]:
+                        cache_key = ("run", r_id)
+                        if cache_key not in last_seq_cache:
+                            cur.execute(
+                                "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
+                                (event.run_id, r_id),
+                            )
+                            row = cur.fetchone()
+                            if row is not None:
+                                last_seq_cache[cache_key] = row[0]
+                        prior = last_seq_cache.get(cache_key)
+                        if prior is not None and seq_int <= prior:
                             cur.execute("ROLLBACK;")
                             return Result.fail(
                                 kind="conflict",
                                 message=(
                                     f"Non-monotonic sequence in run {event.run_id!r}: event {event.event_id} has "
-                                    f"seq {event.seq} ({seq_int}) <= prior seq {row[0]}"
+                                    f"seq {event.seq} ({seq_int}) <= prior seq {prior}"
                                 ),
                             )
+                        last_seq_cache[cache_key] = seq_int
 
                     envelope_dict = event.wire_dict()
                     envelope_json = json.dumps(envelope_dict, separators=(",", ":"), ensure_ascii=False)

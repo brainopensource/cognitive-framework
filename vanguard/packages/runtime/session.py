@@ -66,7 +66,11 @@ from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter
 from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
-from .telemetry import RunTelemetry
+from .evidence_capture import capture_evidence as _capture_evidence_pure
+from .prompt_assembler import PromptAssembler
+from .protocol_pipeline import default_protocol_pipeline
+from .response_handler import ResponseHandler
+from .telemetry import RunTelemetry, compute_run_telemetry, instrument_error as _telemetry_instrument_error
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
 from .governance.approvals import (
     ApprovalAuthority,
@@ -163,49 +167,61 @@ def _controller_trigger(proposal: ControllerProposal) -> str:
 class _LayeredOperator:
     """Compiles L1–L5 for each turn and hands the bundle to the real model.
 
-    It wraps the provider rather than changing `EpisodeEngine`, because
-    `ADR-0060` prices any edit to `agency/episode/` at the generality
-    invariant. The engine keeps handing its own view to `propose`; this
-    intercepts it, compiles the layered context around it, and passes the
-    provider a `ContextBundle` (`ICD §4`).
+    Delegates prompt construction to PromptAssembler (EVO-05) and response
+    parsing/telemetry normalization to ResponseHandler (EVO-06).
     """
 
-    def __init__(self, model: Any, compiler: ContextCompiler, *,
-                 recorder: CompetencePriorRecorder | None = None,
-                 task: TaskContext,
-                 clock: Any,
-                 artifacts: ArtifactWriter | None = None,
-                 provenance: ProvenanceSink | None = None,
-                 meta_controller: Callable[[], ControllerProposal | None] | None = None,
-                 memory: MemoryBinding | None = None,
-                 capabilities: Sequence[Mapping[str, Any]] = ()) -> None:
+    def __init__(
+        self,
+        model: Any,
+        compiler: ContextCompiler,
+        *,
+        recorder: CompetencePriorRecorder | None = None,
+        task: TaskContext,
+        clock: Any,
+        artifacts: ArtifactWriter | None = None,
+        provenance: ProvenanceSink | None = None,
+        meta_controller: Callable[[], ControllerProposal | None] | None = None,
+        memory: MemoryBinding | None = None,
+        capabilities: Sequence[Mapping[str, Any]] = (),
+    ) -> None:
         self._model = model
         configure_capabilities = getattr(model, "configure_capabilities", None)
         if callable(configure_capabilities):
             configure_capabilities(tuple(
                 dict(item) for item in capabilities if isinstance(item, Mapping)))
-        self._compiler = compiler
-        self._recorder = recorder
-        self._task = task
-        self._clock = clock
-        self._dialogue: list[Fragment] = []
+        self._assembler = PromptAssembler(
+            compiler=compiler,
+            task=task,
+            clock=clock,
+            recorder=recorder,
+            provenance=provenance,
+            memory=memory,
+        )
+        self._handler = ResponseHandler(
+            model=model,
+            provenance=provenance,
+            artifacts=artifacts,
+        )
         self.contexts: list[Mapping[str, Any]] = []
-        # `None` is the legacy no-capture composition (`blobs=None`). It is a
-        # first-class state, not a degraded one: a session with no artifact
-        # store captures nothing and therefore claims nothing.
         self._artifacts = artifacts
-        self._provenance = provenance
         self._meta_controller = meta_controller
-        self._memory = memory
+
+    @property
+    def _compiler(self) -> ContextCompiler:
+        return self._assembler.compiler
 
     def note(self, label: str, source: str, text: str, *, evictable: bool = True) -> None:
         """Admit one turn's outcome to L5. Mid-run additions go to L5, always
         (`VG-03 §10.2`) — anything else destroys the cached prefix."""
-        self._dialogue.append(Fragment(source=source, label=label, text=text,
-                                       evictable=evictable))
+        self._assembler.note(label=label, source=source, text=text, evictable=evictable)
 
-    def propose(self, view: Mapping[str, Any], tools: Sequence[Mapping[str, Any]],
-                sampling: Mapping[str, Any]) -> Any:
+    def propose(
+        self,
+        view: Mapping[str, Any],
+        tools: Sequence[Mapping[str, Any]],
+        sampling: Mapping[str, Any],
+    ) -> Any:
         directive = self._meta_controller() if self._meta_controller is not None else None
         if directive is not None:
             lowered = _lower_controller_directive(directive)
@@ -227,171 +243,63 @@ class _LayeredOperator:
                 text=(f"Strategy directive: {directive.kind}. "
                       f"Reason: {directive.payload['reason']}"),
             )
-        memory_fragments, memory_digest = self._memory_fragments()
-        compiled: CompiledContext = self._compiler.compile(
-            brief=self._task.brief,
-            dialogue=tuple(self._dialogue) + memory_fragments,
-        )
-        if self._recorder is not None and self._task.competence_prior is not None:
-            # Before turn 1 reaches the provider (`S5-SA-002`). The recorder
-            # refuses a second prior for the same episode, so a later segment
-            # cannot overwrite a pre-action estimate with a post-evidence one.
-            self._recorder.record(
-                episode_id=self._task.episode_id, run_id=self._task.run_id,
-                principal=self._task.principal, prior=self._task.competence_prior,
-                context=compiled)
-        # The provider contract is `messages` / digests / layers. The engine's
-        # flat view is compiled into L5; it is not a second wire dialect.
-        bundle = dict(compiled.bundle())
-        if memory_digest:
-            bundle["memoryRetrievalDigest"] = memory_digest
-        digest = view.get("lastReceiptDigest")
-        if digest:
-            token = (
-                f"justifying_receipt={digest} "
-                f"progress={view.get('lastProgressSignal') or ''}"
-            )
-            messages = list(bundle.get("messages") or ())
-            messages.append({"role": "user", "content": token})
-            bundle["messages"] = tuple(messages)
-            bundle["lastReceiptDigest"] = digest
-        self.contexts.append(bundle)
-        # 0-based, matching `turn`/`turnIndex` in the frozen cross-lane
-        # fixture and in `mhf.trajectory/1`'s existing turn numbering.
-        turn = len(self.contexts) - 1
 
-        # Context/compaction provenance, then the exact provider input. All
-        # of it before the call, because after the call the only honest thing
-        # to say about a prompt is what it *was*.
-        self._record_selection(compiled, turn)
+        turn = len(self.contexts)
+        bundle, compiled = self._assembler.assemble(view, turn)
+        self.contexts.append(bundle)
+
         input_ref = self._capture(
-            "prompt", bundle, turn=turn,
-            labels={"promptDigest": compiled.digest,
-                    "prefixDigest": compiled.prefix_digest})
+            "prompt",
+            bundle,
+            turn=turn,
+            labels={"promptDigest": compiled.digest, "prefixDigest": compiled.prefix_digest},
+        )
 
         answer = self._model.propose(bundle, tools, sampling)
-
-        # `ADR-0096 §14.1`: the raw structured response, immediately on
-        # return and before anything below reinterprets it. The `usage` and
-        # `resolved_model` folding further down rewrites what this run
-        # *believes* about the call; capturing after it would record the
-        # belief rather than the response.
         value = getattr(answer, "value", None)
         raw = value if value is not None else answer
+        if isinstance(value, Mapping) and value.get("kind") == "effect":
+            action = value.get("action")
+            args = value.get("args")
+            if isinstance(action, str) and isinstance(args, Mapping):
+                # Provider APIs require the declared function name in replayed
+                # assistant messages, while the canonical proposal carries
+                # the manifest verb. Resolve that from the same schemas
+                # supplied to the model for this turn.
+                tool_name = next(
+                    (str(tool.get("name")) for tool in tools
+                     if tool.get("verb") == action and tool.get("name")),
+                    action,
+                )
+                self._assembler.tool_call(
+                    turn=turn,
+                    name=tool_name,
+                    args=args,
+                    thought=str(value.get("text") or value.get("note") or ""),
+                )
         output_ref = self._capture("model_output", raw, turn=turn)
-        # The trajectory `/2` writer reads per-turn exact-I/O references off
-        # the context record (`trajectory.py`), so the refs are stamped here
-        # rather than rediscovered later by matching digests back to turns.
-        if input_ref is not None or output_ref is not None:
-            stamped = dict(self.contexts[-1])
-            if input_ref is not None and input_ref.digest:
-                stamped["model_input_ref"] = input_ref.digest
-            if output_ref is not None and output_ref.digest:
-                stamped["model_output_ref"] = output_ref.digest
-            self.contexts[-1] = stamped
 
-        if self._provenance is not None and hasattr(self._provenance, "record_model_io"):
-            policy = (self._artifacts.policy.identity()
-                      if self._artifacts is not None else {})
-            self._provenance.record_model_io(
-                route=_route_of(self._model), input_ref=input_ref,
-                output_ref=output_ref, capture_policy=policy, turn=turn)
-            # Only when the provider itself reported cache participation. A
-            # live call that touched no cache emits nothing (`14.1` capture is
-            # about what happened, not about what the composition could do).
-            self._provenance.record_cache(
-                reported=cache_participation(value), turn=turn,
-                source_digest=output_ref.digest if output_ref else "")
-
-        if isinstance(value, Mapping):
-            usage = value.get("usage")
-            if isinstance(usage, Mapping):
-                measured = dict(self.contexts[-1])
-                for key in ("prompt_tokens", "completion_tokens", "usd_micros",
-                            "ttft_millis"):
-                    reported = usage.get(key)
-                    if isinstance(reported, int) and not isinstance(reported, bool):
-                        measured[key] = reported
-                measured["provider_usage_reported"] = True
-                resolved = value.get("resolved_model")
-                if isinstance(resolved, str) and resolved:
-                    measured["model"] = resolved
-                fingerprint = value.get("model_fingerprint")
-                if isinstance(fingerprint, str) and fingerprint:
-                    measured["model_fingerprint"] = fingerprint
-                self.contexts[-1] = measured
+        self.contexts[-1] = self._handler.handle(
+            answer,
+            turn,
+            self.contexts[-1],
+            input_ref=input_ref,
+            output_ref=output_ref,
+        )
         return answer
 
-    def _memory_fragments(self) -> tuple[tuple[Fragment, ...], str]:
-        """Retrieve authorized context immediately before compiling a turn."""
-        if self._memory is None:
-            return (), ""
-        access = self._memory.authorize("read", now=_memory_now(self._clock))
-        result = self._memory.port.recall(
-            self._memory.query, access, self._memory.limit)
-        selected = require_retrieval_provenance(result)
-        if selected and len(result.texts) != len(selected):
-            raise PermissionError("memory result has no complete materialized context")
-        fragments = tuple(
-            Fragment(
-                source=f"memory:{result.provenance.policy_identity}",
-                label=f"memory:{record_id}",
-                text=text,
-            )
-            for record_id, text in zip(selected, result.texts)
-            if isinstance(text, str) and text
-        )
-        if len(fragments) != len(selected):
-            raise PermissionError("memory result contains invalid context text")
-        return fragments, result.provenance.digest() if selected else ""
-
-    # -- capture helpers ---------------------------------------------------
-
-    def _capture(self, role: str, payload: Any, *, turn: int,
-                 labels: Mapping[str, Any] | None = None) -> Any:
-        """Hand bytes to the writer, or do nothing on the legacy path.
-
-        Nothing is caught here. `EvidenceCaptureRequiredError` and
-        `EvidenceLedgerAppendError` are fatal by `ADR-0096 §14.2` and must
-        reach the caller through the generic Agency protocol; swallowing them
-        would leave the turn running with evidence it does not have.
-        """
+    def _capture(
+        self,
+        role: str,
+        payload: Any,
+        *,
+        turn: int,
+        labels: Mapping[str, Any] | None = None,
+    ) -> Any:
+        """Hand bytes to the writer, or do nothing on the legacy path."""
         if self._artifacts is None:
             return None
         return self._artifacts.capture(role, payload, turn=turn, labels=labels)
-
-    def _record_selection(self, compiled: CompiledContext, turn: int) -> None:
-        """Context-selection and compaction provenance for one turn.
-
-        The compiler stays pure: it is *asked* for its identity here rather
-        than handed a sink, so no prompt can be assembled differently on the
-        run where provenance was enabled.
-        """
-        if self._provenance is None or not hasattr(self._provenance, "record_context_selection"):
-            return
-        identity = self._compiler.selection_identity()
-        selected = [block.label for block in compiled.blocks]
-        # Per-layer token counts, not a layer tally: `L5` growing while `L1`
-        # holds still is the signal a cache-cost regression looks like, and a
-        # single integer erases it.
-        layer_counts: dict[str, int] = {}
-        for block in compiled.blocks:
-            key = block.layer.value
-            layer_counts[key] = layer_counts.get(key, 0) + block.token_estimate
-        self._provenance.record_context_selection(
-            identity=identity,
-            candidate_digest=compiled.candidate_digest,
-            selected_digest=compiled.digest,
-            prefix_digest=compiled.prefix_digest,
-            selected=selected, dropped=compiled.dropped, elided=compiled.elided,
-            tokens=compiled.total_tokens, layer_counts=layer_counts, turn=turn)
-        self._provenance.record_compaction(
-            identity=identity,
-            input_digest=compiled.candidate_digest,
-            output_digest=compiled.digest,
-            dropped=compiled.dropped, elided=compiled.elided,
-            tokens_before=compiled.candidate_tokens,
-            tokens_after=compiled.total_tokens, turn=turn)
 
 
 def _route_of(model: Any) -> Mapping[str, Any]:
@@ -1010,10 +918,15 @@ class HarnessSession:
                 detail = f"max_turns ({task.max_turns}) exhausted across approval"
                 break
             self.policy.bind(authorization)
+            decoders, patch_detector, truncation_detector = default_protocol_pipeline()
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining, spawn_dispatcher=self.dispatch)
+                max_turns=remaining, spawn_dispatcher=self.dispatch,
+                preset_mode=getattr(harness, "tool_policy_preset", None),
+                protocol_decoders=decoders,
+                patch_detector=patch_detector,
+                truncation_detector=truncation_detector)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -1158,61 +1071,27 @@ class HarnessSession:
     def _capture_evidence(self) -> dict[str, Any]:
         """What this run actually captured, for the `mhf.trajectory/2` writer.
 
-        Empty on the legacy path, and deliberately so: `assemble_trajectory`
-        renders an absent artifact index and a null capture status rather than
-        synthesising a complete one, so a run that captured nothing says that
-        instead of claiming it captured everything it was asked to.
+        Delegates to `evidence_capture.capture_evidence` (EVO-06).
         """
-        if self.artifacts is None:
-            return {}
-        provenance = self.provenance.trajectory_provenance()
-        return {
-            "artifact_index": list(self.artifacts.index_entries()),
-            "context_provenance": provenance["context"],
-            "compaction_provenance": provenance["compaction"],
-            "cache_provenance": provenance["cache"],
-            "capture_status": self.artifacts.capture_state(),
-        }
+        return _capture_evidence_pure(self.artifacts, self.provenance)
 
     def _telemetry(self) -> RunTelemetry:
         """Integer telemetry, with absence preserved (`S9-A-02`).
 
-        A provider that reported no usage did not report zero usage. Summing
-        `.get(key, 0)` across contexts would turn a silent provider into a free
-        run, and a corpus of free runs is how a cost claim becomes fiction.
+        Delegates to `telemetry.compute_run_telemetry` (EVO-06) -- summing
+        reported token usage is a pure function of the operator's contexts
+        and the turn count, with no other session state involved.
         """
-        prompt: int | None = None
-        completion: int | None = None
-        for context in self.operator.contexts:
-            if not isinstance(context, Mapping):
-                continue
-            for key, current in (("prompt_tokens", prompt),
-                                 ("completion_tokens", completion)):
-                reported = context.get(key)
-                if isinstance(reported, bool) or not isinstance(reported, int):
-                    continue
-                if key == "prompt_tokens":
-                    prompt = reported if current is None else current + reported
-                else:
-                    completion = reported if current is None else current + reported
-        return RunTelemetry(
-            turns=self.turns_consumed(),
-            prompt_tokens=prompt,
-            completion_tokens=completion,
-        )
+        return compute_run_telemetry(self.operator.contexts, self.turns_consumed())
 
     def _instrument_error(self) -> str | None:
         """Why this arm produced no usable measurement, or `None`.
 
-        `None` means the instrument worked. It does not mean the run
-        succeeded -- a refused run is a result, an unmeasured one is not.
+        Delegates to `telemetry.instrument_error` (EVO-06). `S7-C-02` calls
+        the zero-turns case `model_not_invoked`: an instrument failure, not
+        a cheap run.
         """
-        if self.turns_consumed() == 0:
-            # No proposal ever reached the ledger: the provider did not answer.
-            # `S7-C-02` calls this `model_not_invoked`, and it is an
-            # instrument failure, not a cheap run.
-            return "model_not_invoked"
-        return None
+        return _telemetry_instrument_error(self.turns_consumed())
 
     def _evaluate(self) -> Any:
         """`ICD 3` / `M5`: the verdict comes from outside the episode.

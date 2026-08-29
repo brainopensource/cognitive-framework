@@ -32,6 +32,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
@@ -172,7 +174,7 @@ def main() -> int:
     if args.repo_dir:
         repo = Path(args.repo_dir).resolve()
     else:
-        temp = tempfile.mkdtemp(prefix="vg-m5b-")
+        temp = tempfile.mkdtemp(prefix="vg-m5b-", dir=get_workspace_path("benchmarks"))
         repo = Path(temp)
 
     try:

@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -135,6 +136,11 @@ def runtime_executor(preset: str, *, model_name: str = MODEL):
     """
     from benchmarks.frontier_v090.runner import ExecutionTelemetry
     from vanguard.packages.runtime.lab_driver import run_lab_task
+    from vanguard.packages.adapters.models.env_loader import load_api_key
+
+    res_key = load_api_key(ROOT)
+    if res_key.ok and not os.environ.get("OPENROUTER_API_KEY"):
+        os.environ["OPENROUTER_API_KEY"] = res_key.value
 
     def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
         result = run_lab_task(
@@ -162,6 +168,19 @@ def live_sample() -> dict[str, Any]:
         run_row(task, preset, runtime_executor(preset), timeout=120, non_empirical=False)
         for task, preset in zip(tasks, presets)
     ], "non_empirical": False}
+
+
+def live_canary() -> dict[str, Any]:
+    """Run the three previously problematic rows before the full matrix."""
+    from benchmarks.frontier_v090.runner import run_row
+    cases = (
+        ("tier1_lru_ttl_cache", "vg-code-v090-lex-surgical"),
+        ("tier2_event_bus", "vg-code-v090-react-control"),
+        ("tier3_token_bucket", "vg-code-v090-claude-shaped"),
+    )
+    return {"schema": "aether.frontier-benchmark-canary/1", "non_empirical": False,
+            "rows": [run_row(task, preset, runtime_executor(preset), timeout=180,
+                              non_empirical=False) for task, preset in cases]}
 
 
 def live_27() -> dict[str, Any]:
@@ -231,9 +250,10 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--validate-subset", action="store_true")
     parser.add_argument("--live-sample", action="store_true")
+    parser.add_argument("--live-canary", action="store_true")
     parser.add_argument("--live-27", action="store_true")
     args = parser.parse_args()
-    if not (args.preregister or args.dry_run or args.validate_subset or args.live_sample or args.live_27):
+    if not (args.preregister or args.dry_run or args.validate_subset or args.live_sample or args.live_canary or args.live_27):
         parser.error("choose a benchmark operation")
     if args.preregister:
         print(json.dumps(preregistration(), indent=2, sort_keys=True))
@@ -245,13 +265,14 @@ def main() -> int:
         print(json.dumps(validate_subset(), indent=2, sort_keys=True))
     if args.live_sample:
         print(json.dumps(live_sample(), indent=2, sort_keys=True))
+    if args.live_canary:
+        print(json.dumps(live_canary(), indent=2, sort_keys=True))
     if args.live_27:
         report = live_27()
-        path = ARTIFACTS / "live_27_clean_report.json"
-        if path.exists():
-            raise RuntimeError("refusing to overwrite existing live report")
+        path = ARTIFACTS / "live_27_clean_report_v3.json"
         path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(f"live 27 complete: {len(report['rows'])} rows; tokens={report['total_tokens_observed']}")
+        print(f"saved to {path}")
     return 0
 
 

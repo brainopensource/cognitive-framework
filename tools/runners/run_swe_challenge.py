@@ -54,8 +54,8 @@ SMOKE_CHALLENGES = (
 # request plus one retry at a bounded transport timeout gives the evaluator a
 # deterministic upper bound and preserves a typed instrument_error when the
 # provider or network is unavailable.
-BENCHMARK_MAX_RETRIES = 1
-BENCHMARK_REQUEST_TIMEOUT_SECONDS = 15.0
+BENCHMARK_MAX_RETRIES = 2
+BENCHMARK_REQUEST_TIMEOUT_SECONDS = 45.0
 BENCHMARK_RUN_TIMEOUT_SECONDS = 300.0
 WORKER_PROTOCOL = "vanguard.swe-worker/1"
 
@@ -139,7 +139,7 @@ def _runtime_worker(config: Mapping[str, Any]) -> dict[str, Any]:
     signer = OperatorSigner(seed_key)
     model = OpenRouterModel(
         model=str(config["model"]),
-        stream=False,
+        stream=True,
         # The secret remains in the child's inherited environment and is not
         # placed in the IPC payload, command line, report, or exception text.
         environ={"OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY", "")},

@@ -54,9 +54,23 @@ class FrontierV090RunnerTests(unittest.TestCase):
         self.assertEqual(row["usage"]["cost_provenance"], "unknown")
 
     def test_dataset_preflight_rejects_passing_untouched_fixture(self) -> None:
-        row = run_row("tier2_event_bus", "test", lambda *_: ExecutionTelemetry("completed", "unused"))
-        self.assertEqual(row["terminal"], "DATASET_INVALID")
-        self.assertEqual(row["terminal_reason"], "baseline_already_passes")
+        from benchmarks.swe_bench.challenges import CHALLENGES, SWEProChallenge
+        dummy = SWEProChallenge(
+            challenge_id="dummy_already_passes",
+            tier=1,
+            title="Dummy Already Passes",
+            kind="bugfix",
+            brief="Dummy brief",
+            files={"dummy.py": "x = 1\n"},
+            oracle_code="import unittest\nclass T(unittest.TestCase):\n    def test_x(self): self.assertTrue(True)\nif __name__ == '__main__': unittest.main()\n",
+        )
+        try:
+            CHALLENGES["dummy_already_passes"] = dummy
+            row = run_row("dummy_already_passes", "test", lambda *_: ExecutionTelemetry("completed", "unused"))
+            self.assertEqual(row["terminal"], "DATASET_INVALID")
+            self.assertEqual(row["terminal_reason"], "baseline_already_passes")
+        finally:
+            CHALLENGES.pop("dummy_already_passes", None)
 
     def test_oracle_identity_is_not_a_public_file_digest(self) -> None:
         seen: dict[str, str] = {}

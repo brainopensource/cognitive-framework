@@ -17,7 +17,7 @@
         {
           "function": {
             "arguments": "{\"target_file\":\"src/core.py\"}",
-            "name": "lex.surgical_patch"
+            "name": "edit_file"
           },
           "type": "function"
         }

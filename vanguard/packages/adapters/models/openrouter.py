@@ -410,59 +410,35 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
         return None
     for raw in raw_calls:
         if not isinstance(raw, Mapping):
-            continue
+            return None
         function = raw.get("function") if isinstance(raw.get("function"), Mapping) else {}
         if not function:
-            continue
+            return None
         arguments: Any = function.get("arguments", {})
         if isinstance(arguments, str):
             try:
-                arguments = json.loads(arguments, strict=False)
+                arguments = json.loads(arguments)
             except Exception:
-                try:
-                    import ast
-                    arguments = ast.literal_eval(arguments)
-                except Exception:
-                    arguments = {}
+                return None
         if not isinstance(arguments, Mapping):
-            arguments = {}
+            return None
         name = function.get("name")
-        call_id = raw.get("id") or "call_0"
-        if isinstance(name, str) and name:
-            tool_calls.append(
-                {
-                    "id": str(call_id),
-                    "name": name,
-                    "arguments": dict(arguments),
-                }
-            )
-
-    from ...domain.transforms.protocol.response_wrangler import ResponseWrangler
-    wrangled = ResponseWrangler().wrangle(text, tool_calls)
-
-    parsed_calls: list[dict[str, Any]] = []
-    for call in wrangled.tool_calls:
-        func = call.get("function") if isinstance(call.get("function"), dict) else {}
-        name = call.get("name") or func.get("name")
-        call_id = call.get("id") or "call_0"
-        raw_args = call.get("arguments") if "arguments" in call else func.get("arguments")
-        if isinstance(raw_args, str):
-            try:
-                args_dict = json.loads(raw_args, strict=False)
-            except Exception:
-                args_dict = {}
-        elif isinstance(raw_args, dict):
-            args_dict = raw_args
-        else:
-            args_dict = {}
-        if name:
-            parsed_calls.append({
-                "id": str(call_id),
-                "name": str(name),
-                "arguments": args_dict,
-            })
-
-    return {"text": wrangled.text, "toolCalls": parsed_calls}
+        call_id = raw.get("id")
+        if not isinstance(name, str) or not name or not isinstance(call_id, str) or not call_id:
+            return None
+        tool_calls.append(
+            {
+                "id": call_id,
+                "name": name,
+                "arguments": dict(arguments),
+            }
+        )
+    if not tool_calls and text and ("DSML" in text or "invoke" in text):
+        clean_text, dsml_calls = _extract_dsml_tool_calls(text)
+        if dsml_calls:
+            tool_calls.extend(dsml_calls)
+            text = clean_text
+    return {"text": text, "toolCalls": tool_calls}
 
 
 def _parse_sse_stream(

@@ -6,7 +6,6 @@ Markdown unified diffs, unescaped JSON tool arguments, and raw content blocks).
 
 from __future__ import annotations
 
-import ast
 import json
 import re
 from dataclasses import dataclass, field
@@ -171,15 +170,7 @@ class JSONArgumentNormalizerPlugin(DecoderPlugin):
         except Exception:
             pass
 
-        # Attempt 3: ast.literal_eval
-        try:
-            val = ast.literal_eval(text)
-            if isinstance(val, dict):
-                return val
-        except Exception:
-            pass
-
-        # Attempt 4: Clean control characters and unescaped newlines in JSON string literals
+        # Attempt 3: Clean control characters and unescaped newlines in JSON string literals
         try:
             sanitized = re.sub(r'(?<!\\)\n', r'\\n', text)
             val = json.loads(sanitized, strict=False)

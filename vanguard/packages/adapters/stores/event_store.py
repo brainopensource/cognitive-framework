@@ -268,49 +268,74 @@ class SqliteEventStore(EventStorePort):
         return self.db_path != ":memory:" and self.journal_mode == "wal"
 
     def append(self, events: Sequence[EventEnvelope]) -> Result[None]:
-        """Atomically append an ordered sequence of event envelopes within a transaction."""
+        """Atomically append an ordered sequence of event envelopes within a transaction.
+
+        EVO-10: monotonicity used to cost one `SELECT ... ORDER BY seq DESC
+        LIMIT 1` per *event*, even when a batch holds many events for the
+        same run/project. `BEGIN IMMEDIATE` below already takes the write
+        lock before this method reads or writes anything, so no concurrent
+        writer can move a grouping key's last seq out from under this
+        transaction -- each distinct key's last-committed seq is fetched at
+        most once per `append()` call and tracked in-memory for the rest of
+        the batch, cutting N lookups to (at most) the number of distinct
+        run/project keys actually present, with identical rejection
+        semantics.
+        """
         if not events:
             return Result.success(None)
 
         with self._lock:
             cur = self._conn.cursor()
+            last_seq_cache: dict[tuple[str, str], int] = {}
             try:
                 cur.execute("BEGIN IMMEDIATE;")
 
                 for event in events:
                     seq_int = int(event.seq)
                     if event.project_id:
-                        cur.execute(
-                            "SELECT seq FROM events WHERE project_id = ? ORDER BY seq DESC LIMIT 1;",
-                            (event.project_id,),
-                        )
-                        row = cur.fetchone()
-                        if row is not None and seq_int <= row[0]:
+                        cache_key = ("project", event.project_id)
+                        if cache_key not in last_seq_cache:
+                            cur.execute(
+                                "SELECT seq FROM events WHERE project_id = ? ORDER BY seq DESC LIMIT 1;",
+                                (event.project_id,),
+                            )
+                            row = cur.fetchone()
+                            if row is not None:
+                                last_seq_cache[cache_key] = row[0]
+                        prior = last_seq_cache.get(cache_key)
+                        if prior is not None and seq_int <= prior:
                             cur.execute("ROLLBACK;")
                             return Result.fail(
                                 kind="conflict",
                                 message=(
                                     f"Non-monotonic sequence in project {event.project_id!r}: "
                                     f"event {event.event_id} has seq {event.seq} ({seq_int}) "
-                                    f"<= prior seq {row[0]}"
+                                    f"<= prior seq {prior}"
                                 ),
                             )
+                        last_seq_cache[cache_key] = seq_int
                     else:
                         r_id = event.run_id or "__global__"
-                        cur.execute(
-                            "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
-                            (event.run_id, r_id),
-                        )
-                        row = cur.fetchone()
-                        if row is not None and seq_int <= row[0]:
+                        cache_key = ("run", r_id)
+                        if cache_key not in last_seq_cache:
+                            cur.execute(
+                                "SELECT seq FROM events WHERE (run_id = ? OR (run_id IS NULL AND ? = '__global__')) ORDER BY seq DESC LIMIT 1;",
+                                (event.run_id, r_id),
+                            )
+                            row = cur.fetchone()
+                            if row is not None:
+                                last_seq_cache[cache_key] = row[0]
+                        prior = last_seq_cache.get(cache_key)
+                        if prior is not None and seq_int <= prior:
                             cur.execute("ROLLBACK;")
                             return Result.fail(
                                 kind="conflict",
                                 message=(
                                     f"Non-monotonic sequence in run {event.run_id!r}: event {event.event_id} has "
-                                    f"seq {event.seq} ({seq_int}) <= prior seq {row[0]}"
+                                    f"seq {event.seq} ({seq_int}) <= prior seq {prior}"
                                 ),
                             )
+                        last_seq_cache[cache_key] = seq_int
 
                     envelope_dict = event.wire_dict()
                     envelope_json = json.dumps(envelope_dict, separators=(",", ":"), ensure_ascii=False)

@@ -51,6 +51,7 @@ def query_openrouter(model: str, prompt: str) -> dict:
         method="POST"
     )
     start_t = time.time()
+    last_err = None
     for attempt in range(3):
         try:
             with urllib.request.urlopen(req, timeout=25) as resp:
@@ -67,8 +68,9 @@ def query_openrouter(model: str, prompt: str) -> dict:
                     "status": "success"
                 }
         except Exception as exc:
+            last_err = exc
             time.sleep(2 ** attempt + 1)
-    return {"content": "", "tool_calls": [], "tokens": 0, "cost_usd": 0.0, "wall_ms": 0.0, "status": f"error: {exc}"}
+    return {"content": "", "tool_calls": [], "tokens": 0, "cost_usd": 0.0, "wall_ms": 0.0, "status": f"error: {last_err}"}
 
 
 def main():

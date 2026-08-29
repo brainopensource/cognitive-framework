@@ -1,7 +1,7 @@
 {
   "schema": "aether.backend-baselines/1",
   "environment": {
-    "python": "3.13.14",
+    "python": "3.12.3",
     "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
     "machine": "x86_64"
   },
@@ -9,85 +9,85 @@
   "results": {
     "no_op_turn": {
       "repeats": 20,
-      "min_ms": 38.613362001342466,
-      "median_ms": 41.99259099914343,
-      "p95_ms": 209.9372199991194,
-      "max_ms": 209.9372199991194
+      "min_ms": 35.94640499795787,
+      "median_ms": 38.36582499934593,
+      "p95_ms": 183.59668499761028,
+      "max_ms": 183.59668499761028
     },
     "durable_turn": {
       "repeats": 20,
-      "min_ms": 235.05515099896002,
-      "median_ms": 265.12420500148437,
-      "p95_ms": 325.1681589972577,
-      "max_ms": 325.1681589972577
+      "min_ms": 187.41045499700704,
+      "median_ms": 202.43102349922992,
+      "p95_ms": 221.91840699815657,
+      "max_ms": 221.91840699815657
     },
     "single_effect_turn_durable_minus_no_op_is_kernel_dispatch_overhead": {
       "repeats": 20,
-      "min_ms": 272.18004500173265,
-      "median_ms": 295.463986998584,
-      "p95_ms": 384.1834260019823,
-      "max_ms": 384.1834260019823
+      "min_ms": 206.0644939992926,
+      "median_ms": 220.7520874999318,
+      "p95_ms": 257.0815310027683,
+      "max_ms": 257.0815310027683
     },
     "event_append_batch_100": {
       "repeats": 10,
-      "min_ms": 42.21687400058727,
-      "median_ms": 51.296671999807586,
-      "p95_ms": 84.33138400141615,
-      "max_ms": 84.33138400141615,
+      "min_ms": 41.52232799970079,
+      "median_ms": 43.538189500395674,
+      "p95_ms": 48.1728300001123,
+      "max_ms": 48.1728300001123,
       "events_per_batch": 100,
-      "ms_per_event_median": 0.5129667199980759
+      "ms_per_event_median": 0.43538189500395674
     },
     "fold_1000_events": {
       "repeats": 10,
-      "min_ms": 8.004341998457676,
-      "median_ms": 8.953951501098345,
-      "p95_ms": 12.690521001786692,
-      "max_ms": 12.690521001786692,
+      "min_ms": 8.618592000857461,
+      "median_ms": 9.343187501144712,
+      "p95_ms": 12.670248001086293,
+      "max_ms": 12.670248001086293,
       "events_folded": 1000,
-      "ms_per_event_median": 0.008953951501098345
+      "ms_per_event_median": 0.009343187501144712
     },
     "checkpoint_reconstruction_500_events": {
       "events_total": 500,
       "checkpoint_at": 250,
       "cold_fold": {
         "repeats": 10,
-        "min_ms": 3.408843000215711,
-        "median_ms": 3.5174260010535363,
-        "p95_ms": 5.13474399849656,
-        "max_ms": 5.13474399849656
+        "min_ms": 3.862754998408491,
+        "median_ms": 3.9670559999649413,
+        "p95_ms": 5.957651002972852,
+        "max_ms": 5.957651002972852
       },
       "from_checkpoint": {
         "repeats": 10,
-        "min_ms": 2.406668001640355,
-        "median_ms": 2.656503002071986,
-        "p95_ms": 4.5449050012393855,
-        "max_ms": 4.5449050012393855
+        "min_ms": 2.6077560032717884,
+        "median_ms": 2.6852220016735373,
+        "p95_ms": 4.303565001464449,
+        "max_ms": 4.303565001464449
       },
-      "speedup_median_x": 1.3240813198065495
+      "speedup_median_x": 1.4773661162810798
     },
     "artifact_capture_batch_50": {
       "repeats": 10,
-      "min_ms": 202.24003000112134,
-      "median_ms": 214.23131700066733,
-      "p95_ms": 226.2154849995568,
-      "max_ms": 226.2154849995568,
+      "min_ms": 169.20347999985097,
+      "median_ms": 175.15754999840283,
+      "p95_ms": 192.14665999970748,
+      "max_ms": 192.14665999970748,
       "artifacts_per_batch": 50,
       "artifact_bytes": 4096,
-      "ms_per_artifact_median": 4.284626340013347
+      "ms_per_artifact_median": 3.5031509999680566
     },
     "single_agent_execution": {
       "repeats": 10,
-      "min_ms": 252.34588500097743,
-      "median_ms": 276.77534699978423,
-      "p95_ms": 284.44432400283404,
-      "max_ms": 284.44432400283404
+      "min_ms": 237.34566700295545,
+      "median_ms": 246.0981170006562,
+      "p95_ms": 274.14717200008454,
+      "max_ms": 274.14717200008454
     },
     "nested_agent_execution": {
       "repeats": 10,
-      "min_ms": 0.3905280027538538,
-      "median_ms": 0.5369424998207251,
-      "p95_ms": 1.2127429981774185,
-      "max_ms": 1.2127429981774185
+      "min_ms": 0.5015729984734207,
+      "median_ms": 0.6074745015212102,
+      "p95_ms": 0.9771869990800042,
+      "max_ms": 0.9771869990800042
     },
     "storage_amplification_1000_events": {
       "events": 1000,
@@ -106,14 +106,14 @@
       "repeats_requested": 5,
       "recovery_samples_captured": 5,
       "resume_after_kill_ms": {
-        "median": 673.7848919983662,
-        "min": 642.9892259984626,
-        "max": 772.8654960010317
+        "median": 625.9285779997299,
+        "min": 614.7502720014018,
+        "max": 651.4057630010939
       },
       "uninterrupted_full_run_ms": {
-        "median": 359.0982249988883,
-        "min": 351.42507500131615,
-        "max": 383.17531300344854
+        "median": 302.9550300016126,
+        "min": 295.65802099750726,
+        "max": 349.6602659979544
       },
       "note": "resume_after_kill_ms times only the fresh resume process; the killed process's own wall time is separate and not comparable to a full uninterrupted run"
     }

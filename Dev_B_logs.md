@@ -219,241 +219,199 @@
 
 
 
-
-
-
-
-
-
-# HELPING DEV A
-
- Dev A Acceleration & Ahead-of-Time Scaffolding Strategy
-
-  Based on Dev A's active log, Dev A was sequentially queuing the following remaining tasks:
-  BETA-07 → BETA-11 → BETA-10 → BETA-12 → BETA-14 → BETA-15 → EVO-00..14.
-
-  To eliminate bottlenecks and ensure zero waiting time, Dev B has already pre-built, scaffolded, and tested all subsequent Beta and future EVO tasks in parallel.
+ Vanguard / AETHER: Comprehensive Engineering Review Prompt & Master Execution Plan
   ──────
-  ## 1. What Has Been Completed & Pre-Delivered Ahead of Dev A
+  ## 1. The Master Audit & Review Prompt
 
-   Task    │ Scope & Requirement                                                 │ Pre-Delivered Implementation & Test Proof                                        │  Status for Dev A
-  ─────────┼─────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────┼────────────────────
-   BETA-10 │ Planner / Executor / Reviewer 3-role composition under monotonic    │ test_beta10_planner_executor_reviewer.py✓ Proves Planner → Executor → Reviewer   │ 100% DONE(Passing)
-           │ attenuation & causal parent tracking                                │ scoped spawn.✓ Asserts fail-closed attenuation denial upon capability widening.  │
-   BETA-12 │ Subprocess kill & fresh-process resume from durable SQLite-WAL      │ test_beta12_kill_and_resume.py✓ Proves process 1 interruption after turn 1.✓     │ 100% DONE(Passing)
-           │ state & blob artifacts                                              │ Proves process 2 resumption in a fresh Python memory space without re-executing  │
-           │                                                                     │ settled effects.                                                                 │
-   BETA-14 │ Performance & SQLite WAL write-amplification baseline support       │ test_beta14_performance_baseline.py✓ Measures marginal WAF <10 × and post-       │ 100% DONE(Passing)
-           │                                                                     │ checkpoint WAF ≤2.5 ×.✓ Validates StructuredConsolidateStrategy O(1) token       │
-           │                                                                     │ ceiling bounding and dead-end retention.                                         │
-   BETA-15 │ Release qualification script & signed release envelope verification │ release_qualify.shrelease_qualification.py✓ Automated candidate subject          │ 100% DONE(Passing)
-           │                                                                     │ verification without internal Git subprocesses.                                  │
-   EVO-14  │ Artifact retention policy & safe garbage collection dry-run         │ retention.pytest_artifact_retention.py✓ Bounded orphan blob collection with      │ 100% DONE(Passing)
-           │                                                                     │ grace periods and immutable ledger protection.                                   │
+  Copy and paste this prompt into any AI agent, subagent, or auditor session to enforce strict code-level verification without hallucinations or drift:
+
+    # ROLE & OPERATING MODEL
+    Act as the Principal Systems Auditor, Staff Backend Architect, and Engineering Tracker for the Vanguard / AETHER recursive agency substrate.
+
+    Your mission is to perform a rigorous, code-first verification of the repository against the authoritative plan in `docs/_archive/reviews/backend/director_review_v5/`
+  (`VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md` & `TODO_V090_MASTERPLAN_GUIDELINE.md`).
+
+    # AUDIT & VERIFICATION RULES
+    1. DO NOT MODIFY code, configurations, or documentation unless explicitly commanded.
+    2. DO NOT BUNDLE OR TRUNCATE TASKS. Enumerate all tasks from BETA-00 through BETA-15 and EVO-00 through EVO-16 with granular sub-tasks.
+    3. Every claim of DONE must name the exact file and symbol (e.g. `vanguard/packages/runtime/app_service.py::ApplicationService.run`).
+    4. Execute tests and linters (`check_tcb_budget.py`, `check_boundaries.py`, `scan_secrets.py`, test runners) to confirm implementation truth vs documentary drift.
+    5. Provide aggregate metrics:
+       - Horizon 1 (0.9.0b1 Beta) % Complete
+       - Horizon 2 (0.9.1 Evolution) % Complete
+       - Overall Repository Progress %
+    6. For any model execution or benchmarking, strictly enforce the approved models registry (`vanguard/packages/adapters/models/models_registry.json`).
   ──────
-  ## 2. Verification Proof
+  ## 2. Blueprint: Building New Agentic Coding Harnesses with AETHER
 
-    python3 -m unittest test.contracts.test_beta10_planner_executor_reviewer test.runtime.test_beta12_kill_and_resume -v
+  Building a new specialized agent (e.g., Autonomous Coder, Codebase Explainer / RAG Tutor, Deep Researcher, or Critic-Reviser) requires zero modifications to the Trusted Computing Base
+  (Kernel). It is entirely declarative through the Agency & Runtime Manifest Architecture:
 
-    test_child_scope_escalation_is_denied_fail_closed (test.contracts.test_beta10_planner_executor_reviewer.TestBeta10PlannerExecutorReviewer.
-  test_child_scope_escalation_is_denied_fail_closed) ... ok
-    test_planner_executor_reviewer_composition_lifecycle (test.contracts.test_beta10_planner_executor_reviewer.TestBeta10PlannerExecutorReviewer.
-  test_planner_executor_reviewer_composition_lifecycle) ... ok
-    test_process_interruption_and_fresh_process_resume_parity (test.runtime.test_beta12_kill_and_resume.TestBeta12KillAndResume.
-  test_process_interruption_and_fresh_process_resume_parity) ... ok
+    ┌────────────────────────────────────────────────────────────────────────────────────────┐
+    │                              AGENT MANIFEST ARCHITECTURE                               │
+    ├────────────────────────────────────────────────────────────────────────────────────────┤
+    │ 1. MANIFEST DECLARATION (manifest.json)                                                │
+    │    • Name & Version: e.g. "vg-code-claude-shaped", "vg-research-deep"                  │
+    │    • Components:                                                                       │
+    │        - system_prompt.txt (Role, formatting, behavior rules)                          │
+    │        - tools/*.json (JSON Schemas for fs.read, patch.apply, proc.exec, search, etc.)  │
+    │        - context-policy.json (RecencyWindow, StructuredConsolidation, Eviction)        │
+    │        - approval-policy.json (Ed25519 threshold, auto-grant, interactive review)      │
+    │    • Capabilities & Sinks:                                                             │
+    │        - Sinks: "observation" (read-only), "privileged" (workspace write), "control"   │
+    │        - Risk Tiers: "low", "medium", "high", "critical"                               │
+    │        - Resource Selectors: {"kind": "fs", "root": "/workspace", "paths": [...]}      │
+    ├────────────────────────────────────────────────────────────────────────────────────────┤
+    │ 2. RECURSIVE SUBSTRATE BINDING (agency/ & runtime/)                                    │
+    │    • ContextCompiler compiles L1 (System) -> L2 (Env) -> L3 (Memory) -> L4 (Task)      │
+    │      -> L5 (Dialogue).                                                                 │
+    │    • Attenuated Child Agent Spawning: Planner spawns Executor with attenuated budget.  │
+    │    • SQLite WAL Event Store & CAS Blob Retention: Every turn, tool invocation, and     │
+    │      model response is immutably recorded with SHA-256 CAS references.                 │
+    └────────────────────────────────────────────────────────────────────────────────────────┘
 
-    ----------------------------------------------------------------------
-    Ran 3 tests in 1.335s
-    OK
+  ### Steps to Register a New Harness:
 
-  All 11 architectural linters pass cleanly (TCB logical lines at 1,373 ≤1,438).
+  1. Create Manifest Directory: Create manifests
+  2. Define Tools & Permissions:
+    {
+      "harness": "vg-my-custom-agent",
+      "components": {
+        "system_prompt": ["vg-my-custom-agent/system-prompt.txt"],
+        "tools": ["vg-code-default/read-tool.json", "vg-code-default/search-tool.json", "vg-code-lex/surgical-patch-tool.json"],
+        "context_policy": ["vg-code-default/context-policy.json"],
+        "approval_policy": ["vg-code-default/approval-policy.json"]
+      },
+      "capabilities": [
+        {"verb": "fs.read", "sink": "observation", "selector": {"kind":"fs","root":"/workspace"}, "risk": "low"},
+        {"verb": "patch.apply", "sink": "privileged", "selector": {"kind":"fs","root":"/workspace"}, "risk": "medium"}
+      ]
+    }
+
+  3. Validate the Manifest: Run validator.py to check tool schemas, budget bounds, and sink bindings.
+  4. Register in Catalog: Add entry to registry.json.
   ──────
-  ## 3. Impact on Dev A's Velocity
+  ## 3. The 4-Stage Execution, Verification & Benchmark Plan
 
-  When Dev A completes his current check on BETA-11 (sparse environment):
+    flowchart TD
+        A["Stage 1: Hermetic Code & Falsifier Gates"] --> B["Stage 2: 12-Dimension Performance & Storage Baselines"]
+        B --> C["Stage 3: Multi-Tier SWE-bench Verified Pro Execution"]
+        C --> D["Stage 4: Automated Ledger KPI Extraction & Regression Diff"]
 
-  • He does not need to implement BETA-10, BETA-12, BETA-14, BETA-15, or EVO-14.
-  • His entire remaining Horizon 1 (0.9.0b1 Beta) backlog will be instantly satisfied and green.
-  • He can immediately declare Horizon 1 closed and transition smoothly into Horizon 2 refactorings (EVO-05 session decomposition, EVO-09 model registry consolidation).
+  ### Stage 1: Hermetic Verification & Linter Gates (Zero Network / Zero Cost)
 
-# HELPING DEV A
+  Before running live LLMs, ensure the core substrate passes all structural and security invariants:
 
- DEV B MASTER ACTION PROMPT: AHEAD-OF-TIME IMPLEMENTATION & FUTURE SCAFFOLDING
+    # 1. Enforce Hexagonal Boundary Isolation
+    python3 tools/linters/check_boundaries.py
 
-    ========================================================================================
-    ROLE:         Dev B (Senior Implementation, Integration, Packaging & Backend Product Developer)
-    TARGET:       Vanguard / AETHER Backend Evolution (Horizon 2: 0.9.1+)
-    MISSION:      Implement, scaffold, test, and deliver the open future EVO work packages in parallel
-                  so that every downstream foundation Dev A reaches is already pre-built and green.
-    AUTHORITATIVE docs/_archive/reviews/backend/director_review_v5/VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md
-    SOURCES:      docs/_archive/reviews/backend/director_review_v5/TODO_V090_MASTERPLAN_GUIDELINE.md
-    ========================================================================================
+    # 2. Verify Trusted Computing Base (Threshold <= 1438 LOC)
+    python3 tools/linters/check_tcb_budget.py
+
+    # 3. Verify Zero Secret Leakage & Domain Blindness
+    python3 tools/linters/scan_secrets.py
+    python3 tools/linters/check_domain_blindness.py
+    python3 tools/linters/check_isolation_policy.py
+
+    # 4. Run Complete Hermetic Unit & Contract Test Suite
+    python3 -m unittest discover -s test -t .
   ──────
-  ## 1. CURRENT REPOSITORY SYNCHRONIZATION STATE
+  ### Stage 2: Performance & Storage Baseline Benchmarking
 
-  ### What Dev A Has Just Completed
+  Execute the 12-dimension benchmark harness to record the framework overhead, SQLite WAL write amplification, and turn latencies:
 
-  • BETA-07: Added typed EventStoreCorruptError and EventStoreIncompatibleError to event_store.py and verified schema migrations.
-  • BETA-11: Added GitUnavailableError and fail-closed _check_git() guards to git.py and added regression tests in test_environment_port.py.
-  • BETA-12: Hardened test_beta12_kill_and_resume.py with a watchdog thread testing real in-process SIGKILL termination and zero effect re-execution upon resumption.
+    python3 benchmarks/backend_baselines.py --out benchmarks/backend_baselines.json
 
-  ### What Is Already Closed in Horizon 1 (0.9.0b1 Beta)
+  Metrics Measured:
 
-  • GOV-01: CONVERGENCE-BASE-v1 annotated Git tag pushed to remote origin; dual-signed manifest CONVERGENCE-BASE-v1.json verified as ACCEPTED_CONTROL.
-  • BETA-01..06, BETA-08..10, BETA-14..15: ApplicationService, CLI, golden cassettes, isolated package smoke test, benchmark baseline, and release qualification are all verified.
+  1. no_op_turn: Turn dispatch latency without tool execution.
+  2. durable_turn: Turn dispatch with SQLite-WAL event persistence.
+  3. single_effect_turn_durable_minus_no_op_is_kernel_dispatch_overhead: Pure mathematical kernel dispatch time.
+  4. event_append_batch_100: Batch append throughput.
+  5. fold_1000_events: Event state fold speed.
+  6. checkpoint_reconstruction_500_events: Cold fold vs delta suffix reconstruction speedup.
+  7. artifact_capture_batch_50: Content-addressed storage (CAS) ingestion speed.
+  8. single_agent_execution: Full ApplicationService.run lifecycle.
+  9. nested_agent_execution: Attenuated child agent spawn lifecycle.
+  10. storage_amplification_1000_events: SQLite DB bytes vs raw canonical JSON event bytes.
+  11. multi_agent_token_overhead: Delegation coordination cost ratio.
+  12. recovery_latency: Fresh-process resumption time after OS SIGKILL.
   ──────
-  ## 2. DEV B FUTURE WORK PACKAGES (HORIZON 2 / 0.9.1 EVOLUTION)
+  ### Stage 3: Real-World SWE-Bench Challenge Execution (Approved Models Only)
 
-  Your objective is to implement the following 6 Open Future Packages from Chapter II of the masterplan:
+  Run coding challenges using the Authoritative Model Registry (models_registry.json):
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-    │  PACKAGE 1: EVO-09 — Unified Model Provider Factory & Registry Consolidation             │
-    │  PACKAGE 2: EVO-10 — Native Manifest Logical Validator & Linter                          │
-    │  PACKAGE 3: EVO-11 — Checkpoint Delta Suffix Decoding (Lazy Replay Optimization)         │
-    │  PACKAGE 4: EVO-02 — Hierarchical YAML/Dict Profile Configuration Model                  │
-    │  PACKAGE 5: EVO-05/06 — Monolithic Session Decomposition (PromptCompiler & ResponseHandler)│
-    │  PACKAGE 6: EVO-13/15 — Cassette CLI Record/Replay & Diagnostic Bundle Exporter          │
-    └──────────────────────────────────────────────────────────────────────────────────────────┘
+  #### 1. Free Band Models (- minimax/minimax-m3:free
+- z-ai/glm-5.2:free
+- inclusionai/ling-3.0-tiny:free
+- poolside/laguna-s-2.1:free
+- cohere/north-mini-code:free
+- google/gemma-4-26b-a4b-it:free
+- nvidia/nemotron-3-super-120b-a12b:free
+- openai/gpt-oss-20b:free)
+
+    # Run Tier-1 Core Data Structures challenge (LRU TTL Cache)
+    python3 tools/runners/run_swe_challenge.py \
+      --challenge tier1_lru_ttl_cache \
+      --model minimax/minimax-m3:free \
+      --report evidence/runs/tier1_lru_minimax.json
+
+    # Run 12-task Pre-registered Smoke Suite on Free Open Models
+    python3 tools/runners/run_swe_challenge.py \
+      --smoke \
+      --model minimax/minimax-m3:free \
+      --report evidence/runs/smoke_free_models.json
+
+  #### 2. Paid Low-Budget Band Models (deepseek/deepseek-v4-flash-0731, xiaomi/mimo-v2.5, z-ai/glm-5.3-flash)
+
+    # Run Systems Infrastructure challenge (Event Bus / Workflow Engine)
+    python3 tools/runners/run_swe_challenge.py \
+      --challenge tier2_event_bus \
+      --model deepseek/deepseek-v4-flash-0731 \
+      --report evidence/runs/tier2_eventbus_deepseek.json
+
+    # Run Real SWE-bench Verified Instance (Flask / Requests)
+    python3 tools/runners/run_swe_challenge.py \
+      --verified pallets__flask-5014 \
+      --model xiaomi/mimo-v2.5 \
+      --report evidence/runs/verified_flask_xiaomi.json
   ──────
-  ### PACKAGE 1: EVO-09 — Unified Model Provider Factory & Registry Consolidation
+  ## 4. Telemetry, Ledger Metadata & KPI Extraction Architecture
 
-  #### Context & Requirement
+  Every execution emits an immutable SQLite event log and a JSON report. The runtime extracts and computes the following KPIs:
 
-  Model instantiation is currently split across bootstrap.py, config.py, and individual adapter files. A single, authoritative provider factory create_model(name_or_alias, **kwargs)
-  must resolve models strictly through models_registry.json with fail-closed fallback handling.
-
-  #### Implementation Details
-
-  1. Target File: Create factory.py and expose in __init__.py.
-  2. Interface Contract:
-    def create_model(
-        model_spec: str | Mapping[str, Any],
-        *,
-        cassette_path: Path | str | None = None,
-        record: bool = False,
-        fake_proposals: Sequence[Mapping[str, Any]] | None = None,
-        env_loader: Any = None,
-    ) -> ModelPort:
-        """
-        Resolves:
-        - 'fake' -> FakeModel(fake_proposals or [])
-        - 'cassette:<path>' or cassette_path -> CassettePlayer or CassetteRecorder
-        - 'ollama:<model_name>' -> OllamaModel(model_name=...)
-        - 'openrouter:<model_name>' or provider alias -> OpenRouterModel(resolved_name)
-        Fails closed with typed ModelResolutionError on unknown provider or unconfigured key.
-        """
-
-  3. Contract Test: Create test_evo09_model_factory.py.
-      • Test resolution of aliases: free, fast, smart, local.
-      • Test cassette wrapping and recording toggles.
-      • Test fail-closed rejection on invalid provider schemes.
-
+   KPI Category                                             │ Metric Name                                              │ Definition & Measurement Seam
+  ──────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+   Cost                                                     │ usd_micros                                               │ Micro-dollars calculated from model input/output token pricing.
+   Token Usage                                              │ prompt_tokens                                            │ Exact input tokens sent across provider boundary.
+                                                            │ completion_tokens                                        │ Exact generated output tokens.
+                                                            │ total_tokens                                             │ Sum of prompt + completion tokens.
+   Turns & Velocity                                         │ turns                                                    │ Number of decision/action cycles to reach resolution.
+                                                            │ wall_clock_seconds                                       │ Total episode duration from activation to termination.
+                                                            │ ttft_millis                                              │ Time to First Token reported by the model stream.
+                                                            │ tokens_per_second                                        │ Generation throughput (tokens/seconds).
+   Accuracy                                                 │ score                                                    │ 1.0 (PASSED) if private unit test oracle passes; 0.0 (FAILED).
+                                                            │ oracle_passed                                            │ Boolean status of test assertion suite in bubblewrap sandbox.
+                                                            │ diff_size                                                │ Number of lines modified in surgical patch.
+   Storage & Causal DAG                                     │ events_emitted                                           │ Total number of structured ledger events appended.
+                                                            │ storage_amplification                                    │ SQLite file size divided by raw JSON event size.
+                                                            │ ledger_digest                                            │ SHA-256 Merkle root of the entire execution sequence.
   ──────
-  ### PACKAGE 2: EVO-10 — Native Manifest Logical Validator & Linter
+  ## 5. Baseline Comparison & Version-over-Version Tracking
 
-  #### Context & Requirement
+  To ensure progress between the Beta (0.9.0b1) and Evolution (0.9.1) versions:
 
-  Agent manifests (vg-code-default, vg-code-lex, vg-code-explain) are currently parsed with minimal schema checks. EVO-10 requires a strict logical validator that proves action-to-tool
-  bindings, resource selectors, budget limits, and risk tiers are logically consistent before runtime composition.
+    # Compare a new candidate report against the baseline:
+    python3 tools/compare_baselines.py \
+      --baseline evidence/baselines/CONVERGENCE-BASE-v1.json \
+      --candidate evidence/runs/swe_candidate_run.json \
+      --out evidence/comparisons/v090_vs_v091_diff.md
 
-  #### Implementation Details
+  ### Key Questions Answered in the Comparative Diff:
 
-  1. Target File: Create validator.py.
-  2. Validation Rules:
-      • Every verb declared in scope.actions must have a corresponding registered tool or kernel sink.
-      • Initial budget allocations (budget.tokens, budget.micros, budget.steps) must be non-negative integers.
-      • constraints.max_depth must be between 1 and 16.
-      • Tool parameter schemas must be valid JSON Schema objects.
-  3. Contract Test: Create test_evo10_manifest_validator.py.
-      • Verify all built-in manifests in vanguard/packages/agency/manifests/ pass validation.
-      • Verify invalid actions, missing tool mappings, or negative budgets fail closed with ManifestValidationError.
+  1. Did the new prompt assembler or context eviction reduce prompt_tokens without degrading the test pass rate?
+  2. Did delta checkpoint reconstruction reduce resume latency on multi-turn episodes?
+  3. What was the total cost difference (Δμ$) between model providers for identical problem tiers?
+  4. Is the agent producing cleaner, smaller diffs with fewer extraneous edits?
 
-  ──────
-  ### PACKAGE 3: EVO-11 — Checkpoint Delta Suffix Decoding (Lazy Replay Optimization)
-
-  #### Context & Requirement
-
-  checkpoints.py currently reads the whole event database to fold state. For long episodes (>100 turns), it must load only the latest valid checkpoint, then query events strictly with
-  seq > checkpoint.seq.
-
-  #### Implementation Details
-
-  1. Target File: Update checkpoints.py.
-  2. Method to Optimize:
-    def restore_latest(self, run_id: str, event_store: EventStorePort) -> tuple[AgentView, int]:
-        """
-        1. Query checkpoint store for latest valid checkpoint for run_id.
-        2. If found and digest verifies, deserialize AgentView state directly.
-        3. Query event_store only for EventRange(run_id=run_id, from_seq=checkpoint.seq + 1).
-        4. Fold delta events into AgentView.
-        5. If checkpoint digest mismatches, fail closed to cold-fold from seq=0.
-        """
-
-  3. Contract Test: Create test_evo11_checkpoint_suffix_fold.py.
-      • Prove delta query reads only K events instead of N total events.
-      • Prove cold-fold fallback activates when a checkpoint file is truncated/corrupted.
-
-  ──────
-  ### PACKAGE 4: EVO-02 — Hierarchical Profile Configuration Model
-
-  #### Context & Requirement
-
-  Profile presets (local, product, evaluator) are currently hardcoded in Python dictionaries inside profiles.py. Support optional override files (e.g. .vanguard/profile.json or
-  .vanguard/vanguard.yaml) that merge on top of system presets without violating layer boundaries.
-
-  #### Implementation Details
-
-  1. Target File: Update profiles.py to add load_custom_profile(path, base_preset="local").
-  2. Invariants:
-      • Custom configurations cannot disable fail-closed policies.
-      • Cannot exceed kernel budget limits.
-  3. Contract Test: Create test_evo02_profile_configuration.py.
-  ──────
-  ### PACKAGE 5: EVO-05 / EVO-06 — Monolithic Session Decomposition
-
-  #### Context & Requirement
-
-  session.py handles prompt assembly, response formatting, telemetry capture, and loop orchestration in a single class. Extract prompt construction and response parsing into focused
-  helper modules.
-
-  #### Implementation Details
-
-  1. Target Files:
-      • prompt_assembler.py (EVO-05): Takes Episode, Scope, Tools, Accumulation and delegates to ContextCompiler.
-      • response_handler.py (EVO-06): Normalizes raw adapter responses, records diagnostic telemetry, and constructs typed Proposal objects.
-  2. Refactor: Keep Session in session.py as a lightweight coordinator using these components.
-  3. Contract Test: Verify existing turn execution tests in test/agency/ and test/runtime/ pass with zero regressions.
-  ──────
-  ### PACKAGE 6: EVO-13 / EVO-15 — Cassette CLI Replay & Diagnostic Exporter
-
-  #### Context & Requirement
-
-  Expose cassette operations and health diagnostic bundle export in cli.py via ApplicationService.
-
-  #### Implementation Details
-
-  1. CLI Commands to Add:
-      • vanguard cassette record <run_id> --out <cassette.json>
-      • vanguard cassette replay <cassette.json> --brief <brief>
-      • vanguard doctor --export-bundle <bundle.zip> (collects scrubbed state metadata, logs, and diagnostics with zero API keys or secrets).
-  2. Contract Test: Create test_evo13_cli_cassette_doctor.py.
-  ──────
-  ## 3. EXECUTION DISCIPLINE & RULES
-
-  1. Kernel Budget Invariant: Logical lines in vanguard/packages/kernel/ must remain ≤1,438 LOC. None of these packages should touch kernel/.
-  2. Hexagonal Boundary Invariant:
-  domain ← ports ← kernel ← agency ← runtime → adapters
-      • adapters and apps must never import kernel or agency.
-  3. Testing Rule: All unit and contract tests must execute hermetically in under 2 seconds without external network dependencies.
-  4. Linters Clean: After completing each package, verify all 11 linters pass:
-    python3 tools/linters/check_boundaries.py && \
-    python3 tools/linters/check_tcb_budget.py && \
-    python3 tools/linters/scan_secrets.py && \
-    python3 tools/linters/check_domain_blindness.py && \
-    python3 tools/linters/check_isolation_policy.py && \
-    python3 tools/linters/check_markdown_links.py && \
-    python3 tools/linters/check_stale_paths.py && \
-    python3 tools/linters/check_doc_metadata.py && \
-    python3 tools/linters/check_falsifier_ids.py && \
-    python3 tools/linters/check_kernel_neutrality.py && \
-    python3 tools/linters/check_test_hygiene.py
+  This establishes an audit-grade, scientific feedback loop for building, refining, and validating autonomous agentic coding tools on top of the Vanguard / AETHER framework.

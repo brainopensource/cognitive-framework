@@ -2,7 +2,6 @@
 
 ## 0. Free Models
 
-- stealth/ox-alpha
 - openrouter/free
 - minimax/minimax-m3:free
 - z-ai/glm-5.2:free

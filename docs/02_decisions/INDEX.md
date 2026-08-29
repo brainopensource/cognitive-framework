@@ -38,7 +38,7 @@ superseded_by: null
 - 🧰 [Product-first M-4 (`0094`)](#product-first-m-4-0094) — useful coding proof first; hermetic assurance remains optional and honest
 - 🌟 [Vision as Law Zero (`0095`)](#vision-as-law-zero-0095) — **`VISION.md` is the constitutional authority for v0.7+**; roadmap reconciled; milestone identifier mapping
 - 🧪 [Constitutional Evidence and Two-Lane Activation (`0096`–`0098`)](#constitutional-evidence-and-two-lane-activation-00960098) — proof-honest evidence, strict schema evolution, Phase-0 closure, and event substrate `/2`
-- 🧭 [M-8 Contract and 2026 Convergence (`0100`–`0104`)](#m-8-contract-and-2026-convergence-01000104) — durable memory/promotion, receipt-backed acceptance, baseline succession, and automated verifier separation
+- 🧭 [M-8 Contract and 2026 Convergence (`0100`–`0105`)](#m-8-contract-and-2026-convergence-01000105) — durable memory/promotion, receipt-backed acceptance, baseline succession, and automated verifier separation
 - 🛡️ [Canonical RF Falsifier Allocation Register](#canonical-rf-falsifier-allocation-register) — ratified requirement identifiers and falsifier allocations
 - 📜 [Consolidated Historical Lineage](#consolidated-historical-lineage) — summaries here; full bodies in Git
 - 📂 [Companion Registers & Governance](#companion-registers--governance-documents)
@@ -160,7 +160,7 @@ the narrower historical wordings in ADR-0080 and ADR-0090 without weakening eith
 
 ---
 
-## M-8 Contract and 2026 Convergence (`0100`–`0104`)
+## M-8 Contract and 2026 Convergence (`0100`–`0105`)
 
 `0099` records the scheduler disposition after M7-01 evidence. Numbering is append-only; the
 decision does not authorize concurrency.
@@ -173,6 +173,7 @@ decision does not authorize concurrency.
 | `0102` | [`0102-convergence-and-baseline-succession.md`](0102-convergence-and-baseline-succession.md) | **Convergence:** records `M-5A-BASE-v2` as contaminated/unpublished, resets unsupported claims, defines `CONVERGENCE-BASE-v1`, and retires parallel Leadership planning. | accepted v1.0.0 | 2026-08-26 |
 | `0103` | [`0103-progress-projection-and-checkpoint-contract.md`](0103-progress-projection-and-checkpoint-contract.md) | **M-6.5 observation seam:** freezes derived progress projection, semantic checkpoint identity, authority-free directives, and controller-off parity. | accepted v1.0.0 | 2026-08-27 |
 | `0104` | [`0104-automated-verifier-identity-separation.md`](0104-automated-verifier-identity-separation.md) | **Delivery governance:** replaces active process approval dependencies with two-lane ownership, exact package predicates, and distinct automated verifier identity. | accepted v1.0.0 | 2026-08-27 |
+| `0105` | [`0105-governor-thread-safety-without-concurrency-authorization.md`](0105-governor-thread-safety-without-concurrency-authorization.md) | **Kernel defensive concurrency protection:** serializes check-then-act budget accounting in kernel Governor without expanding domain authority. | accepted v1.0.0 | 2026-08-28 |
 
 ---
 

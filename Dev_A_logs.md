@@ -341,3 +341,157 @@ here to give the user a comprehensive status checkpoint rather than pushing
 further into EVO-07 (async multi-agent scheduling) without a check-in --
 that item is large (concurrent lineage execution, no-global-lock scheduling)
 and deserves its own focused pass.
+
+---
+
+## Wave 9 — EVO-07/EVO-14 groundwork: Governor thread-safety (scoped down from full concurrent scheduling)
+
+**Important finding before writing any code**: `docs/02_decisions/0099-m7-topology-scheduler-disposition.md`
+records M-7's disposition as `SEQUENTIAL_CONFIRMED` with **no active
+concurrency authorization**, and `vanguard/packages/runtime/scheduler.py`'s
+`SequentialScheduler` is explicitly documented as "not a concurrent
+executor... never enabled here." Building and *enabling* an actual
+concurrent scheduler (parallel dispatch of independent ready operations)
+would need a successor ADR amending ADR-0099 -- a governance decision, not
+an ordinary engineering one. I did not build or wire one. What I did instead
+is real, bounded, defensive groundwork that stands on its own regardless of
+when/whether concurrency gets authorized.
+
+**Found and fixed a genuine, verified race**: `vanguard/packages/kernel/budget.py`'s
+`Governor.reserve()` is check-then-act on `_held` with zero synchronization
+-- two threads can both pass the ceiling check against the same stale
+`remaining()` read and both commit, oversubscribing the ceiling (a real
+`K-07` budget-conservation violation). Added a `threading.Lock` around the
+full body of `reserve`/`commit`/`release`/`is_open`.
+
+**Collision note**: while implementing this, discovered Dev B's session had
+independently found and fixed the *exact same* bug, with an ADR at the same
+number (`0105-kernel-budget-lock-defensive-concurrency.md`, matching method
+names `_reserve_locked`/`_commit_locked`) -- true convergent duplicate work,
+not a coordination failure on either side. This also explains an earlier
+scare: my own kernel/budget.py edit vanished from disk mid-session (verified
+via `grep`/`Read` showing the pristine unlocked file), almost certainly from
+the two sessions racing writes to the same file. Reapplied my fix cleanly,
+then found their ADR already covered the identical decision with matching
+code shape, so I deleted my duplicate `0105-governor-thread-safety-*.md`
+rather than leave two competing ADR-0105 files, and kept theirs as
+canonical. **Caution for whoever reads this next**: `vanguard/packages/kernel/`
+is genuinely being touched by both lanes right now despite ADR-0104 assigning
+kernel/runtime exclusively to Lane A -- worth resolving explicitly rather
+than continuing to race on it.
+
+Verified the fix is real, not cosmetic: `test/kernel/test_governor_concurrency.py`
+(3 tests) includes a monkeypatch-widened race window proving the *unlocked*
+code lets two threads both win a reservation only one ceiling's worth of
+budget could satisfy, and the locked code correctly denies the second --
+confirmed by temporarily neutering the lock and watching the test fail
+exactly as predicted, then restoring it. Also confirms `RF-98` (kernel
+neutrality gate) treats *any* kernel diff as failing unless a classifying
+ADR exists with the exact marker `kernel-budget-concurrency`; Dev B's ADR
+carries it, so `check_kernel_neutrality.py` passes clean (structural: neutral,
+historical: changed-but-classified).
+
+Full suite: 2228 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures as before, confirmed transient-flake-free on a second run.
+
+**What EVO-07/EVO-14 still needs, and isn't done**: an ADR amending
+ADR-0099's `SEQUENTIAL_CONFIRMED` disposition to actually authorize
+concurrency; a real scheduler/executor built on `ready_operations()`/
+`safe_read_only_group()` that dispatches independent ready operations in
+parallel; verified thread-safety of the rest of the dispatch path beyond
+Governor (ledger/event-sink emission, adapter reentrancy); and the harder
+semantic work -- idempotency, cancellation, child-failure handling under
+real concurrency, deterministic joins. None of that is built. I'm not
+claiming it is.
+
+---
+
+## Wave 10 — BETA-15: full beta technical integration sign-off
+
+Per the stop-hook feedback, picked the next genuinely-mine, genuinely-unclaimed
+item rather than redoing work Dev B already reported done (BETA-01/03/04/05/06/
+08/09/13, EVO-02/03/04/09/10/11/13/15 were all explicitly claimed complete in
+Dev B's own reports this session -- not blindly trusted wholesale, but not
+redone from scratch either, consistent with earlier verification-before-reuse
+practice). Also deliberately avoided touching `vanguard/packages/kernel/`
+again this wave given the active write-collision risk flagged last wave.
+
+Added `test/runtime/test_beta15_full_lifecycle_integration.py`, the
+end-to-end chain the plan specifies: **install -> configure -> run ->
+inspect events -> inspect artifacts -> interrupt -> restart -> resume ->
+verify**, all against a real installed sdist (not a source-checkout
+`PYTHONPATH` shortcut for the CLI-facing half).
+
+- Install/configure: builds the sdist, extracts it, `vanguard init` against
+  the extracted package.
+- Run + interrupt: since the CLI's `--model-port fake` has no tape-injection
+  flag (a real product gap, not a test limitation -- there's no way to drive
+  a multi-turn scripted run through the CLI alone), drove the interruptible
+  run via a worker script against the same installed `PYTHONPATH`, reusing
+  the proven self-watchdog `SIGKILL` pattern from BETA-12/EVO-00.
+- Inspect: `vanguard events <run_id> --json` mid-run (before resume) --
+  asserts exactly one settled `EffectCompleted` and at least one
+  `ArtifactCreated`; `vanguard artifacts <digest>` retrieves and verifies
+  that artifact's content by digest.
+- Restart + resume: fresh process, `vanguard resume <run_id>` reaches
+  `completed`.
+- Verify: re-reads events after resume -- sequence numbers strictly
+  monotonic with no duplicates across the restart, still exactly one
+  `EffectCompleted` (proving the settled effect was not replayed), exactly
+  one `EpisodeCompleted`. `vanguard status` confirms terminal state.
+
+Verified stable across 5 runs (1 initial + 4 repeats), no flakiness.
+
+Full suite: 2229 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures as every prior wave, unchanged.
+
+**Honest completeness note on BETA-15 specifically**: this proves the
+happy-path chain works end-to-end from an installed package. It does not
+cover every failure mode BETA-15's parent tasks (BETA-07/12) already unit-test
+separately (corrupt DB, incompatible schema, unknown-settlement-fails-safely)
+-- those remain covered at their own layer, not re-proven here, which is the
+right layering rather than a gap.
+
+---
+
+## Wave 11 — GOV-01 re-verified (still blocked), EVO-05: one event representation
+
+**GOV-01**: re-checked `sprint_active.md` fresh -- `CONVERGENCE-BASE-v1` is
+still recorded absent (`M-5a: no bundle`, `commit_sha`/`tag_object_sha`/
+`tree_digest` unresolved). This is explicitly a release-owner action per
+the active board's own rules ("coding lanes... never simulate commits, tags,
+remote resolution, or clean-subject identity") -- genuinely not something I
+can or should perform myself. Confirmed, not newly discovered.
+
+**BETA-13**: independently re-ran `test/runtime/test_plugin_full_lifecycle.py`
+myself (5/5 passing) rather than trust Dev B's claim secondhand.
+
+**EVO-05 (converge event representations)** -- distinct from Dev B's
+session-decomposition work, which they also labelled "EVO-05/06" but which
+matches this plan's EVO-06, not EVO-05. Investigated: `domain/ledger/events.py::EventEnvelope`
+is the one hand-written domain type every reducer/store/session/kernel path
+actually uses. `domain/wire/types_gen.py` (auto-generated from
+`schemas/mhf/event_envelope*.schema.json`) also defines an
+`EventEnvelope`/`EventEnvelopeV2` pair -- confirmed via repo-wide grep that
+*nothing* imports either one anywhere. The JSON schema files themselves are
+load-bearing (referenced by evidence bundles and cross-language readers) and
+must stay; deleting the generated Python twins isn't safe either (codegen
+would just recreate them from the still-necessary schemas). So the concrete,
+safe action was a guard against future drift rather than a deletion:
+
+- Documented the invariant directly on `EventEnvelope`'s docstring in
+  `events.py`.
+- Added `test/contracts/test_evo05_one_event_representation.py`: AST-scans
+  every `.py` file under `vanguard/`, `test/`, `tools/`, `lab/`, `benchmarks/`
+  for any import of the generated twins and fails if one appears. Verified
+  the guard actually fires (planted a real offending import, watched it
+  fail with the exact file/line, removed the plant) and that it isn't
+  vacuous (a second test asserts the generated twins still exist in
+  `types_gen.py`, so if codegen ever drops them this guard doesn't silently
+  stop meaning anything).
+
+Full suite: 2230 passed, 8 skipped, 0 failed (mine). One new failure not
+mine: `test/test_repo_paths.py::ForeignCwdGovernanceTests` -- caused by
+`benchmarks/agentic_harness_matrix_benchmark.py`, a file I did not create,
+violating the boundary linter (benchmarks may only import `runtime.root` +
+ports). Not my file, not touched. Confirmed stable across two full runs.

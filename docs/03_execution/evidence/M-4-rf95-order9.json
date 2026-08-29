@@ -151,7 +151,7 @@
       "model_routes": [
         {
           "fingerprint_unavailable_reason": "provider_did_not_report",
-          "model": "deepseek/deepseek-chat",
+          "model": "deepseek/deepseek-v4-flash-0731",
           "model_fingerprint": null,
           "provider": "openrouter",
           "tier": 1
@@ -243,7 +243,7 @@
         "model_routes_used": [
           {
             "fingerprint_unavailable_reason": "provider_did_not_report",
-            "model": "deepseek/deepseek-chat",
+            "model": "deepseek/deepseek-v4-flash-0731",
             "model_fingerprint": null,
             "provider": "openrouter",
             "tier": 1
@@ -337,7 +337,7 @@
     "modelRoutes": [
       {
         "fingerprint_unavailable_reason": "provider_did_not_report",
-        "model": "deepseek/deepseek-chat",
+        "model": "deepseek/deepseek-v4-flash-0731",
         "model_fingerprint": null,
         "provider": "openrouter",
         "tier": 1

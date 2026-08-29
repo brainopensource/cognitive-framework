@@ -24,9 +24,9 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.variant == "leaked-secret":
-        payload = {"kind": "ProposalProduced", "model": "openai/gpt-4o-mini", "raw_auth": f"Bearer {SECRET}"}
+        payload = {"kind": "ProposalProduced", "model": "deepseek/deepseek-v4-flash-0731", "raw_auth": f"Bearer {SECRET}"}
     else:
-        payload = {"kind": "ProposalProduced", "model": "openai/gpt-4o-mini", "api_key_ref": "OPENROUTER_API_KEY"}
+        payload = {"kind": "ProposalProduced", "model": "deepseek/deepseek-v4-flash-0731", "api_key_ref": "OPENROUTER_API_KEY"}
 
     envelope = EventEnvelope(
         schema_version="vg.4",

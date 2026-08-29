@@ -64,11 +64,6 @@
     "z-ai/glm-5.2": {"prompt": 350000, "completion": 1400000, "cached": 35000},
     "openai/gpt-5.6-luna": {"prompt": 1000000, "completion": 4000000, "cached": 250000},
     "deepseek/deepseek-v4-pro": {"prompt": 450000, "completion": 1800000, "cached": 45000},
-    "minimax/minimax-m3": {"prompt": 200000, "completion": 800000, "cached": 20000},
-    "openai/gpt-4o-mini": {"prompt": 150000, "completion": 600000, "cached": 75000},
-    "gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
-    "openai/gpt-4o": {"prompt": 2500000, "completion": 10000000, "cached": 1250000},
-    "deepseek-reasoner": {"prompt": 550000, "completion": 2190000, "cached": 140000},
-    "deepseek-coder": {"prompt": 140000, "completion": 280000, "cached": 14000}
+    "minimax/minimax-m3": {"prompt": 200000, "completion": 800000, "cached": 20000}
   }
 }

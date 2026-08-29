@@ -1,1 +1,1 @@
-{"model":"openai/gpt-4o-mini","promptTokens":1500,"completionTokens":750,"cachedTokens":250,"expectedUsdMicros":656,"expectedCostUsd":0.000656}
+{"model":"deepseek/deepseek-v4-flash-0731","promptTokens":1500,"completionTokens":750,"cachedTokens":250,"expectedUsdMicros":656,"expectedCostUsd":0.000656}

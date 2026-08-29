@@ -518,12 +518,11 @@ def main() -> None:
     print("VANGUARD AGENTIC HARNESS & MULTI-MODEL BENCHMARK MATRIX")
     print("=" * 100)
 
-    # Models selected for live OpenRouter API comparison (2 Free, 2 Paid)
+    # Allowed models: Free tier models + deepseek/deepseek-v4-flash-0731 (only authorized paid model)
     eval_models = [
         "nvidia/nemotron-3-super-120b-a12b:free",
         "nvidia/nemotron-3.5-lightning:free",
-        "openai/gpt-4o-mini",
-        "deepseek/deepseek-chat",
+        "deepseek/deepseek-v4-flash-0731",
     ]
 
     print("\n--- 1. EVALUATING AGENTIC CODING HARNESSES (SWE-Bench Verified Pro Challenges) ---")

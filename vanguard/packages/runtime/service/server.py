@@ -227,13 +227,16 @@ def main() -> None:
     import time
     from ...adapters.stores.event_store import SqliteEventStore
     from ..state_contract import StateDirectoryUnwritableError, ensure_state_directory
+    from ..workspace import get_workspace_path
     from .inbox import ServiceInboxStore
+
+    default_sock = str(get_workspace_path("tmp") / "vanguard-runtime.sock") if os.environ.get("AETHER_WORKSPACE_ROOT") else "/tmp/vanguard-runtime.sock"
 
     parser = argparse.ArgumentParser(description="AETHER Runtime UDS Daemon")
     parser.add_argument(
         "--socket",
-        default="/tmp/vanguard-runtime.sock",
-        help="Socket path (default: /tmp/vanguard-runtime.sock)",
+        default=default_sock,
+        help=f"Socket path (default: {default_sock})",
     )
     parser.add_argument("--db", default=None, help="Database path for persistent SQLite WAL store")
     parser.add_argument("--workspace", default=".", help="Workspace root directory")

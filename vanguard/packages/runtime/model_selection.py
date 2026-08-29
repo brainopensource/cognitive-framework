@@ -68,6 +68,7 @@ def select_model(
     port: str = "mock",
     *,
     model_name: str | None = None,
+    models: Sequence[str] | None = None,
     tape: Sequence[Any] = (),
     timeout_seconds: float | None = None,
     probe: Callable[[str], bool] | None = None,
@@ -168,7 +169,7 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
-        if paid_allowed:
+        if paid_allowed or models:
             if not model_name:
                 allowed = list(free_models() if free_models is not None else _free_band())
                 name = allowed[0] if allowed else _get_default_paid_model()
@@ -177,7 +178,7 @@ def select_model(
             return SelectedModel(
                 port=choice,
                 model=OpenRouterModel(
-                    model=name, stream=False, reasoning_effort="none"),
+                    model=name, models=models, stream=False, reasoning_effort="none"),
                 label=f"{choice}:{name}",
             )
 
@@ -193,7 +194,7 @@ def select_model(
         return SelectedModel(
             port=choice,
             model=OpenRouterModel(
-                model=name, stream=False, reasoning_effort="none"),
+                model=name, models=models, stream=False, reasoning_effort="none"),
             label=f"{choice}:{name}",
         )
 

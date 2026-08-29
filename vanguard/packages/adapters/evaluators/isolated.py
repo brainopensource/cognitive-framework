@@ -17,6 +17,7 @@ import sys
 from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping, Sequence
 
+from ...domain.workspace import controlled_environment
 from ...ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ...ports.event_store import Result
 
@@ -96,6 +97,7 @@ class IsolatedEvaluator:
             completed = self._runner(
                 self._command,
                 cwd=self._workspace,
+                env=controlled_environment(os.environ),
                 capture_output=True,
                 timeout=self._timeout_seconds,
                 check=False,

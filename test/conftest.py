@@ -23,9 +23,19 @@ _TRACKED_LAM_DB = _ROOT / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
 
 
 def pytest_configure(config) -> None:
+    ws_root = os.environ.get("AETHER_WORKSPACE_ROOT", "/home/rocha/Coding/Aether-D-System-Workspace")
+    os.environ["AETHER_WORKSPACE_ROOT"] = ws_root
+    tmp_dir = Path(ws_root) / "tmp"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("TMPDIR", str(tmp_dir))
+    os.environ.setdefault("TMP", str(tmp_dir))
+    os.environ.setdefault("TEMP", str(tmp_dir))
+    os.environ.setdefault("XDG_CACHE_HOME", str(Path(ws_root) / "cache"))
+    os.environ.setdefault("XDG_STATE_HOME", str(Path(ws_root) / "state"))
+
     if os.environ.get("LAM_DB_PATH"):
         return
-    directory = tempfile.mkdtemp(prefix="lam-db-")
+    directory = tempfile.mkdtemp(prefix="lam-db-", dir=tmp_dir)
     scratch = Path(directory) / "lam.sqlite"
     if _TRACKED_LAM_DB.is_file():
         shutil.copy2(_TRACKED_LAM_DB, scratch)

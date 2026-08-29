@@ -637,6 +637,7 @@ class OpenRouterModel:
         api_key_ref: str = DEFAULT_KEY_REF,
         endpoint: str = DEFAULT_ENDPOINT,
         model: str = DEFAULT_MODEL,
+        models: Sequence[str] | None = None,
         cassette: Cassette | None = None,
         mode: str = "live",
         transport: Transport | None = None,
@@ -661,6 +662,7 @@ class OpenRouterModel:
         # adapter still represents unknown routes so accounting can report
         # `pricing_known=false` instead of inventing a price.
         self._model = model
+        self._models = list(models) if models is not None else None
         self._mode = mode
         self._provider = provider
         self._transport = transport
@@ -938,8 +940,9 @@ class OpenRouterModel:
                 kind="instrument_error",
                 message=f"secret reference {self.api_key_ref} is unset",
             )
+        target_model = self._models[0] if self._models else route.resolved_model
         body_obj: dict[str, Any] = {
-            "model": route.resolved_model,
+            "model": target_model,
             "messages": _messages(context),
             "temperature": sampling.get("temperature", 0.0),
             # Reasoning-capable routes can spend the first tokens on hidden
@@ -949,6 +952,8 @@ class OpenRouterModel:
             # narrow it through the sampling contract.
             "max_tokens": sampling.get("maxTokens", 4096),
         }
+        if self._models:
+            body_obj["models"] = list(self._models)
         if self._reasoning_effort is not None:
             body_obj["reasoning"] = {"effort": self._reasoning_effort}
         if self._stream:

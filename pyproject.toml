@@ -57,3 +57,4 @@ namespaces = true
 # nothing about this codebase.
 testpaths = ["test"]
 norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_modules"]
+addopts = "--basetemp=/home/rocha/Coding/Aether-D-System-Workspace/tmp/pytest"

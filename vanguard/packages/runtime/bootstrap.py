@@ -31,6 +31,7 @@ from ..adapters.stores.event_store import SqliteEventStore
 from .determinism import ClockPort, SystemClock
 from .profiles import EffectiveExecutionProfile, resolve_profile
 from .wiring import _bwrap_path
+from .workspace import get_workspace_path
 
 __all__ = ["RuntimeDependencies", "RuntimeBootstrap"]
 
@@ -100,7 +101,7 @@ class RuntimeBootstrap:
                 repo, environment_id=f"workspace-{profile.requested.id}:{repo}")
         else:
             bwrap = _bwrap_path()
-            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
+            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-", dir=get_workspace_path("sandboxes")))
             sealed_bundle = sealed_dir / "bundle"
             sealed_bundle.write_bytes(
                 b"sealed evaluator mount is intentionally unavailable to worker\n")

@@ -30,6 +30,8 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
+
 from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 from vanguard.packages.adapters.stores.blob_store import FileBlobStore
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
@@ -305,7 +307,7 @@ def main() -> int:
     if args.repo_dir:
         repo_path = Path(args.repo_dir).resolve()
     else:
-        temp_dir = tempfile.mkdtemp(prefix="vg-rf95-")
+        temp_dir = tempfile.mkdtemp(prefix="vg-rf95-", dir=get_workspace_path("benchmarks"))
         repo_path = Path(temp_dir)
 
     try:

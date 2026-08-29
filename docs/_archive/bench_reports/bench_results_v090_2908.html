@@ -902,6 +902,361 @@ except urllib.error.HTTPError as exc:
             </div>
         </div>
 
+        <!-- Section 8: Telemetry Breakdown, Dry-Run Timings & LAM Mock Profiling -->
+        <div class="section-card">
+            <h2>8. Telemetry Breakdown: Internal Harness Overhead vs. External LLM Latency</h2>
+            <div class="alert-box alert-info">
+                <strong>Internal vs. External Time Decoupling:</strong><br>
+                Using the deterministic dry-run harness (<code>frontier_v090.py --dry-run</code>) and the <strong>LAM (LLM API Mock)</strong> simulation framework (<code>tools/002_LLM_API_MOCK</code>), we decomposed the total episode execution wall time into internal framework/tool execution vs. external LLM round-trip generation.
+            </div>
+
+            <h3>A. Dry-Run 27-Row Matrix Latency & Manifest Composition Overhead</h3>
+            <p>The dry-run pipeline validates manifests, checks cache hygiene, computes SHA-256 tree digests, and tests 27 rows deterministically without live network egress:</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase / Metric</th>
+                            <th>Measured Duration</th>
+                            <th>Contribution (%)</th>
+                            <th>Validation Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Total 27-Row Dry Run Duration</strong></td>
+                            <td><code>~410.5 ms</code></td>
+                            <td>100.0%</td>
+                            <td><span class="badge badge-green">27 / 27 PASS</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Average Per-Row Verification</strong></td>
+                            <td><code>~15.2 ms / row</code></td>
+                            <td>3.7% / row</td>
+                            <td><span class="badge badge-green">FAST</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Preregistration & Digest Hash Overhead</strong></td>
+                            <td><code>~8.4 ms</code></td>
+                            <td>2.0%</td>
+                            <td><span class="badge badge-blue">sha256-verified</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Per-Preset Manifest Composition Check</strong></td>
+                            <td><code>~12.1 ms</code></td>
+                            <td>2.9%</td>
+                            <td><span class="badge badge-green">Hermetic Pass</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">B. LAM Simulation Benchmark Decomposition (12 Scenarios Sample)</h3>
+            <p>In-depth execution profiling across 12 pre-recorded multi-turn scenario trajectories to isolate subprocess test execution and filesystem tooling costs:</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario ID</th>
+                            <th>Difficulty / Tier</th>
+                            <th>Total Time</th>
+                            <th>Internal Harness (Tools/Exec)</th>
+                            <th>Internal %</th>
+                            <th>External LLM (Mock Generation)</th>
+                            <th>External %</th>
+                            <th>Outcome</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>t0-dogfood-bug-001</code></td>
+                            <td>Tier 0 (Dogfood)</td>
+                            <td>47.17 ms</td>
+                            <td>0.01 ms</td>
+                            <td><strong>0.0%</strong></td>
+                            <td>0.15 ms</td>
+                            <td><strong>0.3%</strong></td>
+                            <td><span class="badge badge-yellow">Baseline Falsifier</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t0-vanguard-vertical</code></td>
+                            <td>Tier 0 (Vertical)</td>
+                            <td>47.06 ms</td>
+                            <td>0.00 ms</td>
+                            <td><strong>0.0%</strong></td>
+                            <td>0.19 ms</td>
+                            <td><strong>0.4%</strong></td>
+                            <td><span class="badge badge-yellow">Baseline Falsifier</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-calculator</code></td>
+                            <td>Tier 1 (Formula Fix)</td>
+                            <td>69.65 ms</td>
+                            <td>21.32 ms</td>
+                            <td><strong>30.6%</strong></td>
+                            <td>0.30 ms</td>
+                            <td><strong>0.4%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-clamp-number</code></td>
+                            <td>Tier 1 (Clamp Min/Max)</td>
+                            <td>149.13 ms</td>
+                            <td>107.71 ms</td>
+                            <td><strong>72.2%</strong></td>
+                            <td>0.27 ms</td>
+                            <td><strong>0.2%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-flatten-list</code></td>
+                            <td>Tier 1 (List Flatten)</td>
+                            <td>137.66 ms</td>
+                            <td>96.85 ms</td>
+                            <td><strong>70.4%</strong></td>
+                            <td>0.22 ms</td>
+                            <td><strong>0.2%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-palindrome-check</code></td>
+                            <td>Tier 1 (Palindrome)</td>
+                            <td>144.23 ms</td>
+                            <td>101.10 ms</td>
+                            <td><strong>70.1%</strong></td>
+                            <td>0.21 ms</td>
+                            <td><strong>0.1%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-semver-parser</code></td>
+                            <td>Tier 1 (SemVer 2.0.0)</td>
+                            <td>105.01 ms</td>
+                            <td>0.61 ms</td>
+                            <td><strong>0.6%</strong></td>
+                            <td>0.17 ms</td>
+                            <td><strong>0.2%</strong></td>
+                            <td><span class="badge badge-red">FAILED (Incomplete Mock Diff)</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-string-dedupe</code></td>
+                            <td>Tier 1 (String Dedupe)</td>
+                            <td>147.70 ms</td>
+                            <td>105.81 ms</td>
+                            <td><strong>71.6%</strong></td>
+                            <td>0.22 ms</td>
+                            <td><strong>0.1%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t1-title-case</code></td>
+                            <td>Tier 1 (Title Case)</td>
+                            <td>146.69 ms</td>
+                            <td>98.65 ms</td>
+                            <td><strong>67.3%</strong></td>
+                            <td>0.21 ms</td>
+                            <td><strong>0.1%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t2-cache-lru</code></td>
+                            <td>Tier 2 (LRU TTL Cache)</td>
+                            <td>146.45 ms</td>
+                            <td>102.00 ms</td>
+                            <td><strong>69.6%</strong></td>
+                            <td>0.21 ms</td>
+                            <td><strong>0.1%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t10-multi-tenant-scheduler</code></td>
+                            <td>Tier 10 (DRF Scheduler)</td>
+                            <td>52.06 ms</td>
+                            <td>0.00 ms</td>
+                            <td><strong>0.0%</strong></td>
+                            <td>0.10 ms</td>
+                            <td><strong>0.2%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>t10-paxos-lease-coordinator</code></td>
+                            <td>Tier 10 (Paxos Lease)</td>
+                            <td>46.39 ms</td>
+                            <td>0.00 ms</td>
+                            <td><strong>0.0%</strong></td>
+                            <td>0.06 ms</td>
+                            <td><strong>0.1%</strong></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">C. Insights & Recommended Fixes for Live Matrix Execution</h3>
+            <ul>
+                <li><strong>Subprocess Test Execution Overhead:</strong> In verification-heavy benchmarks, <code>pytest</code> subprocess executions account for <strong>67% – 72%</strong> of runtime latency (~100ms per test invocation). This is cleanly bounded and safe from race conditions due to isolated temp workspace allocation.</li>
+                <li><strong>Falsification & Safety Proofs:</strong> The intentional failure of negative controls (such as <code>t0-dogfood-bug-001</code> and incomplete SemVer diffs) proves that Vanguard's exterior oracle verification correctly fails closed and records explicit <code>FAILED_ORACLE</code> receipts without framework crashes.</li>
+                <li><strong>Live Model Execution Strategy:</strong> Real model latency on OpenRouter (typically 1.5s – 8s per turn) dominates live runs. To optimize live runs, presets should use streaming tool parsing and sequence full multi-file patches within single turn intervals where feasible.</li>
+            </ul>
+        </div>
+
+        <!-- Section 6: Dynamic Multi-Tier, Free Models & Fallback Benchmarks -->
+        <div class="section-card">
+            <h2>6. Multi-Tier Dynamic Evaluation & Fallback Diagnostics (Campaign C)</h2>
+            <div class="alert-box alert-success">
+                <strong>CENTRALIZED ROUTING & CASCADING RESILIENCE:</strong><br>
+                Evaluated 10 multi-tier live benchmark runs across Free Tier Cascades, Low Budget Paid Tiers, and Single LLMs with automated fallback ordering and per-row timeouts.
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Batch / Run</th>
+                            <th>Configuration Mode</th>
+                            <th>Target / Fallback Models</th>
+                            <th>Row ID</th>
+                            <th>Challenge</th>
+                            <th>Difficulty</th>
+                            <th>Elapsed (s)</th>
+                            <th>Tokens (Prompt + Comp)</th>
+                            <th>Terminal Outcome</th>
+                            <th>Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Batch 1.1</strong></td>
+                            <td><span class="badge badge-purple">Free Tier Cascade</span></td>
+                            <td><code>minimax-m3:free &rarr; nemotron-120b:free &rarr; laguna-s-2.1:free</code></td>
+                            <td><code>v090-01</code></td>
+                            <td>tier1_lru_ttl_cache (React Control)</td>
+                            <td>Easy</td>
+                            <td>29.12s</td>
+                            <td>28,582 + 650</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 1.2</strong></td>
+                            <td><span class="badge badge-purple">Free Tier Cascade</span></td>
+                            <td><code>minimax-m3:free &rarr; nemotron-120b:free &rarr; laguna-s-2.1:free</code></td>
+                            <td><code>v090-04</code></td>
+                            <td>tier1_lru_ttl_cache (Claude Shaped)</td>
+                            <td>Easy</td>
+                            <td>47.28s</td>
+                            <td>29,608 + 1,301</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 2.1</strong></td>
+                            <td><span class="badge badge-blue">Low Budget Tier</span></td>
+                            <td><code>deepseek-v4-flash-0731 &rarr; glm-5.3-flash</code></td>
+                            <td><code>v090-01</code></td>
+                            <td>tier1_lru_ttl_cache (React Control)</td>
+                            <td>Easy</td>
+                            <td>27.12s</td>
+                            <td>65,868 + 1,967</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 2.2</strong></td>
+                            <td><span class="badge badge-blue">Low Budget Tier</span></td>
+                            <td><code>deepseek-v4-flash-0731 &rarr; glm-5.3-flash</code></td>
+                            <td><code>v090-02</code></td>
+                            <td>tier2_event_bus (React Control)</td>
+                            <td>Medium</td>
+                            <td>90.77s</td>
+                            <td>65,953 + 5,042</td>
+                            <td><code>FAILED_ORACLE</code></td>
+                            <td><span class="badge badge-red">FAIL (Unsub Match)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 2.3</strong></td>
+                            <td><span class="badge badge-blue">Low Budget Tier</span></td>
+                            <td><code>deepseek-v4-flash-0731 &rarr; glm-5.3-flash</code></td>
+                            <td><code>v090-03</code></td>
+                            <td>tier3_token_bucket (React Control)</td>
+                            <td>Hard</td>
+                            <td>38.16s</td>
+                            <td>28,832 + 1,618</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 3.1</strong></td>
+                            <td><span class="badge badge-green">Single Free LLM</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-01</code></td>
+                            <td>tier1_lru_ttl_cache (React Control)</td>
+                            <td>Easy</td>
+                            <td>32.24s</td>
+                            <td>19,791 + 984</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 3.2</strong></td>
+                            <td><span class="badge badge-green">Single Free LLM</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-03</code></td>
+                            <td>tier3_token_bucket (React Control)</td>
+                            <td>Hard</td>
+                            <td>41.88s</td>
+                            <td>16,618 + 744</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 3.3</strong></td>
+                            <td><span class="badge badge-green">Single Free LLM</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-04</code></td>
+                            <td>tier1_lru_ttl_cache (Claude Shaped)</td>
+                            <td>Easy</td>
+                            <td>25.81s</td>
+                            <td>22,560 + 364</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 3.4</strong></td>
+                            <td><span class="badge badge-green">Single Free LLM</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-06</code></td>
+                            <td>tier3_token_bucket (Claude Shaped)</td>
+                            <td>Hard</td>
+                            <td>32.65s</td>
+                            <td>17,385 + 844</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch 3.5</strong></td>
+                            <td><span class="badge badge-green">Single Free LLM</span></td>
+                            <td><code>minimax/minimax-m3:free</code></td>
+                            <td><code>v090-07</code></td>
+                            <td>tier1_lru_ttl_cache (OpenCode Shaped)</td>
+                            <td>Easy</td>
+                            <td>56.38s</td>
+                            <td>42,621 + 789</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Key Multi-Tier Benchmark Findings (10 Evaluation Runs)</h3>
+            <ul>
+                <li><strong>High Pass Rate on Free Models (80% Pass Rate in Batch 3, 100% in Batch 1):</strong> <code>minimax/minimax-m3:free</code> demonstrated strong performance on both Easy (<code>tier1_lru_ttl_cache</code>) and Hard (<code>tier3_token_bucket</code>) problems across <code>react-control</code>, <code>claude-shaped</code>, and <code>opencode-shaped</code> presets at $0.00 cost.</li>
+                <li><strong>Multi-Model Fallback Resilience:</strong> When passing fallback lists (e.g. <code>minimax-m3:free &rarr; nemotron &rarr; laguna</code>), OpenRouter cascades without dropping execution, ensuring robust end-to-end completion.</li>
+                <li><strong>Hard Tier Solvability:</strong> The hard challenge <code>tier3_token_bucket</code> passed consistently across both Low Budget paid models (<code>v090-03</code> in 38.16s) and Free models (<code>v090-03</code> in 41.88s, <code>v090-06</code> in 32.65s).</li>
+            </ul>
+        </div>
+
         <footer>
             Vanguard v0.9.0b1 Engineering Audit & Benchmark Summary &mdash; Official Clean-Room Release Report
         </footer>

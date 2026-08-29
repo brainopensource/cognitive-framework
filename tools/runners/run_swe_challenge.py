@@ -28,6 +28,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from benchmarks.swe_bench.challenges import CHALLENGES
 from vanguard.packages.adapters.models.env_loader import load_api_key
+from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.root import Runtime
 from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
@@ -541,7 +542,7 @@ def run_challenge(
 ) -> dict[str, Any]:
     """Run a single SWE challenge."""
     challenge = CHALLENGES[challenge_id]
-    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_swe_{challenge_id}_"))
+    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_swe_{challenge_id}_", dir=get_workspace_path("benchmarks")))
     print(f"Setting up {challenge_id} in {scratch_dir}...")
     
     try:
@@ -618,7 +619,7 @@ def run_verified_challenge(
     if not verified_repo.exists():
         raise ValueError(f"Verified repo {verified_repo} does not exist.")
         
-    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_verified_{instance_id}_"))
+    scratch_dir = Path(tempfile.mkdtemp(prefix=f"vanguard_verified_{instance_id}_", dir=get_workspace_path("benchmarks")))
     print(f"Setting up {instance_id} in {scratch_dir}...")
     
     try:

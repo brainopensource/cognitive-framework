@@ -20,6 +20,11 @@ from pathlib import Path
 from typing import Callable, Mapping
 
 from benchmarks.swe_bench.challenges import CHALLENGES, SWEProChallenge
+from vanguard.packages.runtime.root import (
+    controlled_environment,
+    get_workspace_path,
+    validate_workspace_path,
+)
 
 SCHEMA = "aether.frontier-benchmark/2"
 SUBSET = (
@@ -117,7 +122,8 @@ def _materialize_public(challenge: SWEProChallenge, root: Path) -> None:
 def _evaluate(challenge: SWEProChallenge, workspace: Path, timeout: float) -> dict[str, object]:
     """Copy the submitted workspace and execute a sealed oracle externally."""
     started = time.monotonic()
-    with tempfile.TemporaryDirectory(prefix="v090-evaluator-") as temp:
+    eval_dir = get_workspace_path("evaluators")
+    with tempfile.TemporaryDirectory(prefix="v090-evaluator-", dir=eval_dir) as temp:
         evaluator_root = Path(temp)
         submitted = evaluator_root / "submitted"
         sealed = evaluator_root / "sealed"
@@ -130,7 +136,7 @@ def _evaluate(challenge: SWEProChallenge, workspace: Path, timeout: float) -> di
             completed = subprocess.run(
                 [sys.executable, "-I", "-c",
                  "import runpy,sys;p=sys.argv[2];sys.path.insert(0,sys.argv[1]);sys.argv=[p];runpy.run_path(p,run_name='__main__')",
-                 str(submitted), str(oracle)], cwd=submitted, env=dict(os.environ),
+                 str(submitted), str(oracle)], cwd=submitted, env=controlled_environment(os.environ),
                 capture_output=True, text=True, timeout=timeout, check=False,
             )
         except subprocess.TimeoutExpired:
@@ -152,14 +158,16 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
             non_empirical: bool = True,
             workspace_root: Path | None = None) -> dict[str, object]:
     challenge = CHALLENGES[challenge_id]
+    bench_dir = get_workspace_path("benchmarks")
     with ExitStack() as stack:
         if workspace_root is None:
             workspace = Path(stack.enter_context(
-                tempfile.TemporaryDirectory(prefix="v090-agent-")))
+                tempfile.TemporaryDirectory(prefix="v090-agent-", dir=bench_dir)))
         else:
-            workspace_root.mkdir(parents=True, exist_ok=True)
+            resolved_root = validate_workspace_path(workspace_root)
+            resolved_root.mkdir(parents=True, exist_ok=True)
             workspace = Path(tempfile.mkdtemp(
-                prefix=f"{challenge_id}-{preset}-", dir=workspace_root))
+                prefix=f"{challenge_id}-{preset}-", dir=resolved_root))
         _materialize_public(challenge, workspace)
         public_files = snapshot(workspace)
         oracle_digest = digest_bytes(challenge.oracle_code.encode())

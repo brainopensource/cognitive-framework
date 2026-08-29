@@ -33,6 +33,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from vanguard.packages.domain.workspace import get_workspace_path
+
 
 def _time_ms(fn: Callable[[], Any], repeats: int) -> dict[str, Any]:
     samples: list[float] = []
@@ -85,7 +87,7 @@ def _run_one_turn(repo: Path, store: Any, effect: bool) -> None:
 
 def bench_no_op_turn(repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         repo = Path(d)
         (repo / "sample.py").write_text("def f():\n    return 1\n")
         return _time_ms(lambda: _run_one_turn(repo, InMemoryEventStore(), effect=False), repeats)
@@ -93,7 +95,7 @@ def bench_no_op_turn(repeats: int) -> dict[str, Any]:
 
 def bench_durable_turn(repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.event_store import SqliteEventStore
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         repo = Path(d)
         (repo / "sample.py").write_text("def f():\n    return 1\n")
         def _once() -> None:
@@ -104,7 +106,7 @@ def bench_durable_turn(repeats: int) -> dict[str, Any]:
 
 def bench_single_effect_turn_durable(repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.event_store import SqliteEventStore
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         repo = Path(d)
         (repo / "sample.py").write_text("def f():\n    return 1\n")
         def _once() -> None:
@@ -132,7 +134,7 @@ def _envelope(seq: int) -> Any:
 
 def bench_event_append(n_events: int, repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.event_store import SqliteEventStore
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         def _once() -> None:
             store = SqliteEventStore(Path(d) / f"append-{time.perf_counter_ns()}.sqlite3")
             store.append([_envelope(i) for i in range(n_events)])
@@ -176,7 +178,7 @@ def bench_checkpoint_reconstruction(n_events: int, repeats: int) -> dict[str, An
 def bench_artifact_capture(n_artifacts: int, artifact_bytes: int, repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.blob_store import FileBlobStore
     payload = b"x" * artifact_bytes
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         def _once() -> None:
             store = FileBlobStore(Path(d) / f"blobs-{time.perf_counter_ns()}")
             for i in range(n_artifacts):
@@ -195,7 +197,7 @@ def bench_single_agent_execution(repeats: int) -> dict[str, Any]:
     from vanguard.packages.adapters.models.fake import FakeModel
     from vanguard.packages.runtime.app_service import ApplicationService
 
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         def _once() -> None:
             ws = Path(d) / f"ws-{time.perf_counter_ns()}"
             ws.mkdir()
@@ -275,7 +277,7 @@ def bench_storage_amplification(n_events: int) -> dict[str, Any]:
     from vanguard.packages.adapters.stores.event_store import SqliteEventStore
     events = [_envelope(i) for i in range(n_events)]
     raw_json_bytes = sum(len(json.dumps(e.wire_dict(), separators=(",", ":")).encode("utf-8")) for e in events)
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         path = Path(d) / "amp.sqlite3"
         store = SqliteEventStore(path)
         store.append(events)
@@ -322,7 +324,7 @@ def bench_multi_agent_token_overhead(repeats: int) -> dict[str, Any]:
              "usage": {"prompt_tokens": 400, "completion_tokens": 60}},
             {"kind": "finish", "note": "done", "usage": {"prompt_tokens": 420, "completion_tokens": 20}},
         ]
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
             repo = Path(d)
             (repo / "sample.py").write_text("def f():\n    return 1\n")
             run_id = f"run-tok-worker-{time.perf_counter_ns()}"
@@ -343,7 +345,7 @@ def bench_multi_agent_token_overhead(repeats: int) -> dict[str, Any]:
             {"kind": "finish", "note": "delegated to a child; planning only",
              "usage": {"prompt_tokens": 550, "completion_tokens": 90}},
         ]
-        with tempfile.TemporaryDirectory() as d:
+        with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
             repo = Path(d)
             (repo / "sample.py").write_text("def f():\n    return 1\n")
             run_id = f"run-tok-planner-{time.perf_counter_ns()}"
@@ -443,7 +445,7 @@ app.resume(run_id={_json.dumps(run_id)}, profile_id="local", model=model,
 
     recovery_samples: list[float] = []
     uninterrupted_samples: list[float] = []
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         workspace = Path(d)
         (workspace / "pyproject.toml").write_text('[project]\nname="b"\nversion="0.1.0"\n')
         (workspace / "sample.py").write_text("def f():\n    return 1\n")

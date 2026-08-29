@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
 from ...domain.canonicalisation.digest import digest_bytes, digest_of
+from ...domain.workspace import controlled_environment, get_workspace_path
 from ...ports.environment import (
     AffectedResource,
     EffectPreview,
@@ -98,7 +99,8 @@ class GitEnvironment:
             raise GitUnavailableError("git executable not found on PATH")
 
         if worktree_branch:
-            wt_path = Path(worktree_dir or tempfile.mkdtemp(prefix="vg-wt-")).resolve()
+            sandboxes_dir = get_workspace_path("sandboxes") if os.environ.get("AETHER_WORKSPACE_ROOT") else None
+            wt_path = Path(worktree_dir or tempfile.mkdtemp(prefix="vg-wt-", dir=sandboxes_dir)).resolve()
             # Create isolated worktree
             cmd = ["git", "worktree", "add", "-b", worktree_branch, str(wt_path)]
             proc = subprocess.run(cmd, cwd=self._repo_path, capture_output=True, text=True, check=False)
@@ -871,6 +873,7 @@ class GitEnvironment:
                 proc = subprocess.run(
                     list(cmd),
                     cwd=work_cwd,
+                    env=controlled_environment(os.environ),
                     capture_output=True,
                     text=True,
                     check=False,

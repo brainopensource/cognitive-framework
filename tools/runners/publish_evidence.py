@@ -32,6 +32,10 @@ import tempfile
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from vanguard.packages.domain.workspace import get_workspace_path
 EVIDENCE_DIR = _ROOT / "docs" / "03_execution" / "evidence"
 
 
@@ -65,7 +69,7 @@ def publish(args: argparse.Namespace) -> int:
         # any acceptance bound to its digest. Successors get their own label.
         raise SystemExit(f"{destination} already exists; choose a new --label")
 
-    with tempfile.TemporaryDirectory(prefix="aether-evidence-") as staging:
+    with tempfile.TemporaryDirectory(prefix="aether-evidence-", dir=get_workspace_path("tmp")) as staging:
         stage = Path(staging)
         subject = stage / "subject"
         evidence_out = stage / "evidence"

@@ -20,6 +20,12 @@ from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
 from ..domain.canonicalisation.digest import digest_of
+from .workspace import (
+    controlled_environment,
+    get_workspace_path,
+    get_workspace_root,
+    validate_workspace_path,
+)
 from .compose import (
     Harness,
     Receipt,
@@ -139,7 +145,7 @@ class Runtime(_ComposedRuntime):
             # without bubblewrap is a failure of this rootless run, not of
             # the harness, so the probe lives here and not behind `compose`.
             bwrap = _bwrap_path()
-            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-"))
+            sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-", dir=get_workspace_path("sandboxes")))
             sealed_bundle = sealed_dir / "bundle"
             sealed_bundle.write_bytes(
                 b"sealed evaluator mount is intentionally unavailable to worker\n")
@@ -709,4 +715,8 @@ __all__ = [
     "_reservation_for",
     "_sandbox_effector",
     "_span_for",
+    "controlled_environment",
+    "get_workspace_path",
+    "get_workspace_root",
+    "validate_workspace_path",
 ]

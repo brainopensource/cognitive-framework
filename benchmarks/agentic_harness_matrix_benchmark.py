@@ -28,6 +28,8 @@ import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from vanguard.packages.runtime.root import controlled_environment, get_workspace_path
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -54,7 +56,7 @@ def run_single_harness_task(
     if not manifest_path.is_file():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
 
-    with tempfile.TemporaryDirectory() as d:
+    with tempfile.TemporaryDirectory(dir=get_workspace_path("benchmarks")) as d:
         repo = Path(d) / "workspace"
         repo.mkdir(parents=True, exist_ok=True)
 
@@ -67,11 +69,11 @@ def run_single_harness_task(
         oracle_path.write_text(oracle_code, encoding="utf-8")
 
         import subprocess
-        subprocess.run(["git", "init"], cwd=repo, capture_output=True, check=False)
-        subprocess.run(["git", "config", "user.name", "Bench"], cwd=repo, capture_output=True, check=False)
-        subprocess.run(["git", "config", "user.email", "bench@test.local"], cwd=repo, capture_output=True, check=False)
-        subprocess.run(["git", "add", "."], cwd=repo, capture_output=True, check=False)
-        subprocess.run(["git", "commit", "-m", "init"], cwd=repo, capture_output=True, check=False)
+        subprocess.run(["git", "init"], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
+        subprocess.run(["git", "config", "user.name", "Bench"], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
+        subprocess.run(["git", "config", "user.email", "bench@test.local"], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
+        subprocess.run(["git", "add", "."], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
 
         run_id = f"bench-{harness_name}-{task_name}-{time.perf_counter_ns()}"
         task = TaskContext(
@@ -112,6 +114,7 @@ def run_single_harness_task(
             proc = subprocess.run(
                 [sys.executable, "-m", "unittest", "test_oracle.py"],
                 cwd=repo,
+                env=controlled_environment(os.environ),
                 capture_output=True,
                 text=True,
                 timeout=15,

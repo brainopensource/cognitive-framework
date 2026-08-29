@@ -13,6 +13,7 @@ from typing import Any
 from engine import LamEngine
 from pricing import sonnet_usd
 from verdict import evidence_label, pytest_passed
+from vanguard.packages.domain.workspace import get_workspace_path
 
 _HERE = Path(__file__).resolve().parent
 _ENGINE = LamEngine.from_directory(_HERE / "scenarios")
@@ -30,7 +31,7 @@ SYSTEM = (
 
 def simulate_scenario(scenario_id: str) -> dict[str, Any]:
     scenario = _ENGINE.scenario(f"lam/{scenario_id}")
-    workspace = Path(tempfile.mkdtemp(prefix=f"lam-{scenario_id}-"))
+    workspace = Path(tempfile.mkdtemp(prefix=f"lam-{scenario_id}-", dir=get_workspace_path("tmp")))
     for relative, text in scenario.workspace.items():
         path = workspace / relative
         path.parent.mkdir(parents=True, exist_ok=True)

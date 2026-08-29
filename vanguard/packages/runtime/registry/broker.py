@@ -17,6 +17,7 @@ from typing import Any, Mapping, Sequence
 
 from .sandbox import SandboxLimits, apply_rlimits, open_log_sink
 from ..ledger_emitter import LedgerEmitter
+from ..workspace import controlled_environment, get_workspace_path
 from ...adapters.sandbox.ceiling import ceiling_allows
 from vanguard.packages.domain.wire import jsonrpc
 from vanguard.packages.domain.wire.types_gen import EventKind
@@ -108,7 +109,14 @@ class PluginIsolationBroker:
             raise PermissionError("in_process requires an explicit policy grant")
         if plugin_id in self._cells and self._cells[plugin_id].state is not CellState.TERMINATED:
             raise IllegalCellTransition(f"{plugin_id} already bound")
-        workdir = tempfile.mkdtemp(prefix=f"mhf-{plugin_id.replace('.', '-')}-") if isolation != "in_process" else ""
+        workdir = (
+            tempfile.mkdtemp(
+                prefix=f"mhf-{plugin_id.replace('.', '-')}-",
+                dir=get_workspace_path("sandboxes"),
+            )
+            if isolation != "in_process"
+            else ""
+        )
         cell = PluginCell(
             plugin_id=plugin_id,
             isolation=isolation,
@@ -131,7 +139,7 @@ class PluginIsolationBroker:
             cell.state = CellState.RUNNING
             return
         log = open_log_sink(cell.stdout_log)
-        env = os.environ.copy()
+        env = controlled_environment(os.environ)
         pythonpath = str(_REPO_ROOT)
         existing = env.get("PYTHONPATH", "")
         env["PYTHONPATH"] = pythonpath if not existing else pythonpath + os.pathsep + existing

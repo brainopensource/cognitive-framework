@@ -28,6 +28,7 @@ from typing import Any, Mapping, Sequence
 LAM_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(LAM_DIR.parents[1]))
 from vanguard.packages.adapters.models.config import get_default_model
+from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
 DEFAULT_CHALLENGE_ROOT = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
 DEFAULT_MODEL = get_default_model()
 DEFAULT_MAX_CALLS = 60
@@ -369,7 +370,7 @@ def collect_challenge(
     passed = False
     stop_reason = "max_turns"
 
-    with tempfile.TemporaryDirectory(prefix="lam-task-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="lam-task-", dir=get_workspace_path("tmp")) as temp_dir:
         workspace = Path(temp_dir) / challenge.key
         if challenge.is_swe_fixture and challenge.public_root:
             shutil.copytree(challenge.public_root, workspace)

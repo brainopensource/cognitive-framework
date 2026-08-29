@@ -16,6 +16,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 LAM_DIR = Path(__file__).resolve().parent
+import sys
+sys.path.insert(0, str(LAM_DIR.parents[1]))
+from vanguard.packages.domain.workspace import get_workspace_path
 CHALLENGE_ROOT = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
 OUTPUT_ROOT = LAM_DIR / "runs" / "live_captures"
 
@@ -1258,7 +1261,7 @@ def generate_task_trace(task_key: str) -> dict[str, Any]:
     trajectory = []
     cassette_lines = []
 
-    with tempfile.TemporaryDirectory(prefix="lam-synth-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="lam-synth-", dir=get_workspace_path("tmp")) as temp_dir:
         workspace = Path(temp_dir) / task_key
         shutil.copytree(task_dir, workspace)
         before_snapshot = _snapshot(workspace)

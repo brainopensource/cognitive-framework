@@ -37,6 +37,11 @@ TOOLS = [{"name": "read", "verb": "fs.read", "schema": {"type": "object"}}]
 SAMPLING = {"temperature": 0.0, "maxTokens": 8}
 PROPOSAL = {"text": "hello from cassette", "toolCalls": []}
 SECRET = "sk-test-secret-do-not-leak"
+FREE_LIVE_MODELS = (
+    "openrouter/free",
+    "minimax/minimax-m3:free",
+    "z-ai/glm-5.2:free",
+)
 
 
 def _boom_transport(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
@@ -149,6 +154,26 @@ class OpenRouterModelContract(unittest.TestCase):
     def test_request_timeout_must_be_positive(self) -> None:
         with self.assertRaises(ValueError):
             OpenRouterModel(request_timeout=0)
+
+    def test_reasoning_mode_is_explicit_when_configured(self) -> None:
+        bodies = []
+
+        def transport(url, headers, body):
+            del url, headers
+            bodies.append(json.loads(body))
+            return 200, json.dumps({
+                "choices": [{"message": {"content": "ok"}}],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+            }).encode()
+
+        result = OpenRouterModel(
+            transport=transport,
+            environ={"OPENROUTER_API_KEY": SECRET},
+            stream=False,
+            reasoning_effort="none",
+        ).propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(bodies[0]["reasoning"], {"effort": "none"})
 
     def test_trust_spine_sources_do_not_import_openrouter(self) -> None:
         self.assertEqual(_trust_openrouter_imports(), [])
@@ -590,6 +615,44 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(result.error.kind, "instrument_error")
         self.assertIn("truncated", result.error.message.lower())
 
+    def test_terminal_sse_choice_may_close_without_done_sentinel(self) -> None:
+        payload = (
+            b'data: {"choices":[{"index":0,"delta":{"content":"ok"},'
+            b'"finish_reason":"stop"}],"usage":{"prompt_tokens":3,'
+            b'"completion_tokens":1,"total_tokens":4}}\n\n'
+        )
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=_status_transport(200, payload),
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "ok")
+        self.assertEqual(result.value["usage"]["total_tokens"], 4)
+
+    def test_malformed_stream_is_retried_once_and_recovers(self) -> None:
+        calls = []
+        valid = (
+            b'data: {"choices":[{"index":0,"delta":{"content":"ok"},'
+            b'"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n'
+        )
+
+        def malformed_then_valid(url, headers, body):
+            del url, headers, body
+            calls.append(1)
+            return 200, (b"data: {broken\n\n" if len(calls) == 1 else valid)
+
+        port = OpenRouterModel(
+            api_key_ref="OPENROUTER_API_KEY",
+            transport=malformed_then_valid,
+            environ={"OPENROUTER_API_KEY": SECRET},
+        )
+        result = port.propose(CONTEXT, TOOLS, SAMPLING)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.value["text"], "ok")
+        self.assertEqual(len(calls), 2)
+
     def test_malformed_fragmented_tool_arguments_fail_closed(self) -> None:
         sse_payload = (
             b"data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"function\":{\"name\":\"fs.read\",\"arguments\":\"{bad\"}}]}}]}\n\n"
@@ -678,6 +741,30 @@ class OpenRouterModelContract(unittest.TestCase):
             self.assertIn("usd_micros", result.value)
         if result.error is not None:
             self.assertNotIn(os.environ["OPENROUTER_API_KEY"], result.error.message)
+
+    @unittest.skipUnless(
+        os.environ.get("OPENROUTER_API_KEY"),
+        "live OpenRouter free-model matrix skipped: key unset",
+    )
+    def test_optional_live_free_model_matrix(self) -> None:
+        successes = 0
+        for model in FREE_LIVE_MODELS:
+            with self.subTest(model=model):
+                port = OpenRouterModel(model=model, request_timeout=60.0)
+                result = port.propose(CONTEXT, TOOLS, SAMPLING)
+                if not result.ok:
+                    # Free pools are capacity-routed and may return 429 or an
+                    # empty completion. That is a provider result, not grounds
+                    # to make hermetic CI flaky; malformed handling is covered
+                    # by deterministic tests above.
+                    self.assertEqual(result.error.kind, "instrument_error")
+                    self.assertNotIn(os.environ["OPENROUTER_API_KEY"], result.error.message)
+                    continue
+                successes += 1
+                self.assertIn("usage", result.value)
+                self.assertGreater(result.value["usage"]["total_tokens"], 0)
+                self.assertEqual(result.value["usage"]["usd_micros"], 0)
+        self.assertGreater(successes, 0, "no requested free OpenRouter route produced a completion")
 
 
 if __name__ == "__main__":

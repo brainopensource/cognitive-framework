@@ -14,6 +14,8 @@
 
 ## 1. Verified Low-Cost Paid Models
 
+- qwen/qwen3.7-flash
+- qwen/qwen3.6-35b-a3b
 - deepseek/deepseek-v4-flash-0731 (v2 coding)
 - deepseek/deepseek-v4-flash (v2 0423)
 - z-ai/glm-5.3-flash
@@ -22,15 +24,14 @@
 - stepfun/step-3.7-flash
 - xiaomi/mimo-v2.5
 - xiaomi/mimo-v2.5-pro
-- google/gemini-3.7-flash
 - minimax/minimax-m3
 - tencent/hy3-preview
 - upstage/solar-pro4
-- google/gemini-3.7-flash
 - moonshotai/kimi-k2.7-code
 
 ## 2. Great Paid Models
 
+- google/gemini-3.7-flash
 - deepseek/deepseek-v4-pro
 - moonshotai/kimi-k3
 - z-ai/glm-5.3
@@ -163,3 +164,22 @@
 | 50 | GLM-5.3 | Z.AI | Current | Reasoning | 1M | $0.00 / $0.00 | 62.84 |
 
 *Showing 50 of 400*
+
+
+
+
+
+
+
+
+
+  ───────────────────────────────┼──────────────────────┼──────────────────┼────────────┼────────────┼───────┼────────────┼─────────────┼────────────────────────────────────────────────
+   nvidia/nemotron-3-super       │ LRU TTL Expiry Bug   │ 398.90 ms        │ YES        │ YES        │ 1.0   │ 404        │ $0.000000   │ "The method now correctly checks whether the
+                                 │                      │                  │            │            │       │            │             │ entry’s time-to-live has elapsed based on..."
+   nvidia/nemotron-3-super       │ Mutex Race Condition │ 396.41 ms        │ YES        │ YES        │ 1.0   │ 412        │ $0.000000   │ "The function get_or_set(key, val) has a
+                                 │                      │                  │            │            │       │            │             │ check-then-act race condition. With lock..."
+   nvidia/nemotron-3.5-lightning │ LRU TTL Expiry Bug   │ 442.12 ms        │ YES        │ YES        │ 1.0   │ 404        │ $0.000000   │ "Role: Vanguard CodeFix & Critic-Reviser. The
+                                 │                      │                  │            │            │       │            │             │ bug is that is_expired always returns
+                                 │                      │                  │            │            │       │            │             │ False..."
+   nvidia/nemotron-3.5-lightning │ Mutex Race Condition │ 470.93 ms        │ YES        │ YES        │ 1.0   │ 412        │ $0.000000   │ "Role: Vanguard CodeFix & Critic-Reviser.
+                                 │         

@@ -174,7 +174,12 @@ def select_model(
                 name = allowed[0] if allowed else _get_default_paid_model()
             else:
                 name = model_name
-            return SelectedModel(port=choice, model=OpenRouterModel(model=name), label=f"{choice}:{name}")
+            return SelectedModel(
+                port=choice,
+                model=OpenRouterModel(
+                    model=name, stream=False, reasoning_effort="none"),
+                label=f"{choice}:{name}",
+            )
 
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
@@ -185,7 +190,12 @@ def select_model(
         name = model_name or allowed[0]
         if name not in allowed:
             raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
-        return SelectedModel(port=choice, model=OpenRouterModel(model=name), label=f"{choice}:{name}")
+        return SelectedModel(
+            port=choice,
+            model=OpenRouterModel(
+                model=name, stream=False, reasoning_effort="none"),
+            label=f"{choice}:{name}",
+        )
 
     if choice == "router":
         from ..adapters.models.openrouter import OpenRouterModel
@@ -199,7 +209,11 @@ def select_model(
                 name = allowed[0] if allowed else _get_default_paid_model()
             else:
                 name = model_name
-            return SelectedModel(port="router", model=OpenRouterModel(model=name), label=f"router:{name}")
+            return SelectedModel(
+                port="router", model=OpenRouterModel(
+                    model=name, stream=False, reasoning_effort="none"),
+                label=f"router:{name}",
+            )
 
         allowed = list(free_models() if free_models is not None else _free_band())
         if not allowed:
@@ -207,7 +221,11 @@ def select_model(
         name = model_name or allowed[0]
         if name not in allowed:
             raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
-        return SelectedModel(port="router", model=OpenRouterModel(model=name), label=f"router:{name}")
+        return SelectedModel(
+            port="router", model=OpenRouterModel(
+                model=name, stream=False, reasoning_effort="none"),
+            label=f"router:{name}",
+        )
 
     raise ModelUnavailable(choice, "unreachable")
 

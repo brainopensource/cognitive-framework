@@ -379,6 +379,7 @@ def _parse_sse_stream(
     raw_usage: dict[str, Any] | None = None
     first_token_time: float | None = None
     done = False
+    terminal_choice = False
     buffer = ""
     decoder = getincrementaldecoder("utf-8")("strict")
 
@@ -388,7 +389,7 @@ def _parse_sse_stream(
             first_token_time = monotonic()
 
     def accept_event(event: str) -> bool:
-        nonlocal done, raw_usage
+        nonlocal done, raw_usage, terminal_choice
         data_lines = [line[5:].lstrip(" ") for line in event.splitlines()
                       if line.startswith("data:")]
         if not data_lines:
@@ -421,6 +422,11 @@ def _parse_sse_stream(
         delta = choice.get("delta", {})
         if not isinstance(delta, Mapping):
             return False
+        finish_reason = choice.get("finish_reason")
+        if finish_reason is not None:
+            if not isinstance(finish_reason, str) or not finish_reason:
+                return False
+            terminal_choice = True
         content = delta.get("content")
         if content is not None:
             if not isinstance(content, str):
@@ -499,7 +505,15 @@ def _parse_sse_stream(
                 break
         if not done:
             decoder.decode(b"", final=True)
-            return None, None, 0
+            # OpenRouter-compatible providers sometimes close the SSE body
+            # immediately after a terminal choice instead of sending the
+            # optional `[DONE]` sentinel. A finish_reason is an explicit
+            # protocol terminator; EOF without one remains truncated.
+            if buffer.strip():
+                if not accept_event(buffer):
+                    return None, None, 0
+            if not terminal_choice:
+                return None, None, 0
     except (UnicodeDecodeError, OSError, ValueError):
         return None, None, 0
 
@@ -552,12 +566,16 @@ class OpenRouterModel:
         pricing_table: Mapping[str, tuple[float, float, float]] | None = None,
         pricing_micros_table: Mapping[str, tuple[int, int, int]] | None = None,
         stream: bool = True,
+        reasoning_effort: str | None = None,
         request_timeout: float = 30.0,
         monotonic: Callable[[], float] = time.monotonic,
         provider: str = "openrouter",
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
+        # Policy-facing factories resolve and authorize identifiers. The
+        # adapter still represents unknown routes so accounting can report
+        # `pricing_known=false` instead of inventing a price.
         self._model = model
         self._mode = mode
         self._provider = provider
@@ -572,6 +590,7 @@ class OpenRouterModel:
         self._pricing_table = pricing_table
         self._pricing_micros_table = pricing_micros_table
         self._stream = stream
+        self._reasoning_effort = reasoning_effort
         if request_timeout <= 0:
             raise ValueError("request_timeout must be positive")
         self._request_timeout = float(request_timeout)
@@ -768,6 +787,9 @@ class OpenRouterModel:
     #: named so it cannot silently become an unlimited loop against a model
     #: that genuinely never produces content.
     _EMPTY_PROPOSAL_MESSAGE = "proposal must contain text or a tool call"
+    _MALFORMED_STREAM_MESSAGE = (
+        "provider streaming response was malformed, truncated, or empty"
+    )
     _EMPTY_PROPOSAL_RETRIES = 1
 
     def _complete(
@@ -797,14 +819,20 @@ class OpenRouterModel:
             self._EMPTY_PROPOSAL_RETRIES <= 0
             or error is None
             or error.kind != "instrument_error"
-            or error.message != self._EMPTY_PROPOSAL_MESSAGE
+            or error.message not in {
+                self._EMPTY_PROPOSAL_MESSAGE,
+                self._MALFORMED_STREAM_MESSAGE,
+            }
         ):
             return result
         for _ in range(self._EMPTY_PROPOSAL_RETRIES):
             result = self._complete_once(context, tools, sampling)
             if result.ok or (
                 result.error is None
-                or result.error.message != self._EMPTY_PROPOSAL_MESSAGE
+                or result.error.message not in {
+                    self._EMPTY_PROPOSAL_MESSAGE,
+                    self._MALFORMED_STREAM_MESSAGE,
+                }
             ):
                 return result
         return result
@@ -837,6 +865,8 @@ class OpenRouterModel:
             # narrow it through the sampling contract.
             "max_tokens": sampling.get("maxTokens", 1024),
         }
+        if self._reasoning_effort is not None:
+            body_obj["reasoning"] = {"effort": self._reasoning_effort}
         if self._stream:
             body_obj["stream"] = True
             body_obj["stream_options"] = {"include_usage": True}

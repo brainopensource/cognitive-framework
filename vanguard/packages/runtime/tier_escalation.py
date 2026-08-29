@@ -79,12 +79,13 @@ class RoleAwareRouter:
     """
 
     def __init__(self, *, bands: Mapping[str, Sequence[str]],
-                 planner_model: str = "deepseek/deepseek-v4-flash",
-                 recovery_model: str = "deepseek/deepseek-v4-flash",
+                 planner_model: str | None = None,
+                 recovery_model: str | None = None,
                  reviewer_model: str | None = None) -> None:
+        from ..adapters.models.config import get_medium_model
         self._bands = {name: tuple(models) for name, models in bands.items()}
-        self._planner = planner_model
-        self._recovery = recovery_model
+        self._planner = planner_model or get_medium_model()
+        self._recovery = recovery_model or get_medium_model()
         self._reviewer = reviewer_model
 
     def choose(self, role: ModelRole, *, episode_id: str, reason: str,

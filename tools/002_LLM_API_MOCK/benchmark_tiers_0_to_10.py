@@ -12,22 +12,27 @@ if str(LAM_DIR) not in sys.path:
 
 from engine import LamEngine
 from live_coding import resolve_api_key, TOOLS
+from models import models_for_band
+
+FREE_MODEL = models_for_band("free")[0]
+MEDIUM_MODELS = models_for_band("medium")
+HIGH_MODELS = models_for_band("high")
 
 key = resolve_api_key(Path(".env"))
 engine = LamEngine.from_directory(LAM_DIR / "scenarios")
 
 TIER_BENCHMARKS = [
-    (0, "SWE Basics", "t0-dogfood-bug-001", "Fix single-line logic bug in arithmetic validator.", "openrouter/free"),
-    (1, "SWE Easy", "t1-semver-parser", "Implement a SemVer 2.0.0 parser with prerelease tag sorting.", "poolside/laguna-s-2.1:free"),
-    (2, "SWE Medium", "t2-token-bucket", "Implement a thread-safe TokenBucket rate limiter with burst refill.", "nvidia/nemotron-3-super-120b-a12b:free"),
-    (3, "SWE Advanced", "t3-plugin-dag", "Implement a Topological DAG dependency loader with cycle detection.", "stealth/ox-alpha"),
-    (4, "SWE Complex", "t4-protocol-fsm", "Implement a distributed protocol state machine with timeout transitions.", "deepseek/deepseek-v4-flash"),
-    (5, "SWE Concurrency", "t5-concurrent-lsm", "Implement a concurrent Log-Structured Merge (LSM) storage engine.", "deepseek/deepseek-v4-flash"),
-    (6, "SWE Consensus", "t6-raft-consensus", "Implement a full Raft consensus algorithm with AppendEntries log replication.", "stealth/ox-alpha"),
-    (7, "Pro Entry", "t7-orm-query-compiler", "Implement an ANSI SQL AST Query Compiler with join graph cycle detection.", "stealth/ox-alpha"),
-    (8, "Pro Mid", "t8-zero-copy-rpc-wire", "Implement a zero-copy binary RPC wire framer with CRC32 checksums.", "stealth/ox-alpha"),
-    (9, "Pro Hard", "t9-distributed-2pc-engine", "Implement a Two-Phase Commit (2PC) coordinator with WAL crash recovery.", "openai/gpt-5.6-luna"),
-    (10, "Pro Frontier", "t10-multi-tenant-scheduler", "Implement a Multi-Tenant Kernel Scheduler with Dominant Resource Fairness.", "openai/gpt-5.6-luna"),
+    (0, "SWE Basics", "t0-dogfood-bug-001", "Fix single-line logic bug in arithmetic validator.", FREE_MODEL),
+    (1, "SWE Easy", "t1-semver-parser", "Implement a SemVer 2.0.0 parser with prerelease tag sorting.", FREE_MODEL),
+    (2, "SWE Medium", "t2-token-bucket", "Implement a thread-safe TokenBucket rate limiter with burst refill.", FREE_MODEL),
+    (3, "SWE Advanced", "t3-plugin-dag", "Implement a Topological DAG dependency loader with cycle detection.", MEDIUM_MODELS[0]),
+    (4, "SWE Complex", "t4-protocol-fsm", "Implement a distributed protocol state machine with timeout transitions.", MEDIUM_MODELS[0]),
+    (5, "SWE Concurrency", "t5-concurrent-lsm", "Implement a concurrent Log-Structured Merge (LSM) storage engine.", MEDIUM_MODELS[0]),
+    (6, "SWE Consensus", "t6-raft-consensus", "Implement a full Raft consensus algorithm with AppendEntries log replication.", HIGH_MODELS[0]),
+    (7, "Pro Entry", "t7-orm-query-compiler", "Implement an ANSI SQL AST Query Compiler with join graph cycle detection.", HIGH_MODELS[0]),
+    (8, "Pro Mid", "t8-zero-copy-rpc-wire", "Implement a zero-copy binary RPC wire framer with CRC32 checksums.", HIGH_MODELS[0]),
+    (9, "Pro Hard", "t9-distributed-2pc-engine", "Implement a Two-Phase Commit (2PC) coordinator with WAL crash recovery.", HIGH_MODELS[0]),
+    (10, "Pro Frontier", "t10-multi-tenant-scheduler", "Implement a Multi-Tenant Kernel Scheduler with Dominant Resource Fairness.", HIGH_MODELS[0]),
 ]
 
 def query_openrouter(model: str, prompt: str) -> dict:

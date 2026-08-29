@@ -16,7 +16,15 @@ from vanguard.packages.adapters.models.config import load_model_registry
 def load_models() -> Dict[str, List[str]]:
     """Load model bands from vanguard model registry."""
     registry = load_model_registry()
-    data = registry.get("bands", {})
+    data = registry.get("bands")
+    if data is None:
+        tiers = registry.get("tiers", {})
+        data = {
+            "free": list(tiers.get("1", ())),
+            "medium": list(tiers.get("2", ())),
+            "high": list(tiers.get("3", ())),
+            "top": list(tiers.get("4", ())),
+        }
     for band in ("free", "medium", "high", "top"):
         if band not in data or not isinstance(data[band], list):
             raise ValueError(f"models_registry.json must contain array for band '{band}'")

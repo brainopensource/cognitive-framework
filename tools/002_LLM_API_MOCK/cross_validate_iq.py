@@ -12,17 +12,22 @@ if str(LAM_DIR) not in sys.path:
 
 from engine import LamEngine
 from live_coding import resolve_api_key, TOOLS
+from models import models_for_band
+
+FREE_MODEL = models_for_band("free")[0]
+MEDIUM_MODEL = models_for_band("medium")[0]
+HIGH_MODEL = models_for_band("high")[0]
 
 key = resolve_api_key(Path(".env"))
 engine = LamEngine.from_directory(LAM_DIR / "scenarios")
 
 TIER_BENCHMARK_PROMPTS = [
-    (0, "SWE Basics", "Write a Python function clamp(val, min_val, max_val) that bounds val between min_val and max_val.", "openrouter/free", "lam/tier-0"),
-    (1, "SWE Easy", "Implement a SemVer 2.0.0 parser with prerelease tag sorting.", "poolside/laguna-s-2.1:free", "lam/tier-1"),
-    (2, "SWE Medium", "Implement a thread-safe TokenBucket rate limiter with burst refill.", "nvidia/nemotron-3-super-120b-a12b:free", "lam/tier-2"),
-    (3, "SWE Advanced", "Implement a Topological DAG dependency loader with cycle detection.", "stealth/ox-alpha", "lam/tier-3"),
-    (4, "SWE Pro Entry", "Implement an ANSI SQL query compiler with multi-table join deduplication.", "deepseek/deepseek-v4-flash", "lam/tier-4"),
-    (5, "SWE Pro Hard", "Implement a Distributed 2PC Coordinator with WAL intent logging and abort cascades.", "openai/gpt-5.6-luna", "lam/tier-5"),
+    (0, "SWE Basics", "Write a Python function clamp(val, min_val, max_val) that bounds val between min_val and max_val.", FREE_MODEL, "lam/tier-0"),
+    (1, "SWE Easy", "Implement a SemVer 2.0.0 parser with prerelease tag sorting.", FREE_MODEL, "lam/tier-1"),
+    (2, "SWE Medium", "Implement a thread-safe TokenBucket rate limiter with burst refill.", FREE_MODEL, "lam/tier-2"),
+    (3, "SWE Advanced", "Implement a Topological DAG dependency loader with cycle detection.", MEDIUM_MODEL, "lam/tier-3"),
+    (4, "SWE Pro Entry", "Implement an ANSI SQL query compiler with multi-table join deduplication.", MEDIUM_MODEL, "lam/tier-4"),
+    (5, "SWE Pro Hard", "Implement a Distributed 2PC Coordinator with WAL intent logging and abort cascades.", HIGH_MODEL, "lam/tier-5"),
 ]
 
 def query_openrouter(model: str, prompt: str) -> dict:

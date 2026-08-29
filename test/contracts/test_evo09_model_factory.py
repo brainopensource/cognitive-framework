@@ -44,7 +44,7 @@ class TestEvo09ModelFactory(unittest.TestCase):
         # smart alias
         m_smart = create_model("smart")
         self.assertIsInstance(m_smart, OpenRouterModel)
-        self.assertEqual(m_smart._model, "openai/gpt-5.6-luna")
+        self.assertEqual(m_smart._model, "deepseek/deepseek-v4-flash-0731")
 
         # local alias
         m_local = create_model("local")
@@ -58,10 +58,10 @@ class TestEvo09ModelFactory(unittest.TestCase):
         self.assertIsInstance(m_ollama, OllamaModel)
         self.assertEqual(m_ollama.model, "llama3.1")
 
-        # openrouter:<model>
-        m_openrouter = create_model("openrouter:anthropic/claude-3-haiku")
+        # openrouter:<model> must be registered in an enabled tier
+        m_openrouter = create_model("openrouter:deepseek/deepseek-v4-flash-0731")
         self.assertIsInstance(m_openrouter, OpenRouterModel)
-        self.assertEqual(m_openrouter._model, "anthropic/claude-3-haiku")
+        self.assertEqual(m_openrouter._model, "deepseek/deepseek-v4-flash-0731")
 
         # fake / mock
         proposals = [{"kind": "finish", "note": "test"}]
@@ -112,6 +112,8 @@ class TestEvo09ModelFactory(unittest.TestCase):
         """Verify unknown schemes and nonexistent models fail closed with ModelResolutionError."""
         with self.assertRaises(ModelResolutionError):
             create_model("unknown_provider:model_xyz")
+        with self.assertRaises(ValueError):
+            create_model("openrouter:unapproved/vendor-model")
 
         with self.assertRaises(ModelResolutionError):
             create_model("totally_unregistered_and_unknown_model_12345")

@@ -78,6 +78,14 @@ class InPlaceWrites(unittest.TestCase):
                 isolate=False, interactive=True)
             self.assertIsNotNone(result.get("grantId"))
 
+    def test_auto_approved_isolated_run_has_a_bounded_grant(self) -> None:
+        result = lab_run.run_lab_task(
+            "vg-code-default", TASK, max_attempts=1,
+            isolate=True, interactive=False, approve_writes=True)
+
+        self.assertIsNotNone(result.get("grantId"))
+        self.assertIn("auto_approved_writes", result["labDepartures"])
+
     def test_interactive_in_place_mints_and_enforces_workspace(self) -> None:
         from vanguard.packages.ports.environment import EffectRequest
         from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant

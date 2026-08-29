@@ -19,6 +19,8 @@ from .config import (
     get_medium_model,
     get_testing_model,
     load_model_registry,
+    get_offline_default,
+    resolve_model,
 )
 from .fake import FakeModel
 from .ollama import OllamaModel
@@ -28,9 +30,6 @@ __all__ = [
     "ModelResolutionError",
     "create_model",
 ]
-
-DEFAULT_LOCAL_MODEL = "deepseek-r1"
-
 
 class ModelResolutionError(ValueError, RuntimeError):
     """Raised when a model specifier cannot be resolved or fails validation."""
@@ -89,9 +88,9 @@ def create_model(
             proposals = model_spec.get("proposals", fake_proposals)
             inner_model: ModelPort = FakeModel(proposals or [])
         elif provider == "ollama":
-            inner_model = OllamaModel(model=model_name or DEFAULT_LOCAL_MODEL)
+            inner_model = OllamaModel(model=model_name or get_offline_default("ollama"))
         elif provider == "openrouter":
-            inner_model = OpenRouterModel(model=model_name or get_default_model())
+            inner_model = OpenRouterModel(model=resolve_model(model_name or get_default_model()))
         elif provider == "cassette":
             cas_p = model_spec.get("path") or cassette_path
             if not cas_p:
@@ -142,22 +141,22 @@ def create_model(
             target_model = spec[len("openrouter:"):].strip()
             if not target_model:
                 raise ModelResolutionError("openrouter: spec requires a model name")
-            inner_model = OpenRouterModel(model=target_model)
+            inner_model = OpenRouterModel(model=resolve_model(target_model))
 
         elif spec == "local":
-            inner_model = OllamaModel(model=DEFAULT_LOCAL_MODEL)
+            inner_model = OllamaModel(model=get_offline_default("ollama"))
 
         elif spec == "free":
-            inner_model = OpenRouterModel(model=get_free_model())
+            inner_model = OpenRouterModel(model=resolve_model("free"))
 
         elif spec == "fast":
-            inner_model = OpenRouterModel(model=get_medium_model())
+            inner_model = OpenRouterModel(model=resolve_model("fast"))
 
         elif spec == "smart":
-            inner_model = OpenRouterModel(model=get_band_model("high"))
+            inner_model = OpenRouterModel(model=resolve_model("smart"))
 
         elif spec == "testing":
-            inner_model = OpenRouterModel(model=get_testing_model())
+            inner_model = OpenRouterModel(model=resolve_model("testing"))
 
         elif ":" in spec and not spec.startswith(("http://", "https://")):
             scheme, _, _ = spec.partition(":")
@@ -176,10 +175,7 @@ def create_model(
                 pricing = registry.get("pricing_micros", {})
                 all_models.update(pricing.keys())
 
-                if spec in all_models or "/" in spec:
-                    inner_model = OpenRouterModel(model=spec)
-                else:
-                    raise ModelResolutionError(f"Unknown model identifier or unregistered model: {spec!r}")
+                inner_model = OpenRouterModel(model=resolve_model(spec))
             except ModelResolutionError:
                 raise
             except Exception as exc:

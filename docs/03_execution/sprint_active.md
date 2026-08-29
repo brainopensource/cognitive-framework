@@ -108,9 +108,17 @@ Mechanism work and evidence close-out proceed in parallel, but the following gat
    independence caveat below the verdict table: producer (`dev-a-evidence-1`) and reviewer
    (`aether-evidence-reviewer-1`) keys were both held by the same operator for this run, so
    acceptance is mechanically valid but not yet organizationally independent.
-2. Externally create and publish the annotated, remotely resolvable `CONVERGENCE-BASE-v1`; run the
-   fail-closed baseline builder to pin its tag object, commit, tree, schemas, reducers, runtime, and
-   protected materials using `raw-sha256`.
+2. ~~Externally create and publish the annotated, remotely resolvable `CONVERGENCE-BASE-v1`~~ **done**
+   — the annotated tag (`ee80748872104f06c927e098fd5392b139ea7251`, dereferencing to commit
+   `532abf16defb23a0d91259f45aa7042c9b2bae6d`) resolves on the configured remote, and
+   `evidence/baselines/CONVERGENCE-BASE-v1.json` carries a signed `aether.baseline/1` manifest with
+   both creator and reviewer signatures present (55 schema pins, 4 reducer pins, 3 protected
+   subtrees). As with every other bundle in this repository, mechanical signature validity does not
+   by itself establish organizational reviewer independence. `tools/linters/check_baseline_manifest.py`
+   run at current HEAD reports reducer-pin drift against files changed by ordinary development since
+   the tag was cut (e.g. `vanguard/packages/domain/ledger/events.py`) — this is the drift-detection
+   mechanism working as designed (RF-86/RF-98 compare *new* treatment to this frozen baseline going
+   forward), not a defect in the baseline itself.
 3. Re-emit M-5b against that successor baseline. Preserve every historical failed bundle.
 4. Re-emit the stored M-6.5 study with portable references and an explicit digest scheme now that
    M-4 verifies. A valid positive or negative result closes the study; the current undeterminable
@@ -140,7 +148,7 @@ published bundle has no verdict, however green its suites are.
 | M-4 | `passed` | `M-4-rf95-candidate-07` — clean subject `7a3adb1`, live run over `deepseek/deepseek-v4-flash-0731`, real diff (`return a * b`), passing tests, file-backed WAL, complete `mhf.trajectory/2`, matching cold reconstruction; signed `dev-a-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. **Caveat**: the producer and reviewer keys were controlled by the same operator for this run (see `RF-95-candidate-06.md`/`-07.md` honesty notes) — mechanically independent, not yet organizationally independent; a distinct reviewer identity re-signing the same digest would close that gap without rerunning anything. `candidate-05` (`failed`: raw-hex signature, mismatched reviewer key) and `candidate-06` (two `instrument_error` HTTP 429 aborts on `z-ai/glm-5.2:free`, never reached the agent loop) are preserved unmodified. |
 | M-5b | `failed` | `M-5b-graph-coloring` records an acceptance claiming `passed` over an `undeterminable` subject. Its materials also record no digest scheme. The builder now emits `raw-sha256`; a labelled successor is gated on `CONVERGENCE-BASE-v1`. |
 | M-6.5 | `passed` | `M-6.5-attributable-paired-study-order13` — 32 paired trials with portable report references and `raw-sha256` digests; signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
-| M-5a | no bundle | `CONVERGENCE-BASE-v1` is absent. `prepare_convergence_baseline.py` produces a candidate (55 schema pins, 4 reducer pins, 3 protected subtrees) that declares `CANDIDATE_NOT_A_BASELINE` and leaves `commit_sha`, `tag_object_sha`, `tree_digest` unresolved. Only an annotated, remotely resolvable tag can supply them. |
+| M-5a | published | `CONVERGENCE-BASE-v1` is published: annotated tag `ee80748` on commit `532abf16`, resolves on the configured remote. `evidence/baselines/CONVERGENCE-BASE-v1.json` is a signed `aether.baseline/1` manifest (creator + reviewer signatures present). `check_baseline_manifest.py` at current HEAD reports expected reducer-pin drift from development since the tag (not a bundle defect). M-5a's own completion predicate (`agent_view_replay_verified AND convergence_base_v1_verified`) still requires the replay half separately. |
 | M-7 | `passed` | `M-7-topology-order12` — 40 tests, all 25 markers true; direct, planner/executor/reviewer, and fork/read/merge run as real M-6 children with CAS artifact flow; signed `dev-a-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
 | M-8 | `passed` | `M-8-durable-memory-order12` — 59 tests, all 34 markers true; authorization-before-ranking, CAS composition registry, verified rollback in fresh process; signed `dev-b-evidence-1`, accepted `aether-evidence-reviewer-1`; `verify_evidence.py` returns `passed`. |
 

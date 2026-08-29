@@ -164,8 +164,13 @@ def validate_grant_request(
     # Check path containment
     if target_path is not None:
         try:
-            resolved_target = Path(target_path).resolve()
             resolved_ws = Path(grant.workspace_root).resolve()
+            candidate = Path(target_path)
+            resolved_target = (
+                candidate.resolve()
+                if candidate.is_absolute()
+                else (resolved_ws / candidate).resolve()
+            )
             resolved_target.relative_to(resolved_ws)
         except ValueError:
             return False, f"workspace_path_escape_denied:{target_path}"

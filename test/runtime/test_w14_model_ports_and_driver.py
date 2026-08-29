@@ -119,6 +119,8 @@ class OnlyFreeModelsAreReachable(unittest.TestCase):
                                 env=self.ENV, free_models=lambda: ["vendor/model:free"],
                                 allow_paid=True)
         self.assertEqual(selected.label, "openrouter:deepseek/deepseek-v4-flash-0731")
+        self.assertFalse(selected.model._stream)
+        self.assertEqual(selected.model._reasoning_effort, "none")
 
     def test_a_paid_model_is_selected_when_env_var_set(self) -> None:
         env = dict(self.ENV)

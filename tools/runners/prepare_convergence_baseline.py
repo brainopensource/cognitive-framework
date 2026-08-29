@@ -219,6 +219,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if not args.creator_key:
+        print("ERROR: --creator-key is required (no default -- a candidate signed "
+              "with an implicit or guessed key proves nothing)", file=sys.stderr)
+        print("       generate one with tools/runners/keygen_evidence_key.py",
+              file=sys.stderr)
+        return 3
+
     try:
         creator_private_key = load_key(
             Path(args.creator_key).expanduser()).private_bytes(

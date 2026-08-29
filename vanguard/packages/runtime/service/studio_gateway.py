@@ -661,10 +661,17 @@ def create_gateway(
         )
 
     if service is None:
+        from ..state_contract import ensure_state_directory
+
         if db_path is None:
-            db_dir = root / ".vanguard"
-            db_dir.mkdir(parents=True, exist_ok=True)
-            db_path = db_dir / "runtime.db"
+            db_path = root / ".vanguard" / "runtime.db"
+        else:
+            db_path = Path(db_path)
+        # EVO-01: same fail-closed writability/durability contract every
+        # other transport goes through (`RuntimeBootstrap`, the CLI) --
+        # not a bare `mkdir` that silently succeeds even when the target
+        # isn't genuinely writable.
+        ensure_state_directory(db_path.parent, durability_mode="sqlite-wal")
         inbox = ServiceInboxStore(db_path)
         event_store = SqliteEventStore(db_path)
         service = RuntimeService(inbox_store=inbox, event_store=event_store)

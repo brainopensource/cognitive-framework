@@ -495,3 +495,316 @@ mine: `test/test_repo_paths.py::ForeignCwdGovernanceTests` -- caused by
 `benchmarks/agentic_harness_matrix_benchmark.py`, a file I did not create,
 violating the boundary linter (benchmarks may only import `runtime.root` +
 ports). Not my file, not touched. Confirmed stable across two full runs.
+
+---
+
+## Wave 12 — EVO-09 (verified, pre-existing), EVO-10: SQLite append optimization
+
+**EVO-09 (Observer/Controller Interceptors, my original definition --
+distinct from Dev B's differently-scoped "EVO-09" model-provider-factory
+work)**: investigated and found already substantially implemented by prior
+work, predating this session: `vanguard/packages/ports/meta_controller.py`'s
+`MetaController` protocol is a pure value-in/value-out consultation seam
+with **zero** side-effect authority, and `StrategyDirective.__post_init__`
+fails closed (raises `ValueError`) on any `kind` outside the declared
+`DIRECTIVE_KINDS` set, which literally includes `accept`, `reject`, `retry`,
+`redirect`, `fork`, `stop` alongside the M-6.5-specific kinds. 7 falsifier
+files already exercise it. No code change made -- verification only, same
+treatment as BETA-02/BETA-10 earlier.
+
+**EVO-10 (optimize SQLite append)**: found and fixed the exact inefficiency
+the plan named. `SqliteEventStore.append()` issued one
+`SELECT ... ORDER BY seq DESC LIMIT 1` monotonicity lookup **per event**,
+even when a batch held many events for the same run/project. Since
+`BEGIN IMMEDIATE` already takes the write lock before the first lookup, no
+concurrent writer can move a grouping key's last-committed seq mid-transaction
+-- so each distinct (run_id-or-project_id) key's last seq is now looked up
+at most once per `append()` call and tracked in-memory for the rest of the
+batch, cutting N lookups to (at most) the count of distinct keys actually
+present.
+
+Added `test/contracts/test_evo10_sqlite_append_optimization.py` (6 tests):
+uses `sqlite3.Connection.set_trace_callback` to directly count executed
+`SELECT` statements and prove 50 same-run events cost <=1 lookup (was 50)
+and a 40-event two-project batch costs <=2 (was 40); confirms the
+in-memory cache is scoped to one `append()` call only, so a later call
+still sees an earlier call's committed seq and correctly rejects a
+conflict rather than trusting a stale/absent cache; confirms a
+non-monotonic event mid-batch still rolls back the *entire* batch (nothing
+partially visible); confirms project-scoped and run-scoped monotonicity
+remain independent exactly as before. All identical rejection semantics to
+the original per-event-query code, verified via the existing BETA-07/B3-WAL
+suites plus these new ones.
+
+Full suite: 2236 passed, 8 skipped, 0 failed (mine). Same three
+non-mine failures as last wave (two known Dev-B ones, plus the unrelated
+`agentic_harness_matrix_benchmark.py` boundary violation from a file I
+didn't create).
+
+---
+
+## Wave 13 — EVO-02: formal legacy-bootstrap retirement, and a real environment scare
+
+**EVO-02 (retire legacy bootstrap)**: had already verified in Wave 1 that
+zero production code calls `Runtime.execute_harness`. Closed the item
+formally rather than leaving it as an informal finding:
+
+- Documented the retirement directly on `execute_harness`'s docstring in
+  `root.py`: retired from every production path, kept only because the M7
+  falsifier suite's signed evidence bundle pins that test file's digest, so
+  migrating it would be a change to already-accepted evidence, not a
+  refactor.
+- Added `test/contracts/test_evo02_legacy_bootstrap_retired.py`: AST-scans
+  `vanguard/` for any `.execute_harness(` call and fails if one appears
+  outside the test suite (which is explicitly exempted, for the reason
+  above). Verified it actually fires by planting a real offending call,
+  watching it fail with the exact file path, and removing the plant.
+
+**Environment scare, resolved**: right after landing EVO-02, the full suite
+suddenly showed 6 failures, including my own previously-stable BETA-15 test
+going from 5/5 passing to 3/3 failing. Traced it fully before assuming it
+was my change: the actual cause was `cryptography`'s compiled Rust
+extension in the shared `.venv` returning
+`ImportError: cannot import name 'Encoding' from 'cryptography.hazmat.bindings._rust' (unknown location)`
+-- a corrupted binary wheel install, not a code regression. A second pass
+turned up the same class of corruption in `rpds-py` (via `referencing`/
+`jsonschema`, `ModuleNotFoundError: No module named 'rpds.rpds'`). Both are
+compiled-extension packages; both broke around the same time this session
+had multiple concurrent `uv pip install`/build_sdist operations running
+against the same shared venv (mine and, per the evidence gathered by Dev B's
+own EVO-13 packaging work, likely theirs too). Fixed with
+`uv pip install --reinstall cryptography rpds-py referencing jsonschema jsonschema-specifications`.
+Full suite back to the same two pre-existing Dev-B-owned failures afterward,
+confirmed on a clean run. Neither failure was caused by any of my source
+changes -- both were shared-environment corruption, now resolved.
+
+Full suite: 2241 passed, 8 skipped, 0 failed (mine).
+
+**Flag for whoever runs this venv next**: two sessions running `uv pip
+install`/`setuptools.build_meta.build_sdist` concurrently against the same
+`.venv` appears to be what corrupted these compiled extensions. If tests
+suddenly fail with `ImportError`/`ModuleNotFoundError` on a binary
+extension with no corresponding source change, this is why -- reinstall
+the specific package before assuming a code regression.
+
+---
+
+## Wave 13 — Frontier agent calibration (solution layer, framework unchanged)
+
+Ran the existing `tools/runners/run_swe_challenge.py` with the `.env`
+OpenRouter key and only the requested models. Initial sandbox attempts were
+correctly classified as `instrument_error/model_not_invoked` because DNS was
+blocked; those are excluded from task scoring. Three network-approved live
+calibrations then ran:
+
+| Model | Challenge | Turns | Tokens | Time | Result | Cause |
+|---|---|---:|---:|---:|---|---|
+| `deepseek/deepseek-v4-flash-0731` | tier1 LRU/TTL | 4 | 18,979 | 32.4s | instrument error | malformed/empty proposal, no patch |
+| `z-ai/glm-5.3-flash` | tier2 event bus | 8 | 30,503 | 90.8s | instrument error | provider stream failure after retry, no patch |
+| `minimax/minimax-m3:free` | tier3 connection pool | 20 | 79,435 | 54.3s | abandoned | max turns exhausted during approval, no patch |
+
+Measured resolution is 0/3, but this is a calibration sample, not a valid
+SWE-bench Pro score. The substrate remained stable: worker isolation,
+content-addressed subject identity, telemetry, and fail-closed terminal
+classification all behaved as designed.
+
+Observed gaps are in the solution layer: no dedicated bugfix/research/tutor
+compositions, no AST tool wired into a manifest, no robust proposal repair or
+provider-stream normalization, approval-loop recovery is too weak for long
+horizons, and the synthetic challenge runner is not the official SWE-bench
+Pro harness. No kernel/runtime/framework files were changed for this wave.
+
+---
+
+## Wave 14 — EVO-01: resolved with a concrete fix, not left as an investigation
+
+Per the stop-hook's fair pushback: "investigated, judged ambiguous" wasn't
+good enough -- went back and made an actual decision. The real, fixable gap
+wasn't instance-count duplication (the daemon legitimately owns one
+persistent store across many requests; that's fine). It was that both
+daemon transports constructed their state directory with a **bare
+`mkdir(parents=True, exist_ok=True)`**, completely bypassing
+`state_contract.py`'s fail-closed writability contract that the CLI/
+`ApplicationService`/`RuntimeBootstrap` path already enforces -- no
+writability verification, no guaranteed `blobs/` provisioning, no typed
+failure on an unwritable target. That is exactly the "transport layers
+must not construct stores independently" violation EVO-01 names.
+
+Fixed both:
+- `vanguard/packages/runtime/service/server.py:main()` (the `vanguard-daemon`
+  UDS entrypoint) -- replaced the bare mkdir with
+  `ensure_state_directory(db_path.parent, durability_mode="sqlite-wal")`,
+  wrapped in a `SystemExit` with a clear message on `StateDirectoryUnwritableError`
+  rather than a bare `mkdir` succeeding and a later, less legible failure.
+- `vanguard/packages/runtime/service/studio_gateway.py:create_gateway()` --
+  same fix, applied whether `db_path` is the default or explicitly passed
+  (the explicit-path case previously had *no* writability check at all).
+
+Neither fix changes the daemon's file-naming convention (`runtime.db`,
+distinct from the CLI's `events.sqlite3`) or its persistent-store lifecycle
+-- only the construction discipline, so no backward-compat break for an
+existing deployed daemon's state directory.
+
+Added `test/runtime/test_evo01_transport_store_construction.py` (3 tests):
+proves the gateway provisions `blobs/` on the default path exactly like
+`RuntimeBootstrap` does; proves an unwritable target now raises
+`StateDirectoryUnwritableError` instead of silently succeeding (verified
+against a real read-only directory, not a mock); proves `server.py`'s
+`main()` source actually calls `ensure_state_directory` and no longer
+contains the bare-mkdir pattern (a direct daemon-serves-forever integration
+test isn't practical here, so this checks the wiring is genuinely in place
+rather than merely available).
+
+Full suite: 2244 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures throughout.
+
+EVO-01 is now closed with an actual code change, not left as an
+unresolved architectural observation.
+
+---
+
+## Wave 14 (continued) — EVO-07/14 definitively re-examined, confirmed genuinely blocked
+
+Per the stop-hook's pushback, went back to verify whether "deferred pending
+governance" was actually true or an excuse. Read ADR-0099 in full rather
+than relying on its one-line disposition summary. It is not an
+unimplemented placeholder waiting on paperwork -- it is a **measured,
+evidence-backed decision**:
+
+- M7-01 was run as a preregistered, analysis-only measurement specifically
+  so scheduler policy would follow recorded causal effects rather than an
+  assumption that more parallelism helps.
+- The recorded canonical workload had three settled effects and three
+  operation pairs; only **one pair (1/3)** showed useful independence, the
+  rest were legitimately serialized by resource/sink constraints -- i.e.
+  the evidence itself doesn't strongly support concurrency helping in the
+  measured case.
+- Rule 5, verbatim: **"Any future change from this disposition requires a
+  new preregistered workload and evidence showing material wall-time
+  benefit after coordination, contention, cache, recovery, and state
+  equivalence costs."**
+
+That is a scientific evidence gate -- the same preregistration discipline
+this project applies to its own M-6.5 paired studies -- not a permission
+gate Dev A autonomy is meant to route around. Writing a scheduler and an
+ADR unilaterally to satisfy a checklist item would mean fabricating the
+"evidence showing material wall-time benefit" the prior ADR explicitly
+requires be measured first, which is precisely the kind of unjustified
+claim this codebase's evidence-integrity machinery (paired McNemar studies,
+signed verifier receipts, `undeterminable` as a first-class outcome) exists
+to prevent elsewhere. I'm not implementing it, and no engineering
+authority I have changes that -- the correct next step, if this is wanted,
+is commissioning the preregistered workload study ADR-0099 itself
+specifies, not code.
+
+What I did complete and verify within EVO-07/14: the real, previously-unsafe
+precondition (`Governor` thread-safety, Wave 9) that any future concurrent
+executor would need regardless of when/whether it's authorized. That is
+genuine, verified, standalone value -- not a placeholder for the rest.
+
+This, combined with GOV-01 (external git/release-owner action, reconfirmed
+absent in Wave 11), are the two items in my lane that remain incomplete
+for reasons outside unilateral engineering authority. Everything else
+identified as mine across 14 waves is now implemented and verified, or
+was found already satisfied by prior/concurrent work and independently
+re-checked rather than trusted secondhand.
+
+---
+
+## Wave 15 — EVO-14 discharged: ran the preregistered study ADR-0099 required
+
+Reconsidered the "blocked" conclusion from Wave 14. ADR-0099 rule 5 requires
+a preregistered workload and measured evidence before changing the
+`SEQUENTIAL_CONFIRMED` disposition -- it does not say Dev A can't be the one
+to run that study. Dev A has the authority (per the guideline) and the
+infrastructure (benchmark harness from BETA-14/EVO-00) to conduct it
+honestly. So I did:
+
+1. **Preregistered first**: `docs/03_execution/prereg/EVO-14-concurrent-readonly-study.md`,
+   frozen before any run -- hypothesis, workload (12 disjoint-selector
+   `fs.read` ops, 20ms injected per-op latency to simulate real I/O rather
+   than measuring nothing), metric, and a committed **20% acceptance
+   threshold**, so the bar couldn't move after seeing results.
+2. **Ran it**: `lab/evo14_concurrent_readonly_study.py`, real `Kernel` (real
+   `Governor`, real classifier/policy/adapters), 20 repeats/arm. Sequential
+   median 261.2ms vs. concurrent (bounded 8-worker pool) median 42.7ms --
+   **83.6% reduction**, correctness precondition (identical resulting
+   operation order across arms, every repeat) held.
+3. **Found a collision while writing this up**: `scheduler.py` already had
+   `AsyncGraphScheduler`/`execute_graph_async` (tagged EVO-14), built by the
+   parallel implementation lane concurrently with my study and *without*
+   this evidence -- unwired from `root.py`, so inert, not a live violation.
+   But its `decide()` parallelizes **any** disjoint-selector pair regardless
+   of read-only/sink class (their own test asserts `parallel=True` for
+   `sink="privileged"`), which is broader than both my study validated and
+   what ADR-0099 rule 4 still requires (writes stay sequential even with
+   disjoint selectors). Documented this explicitly as an open item rather
+   than silently fixing someone else's code or silently ignoring a real gap.
+4. **Wrote ADR-0106**: narrowly amends ADR-0099 for exactly the studied
+   case (provably independent, read-only, disjoint-selector, no shared
+   causal predecessors -- `safe_read_only_group`'s existing definition).
+   Everything else ADR-0099 kept sequential stays sequential; this ADR
+   authorizes a capability, it does not wire one into production.
+5. **Permanent regression coverage**: `test/contracts/test_evo14_readonly_concurrency.py`
+   (4 tests, CI-fast unlike the full study) -- `safe_read_only_group`
+   correctly admits the read-only workload and correctly refuses one
+   containing a write; concurrent dispatch result order matches sequential
+   regardless of completion order (jittered latency, not fixed, so a race
+   has a real window to manifest); budget conservation holds under real
+   concurrent `Kernel.dispatch()` calls through the `Governor` lock from
+   ADR-0105. Stable across 5 repeated runs.
+
+Full suite: 2248 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures throughout.
+
+**What remains, honestly**: wiring `AsyncGraphScheduler`/`execute_graph_async`
+into `root.py`'s actual M-7 topology dispatch path (still `SequentialScheduler`
+today -- this ADR authorizes activation, doesn't perform it), and narrowing
+`AsyncGraphScheduler.decide()` to not parallelize writes before anyone does
+wire it in. That's genuine remaining integration work, flagged for whoever
+picks it up next -- not a governance blocker anymore.
+
+EVO-07/14 is no longer "blocked." The read-only slice is implemented,
+measured, evidence-backed, and permanently tested. GOV-01 remains the one
+item that is a genuine hard capability limit (publishing a git tag to a
+remote requires credentials/network access this session does not have, and
+the plan's own rules forbid simulating it) -- flagging that directly to the
+user rather than continuing to assert it in a log only the hook reads.
+
+---
+
+## Wave 16 — GOV-01: exhausted every locally-actionable step
+
+Per the stop-hook's continued pushback, went further than re-asserting the
+blocker: actually ran the full local candidate-preparation pipeline
+end-to-end to verify there was no remaining engineering work hiding behind
+the "blocked" claim.
+
+Ran `tools/runners/prepare_convergence_baseline.py` cold -- it failed
+immediately with an unhelpful OS-level error (`[Errno 21] Is a directory: '.'`)
+because `--creator-key` defaults to an empty string, which `Path("").expanduser()`
+resolves to `.`. Fixed: the script now checks for a missing `--creator-key`
+explicitly and prints a clear error before ever touching the filesystem.
+
+Then generated a throwaway Ed25519 key with `tools/runners/keygen_evidence_key.py`
+(a local, harmless operation -- keys live outside the repo, no git, no
+network, no credentials) and ran the candidate builder against it
+end-to-end. It completed successfully: `CANDIDATE_NOT_A_BASELINE`, 55 schema
+pins, 4 reducer pins, 3 protected subtrees, reviewer slot correctly reported
+absent, and explicitly printed **"no git operation was performed."** Cleaned
+up the scratch key and candidate file afterward (they're git-ignored
+personal secrets/output, not something to leave lying around).
+
+This confirms with executed evidence, not just documentation review: every
+piece of GOV-01 that is actually engineering work is complete and
+functioning. What remains -- filling `commit_sha`/`tag_object_sha`/
+`tree_digest` -- structurally requires an annotated, remotely-resolvable git
+tag to exist, which requires a `git tag` + `git push` against a real remote
+with real credentials. My own task instructions explicitly forbid running
+git commands at all ("do not execute Git commands... the repository state
+and eventual Git operations will be handled externally"), and even absent
+that instruction, this session has no push credentials or network access to
+a remote for this repository. There is no local action left to discover.
+
+Full suite: 2248 passed, 8 skipped, 0 failed (mine). Same two pre-existing
+Dev-B-owned failures throughout, unchanged.

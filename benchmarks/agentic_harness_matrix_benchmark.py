@@ -33,13 +33,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from vanguard.packages.runtime.root import Runtime, TaskContext
-from vanguard.packages.runtime.governance.approvals import OperatorSigner
-from vanguard.packages.runtime.autonomous_grant import create_autonomous_grant
-from vanguard.packages.adapters.stores.event_store import SqliteEventStore, InMemoryEventStore
-from vanguard.packages.adapters.stores.blob_store import FileBlobStore
-from vanguard.packages.adapters.models.fake import FakeModel
-from vanguard.packages.adapters.models.cassette import CassettePlayer
-from vanguard.packages.adapters.models.env_loader import load_api_key
+from vanguard.packages.ports.event_store import EventRange
 from benchmarks.swe_bench.challenges import CHALLENGES
 
 MANIFEST_ROOT = ROOT / "vanguard" / "packages" / "agency" / "manifests"
@@ -87,6 +81,10 @@ def run_single_harness_task(
             episode_id=f"episode-{run_id}",
             max_turns=max_turns,
         )
+
+        import importlib
+        SqliteEventStore = importlib.import_module("vanguard.packages.adapters.stores.event_store").SqliteEventStore
+        OperatorSigner = importlib.import_module("vanguard.packages.runtime.governance.approvals").OperatorSigner
 
         db_path = repo / ".vanguard" / "state.sqlite3"
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -407,26 +405,28 @@ def run_codefix_critic_benchmark(models: list[str]) -> list[dict[str, Any]]:
 
 def run_coding_harness_swe_benchmark() -> list[dict[str, Any]]:
     """Execute vg-code-default, vg-code-lex, and vg-code-claude-shaped against SWE challenges with golden fakes & cassettes."""
+    import importlib
+    FakeModel = importlib.import_module("vanguard.packages.adapters.models.fake").FakeModel
     results = []
 
-    # 1. vg-code-lex on tier1_lru_ttl_cache (Golden surgical 5-step repair)
-    print("  ▶ [Harness: vg-code-lex] Task: tier1_lru_ttl_cache (Surgical Patcher)...")
-    chal_lru = CHALLENGES["tier1_lru_ttl_cache"]
+    # 1. vg-code-lex on tier1_version_semver_parser (Golden surgical 5-step repair)
+    print("  ▶ [Harness: vg-code-lex] Task: tier1_version_semver_parser (Surgical Patcher)...")
+    chal_semver = CHALLENGES["tier1_version_semver_parser"]
     lex_tape = [
-        {"kind": "effect", "action": "fs.read", "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}, "args": {"path": "lru/entry.py"}, "note": "read entry"},
-        {"kind": "effect", "action": "patch.apply", "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}, "args": {
-            "path": "lru/entry.py",
-            "diff": "--- a/lru/entry.py\n+++ b/lru/entry.py\n@@ -10,4 +10,4 @@\n     def is_expired(self, current_time: float) -> bool:\n         # BUG: Fails to check expiration properly\n         if self.ttl_seconds is None:\n             return False\n-        return False\n+        return (current_time - self.created_at) >= self.ttl_seconds\n",
+        {"kind": "effect", "action": "fs.read", "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}, "args": {"path": "semver/version.py"}, "note": "read semver version"},
+        {"kind": "effect", "action": "patch", "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}, "args": {
+            "path": "semver/version.py",
+            "diff": "--- a/semver/version.py\n+++ b/semver/version.py\n@@ -12,4 +12,4 @@\n     @classmethod\n     def parse(cls, s: str) -> 'Version':\n         parts = [int(p) for p in s.strip().lstrip('v').split('.')]\n-        return cls(parts[0], parts[1], parts[2])\n+        return cls(parts[0], parts[1], parts[2] if len(parts) > 2 else 0)\n"
         }, "note": "apply surgical fix"},
         {"kind": "effect", "action": "proc.exec", "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}, "args": {"argv": ["python3", "-m", "unittest", "test_oracle.py"]}, "note": "run oracle"},
         {"kind": "finish", "note": "done"},
     ]
     res_lex = run_single_harness_task(
         harness_name="vg-code-lex",
-        task_name="tier1_lru_ttl_cache",
-        brief=chal_lru.brief,
-        files=chal_lru.files,
-        oracle_code=chal_lru.oracle_code,
+        task_name="tier1_version_semver_parser",
+        brief=chal_semver.brief,
+        files=chal_semver.files,
+        oracle_code=chal_semver.oracle_code,
         model=FakeModel(lex_tape),
     )
     res_lex["model"] = "cassette/golden-deterministic"

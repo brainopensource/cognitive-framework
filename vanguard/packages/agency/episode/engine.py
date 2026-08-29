@@ -309,8 +309,8 @@ class EpisodeEngine:
             # provider repeats the identical malformed output until the
             # no-progress bound abandons the run (`ADR-0106 §3`).
             recovery_feedback = {
-                "reason": decision.retry_reason,
                 **dict(decision.retry_feedback),
+                "reason": decision.retry_reason,
             }
             if decision.continuation:
                 base_tokens = int(base_sampling.get("maxTokens", 4096) or 4096)

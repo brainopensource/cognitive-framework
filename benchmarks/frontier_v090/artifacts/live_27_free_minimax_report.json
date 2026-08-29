@@ -11,7 +11,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Easy",
-      "elapsed_s": 1.33,
+      "elapsed_s": 34.25,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -19,14 +19,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:92dc7115a80c6c6d71a84d2958fb4f40bff95562d1651a845b7a2c8cf01d31c2",
+        "stderr_digest": "sha256:5c5fa1565f7a3ca371d4857573225b02bb868ec2caeb8d51e7e7c8335b5bc601",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 205.002
+        "wall_ms": 200.04
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 1,
       "preset": "vg-code-v090-react-control",
-      "row_digest": "sha256:ace53354a7f067c6d197ccaf8850744e29afcbb50684587477635272818f60a5",
+      "row_digest": "sha256:f69f3df2ea2c7dcb5289699fe6de57c8ad0569a9ed0e1e6a7f896ed6b06d9f2f",
       "run_id": "v090-01",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -35,10 +35,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 773,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 43544
       }
     },
     {
@@ -49,7 +49,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Medium",
-      "elapsed_s": 1.02,
+      "elapsed_s": 23.72,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -57,14 +57,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:e7f56467a6ad7c881a070b3ec9591ceaf834659628151ba67935b357047236c1",
+        "stderr_digest": "sha256:3b4d3d65dcfdbc4c9cbcdea34d309d00dc1375b8e3f4321dc17ae8025b6840b2",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.488
+        "wall_ms": 53.044
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 2,
       "preset": "vg-code-v090-react-control",
-      "row_digest": "sha256:61cbf13232432e6d34cd3bdcfc9c498b7baf636300868682f1c89a0c7920d1bf",
+      "row_digest": "sha256:ec78c87e28238817e7fd8d14499541a60259d9d968a0b61e170b56b15b5b9f39",
       "run_id": "v090-02",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -73,48 +73,50 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 363,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 22892
       }
     },
     {
-      "after_digest": "sha256:bf687328090cb496a1e2fd0e2af45d64a6eb740e7b0d11228cb9b3bdec065726",
+      "after_digest": "sha256:3f57712a6a48fb56a47ef7fc6dcc11c59519ec2945b46d7588302aab3d8bd14f",
       "before_digest": "sha256:bf687328090cb496a1e2fd0e2af45d64a6eb740e7b0d11228cb9b3bdec065726",
       "challenge_id": "tier3_token_bucket",
       "challenge_slot": "CODE-H",
-      "changed_files": [],
+      "changed_files": [
+        "ratelimit/bucket.py"
+      ],
       "class_name": "Coding",
       "difficulty": "Hard",
-      "elapsed_s": 0.93,
+      "elapsed_s": 38.31,
       "non_empirical": false,
       "oracle": {
-        "exit_code": 1,
+        "exit_code": 0,
         "instrument_valid": true,
         "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
-        "reason": "oracle_failed",
-        "result": false,
-        "stderr_digest": "sha256:7b4d79a475274b277cbc2d14be181c9cfbc0ef20dea334473e7f080767823375",
+        "reason": null,
+        "result": true,
+        "stderr_digest": "sha256:e87a3624b9ff6e37854d66ac2b9be4b54fd9776a804b023f94a14be04934c3a8",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 48.381
+        "wall_ms": 109.656
       },
       "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
       "ordinal": 3,
       "preset": "vg-code-v090-react-control",
-      "row_digest": "sha256:234b7c2248a6f94b96e8dbe8807dc951790cb735ce32ed71f78d5a67cba2f0be",
+      "row_digest": "sha256:0ae73afcc5133dce066232566fd0a08b66bae27a5c19a0dd6065a58e7a4192cd",
       "run_id": "v090-03",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:4950f3928457ecb1e94893d7341bb30b1dfcb25be7a17b9f77a60ae8b098f07e",
-      "terminal": "NO_PATCH",
-      "terminal_reason": "completed_without_source_patch",
+      "terminal": "COMPLETED",
+      "terminal_reason": "completed_patch_passed_oracle",
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 1334,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 47937
       }
     },
     {
@@ -125,7 +127,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Easy",
-      "elapsed_s": 0.78,
+      "elapsed_s": 41.18,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -133,14 +135,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:4ac485f7c7292272f2f45e0dc1eb27a42b3df837030062118b1290f4afe0442f",
+        "stderr_digest": "sha256:16da559774b22436510594c713ae4a3460cefe7f5148cdad289f7d83116fc0f0",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 210.414
+        "wall_ms": 204.495
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 4,
       "preset": "vg-code-v090-claude-shaped",
-      "row_digest": "sha256:8bdaa79708a0f48c966fac7b0646b5de549a7323de5aa2716b2af1ce62594d97",
+      "row_digest": "sha256:34d639d068083fec53d7953c6cacb4e7d2075aca48aea9bf1bf2da9aa6b27ce7",
       "run_id": "v090-04",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -149,10 +151,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 694,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 56980
       }
     },
     {
@@ -163,7 +165,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Medium",
-      "elapsed_s": 0.87,
+      "elapsed_s": 38.1,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -171,14 +173,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:de91a2e8e407e48d2a12be6128e9953a0fb0e20d07d53c80eb4cbc60ab7bb2e2",
+        "stderr_digest": "sha256:ad00254143c2660f00afbf8f8d1173896f28780672d4773296dea70fa8553440",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 52.427
+        "wall_ms": 50.911
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 5,
       "preset": "vg-code-v090-claude-shaped",
-      "row_digest": "sha256:9087f53d29b7c7f1520dfde2001e0013dcddca0658bc9a89da157b5d55d5e2a7",
+      "row_digest": "sha256:69a33aeb3d1b34657d6378026f4400822478b7781fd7df2848abf809d057f62c",
       "run_id": "v090-05",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -187,10 +189,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 697,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 50258
       }
     },
     {
@@ -201,7 +203,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Hard",
-      "elapsed_s": 0.82,
+      "elapsed_s": 31.66,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -209,14 +211,14 @@
         "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:ca69b2b5c82578ee63fd408a0aedea02fe093c95452e9d7f6964f52796a6df5a",
+        "stderr_digest": "sha256:ef20c6bf1be708bebf1c7793adc28f925956f06d93700d6813f024ccd1a1b20c",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 50.944
+        "wall_ms": 49.966
       },
       "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
       "ordinal": 6,
       "preset": "vg-code-v090-claude-shaped",
-      "row_digest": "sha256:94938239b124052a1a850a82d9c802c2e16416a99394d0a1b45f7b25bb0f20f0",
+      "row_digest": "sha256:01920b4797c7c3f89cd6fccef56f435c0cee197372a26e82d6c4de88a88a8967",
       "run_id": "v090-06",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:4950f3928457ecb1e94893d7341bb30b1dfcb25be7a17b9f77a60ae8b098f07e",
@@ -225,10 +227,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 621,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 41508
       }
     },
     {
@@ -239,7 +241,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Easy",
-      "elapsed_s": 1.06,
+      "elapsed_s": 29.63,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -247,14 +249,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:bb712aba9c8d7c3eed3f7ae40e56c1b4f020198d98d4c8df9cddaec3d4822119",
+        "stderr_digest": "sha256:2227cc66d3ce4a892fa5b7023935bf8d5122eaf60c117fef12c9005ccf557466",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 203.436
+        "wall_ms": 202.223
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 7,
       "preset": "vg-code-v090-opencode-shaped",
-      "row_digest": "sha256:0a4b87729f90fb28f6a3641fb39f6d2f51e4a0e29f0adc6865d04af3a154ce90",
+      "row_digest": "sha256:edbc2cd693ddf554b0bbe32f83b74b251045831f2f99fb100624a98818f29efb",
       "run_id": "v090-07",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -263,10 +265,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 484,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 33115
       }
     },
     {
@@ -277,7 +279,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Medium",
-      "elapsed_s": 0.69,
+      "elapsed_s": 17.05,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -285,14 +287,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:020d1643e063bc092f1b18e2cce0a6bccac08d313d76187055644cbb37c7a60e",
+        "stderr_digest": "sha256:0ccf95d990bea12e295f82c21084d37d3b018e3b584a5a9eb9a407af647ded4c",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 53.063
+        "wall_ms": 53.848
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 8,
       "preset": "vg-code-v090-opencode-shaped",
-      "row_digest": "sha256:98d70e22aa97bce14123ffc092ac01154cb040a5f2705980ad87d280e4f51ad2",
+      "row_digest": "sha256:988158ce50dcd9c341ba2d1eb4d592376536f65b2dfe0592b05a86cdd3e051d1",
       "run_id": "v090-08",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -301,10 +303,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 193,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 11385
       }
     },
     {
@@ -315,7 +317,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Hard",
-      "elapsed_s": 0.67,
+      "elapsed_s": 27.1,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -323,14 +325,14 @@
         "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:6d2074b69e6a391ff368995034ca0ea45abf096f8274718c8c4dff1a84016ba0",
+        "stderr_digest": "sha256:6df7025c5ee3e89940766a824032991d1b689f3435f3579ab22611679f92ceb0",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 52.039
+        "wall_ms": 52.214
       },
       "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
       "ordinal": 9,
       "preset": "vg-code-v090-opencode-shaped",
-      "row_digest": "sha256:7c1b64cce9f65ede893a06a21308ec95df5aba3fe3b2073fd434a8fdf446c02c",
+      "row_digest": "sha256:f8feef41243b781f18084ad34002c491517ac534988a2fd68f7f135b21797976",
       "run_id": "v090-09",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:4950f3928457ecb1e94893d7341bb30b1dfcb25be7a17b9f77a60ae8b098f07e",
@@ -339,10 +341,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 443,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 30484
       }
     },
     {
@@ -353,7 +355,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Easy",
-      "elapsed_s": 0.86,
+      "elapsed_s": 2.89,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -361,9 +363,9 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:bd6e958eebd8157e2436240945c15b35024386968dbdbcac5e7c0115a4b83d43",
+        "stderr_digest": "sha256:334b05b62f50b71c7198b2303a17e945eb2be627ed7b1ab161519982760388c6",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 212.207
+        "wall_ms": 201.85
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 10,
@@ -391,7 +393,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Medium",
-      "elapsed_s": 0.67,
+      "elapsed_s": 2.7,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -399,9 +401,9 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:b335c41ee7bb736bcb1454b3f83d50cbb7e01df2a5ae1465037ecb6f227a5b56",
+        "stderr_digest": "sha256:6949e4ce67bcd6b7e85369d5bda5aea830ad5f85bc3722c6b001a46efc713ef4",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 53.796
+        "wall_ms": 53.718
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 11,
@@ -429,7 +431,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Hard",
-      "elapsed_s": 0.9,
+      "elapsed_s": 3.08,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -437,9 +439,9 @@
         "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:77b14e3e437e11bb3ad146a495c79a312cdcf1033d5c2565d97f1fcb369ec2d1",
+        "stderr_digest": "sha256:f5ef8a3fb0c4895500a3b25c9d827524ba5d2b404cfceec859b34a116009a142",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.208
+        "wall_ms": 57.589
       },
       "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
       "ordinal": 12,
@@ -467,7 +469,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Easy",
-      "elapsed_s": 0.82,
+      "elapsed_s": 21.85,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -475,14 +477,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:578226d0d1c28ee3c9b6787f6050b0e1b10b5ab26fe98658f9a3c23f9dc475e0",
+        "stderr_digest": "sha256:6b5b2fc7bd33634b42f24fe98df47456ee85d63aa86adac9fc62c31d0b933d31",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 206.386
+        "wall_ms": 201.353
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 13,
       "preset": "vg-code-v090-lim-falsifier",
-      "row_digest": "sha256:730aef0cf134c5aa932fac26f25a646d649b7459e171559bcc715d7056f185d3",
+      "row_digest": "sha256:056e4637a07cee14c252b89292fa5c6eaa267b0a9d3d977bb7b4fc92e1c655be",
       "run_id": "v090-13",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -491,10 +493,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 333,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 19781
       }
     },
     {
@@ -505,7 +507,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Medium",
-      "elapsed_s": 0.62,
+      "elapsed_s": 14.9,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -513,14 +515,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:1d15f15fadb7bceabf95740c57f76e879ac04f2fd7a0a626a801e3ecaf305dc1",
+        "stderr_digest": "sha256:d808e45df39c96ea8e62b95bdf0f9f4f088f0ceccb7b9cdb58f41a47739f0f06",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.092
+        "wall_ms": 52.234
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 14,
       "preset": "vg-code-v090-lim-falsifier",
-      "row_digest": "sha256:bbe16c7e7d6ae1921f9aa385dbcbb776f9911340551f3460e6bbaa760b1abef7",
+      "row_digest": "sha256:03af3a583e9575ffdf3a353cd88b9bd7c8a485c4a2acfc35c1f43dc6b87539d7",
       "run_id": "v090-14",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -529,10 +531,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 192,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 9052
       }
     },
     {
@@ -543,7 +545,7 @@
       "changed_files": [],
       "class_name": "Coding",
       "difficulty": "Hard",
-      "elapsed_s": 0.67,
+      "elapsed_s": 35.61,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -551,14 +553,14 @@
         "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:55baa014eb8c911cc7b58dbedc9415f42ed1abb513ca430a0ce455711627a1cf",
+        "stderr_digest": "sha256:ab8734049d14dc8b45eb515989e2a8b3b9585baacab9b1b2c378de1d4925572a",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 48.911
+        "wall_ms": 53.97
       },
       "oracle_digest": "sha256:82b6f5e77b15087c54eeec10842890e7ad98f5e47f3f1cb0b76d2b4bdbc55ad2",
       "ordinal": 15,
       "preset": "vg-code-v090-lim-falsifier",
-      "row_digest": "sha256:68f7ee83d5b955e835fbf375f6c59a6f8ee81db7ac554b5fc09a438180e9121b",
+      "row_digest": "sha256:707e7eeed22335909d5c29ef441d2d6bdf8c5fd45e7ee69363bc1cb89fb33299",
       "run_id": "v090-15",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:4950f3928457ecb1e94893d7341bb30b1dfcb25be7a17b9f77a60ae8b098f07e",
@@ -567,10 +569,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 1330,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 42658
       }
     },
     {
@@ -581,7 +583,7 @@
       "changed_files": [],
       "class_name": "Tutor",
       "difficulty": "Easy",
-      "elapsed_s": 0.76,
+      "elapsed_s": 47.53,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -589,14 +591,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:c398da8c0dfca554418467aa1baa69e184a1e7fe146a1cf8ee3ecb727dc65896",
+        "stderr_digest": "sha256:878c932876c888c525df688af13a11e4e001ecb56d9b9fe9a31282e6dd9d7309",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 204.395
+        "wall_ms": 204.767
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 16,
       "preset": "vg-tutor-v090-v1-read-search",
-      "row_digest": "sha256:e4cbb18d460b111372690f46784f1f0403b0a7dd40f5e7a9cba1d263a8640be6",
+      "row_digest": "sha256:de07b6764c189b075aa75fa459f236afd6f0aba553fed92f73a30b85041ee3d6",
       "run_id": "v090-16",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -605,10 +607,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 2637,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 23456
       }
     },
     {
@@ -619,7 +621,7 @@
       "changed_files": [],
       "class_name": "Tutor",
       "difficulty": "Hard",
-      "elapsed_s": 0.6,
+      "elapsed_s": 75.92,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -627,14 +629,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:dd3257ff4f593ddfc6d2051f857cf8869473ace043ae16498287bd4eba02b6e9",
+        "stderr_digest": "sha256:a9d2e273b7995ff5ace98e39fccef8561e4a1011660665b5c7a737dbc60bf98e",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 48.537
+        "wall_ms": 64.459
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 17,
       "preset": "vg-tutor-v090-v1-read-search",
-      "row_digest": "sha256:566d07e32ba51f9302956fcb94d685d94a577901cf0b40b28fe7080ce33fb907",
+      "row_digest": "sha256:2c8a2d6f059a644c07e217edc5f75c794885235ee26f5afbf6ed15e96675d90c",
       "run_id": "v090-17",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -643,10 +645,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 5199,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 46217
       }
     },
     {
@@ -657,7 +659,7 @@
       "changed_files": [],
       "class_name": "Tutor",
       "difficulty": "Easy",
-      "elapsed_s": 0.78,
+      "elapsed_s": 62.48,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -665,14 +667,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:bf49a7aec65f0ce5132e947163997fb9128a17488e26e80c8adb7797a97dabe3",
+        "stderr_digest": "sha256:c7960bc1f1d3f9518865d2163aed94d5e32e0dc5483ddcb0af1b982d046a9985",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 201.576
+        "wall_ms": 202.194
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 18,
       "preset": "vg-tutor-v090-v2-evidence-graph",
-      "row_digest": "sha256:1dea5458edf5f096bde2cb7f872caa480dcd91400e51d9892e9ce731ad9b8fb0",
+      "row_digest": "sha256:2398e30c80210820a0ca12bb83068ab46a60e7ec6cc46cfa113c8aa68caf3498",
       "run_id": "v090-18",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -681,10 +683,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 3592,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 32062
       }
     },
     {
@@ -695,7 +697,7 @@
       "changed_files": [],
       "class_name": "Tutor",
       "difficulty": "Hard",
-      "elapsed_s": 0.6,
+      "elapsed_s": 74.76,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -703,14 +705,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:4bc3b507390be53ed7373d13d4e7cdc429ba1763a794780d8c7e273d59ca81b6",
+        "stderr_digest": "sha256:f8247113b109e20022cc4dd2dfe70e8002d1846695083cd136849d0f965928cd",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 54.134
+        "wall_ms": 50.624
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 19,
       "preset": "vg-tutor-v090-v2-evidence-graph",
-      "row_digest": "sha256:ba3dbceeed7c31f4bf384bd7d2defe1ad4799e00cf10f8f354e907006b746e85",
+      "row_digest": "sha256:34a9da0ee438289f833af65cb54fca2b4b5a420e461800ba3759b66c5947e70b",
       "run_id": "v090-19",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -719,10 +721,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 3376,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 30706
       }
     },
     {
@@ -733,7 +735,7 @@
       "changed_files": [],
       "class_name": "Research",
       "difficulty": "Easy",
-      "elapsed_s": 0.77,
+      "elapsed_s": 57.99,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -741,14 +743,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:a031d7d2ae6266c5f32033a24e1243f54c0665c6314be6f8b8bf5c302ea78550",
+        "stderr_digest": "sha256:b82a1c0587f9e8b7f4db5fdf5a8c8882e1fa03677e1101c993e73c9053b71c2d",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 206.012
+        "wall_ms": 211.54
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 20,
       "preset": "vg-research-v090-v1-local",
-      "row_digest": "sha256:4effcfeb538ba404ca28a6bb14c130ad5529f3894b0645d0a534d7f1b60ee732",
+      "row_digest": "sha256:7d287a4d2d42773d302720864bf2a84146f1e255de5962e0982af32bd8e01af5",
       "run_id": "v090-20",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -757,10 +759,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 2566,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 51063
       }
     },
     {
@@ -771,7 +773,7 @@
       "changed_files": [],
       "class_name": "Research",
       "difficulty": "Hard",
-      "elapsed_s": 0.6,
+      "elapsed_s": 60.76,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -779,14 +781,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:c9f1e9ae16029ab36a9eb004f430f103637566df51047e16a29a45d2ba705c7d",
+        "stderr_digest": "sha256:9e5b4296ac4c5a0da7e9be65787fe5d7182d679354295f8be8097d3469817cf4",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.916
+        "wall_ms": 54.872
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 21,
       "preset": "vg-research-v090-v1-local",
-      "row_digest": "sha256:40b7ee7223b24b3f4717edab9a79046722ca65575d4f75b3cf729710e396488c",
+      "row_digest": "sha256:665f25289929661c083a2adf9ff27fb71cf81470419d7d122f3d4ebbccedb5f9",
       "run_id": "v090-21",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -795,10 +797,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 2801,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 51589
       }
     },
     {
@@ -809,7 +811,7 @@
       "changed_files": [],
       "class_name": "Research",
       "difficulty": "Easy",
-      "elapsed_s": 0.76,
+      "elapsed_s": 48.38,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -817,14 +819,14 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:d30053c3eddd4ec9e24d0056a1c5850b3721ef875a237869212925d7347add9e",
+        "stderr_digest": "sha256:23ce07b426376de96051f5216db64119fff72ed77f83fd8551515b7f0a10bdc2",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 206.459
+        "wall_ms": 202.44
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 22,
       "preset": "vg-research-v090-v2-web-corroborated",
-      "row_digest": "sha256:539490c1da710455e39945650431783a0efb48fcb796e5880a583373d65bd6d2",
+      "row_digest": "sha256:809e5f496196a24075ccd94969340ff89d57d4c75ffe50f14ccc8e0e46c87077",
       "run_id": "v090-22",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
@@ -833,10 +835,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 1172,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 44526
       }
     },
     {
@@ -847,7 +849,7 @@
       "changed_files": [],
       "class_name": "Research",
       "difficulty": "Hard",
-      "elapsed_s": 0.6,
+      "elapsed_s": 85.27,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -855,14 +857,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:42ee9f4bb3ddc9c6470a81586d0bf38cd3a1f7b9c29d38da95adfa9c051548a8",
+        "stderr_digest": "sha256:19f8a9dd762f8c218194b8aa12831215e2798a1ac29158dafa155ca6fbc70608",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.67
+        "wall_ms": 53.738
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 23,
       "preset": "vg-research-v090-v2-web-corroborated",
-      "row_digest": "sha256:631264a01714ba8198cb7766b7773a0b70f5d3d068dd5cfd73a87f79d7aea924",
+      "row_digest": "sha256:41136b6c8aa099fa4e22eb60019a3b4db6ea83150c2e68a1d9acaa69743d14a0",
       "run_id": "v090-23",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -871,48 +873,50 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 5877,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 49457
       }
     },
     {
-      "after_digest": "sha256:66793e685e7d299b35c6581c378ce602baccaa7de01288639ec2d744680cb4b5",
+      "after_digest": "sha256:10f514bbd5553a16a50f06fba4c905f027f587fbbd40e9774bde7aaa753e32dc",
       "before_digest": "sha256:66793e685e7d299b35c6581c378ce602baccaa7de01288639ec2d744680cb4b5",
       "challenge_id": "tier1_lru_ttl_cache",
       "challenge_slot": "BUG-E",
-      "changed_files": [],
+      "changed_files": [
+        "lru/entry.py"
+      ],
       "class_name": "Bugfix",
       "difficulty": "Easy",
-      "elapsed_s": 0.79,
+      "elapsed_s": 33.13,
       "non_empirical": false,
       "oracle": {
-        "exit_code": 1,
+        "exit_code": 0,
         "instrument_valid": true,
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
-        "reason": "oracle_failed",
-        "result": false,
-        "stderr_digest": "sha256:89f1c4a9a29787ce4d3395f60c6196e0a040c54e34a1c225054fa7318fe3cbaf",
+        "reason": null,
+        "result": true,
+        "stderr_digest": "sha256:8609c9264654ba0859f7e2a0d8c9d47bd9cd70efa5f62ea9fcdfa482740bfbf6",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 203.319
+        "wall_ms": 204.975
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 24,
       "preset": "vg-bugfix-v090-v1-direct",
-      "row_digest": "sha256:0cf6fa6be8341fd3ce02585100374d28bab831a8bf82b3cc52ad08bda1fdf865",
+      "row_digest": "sha256:6d49a88cb326281f12c3745e81b805720e32c14dee94888e1fa84d116c7642cd",
       "run_id": "v090-24",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
-      "terminal": "NO_PATCH",
-      "terminal_reason": "completed_without_source_patch",
+      "terminal": "COMPLETED",
+      "terminal_reason": "completed_patch_passed_oracle",
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 715,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 42097
       }
     },
     {
@@ -923,7 +927,7 @@
       "changed_files": [],
       "class_name": "Bugfix",
       "difficulty": "Hard",
-      "elapsed_s": 0.65,
+      "elapsed_s": 42.89,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -931,14 +935,14 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:6824c96014860ede9446debfe3359ea520d9fc5202e108106f0dee79d49d8a84",
+        "stderr_digest": "sha256:0f5a14313b1e3c87b84ae35a061258bc88fd2e035ba62e666782049828c7b79f",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 50.833
+        "wall_ms": 49.288
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 25,
       "preset": "vg-bugfix-v090-v1-direct",
-      "row_digest": "sha256:6635a07b38692dfc101062d6f4af32f39024710b2fc0c6a586de9789e778799c",
+      "row_digest": "sha256:4647169829c1388f9fdd22068a27dd2784e77a65289180b5b6f606a0c9a22d85",
       "run_id": "v090-25",
       "schema": "aether.frontier-benchmark/2",
       "task_digest": "sha256:47f19bca3643ef8997299aaac3902423750e58fc29e8a178c37c9dd419a0fcbe",
@@ -947,10 +951,10 @@
       "trajectory_digest": null,
       "usage": {
         "cached_tokens": null,
-        "completion_tokens": null,
+        "completion_tokens": 456,
         "cost_provenance": "unknown",
         "cost_usd": null,
-        "prompt_tokens": null
+        "prompt_tokens": 38125
       }
     },
     {
@@ -961,7 +965,7 @@
       "changed_files": [],
       "class_name": "Bugfix",
       "difficulty": "Easy",
-      "elapsed_s": 0.79,
+      "elapsed_s": 3.42,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -969,9 +973,9 @@
         "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:5ea763eb9ee2637ecfc54a29b79aea0c850990ef1596828c00fbb42310dc2be0",
+        "stderr_digest": "sha256:10a6939738eb2625e0caf4664668286cd7e662c12da08fd148fa18d9e7b3afe3",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 207.952
+        "wall_ms": 209.958
       },
       "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
       "ordinal": 26,
@@ -999,7 +1003,7 @@
       "changed_files": [],
       "class_name": "Bugfix",
       "difficulty": "Hard",
-      "elapsed_s": 0.9,
+      "elapsed_s": 2.44,
       "non_empirical": false,
       "oracle": {
         "exit_code": 1,
@@ -1007,9 +1011,9 @@
         "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
         "reason": "oracle_failed",
         "result": false,
-        "stderr_digest": "sha256:4e90b810023733c051d95ff48e6344e09deac7af8761cdc3e3c881de3380a04a",
+        "stderr_digest": "sha256:3ac89e19008288b7c96dcaea3cff4a58e3fd978847aa77806d0b9603bf839985",
         "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "wall_ms": 51.06
+        "wall_ms": 101.561
       },
       "oracle_digest": "sha256:98e248a09ea5951b19f2146afc47b8842f38d4293c284d3780d2ca2159a933ab",
       "ordinal": 27,
@@ -1031,5 +1035,5 @@
     }
   ],
   "schema": "aether.frontier-benchmark-live-report/2",
-  "total_tokens_observed": 0
+  "total_tokens_observed": 854740
 }

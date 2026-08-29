@@ -1,0 +1,26 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "synthetic_failing_forensic_generator",
+  "id": "t4-fail-dsml_markdown_protocol_drift-v03",
+  "n_files": 3,
+  "n_turns": 1,
+  "tier": 4,
+  "title": "Provider Protocol Drift: Raw Markdown Diff Block in Text Body (Issue E) (Variant 3)",
+  "turns": [
+    {
+      "content": "Here is the diff:\n```diff\n--- a/src/helper.py\n+++ b/src/helper.py\n@@ -2,2 +2,2 @@\n-    return f\"RES: {val}\"\n+    return f\"RES: {val}_MODIFIED\"\n```",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 0
+    }
+  ],
+  "workspace": {
+    "src/core.py": "# Target Module\ndef calculate_metric(x):\n    return x * 2\n",
+    "src/helper.py": "# Secondary Implicated Module\ndef format_output(val):\n    return f\"RES: {val}\"\n",
+    "tests/test_core.py": "import unittest\nfrom src.core import calculate_metric\nfrom src.helper import format_output\n\nclass TestLogic(unittest.TestCase):\n    def test_run(self):\n        self.assertEqual(calculate_metric(5), 10)\n        self.assertEqual(format_output(10), \"RES: 10_MODIFIED\")\nif __name__ == \"__main__\": unittest.main()\n"
+  }
+}

@@ -284,38 +284,51 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
-    if "messages" in context:
-        raw_list = [dict(item) for item in context["messages"]]
-        merged: list[dict[str, Any]] = []
-        for msg in raw_list:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            if merged and merged[-1]["role"] == "system" and role == "system":
-                merged[-1]["content"] += "\n\n" + str(content)
-            else:
-                preserved = dict(msg)
-                preserved["role"] = role
-                preserved["content"] = content if content is None else str(content)
-                merged.append(preserved)
-        return merged
+    if "messages" in context and isinstance(context["messages"], list):
+        return [dict(item) for item in context["messages"]]
+
     messages: list[dict[str, Any]] = []
     system = context.get("system")
     if isinstance(system, str) and system:
         messages.append({"role": "system", "content": system})
+
     for block in context.get("blocks") or ():
-        label = block.get("label", "")
-        content = block.get("content", "")
-        messages.append({"role": "user", "content": f"[{label}] {content}"})
+        if isinstance(block, Mapping):
+            layer = block.get("layer")
+            label = block.get("label", "")
+            content = str(block.get("content") or block.get("text") or "")
+            role = block.get("role")
+
+            if layer == "L1" or label == "system-core":
+                if not any(m.get("role") == "system" for m in messages):
+                    messages.append({"role": "system", "content": content})
+                else:
+                    for m in messages:
+                        if m.get("role") == "system":
+                            if content not in m["content"]:
+                                m["content"] += "\n\n" + content
+                            break
+            elif layer == "L5" and role in {"assistant", "tool"}:
+                msg_entry: dict[str, Any] = {"role": role, "content": content}
+                if "tool_calls" in block:
+                    msg_entry["tool_calls"] = block["tool_calls"]
+                if "tool_call_id" in block:
+                    msg_entry["tool_call_id"] = block["tool_call_id"]
+                messages.append(msg_entry)
+            else:
+                messages.append({"role": "user", "content": f"[{label}] {content}" if label else content})
+
     for item in context.get("history") or ():
         if isinstance(item, str):
             messages.append({"role": "user", "content": item})
         elif isinstance(item, Mapping):
             messages.append(dict(item))
+
     for step in context.get("history_steps") or ():
         if not isinstance(step, Mapping):
             continue
         if step.get("type") == "assistant_tool_call":
-            messages.append({"role": "assistant", "content": step.get("thought"),
+            messages.append({"role": "assistant", "content": step.get("thought") or "",
                              "tool_calls": [{"id": step.get("call_id", "call_0"),
                                              "type": "function", "function": {
                                                  "name": step.get("action", ""),
@@ -323,6 +336,7 @@ def _messages(context: ContextBundle) -> list[dict[str, Any]]:
         elif step.get("type") == "tool_response":
             messages.append({"role": "tool", "tool_call_id": step.get("call_id", "call_0"),
                              "content": str(step.get("result_text", ""))})
+
     if not messages:
         messages.append({"role": "user", "content": ""})
     return messages
@@ -396,10 +410,10 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
         return None
     for raw in raw_calls:
         if not isinstance(raw, Mapping):
-            return None
+            continue
         function = raw.get("function") if isinstance(raw.get("function"), Mapping) else {}
         if not function:
-            return None
+            continue
         arguments: Any = function.get("arguments", {})
         if isinstance(arguments, str):
             try:
@@ -409,26 +423,46 @@ def _parse_proposal(body: Mapping[str, Any]) -> dict[str, Any] | None:
                     import ast
                     arguments = ast.literal_eval(arguments)
                 except Exception:
-                    return None
+                    arguments = {}
         if not isinstance(arguments, Mapping):
-            return None
+            arguments = {}
         name = function.get("name")
-        call_id = raw.get("id")
-        if not isinstance(name, str) or not name or not isinstance(call_id, str) or not call_id:
-            return None
-        tool_calls.append(
-            {
-                "id": call_id,
-                "name": name,
-                "arguments": dict(arguments),
-            }
-        )
-    if not tool_calls and text and ("DSML" in text or "invoke" in text):
-        clean_text, dsml_calls = _extract_dsml_tool_calls(text)
-        if dsml_calls:
-            tool_calls.extend(dsml_calls)
-            text = clean_text
-    return {"text": text, "toolCalls": tool_calls}
+        call_id = raw.get("id") or "call_0"
+        if isinstance(name, str) and name:
+            tool_calls.append(
+                {
+                    "id": str(call_id),
+                    "name": name,
+                    "arguments": dict(arguments),
+                }
+            )
+
+    from ...domain.transforms.protocol.response_wrangler import ResponseWrangler
+    wrangled = ResponseWrangler().wrangle(text, tool_calls)
+
+    parsed_calls: list[dict[str, Any]] = []
+    for call in wrangled.tool_calls:
+        func = call.get("function") if isinstance(call.get("function"), dict) else {}
+        name = call.get("name") or func.get("name")
+        call_id = call.get("id") or "call_0"
+        raw_args = call.get("arguments") if "arguments" in call else func.get("arguments")
+        if isinstance(raw_args, str):
+            try:
+                args_dict = json.loads(raw_args, strict=False)
+            except Exception:
+                args_dict = {}
+        elif isinstance(raw_args, dict):
+            args_dict = raw_args
+        else:
+            args_dict = {}
+        if name:
+            parsed_calls.append({
+                "id": str(call_id),
+                "name": str(name),
+                "arguments": args_dict,
+            })
+
+    return {"text": wrangled.text, "toolCalls": parsed_calls}
 
 
 def _parse_sse_stream(

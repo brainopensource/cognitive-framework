@@ -1437,6 +1437,625 @@ except urllib.error.HTTPError as exc:
                 <li><strong>Read-Only Preset Behavior:</strong> Research and Tutor presets (<code>v090-16</code> through <code>v090-22</code>) intentionally lack <code>patch.apply</code> capability by design (Invariant I-6), producing clean <code>NO_PATCH</code> verification receipts without crashes.</li>
                 <li><strong>Multi-Model Fallback Resilience:</strong> When passing fallback lists (e.g. <code>minimax-m3:free &rarr; nemotron &rarr; laguna</code>), OpenRouter cascades without dropping execution, ensuring robust end-to-end completion.</li>
             </ul>
+        <!-- Section 9: Full 27-Row Frontier Matrix Evaluation — MiniMax v3 Free (Campaign D) -->
+        <div class="section-card">
+            <h2>9. Full 27-Row Frontier Matrix Evaluation &mdash; MiniMax v3 Free (Campaign D)</h2>
+            <div class="alert-box alert-success">
+                <strong>COMPLETE ZERO-COST 27-ROW MATRIX RUN:</strong><br>
+                Executed all 27 benchmark rows using <code>minimax/minimax-m3:free</code> via OpenRouter (<code>benchmarks/frontier_v090/artifacts/live_27_free_minimax_report.json</code>). Total tokens consumed: <strong>854,740</strong> ($0.00 spend).
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Harness Preset</th>
+                            <th>Class</th>
+                            <th>Challenge ID</th>
+                            <th>Diff</th>
+                            <th>Elapsed</th>
+                            <th>Prompt Tok</th>
+                            <th>Comp Tok</th>
+                            <th>Total Tok</th>
+                            <th>Terminal Outcome</th>
+                            <th>Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>01</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Coding</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>34.25s</td>
+                            <td>43,544</td>
+                            <td>773</td>
+                            <td>44,317</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>02</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Coding</td>
+                            <td>tier2_event_bus</td>
+                            <td>Med</td>
+                            <td>23.72s</td>
+                            <td>22,892</td>
+                            <td>363</td>
+                            <td>23,255</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>03</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>Coding</td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>38.31s</td>
+                            <td>47,937</td>
+                            <td>1,334</td>
+                            <td><strong>49,271</strong></td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>04</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>41.18s</td>
+                            <td>56,980</td>
+                            <td>694</td>
+                            <td>57,674</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>05</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier2_event_bus</td>
+                            <td>Med</td>
+                            <td>38.10s</td>
+                            <td>50,258</td>
+                            <td>697</td>
+                            <td>50,955</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>06</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>31.66s</td>
+                            <td>41,508</td>
+                            <td>621</td>
+                            <td>42,129</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>07</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>29.63s</td>
+                            <td>33,115</td>
+                            <td>484</td>
+                            <td>33,599</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>08</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier2_event_bus</td>
+                            <td>Med</td>
+                            <td>17.05s</td>
+                            <td>11,385</td>
+                            <td>193</td>
+                            <td>11,578</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>09</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>Coding</td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>27.10s</td>
+                            <td>30,484</td>
+                            <td>443</td>
+                            <td>30,927</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>10</strong></td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Coding</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>2.89s</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>11</strong></td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Coding</td>
+                            <td>tier2_event_bus</td>
+                            <td>Med</td>
+                            <td>2.70s</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>12</strong></td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>Coding</td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>3.08s</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>13</strong></td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Coding</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>21.85s</td>
+                            <td>19,781</td>
+                            <td>333</td>
+                            <td>20,114</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>14</strong></td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Coding</td>
+                            <td>tier2_event_bus</td>
+                            <td>Med</td>
+                            <td>14.90s</td>
+                            <td>9,052</td>
+                            <td>192</td>
+                            <td>9,244</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>15</strong></td>
+                            <td><code>vg-code-v090-lim-falsifier</code></td>
+                            <td>Coding</td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>35.61s</td>
+                            <td>42,658</td>
+                            <td>1,330</td>
+                            <td>43,988</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>16</strong></td>
+                            <td><code>vg-tutor-v090-v1-read-search</code></td>
+                            <td>Tutor</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>47.53s</td>
+                            <td>23,456</td>
+                            <td>2,637</td>
+                            <td>26,093</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>17</strong></td>
+                            <td><code>vg-tutor-v090-v1-read-search</code></td>
+                            <td>Tutor</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>75.92s</td>
+                            <td>46,217</td>
+                            <td>5,199</td>
+                            <td>51,416</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>18</strong></td>
+                            <td><code>vg-tutor-v090-v2-evidence-graph</code></td>
+                            <td>Tutor</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>62.48s</td>
+                            <td>32,062</td>
+                            <td>3,592</td>
+                            <td>35,654</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>19</strong></td>
+                            <td><code>vg-tutor-v090-v2-evidence-graph</code></td>
+                            <td>Tutor</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>74.76s</td>
+                            <td>30,706</td>
+                            <td>3,376</td>
+                            <td>34,082</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>20</strong></td>
+                            <td><code>vg-research-v090-v1-local</code></td>
+                            <td>Research</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>57.99s</td>
+                            <td>51,063</td>
+                            <td>2,566</td>
+                            <td>53,629</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>21</strong></td>
+                            <td><code>vg-research-v090-v1-local</code></td>
+                            <td>Research</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>60.76s</td>
+                            <td>51,589</td>
+                            <td>2,801</td>
+                            <td>54,390</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>22</strong></td>
+                            <td><code>vg-research-v090-v2-web-corroborated</code></td>
+                            <td>Research</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>48.38s</td>
+                            <td>44,526</td>
+                            <td>1,172</td>
+                            <td>45,698</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>23</strong></td>
+                            <td><code>vg-research-v090-v2-web-corroborated</code></td>
+                            <td>Research</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>85.27s</td>
+                            <td>49,457</td>
+                            <td>5,877</td>
+                            <td>55,334</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-blue">READ-ONLY (Pass)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>24</strong></td>
+                            <td><code>vg-bugfix-v090-v1-direct</code></td>
+                            <td>Bugfix</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>33.13s</td>
+                            <td>42,097</td>
+                            <td>715</td>
+                            <td><strong>42,812</strong></td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>25</strong></td>
+                            <td><code>vg-bugfix-v090-v1-direct</code></td>
+                            <td>Bugfix</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>42.89s</td>
+                            <td>38,125</td>
+                            <td>456</td>
+                            <td>38,581</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>26</strong></td>
+                            <td><code>vg-bugfix-v090-v2-reproduce-verify</code></td>
+                            <td>Bugfix</td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>3.42s</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>27</strong></td>
+                            <td><code>vg-bugfix-v090-v2-reproduce-verify</code></td>
+                            <td>Bugfix</td>
+                            <td>tier2_event_bus</td>
+                            <td>Hard</td>
+                            <td>2.44s</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Key Takeaways from Full Free-Tier Matrix Run</h3>
+            <ul>
+                <li><strong>Zero Cost Full-Matrix Evaluation:</strong> Executed all 27 benchmark rows end-to-end consuming 854,740 tokens with zero billing cost ($0.00).</li>
+                <li><strong>Hard Challenge Resolution:</strong> Solved the Hard token-bucket rate limiter challenge (<code>v090-03</code>) under <code>vg-code-v090-react-control</code> in 38.31s, generating full passing code.</li>
+                <li><strong>Bugfix Direct Resolution:</strong> Solved the Easy LRU TTL cache challenge (<code>v090-24</code>) under <code>vg-bugfix-v090-v1-direct</code> in 33.13s.</li>
+                <li><strong>Strict Attenuation Invariant Verification:</strong> All 8 read-only Tutor and Research rows (<code>v090-16</code> through <code>v090-23</code>) explored the workspaces extensively (up to 85.27s and 55k tokens per run) while remaining strictly within read capability bounds without policy violations.</li>
+        </div>
+
+        <!-- Section 10: 10-Row Real Frontier Evaluation — DeepSeek v4 Flash (Campaign E) -->
+        <div class="section-card">
+            <h2>10. 10-Row Real Benchmark Batch &mdash; DeepSeek v4 Flash (Campaign E)</h2>
+            <div class="alert-box alert-success">
+                <strong>REAL OPENROUTER EVALUATION RUN:</strong><br>
+                Executed 10 benchmark rows (v090-01 to v090-10) using <code>deepseek/deepseek-v4-flash-0731</code> via OpenRouter (<code>benchmarks/frontier_v090/artifacts/test_deepseek_v4_flash_batch10.json</code>). All 10 multi-turn trajectories ingested into <code>tools/002_LLM_API_MOCK/lam.sqlite</code>.
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Preset</th>
+                            <th>Challenge ID</th>
+                            <th>Difficulty</th>
+                            <th>Elapsed</th>
+                            <th>Prompt Tok</th>
+                            <th>Comp Tok</th>
+                            <th>Total Tok</th>
+                            <th>Outcome</th>
+                            <th>Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>v090-01</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>11.81s</td>
+                            <td>15,242</td>
+                            <td>164</td>
+                            <td>15,406</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-02</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>tier2_event_bus</td>
+                            <td>Medium</td>
+                            <td>64.75s</td>
+                            <td>49,656</td>
+                            <td>362</td>
+                            <td>50,018</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-03</strong></td>
+                            <td><code>vg-code-v090-react-control</code></td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>36.73s</td>
+                            <td>35,614</td>
+                            <td>1,029</td>
+                            <td>36,643</td>
+                            <td><code>COMPLETED</code></td>
+                            <td><span class="badge badge-green">PASSED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-04</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>11.44s</td>
+                            <td>14,564</td>
+                            <td>146</td>
+                            <td>14,710</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-05</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>tier2_event_bus</td>
+                            <td>Medium</td>
+                            <td>18.27s</td>
+                            <td>37,078</td>
+                            <td>307</td>
+                            <td>37,385</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-06</strong></td>
+                            <td><code>vg-code-v090-claude-shaped</code></td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>24.38s</td>
+                            <td>61,624</td>
+                            <td>1,062</td>
+                            <td>62,686</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-07</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>9.15s</td>
+                            <td>14,594</td>
+                            <td>228</td>
+                            <td>14,822</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-08</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>tier2_event_bus</td>
+                            <td>Medium</td>
+                            <td>22.81s</td>
+                            <td>54,728</td>
+                            <td>822</td>
+                            <td>55,550</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-09</strong></td>
+                            <td><code>vg-code-v090-opencode-shaped</code></td>
+                            <td>tier3_token_bucket</td>
+                            <td>Hard</td>
+                            <td>26.39s</td>
+                            <td>24,979</td>
+                            <td>4,329</td>
+                            <td>29,308</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>v090-10</strong></td>
+                            <td><code>vg-code-v090-lex-surgical</code></td>
+                            <td>tier1_lru_ttl_cache</td>
+                            <td>Easy</td>
+                            <td>32.65s</td>
+                            <td>59,033</td>
+                            <td>783</td>
+                            <td>59,816</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-yellow">NO_PATCH (Text Out)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Key Takeaways from DeepSeek v4 Flash Batch</h3>
+            <ul>
+                <li><strong>Hard Tier Multi-File Solution:</strong> <code>v090-03</code> (<code>tier3_token_bucket</code>) solved under <code>vg-code-v090-react-control</code> in 36.73s, passing 100% of hidden exterior test assertions.</li>
+        </div>
+
+        <!-- Section 11: High-Fidelity Forensic Failure Mode Benchmarks — LAM Mock + Harness Limits -->
+        <div class="section-card">
+            <h2>11. Forensic Failure Mode Benchmarks &mdash; LAM Mock & Harness Limit Suite</h2>
+            <div class="alert-box alert-danger">
+                <strong>OFFLINE HARNESS LIMIT TEST SUITE (25 / 25 FAILURE MODES REPRODUCED):</strong><br>
+                Executed 25 high-fidelity synthetic failing scenarios across 5 core failure archetypes in <code>tools/002_LLM_API_MOCK</code> with zero network egress ($0.00 cost). All 25 runs reproduced the exact failure bounds observed during live OpenRouter campaigns.
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Archetype</th>
+                            <th>Subsystem Attribution</th>
+                            <th>Recreated Failure Mode</th>
+                            <th>Scenarios</th>
+                            <th>Sim Time</th>
+                            <th>Oracle State</th>
+                            <th>Limit Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Issue A</strong></td>
+                            <td><code>agency/context/compiler.py</code></td>
+                            <td>Conversational Context Flattening (7x infinite read loop)</td>
+                            <td><code>t4-fail-conversational_flattening_loop-v01..05</code></td>
+                            <td>0.44s</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-red">FAIL (Read Loop)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Issue B</strong></td>
+                            <td><code>agency/episode/engine.py</code></td>
+                            <td>Premature Model Termination (Turn 0 text-only explanation)</td>
+                            <td><code>t3-fail-premature_no_patch_exit-v01..05</code></td>
+                            <td>0.41s</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-red">FAIL (No Patch)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Issue C</strong></td>
+                            <td><code>domain/transforms/repository/</code></td>
+                            <td>Multi-File Partial Patching (missed helper module)</td>
+                            <td><code>t5-fail-multi_file_partial_diff_failure-v01..05</code></td>
+                            <td>0.48s</td>
+                            <td><code>FAILED_ORACLE</code></td>
+                            <td><span class="badge badge-red">FAIL (Partial Diff)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Issue D</strong></td>
+                            <td><code>agency/manifests/</code></td>
+                            <td>Tool Signature Mismatch (unmapped specialized verb)</td>
+                            <td><code>t2-fail-preset_tool_signature_mismatch-v01..05</code></td>
+                            <td>0.39s</td>
+                            <td><code>TOOL_ERROR</code></td>
+                            <td><span class="badge badge-red">FAIL (Verb Mismatch)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Issue E</strong></td>
+                            <td><code>adapters/models/openrouter.py</code></td>
+                            <td>Provider Protocol Drift (raw markdown diff block in chat)</td>
+                            <td><code>t4-fail-dsml_markdown_protocol_drift-v01..05</code></td>
+                            <td>0.47s</td>
+                            <td><code>NO_PATCH</code></td>
+                            <td><span class="badge badge-red">FAIL (Unparsed Diff)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Strategic Significance for Vanguard Roadmap</h3>
+            <ul>
+                <li><strong>100% Deterministic Limit Mapping:</strong> All 25 scenarios failed precisely as designed in 2.196s total, mirroring live OpenRouter failure modes.</li>
+                <li><strong>Zero-Cost Regression Testbed:</strong> Provides an instant local falsification harness to test the 5-Pillar Architectural Solution (Response Wrangler, Causal Role Compiler, Admission Gate, and Change Surface Estimator) completely offline before committing code.</li>
+            </ul>
         </div>
 
         <footer>

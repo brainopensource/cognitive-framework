@@ -392,21 +392,6 @@ class _SwappablePolicy:
         return self._current.authorize(request, **kwargs)
 
 
-def _preset_mode_for(harness_id: str) -> str | None:
-    """Derive the tool-policy preset intent from the manifest id (`ADR-0106 §4`).
-
-    Presets declare intent; the resolver intersects it with adapter
-    capability. Research and explanation presets are read-only judgement
-    flows and declare `auto`; every other harness declares the coding
-    phase ladder. Unrecognised ids still map to the coding default because
-    the ladder degrades to kernel authority when retries exhaust.
-    """
-    identifier = str(harness_id or "").lower()
-    if "research" in identifier or "explain" in identifier or "tutor" in identifier:
-        return "research"
-    return "code"
-
-
 class HarnessSession:
     """Wiring for one run. `run()` owns the lifecycle, not the wiring.
 
@@ -938,7 +923,7 @@ class HarnessSession:
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
                 max_turns=remaining, spawn_dispatcher=self.dispatch,
-                preset_mode=_preset_mode_for(harness.harness),
+                preset_mode=getattr(harness, "tool_policy_preset", None),
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector)

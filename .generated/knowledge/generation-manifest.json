@@ -1,0 +1,99 @@
+{
+  "block": "A",
+  "recorded_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574",
+  "generation_timestamp_utc": "2026-08-29T22:59:26Z",
+  "deterministic_sorting_rule": "records sorted lexicographically by repository-relative path (POSIX separators, as emitted by `git ls-files`); JSON keys serialized with sort_keys=True",
+  "commands": [
+    {
+      "purpose": "resolve remote, branch, HEAD SHA, origin/main SHA, merge-base, worktree status",
+      "commands": [
+        "git remote -v",
+        "git branch --show-current",
+        "git rev-parse HEAD",
+        "git fetch origin main --quiet",
+        "git rev-parse origin/main",
+        "git merge-base HEAD origin/main",
+        "git status",
+        "git rev-list --count origin/main..HEAD",
+        "git rev-list --count HEAD..origin/main"
+      ],
+      "tool_versions": {"git": "2.43.0"},
+      "exit_status": 0,
+      "errors": []
+    },
+    {
+      "purpose": "record environment/tooling versions",
+      "commands": ["uname -a", "python3 --version", "node --version", "npm --version", "git --version", "rg --version"],
+      "exit_status": 0,
+      "errors": []
+    },
+    {
+      "purpose": "verify governing bootstrap package and bounded TARGET bundle exist and read them",
+      "commands": ["test -f <each DOC_* path>", "Read tool over the 5 DOC_* docs and the 9 bounded governance/TARGET bundle files"],
+      "exit_status": 0,
+      "errors": []
+    },
+    {
+      "purpose": "generate deterministic repository inventory",
+      "commands": ["python3 tools/docs_alpha/gen_inventory.py"],
+      "tool_versions": {"python3": "3.12.3"},
+      "inputs": "git ls-files at recorded SHA, minus EXCLUDE_DIR_PARTS (.git, __pycache__, node_modules, .venv, .vanguard, vanguard_runtime.egg-info, lab, output)",
+      "outputs": [".generated/knowledge/repository-inventory.jsonl"],
+      "record_count": 2597,
+      "exit_status": 0,
+      "errors": [],
+      "reproducibility_check": "ran twice consecutively; md5sum 71e35c24d0768d52d9934654a99d091e identical both runs (byte-identical, timestamp-free output)"
+    },
+    {
+      "purpose": "run existing repository documentation/governance checks (pre-existing validation, no new dependency)",
+      "commands": [
+        "python3 tools/linters/check_markdown_links.py",
+        "python3 tools/linters/check_stale_paths.py",
+        "python3 tools/linters/check_doc_metadata.py",
+        "python3 tools/linters/check_falsifier_ids.py",
+        "python3 tools/linters/scan_secrets.py"
+      ],
+      "exit_status": 0,
+      "results": {
+        "check_markdown_links.py": "LINK PASS: local markdown links resolve",
+        "check_stale_paths.py": "STALE PATH PASS: 543 files scanned; no obsolete docs/ layout tokens",
+        "check_doc_metadata.py": "DOC METADATA PASS: 58 living documents verified with valid, unique metadata",
+        "check_falsifier_ids.py": "RF ID PASS: allocations are unique and all canonical citations are allocated",
+        "scan_secrets.py": "SECRET SCAN PASS: no blocking secret patterns in scanned surfaces"
+      },
+      "errors": []
+    }
+  ],
+  "tools_used_evidence_log": [
+    {
+      "name": "git",
+      "version": "2.43.0",
+      "classification": "REQUIRED",
+      "problem_and_phase": "branch/SHA capture, divergence, provenance (Block A / flow steps 0-3)",
+      "keep_or_remove": "keep"
+    },
+    {
+      "name": "python3 stdlib (pathlib, json, subprocess)",
+      "version": "3.12.3",
+      "classification": "REQUIRED",
+      "problem_and_phase": "deterministic JSONL inventory generation (Block A / flow step 3)",
+      "keep_or_remove": "keep"
+    },
+    {
+      "name": "existing repository linters (tools/linters/*)",
+      "version": "n/a (repo-pinned)",
+      "classification": "REQUIRED",
+      "problem_and_phase": "pre-existing validation baseline, run without modification (Block A step 8 per governing prompt)",
+      "keep_or_remove": "keep, unmodified"
+    },
+    {
+      "name": "rg (ripgrep)",
+      "version": "14.1.0",
+      "classification": "REQUIRED",
+      "problem_and_phase": "available for future deterministic discovery; not required for this run's inventory since git ls-files sufficed",
+      "keep_or_remove": "keep, unused this run"
+    }
+  ],
+  "known_exclusions": [".git", "__pycache__", "node_modules", ".venv", ".vanguard", "vanguard_runtime.egg-info", "lab", "output"],
+  "errors": []
+}

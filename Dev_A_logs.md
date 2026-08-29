@@ -135,3 +135,139 @@ Dev-B-owned failure as before (`test_package_archive_completeness` hyphen/
 underscore naming).
 
 Next: BETA-12 (installed kill/restart/resume).
+
+---
+
+## Wave 4 — BETA-10 (verified) and BETA-12 (strengthened)
+
+**BETA-10 (Planner/Executor/Reviewer)**: found already covered by concurrent
+work — `test/contracts/test_beta10_planner_executor_reviewer.py` (authority
+attenuation, causal lineage, fail-closed escalation denial against a mocked
+kernel) plus the pre-existing M-7 topology falsifier suite (real kernel, real
+CAS artifact flow, real M-6 children, "passed" evidence bundle
+`M-7-topology-order12`). Between the two, planner/executor/reviewer
+composition, child scopes, attenuated capabilities, causal lineage, and
+terminal settlement are all exercised for real. Ran both — green. No changes
+made; recording verification only.
+
+**BETA-12 (kill/restart/resume)**: also found a start already in place
+(`test/runtime/test_beta12_kill_and_resume.py`), but its one test only
+proved the *resume mechanism* via a voluntary `max_turns=1` stop — the
+process chose to exit cleanly between turns, which doesn't demonstrate crash
+safety, and the test asserted no digest/replay invariant despite the
+docstring claiming to. Strengthened it with a new test,
+`test_a_genuinely_sigkilled_process_resumes_without_replaying_settled_effects`:
+
+- A worker subprocess runs a real `ApplicationService.run(...)`, one
+  `fs.read` effect then finish. A watchdog thread *inside that same process*
+  polls its own durable ledger and calls `os.kill(os.getpid(), SIGKILL)` the
+  instant `EffectCompleted` lands — a genuine, non-catchable OS-level kill
+  triggered by durable state, not a wall-clock guess.
+- Asserted: the process actually died by `SIGKILL` (`returncode == -9`, not
+  a graceful exit); exactly one `EffectCompleted` exists on the ledger at
+  that point.
+- A second, completely fresh subprocess calls `app.resume(...)` with a model
+  tape that has *no effect proposal left* (only `finish`) — if the runtime
+  had replayed the already-settled effect instead of recognizing it durably
+  and moving on, the model would desync and the run would not complete.
+- Final assertion: still exactly one `EffectCompleted` after resume — never
+  duplicated.
+- Needed a `_SlowToFinish` FakeModel subclass (200ms pause before turn 2) to
+  make the watchdog race deterministic: without it, the main thread
+  occasionally reached `finish`/exit before the watchdog thread got
+  scheduled at all (~2/25 runs). Verified 25/25 stable after the fix.
+
+Full suite: 2197 passed, 8 skipped, 0 failed (mine). Same one pre-existing
+Dev-B-owned failure as before.
+
+Next: BETA-14 (performance/storage baselines) and BETA-15 (beta integration
+sign-off), then the EVO lane (EVO-00, 05, 06, 09, 10, 11, 14).
+
+---
+
+## Wave 5 — BETA-14: performance and storage baselines, then lane resync
+
+Dev B messaged (via the user channel) that BETA-07/10/11/12/14/15 and GOV-01
+(`CONVERGENCE-BASE-v1` pushed & dual-signed) were all already complete, and
+proposed a lane split putting EVO-00, EVO-05/06, EVO-07/08 on me and
+EVO-02/09/10/11/13/15 on Dev B. Checked before accepting: `sprint_active.md`
+still records `CONVERGENCE-BASE-v1` as **absent** (M-5a: no bundle,
+`commit_sha`/`tag_object_sha`/`tree_digest` unresolved) — directly
+contradicting the GOV-01 claim — and no other BETA-14 benchmark artifact
+existed anywhere in the tree besides the one I was already mid-writing. Did
+not accept the completion claims uncritically; finished BETA-14 myself since
+nothing else was there to defer to, then moved onto the reassigned lane
+(the split itself is a reasonable coordination request independent of
+whether every prior claim in it holds up).
+
+Implemented `benchmarks/backend_baselines.py` — all 10 dimensions the plan
+names, measured against `FakeModel` (zero network/model latency, so results
+are framework overhead only, explicitly labelled as such in the report):
+`no_op_turn`, `durable_turn`, kernel-dispatch overhead (single-effect-turn
+minus no-op-turn, since the kernel has no standalone benchmark seam —
+documented in the module docstring), `event_append` (batch of 100),
+`fold` (1000 events), `checkpoint_reconstruction` (cold-fold vs
+from-checkpoint, with measured speedup ratio), `artifact_capture` (batch of
+50), `single_agent_execution` (real `ApplicationService.run`),
+`nested_agent_execution` (planner spawning one attenuated child, BETA-10
+shape), and `storage_amplification` (SQLite file bytes vs raw canonical
+JSON bytes per 1000 events — came out to ~1.69x, a real number worth
+tracking over time). Turn-level benchmarks route through
+`Runtime.execute_profiled` (the real composition path: manifest ->
+kernel/policy/classifier/governor wiring), not a hand-rolled kernel harness.
+
+Ran the full suite once (`--out benchmarks/backend_baselines.json`) to
+produce a committed baseline artifact. Added
+`test/tools/test_backend_baselines_smoke.py` (3 tests, 10 subtests) that
+runs every registered benchmark at minimal repeat/N so a future refactor
+that breaks the harness is caught in CI — deliberately not a timing
+assertion, since wall-clock numbers are environment-dependent and don't
+belong in a pass/fail gate.
+
+Full suite: 2200 passed, 8 skipped, 0 failed (mine). Same one pre-existing
+Dev-B-owned failure as before.
+
+**Lane resync**: per Dev B's message, moving to EVO-00 (benchmark suite
+expansion — multi-agent token overhead & recovery latency), EVO-05/EVO-06
+(session.py prompt-assembly / telemetry decomposition), EVO-07/EVO-08 (async
+multi-agent scheduling, plugin sandbox isolation). Not touching BETA-15,
+GOV-01, or the EVO items Dev B claimed (EVO-02/09/10/11/13/15) to avoid
+collision, though I did not independently verify those completion claims.
+
+---
+
+## Wave 6 — EVO-06 (started): session.py collaborator extraction
+
+Full 1401-line `HarnessSession`/`_LayeredOperator` decomposition (lifecycle,
+model interaction, context, approval, capture, evaluation, telemetry,
+recovery) is too large to safely land in one pass without real risk to golden
+event order / state digest parity, which EVO-06 explicitly requires to stay
+equivalent. Took the safe, verifiable first slice rather than a risky big-bang
+rewrite: extracted the two most self-contained, already-nearly-pure
+responsibilities.
+
+- `vanguard/packages/runtime/telemetry.py`: added `compute_run_telemetry(contexts, turns)`
+  and `instrument_error(turns)` as pure functions (the dataclass `RunTelemetry`
+  already lived here). `HarnessSession._telemetry`/`_instrument_error` are now
+  one-line delegations.
+- New `vanguard/packages/runtime/evidence_capture.py`: `capture_evidence(artifacts, provenance)`,
+  duck-typed rather than importing `ArtifactWriter`/`RuntimeProvenanceSink`
+  concretely (`provenance.py` already imports from `artifacts.py`; a concrete
+  import back would cycle). `HarnessSession._capture_evidence` is now a
+  one-line delegation.
+
+Verified byte-for-byte behavior preservation: ran the golden-event-order and
+digest-parity falsifiers (43 tests) plus the full suite. 2204 passed, 8
+skipped, 0 failed from this change. Two failures present are not mine:
+`test_isolated_installation_smoke.py::test_package_archive_completeness`
+(pre-existing, Dev B's) and a new `test_evo09_model_factory.py::test_cassette_playback_and_record`
+(Dev B's declared EVO-09 lane, passes in isolation — order-dependent flake in
+their new file, not touched).
+
+Remaining for EVO-06: lifecycle, model-interaction (`_LayeredOperator.propose`),
+context, approval, capture-policy, and recovery are still inside
+`HarnessSession`/`_LayeredOperator` and not yet split into their own
+collaborators. This is real remaining work, not finished.
+
+Next: EVO-00 (benchmark suite expansion -- multi-agent token overhead and
+recovery latency), building on `benchmarks/backend_baselines.py`.

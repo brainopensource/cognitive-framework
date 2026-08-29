@@ -209,3 +209,186 @@
   • He does not need to implement BETA-10, BETA-12, BETA-14, BETA-15, or EVO-14.
   • His entire remaining Horizon 1 (0.9.0b1 Beta) backlog will be instantly satisfied and green.
   • He can immediately declare Horizon 1 closed and transition smoothly into Horizon 2 refactorings (EVO-05 session decomposition, EVO-09 model registry consolidation).
+
+
+# HELPING DEV A
+
+ DEV B MASTER ACTION PROMPT: AHEAD-OF-TIME IMPLEMENTATION & FUTURE SCAFFOLDING
+
+    ========================================================================================
+    ROLE:         Dev B (Senior Implementation, Integration, Packaging & Backend Product Developer)
+    TARGET:       Vanguard / AETHER Backend Evolution (Horizon 2: 0.9.1+)
+    MISSION:      Implement, scaffold, test, and deliver the open future EVO work packages in parallel
+                  so that every downstream foundation Dev A reaches is already pre-built and green.
+    AUTHORITATIVE docs/_archive/reviews/backend/director_review_v5/VANGUARD_090_BACKEND_AUDIT_AND_EVOLUTION_PLAN.md
+    SOURCES:      docs/_archive/reviews/backend/director_review_v5/TODO_V090_MASTERPLAN_GUIDELINE.md
+    ========================================================================================
+  ──────
+  ## 1. CURRENT REPOSITORY SYNCHRONIZATION STATE
+
+  ### What Dev A Has Just Completed
+
+  • BETA-07: Added typed EventStoreCorruptError and EventStoreIncompatibleError to event_store.py and verified schema migrations.
+  • BETA-11: Added GitUnavailableError and fail-closed _check_git() guards to git.py and added regression tests in test_environment_port.py.
+  • BETA-12: Hardened test_beta12_kill_and_resume.py with a watchdog thread testing real in-process SIGKILL termination and zero effect re-execution upon resumption.
+
+  ### What Is Already Closed in Horizon 1 (0.9.0b1 Beta)
+
+  • GOV-01: CONVERGENCE-BASE-v1 annotated Git tag pushed to remote origin; dual-signed manifest CONVERGENCE-BASE-v1.json verified as ACCEPTED_CONTROL.
+  • BETA-01..06, BETA-08..10, BETA-14..15: ApplicationService, CLI, golden cassettes, isolated package smoke test, benchmark baseline, and release qualification are all verified.
+  ──────
+  ## 2. DEV B FUTURE WORK PACKAGES (HORIZON 2 / 0.9.1 EVOLUTION)
+
+  Your objective is to implement the following 6 Open Future Packages from Chapter II of the masterplan:
+
+    ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+    │  PACKAGE 1: EVO-09 — Unified Model Provider Factory & Registry Consolidation             │
+    │  PACKAGE 2: EVO-10 — Native Manifest Logical Validator & Linter                          │
+    │  PACKAGE 3: EVO-11 — Checkpoint Delta Suffix Decoding (Lazy Replay Optimization)         │
+    │  PACKAGE 4: EVO-02 — Hierarchical YAML/Dict Profile Configuration Model                  │
+    │  PACKAGE 5: EVO-05/06 — Monolithic Session Decomposition (PromptCompiler & ResponseHandler)│
+    │  PACKAGE 6: EVO-13/15 — Cassette CLI Record/Replay & Diagnostic Bundle Exporter          │
+    └──────────────────────────────────────────────────────────────────────────────────────────┘
+  ──────
+  ### PACKAGE 1: EVO-09 — Unified Model Provider Factory & Registry Consolidation
+
+  #### Context & Requirement
+
+  Model instantiation is currently split across bootstrap.py, config.py, and individual adapter files. A single, authoritative provider factory create_model(name_or_alias, **kwargs)
+  must resolve models strictly through models_registry.json with fail-closed fallback handling.
+
+  #### Implementation Details
+
+  1. Target File: Create factory.py and expose in __init__.py.
+  2. Interface Contract:
+    def create_model(
+        model_spec: str | Mapping[str, Any],
+        *,
+        cassette_path: Path | str | None = None,
+        record: bool = False,
+        fake_proposals: Sequence[Mapping[str, Any]] | None = None,
+        env_loader: Any = None,
+    ) -> ModelPort:
+        """
+        Resolves:
+        - 'fake' -> FakeModel(fake_proposals or [])
+        - 'cassette:<path>' or cassette_path -> CassettePlayer or CassetteRecorder
+        - 'ollama:<model_name>' -> OllamaModel(model_name=...)
+        - 'openrouter:<model_name>' or provider alias -> OpenRouterModel(resolved_name)
+        Fails closed with typed ModelResolutionError on unknown provider or unconfigured key.
+        """
+
+  3. Contract Test: Create test_evo09_model_factory.py.
+      • Test resolution of aliases: free, fast, smart, local.
+      • Test cassette wrapping and recording toggles.
+      • Test fail-closed rejection on invalid provider schemes.
+
+  ──────
+  ### PACKAGE 2: EVO-10 — Native Manifest Logical Validator & Linter
+
+  #### Context & Requirement
+
+  Agent manifests (vg-code-default, vg-code-lex, vg-code-explain) are currently parsed with minimal schema checks. EVO-10 requires a strict logical validator that proves action-to-tool
+  bindings, resource selectors, budget limits, and risk tiers are logically consistent before runtime composition.
+
+  #### Implementation Details
+
+  1. Target File: Create validator.py.
+  2. Validation Rules:
+      • Every verb declared in scope.actions must have a corresponding registered tool or kernel sink.
+      • Initial budget allocations (budget.tokens, budget.micros, budget.steps) must be non-negative integers.
+      • constraints.max_depth must be between 1 and 16.
+      • Tool parameter schemas must be valid JSON Schema objects.
+  3. Contract Test: Create test_evo10_manifest_validator.py.
+      • Verify all built-in manifests in vanguard/packages/agency/manifests/ pass validation.
+      • Verify invalid actions, missing tool mappings, or negative budgets fail closed with ManifestValidationError.
+
+  ──────
+  ### PACKAGE 3: EVO-11 — Checkpoint Delta Suffix Decoding (Lazy Replay Optimization)
+
+  #### Context & Requirement
+
+  checkpoints.py currently reads the whole event database to fold state. For long episodes (>100 turns), it must load only the latest valid checkpoint, then query events strictly with
+  seq > checkpoint.seq.
+
+  #### Implementation Details
+
+  1. Target File: Update checkpoints.py.
+  2. Method to Optimize:
+    def restore_latest(self, run_id: str, event_store: EventStorePort) -> tuple[AgentView, int]:
+        """
+        1. Query checkpoint store for latest valid checkpoint for run_id.
+        2. If found and digest verifies, deserialize AgentView state directly.
+        3. Query event_store only for EventRange(run_id=run_id, from_seq=checkpoint.seq + 1).
+        4. Fold delta events into AgentView.
+        5. If checkpoint digest mismatches, fail closed to cold-fold from seq=0.
+        """
+
+  3. Contract Test: Create test_evo11_checkpoint_suffix_fold.py.
+      • Prove delta query reads only K events instead of N total events.
+      • Prove cold-fold fallback activates when a checkpoint file is truncated/corrupted.
+
+  ──────
+  ### PACKAGE 4: EVO-02 — Hierarchical Profile Configuration Model
+
+  #### Context & Requirement
+
+  Profile presets (local, product, evaluator) are currently hardcoded in Python dictionaries inside profiles.py. Support optional override files (e.g. .vanguard/profile.json or
+  .vanguard/vanguard.yaml) that merge on top of system presets without violating layer boundaries.
+
+  #### Implementation Details
+
+  1. Target File: Update profiles.py to add load_custom_profile(path, base_preset="local").
+  2. Invariants:
+      • Custom configurations cannot disable fail-closed policies.
+      • Cannot exceed kernel budget limits.
+  3. Contract Test: Create test_evo02_profile_configuration.py.
+  ──────
+  ### PACKAGE 5: EVO-05 / EVO-06 — Monolithic Session Decomposition
+
+  #### Context & Requirement
+
+  session.py handles prompt assembly, response formatting, telemetry capture, and loop orchestration in a single class. Extract prompt construction and response parsing into focused
+  helper modules.
+
+  #### Implementation Details
+
+  1. Target Files:
+      • prompt_assembler.py (EVO-05): Takes Episode, Scope, Tools, Accumulation and delegates to ContextCompiler.
+      • response_handler.py (EVO-06): Normalizes raw adapter responses, records diagnostic telemetry, and constructs typed Proposal objects.
+  2. Refactor: Keep Session in session.py as a lightweight coordinator using these components.
+  3. Contract Test: Verify existing turn execution tests in test/agency/ and test/runtime/ pass with zero regressions.
+  ──────
+  ### PACKAGE 6: EVO-13 / EVO-15 — Cassette CLI Replay & Diagnostic Exporter
+
+  #### Context & Requirement
+
+  Expose cassette operations and health diagnostic bundle export in cli.py via ApplicationService.
+
+  #### Implementation Details
+
+  1. CLI Commands to Add:
+      • vanguard cassette record <run_id> --out <cassette.json>
+      • vanguard cassette replay <cassette.json> --brief <brief>
+      • vanguard doctor --export-bundle <bundle.zip> (collects scrubbed state metadata, logs, and diagnostics with zero API keys or secrets).
+  2. Contract Test: Create test_evo13_cli_cassette_doctor.py.
+  ──────
+  ## 3. EXECUTION DISCIPLINE & RULES
+
+  1. Kernel Budget Invariant: Logical lines in vanguard/packages/kernel/ must remain ≤1,438 LOC. None of these packages should touch kernel/.
+  2. Hexagonal Boundary Invariant:
+  domain ← ports ← kernel ← agency ← runtime → adapters
+      • adapters and apps must never import kernel or agency.
+  3. Testing Rule: All unit and contract tests must execute hermetically in under 2 seconds without external network dependencies.
+  4. Linters Clean: After completing each package, verify all 11 linters pass:
+    python3 tools/linters/check_boundaries.py && \
+    python3 tools/linters/check_tcb_budget.py && \
+    python3 tools/linters/scan_secrets.py && \
+    python3 tools/linters/check_domain_blindness.py && \
+    python3 tools/linters/check_isolation_policy.py && \
+    python3 tools/linters/check_markdown_links.py && \
+    python3 tools/linters/check_stale_paths.py && \
+    python3 tools/linters/check_doc_metadata.py && \
+    python3 tools/linters/check_falsifier_ids.py && \
+    python3 tools/linters/check_kernel_neutrality.py && \
+    python3 tools/linters/check_test_hygiene.py

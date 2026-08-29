@@ -1,0 +1,99 @@
+{
+  "schema": "aether.backend-baselines/1",
+  "environment": {
+    "python": "3.13.14",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "machine": "x86_64"
+  },
+  "model": "fake (zero network, zero model latency -- framework overhead only)",
+  "results": {
+    "no_op_turn": {
+      "repeats": 20,
+      "min_ms": 34.05872699659085,
+      "median_ms": 36.83307049868745,
+      "p95_ms": 167.01420999743277,
+      "max_ms": 167.01420999743277
+    },
+    "durable_turn": {
+      "repeats": 20,
+      "min_ms": 199.0295169998717,
+      "median_ms": 231.3923235014954,
+      "p95_ms": 268.35944000049494,
+      "max_ms": 268.35944000049494
+    },
+    "single_effect_turn_durable_minus_no_op_is_kernel_dispatch_overhead": {
+      "repeats": 20,
+      "min_ms": 229.26008200010983,
+      "median_ms": 255.9627125010593,
+      "p95_ms": 335.8708759988076,
+      "max_ms": 335.8708759988076
+    },
+    "event_append_batch_100": {
+      "repeats": 10,
+      "min_ms": 41.03647399824695,
+      "median_ms": 43.60484350036131,
+      "p95_ms": 77.71239500289084,
+      "max_ms": 77.71239500289084,
+      "events_per_batch": 100,
+      "ms_per_event_median": 0.4360484350036131
+    },
+    "fold_1000_events": {
+      "repeats": 10,
+      "min_ms": 7.625394999195123,
+      "median_ms": 8.022060997973313,
+      "p95_ms": 10.057956002128776,
+      "max_ms": 10.057956002128776,
+      "events_folded": 1000,
+      "ms_per_event_median": 0.008022060997973313
+    },
+    "checkpoint_reconstruction_500_events": {
+      "events_total": 500,
+      "checkpoint_at": 250,
+      "cold_fold": {
+        "repeats": 10,
+        "min_ms": 3.309898998850258,
+        "median_ms": 3.44252049944771,
+        "p95_ms": 4.088179997779662,
+        "max_ms": 4.088179997779662
+      },
+      "from_checkpoint": {
+        "repeats": 10,
+        "min_ms": 2.279250002175104,
+        "median_ms": 2.3878925003373297,
+        "p95_ms": 6.435587998566916,
+        "max_ms": 6.435587998566916
+      },
+      "speedup_median_x": 1.4416563974137848
+    },
+    "artifact_capture_batch_50": {
+      "repeats": 10,
+      "min_ms": 185.60158200125443,
+      "median_ms": 234.96192449965747,
+      "p95_ms": 252.89901199721498,
+      "max_ms": 252.89901199721498,
+      "artifacts_per_batch": 50,
+      "artifact_bytes": 4096,
+      "ms_per_artifact_median": 4.699238489993149
+    },
+    "single_agent_execution": {
+      "repeats": 10,
+      "min_ms": 232.92547399978503,
+      "median_ms": 260.75227099863696,
+      "p95_ms": 287.5630700000329,
+      "max_ms": 287.5630700000329
+    },
+    "nested_agent_execution": {
+      "repeats": 10,
+      "min_ms": 0.32476699925609864,
+      "median_ms": 0.43633450150082354,
+      "p95_ms": 0.689163996867137,
+      "max_ms": 0.689163996867137
+    },
+    "storage_amplification_1000_events": {
+      "events": 1000,
+      "raw_canonical_json_bytes": 718780,
+      "sqlite_file_bytes": 1212416,
+      "amplification_x": 1.6867692478922618
+    }
+  }
+}

@@ -520,6 +520,50 @@ class CheckpointManager:
         return Reconstruction(
             state=state, capability="full_cold", events_replayed=len(envelopes))
 
+    def restore_latest(
+        self,
+        run_id: str,
+        event_store: Any,
+        checkpoint: Optional[Checkpoint] = None,
+        verify: bool = False,
+    ) -> tuple[Optional[LedgerState], int]:
+        """Restore latest folded state using lazy delta suffix decoding (EVO-11).
+
+        1. If checkpoint is passed, load and verify its digest and pins.
+        2. If valid, query event_store strictly for delta events: EventRange(run_id=run_id, after_seq=str(checkpoint.last_seq)).
+        3. Fold delta events onto the deserialized checkpoint base state.
+        4. If verify=True, run cold-fold from seq=0 and assert parity.
+        5. If checkpoint load, digest validation, or delta fold fails, fail closed to cold-fold from seq=0.
+
+        Returns (state, events_replayed_count).
+        """
+        from ..ports.event_store import EventRange
+
+        if checkpoint is not None:
+            try:
+                base = self.load(checkpoint)
+                delta_res = event_store.read(EventRange(run_id=run_id, after_seq=str(checkpoint.last_seq)))
+                if delta_res.ok and delta_res.value is not None:
+                    delta_events = list(delta_res.value)
+                    warm = reduce_batch(base, delta_events)
+                    if not verify:
+                        return warm, len(delta_events)
+
+                    all_res = event_store.read(EventRange(run_id=run_id))
+                    all_events = list(all_res.value or [])
+                    cold_state = reduce_batch(initial_state(), all_events) if all_events else None
+                    if cold_state is not None and cold_state.digest() == warm.digest():
+                        return warm, len(delta_events)
+            except Exception:
+                pass
+
+        all_res = event_store.read(EventRange(run_id=run_id))
+        all_events = list(all_res.value or [])
+        if not all_events:
+            return None, 0
+        cold_state = reduce_batch(initial_state(), all_events)
+        return cold_state, len(all_events)
+
 
 def _with_reason(outcome: Reconstruction, reason: str) -> Reconstruction:
     return Reconstruction(

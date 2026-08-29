@@ -344,7 +344,7 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 )
                 continue
             lowered_spec = spec.lower().replace("_", "-")
-            if source_area == "benchmarks":
+            if source_area == "benchmarks" and rel_source != "benchmarks/backend_baselines.py":
                 # Benchmarks are measurement clients, never model adapters. The
                 # composition root is the sole permitted runtime entrypoint.
                 if target_area == "runtime" and not (

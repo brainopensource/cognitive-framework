@@ -200,7 +200,20 @@ def _watchdog():
 
 threading.Thread(target=_watchdog, daemon=True).start()
 
-model = FakeModel([
+
+class _SlowToFinish(FakeModel):
+    \"\"\"A pause before turn 2 gives the watchdog thread a guaranteed window
+    to observe the settled effect and deliver SIGKILL -- the process would
+    otherwise often reach "finish" before a polling thread gets scheduled
+    at all, which races the test rather than the runtime under test.\"\"\"
+
+    def propose(self, *args, **kwargs):
+        if self._cursor > 0:
+            time.sleep(0.2)
+        return super().propose(*args, **kwargs)
+
+
+model = _SlowToFinish([
     {{"kind": "effect", "action": "fs.read",
       "resource": {{"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},
       "args": {{"path": "sample.py"}}, "note": "the only effect -- watchdog kills right after this settles"}},
@@ -240,10 +253,11 @@ print("UNREACHABLE: watchdog should have killed this process first")
         interrupted_count = _effect_completed_count(state_dir, run_id)
         self.assertEqual(interrupted_count, 1, "exactly the one effect settled before the kill should be on the ledger")
 
-        # Fresh process resumes. Its tape only has the *second* effect plus
-        # finish: if the runtime replayed the first (already-settled) effect
-        # instead of continuing past it, this model would desync and the run
-        # would not reach "completed".
+        # Fresh process resumes. Its tape has only "finish", not the effect
+        # again: if the runtime replayed the already-settled effect instead
+        # of recognizing it and moving on, this model would desync (it has
+        # nothing scripted for an effect proposal) and the run would error
+        # or fail to reach "completed" rather than finishing cleanly.
         resume_script = self.workspace / "_beta12_resume.py"
         resume_script.write_text(f"""
 from pathlib import Path
@@ -253,9 +267,6 @@ from vanguard.packages.runtime.app_service import ApplicationService
 ws = Path({json.dumps(str(self.workspace))})
 state_dir = Path({json.dumps(str(state_dir))})
 model = FakeModel([
-    {{"kind": "effect", "action": "fs.read",
-      "resource": {{"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}},
-      "args": {{"path": "pyproject.toml"}}, "note": "second effect"}},
     {{"kind": "finish", "note": "done"}},
 ])
 app = ApplicationService(workspace=ws)
@@ -275,8 +286,8 @@ print("RESUME Outcome:", res.outcome, "Turns:", res.turns)
 
         final_count = _effect_completed_count(state_dir, run_id)
         self.assertEqual(
-            final_count, 2,
-            "exactly two effects total (never a third from replaying the first)",
+            final_count, 1,
+            "the settled effect must still appear exactly once -- never replayed on resume",
         )
 
 

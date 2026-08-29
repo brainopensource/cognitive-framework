@@ -25,8 +25,14 @@ class TestEvo14AsyncScheduler(unittest.TestCase):
     def setUp(self) -> None:
         self.scheduler = AsyncGraphScheduler()
 
-    def test_disjoint_resources_scheduled_in_parallel(self) -> None:
-        """Prove that operations with disjoint resource selectors run in parallel in Wave 0."""
+    def test_disjoint_privileged_writes_still_run_sequentially(self) -> None:
+        """ADR-0099 rule 4 / ADR-0106: writes stay sequential regardless of
+        selector disjointness -- only read-only, non-exclusive-sink pairs may
+        share a parallel wave. This was previously (incorrectly, and without
+        the evidence ADR-0099 rule 5 requires) asserting `privileged`-sink
+        operations went parallel just because their selectors didn't
+        overlap; corrected after ADR-0106's preregistered study validated
+        only the read-only case."""
         ops = [
             ReadyOperation(
                 operation_id="op_a",
@@ -37,6 +43,28 @@ class TestEvo14AsyncScheduler(unittest.TestCase):
                 operation_id="op_b",
                 selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace/src/b"]},
                 sink="privileged",
+            ),
+        ]
+        decisions = self.scheduler.decide(ops)
+        self.assertEqual(len(decisions), 2)
+        self.assertEqual(decisions[0].wave, 0)
+        self.assertEqual(decisions[1].wave, 1)
+        self.assertFalse(decisions[0].parallel)
+        self.assertFalse(decisions[1].parallel)
+
+    def test_disjoint_read_only_operations_with_non_exclusive_sinks_run_in_parallel(self) -> None:
+        """The case ADR-0106 actually authorizes: read-only, non-exclusive-sink,
+        disjoint-selector operations may share a parallel wave."""
+        ops = [
+            ReadyOperation(
+                operation_id="op_a",
+                selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace/src/a"]},
+                sink="observation", read_only=True,
+            ),
+            ReadyOperation(
+                operation_id="op_b",
+                selector={"kind": "fs", "root": "/workspace", "paths": ["/workspace/src/b"]},
+                sink="observation", read_only=True,
             ),
         ]
         decisions = self.scheduler.decide(ops)

@@ -92,23 +92,22 @@ class AsyncGraphScheduler:
             for op in remaining:
                 can_add = True
                 for batch_op in current_batch:
-                    # If both are read-only with non-exclusive sinks, they can safely co-exist
-                    if op.read_only and batch_op.read_only:
-                        if op.sink in non_exclusive_sinks and batch_op.sink in non_exclusive_sinks:
-                            continue
-
-                    # Check disjointness of resource selectors
-                    if op.selector is not None and batch_op.selector is not None:
-                        try:
-                            if not disjoint(op.selector, batch_op.selector):
-                                can_add = False
-                                break
-                        except Exception:
-                            can_add = False
-                            break
-                    else:
-                        can_add = False
-                        break
+                    # ADR-0106: concurrent (same-wave, parallel) dispatch is
+                    # authorized only for read-only operations with
+                    # non-exclusive sinks -- ADR-0099 rule 4 keeps writes
+                    # sequential regardless of selector disjointness. A
+                    # disjoint-selector pair that includes anything else
+                    # (write, unknown sink, exclusive sink) must fall back to
+                    # a later sequential wave, never share a parallel wave.
+                    both_safe_read_only = (
+                        op.read_only and batch_op.read_only
+                        and op.sink in non_exclusive_sinks
+                        and batch_op.sink in non_exclusive_sinks
+                    )
+                    if both_safe_read_only:
+                        continue
+                    can_add = False
+                    break
 
                 if can_add:
                     current_batch.append(op)

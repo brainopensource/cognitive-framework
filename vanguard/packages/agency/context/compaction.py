@@ -218,6 +218,11 @@ class StructuredConsolidateStrategy:
             dialogue.insert(0, summary_block)
             elided.append("structured_record")
 
+            # If inserting summary_block pushed total over ceiling, drop remaining un-consolidated blocks
+            while total() > ceiling and len(dialogue) > 1:
+                b = dialogue.pop(1)
+                dropped.append(b.label)
+
         while total() > ceiling and notes:
             dropped.append(notes.pop(0).label)
 

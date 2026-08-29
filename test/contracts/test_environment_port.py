@@ -339,5 +339,50 @@ class EnvironmentPortContract(unittest.TestCase):
             self.assertFalse(wt_dir.exists())
 
 
+class GitUnavailableFailsClosed(unittest.TestCase):
+    """BETA-11: a sparse host with no `git` on `PATH` must never crash.
+
+    The M7 topology falsifiers route real work through `GitEnvironment`; a
+    host missing `git` used to surface a raw `FileNotFoundError` from deep
+    inside `subprocess.run`, which is exactly what the sparse-environment
+    regression looked like. Every port method now fails closed with a typed
+    `unavailable` Result, and construction itself refuses up front.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.repo_path = Path(self._tmp.name)
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def test_construction_refuses_with_a_typed_error_not_a_crash(self) -> None:
+        from vanguard.packages.adapters.environment.git import GitUnavailableError
+
+        with patch("shutil.which", return_value=None):
+            with self.assertRaises(GitUnavailableError):
+                GitEnvironment(repo_path=self.repo_path)
+
+    def test_every_port_method_returns_unavailable_once_git_disappears(self) -> None:
+        subprocess.run(["git", "init", "-b", "main"], cwd=self.repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Vanguard Test"], cwd=self.repo_path, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "test@vanguard.dev"], cwd=self.repo_path, capture_output=True, check=True)
+        env = GitEnvironment(repo_path=self.repo_path)
+        try:
+            with patch("shutil.which", return_value=None):
+                for label, result in (
+                    ("profile", env.profile()),
+                    ("snapshot", env.snapshot()),
+                    ("observe", env.observe(ObservationRequest(action="read", path="a.txt"))),
+                    ("preview", env.preview(EffectRequest(verb="fs.write", action="write", args={"path": "a.txt", "content": "x"}))),
+                    ("apply", env.apply(EffectRequest(verb="fs.write", action="write", args={"path": "a.txt", "content": "x"}))),
+                ):
+                    with self.subTest(method=label):
+                        self.assertFalse(result.ok, f"{label} must fail, not raise, when git is gone")
+                        self.assertEqual(result.error.kind, "unavailable")
+        finally:
+            env.dispose()
+
+
 if __name__ == "__main__":
     unittest.main()

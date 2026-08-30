@@ -193,23 +193,34 @@ board because no Wave 1 implementation prompt or accepted M-8 bundle exists.
 
 ## Wave 1 / FIN-A1 disposition
 
-FIN-A1 was audited on `4b29f07f3832ce1476868134b2f1fad4d135c5f7` and remains
-`BLOCKED`. The M-8 proof runner completed in a fresh process with `59` tests,
-`0` failures, and `34/34` required markers; the focused memory/runtime suite
-completed `25` tests and the cold-restart suite `29` tests, all green. These
-are mechanism and falsifier observations, not milestone acceptance.
+FIN-A1 was evaluated on exact subject
+`9c91bb60e0e78ce98e2db7f84f417d1ceefb3e90` (tree
+`97ad71f49d0e392c3157cf08f3040f67e4da5c2b`, parent
+`4b29f07f3832ce1476868134b2f1fad4d135c5f7`) and remains `BLOCKED`. The M-8
+proof runner completed in a fresh process with `59` tests, `0` failures, and
+`34/34` required markers; the focused memory/runtime suite completed `25`
+tests and the cold-restart suite `29` tests, all green. These are mechanism
+and falsifier observations, not milestone acceptance.
 
 The acceptance prerequisites are not present:
 
-- no executable, preregistered held-out workload with attributable real
-  observations, cost, tokens, and latency exists in the current subject;
+- no executable, preregistered held-out workload/corpus for the required
+  control/treatment study exists in the current subject. The available M-8
+  runner uses deterministic test doubles, so it cannot supply empirical
+  real-model observations, cost, tokens, or latency;
 - no producer-signed M-8 bundle, promotion receipt, or executed rollback
   receipt has been deposited;
 - no independent verifier input can be issued by Dev A;
-- the current working tree contains unrelated Dev B changes and the existing
-  `.draft/todo/beta_delivery.md`; the full suite therefore returned `2348`
-  tests, `1` failure, `0` errors, and `20` skips because path hygiene rejects
-  a machine-local path in that draft.
+- the current working tree contains unrelated Dev B changes. The full suite
+  returned `2348` tests, `1` failure, `0` errors, and `20` skips because path
+  hygiene rejects the machine-local path in the existing
+  `.draft/todo/beta_delivery.md`.
+
+The canonical threshold remains `0.05` held-out lift with the existing
+regression budget `0.02`; it was not changed or applied post hoc. No external
+model call was made for FIN-A1, so there are no new canary tokens, cost, or
+latency records to report. The prior frontier canary is not substituted for
+this study because it used the wrong workload and a two-episode driver policy.
 
 No synthetic runner result is promoted to held-out lift, and no M-8 acceptance
 claim is made. M-9 remains unauthorized.

@@ -1,0 +1,1061 @@
+==============================================================================
+ AGGREGATED DEVELOPER CONTEXT OVERVIEW
+==============================================================================
+
+--- 1. REPO & ENV STATE ---
+=== TIMESTAMP ===
+2026-08-30T07:54:22Z
+
+=== GIT ===
+## feat/beta-release_electroweak-v091
+M  .generated/knowledge/catalog.jsonl
+ M .gitignore
+M  Makefile
+M  benchmarks/frontier_v090/artifacts/dry_run_report.json
+M  benchmarks/frontier_v090/artifacts/preregistration.json
+AM collect_dev_context.sh
+M  tools/002_LLM_API_MOCK/lam.sqlite
+M  tools/lda/index.html
+Current Branch: feat/beta-release_electroweak-v091
+HEAD SHA:       7d46c7f5528cf23a7b6cfcd6e02ece4d7f32e6a0
+Recent Commits:
+7d46c7f Merge pull request #26 from brainopensource/docs/convergenc-electroweak-v091
+9e3271b feat(LDA): Convergence - LDA LLM Doc Atlas added to see context metadata
+1dc4524 feat(LDA): Convergence - LDA LLM Doc Atlas added to see context metadata
+649f37a refactor(docs-PI): Convergence - Docs OSS Tools Fixes, CICD, justfile, mk, etc
+52ee37c refactor(docs-PI): Convergence - Docs OSS Party
+
+=== ENV ===
+Python: Python 3.12.3
+uv:     uv 0.5.9
+Node:   v22.18.0
+npm:    10.9.2
+just:   NOT FOUND
+make:   GNU Make 4.3
+rg:     ripgrep 14.1.0
+
+--- 2. COMMANDS DISCOVERY ---
+=== JUST ===
+# AETHER Repository Control Surface & Developer Gates
+
+# Default recipe: fast local development check
+default: check
+
+# Fast normal development validation loop
+check:
+	python3 tools/linters/check_boundaries.py
+	python3 tools/linters/check_tcb_budget.py
+	python3 tools/linters/check_domain_blindness.py
+	python3 tools/linters/check_isolation_policy.py
+	python3 tools/linters/check_path_hygiene.py
+	just docs-check
+	@echo "AETHER CHECK: PASS"
+
+# Fast deterministic documentation checks (metadata, uniqueness, links, lint)
+docs-check:
+	python3 tools/linters/check_doc_metadata.py
+	python3 tools/linters/check_markdown_links.py
+	npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+
+# Build documentation site strictly with Material for MkDocs
+docs-build:
+	uv run mkdocs build --strict
+
+# Serve local documentation site with live reloading
+docs-serve:
+	uv run mkdocs serve
+
+# Regenerate permanent machine knowledge base (.generated/knowledge/)
+docs-knowledge:
+	python3 tools/generate_knowledge_base.py
+
+# Full CI documentation gate (check + zero-rebuild knowledge + strict build)
+docs-full: docs-check
+	python3 tools/generate_knowledge_base.py
+	uv run mkdocs build --strict
+
+# Experimental code intelligence diagram generation (.generated/diagrams/)
+docs-diagrams:
+	python3 tools/generate_exploratory_diagrams.py
+
+# Local RAG V0 query interface
+docs-rag QUERY:
+	python3 tools/docs_rag_v0.py "{{QUERY}}"
+
+# LDA thin orchestration wrappers
+lda:
+	uv run lda serve
+lda-status:
+	uv run lda status
+lda-scan:
+	uv run lda scan
+lda-check:
+	uv run lda check
+lda-query QUERY:
+	uv run lda query "{{QUERY}}"
+lda-context TASK:
+	uv run lda context "{{TASK}}"
+lda-doctor:
+	uv run lda doctor
+
+# Canonical local/CI qualification gate before PR completion or sprint closure
+verify:
+	uv lock --check
+	uv sync --frozen
+	python3 tools/linters/check_boundaries.py
+	python3 tools/linters/check_tcb_budget.py
+	python3 tools/linters/check_domain_blindness.py
+	python3 tools/linters/check_isolation_policy.py
+	python3 tools/linters/check_path_hygiene.py
+	python3 tools/linters/check_event_coverage.py
+	python3 tools/linters/check_execution_truth.py
+	python3 tools/linters/check_falsifier_ids.py
+	python3 tools/linters/scan_secrets.py
+	python3 -m unittest discover -s test/kernel -t .
+	python3 -m unittest discover -s test/agency -t .
+	python3 -m unittest discover -s test/contracts -t .
+	npm run typecheck
+	npm test
+	just docs-full
+	@echo "AETHER VERIFY: PASS"
+
+# Release candidate qualification wrapper
+release-verify SUBJECT ENVELOPE GIT_RECEIPT:
+	python3 tools/release_qualification.py --subject "{{SUBJECT}}" --envelope "{{ENVELOPE}}" --git-receipt "{{GIT_RECEIPT}}"
+	@echo "AETHER RELEASE VERIFY: PASS"
+
+=== MAKE ===
+1:.PHONY: clean clean-py clean-benchmark-cache clean-js clean-build clean-test clean-cache clean-wsl clean-all help dev-context
+3:help:
+19:clean-benchmark-cache:
+25:clean-py:
+43:clean-js:
+52:clean-build:
+62:clean-test:
+72:clean-cache:
+83:clean-wsl:
+89:clean: clean-py clean-js clean-build clean-test clean-cache clean-wsl
+95:clean-all: clean
+103:dev-context:
+
+=== NPM SCRIPTS ===
+{
+  "vg": "npm --workspace @vanguard/cli run vg --",
+  "aether-tui": "npm --workspace @aether/tui run tui --",
+  "build": "npm run build:contracts && npm run build:projections && npm run build:client && npm run build:ui-web && npm run build:tui && npm run build:desktop && npm run build:lab && npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+  "build:contracts": "npm --workspace @aether/contracts run build",
+  "build:projections": "npm --workspace @aether/projections run build",
+  "build:client": "npm --workspace @aether/client run build",
+  "build:ui-web": "npm --workspace @aether/ui-web run build",
+  "build:tui": "npm --workspace @aether/tui run build",
+  "build:desktop": "npm --workspace @aether/desktop run build",
+  "build:lab": "npm --workspace @aether/lab run build",
+  "build:client-core": "npm --workspace @vanguard/client-core run build",
+  "build:cli": "npm --workspace @vanguard/cli run build",
+  "build:studio": "npm --workspace @vanguard/studio run build",
+  "build:studio-browser": "npm --workspace @vanguard/studio run build:browser",
+  "typecheck": "npm run typecheck:contracts && npm run typecheck:projections && npm run typecheck:client && npm run typecheck:ui-web && npm run typecheck:tui && npm run typecheck:desktop && npm run typecheck:lab && npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
+  "typecheck:contracts": "npm --workspace @aether/contracts run typecheck",
+  "typecheck:projections": "npm --workspace @aether/projections run typecheck",
+  "typecheck:client": "npm --workspace @aether/client run typecheck",
+  "typecheck:ui-web": "npm --workspace @aether/ui-web run typecheck",
+  "typecheck:tui": "npm --workspace @aether/tui run typecheck",
+  "typecheck:desktop": "npm --workspace @aether/desktop run typecheck",
+  "typecheck:lab": "npm --workspace @aether/lab run typecheck",
+  "test": "npm run test:contracts && npm run test:projections && npm run test:client && npm run test:ui-web && npm run test:tui && npm run test:desktop && npm run test:lab && npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test",
+  "test:contracts": "npm --workspace @aether/contracts test",
+  "test:projections": "npm --workspace @aether/projections test",
+  "test:client": "npm --workspace @aether/client test",
+  "test:ui-web": "npm --workspace @aether/ui-web test",
+  "test:tui": "npm --workspace @aether/tui test",
+  "test:desktop": "npm --workspace @aether/desktop test",
+  "test:lab": "npm --workspace @aether/lab test"
+}
+
+--- 3. TEST & LINTER BASELINE ---
+=== TCB & HEXAGONAL LINTERS ===
+BOUNDARY PASS: 597 source files checked
+{"alarm_delta_lines": 131, "baseline_logical_loc": 1307, "current_logical_loc": 1384, "files": {"vanguard/packages/kernel/__init__.py": 41, "vanguard/packages/kernel/attenuation.py": 171, "vanguard/packages/kernel/budget.py": 150, "vanguard/packages/kernel/classifier.py": 96, "vanguard/packages/kernel/dispatch.py": 372, "vanguard/packages/kernel/grants.py": 201, "vanguard/packages/kernel/model.py": 137, "vanguard/packages/kernel/policy.py": 106, "vanguard/packages/kernel/provenance.py": 110}, "threshold": 1438}
+TCB PASS: 1384 logical lines across 9 files (alarm above 1438)
+DOMAIN-BLINDNESS WARN: scan target missing (not an error): layer0/
+DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in vanguard/packages/domain/, vanguard/packages/kernel/
+ISOLATION POLICY PASS: proc.exec plugins declare container/subprocess
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:16: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-001-tes79il0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:16: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-001-tes79il0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:33: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-002-3qixy5bl",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:33: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-002-3qixy5bl",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:50: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-003-oz5wpxod",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:50: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-dogfood-bug-003-oz5wpxod",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:67: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-vanguard-vertical-5w6w1yk_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:67: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t0-vanguard-vertical-5w6w1yk_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:84: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-calculator-pmki7jbd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:84: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-calculator-pmki7jbd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:101: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-clamp-number-eyaqgnw1",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:101: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-clamp-number-eyaqgnw1",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:118: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v001-e3jv4a3s",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:118: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v001-e3jv4a3s",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:135: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v041-s4wvcdk5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:135: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v041-s4wvcdk5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:152: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v081-1kyefzwu",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:152: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-async_worker_pool-v081-1kyefzwu",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:169: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v004-3w2806yr"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:169: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v004-3w2806yr"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:186: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v044-a76i2z1k"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:186: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v044-a76i2z1k"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:203: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v084-sjy8n7of"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:203: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-bloom_filter_counting-v084-sjy8n7of"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:220: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v003-px6pmpsb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:220: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v003-px6pmpsb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:237: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v043-e_oewudu
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:237: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v043-e_oewudu
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:254: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v083-8_k3gbeb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:254: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-sliding_window_counter-v083-8_k3gbeb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:271: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v002-w5svyuai",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:271: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v002-w5svyuai",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:288: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v042-1ctr7d8f",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:288: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v042-1ctr7d8f",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:305: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v082-b1eybpga",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:305: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-fab-trie_router-v082-b1eybpga",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:322: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-flatten-list-scstf4g_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:322: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-flatten-list-scstf4g_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:339: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-palindrome-check-j399wh4h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:339: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-palindrome-check-j399wh4h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:356: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-semver-parser-i9v_agl9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:356: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-semver-parser-i9v_agl9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:373: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-string-dedupe-di2m6rki",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:373: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-string-dedupe-di2m6rki",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:390: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-lru-ttl-cache-8m26vizd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:390: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-lru-ttl-cache-8m26vizd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:407: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-ring-buffer-stream-7bojmke5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:407: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-ring-buffer-stream-7bojmke5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:424: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-version-semver-parser-wae3byph",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:424: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-tier1-version-semver-parser-wae3byph",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:441: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-title-case-motpkar2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:441: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t1-title-case-motpkar2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:458: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-distributed-jit-optimizer-s62ko1y_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:458: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-distributed-jit-optimizer-s62ko1y_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:475: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-drf_tenant_scheduler-v037-78f2vevq"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:475: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-drf_tenant_scheduler-v037-78f2vevq"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:492: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-drf_tenant_scheduler-v077-lloomucw"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:492: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-drf_tenant_scheduler-v077-lloomucw"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:509: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-epoll_reactor_core-v039-w2n_6aop",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:509: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-epoll_reactor_core-v039-w2n_6aop",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:526: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-epoll_reactor_core-v079-2i4q5xk8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:526: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-epoll_reactor_core-v079-2i4q5xk8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:543: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-paxos_lease_coordinator-v038-me_xg2
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:543: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-paxos_lease_coordinator-v038-me_xg2
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:560: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-paxos_lease_coordinator-v078-48x0li
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:560: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-paxos_lease_coordinator-v078-48x0li
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:577: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-ring_buffer_allocator-v040-_xlbc922
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:577: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-ring_buffer_allocator-v040-_xlbc922
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:594: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-ring_buffer_allocator-v080-n066e61p
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:594: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-fab-ring_buffer_allocator-v080-n066e61p
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:611: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-multi-tenant-scheduler-o_fjhtlw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:611: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-multi-tenant-scheduler-o_fjhtlw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:628: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-byzantine_hotstuff_consensus-i
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:628: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-byzantine_hotstuff_consensus-i
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:645: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-compiler_opt_loop_vectorizer-n
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:645: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-compiler_opt_loop_vectorizer-n
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:662: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-distributed_spanner_true_time-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:662: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-distributed_spanner_true_time-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:679: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-distributed_storage_erasure_co
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:679: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-distributed_storage_erasure_co
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:696: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-kernel_bpf_verifier_jit-n9iilb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:696: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-kernel_bpf_verifier_jit-n9iilb
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:713: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-kzg_snark_plonk_prover-ke86i_8
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:713: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-kzg_snark_plonk_prover-ke86i_8
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:730: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-quantum_clifford_tableau_sim-h
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:730: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-quantum_clifford_tableau_sim-h
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:747: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-zero_knowledge_zkvm_executor-f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:747: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-opus-pro-zero_knowledge_zkvm_executor-f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:764: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-paxos-lease-coordinator-_09mhxst",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:764: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t10-paxos-lease-coordinator-_09mhxst",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:781: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-cache-lru-sug3nd78",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:781: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-cache-lru-sug3nd78",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:798: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-config-cascader-15p3v54a",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:798: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-config-cascader-15p3v54a",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:815: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-config-override-czc6dn9n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:815: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-config-override-czc6dn9n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:832: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-django-10097-uls8yngn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:832: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-django-10097-uls8yngn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:849: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v005-hp2_don4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:849: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v005-hp2_don4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:866: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v045-_edilc3d",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:866: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v045-_edilc3d",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:883: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v085-2c3u4vep",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:883: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-b_tree_node_split-v085-2c3u4vep",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:900: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v007-qeesttn9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:900: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v007-qeesttn9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:917: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v047-r1cgjhqy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:917: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v047-r1cgjhqy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:934: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v087-mbimmafy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:934: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-consistent_hash_ring-v087-mbimmafy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:951: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v008-s5k8hnrb",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:951: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v008-s5k8hnrb",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:968: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v048-r_rn4ajk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:968: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v048-r_rn4ajk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:985: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v088-nybj_sq3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:985: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-raft_log_compaction-v088-nybj_sq3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1002: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v006-b_95i5vg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1002: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v006-b_95i5vg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1019: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v046-vhfrk4f_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1019: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v046-vhfrk4f_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1036: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v086-a28xv42n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1036: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fab-skip_list_index-v086-a28xv42n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1053: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v01-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1053: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v01-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1070: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v02-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1070: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v02-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1087: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v03-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1087: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v03-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1104: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v04-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1104: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v04-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1121: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v05-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1121: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-fail-preset_tool_signature_mismatch-v05-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1138: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-flask-5014-g8ifq0bv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1138: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-flask-5014-g8ifq0bv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1155: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-import-cycle-0_cuz9oc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1155: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-import-cycle-0_cuz9oc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1172: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-isolated-cache-19fznloq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1172: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-isolated-cache-19fznloq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1189: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-json-validator-xqcu4ygq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1189: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-json-validator-xqcu4ygq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1206: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-requests-1142-11gejvqe",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1206: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-requests-1142-11gejvqe",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1223: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-retry-exponential-1740drlw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1223: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-retry-exponential-1740drlw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1240: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-event-bus-x9j4ezjk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1240: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-event-bus-x9j4ezjk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1257: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-fsm-workflow-engine-txr06zi0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1257: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-fsm-workflow-engine-txr06zi0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1274: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-retry-exponential-backoff-8g95t48f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1274: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-retry-exponential-backoff-8g95t48f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1291: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-web-reactive-signals-ip00wh94",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1291: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-tier2-web-reactive-signals-ip00wh94",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1308: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-token-bucket-r_zedr_8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1308: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-token-bucket-r_zedr_8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1325: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-trie-router-tjzal4z4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1325: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-trie-router-tjzal4z4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1342: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-two-files-q6yvos8i",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1342: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-two-files-q6yvos8i",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1359: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-version-comparator-s0rhex2m",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1359: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t2-version-comparator-s0rhex2m",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1376: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-astropy-12907-a25zbpwi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1376: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-astropy-12907-a25zbpwi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1393: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-caching-engine-8pwkd6jf",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1393: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-caching-engine-8pwkd6jf",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1410: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-circuit-breaker-i6p_ojqc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1410: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-circuit-breaker-i6p_ojqc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1427: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-connection-pool-2q9hzku5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1427: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-connection-pool-2q9hzku5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1444: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-context-layers-s1fq1i2t",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1444: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-context-layers-s1fq1i2t",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1461: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-event-bus-365rvv0n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1461: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-event-bus-365rvv0n",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1478: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v009-5elskvm3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1478: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v009-5elskvm3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1495: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v049-sz5rq20w",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1495: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v049-sz5rq20w",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1512: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v089-luy8fh7q",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1512: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-lsm_memtable_flush-v089-luy8fh7q",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1529: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v010-45givbfh",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1529: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v010-45givbfh",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1546: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v050-i58kv084",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1546: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v050-i58kv084",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1563: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v090-2ip1a8g2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1563: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-sstable_block_reader-v090-2ip1a8g2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1580: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v012-pfxfxj1y",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1580: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v012-pfxfxj1y",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1597: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v052-734yn4yo",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1597: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v052-734yn4yo",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1614: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v092-4bpw6l7o",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1614: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-two_phase_commit_tx-v092-4bpw6l7o",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1631: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v011-_o57ir9y
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1631: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v011-_o57ir9y
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1648: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v051-wfry1fq_
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1648: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v051-wfry1fq_
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1665: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v091-fa3l1kz9
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1665: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fab-vector_clock_causality-v091-fa3l1kz9
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1682: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v01-kwsbn_o
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1682: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v01-kwsbn_o
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1699: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v02-ozsvyt5
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1699: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v02-ozsvyt5
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1716: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v03-ytf9298
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1716: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v03-ytf9298
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1733: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v04-hwd1i2l
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1733: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v04-hwd1i2l
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1750: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v05-jjh65h2
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1750: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-fail-premature_no_patch_exit-v05-jjh65h2
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1767: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-file-rotator-4idx89b9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1767: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-file-rotator-4idx89b9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1784: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-json-patch-k55cpp_1",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1784: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-json-patch-k55cpp_1",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1801: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-ledger-digest-00jix571",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1801: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-ledger-digest-00jix571",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1818: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-matplotlib-13989-aw5qdrib",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1818: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-matplotlib-13989-aw5qdrib",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1835: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-middleware-stack-5un2yj35",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1835: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-middleware-stack-5un2yj35",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1852: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-plugin-dag-zxdd5fpi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1852: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-plugin-dag-zxdd5fpi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1869: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-seaborn-3069-vwlt2h8s",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1869: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-seaborn-3069-vwlt2h8s",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1886: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-sphinx-10323-1a6knyvz",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1886: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-sphinx-10323-1a6knyvz",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1903: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-api-idempotency-middleware-9tm0f_u
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1903: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-api-idempotency-middleware-9tm0f_u
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1920: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-connection-pool-7ehtssod",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1920: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-connection-pool-7ehtssod",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1937: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-rw-lock-priority-_r_syau9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1937: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-rw-lock-priority-_r_syau9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1954: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-token-bucket-pqlyr0zi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1954: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-tier3-token-bucket-pqlyr0zi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1971: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-xarray-2905-d1jd3kvm",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1971: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t3-xarray-2905-d1jd3kvm",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1988: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-approval-todo-4n62c5aa",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:1988: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-approval-todo-4n62c5aa",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2005: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-circuit-breaker-zqy9ec9_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2005: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-circuit-breaker-zqy9ec9_",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2022: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v016-8xudisck",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2022: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v016-8xudisck",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2039: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v056-imwazxpv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2039: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v056-imwazxpv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2056: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v096-q085gucx",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2056: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-autograd_tape_engine-v096-q085gucx",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2073: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v013-pf0fdnv7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2073: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v013-pf0fdnv7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2090: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v053-esf37eqw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2090: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v053-esf37eqw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2107: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v093-o6affs2j",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2107: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-dag_cycle_detector-v093-o6affs2j",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2124: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v015-w7ictgh5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2124: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v015-w7ictgh5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2141: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v055-_16fpabi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2141: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v055-_16fpabi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2158: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v095-m9pxx4js",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2158: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-lazy_segment_tree-v095-m9pxx4js",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2175: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v014-fv4ef1ts"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2175: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v014-fv4ef1ts"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2192: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v054-jj8xuvur"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2192: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v054-jj8xuvur"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2209: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v094-o4klio9b"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2209: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fab-vdom_fiber_reconciler-v094-o4klio9b"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2226: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v01-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2226: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v01-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2243: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v02-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2243: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v02-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2260: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v03-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2260: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v03-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2277: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v04-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2277: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v04-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2294: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v05-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2294: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-conversational_flattening_loop-v05-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2311: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v01-8i
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2311: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v01-8i
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2328: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v02-4k
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2328: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v02-4k
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2345: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v03-dq
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2345: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v03-dq
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2362: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v04-1n
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2362: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v04-1n
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2379: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v05-8l
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2379: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-fail-dsml_markdown_protocol_drift-v05-8l
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2396: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-feature-todos-c__aswyn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2396: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-feature-todos-c__aswyn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2413: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-protocol-fsm-sdarqxj0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2413: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-protocol-fsm-sdarqxj0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2430: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-pylint-4551-u45czcxg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2430: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-pylint-4551-u45czcxg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2447: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-pytest-10051-uvgbupa2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2447: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-pytest-10051-uvgbupa2",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2464: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-rate-limiter-a1ba8_na",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2464: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-rate-limiter-a1ba8_na",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2481: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-saga-orchestration-kt39s3zp",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2481: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-saga-orchestration-kt39s3zp",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2498: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-scikit-learn-10297-sr2smr2z",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2498: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-scikit-learn-10297-sr2smr2z",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2515: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-stream-pipeline-w6ys17n9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2515: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-stream-pipeline-w6ys17n9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2532: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-sympy-11618-jpuxg77v",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2532: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-sympy-11618-jpuxg77v",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2549: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-dag-resolver-urtwqrxb",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2549: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-dag-resolver-urtwqrxb",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2566: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-ds-feature-scaler-imputer-1rj_vrur
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2566: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-ds-feature-scaler-imputer-1rj_vrur
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2583: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-lcb-lazy-segment-tree-jjpwwkrk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2583: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-lcb-lazy-segment-tree-jjpwwkrk",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2600: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-stream-window-aggregator-nq0bj9vy"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2600: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-stream-window-aggregator-nq0bj9vy"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2617: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-trie-prefix-router-atul6_n0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2617: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-trie-prefix-router-atul6_n0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2634: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-web-vdom-reconciler-jfdefzfe",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2634: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-tier4-web-vdom-reconciler-jfdefzfe",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2651: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-token-bucket-mqmhw68h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2651: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t4-token-bucket-mqmhw68h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2668: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-async-event-loop-ubxxp313",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2668: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-async-event-loop-ubxxp313",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2685: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-concurrent-lsm-djc7hruy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2685: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-concurrent-lsm-djc7hruy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2702: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-distributed-wal-0q3k1kos",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2702: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-distributed-wal-0q3k1kos",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2719: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-extract-context-compiler-xj6j9qlt",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2719: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-extract-context-compiler-xj6j9qlt",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2736: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-extract-module-v4nb968h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2736: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-extract-module-v4nb968h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2753: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v018-a5i5qlt
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2753: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v018-a5i5qlt
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2770: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v058-ddpocy1
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2770: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v058-ddpocy1
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2787: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v098-qy6wshg
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2787: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-datalog_fixpoint_engine-v098-qy6wshg
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2804: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v019-03apboyg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2804: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v019-03apboyg",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2821: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v059-7ycaohqq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2821: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v059-7ycaohqq",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2838: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v099-1aauud1h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2838: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-jsonpath_ast_filter-v099-1aauud1h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2855: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v020-o0hdpwzj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2855: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v020-o0hdpwzj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2872: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v060-jqzfoaza",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2872: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v060-jqzfoaza",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2889: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v100-f9d6c4wi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2889: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-schema_migration_dag-v100-f9d6c4wi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2906: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v017-ji0j1_1z",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2906: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v017-ji0j1_1z",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2923: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v057-f42qrk74",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2923: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v057-f42qrk74",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2940: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v097-js05wbo9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2940: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fab-sql_cost_optimizer-v097-js05wbo9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2957: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v01
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2957: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v01
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2974: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v02
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2974: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v02
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2991: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v03
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:2991: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v03
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3008: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v04
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3008: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v04
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3025: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v05
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3025: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-fail-multi_file_partial_diff_failure-v05
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3042: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-immutable-trie-ltz753kf",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3042: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-immutable-trie-ltz753kf",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3059: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-persistent-b-tree-vx8rvag4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3059: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-persistent-b-tree-vx8rvag4",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3076: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-datalog-engine-haselm1e",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3076: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-datalog-engine-haselm1e",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3093: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-ds-autograd-engine-ovn4x5as",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3093: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-ds-autograd-engine-ovn4x5as",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3110: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-jsonpath-query-compiler-zwufxtna",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3110: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-jsonpath-query-compiler-zwufxtna",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3127: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-sql-micro-planner-5v1vurdy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3127: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-sql-micro-planner-5v1vurdy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3144: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-swe-schema-migration-engine-yp6hd9
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3144: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-tier5-swe-schema-migration-engine-yp6hd9
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3161: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-topological-dag-p685evpy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3161: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t5-topological-dag-p685evpy",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3178: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-async-actor-engine-1ob6kdju",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3178: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-async-actor-engine-1ob6kdju",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3195: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-compiler-ast-optimizer-2it76s1j",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3195: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-compiler-ast-optimizer-2it76s1j",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3212: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-distributed-raft-consensus-m7yephf5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3212: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-distributed-raft-consensus-m7yephf5",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3229: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-byzantine_fault_paxos-v023-d0fkn9wi"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3229: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-byzantine_fault_paxos-v023-d0fkn9wi"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3246: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-byzantine_fault_paxos-v063-ixmsdev_"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3246: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-byzantine_fault_paxos-v063-ixmsdev_"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3263: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-gossip_swim_failure-v022-n7svlm8v",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3263: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-gossip_swim_failure-v022-n7svlm8v",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3280: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-gossip_swim_failure-v062-74t8xsyn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3280: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-gossip_swim_failure-v062-74t8xsyn",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3297: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-quantum_statevector_sim-v024-518tjh7
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3297: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-quantum_statevector_sim-v024-518tjh7
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3314: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-quantum_statevector_sim-v064-uslnsgn
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3314: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-quantum_statevector_sim-v064-uslnsgn
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3331: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-raft_state_machine-v021-z6z54uxw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3331: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-raft_state_machine-v021-z6z54uxw",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3348: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-raft_state_machine-v061-awj63pnj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3348: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-fab-raft_state_machine-v061-awj63pnj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3365: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-persistent-avl-tree-hbionxw9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3365: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-persistent-avl-tree-hbionxw9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3382: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-raft-consensus-wz5t3zht",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3382: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-raft-consensus-wz5t3zht",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3399: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-gossip-membership-ip0942r3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3399: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-gossip-membership-ip0942r3",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3416: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-hle-quantum-statevector-sim-gyj90y
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3416: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-hle-quantum-statevector-sim-gyj90y
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3433: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-raft-state-machine-ranjpcj8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3433: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-raft-state-machine-ranjpcj8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3450: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-vector-clock-causality-qv85y4e0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3450: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-tier6-vector-clock-causality-qv85y4e0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3467: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-transactional-mvcc-db-w4wb3k1l",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3467: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t6-transactional-mvcc-db-w4wb3k1l",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3484: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-async-actor-mesh-1tugrj_7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3484: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-async-actor-mesh-1tugrj_7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3501: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-kzg_poly_commitment-v025-2tqdkfge",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3501: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-kzg_poly_commitment-v025-2tqdkfge",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3518: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-kzg_poly_commitment-v065-u6le12hu",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3518: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-kzg_poly_commitment-v065-u6le12hu",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3535: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-lsm_tree_engine-v028-qwm4sr77",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3535: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-lsm_tree_engine-v028-qwm4sr77",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3552: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-lsm_tree_engine-v068-g99f1n0y",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3552: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-lsm_tree_engine-v068-g99f1n0y",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3569: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-merkle_patricia_trie-v026-q3ww801b",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3569: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-merkle_patricia_trie-v026-q3ww801b",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3586: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-merkle_patricia_trie-v066-i11nrfmt",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3586: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-merkle_patricia_trie-v066-i11nrfmt",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3603: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-snark_r1cs_verifier-v027-eqo8z49r",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3603: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-snark_r1cs_verifier-v027-eqo8z49r",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3620: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-snark_r1cs_verifier-v067-lz9bc0qi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3620: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-fab-snark_r1cs_verifier-v067-lz9bc0qi",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3637: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-graphql-federation-1cwleykl",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3637: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-graphql-federation-1cwleykl",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3654: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-jit-bytecode-vm-71skrk92",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3654: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-jit-bytecode-vm-71skrk92",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3671: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-orm-query-compiler-vl8ys7l0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3671: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-orm-query-compiler-vl8ys7l0",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3688: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-greenfield-bytecode-vm-y9e7ur2h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3688: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-greenfield-bytecode-vm-y9e7ur2h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3705: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-greenfield-kv-lsm-tree-ji_86lsd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3705: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-greenfield-kv-lsm-tree-ji_86lsd",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3722: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-hle-zk-poly-commitment-verifier-y4
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3722: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t7-tier7-hle-zk-poly-commitment-verifier-y4
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3739: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-columnar-arrow-filter-45vf_1l9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3739: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-columnar-arrow-filter-45vf_1l9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3756: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-event-sourcing-cqrs-xmcqm8g7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3756: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-event-sourcing-cqrs-xmcqm8g7",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3773: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-arrow_columnar_filter-v030-n3oelqk2"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3773: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-arrow_columnar_filter-v030-n3oelqk2"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3790: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-arrow_columnar_filter-v070-xu7kaf8t"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3790: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-arrow_columnar_filter-v070-xu7kaf8t"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3807: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-lock_free_mpsc_queue-v032-0zqjwkly",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3807: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-lock_free_mpsc_queue-v032-0zqjwkly",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3824: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-lock_free_mpsc_queue-v072-eo5_td4h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3824: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-lock_free_mpsc_queue-v072-eo5_td4h",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3841: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-sharded_kv_raft_engine-v031-lvasp684
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3841: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-sharded_kv_raft_engine-v031-lvasp684
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3858: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-sharded_kv_raft_engine-v071-3mqeiemq
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3858: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-sharded_kv_raft_engine-v071-3mqeiemq
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3875: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-zero_copy_rpc_wire-v029-74ts9ezj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3875: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-zero_copy_rpc_wire-v029-74ts9ezj",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3892: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-zero_copy_rpc_wire-v069-uwy6a68m",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3892: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-fab-zero_copy_rpc_wire-v069-uwy6a68m",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3909: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-sharded-consistent-hash-mbdhe176",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3909: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-sharded-consistent-hash-mbdhe176",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3926: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-zero-copy-rpc-wire-9w3in13k",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3926: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t8-zero-copy-rpc-wire-9w3in13k",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3943: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-distributed-2pc-engine-8xzzlnop",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3943: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-distributed-2pc-engine-8xzzlnop",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3960: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-distributed-deadlock-detector-glv28td9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3960: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-distributed-deadlock-detector-glv28td9",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3977: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-crdt_distributed_text-v036-nbzx5dz1"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3977: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-crdt_distributed_text-v036-nbzx5dz1"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3994: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-crdt_distributed_text-v076-te7ot3nm"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:3994: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-crdt_distributed_text-v076-te7ot3nm"
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4011: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-deadlock_cycle_resolver-v034-s1nf1fz
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4011: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-deadlock_cycle_resolver-v034-s1nf1fz
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4028: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-deadlock_cycle_resolver-v074-6tivqcn
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4028: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-deadlock_cycle_resolver-v074-6tivqcn
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4045: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-distributed_2pc_wal-v033-1e2j7exc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4045: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-distributed_2pc_wal-v033-1e2j7exc",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4062: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-distributed_2pc_wal-v073-21pf94fv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4062: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-distributed_2pc_wal-v073-21pf94fv",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4079: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-mvcc_storage_engine-v035-whqieuy8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4079: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-mvcc_storage_engine-v035-whqieuy8",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4096: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-mvcc_storage_engine-v075-1ms4qu81",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4096: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-fab-mvcc_storage_engine-v075-1ms4qu81",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4113: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-mvcc-storage-engine-3bnpmr3f",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4113: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-mvcc-storage-engine-3bnpmr3f",
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4130: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-actor_mesh_supervision_tree-n70
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4130: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-actor_mesh_supervision_tree-n70
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4147: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-database_buffer_pool_clock_pro-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4147: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-database_buffer_pool_clock_pro-
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4164: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_deadlock_wait_for_g
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4164: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_deadlock_wait_for_g
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4181: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_query_optimizer_cbo
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4181: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_query_optimizer_cbo
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4198: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_raft_linearizable_k
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4198: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_raft_linearizable_k
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4215: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_saga_orchestrator_w
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4215: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_saga_orchestrator_w
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4232: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_vector_db_hnsw-s46a
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4232: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-distributed_vector_db_hnsw-s46a
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4249: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-gpu_tensor_autograd_graph-tj4b0
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4249: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-gpu_tensor_autograd_graph-tj4b0
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4266: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-immutable_persistent_hash_array
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4266: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-immutable_persistent_hash_array
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4283: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-jit_wasm_compiler_arm64-i9ugn9f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4283: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-jit_wasm_compiler_arm64-i9ugn9f
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4300: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-lock_free_skip_list_ssi-_vipa21
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4300: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-lock_free_skip_list_ssi-_vipa21
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4317: forbidden machine-local user directory path: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-realtime_hft_order_book_simd-g6
+PATH HYGIENE FAIL: dev_context_logs/14_lam_simulation.txt:4317: forbidden developer username occurrence: "workspace": "/home/rocha/Coding/Aether-D-System/.vanguard/workspace/tmp/lam-t9-opus-pro-realtime_hft_order_book_simd-g6
+PATH HYGIENE FAIL: dev_context_logs/16_frontier_dryrun.txt:5: forbidden machine-local user directory path: • Preregistration Artifact : /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/preregistration.json
+PATH HYGIENE FAIL: dev_context_logs/16_frontier_dryrun.txt:5: forbidden developer username occurrence: • Preregistration Artifact : /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/preregistration.json
+PATH HYGIENE FAIL: dev_context_logs/16_frontier_dryrun.txt:176: forbidden machine-local user directory path: ✅ DRY RUN REPORT WRITTEN: /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/dry_run_report.json
+PATH HYGIENE FAIL: dev_context_logs/16_frontier_dryrun.txt:176: forbidden developer username occurrence: ✅ DRY RUN REPORT WRITTEN: /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/dry_run_report.json
+PATH HYGIENE FAIL: dev_context_logs/18_failure_evidence.txt:484: forbidden developer username occurrence: vanguard/clients/studio/dist-browser/browser.js.map:4:  "sourcesContent": ["/**\n * @license React\n * react.development
+
+=== CANONICAL UNIT TESTS ===
+.................................................................................................
+----------------------------------------------------------------------
+Ran 97 tests in 0.549s
+
+OK
+.........................................................................................................................
+----------------------------------------------------------------------
+Ran 121 tests in 1.486s
+
+OK
+..........................................................................................................................................s..s.......s....ss...................................................................................................................................s.................................................................................................................................
+----------------------------------------------------------------------
+Ran 416 tests in 8.616s
+
+OK (skipped=6)
+
+--- 4. CODE STATS ---
+FILES: 2649
+LOC: 222520
+BY_LANGUAGE:
+.py    files=2270  loc=148398
+.ts    files=256   loc=28975
+.tsx   files=85    loc=7001
+.js    files=38    loc=38146
+
+LARGEST 40 FILES:
+ 30557 LOC  vanguard/clients/studio/dist-browser/browser.js
+  6708 LOC  site/assets/javascripts/lunr/wordcut.js
+  1437 LOC  tools/002_LLM_API_MOCK/generate_synthetic_corpus.py
+  1349 LOC  vanguard/packages/runtime/service/service.py
+  1281 LOC  vanguard/packages/runtime/session.py
+  1149 LOC  benchmarks/swe_bench/domain_challenges.py
+  1143 LOC  vanguard/packages/adapters/models/openrouter.py
+  1058 LOC  vanguard/packages/domain/artifacts/manifest.py
+  1044 LOC  benchmarks/swe_bench/challenges.py
+  1007 LOC  vanguard/packages/adapters/environment/git.py
+   907 LOC  vanguard/packages/agency/episode/engine.py
+   866 LOC  tools/runners/run_swe_challenge.py
+   865 LOC  vanguard/clients/client/src/application/app-controller.ts
+   860 LOC  test/falsifiers/test_rf101_rf112_canonical_recursion.py
+   848 LOC  test/runtime/test_evidence_capture.py
+   832 LOC  tools/runners/build_evidence_bundle.py
+   821 LOC  vanguard/packages/domain/ledger/reducer.py
+   813 LOC  lab/m65_study.py
+   812 LOC  test/adapters/test_openrouter.py
+   772 LOC  vanguard/packages/runtime/delegation.py
+   740 LOC  test/agency/test_episode_spawn.py
+   723 LOC  vanguard/packages/runtime/root.py
+   722 LOC  vanguard/packages/runtime/service/studio_gateway.py
+   707 LOC  vanguard/packages/domain/wire/types_gen.py
+   690 LOC  vanguard/packages/runtime/artifacts.py
+   668 LOC  vanguard/packages/adapters/environment/fake.py
+   665 LOC  vanguard/packages/runtime/governance/learning.py
+   664 LOC  vanguard/packages/runtime/app_service.py
+   654 LOC  vanguard/packages/domain/generated/contracts.gen.ts
+   640 LOC  vanguard/packages/adapters/stores/memory_engine.py
+   625 LOC  vanguard/clients/lab/src/state/lab-store.ts
+   623 LOC  vanguard/packages/runtime/skill_evaluation.py
+   619 LOC  vanguard/packages/runtime/governance/approvals.py
+   591 LOC  test/falsifiers/test_falsifiers.py
+   588 LOC  vanguard/clients/studio/src/ui/CodingAgentWorkbench.tsx
+   587 LOC  vanguard/packages/domain/evidence/audit.py
+   586 LOC  test/runtime/test_composition_root.py
+   585 LOC  vanguard/packages/adapters/models/invocation.py
+   584 LOC  vanguard/packages/runtime/checkpoints.py
+   582 LOC  tools/002_LLM_API_MOCK/server.py
+
+--- 5. SQLITE SUMMARY ---
+Found 2 SQLite database(s).
+
+====================================================================================================
+DATABASE: benchmarks/frontier_v090/runs/tier1_lru_ttl_cache-vg-code-v090-react-control-9e64iiva/.vanguard/events.sqlite3
+
+  TABLE: events
+  ROWS:    244
+  COLUMNS: global_id, event_id, seq, seq_str, run_id, episode_id, project_id, scope, occurred_at, recorded_at, principal, tenant_id, owner_id, confidentiality, retention_class, trainability, redaction_status, envelope_json, envelope_digest
+
+  TABLE: sqlite_sequence
+  ROWS:    1
+  COLUMNS: name, seq
+
+====================================================================================================
+DATABASE: tools/002_LLM_API_MOCK/lam.sqlite
+
+  TABLE: budget_events
+  ROWS:    0
+  COLUMNS: event_id, ts, calls_delta, usd_delta, note
+
+  TABLE: episodes
+  ROWS:    9
+  COLUMNS: episode_id, parent_id, task_id, depth, depth_label, budget_tokens, remaining_tokens, tokens_used, recorded_at
+
+  TABLE: mock_calls
+  ROWS:    627
+  COLUMNS: id, created_at, request_sha256, scenario_key, tier, requested_turn, returned_turn, reply_sha256, source_label, run_id, prompt_snippet, response_snippet, evidence_label, tokens, millis, prompt_tokens, completion_tokens, cost_usd
+
+  TABLE: model_ceilings
+  ROWS:    33
+  COLUMNS: model, band, ceiling_tier, evidence_trace_id, updated_at
+
+  TABLE: scenarios
+  ROWS:    254
+  COLUMNS: id, tier, title, atoms_used, n_files, n_turns, created_from, content_hash
+
+  TABLE: sqlite_sequence
+  ROWS:    2
+  COLUMNS: name, seq
+
+  TABLE: traces
+  ROWS:    598
+  COLUMNS: trace_id, scenario_id, backend, model, passed, llm_calls, prompt_tokens, completion_tokens, usd, wall_s, recorded_at, blob_path, is_downgrade, model_tier, scenario_tier, harness, cascade, episode_id, parent_id, task_id, depth, context_bytes, compression_ratio, memory_turns, skills_used, harness_version
+
+--- 6. LAM UNIT TESTS ---
+test_engine_module_exists (test.tools.test_llm_api_mock.LamImport.test_engine_module_exists) ... ok
+test_recorder_schema_and_proxy_usage (test.tools.test_llm_api_mock.ServerIntegrationAndEvidenceTests.test_recorder_schema_and_proxy_usage) ... ok
+test_release_admission_refuses_lam_replay (test.tools.test_llm_api_mock.ServerIntegrationAndEvidenceTests.test_release_admission_refuses_lam_replay) ... ok
+test_select_model_lam_port (test.tools.test_llm_api_mock.ServerIntegrationAndEvidenceTests.test_select_model_lam_port) ... ok
+test_unified_server_openai_and_ollama_endpoints (test.tools.test_llm_api_mock.ServerIntegrationAndEvidenceTests.test_unified_server_openai_and_ollama_endpoints) ... ok
+test_five_tiers_are_registered (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_five_tiers_are_registered) ... ok
+test_tier1_advances_on_tool_observation_count_not_session_state (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_tier1_advances_on_tool_observation_count_not_session_state)
+Stateless: two independent engines with the same history must agree. ... ok
+test_tier1_calculator_turn0_calls_view_file (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_tier1_calculator_turn0_calls_view_file) ... ok
+test_tier1_stop_after_tests_pass (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_tier1_stop_after_tests_pass) ... ok
+test_tier5_has_more_turns_than_tier1 (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_tier5_has_more_turns_than_tier1) ... ok
+test_unknown_model_is_instrument_error_not_a_guess (test.tools.test_llm_api_mock.StatelessTurnAdvance.test_unknown_model_is_instrument_error_not_a_guess) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.908s
+
+OK
+
+--- 7. FRONTIER DRY RUN ---
+
+======================================================================
+⚡ VANGUARD BENCHMARK DRY RUN (27 Rows Deterministic Matrix)
+======================================================================
+• Preregistration Artifact : /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/preregistration.json
+• Preregistration Digest   : sha256:dac286c92976f5e5a5495d3f50533c2e269baeec3298eb18a4ce278c825a4f66
+• Framework Digest        : sha256:4e33178087e69ced81069af6ff469a76110c5e9054d7a42657a06f2487da9c2c
+• Subject Digest          : sha256:3fa714a3bf34e37128f27f516d273eb8ef3c37275cfd6861224ec9949555eab9
+• Target Model            : deepseek/deepseek-v4-flash-0731
+----------------------------------------------------------------------
+
+[01/27] 76.6ms 🔹 [v090-04] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[02/27] 11.1ms 🔹 [v090-25] BUGFIX (Hard) | Slot: BUG-H
+        Preset   : vg-bugfix-v090-v1-direct (manifest: sha256:92293c8d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[03/27] 10.5ms 🔹 [v090-20] RESEARCH (Easy) | Slot: RESEARCH-E
+        Preset   : vg-research-v090-v1-local (manifest: sha256:9a22a834...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a local research agent. Search repository documents and produce a concise evidence-backed..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[04/27] 11.3ms 🔹 [v090-10] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[05/27] 11.8ms 🔹 [v090-08] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[06/27] 11.5ms 🔹 [v090-13] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[07/27] 10.7ms 🔹 [v090-21] RESEARCH (Hard) | Slot: RESEARCH-H
+        Preset   : vg-research-v090-v1-local (manifest: sha256:9a22a834...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a local research agent. Search repository documents and produce a concise evidence-backed..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[08/27] 11.1ms 🔹 [v090-03] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[09/27] 10.5ms 🔹 [v090-22] RESEARCH (Easy) | Slot: RESEARCH-E
+        Preset   : vg-research-v090-v2-web-corroborated (manifest: sha256:2afe97fa...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a research agent with the same local read-only tools as Research V1. Decompose questions,..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[10/27] 11.0ms 🔹 [v090-01] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[11/27] 11.6ms 🔹 [v090-11] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[12/27] 11.1ms 🔹 [v090-05] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[13/27] 10.5ms 🔹 [v090-19] TUTOR (Hard) | Slot: TUTOR-H
+        Preset   : vg-tutor-v090-v2-evidence-graph (manifest: sha256:7e30a513...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only evidence-graph code tutor. Build a temporary graph of files, symbols, require..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[14/27] 10.5ms 🔹 [v090-16] TUTOR (Easy) | Slot: TUTOR-E
+        Preset   : vg-tutor-v090-v1-read-search (manifest: sha256:b76b6127...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only code tutor. Search and read the repository, then explain the requested execut..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[15/27] 11.2ms 🔹 [v090-12] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[16/27] 10.8ms 🔹 [v090-26] BUGFIX (Easy) | Slot: BUG-E
+        Preset   : vg-bugfix-v090-v2-reproduce-verify (manifest: sha256:e51a16ed...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[17/27] 11.5ms 🔹 [v090-07] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[18/27] 10.9ms 🔹 [v090-24] BUGFIX (Easy) | Slot: BUG-E
+        Preset   : vg-bugfix-v090-v1-direct (manifest: sha256:92293c8d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[19/27] 10.6ms 🔹 [v090-23] RESEARCH (Hard) | Slot: RESEARCH-H
+        Preset   : vg-research-v090-v2-web-corroborated (manifest: sha256:2afe97fa...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a research agent with the same local read-only tools as Research V1. Decompose questions,..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[20/27] 11.0ms 🔹 [v090-09] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[21/27] 10.5ms 🔹 [v090-18] TUTOR (Easy) | Slot: TUTOR-E
+        Preset   : vg-tutor-v090-v2-evidence-graph (manifest: sha256:7e30a513...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only evidence-graph code tutor. Build a temporary graph of files, symbols, require..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[22/27] 10.6ms 🔹 [v090-17] TUTOR (Hard) | Slot: TUTOR-H
+        Preset   : vg-tutor-v090-v1-read-search (manifest: sha256:b76b6127...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only code tutor. Search and read the repository, then explain the requested execut..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[23/27] 11.4ms 🔹 [v090-02] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[24/27] 11.1ms 🔹 [v090-06] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[25/27] 11.3ms 🔹 [v090-27] BUGFIX (Hard) | Slot: BUG-H
+        Preset   : vg-bugfix-v090-v2-reproduce-verify (manifest: sha256:e51a16ed...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[26/27] 11.2ms 🔹 [v090-14] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[27/27] 11.3ms 🔹 [v090-15] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+
+======================================================================
+✅ DRY RUN REPORT WRITTEN: /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/dry_run_report.json
+📊 Rows Verified: 27 / 27 | Mode: Non-Empirical Deterministic
+======================================================================
+
+dry-run complete: 27 rows; non-empirical
+
+--- 8. KNOWLEDGE INDEXES SUMMARY ---
+=== KNOWLEDGE FILES ===
+catalog.jsonl  272619 bytes
+code-map.jsonl  1820 bytes
+links.jsonl  48072 bytes
+ownership.jsonl  12631 bytes
+report.json  346 bytes
+symbols.jsonl  1750 bytes
+
+=== ROW COUNTS ===
+  1391 .generated/knowledge/catalog.jsonl
+    12 .generated/knowledge/code-map.jsonl
+   225 .generated/knowledge/links.jsonl
+    80 .generated/knowledge/ownership.jsonl
+    11 .generated/knowledge/symbols.jsonl
+  1719 total
+
+=== CODE MAP SAMPLE ===
+{"subsystem": "SUB-B-01 Domain", "package_path": "vanguard/packages/domain/", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"subsystem": "SUB-B-02 Ports", "package_path": "vanguard/packages/ports/", "canonical_owner": "docs/backend/reference/ports.md"}
+{"subsystem": "SUB-B-03 Kernel Core", "package_path": "vanguard/packages/kernel/", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"subsystem": "SUB-B-04 Agency Engine", "package_path": "vanguard/packages/agency/", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"subsystem": "SUB-B-05 Causal State", "package_path": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"subsystem": "SUB-B-06 Composition", "package_path": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"subsystem": "SUB-B-07 Delegation", "package_path": "vanguard/packages/agency/spawn.py", "canonical_owner": "docs/backend/architecture/delegation-topology.md"}
+{"subsystem": "SUB-B-08 Governed Memory", "package_path": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
+{"subsystem": "SUB-B-09 Assurance & Evaluation", "package_path": "vanguard/packages/runtime/evaluator_gateway.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"subsystem": "SUB-B-10 Domain Packs", "package_path": "packs/", "canonical_owner": "docs/backend/reference/manifests.md"}
+{"subsystem": "SUB-B-11 Application Interfaces", "package_path": "vanguard/packages/runtime/service/", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
+{"subsystem": "SUB-B-12 Schemas", "package_path": "schemas/", "canonical_owner": "docs/backend/reference/schemas.md"}
+
+=== SYMBOL SAMPLE ===
+{"symbol": "Kernel", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "EpisodeEngine", "kind": "class", "defined_in": "vanguard/packages/agency/turns.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "HarnessSession", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/sqlite_store.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"symbol": "EvidenceCaptureService", "kind": "class", "defined_in": "vanguard/packages/runtime/evidence.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"symbol": "RuntimeService", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/reference/runtime-service.md"}
+{"symbol": "IPlanner", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IToolkit", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+
+=== LINKS SAMPLE ===
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-readme", "target_path": "README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}

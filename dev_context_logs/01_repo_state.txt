@@ -1,0 +1,32 @@
+=== TIMESTAMP ===
+2026-08-30T08:08:05Z
+
+=== GIT PROVENANCE ===
+## feat/beta-release_electroweak-v091
+M  .generated/knowledge/catalog.jsonl
+ M .gitignore
+M  Makefile
+M  benchmarks/frontier_v090/artifacts/dry_run_report.json
+M  benchmarks/frontier_v090/artifacts/preregistration.json
+AM collect_dev_context.sh
+MM tools/002_LLM_API_MOCK/lam.sqlite
+M  tools/lda/index.html
+Branch:   feat/beta-release_electroweak-v091
+HEAD SHA: 7d46c7f5528cf23a7b6cfcd6e02ece4d7f32e6a0
+Recent Commits:
+7d46c7f Merge pull request #26 from brainopensource/docs/convergenc-electroweak-v091
+9e3271b feat(LDA): Convergence - LDA LLM Doc Atlas added to see context metadata
+1dc4524 feat(LDA): Convergence - LDA LLM Doc Atlas added to see context metadata
+649f37a refactor(docs-PI): Convergence - Docs OSS Tools Fixes, CICD, justfile, mk, etc
+52ee37c refactor(docs-PI): Convergence - Docs OSS Party
+
+=== CAPABILITY RUNTIMES ===
+Python: Python 3.12.3
+uv:     uv 0.5.9
+Node:   v22.18.0
+npm:    10.9.2
+just:   NOT FOUND
+make:   GNU Make 4.3
+cargo:  cargo 1.98.0 (797e8a9bc 2026-08-05)
+go:     NOT FOUND
+rg:     ripgrep 14.1.0

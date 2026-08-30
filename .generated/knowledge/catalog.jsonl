@@ -179,44 +179,6 @@
 {"path": "schemas/v4/port-interfaces.md", "kind": "doc", "bytes": 4092, "lines": 45, "words": 527, "estimated_tokens": 863, "title": "Port interfaces and activation control"}
 {"path": "schemas/v4/vectors/README.md", "kind": "doc", "bytes": 1701, "lines": 25, "words": 250, "estimated_tokens": 379, "title": "Golden vectors"}
 {"path": "schemas/v4/vectors/canonicalisation/README.md", "kind": "doc", "bytes": 1446, "lines": 27, "words": 186, "estimated_tokens": 304, "title": "`canonicalisation/` \u2014 the golden triples (`GV-2`)"}
-{"path": "site/assets/javascripts/bundle.d7400e89.min.js", "kind": "code", "language": "JavaScript", "bytes": 114286, "lines": 16, "words": 2643, "estimated_tokens": 28571, "title": "bundle.d7400e89.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ar.min.js", "kind": "code", "language": "JavaScript", "bytes": 17074, "lines": 1, "words": 1127, "estimated_tokens": 3312, "title": "lunr.ar.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.da.min.js", "kind": "code", "language": "JavaScript", "bytes": 4654, "lines": 18, "words": 234, "estimated_tokens": 1138, "title": "lunr.da.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.de.min.js", "kind": "code", "language": "JavaScript", "bytes": 6119, "lines": 18, "words": 374, "estimated_tokens": 1503, "title": "lunr.de.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.du.min.js", "kind": "code", "language": "JavaScript", "bytes": 6208, "lines": 18, "words": 288, "estimated_tokens": 1526, "title": "lunr.du.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.el.min.js", "kind": "code", "language": "JavaScript", "bytes": 14950, "lines": 1, "words": 137, "estimated_tokens": 2582, "title": "lunr.el.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.es.min.js", "kind": "code", "language": "JavaScript", "bytes": 11499, "lines": 18, "words": 651, "estimated_tokens": 2814, "title": "lunr.es.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.fi.min.js", "kind": "code", "language": "JavaScript", "bytes": 9342, "lines": 18, "words": 454, "estimated_tokens": 2274, "title": "lunr.fi.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.fr.min.js", "kind": "code", "language": "JavaScript", "bytes": 10669, "lines": 18, "words": 465, "estimated_tokens": 2632, "title": "lunr.fr.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.he.min.js", "kind": "code", "language": "JavaScript", "bytes": 6882, "lines": 1, "words": 676, "estimated_tokens": 1282, "title": "lunr.he.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.hi.min.js", "kind": "code", "language": "JavaScript", "bytes": 3383, "lines": 1, "words": 216, "estimated_tokens": 537, "title": "lunr.hi.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.hu.min.js", "kind": "code", "language": "JavaScript", "bytes": 9437, "lines": 18, "words": 569, "estimated_tokens": 2298, "title": "lunr.hu.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.hy.min.js", "kind": "code", "language": "JavaScript", "bytes": 1264, "lines": 1, "words": 84, "estimated_tokens": 283, "title": "lunr.hy.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.it.min.js", "kind": "code", "language": "JavaScript", "bytes": 11232, "lines": 18, "words": 617, "estimated_tokens": 2777, "title": "lunr.it.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ja.min.js", "kind": "code", "language": "JavaScript", "bytes": 2313, "lines": 1, "words": 92, "estimated_tokens": 517, "title": "lunr.ja.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.jp.min.js", "kind": "code", "language": "JavaScript", "bytes": 36, "lines": 1, "words": 1, "estimated_tokens": 9, "title": "lunr.jp.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.kn.min.js", "kind": "code", "language": "JavaScript", "bytes": 3494, "lines": 1, "words": 193, "estimated_tokens": 540, "title": "lunr.kn.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ko.min.js", "kind": "code", "language": "JavaScript", "bytes": 7972, "lines": 1, "words": 826, "estimated_tokens": 956, "title": "lunr.ko.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.multi.min.js", "kind": "code", "language": "JavaScript", "bytes": 817, "lines": 1, "words": 7, "estimated_tokens": 204, "title": "lunr.multi.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.nl.min.js", "kind": "code", "language": "JavaScript", "bytes": 6026, "lines": 18, "words": 259, "estimated_tokens": 1480, "title": "lunr.nl.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.no.min.js", "kind": "code", "language": "JavaScript", "bytes": 4754, "lines": 18, "words": 314, "estimated_tokens": 1161, "title": "lunr.no.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.pt.min.js", "kind": "code", "language": "JavaScript", "bytes": 10171, "lines": 18, "words": 531, "estimated_tokens": 2498, "title": "lunr.pt.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ro.min.js", "kind": "code", "language": "JavaScript", "bytes": 10958, "lines": 18, "words": 644, "estimated_tokens": 2656, "title": "lunr.ro.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ru.min.js", "kind": "code", "language": "JavaScript", "bytes": 10331, "lines": 18, "words": 667, "estimated_tokens": 1984, "title": "lunr.ru.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.sa.min.js", "kind": "code", "language": "JavaScript", "bytes": 4901, "lines": 1, "words": 265, "estimated_tokens": 675, "title": "lunr.sa.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.stemmer.support.min.js", "kind": "code", "language": "JavaScript", "bytes": 3647, "lines": 1, "words": 58, "estimated_tokens": 912, "title": "lunr.stemmer.support.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.sv.min.js", "kind": "code", "language": "JavaScript", "bytes": 4523, "lines": 18, "words": 261, "estimated_tokens": 1101, "title": "lunr.sv.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.ta.min.js", "kind": "code", "language": "JavaScript", "bytes": 2406, "lines": 1, "words": 108, "estimated_tokens": 438, "title": "lunr.ta.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.te.min.js", "kind": "code", "language": "JavaScript", "bytes": 2330, "lines": 1, "words": 92, "estimated_tokens": 426, "title": "lunr.te.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.th.min.js", "kind": "code", "language": "JavaScript", "bytes": 1031, "lines": 1, "words": 44, "estimated_tokens": 257, "title": "lunr.th.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.tr.min.js", "kind": "code", "language": "JavaScript", "bytes": 15009, "lines": 18, "words": 554, "estimated_tokens": 3692, "title": "lunr.tr.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.vi.min.js", "kind": "code", "language": "JavaScript", "bytes": 784, "lines": 1, "words": 40, "estimated_tokens": 190, "title": "lunr.vi.min.js"}
-{"path": "site/assets/javascripts/lunr/min/lunr.zh.min.js", "kind": "code", "language": "JavaScript", "bytes": 2158, "lines": 1, "words": 200, "estimated_tokens": 464, "title": "lunr.zh.min.js"}
-{"path": "site/assets/javascripts/lunr/tinyseg.js", "kind": "code", "language": "JavaScript", "bytes": 22878, "lines": 206, "words": 750, "estimated_tokens": 4986, "title": "tinyseg.js"}
-{"path": "site/assets/javascripts/lunr/wordcut.js", "kind": "code", "language": "JavaScript", "bytes": 677463, "lines": 6708, "words": 25235, "estimated_tokens": 96558, "title": "wordcut.js"}
-{"path": "site/assets/javascripts/workers/search.2c215733.min.js", "kind": "code", "language": "JavaScript", "bytes": 39481, "lines": 42, "words": 926, "estimated_tokens": 9870, "title": "search.2c215733.min.js"}
-{"path": "site/reports/benchmark/main/BENCHMARK_V090_FULL.MD", "kind": "doc", "bytes": 48974, "lines": 1875, "words": 6700, "estimated_tokens": 10581, "title": "AETHER Vanguard v0.9 Frontier Product Benchmarking Master Plan"}
-{"path": "site/reports/benchmark/main/BENCHMARK_V090_QUICKRUN.MD", "kind": "doc", "bytes": 8753, "lines": 160, "words": 984, "estimated_tokens": 1750, "title": "Vanguard / AETHER v0.90 Frontier Benchmark Quick-Run Guide"}
 {"path": "test/README.md", "kind": "doc", "bytes": 18640, "lines": 271, "words": 2472, "estimated_tokens": 3946, "title": "Vanguard / AETHER \u2014 Testing Subsystem Guide"}
 {"path": "test/__init__.py", "kind": "test", "language": "Python", "bytes": 875, "lines": 21, "words": 65, "estimated_tokens": 219, "title": "__init__.py"}
 {"path": "test/adapters/__init__.py", "kind": "test", "language": "Python", "bytes": 63, "lines": 1, "words": 6, "estimated_tokens": 16, "title": "__init__.py"}
@@ -741,7 +703,7 @@
 {"path": "tools/007_LLM_DOCS_ATLAS/core/config.py", "kind": "code", "language": "Python", "bytes": 2973, "lines": 70, "words": 226, "estimated_tokens": 743, "title": "config.py"}
 {"path": "tools/007_LLM_DOCS_ATLAS/core/models.py", "kind": "code", "language": "Python", "bytes": 2004, "lines": 72, "words": 208, "estimated_tokens": 501, "title": "models.py"}
 {"path": "tools/007_LLM_DOCS_ATLAS/core/paths.py", "kind": "code", "language": "Python", "bytes": 419, "lines": 10, "words": 49, "estimated_tokens": 105, "title": "paths.py"}
-{"path": "tools/007_LLM_DOCS_ATLAS/core/profile.py", "kind": "code", "language": "Python", "bytes": 1755, "lines": 40, "words": 175, "estimated_tokens": 439, "title": "profile.py"}
+{"path": "tools/007_LLM_DOCS_ATLAS/core/profile.py", "kind": "code", "language": "Python", "bytes": 1788, "lines": 40, "words": 179, "estimated_tokens": 447, "title": "profile.py"}
 {"path": "tools/007_LLM_DOCS_ATLAS/core/registry.py", "kind": "code", "language": "Python", "bytes": 565, "lines": 16, "words": 58, "estimated_tokens": 141, "title": "registry.py"}
 {"path": "tools/007_LLM_DOCS_ATLAS/core/runner.py", "kind": "code", "language": "Python", "bytes": 241, "lines": 6, "words": 25, "estimated_tokens": 60, "title": "runner.py"}
 {"path": "tools/007_LLM_DOCS_ATLAS/dashboard.py", "kind": "code", "language": "Python", "bytes": 882, "lines": 8, "words": 53, "estimated_tokens": 220, "title": "dashboard.py"}
@@ -1040,7 +1002,6 @@
 {"path": "vanguard/clients/projections/src/trace-graph.ts", "kind": "code", "language": "TypeScript", "bytes": 3861, "lines": 131, "words": 424, "estimated_tokens": 965, "title": "trace-graph.ts"}
 {"path": "vanguard/clients/projections/test/golden-parity.test.ts", "kind": "test", "language": "TypeScript", "bytes": 2529, "lines": 76, "words": 247, "estimated_tokens": 632, "title": "golden-parity.test.ts"}
 {"path": "vanguard/clients/projections/test/projections.test.ts", "kind": "test", "language": "TypeScript", "bytes": 6951, "lines": 218, "words": 527, "estimated_tokens": 1735, "title": "projections.test.ts"}
-{"path": "vanguard/clients/studio/dist-browser/browser.js", "kind": "code", "language": "JavaScript", "bytes": 1365810, "lines": 30556, "words": 113158, "estimated_tokens": 341450, "title": "browser.js"}
 {"path": "vanguard/clients/studio/src/browser-entry.tsx", "kind": "code", "language": "TypeScript", "bytes": 7881, "lines": 231, "words": 730, "estimated_tokens": 1970, "title": "browser-entry.tsx"}
 {"path": "vanguard/clients/studio/src/contract/index.ts", "kind": "code", "language": "TypeScript", "bytes": 2165, "lines": 87, "words": 195, "estimated_tokens": 541, "title": "index.ts"}
 {"path": "vanguard/clients/studio/src/index.ts", "kind": "code", "language": "TypeScript", "bytes": 721, "lines": 18, "words": 72, "estimated_tokens": 180, "title": "index.ts"}

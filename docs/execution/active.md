@@ -163,3 +163,30 @@ time; Dev B may not change normative contracts.
 
 M-9 remains blocked until M-8 is independently accepted. M-10 remains blocked
 until M-9 is accepted. SWE-P0–P5 are parallel, non-authorizing evidence work.
+
+## Dev B independent handoff disposition
+
+The Dev B Wave 0 handoff was received and audited against this subject. It is
+accepted as an audit input, not as milestone acceptance. Its classifications of
+M-6, M-7, and M-8 as `INTEGRATED` describe mechanism/integration only; the
+required producer bundles and independent acceptance receipts remain absent.
+
+The audit corrections are:
+
+- The real parent of this subject is
+  `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304`; prose such as
+  `Aether-D-System` is not a Git identity.
+- `just check`/`just verify` are not PASS in this environment: `just` is not
+  installed and the direct command exits `127`.
+- `check_baseline_manifest.py` returned `FAIL`/`UNVERIFIED`, reporting remote
+  tag resolution, dependency digest, and reducer-pin mismatches. The baseline
+  is therefore not accepted on the current subject.
+- The fresh M-8 proof returned `59` tests and `0` failures, which verifies
+  mechanisms and falsifiers only. The fresh M-7 proof returned `40` tests and
+  `6` failures, so M-7 cannot be reported as closed.
+- `.draft/todo/beta_delivery.md` is an existing untracked contributor artifact
+  and is preserved; the working tree is consequently not clean until its
+  owner disposes of it.
+
+The first Dev B package remains `FIN-B1`, but Wave 1 is not started by this
+board because no Wave 1 implementation prompt or accepted M-8 bundle exists.

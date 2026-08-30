@@ -1,6 +1,6 @@
 import unittest
 
-from vanguard.packages.runtime.coding_state import CodingTaskState
+from vanguard.packages.runtime.task_state import CodingTaskState
 
 
 class TestCodingTaskState(unittest.TestCase):

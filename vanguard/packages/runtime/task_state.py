@@ -1,8 +1,4 @@
-"""Reconstructible coding-harness state (`CodingTaskState`).
-
-This is a runtime projection of durable facts, not an authority or a second
-ledger. Callers may persist its canonical form and rebuild it from events.
-"""
+"""Reconstructible task state for semantic runtime continuation."""
 
 from __future__ import annotations
 

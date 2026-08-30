@@ -1,12 +1,28 @@
-"""Command line interface for LDA."""
+"""Command line interface for LDA — Universal Repository Intelligence."""
 from __future__ import annotations
-import argparse, json, re, shutil, sys
+
+import argparse
+import json
+import shutil
+import sys
 from pathlib import Path
-from .atlas import collect
+
+from .atlas import (
+    collect,
+    compile_task_context,
+    get_callers,
+    get_references,
+    get_repository_map,
+    get_storage,
+    get_symbol_details,
+    index_repository,
+    query_repository,
+)
 from .core.config import AtlasContext
 from .core.models import Candidate, ContextPacket, serialise
 
-def _rows(ctx, name):
+
+def _rows(ctx: AtlasContext, name: str):
     path = ctx.knowledge / name
     if not path.exists():
         if name == "catalog.jsonl":
@@ -15,50 +31,139 @@ def _rows(ctx, name):
         return []
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
-def _snapshot(ctx):
-    docs = _rows(ctx, "catalog.jsonl"); links = _rows(ctx, "links.jsonl")
-    total = {"documents": len(docs), "canonical_docs": sum(r.get("authority") in {"constitutional", "normative", "canonical"} for r in docs), "non_canonical_docs": sum(r.get("authority") not in {"constitutional", "normative", "canonical"} for r in docs), "lines": sum(r.get("lines", 0) for r in docs), "bytes": sum(r.get("bytes", 0) for r in docs), "estimated_tokens": sum(r.get("estimated_tokens", 0) for r in docs), "links": len(links), "broken_links": 0, "symbols": len(_rows(ctx,"symbols.jsonl")), "code_mappings": len(_rows(ctx,"code-map.jsonl")), "providers": [r.provider for r in collect(ctx)], "largest_docs": sorted(docs, key=lambda r:r.get("estimated_tokens",0), reverse=True)[:5]}
+
+def _snapshot(ctx: AtlasContext):
+    storage = get_storage(ctx.root)
+    stats = storage.get_stats()
+    topo = storage.get_topology_map()
+
+    docs = _rows(ctx, "catalog.jsonl")
+    links = _rows(ctx, "links.jsonl")
+
+    total = {
+        "status": "HEALTHY",
+        "root": str(ctx.root),
+        "database_stats": stats,
+        "topology": topo,
+        "documents": stats.get("documents", len(docs)),
+        "symbols": stats.get("symbols", len(_rows(ctx, "symbols.jsonl"))),
+        "relations": stats.get("relations", len(links)),
+        "lines": sum(r.get("lines", 0) for r in docs),
+        "bytes": sum(r.get("bytes", 0) for r in docs),
+        "estimated_tokens": sum(r.get("estimated_tokens", 0) for r in docs),
+        "providers": [r.provider for r in collect(ctx)],
+    }
     return total
 
-def _packet(ctx, task, budget):
-    terms = set(re.findall(r"[a-zA-Z][a-zA-Z0-9_/-]{2,}", task.lower()))
-    docs = []
-    for row in _rows(ctx, "catalog.jsonl"):
-        hay = " ".join(str(row.get(k,"")) for k in ("canonical_id","path","title","owner","summary")).lower(); hits = sum(t in hay for t in terms)
-        authority = row.get("authority"); boost = ctx.profile.authority_score(authority)
-        if hits or boost > 2: docs.append(Candidate(row.get("path",""), "document", row.get("title",row.get("path","")), hits*10+boost, row.get("estimated_tokens",0), "keyword/authority match", authority))
-    docs.sort(key=lambda c:(-c.score,c.tokens,c.locator)); chosen=[]; used=0
-    for item in docs:
-        if used + item.tokens <= budget: chosen.append(item); used += item.tokens
-    symbols=[]; code=[]
-    for row in _rows(ctx,"symbols.jsonl"):
-        if any(t in row.get("symbol","").lower() for t in terms): symbols.append(Candidate(row.get("defined_in",""),"symbol",row.get("symbol",""),20,0,"symbol match"))
-    for row in _rows(ctx,"code-map.jsonl"):
-        if any(t in (row.get("subsystem","")+row.get("package_path","")).lower() for t in terms): code.append(Candidate(row.get("package_path",""),"code",row.get("subsystem",""),15,0,"code-map match"))
-    warnings=[]
-    if ctx.profile.excluded_authority and not ctx.include_research: warnings.append("Excluded authorities are omitted by profile policy.")
-    return ContextPacket(task,budget,used,chosen,code,symbols,[],sorted({c.authority for c in chosen if c.authority}),warnings)
 
 def main(argv=None):
-    parser=argparse.ArgumentParser(prog="lda"); parser.add_argument("--root",type=Path); sub=parser.add_subparsers(dest="command",required=True)
-    for name in ("status","scan","check","build","doctor"): sub.add_parser(name).add_argument("--json",action="store_true")
-    q=sub.add_parser("query"); q.add_argument("query"); q.add_argument("--json",action="store_true")
-    c=sub.add_parser("context"); c.add_argument("task"); c.add_argument("--budget",type=int,default=6000); c.add_argument("--json",action="store_true"); c.add_argument("--include-research",action="store_true")
-    i=sub.add_parser("inspect"); i.add_argument("target"); i.add_argument("--json",action="store_true")
-    args=parser.parse_args(argv); ctx=AtlasContext.discover(args.root, getattr(args,"include_research",False)); result=None
-    if args.command in {"status","scan"}: result=_snapshot(ctx)
-    elif args.command == "context": result=serialise(_packet(ctx,args.task,args.budget))
-    elif args.command == "query": result=[r for r in _rows(ctx,"catalog.jsonl") if args.query.lower() in json.dumps(r).lower()]
-    elif args.command == "inspect": result=next((r for r in _rows(ctx,"catalog.jsonl") if args.target in {r.get("path"),r.get("canonical_id")}), {"error":"not found","target":args.target})
-    elif args.command == "doctor": result={"root":str(ctx.root),"knowledge":ctx.knowledge.exists(),"required":["python3"],"optional":{"mkdocs":shutil.which("mkdocs") is not None,"vale":shutil.which("vale") is not None,"markdownlint":shutil.which("markdownlint") is not None}}
-    elif args.command == "check": result={"delegation":"use just docs-check/docs-full or docs-build","status":"available"}
+    parser = argparse.ArgumentParser(prog="lda", description="LDA Universal Repository Intelligence & Context Engine")
+    parser.add_argument("--root", type=Path, default=None, help="Root path of target repository")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    # 1. Index command
+    idx_p = sub.add_parser("index", help="Index repository into SQLite + FTS5 fact graph")
+    idx_p.add_argument("--incremental", action="store_true", help="Perform warm incremental re-index")
+    idx_p.add_argument("--json", action="store_true")
+
+    # 2. Status & Scan
+    for name in ("status", "scan", "check", "doctor", "build"):
+        sub.add_parser(name).add_argument("--json", action="store_true")
+
+    # 3. Query
+    q_p = sub.add_parser("query", help="Query repository symbols, docs, and AST entities")
+    q_p.add_argument("query", type=str)
+    q_p.add_argument("--json", action="store_true")
+
+    # 4. Symbol
+    sym_p = sub.add_parser("symbol", help="Lookup detailed symbol information")
+    sym_p.add_argument("symbol", type=str)
+    sym_p.add_argument("--json", action="store_true")
+
+    # 5. Callers
+    call_p = sub.add_parser("callers", help="Find upstream callers of a symbol")
+    call_p.add_argument("symbol_id", type=str)
+    call_p.add_argument("--json", action="store_true")
+
+    # 6. References
+    ref_p = sub.add_parser("references", help="Find references/usages of a symbol")
+    ref_p.add_argument("symbol_id", type=str)
+    ref_p.add_argument("--json", action="store_true")
+
+    # 7. Context (Primary Product)
+    ctx_p = sub.add_parser("context", help="Compile token-budgeted high-signal ContextPacket for an AI agent")
+    ctx_p.add_argument("task", type=str)
+    ctx_p.add_argument("--budget", type=int, default=8000)
+    ctx_p.add_argument("--json", action="store_true")
+    ctx_p.add_argument("--include-research", action="store_true")
+
+    # 8. Map
+    map_p = sub.add_parser("map", help="Display repository architectural topology map")
+    map_p.add_argument("--json", action="store_true")
+
+    # 9. Inspect
+    i_p = sub.add_parser("inspect", help="Inspect a specific document or canonical ID")
+    i_p.add_argument("target", type=str)
+    i_p.add_argument("--json", action="store_true")
+
+    args = parser.parse_args(argv)
+    repo_root = args.root.resolve() if args.root else Path.cwd().resolve()
+    ctx = AtlasContext.discover(repo_root, getattr(args, "include_research", False))
+
+    result = None
+
+    if args.command == "index":
+        result = index_repository(repo_root, incremental=args.incremental)
+    elif args.command in {"status", "scan"}:
+        result = _snapshot(ctx)
+    elif args.command == "query":
+        fts_res = query_repository(repo_root, args.query)
+        if not fts_res:
+            # Fallback to catalog rows
+            fts_res = [r for r in _rows(ctx, "catalog.jsonl") if args.query.lower() in json.dumps(r).lower()]
+        result = fts_res
+    elif args.command == "symbol":
+        result = get_symbol_details(repo_root, args.symbol)
+    elif args.command == "callers":
+        result = get_callers(repo_root, args.symbol_id)
+    elif args.command == "references":
+        result = get_references(repo_root, args.symbol_id)
+    elif args.command == "context":
+        packet = compile_task_context(repo_root, args.task, budget=args.budget)
+        result = serialise(packet)
+    elif args.command == "map":
+        result = get_repository_map(repo_root)
+    elif args.command == "inspect":
+        result = next((r for r in _rows(ctx, "catalog.jsonl") if args.target in {r.get("path"), r.get("canonical_id")}), {"error": "not found", "target": args.target})
+    elif args.command == "doctor":
+        storage = get_storage(repo_root)
+        result = {
+            "root": str(repo_root),
+            "storage_db": str(storage.db_path),
+            "db_exists": storage.db_path.exists(),
+            "required": ["python3", "sqlite3"],
+            "optional": {
+                "mkdocs": shutil.which("mkdocs") is not None,
+                "vale": shutil.which("vale") is not None,
+                "markdownlint": shutil.which("markdownlint") is not None,
+                "rg": shutil.which("rg") is not None
+            }
+        }
+    elif args.command == "check":
+        result = {"delegation": "use just check or test runners", "status": "available"}
     elif args.command == "build":
         from .dashboard import write_dashboard
-        path=write_dashboard(ctx, ctx.root / "tools" / "007_LLM_DOCS_ATLAS" / "dashboard.html")
-        result={"dashboard":str(path.relative_to(ctx.root)),"status":"built"}
-    wants_json=getattr(args,"json",False)
-    if wants_json: print(json.dumps(result,indent=2,sort_keys=True))
-    else: print(json.dumps(result,indent=2,sort_keys=True) if isinstance(result,(dict,list)) else result)
+        path = write_dashboard(ctx, repo_root / "tools" / "007_LLM_DOCS_ATLAS" / "dashboard.html")
+        result = {"dashboard": str(path.relative_to(repo_root)), "status": "built"}
+
+    wants_json = getattr(args, "json", False)
+    if wants_json or isinstance(result, (dict, list)):
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(result)
+
     return 0
 
-if __name__ == "__main__": sys.exit(main())
+
+if __name__ == "__main__":
+    sys.exit(main())

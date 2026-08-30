@@ -1,0 +1,223 @@
+{
+  "analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574",
+  "block": "G",
+  "canonical_pages": 30,
+  "checks": {
+    "authorized_scope": {
+      "concurrent_user_owned_changes_excluded": [
+        "package-lock.json",
+        "package.json",
+        "vanguard/clients/cli/src/commands/agent.ts",
+        "vanguard/clients/cli/src/commands/artifact.ts",
+        "vanguard/clients/cli/src/commands/event.ts",
+        "vanguard/clients/cli/src/commands/index.ts",
+        "vanguard/clients/cli/src/composition/parse-cli.ts",
+        "vanguard/clients/cli/src/main.tsx",
+        "vanguard/clients/cli/src/output.ts",
+        "vanguard/clients/client-core/src/contract/types.ts",
+        "vanguard/clients/client/src/signers/operator-signer.ts",
+        "vanguard/clients/client/src/signers/web-signer.ts",
+        "vanguard/clients/client/src/transports/http.ts",
+        "vanguard/clients/client/src/transports/socket.ts",
+        "vanguard/clients/client/tsconfig.json",
+        "vanguard/clients/cli/src/commands/approve.ts",
+        "vanguard/clients/cli/src/commands/daemon.ts",
+        "vanguard/clients/cli/src/commands/doctor.ts",
+        "vanguard/clients/cli/src/commands/run.ts",
+        "vanguard/clients/cli/src/commands/workflow.ts",
+        "vanguard/clients/cli/test/cli-vertical-slice.test.ts",
+        "vanguard/clients/client/src/index.ts",
+        "vanguard/clients/client/test/",
+        "vanguard/clients/projections/"
+      ],
+      "excluded_frontend": "not touched by this execution",
+      "prohibited_paths_modified": [],
+      "status": "PASS"
+    },
+    "canonical_ids": {
+      "duplicates": [],
+      "page_count": 30,
+      "registry_count": 30,
+      "status": "PASS"
+    },
+    "canonical_ownership": {
+      "collision_ids": [],
+      "registered_rows": 96,
+      "status": "PASS"
+    },
+    "code_map": {
+      "errors": [],
+      "status": "PASS"
+    },
+    "implementation_drift": {
+      "analysis_subject": "9fd444674bf3a97f2673ff36a5f5928ef046c574",
+      "committed_implementation_paths": [
+        "vanguard/clients/client/package.json",
+        "vanguard/clients/client/src/client.ts",
+        "vanguard/clients/client/src/transports/http.ts",
+        "vanguard/clients/client/src/transports/replay.ts",
+        "vanguard/clients/client/src/transports/socket.ts",
+        "vanguard/clients/client/src/transports/transport.ts",
+        "vanguard/clients/client/tsconfig.json",
+        "vanguard/clients/contracts/package.json",
+        "vanguard/clients/contracts/src/errors.ts",
+        "vanguard/clients/contracts/src/index.ts",
+        "vanguard/clients/contracts/src/jcs.ts",
+        "vanguard/clients/contracts/src/parse.ts",
+        "vanguard/clients/contracts/src/types.ts",
+        "vanguard/clients/contracts/test/contracts.test.ts",
+        "vanguard/clients/contracts/tsconfig.json"
+      ],
+      "concurrent_uncommitted_implementation_paths": [
+        "package-lock.json",
+        "package.json",
+        "vanguard/clients/cli/src/commands/agent.ts",
+        "vanguard/clients/cli/src/commands/artifact.ts",
+        "vanguard/clients/cli/src/commands/event.ts",
+        "vanguard/clients/cli/src/commands/index.ts",
+        "vanguard/clients/cli/src/composition/parse-cli.ts",
+        "vanguard/clients/cli/src/main.tsx",
+        "vanguard/clients/cli/src/output.ts",
+        "vanguard/clients/client-core/src/contract/types.ts",
+        "vanguard/clients/client/src/signers/operator-signer.ts",
+        "vanguard/clients/client/src/signers/web-signer.ts",
+        "vanguard/clients/client/src/transports/http.ts",
+        "vanguard/clients/client/src/transports/socket.ts",
+        "vanguard/clients/client/tsconfig.json",
+        "vanguard/clients/cli/src/commands/approve.ts",
+        "vanguard/clients/cli/src/commands/daemon.ts",
+        "vanguard/clients/cli/src/commands/doctor.ts",
+        "vanguard/clients/cli/src/commands/run.ts",
+        "vanguard/clients/cli/src/commands/workflow.ts",
+        "vanguard/clients/cli/test/cli-vertical-slice.test.ts",
+        "vanguard/clients/client/src/index.ts",
+        "vanguard/clients/client/test/",
+        "vanguard/clients/projections/"
+      ],
+      "current_head": "d8abc8c35e9022029a5badc4ef4027fa181ab1d8",
+      "excluded_frontend_paths": [
+        "vanguard/clients/client/package.json",
+        "vanguard/clients/client/src/client.ts",
+        "vanguard/clients/client/src/transports/http.ts",
+        "vanguard/clients/client/src/transports/replay.ts",
+        "vanguard/clients/client/src/transports/socket.ts",
+        "vanguard/clients/client/src/transports/transport.ts",
+        "vanguard/clients/client/tsconfig.json",
+        "vanguard/clients/contracts/package.json",
+        "vanguard/clients/contracts/src/errors.ts",
+        "vanguard/clients/contracts/src/index.ts",
+        "vanguard/clients/contracts/src/jcs.ts",
+        "vanguard/clients/contracts/src/parse.ts",
+        "vanguard/clients/contracts/src/types.ts",
+        "vanguard/clients/contracts/test/contracts.test.ts",
+        "vanguard/clients/contracts/tsconfig.json",
+        "package-lock.json",
+        "vanguard/clients/cli/src/commands/agent.ts",
+        "vanguard/clients/cli/src/commands/artifact.ts",
+        "vanguard/clients/cli/src/commands/event.ts",
+        "vanguard/clients/cli/src/commands/index.ts",
+        "vanguard/clients/cli/src/composition/parse-cli.ts",
+        "vanguard/clients/cli/src/main.tsx",
+        "vanguard/clients/cli/src/output.ts",
+        "vanguard/clients/client-core/src/contract/types.ts",
+        "vanguard/clients/client/src/signers/operator-signer.ts",
+        "vanguard/clients/client/src/signers/web-signer.ts",
+        "vanguard/clients/client/src/transports/http.ts",
+        "vanguard/clients/client/src/transports/socket.ts",
+        "vanguard/clients/client/tsconfig.json",
+        "vanguard/clients/cli/src/commands/approve.ts",
+        "vanguard/clients/cli/src/commands/daemon.ts",
+        "vanguard/clients/cli/src/commands/doctor.ts",
+        "vanguard/clients/cli/src/commands/run.ts",
+        "vanguard/clients/cli/src/commands/workflow.ts",
+        "vanguard/clients/cli/test/cli-vertical-slice.test.ts",
+        "vanguard/clients/client/src/index.ts",
+        "vanguard/clients/client/test/",
+        "vanguard/clients/projections/"
+      ],
+      "interpretation": "AS_BUILT claims remain pinned to the subject; client/frontend changes are explicitly outside this reconstruction input and are not absorbed.",
+      "status": "PASS"
+    },
+    "legacy_provenance": {
+      "audit_records": 5487,
+      "loss_records": 2,
+      "status": "PASS"
+    },
+    "links": {
+      "errors": [],
+      "external_links_policy": "recorded/non-blocking",
+      "status": "PASS"
+    },
+    "metadata": {
+      "count": 30,
+      "status": "PASS"
+    },
+    "relations": {
+      "errors": [],
+      "status": "PASS",
+      "vocabulary": [
+        "describes",
+        "implements",
+        "tests",
+        "conforms_to",
+        "depends_on",
+        "supersedes",
+        "derived_from",
+        "links_to",
+        "has_gap",
+        "contradicts"
+      ]
+    },
+    "repository_linters": {
+      "known_exception": "docs/SPEC.md exceeds the existing 250-line budget at 270 lines; active docs were not modified.",
+      "results": [
+        {
+          "command": "python3 tools/linters/check_doc_metadata.py",
+          "exit_status": 0,
+          "output": "DOC METADATA PASS: 58 living documents verified with valid, unique metadata",
+          "status": "PASS"
+        },
+        {
+          "command": "python3 tools/linters/check_doc_budgets.py",
+          "exit_status": 1,
+          "output": "DOC BUDGET FAIL: docs/SPEC.md: 270 lines exceeds budget 250",
+          "status": "KNOWN_PREEXISTING_EXCEPTION"
+        },
+        {
+          "command": "python3 tools/linters/check_markdown_links.py",
+          "exit_status": 0,
+          "output": "LINK PASS: local markdown links resolve",
+          "status": "PASS"
+        },
+        {
+          "command": "python3 tools/linters/check_stale_paths.py",
+          "exit_status": 0,
+          "output": "STALE PATH PASS: 552 files scanned; no obsolete docs/ layout tokens",
+          "status": "PASS"
+        },
+        {
+          "command": "python3 tools/linters/check_falsifier_ids.py",
+          "exit_status": 0,
+          "output": "RF ID PASS: allocations are unique and all canonical citations are allocated",
+          "status": "PASS"
+        },
+        {
+          "command": "python3 tools/linters/scan_secrets.py",
+          "exit_status": 0,
+          "output": "SECRET SCAN PASS: no blocking secret patterns in scanned surfaces",
+          "status": "PASS"
+        }
+      ],
+      "status": "PASS_WITH_KNOWN_EXCEPTION"
+    },
+    "traceability": {
+      "missing_authority": [],
+      "status": "PASS",
+      "unknown_evidence": []
+    }
+  },
+  "critical_knowledge_loss": 0,
+  "current_head": "d8abc8c35e9022029a5badc4ef4027fa181ab1d8",
+  "errors": [],
+  "status": "PASS"
+}

@@ -32,6 +32,12 @@ evidence:
   - E-B-042
   - E-B-043
   - E-B-047
+normative_authority:
+  - VISION.md
+  - docs/SPEC.md
+  - docs/01_law/
+  - docs/02_decisions/INDEX.md
+  - docs/03_execution/sprint_active.md
 relationships:
   - arch.system.overview
   - guide.getting-started

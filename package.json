@@ -7,12 +7,21 @@
   ],
   "scripts": {
     "vg": "npm --workspace @vanguard/cli run vg --",
-    "build": "npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+    "build": "npm run build:contracts && npm run build:client && npm run build:projections && npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+    "build:contracts": "npm --workspace @aether/contracts run build",
+    "build:client": "npm --workspace @aether/client run build",
+    "build:projections": "npm --workspace @aether/projections run build",
     "build:client-core": "npm --workspace @vanguard/client-core run build",
     "build:cli": "npm --workspace @vanguard/cli run build",
     "build:studio": "npm --workspace @vanguard/studio run build",
     "build:studio-browser": "npm --workspace @vanguard/studio run build:browser",
-    "typecheck": "npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
-    "test": "npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test"
+    "typecheck": "npm run typecheck:contracts && npm run typecheck:client && npm run typecheck:projections && npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
+    "typecheck:contracts": "npm --workspace @aether/contracts run typecheck",
+    "typecheck:client": "npm --workspace @aether/client run typecheck",
+    "typecheck:projections": "npm --workspace @aether/projections run typecheck",
+    "test": "npm run test:contracts && npm run test:client && npm run test:projections && npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test",
+    "test:contracts": "npm --workspace @aether/contracts test",
+    "test:client": "npm --workspace @aether/client test",
+    "test:projections": "npm --workspace @aether/projections test"
   }
 }

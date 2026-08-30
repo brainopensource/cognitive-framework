@@ -193,10 +193,10 @@ board because no Wave 1 implementation prompt or accepted M-8 bundle exists.
 
 ## Wave 1 / FIN-A1 disposition
 
-FIN-A1 was evaluated on exact subject
-`9c91bb60e0e78ce98e2db7f84f417d1ceefb3e90` (tree
-`97ad71f49d0e392c3157cf08f3040f67e4da5c2b`, parent
-`4b29f07f3832ce1476868134b2f1fad4d135c5f7`) and remains `BLOCKED`. The M-8
+FIN-A1 was evaluated against remote exact subject
+`49a0a4a3b30525d3775501ab05c1dcdd1e9f262e` (tree
+`027e58c9746684c283900896245118e813550281`, parent
+`b9e936c7e244d59c32df0e4a8c6078b0839233d5`) and remains `BLOCKED`. The M-8
 proof runner completed in a fresh process with `59` tests, `0` failures, and
 `34/34` required markers; the focused memory/runtime suite completed `25`
 tests and the cold-restart suite `29` tests, all green. These are mechanism
@@ -211,10 +211,14 @@ The acceptance prerequisites are not present:
 - no producer-signed M-8 bundle, promotion receipt, or executed rollback
   receipt has been deposited;
 - no independent verifier input can be issued by Dev A;
+- a local untracked `benchmarks/m8_heldout/runner.py` and its test were found,
+  but they are not part of this exact subject and are not admissible evidence:
+  the runner synthesizes outcomes, embeds a default key, and fails the
+  repository boundary linter. They were not executed or integrated;
 - the current working tree contains unrelated Dev B changes. The full suite
-  returned `2348` tests, `1` failure, `0` errors, and `20` skips because path
-  hygiene rejects the machine-local path in the existing
-  `.draft/todo/beta_delivery.md`.
+  was therefore not attributable to the exact subject: it included local
+  untracked tests and returned `45` failures and `39` errors under the
+  restricted UDS environment.
 
 The canonical threshold remains `0.05` held-out lift with the existing
 regression budget `0.02`; it was not changed or applied post hoc. No external

@@ -21,7 +21,7 @@ const base = (seq: string, eventId: string, kind: string, payload: Record<string
   seq,
   occurredAt: new Date(Date.now() + Number(seq) * 1000).toISOString(),
   recordedAt: new Date().toISOString(),
-  principal: "developer-rocha",
+  principal: "developer-local",
   tenantId: "local",
   ownerId: "local",
   confidentiality: "internal",
@@ -90,7 +90,7 @@ const demoEvents: EventEnvelope[] = [
   base("11", "ev-011", "ApprovalResolved", {
     approvalId: "approval-k06-patch",
     decision: "approved",
-    reviewer: "developer-rocha",
+    reviewer: "developer-local",
   }),
   base("12", "ev-012", "EffectStarted", {
     descriptor: "sha256:desc_fs_patch_dispatch",

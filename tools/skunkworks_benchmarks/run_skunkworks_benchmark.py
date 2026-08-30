@@ -25,7 +25,7 @@ def load_api_key() -> str:
     key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if key:
         return key
-    for env_path in [Path(".env"), Path("/home/rocha/Coding/LIM_LLM_INT_MACHINE/.env")]:
+    for env_path in [Path(".env"), Path.home() / ".aether" / ".env"]:
         if env_path.exists():
             for line in env_path.read_text(encoding="utf-8").splitlines():
                 if "=" in line and not line.strip().startswith("#"):

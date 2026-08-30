@@ -31,7 +31,7 @@ def extract_ast_evidence() -> list[dict[str, str]]:
         if res.returncode == 0 and res.stdout.strip():
             matches = json.loads(res.stdout)
             for m in matches[:10]:
-                file_path = m.get("file", "")
+                file_path = m.get("file", "").replace("\\", "/")
                 evidence.append({
                     "subsystem": "AST-Grep structural call: dispatch",
                     "package_path": file_path,

@@ -93,7 +93,7 @@ By cross-pollinating the **Cordis egalitarian microkernel ("all is a plugin")**,
 
 ### 2.1 The 27-Measurement Matrix Analysis
 
-The Vanguard v0.9 benchmarking program ([](file:///home/rocha/Coding/Aether-D-System/BENCHMARK_V090_FULL.MD)) formalizes a strict, scientific evaluation across 11 presets and 27 planned measurements.
+The Vanguard v0.9 benchmarking program ([](../../BENCHMARK_V090_FULL.MD)) formalizes a strict, scientific evaluation across 11 presets and 27 planned measurements.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -122,7 +122,7 @@ The Vanguard v0.9 benchmarking program ([](file:///home/rocha/Coding/Aether-D-Sy
 
 ### 2.2 Evaluation of the 12 Quick Wins (QW-01 to QW-12)
 
-The findings in [](file:///home/rocha/Coding/Aether-D-System/QUICK_WINS_FOR_FRAMEWORK_IMPROVEMENT.MD) highlight critical practical bottlenecks at the intersection of substrate and frontier products:
+The findings in [](../../QUICK_WINS_FOR_FRAMEWORK_IMPROVEMENT.MD) highlight critical practical bottlenecks at the intersection of substrate and frontier products:
 
 | ID | Title & Focus | Technical Diagnostic | Solution Architecture |
 |:---|:---|:---|:---|
@@ -175,7 +175,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ```
 
 **Key Invariants:**
-- **TCB Budget**: Kernel LOC $\le 1438$ (enforced by [](file:///home/rocha/Coding/Aether-D-System/tools/linters/check_tcb_budget.py)).
+- **TCB Budget**: Kernel LOC $\le 1438$ (enforced by [](../../tools/linters/check_tcb_budget.py)).
 - **Domain Blindness**: Kernel is completely agnostic of domain concepts (no code, git, or web semantics).
 - **Prefix-Stable Context**: L1–L5 compiler guarantees that prompt layers L1–L3 are immutable, maximizing provider cache hits.
 
@@ -304,7 +304,7 @@ Analysis of production coding agents (e.g., Claude Code CLI) reveals crucial eng
 ```
 
 ### 5.1 Pillar 1: Pluggable  Microkernel (Cordis Pattern)
-- **Problem**: Hardcoded  loop in [](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/engine.py) prevents experimenting with alternative cognitive architectures.
+- **Problem**: Hardcoded  loop in [](../../vanguard/packages/agency/episode/engine.py) prevents experimenting with alternative cognitive architectures.
 - **Solution**: Promote  to an egalitarian protocol:
   ```python
   class AgentLoop(Protocol):
@@ -342,7 +342,7 @@ Analysis of production coding agents (e.g., Claude Code CLI) reveals crucial eng
 
 ### 5.7 Pillar 7: AST Mutation Verification & Anti-Collusion Engine
 - **Problem**: Agents can write trivial or no-op assertions that pass without verifying the bug fix.
-- **Solution**: Port LIM's [](file:///home/rocha/Coding/LIM_LLM_INT_MACHINE/mutation_verifier.py) to generate syntactic mutants and verify that test suites fail on broken code.
+- **Solution**: Port LIM's [](mutation_verifier.py) to generate syntactic mutants and verify that test suites fail on broken code.
 
 ### 5.8 Pillar 8: Deterministic Anti-Thrashing State-Hash FSM
 - **Problem**: Cheap models enter infinite loops repeating identical invalid actions.

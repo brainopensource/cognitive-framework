@@ -11,12 +11,16 @@ import {
 import { parseJsonlLine, type EventEnvelope } from "@aether/contracts";
 
 function findRepoRoot(startDir: string): string {
-  let cur = startDir;
-  while (cur !== "/" && cur.length > 1) {
+  let cur = resolve(startDir);
+  while (true) {
     if (existsSync(join(cur, "package.json")) && existsSync(join(cur, "vanguard"))) {
       return cur;
     }
-    cur = resolve(cur, "..");
+    const parent = resolve(cur, "..");
+    if (parent === cur) {
+      break;
+    }
+    cur = parent;
   }
   return startDir;
 }

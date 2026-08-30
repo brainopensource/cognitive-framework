@@ -237,8 +237,7 @@ class TheGeneratedSchemaIsTheSoleVocabulary(unittest.TestCase):
                 self.assertIn(kind, WRITABLE_KINDS)
 
     def test_no_sixth_semantic_kind_entered_without_reopening_the_adr(self) -> None:
-        adr = (ROOT / "docs" / "02_decisions"
-               / "0098-event-substrate-v2-and-semantic-kind-roster.md").read_text()
+        adr = (ROOT / "docs" / "backend" / "reference" / "events.md").read_text()
         for kind in _SEMANTIC:
             self.assertIn(kind, adr)
 

@@ -8,6 +8,7 @@ to generate the lightweight, machine-readable knowledge layer in .generated/know
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import sys
@@ -35,7 +36,7 @@ def build_knowledge_base() -> dict[str, int]:
     doc_id_map: dict[str, str] = {}
 
     for path in all_docs:
-        rel_path = str(path.relative_to(ROOT))
+        rel_path = str(path.relative_to(ROOT)).replace("\\", "/")
         text = path.read_text(encoding="utf-8")
         fm_match = FRONTMATTER_RE.match(text)
         meta: dict[str, str] = {}
@@ -53,6 +54,12 @@ def build_knowledge_base() -> dict[str, int]:
         title = title_match.group(1).strip() if title_match else path.stem
         title = re.sub(r"[`*_~]", "", title)
 
+        bytes_size = path.stat().st_size
+        lines = len(text.splitlines())
+        words = len(text.split())
+        tokens = int(math.ceil((len(text) / 4.0 + words / 0.75) / 2.0))
+        size_class = "SMALL" if tokens < 4000 else "NORMAL" if tokens < 8000 else "LARGE" if tokens < 12000 else "VERY_LARGE" if tokens < 16000 else "OVERSIZED"
+
         catalog_rows.append({
             "canonical_id": doc_id,
             "path": rel_path,
@@ -62,6 +69,11 @@ def build_knowledge_base() -> dict[str, int]:
             "truth_plane": meta.get("truth_plane", "AS_BUILT"),
             "status": meta.get("status", "living"),
             "owner": meta.get("owner", "repository-governance"),
+            "bytes": bytes_size,
+            "lines": lines,
+            "words": words,
+            "estimated_tokens": tokens,
+            "size_classification": size_class,
         })
 
         ownership_rows.append({
@@ -72,7 +84,7 @@ def build_knowledge_base() -> dict[str, int]:
 
     seen_links: set[tuple[str, str, str, str]] = set()
     for path in all_docs:
-        rel_path = str(path.relative_to(ROOT))
+        rel_path = str(path.relative_to(ROOT)).replace("\\", "/")
         text = path.read_text(encoding="utf-8")
         src_id = doc_id_map.get(rel_path, path.stem)
 
@@ -85,7 +97,7 @@ def build_knowledge_base() -> dict[str, int]:
                 continue
             target_path = (path.parent / path_part).resolve()
             try:
-                rel_target = str(target_path.relative_to(ROOT))
+                rel_target = str(target_path.relative_to(ROOT)).replace("\\", "/")
                 tgt_id = doc_id_map.get(rel_target, Path(rel_target).stem)
                 key = (src_id, rel_path, tgt_id, rel_target)
                 if key not in seen_links:

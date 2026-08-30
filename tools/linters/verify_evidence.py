@@ -469,7 +469,7 @@ def verify_all(evidence_dir: Path) -> list[Verdict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--evidence-dir", type=Path,
-                        default=_ROOT / "docs" / "03_execution" / "evidence")
+                        default=_ROOT / "docs" / "execution" / "evidence")
     parser.add_argument("--milestone", default="",
                         help="verify only bundles whose filename starts with this")
     parser.add_argument("--json", action="store_true",

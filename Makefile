@@ -41,12 +41,9 @@ clean-py:
 ## JavaScript cleanup
 clean-js:
 	@echo "🧹 Cleaning JavaScript cache & artifacts..."
-	find . -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "build" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.lock" -path "*/node_modules/*" -prune -o -type f -name "package-lock.json" -delete 2>/dev/null || true
-	find . -type f -name "yarn.lock" -delete 2>/dev/null || true
 	find . -type d -name ".turbo" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ JavaScript cleanup complete"
 

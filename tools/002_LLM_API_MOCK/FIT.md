@@ -2,8 +2,8 @@
 
 > **Evidence label:** `lam/*` rows are **`lam-replay`**, not live model ceilings. Live rows must carry `evidence_label` from `verdict.py`. A chat ping (`def add`) is a canary, not a tier pass.
 
-**Source Artifact:** [`tools/002_LLM_API_MOCK/runs/ladder_free.json`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/runs/ladder_free.json)  
-**Database File:** [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite)  
+**Source Artifact:** [`tools/002_LLM_API_MOCK/runs/ladder_free.json`](runs/ladder_free.json)  
+**Database File:** [`tools/002_LLM_API_MOCK/lam.sqlite`](lam.sqlite)  
 **Corpus Size:** 36 Gold Coding Scenarios (6 per tier across Tiers 1–6)  
 **Execution Mode:** Un-stubbed Harness Multi-Turn Tool Loop (`view_file`, `edit_file`, `run_command`, `list_dir`, `grep_file`) with Pytest Verification
 

@@ -21,29 +21,29 @@ import repo_paths  # noqa: E402
 
 class RepoPathsTests(unittest.TestCase):
     def test_repo_root_from_this_file(self) -> None:
-        # Foundation Lock (v0.5.0 concept lock, docs/MASTER_REFACTOR_GUIDELINE_FINAL.md):
-        # docs/scrum and docs/main_v4 never existed on this tree (confirmed by direct
-        # listing) — they are now authority-ordered under docs/01_law through
-        # docs/09_diagrams. This assertion
-        # previously required the dead docs/scrum path; it now asserts the live layout,
-        # which resolves after the compact SPEC index and law-leaf migration.
         root = repo_paths.repo_root()
         self.assertTrue((root / "docs" / "SPEC.md").is_file())
-        self.assertFalse((root / "docs" / "v4").exists())
-        self.assertTrue((root / "docs" / "01_law").is_dir())
-        self.assertTrue((root / "docs" / "03_execution").is_dir())
-        self.assertFalse((root / "docs" / "scrum").exists())
-        self.assertFalse((root / "docs" / "agile").exists())
-        # The compatibility helpers now resolve the authority-ordered execution tree.
+        self.assertTrue((root / "docs" / "decisions.md").is_file())
+        self.assertTrue((root / "docs" / "architecture").is_dir())
+        self.assertTrue((root / "docs" / "execution").is_dir())
         self.assertEqual(
             repo_paths.active_mvp_contract(),
-            root / "docs/03_execution/sprint0/active-mvp-contract.json",
+            root / "docs/execution/sprint0/active-mvp-contract.json",
         )
         self.assertEqual(
             repo_paths.preregistered_oracles(),
             root / "test/fixtures/preregistered_oracles.json",
         )
-        self.assertEqual(repo_paths.docs_development_guides(), root / "docs/07_engineering")
+        self.assertEqual(repo_paths.docs_development_guides(), root / "docs/development")
+
+    def test_semantic_path_constants(self) -> None:
+        self.assertEqual(repo_paths.DOCS_ROOT, repo_paths.REPO_ROOT / "docs")
+        self.assertEqual(repo_paths.SCHEMAS_ROOT, repo_paths.REPO_ROOT / "schemas")
+        self.assertEqual(repo_paths.PACKS_ROOT, repo_paths.REPO_ROOT / "packs")
+        self.assertEqual(repo_paths.TEST_ROOT, repo_paths.REPO_ROOT / "test")
+        self.assertEqual(repo_paths.GENERATED_ROOT, repo_paths.REPO_ROOT / ".generated")
+        self.assertEqual(repo_paths.TOOLS_ROOT, repo_paths.REPO_ROOT / "tools")
+        self.assertEqual(repo_paths.VANGUARD_ROOT, repo_paths.REPO_ROOT / "vanguard")
 
     def test_rewrite_legacy_paths(self) -> None:
         self.assertEqual(repo_paths.rewrite_legacy_doc_path("docs/v4/00_vanguard_registry_v040.md"), "docs/main_v4/00_vanguard_registry_v040.md")
@@ -75,12 +75,13 @@ class ForeignCwdGovernanceTests(unittest.TestCase):
         )
 
     def test_audit_and_governance_from_foreign_cwd(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory(prefix="aether space dir ") as tmp:
             foreign = Path(tmp)
             for script in (
                 "linters/check_boundaries.py",
                 "linters/check_doc_metadata.py",
                 "linters/check_stale_paths.py",
+                "linters/check_path_hygiene.py",
             ):
                 result = self._run(script, foreign)
                 self.assertEqual(

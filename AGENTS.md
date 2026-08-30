@@ -145,34 +145,33 @@ Do not infer authorization from archived proposals, reviews, research, or comple
 
 ---
 
-## 5. Commit & Pull Request Guidelines
+## 5. Agent Implementation Rules & Required Validation Behavior
 
-- **Commit Messages**: Use concise imperative subjects with established subsystem prefixes:
-  - `feat(kernel): ...`, `fix(runtime): ...`, `test(contracts): ...`, `docs: ...`, `cleanup: ...`.
-- **PR Description**:
-  - Explain the exact behavior change and verification evidence.
-  - Cite at least one valid active requirement from `docs/SPEC.md` or active ADRs (e.g. `REQ-TRUST-001`, `REQ-LATTICE-002`).
-  - Confirm that `check_boundaries.py`, `check_tcb_budget.py`, and `scan_secrets.py` pass.
-- **Security Invariants**: Changes crossing sandbox, capability, approval, or evaluator boundaries must include corresponding security tests under `test/security/` or `test/trust/`.
+AI Agents working in this repository MUST comply with the following operational constraints:
+- **Scope Contained**: Modify code strictly within the assigned task scope.
+- **Tests Synchronized**: Update or add automated tests whenever runtime behavior or contracts change.
+- **Docs Synchronized**: Update canonical documentation when durable architecture, contract, API, workflow, configuration, or user behavior changes.
+- **No Unsolicited Docs Sprawl**: Do not edit or create documentation files when code behavior does not change. Never create scratch Markdown under `docs/`.
+- **No Custom ADRs / Reports**: Never create new ADRs for ordinary architecture updates or post-hoc Markdown implementation reports in the repository tree.
+- **No Manual Edit of Generated Artifacts**: Never manually edit rebuildable machine outputs under `.generated/knowledge/` or `.generated/diagrams/`.
+- **Validation Commands**:
+  - Run `just check` during incremental development loops.
+  - Run `just verify` before claiming task, PR, or sprint completion.
+- **Honest Status Reporting**: Agents MUST report commands actually executed and NEVER claim `PASS` for an unexecuted command. Never suppress failing assertions with `|| true`. Fix task-introduced failures before declaring completion.
 
 ---
 
-## 6. Security & Credentials
+## 6. Documentation Routing & Ownership Model
 
-- Never commit credentials, private keys, or unreviewed model output dumps.
-- Model provider API keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`) are read exclusively from environment variables and must remain unset during automated test runs.
-- Model adapters are structured as OpenRouter, Ollama, Cassette, Fake — not individual vendor files.
-
-### Environment-sensitive behavior
-
-- Keep provider API keys unset during hermetic tests; live-provider checks must be explicitly selected.
-- A missing local Ollama daemon is an environment condition, not permission to weaken an assertion.
-- `test/broken/fixtures/` contains intentional violations used to prove linters fail closed.
-
-### TypeScript CLI
-
-From the repository root, use `npm run typecheck`, `npm test`, and `npm run vg`. The CLI is a
-client of the runtime and must not duplicate domain or authority logic.
+When updating documentation, route information to its semantic owner:
+- **`docs/SPEC.md`**: Normative RFC-2119 specifications and core target requirements.
+- **`docs/architecture/`**: Global system architecture, dispatch pipeline, isolation, and system workflows.
+- **`docs/backend/`**: Microkernel, event engine, delegation, memory, and reference schemas/ports/APIs.
+- **`docs/frontend/`**: Frontend client architecture, state management, and design tokens.
+- **`docs/product/`**: Product PRDs, requirements, and user behavior.
+- **`docs/execution/active.md`**: Current sprint status, task ladder, and active authorization.
+- **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).
+- **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
 ---
 

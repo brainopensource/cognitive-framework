@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from pathlib import Path
@@ -13,7 +14,7 @@ DB_PATH = LAM_DIR / "lam.sqlite"
 SPLIT_MANIFEST = LAM_DIR / "calibration_split.json"
 CAPTURES_DIR = LAM_DIR / "runs" / "live_captures"
 SCENARIOS_DIR = LAM_DIR / "scenarios"
-LAB_DIR = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
+LAB_DIR = Path(os.environ.get("LEX_LAB_DIR", str(LAM_DIR / "lab")))
 
 import sys
 if str(LAM_DIR) not in sys.path:

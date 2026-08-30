@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -19,8 +20,8 @@ from vanguard.packages.domain.workspace import (
 
 class TestWorkspaceIsolationContract(unittest.TestCase):
     def setUp(self) -> None:
-        self.workspace_root = Path("/home/rocha/Coding/Aether-D-System-Workspace").resolve()
-        self.workspace_root.mkdir(parents=True, exist_ok=True)
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.workspace_root = Path(self.temp_dir.name).resolve()
         self.env_patcher = patch.dict(
             os.environ,
             {
@@ -36,11 +37,12 @@ class TestWorkspaceIsolationContract(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.env_patcher.stop()
+        self.temp_dir.cleanup()
 
     def test_workspace_root_resolution_and_validation(self) -> None:
         root = get_workspace_root()
         self.assertTrue(root.is_dir())
-        self.assertEqual(root, Path("/home/rocha/Coding/Aether-D-System-Workspace").resolve())
+        self.assertEqual(root, self.workspace_root)
 
     def test_missing_workspace_root_fails_closed(self) -> None:
         with patch.dict(os.environ, {}, clear=True), patch("vanguard.packages.domain.workspace._discover_workspace_root", return_value=None):
@@ -64,11 +66,11 @@ class TestWorkspaceIsolationContract(unittest.TestCase):
 
         # Escapes must raise RuntimeError
         with self.assertRaises(RuntimeError) as ctx:
-            validate_workspace_path("/tmp/escape_test")
+            validate_workspace_path(Path(tempfile.gettempdir()) / "escape_test")
         self.assertIn("escapes AETHER_WORKSPACE_ROOT", str(ctx.exception))
 
         with self.assertRaises(RuntimeError) as ctx:
-            validate_workspace_path("/etc/passwd")
+            validate_workspace_path(Path("/etc/passwd").resolve() if os.name != "nt" else Path("C:\\Windows\\System32\\drivers\\etc\\hosts").resolve())
         self.assertIn("escapes AETHER_WORKSPACE_ROOT", str(ctx.exception))
 
     def test_controlled_environment_contains_overrides(self) -> None:

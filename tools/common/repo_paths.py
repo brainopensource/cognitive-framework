@@ -10,10 +10,6 @@ literals for the documentation move:
 Commands are independent of the process working directory: ``repo_root()``
 walks from this file (and, if needed, from cwd) until the live layout is
 found. A missing file is never treated as satisfied evidence.
-
-S7-A-07: the `docs/agile` -> `docs/scrum` restructure moved every sprint
-directory under `docs/scrum/sprints/`. The pre-restructure layout is kept as a
-resolution fallback only; it is never the answer on a live tree.
 """
 
 from __future__ import annotations
@@ -53,7 +49,6 @@ LEGACY = {
 LIVE_PREFIXES = tuple(CANONICAL.values())
 
 # Obsolete layouts left behind by the documentation move.
-# Negative lookaheads keep live `docs/reviews` and `docs/development_guides`.
 _STALE_TOKEN = re.compile(
     r"(?P<path>"
     r"docs/v4(?:/|\b)"
@@ -80,11 +75,14 @@ _ROOT_SENTINELS_SPEC = (
     Path("docs") / "SPEC.md",
     Path(".github") / "workflows" / "ci.yml",
 )
+_ROOT_SENTINELS_PYPROJECT = (
+    Path("pyproject.toml"),
+    Path("vanguard") / "packages",
+)
 
 
 def repo_root(start: Path | None = None) -> Path:
     """Return the repository root even when invoked from a foreign cwd."""
-
     search: list[Path] = []
     here = Path(__file__).resolve().parent.parent.parent
     search.append(here)
@@ -92,7 +90,7 @@ def repo_root(start: Path | None = None) -> Path:
     cwd = (start or Path.cwd()).resolve()
     search.append(cwd)
     search.extend(cwd.parents)
-    env_root = os.environ.get("VANGUARD_ROOT")
+    env_root = os.environ.get("VANGUARD_ROOT") or os.environ.get("AETHER_REPO_ROOT")
     if env_root:
         search.insert(0, Path(env_root).resolve())
 
@@ -109,6 +107,8 @@ def repo_root(start: Path | None = None) -> Path:
             return candidate
         if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_SPEC):
             return candidate
+        if all((candidate / sentinel).exists() for sentinel in _ROOT_SENTINELS_PYPROJECT):
+            return candidate
     raise FileNotFoundError(
         "cannot locate repository root: expected pyproject.toml or docs/SPEC.md"
     )
@@ -118,6 +118,45 @@ def repo_path(*parts: str | os.PathLike[str]) -> Path:
     return repo_root().joinpath(*parts)
 
 
+def get_docs_root() -> Path:
+    return repo_root() / "docs"
+
+
+def get_schemas_root() -> Path:
+    return repo_root() / "schemas"
+
+
+def get_packs_root() -> Path:
+    return repo_root() / "packs"
+
+
+def get_test_root() -> Path:
+    return repo_root() / "test"
+
+
+def get_generated_root() -> Path:
+    return repo_root() / ".generated"
+
+
+def get_tools_root() -> Path:
+    return repo_root() / "tools"
+
+
+def get_vanguard_root() -> Path:
+    return repo_root() / "vanguard"
+
+
+# Export module-level aliases for convenient direct access
+REPO_ROOT = repo_root()
+DOCS_ROOT = REPO_ROOT / "docs"
+SCHEMAS_ROOT = REPO_ROOT / "schemas"
+PACKS_ROOT = REPO_ROOT / "packs"
+TEST_ROOT = REPO_ROOT / "test"
+GENERATED_ROOT = REPO_ROOT / ".generated"
+TOOLS_ROOT = REPO_ROOT / "tools"
+VANGUARD_ROOT = REPO_ROOT / "vanguard"
+
+
 def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
     return root.joinpath(CANONICAL["docs_decisions"], *parts)
@@ -125,6 +164,8 @@ def docs_main_v4(*parts: str | os.PathLike[str]) -> Path:
 
 def docs_scrum(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
+    if (root / "docs" / "execution").exists():
+        return root.joinpath("docs", "execution", *parts)
     if (root / CANONICAL["docs_execution"]).exists():
         return root.joinpath(CANONICAL["docs_execution"], *parts)
     if (root / LEGACY["docs_scrum"]).exists():
@@ -133,9 +174,10 @@ def docs_scrum(*parts: str | os.PathLike[str]) -> Path:
 
 
 def docs_sprint(sprint: str, *parts: str | os.PathLike[str]) -> Path:
-    """Resolve a sprint directory. Sprints live under `docs/scrum/sprints/`."""
-
+    """Resolve a sprint directory. Sprints live under `docs/execution/`."""
     root = repo_root()
+    if (root / "docs" / "execution").exists():
+        return root.joinpath("docs", "execution", sprint, *parts)
     if (root / CANONICAL["docs_execution"]).exists():
         return root.joinpath(CANONICAL["docs_execution"], sprint, *parts)
     if (root / LEGACY["docs_sprints"]).exists():
@@ -150,6 +192,8 @@ def docs_reviews(*parts: str | os.PathLike[str]) -> Path:
 
 def docs_development_guides(*parts: str | os.PathLike[str]) -> Path:
     root = repo_root()
+    if (root / "docs" / "engineering").exists():
+        return root.joinpath("docs", "engineering", *parts)
     if (root / CANONICAL["docs_engineering"]).exists():
         return root.joinpath(CANONICAL["docs_engineering"], *parts)
     if (root / LEGACY["docs_development_guides"]).exists():
@@ -170,24 +214,14 @@ def schema_archaeology_traces() -> Path:
 
 
 def preregistered_oracles() -> Path:
-    """Return the canonical path to the preregistered oracle registry.
-
-    Wave 0 (ADR-0075 F-20): restored to test/fixtures/ as the stable,
-    test-suite-owned location. Fallback to docs/03_execution/evidence/ for
-    historical compatibility. The sprint6B fallback is retired — that path
-    no longer exists in the tree.
-    """
+    """Return the canonical path to the preregistered oracle registry."""
     root = repo_root()
-    # Primary canonical: test-suite-owned (Wave 0 restoration, ADR-0075 F-20).
     test_fixtures = root / "test" / "fixtures" / "preregistered_oracles.json"
     if test_fixtures.exists():
         return test_fixtures
-    # Legacy docs location (v0.5.1 baseline, deleted at commit caaa7af).
     docs_evidence = root / "docs" / "03_execution" / "evidence" / "preregistered_oracles.json"
     if docs_evidence.exists():
         return docs_evidence
-    # Return canonical test/fixtures path even if missing so callers get a
-    # deterministic error rather than a ghost sprint6B path.
     return test_fixtures
 
 
@@ -203,7 +237,6 @@ def kernel_tcb_budget() -> Path:
 
 def rewrite_legacy_doc_path(value: str) -> str:
     """Map a single obsolete docs path to the live layout. Identity if already live."""
-
     text = value.replace("\\", "/")
     if text.startswith("docs/scrum"):
         return value
@@ -230,7 +263,6 @@ def rewrite_legacy_doc_path(value: str) -> str:
 
 def stale_path_matches(text: str) -> list[str]:
     """Return obsolete path tokens. Live prefixes are not reported."""
-
     return [match.group("path").rstrip("/") for match in _STALE_TOKEN.finditer(text)]
 
 

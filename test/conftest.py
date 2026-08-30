@@ -23,7 +23,8 @@ _TRACKED_LAM_DB = _ROOT / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
 
 
 def pytest_configure(config) -> None:
-    ws_root = os.environ.get("AETHER_WORKSPACE_ROOT", "/home/rocha/Coding/Aether-D-System-Workspace")
+    default_ws = str(Path(tempfile.gettempdir()) / "aether_workspace")
+    ws_root = os.environ.get("AETHER_WORKSPACE_ROOT", default_ws)
     os.environ["AETHER_WORKSPACE_ROOT"] = ws_root
     tmp_dir = Path(ws_root) / "tmp"
     tmp_dir.mkdir(parents=True, exist_ok=True)

@@ -14,5 +14,5 @@
   },
   "cost_usd_micros": 0,
   "cost_usd": 0.0,
-  "response_file": "/home/rocha/Coding/Aether-D-System/tools/001_LLM_API_ROUTER/outputs/20260816_004626_mock_qwen25_response.md"
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260816_004626_mock_qwen25_response.md"
 }

@@ -758,6 +758,12 @@ def main() -> int:
     if not args.out:
         raise SystemExit("--out is required when building an evidence bundle")
 
+    out = Path(args.out)
+    if out.exists():
+        raise SystemExit(
+            f"refusing to overwrite existing evidence bundle {out}; "
+            f"publish a successor bundle instead")
+
     subject_root = Path(args.subject_root).resolve()
     evidence_root = Path(args.evidence_root).resolve() if args.evidence_root else None
 

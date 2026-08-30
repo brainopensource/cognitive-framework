@@ -95,7 +95,7 @@ rec = opt.recommend_provider(scenario_tier=3, policy="balanced")
 
 ## 7. Persistence, Telemetry & Analyzer Tools
 
-- **SQLite Database:** [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite) (444 recorded mock calls / gold traces)
+- **SQLite Database:** [`tools/002_LLM_API_MOCK/lam.sqlite`](../lam.sqlite) (444 recorded mock calls / gold traces)
 - **Harness Analyzer Report Generator:**
 ```bash
 python3 -c "
@@ -104,4 +104,4 @@ analyzer = HarnessAnalyzer()
 print(analyzer.render_markdown_report())
 "
 ```
-- **KPI Log File:** [`tools/002_LLM_API_MOCK/docs/LAM_logs_benchmarking_KPIS_dont_commit.md`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/docs/LAM_logs_benchmarking_KPIS_dont_commit.md)
+- **KPI Log File:** [`tools/002_LLM_API_MOCK/docs/LAM_logs_benchmarking_KPIS_dont_commit.md`](LAM_logs_benchmarking_KPIS_dont_commit.md)

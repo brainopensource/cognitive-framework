@@ -14,5 +14,5 @@
   },
   "cost_usd_micros": 262,
   "cost_usd": 0.000262,
-  "response_file": "/home/rocha/Coding/Aether-D-System/tools/001_LLM_API_ROUTER/outputs/20260816_165328_groq_openai_gpt-oss-120b_response.md"
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260816_165328_groq_openai_gpt-oss-120b_response.md"
 }

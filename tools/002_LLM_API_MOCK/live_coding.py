@@ -29,7 +29,7 @@ LAM_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(LAM_DIR.parents[1]))
 from vanguard.packages.adapters.models.config import get_default_model
 from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
-DEFAULT_CHALLENGE_ROOT = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
+DEFAULT_CHALLENGE_ROOT = Path(os.environ.get("LEX_CHALLENGE_ROOT", str(LAM_DIR / "lab")))
 DEFAULT_MODEL = get_default_model()
 DEFAULT_MAX_CALLS = 60
 DEFAULT_MAX_USD = 0.10
@@ -483,7 +483,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--split-manifest", type=Path, default=LAM_DIR / "calibration_split.json")
     parser.add_argument("--split", choices=["all", "real_calibration", "real_audit", "real_all", "synthetic"], default=None)
     parser.add_argument("--challenge", action="append", dest="challenges")
-    parser.add_argument("--dotenv", type=Path, default=Path("/home/rocha/Coding/LEX_LLM_EXECUTION/.env"))
+    parser.add_argument("--dotenv", type=Path, default=Path(".env"))
     parser.add_argument("--output", type=Path, default=LAM_DIR / "runs" / "live_captures")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--max-calls", type=int, default=DEFAULT_MAX_CALLS)

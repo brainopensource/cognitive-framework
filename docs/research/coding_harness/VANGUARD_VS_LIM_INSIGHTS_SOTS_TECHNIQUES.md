@@ -126,7 +126,7 @@ Empirical validations on live benchmarks across **DeepSeek v4 Flash (`deepseek/d
 
 To ensure rigorous scientific experimentation without introducing boundary regressions or inflating Vanguard’s audited TCB line budget, `006_LLM_INT_MACHINE` was constructed with **strict architectural isolation**:
 1. **Zero Imports from Vanguard**: Operates 100% independently using Python 3.10+ standard libraries (`ast`, `subprocess`, `urllib.request`, `json`, `dataclasses`).
-2. **Instant A/B Feature Toggling**: The [`HarnessConfig`](file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/config.py) matrix allows individual toggling of `use_ast_preflight`, `use_reproduce_first`, `use_speculative_rollback`, `use_dialogue_compaction`, `use_dead_ends_tracking`, and `use_paged_output` for empirical ablation studies.
+2. **Instant A/B Feature Toggling**: The `HarnessConfig` matrix (`tools/006_LLM_INT_MACHINE/config.py`) allows individual toggling of `use_ast_preflight`, `use_reproduce_first`, `use_speculative_rollback`, `use_dialogue_compaction`, `use_dead_ends_tracking`, and `use_paged_output` for empirical ablation studies.
 3. **Rapid Prototyping Sandbox**: Acts as an accelerator for frontier algorithmic testing before porting verified features into Vanguard's hexagonal production packages.
 
 ---
@@ -246,7 +246,7 @@ Evaluating **`deepseek/deepseek-v4-flash-0731`** revealed exceptional benchmark 
 
 - **`minimax/minimax-m3:free`**: Demonstrated strong reasoning on Tier 5 Datalog unification, reducing turn counts from 10 down to 5 when paired with Vanguard Core compaction.
 - **`openrouter/free`**: Successfully resolved Tier 1 LRU TTL Cache in 3 turns under SOTA Full (reducing token consumption from 27,045 to 3,946 tokens).
-- **Upstream Rate-Limiting**: Free shared pools (`z-ai/glm-5.2:free`) exhibited transient HTTP 429 rate-limiting under burst requests, highlighting the necessity of our exponential backoff retry logic in [`llm_client.py`](file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/llm_client.py).
+- **Upstream Rate-Limiting**: Free shared pools (`z-ai/glm-5.2:free`) exhibited transient HTTP 429 rate-limiting under burst requests, highlighting the necessity of our exponential backoff retry logic in `tools/006_LLM_INT_MACHINE/llm_client.py`.
 
 ---
 
@@ -335,7 +335,7 @@ In naive ReAct, tools or system prompts are dynamically injected or reordered, c
 
 ### 3.2 Feature 2: Pluggable Dialogue Compaction & Algebraic Dead-Ends
 
-When dialogue volume in $L_5$ approaches token ceilings, LIM's [`ContextEngine`](file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/context_engine.py) applies a two-tier compaction reduction:
+When dialogue volume in $L_5$ approaches token ceilings, LIM's `ContextEngine` (`tools/006_LLM_INT_MACHINE/context_engine.py`) applies a two-tier compaction reduction:
 
 $$\mathcal{C}(\text{Dialogue}) = \text{EvictBulkyReceipts}(\text{Dialogue}) \circ \text{ConsolidateStructured}(\text{Dialogue})$$
 
@@ -1204,7 +1204,7 @@ def export_benchmark_dashboard(reports: Sequence[Any], output_file: Path | str =
 To bring the validated capabilities from `006_LLM_INT_MACHINE` into Vanguard's production hexagonal codebase without violating boundary rules:
 
 ### 7.1 Porting AST Pre-Flight into `adapters/bindings/code.py`
-Insert the in-memory `ast.parse` check inside the surgical patch tool binding in [`vanguard/packages/adapters/bindings/code.py`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/adapters/bindings/code.py):
+Insert the in-memory `ast.parse` check inside the surgical patch tool binding in [`vanguard/packages/adapters/bindings/code.py`](../../../vanguard/packages/adapters/bindings/code.py):
 
 ```python
 # Hook into execute_patch in code.py:
@@ -1216,7 +1216,7 @@ if path.endswith(".py"):
 ```
 
 ### 7.2 Porting Gated Reproducer Protocol into `vg-code-swe-pro`
-Add a dedicated manifest pack [`vanguard/packages/agency/manifests/vg-code-swe-pro/`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/manifests/) configuring:
+Add a dedicated manifest pack [`vanguard/packages/agency/manifests/vg-code-swe-pro/`](../../../vanguard/packages/agency/manifests/) configuring:
 - `system-prompt.txt`: Strict Reproduce-First methodology.
 - `context-policy.json`: `structured_consolidate` with dead-ends retention.
 - `budget-policy.json`: Monotonic reservations calibrated for DeepSeek v4 Flash.

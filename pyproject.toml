@@ -57,7 +57,6 @@ namespaces = true
 # nothing about this codebase.
 testpaths = ["test"]
 norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_modules"]
-addopts = "--basetemp=/home/rocha/Coding/Aether-D-System-Workspace/tmp/pytest"
 
 [dependency-groups]
 dev = [
@@ -66,4 +65,5 @@ dev = [
     "mkdocs-material>=9.7.7",
     "mkdocstrings>=1.0.6",
     "mkdocstrings-python>=2.0.7",
+    "rust-just>=1.58.0",
 ]

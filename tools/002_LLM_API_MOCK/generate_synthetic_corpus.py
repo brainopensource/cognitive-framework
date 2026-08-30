@@ -18,8 +18,9 @@ from typing import Any, Dict, List
 LAM_DIR = Path(__file__).resolve().parent
 import sys
 sys.path.insert(0, str(LAM_DIR.parents[1]))
+import os
 from vanguard.packages.domain.workspace import get_workspace_path
-CHALLENGE_ROOT = Path("/home/rocha/Coding/LEX_LLM_EXECUTION/lab")
+CHALLENGE_ROOT = Path(os.environ.get("LEX_CHALLENGE_ROOT", str(LAM_DIR / "lab")))
 OUTPUT_ROOT = LAM_DIR / "runs" / "live_captures"
 
 FIXES: Dict[str, Dict[str, str]] = {

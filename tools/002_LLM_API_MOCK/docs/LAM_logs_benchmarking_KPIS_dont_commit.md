@@ -2,14 +2,14 @@
 
 **Date:** 2026-08-16  
 **Subject:** Empirical Key Performance Indicators (KPIs), Harness Optimization & Multi-Tier SWE-Verified Benchmark Matrix  
-**Database File:** [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite)  
+**Database File:** [`tools/002_LLM_API_MOCK/lam.sqlite`](../lam.sqlite)  
 **Corpus:** 20 Gold SWE-Verified Pro Coding Scenarios across Tiers 1–7 (Multi-File Bugfixes, Greenfield Projects & Compiler Architectures)
 
 ---
 
 ## 1. SQLite Database Overview & KPI Metrics
 
-Querying the SQLite database [`tools/002_LLM_API_MOCK/lam.sqlite`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/lam.sqlite) yields the following empirical performance metrics:
+Querying the SQLite database [`tools/002_LLM_API_MOCK/lam.sqlite`](../lam.sqlite) yields the following empirical performance metrics:
 
 - **Registered Scenarios (`scenarios` table):** 51 scenarios (31 legacy + 20 multi-tier SWE-Pro)
 - **Recorded Execution Traces (`traces` table):** 62 traces

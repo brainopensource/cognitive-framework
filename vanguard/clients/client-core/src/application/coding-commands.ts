@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, delimiter } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
@@ -55,7 +55,7 @@ export function createPythonCodingBackend(options?: {
     findRepoRoot(fileURLToPath(new URL(".", import.meta.url)));
   const pythonPath = options?.pythonPath ?? [cwd, process.env.PYTHONPATH ?? ""]
     .filter(Boolean)
-    .join(":");
+    .join(delimiter);
 
   return {
     async invoke(request: CodingRequest) {

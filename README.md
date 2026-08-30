@@ -90,7 +90,7 @@ Mechanism presence is not milestone acceptance; the active board cites the evide
 6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`.
 7. Run SWE-Bench optimization as a separate preregistered measurement program.
 
-LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may assist
+LIM (`tools/006_LLM_INT_MACHINE/`) and LEX research harnesses may assist
 development and research. They never provide Vanguard runtime or acceptance authority; adopted
 techniques must be independently implemented behind Vanguard interfaces and verified by tests,
 falsifiers, and the normal evidence gates.
@@ -234,33 +234,58 @@ Historical milestone identifiers keep their meaning; `ADR-0095` §4 is the trans
 
 ## 7. Developer & Reviewer Commands
 
-### Python Environment (Python 3.10+)
+### Practical Development Loop (`just`)
+
+The repository uses `just` to expose clean, repository-owned validation commands.
+
 ```bash
-# Install editable package with dev dependencies
+# 1. Normal local development check (fast)
+just check
+
+# 2. Browse local documentation with live rendering (MkDocs + Mermaid)
+just docs-serve
+
+# 3. Validate documentation structure, frontmatter, links, and linting
+just docs-check
+
+# 4. Strict MkDocs site build
+just docs-build
+
+# 5. Regenerate machine-readable knowledge base (.generated/knowledge/)
+just docs-knowledge
+
+# 6. Complete documentation qualification gate
+just docs-full
+
+# 7. Complete local/CI qualification gate (run before PR completion / sprint closure)
+just verify
+```
+
+### Python Environment (`uv`)
+`pyproject.toml` and `uv.lock` are the canonical Python dependency surfaces.
+
+```bash
+# Synchronize environment with locked dependencies
 uv sync
 
-# Run focused production kernel tests
-python3 -m unittest discover -s test/kernel -t .
+# Add or remove a package
+uv add <package>
+uv remove <package>
 
-# Run contract tests
-python3 -m unittest discover -s test/contracts -t .
-
-# Run agency turn engine tests
-python3 -m unittest discover -s test/agency -t .
-
-# Run domain pack tests
-python3 -m unittest discover -s test/packs -t .
-
-# Run static architectural linters
-python3 tools/linters/check_boundaries.py       # Hexagonal lattice enforcement
-python3 tools/linters/check_tcb_budget.py       # TCB kernel LOC budget check
-python3 tools/linters/scan_secrets.py           # Secret & credential leak scanner
-python3 tools/linters/check_domain_blindness.py # Kernel domain blindness (I-7)
-python3 tools/linters/check_isolation_policy.py # Sandbox isolation policy (I-6)
-python3 tools/linters/check_falsifier_ids.py    # RF namespace and allocation integrity
-python3 tools/linters/check_markdown_links.py   # Documentation link integrity
-python3 tools/linters/check_stale_paths.py      # Stale path reference checker
+# Run commands within the uv virtual environment
+uv run <command>
 ```
+
+### Validation Workflow Summary
+
+| Situation | Command | Scope & Behavior |
+|---|---|---|
+| **Normal development** | `just check` | Fast architectural linters, TCB budget, and doc metadata checks |
+| **Browse documentation** | `just docs-serve` | Serve MkDocs site with live Mermaid rendering at `localhost:8000` |
+| **Validate documentation** | `just docs-check` | Frontmatter validation, link/anchor checks, and markdownlint |
+| **Before PR / Task completion** | `just verify` | Complete local/CI gate: locks, linters, tests, typecheck, docs-full |
+| **Sprint / Milestone closure** | `just verify` | Complete repository qualification gate |
+| **Release qualification** | `python3 tools/release_qualification.py` | Signed release envelope and external git receipt verification |
 
 ### TypeScript CLI Environment (Node.js 20+)
 ```bash

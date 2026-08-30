@@ -5,203 +5,118 @@ class: navigation
 authority: descriptive
 truth_plane: BOTH
 status: living
-implementation_status: PARTIAL
+implementation_status: IMPLEMENTED
 owner: documentation-governance
 canonical_for:
   - documentation authority explanation
-  - audience reading paths
-  - canonical navigation
-purpose: Orient audiences and route them to canonical owners across architecture, backend, frontend, product, execution, theory, and research documentation.
+  - machine context navigation and routing rules
+  - task to documentation routing
+purpose: Canonical root entry point and machine/human documentation router for AETHER.
 audience:
   - newcomer
   - operator
   - developer
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
+  - agent
 version: 0.9.1a1
-last_verified: 2026-08-29
-evidence:
-  - E-B-001
-  - E-B-002
-  - E-B-021
-  - E-B-022
-  - E-B-023
-  - E-B-024
-  - E-B-025
-  - E-B-026
-  - E-B-042
-  - E-B-043
-  - E-B-047
+last_verified: 2026-08-30
 normative_authority:
   - VISION.md
   - docs/SPEC.md
-  - docs/01_law/
-  - decision.index
-  - docs/03_execution/sprint_active.md
+  - docs/decisions.md
+  - docs/execution/active.md
 relationships:
   - arch.system.overview
   - arch.system.boundaries
   - arch.system.data-flow
-  - guide.getting-started
-  - ref.commands
   - spec.core
   - decision.index
   - execution.active
-  - theory.agent-substrate
-  - nav.frontend
-  - nav.research
 reviewer: documentation-specialist
 confidence: high
 ---
 
-# Vanguard Candidate Documentation
+# AETHER Documentation Master Index & Context Router
 
-## Purpose
-This document is the canonical root entry point and navigation directory for the Vanguard candidate documentation tree, orienting human and agentic readers, explaining truth planes, and routing inquiries to their authoritative canonical owners.
+## 1. Documentation Authority Hierarchy & Rules
 
-## Scope
-- Overview of the evidence-backed candidate documentation structure partitioned into global architecture, backend, frontend, product, execution, theory, and research domains.
-- Guided reading paths tailored for operators, agent pack developers, core contributors, and system architects.
-- Truth plane definitions (`AS_BUILT` versus `TARGET`) and implementation status vocabulary.
-- Canonical owner directory routing all system-wide, backend, frontend, product, execution, theory, and research documentation surfaces.
+AETHER documentation strictly separates constitutional vision, normative law, architecture, reference, and non-canonical research:
 
-## Non-responsibilities
-- Deep subsystem architectural explanations (owned by [`arch.system.overview`](architecture/overview.md), [`arch.system.boundaries`](architecture/boundaries.md), [`arch.system.data-flow`](architecture/data-flow.md), and backend architecture leaves).
-- Exact CLI flags, option syntax, and API schemas (owned by [`ref.commands`](backend/reference/commands.md) and reference leaves).
-- Normative product requirements and TARGET specifications (owned by [`spec.core`](SPEC.md)).
+| Authority Tier | Document / Directory | Role & Authority Model |
+|---|---|---|
+| **0. Constitutional** | [`VISION.md`](../VISION.md) | Foundational vision, identity, ontology, and high-level direction. |
+| **1. Operational Law** | [`AGENTS.md`](../AGENTS.md) | Operational guidelines and mandatory execution rules for AI agents and human contributors. |
+| **2. Human Entry Point** | [`README.md`](../README.md) | High-level repository entry point, setup guide, and validation summary table. |
+| **3. Normative Spec** | [`docs/SPEC.md`](SPEC.md) | RFC 2119 normative requirements and architectural refusals. |
+| **4. Decisions Index** | [`docs/decisions.md`](decisions.md) | Compact index of accepted Architecture Decision Records (ADRs). |
+| **5. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, wire contracts, and API references. |
+| **6. Active Execution** | [`docs/execution/active.md`](execution/active.md), [`docs/execution/milestones.md`](execution/milestones.md) | Active execution board, task ladder, and milestone predicates. |
+| **7. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
+| **8. Non-Canonical** | [`docs/theory/`](theory/agent-substrate.md), [`docs/research/`](research/), [`docs/reports/`](reports/) | Non-canonical theoretical essays, historical harness research, and post-mortem audit reports (`authority: non-canonical`). |
 
-## AS_BUILT Status
-- `IMPLEMENTED` — Root candidate navigation is active and verified across all 25 Block D documentation work packets at analysis subject SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`.
-
-## TARGET Status
-- `PARTIAL` — The approved TARGET surfaces are present. Their requirements, gaps, conflicts, decisions, execution intent, and theory remain explicitly separate from the AS_BUILT pages.
-
----
-
-## 1. What This Candidate Documentation Describes
-
-This documentation set represents the code-verified **AS_BUILT** state of Vanguard / AETHER reconstructed directly from production packages (`vanguard/packages/`), schemas (`schemas/`), manifests (`packs/`), and executable verification tests (`test/`). Every material implementation claim is tied to concrete code evidence.
-
-TARGET product intent is reconstructed separately from current authority. Start with the compact [TARGET specification](SPEC.md), then use the [decision index](decisions.md), [milestone gates](execution/milestones.md), [active execution view](execution/active.md), or [agent-substrate theory](theory/agent-substrate.md). A TARGET requirement never proves implementation; each divergence is registered in the Block E reconciliation artifacts.
+> [!IMPORTANT]
+> **Authority Rule**: Lower-tier documents or non-canonical research/reports (`authority: non-canonical`) must **never** be used to reject a higher-tier requirement or override canonical architecture.
 
 ---
 
-## 2. Choose a Path
+## 2. Machine & AI Context Loading Strategy
 
-Depending on your objective, follow one of the recommended reading paths:
+To optimize LLM context usage (e.g. 16K and 32K context windows) and prevent prompt bloat:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                       CHOOSE YOUR PATH                      │
-├─────────────────────────────────────────────────────────────┤
-│  1. Newcomer / Operator:                                    │
-│     Getting Started -> Commands -> Run & Resume             │
-│                                                             │
-│  2. Agent / Pack Developer:                                 │
-│     Compose an Agent -> Add Pack or Tool -> Manifests       │
-│                                                             │
-│  3. Substrate & Infrastructure Contributor:                 │
-│     System Overview -> Kernel TCB -> Hexagonal Ports        │
-│                                                             │
-│  4. System Architect / Auditor:                             │
-│     Runtime Execution -> Causal State -> Assurance / Eval   │
-└─────────────────────────────────────────────────────────────┘
+               ┌─────────────────────────────────────────┐
+               │             1. Read docs/README.md      │
+               └────────────────────┬────────────────────┘
+                                    │
+               ┌────────────────────▼────────────────────┐
+               │   2. Match Task Category in Routing Table│
+               └────────────────────┬────────────────────┘
+                                    │
+               ┌────────────────────▼────────────────────┐
+               │  3. Consult .generated/knowledge/ Index │
+               │     (ownership, links, code-map, symbols│
+               └────────────────────┬────────────────────┘
+                                    │
+               ┌────────────────────▼────────────────────┐
+               │  4. Load ONLY Canonical Owner Document  │
+               └─────────────────────────────────────────┘
 ```
 
-### Path 1: Newcomer & Operator Quickstart
-1. [Getting Started Guide](backend/guides/getting-started.md): Installation, initialization (`init`), and first task run.
-2. [Commands Reference](backend/reference/commands.md): Python `vanguard` and TypeScript `vg` CLI commands.
-3. [Run, Inspect & Resume Guide](backend/guides/run-and-resume.md): Monitoring runs, checking events, and cold crash recovery.
-4. [Operate Runtime Service Guide](backend/guides/operate-runtime-service.md): Running `vanguard-daemon` and Studio.
-
-### Path 2: Agent Pack & Tool Developer
-1. [Compose an Agent Guide](backend/guides/compose-an-agent.md): Building custom agent pack definitions.
-2. [Add a Pack or Tool Guide](backend/guides/add-pack-or-tool.md): Declaring tools and writing `IToolkit` handlers.
-3. [Manifests & Packs Reference](backend/reference/manifests.md): `mhf.manifest/2` schema and pack file layouts.
-4. [Agency Turn Engine Architecture](backend/architecture/agency.md): Context compiler layers and proposal turn loop.
-
-### Path 3: Infrastructure & Adapter Contributor
-1. [System Overview](architecture/overview.md): Subsystem boundary map and hexagonal layer rules.
-2. [Hexagonal Ports Reference](backend/reference/ports.md): The 5 SPI protocols and port signatures.
-3. [Add an Adapter or Provider Guide](backend/guides/add-adapter-or-provider.md): Implementing model or store adapters.
-4. [Configuration & Profiles Reference](backend/reference/configuration.md): Execution profiles and environment variables.
-
-### Path 4: Architecture & Trust Auditor
-1. [Kernel & Trusted Computing Base](backend/architecture/kernel.md): 13-stage dispatch (S0–S12) and TCB budget.
-2. [Runtime Execution Architecture](backend/architecture/runtime-execution.md): `HarnessSession` lifecycle and `RunPlan` identity.
-3. [Causal State & Persistence](backend/architecture/causal-state.md): Event log truth model, reducers, and checkpoints.
-4. [Assurance & Evaluation Architecture](backend/architecture/assurance-evaluation.md): Trajectory capture and exterior signed verdicts.
+1. **Do NOT load the whole docs corpus by default.** The canonical documentation corpus is designed for targeted retrieval.
+2. **First step for any task**: Read [`docs/README.md`](README.md) or query the machine knowledge layer via `python3 tools/docs_rag_v0.py "YOUR QUERY"`.
+3. **Inspect Machine Knowledge**: Use `.generated/knowledge/ownership.jsonl`, `code-map.jsonl`, and `symbols.jsonl` to locate exact file paths and line ranges.
+4. **Load Canonical Owner First**: Read only the canonical owner Markdown file for the target subsystem.
+5. **Non-canonical Research/Reports**: Load files under `docs/research/` or `docs/reports/` **only** when explicitly instructed.
 
 ---
 
-## 3. Truth Planes & Status Vocabulary
+## 3. Task-to-Documentation Routing Table
 
-Documentation pages in Vanguard are classified by explicit truth planes and status labels:
-
-### Truth Planes
-- **`AS_BUILT`**: Describes the existing, verified implementation in the repository as of analysis subject SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`. All 25 Block D pages operate strictly on this plane.
-- **`TARGET_DEPENDENT`**: Describes aspirational requirements, future specifications, and milestone plans. Deferred to Block E reconciliation.
-
-### Implementation Status Labels
-- **`IMPLEMENTED`**: Fully evidenced in production code, schemas, and passing contract tests.
-- **`PARTIAL`**: Operational mechanisms with identified integration seams or command asymmetries (e.g. `delegation-topology.md`, `application-interfaces.md`).
-- **`EXPERIMENTAL`**: Research or canary components not part of the default execution path.
-- **`DEFERRED`**: Content intentionally excluded from Block D pending Block E TARGET reconciliation.
+| Task Category | Primary Canonical Owner | Secondary Reference / Evidence | Typical Docs Packet (Est Tokens) |
+|---|---|---|---|
+| **Kernel / TCB** | [`docs/backend/architecture/kernel.md`](backend/architecture/kernel.md) | [`docs/SPEC.md`](SPEC.md), [`backend/reference/ports.md`](backend/reference/ports.md) | ~3,500 – 5,500 tokens |
+| **Runtime Service** | [`docs/backend/architecture/runtime-execution.md`](backend/architecture/runtime-execution.md) | [`backend/reference/runtime-service.md`](backend/reference/runtime-service.md), `symbols.jsonl` | ~3,800 – 6,000 tokens |
+| **Events & Ledgers** | [`docs/backend/architecture/causal-state.md`](backend/architecture/causal-state.md) | [`docs/backend/reference/events.md`](backend/reference/events.md), [`backend/reference/schemas.md`](backend/reference/schemas.md) | ~3,500 – 5,200 tokens |
+| **Agency & Turns** | [`docs/backend/architecture/agency.md`](backend/architecture/agency.md) | [`backend/architecture/workflows/agent-lifecycle.md`](backend/architecture/workflows/agent-lifecycle.md) | ~3,000 – 5,000 tokens |
+| **Delegation / Topology**| [`docs/backend/architecture/delegation-topology.md`](backend/architecture/delegation-topology.md) | [`backend/architecture/workflows/delegation.md`](backend/architecture/workflows/delegation.md) | ~2,500 – 4,500 tokens |
+| **Artifacts & Evidence** | [`docs/backend/architecture/assurance-evaluation.md`](backend/architecture/assurance-evaluation.md) | [`backend/reference/artifacts-memory.md`](backend/reference/artifacts-memory.md) | ~3,200 – 5,500 tokens |
+| **CLI / TUI / Client** | [`docs/product/frontend/PRD_AETHER_CLI.md`](product/frontend/PRD_AETHER_CLI.md) | [`docs/product/frontend/PRD_AETHER_TUI.md`](product/frontend/PRD_AETHER_TUI.md) | ~4,000 – 6,500 tokens |
+| **Frontend Platform** | [`docs/product/frontend/PRD_FRONTEND_PLATFORM.md`](product/frontend/PRD_FRONTEND_PLATFORM.md) | [`docs/product/frontend/PRD_AETHER_DESKTOP.md`](product/frontend/PRD_AETHER_DESKTOP.md) | ~6,000 – 9,000 tokens |
+| **Active Tasks / Sprints**| [`docs/execution/active.md`](execution/active.md) | [`docs/execution/milestones.md`](execution/milestones.md) | ~2,000 – 4,000 tokens |
 
 ---
 
-## 4. Canonical Owner Directory
+## 4. Machine Knowledge Layer Integration
 
-Every durable architectural and operational fact has exactly one canonical owner:
+The repository automatically maintains a deterministic, machine-readable knowledge layer in `.generated/knowledge/` (`just docs-knowledge`):
 
-### Global Architecture (`candidate-docs/architecture/`)
-- [System Overview](architecture/overview.md) (`arch.system.overview`)
-- [System Boundaries & Isolation](architecture/boundaries.md) (`arch.system.boundaries`)
-- [End-to-End Data Flow](architecture/data-flow.md) (`arch.system.data-flow`)
+- **`catalog.jsonl`**: Complete catalog of all 80 living documentation files, including titles, authority tiers, status, file size, line counts, and estimated tokens.
+- **`ownership.jsonl`**: Canonical ownership mappings from subsystem IDs to document paths.
+- **`links.jsonl`**: Verified markdown link relationship graph (236 relationships).
+- **`code-map.jsonl`**: Mappings from production packages (`vanguard/packages/`) to canonical documentation owners.
+- **`symbols.jsonl`**: Key Python protocols and TypeScript interfaces linked to canonical doc owners.
 
-### Backend Architecture (`candidate-docs/backend/architecture/`)
-- [Runtime Execution Architecture](backend/architecture/runtime-execution.md) (`arch.runtime.execution`)
-- [Kernel & Trusted Computing Base](backend/architecture/kernel.md) (`arch.trust.kernel`)
-- [Agency Turn Engine](backend/architecture/agency.md) (`arch.agency.turns`)
-- [Causal State & Persistence](backend/architecture/causal-state.md) (`arch.state.causal`)
-- [Composition & Extensibility](backend/architecture/composition-extensibility.md) (`arch.composition.extensibility`)
-- [Delegation & Topology](backend/architecture/delegation-topology.md) (`arch.orchestration.delegation`)
-- [Memory & Governed Learning](backend/architecture/memory-learning.md) (`arch.memory.learning`)
-- [Assurance & Evaluation](backend/architecture/assurance-evaluation.md) (`arch.assurance.evaluation`)
-- [Application & Client Interfaces](backend/architecture/application-interfaces.md) (`arch.interfaces.clients`)
-
-### Backend Reference (`candidate-docs/backend/reference/`)
-- [Commands Reference](backend/reference/commands.md) (`ref.commands`)
-- [Runtime Service Protocol Reference (`vg.4`)](backend/reference/runtime-service.md) (`ref.runtime-service`)
-- [Event Substrate & Envelope Reference](backend/reference/events.md) (`ref.events`)
-- [JSON Schemas & Wire Contracts](backend/reference/schemas.md) (`ref.schemas`)
-- [Configuration & Profiles Reference](backend/reference/configuration.md) (`ref.configuration`)
-- [Hexagonal Ports & SPI Reference](backend/reference/ports.md) (`ref.ports`)
-- [Manifests, Packs & Plugins](backend/reference/manifests.md) (`ref.manifests`)
-- [Artifact Storage & Memory Reference](backend/reference/artifacts-memory.md) (`ref.artifacts`)
-
-### Backend Guides (`candidate-docs/backend/guides/`)
-- [Getting Started Guide](backend/guides/getting-started.md) (`guide.getting-started`)
-- [Run, Inspect & Resume Guide](backend/guides/run-and-resume.md) (`guide.run-resume`)
-- [Compose an Agent Guide](backend/guides/compose-an-agent.md) (`guide.compose-agent`)
-- [Add a Pack or Tool Guide](backend/guides/add-pack-or-tool.md) (`guide.add-pack-tool`)
-- [Add an Adapter or Provider Guide](backend/guides/add-adapter-or-provider.md) (`guide.add-adapter-provider`)
-- [Operate Runtime Service Guide](backend/guides/operate-runtime-service.md) (`guide.operate-service`)
-
-### Frontend Documentation (`candidate-docs/frontend/`)
-- [Frontend Documentation Directory](frontend/README.md) (`nav.frontend` — Intentionally Deferred)
-
-### Product Requirements (`candidate-docs/product/`)
-- [Frontend PRD Placement Manifest](product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md) (`frontend-prd-placement-manifest`)
-- [Frontend Platform PRD](product/frontend/PRD_FRONTEND_PLATFORM.md) (`product.frontend.platform`)
-- [AETHER CLI PRD](product/frontend/PRD_AETHER_CLI.md) (`product.frontend.cli`)
-- [AETHER TUI PRD](product/frontend/PRD_AETHER_TUI.md) (`product.frontend.tui`)
-- [AETHER Desktop PRD](product/frontend/PRD_AETHER_DESKTOP.md) (`product.frontend.desktop`)
-- [AETHER Lab PRD](product/frontend/PRD_AETHER_LAB.md) (`product.frontend.lab`)
-
-### Execution (`candidate-docs/execution/`)
-- [Active Execution View](execution/active.md) (`execution.active`)
-- [Milestone Gates](execution/milestones.md) (`execution.milestones`)
-
-### Theory & Research (`candidate-docs/theory/`, `candidate-docs/research/`)
-- [Agent Substrate Theory](theory/agent-substrate.md) (`theory.agent-substrate`)
+To perform local deterministic context retrieval for an AI agent without loading full files:
+```bash
+python3 tools/docs_rag_v0.py "YOUR SEARCH QUERY"
+```

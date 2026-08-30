@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Workspace environment configuration for Vanguard / AETHER
-export AETHER_WORKSPACE_ROOT="/home/rocha/Coding/Aether-D-System-Workspace"
+if [ -z "$AETHER_WORKSPACE_ROOT" ]; then
+    _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export AETHER_WORKSPACE_ROOT="${_SCRIPT_DIR}/.vanguard/workspace"
+fi
 export TMPDIR="$AETHER_WORKSPACE_ROOT/tmp"
 export TMP="$AETHER_WORKSPACE_ROOT/tmp"
 export TEMP="$AETHER_WORKSPACE_ROOT/tmp"

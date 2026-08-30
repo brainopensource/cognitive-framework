@@ -10,7 +10,7 @@
 
 **Yes, with 100% wire-level and protocol parity.**
 
-Our stateless mock engine ([`tools/002_LLM_API_MOCK`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/)) matches the OpenAI and OpenRouter HTTP and Server-Sent Events (`SSE`) streaming protocols bit-for-bit:
+Our stateless mock engine ([`tools/002_LLM_API_MOCK`](../)) matches the OpenAI and OpenRouter HTTP and Server-Sent Events (`SSE`) streaming protocols bit-for-bit:
 1. **Exact Wire Framing:** Implements `object: "chat.completion"`, `finish_reason: "stop"` / `"tool_calls"`, integer Unix timestamps, and `choices` array structure.
 2. **Streaming Delta Events:** Emits `data: {"choices": [{"delta": {"content": "..."}}]}` and terminates with `data: [DONE]`.
 3. **Stateless Multi-Turn Progression:** Automatically detects prior turns in the conversation stack or counts `role: "tool"` observation responses to advance from Turn 1 (flawed) to Turn 2 (fixed) deterministically.
@@ -1254,9 +1254,9 @@ The existing LEX command remains useful for regression testing the collector its
 
 ```bash
 python3 tools/002_LLM_API_MOCK/live_coding.py \
-  --challenge-root /home/rocha/Coding/LEX_LLM_EXECUTION/lab \
+  --challenge-root lab \
   --challenge semver_parser \
-  --dotenv /home/rocha/Coding/LEX_LLM_EXECUTION/.env \
+  --dotenv .env \
   --model deepseek/deepseek-v4-flash \
   --max-calls 60 \
   --max-usd 0.10
@@ -1271,7 +1271,7 @@ python3 tools/002_LLM_API_MOCK/live_coding.py \
   --challenge astropy__astropy-12907 \
   --format swe-verified \
   --evaluator-root /var/tmp/lam-swe-evaluator \
-  --dotenv /home/rocha/Coding/LEX_LLM_EXECUTION/.env \
+  --dotenv .env \
   --model deepseek/deepseek-v4-flash \
   --max-calls 60 \
   --max-usd 0.10

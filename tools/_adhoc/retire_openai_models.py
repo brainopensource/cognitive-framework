@@ -30,7 +30,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path("/home/rocha/Coding/Aether-D-System")
+REPO = Path(__file__).resolve().parents[2]
 
 SKIP_DIRS = {
     ".git", "node_modules", "__pycache__", ".venv",

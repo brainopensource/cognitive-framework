@@ -173,6 +173,9 @@ class MachineReadableOutputIsActuallyMachineReadable(unittest.TestCase):
     """
 
     def test_json_stdout_is_valid_json_and_summary_goes_to_stderr(self) -> None:
+        evidence_dir = _ROOT / "docs" / "execution" / "evidence"
+        if not evidence_dir.exists() or not list(evidence_dir.glob("*.json")):
+            self.skipTest("No evidence bundles present to verify")
         result = subprocess.run(
             [sys.executable, "tools/linters/verify_evidence.py", "--json"],
             cwd=_ROOT, capture_output=True, text=True, check=False,

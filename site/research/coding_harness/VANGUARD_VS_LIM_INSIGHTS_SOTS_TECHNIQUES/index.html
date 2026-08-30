@@ -2653,7 +2653,7 @@
 <h3 id="13-why-lim-was-built-as-an-isolated-skunkworks-engine">1.3 Why LIM Was Built as an Isolated Skunkworks Engine</h3>
 <p>To ensure rigorous scientific experimentation without introducing boundary regressions or inflating Vanguard’s audited TCB line budget, <code>006_LLM_INT_MACHINE</code> was constructed with <strong>strict architectural isolation</strong>:
 1. <strong>Zero Imports from Vanguard</strong>: Operates 100% independently using Python 3.10+ standard libraries (<code>ast</code>, <code>subprocess</code>, <code>urllib.request</code>, <code>json</code>, <code>dataclasses</code>).
-2. <strong>Instant A/B Feature Toggling</strong>: The <a href="file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/config.py"><code>HarnessConfig</code></a> matrix allows individual toggling of <code>use_ast_preflight</code>, <code>use_reproduce_first</code>, <code>use_speculative_rollback</code>, <code>use_dialogue_compaction</code>, <code>use_dead_ends_tracking</code>, and <code>use_paged_output</code> for empirical ablation studies.
+2. <strong>Instant A/B Feature Toggling</strong>: The <code>HarnessConfig</code> matrix (<code>tools/006_LLM_INT_MACHINE/config.py</code>) allows individual toggling of <code>use_ast_preflight</code>, <code>use_reproduce_first</code>, <code>use_speculative_rollback</code>, <code>use_dialogue_compaction</code>, <code>use_dead_ends_tracking</code>, and <code>use_paged_output</code> for empirical ablation studies.
 3. <strong>Rapid Prototyping Sandbox</strong>: Acts as an accelerator for frontier algorithmic testing before porting verified features into Vanguard's hexagonal production packages.</p>
 <hr />
 <h3 id="14-formal-mathematical-pomdp-problem-formulation">1.4 Formal Mathematical POMDP Problem Formulation</h3>
@@ -2924,7 +2924,7 @@ For any recursive execution chain of depth $N$, no delegated child subagent can 
 <ul>
 <li><strong><code>minimax/minimax-m3:free</code></strong>: Demonstrated strong reasoning on Tier 5 Datalog unification, reducing turn counts from 10 down to 5 when paired with Vanguard Core compaction.</li>
 <li><strong><code>openrouter/free</code></strong>: Successfully resolved Tier 1 LRU TTL Cache in 3 turns under SOTA Full (reducing token consumption from 27,045 to 3,946 tokens).</li>
-<li><strong>Upstream Rate-Limiting</strong>: Free shared pools (<code>z-ai/glm-5.2:free</code>) exhibited transient HTTP 429 rate-limiting under burst requests, highlighting the necessity of our exponential backoff retry logic in <a href="file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/llm_client.py"><code>llm_client.py</code></a>.</li>
+<li><strong>Upstream Rate-Limiting</strong>: Free shared pools (<code>z-ai/glm-5.2:free</code>) exhibited transient HTTP 429 rate-limiting under burst requests, highlighting the necessity of our exponential backoff retry logic in <code>tools/006_LLM_INT_MACHINE/llm_client.py</code>.</li>
 </ul>
 <hr />
 <h3 id="24-ablation-analysis-baseline-react-vs-vanguard-core-vs-sota-full">2.4 Ablation Analysis: Baseline ReAct vs. Vanguard Core vs. SOTA Full</h3>
@@ -2994,7 +2994,7 @@ For any recursive execution chain of depth $N$, no delegated child subagent can 
 <p>In naive ReAct, tools or system prompts are dynamically injected or reordered, causing $k \to 0$ and $H(t) \to 0$. In Vanguard and LIM, $k$ is permanently frozen, guaranteeing $H(t) \ge 70\%$ across multi-turn episodes.</p>
 <hr />
 <h3 id="32-feature-2-pluggable-dialogue-compaction-algebraic-dead-ends">3.2 Feature 2: Pluggable Dialogue Compaction &amp; Algebraic Dead-Ends</h3>
-<p>When dialogue volume in $L_5$ approaches token ceilings, LIM's <a href="file:///home/rocha/Coding/Aether-D-System/tools/006_LLM_INT_MACHINE/context_engine.py"><code>ContextEngine</code></a> applies a two-tier compaction reduction:</p>
+<p>When dialogue volume in $L_5$ approaches token ceilings, LIM's <code>ContextEngine</code> (<code>tools/006_LLM_INT_MACHINE/context_engine.py</code>) applies a two-tier compaction reduction:</p>
 <p>$$\mathcal{C}(\text{Dialogue}) = \text{EvictBulkyReceipts}(\text{Dialogue}) \circ \text{ConsolidateStructured}(\text{Dialogue})$$</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># From tools/006_LLM_INT_MACHINE/context_engine.py</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">compact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ceiling_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -3821,7 +3821,7 @@ For any recursive execution chain of depth $N$, no delegated child subagent can 
 <h2 id="7-substrate-porting-blueprint-integrating-lim-features-into-vanguard">7. Substrate Porting Blueprint: Integrating LIM Features into Vanguard</h2>
 <p>To bring the validated capabilities from <code>006_LLM_INT_MACHINE</code> into Vanguard's production hexagonal codebase without violating boundary rules:</p>
 <h3 id="71-porting-ast-pre-flight-into-adaptersbindingscodepy">7.1 Porting AST Pre-Flight into <code>adapters/bindings/code.py</code></h3>
-<p>Insert the in-memory <code>ast.parse</code> check inside the surgical patch tool binding in <a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/adapters/bindings/code.py"><code>vanguard/packages/adapters/bindings/code.py</code></a>:</p>
+<p>Insert the in-memory <code>ast.parse</code> check inside the surgical patch tool binding in <a href="../../../vanguard/packages/adapters/bindings/code.py"><code>vanguard/packages/adapters/bindings/code.py</code></a>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Hook into execute_patch in code.py:</span>
 <a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".py"</span><span class="p">):</span>
 <a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>    <span class="k">try</span><span class="p">:</span>
@@ -3830,7 +3830,7 @@ For any recursive execution chain of depth $N$, no delegated child subagent can 
 <a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>        <span class="k">return</span> <span class="n">Result</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">"syntax_error"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"AST SyntaxError at line </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">lineno</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">msg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="72-porting-gated-reproducer-protocol-into-vg-code-swe-pro">7.2 Porting Gated Reproducer Protocol into <code>vg-code-swe-pro</code></h3>
-<p>Add a dedicated manifest pack <a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/manifests/"><code>vanguard/packages/agency/manifests/vg-code-swe-pro/</code></a> configuring:
+<p>Add a dedicated manifest pack <a href="../../../vanguard/packages/agency/manifests/"><code>vanguard/packages/agency/manifests/vg-code-swe-pro/</code></a> configuring:
 - <code>system-prompt.txt</code>: Strict Reproduce-First methodology.
 - <code>context-policy.json</code>: <code>structured_consolidate</code> with dead-ends retention.
 - <code>budget-policy.json</code>: Monotonic reservations calibrated for DeepSeek v4 Flash.</p>

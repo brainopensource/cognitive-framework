@@ -1,7 +1,7 @@
 # Vanguard / AETHER v0.90 Frontier Benchmark Quick-Run Guide
 
 **Primary Driver:** `tools/benchmark-drivers/frontier_v090.py`  
-**Workspace Root:** `/home/rocha/Coding/Aether-D-System-Workspace`  
+**Workspace Root:** `.vanguard/workspace` (configurable via `AETHER_WORKSPACE_ROOT`)  
 **Target Model:** `deepseek/deepseek-v4-flash-0731` via OpenRouter  
 
 ---
@@ -11,7 +11,6 @@
 The workspace root is auto-detected from `.vanguard/workspace.toml` and `OPENROUTER_API_KEY` is loaded automatically from the repo's `.env` — no manual setup required:
 
 ```bash
-cd /home/rocha/Coding/Aether-D-System
 python3 tools/benchmark-drivers/frontier_v090.py --dry-run
 ```
 

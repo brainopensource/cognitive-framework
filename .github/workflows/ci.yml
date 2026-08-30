@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   vanguard-living-gates:
-    name: Living Gates — Packages Lattice, Boundaries, TCB, Links, Secrets
+    name: Living Gates — Packages Lattice, Boundaries, TCB, Links, Secrets (Linux)
     runs-on: ubuntu-latest
     env:
       OPENROUTER_API_KEY: ""
@@ -54,6 +54,9 @@ jobs:
 
       - name: Duplication detector (F-16)
         run: python3 tools/linters/check_duplication.py --enforce
+
+      - name: Path hygiene check
+        run: python3 tools/linters/check_path_hygiene.py
 
       - name: Kernel package tests
         run: python3 -m unittest discover -s test/kernel -t .
@@ -146,3 +149,62 @@ jobs:
           else
             echo 'RF-86 NOT APPLICABLE: ADR-0102 successor baseline has not been accepted; no pass is claimed.'
           fi
+
+  vanguard-windows-portable:
+    name: Portable Core & Hygiene Gates (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18'
+
+      - name: Install locked dependencies
+        run: |
+          uv sync --frozen
+          npm ci
+
+      - name: Path hygiene check
+        run: uv run python tools/linters/check_path_hygiene.py
+
+      - name: Repo paths test (F-20)
+        run: uv run python -m unittest test.test_repo_paths
+
+      - name: Hexagonal boundary lattice check
+        run: uv run python tools/linters/check_boundaries.py
+
+      - name: TCB budget safety check
+        run: uv run python tools/linters/check_tcb_budget.py
+
+      - name: Domain-blindness (I-7, F-18)
+        run: uv run python tools/linters/check_domain_blindness.py
+
+      - name: Isolation policy (I-6)
+        run: uv run python tools/linters/check_isolation_policy.py
+
+      - name: Kernel package tests
+        run: uv run python -m unittest discover -s test/kernel -t .
+
+      - name: Agency package tests
+        run: uv run python -m unittest discover -s test/agency -t .
+
+      - name: Contracts package tests
+        run: uv run python -m unittest discover -s test/contracts -t .
+
+      - name: TypeScript typecheck and tests
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Documentation metadata and link validation
+        run: |
+          uv run python tools/linters/check_doc_metadata.py
+          uv run python tools/linters/check_markdown_links.py
+          npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+          uv run mkdocs build --strict

@@ -144,6 +144,11 @@ Events must be emitted exclusively through `LedgerEmitter` via role-scoped facad
 | `PluginDiscovered` | `registry` | `registry-policy` | Pack plugin candidate detected. |
 | `PluginActivated` | `registry` | `registry-policy` | Pack plugin verified and loaded. |
 | `PluginQuiesced` | `registry` | `registry-policy` | Pack plugin unloaded or deactivated. |
+| `GoalDeclared` | `session` | `session-policy` | High-level execution goal established. |
+| `PlanRevised` | `session` | `session-policy` | Plan steps updated. |
+| `StrategyChanged` | `session` | `session-policy` | Agent strategy adjusted. |
+| `ProgressAssessed` | `session` | `session-policy` | Goal progress evaluated. |
+| `ContextCompacted` | `session` | `session-policy` | Context window compacted. |
 
 ### Deprecated Historical Kinds (`DEPRECATED_KINDS`)
 The following kinds are frozen historical names from legacy specifications. They remain permanently readable by all readers to ensure past ledgers validate, but new writes are unconditionally rejected with `DeprecatedKindError`:

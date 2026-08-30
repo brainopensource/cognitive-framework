@@ -1,0 +1,49 @@
+{
+  "name": "@aether/tui",
+  "version": "0.1.0",
+  "description": "AETHER interactive terminal cockpit and progressive disclosure UI",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "aether-tui": "dist/src/main.js"
+  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./theme.js": {
+      "types": "./dist/src/theme.d.ts",
+      "default": "./dist/src/theme.js"
+    },
+    "./store.js": {
+      "types": "./dist/src/store.d.ts",
+      "default": "./dist/src/store.js"
+    }
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build --silent && node --test dist/test/*.test.js",
+    "tui": "node dist/src/main.js"
+  },
+  "dependencies": {
+    "@aether/contracts": "*",
+    "@aether/client": "*",
+    "@aether/projections": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

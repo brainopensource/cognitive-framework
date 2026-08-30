@@ -1,5 +1,0 @@
-{"name":"emit","verb":"proof.emit",
- "description":"Write a verified witness to the workspace. Privileged. Single action.",
- "schema":{"type":"object","additionalProperties":false,
-  "properties":{"path":{"type":"string"},"witness":{"type":"string"}},
-  "required":["path","witness"]}}

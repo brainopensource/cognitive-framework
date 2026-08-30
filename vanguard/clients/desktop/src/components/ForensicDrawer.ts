@@ -1,5 +1,14 @@
 import type { DesktopStore, ForensicTab } from "../state/desktop-store.js";
-import { renderDiffViewer, renderArtifactReference, renderStatusBadge, renderErrorState } from "@aether/ui-web";
+import {
+  renderDiffViewer,
+  renderArtifactReference,
+  renderStatusBadge,
+  renderErrorState,
+  renderMultiFileDiffViewer,
+  renderProviderManager,
+  renderVerificationCard,
+  renderResearchCitationCard,
+} from "@aether/ui-web";
 import { formatDeepLink } from "@aether/projections";
 
 export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
@@ -9,7 +18,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
   const drawer = document.createElement("aside");
   drawer.className = "aether-forensic-drawer";
   drawer.style.cssText = `
-    width: 460px;
+    width: 480px;
     height: 100%;
     background: var(--aether-surface, #181825);
     border-left: 1px solid var(--aether-border, #313244);
@@ -45,7 +54,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
 
   // 2. Tab Bar
   const tabs = document.createElement("div");
-  tabs.style.cssText = "display: flex; border-bottom: 1px solid var(--aether-border, #313244); background: var(--aether-surface-raised, #1e1e2e);";
+  tabs.style.cssText = "display: flex; border-bottom: 1px solid var(--aether-border, #313244); background: var(--aether-surface-raised, #1e1e2e); overflow-x: auto;";
 
   const tabList: Array<{ id: ForensicTab; label: string }> = [
     { id: "diffs", label: "Diffs" },
@@ -69,6 +78,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
       font-weight: 600;
       cursor: pointer;
       font-size: 12px;
+      white-space: nowrap;
     `;
     tabBtn.textContent = t.label;
     tabBtn.onclick = () => store.openForensicDrawer(t.id);
@@ -78,7 +88,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
 
   // 3. Content Pane
   const content = document.createElement("div");
-  content.style.cssText = "flex: 1; overflow-y: auto; padding: 14px; box-sizing: border-box;";
+  content.style.cssText = "flex: 1; overflow-y: auto; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;";
 
   // Failures / Diagnostics banner if present
   if (state.lastFailure) {
@@ -92,41 +102,72 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
   }
 
   if (state.activeForensicTab === "diffs") {
-    if (state.activeDiffText) {
+    if (state.multiFileDiff && state.multiFileDiff.files.length > 0) {
+      content.appendChild(
+        renderMultiFileDiffViewer({
+          diffModel: state.multiFileDiff,
+        })
+      );
+    } else if (state.activeDiffText) {
       content.appendChild(renderDiffViewer(state.activeDiffText));
     } else {
       const empty = document.createElement("div");
       empty.style.cssText = "color: var(--aether-text-muted, #6c7086); font-size: 13px; text-align: center; padding: 32px 0;";
-      empty.textContent = "No active diff selected.";
+      empty.textContent = "No active diff or file modifications selected.";
       content.appendChild(empty);
     }
   } else if (state.activeForensicTab === "evidence") {
     const claims = state.evidenceGrid.claims;
-    if (claims.length === 0) {
+    const citations = state.researchSummary.citations;
+
+    if (claims.length === 0 && citations.length === 0) {
       const empty = document.createElement("div");
       empty.style.cssText = "color: var(--aether-text-muted, #6c7086); font-size: 13px; text-align: center; padding: 32px 0;";
-      empty.textContent = "No verified evidence claims recorded yet.";
+      empty.textContent = "No verified evidence claims or citations recorded yet.";
       content.appendChild(empty);
     } else {
-      for (const claim of claims) {
-        const item = document.createElement("div");
-        item.style.cssText = `
-          padding: 10px 12px;
-          margin-bottom: 8px;
-          background: var(--aether-surface-raised, #252538);
-          border: 1px solid var(--aether-border, #313244);
-          border-radius: 6px;
-          font-size: 12px;
-          color: var(--aether-text-primary, #cdd6f4);
-        `;
-        item.innerHTML = `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <strong style="color: var(--aether-success, #a6e3a1);">✔ [${claim.claimType}]</strong>
-            <span style="font-size: 11px; color: var(--aether-text-muted);">${claim.claimId ? `id:${claim.claimId.slice(0, 8)}` : ""}</span>
-          </div>
-          <div>${claim.statement}</div>
-        `;
-        content.appendChild(item);
+      if (citations.length > 0) {
+        const citeHeader = document.createElement("div");
+        citeHeader.style.cssText = "font-weight: 700; color: var(--aether-accent, #89b4fa); font-size: 12px; margin-bottom: 4px;";
+        citeHeader.textContent = "Research Citations & Sources";
+        content.appendChild(citeHeader);
+
+        for (const cite of citations) {
+          content.appendChild(
+            renderResearchCitationCard({
+              citation: cite,
+              onOpenLabEvidence: (evId) => store.openInLab({ kind: "run", runId: state.runId }),
+            })
+          );
+        }
+      }
+
+      if (claims.length > 0) {
+        const claimHeader = document.createElement("div");
+        claimHeader.style.cssText = "font-weight: 700; color: var(--aether-accent, #89b4fa); font-size: 12px; margin-top: 8px; margin-bottom: 4px;";
+        claimHeader.textContent = "Verified Claims";
+        content.appendChild(claimHeader);
+
+        for (const claim of claims) {
+          const item = document.createElement("div");
+          item.style.cssText = `
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: var(--aether-surface-raised, #252538);
+            border: 1px solid var(--aether-border, #313244);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--aether-text-primary, #cdd6f4);
+          `;
+          item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <strong style="color: var(--aether-success, #a6e3a1);">✔ [${claim.claimType}]</strong>
+              <span style="font-size: 11px; color: var(--aether-text-muted);">${claim.claimId ? `id:${claim.claimId.slice(0, 8)}` : ""}</span>
+            </div>
+            <div>${claim.statement}</div>
+          `;
+          content.appendChild(item);
+        }
       }
     }
   } else if (state.activeForensicTab === "artifacts") {
@@ -143,10 +184,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
             digest: art.digest,
             path: art.path,
             summary: `Kind: ${art.kind}`,
-            onOpenInLab: () => {
-              const link = formatDeepLink({ kind: "artifact", digest: art.digest });
-              alert(`Deep link to Lab: ${link}`);
-            },
+            onOpenInLab: () => store.openInLab({ kind: "artifact", digest: art.digest }),
           })
         );
       }
@@ -156,47 +194,49 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
     if (nodes.length === 0) {
       const empty = document.createElement("div");
       empty.style.cssText = "color: var(--aether-text-muted, #6c7086); font-size: 13px; text-align: center; padding: 32px 0;";
-      empty.textContent = "No trace graph nodes recorded yet.";
+      empty.textContent = "No causal trace nodes recorded.";
       content.appendChild(empty);
     } else {
-      for (const node of nodes) {
+      const labBtn = document.createElement("button");
+      labBtn.style.cssText = "padding: 6px 12px; background: var(--aether-surface-raised, #252538); color: var(--aether-accent, #89b4fa); border: 1px solid var(--aether-border, #313244); border-radius: 4px; font-size: 11px; cursor: pointer; align-self: flex-start;";
+      labBtn.textContent = "Open Full Trace Graph in Lab ↗";
+      labBtn.onclick = () => store.openInLab({ kind: "trace", runId: state.runId, nodeId: nodes[0]?.id ?? "" });
+      content.appendChild(labBtn);
+
+      for (const n of nodes) {
         const item = document.createElement("div");
         item.style.cssText = `
-          padding: 8px 12px;
+          padding: 8px 10px;
           margin-bottom: 6px;
-          background: var(--aether-surface-raised, #252538);
+          background: var(--aether-bg, #11111b);
           border: 1px solid var(--aether-border, #313244);
-          border-radius: 6px;
-          font-size: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          border-radius: 4px;
+          font-size: 11px;
+          font-family: var(--aether-font-mono, monospace);
         `;
         item.innerHTML = `
-          <div>
-            <strong style="color: var(--aether-accent);">${node.summary ?? node.kind}</strong>
-            <div style="font-size: 11px; color: var(--aether-text-muted); font-family: var(--aether-font-mono);">${node.id.slice(0, 16)}…</div>
+          <div style="display: flex; justify-content: space-between;">
+            <strong style="color: var(--aether-accent, #89b4fa);">${n.kind}</strong>
+            <span style="color: var(--aether-text-muted, #6c7086);">seq: ${n.seq}</span>
           </div>
+          <div style="color: var(--aether-text-muted, #6c7086); margin-top: 2px;">node: ${n.id.slice(0, 12)}…</div>
         `;
-        const badge = renderStatusBadge({ status: "completed", label: node.kind, size: "sm" });
-        item.appendChild(badge);
         content.appendChild(item);
       }
     }
   } else if (state.activeForensicTab === "runs") {
-    const runs = state.runs;
-    if (runs.length === 0) {
+    if (state.runs.length === 0) {
       const empty = document.createElement("div");
       empty.style.cssText = "color: var(--aether-text-muted, #6c7086); font-size: 13px; text-align: center; padding: 32px 0;";
-      empty.textContent = "No previous runs found for current workspace.";
+      empty.textContent = "No runs recorded in runtime.";
       content.appendChild(empty);
     } else {
-      for (const r of runs) {
-        const item = document.createElement("div");
+      for (const r of state.runs) {
         const isActive = r.runId === state.runId;
+        const item = document.createElement("div");
         item.style.cssText = `
           padding: 10px 12px;
-          margin-bottom: 6px;
+          margin-bottom: 8px;
           background: ${isActive ? "var(--aether-surface-raised, #252538)" : "var(--aether-bg, #11111b)"};
           border: 1px solid ${isActive ? "var(--aether-accent, #89b4fa)" : "var(--aether-border, #313244)"};
           border-radius: 6px;
@@ -208,7 +248,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
         topRow.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;";
 
         const idSpan = document.createElement("span");
-        idSpan.style.cssText = "font-weight: 700; font-family: var(--aether-font-mono); color: var(--aether-text-primary);";
+        idSpan.style.cssText = "font-weight: 700; font-family: var(--aether-font-mono, monospace); color: var(--aether-text-primary, #cdd6f4);";
         idSpan.textContent = `Run: ${r.runId.slice(0, 8)}…`;
         topRow.appendChild(idSpan);
 
@@ -220,7 +260,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
         btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 6px;";
 
         const attachBtn = document.createElement("button");
-        attachBtn.style.cssText = "padding: 2px 6px; font-size: 11px; background: var(--aether-accent); color: var(--aether-bg); border: none; border-radius: 4px; cursor: pointer;";
+        attachBtn.style.cssText = "padding: 2px 6px; font-size: 11px; background: var(--aether-accent, #89b4fa); color: var(--aether-bg, #11111b); border: none; border-radius: 4px; cursor: pointer;";
         attachBtn.textContent = "Attach";
         attachBtn.onclick = (e) => {
           e.stopPropagation();
@@ -228,13 +268,21 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
         };
         btnRow.appendChild(attachBtn);
 
+        const cliBtn = document.createElement("button");
+        cliBtn.style.cssText = "padding: 2px 6px; font-size: 11px; background: var(--aether-surface-raised, #252538); color: var(--aether-text-primary, #cdd6f4); border: 1px solid var(--aether-border, #313244); border-radius: 4px; cursor: pointer;";
+        cliBtn.textContent = "Copy CLI";
+        cliBtn.onclick = (e) => {
+          e.stopPropagation();
+          store.copyCliCommand(r.runId);
+        };
+        btnRow.appendChild(cliBtn);
+
         const labBtn = document.createElement("button");
-        labBtn.style.cssText = "padding: 2px 6px; font-size: 11px; background: var(--aether-surface-raised); color: var(--aether-info); border: 1px solid var(--aether-border); border-radius: 4px; cursor: pointer;";
+        labBtn.style.cssText = "padding: 2px 6px; font-size: 11px; background: var(--aether-surface-raised, #252538); color: var(--aether-info, #89dceb); border: 1px solid var(--aether-border, #313244); border-radius: 4px; cursor: pointer;";
         labBtn.textContent = "Lab ↗";
         labBtn.onclick = (e) => {
           e.stopPropagation();
-          const link = formatDeepLink({ kind: "run", runId: r.runId });
-          alert(`Deep link to Lab: ${link}`);
+          store.openInLab({ kind: "run", runId: r.runId });
         };
         btnRow.appendChild(labBtn);
 
@@ -244,47 +292,50 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
       }
     }
   } else if (state.activeForensicTab === "settings") {
+    // Render Provider Manager
+    const providerSec = renderProviderManager({
+      providers: state.providers,
+      selectedProviderId: state.selectedProviderId,
+      onSelectDefault: (id) => store.controller.setDefaultProvider(id),
+      onSelectModel: (pId, mId) => store.controller.updateProvider(pId, { selectedModel: mId }),
+      onAddProvider: (p) => store.controller.addProvider(p),
+      onRemoveProvider: (id) => store.controller.removeProvider(id),
+      onUpdateCredential: (pId, secret) => store.controller.setProviderCredential(pId, secret),
+      onValidateProvider: (pId) => store.controller.validateProvider(pId),
+    });
+    content.appendChild(providerSec);
+
+    // Appearance & Preferences
     const s = state.settings;
-    const form = document.createElement("div");
-    form.style.cssText = "display: flex; flex-direction: column; gap: 14px; font-size: 13px;";
-
-    // Section 1: General
-    form.innerHTML = `
-      <div style="font-weight: 700; color: var(--aether-accent); border-bottom: 1px solid var(--aether-border); padding-bottom: 4px;">General</div>
+    const prefBox = document.createElement("div");
+    prefBox.style.cssText = "display: flex; flex-direction: column; gap: 12px; margin-top: 16px; border-top: 1px solid var(--aether-border, #313244); padding-top: 12px;";
+    prefBox.innerHTML = `
+      <div style="font-weight: 700; color: var(--aether-accent, #89b4fa);">Preferences</div>
       <div>
-        <label style="color: var(--aether-text-muted); font-size: 11px; display: block; margin-bottom: 2px;">Default Runtime Socket</label>
-        <input type="text" id="set-runtime" value="${s.runtime.socketPath}" style="width: 100%; padding: 6px; background: var(--aether-bg); border: 1px solid var(--aether-border); color: var(--aether-text-primary); border-radius: 4px; box-sizing: border-box;" />
+        <label style="color: var(--aether-text-muted, #6c7086); font-size: 11px; display: block; margin-bottom: 2px;">Default Runtime Socket</label>
+        <input type="text" id="set-runtime" value="${s.runtime.socketPath}" style="width: 100%; padding: 6px; background: var(--aether-bg, #11111b); border: 1px solid var(--aether-border, #313244); color: var(--aether-text-primary, #cdd6f4); border-radius: 4px; box-sizing: border-box;" />
       </div>
       <div>
-        <label style="color: var(--aether-text-muted); font-size: 11px; display: block; margin-bottom: 2px;">Default Workspace</label>
-        <input type="text" id="set-workspace" value="${s.general.defaultWorkspace}" style="width: 100%; padding: 6px; background: var(--aether-bg); border: 1px solid var(--aether-border); color: var(--aether-text-primary); border-radius: 4px; box-sizing: border-box;" />
+        <label style="color: var(--aether-text-muted, #6c7086); font-size: 11px; display: block; margin-bottom: 2px;">Default Workspace</label>
+        <input type="text" id="set-workspace" value="${s.general.defaultWorkspace}" style="width: 100%; padding: 6px; background: var(--aether-bg, #11111b); border: 1px solid var(--aether-border, #313244); color: var(--aether-text-primary, #cdd6f4); border-radius: 4px; box-sizing: border-box;" />
       </div>
-
-      <div style="font-weight: 700; color: var(--aether-accent); border-bottom: 1px solid var(--aether-border); padding-bottom: 4px; margin-top: 8px;">Appearance</div>
       <div>
-        <label style="color: var(--aether-text-muted); font-size: 11px; display: block; margin-bottom: 2px;">Theme</label>
-        <select id="set-theme" style="width: 100%; padding: 6px; background: var(--aether-bg); border: 1px solid var(--aether-border); color: var(--aether-text-primary); border-radius: 4px; box-sizing: border-box;">
+        <label style="color: var(--aether-text-muted, #6c7086); font-size: 11px; display: block; margin-bottom: 2px;">Theme</label>
+        <select id="set-theme" style="width: 100%; padding: 6px; background: var(--aether-bg, #11111b); border: 1px solid var(--aether-border, #313244); color: var(--aether-text-primary, #cdd6f4); border-radius: 4px; box-sizing: border-box;">
           <option value="dark" ${s.appearance.theme === "dark" ? "selected" : ""}>Dark (Electroweak)</option>
           <option value="light" ${s.appearance.theme === "light" ? "selected" : ""}>Light</option>
           <option value="high-contrast" ${s.appearance.theme === "high-contrast" ? "selected" : ""}>High Contrast</option>
         </select>
       </div>
-
-      <div style="font-weight: 700; color: var(--aether-accent); border-bottom: 1px solid var(--aether-border); padding-bottom: 4px; margin-top: 8px;">Accessibility</div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="set-motion" ${s.appearance.reducedMotion ? "checked" : ""} />
-        <label for="set-motion" style="color: var(--aether-text-primary);">Reduced Motion</label>
-      </div>
     `;
 
     const saveBtn = document.createElement("button");
-    saveBtn.style.cssText = "margin-top: 12px; padding: 8px 14px; background: var(--aether-accent); color: var(--aether-bg); border: none; border-radius: 6px; font-weight: 700; cursor: pointer;";
-    saveBtn.textContent = "Save Settings";
+    saveBtn.style.cssText = "margin-top: 8px; padding: 8px 14px; background: var(--aether-accent, #89b4fa); color: var(--aether-bg, #11111b); border: none; border-radius: 6px; font-weight: 700; cursor: pointer;";
+    saveBtn.textContent = "Save Preferences";
     saveBtn.onclick = () => {
-      const runtimeInput = form.querySelector("#set-runtime") as HTMLInputElement;
-      const wsInput = form.querySelector("#set-workspace") as HTMLInputElement;
-      const themeSelect = form.querySelector("#set-theme") as HTMLSelectElement;
-      const motionCheck = form.querySelector("#set-motion") as HTMLInputElement;
+      const runtimeInput = prefBox.querySelector("#set-runtime") as HTMLInputElement;
+      const wsInput = prefBox.querySelector("#set-workspace") as HTMLInputElement;
+      const themeSelect = prefBox.querySelector("#set-theme") as HTMLSelectElement;
 
       store.controller.updateSettings({
         runtime: { ...s.runtime, socketPath: runtimeInput?.value ?? s.runtime.socketPath },
@@ -292,13 +343,11 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
         appearance: {
           ...s.appearance,
           theme: (themeSelect?.value as any) ?? s.appearance.theme,
-          reducedMotion: motionCheck?.checked ?? s.appearance.reducedMotion,
         },
       });
-      alert("Settings updated!");
     };
-    form.appendChild(saveBtn);
-    content.appendChild(form);
+    prefBox.appendChild(saveBtn);
+    content.appendChild(prefBox);
   }
 
   drawer.appendChild(content);

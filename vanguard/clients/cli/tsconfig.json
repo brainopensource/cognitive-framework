@@ -8,12 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "dist",
-    "rootDir": ".",
-    "baseUrl": ".",
-    "paths": {
-      "@vanguard/client-core": ["../client-core/dist/src/index.d.ts"],
-      "@vanguard/client-core/*": ["../client-core/dist/src/*"]
-    }
+    "rootDir": "."
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts"]
 }

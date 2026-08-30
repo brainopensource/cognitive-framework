@@ -6,6 +6,7 @@ export * from "./transports/replay.js";
 export * from "./signers/operator-signer.js";
 export * from "./signers/web-signer.js";
 export * from "./application/app-controller.js";
+export * from "./persistence/persistence-port.js";
 
 import type { RuntimeClient } from "./client.js";
 import { SocketRuntimeClient, type SocketTransportOptions } from "./transports/socket.js";

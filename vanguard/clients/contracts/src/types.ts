@@ -397,3 +397,189 @@ export type FrontendSettings = {
   accessibility: AccessibilitySettings;
 };
 
+// ==========================================
+// 1. PROVIDER & CREDENTIAL CONFIGURATION
+// ==========================================
+
+export type ProviderType = "openrouter" | "ollama" | "anthropic" | "openai" | "custom";
+
+export type CredentialState = "NOT_CONFIGURED" | "CONFIGURED" | "INVALID" | "UNAVAILABLE";
+
+export type ModelDescriptor = {
+  id: string;
+  name: string;
+  contextWindow?: number;
+  supportsVision?: boolean;
+  defaultForRole?: string;
+};
+
+export type ModelProviderConfig = {
+  id: string;
+  name: string;
+  type: ProviderType;
+  baseUrl?: string;
+  credentialKeyRef: string;
+  credentialState: CredentialState;
+  models: ModelDescriptor[];
+  selectedModel: string;
+  enabled: boolean;
+  isDefault: boolean;
+  lastValidatedAt?: string;
+  lastError?: string;
+};
+
+export type ExecutionProfile = {
+  id: string;
+  name: string;
+  providerId: string;
+  modelId: string;
+  temperature?: number;
+  maxBudgetUsd?: number;
+};
+
+export type SecureCredentialRef = {
+  keyRef: string;
+  providerType: ProviderType;
+  state: CredentialState;
+  label: string;
+  lastUpdated?: string;
+};
+
+// ==========================================
+// 2. STARTUP READINESS
+// ==========================================
+
+export type ReadinessStepId = "runtime" | "provider" | "credential" | "workspace" | "composition";
+
+export type ReadinessStepStatus = "ready" | "pending" | "invalid" | "unreachable";
+
+export type ReadinessStep = {
+  id: ReadinessStepId;
+  title: string;
+  status: ReadinessStepStatus;
+  description: string;
+  actionLabel?: string;
+  routeTarget?: string;
+};
+
+export type StartupReadiness = {
+  isReady: boolean;
+  steps: ReadinessStep[];
+  nextRequiredStep?: ReadinessStepId;
+};
+
+// ==========================================
+// 3. MUTATION LIFECYCLE & MULTI-FILE DIFFS
+// ==========================================
+
+export type MutationLifecycleState = "PROPOSED" | "APPROVED" | "APPLIED" | "VERIFIED" | "FAILED";
+
+export type FileDiffEntry = {
+  filePath: string;
+  oldPath?: string;
+  status: MutationLifecycleState;
+  additions: number;
+  deletions: number;
+  patchText: string;
+  isBinary?: boolean;
+};
+
+export type MultiFileDiffModel = {
+  diffId: string;
+  approvalId?: string;
+  files: FileDiffEntry[];
+  overallStatus: MutationLifecycleState;
+  summary: {
+    totalFiles: number;
+    totalAdditions: number;
+    totalDeletions: number;
+  };
+};
+
+// ==========================================
+// 4. VERIFICATION UX MODELS
+// ==========================================
+
+export type VerificationKind = "tests" | "lint" | "typecheck" | "build" | "custom";
+
+export type VerificationStatus = "pass" | "fail" | "partial" | "unavailable";
+
+export type VerificationSummary = {
+  id: string;
+  kind: VerificationKind;
+  status: VerificationStatus;
+  command?: string;
+  durationMs?: number;
+  passedCount?: number;
+  failedCount?: number;
+  skippedCount?: number;
+  importantOutput?: string;
+  relatedArtifacts?: string[];
+  timestamp: string;
+};
+
+// ==========================================
+// 5. RESEARCH SOURCE & CITATION UX
+// ==========================================
+
+export type CitationItem = {
+  id: string;
+  sourceTitle: string;
+  sourceOrigin: string;
+  citationText: string;
+  claimAssociation?: string;
+  evidenceAssociation?: string;
+  confidence?: number;
+  uncertaintyNotes?: string;
+  artifactRef?: string;
+};
+
+export type ResearchProgressSummary = {
+  totalSources: number;
+  verifiedClaims: number;
+  activeRetrievals: number;
+  citations: CitationItem[];
+  synthesisText?: string;
+};
+
+// ==========================================
+// 6. MULTI-AGENT & WORKFLOW PRESENTATION
+// ==========================================
+
+export type AgentParticipantState = {
+  agentId: string;
+  role: string;
+  status: "active" | "waiting" | "completed" | "failed";
+  currentActivity?: string;
+  parentAgentId?: string;
+  handoffTimestamp?: string;
+};
+
+export type WorkflowExecutionView = {
+  workflowId: string;
+  title: string;
+  currentStage: string;
+  participants: AgentParticipantState[];
+  intermediateArtifacts: string[];
+  isTerminal: boolean;
+};
+
+// ==========================================
+// 7. CONVERSATION PERSISTENCE METADATA
+// ==========================================
+
+export type FrontendConversationMeta = {
+  id: string;
+  title: string;
+  agentId: string;
+  workflowId?: string;
+  workspacePath: string;
+  runIds: string[];
+  activeRunId: string;
+  createdAt: string;
+  updatedAt: string;
+  lastOpenedAt?: string;
+  draft: string;
+  turnCount: number;
+};
+

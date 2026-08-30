@@ -1,7 +1,14 @@
 import type { DesktopStore } from "../state/desktop-store.js";
-import type { ConversationTurn } from "@aether/projections";
-import type { SemanticActivityItem } from "@aether/contracts";
-import { renderEmptyState, renderStatusBadge, renderDiffViewer, renderCodeBlock, renderArtifactReference } from "@aether/ui-web";
+import type { ConversationTurn, ConversationActivityCard } from "@aether/projections";
+import {
+  renderEmptyState,
+  renderStatusBadge,
+  renderDiffViewer,
+  renderCodeBlock,
+  renderArtifactReference,
+  renderVerificationCard,
+  renderResearchCitationCard,
+} from "@aether/ui-web";
 
 export function renderTranscriptPane(store: DesktopStore): HTMLElement {
   const container = document.createElement("main");
@@ -28,7 +35,7 @@ export function renderTranscriptPane(store: DesktopStore): HTMLElement {
       description: "Select your target repository and start an agent session by entering an instruction below.",
       actionLabel: "Quickstart Session",
       onAction: () => {
-        store.update((s) => ({ ...s, composerText: "Analyze repository architecture and verify test status" }));
+        store.setDraft("Analyze repository architecture and verify test status");
       },
     });
     container.appendChild(empty);
@@ -78,6 +85,8 @@ export function renderTranscriptPane(store: DesktopStore): HTMLElement {
 }
 
 function renderTurnCard(turn: ConversationTurn, store: DesktopStore): HTMLElement {
+  const state = store.get();
+  const density = state.settings.appearance?.density ?? "comfortable";
   const card = document.createElement("div");
   const isUser = turn.speaker === "user";
 
@@ -116,8 +125,31 @@ function renderTurnCard(turn: ConversationTurn, store: DesktopStore): HTMLElemen
       white-space: pre-wrap;
       border: ${isUser ? "none" : "1px solid var(--aether-border, #313244)"};
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      position: relative;
     `;
     bubble.textContent = turn.text;
+
+    // Safe copy button
+    const copyBtn = document.createElement("button");
+    copyBtn.style.cssText = `
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: ${isUser ? "var(--aether-bg, #11111b)" : "var(--aether-text-muted, #6c7086)"};
+      font-size: 11px;
+      cursor: pointer;
+      opacity: 0.6;
+    `;
+    copyBtn.textContent = "📋";
+    copyBtn.title = "Copy message text";
+    copyBtn.onclick = () => {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(turn.text);
+      }
+    };
+    bubble.appendChild(copyBtn);
     card.appendChild(bubble);
   }
 
@@ -127,6 +159,23 @@ function renderTurnCard(turn: ConversationTurn, store: DesktopStore): HTMLElemen
     activityContainer.style.cssText = "display: flex; flex-direction: column; gap: 6px; margin-top: 4px;";
 
     for (const act of turn.activityCards) {
+      // If minimal/compact density, skip minor tool exploration unless verification/diff/approval
+      if (density === "compact" && act.kind === "tool") {
+        continue;
+      }
+
+      if (act.kind === "verification") {
+        const verCard = renderVerificationCard({
+          id: act.id,
+          kind: "tests",
+          status: act.status === "completed" ? "pass" : "fail",
+          importantOutput: act.details,
+          timestamp: new Date().toISOString(),
+        });
+        activityContainer.appendChild(verCard);
+        continue;
+      }
+
       const actCard = document.createElement("div");
       actCard.style.cssText = `
         padding: 8px 12px;

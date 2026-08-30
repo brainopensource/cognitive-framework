@@ -64,6 +64,12 @@ if (
   command === "workflow" ||
   command === "artifact" ||
   command === "event" ||
+  command === "config" ||
+  command === "provider" ||
+  command === "model" ||
+  command === "workspace" ||
+  command === "history" ||
+  command === "attach" ||
   command === "run"
 ) {
   process.exit(exitCode);

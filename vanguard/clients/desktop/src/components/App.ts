@@ -8,6 +8,7 @@ import { renderTranscriptPane } from "./TranscriptPane.js";
 import { renderComposer } from "./Composer.js";
 import { renderForensicDrawer } from "./ForensicDrawer.js";
 import { renderCommandPalette } from "./CommandPalette.js";
+import { renderStartupReadinessModal, renderMultiAgentStatusBar } from "@aether/ui-web";
 import type { RuntimeClient } from "@aether/client";
 
 export class DesktopApp {
@@ -17,10 +18,11 @@ export class DesktopApp {
   private rootElement: HTMLElement | null = null;
   private unsubscribe?: () => void;
   private keydownHandler?: (e: KeyboardEvent) => void;
+  private readinessDismissed = false;
 
   constructor(options: { store?: DesktopStore; client?: RuntimeClient; bridge?: TauriNativeBridge } = {}) {
-    this.store = options.store ?? new DesktopStore();
     this.bridge = options.bridge ?? new TauriNativeBridge();
+    this.store = options.store ?? new DesktopStore({ bridge: this.bridge });
     this.client = options.client;
   }
 
@@ -28,10 +30,12 @@ export class DesktopApp {
     this.rootElement = target;
 
     // Inject CSS variables
-    const themeName = this.store.get().settings.appearance.theme ?? "dark";
-    const styleEl = document.createElement("style");
-    styleEl.textContent = generateCssVariables(getThemeTokens(themeName));
-    document.head.appendChild(styleEl);
+    if (typeof document !== "undefined" && document.head) {
+      const themeName = this.store.get().settings.appearance.theme ?? "dark";
+      const styleEl = document.createElement("style");
+      styleEl.textContent = generateCssVariables(getThemeTokens(themeName));
+      document.head.appendChild(styleEl);
+    }
 
     // Keyboard Shortcuts
     this.keydownHandler = (e: KeyboardEvent) => {
@@ -106,6 +110,11 @@ export class DesktopApp {
 
     mainCol.appendChild(renderTopBar(this.store, this.bridge));
 
+    // Multi-Agent status bar if applicable
+    if (state.workflowExecution && state.workflowExecution.participants.length > 1) {
+      mainCol.appendChild(renderMultiAgentStatusBar(state.workflowExecution));
+    }
+
     const banner = renderApprovalBanner(this.store, this.client);
     if (banner) mainCol.appendChild(banner);
 
@@ -121,6 +130,28 @@ export class DesktopApp {
     // 4. Command Palette (Modal Overlay)
     const palette = renderCommandPalette(this.store);
     if (palette) appContainer.appendChild(palette);
+
+    // 5. Startup Readiness Gate (Modal when unready and not dismissed)
+    if (!state.readiness.isReady && !this.readinessDismissed) {
+      const readinessModal = renderStartupReadinessModal({
+        readiness: state.readiness,
+        onAction: (step) => {
+          if (step.id === "provider" || step.id === "credential") {
+            this.store.openForensicDrawer("settings");
+            this.store.update((s) => ({ ...s, activeSettingsTab: "providers" }));
+          } else if (step.id === "runtime") {
+            this.store.controller.connectRuntime();
+          } else if (step.id === "workspace") {
+            this.bridge.openDirectoryDialog().then((dir) => {
+              if (dir) this.store.controller.selectWorkspace(dir);
+            });
+          }
+          this.readinessDismissed = true;
+          this.render();
+        },
+      });
+      appContainer.appendChild(readinessModal);
+    }
 
     if (this.rootElement) {
       this.rootElement.innerHTML = "";

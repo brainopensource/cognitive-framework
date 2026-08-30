@@ -12,6 +12,17 @@ import type {
   StartRunRequest,
   DaemonStatus,
   SemanticActivityItem,
+  ModelProviderConfig,
+  ModelDescriptor,
+  ProviderType,
+  CredentialState,
+  ExecutionProfile,
+  StartupReadiness,
+  MultiFileDiffModel,
+  VerificationSummary,
+  ResearchProgressSummary,
+  WorkflowExecutionView,
+  FrontendConversationMeta,
 } from "@aether/contracts";
 import {
   emptyRunSnapshot,
@@ -28,6 +39,12 @@ import {
   diagnoseFailure,
   DEFAULT_FRONTEND_SETTINGS,
   mergeSettings,
+  reduceMultiFileDiff,
+  reduceVerificationSummaries,
+  reduceResearchSummary,
+  reduceMultiAgentExecution,
+  reconcileOfflineStream,
+  evaluateStartupReadiness,
   type RunSnapshotModel,
   type ConversationTurn,
   type ApprovalState,
@@ -40,25 +57,17 @@ import {
 import type { RuntimeClient } from "../client.js";
 import { SocketRuntimeClient } from "../transports/socket.js";
 import { HttpRuntimeClient } from "../transports/http.js";
+import {
+  type FrontendPersistencePort,
+  LocalStoragePersistenceAdapter,
+} from "../persistence/persistence-port.js";
 
 export type ConversationGroup = {
   label: "Today" | "Yesterday" | "Last 7 Days" | "Older";
-  conversations: ConversationRecord[];
+  conversations: FrontendConversationMeta[];
 };
 
-export type ConversationRecord = {
-  id: string;
-  title: string;
-  agentId: string;
-  workflowId?: string;
-  workspacePath: string;
-  runIds: string[];
-  activeRunId: string;
-  createdAt: string;
-  updatedAt: string;
-  draft: string;
-  turnCount: number;
-};
+export type ConversationRecord = FrontendConversationMeta;
 
 export type AppControllerState = {
   // Connection & Transport
@@ -71,13 +80,17 @@ export type AppControllerState = {
   currentWorkspace: string;
   recentWorkspaces: string[];
 
-  // Catalog
+  // Catalog & Providers
   availableAgents: AgentDescriptor[];
   selectedAgentId: string;
   recentAgentIds: string[];
 
   availableWorkflows: WorkflowDescriptor[];
   selectedWorkflowId: string;
+
+  providers: ModelProviderConfig[];
+  selectedProviderId: string;
+  readiness: StartupReadiness;
 
   // Runs & Stream
   activeRunId: string;
@@ -96,8 +109,14 @@ export type AppControllerState = {
   traceGraph: TraceGraph;
   pendingApproval?: PendingApproval;
 
+  // Product Stage Projections
+  multiFileDiff: MultiFileDiffModel;
+  verificationSummaries: VerificationSummary[];
+  researchSummary: ResearchProgressSummary;
+  workflowExecution: WorkflowExecutionView;
+
   // Conversation Index
-  conversations: ConversationRecord[];
+  conversations: FrontendConversationMeta[];
   activeConversationId: string;
   searchQuery: string;
 
@@ -163,24 +182,80 @@ export const DEFAULT_WORKFLOWS: WorkflowDescriptor[] = [
   },
 ];
 
+export const DEFAULT_PROVIDERS: ModelProviderConfig[] = [
+  {
+    id: "provider-openrouter",
+    name: "OpenRouter",
+    type: "openrouter",
+    baseUrl: "https://openrouter.ai/api/v1",
+    credentialKeyRef: "cred-openrouter",
+    credentialState: "CONFIGURED",
+    models: [
+      { id: "openrouter/free", name: "Free Tier Router", defaultForRole: "general" },
+      { id: "deepseek/deepseek-chat", name: "DeepSeek V3", defaultForRole: "coding" },
+      { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet", defaultForRole: "audit" },
+    ],
+    selectedModel: "openrouter/free",
+    enabled: true,
+    isDefault: true,
+    lastValidatedAt: new Date().toISOString(),
+  },
+  {
+    id: "provider-ollama",
+    name: "Ollama (Local)",
+    type: "ollama",
+    baseUrl: "http://localhost:11434",
+    credentialKeyRef: "cred-ollama-local",
+    credentialState: "CONFIGURED",
+    models: [
+      { id: "llama3:latest", name: "Llama 3 Local" },
+      { id: "qwen2.5-coder:latest", name: "Qwen 2.5 Coder Local" },
+    ],
+    selectedModel: "qwen2.5-coder:latest",
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: "provider-anthropic",
+    name: "Anthropic Direct",
+    type: "anthropic",
+    baseUrl: "https://api.anthropic.com",
+    credentialKeyRef: "cred-anthropic",
+    credentialState: "NOT_CONFIGURED",
+    models: [
+      { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Latest)" },
+      { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
+    ],
+    selectedModel: "claude-3-5-sonnet-20241022",
+    enabled: false,
+    isDefault: false,
+  },
+];
+
 export class FrontendAppController {
   private client: RuntimeClient | null = null;
   private abortController: AbortController | null = null;
+  private persistence: FrontendPersistencePort;
   private state: AppControllerState;
   private listeners = new Set<(state: AppControllerState) => void>();
 
   constructor(options?: {
     client?: RuntimeClient;
+    persistence?: FrontendPersistencePort;
     initialSettings?: Partial<FrontendSettings>;
     initialWorkspace?: string;
     initialAgentId?: string;
+    initialProviders?: ModelProviderConfig[];
   }) {
+    this.persistence = options?.persistence ?? new LocalStoragePersistenceAdapter();
     const settings = mergeSettings(DEFAULT_FRONTEND_SETTINGS, options?.initialSettings);
     const initialWorkspace = options?.initialWorkspace ?? settings.general.defaultWorkspace;
     const initialAgentId = options?.initialAgentId ?? settings.general.defaultAgent;
-    const initialConvId = `conv-${Date.now()}`;
+    const initialConvId = `conv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const providers = options?.initialProviders ?? DEFAULT_PROVIDERS;
+    const defaultProvider = providers.find((p) => p.isDefault) ?? providers[0];
 
-    const defaultConversation: ConversationRecord = {
+    const defaultConversation: FrontendConversationMeta = {
       id: initialConvId,
       title: "Workspace Session",
       agentId: initialAgentId,
@@ -196,6 +271,14 @@ export class FrontendAppController {
 
     this.client = options?.client ?? null;
 
+    const initialReadiness = evaluateStartupReadiness({
+      runtimeConnected: !!this.client,
+      daemonStatus: null,
+      providers,
+      activeWorkspace: initialWorkspace,
+      activeAgentOrWorkflowId: initialAgentId,
+    });
+
     this.state = {
       connectionState: this.client ? "CONNECTED" : "OFFLINE",
       daemonStatus: null,
@@ -208,6 +291,9 @@ export class FrontendAppController {
       recentAgentIds: [initialAgentId],
       availableWorkflows: DEFAULT_WORKFLOWS,
       selectedWorkflowId: settings.general.defaultWorkflow,
+      providers,
+      selectedProviderId: defaultProvider?.id ?? "provider-openrouter",
+      readiness: initialReadiness,
       activeRunId: "",
       attachedRunId: "",
       runs: [],
@@ -221,6 +307,10 @@ export class FrontendAppController {
       evidenceGrid: emptyEvidenceGrid(),
       traceGraph: emptyTraceGraph(),
       pendingApproval: undefined,
+      multiFileDiff: reduceMultiFileDiff([]),
+      verificationSummaries: [],
+      researchSummary: reduceResearchSummary([]),
+      workflowExecution: reduceMultiAgentExecution([]),
       conversations: [defaultConversation],
       activeConversationId: initialConvId,
       searchQuery: "",
@@ -247,6 +337,15 @@ export class FrontendAppController {
 
   public updateState(fn: (prev: AppControllerState) => AppControllerState): void {
     this.state = fn(this.state);
+    // Recalculate readiness
+    const readiness = evaluateStartupReadiness({
+      runtimeConnected: this.state.connectionState === "CONNECTED",
+      daemonStatus: this.state.daemonStatus,
+      providers: this.state.providers,
+      activeWorkspace: this.state.currentWorkspace,
+      activeAgentOrWorkflowId: this.state.selectedAgentId || this.state.selectedWorkflowId,
+    });
+    this.state = { ...this.state, readiness };
     this.emit();
   }
 
@@ -262,7 +361,50 @@ export class FrontendAppController {
     }));
   }
 
-  // 1. RUNTIME CONNECTION
+  public getPersistence(): FrontendPersistencePort {
+    return this.persistence;
+  }
+
+  // 1. RESTORATION FROM PERSISTENCE
+  public async restoreFromPersistence(): Promise<void> {
+    try {
+      const [savedSettings, savedProviders, savedConversations, savedRecents] = await Promise.all([
+        this.persistence.loadSettings(),
+        this.persistence.loadProviders(),
+        this.persistence.loadConversations(),
+        this.persistence.loadRecentWorkspaces(),
+      ]);
+
+      this.updateState((s) => {
+        const nextSettings = savedSettings ? mergeSettings(s.settings, savedSettings) : s.settings;
+        const nextProviders = savedProviders && savedProviders.length > 0 ? savedProviders : s.providers;
+        const nextConversations = savedConversations && savedConversations.length > 0 ? savedConversations : s.conversations;
+        const nextRecents = savedRecents && savedRecents.length > 0 ? savedRecents : s.recentWorkspaces;
+        const activeConv = nextConversations[0];
+
+        return {
+          ...s,
+          settings: nextSettings,
+          providers: nextProviders,
+          conversations: nextConversations,
+          recentWorkspaces: nextRecents,
+          activeConversationId: activeConv?.id ?? s.activeConversationId,
+          currentWorkspace: activeConv?.workspacePath || s.currentWorkspace,
+          selectedAgentId: activeConv?.agentId || s.selectedAgentId,
+        };
+      });
+
+      // Restore active draft
+      const draft = await this.persistence.loadDraft(this.state.activeConversationId);
+      if (draft) {
+        this.setConversationDraft(draft);
+      }
+    } catch {
+      /* Fallback to memory state */
+    }
+  }
+
+  // 2. RUNTIME CONNECTION
   public async connectRuntime(target?: { socketPath?: string; httpUrl?: string }): Promise<boolean> {
     const socketPath = target?.socketPath ?? this.state.settings.runtime.socketPath;
     const httpUrl = target?.httpUrl ?? this.state.settings.runtime.httpUrl;
@@ -336,13 +478,127 @@ export class FrontendAppController {
 
     const success = await this.connectRuntime();
     if (success && this.state.activeRunId) {
-      // Re-attach with cursor
       this.attachRun(this.state.activeRunId);
     }
     return success;
   }
 
-  // 2. WORKSPACE MANAGEMENT
+  // 3. PROVIDER & CREDENTIAL MANAGEMENT
+  public addProvider(config: Omit<ModelProviderConfig, "id">): string {
+    const id = `provider-${Date.now()}`;
+    const newProvider: ModelProviderConfig = {
+      ...config,
+      id,
+    };
+
+    this.updateState((s) => {
+      const providers = [...s.providers, newProvider];
+      this.persistence.saveProviders(providers);
+      return {
+        ...s,
+        providers,
+        statusMessage: `Added provider ${newProvider.name}`,
+      };
+    });
+
+    return id;
+  }
+
+  public updateProvider(id: string, patch: Partial<ModelProviderConfig>): void {
+    this.updateState((s) => {
+      const providers = s.providers.map((p) => (p.id === id ? { ...p, ...patch } : p));
+      this.persistence.saveProviders(providers);
+      return {
+        ...s,
+        providers,
+      };
+    });
+  }
+
+  public removeProvider(id: string): void {
+    this.updateState((s) => {
+      const providers = s.providers.filter((p) => p.id !== id);
+      const nextDefault = providers.find((p) => p.isDefault) ?? providers[0];
+      this.persistence.saveProviders(providers);
+      return {
+        ...s,
+        providers,
+        selectedProviderId: s.selectedProviderId === id ? nextDefault?.id ?? "" : s.selectedProviderId,
+        statusMessage: `Provider removed`,
+      };
+    });
+  }
+
+  public setDefaultProvider(id: string): void {
+    this.updateState((s) => {
+      const providers = s.providers.map((p) => ({
+        ...p,
+        isDefault: p.id === id,
+      }));
+      this.persistence.saveProviders(providers);
+      return {
+        ...s,
+        providers,
+        selectedProviderId: id,
+        statusMessage: `Default provider set`,
+      };
+    });
+  }
+
+  public async setProviderCredential(providerId: string, secret: string): Promise<void> {
+    const provider = this.state.providers.find((p) => p.id === providerId);
+    if (!provider) return;
+
+    await this.persistence.saveSecureCredential(provider.credentialKeyRef, secret);
+    const state = await this.persistence.getCredentialState(provider.credentialKeyRef);
+
+    this.updateProvider(providerId, {
+      credentialState: state,
+      lastValidatedAt: new Date().toISOString(),
+      lastError: undefined,
+    });
+  }
+
+  public async deleteProviderCredential(providerId: string): Promise<void> {
+    const provider = this.state.providers.find((p) => p.id === providerId);
+    if (!provider) return;
+
+    await this.persistence.deleteSecureCredential(provider.credentialKeyRef);
+    this.updateProvider(providerId, {
+      credentialState: "NOT_CONFIGURED",
+    });
+  }
+
+  public async validateProvider(providerId: string): Promise<{ ok: boolean; error?: string }> {
+    const provider = this.state.providers.find((p) => p.id === providerId);
+    if (!provider) return { ok: false, error: "Provider not found" };
+
+    if (provider.type === "ollama") {
+      this.updateProvider(providerId, {
+        credentialState: "CONFIGURED",
+        lastValidatedAt: new Date().toISOString(),
+      });
+      return { ok: true };
+    }
+
+    const state = await this.persistence.getCredentialState(provider.credentialKeyRef);
+    if (state !== "CONFIGURED") {
+      this.updateProvider(providerId, {
+        credentialState: "INVALID",
+        lastError: "Invalid or missing API key",
+      });
+      return { ok: false, error: "API Key not configured" };
+    }
+
+    this.updateProvider(providerId, {
+      credentialState: "CONFIGURED",
+      lastValidatedAt: new Date().toISOString(),
+      lastError: undefined,
+    });
+    return { ok: true };
+  }
+
+  // 4. WORKSPACE MANAGEMENT
   public selectWorkspace(path: string): void {
     const clean = path.trim();
     if (!clean) return;
@@ -352,6 +608,7 @@ export class FrontendAppController {
         0,
         s.settings.workspace.maxRecentWorkspaces
       );
+      this.persistence.saveRecentWorkspaces(updatedRecents);
       return {
         ...s,
         currentWorkspace: clean,
@@ -366,13 +623,17 @@ export class FrontendAppController {
   }
 
   public clearRecentWorkspaces(): void {
-    this.updateState((s) => ({
-      ...s,
-      recentWorkspaces: [s.currentWorkspace],
-    }));
+    this.updateState((s) => {
+      const recents = [s.currentWorkspace];
+      this.persistence.saveRecentWorkspaces(recents);
+      return {
+        ...s,
+        recentWorkspaces: recents,
+      };
+    });
   }
 
-  // 3. AGENT & WORKFLOW SELECTION
+  // 5. AGENT & WORKFLOW SELECTION
   public selectAgent(agentId: string): void {
     const found = this.state.availableAgents.find((a) => a.id === agentId);
     if (!found) return;
@@ -396,10 +657,10 @@ export class FrontendAppController {
     }));
   }
 
-  // 4. CONVERSATION MANAGEMENT
+  // 6. CONVERSATION MANAGEMENT
   public newChat(): void {
-    const newId = `conv-${Date.now()}`;
-    const newConv: ConversationRecord = {
+    const newId = `conv-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const newConv: FrontendConversationMeta = {
       id: newId,
       title: "New Conversation",
       agentId: this.state.selectedAgentId,
@@ -418,25 +679,33 @@ export class FrontendAppController {
       this.abortController = null;
     }
 
-    this.updateState((s) => ({
-      ...s,
-      conversations: [newConv, ...s.conversations],
-      activeConversationId: newId,
-      activeRunId: "",
-      attachedRunId: "",
-      isStreaming: false,
-      streamCursorSeq: "0",
-      snapshot: emptyRunSnapshot(),
-      events: [],
-      turns: [],
-      activities: [],
-      approvalState: emptyApprovalState(),
-      evidenceGrid: emptyEvidenceGrid(),
-      traceGraph: emptyTraceGraph(),
-      pendingApproval: undefined,
-      lastFailure: null,
-      statusMessage: "New chat started",
-    }));
+    this.updateState((s) => {
+      const conversations = [newConv, ...s.conversations];
+      this.persistence.saveConversations(conversations);
+      return {
+        ...s,
+        conversations,
+        activeConversationId: newId,
+        activeRunId: "",
+        attachedRunId: "",
+        isStreaming: false,
+        streamCursorSeq: "0",
+        snapshot: emptyRunSnapshot(),
+        events: [],
+        turns: [],
+        activities: [],
+        approvalState: emptyApprovalState(),
+        evidenceGrid: emptyEvidenceGrid(),
+        traceGraph: emptyTraceGraph(),
+        pendingApproval: undefined,
+        multiFileDiff: reduceMultiFileDiff([]),
+        verificationSummaries: [],
+        researchSummary: reduceResearchSummary([]),
+        workflowExecution: reduceMultiAgentExecution([]),
+        lastFailure: null,
+        statusMessage: "New chat started",
+      };
+    });
   }
 
   public selectConversation(conversationId: string): void {
@@ -461,66 +730,48 @@ export class FrontendAppController {
     const clean = newTitle.trim();
     if (!clean) return;
 
-    this.updateState((s) => ({
-      ...s,
-      conversations: s.conversations.map((c) =>
+    this.updateState((s) => {
+      const conversations = s.conversations.map((c) =>
         c.id === conversationId ? { ...c, title: clean, updatedAt: new Date().toISOString() } : c
-      ),
-    }));
+      );
+      this.persistence.saveConversations(conversations);
+      return {
+        ...s,
+        conversations,
+      };
+    });
   }
 
   public deleteConversation(conversationId: string): void {
     this.updateState((s) => {
       const remaining = s.conversations.filter((c) => c.id !== conversationId);
       const nextActive = remaining[0]?.id ?? `conv-${Date.now()}`;
-      const finalConversations = remaining.length > 0
-        ? remaining
-        : [
-            {
-              id: nextActive,
-              title: "New Conversation",
-              agentId: s.selectedAgentId,
-              workflowId: s.selectedWorkflowId,
-              workspacePath: s.currentWorkspace,
-              runIds: [],
-              activeRunId: "",
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              draft: "",
-              turnCount: 0,
-            },
-          ];
+      const finalConversations =
+        remaining.length > 0
+          ? remaining
+          : [
+              {
+                id: nextActive,
+                title: "New Conversation",
+                agentId: s.selectedAgentId,
+                workflowId: s.selectedWorkflowId,
+                workspacePath: s.currentWorkspace,
+                runIds: [],
+                activeRunId: "",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                draft: "",
+                turnCount: 0,
+              },
+            ];
 
+      this.persistence.saveConversations(finalConversations);
       return {
         ...s,
         conversations: finalConversations,
         activeConversationId: s.activeConversationId === conversationId ? nextActive : s.activeConversationId,
       };
     });
-  }
-
-  public restoreConversationFromRun(runId: string, title?: string): void {
-    const newId = `conv-run-${runId}`;
-    const newConv: ConversationRecord = {
-      id: newId,
-      title: title ?? `Run ${runId.slice(0, 8)}`,
-      agentId: this.state.selectedAgentId,
-      workspacePath: this.state.currentWorkspace,
-      runIds: [runId],
-      activeRunId: runId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      draft: "",
-      turnCount: 0,
-    };
-
-    this.updateState((s) => ({
-      ...s,
-      conversations: [newConv, ...s.conversations.filter((c) => c.id !== newId)],
-      activeConversationId: newId,
-    }));
-
-    this.attachRun(runId);
   }
 
   public getGroupedConversations(): ConversationGroup[] {
@@ -533,24 +784,19 @@ export class FrontendAppController {
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;
 
-    const today: ConversationRecord[] = [];
-    const yesterday: ConversationRecord[] = [];
-    const last7Days: ConversationRecord[] = [];
-    const older: ConversationRecord[] = [];
+    const today: FrontendConversationMeta[] = [];
+    const yesterday: FrontendConversationMeta[] = [];
+    const last7Days: FrontendConversationMeta[] = [];
+    const older: FrontendConversationMeta[] = [];
 
     for (const c of filtered) {
       const updated = new Date(c.updatedAt).getTime();
       const diffDays = Math.floor((now - updated) / oneDay);
 
-      if (diffDays < 1) {
-        today.push(c);
-      } else if (diffDays < 2) {
-        yesterday.push(c);
-      } else if (diffDays < 7) {
-        last7Days.push(c);
-      } else {
-        older.push(c);
-      }
+      if (diffDays < 1) today.push(c);
+      else if (diffDays < 2) yesterday.push(c);
+      else if (diffDays < 7) last7Days.push(c);
+      else older.push(c);
     }
 
     const groups: ConversationGroup[] = [];
@@ -562,7 +808,7 @@ export class FrontendAppController {
     return groups;
   }
 
-  // 5. RUN LIFECYCLE & INGESTION
+  // 7. RUN LIFECYCLE & INGESTION
   public async refreshRuns(): Promise<void> {
     if (!this.client) return;
 
@@ -577,19 +823,22 @@ export class FrontendAppController {
 
   public ingestEnvelope(envelope: EventEnvelope): void {
     this.updateState((prev) => {
-      const nextEvents = [...prev.events, envelope];
+      const nextEvents = reconcileOfflineStream(prev.events, [envelope]);
       const nextSnapshot = reduceRunSnapshot(prev.snapshot, envelope);
       const nextTurns = toConversationTurns(nextEvents);
       const nextActivities = [...prev.activities, classifyActivityEnvelope(envelope)];
       const nextApprovalState = reduceApprovalState(prev.approvalState, envelope);
       const nextEvidence = reduceEvidence(prev.evidenceGrid, envelope);
       const nextTraceGraph = reduceTraceGraph(prev.traceGraph, envelope);
+      const nextDiff = reduceMultiFileDiff(nextEvents);
+      const nextVerifications = reduceVerificationSummaries(nextEvents);
+      const nextResearch = reduceResearchSummary(nextEvents);
+      const nextWorkflow = reduceMultiAgentExecution(nextEvents, prev.selectedWorkflowId);
 
       const pendingApproval = nextSnapshot.pendingApproval;
       const runId = envelope.runId ?? prev.activeRunId;
       const seq = envelope.seq ?? prev.streamCursorSeq;
 
-      // Update conversation metadata
       const updatedConversations = prev.conversations.map((c) => {
         if (c.id === prev.activeConversationId) {
           const firstGoal = nextTurns.find((t) => t.speaker === "user")?.text;
@@ -606,6 +855,8 @@ export class FrontendAppController {
         return c;
       });
 
+      this.persistence.saveConversations(updatedConversations);
+
       return {
         ...prev,
         events: nextEvents,
@@ -615,6 +866,10 @@ export class FrontendAppController {
         approvalState: nextApprovalState,
         evidenceGrid: nextEvidence,
         traceGraph: nextTraceGraph,
+        multiFileDiff: nextDiff,
+        verificationSummaries: nextVerifications,
+        researchSummary: nextResearch,
+        workflowExecution: nextWorkflow,
         pendingApproval,
         activeRunId: runId,
         streamCursorSeq: seq,
@@ -638,11 +893,13 @@ export class FrontendAppController {
       lastFailure: null,
     }));
 
-    const agent = s.availableAgents.find((a) => a.id === s.selectedAgentId);
+    const activeProvider = s.providers.find((p) => p.id === s.selectedProviderId) ?? s.providers.find((p) => p.isDefault);
+    const model = activeProvider?.selectedModel ?? "openrouter/free";
+
     const req: StartRunRequest = {
       repo: s.currentWorkspace,
       prompt,
-      model: agent?.modelSummary.split("/")[0] ?? "openrouter/free",
+      model,
       profileId: s.selectedAgentId,
       ...options,
     };
@@ -667,9 +924,16 @@ export class FrontendAppController {
       statusMessage: `Attached to run ${runRef.runId}`,
     }));
 
+    // Clear draft for this conversation
+    this.setConversationDraft("");
+
     // Begin streaming
     this.attachRun(runRef.runId);
     return runRef;
+  }
+
+  public async submitFollowUp(prompt: string): Promise<RunRef | null> {
+    return this.startRun(prompt);
   }
 
   public async attachRun(runId: string): Promise<void> {
@@ -737,6 +1001,10 @@ export class FrontendAppController {
       evidenceGrid: emptyEvidenceGrid(),
       traceGraph: emptyTraceGraph(),
       pendingApproval: undefined,
+      multiFileDiff: reduceMultiFileDiff([]),
+      verificationSummaries: [],
+      researchSummary: reduceResearchSummary([]),
+      workflowExecution: reduceMultiAgentExecution([]),
     }));
 
     this.attachRun(runId);
@@ -795,7 +1063,7 @@ export class FrontendAppController {
     }
   }
 
-  // 6. APPROVAL RESOLUTION
+  // 8. APPROVAL RESOLUTION
   public async resolveApproval(
     approvalId: string,
     decision: "approve" | "reject" | ApprovalDecision
@@ -831,19 +1099,25 @@ export class FrontendAppController {
     }
   }
 
-  // 7. SETTINGS & DRAFTS
+  // 9. SETTINGS & DRAFTS
   public updateSettings(partial: Partial<FrontendSettings>): void {
-    this.updateState((s) => ({
-      ...s,
-      settings: mergeSettings(s.settings, partial),
-    }));
+    this.updateState((s) => {
+      const settings = mergeSettings(s.settings, partial);
+      this.persistence.saveSettings(settings);
+      return {
+        ...s,
+        settings,
+      };
+    });
   }
 
   public setConversationDraft(draft: string): void {
+    const activeId = this.state.activeConversationId;
+    this.persistence.saveDraft(activeId, draft);
     this.updateState((s) => ({
       ...s,
       conversations: s.conversations.map((c) =>
-        c.id === s.activeConversationId ? { ...c, draft } : c
+        c.id === activeId ? { ...c, draft } : c
       ),
     }));
   }

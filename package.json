@@ -40,5 +40,9 @@
   "devDependencies": {
     "@ast-grep/cli": "^0.45.2",
     "markdownlint-cli2": "^0.23.2"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.52.0",
+    "ink": "^5.1.0"
   }
 }

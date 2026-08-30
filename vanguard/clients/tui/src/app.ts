@@ -12,6 +12,7 @@ import { renderConnectionBanner } from "./components/connection-banner.js";
 import { renderCommandPalette } from "./components/command-palette.js";
 import { renderHelpOverlay } from "./components/help-overlay.js";
 import { renderDiffViewer } from "./components/diff-viewer.js";
+import { renderSelectModal } from "./components/select-modal.js";
 import type { RuntimeClient } from "@aether/client";
 
 export type TuiAppOptions = {
@@ -136,6 +137,31 @@ export class TuiApplication {
       renderHelpOverlay(this.screen, this.theme);
     } else if (state.activeModal === "diff-viewer") {
       renderDiffViewer(this.screen, state.diffViewerContent, 0, this.theme);
+    } else if (state.activeModal === "select-agent") {
+      renderSelectModal(
+        this.screen,
+        "Agent",
+        state.availableAgents.map((a) => ({ id: a.id, name: a.name, description: a.description })),
+        this.keyboard.getSelectModalIndex(),
+        this.theme
+      );
+    } else if (state.activeModal === "select-workflow") {
+      renderSelectModal(
+        this.screen,
+        "Workflow",
+        state.availableWorkflows.map((w) => ({ id: w.id, name: w.name, description: w.description })),
+        this.keyboard.getSelectModalIndex(),
+        this.theme
+      );
+    } else if (state.activeModal === "history") {
+      const convs = this.store.controller.getState().conversations;
+      renderSelectModal(
+        this.screen,
+        "Conversation History",
+        convs.map((c: any) => ({ id: c.id.slice(0, 8), name: c.title, description: `${c.turnCount} turns • ${c.workspacePath}` })),
+        this.keyboard.getSelectModalIndex(),
+        this.theme
+      );
     }
 
     this.screen.render();

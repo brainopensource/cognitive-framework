@@ -6,7 +6,7 @@ canonical_for:
   - aether-lab-product-requirements
 status: proposed
 owner: product-architecture
-version: "0.1.0"
+version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_LAB.md
 subordinate_to:
@@ -34,10 +34,10 @@ The purpose of Lab is strictly bounded: answer difficult engineering questions a
 
 | Dimension | AS_BUILT (Repository Evidence) | TARGET (Electroweak Baseline) | Strategic Gap & Action |
 |---|---|---|---|
-| **View Architecture** | 22 disparate exploratory views in `vanguard/clients/studio/src/ui/` with speculative features. | Core inspection workbenches built with **SolidJS** and lazy-loaded on demand. | Consolidate views down to a focused core of precision inspection workbenches. |
+| **View Architecture** | 22 disparate exploratory views in `vanguard/clients/studio/src/ui/` with speculative features. | Focused core inspection workbenches built with **SolidJS** and lazy-loaded on demand. | Consolidate views down to a focused core of precision inspection workbenches. |
 | **State Infrastructure** | Ad-hoc store in `vanguard/clients/studio/src/store/` maintaining custom state copies. | 100% reuse of `@aether/client` and `@aether/projections` with zero duplicate reducers. | Delete redundant UI state models; bind views directly to shared projection signals. |
-| **Graph Rendering** | Experimental React Flow and manual DOM layout in `LineageGraphView.tsx`. | Lightweight SVG/Canvas DAG renderer for human-scale traces, lazy-loaded on demand. | Implement zero-dependency SVG DAG renderer with layout computed in Web Workers. |
-| **Analytical Querying** | Speculative DuckDB-Wasm plans without bounded memory controls. | Standard cursor-paginated SQLite event streaming; optional client-side export for analytical tools. | Focus initial Lab strictly on live ledger streaming and historical replay. |
+| **Graph Rendering** | Experimental React Flow and manual DOM layout in `LineageGraphView.tsx`. | Lightweight DAG visualization for human-scale traces, lazy-loaded on demand. | Adopt zero-overhead trace visualization that bounds DOM node count regardless of graph depth. |
+| **Analytical Querying** | Speculative DuckDB-Wasm plans without bounded memory controls. | Cursor-resumable event streaming through the public `RuntimeService` gateway, backed by the canonical ledger. | Focus initial Lab strictly on live ledger streaming and historical replay via standard client SDK. |
 
 ---
 
@@ -45,7 +45,7 @@ The purpose of Lab is strictly bounded: answer difficult engineering questions a
 
 - **Kernel & Agency Subsystem Engineers**:
   - Trace execution lineage and verify capability grant attenuation across agent turns.
-  - Inspect context compaction triggers and token reduction ratios.
+  - Inspect context compaction triggers, token reduction ratios, and assembled prompt layers.
   - Audit budget lease reservations, commits, and releases.
 - **Evaluation & Benchmark Researchers**:
   - Inspect recorded execution trajectories and verify signed exterior evaluator verdicts.
@@ -86,7 +86,7 @@ The purpose of Lab is strictly bounded: answer difficult engineering questions a
 2. **Virtualized Event Ledger (`/events`)**: High-throughput table rendering raw `EventEnvelope` streams with instant payload inspectors and filter presets (errors, approvals, effects, budget).
 3. **Causal Trace Explorer (`/trace`)**: Lightweight DAG rendering causal relationships linking Goals -> Model Proposals -> Effects -> Artifacts.
 4. **Artifact & Evidence Inspector (`/artifacts`)**: Content-addressed blob preview, hash verification, and evidence claim validation.
-5. **Context Layer Inspector (`/context`)**: Breakdown of active token contributions across context layers (System, Memory, Tools, History, Retrieved Spans) and compaction diffs.
+5. **Context Layer Inspector (`/context`)**: Breakdown of active token contributions across context layers (System, Memory, Tools, History, Retrieved Spans) and compaction diffs derived strictly from committed event facts.
 6. **Subsystem & Capability Inspector (`/system`)**: Displays runtime health, active capability matrix (`/api/v1/capabilities`), and environment profile status.
 
 ### 4.2 Candidate Workbenches (Future Extensions)
@@ -96,28 +96,39 @@ The purpose of Lab is strictly bounded: answer difficult engineering questions a
 
 ---
 
-## 5. Technology Stack & Extreme Lightness
+## 5. Technology Stack & Lightweight Architecture
 
 - **Frontend Core**: SolidJS + TypeScript + Vite + Bun.
 - **Zero Heavy Dependencies**:
   - NO heavy external charting libraries by default; simple SVG sparklines and bar graphs.
   - NO complex external state managers; uses pure SolidJS signals connected to `@aether/projections`.
   - Lazy loading for all workbench modules (only the active workbench is loaded into memory).
+- **Scalable Inspection Requirement**:
+  - Inspection of 100k-event histories MUST remain responsive without requiring the entire event dataset or full trace graph to be mounted simultaneously in browser DOM memory.
 
 ---
 
-## 6. Provisional Performance Targets
+## 6. Accessibility Requirements
 
-The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+- **Standard Compliance**: Target WCAG 2.2 Level AA compliance.
+- **Keyboard Navigation**: Full keyboard operability across workbenches, event tables, and inspector drawers.
+- **Screen Reader Support**: Accessible table structures with explicit headers, ARIA labels for payload inspectors, and semantic section headings.
+- **Visual Ergonomics**: Support high-contrast dark/light modes; never rely on color alone for failure states; support reduced-motion settings.
+
+---
+
+## 7. Provisional Performance Targets
+
+The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks on reference hardware:
 
 - **Initial Bundle Size**: Target $<300\text{ KB}$ minified and compressed.
 - **Cold Boot to Interactive**: Target $<600\text{ ms}$ in standard web browsers on reference hardware.
-- **Virtual Table Performance**: Target smooth 60 fps scrolling over 100,000 events using DOM row virtualization ($<150$ DOM nodes rendered simultaneously).
+- **Virtual Table Performance**: Target smooth 60 fps scrolling over 100,000 events using DOM row virtualization.
 - **Memory Footprint**: Target tab heap memory $<100\text{ MB}$ for active debugging sessions.
 
 ---
 
-## 7. Non-Goals & Out-of-Scope Boundaries
+## 8. Non-Goals & Out-of-Scope Boundaries
 
 - **NON-GOAL 1**: Lab is NOT an IDE and MUST NOT contain code editors or terminal emulators.
 - **NON-GOAL 2**: Lab MUST NOT implement an alternative backend simulation loop.
@@ -125,9 +136,9 @@ The following values represent **provisional engineering budgets (TARGET thresho
 
 ---
 
-## 8. Candidate Future Documents & Ownership References
+## 9. Candidate Future Documents & Ownership References
 
 - **Candidate Architecture Owner**: `docs/architecture/frontend/lab-inspection-architecture.md`
 - **Candidate Reference Owner**: `docs/reference/frontend/lab-workbenches.md`
-- **Candidate Decisions Owner**: `docs/decisions/frontend/0111-lab-minimal-companion-scope.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/adr-candidate-lab-minimal-scope.md`
 - **Candidate Execution Owner**: `docs/execution/frontend/lab-backlog.md`

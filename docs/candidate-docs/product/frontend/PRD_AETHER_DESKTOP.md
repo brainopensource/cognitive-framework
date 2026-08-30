@@ -6,7 +6,7 @@ canonical_for:
   - aether-desktop-product-requirements
 status: proposed
 owner: product-architecture
-version: "0.1.0"
+version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_DESKTOP.md
 subordinate_to:
@@ -36,13 +36,25 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
 | **Packaging & Native Shell** | Browser-only prototype (`vanguard/clients/studio/`) served over custom Node server. | Native desktop application packaged with **Tauri 2** (WebKit on macOS/Linux, WebView2 on Windows). | Package frontend with Tauri 2; eliminate Node.js runtime dependency on user machines. |
 | **UI Framework & Footprint** | React 18 with custom CSS in Studio (runtime overhead not yet formally benchmarked). | **SolidJS** + **Vite** on **Bun**, utilizing fine-grained reactive primitives and semantic tokens. | Migrate UI components to SolidJS for targeted low memory usage and responsive rendering. |
 | **UX & Layout Model** | Sprawling dashboard with 22 disparate engineering views (`StudioApp.tsx`). | Minimalist conversation-first desktop layout with progressive disclosure cards and slide-out drawers. | Refactor into clean two-pane layout: conversation sidebar + active chat/evidence transcript. |
-| **Key & Secret Storage** | In-memory web signer with non-persistent session keys (`WebCryptoSigner`). | Native OS Keychain integration (macOS Keychain, Windows Credential Manager, Secret Service API). | Implement secure keychain storage via thin Tauri Rust bridge. |
+| **Key & Secret Storage** | In-memory web signer with non-persistent session keys (`WebCryptoSigner`). | Native OS Keychain integration (macOS Keychain, Windows Credential Manager, Secret Service API). | Implement secure keychain storage and restricted envelope validation via thin Tauri Rust bridge. |
 
 ---
 
-## 3. Technology Stack & Native Boundaries
+## 3. Technology Stack & Operating Modes
 
-### 3.1 Proposed Architectural Hierarchy
+### 3.1 Dual Operating Modes
+
+AETHER Desktop MUST support two distinct runtime connectivity profiles:
+
+1. **Managed Local Runtime Mode (Default Desktop Distribution)**:
+   - Desktop spawns and manages the lifecycle of a bundled, version-matched `RuntimeService` sidecar process.
+   - Enforces single-instance locks (`aether.lock`), monitors process liveness via periodic `/api/v1/health` probes, and triggers graceful shutdown (`SIGINT` + CAS settlement) when the application window closes.
+   - Rotates local sidecar log files under `~/.aether/logs/desktop/`.
+2. **External Runtime Mode (Power User & Remote Profile)**:
+   - Desktop connects to an independently running `RuntimeService` daemon over loopback AF_UNIX UDS or authenticated HTTP/SSE.
+   - Performs a capability and protocol handshake (`/api/v1/capabilities`) upon connection to ensure wire version compatibility.
+
+### 3.2 Proposed Architectural Hierarchy
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -52,7 +64,7 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
                                     │ Validated Native IPC
 ┌───────────────────────────────────▼────────────────────────────────────┐
 │                       THIN TAURI 2 RUST LAYER                          │
-│   Process Lifecycle │ Secure Keychain │ Native Windows │ Dialogs       │
+│   Process Lifecycle │ Secure Keychain │ Envelope Validator │ Dialogs   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ Loopback UDS / HTTP SSE
 ┌───────────────────────────────────▼────────────────────────────────────┐
@@ -60,18 +72,18 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 Native Boundary Requirements
+### 3.3 Native Boundary & Security Invariants
 
-- **Desktop IPC Boundary**: Desktop MUST communicate with native platform integrations through a versioned, validated native IPC boundary. *Note: Exact IPC message schemas and serialization formats belong to future frontend reference documentation (`docs/reference/frontend/tauri-ipc-contract.md`).*
+- **Desktop IPC Boundary**: Desktop MUST communicate with native platform integrations through a versioned, validated native IPC boundary.
 - **Approved Rust Responsibilities**:
-  - Managing the Python runtime sidecar lifecycle (spawn, health check, graceful shutdown).
-  - Interfacing with OS Keychains for storing Ed25519 signing keys.
-  - Native file system dialogs (folder picker for workspace selection).
-  - Native window framing, tray icon, and system notifications.
+  - Managing Python runtime sidecar process lifecycle and health probes.
+  - Interfacing with OS Keychains to hold Ed25519 signing keys.
+  - **Restricted Signing Envelope Validation**: Validating that signing requests adhere to the canonical approval schema (verifying action, digests, and expiration) before signing, preventing an untrusted WebView from acting as an arbitrary byte-signing oracle.
+  - Native file system dialogs (workspace directory selection), window framing, tray icons, and system notifications.
 - **Strictly Forbidden Rust Responsibilities**:
   - MUST NOT implement agent logic, turn execution, or prompt assembly.
   - MUST NOT maintain event projections, reducers, or conversation histories.
-  - MUST NOT parse domain contracts or execute business rules.
+  - MUST NOT parse AETHER execution/domain contracts (except the narrowly scoped, versioned approval-signing envelope required by the native security boundary) or execute business rules.
 
 ---
 
@@ -108,7 +120,7 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
 1. **Left Navigation Sidebar (Collapsible)**:
    - "New Chat" action button.
    - Historical conversation list grouped by date (Today, Yesterday, Last 7 Days, Older).
-   - Search bar for full-text query across conversations and artifacts.
+   - Search bar for full-text query across local conversation indexes.
    - Settings launcher.
 2. **Main Transcript Pane**:
    - Header with active Agent/Workflow selector and Workspace directory breadcrumb.
@@ -139,37 +151,50 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
 
 ### 5.3 Cryptographic Approval Modal
 
-When the agent attempts a governed effect (e.g. disk write, shell command):
+When the agent attempts a governed effect:
 
 1. A modal dialog interrupts the stream with a clear description of the requested effect.
-2. Displays the exact normalized diff or command line arguments.
-3. Provides an "Approve & Apply" button that cryptographically signs the challenge with the local Ed25519 key stored in the OS Keychain.
+2. Displays the exact normalized diff or command line arguments and challenge digest.
+3. Provides an "Approve & Apply" button that cryptographically signs the challenge with the local Ed25519 key via the native security bridge.
 4. Provides a "Reject" button allowing the user to provide corrective feedback directly to the agent.
 
 ---
 
-## 6. Provisional Performance Targets
+## 6. Accessibility Requirements
 
-The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
-
-- **Cold Startup Latency**: Provisional target of $<1.2\text{ s}$ from application icon click to interactive UI on reference hardware.
-- **Memory Footprint (Idle)**: Provisional target of $<60\text{ MB}$ RAM total across native and WebView processes.
-- **Memory Footprint (Active Streaming)**: Provisional target of $<120\text{ MB}$ RAM during high-speed token ingestion.
-- **Scrolling Performance**: Target 60 fps rendering during continuous scrolling over long conversations using DOM virtualization.
-- **Installer Package Size**: Target $<25\text{ MB}$ total download size across macOS (.dmg), Linux (.AppImage/.deb), and Windows (.msi).
+- **Standard Compliance**: Target WCAG 2.2 Level AA compliance.
+- **Full Keyboard Navigation**: Complete navigation of conversations, messages, diffs, and approval modals via keyboard with visible focus indicators.
+- **Screen Reader Support**: Semantic HTML landmark roles (`nav`, `main`, `region`), ARIA live regions for streaming token announcements, and accessible names on all icon buttons.
+- **Visual Ergonomics**: Support high-contrast dark/light themes; never convey critical status by color alone; honor OS `prefers-reduced-motion`.
 
 ---
 
-## 7. Security & Sandboxing Requirements
+## 7. Provisional Performance & Packaging Budgets
+
+Performance budgets are partitioned between the native application shell and the complete managed distribution:
+
+| Metric Dimension | Provisional Engineering Target | Scope / Context |
+|---|---|---|
+| **Cold Startup Latency (P95)** | $<1.2\text{ s}$ (Application Shell Ready) | Time from icon click to interactive UI on reference hardware. |
+| **Idle Memory (Application Shell)** | $<60\text{ MB}$ RAM | Combined Tauri native process + WebView memory. |
+| **Idle Memory (Managed Distribution)**| $<180\text{ MB}$ RAM | Total memory including bundled Python runtime sidecar. |
+| **Streaming Frame Rate** | Consistent 60 fps | Scrolling and rendering during high-speed token arrival. |
+| **Installer Size (Shell Only)** | $<25\text{ MB}$ download | Standalone client package connecting to external runtime. |
+| **Installer Size (Managed Bundle)** | $<150\text{ MB}$ download | Complete package including embedded Python runtime and wheels. |
+
+---
+
+## 8. Security & Sandboxing Architecture
 
 - **WebView Sandboxing**: WebViews MUST operate with strict CSP (`default-src 'self'`). Inline script execution is disabled.
-- **Zero Raw HTML Injection**: Markdown parser MUST sanitize arbitrary HTML tags to prevent XSS.
-- **External Link Mediation**: All hyperlinks MUST open in the default external operating system browser, never inside the application WebView.
+- **Sanitized Markdown Rendering**: Strip arbitrary HTML tags (`<script>`, `<iframe>`, remote `<img>`) to prevent XSS and pixel-tracking leaks.
+- **External Link Mediation**: All external hyperlinks MUST open in the default operating system browser, never inside the application WebView.
+- **Host & Origin Validation**: Loopback HTTP endpoints MUST enforce `Host` header allowlisting (`127.0.0.1`, `localhost`) to prevent DNS-rebinding attacks.
 - **Key Isolation**: Ed25519 private keys MUST be marked non-exportable in OS Keychains where supported.
 
 ---
 
-## 8. Non-Goals & Out-of-Scope Boundaries
+## 9. Non-Goals & Out-of-Scope Boundaries
 
 - **NON-GOAL 1**: Embedding a full terminal emulator or xterm.js instance inside Desktop.
 - **NON-GOAL 2**: Providing an integrated software development environment (IDE) with language servers and debuggers.
@@ -177,9 +202,9 @@ The following values represent **provisional engineering budgets (TARGET thresho
 
 ---
 
-## 9. Candidate Future Documents & Ownership References
+## 10. Candidate Future Documents & Ownership References
 
 - **Candidate Architecture Owner**: `docs/architecture/frontend/desktop-tauri-boundary.md`
 - **Candidate Reference Owner**: `docs/reference/frontend/tauri-ipc-contract.md`
-- **Candidate Decisions Owner**: `docs/decisions/frontend/0110-tauri2-rust-boundary.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/adr-candidate-tauri2-rust-boundary.md`
 - **Candidate Execution Owner**: `docs/execution/frontend/desktop-backlog.md`

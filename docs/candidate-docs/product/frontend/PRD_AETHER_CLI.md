@@ -6,7 +6,7 @@ canonical_for:
   - aether-cli-product-requirements
 status: proposed
 owner: product-architecture
-version: "0.1.0"
+version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_CLI.md
 subordinate_to:
@@ -35,7 +35,7 @@ The CLI operates purely as a command dispatcher and structured stream transmitte
 | **Runtime & Packaging** | Node.js + `tsx` runtime (`vanguard/clients/cli/package.json`), running interpreted TypeScript. | Standalone compiled native binary built with **Bun** (`bun build --compile`). | Migrate build pipeline to Bun to achieve low cold startup latency for automation. |
 | **Command Implementation** | Mixed legacy handlers in `vanguard/clients/cli/src/commands/legacy.tsx` with Ink dependencies. | Clean command handlers in `@aether/cli` relying purely on `@aether/client` SDK. | Remove all React/Ink dependencies from CLI command execution paths. |
 | **Streaming Output** | Basic console logging with partial JSON flags. | Strict dual-mode output: Human-readable ANSI summaries vs Line-delimited NDJSON streams (`--ndjson`). | Implement strict NDJSON event streaming to `stdout` with diagnostics on `stderr`. |
-| **Exit Code Protocol** | Ad-hoc exit codes (0 for success, 1 for error). | Formally specified exit code contract (0–6, 130) matching machine-verifiable failure classes. | Standardize exit codes across all commands and automated tests. |
+| **Exit Code Protocol** | Ad-hoc exit codes (0 for success, 1 for error). | Comprehensive exit code contract (0–6, 130) covering all 10 canonical RuntimeService error categories. | Standardize exit codes across all commands and automated tests. |
 
 ---
 
@@ -43,22 +43,24 @@ The CLI operates purely as a command dispatcher and structured stream transmitte
 
 - **CI/CD Engineers**: Embed autonomous agent runs into pull request evaluation workflows (e.g. `aether run --agent pr-reviewer --repo .`).
 - **DevOps & Automation Developers**: Write shell scripts that trigger agent runs, stream structured events into `jq` or observability sinks, and extract generated artifacts.
-- **Systems Developers**: Inspect daemon health (`aether doctor`), tail event ledgers (`aether event tail`), and manage agent manifests without launching graphical interfaces.
+- **Systems Developers**: Inspect daemon health (`aether doctor`), tail event ledgers (`aether event tail`), and validate agent manifests without launching graphical interfaces.
 
 ---
 
-## 4. Proposed Command Taxonomy & Grammar (Product Scope)
+## 4. Proposed Command Taxonomy & Contract Mapping (Product Scope)
+
+To maintain architectural integrity, all CLI commands are classified by backend contract availability:
 
 ```text
 aether [command] [subcommand] [flags]
 ```
 
-### 4.1 Execution & Run Management
+### 4.1 Execution & Run Management (`CURRENT` RuntimeService Commands)
 
 ```text
 aether run [options]
-  --agent <id>            Agent identifier or path to agent manifest
-  --workflow <id>         Workflow identifier or path to workflow manifest
+  --agent <id|path>       Agent identifier or path to agent manifest
+  --workflow <id|path>    Workflow identifier or path to workflow manifest
   --repo <path>           Target repository/workspace path (default: current directory)
   --prompt <string>       Initial user prompt/objective
   --profile <id>          Execution assurance profile (default: standard)
@@ -79,35 +81,30 @@ aether run resume <run-id> [--checkpoint <id>]
 aether run replay <fixture-path> [--speed <multiplier>]
 ```
 
-### 4.2 Agents & Workflows
+### 4.2 Agents & Workflows (`FRONTEND-LOCAL` Manifest Operations)
+
+In the initial v0.9 baseline, agent and workflow commands perform local filesystem manifest discovery and schema validation:
 
 ```text
-aether agent list [--json]
-aether agent inspect <agent-id> [--json]
-aether agent validate <manifest-path> [--json]
+aether agent list [--json]                      # Scans local workspace manifests
+aether agent inspect <agent-id> [--json]         # Reads and formats local manifest
+aether agent validate <manifest-path> [--json]   # Validates against schemas/v4/
 
-aether workflow list [--json]
-aether workflow inspect <workflow-id> [--json]
-aether workflow validate <manifest-path> [--json]
-aether workflow run <workflow-path> [--input <json-file>]
+aether workflow list [--json]                    # Scans local workspace workflows
+aether workflow inspect <workflow-id> [--json]   # Reads and formats local workflow
+aether workflow validate <manifest-path> [--json]# Validates against schemas/v4/
 ```
 
-### 4.3 Artifacts, Ledger & Governance
+### 4.3 Artifacts, Ledger & Governance (`CURRENT` & `BACKEND-GAP`)
 
 ```text
-aether artifact list [--run-id <id>] [--kind <kind>] [--json]
-aether artifact get <digest> [--output <file-path>]
-aether artifact explain <digest> [--json]
-
-aether event tail <run-id> [--after-seq <n>] [--ndjson]
-aether evidence verify <run-id> [--trust-root <path>]
-
-aether approve <approval-id> --decision approved|rejected [--key <path>]
-aether doctor [--json]
-aether daemon start|stop|status
+aether artifact explain <digest> [--json]        # CURRENT: Dispatches ExplainArtifact
+aether artifact get <digest> [--output <path>]   # BACKEND-GAP: Pending runtime blob endpoint
+aether event tail <run-id> [--after-seq <n>]     # CURRENT: Streams committed ledger events
+aether approve <approval-id> --decision ...      # CURRENT: Cryptographically resolves approval
+aether doctor [--json]                           # CURRENT: Queries /api/v1/capabilities & health
+aether daemon start|stop|status                  # FRONTEND-LOCAL: Local daemon process management
 ```
-
-*Note: The exact command-line options, argument parsing conventions, and formatting schemas belong to future reference documentation (`docs/reference/frontend/cli-commands.md`).*
 
 ---
 
@@ -154,18 +151,18 @@ When `--ndjson` is specified, each emitted `EventEnvelope` is written as a singl
 
 ## 6. AETHER CLI Exit Code Contract
 
-The CLI MUST adhere to a deterministic, structured exit code contract:
+The CLI MUST map all 10 canonical `RuntimeService` error categories into a deterministic exit code contract:
 
-| Code | Label | Trigger Condition |
-|---:|---|---|
-| `0` | `SUCCESS` | Run satisfied all objectives, verification passed, command completed normally. |
-| `1` | `EXECUTION_FAILED` | Agent completed execution but failed task assertions or tests. |
-| `2` | `INVALID_INPUT` | Command-line arguments failed schema validation or manifest was malformed. |
-| `3` | `APPROVAL_REQUIRED` | Non-interactive execution halted because governance approval was requested. |
-| `4` | `PERMISSION_DENIED` | Capability check failed, cryptographic signature invalid, or unauthenticated. |
-| `5` | `RESOURCE_EXHAUSTED` | Execution terminated due to budget exhaustion (tokens, cost, turns, or time). |
-| `6` | `DAEMON_UNAVAILABLE` | Could not establish connection to local AETHER RuntimeService UDS/HTTP socket. |
-| `130` | `INTERRUPTED` | Process received `SIGINT` (Ctrl+C) and completed graceful cancellation. |
+| Exit Code | Label | RuntimeService Error Mapping | Trigger Condition |
+|---:|---|---|---|
+| `0` | `SUCCESS` | `None` (Normal completion) | Task satisfied, verification passed, command completed normally. |
+| `1` | `EXECUTION_FAILED` | `conflict`, `internal` | Agent failed task assertions, CAS conflict, or internal runtime fault. |
+| `2` | `INVALID_INPUT` | `invalid_request`, `not_found`, `incompatible_version`, `frame_too_large` | Schema validation error, unknown resource, or wire version mismatch. |
+| `3` | `APPROVAL_REQUIRED` | `None` (State suspension) | Non-interactive execution halted because governance approval was requested. |
+| `4` | `PERMISSION_DENIED` | `unauthenticated`, `permission_denied` | Missing credentials, invalid cryptographic signature, or policy denial. |
+| `5` | `RESOURCE_EXHAUSTED` | `rate_limited` | Budget exhausted (tokens, cost, turn limits) or gateway rate-limited. |
+| `6` | `DAEMON_UNAVAILABLE` | `not_available` | Could not establish connection to local RuntimeService UDS/HTTP socket. |
+| `130` | `INTERRUPTED` | `None` (Signal handling) | Process received `SIGINT` (Ctrl+C) and completed graceful cancellation. |
 
 ---
 
@@ -178,10 +175,10 @@ The CLI MUST adhere to a deterministic, structured exit code contract:
 
 ## 8. Provisional Performance Targets
 
-The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks on reference hardware:
 
-- **Cold Startup Latency**: Provisional target of $<15\text{ ms}$ for binary invocation to version/help output under Bun on reference hardware.
-- **Memory Consumption**: Provisional target of Resident Set Size (RSS) $<35\text{ MB}$ during active NDJSON streaming.
+- **Cold Startup Latency (P95)**: Provisional target of $<15\text{ ms}$ for binary invocation to version/help output under Bun.
+- **Memory Consumption (P95 RSS)**: Provisional target of Resident Set Size (RSS) $<35\text{ MB}$ during active NDJSON streaming.
 - **Zero VDOM / React Footprint**: The CLI binary MUST contain zero React, VDOM, or UI framework dependencies.
 
 ---
@@ -198,5 +195,5 @@ The following values represent **provisional engineering budgets (TARGET thresho
 
 - **Candidate Architecture Owner**: `docs/architecture/frontend/cli-architecture.md`
 - **Candidate Reference Owner**: `docs/reference/frontend/cli-commands.md`
-- **Candidate Decisions Owner**: `docs/decisions/frontend/0108-cli-headless-posix-standard.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/adr-candidate-cli-exit-contract.md`
 - **Candidate Execution Owner**: `docs/execution/frontend/cli-backlog.md`

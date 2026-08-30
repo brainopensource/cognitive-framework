@@ -6,7 +6,7 @@ canonical_for:
   - aether-tui-product-requirements
 status: proposed
 owner: product-architecture
-version: "0.1.0"
+version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_TUI.md
 subordinate_to:
@@ -24,7 +24,7 @@ subordinate_to:
 
 > **The TUI is an ultra-fast, conversational cockpit: it delivers real-time token streaming, progressive activity disclosure, and in-terminal cryptographic approvals with fine-grained reactive terminal cell updates.**
 
-By combining **SolidJS** and **OpenTUI**, the TUI aims to avoid the overhead of full-tree virtual DOM reconciliation over terminal buffers, targeting high responsiveness during high-frequency token streams.
+By combining **SolidJS** and **OpenTUI**, the TUI targets high responsiveness during high-frequency token streams without incurring full-tree virtual DOM reconciliation overhead.
 
 ---
 
@@ -32,7 +32,7 @@ By combining **SolidJS** and **OpenTUI**, the TUI aims to avoid the overhead of 
 
 | Dimension | AS_BUILT (Repository Evidence) | TARGET (Electroweak Baseline) | Strategic Gap & Action |
 |---|---|---|---|
-| **Terminal Rendering Engine** | React 18 + Ink (`ink@^5.1.0`), which relies on React VDOM reconciliation over terminal cells. | **OpenTUI** + **SolidJS** on **Bun**, rendering via fine-grained reactive terminal cell buffers. | Replace Ink with OpenTUI + SolidJS to address rendering latency hypotheses during streaming. |
+| **Terminal Rendering Engine** | React 18 + Ink (`ink@^5.1.0`), which relies on React VDOM reconciliation over terminal cells. | **OpenTUI** + **SolidJS** on **Bun**, rendering via fine-grained reactive terminal cell buffers. | Ratify OpenTUI conditionally; gate complete Ink deletion on a cross-terminal qualification benchmark spike. |
 | **Interactive Approvals** | Minimal prompt in `ApprovalInterceptor.tsx` with basic text diff rendering. | Dedicated Governance Deck with interactive unified diff browser and one-key Ed25519 signing. | Implement dedicated terminal diff viewer and secure cryptographic signing flows. |
 | **Progressive Disclosure** | Flat transcript window with limited folding and no collapsible tool activity cards. | Progressive disclosure hierarchy: compact folded summaries by default, expandable to full diffs/spans. | Build collapsible card primitives (`ui-tui`) for file changes, tool runs, and test outputs. |
 | **Keyboard Grammar** | Basic readline input with limited navigation shortcuts. | Comprehensive modal keybinding grammar (navigation, transcript scrolling, command palette). | Implement modal focus management and customizable keybinding maps. |
@@ -112,14 +112,13 @@ The TUI supports an intuitive modal navigation model:
 | `d` | Approval Deck | Open interactive side-by-side terminal diff viewer. |
 | `Esc` | Modal / Diff | Close diff viewer or command palette and return to Composer. |
 
-*Note: The complete, customizable keybinding map and terminal capability matrix belong to future reference documentation (`docs/reference/frontend/tui-keybindings.md`).*
-
 ---
 
-## 6. Real-Time Streaming & Progressive Disclosure
+## 6. Real-Time Streaming & Terminal Invariants
 
-### 6.1 Token Streaming Requirements
+### 6.1 Stream Presentation Invariants
 
+- **Zero Input Starvation**: User keystrokes in the message composer MUST take priority over incoming background stream rendering.
 - **Incremental Token Updates**: Text and code tokens MUST stream into the active turn card without triggering layout instability in historical messages.
 - **Activity Folding**: High-volume tool events (file reads, search scans, AST queries) MUST be grouped into single-line folded activity cards:
   - *Folded*: `▸ Read 8 files [0.14s]`
@@ -138,19 +137,37 @@ When the runtime requests approval for an effect:
 
 ---
 
-## 8. Provisional Performance Targets
+## 8. OpenTUI Qualification & Terminal Accessibility Requirements
 
-The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+### 8.1 Stack Qualification Spike Criteria
 
-- **First Frame Paint**: Provisional target of $<40\text{ ms}$ from binary launch to interactive shell on reference systems.
-- **Keystroke Input Latency**: Provisional target of $<12\text{ ms}$ from keypress to terminal cell buffer update.
-- **Streaming Frame Rate**: Target 60 fps rendering during continuous token streaming.
-- **Terminal Resize Latency**: Target layout reflow $<16\text{ ms}$ on `SIGWINCH`.
-- **Memory Footprint**: Target Resident Set Size (RSS) $<45\text{ MB}$ during active sessions.
+Before complete retirement of the legacy Ink driver, the OpenTUI + SolidJS integration MUST pass a qualification matrix covering:
+
+1. **Terminal Environments**: Linux terminal emulators, macOS Terminal/iTerm2, Windows Terminal, `tmux`, and remote SSH sessions.
+2. **Color Profiles**: 24-bit TrueColor, 256-color palette fallback, and 16-color ANSI mode.
+3. **Resilience**: Rapid terminal resize storms (`SIGWINCH`), wide CJK Unicode characters, complex combining characters, and multi-line pasted prompts.
+
+### 8.2 Terminal Accessibility Invariants
+
+- **Non-Color Status Cues**: All operational states MUST include explicit textual indicators (e.g. `[OK]`, `[FAIL]`, `[HOLD]`) alongside color formatting.
+- **Predictable Focus Model**: Visual inverse-color focus borders MUST unambiguously identify the active focus region (Composer vs Transcript vs Governance Deck).
+- **Reduced Motion**: Support a `--no-animation` flag that replaces streaming spinners with static progress indicators.
 
 ---
 
-## 9. Non-Goals & Out-of-Scope Boundaries
+## 9. Provisional Performance Targets
+
+The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+
+- **First Frame Paint (P95)**: Provisional target of $<40\text{ ms}$ from binary launch to interactive shell on reference hardware.
+- **Keystroke Input Latency (P95)**: Provisional target of $<12\text{ ms}$ from keypress to terminal cell buffer update.
+- **Stream Ingestion Latency (P95)**: Event commit to visible terminal cell update $<50\text{ ms}$.
+- **Terminal Resize Latency**: Target layout reflow $<16\text{ ms}$ on `SIGWINCH`.
+- **Memory Footprint (P95 RSS)**: Target Resident Set Size (RSS) $<45\text{ MB}$ during active sessions.
+
+---
+
+## 10. Non-Goals & Out-of-Scope Boundaries
 
 - **NON-GOAL 1**: Emulating full IDE features (file trees, LSP language servers, multi-window tiling).
 - **NON-GOAL 2**: Rendering rich bitmap graphics or web-standard HTML elements in the terminal.
@@ -158,9 +175,9 @@ The following values represent **provisional engineering budgets (TARGET thresho
 
 ---
 
-## 10. Candidate Future Documents & Ownership References
+## 11. Candidate Future Documents & Ownership References
 
 - **Candidate Architecture Owner**: `docs/architecture/frontend/tui-opentui-architecture.md`
 - **Candidate Reference Owner**: `docs/reference/frontend/tui-keybindings.md`
-- **Candidate Decisions Owner**: `docs/decisions/frontend/0109-opentui-solid-selection.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/adr-candidate-opentui-solid.md`
 - **Candidate Execution Owner**: `docs/execution/frontend/tui-backlog.md`

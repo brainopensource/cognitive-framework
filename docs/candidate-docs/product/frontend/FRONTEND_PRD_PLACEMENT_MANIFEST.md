@@ -7,7 +7,7 @@ canonical_for:
   - frontend-documentation-placement-map
 status: proposed
 owner: product-architecture
-version: "0.1.0"
+version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md
 subordinate_to:
@@ -30,13 +30,13 @@ PRDs establish user needs, functional requirements, provisional performance targ
 
 ## 2. Proposed PRD Placement & Canonical Ownership Map
 
-| Document Title | Canonical ID | Staging Path (Current) | Future Canonical Owner | Truth Plane | Candidate Architecture Owner | Candidate Reference Owner | Candidate ADR Owner | Candidate Execution Owner |
+| Document Title | Canonical ID | Staging Path (Current) | Future Canonical Owner | Truth Plane | Candidate Architecture Owner | Candidate Reference Owner | Candidate ADR Owner (Unassigned ID) | Candidate Execution Owner |
 |---|---|---|---|---|---|---|---|---|
-| **Frontend Platform PRD** | `product.frontend.platform` | `docs/candidate-docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | `docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | Product Requirements | `docs/architecture/frontend/platform-architecture.md` | `docs/reference/frontend/client-sdk.md` | `docs/decisions/frontend/0107-frontend-stack-ratification.md` | `docs/execution/frontend/roadmap.md` |
-| **AETHER CLI PRD** | `product.frontend.cli` | `docs/candidate-docs/product/frontend/PRD_AETHER_CLI.md` | `docs/product/frontend/PRD_AETHER_CLI.md` | Product Requirements | `docs/architecture/frontend/cli-architecture.md` | `docs/reference/frontend/cli-commands.md` | `docs/decisions/frontend/0108-cli-headless-posix-standard.md` | `docs/execution/frontend/cli-backlog.md` |
-| **AETHER TUI PRD** | `product.frontend.tui` | `docs/candidate-docs/product/frontend/PRD_AETHER_TUI.md` | `docs/product/frontend/PRD_AETHER_TUI.md` | Product Requirements | `docs/architecture/frontend/tui-opentui-architecture.md` | `docs/reference/frontend/tui-keybindings.md` | `docs/decisions/frontend/0109-opentui-solid-selection.md` | `docs/execution/frontend/tui-backlog.md` |
-| **AETHER Desktop PRD** | `product.frontend.desktop` | `docs/candidate-docs/product/frontend/PRD_AETHER_DESKTOP.md` | `docs/product/frontend/PRD_AETHER_DESKTOP.md` | Product Requirements | `docs/architecture/frontend/desktop-tauri-boundary.md` | `docs/reference/frontend/tauri-ipc-contract.md` | `docs/decisions/frontend/0110-tauri2-rust-boundary.md` | `docs/execution/frontend/desktop-backlog.md` |
-| **AETHER Lab PRD** | `product.frontend.lab` | `docs/candidate-docs/product/frontend/PRD_AETHER_LAB.md` | `docs/product/frontend/PRD_AETHER_LAB.md` | Product Requirements | `docs/architecture/frontend/lab-inspection-architecture.md` | `docs/reference/frontend/lab-workbenches.md` | `docs/decisions/frontend/0111-lab-minimal-companion-scope.md` | `docs/execution/frontend/lab-backlog.md` |
+| **Frontend Platform PRD** | `product.frontend.platform` | `docs/candidate-docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | `docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | Product Requirements | `docs/architecture/frontend/platform-architecture.md` | `docs/reference/frontend/client-sdk.md` | `docs/decisions/frontend/adr-candidate-frontend-stack.md` | `docs/execution/frontend/roadmap.md` |
+| **AETHER CLI PRD** | `product.frontend.cli` | `docs/candidate-docs/product/frontend/PRD_AETHER_CLI.md` | `docs/product/frontend/PRD_AETHER_CLI.md` | Product Requirements | `docs/architecture/frontend/cli-architecture.md` | `docs/reference/frontend/cli-commands.md` | `docs/decisions/frontend/adr-candidate-cli-exit-contract.md` | `docs/execution/frontend/cli-backlog.md` |
+| **AETHER TUI PRD** | `product.frontend.tui` | `docs/candidate-docs/product/frontend/PRD_AETHER_TUI.md` | `docs/product/frontend/PRD_AETHER_TUI.md` | Product Requirements | `docs/architecture/frontend/tui-opentui-architecture.md` | `docs/reference/frontend/tui-keybindings.md` | `docs/decisions/frontend/adr-candidate-opentui-solid.md` | `docs/execution/frontend/tui-backlog.md` |
+| **AETHER Desktop PRD** | `product.frontend.desktop` | `docs/candidate-docs/product/frontend/PRD_AETHER_DESKTOP.md` | `docs/product/frontend/PRD_AETHER_DESKTOP.md` | Product Requirements | `docs/architecture/frontend/desktop-tauri-boundary.md` | `docs/reference/frontend/tauri-ipc-contract.md` | `docs/decisions/frontend/adr-candidate-tauri2-rust-boundary.md` | `docs/execution/frontend/desktop-backlog.md` |
+| **AETHER Lab PRD** | `product.frontend.lab` | `docs/candidate-docs/product/frontend/PRD_AETHER_LAB.md` | `docs/product/frontend/PRD_AETHER_LAB.md` | Product Requirements | `docs/architecture/frontend/lab-inspection-architecture.md` | `docs/reference/frontend/lab-workbenches.md` | `docs/decisions/frontend/adr-candidate-lab-minimal-scope.md` | `docs/execution/frontend/lab-backlog.md` |
 
 ---
 
@@ -58,12 +58,12 @@ Candidate Future Documentation Topics:
 │   ├── design-tokens.md                    # Design token dictionary, elevation levels & schemas
 │   └── tauri-ipc-contract.md               # IPC message definitions for Rust/WebView boundary
 │
-├── docs/decisions/frontend/
-│   ├── 0107-frontend-stack-ratification.md # ADR locking SolidJS, OpenTUI, Bun, and Tauri 2
-│   ├── 0108-cli-headless-posix-standard.md # ADR establishing CLI exit code and NDJSON contracts
-│   ├── 0109-opentui-solid-selection.md     # ADR approving replacement of React/Ink with OpenTUI+SolidJS
-│   ├── 0110-tauri2-rust-boundary.md        # ADR defining the non-domain boundary for Rust code
-│   └── 0111-lab-minimal-companion-scope.md # ADR bounding Lab scope to zero unique state infrastructure
+├── docs/decisions/frontend/ (Decision Status: Candidate / Unassigned ADR Numbers)
+│   ├── adr-candidate-frontend-stack.md     # Candidate ADR evaluating SolidJS, OpenTUI, Bun, and Tauri 2
+│   ├── adr-candidate-cli-exit-contract.md  # Candidate ADR establishing CLI exit code and NDJSON contracts
+│   ├── adr-candidate-opentui-solid.md      # Candidate ADR evaluating replacement of React/Ink with OpenTUI+SolidJS
+│   ├── adr-candidate-tauri2-rust-boundary.md # Candidate ADR defining the non-domain boundary for Rust code
+│   └── adr-candidate-lab-minimal-scope.md  # Candidate ADR bounding Lab scope to zero unique state infrastructure
 │
 └── docs/execution/frontend/
     ├── frontend-migration-roadmap.md       # Phased migration roadmap

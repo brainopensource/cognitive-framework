@@ -17,6 +17,7 @@ class TestAppServiceAndCli(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.workspace = Path(self.tmp_dir.name).resolve()
+        (self.workspace / "pyproject.toml").touch()
         self.state_dir = self.workspace / ".vanguard"
         self.state_dir.mkdir(parents=True, exist_ok=True)
         (self.state_dir / "blobs").mkdir(parents=True, exist_ok=True)
@@ -105,7 +106,7 @@ class TestAppServiceAndCli(unittest.TestCase):
                 "-w",
                 str(self.workspace),
                 "--profile",
-                "product",
+                "local",
                 "--model-port",
                 "fake",
                 "--run-id",

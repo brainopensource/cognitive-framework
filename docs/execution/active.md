@@ -107,3 +107,28 @@ seam at a time.
    executable; design and fixtures may be prepared independently.
 4. Keep delegation/concurrency optimization outside the v0.9.2 critical path until the
    single-agent verification loop has a measured baseline.
+
+### W-092-5 qualification disposition (exact subject)
+
+As of `HEAD 92486100e683fa1f441d9cfb8dc2823e4abd5de5` on
+`feat/beta-release_electroweak-v091`, W-092-5 is **BLOCKED**, not PASS. The
+working tree contains the contributor patches under review, so this disposition
+is bound to the exact tree captured by the integration owner rather than to a
+different contributor report.
+
+- Deterministic LAM: 27/27 rows completed, non-empirical only.
+- Focused gates: kernel 97/97; contracts 417/417; agency 126/126; packs 67/67;
+  adapters 154/154 (2 skips); benchmarks 29/29; tools 97/97.
+- Runtime: 641 tests produced 4 failures, 18 errors, and 7 skips in the
+  restricted environment. The 18 socket-related errors are environmental
+  `PermissionError` failures; a privileged targeted service/gateway run passed
+  17/17. The remaining dogfood failures are not release evidence.
+- Security: 1 failure in process-group timeout behavior. M-7 falsifiers remain
+  10 failures and are outside current v0.9.2 authorization.
+- `just check` and `just verify` could not run because `just` is unavailable.
+- Release qualification was not run because no real subject, evidence envelope,
+  and git receipt inputs exist; no placeholders were created.
+
+This records qualification state only. It does not close M-4–M-10, SWE-bench,
+or a release candidate, and it does not change any TARGET/PLANNED architecture
+label to AS_BUILT.

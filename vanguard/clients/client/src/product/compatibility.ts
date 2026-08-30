@@ -12,7 +12,7 @@ export type CompatibilityReport = {
   capabilities: string[];
 };
 
-export const CURRENT_FRONTEND_VERSION = "0.9.0b1";
+export const CURRENT_FRONTEND_VERSION = "0.9.1-rc1";
 export const EXPECTED_WIRE_PROTOCOL = "vg.4";
 
 export class CompatibilityNegotiator {

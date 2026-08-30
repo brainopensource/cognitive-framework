@@ -24,11 +24,11 @@ test("CompatibilityNegotiator: COMPATIBLE status on matching versions and protoc
   const status: DaemonStatus = {
     status: "running",
     socketPath: "/tmp/vanguard-runtime.sock",
-    version: "0.9.0b1",
+    version: "0.9.1-rc1",
     uptimeSeconds: 120,
   };
 
-  const report = CompatibilityNegotiator.evaluate(status, "0.9.0b1", "vg.4");
+  const report = CompatibilityNegotiator.evaluate(status, "0.9.1-rc1", "vg.4");
   assert.equal(report.status, "COMPATIBLE");
   assert.equal(report.reasons.length, 0);
 });
@@ -41,7 +41,7 @@ test("CompatibilityNegotiator: INCOMPATIBLE status on protocol or major version 
     uptimeSeconds: 120,
   };
 
-  const report = CompatibilityNegotiator.evaluate(status, "0.9.0b1", "vg.4");
+  const report = CompatibilityNegotiator.evaluate(status, "0.9.1-rc1", "vg.4");
   assert.equal(report.status, "INCOMPATIBLE");
   assert.ok(report.reasons.some((r) => r.includes("Major version mismatch")));
 });

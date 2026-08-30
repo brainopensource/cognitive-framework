@@ -28,7 +28,7 @@ from .service import (
 try:
     from vanguard import __version__
 except ImportError:
-    __version__ = "0.9.0b1"
+    __version__ = "0.9.1-rc1"
 
 
 def get_default_paths() -> tuple[Path, Path, Path, Path]:

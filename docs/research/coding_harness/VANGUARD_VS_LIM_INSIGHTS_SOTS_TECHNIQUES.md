@@ -38,20 +38,20 @@ Empirical validations on live benchmarks across **DeepSeek v4 Flash (`deepseek/d
    - 1.3 Why LIM Was Built as an Isolated Skunkworks Engine
    - 1.4 Formal Mathematical POMDP Problem Formulation
    - 1.5 Monotonic Capability Attenuation Lattice Proof
-2. [Empirical Benchmark Findings & Comprehensive Data Matrices](#2-empirical-benchmark-findings--comprehensive-data-matrices)
+2. [Empirical Benchmark Findings & Comprehensive Data Matrices](#2-empirical-benchmark-findings-comprehensive-data-matrices)
    - 2.1 Master Empirical Benchmark Table
    - 2.2 DeepSeek v4 Flash (`deepseek-v4-flash-0731`) Performance Analysis
    - 2.3 Upstream Free Models (`minimax-m3:free`, `openrouter/free`) Comparative Analysis
    - 2.4 Ablation Analysis: Baseline ReAct vs. Vanguard Core vs. SOTA Full
    - 2.5 Detailed KPI Metrics: Latency, Cost, Token Curves, and Diff Footprints
-3. [Cognitive Mechanics & SOTA Feature Deep-Dive](#3-cognitive-mechanics--sota-feature-deep-dive)
+3. [Cognitive Mechanics & SOTA Feature Deep-Dive](#3-cognitive-mechanics-sota-feature-deep-dive)
    - 3.1 Feature 1: Prefix-Stable L1–L5 Context Compilation & Cache Alignment
    - 3.2 Feature 2: Pluggable Dialogue Compaction & Algebraic Dead-Ends
    - 3.3 Feature 3: In-Process Surgical AST Pre-Flight Syntax Gates
    - 3.4 Feature 4: Gated Dual-Loop Reproducer State Machine
    - 3.5 Feature 5: Speculative Git Checkpoint Branching & MCTS Rollbacks
    - 3.6 Feature 6: Paged Head/Tail Output Truncation Mechanics
-4. [Challenge Deep-Dives & Empirical Trajectory Case Studies](#4-challenge-deep-dives--empirical-trajectory-case-studies)
+4. [Challenge Deep-Dives & Empirical Trajectory Case Studies](#4-challenge-deep-dives-empirical-trajectory-case-studies)
    - 4.1 Case Study 1: `tier1_lru_cache` (Thread-Safe LRU with Monotonic TTL)
    - 4.2 Case Study 2: `tier5_datalog_engine` (Stratified Deductive Inference Engine)
    - 4.3 Detailed Turn-by-Turn Trajectory Logs and Receipts
@@ -73,13 +73,13 @@ Empirical validations on live benchmarks across **DeepSeek v4 Flash (`deepseek/d
    - 7.2 Porting Gated Reproducer Protocol into `vg-code-swe-pro`
    - 7.3 Preserving the $\le 1438$ LOC TCB Budget & Boundary Invariants
    - 7.4 Verification and Linter Matrix
-8. [Comprehensive Appendices: Mathematical Proofs & Trace Schemas](#8-comprehensive-appendices-mathematical-proofs--trace-schemas)
+8. [Comprehensive Appendices: Mathematical Proofs & Trace Schemas](#8-comprehensive-appendices-mathematical-proofs-trace-schemas)
    - 8.1 Appendix A: Bellman Optimality Derivations in Autonomous Program Repair
    - 8.2 Appendix B: JCS Canonical Receipts & HMAC Provenance Signatures
    - 8.3 Appendix C: Full Raw Output Comparison Traces Across Benchmark Cells
    - 8.4 Appendix D: Tree-Sitter S-Expression Query Engine Specification
    - 8.5 Appendix E: Linter & Invariant Assurance Commands
-9. [Academic Bibliography & References](#9-academic-bibliography--references)
+9. [Academic Bibliography & References](#9-academic-bibliography-references)
 
 ---
 

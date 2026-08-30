@@ -17,8 +17,8 @@
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "research", "target_path": "docs/research", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "reports", "target_path": "docs/reports", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "README", "target_path": "test/README.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "README", "target_path": "test/README.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "0095-vision-as-law-zero-and-roadmap-reconciliation", "target_path": "docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "01_law", "target_path": "docs/01_law", "relationship_type": "markdown_link"}

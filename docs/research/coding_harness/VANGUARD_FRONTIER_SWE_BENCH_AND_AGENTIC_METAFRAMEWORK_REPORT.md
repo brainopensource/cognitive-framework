@@ -44,7 +44,7 @@ We provide:
    - 1.2 Mathematical Foundations of Fault Localization: SBFL vs. Semantic LLM Ranking
    - 1.3 The Five Failure Modes of Naive ReAct Coding Agents
    - 1.4 Comparative Taxonomy of Frontier Coding Architectures
-2. [Vanguard Substrate Architecture & Core Invariants](#2-vanguard-substrate-architecture--core-invariants)
+2. [Vanguard Substrate Architecture & Core Invariants](#2-vanguard-substrate-architecture-core-invariants)
    - 2.1 Hexagonal Boundary Lattice
    - 2.2 Trusted Computing Base (TCB) & 13-Stage Dispatch Pipeline
    - 2.3 Mathematical Monotonic Capability Attenuation & Budget Conservation
@@ -61,12 +61,12 @@ We provide:
    - 4.2 Prototyping `vg-code-explain` (The Pedagogical Code Comprehension Tutor)
    - 4.3 Manifest Composition, Policy Freezing, and Engine Instantiation
    - 4.4 Declarative Tool Binding Schema Configurations
-5. [The Isolated Benchmark Laboratory & Execution Guide](#5-the-isolated-benchmark-laboratory--execution-guide)
+5. [The Isolated Benchmark Laboratory & Execution Guide](#5-the-isolated-benchmark-laboratory-execution-guide)
    - 5.1 The 20 SWE-Bench Pro Multi-Tier Challenges ($T_1 \dots T_7$)
    - 5.2 Deep Breakdown of Tier 4 to Tier 7 Complex Challenges
    - 5.3 Greenfield Fullstack & Exterior Evaluator Suites (UID `10001`/`10002`)
    - 5.4 Benchmarking Command Line Reference & Statistical McNemar Evaluation
-6. [Deconstructing Claude Code CLI & Frontier SOTA](#6-deconstructing-claude-code-cli--frontier-sota)
+6. [Deconstructing Claude Code CLI & Frontier SOTA](#6-deconstructing-claude-code-cli-frontier-sota)
    - 6.1 Tool Ergonomics & Fuzzy Context Search-and-Replace
    - 6.2 Output Paging & Token-Aware Truncation Mechanics
    - 6.3 The "Reproduce-First" Fail-to-Pass Imperative
@@ -82,7 +82,7 @@ We provide:
 8. [The Vanguard Meta-Framework Roadmap](#8-the-vanguard-meta-framework-roadmap)
    - 8.1 Architectural Roadmap (Phases 1 to 4)
    - 8.2 Testing, Invariant Verification, and Linter Matrix
-9. [Academic References & Bibliography](#9-academic-references--bibliography)
+9. [Academic References & Bibliography](#9-academic-references-bibliography)
 
 ---
 

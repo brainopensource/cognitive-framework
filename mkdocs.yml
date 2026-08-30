@@ -65,23 +65,40 @@ docs_dir: docs
 
 nav:
   - Home: README.md
-  - Overview:
+  - Law & Norms:
+      - Specification (SPEC): SPEC.md
+      - Decisions Index: decisions.md
+  - Architecture:
       - System Overview: architecture/overview.md
       - System Boundaries: architecture/boundaries.md
       - Data Flow: architecture/data-flow.md
-      - Decisions Index: decisions.md
-  - Architecture:
       - Workflows:
           - End-to-End Execution: architecture/workflows/end-to-end-execution.md
           - System Bootstrap: architecture/workflows/system-bootstrap.md
   - Backend:
-      - Delegation & Topology: backend/architecture/delegation-topology.md
+      - Architecture:
+          - Agency: backend/architecture/agency.md
+          - Application Interfaces: backend/architecture/application-interfaces.md
+          - Assurance & Evaluation: backend/architecture/assurance-evaluation.md
+          - Causal State: backend/architecture/causal-state.md
+          - Composition & Extensibility: backend/architecture/composition-extensibility.md
+          - Delegation & Topology: backend/architecture/delegation-topology.md
+          - Kernel: backend/architecture/kernel.md
+          - Memory & Learning: backend/architecture/memory-learning.md
+          - Runtime Execution: backend/architecture/runtime-execution.md
       - Workflows:
           - Request Execution: backend/architecture/workflows/request-execution.md
           - Agent Lifecycle: backend/architecture/workflows/agent-lifecycle.md
           - Event Lifecycle: backend/architecture/workflows/event-lifecycle.md
           - Delegation: backend/architecture/workflows/delegation.md
           - Recovery & Resume: backend/architecture/workflows/recovery-resume.md
+      - Guides:
+          - Getting Started: backend/guides/getting-started.md
+          - Compose an Agent: backend/guides/compose-an-agent.md
+          - Add Pack or Tool: backend/guides/add-pack-or-tool.md
+          - Add Adapter or Provider: backend/guides/add-adapter-or-provider.md
+          - Operate Runtime Service: backend/guides/operate-runtime-service.md
+          - Run and Resume: backend/guides/run-and-resume.md
       - Reference:
           - Schemas: backend/reference/schemas.md
           - Runtime Service: backend/reference/runtime-service.md
@@ -92,9 +109,49 @@ nav:
           - Manifests: backend/reference/manifests.md
           - Configuration: backend/reference/configuration.md
           - Artifacts & Memory: backend/reference/artifacts-memory.md
+  - Frontend:
+      - Overview: frontend/README.md
+  - Product PRDs:
+      - PRD Placement Manifest: product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md
+      - PRD CLI: product/frontend/PRD_AETHER_CLI.md
+      - PRD Desktop: product/frontend/PRD_AETHER_DESKTOP.md
+      - PRD Lab: product/frontend/PRD_AETHER_LAB.md
+      - PRD TUI: product/frontend/PRD_AETHER_TUI.md
+      - PRD Platform: product/frontend/PRD_FRONTEND_PLATFORM.md
   - Execution:
       - Active Execution: execution/active.md
       - Milestones: execution/milestones.md
   - Theory & Reports:
       - Theory: theory/agent-substrate.md
-      - Atlas Control Plane Report: atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT.md
+      - Project Status Summary: reports/reviews/AETHER_V090_PROJECT_STATUS_SUMMARY.md
+  - Research:
+      - AI Models: research/AI/openrouter_llm_models_suggested.md
+      - Coding Harness:
+          - Archon Gemini Prototype: research/coding_harness/ARCHON_gemini_prototype.md
+          - Dekas Claude Prototype: research/coding_harness/DEKAS_claude_prototype.md
+          - LLM Response Wrangler: research/coding_harness/LLM_RESPONSE_WRANGLER.md
+          - LLM Benchmarking: research/coding_harness/LLM_benchmarkings.md
+          - Research 2308B GM: research/coding_harness/RESEARCH_2308B_gm.md
+          - Harness Builder Framework: research/coding_harness/RESEARCH_Harness_Builder_Framework.md
+          - Meta Cognitive Engineering: research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING.md
+          - Meta Cognitive Briefing: research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing.md
+          - Meta Framework 2408: research/coding_harness/RESEARCH_META_FRAMEWORK_2408.md
+          - Theoretical Synthesis: research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS.md
+          - Deepseek Harness Algorithms: research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas.md
+          - Agentic Coding Builder Framework B: research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md
+          - Higgs 2308: research/coding_harness/RESEARCH_higgs_2308.md
+          - Metaframework 2508: research/coding_harness/RESEARCH_metaframework_2508_improved.md
+          - Frontier SWE Bench & Metaframework Report: research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT.md
+          - Vanguard vs LIM Insights: research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md
+          - Future Improvements SOTA Harness: research/coding_harness/future_improvements_sota_harness_2808.md
+          - Proposal GLM Harness Beta: research/coding_harness/proposal_glm_harness_BETA.md
+          - Proposal HY3 Improved: research/coding_harness/proposal_hy3_improved.md
+          - Agentic Runtime Systems Engineering: research/coding_harness/research_agentic_runtime_systems_engineering.md
+          - Harness Agentic Systems Engineering: research/coding_harness/research_harness_agentic_systems_engineering.md
+          - Suggested LIM Improvements: research/coding_harness/suggested_LIM_improvements.md
+          - Vanguard Body Detailed: research/coding_harness/vanguard_body_detailed.md
+      - Frontend Research:
+          - Frontend Masterplan: research/frontend/AETHER_FRONTEND_MASTERPLAN.md
+          - Frontend Prototype: research/frontend/frontend_prototype.md
+          - Frontend Prototype Beta Gem: research/frontend/frontend_prototype_beta_gem.md
+          - Integration Plan: research/frontend/integration_plan.md

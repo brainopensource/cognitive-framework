@@ -8,7 +8,6 @@
 {"canonical_id": "arch.system.overview", "canonical_owner_path": "docs/architecture/overview.md", "owner": "system-architecture"}
 {"canonical_id": "arch.workflow.end-to-end-execution", "canonical_owner_path": "docs/architecture/workflows/end-to-end-execution.md", "owner": "architecture-governance"}
 {"canonical_id": "arch.workflow.system-bootstrap", "canonical_owner_path": "docs/architecture/workflows/system-bootstrap.md", "owner": "architecture-governance"}
-{"canonical_id": "atlas.oss-evolution-report", "canonical_owner_path": "docs/atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT.md", "owner": "repository-governance"}
 {"canonical_id": "arch.agency.turns", "canonical_owner_path": "docs/backend/architecture/agency.md", "owner": "agency-turn-engine"}
 {"canonical_id": "arch.interfaces.clients", "canonical_owner_path": "docs/backend/architecture/application-interfaces.md", "owner": "application-interfaces"}
 {"canonical_id": "arch.assurance.evaluation", "canonical_owner_path": "docs/backend/architecture/assurance-evaluation.md", "owner": "assurance-evaluation"}

@@ -74,6 +74,9 @@ def build_rc() -> Path:
             # Copy dist/
             if (src / "dist").exists():
                 shutil.copytree(src / "dist", dest / "dist")
+            # Copy fixtures/
+            if (src / "fixtures").exists():
+                shutil.copytree(src / "fixtures", dest / "fixtures")
             # Copy HTML files if present
             for html in src.glob("*.html"):
                 shutil.copy2(html, dest / html.name)

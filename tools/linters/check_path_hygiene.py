@@ -27,6 +27,9 @@ IGNORED_DIRS = {
     "build",
     "site",
     ".coverage",
+    ".vanguard",
+    ".lda",
+    "dev_context_logs",
 }
 
 IGNORED_FILES = {

@@ -176,14 +176,16 @@ def fold_agent_view(
             attempts.append({
                 "eventId": event.event_id,
                 "operationId": payload.get("operationId") or event.event_id,
-                "verb": payload.get("verb") or payload.get("operatorId") or "unknown",
+                # Production `/2` events use `action`; older readable history
+                # used `verb` or `operatorId`.
+                "verb": payload.get("action") or payload.get("verb") or payload.get("operatorId") or "unknown",
                 "status": "proposed",
             })
         elif kind == "EffectStarted":
             attempts.append({
                 "eventId": event.event_id,
                 "operationId": payload.get("operationId") or payload.get("descriptorDigest") or event.event_id,
-                "verb": payload.get("verb") or "effect",
+                "verb": payload.get("action") or payload.get("verb") or "effect",
                 "status": "dispatched",
             })
         elif kind in _EFFECT_KINDS:
@@ -201,11 +203,11 @@ def fold_agent_view(
                 attempts.append({
                     "eventId": event.event_id,
                     "operationId": operation_id,
-                    "verb": payload.get("verb") or "effect",
+                    "verb": payload.get("action") or payload.get("verb") or "effect",
                     "status": status,
                 })
         elif kind in _BUDGET_KINDS:
-            for key, value in (payload.get("debits") or payload.get("dimensions") or {}).items():
+            for key, value in (payload.get("debits") or payload.get("settlement") or payload.get("dimensions") or {}).items():
                 if key in {"usd_micros", "millis", "tokens", "bytes"}:
                     budget[key] = budget.get(key, 0) + int(value)
         elif kind == "ChildSpawned":

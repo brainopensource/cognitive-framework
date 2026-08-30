@@ -1,6 +1,6 @@
 {
   "authority": "non-authorizing",
-  "framework_digest": "sha256:4e33178087e69ced81069af6ff469a76110c5e9054d7a42657a06f2487da9c2c",
+  "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
   "global_cost_usd": 0.5,
   "global_token_ceiling": 1000000,
   "manifest_ids": [
@@ -22,7 +22,7 @@
     "no empirical scores from cassette/fake runs"
   ],
   "planned_measurements": 27,
-  "preregistration_digest": "sha256:dac286c92976f5e5a5495d3f50533c2e269baeec3298eb18a4ce278c825a4f66",
+  "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
   "provider": "openrouter",
   "randomization": {
     "algorithm": "python-random-shuffle",
@@ -335,7 +335,7 @@
   "status": "proposed",
   "stop_tokens": 950000,
   "streaming": true,
-  "subject_digest": "sha256:3fa714a3bf34e37128f27f516d273eb8ef3c37275cfd6861224ec9949555eab9",
+  "subject_digest": "sha256:2bd333193a4096bdc6ffd1e51c27fbdee5ca3a06536ac9a61a3028dee0774b79",
   "temperature": 0,
   "timeout_seconds": 1800
 }

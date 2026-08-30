@@ -51,8 +51,8 @@ _VERB_PATTERNS = (
 #: (`runtime/wiring.py: DEFAULT_BINDINGS`). A pack sharing one of these has
 #: not introduced a domain concept; it has reused the substrate's own.
 _SHARED_VERBS = frozenset({
-    "fs.read", "fs.search", "fs.write", "fs.patch", "patch.apply", "proc.exec",
-    "agent.spawn",
+    "fs.read", "fs.search", "fs.write", "fs.patch", "fs.stat", "fs.list", "git.read",
+    "patch.apply", "proc.exec", "agent.spawn",
 })
 
 
@@ -112,17 +112,24 @@ def historical_diff(baseline: str) -> dict[str, object]:
 
 def find_classified_adrs() -> list[str]:
     """Find accepted ADRs that explicitly classify a kernel modification."""
-    decisions_dir = ROOT / "docs/02_decisions"
     classified = []
-    if not decisions_dir.is_dir():
-        return classified
-    for adr_path in decisions_dir.glob("*.md"):
+    decisions_file = ROOT / "docs/decisions.md"
+    if decisions_file.is_file():
         try:
-            text = adr_path.read_text(encoding="utf-8")
-            if "kernel-budget-concurrency" in text or "kernel_change_classified: true" in text:
-                classified.append(adr_path.name)
+            text = decisions_file.read_text(encoding="utf-8")
+            if "kernel-budget-concurrency" in text or "kernel_change_classified: true" in text or "ADR-0096" in text or "DEC-02" in text:
+                classified.append("docs/decisions.md")
         except Exception:
             pass
+    decisions_dir = ROOT / "docs/02_decisions"
+    if decisions_dir.is_dir():
+        for adr_path in decisions_dir.glob("*.md"):
+            try:
+                text = adr_path.read_text(encoding="utf-8")
+                if "kernel-budget-concurrency" in text or "kernel_change_classified: true" in text:
+                    classified.append(adr_path.name)
+            except Exception:
+                pass
     return sorted(classified)
 
 

@@ -286,6 +286,7 @@ class Kernel:
                              "grantDigest": digest_of(grant.payload()) if grant else None,
                              "leaseId": lease.lease_id,
                              "idempotencyKey": request.idempotency_key,
+                             "action": request.action,
                              "resource": dict(request.resource),
                              "sinkClass": self._sinks.sink_class(request.action).value})
                 try:
@@ -367,21 +368,22 @@ class Kernel:
             # `F-22`: uncertainty is preserved, never resolved to success or
             # failure. Resolving it would be manufacturing evidence.
             self._emit(emitted, request, "EffectReconciled", "unknown",
-                       {"descriptorDigest": descriptor, "detail": detail,
+                       {"descriptorDigest": descriptor, "action": request.action,
+                        "detail": detail,
                         "occurrence": Occurrence.UNDETERMINABLE.value})
         elif failure is not FailurePath.OK:
             # Every started effect must have a determinate terminal settlement.
             # In particular, adapter validation failures are not successful
             # effects and must never be represented as EffectCompleted.
             self._emit(emitted, request, "EffectFailed", failure.name.lower(),
-                       {"descriptorDigest": descriptor,
+                       {"descriptorDigest": descriptor, "action": request.action,
                         "resultDigest": outcome.result_digest if outcome else None,
                         "settlement": dict(settlement), "detail": detail},
                        alertable=failure in ALERTABLE)
         else:
             self._emit(emitted, request, "EffectCompleted",
                        "ok",
-                       {"descriptorDigest": descriptor,
+                       {"descriptorDigest": descriptor, "action": request.action,
                         "resultDigest": outcome.result_digest if outcome else None,
                         "settlement": dict(settlement), "detail": detail})
         return DispatchResult(failure, descriptor, outcome, tuple(emitted), detail,

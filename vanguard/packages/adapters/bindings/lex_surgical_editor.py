@@ -4,7 +4,24 @@ Provides 5-tier fallback patching: Exact -> Whitespace-Tolerant -> Fuzzy Anchor 
 
 from __future__ import annotations
 import re
+from dataclasses import dataclass
 from typing import Optional, Tuple
+
+from ...domain.canonicalisation.digest import digest_of
+
+
+@dataclass(frozen=True, slots=True)
+class PatchReceipt:
+    """Fail-closed identity for one fully applied surgical patch."""
+
+    preimage_digest: str
+    postimage_digest: str
+    strategy: str
+    hunks_applied: int = 1
+
+    @property
+    def success(self) -> bool:
+        return bool(self.preimage_digest and self.postimage_digest and self.hunks_applied > 0)
 
 
 class LexSurgicalEditor:
@@ -124,3 +141,21 @@ class LexSurgicalEditor:
             return True, res, "fuzzy_anchors"
 
         return False, source, "exhausted_all_strategies"
+
+    @classmethod
+    def apply_patch(
+        cls, source: str, target_chunk: str, replacement_chunk: str,
+    ) -> tuple[bool, str, PatchReceipt | None, str]:
+        """Apply one exact-preimage hunk and return a verifiable receipt.
+
+        The broad compatibility editor remains available for legacy callers;
+        this API is the coding-harness path and therefore does not permit
+        fuzzy or partial application.
+        """
+        if not target_chunk or source.count(target_chunk) != 1:
+            return False, source, None, "preimage_not_unique"
+        preimage = digest_of({"content": source})
+        updated = source.replace(target_chunk, replacement_chunk, 1)
+        postimage = digest_of({"content": updated})
+        receipt = PatchReceipt(preimage, postimage, "exact_match", 1)
+        return receipt.success, updated, receipt, "applied"

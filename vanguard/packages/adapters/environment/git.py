@@ -370,6 +370,13 @@ class GitEnvironment:
 
         if action in ("list", "glob"):
             pattern = req.pattern or req.args.get("pattern", "*")
+            max_results_val = req.args.get("max_results", 100)
+            try:
+                max_results = int(max_results_val)
+            except (ValueError, TypeError):
+                return Result.fail("invalid_request", "list/glob max_results must be an integer")
+            if max_results < 1 or max_results > 1000:
+                return Result.fail("invalid_request", "list/glob max_results must be between 1 and 1000")
             ls_proc = subprocess.run(
                 ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
                 cwd=self._working_dir,
@@ -386,12 +393,14 @@ class GitEnvironment:
                     for p in self._working_dir.rglob("*")
                     if p.is_file() and not any(part.startswith(".") for part in p.relative_to(self._working_dir).parts)
                 ]
-            matching = [f for f in sorted(set(all_files)) if fnmatch.fnmatch(f, pattern) or pattern in ("*", "")]
+            matching_all = [f for f in sorted(set(all_files)) if fnmatch.fnmatch(f, pattern) or pattern in ("*", "")]
+            matching = matching_all[:max_results]
             return Result.success(
                 Observation(
                     action=action,
                     files=tuple(matching),
-                    metadata={"total_files": len(matching)},
+                    metadata={"total_files": len(matching_all), "returned_files": len(matching),
+                              "max_results": max_results, "has_more": len(matching_all) > max_results},
                 )
             )
 

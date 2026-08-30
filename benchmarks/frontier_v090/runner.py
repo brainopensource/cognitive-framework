@@ -83,6 +83,9 @@ class ExecutionTelemetry:
     cost_usd: float | None = None
     cost_provenance: str = "unknown"
     trajectory_digest: str | None = None
+    event_store_identity: str | None = None
+    provider: str | None = None
+    model: str | None = None
 
 
 @dataclass(frozen=True)
@@ -191,6 +194,11 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
         # remains available solely to the exterior evaluator below.
         telemetry = executor(workspace, _public_challenge(challenge))
         after = snapshot(workspace)
+        if not non_empirical and not telemetry.trajectory_digest:
+            # A live result without an immutable trajectory cannot support a
+            # capability claim, even when its source patch happens to pass.
+            return _row(identity, "INSTRUMENT_ERROR", "missing_trajectory_identity",
+                        baseline, telemetry, public_files, after, non_empirical)
         changed = sorted(path for path in set(public_files) | set(after) if public_files.get(path) != after.get(path))
         if not changed:
             return _row(identity, "NO_PATCH", "completed_without_source_patch", baseline, telemetry, public_files, after, non_empirical)
@@ -218,6 +226,14 @@ def _row(identity: Mapping[str, object], terminal: str, reason: str,
         "changed_files": changed, "before_digest": canonical_digest(before),
         "after_digest": canonical_digest(after), "oracle": dict(oracle), "usage": usage,
         "trajectory_digest": telemetry.trajectory_digest if telemetry else None,
+        "event_store_identity": telemetry.event_store_identity if telemetry else None,
+        "provider": telemetry.provider if telemetry else None,
+        "model": telemetry.model if telemetry else None,
+        "trajectory_linkage": {
+            "status": "linked" if telemetry and telemetry.trajectory_digest else "missing",
+            "trajectory_digest": telemetry.trajectory_digest if telemetry else None,
+            "event_store_identity": telemetry.event_store_identity if telemetry else None,
+        },
         "non_empirical": non_empirical,
     }
     body["row_digest"] = evidence_digest(body)

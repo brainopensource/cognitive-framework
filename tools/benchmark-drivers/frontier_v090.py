@@ -264,7 +264,10 @@ def runtime_executor(preset: str, *, model_name: str | None = None, models: Sequ
             terminal_reason=str(result.get("detail", "")),
             prompt_tokens=result.get("promptTokens"),
             completion_tokens=result.get("completionTokens"),
-            trajectory_digest=None,
+            trajectory_digest=result.get("trajectoryDigest"),
+            event_store_identity=result.get("eventStoreIdentity"),
+            provider=result.get("provider"),
+            model=result.get("model"),
         )
     return execute
 

@@ -48,6 +48,7 @@ from .protocol_recovery import (
     RecoveryDecision,
     recover_proposal,
 )
+from .admission_gate import AdmissionVerdict
 from .tool_policy import derive_phase, resolve_tool_policy
 from .state import (
     TERMINAL_FOR_KIND,
@@ -207,6 +208,7 @@ class EpisodeEngine:
         protocol_decoders: Sequence[Any] = (),
         patch_detector: Any = None,
         truncation_detector: Any = None,
+        completion_admitter: Any = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -236,6 +238,10 @@ class EpisodeEngine:
         self._protocol_decoders = tuple(protocol_decoders)
         self._patch_detector = patch_detector
         self._truncation_detector = truncation_detector
+        #: Optional composition seam. Agency records the model's finish
+        #: proposal, while the harness pack supplies task-specific admission
+        #: facts (patch and verification). No coding policy is imported here.
+        self._completion_admitter = completion_admitter
 
     # ------------------------------------------------------------------
 
@@ -426,6 +432,25 @@ class EpisodeEngine:
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
             if terminal is not None:
+                if (proposal.kind == ProposalKind.FINISH
+                        and self._completion_admitter is not None):
+                    verdict = self._completion_admitter(episode, proposal)
+                    if not isinstance(verdict, AdmissionVerdict):
+                        raise TypeError("completion_admitter must return AdmissionVerdict")
+                    if not verdict.admissible:
+                        if not _apply_retry(
+                            RecoveryDecision(
+                                status="retry_model",
+                                retry_reason="COMPLETION_ADMISSION_REJECTED",
+                                retry_feedback={
+                                    "admissionReason": verdict.reason,
+                                    "feedback": verdict.rejection_feedback or verdict.reason,
+                                },
+                            ),
+                            base_sampling=turn_sampling,
+                        ):
+                            break
+                        continue
                 episode = episode.terminated(terminal, proposal.note)
                 break
 

@@ -9,7 +9,7 @@ try:
     # source checkouts and an installed wheel expose the same public value.
     __version__ = version("vanguard-runtime")
 except PackageNotFoundError:  # pragma: no cover - source tree without metadata
-    __version__ = "0.9.1-rc1"
+    __version__ = "0.9.0b1"
 
 
 __all__ = ["__version__"]

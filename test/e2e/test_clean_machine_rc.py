@@ -79,7 +79,6 @@ class TestCleanMachineReleaseCandidate(unittest.TestCase):
 
     def test_02_first_run_diagnostics_and_catalogs(self) -> None:
         """Step 2: Run CLI commands on clean machine without daemon running."""
-        # Install first
         self.run_cmd(["bash", str(self.dist_dir / "install.sh"), str(self.install_prefix)])
 
         # aether doctor (fails closed cleanly with daemon offline)
@@ -139,6 +138,9 @@ class TestCleanMachineReleaseCandidate(unittest.TestCase):
         try:
             # Wait for daemon ready
             time.sleep(1.0)
+            if daemon_proc.poll() is not None:
+                out, err = daemon_proc.communicate()
+                self.fail(f"Daemon exited prematurely with code {daemon_proc.returncode}.\nStdout: {out}\nStderr: {err}")
 
             # Check aether doctor (should now report healthy: true)
             res_doc = self.run_cmd(["aether", "doctor", "--json"])
@@ -154,12 +156,20 @@ class TestCleanMachineReleaseCandidate(unittest.TestCase):
                     "aether",
                     "run",
                     "--demo",
-                    "satisfied",
+                    "successful-episode",
                     "--headless",
                 ]
             )
             self.assertEqual(res_run.returncode, 0, f"Demo run failed: {res_run.stderr}\n{res_run.stdout}")
             self.assertTrue("Outcome: satisfied" in res_run.stdout or "satisfied" in res_run.stdout)
+
+            # Test history inspection command from CLI
+            res_hist = self.run_cmd(["aether", "history", "--json"])
+            self.assertEqual(res_hist.returncode, 0)
+
+            # Test workspace command from CLI
+            res_ws = self.run_cmd(["aether", "workspace", "current", "--json"])
+            self.assertEqual(res_ws.returncode, 0)
 
         finally:
             daemon_proc.terminate()
@@ -168,28 +178,50 @@ class TestCleanMachineReleaseCandidate(unittest.TestCase):
             except subprocess.TimeoutExpired:
                 daemon_proc.kill()
 
-    def test_04_uninstall_preserves_user_data(self) -> None:
-        """Step 4: Verify uninstaller cleans application while preserving user data."""
+    def test_04_uninstall_preserves_user_data_and_reinstall_restores(self) -> None:
+        """Step 4: Verify uninstaller cleans application while preserving user data, and reinstallation restores continuity."""
         self.run_cmd(["bash", str(self.dist_dir / "install.sh"), str(self.install_prefix)])
 
-        # Create user configuration
+        # Create user configuration & workspace history
         user_config = self.clean_home / ".config" / "aether" / "config.json"
         user_config.parent.mkdir(parents=True, exist_ok=True)
-        user_config.write_text(json.dumps({"general": {"defaultAgent": "coding-agent"}}), encoding="utf-8")
+        user_config.write_text(
+            json.dumps(
+                {
+                    "general": {
+                        "defaultAgent": "coding-agent",
+                        "defaultWorkspace": "/tmp/my-persisted-ws",
+                    },
+                    "workspace": {
+                        "recentWorkspaces": ["/tmp/my-persisted-ws"],
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
 
         # Run uninstaller
         uninstall_script = self.dist_dir / "uninstall.sh"
         res_un = self.run_cmd(["bash", str(uninstall_script), str(self.install_prefix)])
         self.assertEqual(res_un.returncode, 0)
 
-        # Application directory should be gone
+        # Application directory should be removed
         self.assertFalse((self.install_prefix / "lib" / "aether").exists())
         self.assertFalse((self.install_prefix / "bin" / "aether").exists())
 
         # User data must still exist!
         self.assertTrue(user_config.exists())
-        loaded = json.loads(user_config.read_text(encoding="utf-8"))
-        self.assertEqual(loaded["general"]["defaultAgent"], "coding-agent")
+
+        # Re-install over existing user state
+        res_reinstall = self.run_cmd(["bash", str(self.dist_dir / "install.sh"), str(self.install_prefix)])
+        self.assertEqual(res_reinstall.returncode, 0)
+
+        # Check config show via reinstalled CLI
+        res_cfg = self.run_cmd(["aether", "config", "show", "--json"])
+        self.assertEqual(res_cfg.returncode, 0)
+        data_cfg = json.loads(res_cfg.stdout)
+        self.assertEqual(data_cfg["data"]["settings"]["general"]["defaultAgent"], "coding-agent")
+        self.assertEqual(data_cfg["data"]["settings"]["general"]["defaultWorkspace"], "/tmp/my-persisted-ws")
 
 
 if __name__ == "__main__":

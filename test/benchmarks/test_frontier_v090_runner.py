@@ -12,6 +12,7 @@ from benchmarks.frontier_v090.runner import (
     run_row,
     validate_subset,
 )
+from vanguard.packages.runtime.root import get_workspace_path
 
 
 class FrontierV090RunnerTests(unittest.TestCase):
@@ -36,7 +37,7 @@ class FrontierV090RunnerTests(unittest.TestCase):
         self.assertFalse(any("oracle" in path.lower() for path in observed))
 
     def test_persistent_workspace_keeps_runtime_logs_inside_requested_root(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
+        with tempfile.TemporaryDirectory(dir=get_workspace_path("tmp")) as temp:
             root = Path(temp)
 
             row = run_row(SUBSET[0], "test", lambda *_: ExecutionTelemetry(
@@ -64,6 +65,18 @@ class FrontierV090RunnerTests(unittest.TestCase):
         self.assertEqual(row["changed_files"], ["lru/entry.py"])
         self.assertIsNone(row["usage"]["cost_usd"])
         self.assertEqual(row["usage"]["cost_provenance"], "unknown")
+        self.assertEqual(row["trajectory_linkage"]["status"], "missing")
+
+    def test_row_preserves_trajectory_and_provider_identity(self) -> None:
+        telemetry = ExecutionTelemetry(
+            "completed", "runtime_done", trajectory_digest="sha256:trajectory",
+            event_store_identity="sha256:event-store", provider="cassette",
+            model="golden-model",
+        )
+        row = run_row(SUBSET[0], "test", lambda *_: telemetry)
+        self.assertEqual(row["trajectory_linkage"]["status"], "linked")
+        self.assertEqual(row["provider"], "cassette")
+        self.assertEqual(row["event_store_identity"], "sha256:event-store")
 
     def test_dataset_preflight_rejects_passing_untouched_fixture(self) -> None:
         from benchmarks.swe_bench.challenges import CHALLENGES, SWEProChallenge

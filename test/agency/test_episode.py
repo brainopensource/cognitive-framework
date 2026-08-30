@@ -11,6 +11,7 @@ from __future__ import annotations
 import unittest
 
 from vanguard.packages.agency import EpisodeEngine, RunTermination
+from vanguard.packages.agency.episode.admission_gate import AdmissionVerdict
 from vanguard.packages.kernel import AdapterOutcome, FailurePath, Occurrence
 
 from test.kernel import fakes
@@ -19,6 +20,7 @@ from test.agency import doubles
 
 def build(proposals, *, model=None, **harness_kwargs):
     """A real kernel plus a scripted provider, wired as the composition root."""
+    completion_admitter = harness_kwargs.pop("completion_admitter", None)
     harness = fakes.build(**harness_kwargs)
     engine = EpisodeEngine(
         kernel=harness.kernel,
@@ -27,6 +29,7 @@ def build(proposals, *, model=None, **harness_kwargs):
         events=harness.sink,
         scope=fakes.child_scope(),
         max_turns=8,
+        completion_admitter=completion_admitter,
     )
     return harness, engine
 
@@ -96,6 +99,20 @@ class Terminals(unittest.TestCase):
     def test_finish_completes(self) -> None:
         harness, engine = build([doubles.finish()])
         self.assertIs(run(engine, harness).terminal, RunTermination.COMPLETED)
+
+    def test_completion_admission_rejection_returns_to_the_model(self) -> None:
+        harness, engine = build(
+            [doubles.finish(), doubles.finish()],
+            completion_admitter=lambda episode, proposal: (
+                AdmissionVerdict(False, "VERIFICATION_REQUIRED")
+                if episode.turn_count == 0
+                else AdmissionVerdict(True, "completion_admissible")
+            ),
+        )
+        outcome = run(engine, harness)
+
+        self.assertIs(outcome.terminal, RunTermination.COMPLETED)
+        self.assertEqual(outcome.episode.turn_count, 1)
 
     def test_abstain_abstains(self) -> None:
         harness, engine = build([doubles.abstain()])

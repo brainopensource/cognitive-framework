@@ -49,11 +49,11 @@ The Tier-1 “overall PASS” should not be taken literally: its detailed test l
 
 The actual authority order is:
 
-1. [VISION.md](/home/rocha/Coding/Aether-D-System/VISION.md)
-2. [docs/SPEC.md](/home/rocha/Coding/Aether-D-System/docs/SPEC.md)
-3. [docs/decisions.md](/home/rocha/Coding/Aether-D-System/docs/decisions.md)
+1. [VISION.md](VISION.md)
+2. [docs/SPEC.md](docs/SPEC.md)
+3. [docs/decisions.md](docs/decisions.md)
 4. As-built architecture/reference documentation
-5. [docs/execution/active.md](/home/rocha/Coding/Aether-D-System/docs/execution/active.md)
+5. [docs/execution/active.md](docs/execution/active.md)
 6. Milestone contracts
 7. Research/reports as non-authorizing evidence
 
@@ -130,7 +130,7 @@ Framework weaknesses:
 
 5. Context policy is not actually bound.
 
-   [session.py](/home/rocha/Coding/Aether-D-System/vanguard/packages/runtime/session.py:550) constructs `ContextCompiler` without the manifest’s context policy. The default happens to resemble the default pack, but alternate pack settings are not authoritative.
+   [session.py](vanguard/packages/runtime/session.py) constructs `ContextCompiler` without the manifest’s context policy. The default happens to resemble the default pack, but alternate pack settings are not authoritative.
 
 ## 5. Coding Harness Assessment
 
@@ -387,7 +387,7 @@ The largest gap to strong coding harnesses is disciplined stateful execution, no
 - Problem: `AgentView` cannot see actual actions or budget usage.
 - Evidence: current SQLite events emit `action`; reducer reads `verb`; reconstructed attempts are `unknown`.
 - Hypothesis: aligning reader compatibility with emitted fields restores useful replay, meta-control and analysis without changing event identity.
-- Implementation: update compatibility reads in [agent_view.py](/home/rocha/Coding/Aether-D-System/vanguard/packages/domain/ledger/agent_view.py:168), plus contract vectors for current event payloads.
+- Implementation: update compatibility reads in [agent_view.py](vanguard/packages/domain/ledger/agent_view.py), plus contract vectors for current event payloads.
 - Expected behavior: replay exposes exact proposal/effect verbs and consumed additive budgets.
 - Metric: 100% of proposal/effect events receive non-generic action attribution; budget totals equal ledger reducer totals.
 - Fast experiment: fold the retained 244-event DB before/after.

@@ -49,6 +49,7 @@ from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..ports.event_store import Result as PortResult
+from ..domain.canonicalisation.digest import digest_of
 from .mock_episode_tape import (
     brief_from_task_dir,
     episode_tape,
@@ -318,6 +319,13 @@ def run_lab_task(
         # `C-01`: a refusal that produced no turn is still on the ledger.
         "terminalRefusal": log.terminal_refusal,
         "grantId": grant.grant_id if grant is not None else None,
+        "trajectory": getattr(last, "trajectory", None) if last is not None else None,
+        "trajectoryDigest": (
+            digest_of(getattr(last, "trajectory"))
+            if last is not None and isinstance(getattr(last, "trajectory", None), dict)
+            else None
+        ),
+        "eventStoreIdentity": digest_of({"db_path": store.db_path, "run_id": "lab-run"}),
         **selected.to_dict(),
     }
     # A benchmark may launch hundreds of sessions.  The isolated workspace and

@@ -46,19 +46,19 @@ docs-rag QUERY:
 
 # LDA thin orchestration wrappers
 lda:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli status
+	uv run lda serve
 lda-status:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli status
+	uv run lda status
 lda-scan:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli scan
+	uv run lda scan
 lda-check:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli check
+	uv run lda check
 lda-query QUERY:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli query "{{QUERY}}"
+	uv run lda query "{{QUERY}}"
 lda-context TASK:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli context "{{TASK}}"
+	uv run lda context "{{TASK}}"
 lda-doctor:
-	python3 -m tools.007_LLM_DOCS_ATLAS.cli doctor
+	uv run lda doctor
 
 # Canonical local/CI qualification gate before PR completion or sprint closure
 verify:

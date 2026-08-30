@@ -5,9 +5,10 @@ from .core.models import ProviderResult
 from .core.registry import ProviderRegistry
 from .providers.git import GitProvider
 from .providers.knowledge import KnowledgeProvider
+from .providers.filesystem import FilesystemProvider
 
 def default_registry() -> ProviderRegistry:
-    registry = ProviderRegistry(); registry.register(KnowledgeProvider()); registry.register(GitProvider()); return registry
+    registry = ProviderRegistry(); registry.register(FilesystemProvider()); registry.register(KnowledgeProvider()); registry.register(GitProvider()); return registry
 
 def collect(ctx: AtlasContext, registry: ProviderRegistry | None = None) -> list[ProviderResult]:
     results = []

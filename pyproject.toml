@@ -29,6 +29,7 @@ classifiers = [
 ]
 
 [project.scripts]
+lda = "tools.lda.cli:main"
 vanguard = "vanguard.packages.runtime.cli:main"
 vanguard-evaluator = "vanguard.packages.adapters.evaluators.daemon:main"
 vanguard-daemon = "vanguard.packages.runtime.service.server:main"
@@ -41,7 +42,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["vanguard*", "schemas*", "packs*"]
+include = ["vanguard*", "schemas*", "packs*", "tools*"]
 namespaces = true
 
 [tool.setuptools.package-data]

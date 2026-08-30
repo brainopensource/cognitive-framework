@@ -1,7 +1,10 @@
 from pathlib import Path
 
 def find_root(start: Path | None = None) -> Path:
-    here = (start or Path.cwd()).resolve()
+    if start is not None:
+        return start.resolve()
+    here = Path.cwd().resolve()
+    markers = (".git", "pyproject.toml", "package.json", "Cargo.toml", "go.mod", "pom.xml", "build.gradle")
     for candidate in (here, *here.parents):
-        if (candidate / "justfile").exists() and (candidate / "docs").exists(): return candidate
-    raise FileNotFoundError("could not discover repository root (expected justfile and docs/)")
+        if any((candidate / marker).exists() for marker in markers): return candidate
+    return here

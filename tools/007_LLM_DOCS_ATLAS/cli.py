@@ -8,7 +8,11 @@ from .core.models import Candidate, ContextPacket, serialise
 
 def _rows(ctx, name):
     path = ctx.knowledge / name
-    if not path.exists(): return []
+    if not path.exists():
+        if name == "catalog.jsonl":
+            from .providers.filesystem import FilesystemProvider
+            return [e.metadata for e in FilesystemProvider().collect(ctx).entities if e.kind == "document"]
+        return []
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 def _snapshot(ctx):
@@ -21,7 +25,7 @@ def _packet(ctx, task, budget):
     docs = []
     for row in _rows(ctx, "catalog.jsonl"):
         hay = " ".join(str(row.get(k,"")) for k in ("canonical_id","path","title","owner","summary")).lower(); hits = sum(t in hay for t in terms)
-        authority = row.get("authority"); boost = 8 if authority in {"constitutional","normative","canonical"} else 2
+        authority = row.get("authority"); boost = ctx.profile.authority_score(authority)
         if hits or boost > 2: docs.append(Candidate(row.get("path",""), "document", row.get("title",row.get("path","")), hits*10+boost, row.get("estimated_tokens",0), "keyword/authority match", authority))
     docs.sort(key=lambda c:(-c.score,c.tokens,c.locator)); chosen=[]; used=0
     for item in docs:
@@ -31,7 +35,9 @@ def _packet(ctx, task, budget):
         if any(t in row.get("symbol","").lower() for t in terms): symbols.append(Candidate(row.get("defined_in",""),"symbol",row.get("symbol",""),20,0,"symbol match"))
     for row in _rows(ctx,"code-map.jsonl"):
         if any(t in (row.get("subsystem","")+row.get("package_path","")).lower() for t in terms): code.append(Candidate(row.get("package_path",""),"code",row.get("subsystem",""),15,0,"code-map match"))
-    return ContextPacket(task,budget,used,chosen,code,symbols,[],sorted({c.authority for c in chosen if c.authority}),["Research and reports are excluded by default."])
+    warnings=[]
+    if ctx.profile.excluded_authority and not ctx.include_research: warnings.append("Excluded authorities are omitted by profile policy.")
+    return ContextPacket(task,budget,used,chosen,code,symbols,[],sorted({c.authority for c in chosen if c.authority}),warnings)
 
 def main(argv=None):
     parser=argparse.ArgumentParser(prog="lda"); parser.add_argument("--root",type=Path); sub=parser.add_subparsers(dest="command",required=True)

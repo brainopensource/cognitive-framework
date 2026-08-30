@@ -54,6 +54,7 @@ This document is the canonical reference owner for all hexagonal port protocols 
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure Python protocols enforce strict dependency inversion (`domain <- ports <- kernel <- agency <- runtime -> adapters`).
+- `PARTIAL` — `IContextManager` and `IndexPort` provide the existing extension seams; the provider-neutral repository `ContextPacket` usage described in Section 5 is a **v0.9.2 target**, not a new implemented port signature.
 
 ---
 
@@ -124,6 +125,28 @@ Adapters live in `vanguard/packages/adapters/` and must never import `kernel` or
 SPI methods return the `Result[T]` Algebraic Data Type (`vanguard.packages.domain.wire.result`):
 - `Ok(value)`: Successful operation wrapping output value.
 - `Err(error)`: Explicit typed error (`EffectFailure`, `MemoryError`, `EvaluationError`) avoiding untyped runtime exceptions.
+
+---
+
+## 5. v0.9.2 Target: Repository-Intelligence Binding
+
+> **TARGET / PLANNED — not AS_BUILT.** Reuse the five frozen SPIs and existing `IndexPort`; do not add an LDA-specific substrate port.
+
+The code-pack `IContextManager` may query `IndexPort` or a provider adapter and compile the results into a bounded, value-only context packet. The planned logical fields are:
+
+```text
+task_digest                 repository_snapshot_digest
+provider_id                 provider_version
+query_digest                selected_documents[]
+selected_symbols[]          selected_files[]
+related_tests[]             dependency_edges[]
+estimated_tokens            omissions[]
+packet_digest
+```
+
+`omissions` makes truncation, unavailable sources, and failed provider lookups explicit. Hits are advisory references with provenance and confidence; consumers resolve and verify target files before use. An index health claim is usable only when its schema is valid, its source snapshot matches, required entity counts are non-zero, referenced paths resolve, and freshness checks pass. Otherwise composition degrades to a deterministic filesystem/source search implementation.
+
+The provider boundary is intentionally narrow: it retrieves and ranks information but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Exact value types and versioned schemas should be added here only when their source implementation lands.
 
 ---
 

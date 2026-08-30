@@ -64,6 +64,7 @@ This document is the canonical architecture owner for the end-to-end runtime lif
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Single runtime authority (`HarnessSession`) orchestrates all composition, activation, execution, and teardown across the substrate (`RF-94`).
+- `PARTIAL` — Current composition exposes context/index seams, but manifest context-policy binding, optional repository-intelligence packets, coding completion admission, and semantic task-state continuation are **v0.9.2 targets** described below.
 
 ---
 
@@ -131,6 +132,34 @@ When a run is resumed from disk (`vanguard resume --run-id <ID>`):
 ## 5. Compatibility Seam (`UNR-B-004`)
 
 - `Runtime.execute_harness` (`vanguard/packages/runtime/compose.py`) is an obsolete legacy entry point that remains in the codebase for backwards compatibility and test verification. All production paths invoke `HarnessSession` directly.
+
+---
+
+## 6. v0.9.2 Target: Context and Completion Policy Binding
+
+> **TARGET / PLANNED — not AS_BUILT.** The existing single composition root remains authoritative; v0.9.2 extends its bindings rather than introducing a second runtime path.
+
+`HarnessSession` should bind the manifest-resolved context policy into `ContextCompiler` and optionally bind an `IContextManager` backed by `IndexPort`. Repository intelligence is provider-neutral and authority-free:
+
+```text
+Task + repository snapshot
+        -> code-pack IContextManager
+        -> optional IndexPort/provider adapter
+        -> bounded ContextPacket
+        -> existing ContextCompiler
+```
+
+LDA, SCIP-style indexes, and future providers are substitutable adapters/projections. Vanguard must not import or require LDA. A deterministic filesystem index remains the fallback when an external index is absent, empty, stale, or invalid. Provider output selects references; it cannot propose effects, grant capabilities, or override canonical documentation, source, tests, or ledger facts.
+
+The target `ContextPacket` records at minimum the task digest, repository snapshot digest, provider identity/version, query digest, selected documents/symbols/files/tests/dependency edges, estimated tokens, omissions, and an overall packet digest. It is bounded by the manifest context budget and captured as evidence sufficient to reproduce selection.
+
+The same composition path binds a generic completion-admission policy. `EpisodeEngine` asks whether completion is admissible; the code pack interprets coding verification, while runtime records the decision and its evidence reference. External evaluation remains a later, independent lifecycle stage.
+
+`D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
+
+## 7. v0.9.2 Target: Semantic Continuation
+
+Cold resume already reconstructs safety/accounting state and reconciles effects. The v0.9.2 target additionally reconstructs a compact semantic continuation packet from ledger facts and artifacts: original task identity, current plan, latest classified failure, modified-file/postimage identity, latest verification, settled effects, next action, and remaining budgets. This packet is derived state; missing artifacts must fail explicitly or trigger regrounding rather than silently inventing context.
 
 ---
 

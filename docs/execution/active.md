@@ -14,8 +14,8 @@ audience:
   - contributor
   - release-owner
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-08-29
+version: 0.9.2a0
+last_verified: 2026-08-30
 normative_authority:
   - docs/03_execution/sprint_active.md
   - docs/03_execution/backlog.md
@@ -66,3 +66,44 @@ The active board supplies current authorization; the [milestones.md](milestones.
 supplies the stable M-4–M-8 package contracts, lane ownership, dependencies, acceptance predicates,
 and evidence obligations. This candidate view links that detail rather than copying its mutable
 tables, so package status cannot be mistaken for a second active board.
+
+## Vanguard v0.9.2 documentation and implementation waves
+
+The repository owner authorized the v0.9.2 documentation and implementation-planning pass on
+2026-08-30. This authorization does not resolve the M-7/M-8 acceptance conflicts above and does
+not authorize M-9 or M-10 promotion. Work MUST preserve the existing trust spine and MUST NOT
+claim benchmark or milestone acceptance from mechanism presence.
+
+Two contributor roles may work concurrently:
+
+- **Dev A — Senior Principal:** owns cross-cutting architecture, contracts, integration,
+  experiment design, difficult migrations, and final review. Dev A may work across the authorized
+  v0.9.2 scope but remains bound by the SPEC, decisions, architectural boundaries, evidence gates,
+  and WIP rules.
+- **Dev B — Standard implementation contributor:** owns bounded implementation packages,
+  synchronized tests, fixtures, adapters, instrumentation, and documentation corrections assigned
+  by Dev A or this board. Dev B MUST NOT independently change normative contracts, trust
+  boundaries, event identities, or milestone predicates.
+
+Parallelism applies between independent work packages, not within a shared authority surface.
+Only one contributor may edit a given canonical document, schema, event family, or composition
+seam at a time.
+
+| Wave | Outcome | Dev A lead package | Dev B supporting package | Entry gate | Exit gate |
+|---|---|---|---|---|---|
+| W-092-0 | Canonical contracts and navigable implementation map | Reconcile SPEC, decisions, architecture ownership, context/verification/recovery contracts | Validate links, paths, generated-index freshness and executable examples | Review evidence is available; no production mutation required | Canonical owners agree; no target is described as AS_BUILT; indexes have explicit fallback rules |
+| W-092-1 | Correct benchmark evidence and projection semantics | Evidence identity, benchmark validity, `AgentView` compatibility design and review | Fixtures, result persistence, reducer vectors and retained-ledger regression | W-092-0 contracts merged | Zero invalid development fixtures; every result links trajectory; current events fold to exact actions/budgets |
+| W-092-2 | Verification-admitted coding loop | Completion-admission seam and framework/harness boundary | LAM scenarios, test parsing, zero-test and stale-verification cases | W-092-1 evidence linkage green | Applicable patched tasks cannot complete without fresh successful verification |
+| W-092-3 | Bounded context and durable coding state | Provider-neutral context integration and task-state projection | Deterministic index fallback, ranking fixtures, token/duplicate-read telemetry | W-092-2 loop green | Controlled A/B meets preregistered token/turn threshold without success regression |
+| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Cross-cutting recovery and semantic-resume integration | Range/list/symbol tools, patch corpus, typed failure fixtures, adapter profiles | W-092-3 treatment accepted or rejected with evidence | Patch/recovery acceptance targets pass; retries are bounded; resume restores durable next-action state |
+| W-092-5 | Qualification and release closure | Controlled real-model canary, larger sample decision, release evidence review | Deterministic/local matrix execution, artifact audit, docs-as-built synchronization | W-092-1–4 exact-subject receipts available | Release claim matches evidence; `just check` and `just verify` pass on exact candidate; no SWE claim without official qualification |
+
+### Immediate authorized queue
+
+1. Complete W-092-0 and validate the canonical cross-links.
+2. Start W-092-1 with benchmark preflight/evidence persistence and `AgentView` reducer vectors in
+   parallel, because they have disjoint production owners.
+3. Do not start W-092-3 or later production integration before the W-092-2 completion contract is
+   executable; design and fixtures may be prepared independently.
+4. Keep delegation/concurrency optimization outside the v0.9.2 critical path until the
+   single-agent verification loop has a measured baseline.

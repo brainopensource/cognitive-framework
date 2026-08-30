@@ -53,6 +53,7 @@ This document is the canonical architecture owner for the `EpisodeEngine` sequen
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Fully functional bounded sequential episode engine implemented in `vanguard.packages.agency`.
+- `PARTIAL` — Protocol recovery and generic context compaction are implemented, but the coding-specific plan, verification-admission, classified recovery, and durable task-state loop described in Section 6 are **v0.9.2 targets**, not current behavior.
 
 ---
 
@@ -137,6 +138,96 @@ Episodes conclude with one of the following terminal states:
 - **`ESCALATED`**: Action halted awaiting operator approval.
 - **`CANCELLED`**: Explicit cancellation command received from client.
 - **`RUNTIME_ERROR`**: Unrecoverable kernel or adapter fault.
+
+---
+
+## 6. v0.9.2 Target: Coding Harness Control Loop
+
+> **TARGET / PLANNED — not AS_BUILT.** This section fixes the intended ownership and behavioral contract for v0.9.2 implementation. It does not assert that the current `EpisodeEngine` enforces these transitions.
+
+Vanguard owns the generic bounded turn, dispatch, event-observation, budget, and completion-admission seams. Coding semantics remain above the substrate in the code pack/harness: repository discovery, patch state, test selection, test-result interpretation, and the definition of an applicable coding verification. No coding vocabulary or repository-intelligence dependency belongs in the domain-blind kernel.
+
+The coding harness targets the following outcome-driven state machine:
+
+```text
+INGEST -> DISCOVER -> PLAN -> EDIT -> VERIFY_TARGETED
+                         ^              |
+                         |              +-> RECOVER --+
+                         |                            |
+                         +----------------------------+
+                                        |
+                                        +-> VERIFY_BROAD -> COMPLETE
+                                                   |
+                                                   +-> RECOVER | ABANDON
+```
+
+Transitions depend on observed receipts, not merely on the attempted verb. In particular, attempting a patch does not enter verification unless the complete patch was applied, and requesting completion does not enter `COMPLETE` unless the configured admission policy accepts fresh verification.
+
+### 6.1 Durable coding task state
+
+The code pack should maintain a replayable value equivalent to:
+
+```text
+CodingTaskState
+  task_identity
+  repository_snapshot
+  goal
+  constraints
+  current_plan
+  hypotheses
+  inspected_files
+  relevant_symbols
+  modified_files
+  verification_plan
+  last_verification
+  classified_failure
+  next_action
+  settled_effects
+  remaining_budgets
+```
+
+This is a coding-pack projection, not a new authoritative state store. Durable facts and referenced artifacts remain in the causal ledger; the value is reconstructed by folding them. Compaction must preserve the goal and constraints, current plan, modified files, latest relevant failure, latest verification, settled effects, next action, and remaining budgets. Raw old observations and duplicate reads may be summarized.
+
+### 6.2 Completion admission and verification freshness
+
+The framework may expose a generic completion-admission callback. The code pack supplies the coding policy. For a patch-producing task, the target rule is:
+
+$$
+\operatorname{CompletionAdmitted} =
+\operatorname{FinishRequested}
+\land \operatorname{RequirementsSatisfied}
+\land \operatorname{VerificationApplicable}
+\land \operatorname{VerificationExecuted}
+\land \operatorname{VerificationPassed}
+\land \operatorname{VerificationFresh}
+$$
+
+`VerificationFresh` means the successful receipt is bound to the current workspace/postimage digest and occurred after the most recent accepted edit. A zero-exit command that collected zero applicable tests is not a passing test verification. Analysis-only, documentation-only, greenfield, and repositories-without-tests require an explicit pack policy rather than an implicit bypass.
+
+Local verification is an operational completion condition; it never replaces the independent evaluator/oracle owned by [`arch.assurance.evaluation`](assurance-evaluation.md).
+
+### 6.3 Typed recovery policy
+
+The initial coding failure taxonomy is:
+
+```text
+CONTEXT_INSUFFICIENT     CONTEXT_STALE
+TOOL_SCHEMA_INVALID     TOOL_EXECUTION_FAILED
+PATCH_PREIMAGE_MISMATCH PATCH_PARTIAL
+TEST_COLLECTION_EMPTY   TEST_FAILED
+VERIFICATION_STALE      PROVIDER_TRANSIENT
+PROVIDER_PERMANENT      BUDGET_EXHAUSTED
+NO_PROGRESS             PREMATURE_FINISH
+```
+
+Each class has a bounded retry limit and a recovery action. A retry is admissible only when the failure is retryable, budget remains, and the next action or information state differs materially. Repeating the same action with the same arguments against unchanged state is `NO_PROGRESS`, not recovery. Provider adapters may perform transport retries; the harness separately decides whether a failed turn or task action should be retried.
+
+### 6.4 Planned implementation and falsifiers
+
+- **Generic framework seam**: completion-admission result and typed recovery decision in `vanguard/packages/agency/episode/`.
+- **Coding ownership**: state reducer, repository context selection, verification policy, and failure interpretation in the code pack/harness.
+- **Runtime binding**: manifest-selected context and admission policies in `vanguard/packages/runtime/session.py`.
+- **Required falsifiers**: premature finish, zero-test success, stale verification after edit, partial patch, repeated identical action, failed-test repair, and fresh-process reconstruction of the next action.
 
 ---
 

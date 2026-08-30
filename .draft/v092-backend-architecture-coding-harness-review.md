@@ -642,3 +642,383 @@ LDA USEFUL: NO
 LAM USEFUL: PARTIAL
 V0.9.2 PLAN READY: YES
 ```
+
+---
+
+## 21. Session Addendum — Repository Intelligence as an AI Navigation Atlas
+
+> **Status:** temporary, non-canonical working material. Durable rules from this section must be
+> routed to their semantic owners in `AGENTS.md`, `README.md`, `docs/SPEC.md`, architecture,
+> reference, and execution documents. This draft is evidence and design rationale, never authority.
+
+### 21.1 Why the atlas matters
+
+The combination of `dev_context_logs/`, `.generated/knowledge/`, `.lda/index.db*`, canonical
+documentation, source, tests, and event/benchmark stores can reduce repository discovery from a
+workspace-wide read to a small, targeted context packet. This is particularly valuable for AI
+development because repository exploration consumes the same bounded context needed for planning,
+editing, verification, and recovery.
+
+The desired routing path is:
+
+```text
+dev_context_logs/context_summary.*             Tier-1 session bootstrap
+        ↓
+.generated/knowledge/code-map + ownership      subsystem and canonical owner
+        ↓
+.generated/knowledge/symbols + links           target symbol, relation and source path
+        ↓
+canonical documentation                        constraints and architectural intent
+        ↓
+targeted source + tests + schemas               implementation and executable falsifiers
+        ↓
+SQLite trajectories / benchmark evidence       observed behavior when the task requires it
+```
+
+The corresponding authority rule is:
+
+```text
+index points
+documentation constrains
+source implements
+tests falsify
+ledger/evidence demonstrates
+```
+
+Generated indexes and LDA are reconstructible projections. They MUST NOT override canonical
+documentation, source, schemas, tests, Git state, or exact-subject evidence.
+
+### 21.2 Atlas health and fallback
+
+The review found a material distinction between operational availability and semantic usefulness:
+
+- LDA reported `HEALTHY` while indexing zero documents, files, symbols and relations.
+- Generated symbol data contained at least one stale historical path for `EpisodeEngine`.
+- Tier-1 context was generated for a different HEAD than the reviewed source.
+
+A navigation provider should therefore be considered usable only when:
+
+```text
+index_usable =
+    schema_valid
+    AND source_identity_matches
+    AND entity_count > 0
+    AND required_paths_resolve
+    AND freshness_gate_passes
+```
+
+Recommended health states:
+
+```text
+HEALTHY  usable and source-matched
+STALE    structurally valid but generated for another source identity
+EMPTY    structurally valid but has no useful indexed entities
+INVALID  schema, integrity or path validation failed
+```
+
+If the atlas is not usable, navigation degrades deterministically:
+
+```text
+LDA/generated index unavailable
+→ rg --files
+→ targeted rg query
+→ canonical owner document
+→ source and tests
+```
+
+Development must remain possible without LDA. LDA, SCIP, Kythe-style systems, AST indexes, and
+future providers are optional accelerators behind provider-neutral seams.
+
+### 21.3 ContextPacket target contract
+
+The optional repository-intelligence result should be a bounded value, not an agent and not an
+authority:
+
+```text
+ContextPacket {
+    task_digest
+    repository_snapshot_digest
+    provider_id
+    provider_version
+    index_snapshot_digest
+    query_digest
+    selected_documents[]
+    selected_symbols[]
+    selected_files[]
+    dependency_edges[]
+    related_tests[]
+    estimated_tokens
+    omissions[]
+}
+```
+
+`omissions` makes truncation, unavailable indexes, rejected low-confidence relations, and budget
+loss visible. Provider identity and snapshot digests make context selection replayable and allow a
+control/treatment benchmark to distinguish retrieval changes from model changes.
+
+The target seam remains:
+
+```text
+coding pack IContextManager
+→ IndexPort / optional provider adapter
+→ value-only ContextPacket
+→ existing ContextCompiler
+```
+
+No coding intelligence belongs in the domain-blind kernel.
+
+### 21.4 Context selection and budgeting
+
+The conceptual selection objective is:
+
+```text
+maximize Σ(i ∈ S) [wt·task(i) + ws·symbol(i) + wd·dependency(i)
+                    + wa·authority(i) + wv·verification(i) - wn·noise(i)]
+subject to Σ(i ∈ S) tokens(i) ≤ Bcontext
+```
+
+The weights are experimental configuration, not normative constants. The durable requirements are
+boundedness, deterministic identity, visible omissions, provider neutrality, and no authority
+transfer.
+
+The context budget is partitioned as:
+
+```text
+Btotal = Bstable-prefix + Btask-state + Bworking-context + Brecovery-reserve
+```
+
+with:
+
+```text
+Bstable-prefix + Btask-state < Btotal
+Brecovery-reserve ≥ Bminimum-recovery
+```
+
+Compaction must preserve the task objective and constraints, modified files, current plan,
+hypothesis, last relevant failure, last fresh verification, settled effects, remaining budgets and
+termination criteria. Old raw reads, duplicate observations and superseded diagnostics may be
+summarized or evicted.
+
+## 22. Session Addendum — Coding Harness Contracts to Preserve
+
+### 22.1 Durable coding task state
+
+The coding-specific projection should minimally represent:
+
+```text
+CodingTaskState {
+    task_identity
+    repository_snapshot
+    goal
+    constraints
+    current_plan
+    hypotheses
+    inspected_files
+    relevant_symbols
+    modified_files
+    verification_plan
+    last_verification
+    classified_failure
+    next_action
+    settled_effects
+    remaining_budgets
+}
+```
+
+This belongs above the substrate, normally in the coding pack/harness. Event-sourced operational
+truth and existing runtime composition remain authoritative; the projection is reconstructible.
+
+Target coding state machine:
+
+```text
+INGEST
+→ DISCOVER
+→ PLAN
+→ EDIT
+→ VERIFY_TARGETED
+→ RECOVER | VERIFY_BROAD
+→ COMPLETE | ABANDON
+```
+
+Transitions depend on successful receipts and current state, not merely on an attempted tool verb.
+
+### 22.2 Completion admission and verification freshness
+
+```text
+CompletionAdmitted =
+    ModelRequestedFinish
+    AND TaskRequirementsSatisfied
+    AND VerificationApplicable
+    AND VerificationExecuted
+    AND VerificationPassed
+    AND VerificationCoversCurrentWorkspaceState
+```
+
+For applicable patch tasks:
+
+```text
+modified_files ≠ ∅
+AND verification.exit_code = 0
+AND verification.executed_test_count > 0
+AND verification.workspace_digest = current_workspace_digest
+```
+
+Any subsequent patch invalidates the prior verification. A command that collects or executes zero
+tests does not satisfy the gate. Analysis-only, documentation-only, greenfield, and testless tasks
+require explicit policy rather than silently bypassing verification.
+
+Local verification is an operational completion condition. An exterior oracle remains independent
+evaluation and cannot be replaced by the agent's own verification receipt.
+
+### 22.3 Patch correctness
+
+```text
+PatchSuccess =
+    PreimageMatched
+    AND AllHunksApplied
+    AND WorkspaceContained
+    AND PostimageDigestRecorded
+```
+
+Ambiguous anchors and partial multi-hunk application fail closed. A patch receipt should identify
+every affected file/hunk and invalidate verification for the changed workspace state.
+
+### 22.4 Failure taxonomy and bounded recovery
+
+Initial failure classes:
+
+```text
+CONTEXT_INSUFFICIENT
+CONTEXT_STALE
+TOOL_SCHEMA_INVALID
+TOOL_EXECUTION_FAILED
+PATCH_PREIMAGE_MISMATCH
+PATCH_PARTIAL
+TEST_COLLECTION_EMPTY
+TEST_FAILED
+VERIFICATION_STALE
+PROVIDER_TRANSIENT
+PROVIDER_PERMANENT
+BUDGET_EXHAUSTED
+NO_PROGRESS
+PREMATURE_FINISH
+```
+
+For failure class `c`:
+
+```text
+retry_count(c) ≤ retry_limit(c)
+```
+
+A retry is useful only when it is permitted, budgeted, changes the recovery action or relevant
+state, and has positive expected information gain. Repeating the same action and arguments against
+the same state is a no-progress loop, not recovery.
+
+### 22.5 Minimum trajectory and benchmark identity
+
+Every qualifying run should retain:
+
+```text
+run_id, task_id, task_digest, repository_snapshot,
+harness_version, manifest_digest, prompt/preset_digest,
+provider/model identity, trajectory_digest, event-store identity,
+terminal state/reason, patch digest, verification receipt,
+exterior evaluator receipt, tokens, cost, latency, turns,
+tool calls, and retry counts by failure class
+```
+
+Core measures:
+
+```text
+success_rate = unique_valid_tasks_passed / unique_valid_tasks_attempted
+verification_rate = completed_tasks_with_fresh_verification / completed_applicable_tasks
+retry_efficiency = failed_states_recovered / additional_retry_turns
+duplicate_read_rate = redundant_reads / all_reads
+cost_per_solved_task = total_experiment_cost / unique_valid_tasks_passed
+```
+
+Repeated attempts on the same problem do not increase task coverage. A benchmark row without a
+trajectory identity is incomplete evidence.
+
+## 23. v0.9.2 Delivery Waves
+
+The implementation plan is organized as six numbered stages, W-092-0 through W-092-5. Up to five
+independent work packages may progress in parallel only when they have disjoint authority and file
+ownership. Parallelism does not waive the repository WIP, validation, evidence, or review gates.
+
+### W-092-0 — Canonical contracts and navigation
+
+- Reconcile active execution authorization and milestone relationship.
+- Canonicalize navigation, context, verification, patch, recovery and evidence contracts.
+- Label all planned behavior as target rather than AS_BUILT.
+- Add atlas freshness checks and deterministic fallback guidance.
+- Establish exact source identities for the implementation subject.
+
+### W-092-1 — Correctness of subjects, evidence and projections
+
+- Repair invalid benchmark fixtures and role/evaluator mismatches.
+- Persist terminal reason, model/provider, token/cost and trajectory identities.
+- Repair current-event `AgentView` action/budget projection.
+- Add retained-ledger reducer vectors and benchmark preflight tests.
+
+### W-092-2 — Verification-admitted execution
+
+- Introduce the generic completion-admission seam above the kernel.
+- Implement coding-specific fresh-verification policy in the coding pack.
+- Integrate deterministic test parsing and compact failure feedback.
+- Cover premature finish, zero tests, failed-test recovery and post-patch staleness in LAM/tests.
+
+### W-092-3 — Structured context and durable planning
+
+- Bind manifest context policy to the compiler.
+- Integrate optional provider-neutral ContextPackets through existing seams.
+- Persist/reconstruct coding plan, failure, verification and next-action state.
+- Compare static-map control with bounded ranked context using exact paired identities.
+
+### W-092-4 — Tooling, patching, recovery and resume
+
+- Add bounded range reads, listing/glob and symbol lookup.
+- Add exact-preimage, atomic, multi-hunk patch behavior.
+- Make typed transport/effect/task recovery operational and bounded.
+- Restore semantic task/plan/verification state on fresh-process resume.
+- Add provider capability profiles behind adapter/pack boundaries.
+
+### W-092-5 — Qualification and release closure
+
+- Run deterministic LAM regressions and the fixed local challenge matrix.
+- Run a 3–5 task real-model canary only after local gates pass.
+- Decide whether a 20–50 task controlled sample is justified.
+- Synchronize canonical documentation to final AS_BUILT behavior.
+- Run exact-candidate `just check` and `just verify`.
+- Make no SWE-bench claim without official dataset/evaluator qualification.
+
+## 24. Two-Contributor Operating Model
+
+### Dev A — Senior Principal
+
+Dev A owns architectural judgment, normative interpretation, integration boundaries, high-risk
+changes, experimental design, falsification criteria, and final exact-subject review. “May do
+anything” means freedom to work anywhere inside the authorized v0.9.2 scope; it does not waive the
+SPEC, security boundaries, Git safety, tests, evidence requirements, canonical ownership, or
+milestone authority.
+
+### Dev B — Standard implementation contributor
+
+Dev B follows the normal repository workflow and supports Dev A with bounded packages: tests,
+fixtures, adapters, instrumentation, mechanical implementation, index validation and documentation
+corrections. Dev B escalates changes to normative law, trust boundaries, event identities,
+composition authority or milestone predicates.
+
+Recommended parallel pairing:
+
+| Wave | Dev A | Dev B |
+|---|---|---|
+| W-092-0 | Contracts, architecture and ownership | Link/path/index validation and examples |
+| W-092-1 | Evidence schema and projection review | Fixtures, persistence and reducer tests |
+| W-092-2 | Completion-admission integration | LAM/test-parser scenarios and edge cases |
+| W-092-3 | Context/task-state integration | Index fallback, ranking fixtures and telemetry |
+| W-092-4 | Recovery/resume/provider integration | Tool and patch corpus implementation |
+| W-092-5 | Qualification disposition | Matrix execution and artifact audit |
+
+Files or event families shared between packages must have one active owner. Dev B should prepare a
+separate bounded patch or hand findings to Dev A instead of concurrently modifying the same seam.

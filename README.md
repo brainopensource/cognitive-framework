@@ -118,6 +118,27 @@ of its own.
 4. [`docs/execution/active.md`](docs/execution/active.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md).
 5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
 
+### Fast targeted navigation
+
+For implementation and review work, use the repository's generated intelligence to route a small,
+task-specific context before opening source broadly:
+
+```text
+dev_context_logs/context_summary.{md,json}
+    -> .generated/knowledge/code-map.jsonl
+    -> .generated/knowledge/{symbols,ownership}.jsonl
+    -> applicable canonical documentation
+    -> targeted source and tests
+    -> Tier-2 logs, SQLite trajectories, and benchmark evidence as needed
+```
+
+These artifacts are navigation aids, not authorities. Confirm their repository revision/digest,
+non-zero content, and referenced paths before use; an index that merely opens is not necessarily
+current or usable. If LDA or generated knowledge is empty, stale, or inconsistent, fall back to
+`rg --files`, targeted `rg`, canonical documentation, source, and tests. Prefer selected entries and
+sections over loading whole indexes or log directories into an AI context window. The mandatory
+agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
+
 ---
 
 ## 3. What Exists in This Repository (As-Built Inventory)

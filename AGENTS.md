@@ -47,6 +47,46 @@ docs/theory/ | docs/research/ | docs/reports/
 - **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
 - **The Execution**: [`docs/execution/active.md`](docs/execution/active.md).
 
+### Repository-Intelligence Navigation Protocol
+
+Humans and AI agents MUST use repository-intelligence artifacts as a token-bounded routing layer,
+not as architectural authority. For targeted work, navigate in this order:
+
+```text
+dev_context_logs/context_summary.{md,json}       # Tier 1: fast state/evidence bootstrap
+    -> .generated/knowledge/code-map.jsonl       # subsystem and canonical-owner routing
+    -> .generated/knowledge/{symbols,ownership}.jsonl
+    -> canonical documentation                   # applicable law, decisions, architecture
+    -> targeted source and tests                 # implementation and executable falsifiers
+    -> dev_context_logs/ Tier 2, SQLite, evidence, benchmarks
+```
+
+Load only the entries, files, and sections needed for the assigned task. Do not place complete
+indexes, broad source trees, or all Tier-2 logs into the context window when a targeted query is
+sufficient.
+
+The authority rule is:
+
+```text
+indexes route; canonical documents constrain; source implements; tests falsify;
+ledger and benchmark artifacts demonstrate observed behavior
+```
+
+Before relying on `.lda/index.db*`, `.generated/knowledge/`, or `dev_context_logs/`, agents MUST
+check, when the metadata is available, that:
+
+- the recorded source revision or digest matches the inspected repository subject;
+- required entity counts are non-zero and expected tables/files are present;
+- referenced paths and primary symbols resolve in the current tree;
+- generator/schema versions are supported and the artifact is not marked stale or invalid.
+
+An index that opens successfully but is empty, stale, or contains unresolved paths is not healthy
+for navigation. When freshness or usability cannot be established, report that limitation and fall
+back deterministically to `rg --files`, targeted `rg`, canonical documents, source, and tests.
+Generated indexes, LDA databases, summaries, diagrams, and historical logs are reconstructible
+projections: they MUST NOT override higher-authority documentation, current source, tests, Git state,
+or durable runtime evidence, and MUST NOT be edited manually.
+
 ### Hexagonal Production Lattice (`vanguard/packages/`)
 The canonical production truth lives in `vanguard/packages/`, strictly enforcing the hexagonal boundary flow:
 ```text

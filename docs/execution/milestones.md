@@ -14,8 +14,8 @@ audience:
   - contributor
   - release-owner
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-08-29
+version: 0.9.2a0
+last_verified: 2026-08-30
 normative_authority:
   - docs/03_execution/milestones.md
   - docs/SPEC.md#milestone-compatibility
@@ -56,3 +56,21 @@ This page owns stable outcomes and gate predicates. It does not own current pack
 ## Current-status caveat
 
 The active authority corpus contains inconsistent M-7/M-8 and baseline status statements (`CONFLICT-E-002` and `CONFLICT-E-003`). This page therefore publishes stable gates only. It does not select a current completion state; see [execution.active](active.md) and the generated conflict register.
+
+## v0.9.2 capability-wave overlay
+
+Vanguard v0.9.2 is an implementation and qualification overlay, not a replacement milestone
+ladder. Its waves are routed through [execution.active](active.md) and contribute evidence to the
+existing M-4–M-10 gates without silently closing them.
+
+| Capability wave | Stable outcome | Required evidence |
+|---|---|---|
+| W-092-0 | Canonical context, completion, verification, recovery, patch, and trajectory contracts | Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks |
+| W-092-1 | Valid benchmark subjects and lossless trajectory/projection evidence | Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors |
+| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios, local challenge receipts, exterior evaluator kept independent |
+| W-092-3 | Bounded provider-neutral repository context and durable coding state | Control/treatment trajectories with task, index, context and prompt identities |
+| W-092-4 | Reliable observation, patching, typed recovery and semantic resume | Patch corpus, injected-failure study, cold-restart parity and provider contract tests |
+| W-092-5 | Evidence-qualified release disposition | Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary |
+
+No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
+be evaluated under the milestone acceptance boundary to which it is offered.

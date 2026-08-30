@@ -190,3 +190,26 @@ The audit corrections are:
 
 The first Dev B package remains `FIN-B1`, but Wave 1 is not started by this
 board because no Wave 1 implementation prompt or accepted M-8 bundle exists.
+
+## Wave 1 / FIN-A1 disposition
+
+FIN-A1 was audited on `4b29f07f3832ce1476868134b2f1fad4d135c5f7` and remains
+`BLOCKED`. The M-8 proof runner completed in a fresh process with `59` tests,
+`0` failures, and `34/34` required markers; the focused memory/runtime suite
+completed `25` tests and the cold-restart suite `29` tests, all green. These
+are mechanism and falsifier observations, not milestone acceptance.
+
+The acceptance prerequisites are not present:
+
+- no executable, preregistered held-out workload with attributable real
+  observations, cost, tokens, and latency exists in the current subject;
+- no producer-signed M-8 bundle, promotion receipt, or executed rollback
+  receipt has been deposited;
+- no independent verifier input can be issued by Dev A;
+- the current working tree contains unrelated Dev B changes and the existing
+  `.draft/todo/beta_delivery.md`; the full suite therefore returned `2348`
+  tests, `1` failure, `0` errors, and `20` skips because path hygiene rejects
+  a machine-local path in that draft.
+
+No synthetic runner result is promoted to held-out lift, and no M-8 acceptance
+claim is made. M-9 remains unauthorized.

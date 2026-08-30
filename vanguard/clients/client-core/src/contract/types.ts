@@ -77,16 +77,31 @@ export type StartRunRequest = {
 };
 
 export type RunRef = { runId: string; episodeId?: string };
-export type RunSnapshot = { runId: string; status: string; seq: string };
+export type RunSnapshot = {
+  runId: string;
+  status: string;
+  seq: string;
+  verdict?: string;
+  metrics?: Record<string, unknown>;
+};
+export type RunSummary = {
+  runId: string;
+  status: string;
+  seq: string;
+  occurredAt?: string;
+  verdict?: string;
+};
 export type CommandReceipt = {
   runId: string;
   command: "cancel" | "checkpoint" | "resume" | "resolve_approval" | "record_correction" | "daemon_signal";
   status: "requested" | "accepted" | "rejected";
+  detail?: string;
+  result?: Record<string, unknown>;
 };
 export type ResumeRunRequest = { runId: string; checkpointId?: string };
 export type ResolveApprovalRequest = {
   approvalId: string;
-  decision: "approve" | "reject";
+  decision: "approve" | "reject" | "approved" | "rejected" | ApprovalDecision;
   signature?: string;
   signerKeyRef?: string;
 };
@@ -154,12 +169,14 @@ export interface RuntimeClient {
   startRun(request: StartRunRequest, signal?: AbortSignal): Promise<Result<RunRef>>;
   streamEvents(cursor: EventCursor, signal?: AbortSignal): AsyncIterable<Result<StreamItem>>;
   getRun(runId: string, signal?: AbortSignal): Promise<Result<RunSnapshot>>;
-  requestCancel(runId: string, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
-  requestCheckpoint(runId: string, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
-  requestResume(request: ResumeRunRequest, signal?: AbortSignal): Promise<Result<RunRef>>;
-  explainArtifact(artifactId: string, signal?: AbortSignal): Promise<Result<ArtifactExplanation>>;
+  listRuns?(options?: { limit?: number; offset?: number; status?: string }, signal?: AbortSignal): Promise<Result<RunSummary[]>>;
+  requestCancel(runId: string, signalOrReason?: AbortSignal | { reason?: string }): Promise<Result<CommandReceipt>>;
+  requestCheckpoint(runId: string, signalOrReason?: AbortSignal | { reason?: string }): Promise<Result<CommandReceipt>>;
+  requestResume(request: ResumeRunRequest | string, signalOrOpts?: AbortSignal | { checkpointId?: string }): Promise<Result<RunRef | CommandReceipt>>;
+  explainArtifact(artifactId: string, signalOrOptions?: AbortSignal | { substrateProfile?: string }): Promise<Result<ArtifactExplanation>>;
   resolveApproval(request: ResolveApprovalRequest, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
   recordCorrection(record: CorrectionRecord, signal?: AbortSignal): Promise<Result<CommandReceipt>>;
+  getCapabilities?(signal?: AbortSignal): Promise<Result<Record<string, unknown>>>;
   getDaemonStatus(signal?: AbortSignal): Promise<Result<DaemonStatus>>;
 }
 

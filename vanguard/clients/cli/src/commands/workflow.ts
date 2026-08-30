@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import type { ParsedCli } from "../composition/parse-cli.js";
 import {
@@ -7,20 +7,19 @@ import {
   writeJsonOutcome,
 } from "../output.js";
 
-type AgentManifestSummary = {
+type WorkflowSummary = {
   id: string;
   name: string;
   path: string;
-  version?: string;
-  role?: string;
+  description?: string;
 };
 
-function scanLocalAgents(dir: string = process.cwd()): AgentManifestSummary[] {
-  const agents: AgentManifestSummary[] = [];
+function scanLocalWorkflows(dir: string = process.cwd()): WorkflowSummary[] {
+  const workflows: WorkflowSummary[] = [];
   const candidateDirs = [
-    join(dir, "agents"),
-    join(dir, ".aether", "agents"),
-    join(dir, "vanguard", "packages", "agency"),
+    join(dir, "workflows"),
+    join(dir, ".aether", "workflows"),
+    join(dir, "vanguard", "packages", "runtime"),
   ];
 
   for (const cDir of candidateDirs) {
@@ -30,7 +29,7 @@ function scanLocalAgents(dir: string = process.cwd()): AgentManifestSummary[] {
         for (const file of files) {
           if (file.endsWith(".json") || file.endsWith(".yaml") || file.endsWith(".yml") || file.endsWith(".py")) {
             const id = basename(file, file.includes(".") ? file.slice(file.lastIndexOf(".")) : "");
-            agents.push({
+            workflows.push({
               id,
               name: id,
               path: join(cDir, file),
@@ -38,69 +37,67 @@ function scanLocalAgents(dir: string = process.cwd()): AgentManifestSummary[] {
           }
         }
       } catch {
-        /* ignore read errors */
+        /* ignore */
       }
     }
   }
 
-  // Always include default core agent
-  if (!agents.some((a) => a.id === "coding-agent" || a.id === "vg-code-default")) {
-    agents.push({
-      id: "coding-agent",
-      name: "AETHER Default Coding Agent",
-      path: "built-in://coding-agent",
-      version: "0.9.1",
-      role: "Software Engineering Substrate",
+  if (!workflows.some((w) => w.id === "default-turn-loop")) {
+    workflows.push({
+      id: "default-turn-loop",
+      name: "Default Turn Loop Workflow",
+      path: "built-in://default-turn-loop",
+      description: "Observe -> Decide -> Authorize -> Execute -> Record loop",
     });
   }
 
-  return agents;
+  return workflows;
 }
 
-export async function handleAgent(args: string[], options: ParsedCli): Promise<number> {
+export async function handleWorkflow(args: string[], options: ParsedCli): Promise<number> {
   const subcommand = args[0] || "list";
 
   if (subcommand === "list") {
-    const agents = scanLocalAgents(options.repo);
+    const workflows = scanLocalWorkflows(options.repo);
     if (options.json) {
       writeJsonOutcome({
         api: "aether.cli-outcome/1",
-        command: "agent list",
+        command: "workflow list",
         status: "success",
-        data: { agents },
+        data: { workflows },
       });
     } else {
-      console.log(`\nDiscovered Local Agents (${agents.length}):`);
-      for (const ag of agents) {
-        console.log(`  ${ag.id.padEnd(24)} ${ag.path}`);
+      console.log(`\nDiscovered Local Workflows (${workflows.length}):`);
+      for (const wf of workflows) {
+        console.log(`  ${wf.id.padEnd(24)} ${wf.path}`);
       }
     }
     return CLI_EXIT_CODES.SUCCESS;
   }
 
   if (subcommand === "inspect" || subcommand === "show") {
-    const agentId = args[1];
-    if (!agentId) {
-      logDiagnostic("Missing <agent-id> for agent inspect");
+    const wfId = args[1];
+    if (!wfId) {
+      logDiagnostic("Missing <workflow-id> for workflow inspect");
       return CLI_EXIT_CODES.INVALID_INPUT;
     }
-    const agents = scanLocalAgents(options.repo);
-    const match = agents.find((a) => a.id === agentId);
+    const workflows = scanLocalWorkflows(options.repo);
+    const match = workflows.find((w) => w.id === wfId);
     if (!match) {
-      logDiagnostic(`Agent '${agentId}' not found`);
+      logDiagnostic(`Workflow '${wfId}' not found`);
       return CLI_EXIT_CODES.INVALID_INPUT;
     }
     if (options.json) {
       writeJsonOutcome({
         api: "aether.cli-outcome/1",
-        command: "agent inspect",
+        command: "workflow inspect",
         status: "success",
         data: match,
       });
     } else {
-      console.log(`\nAgent: ${match.name} (${match.id})`);
-      console.log(`Path:  ${match.path}`);
-      if (match.role) console.log(`Role:  ${match.role}`);
+      console.log(`\nWorkflow: ${match.name} (${match.id})`);
+      console.log(`Path:     ${match.path}`);
+      if (match.description) console.log(`Description: ${match.description}`);
     }
     return CLI_EXIT_CODES.SUCCESS;
   }
@@ -108,7 +105,7 @@ export async function handleAgent(args: string[], options: ParsedCli): Promise<n
   if (subcommand === "validate") {
     const manifestPath = args[1];
     if (!manifestPath) {
-      logDiagnostic("Missing <manifest-path> for agent validate");
+      logDiagnostic("Missing <manifest-path> for workflow validate");
       return CLI_EXIT_CODES.INVALID_INPUT;
     }
     if (!existsSync(manifestPath)) {
@@ -123,12 +120,12 @@ export async function handleAgent(args: string[], options: ParsedCli): Promise<n
       if (options.json) {
         writeJsonOutcome({
           api: "aether.cli-outcome/1",
-          command: "agent validate",
+          command: "workflow validate",
           status: "success",
           data: { valid: true, path: manifestPath },
         });
       } else {
-        console.log(`Valid manifest: ${manifestPath}`);
+        console.log(`Valid workflow manifest: ${manifestPath}`);
       }
       return CLI_EXIT_CODES.SUCCESS;
     } catch (err) {
@@ -137,6 +134,6 @@ export async function handleAgent(args: string[], options: ParsedCli): Promise<n
     }
   }
 
-  logDiagnostic(`Unknown agent subcommand '${subcommand}' (supported: list, inspect, validate)`);
+  logDiagnostic(`Unknown workflow subcommand '${subcommand}' (supported: list, inspect, validate)`);
   return CLI_EXIT_CODES.INVALID_INPUT;
 }

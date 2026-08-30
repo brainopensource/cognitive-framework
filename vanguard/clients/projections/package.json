@@ -1,0 +1,55 @@
+{
+  "name": "@aether/projections",
+  "version": "0.1.0",
+  "description": "AETHER pure deterministic projections, event folds, and trace generators",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./run-snapshot.js": {
+      "types": "./dist/src/run-snapshot.d.ts",
+      "default": "./dist/src/run-snapshot.js"
+    },
+    "./trace-graph.js": {
+      "types": "./dist/src/trace-graph.d.ts",
+      "default": "./dist/src/trace-graph.js"
+    },
+    "./evidence-grid.js": {
+      "types": "./dist/src/evidence-grid.d.ts",
+      "default": "./dist/src/evidence-grid.js"
+    },
+    "./conversation.js": {
+      "types": "./dist/src/conversation.d.ts",
+      "default": "./dist/src/conversation.js"
+    },
+    "./approval-state.js": {
+      "types": "./dist/src/approval-state.d.ts",
+      "default": "./dist/src/approval-state.js"
+    }
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build --silent && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "@aether/contracts": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

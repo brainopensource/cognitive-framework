@@ -421,7 +421,8 @@ export class SocketRuntimeClient implements RuntimeClient {
       if (!this.signer) {
         return fail("permission_denied", "No signer configured to resolve approval");
       }
-      decision = await this.signer.signChallenge(this.lastChallenge, request.decision);
+      const resolution = request.decision === "reject" ? "rejected" : "approved";
+      decision = await this.signer.signChallenge(this.lastChallenge, resolution);
     }
 
     const payload: Record<string, unknown> = { decision };

@@ -3,9 +3,9 @@ id: nav.home
 canonical_id: nav.home
 class: navigation
 authority: descriptive
-truth_plane: AS_BUILT
+truth_plane: BOTH
 status: living
-implementation_status: IMPLEMENTED
+implementation_status: PARTIAL
 owner: documentation-governance
 canonical_for:
   - documentation authority explanation
@@ -36,6 +36,10 @@ relationships:
   - arch.system.overview
   - guide.getting-started
   - ref.commands
+  - spec.core
+  - decision.index
+  - execution.active
+  - theory.agent-substrate
 reviewer: documentation-specialist
 confidence: high
 ---
@@ -48,22 +52,27 @@ This document is the canonical root entry point and navigation directory for the
 ## Scope
 - Overview of the evidence-backed candidate documentation structure.
 - Guided reading paths tailored for operators, agent pack developers, core contributors, and system architects.
-- Truth plane definitions (`AS_BUILT` vs `TARGET_DEPENDENT`) and implementation status vocabulary.
-- Canonical owner directory routing all 25 active AS_BUILT pages.
+- Truth plane definitions (`AS_BUILT` versus `TARGET`) and implementation status vocabulary.
+- Canonical owner directory routing all 25 AS_BUILT pages and five TARGET-dependent surfaces completed in Block E.
 
 ## Non-responsibilities
 - Deep subsystem architectural explanations (owned by [`arch.system.overview`](architecture/overview.md) and subsystem architecture leaves).
 - Exact CLI flags, option syntax, and API schemas (owned by [`ref.commands`](reference/commands.md) and reference leaves).
-- Normative product requirements and TARGET specifications (deferred to Block E).
+- Normative product requirements and TARGET specifications (owned by [`spec.core`](SPEC.md)).
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Root candidate navigation is active and verified across all 25 Block D documentation work packets at analysis subject SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`.
+
+## TARGET Status
+- `PARTIAL` — The five approved TARGET surfaces are present. Their requirements, gaps, conflicts, decisions, execution intent, and theory remain explicitly separate from the AS_BUILT pages.
 
 ---
 
 ## 1. What This Candidate Documentation Describes
 
 This documentation set represents the code-verified **AS_BUILT** state of Vanguard / AETHER reconstructed directly from production packages (`vanguard/packages/`), schemas (`schemas/`), manifests (`packs/`), and executable verification tests (`test/`). Every material implementation claim is tied to concrete code evidence.
+
+TARGET product intent is reconstructed separately from current authority. Start with the compact [TARGET specification](SPEC.md), then use the [decision index](decisions/README.md), [milestone gates](execution/milestones.md), [active execution view](execution/active.md), or [agent-substrate theory](theory/agent-substrate.md). A TARGET requirement never proves implementation; each divergence is registered in the Block E reconciliation artifacts.
 
 ---
 

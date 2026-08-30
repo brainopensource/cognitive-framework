@@ -1,0 +1,22 @@
+{"canonical_id": "spec.core", "completed_exactly_once": true, "packet_id": "WP-E-001", "result_id": "RESULT-E-001", "status": "COMPLETED"}
+{"canonical_id": "decision.index", "completed_exactly_once": true, "packet_id": "WP-E-002", "result_id": "RESULT-E-002", "status": "COMPLETED"}
+{"canonical_id": "execution.milestones", "completed_exactly_once": true, "packet_id": "WP-E-003", "result_id": "RESULT-E-003", "status": "COMPLETED"}
+{"canonical_id": "execution.active", "completed_exactly_once": true, "packet_id": "WP-E-004", "result_id": "RESULT-E-004", "status": "COMPLETED"}
+{"canonical_id": "theory.agent-substrate", "completed_exactly_once": true, "packet_id": "WP-E-005", "result_id": "RESULT-E-005", "status": "COMPLETED"}
+{"check": "authority reviewed", "result_id": "CHECK-E-001", "status": "PASS"}
+{"check": "TARGET architecture reconstructed", "result_id": "CHECK-E-002", "status": "PASS"}
+{"check": "claims trace to authority", "result_id": "CHECK-E-003", "status": "PASS"}
+{"check": "truth planes separated", "result_id": "CHECK-E-004", "status": "PASS"}
+{"check": "gaps explicit", "result_id": "CHECK-E-005", "status": "PASS"}
+{"check": "contradictions explicit", "result_id": "CHECK-E-006", "status": "PASS"}
+{"check": "authority conflicts preserved", "result_id": "CHECK-E-007", "status": "PASS"}
+{"check": "five deferred packets complete", "result_id": "CHECK-E-008", "status": "PASS"}
+{"check": "canonical IDs unique", "result_id": "CHECK-E-009", "status": "PASS"}
+{"check": "canonical ownership collision-free", "result_id": "CHECK-E-010", "status": "PASS"}
+{"check": "implementation unchanged", "result_id": "CHECK-E-011", "status": "PASS"}
+{"check": "active docs and ADR history unchanged", "result_id": "CHECK-E-012", "status": "PASS"}
+{"check": "candidate links resolve", "result_id": "CHECK-E-013", "status": "PASS"}
+{"check": "metadata complete", "result_id": "CHECK-E-014", "status": "PASS"}
+{"check": "adversarial review complete", "result_id": "CHECK-E-015", "status": "PASS"}
+{"check": "repository-wide documentation budget", "disposition": "Block E is prohibited from editing active docs; all five TARGET candidate pages are 108 lines or fewer", "finding": "docs/SPEC.md is 270 lines against its 250-line active-tree budget at HEAD", "result_id": "EXCEPTION-E-001", "status": "NON_BLOCKING_PREEXISTING"}
+{"record": "BLOCK E EXIT GATE: PASS", "result_id": "GATE-E-001", "status": "PASS", "technical_approval": {"approved_by": "delegated-tech-lead-block-e", "approved_for": "BLOCK F \u2014 Legacy Loss Audit", "critical_unresolved_defects": 0}}

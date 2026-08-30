@@ -1,5 +1,5 @@
-{"canonical_id": "nav.home", "class": "navigation", "deferred_until_block_e": false, "path": "candidate-docs/README.md", "truth_plane": "AS_BUILT"}
-{"canonical_id": "spec.core", "class": "normative", "deferred_until_block_e": true, "path": "candidate-docs/SPEC.md", "truth_plane": "TARGET_DEPENDENT"}
+{"canonical_id": "nav.home", "class": "navigation", "deferred_until_block_e": false, "path": "candidate-docs/README.md", "truth_plane": "BOTH_SEPARATED"}
+{"canonical_id": "spec.core", "class": "normative", "deferred_until_block_e": false, "path": "candidate-docs/SPEC.md", "truth_plane": "TARGET"}
 {"canonical_id": "arch.system.overview", "class": "architecture", "deferred_until_block_e": false, "path": "candidate-docs/architecture/overview.md", "truth_plane": "AS_BUILT"}
 {"canonical_id": "arch.runtime.execution", "class": "architecture", "deferred_until_block_e": false, "path": "candidate-docs/architecture/runtime-execution.md", "truth_plane": "AS_BUILT"}
 {"canonical_id": "arch.trust.kernel", "class": "architecture", "deferred_until_block_e": false, "path": "candidate-docs/architecture/kernel.md", "truth_plane": "AS_BUILT"}
@@ -24,7 +24,7 @@
 {"canonical_id": "guide.add-pack-tool", "class": "guide", "deferred_until_block_e": false, "path": "candidate-docs/guides/add-pack-or-tool.md", "truth_plane": "AS_BUILT"}
 {"canonical_id": "guide.add-adapter-provider", "class": "guide", "deferred_until_block_e": false, "path": "candidate-docs/guides/add-adapter-or-provider.md", "truth_plane": "AS_BUILT"}
 {"canonical_id": "guide.operate-service", "class": "guide", "deferred_until_block_e": false, "path": "candidate-docs/guides/operate-runtime-service.md", "truth_plane": "AS_BUILT"}
-{"canonical_id": "decision.index", "class": "decision", "deferred_until_block_e": true, "path": "candidate-docs/decisions/README.md", "truth_plane": "TARGET_DEPENDENT"}
-{"canonical_id": "execution.milestones", "class": "execution", "deferred_until_block_e": true, "path": "candidate-docs/execution/milestones.md", "truth_plane": "TARGET_DEPENDENT"}
-{"canonical_id": "execution.active", "class": "execution", "deferred_until_block_e": true, "path": "candidate-docs/execution/active.md", "truth_plane": "TARGET_DEPENDENT"}
-{"canonical_id": "theory.agent-substrate", "class": "theory", "deferred_until_block_e": true, "path": "candidate-docs/theory/agent-substrate.md", "truth_plane": "TARGET_DEPENDENT"}
+{"canonical_id": "decision.index", "class": "decision", "deferred_until_block_e": false, "path": "candidate-docs/decisions/README.md", "truth_plane": "TARGET"}
+{"canonical_id": "execution.milestones", "class": "execution", "deferred_until_block_e": false, "path": "candidate-docs/execution/milestones.md", "truth_plane": "TARGET"}
+{"canonical_id": "execution.active", "class": "execution", "deferred_until_block_e": false, "path": "candidate-docs/execution/active.md", "truth_plane": "TARGET"}
+{"canonical_id": "theory.agent-substrate", "class": "theory", "deferred_until_block_e": false, "path": "candidate-docs/theory/agent-substrate.md", "truth_plane": "TARGET"}

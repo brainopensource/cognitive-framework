@@ -86,3 +86,46 @@ export function toTraceGraph(envelopes: readonly EventEnvelope[]): TraceGraph {
 
   return { nodes, edges };
 }
+
+export function emptyTraceGraph(): TraceGraph {
+  return { nodes: [], edges: [] };
+}
+
+export function reduceTraceGraph(previous: TraceGraph, envelope: EventEnvelope): TraceGraph {
+  const nextNode: TraceNode = {
+    id: envelope.eventId,
+    kind: String(envelope.payload.kind ?? "unknown"),
+    seq: envelope.seq,
+    runId: envelope.runId,
+    principal: envelope.principal,
+    occurredAt: envelope.occurredAt,
+    summary:
+      typeof envelope.payload.goal === "string"
+        ? envelope.payload.goal
+        : typeof envelope.payload.text === "string"
+        ? envelope.payload.text
+        : typeof envelope.payload.tool === "string"
+        ? envelope.payload.tool
+        : undefined,
+  };
+
+  const nextNodes = [...previous.nodes, nextNode];
+  const nextEdges = [...previous.edges];
+  const edgeSet = new Set(previous.edges.map((e) => e.id));
+
+  if (typeof envelope.parentEventId === "string" && envelope.parentEventId.trim().length > 0) {
+    const id = `${envelope.parentEventId}->${envelope.eventId}`;
+    if (!edgeSet.has(id) && envelope.parentEventId !== envelope.eventId) {
+      nextEdges.push({ id, source: envelope.parentEventId, target: envelope.eventId, relation: "causal" });
+    }
+  } else if (previous.nodes.length > 0) {
+    const lastNode = previous.nodes[previous.nodes.length - 1]!;
+    const id = `${lastNode.id}->${envelope.eventId}`;
+    if (!edgeSet.has(id) && lastNode.id !== envelope.eventId) {
+      nextEdges.push({ id, source: lastNode.id, target: envelope.eventId, relation: "sequence" });
+    }
+  }
+
+  return { nodes: nextNodes, edges: nextEdges };
+}
+

@@ -269,3 +269,131 @@ export interface SignerPort {
     reviewer?: string
   ): Promise<ApprovalDecision> | ApprovalDecision;
 }
+
+export type AgentDescriptor = {
+  id: string;
+  name: string;
+  description: string;
+  validationStatus: "valid" | "invalid" | "unverified";
+  modelSummary: string;
+  toolSummary: string[];
+  capabilitySummary: string[];
+  manifestPath: string;
+};
+
+export type WorkflowDescriptor = {
+  id: string;
+  name: string;
+  description: string;
+  manifestPath: string;
+  validationStatus: "valid" | "invalid" | "unverified";
+  participatingAgents?: string[];
+  entrypointOrStages?: string[];
+};
+
+export type FrontendConnectionState =
+  | "CONNECTING"
+  | "CONNECTED"
+  | "RECONNECTING"
+  | "OFFLINE"
+  | "DEGRADED"
+  | "INCOMPATIBLE";
+
+export type ActivityCategory =
+  | "MESSAGE"
+  | "FILE_READ"
+  | "SEARCH"
+  | "TOOL"
+  | "COMMAND"
+  | "PATCH"
+  | "VERIFICATION"
+  | "RESEARCH"
+  | "CITATION"
+  | "ARTIFACT"
+  | "APPROVAL"
+  | "WARNING"
+  | "ERROR"
+  | "COMPLETION";
+
+export type ActivityClaim = {
+  claimType: string;
+  statement: string;
+  pass: boolean;
+};
+
+export type SemanticActivityItem = {
+  id: string;
+  category: ActivityCategory;
+  title: string;
+  details?: string;
+  diff?: string;
+  command?: string;
+  filePath?: string;
+  searchQuery?: string;
+  citationUrl?: string;
+  artifactId?: string;
+  approvalId?: string;
+  claims?: ActivityClaim[];
+  status: "pending" | "running" | "completed" | "failed";
+  durationMs?: number;
+  timestamp: string;
+  seq?: string;
+  eventId?: string;
+  rawPayload?: Record<string, unknown>;
+};
+
+export type DeepLinkTarget =
+  | { kind: "run"; runId: string; eventSeq?: string }
+  | { kind: "event"; runId: string; seq: string }
+  | { kind: "artifact"; digest: string }
+  | { kind: "approval"; approvalId: string }
+  | { kind: "trace"; runId: string; nodeId: string }
+  | { kind: "context"; layer?: string };
+
+export type GeneralSettings = {
+  defaultRuntime: string;
+  defaultWorkspace: string;
+  defaultAgent: string;
+  defaultWorkflow: string;
+  autoFollowStreaming: boolean;
+};
+
+export type RuntimeSettings = {
+  socketPath: string;
+  httpUrl: string;
+  reconnectIntervalMs: number;
+  maxReconnectAttempts: number;
+  requestTimeoutMs: number;
+};
+
+export type AppearanceSettings = {
+  theme: "dark" | "light" | "high-contrast";
+  density: "compact" | "comfortable";
+  reducedMotion: boolean;
+};
+
+export type WorkspaceSettings = {
+  recentWorkspaces: string[];
+  maxRecentWorkspaces: number;
+};
+
+export type TerminalSettings = {
+  tuiAnimation: boolean;
+  tuiColorMode: "truecolor" | "256color" | "16color" | "plain";
+};
+
+export type AccessibilitySettings = {
+  highContrast: boolean;
+  screenReaderOptimized: boolean;
+  fontSize: number;
+};
+
+export type FrontendSettings = {
+  general: GeneralSettings;
+  runtime: RuntimeSettings;
+  appearance: AppearanceSettings;
+  workspace: WorkspaceSettings;
+  terminal: TerminalSettings;
+  accessibility: AccessibilitySettings;
+};
+

@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@aether/contracts": "*",
+    "@aether/projections": "*",
     "canonicalize": "^2.1.0"
   },
   "devDependencies": {

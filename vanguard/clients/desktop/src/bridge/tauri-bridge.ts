@@ -6,13 +6,20 @@ export interface NativePlatformBridge {
   stopSidecar(): Promise<Result<void>>;
   openDirectoryDialog(): Promise<string | null>;
   signApproval(challenge: ApprovalChallenge, resolution: "approved" | "rejected"): Promise<ApprovalDecision>;
+  sendNotification(title: string, body: string): Promise<void>;
+  openExternalUrl(url: string): Promise<void>;
+  restoreWindowState(): Promise<void>;
+  saveWindowState(state: Record<string, unknown>): Promise<void>;
 }
 
 export class TauriNativeBridge implements NativePlatformBridge {
   isTauri(): boolean {
     if (typeof globalThis === "undefined") return false;
     const g = globalThis as any;
-    return typeof g.__TAURI_INTERNALS__ !== "undefined" || (typeof g.window !== "undefined" && typeof g.window.__TAURI__ !== "undefined");
+    return (
+      typeof g.__TAURI_INTERNALS__ !== "undefined" ||
+      (typeof g.window !== "undefined" && typeof g.window.__TAURI__ !== "undefined")
+    );
   }
 
   async startSidecar(): Promise<Result<{ pid: number; socketPath: string }>> {
@@ -66,7 +73,10 @@ export class TauriNativeBridge implements NativePlatformBridge {
     }
   }
 
-  async signApproval(challenge: ApprovalChallenge, resolution: "approved" | "rejected"): Promise<ApprovalDecision> {
+  async signApproval(
+    challenge: ApprovalChallenge,
+    resolution: "approved" | "rejected"
+  ): Promise<ApprovalDecision> {
     if (this.isTauri()) {
       try {
         const invoke = (globalThis as any).window.__TAURI__.invoke;
@@ -86,5 +96,64 @@ export class TauriNativeBridge implements NativePlatformBridge {
       reviewer: "desktop-operator",
       signature: "a".repeat(128),
     };
+  }
+
+  async sendNotification(title: string, body: string): Promise<void> {
+    if (this.isTauri()) {
+      try {
+        const notification = (globalThis as any).window.__TAURI__.notification;
+        if (notification && notification.sendNotification) {
+          notification.sendNotification({ title, body });
+          return;
+        }
+      } catch {
+        /* fallback */
+      }
+    }
+
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(title, { body });
+    }
+  }
+
+  async openExternalUrl(url: string): Promise<void> {
+    if (this.isTauri()) {
+      try {
+        const shell = (globalThis as any).window.__TAURI__.shell;
+        if (shell && shell.open) {
+          await shell.open(url);
+          return;
+        }
+      } catch {
+        /* fallback */
+      }
+    }
+    if (typeof window !== "undefined" && window.open) {
+      window.open(url, "_blank");
+    }
+  }
+
+  async restoreWindowState(): Promise<void> {
+    if (this.isTauri()) {
+      try {
+        const invoke = (globalThis as any).window.__TAURI__.invoke;
+        await invoke("restore_window_state");
+      } catch {
+        /* fallback */
+      }
+    }
+  }
+
+  async saveWindowState(state: Record<string, unknown>): Promise<void> {
+    if (this.isTauri()) {
+      try {
+        const invoke = (globalThis as any).window.__TAURI__.invoke;
+        await invoke("save_window_state", { state });
+      } catch {
+        /* fallback */
+      }
+    } else if (typeof localStorage !== "undefined") {
+      localStorage.setItem("aether_window_state", JSON.stringify(state));
+    }
   }
 }

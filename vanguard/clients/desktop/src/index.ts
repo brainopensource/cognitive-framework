@@ -6,6 +6,7 @@ export * from "./components/Composer.js";
 export * from "./components/ApprovalBanner.js";
 export * from "./components/ForensicDrawer.js";
 export * from "./components/DiffViewer.js";
+export * from "./components/CommandPalette.js";
 export * from "./state/desktop-store.js";
 export * from "./state/session-history.js";
 export * from "./bridge/tauri-bridge.js";

@@ -5,6 +5,7 @@ export * from "./transports/http.js";
 export * from "./transports/replay.js";
 export * from "./signers/operator-signer.js";
 export * from "./signers/web-signer.js";
+export * from "./application/app-controller.js";
 
 import type { RuntimeClient } from "./client.js";
 import { SocketRuntimeClient, type SocketTransportOptions } from "./transports/socket.js";

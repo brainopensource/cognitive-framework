@@ -37,7 +37,8 @@
   "dependencies": {
     "@aether/contracts": "*",
     "@aether/client": "*",
-    "@aether/projections": "*"
+    "@aether/projections": "*",
+    "@aether/ui-web": "*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

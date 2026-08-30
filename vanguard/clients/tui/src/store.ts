@@ -4,13 +4,19 @@ import {
   toConversationTurns,
   emptyApprovalState,
   reduceApprovalState,
+  classifyActivityEnvelope,
+  evaluateCapabilities,
+  diagnoseFailure,
   type RunSnapshotModel,
   type ConversationTurn,
   type ApprovalState,
   type PendingApproval,
+  type FrontendCapabilityFlags,
+  type FailureDiagnostics,
 } from "@aether/projections";
-import type { EventEnvelope } from "@aether/contracts";
+import type { EventEnvelope, AgentDescriptor, WorkflowDescriptor, SemanticActivityItem } from "@aether/contracts";
 import type { RuntimeClient } from "@aether/client";
+import { FrontendAppController, DEFAULT_AGENTS, DEFAULT_WORKFLOWS } from "@aether/client";
 
 // Fine-grained Signal primitive
 export type Signal<T> = {
@@ -60,11 +66,18 @@ export type TuiStoreState = {
   model: string;
   runId: string;
 
+  // Catalog
+  availableAgents: AgentDescriptor[];
+  availableWorkflows: WorkflowDescriptor[];
+
   // Runtime & Stream status
   connectionState: ConnectionState;
+  capabilities: FrontendCapabilityFlags;
+  lastFailure: FailureDiagnostics | null;
   snapshot: RunSnapshotModel;
   events: EventEnvelope[];
   turns: ConversationTurn[];
+  activities: SemanticActivityItem[];
   approvalState: ApprovalState;
   pendingApproval?: PendingApproval;
 
@@ -84,20 +97,34 @@ export type TuiStoreState = {
 };
 
 export class TuiStore {
+  public readonly controller: FrontendAppController;
   public readonly state: Signal<TuiStoreState>;
   private abortController: AbortController | null = null;
 
-  constructor(initial: Partial<TuiStoreState> = {}) {
+  constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
+    this.controller = new FrontendAppController({
+      client,
+      initialWorkspace: initial.workspacePath ?? ".",
+      initialAgentId: initial.agentId ?? "coding-agent",
+    });
+
+    const ctrlState = this.controller.getState();
+
     this.state = createSignal<TuiStoreState>({
-      agentId: initial.agentId ?? "coding-agent",
-      workflowId: initial.workflowId ?? "default-turn-loop",
-      workspacePath: initial.workspacePath ?? ".",
+      agentId: initial.agentId ?? ctrlState.selectedAgentId,
+      workflowId: initial.workflowId ?? ctrlState.selectedWorkflowId,
+      workspacePath: initial.workspacePath ?? ctrlState.currentWorkspace,
       model: initial.model ?? "openrouter/free",
-      runId: initial.runId ?? "",
+      runId: initial.runId ?? ctrlState.activeRunId,
+      availableAgents: DEFAULT_AGENTS,
+      availableWorkflows: DEFAULT_WORKFLOWS,
       connectionState: initial.connectionState ?? "connected",
+      capabilities: ctrlState.capabilities,
+      lastFailure: ctrlState.lastFailure,
       snapshot: initial.snapshot ?? emptyRunSnapshot(),
       events: initial.events ?? [],
       turns: initial.turns ?? [],
+      activities: [],
       approvalState: initial.approvalState ?? emptyApprovalState(),
       pendingApproval: initial.pendingApproval,
       focus: initial.focus ?? "composer",
@@ -124,10 +151,13 @@ export class TuiStore {
   }
 
   public ingestEnvelope(envelope: EventEnvelope): void {
+    this.controller.ingestEnvelope(envelope);
+
     this.update((prev) => {
       const nextEvents = [...prev.events, envelope];
       const nextSnapshot = reduceRunSnapshot(prev.snapshot, envelope);
       const nextTurns = toConversationTurns(nextEvents);
+      const nextActivities = [...prev.activities, classifyActivityEnvelope(envelope)];
       const nextApprovalState = reduceApprovalState(prev.approvalState, envelope);
 
       let pendingApproval = nextSnapshot.pendingApproval;
@@ -141,6 +171,7 @@ export class TuiStore {
         events: nextEvents,
         snapshot: nextSnapshot,
         turns: nextTurns,
+        activities: nextActivities,
         approvalState: nextApprovalState,
         pendingApproval,
         focus,
@@ -192,6 +223,24 @@ export class TuiStore {
     return text;
   }
 
+  public selectAgent(agentId: string): void {
+    this.controller.selectAgent(agentId);
+    this.update((prev) => ({
+      ...prev,
+      agentId,
+      statusMessage: `Agent switched to ${agentId}`,
+    }));
+  }
+
+  public selectWorkflow(workflowId: string): void {
+    this.controller.selectWorkflow(workflowId);
+    this.update((prev) => ({
+      ...prev,
+      workflowId,
+      statusMessage: `Workflow switched to ${workflowId}`,
+    }));
+  }
+
   public async startRun(client: RuntimeClient, prompt: string): Promise<void> {
     const cur = this.get();
     this.update((prev) => ({
@@ -208,10 +257,12 @@ export class TuiStore {
     });
 
     if (!res.ok) {
+      const diag = diagnoseFailure(res.error);
       this.update((prev) => ({
         ...prev,
         connectionState: "unavailable",
-        statusMessage: `Failed to start run: ${res.error.message}`,
+        lastFailure: diag,
+        statusMessage: `Failed to start run: ${diag.cause}`,
       }));
       return;
     }
@@ -237,10 +288,12 @@ export class TuiStore {
     try {
       for await (const item of client.streamEvents({ runId }, signal)) {
         if (!item.ok) {
+          const diag = diagnoseFailure(item.error);
           this.update((prev) => ({
             ...prev,
             connectionState: "reconnecting",
-            statusMessage: `Stream error: ${item.error.message}`,
+            lastFailure: diag,
+            statusMessage: `Stream error: ${diag.cause}`,
           }));
           continue;
         }
@@ -276,9 +329,11 @@ export class TuiStore {
         statusMessage: `Approval ${pending.approvalId} resolved: ${decision}`,
       }));
     } else {
+      const diag = diagnoseFailure(res.error);
       this.update((prev) => ({
         ...prev,
-        statusMessage: `Approval resolution failed: ${res.error.message}`,
+        lastFailure: diag,
+        statusMessage: `Approval resolution failed: ${diag.cause}`,
       }));
     }
   }

@@ -1,7 +1,7 @@
 {
-  "name": "@aether/desktop",
+  "name": "@aether/ui-web",
   "version": "0.1.0",
-  "description": "AETHER native desktop application and developer workspace",
+  "description": "Shared Web & DOM UI component primitives for AETHER Desktop and Lab",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/src/index.js",
@@ -10,21 +10,11 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
-    },
-    "./bridge": {
-      "types": "./dist/src/bridge/tauri-bridge.d.ts",
-      "default": "./dist/src/bridge/tauri-bridge.js"
-    },
-    "./state": {
-      "types": "./dist/src/state/desktop-store.d.ts",
-      "default": "./dist/src/state/desktop-store.js"
     }
   },
   "files": [
     "dist/src/**/*.js",
-    "dist/src/**/*.d.ts",
-    "index.html",
-    "README.md"
+    "dist/src/**/*.d.ts"
   ],
   "engines": {
     "node": ">=20.0.0"
@@ -36,9 +26,7 @@
   },
   "dependencies": {
     "@aether/contracts": "*",
-    "@aether/client": "*",
-    "@aether/projections": "*",
-    "@aether/ui-web": "*"
+    "@aether/projections": "*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

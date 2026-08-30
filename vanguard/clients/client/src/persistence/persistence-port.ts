@@ -210,8 +210,9 @@ export class NodeFsPersistenceAdapter implements FrontendPersistencePort {
     if (customBaseDir) {
       this.baseDir = customBaseDir;
     } else if (typeof process !== "undefined" && process.env) {
+      const xdgConfig = process.env.XDG_CONFIG_HOME;
       const home = process.env.HOME || process.env.USERPROFILE || "/tmp";
-      this.baseDir = `${home}/.config/aether`;
+      this.baseDir = xdgConfig ? `${xdgConfig}/aether` : `${home}/.config/aether`;
     } else {
       this.baseDir = "/tmp/.aether";
     }
@@ -259,7 +260,9 @@ export class NodeFsPersistenceAdapter implements FrontendPersistencePort {
   }
 
   async loadSettings(): Promise<Partial<FrontendSettings> | null> {
-    const data = await this.readJson<Partial<FrontendSettings>>("settings.json");
+    const data =
+      (await this.readJson<Partial<FrontendSettings>>("config.json")) ??
+      (await this.readJson<Partial<FrontendSettings>>("settings.json"));
     return data ?? this.memoryFallback.loadSettings();
   }
 

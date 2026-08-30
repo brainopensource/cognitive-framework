@@ -11,7 +11,7 @@ last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_TUI.md
 subordinate_to:
   - product.frontend.platform
-  - ../../../SPEC.md
+  - ../../SPEC.md
 ---
 
 # Product Requirements Document: AETHER TUI (Terminal Cockpit)

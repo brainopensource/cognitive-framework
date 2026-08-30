@@ -19,7 +19,7 @@ audience:
 version: 0.9.1a1
 last_verified: 2026-08-29
 normative_authority:
-  - ../SPEC.md
+  - ./SPEC.md
 relationships:
   - spec.core
   - arch.system.overview
@@ -38,7 +38,7 @@ confidence: high
 
 This document is the single canonical repository for the foundational architectural choices and trade-offs governing AETHER. It answers strictly **why** non-obvious directions were chosen over defensible alternatives.
 
-Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implementation structure to [`architecture`](../architecture/overview.md) and [`reference`](../reference/schemas.md), and execution status to [`execution.active`](../execution/active.md).
+Normative requirements belong exclusively to [`spec.core`](SPEC.md), implementation structure to [`architecture`](architecture/overview.md) and [`reference`](backend/reference/schemas.md), and execution status to [`execution.active`](execution/active.md).
 
 ---
 
@@ -52,7 +52,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Empirically demonstrable proof that general substrate primitives cannot express required agentic topologies without unacceptable overhead or ergonomic burden.
 
-**Canonical owners:** [`spec.core`](../SPEC.md), [`arch.system.overview`](../architecture/overview.md) *(Provenance: ADR-0069, ADR-0095)*
+**Canonical owners:** [`spec.core`](SPEC.md), [`arch.system.overview`](architecture/overview.md) *(Provenance: ADR-0069, ADR-0095)*
 
 ---
 
@@ -66,7 +66,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Formal mathematical proof that dynamic multi-tenant agent mediation requires domain-aware kernel operations that cannot be safely expressed via user-space capability attenuation.
 
-**Canonical owners:** [`spec.core`](../SPEC.md), [`arch.trust.kernel`](../architecture/kernel.md) *(Provenance: ADR-0069, ADR-0074, ADR-0096)*
+**Canonical owners:** [`spec.core`](SPEC.md), [`arch.trust.kernel`](backend/architecture/kernel.md) *(Provenance: ADR-0069, ADR-0074, ADR-0096)*
 
 ---
 
@@ -80,7 +80,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Workload evidence demonstrating that deterministic event folding cannot meet latency budgets even when assisted by discardable checkpoint caches.
 
-**Canonical owners:** [`arch.state.causal`](../architecture/causal-state.md), [`ref.events`](../reference/events.md) *(Provenance: ADR-0071, ADR-0096, ADR-0098)*
+**Canonical owners:** [`arch.state.causal`](backend/architecture/causal-state.md), [`ref.events`](backend/reference/events.md) *(Provenance: ADR-0071, ADR-0096, ADR-0098)*
 
 ---
 
@@ -94,7 +94,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Evidence that cognitive streaming continuation requires low-latency in-memory state that cannot be reconstructed via prefix-cached token buffers.
 
-**Canonical owners:** [`arch.agency.turns`](../architecture/agency.md), [`arch.state.causal`](../architecture/causal-state.md) *(Provenance: ADR-0070, ADR-0095, ADR-0096)*
+**Canonical owners:** [`arch.agency.turns`](backend/architecture/agency.md), [`arch.state.causal`](backend/architecture/causal-state.md) *(Provenance: ADR-0070, ADR-0095, ADR-0096)*
 
 ---
 
@@ -108,7 +108,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** None; maintaining declared versus observed separation is an inviolable architectural auditability invariant.
 
-**Canonical owners:** [`arch.composition.extensibility`](../architecture/composition-extensibility.md), [`ref.manifests`](../reference/manifests.md) *(Provenance: ADR-0077, ADR-0088)*
+**Canonical owners:** [`arch.composition.extensibility`](backend/architecture/composition-extensibility.md), [`ref.manifests`](backend/reference/manifests.md) *(Provenance: ADR-0077, ADR-0088)*
 
 ---
 
@@ -122,7 +122,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Hardware-enforced cryptographic capabilities that render software kernel reference monitoring redundant.
 
-**Canonical owners:** [`arch.orchestration.delegation`](../architecture/delegation-topology.md), [`spec.core`](../SPEC.md) *(Provenance: ADR-0080, ADR-0099)*
+**Canonical owners:** [`arch.orchestration.delegation`](backend/architecture/delegation-topology.md), [`spec.core`](SPEC.md) *(Provenance: ADR-0080, ADR-0099)*
 
 ---
 
@@ -136,7 +136,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Theoretical proof that self-referential cognitive systems can prevent reward hacking without external ground truth.
 
-**Canonical owners:** [`arch.assurance.evaluation`](../architecture/assurance-evaluation.md), [`arch.memory.learning`](../architecture/memory-learning.md) *(Provenance: ADR-0072, ADR-0079, ADR-0100, ADR-0104)*
+**Canonical owners:** [`arch.assurance.evaluation`](backend/architecture/assurance-evaluation.md), [`arch.memory.learning`](backend/architecture/memory-learning.md) *(Provenance: ADR-0072, ADR-0079, ADR-0100, ADR-0104)*
 
 ---
 
@@ -150,7 +150,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Preregistered empirical benchmark evidence demonstrating $\ge 20\%$ median wall-time reduction with byte-identical result ordering on disjoint, read-only operations.
 
-**Canonical owners:** [`arch.agency.turns`](../architecture/agency.md), [`arch.orchestration.delegation`](../architecture/delegation-topology.md) *(Provenance: ADR-0070, ADR-0099, ADR-0105, indexed ADR-0106)*
+**Canonical owners:** [`arch.agency.turns`](backend/architecture/agency.md), [`arch.orchestration.delegation`](backend/architecture/delegation-topology.md) *(Provenance: ADR-0070, ADR-0099, ADR-0105, indexed ADR-0106)*
 
 ---
 
@@ -164,7 +164,7 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** A unified capability-secure OS substrate where user-space process execution and cognitive model calls share a single hardware capability architecture.
 
-**Canonical owners:** [`arch.trust.kernel`](../architecture/kernel.md), [`arch.composition.extensibility`](../architecture/composition-extensibility.md) *(Provenance: ADR-0072, ADR-0074)*
+**Canonical owners:** [`arch.trust.kernel`](backend/architecture/kernel.md), [`arch.composition.extensibility`](backend/architecture/composition-extensibility.md) *(Provenance: ADR-0072, ADR-0074)*
 
 ---
 
@@ -178,4 +178,4 @@ Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implemen
 
 **Reversal condition:** Zero-knowledge cryptographic vector search that provably prevents cross-principal information leakage during un-authenticated indexing.
 
-**Canonical owners:** [`arch.memory.learning`](../architecture/memory-learning.md), [`ref.artifacts`](../reference/artifacts-memory.md) *(Provenance: ADR-0096, ADR-0100)*
+**Canonical owners:** [`arch.memory.learning`](backend/architecture/memory-learning.md), [`ref.artifacts`](backend/reference/artifacts-memory.md) *(Provenance: ADR-0096, ADR-0100)*

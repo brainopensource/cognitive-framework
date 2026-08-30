@@ -35,7 +35,7 @@ confidence: high
 
 ## Purpose
 
-This page is the compact normative owner for the reconstructed **TARGET** contract. It does not describe implementation merely because a requirement exists. AS_BUILT structure and behavior remain owned by the [architecture](architecture/overview.md) and [reference](reference/schemas.md) pages at analysis SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`.
+This page is the compact normative owner for the reconstructed **TARGET** contract. It does not describe implementation merely because a requirement exists. AS_BUILT structure and behavior remain owned by the [architecture](architecture/overview.md) and [reference](backend/reference/schemas.md) pages at analysis SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`.
 
 RFC-2119 terms are normative. Each clause carries a Block E TARGET claim ID; the generated reconciliation register records its authority, implementation evidence, relationship, status, and gap.
 
@@ -96,8 +96,8 @@ RFC-2119 terms are normative. Each clause carries a Block E TARGET claim ID; the
 
 The TARGET contract is `PARTIAL` at the recorded AS_BUILT SHA. The most important divergences are:
 
-- The live TypeScript `StartRun` path contradicts the valid-profile requirement ([runtime-service reference](reference/runtime-service.md)).
-- Multi-role/topology mechanisms exist, but the full accepted real-effect/artifact-flow integration is only partial at the recorded SHA ([delegation architecture](architecture/delegation-topology.md)).
+- The live TypeScript `StartRun` path contradicts the valid-profile requirement ([runtime-service reference](backend/reference/runtime-service.md)).
+- Multi-role/topology mechanisms exist, but the full accepted real-effect/artifact-flow integration is only partial at the recorded SHA ([delegation architecture](backend/architecture/delegation-topology.md)).
 - The M-9 unified product/client boundary and M-10 qualification contract remain planned ([milestone gates](execution/milestones.md)).
 - Protocol-recovery, tool-policy, transform, and workflow seams exist, but the accepted `mhf.topology/2` workflow surface is not a canonical production execution path.
 

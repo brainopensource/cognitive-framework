@@ -11,7 +11,7 @@ last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_DESKTOP.md
 subordinate_to:
   - product.frontend.platform
-  - ../../../SPEC.md
+  - ../../SPEC.md
   - ../../../01_law/SECURITY.md
 ---
 

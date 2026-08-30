@@ -58,7 +58,7 @@ This document is the canonical reference owner for the catalog of JSON Schema fa
 
 ## Non-responsibilities
 - Duplicating raw JSON schema texts (readers should consult the `schemas/` directory directly).
-- Defining behavioral invariants from schema syntax alone (owned by [`arch.system.overview`](../architecture/overview.md) and [`arch.trust.kernel`](../architecture/kernel.md)).
+- Defining behavioral invariants from schema syntax alone (owned by [`arch.system.overview`](../../architecture/overview.md) and [`arch.trust.kernel`](../architecture/kernel.md)).
 - Event envelope detailed semantics (owned by [`ref.events`](events.md)).
 
 ## AS_BUILT Status

@@ -31,7 +31,7 @@ confidence: high
 
 ## Status boundary
 
-This page is **TARGET conceptual framing** with status `EXPERIMENTAL`. It does not claim that every concept below is implemented, accepted by a milestone, or authorized for current work. Exact implementation belongs to the [AS_BUILT agency](../architecture/agency.md), [delegation](../architecture/delegation-topology.md), and [memory](../architecture/memory-learning.md) owners.
+This page is **TARGET conceptual framing** with status `EXPERIMENTAL`. It does not claim that every concept below is implemented, accepted by a milestone, or authorized for current work. Exact implementation belongs to the [AS_BUILT agency](../backend/architecture/agency.md), [delegation](../backend/architecture/delegation-topology.md), and [memory](../backend/architecture/memory-learning.md) owners.
 
 ## Central thesis
 

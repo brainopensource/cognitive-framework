@@ -50,7 +50,7 @@ This document is the canonical reference owner for all hexagonal port protocols 
 
 ## Non-responsibilities
 - Step-by-step procedures for writing a new adapter (owned by [`guide.add-adapter-provider`](../guides/add-adapter-or-provider.md)).
-- High-level hexagonal architectural dependency rationale (owned by [`arch.system.overview`](../architecture/overview.md) and [`arch.composition.extensibility`](../architecture/composition-extensibility.md)).
+- High-level hexagonal architectural dependency rationale (owned by [`arch.system.overview`](../../architecture/overview.md) and [`arch.composition.extensibility`](../architecture/composition-extensibility.md)).
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure Python protocols enforce strict dependency inversion (`domain <- ports <- kernel <- agency <- runtime -> adapters`).

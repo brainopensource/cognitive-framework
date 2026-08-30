@@ -11,7 +11,7 @@ version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md
 subordinate_to:
-  - ../../../SPEC.md
+  - ../../SPEC.md
 ---
 
 # AETHER Frontend PRD Placement & Knowledge Ownership Manifest
@@ -32,11 +32,11 @@ PRDs establish user needs, functional requirements, provisional performance targ
 
 | Document Title | Canonical ID | Staging Path (Current) | Future Canonical Owner | Truth Plane | Candidate Architecture Owner | Candidate Reference Owner | Candidate ADR Owner (Unassigned ID) | Candidate Execution Owner |
 |---|---|---|---|---|---|---|---|---|
-| **Frontend Platform PRD** | `product.frontend.platform` | `docs/candidate-docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | `docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | Product Requirements | `docs/architecture/frontend/platform-architecture.md` | `docs/reference/frontend/client-sdk.md` | `docs/decisions/frontend/adr-candidate-frontend-stack.md` | `docs/execution/frontend/roadmap.md` |
-| **AETHER CLI PRD** | `product.frontend.cli` | `docs/candidate-docs/product/frontend/PRD_AETHER_CLI.md` | `docs/product/frontend/PRD_AETHER_CLI.md` | Product Requirements | `docs/architecture/frontend/cli-architecture.md` | `docs/reference/frontend/cli-commands.md` | `docs/decisions/frontend/adr-candidate-cli-exit-contract.md` | `docs/execution/frontend/cli-backlog.md` |
-| **AETHER TUI PRD** | `product.frontend.tui` | `docs/candidate-docs/product/frontend/PRD_AETHER_TUI.md` | `docs/product/frontend/PRD_AETHER_TUI.md` | Product Requirements | `docs/architecture/frontend/tui-opentui-architecture.md` | `docs/reference/frontend/tui-keybindings.md` | `docs/decisions/frontend/adr-candidate-opentui-solid.md` | `docs/execution/frontend/tui-backlog.md` |
-| **AETHER Desktop PRD** | `product.frontend.desktop` | `docs/candidate-docs/product/frontend/PRD_AETHER_DESKTOP.md` | `docs/product/frontend/PRD_AETHER_DESKTOP.md` | Product Requirements | `docs/architecture/frontend/desktop-tauri-boundary.md` | `docs/reference/frontend/tauri-ipc-contract.md` | `docs/decisions/frontend/adr-candidate-tauri2-rust-boundary.md` | `docs/execution/frontend/desktop-backlog.md` |
-| **AETHER Lab PRD** | `product.frontend.lab` | `docs/candidate-docs/product/frontend/PRD_AETHER_LAB.md` | `docs/product/frontend/PRD_AETHER_LAB.md` | Product Requirements | `docs/architecture/frontend/lab-inspection-architecture.md` | `docs/reference/frontend/lab-workbenches.md` | `docs/decisions/frontend/adr-candidate-lab-minimal-scope.md` | `docs/execution/frontend/lab-backlog.md` |
+| **Frontend Platform PRD** | `product.frontend.platform` | `candidate-docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | `docs/product/frontend/PRD_FRONTEND_PLATFORM.md` | Product Requirements | `docs/architecture/frontend/platform-architecture.md` | `docs/reference/frontend/client-sdk.md` | `docs/decisions/frontend/adr-candidate-frontend-stack.md` | `docs/execution/frontend/roadmap.md` |
+| **AETHER CLI PRD** | `product.frontend.cli` | `candidate-docs/product/frontend/PRD_AETHER_CLI.md` | `docs/product/frontend/PRD_AETHER_CLI.md` | Product Requirements | `docs/architecture/frontend/cli-architecture.md` | `docs/reference/frontend/cli-commands.md` | `docs/decisions/frontend/adr-candidate-cli-exit-contract.md` | `docs/execution/frontend/cli-backlog.md` |
+| **AETHER TUI PRD** | `product.frontend.tui` | `candidate-docs/product/frontend/PRD_AETHER_TUI.md` | `docs/product/frontend/PRD_AETHER_TUI.md` | Product Requirements | `docs/architecture/frontend/tui-opentui-architecture.md` | `docs/reference/frontend/tui-keybindings.md` | `docs/decisions/frontend/adr-candidate-opentui-solid.md` | `docs/execution/frontend/tui-backlog.md` |
+| **AETHER Desktop PRD** | `product.frontend.desktop` | `candidate-docs/product/frontend/PRD_AETHER_DESKTOP.md` | `docs/product/frontend/PRD_AETHER_DESKTOP.md` | Product Requirements | `docs/architecture/frontend/desktop-tauri-boundary.md` | `docs/reference/frontend/tauri-ipc-contract.md` | `docs/decisions/frontend/adr-candidate-tauri2-rust-boundary.md` | `docs/execution/frontend/desktop-backlog.md` |
+| **AETHER Lab PRD** | `product.frontend.lab` | `candidate-docs/product/frontend/PRD_AETHER_LAB.md` | `docs/product/frontend/PRD_AETHER_LAB.md` | Product Requirements | `docs/architecture/frontend/lab-inspection-architecture.md` | `docs/reference/frontend/lab-workbenches.md` | `docs/decisions/frontend/adr-candidate-lab-minimal-scope.md` | `docs/execution/frontend/lab-backlog.md` |
 
 ---
 
@@ -75,6 +75,6 @@ Candidate Future Documentation Topics:
 
 ## 4. Governance & Cutover Policy
 
-1. **Staging Status**: Documents in `docs/candidate-docs/product/frontend/` remain in proposal status (`status: proposed`) as TARGET planning artifacts.
+1. **Staging Status**: Documents in `candidate-docs/product/frontend/` remain in proposal status (`status: proposed`) as TARGET planning artifacts.
 2. **Promotion Rule**: These documents are proposed staging artifacts. Their future canonical promotion is subject to documentation reconstruction, ownership validation, TARGET reconciliation, independent review, and governance ratification.
 3. **Anti-Sprawl Enforcement**: No temporary scratch files or unauthorized architecture specifications may be created outside the canonical documentation structure.

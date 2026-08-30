@@ -110,7 +110,7 @@ seam at a time.
 
 ### W-092-5 qualification disposition (exact subject)
 
-As of the integration commit recorded as `HEAD` on
+As of the reconciled integration commit `1160e1f` on
 `feat/beta-release_electroweak-v091`, W-092-5 is **BLOCKED**, not PASS. The
 working tree contains the contributor patches under review, so this disposition
 is bound to the exact tree captured by the integration owner rather than to a
@@ -125,11 +125,13 @@ different contributor report.
   17/17. The remaining dogfood failures are not release evidence.
 - Security: 1 failure in process-group timeout behavior. M-7 falsifiers remain
   10 failures and are outside current v0.9.2 authorization.
-- Final full-suite run on this exact code subject: 2,348 tests, 54 failures,
+- Final full-suite run on this exact code subject: 2,348 tests, 55 failures,
   39 errors, and 20 skips. The broader failures include pre-existing
   M-5/M-6.5/M-7 falsifiers, LAM/sandbox integrations, dogfood, and security;
   they are not release evidence.
-- `just check` and `just verify` could not run because `just` is unavailable.
+- `just` 1.58.0 was executed from the project tool cache. `just check` passed;
+  `just verify` reached the strict documentation build and was blocked by the
+  pre-existing missing navigation target and broken research anchors.
 - Release qualification was not run because no real subject, evidence envelope,
   and git receipt inputs exist; no placeholders were created.
 

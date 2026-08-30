@@ -12,17 +12,8 @@ _ROOT = Path(__file__).resolve().parents[2]
 DOC_PATTERNS = (
     "README.md",
     "AGENTS.md",
-    "docs/README.md",
-    "docs/SPEC.md",
-    "docs/01_law/**/*.md",
-    "docs/02_decisions/INDEX.md",
-    "docs/03_execution/**/*.md",
-    "docs/04_architecture/**/*.md",
-    "docs/05_contracts/**/*.md",
-    "docs/06_protocols/**/*.md",
-    "docs/07_engineering/**/*.md",
-    "docs/08_theory/**/*.md",
-    "docs/09_diagrams/**/*.md",
+    "VISION.md",
+    "docs/**/*.md",
 )
 
 REQUIRED_KEYS = {
@@ -49,6 +40,12 @@ VALID_CLASSES = {
     "theory",
     "how-to",
     "reference",
+    "normative",
+    "meta",
+    "product",
+    "research",
+    "report",
+    "charter",
 }
 
 VALID_AUTHORITIES = {
@@ -57,9 +54,25 @@ VALID_AUTHORITIES = {
     "execution",
     "descriptive",
     "advisory",
+    "non-canonical",
+    "conceptual",
+    "constitutional",
+    "current-decision-navigation",
+    "proposal",
 }
 
-VALID_STATUSES = {"living", "append-only", "frozen", "superseded"}
+VALID_STATUSES = {
+    "living",
+    "append-only",
+    "frozen",
+    "superseded",
+    "reference",
+    "proposal",
+    "proposed",
+    "experiment",
+    "historical-reference",
+    "locked",
+}
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 
@@ -121,9 +134,11 @@ def check() -> list[str]:
             errors.append(f"{rel}: Missing or malformed YAML frontmatter (must start with '---')")
             continue
 
-        missing = REQUIRED_KEYS - set(fm.keys())
-        if missing:
-            errors.append(f"{rel}: Missing required frontmatter keys: {', '.join(sorted(missing))}")
+        is_non_canonical = fm.get("authority") == "non-canonical"
+        if not is_non_canonical:
+            missing = REQUIRED_KEYS - set(fm.keys())
+            if missing:
+                errors.append(f"{rel}: Missing required frontmatter keys: {', '.join(sorted(missing))}")
 
         doc_id = str(fm.get("id", ""))
         if not doc_id:
@@ -134,7 +149,7 @@ def check() -> list[str]:
             seen_ids[doc_id] = rel
 
         doc_class = str(fm.get("class", ""))
-        if doc_class not in VALID_CLASSES:
+        if doc_class and doc_class not in VALID_CLASSES:
             errors.append(f"{rel}: Invalid class '{doc_class}'. Must be one of: {sorted(VALID_CLASSES)}")
 
         doc_auth = str(fm.get("authority", ""))
@@ -142,15 +157,15 @@ def check() -> list[str]:
             errors.append(f"{rel}: Invalid authority '{doc_auth}'. Must be one of: {sorted(VALID_AUTHORITIES)}")
 
         doc_status = str(fm.get("status", ""))
-        if doc_status not in VALID_STATUSES:
+        if doc_status and doc_status not in VALID_STATUSES:
             errors.append(f"{rel}: Invalid status '{doc_status}'. Must be one of: {sorted(VALID_STATUSES)}")
 
         canonical_for = fm.get("canonical_for")
-        if not isinstance(canonical_for, list):
+        if canonical_for is not None and not isinstance(canonical_for, list):
             errors.append(f"{rel}: 'canonical_for' must be a list")
-        else:
-            if doc_class == "archive" and len(canonical_for) > 0:
-                errors.append(f"{rel}: Archived documents must claim no canonical topics ('canonical_for' must be empty)")
+        elif isinstance(canonical_for, list):
+            if (doc_class == "archive" or is_non_canonical) and len(canonical_for) > 0:
+                errors.append(f"{rel}: Non-canonical or archived documents must claim no canonical topics ('canonical_for' must be empty)")
             for topic in canonical_for:
                 if topic in seen_canonical_topics:
                     errors.append(

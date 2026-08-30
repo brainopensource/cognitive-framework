@@ -1,0 +1,4013 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+        <link rel="prev" href="../../theory/agent-substrate/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Atlas Control Plane Report - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-documentation-control-plane-and-atlas-oss-evolution" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Atlas Control Plane Report
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-a-clean-documentation-baseline-to-an-automated-repository-knowledge-control-plane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From a Clean Documentation Baseline to an Automated Repository Knowledge Control Plane
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-a-clean-documentation-baseline-to-an-automated-repository-knowledge-control-plane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From a Clean Documentation Baseline to an Automated Repository Knowledge Control Plane
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-documentation-control-plane-and-atlas-oss-evolution">AETHER Documentation Control Plane and Atlas OSS Evolution</h1>
+<h2 id="from-a-clean-documentation-baseline-to-an-automated-repository-knowledge-control-plane">From a Clean Documentation Baseline to an Automated Repository Knowledge Control Plane</h2>
+<p><strong>Status:</strong> Technical strategy and implementation report<br />
+<strong>Project:</strong> AETHER — Electroweak documentation line<br />
+<strong>Date:</strong> 2026-08-30<br />
+<strong>Scope:</strong> Documentation infrastructure, repository knowledge extraction, OSS orchestration, and future Atlas architecture  </p>
+<hr />
+<h1 id="executive-summary">Executive Summary</h1>
+<p>AETHER has already completed the hardest prerequisite for a durable documentation system: the documentation surface has been reconstructed, compressed, separated by domain, assigned canonical ownership, and validated against the repository. The next problem is therefore <strong>not another documentation migration</strong>. The next problem is to install a permanent control plane that makes regression into documentation sprawl difficult, mechanically detectable, and increasingly automatable.</p>
+<p>This report unifies two complementary plans:</p>
+<ol>
+<li><strong>“Sim. Pra ganhar produtividade agora…” = plano operacional P0, para instalar já.</strong></li>
+<li><strong>“Sim. E eu simplificaria…” = direção arquitetural do futuro Atlas, depois que houver evidência real do P0.</strong></li>
+</ol>
+<p>The two plans should not be implemented simultaneously as one large platform. They define two different horizons:</p>
+<ul>
+<li><strong>P0 / operational now:</strong> use mature OSS tools to make the current Markdown documentation structured, validated, searchable, reproducible, and easy for humans and agents to consume.</li>
+<li><strong>Atlas / architectural future:</strong> convert the practical evidence collected by P0 into a thin repository-knowledge control plane that orchestrates OSS parsers, indexers, search engines, code-intelligence protocols, migration engines, and agentic reasoning through a stable intermediate representation.</li>
+</ul>
+<p>The central architectural thesis is:</p>
+<blockquote>
+<p><strong>Atlas should not become a parser, code indexer, search engine, graph database, codemod engine, documentation generator, or agent harness. Atlas should become the control plane that composes those capabilities and normalizes their evidence into one project model.</strong></p>
+</blockquote>
+<p>This allows AETHER to obtain immediate productivity while also creating a real-world laboratory for Atlas. The same tools used to maintain AETHER documentation become candidates for Atlas adapters. Their measured strengths, limitations, output quality, false-positive rates, incremental behavior, and operational costs become empirical design inputs rather than speculative architecture.</p>
+<p>The resulting strategy is intentionally evolutionary:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Clean AETHER docs
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>        ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Docs-as-code control plane
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Generated machine knowledge
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        ↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Docs ↔ code evidence
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        ↓
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Proto-Atlas commands
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        ↓
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>Stable PKIR
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        ↓
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>Atlas control plane
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        ↓
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>Optional large-scale/deep-analysis backends
+</code></pre></div>
+<p>The practical objective is therefore not to “build Atlas now.” It is to make the current documentation system <strong>Atlas-compatible by construction</strong> while obtaining immediate engineering value.</p>
+<hr />
+<h1 id="1-current-aether-documentation-baseline">1. Current AETHER Documentation Baseline</h1>
+<p>The current documentation structure is already substantially better than the legacy corpus because it distinguishes global system truth from backend, frontend, product, execution, theory, and research domains.</p>
+<p>The current intended structure is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docs/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── README.md
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── SPEC.md
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── decisions.md
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>├── architecture/
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── overview.md
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── boundaries.md
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   └── data-flow.md
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── backend/
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   ├── architecture/
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   ├── reference/
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   └── guides/
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>├── frontend/
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   ├── README.md
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   ├── architecture/
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   ├── reference/
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   └── guides/
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>├── product/
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│   └── frontend/
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│       ├── FRONTEND_PRD_PLACEMENT_MANIFEST.md
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│       ├── PRD_AETHER_CLI.md
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│       ├── PRD_AETHER_DESKTOP.md
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│       ├── PRD_AETHER_LAB.md
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│       ├── PRD_AETHER_TUI.md
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│       └── PRD_FRONTEND_PLATFORM.md
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>├── execution/
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   ├── active.md
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   └── milestones.md
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>├── theory/
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   └── agent-substrate.md
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>└── research/
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>    └── README.md
+</code></pre></div>
+<p>This structure establishes useful ownership boundaries:</p>
+<ul>
+<li><code>SPEC.md</code> owns compact normative requirements.</li>
+<li><code>architecture/</code> owns global end-to-end architecture.</li>
+<li><code>backend/architecture/</code> owns backend/substrate structure and behavior.</li>
+<li><code>backend/reference/</code> owns exact contracts, events, schemas, manifests, ports, and commands.</li>
+<li><code>backend/guides/</code> owns operational procedures.</li>
+<li><code>frontend/</code> is intentionally sparse until the frontend stabilizes.</li>
+<li><code>product/frontend/</code> owns product requirements independently of implementation churn.</li>
+<li><code>execution/</code> owns current work and milestone sequencing.</li>
+<li><code>decisions.md</code> should own only irreducible rationale that is not already encoded elsewhere.</li>
+<li><code>theory/</code> owns durable conceptual models.</li>
+<li><code>research/</code> owns exploratory, non-authoritative evidence and reports.</li>
+</ul>
+<p>This baseline should <strong>not</strong> be replaced by another taxonomy during the OSS setup. The OSS stack must adapt to this structure.</p>
+<hr />
+<h1 id="2-the-core-documentation-philosophy">2. The Core Documentation Philosophy</h1>
+<p>The most important design decision is to keep the human-authoritative documentation layer small and to derive machine views from it.</p>
+<p>The durable model is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Markdown + Git
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>     =
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>human-authored durable source
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Generated indexes
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>     =
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>machine-reconstructible views
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>MkDocs / Obsidian
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>     =
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>human interfaces
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>Agents / context compiler
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>     =
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>machine consumers
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>Atlas
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>     =
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>future orchestration and semantic control plane
+</code></pre></div>
+<p>No view should silently become a second source of truth.</p>
+<h2 id="21-one-fact-one-canonical-owner">2.1 One fact, one canonical owner</h2>
+<p>A durable fact should have one primary owner.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Normative guarantee       → SPEC.md
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Runtime architecture      → backend/architecture/runtime-execution.md
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Event wire shape          → backend/reference/events.md
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Current implementation    → code + AS_BUILT documentation
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>Current work              → execution/active.md
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>Release gate              → execution/milestones.md
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Product requirement       → product/
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>Architectural rationale   → decisions.md
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>Exploratory hypothesis    → research/
+</code></pre></div>
+<p>Other documents link to the owner instead of copying the content.</p>
+<p>This is the strongest anti-bloat rule in the entire system.</p>
+<h2 id="22-generated-knowledge-is-disposable">2.2 Generated knowledge is disposable</h2>
+<p>Everything under a machine-generated knowledge directory must be reproducible.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>.generated/knowledge/catalog.jsonl
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>.generated/knowledge/links.jsonl
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>.generated/knowledge/symbols.jsonl
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>.generated/knowledge/code-map.jsonl
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>.generated/knowledge/claims.jsonl
+</code></pre></div>
+<p>These files are useful for agents and tools, but they are not edited manually.</p>
+<p>If the generated directory is deleted, a command should regenerate it from repository sources.</p>
+<h2 id="23-git-owns-chronology">2.3 Git owns chronology</h2>
+<p>Documentation metadata should not duplicate information already encoded by Git.</p>
+<p>Avoid maintaining fields whose primary purpose is to repeat:</p>
+<ul>
+<li>author;</li>
+<li>commit;</li>
+<li>modification timestamp;</li>
+<li>review history;</li>
+<li>branch history;</li>
+<li>previous file paths;</li>
+<li>migration provenance that only matters to the reconstruction process.</li>
+</ul>
+<p>Those facts are naturally available from version control.</p>
+<h2 id="24-research-never-promotes-itself">2.4 Research never promotes itself</h2>
+<p>Research may contain hypotheses, reports, benchmarks, external references, and speculative architectures. It is intentionally allowed to be less constrained.</p>
+<p>But the transition:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>research
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>   ↓
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>canonical architecture / SPEC
+</code></pre></div>
+<p>must be explicit.</p>
+<p>An LLM, import process, document converter, or external source must never automatically promote exploratory content into canonical truth.</p>
+<hr />
+<h1 id="3-documentation-as-a-compilable-system">3. Documentation as a Compilable System</h1>
+<p>The immediate goal should be to treat documentation less like a folder of prose and more like a compilable artifact.</p>
+<p>A document enters the active documentation surface only if it passes structural constraints.</p>
+<p>A useful conceptual pipeline is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Markdown source
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>      │
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>      ├── metadata validation
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>      ├── syntax/style validation
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>      ├── terminology validation
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>      ├── link validation
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>      ├── ownership validation
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>      ├── duplicate-ID validation
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>      ├── stale-path validation
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>      └── site compilation
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>              │
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>              ▼
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>          VALID DOC
+</code></pre></div>
+<p>This does not require Atlas. Mature OSS already solves most of it.</p>
+<hr />
+<h1 id="4-recommended-repository-level-documentation-infrastructure">4. Recommended Repository-Level Documentation Infrastructure</h1>
+<p>Tooling should remain outside <code>docs/</code>.</p>
+<p>Recommended repository structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Aether-D-System/
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── docs/
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>│   └── ...
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>│
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>├── .docs/
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>│   ├── document.schema.json
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>│   ├── taxonomy.yml
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>│   ├── terminology.yml
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>│   ├── authority.yml
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>│   └── vale/
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>│
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>├── tools/
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>│   └── docs/
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>│       ├── validate.py
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>│       ├── catalog.py
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>│       ├── extract_links.py
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>│       ├── code_map.py
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>│       ├── ingest.py
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>│       └── report.py
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>│
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>├── .generated/
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>│   └── knowledge/
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>│       ├── catalog.jsonl
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>│       ├── links.jsonl
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>│       ├── symbols.jsonl
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>│       ├── code-map.jsonl
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>│       └── report.json
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>│
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>├── mkdocs.yml
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>├── justfile
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>├── .vale.ini
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a>├── .markdownlint-cli2.yaml
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>├── .lychee.toml
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>└── .pre-commit-config.yaml
+</code></pre></div>
+<p>The separation is deliberate:</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/</code></td>
+<td>durable human-authored project knowledge</td>
+</tr>
+<tr>
+<td><code>.docs/</code></td>
+<td>documentation policy and schemas</td>
+</tr>
+<tr>
+<td><code>tools/docs/</code></td>
+<td>minimal orchestration glue</td>
+</tr>
+<tr>
+<td><code>.generated/knowledge/</code></td>
+<td>derived machine-readable repository knowledge</td>
+</tr>
+<tr>
+<td>root config files</td>
+<td>interfaces to mature OSS tools</td>
+</tr>
+</tbody>
+</table>
+<p>This provides a clean path into Atlas because the future Atlas can consume <code>.generated/knowledge/</code> without imposing itself on authoring.</p>
+<hr />
+<h1 id="5-minimal-frontmatter-contract">5. Minimal Frontmatter Contract</h1>
+<p>The reconstruction process used richer metadata because it needed to represent review state, authority reconciliation, analysis SHA, confidence, and migration provenance. That metadata is useful during reconstruction but should not automatically become the permanent authoring burden.</p>
+<p>A smaller steady-state schema is preferable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nn">---</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend.arch.kernel</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">architecture</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nt">authority</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">descriptive</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nt">truth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">as-built</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain-blind effect mediation and authority boundary.</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="nt">related</span><span class="p">:</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend.ref.events</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spec.core</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="nn">---</span>
+</code></pre></div>
+<p>Recommended required fields:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>id
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>kind
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>authority
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>truth
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>status
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>owner
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>summary
+</code></pre></div>
+<p>Recommended optional fields:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>related
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>tags
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>supersedes
+</code></pre></div>
+<p>Everything else should require justification.</p>
+<h2 id="51-why-minimal-metadata-matters">5.1 Why minimal metadata matters</h2>
+<p>Metadata is useful only when its machine value exceeds its maintenance cost.</p>
+<p>Too little metadata produces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>hard-to-query prose
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ambiguous authority
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>weak retrieval
+</code></pre></div>
+<p>Too much metadata produces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>schema bureaucracy
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>stale fields
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>LLM context inflation
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>human avoidance
+</code></pre></div>
+<p>The P0 experiment should explicitly measure this trade-off.</p>
+<p>The future Atlas can infer additional data from Git, content, code indexes, and generated relationships rather than requiring humans to type it.</p>
+<hr />
+<h1 id="6-p0-oss-stack-to-install-now">6. P0: OSS Stack to Install Now</h1>
+<p>The first attached plan is the operational plan. Its purpose is immediate productivity and evidence generation.</p>
+<p>The recommended P0 stack is:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Technology</th>
+<th>Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documentation site/navigation/search</td>
+<td>MkDocs + Material for MkDocs</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Command orchestration</td>
+<td><code>just</code></td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Metadata format</td>
+<td>YAML frontmatter</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Metadata contract</td>
+<td>JSON Schema</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Schema validation</td>
+<td>Python <code>jsonschema</code></td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Markdown linting</td>
+<td>markdownlint-cli2</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Terminology/style ontology</td>
+<td>Vale</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Link integrity</td>
+<td>Lychee</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Git hooks</td>
+<td>pre-commit</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Diagrams as code</td>
+<td>Mermaid</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Metadata shell queries</td>
+<td><code>yq</code> / <code>jq</code></td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Python API extraction</td>
+<td>mkdocstrings + Griffe</td>
+<td>P0/P0.5</td>
+</tr>
+<tr>
+<td>TypeScript API extraction</td>
+<td>TypeDoc</td>
+<td>after frontend stabilization</td>
+</tr>
+<tr>
+<td>Legacy markup conversion</td>
+<td>Pandoc</td>
+<td>on demand</td>
+</tr>
+<tr>
+<td>Complex document ingestion</td>
+<td>Docling</td>
+<td>on demand</td>
+</tr>
+<tr>
+<td>Structural code analysis</td>
+<td>ast-grep</td>
+<td>P1 experiment</td>
+</tr>
+<tr>
+<td>Symbol graph</td>
+<td>SCIP</td>
+<td>P1 experiment</td>
+</tr>
+</tbody>
+</table>
+<p>The key principle is not merely “use these tools.” It is:</p>
+<blockquote>
+<p><strong>Use mature OSS as deterministic workers and write only enough proprietary glue to coordinate them.</strong></p>
+</blockquote>
+<hr />
+<h1 id="7-mkdocs-material-for-mkdocs">7. MkDocs + Material for MkDocs</h1>
+<h2 id="71-role">7.1 Role</h2>
+<p>MkDocs provides the human documentation build surface. Material for MkDocs adds a mature navigation, search, metadata/tag, and presentation layer while keeping Markdown as source.</p>
+<p>The official Material documentation supports tags in page frontmatter and metadata inheritance through <code>.meta.yml</code>, which is valuable because it allows folder-level policy without repeating metadata in every document.</p>
+<h2 id="72-why-it-fits-aether">7.2 Why it fits AETHER</h2>
+<p>AETHER needs:</p>
+<ul>
+<li>hierarchical navigation;</li>
+<li>fast discovery;</li>
+<li>local documentation rendering;</li>
+<li>searchable Markdown;</li>
+<li>support for metadata;</li>
+<li>diagram rendering;</li>
+<li>deterministic CI builds;</li>
+<li>minimal authoring friction.</li>
+</ul>
+<p>MkDocs is a view over <code>docs/</code>; it does not need to own the source model.</p>
+<h2 id="73-usage">7.3 Usage</h2>
+<p>Suggested commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>just<span class="w"> </span>docs-serve
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>just<span class="w"> </span>docs-build
+</code></pre></div>
+<p><code>docs-build</code> should run in strict mode.</p>
+<p>MkDocs should consume the existing structure, not force a new one.</p>
+<h2 id="74-what-mkdocs-is-not">7.4 What MkDocs is not</h2>
+<p>MkDocs is not:</p>
+<ul>
+<li>the knowledge model;</li>
+<li>the authority engine;</li>
+<li>the code index;</li>
+<li>the graph database;</li>
+<li>Atlas.</li>
+</ul>
+<p>It is the human-readable documentation compiler.</p>
+<hr />
+<h1 id="8-just-one-developer-interface-over-many-oss-tools">8. <code>just</code>: One Developer Interface over Many OSS Tools</h1>
+<p>A recurring failure mode of OSS-heavy stacks is exposing every tool directly to every contributor.</p>
+<p>Do not require developers to remember:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>markdownlint-cli2 ...
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>vale ...
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>lychee ...
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>python tools/docs/validate.py ...
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>mkdocs ...
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>scip ...
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>ast-grep ...
+</code></pre></div>
+<p>Expose one interface.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>just docs-check
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>just docs-build
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>just docs-serve
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>just docs-map
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>just docs-query QUERY
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>just docs-ingest FILE
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>just docs-full
+</code></pre></div>
+<p>The <code>just</code> project is explicitly a project-specific command runner rather than a general build system. This makes it appropriate as the thin human-facing orchestration layer.</p>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Developer
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    │
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    ▼
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>   just
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    │
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    ├── OSS tool A
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    ├── OSS tool B
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>    ├── OSS tool C
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>    └── tiny AETHER scripts
+</code></pre></div>
+<p>This is already a prototype of the future Atlas philosophy:</p>
+<blockquote>
+<p>one stable interface over heterogeneous workers.</p>
+</blockquote>
+<hr />
+<h1 id="9-json-schema-jsonschema">9. JSON Schema + <code>jsonschema</code></h1>
+<p>The Markdown frontmatter becomes useful only if it is validated.</p>
+<p>Create:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>.docs/document.schema.json
+</code></pre></div>
+<p>The schema should enforce:</p>
+<ul>
+<li>stable IDs;</li>
+<li>allowed <code>kind</code>;</li>
+<li>allowed authority classes;</li>
+<li>allowed truth planes;</li>
+<li>allowed lifecycle states;</li>
+<li>expected types for relations;</li>
+<li>optional fields only where justified.</li>
+</ul>
+<p>Do not write a large custom validator if JSON Schema already expresses the rule.</p>
+<p>Custom Python should only implement repository-specific invariants that generic schema validation cannot express, such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>canonical ID must be globally unique
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>related ID must resolve
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>authority combinations must be legal
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>frontend docs may be deferred
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>a generated page must not be manually edited
+</code></pre></div>
+<hr />
+<h1 id="10-markdownlint-cli2">10. markdownlint-cli2</h1>
+<p>Markdown is flexible enough to become structurally inconsistent unless linted.</p>
+<p>markdownlint-cli2 is appropriate for:</p>
+<ul>
+<li>heading structure;</li>
+<li>list formatting;</li>
+<li>spacing conventions;</li>
+<li>duplicate headings;</li>
+<li>malformed Markdown patterns;</li>
+<li>deterministic CI enforcement.</li>
+</ul>
+<p>It also documents direct pre-commit integration.</p>
+<p>Use it for <strong>structure</strong>, not conceptual correctness.</p>
+<p>Do not overload markdownlint with AETHER-specific ontology rules; Vale and custom metadata checks are better layers for that.</p>
+<hr />
+<h1 id="11-vale-terminology-and-ontology-drift-detection">11. Vale: Terminology and Ontology Drift Detection</h1>
+<p>Vale is unusually important for AETHER because the project has experienced conceptual vocabulary drift across multiple architectural eras.</p>
+<p>Vale is markup-aware: it parses prose rather than blindly linting syntax tokens.</p>
+<p>AETHER-specific Vale rules can detect terminology such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>deprecated term:
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>Agent Instance
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>preferred:
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>AgentView
+</code></pre></div>
+<p>or:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>deprecated:
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>event log
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>preferred where semantically appropriate:
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>causal ledger
+</code></pre></div>
+<p>or warn about historical branding inside active normative documentation.</p>
+<p>This converts some semantic drift from a review problem into a deterministic lint problem.</p>
+<h2 id="111-appropriate-vale-rules">11.1 Appropriate Vale rules</h2>
+<p>Good candidates:</p>
+<ul>
+<li>obsolete architectural terminology;</li>
+<li>forbidden metaphors in normative docs;</li>
+<li>inconsistent capitalization of canonical entities;</li>
+<li>incorrect authority language;</li>
+<li>vague words in normative documents;</li>
+<li>stale project branding;</li>
+<li>repeated weak phrases that hide implementation status.</li>
+</ul>
+<h2 id="112-what-vale-should-not-do">11.2 What Vale should not do</h2>
+<p>Vale should not try to prove:</p>
+<ul>
+<li>whether an architectural claim matches code;</li>
+<li>whether a decision is still authoritative;</li>
+<li>whether a benchmark is scientifically valid.</li>
+</ul>
+<p>Those require stronger evidence.</p>
+<hr />
+<h1 id="12-lychee-link-integrity">12. Lychee: Link Integrity</h1>
+<p>Lychee is a fast asynchronous link checker implemented in Rust and supports Markdown, HTML, websites, CLI use, library use, GitHub Actions, and pre-commit integration.</p>
+<p>For AETHER it should verify:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>doc → doc
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>doc → anchor
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>doc → external source
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>generated site → external source
+</code></pre></div>
+<p>Internal path checks can remain in the existing repository-specific checker if that checker understands canonical IDs and AETHER-specific routing better.</p>
+<p>A useful split is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>fast local checks
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>    → internal path/anchor validator
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>slower network checks
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>    → Lychee
+</code></pre></div>
+<p>External URLs should normally be checked in CI rather than on every local commit to avoid latency and rate-limit problems.</p>
+<hr />
+<h1 id="13-pre-commit-fast-local-regression-barrier">13. pre-commit: Fast Local Regression Barrier</h1>
+<p>pre-commit exists to manage multi-language Git hooks and is explicitly designed to run standard linters before review.</p>
+<p>Do not put the entire documentation pipeline into every commit.</p>
+<p>Recommended local hook set:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>frontmatter schema
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>canonical ID uniqueness
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>markdownlint
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>Vale
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>internal links
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>stale paths
+</code></pre></div>
+<p>Avoid by default:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>full external URL crawl
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>SCIP indexing
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>deep code analysis
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>Docling conversion
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>full repository semantic reconciliation
+</code></pre></div>
+<p>Those belong in CI or explicit commands.</p>
+<p>The goal is a sub-second or low-second feedback loop whenever possible.</p>
+<p>If pre-commit becomes irritating, developers will bypass it, destroying its value.</p>
+<hr />
+<h1 id="14-mermaid-architecture-as-versioned-text">14. Mermaid: Architecture as Versioned Text</h1>
+<p>New diagrams should default to Mermaid when the representation is expressible there.</p>
+<p>Benefits:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>Git-diffable
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>AI-editable
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>text-searchable
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>copyable
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>regenerable
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>embeddable in Markdown
+</code></pre></div>
+<p>This avoids a proliferation of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>architecture_final.png
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>architecture_final_v2.png
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>architecture_final_REAL.png
+</code></pre></div>
+<p>Mermaid should be preferred for:</p>
+<ul>
+<li>sequences;</li>
+<li>state machines;</li>
+<li>component relationships;</li>
+<li>flows;</li>
+<li>topology illustrations;</li>
+<li>lifecycle diagrams.</li>
+</ul>
+<p>Use graphical design tools only when Mermaid cannot represent the information adequately.</p>
+<hr />
+<h1 id="15-yq-and-jq-proto-query-interface">15. <code>yq</code> and <code>jq</code>: Proto-Query Interface</h1>
+<p>These tools are useful because the P0 metadata model is YAML/JSON.</p>
+<p>Before writing a sophisticated Atlas query language, simple questions can already be answered deterministically.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>all active backend architecture documents
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>all TARGET documents
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>all docs owned by frontend
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>all relationships targeting spec.core
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>all research documents with status experimental
+</code></pre></div>
+<p>The important architectural lesson is that <strong>structured metadata permits useful queries without a database</strong>.</p>
+<p>This helps measure whether the future PKIR needs a richer query engine or whether simpler representations remain sufficient.</p>
+<hr />
+<h1 id="16-generated-api-documentation-griffe-mkdocstrings-and-typedoc">16. Generated API Documentation: Griffe, mkdocstrings, and TypeDoc</h1>
+<p>A major source of documentation bloat is manually copying information that is already authoritative in code.</p>
+<h2 id="161-python">16.1 Python</h2>
+<p>Griffe extracts the structural API model of Python programs and can serialize API information. mkdocstrings' Python handler uses Griffe to collect and render Python documentation.</p>
+<p>Use these for:</p>
+<ul>
+<li>exported APIs;</li>
+<li>signatures;</li>
+<li>parameters;</li>
+<li>docstrings;</li>
+<li>public classes;</li>
+<li>protocols;</li>
+<li>package reference.</li>
+</ul>
+<p>Do not manually maintain large API tables in Markdown when the data can be generated.</p>
+<h2 id="162-typescript">16.2 TypeScript</h2>
+<p>TypeDoc converts TypeScript source comments into HTML documentation or a JSON model.</p>
+<p>When the frontend architecture stabilizes, TypeDoc can provide:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>TS exports
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>components
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>interfaces
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>types
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>client APIs
+</code></pre></div>
+<p>Its JSON model is especially interesting for Atlas because generated API information can feed the machine knowledge layer without scraping rendered HTML.</p>
+<h2 id="163-separation">16.3 Separation</h2>
+<p>Human documentation explains:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>why
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>architecture
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>usage
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>semantics
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>constraints
+</code></pre></div>
+<p>Generated API documentation describes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>exact callable surface
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>types
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>signatures
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>exports
+</code></pre></div>
+<p>This reduces duplicate ownership.</p>
+<hr />
+<h1 id="17-pandoc-universal-legacy-markup-adapter">17. Pandoc: Universal Legacy Markup Adapter</h1>
+<p>Pandoc should be treated as an ingestion adapter, not as part of the daily authoring loop.</p>
+<p>The official Pandoc manual describes it as a library and CLI for converting between numerous markup and word-processing formats.</p>
+<p>Use it for sources such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>RST
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>HTML
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>DOCX
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>LaTeX
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>Org
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>other Markdown dialects
+</code></pre></div>
+<p>Pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>Legacy document
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>       ↓
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>     Pandoc
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>       ↓
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>normalized staging Markdown
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>       ↓
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>AI/human reconciliation
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>       ↓
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>canonical AETHER document
+</code></pre></div>
+<p>Important rule:</p>
+<blockquote>
+<p><strong>Conversion does not grant authority.</strong></p>
+</blockquote>
+<p>Pandoc solves syntax conversion, not semantic reconciliation.</p>
+<hr />
+<h1 id="18-docling-complex-document-ingestion">18. Docling: Complex Document Ingestion</h1>
+<p>Docling is appropriate when source documents contain complex layout or are not primarily markup.</p>
+<p>Its current documentation lists support for formats including PDF, DOCX, XLSX, PPTX, HTML, Markdown, LaTeX, images, and other formats, and it exports to Markdown and a structured JSON representation called <code>DoclingDocument</code>.</p>
+<p>That makes it conceptually important for future Atlas:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>PDF / Office / complex source
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>        ↓
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>      Docling
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>        ↓
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a> DoclingDocument
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>        ↓
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a> Atlas adapter
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>        ↓
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a> normalized evidence
+</code></pre></div>
+<p>Do not build OCR, layout analysis, PDF table extraction, or Office ingestion inside Atlas unless a future requirement proves an OSS gap.</p>
+<hr />
+<h1 id="19-p05-generated-knowledge-layer">19. P0.5: Generated Knowledge Layer</h1>
+<p>Once P0 validation is reliable, produce small deterministic machine indexes.</p>
+<p>Recommended files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>.generated/knowledge/
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>├── catalog.jsonl
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>├── links.jsonl
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>├── ownership.jsonl
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>├── headings.jsonl
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>└── report.json
+</code></pre></div>
+<p>Example catalog row:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="p">{</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.arch.kernel"</span><span class="p">,</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"architecture"</span><span class="p">,</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="w">  </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"docs/backend/architecture/kernel.md"</span><span class="p">,</span>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="w">  </span><span class="nt">"authority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"descriptive"</span><span class="p">,</span>
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a><span class="w">  </span><span class="nt">"truth"</span><span class="p">:</span><span class="w"> </span><span class="s2">"as-built"</span>
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a><span class="p">}</span>
+</code></pre></div>
+<p>Example relationship row:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="p">{</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.arch.kernel"</span><span class="p">,</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="nt">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"related_to"</span><span class="p">,</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">  </span><span class="nt">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.ref.events"</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>The generated layer starts to resemble a primitive project knowledge representation without committing to Atlas internals.</p>
+<hr />
+<h1 id="20-p1-ast-grep-for-structural-code-evidence">20. P1: ast-grep for Structural Code Evidence</h1>
+<p>ast-grep is a Rust-based structural search, lint, and rewriting engine built around syntax trees. It supports many languages and structured JSON output.</p>
+<p>Its first use in AETHER should be <strong>observation</strong>, not automated mutation.</p>
+<p>Questions to test:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>Where is AgentView defined?
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>Which production sites construct it?
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>Where is EffectRequest produced?
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>Are deprecated classes still instantiated?
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>Which modules violate a stated boundary?
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>Where are legacy runtime entry points used?
+</code></pre></div>
+<p>Possible output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>doc claim
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>   ↓
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>search rule
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>   ↓
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>AST matches
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>   ↓
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>code evidence
+</code></pre></div>
+<p>This provides a first deterministic bridge between documentation and code.</p>
+<h2 id="201-why-not-direct-tree-sitter-first">20.1 Why not direct Tree-sitter first</h2>
+<p>ast-grep already provides a high-level polyglot structural interface powered by Tree-sitter-like syntax parsing.</p>
+<p>Direct Tree-sitter should be added only when:</p>
+<ul>
+<li>source-range fidelity is insufficient;</li>
+<li>custom grammars are required;</li>
+<li>Atlas needs low-level syntax traversal unavailable through higher-level tools;</li>
+<li>latency measurements justify avoiding another abstraction layer.</li>
+</ul>
+<p>Use the highest-level mature abstraction that solves the problem.</p>
+<hr />
+<h1 id="21-p1-scip-for-symbol-intelligence">21. P1: SCIP for Symbol Intelligence</h1>
+<p>SCIP is a language-agnostic code intelligence protocol for information such as:</p>
+<ul>
+<li>definition;</li>
+<li>references;</li>
+<li>implementations.</li>
+</ul>
+<p>Its official repository provides a protobuf schema, Go and Rust bindings, and indexers across multiple language ecosystems including Python and TypeScript.</p>
+<p>This makes SCIP a strong candidate for the stable symbol layer.</p>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>docs/backend/architecture/agency.md
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>              │
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>              │ refers_to
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>              ▼
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>       symbol:AgentView
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>          /       \
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a> definition      references
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a>    │                │
+<a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>    ▼                ▼
+<a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a> Python source     callers
+</code></pre></div>
+<h2 id="211-ast-grep-vs-scip">21.1 ast-grep vs SCIP</h2>
+<p>They solve different problems.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>ast-grep
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>→ syntax patterns
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>→ structural rules
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>→ structural rewrites
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>→ custom repository-specific detection
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>SCIP
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>→ symbol identities
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>→ definitions
+<a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>→ references
+<a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a>→ implementations
+<a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a>→ language-agnostic navigation
+</code></pre></div>
+<p>Atlas may ultimately consume both.</p>
+<p>The P1 experiment should measure overlap rather than assuming both are necessary everywhere.</p>
+<hr />
+<h1 id="22-what-to-measure-during-p0-and-p1">22. What to Measure During P0 and P1</h1>
+<p>The experiments are valuable only if the project records evidence.</p>
+<p>For each OSS component measure:</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Example metric</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>automation gain</td>
+<td>manual minutes avoided</td>
+</tr>
+<tr>
+<td>precision</td>
+<td>false-positive rate</td>
+</tr>
+<tr>
+<td>recall</td>
+<td>relevant facts discovered</td>
+</tr>
+<tr>
+<td>configuration cost</td>
+<td>config LOC / maintenance</td>
+</tr>
+<tr>
+<td>incremental capability</td>
+<td>full rebuild vs changed-file processing</td>
+</tr>
+<tr>
+<td>structured output</td>
+<td>JSON / protobuf / AST availability</td>
+</tr>
+<tr>
+<td>determinism</td>
+<td>repeatable output</td>
+</tr>
+<tr>
+<td>language coverage</td>
+<td>Python / TypeScript / Rust / etc.</td>
+</tr>
+<tr>
+<td>agent usability</td>
+<td>CLI stability / parseability</td>
+</tr>
+<tr>
+<td>performance</td>
+<td>wall-clock / memory</td>
+</tr>
+<tr>
+<td>operational complexity</td>
+<td>install/runtime dependencies</td>
+</tr>
+<tr>
+<td>Atlas role</td>
+<td>core / adapter / optional backend / reject</td>
+</tr>
+</tbody>
+</table>
+<p>A useful experimental register could remain generated or live under research:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>docs/research/atlas-oss-evaluation.md
+</code></pre></div>
+<p>Keep it explicitly non-normative.</p>
+<hr />
+<h1 id="23-the-future-atlas-a-thin-repository-knowledge-control-plane">23. The Future Atlas: A Thin Repository Knowledge Control Plane</h1>
+<p>The second attached plan defines the long-term architecture.</p>
+<p>Atlas should become:</p>
+<blockquote>
+<p><strong>A tool-independent repository knowledge control plane that transforms heterogeneous project evidence into a canonical project model and uses that model to drive search, context compilation, organization, migration, validation, and agent operations.</strong></p>
+</blockquote>
+<p>It should explicitly avoid rebuilding mature functionality.</p>
+<hr />
+<h1 id="24-atlas-as-an-intermediate-representation">24. Atlas as an Intermediate Representation</h1>
+<p>The most important proprietary concept is not the parser. It is the normalized model.</p>
+<p>A minimal Project Knowledge Intermediate Representation (PKIR) might contain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>Entity
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>Relation
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>Claim
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>Evidence
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>Locator
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>Authority
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>Revision
+</code></pre></div>
+<p>Possible Rust representation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Entity</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Relation</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Claim</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Evidence</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Locator</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Authority</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Revision</span><span class="w"> </span><span class="p">{}</span>
+</code></pre></div>
+<p>An entity:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="p">{</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"concept.agent-view"</span><span class="p">,</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="w">  </span><span class="nt">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"concept"</span><span class="p">,</span>
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AgentView"</span><span class="p">,</span>
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="w">  </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Event-derived projection of agent state"</span>
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>A relation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="p">{</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"concept.agent-view"</span><span class="p">,</span>
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="w">  </span><span class="nt">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"implemented_by"</span><span class="p">,</span>
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="w">  </span><span class="nt">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"symbol:aether.agency.AgentView"</span><span class="p">,</span>
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a><span class="w">  </span><span class="nt">"evidence"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scip:..."</span>
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>Another relation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="p">{</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"concept.agent-view"</span><span class="p">,</span>
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="w">  </span><span class="nt">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"specified_by"</span><span class="p">,</span>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="w">  </span><span class="nt">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"doc:spec.core#agent-state"</span><span class="p">,</span>
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a><span class="w">  </span><span class="nt">"authority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"normative"</span>
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>This is where Atlas becomes technically distinctive.</p>
+<p>OSS solves syntax and indexing.</p>
+<p>Atlas solves:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>identity
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>semantic normalization
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>authority
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>provenance
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>reconciliation
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>canonical ownership
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>knowledge preservation
+<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>context compilation
+<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>migration planning
+</code></pre></div>
+<hr />
+<h1 id="25-fact-providers-not-giant-integrations">25. Fact Providers, Not Giant Integrations</h1>
+<p>Every external extractor should behave like an adapter.</p>
+<p>Conceptual interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="k">trait</span><span class="w"> </span><span class="n">FactProvider</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">repo</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">Repository</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Support</span><span class="p">;</span>
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">repo</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">Repository</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">FactBatch</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="p">}</span>
+</code></pre></div>
+<p>Possible providers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>GitProvider
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>MarkdownProvider
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>PandocProvider
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>DoclingProvider
+<a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>ScipProvider
+<a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a>AstGrepProvider
+<a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a>SchemaProvider
+<a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a>TestProvider
+<a id="__codelineno-49-9" name="__codelineno-49-9" href="#__codelineno-49-9"></a>GleanProvider
+<a id="__codelineno-49-10" name="__codelineno-49-10" href="#__codelineno-49-10"></a>JoernProvider
+</code></pre></div>
+<p>External data flow:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>tool-specific output
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>        ↓
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>    provider
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>        ↓
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>normalized Atlas facts
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>        ↓
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>       PKIR
+</code></pre></div>
+<p>Atlas must not encode SCIP semantics throughout its core.</p>
+<p>It must not encode Glean semantics throughout its core.</p>
+<p>It must not encode Markdown AST types throughout its reasoning engine.</p>
+<p>The adapter boundary protects the control plane.</p>
+<hr />
+<h1 id="26-migration-providers">26. Migration Providers</h1>
+<p>The same architecture should apply to changes.</p>
+<p>Conceptual interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="k">trait</span><span class="w"> </span><span class="n">MigrationProvider</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span>
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a><span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a><span class="w">        </span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="nc">MigrationRequest</span>
+<a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">MigrationPlan</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a>
+<a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
+<a id="__codelineno-51-8" name="__codelineno-51-8" href="#__codelineno-51-8"></a><span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-51-9" name="__codelineno-51-9" href="#__codelineno-51-9"></a><span class="w">        </span><span class="n">plan</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">MigrationPlan</span>
+<a id="__codelineno-51-10" name="__codelineno-51-10" href="#__codelineno-51-10"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">MigrationResult</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-51-11" name="__codelineno-51-11" href="#__codelineno-51-11"></a>
+<a id="__codelineno-51-12" name="__codelineno-51-12" href="#__codelineno-51-12"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">verify</span><span class="p">(</span>
+<a id="__codelineno-51-13" name="__codelineno-51-13" href="#__codelineno-51-13"></a><span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-51-14" name="__codelineno-51-14" href="#__codelineno-51-14"></a><span class="w">        </span><span class="n">result</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">MigrationResult</span>
+<a id="__codelineno-51-15" name="__codelineno-51-15" href="#__codelineno-51-15"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">Verification</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-51-16" name="__codelineno-51-16" href="#__codelineno-51-16"></a><span class="p">}</span>
+</code></pre></div>
+<p>Implementations might include:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>GitMoveProvider
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>MarkdownRewriteProvider
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>AstGrepMigrationProvider
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>OpenRewriteProvider
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>PandocMigrationProvider
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>AgentMigrationProvider
+</code></pre></div>
+<p>This separates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>what Atlas wants changed
+</code></pre></div>
+<p>from:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>how a particular language/tool performs that change
+</code></pre></div>
+<hr />
+<h1 id="27-the-role-of-ai">27. The Role of AI</h1>
+<p>Atlas should not use an LLM for tasks that deterministic tools solve better.</p>
+<p>Avoid LLMs for:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>find functions
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>find definitions
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>find references
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>parse Markdown
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>parse Git history
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>check links
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>perform exact text search
+<a id="__codelineno-55-8" name="__codelineno-55-8" href="#__codelineno-55-8"></a>apply deterministic rename
+<a id="__codelineno-55-9" name="__codelineno-55-9" href="#__codelineno-55-9"></a>enumerate files
+<a id="__codelineno-55-10" name="__codelineno-55-10" href="#__codelineno-55-10"></a>calculate hashes
+<a id="__codelineno-55-11" name="__codelineno-55-11" href="#__codelineno-55-11"></a>validate schemas
+</code></pre></div>
+<p>Use semantic reasoning for ambiguity:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>Do these two documents represent the same concept?
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>Is this historical claim still current?
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>Does this rationale conflict with current SPEC?
+<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>
+<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>Which of several conflicting pages should become canonical?
+<a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>
+<a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>How should these clusters be named?
+<a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a>
+<a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a>Does a code change materially require an architecture update?
+<a id="__codelineno-56-12" name="__codelineno-56-12" href="#__codelineno-56-12"></a>
+<a id="__codelineno-56-13" name="__codelineno-56-13" href="#__codelineno-56-13"></a>Which context bundle best answers this task?
+</code></pre></div>
+<p>The target architecture is therefore roughly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>deterministic extraction
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>        +
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>bounded semantic reasoning
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>        +
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>deterministic verification
+</code></pre></div>
+<p>not:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>LLM reads everything and guesses
+</code></pre></div>
+<hr />
+<h1 id="28-storage-strategy-sqlite-first">28. Storage Strategy: SQLite First</h1>
+<p>Do not introduce a graph database merely because the data is graph-shaped.</p>
+<p>Initial PKIR tables could be:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="n">entity</span>
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a><span class="n">relation</span>
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a><span class="n">claim</span>
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a><span class="n">evidence</span>
+<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a><span class="k">locator</span>
+<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a><span class="n">revision</span>
+<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a><span class="n">authority</span>
+</code></pre></div>
+<p>Many graph operations can be implemented initially using:</p>
+<ul>
+<li>indexes;</li>
+<li>joins;</li>
+<li>recursive CTEs.</li>
+</ul>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>neighbors(entity)
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>documents_for(symbol)
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>tests_for(component)
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>dependencies(component)
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>claims_supported_by(code-location)
+</code></pre></div>
+<p>SQLite provides:</p>
+<ul>
+<li>local-first operation;</li>
+<li>a single-file database;</li>
+<li>mature transaction semantics;</li>
+<li>low operational burden;</li>
+<li>excellent suitability for a developer tool.</li>
+</ul>
+<p>The database should remain behind a storage interface so it can be replaced later.</p>
+<hr />
+<h1 id="29-tantivy-later-full-text-search-backend">29. Tantivy: Later Full-Text Search Backend</h1>
+<p>Tantivy is a Rust library for building full-text search engines and uses BM25 relevance.</p>
+<p>It becomes relevant when Atlas needs its own fast search over:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>documents
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>headings
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>claims
+<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>symbols
+<a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a>evidence
+<a id="__codelineno-61-6" name="__codelineno-61-6" href="#__codelineno-61-6"></a>Git revisions
+</code></pre></div>
+<p>It is not required for P0 because MkDocs/local grep/current repository tools already provide useful search.</p>
+<p>Adopt Tantivy only when measurements show Atlas needs:</p>
+<ul>
+<li>lower-latency unified search;</li>
+<li>programmatic search ranking;</li>
+<li>hybrid ranking with authority/graph factors;</li>
+<li>local embedded indexing.</li>
+</ul>
+<p>A future Atlas score could combine:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>exact ID match
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>+
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>symbol match
+<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>+
+<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>BM25
+<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>+
+<a id="__codelineno-62-7" name="__codelineno-62-7" href="#__codelineno-62-7"></a>graph proximity
+<a id="__codelineno-62-8" name="__codelineno-62-8" href="#__codelineno-62-8"></a>+
+<a id="__codelineno-62-9" name="__codelineno-62-9" href="#__codelineno-62-9"></a>authority
+<a id="__codelineno-62-10" name="__codelineno-62-10" href="#__codelineno-62-10"></a>+
+<a id="__codelineno-62-11" name="__codelineno-62-11" href="#__codelineno-62-11"></a>freshness
+<a id="__codelineno-62-12" name="__codelineno-62-12" href="#__codelineno-62-12"></a>+
+<a id="__codelineno-62-13" name="__codelineno-62-13" href="#__codelineno-62-13"></a>optional semantic similarity
+</code></pre></div>
+<p>Vector search is not necessary to start.</p>
+<hr />
+<h1 id="30-glean-optional-large-scale-fact-backend">30. Glean: Optional Large-Scale Fact Backend</h1>
+<p>Glean is highly relevant conceptually but should not be a P0 dependency.</p>
+<p>Its official model is already close to several Atlas ideas:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>facts
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>predicates
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>schemas
+<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>queries
+<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>derived predicates
+</code></pre></div>
+<p>Glean also supports user-defined schemas and can store information beyond its built-in code indexes.</p>
+<p>This raises an important possibility:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>Atlas PKIR
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>     │
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>StorageProvider
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>   /      \
+<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>SQLite    Glean
+<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>local     scale
+</code></pre></div>
+<p>Glean may eventually serve as:</p>
+<ul>
+<li>large repository fact storage;</li>
+<li>derived relation engine;</li>
+<li>cross-repository indexing layer;</li>
+<li>scalable code-knowledge backend.</li>
+</ul>
+<p>But Atlas should not require a Glean deployment merely to operate on one developer repository.</p>
+<p>Use it when scale justifies it.</p>
+<hr />
+<h1 id="31-joern-deep-analysis-tier">31. Joern: Deep Analysis Tier</h1>
+<p>Joern uses a Code Property Graph (CPG), combining program constructs and relationships in a graph representation.</p>
+<p>This is useful for deeper program analyses such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>data flow
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>control flow
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>security analysis
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>program patterns
+</code></pre></div>
+<p>But it is more expensive and operationally heavier than basic syntax/symbol indexing.</p>
+<p>Use a tiered analysis model:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>Tier 0  filesystem + Git
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>Tier 1  Markdown/config/schema
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>Tier 2  ast-grep
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>Tier 3  SCIP
+<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>Tier 4  Joern
+<a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>Tier 5  LLM semantic reasoning
+</code></pre></div>
+<p>Every task should use the cheapest tier capable of answering it.</p>
+<p>Joern is therefore a future deep-analysis adapter, not a baseline requirement.</p>
+<hr />
+<h1 id="32-openrewrite-semantic-migration-backend">32. OpenRewrite: Semantic Migration Backend</h1>
+<p>OpenRewrite represents transformations as reusable recipes over its semantic tree model and is designed for automated code migrations and refactoring.</p>
+<p>Use it later for:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>framework upgrades
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>API migrations
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>package moves
+<a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a>dependency migrations
+<a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a>type-aware changes
+<a id="__codelineno-67-6" name="__codelineno-67-6" href="#__codelineno-67-6"></a>large semantic refactors
+</code></pre></div>
+<p>Potential routing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>Migration request
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>      │
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>      ├── simple file/text change → native/Git
+<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>      ├── structural code change → ast-grep
+<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>      ├── semantic migration → OpenRewrite
+<a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a>      └── ambiguous transformation → agent-assisted plan
+</code></pre></div>
+<p>Atlas should produce the migration intent and verification contract; the specialized engine performs the transformation.</p>
+<hr />
+<h1 id="33-cytoscapejs-visualization-not-knowledge-storage">33. Cytoscape.js: Visualization, Not Knowledge Storage</h1>
+<p>Cytoscape.js is valuable for displaying project graphs and running graph algorithms in a frontend.</p>
+<p>Potential future UI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>Atlas API
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>    ↓
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>graph query
+<a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>    ↓
+<a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a>JSON nodes/edges
+<a id="__codelineno-69-6" name="__codelineno-69-6" href="#__codelineno-69-6"></a>    ↓
+<a id="__codelineno-69-7" name="__codelineno-69-7" href="#__codelineno-69-7"></a>Cytoscape.js
+</code></pre></div>
+<p>This could visualize:</p>
+<ul>
+<li>doc ownership;</li>
+<li>code-to-doc relationships;</li>
+<li>module dependencies;</li>
+<li>concepts;</li>
+<li>tests;</li>
+<li>execution flows;</li>
+<li>provenance chains.</li>
+</ul>
+<p>Cytoscape.js should not define Atlas's graph model. It is a rendering and interaction client.</p>
+<hr />
+<h1 id="34-obsidian-optional-human-workspace">34. Obsidian: Optional Human Workspace</h1>
+<p>Obsidian can remain useful as a local Markdown browsing and editing environment.</p>
+<p>The correct relationship is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>Markdown files
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>   ↓
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>Obsidian view
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>Markdown files
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>   ↓
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>MkDocs view
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a>
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>Markdown files
+<a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a>   ↓
+<a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a>Atlas model
+</code></pre></div>
+<p>Do not allow Obsidian-specific features to become mandatory repository semantics.</p>
+<p>In particular, prefer portable Markdown links over requiring proprietary wiki-link conventions unless a translation layer is intentionally introduced.</p>
+<p>The future “evolution of Obsidian” described by Atlas is not primarily a prettier editor. It is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>human knowledge workspace
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>+
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>repository facts
+<a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a>+
+<a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>code intelligence
+<a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a>+
+<a id="__codelineno-71-7" name="__codelineno-71-7" href="#__codelineno-71-7"></a>authority model
+<a id="__codelineno-71-8" name="__codelineno-71-8" href="#__codelineno-71-8"></a>+
+<a id="__codelineno-71-9" name="__codelineno-71-9" href="#__codelineno-71-9"></a>automated validation
+<a id="__codelineno-71-10" name="__codelineno-71-10" href="#__codelineno-71-10"></a>+
+<a id="__codelineno-71-11" name="__codelineno-71-11" href="#__codelineno-71-11"></a>agent context
+<a id="__codelineno-71-12" name="__codelineno-71-12" href="#__codelineno-71-12"></a>+
+<a id="__codelineno-71-13" name="__codelineno-71-13" href="#__codelineno-71-13"></a>migration planning
+<a id="__codelineno-71-14" name="__codelineno-71-14" href="#__codelineno-71-14"></a>+
+<a id="__codelineno-71-15" name="__codelineno-71-15" href="#__codelineno-71-15"></a>graph/query surface
+</code></pre></div>
+<p>Obsidian can remain one interface over that substrate.</p>
+<hr />
+<h1 id="35-grok-build-as-architectural-inspiration">35. Grok Build as Architectural Inspiration</h1>
+<p>Grok Build is useful as a reference architecture, not as a foundational dependency.</p>
+<p>The project was open-sourced in July 2026. Its published architecture exposes practical patterns including:</p>
+<ul>
+<li>context assembly;</li>
+<li>tool-call dispatch;</li>
+<li>tool registry;</li>
+<li>TUI;</li>
+<li>local-first operation;</li>
+<li>config-driven behavior;</li>
+<li>plugins;</li>
+<li>hooks;</li>
+<li>skills;</li>
+<li>MCP servers;</li>
+<li>subagents;</li>
+<li>headless execution;</li>
+<li>workflows.</li>
+</ul>
+<p>The most relevant ideas for Atlas are:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>small control plane
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>config-driven
+<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>local-first
+<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a>extensions behind interfaces
+<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>headless automation
+<a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a>one interactive CLI/TUI surface
+<a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a>structured tools
+<a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a>agent orchestration
+</code></pre></div>
+<p>Atlas should borrow these design patterns while remaining deterministic without an LLM.</p>
+<p>The documentation control plane must work even when:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>no model API is configured
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>no internet exists
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a>no agent is running
+</code></pre></div>
+<p>AI is an optional semantic worker, not a runtime prerequisite for basic repository integrity.</p>
+<hr />
+<h1 id="36-super-atlas-best-of-breed-composition">36. Super-Atlas: Best-of-Breed Composition</h1>
+<p>A mature architecture can eventually look like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>                           ATLAS
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>                 Repository Knowledge Control Plane
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>                              │
+<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a>          ┌───────────────────┼────────────────────┐
+<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>          │                   │                    │
+<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>       INGEST               MODEL                ACTION
+<a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a>          │                   │                    │
+<a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>          ▼                   ▼                    ▼
+<a id="__codelineno-74-9" name="__codelineno-74-9" href="#__codelineno-74-9"></a>       OSS tools             PKIR              OSS tools
+</code></pre></div>
+<p>Expanded:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>Repository
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>   │
+<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>   ├── Git
+<a id="__codelineno-75-4" name="__codelineno-75-4" href="#__codelineno-75-4"></a>   ├── Markdown
+<a id="__codelineno-75-5" name="__codelineno-75-5" href="#__codelineno-75-5"></a>   ├── JSON/YAML schemas
+<a id="__codelineno-75-6" name="__codelineno-75-6" href="#__codelineno-75-6"></a>   │
+<a id="__codelineno-75-7" name="__codelineno-75-7" href="#__codelineno-75-7"></a>   ├── legacy docs ───── Pandoc
+<a id="__codelineno-75-8" name="__codelineno-75-8" href="#__codelineno-75-8"></a>   ├── complex docs ──── Docling
+<a id="__codelineno-75-9" name="__codelineno-75-9" href="#__codelineno-75-9"></a>   │
+<a id="__codelineno-75-10" name="__codelineno-75-10" href="#__codelineno-75-10"></a>   ├── structural code ─ ast-grep
+<a id="__codelineno-75-11" name="__codelineno-75-11" href="#__codelineno-75-11"></a>   ├── symbols ───────── SCIP
+<a id="__codelineno-75-12" name="__codelineno-75-12" href="#__codelineno-75-12"></a>   ├── deep analysis ─── Joern
+<a id="__codelineno-75-13" name="__codelineno-75-13" href="#__codelineno-75-13"></a>   ├── large-scale facts Glean
+<a id="__codelineno-75-14" name="__codelineno-75-14" href="#__codelineno-75-14"></a>   │
+<a id="__codelineno-75-15" name="__codelineno-75-15" href="#__codelineno-75-15"></a>   └── tests / CI / build evidence
+<a id="__codelineno-75-16" name="__codelineno-75-16" href="#__codelineno-75-16"></a>                   │
+<a id="__codelineno-75-17" name="__codelineno-75-17" href="#__codelineno-75-17"></a>                   ▼
+<a id="__codelineno-75-18" name="__codelineno-75-18" href="#__codelineno-75-18"></a>             Atlas Providers
+<a id="__codelineno-75-19" name="__codelineno-75-19" href="#__codelineno-75-19"></a>                   │
+<a id="__codelineno-75-20" name="__codelineno-75-20" href="#__codelineno-75-20"></a>                   ▼
+<a id="__codelineno-75-21" name="__codelineno-75-21" href="#__codelineno-75-21"></a>                 PKIR
+<a id="__codelineno-75-22" name="__codelineno-75-22" href="#__codelineno-75-22"></a>                   │
+<a id="__codelineno-75-23" name="__codelineno-75-23" href="#__codelineno-75-23"></a>        ┌──────────┼──────────┐
+<a id="__codelineno-75-24" name="__codelineno-75-24" href="#__codelineno-75-24"></a>        │          │          │
+<a id="__codelineno-75-25" name="__codelineno-75-25" href="#__codelineno-75-25"></a>      Search     Graph      Evidence
+<a id="__codelineno-75-26" name="__codelineno-75-26" href="#__codelineno-75-26"></a>        │          │          │
+<a id="__codelineno-75-27" name="__codelineno-75-27" href="#__codelineno-75-27"></a>     Tantivy     SQLite     SQLite
+<a id="__codelineno-75-28" name="__codelineno-75-28" href="#__codelineno-75-28"></a>        │          │          │
+<a id="__codelineno-75-29" name="__codelineno-75-29" href="#__codelineno-75-29"></a>        └──────────┼──────────┘
+<a id="__codelineno-75-30" name="__codelineno-75-30" href="#__codelineno-75-30"></a>                   ▼
+<a id="__codelineno-75-31" name="__codelineno-75-31" href="#__codelineno-75-31"></a>              Atlas Engine
+<a id="__codelineno-75-32" name="__codelineno-75-32" href="#__codelineno-75-32"></a>                   │
+<a id="__codelineno-75-33" name="__codelineno-75-33" href="#__codelineno-75-33"></a>     ┌─────────────┼──────────────┐
+<a id="__codelineno-75-34" name="__codelineno-75-34" href="#__codelineno-75-34"></a>     │             │              │
+<a id="__codelineno-75-35" name="__codelineno-75-35" href="#__codelineno-75-35"></a>    MAP         CONTEXT        MIGRATE
+<a id="__codelineno-75-36" name="__codelineno-75-36" href="#__codelineno-75-36"></a>     │             │              │
+<a id="__codelineno-75-37" name="__codelineno-75-37" href="#__codelineno-75-37"></a> Cytoscape       Agents     ast-grep /
+<a id="__codelineno-75-38" name="__codelineno-75-38" href="#__codelineno-75-38"></a> Mermaid         MCP/API    OpenRewrite
+<a id="__codelineno-75-39" name="__codelineno-75-39" href="#__codelineno-75-39"></a> MkDocs
+</code></pre></div>
+<p>This is a “super Atlas” because it combines specialist engines rather than replacing them.</p>
+<hr />
+<h1 id="37-atlas-bootstrap-pipeline">37. Atlas Bootstrap Pipeline</h1>
+<p>A future bootstrap command could operate as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>atlas bootstrap .
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>        │
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>        ▼
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a> Repository Probe
+<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a>        │
+<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a>   ┌────┼──────────────┐
+<a id="__codelineno-76-7" name="__codelineno-76-7" href="#__codelineno-76-7"></a>   ▼    ▼              ▼
+<a id="__codelineno-76-8" name="__codelineno-76-8" href="#__codelineno-76-8"></a>  Git  Docs           Code
+<a id="__codelineno-76-9" name="__codelineno-76-9" href="#__codelineno-76-9"></a>   │    │              │
+<a id="__codelineno-76-10" name="__codelineno-76-10" href="#__codelineno-76-10"></a>   │ Markdown       ast-grep
+<a id="__codelineno-76-11" name="__codelineno-76-11" href="#__codelineno-76-11"></a>   │ Pandoc         SCIP
+<a id="__codelineno-76-12" name="__codelineno-76-12" href="#__codelineno-76-12"></a>   │ Docling          │
+<a id="__codelineno-76-13" name="__codelineno-76-13" href="#__codelineno-76-13"></a>   └────┬──────────────┘
+<a id="__codelineno-76-14" name="__codelineno-76-14" href="#__codelineno-76-14"></a>        ▼
+<a id="__codelineno-76-15" name="__codelineno-76-15" href="#__codelineno-76-15"></a>     Raw Facts
+<a id="__codelineno-76-16" name="__codelineno-76-16" href="#__codelineno-76-16"></a>        │
+<a id="__codelineno-76-17" name="__codelineno-76-17" href="#__codelineno-76-17"></a>        ▼
+<a id="__codelineno-76-18" name="__codelineno-76-18" href="#__codelineno-76-18"></a>    PKIR Normalize
+<a id="__codelineno-76-19" name="__codelineno-76-19" href="#__codelineno-76-19"></a>        │
+<a id="__codelineno-76-20" name="__codelineno-76-20" href="#__codelineno-76-20"></a>        ▼
+<a id="__codelineno-76-21" name="__codelineno-76-21" href="#__codelineno-76-21"></a>   Entity Resolution
+<a id="__codelineno-76-22" name="__codelineno-76-22" href="#__codelineno-76-22"></a>       / \
+<a id="__codelineno-76-23" name="__codelineno-76-23" href="#__codelineno-76-23"></a>      /   \
+<a id="__codelineno-76-24" name="__codelineno-76-24" href="#__codelineno-76-24"></a> deterministic
+<a id="__codelineno-76-25" name="__codelineno-76-25" href="#__codelineno-76-25"></a>    merge     ambiguous
+<a id="__codelineno-76-26" name="__codelineno-76-26" href="#__codelineno-76-26"></a>                │
+<a id="__codelineno-76-27" name="__codelineno-76-27" href="#__codelineno-76-27"></a>                ▼
+<a id="__codelineno-76-28" name="__codelineno-76-28" href="#__codelineno-76-28"></a>               LLM
+<a id="__codelineno-76-29" name="__codelineno-76-29" href="#__codelineno-76-29"></a>                │
+<a id="__codelineno-76-30" name="__codelineno-76-30" href="#__codelineno-76-30"></a>        ┌───────┘
+<a id="__codelineno-76-31" name="__codelineno-76-31" href="#__codelineno-76-31"></a>        ▼
+<a id="__codelineno-76-32" name="__codelineno-76-32" href="#__codelineno-76-32"></a>  Canonical Project Model
+<a id="__codelineno-76-33" name="__codelineno-76-33" href="#__codelineno-76-33"></a>        │
+<a id="__codelineno-76-34" name="__codelineno-76-34" href="#__codelineno-76-34"></a>   ┌────┼──────────┐
+<a id="__codelineno-76-35" name="__codelineno-76-35" href="#__codelineno-76-35"></a>   ▼    ▼          ▼
+<a id="__codelineno-76-36" name="__codelineno-76-36" href="#__codelineno-76-36"></a> Search Map     Conflicts
+<a id="__codelineno-76-37" name="__codelineno-76-37" href="#__codelineno-76-37"></a>   │    │          │
+<a id="__codelineno-76-38" name="__codelineno-76-38" href="#__codelineno-76-38"></a>   └────┼──────────┘
+<a id="__codelineno-76-39" name="__codelineno-76-39" href="#__codelineno-76-39"></a>        ▼
+<a id="__codelineno-76-40" name="__codelineno-76-40" href="#__codelineno-76-40"></a>     Context
+<a id="__codelineno-76-41" name="__codelineno-76-41" href="#__codelineno-76-41"></a>        │
+<a id="__codelineno-76-42" name="__codelineno-76-42" href="#__codelineno-76-42"></a>        ▼
+<a id="__codelineno-76-43" name="__codelineno-76-43" href="#__codelineno-76-43"></a>      Agents
+</code></pre></div>
+<p>The LLM handles ambiguity, not basic extraction.</p>
+<hr />
+<h1 id="38-context-compilation">38. Context Compilation</h1>
+<p>One of Atlas's highest-value features should be task-specific context construction.</p>
+<p>Instead of giving an agent the whole documentation tree:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>Task:
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>change child budget attenuation
+</code></pre></div>
+<p>Atlas could derive:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>SPEC clauses
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>+
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>backend architecture pages
+<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a>+
+<a id="__codelineno-78-5" name="__codelineno-78-5" href="#__codelineno-78-5"></a>relevant event/schema reference
+<a id="__codelineno-78-6" name="__codelineno-78-6" href="#__codelineno-78-6"></a>+
+<a id="__codelineno-78-7" name="__codelineno-78-7" href="#__codelineno-78-7"></a>current execution task
+<a id="__codelineno-78-8" name="__codelineno-78-8" href="#__codelineno-78-8"></a>+
+<a id="__codelineno-78-9" name="__codelineno-78-9" href="#__codelineno-78-9"></a>symbol definitions
+<a id="__codelineno-78-10" name="__codelineno-78-10" href="#__codelineno-78-10"></a>+
+<a id="__codelineno-78-11" name="__codelineno-78-11" href="#__codelineno-78-11"></a>callers
+<a id="__codelineno-78-12" name="__codelineno-78-12" href="#__codelineno-78-12"></a>+
+<a id="__codelineno-78-13" name="__codelineno-78-13" href="#__codelineno-78-13"></a>tests
+<a id="__codelineno-78-14" name="__codelineno-78-14" href="#__codelineno-78-14"></a>+
+<a id="__codelineno-78-15" name="__codelineno-78-15" href="#__codelineno-78-15"></a>recent relevant Git change
+</code></pre></div>
+<p>The future command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>atlas<span class="w"> </span>context<span class="w"> </span><span class="s2">"modify child budget attenuation"</span>
+</code></pre></div>
+<p>could produce a bounded context bundle with provenance explaining why each item was selected.</p>
+<p>This is more valuable than a generic vector search because the selection can account for:</p>
+<ul>
+<li>canonical ownership;</li>
+<li>authority;</li>
+<li>code proximity;</li>
+<li>symbol relationships;</li>
+<li>current status;</li>
+<li>freshness;</li>
+<li>test coverage;</li>
+<li>explicit metadata.</li>
+</ul>
+<hr />
+<h1 id="39-automatic-drift-detection">39. Automatic Drift Detection</h1>
+<p>The generated knowledge layer enables increasingly powerful drift checks.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>docs mention a canonical symbol
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>but SCIP no longer resolves it
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>architecture claims one runtime owner
+<a id="__codelineno-81-2" name="__codelineno-81-2" href="#__codelineno-81-2"></a>but structural analysis finds a second production caller
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>reference event exists
+<a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>but no emitter is found
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>guide links to removed command
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>SPEC invariant has no mapped test
+</code></pre></div>
+<p>These should initially be warnings and experiments.</p>
+<p>Only promote a detector to a blocking CI gate when its precision is proven.</p>
+<p>This avoids creating a noisy control plane that developers learn to ignore.</p>
+<hr />
+<h1 id="40-documentation-change-workflow">40. Documentation Change Workflow</h1>
+<p>The normal development loop should remain simple.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>milestone / active task
+<a id="__codelineno-85-2" name="__codelineno-85-2" href="#__codelineno-85-2"></a>        ↓
+<a id="__codelineno-85-3" name="__codelineno-85-3" href="#__codelineno-85-3"></a>implementation
+<a id="__codelineno-85-4" name="__codelineno-85-4" href="#__codelineno-85-4"></a>        ↓
+<a id="__codelineno-85-5" name="__codelineno-85-5" href="#__codelineno-85-5"></a>tests
+<a id="__codelineno-85-6" name="__codelineno-85-6" href="#__codelineno-85-6"></a>        ↓
+<a id="__codelineno-85-7" name="__codelineno-85-7" href="#__codelineno-85-7"></a>did durable behavior change?
+<a id="__codelineno-85-8" name="__codelineno-85-8" href="#__codelineno-85-8"></a>        │
+<a id="__codelineno-85-9" name="__codelineno-85-9" href="#__codelineno-85-9"></a>        ├─ no → no doc rewrite required
+<a id="__codelineno-85-10" name="__codelineno-85-10" href="#__codelineno-85-10"></a>        │
+<a id="__codelineno-85-11" name="__codelineno-85-11" href="#__codelineno-85-11"></a>        └─ yes
+<a id="__codelineno-85-12" name="__codelineno-85-12" href="#__codelineno-85-12"></a>             │
+<a id="__codelineno-85-13" name="__codelineno-85-13" href="#__codelineno-85-13"></a>             ├─ normative contract? → SPEC
+<a id="__codelineno-85-14" name="__codelineno-85-14" href="#__codelineno-85-14"></a>             ├─ architecture? → architecture page
+<a id="__codelineno-85-15" name="__codelineno-85-15" href="#__codelineno-85-15"></a>             ├─ API/schema/event? → reference
+<a id="__codelineno-85-16" name="__codelineno-85-16" href="#__codelineno-85-16"></a>             ├─ usage? → guide
+<a id="__codelineno-85-17" name="__codelineno-85-17" href="#__codelineno-85-17"></a>             ├─ product behavior? → product
+<a id="__codelineno-85-18" name="__codelineno-85-18" href="#__codelineno-85-18"></a>             └─ irreducible rationale? → decisions
+<a id="__codelineno-85-19" name="__codelineno-85-19" href="#__codelineno-85-19"></a>        ↓
+<a id="__codelineno-85-20" name="__codelineno-85-20" href="#__codelineno-85-20"></a>just docs-check
+<a id="__codelineno-85-21" name="__codelineno-85-21" href="#__codelineno-85-21"></a>        ↓
+<a id="__codelineno-85-22" name="__codelineno-85-22" href="#__codelineno-85-22"></a>PR / merge
+</code></pre></div>
+<p>No status report is generated merely because a change occurred.</p>
+<hr />
+<h1 id="41-anti-bloat-constitution">41. Anti-Bloat Constitution</h1>
+<p>The documentation system should encode the following rules:</p>
+<ol>
+<li><strong>One durable fact has one canonical owner.</strong></li>
+<li><strong>Do not create a document to explain that another document changed.</strong></li>
+<li><strong>If information can be generated reliably from code, generate it instead of copying it.</strong></li>
+<li><strong>Research never becomes canonical automatically.</strong></li>
+<li><strong>Generated data is never edited manually.</strong></li>
+<li><strong>Create a new Markdown page only when no existing canonical owner can contain the information cleanly.</strong></li>
+<li><strong>A code change that alters a durable contract updates the canonical documentation in the same change.</strong></li>
+<li><strong>Git owns history; active docs own current truth.</strong></li>
+<li><strong>MkDocs, Obsidian, AI, and Atlas are interfaces or derived views; Markdown + code + Git remain evidence sources.</strong></li>
+<li><strong>Prefer adapters and configuration over new implementations when OSS already solves the capability.</strong></li>
+<li><strong>Do not maintain the same API shape manually in source and Markdown.</strong></li>
+<li><strong>Do not load <code>research/</code> into normal agent context unless the task requires it.</strong></li>
+<li><strong>Do not create an ADR for ordinary architecture documentation.</strong></li>
+<li><strong>A decision record exists only when the rationale or reversal criterion cannot be reconstructed from current SPEC, architecture, reference, or code.</strong></li>
+<li><strong>Every new automation must demonstrate lower maintenance cost than the manual process it replaces.</strong></li>
+</ol>
+<hr />
+<h1 id="42-technologies-explicitly-not-used-now">42. Technologies Explicitly Not Used Now</h1>
+<p>The future stack includes many powerful technologies that should deliberately remain outside P0.</p>
+<h2 id="421-direct-tree-sitter">42.1 Direct Tree-sitter</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> ast-grep already provides a convenient polyglot structural interface.</p>
+<p><strong>Later:</strong> use direct Tree-sitter when Atlas needs lower-level parsing, custom language support, source mapping, or extraction behavior unavailable through ast-grep.</p>
+<hr />
+<h2 id="422-glean">42.2 Glean</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> too much operational machinery for a single-repository documentation-control problem.</p>
+<p><strong>Later:</strong> candidate <code>StorageProvider</code> / code fact backend for very large repositories or cross-repository Atlas deployments.</p>
+<hr />
+<h2 id="423-joern">42.3 Joern</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> deep Code Property Graph analysis is unnecessary for everyday documentation integrity.</p>
+<p><strong>Later:</strong> on-demand Tier-4 provider for data flow, security analysis, or complex program relationships.</p>
+<hr />
+<h2 id="424-openrewrite">42.4 OpenRewrite</h2>
+<p><strong>Now:</strong> no baseline dependency.</p>
+<p><strong>Why:</strong> current priority is knowledge organization, not large semantic framework migrations.</p>
+<p><strong>Later:</strong> <code>MigrationProvider</code> for complex type-aware or framework-level refactoring.</p>
+<hr />
+<h2 id="425-tantivy">42.5 Tantivy</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> MkDocs, repository search, and generated indexes are sufficient to validate P0 concepts.</p>
+<p><strong>Later:</strong> embedded Atlas full-text/BM25 index when unified low-latency programmatic search becomes useful.</p>
+<hr />
+<h2 id="426-neo4j">42.6 Neo4j</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> graph-shaped data does not require a graph database. It adds deployment and data-model complexity.</p>
+<p><strong>Later:</strong> only if proven query/workload requirements exceed SQLite/Glean or a specialized backend provides a measurable advantage.</p>
+<p>Likely unnecessary.</p>
+<hr />
+<h2 id="427-graphrag">42.7 GraphRAG</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> the main problem is authority, identity, provenance, and deterministic repository relationships, not merely semantic retrieval over a graph.</p>
+<p><strong>Later:</strong> potentially as a context/research adapter after PKIR exists, never as the canonical project model.</p>
+<hr />
+<h2 id="428-vector-database">42.8 Vector Database</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> exact IDs, metadata, symbols, BM25, links, and graph relationships should be exploited first.</p>
+<p><strong>Later:</strong> embeddings can become an optional retrieval signal when semantic recall provides measurable incremental value.</p>
+<hr />
+<h2 id="429-backstage">42.9 Backstage</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> Backstage is primarily an internal developer portal/platform experience. AETHER's immediate problem is repository knowledge integrity.</p>
+<p><strong>Later:</strong> an organization-scale Atlas could expose data to Backstage rather than become Backstage.</p>
+<hr />
+<h2 id="4210-cytoscapejs">42.10 Cytoscape.js</h2>
+<p><strong>Now:</strong> not required.</p>
+<p><strong>Why:</strong> no need for graph visualization before the knowledge model is useful.</p>
+<p><strong>Later:</strong> excellent client for an Atlas map UI.</p>
+<hr />
+<h2 id="4211-custom-rust-parser-custom-lsp">42.11 Custom Rust Parser / Custom LSP</h2>
+<p><strong>Now:</strong> explicitly no.</p>
+<p><strong>Why:</strong> extremely high reinvention cost. SCIP, ast-grep, Tree-sitter, language servers, and existing parsers already solve most syntax/symbol problems.</p>
+<p><strong>Later:</strong> write only missing adapters or project-specific inference.</p>
+<hr />
+<h2 id="4212-custom-graph-database">42.12 Custom Graph Database</h2>
+<p><strong>Now:</strong> no.</p>
+<p><strong>Why:</strong> premature infrastructure.</p>
+<p><strong>Later:</strong> only after measured SQLite/Glean limitations.</p>
+<hr />
+<h1 id="43-tool-adoption-matrix">43. Tool Adoption Matrix</h1>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">Future Atlas</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MkDocs Material</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">UI adapter</td>
+<td>human docs</td>
+</tr>
+<tr>
+<td><code>just</code></td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">may become Atlas CLI wrapper</td>
+<td>orchestration</td>
+</tr>
+<tr>
+<td>YAML frontmatter</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">input evidence</td>
+<td>metadata</td>
+</tr>
+<tr>
+<td>JSON Schema</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">schema provider</td>
+<td>contract</td>
+</tr>
+<tr>
+<td>jsonschema</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">adapter/internal</td>
+<td>validation</td>
+</tr>
+<tr>
+<td>markdownlint-cli2</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">validator</td>
+<td>Markdown structure</td>
+</tr>
+<tr>
+<td>Vale</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">validator</td>
+<td>terminology</td>
+</tr>
+<tr>
+<td>Lychee</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">validator</td>
+<td>links</td>
+</tr>
+<tr>
+<td>pre-commit</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">external</td>
+<td>local gates</td>
+</tr>
+<tr>
+<td>Mermaid</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">rendering adapter</td>
+<td>diagrams</td>
+</tr>
+<tr>
+<td>yq/jq</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">optional</td>
+<td>metadata query</td>
+</tr>
+<tr>
+<td>Griffe</td>
+<td style="text-align: right;">P0.5</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">provider</td>
+<td>Python API model</td>
+</tr>
+<tr>
+<td>mkdocstrings</td>
+<td style="text-align: right;">P0.5</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">view generator</td>
+<td>Python docs</td>
+</tr>
+<tr>
+<td>TypeDoc</td>
+<td style="text-align: right;">later</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">provider</td>
+<td>TypeScript API model</td>
+</tr>
+<tr>
+<td>Pandoc</td>
+<td style="text-align: right;">on demand</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">ingestion provider</td>
+<td>format conversion</td>
+</tr>
+<tr>
+<td>Docling</td>
+<td style="text-align: right;">on demand</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">ingestion provider</td>
+<td>complex docs</td>
+</tr>
+<tr>
+<td>ast-grep</td>
+<td style="text-align: right;">experiment</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">provider + migration</td>
+<td>AST search/rewrite</td>
+</tr>
+<tr>
+<td>SCIP</td>
+<td style="text-align: right;">experiment</td>
+<td style="text-align: right;">Yes</td>
+<td style="text-align: right;">provider</td>
+<td>symbols</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td style="text-align: right;">generated scripts</td>
+<td style="text-align: right;">likely</td>
+<td style="text-align: right;">default store</td>
+<td>PKIR</td>
+</tr>
+<tr>
+<td>Tantivy</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional</td>
+<td style="text-align: right;">likely</td>
+<td>full-text</td>
+</tr>
+<tr>
+<td>Glean</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional scale backend</td>
+<td>facts</td>
+</tr>
+<tr>
+<td>Joern</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional</td>
+<td style="text-align: right;">optional deep provider</td>
+<td>CPG</td>
+</tr>
+<tr>
+<td>OpenRewrite</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional</td>
+<td style="text-align: right;">migration provider</td>
+<td>semantic rewrite</td>
+</tr>
+<tr>
+<td>Cytoscape.js</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional</td>
+<td style="text-align: right;">UI</td>
+<td>graph</td>
+</tr>
+<tr>
+<td>Tree-sitter direct</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">fallback</td>
+<td style="text-align: right;">provider internals</td>
+<td>parsing</td>
+</tr>
+<tr>
+<td>Neo4j</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">unlikely</td>
+<td>graph DB</td>
+</tr>
+<tr>
+<td>GraphRAG</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional consumer</td>
+<td>semantic retrieval</td>
+</tr>
+<tr>
+<td>Vector DB</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">optional</td>
+<td>embeddings</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="44-p0-implementation-sequence">44. P0 Implementation Sequence</h1>
+<p>The immediate implementation should be deliberately small.</p>
+<h2 id="step-1-freeze-the-clean-docs-taxonomy">Step 1 — Freeze the clean docs taxonomy</h2>
+<p>Do not restructure documentation again while setting up tools.</p>
+<p>Use the current global/backend/frontend/product/execution/theory/research structure.</p>
+<h2 id="step-2-create-docs">Step 2 — Create <code>.docs/</code></h2>
+<p>Add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>.docs/
+<a id="__codelineno-86-2" name="__codelineno-86-2" href="#__codelineno-86-2"></a>├── document.schema.json
+<a id="__codelineno-86-3" name="__codelineno-86-3" href="#__codelineno-86-3"></a>├── taxonomy.yml
+<a id="__codelineno-86-4" name="__codelineno-86-4" href="#__codelineno-86-4"></a>├── terminology.yml
+<a id="__codelineno-86-5" name="__codelineno-86-5" href="#__codelineno-86-5"></a>└── vale/
+</code></pre></div>
+<h2 id="step-3-simplify-permanent-frontmatter">Step 3 — Simplify permanent frontmatter</h2>
+<p>Define the minimum required metadata set.</p>
+<p>Migrate reconstruction-only metadata out of normal authoring where it no longer adds durable value.</p>
+<h2 id="step-4-add-just">Step 4 — Add <code>just</code></h2>
+<p>Create the stable commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>docs-check
+<a id="__codelineno-87-2" name="__codelineno-87-2" href="#__codelineno-87-2"></a>docs-build
+<a id="__codelineno-87-3" name="__codelineno-87-3" href="#__codelineno-87-3"></a>docs-serve
+<a id="__codelineno-87-4" name="__codelineno-87-4" href="#__codelineno-87-4"></a>docs-full
+<a id="__codelineno-87-5" name="__codelineno-87-5" href="#__codelineno-87-5"></a>docs-map
+</code></pre></div>
+<p>Do not add dozens of commands before they are needed.</p>
+<h2 id="step-5-install-fast-validators">Step 5 — Install fast validators</h2>
+<p>Wire:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>jsonschema/custom metadata check
+<a id="__codelineno-88-2" name="__codelineno-88-2" href="#__codelineno-88-2"></a>markdownlint-cli2
+<a id="__codelineno-88-3" name="__codelineno-88-3" href="#__codelineno-88-3"></a>Vale
+<a id="__codelineno-88-4" name="__codelineno-88-4" href="#__codelineno-88-4"></a>internal links
+<a id="__codelineno-88-5" name="__codelineno-88-5" href="#__codelineno-88-5"></a>stale paths
+</code></pre></div>
+<h2 id="step-6-install-mkdocs">Step 6 — Install MkDocs</h2>
+<p>Make the existing tree navigable and searchable.</p>
+<p>Do not change document ownership just to satisfy the site generator.</p>
+<h2 id="step-7-install-pre-commit">Step 7 — Install pre-commit</h2>
+<p>Only fast checks.</p>
+<h2 id="step-8-add-ci">Step 8 — Add CI</h2>
+<p>Run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>fast checks
+<a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>MkDocs strict build
+<a id="__codelineno-89-3" name="__codelineno-89-3" href="#__codelineno-89-3"></a>external Lychee
+<a id="__codelineno-89-4" name="__codelineno-89-4" href="#__codelineno-89-4"></a>generated index reproducibility
+<a id="__codelineno-89-5" name="__codelineno-89-5" href="#__codelineno-89-5"></a>canonical ownership checks
+</code></pre></div>
+<h2 id="step-9-generate-catalog-links">Step 9 — Generate catalog + links</h2>
+<p>Keep scripts tiny.</p>
+<p>The output should be JSONL.</p>
+<h2 id="step-10-add-api-generation">Step 10 — Add API generation</h2>
+<p>Start with Python Griffe/mkdocstrings.</p>
+<p>Add TypeDoc when frontend surfaces stabilize.</p>
+<p>This completes P0/P0.5.</p>
+<hr />
+<h1 id="45-p1-experiment-sequence">45. P1 Experiment Sequence</h1>
+<p>P1 exists to discover how much Atlas can reuse.</p>
+<h2 id="experiment-a-ast-grep">Experiment A — ast-grep</h2>
+<p>Choose 5–10 architectural concepts and measure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>definition discovery
+<a id="__codelineno-90-2" name="__codelineno-90-2" href="#__codelineno-90-2"></a>pattern discovery
+<a id="__codelineno-90-3" name="__codelineno-90-3" href="#__codelineno-90-3"></a>deprecated implementation detection
+<a id="__codelineno-90-4" name="__codelineno-90-4" href="#__codelineno-90-4"></a>boundary checks
+<a id="__codelineno-90-5" name="__codelineno-90-5" href="#__codelineno-90-5"></a>false positives
+<a id="__codelineno-90-6" name="__codelineno-90-6" href="#__codelineno-90-6"></a>performance
+<a id="__codelineno-90-7" name="__codelineno-90-7" href="#__codelineno-90-7"></a>JSON output quality
+</code></pre></div>
+<h2 id="experiment-b-scip">Experiment B — SCIP</h2>
+<p>Index Python and TypeScript.</p>
+<p>Measure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>definitions
+<a id="__codelineno-91-2" name="__codelineno-91-2" href="#__codelineno-91-2"></a>references
+<a id="__codelineno-91-3" name="__codelineno-91-3" href="#__codelineno-91-3"></a>implementations
+<a id="__codelineno-91-4" name="__codelineno-91-4" href="#__codelineno-91-4"></a>symbol stability
+<a id="__codelineno-91-5" name="__codelineno-91-5" href="#__codelineno-91-5"></a>incremental cost
+<a id="__codelineno-91-6" name="__codelineno-91-6" href="#__codelineno-91-6"></a>cross-language usefulness
+</code></pre></div>
+<h2 id="experiment-c-docs-code-map">Experiment C — Docs ↔ code map</h2>
+<p>Build:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>code-map.jsonl
+</code></pre></div>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a><span class="p">{</span>
+<a id="__codelineno-93-2" name="__codelineno-93-2" href="#__codelineno-93-2"></a><span class="w">  </span><span class="nt">"doc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.arch.kernel"</span><span class="p">,</span>
+<a id="__codelineno-93-3" name="__codelineno-93-3" href="#__codelineno-93-3"></a><span class="w">  </span><span class="nt">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"implemented_by"</span><span class="p">,</span>
+<a id="__codelineno-93-4" name="__codelineno-93-4" href="#__codelineno-93-4"></a><span class="w">  </span><span class="nt">"symbol"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scip-python ...Kernel..."</span><span class="p">,</span>
+<a id="__codelineno-93-5" name="__codelineno-93-5" href="#__codelineno-93-5"></a><span class="w">  </span><span class="nt">"evidence"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"..."</span><span class="p">]</span>
+<a id="__codelineno-93-6" name="__codelineno-93-6" href="#__codelineno-93-6"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="experiment-d-agent-context">Experiment D — Agent context</h2>
+<p>Use generated data to construct a task-specific context bundle.</p>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>whole docs context
+<a id="__codelineno-94-2" name="__codelineno-94-2" href="#__codelineno-94-2"></a>vs
+<a id="__codelineno-94-3" name="__codelineno-94-3" href="#__codelineno-94-3"></a>structured context selection
+</code></pre></div>
+<p>Measure quality, tokens, latency, and missed information.</p>
+<hr />
+<h1 id="46-p15-proto-atlas">46. P1.5: Proto-Atlas</h1>
+<p>Only after P1 proves value should the project's custom glue become a named subsystem.</p>
+<p>Possible commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>docs<span class="w"> </span>map
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a>docs<span class="w"> </span>query
+<a id="__codelineno-95-3" name="__codelineno-95-3" href="#__codelineno-95-3"></a>docs<span class="w"> </span>show<span class="w"> </span>backend.arch.kernel
+<a id="__codelineno-95-4" name="__codelineno-95-4" href="#__codelineno-95-4"></a>docs<span class="w"> </span>context<span class="w"> </span><span class="s2">"change agent.spawn budget semantics"</span>
+<a id="__codelineno-95-5" name="__codelineno-95-5" href="#__codelineno-95-5"></a>docs<span class="w"> </span>conflicts
+<a id="__codelineno-95-6" name="__codelineno-95-6" href="#__codelineno-95-6"></a>docs<span class="w"> </span>stale
+</code></pre></div>
+<p>The implementation can still be Python/shell if that is fastest.</p>
+<p>Do not rewrite it in Rust merely to declare Atlas has begun.</p>
+<p>Atlas begins when a stable abstraction appears, not when a language is chosen.</p>
+<hr />
+<h1 id="47-p2-atlas-control-plane">47. P2: Atlas Control Plane</h1>
+<p>At P2, formalize:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>PKIR
+<a id="__codelineno-96-2" name="__codelineno-96-2" href="#__codelineno-96-2"></a>FactProvider
+<a id="__codelineno-96-3" name="__codelineno-96-3" href="#__codelineno-96-3"></a>MigrationProvider
+<a id="__codelineno-96-4" name="__codelineno-96-4" href="#__codelineno-96-4"></a>StorageProvider
+<a id="__codelineno-96-5" name="__codelineno-96-5" href="#__codelineno-96-5"></a>SearchProvider
+<a id="__codelineno-96-6" name="__codelineno-96-6" href="#__codelineno-96-6"></a>ContextCompiler
+<a id="__codelineno-96-7" name="__codelineno-96-7" href="#__codelineno-96-7"></a>AuthorityResolver
+<a id="__codelineno-96-8" name="__codelineno-96-8" href="#__codelineno-96-8"></a>EvidenceResolver
+</code></pre></div>
+<p>At this point a Rust core becomes attractive if:</p>
+<ul>
+<li>performance matters;</li>
+<li>static schemas are stable;</li>
+<li>a single binary is valuable;</li>
+<li>providers can be cleanly isolated;</li>
+<li>the Python prototype has taught what needs to exist.</li>
+</ul>
+<p>A minimal layout might be:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>atlas/
+<a id="__codelineno-97-2" name="__codelineno-97-2" href="#__codelineno-97-2"></a>├── crates/
+<a id="__codelineno-97-3" name="__codelineno-97-3" href="#__codelineno-97-3"></a>│   ├── atlas-pkir/
+<a id="__codelineno-97-4" name="__codelineno-97-4" href="#__codelineno-97-4"></a>│   ├── atlas-engine/
+<a id="__codelineno-97-5" name="__codelineno-97-5" href="#__codelineno-97-5"></a>│   ├── atlas-adapters/
+<a id="__codelineno-97-6" name="__codelineno-97-6" href="#__codelineno-97-6"></a>│   ├── atlas-cli/
+<a id="__codelineno-97-7" name="__codelineno-97-7" href="#__codelineno-97-7"></a>│   └── atlas-mcp/
+<a id="__codelineno-97-8" name="__codelineno-97-8" href="#__codelineno-97-8"></a>│
+<a id="__codelineno-97-9" name="__codelineno-97-9" href="#__codelineno-97-9"></a>├── schemas/
+<a id="__codelineno-97-10" name="__codelineno-97-10" href="#__codelineno-97-10"></a>├── rules/
+<a id="__codelineno-97-11" name="__codelineno-97-11" href="#__codelineno-97-11"></a>└── prompts/
+</code></pre></div>
+<p>Do not begin with 20 crates.</p>
+<hr />
+<h1 id="48-p3-scale-and-deep-intelligence">48. P3: Scale and Deep Intelligence</h1>
+<p>Only measured needs should unlock:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>Glean
+<a id="__codelineno-98-2" name="__codelineno-98-2" href="#__codelineno-98-2"></a>Joern
+<a id="__codelineno-98-3" name="__codelineno-98-3" href="#__codelineno-98-3"></a>Tantivy
+<a id="__codelineno-98-4" name="__codelineno-98-4" href="#__codelineno-98-4"></a>OpenRewrite
+<a id="__codelineno-98-5" name="__codelineno-98-5" href="#__codelineno-98-5"></a>distributed indexing
+<a id="__codelineno-98-6" name="__codelineno-98-6" href="#__codelineno-98-6"></a>cross-repository Atlas
+<a id="__codelineno-98-7" name="__codelineno-98-7" href="#__codelineno-98-7"></a>embeddings
+<a id="__codelineno-98-8" name="__codelineno-98-8" href="#__codelineno-98-8"></a>advanced graph UI
+</code></pre></div>
+<p>The future architecture remains stable because each appears behind a provider interface.</p>
+<hr />
+<h1 id="49-acceptance-criteria-by-phase">49. Acceptance Criteria by Phase</h1>
+<h2 id="p0">P0</h2>
+<p>Pass when:</p>
+<ul>
+<li>all active docs validate against metadata schema;</li>
+<li>no canonical ID collision exists;</li>
+<li>links and anchors pass;</li>
+<li>terminology rules catch known deprecated vocabulary;</li>
+<li>MkDocs builds strictly;</li>
+<li>a contributor can run one command for normal docs validation;</li>
+<li>generated artifacts are reproducible.</li>
+</ul>
+<h2 id="p05">P0.5</h2>
+<p>Pass when:</p>
+<ul>
+<li>catalog and relationships are generated deterministically;</li>
+<li>public API reference is generated from code where appropriate;</li>
+<li>no generated output is manually owned.</li>
+</ul>
+<h2 id="p1">P1</h2>
+<p>Pass when:</p>
+<ul>
+<li>docs↔code relationships are demonstrated for real AETHER subsystems;</li>
+<li>ast-grep and SCIP costs/benefits are measured;</li>
+<li>false-positive rates are documented;</li>
+<li>structured outputs can feed agent context.</li>
+</ul>
+<h2 id="p2">P2</h2>
+<p>Pass when:</p>
+<ul>
+<li>PKIR is tool-independent;</li>
+<li>at least two FactProviders produce interchangeable normalized facts;</li>
+<li>authority/provenance are first-class;</li>
+<li>Atlas can compile a task context without loading the entire repository;</li>
+<li>removing one provider does not break the core model.</li>
+</ul>
+<hr />
+<h1 id="50-scientific-hypotheses-the-aether-experiment-can-test">50. Scientific Hypotheses the AETHER Experiment Can Test</h1>
+<p>The AETHER documentation problem can become a real Atlas research program.</p>
+<h2 id="h1-minimal-explicit-metadata-is-sufficient">H1 — Minimal explicit metadata is sufficient</h2>
+<p>Can ~7 human-authored fields plus generated evidence make a repository reliably machine-readable?</p>
+<h2 id="h2-symbol-protocols-ast-structure-solve-most-docscode-mapping">H2 — Symbol protocols + AST structure solve most docs↔code mapping</h2>
+<p>Can SCIP + ast-grep resolve enough relationships that Atlas does not need a custom compiler/indexer?</p>
+<h2 id="h3-authority-aware-retrieval-beats-semantic-retrieval-alone">H3 — Authority-aware retrieval beats semantic retrieval alone</h2>
+<p>Does a context compiler using:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>authority
+<a id="__codelineno-99-2" name="__codelineno-99-2" href="#__codelineno-99-2"></a>canonical ownership
+<a id="__codelineno-99-3" name="__codelineno-99-3" href="#__codelineno-99-3"></a>symbol proximity
+<a id="__codelineno-99-4" name="__codelineno-99-4" href="#__codelineno-99-4"></a>graph relations
+<a id="__codelineno-99-5" name="__codelineno-99-5" href="#__codelineno-99-5"></a>freshness
+</code></pre></div>
+<p>produce better task context than embedding similarity alone?</p>
+<h2 id="h4-repository-organization-can-remain-markdown-native">H4 — Repository organization can remain Markdown-native</h2>
+<p>Can PKIR be fully reconstructible while Markdown remains the human source?</p>
+<h2 id="h5-deterministic-machinery-can-resolve-the-majority-of-repository-knowledge-tasks">H5 — Deterministic machinery can resolve the majority of repository knowledge tasks</h2>
+<p>What fraction of operations require actual semantic LLM reasoning?</p>
+<p>The desired result is likely:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a>large deterministic majority
+<a id="__codelineno-100-2" name="__codelineno-100-2" href="#__codelineno-100-2"></a>+
+<a id="__codelineno-100-3" name="__codelineno-100-3" href="#__codelineno-100-3"></a>small semantic ambiguity layer
+</code></pre></div>
+<p>but this must be measured.</p>
+<hr />
+<h1 id="51-design-principle-atlas-as-the-llvm-ir-of-project-knowledge">51. Design Principle: Atlas as the LLVM IR of Project Knowledge</h1>
+<p>A useful analogy is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>C / C++ / Rust / ...
+<a id="__codelineno-101-2" name="__codelineno-101-2" href="#__codelineno-101-2"></a>       ↓
+<a id="__codelineno-101-3" name="__codelineno-101-3" href="#__codelineno-101-3"></a>      LLVM IR
+<a id="__codelineno-101-4" name="__codelineno-101-4" href="#__codelineno-101-4"></a>       ↓
+<a id="__codelineno-101-5" name="__codelineno-101-5" href="#__codelineno-101-5"></a>many optimization / target backends
+</code></pre></div>
+<p>Atlas aspires to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>Markdown / Git / SCIP / ast-grep / Docling / schemas / tests / Glean / Joern
+<a id="__codelineno-102-2" name="__codelineno-102-2" href="#__codelineno-102-2"></a>                              ↓
+<a id="__codelineno-102-3" name="__codelineno-102-3" href="#__codelineno-102-3"></a>                             PKIR
+<a id="__codelineno-102-4" name="__codelineno-102-4" href="#__codelineno-102-4"></a>                              ↓
+<a id="__codelineno-102-5" name="__codelineno-102-5" href="#__codelineno-102-5"></a>       search / map / context / migration / agents / verification / UI
+</code></pre></div>
+<p>The innovation is the stable intermediate semantics, not the individual parser.</p>
+<p>This prevents Atlas from becoming a monolithic reimplementation of the software ecosystem.</p>
+<hr />
+<h1 id="52-final-recommended-architecture">52. Final Recommended Architecture</h1>
+<p>The immediate stack:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>                       AETHER
+<a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>                         │
+<a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>                         ▼
+<a id="__codelineno-103-4" name="__codelineno-103-4" href="#__codelineno-103-4"></a>                  Markdown + Git
+<a id="__codelineno-103-5" name="__codelineno-103-5" href="#__codelineno-103-5"></a>                         │
+<a id="__codelineno-103-6" name="__codelineno-103-6" href="#__codelineno-103-6"></a>      ┌──────────────────┼──────────────────┐
+<a id="__codelineno-103-7" name="__codelineno-103-7" href="#__codelineno-103-7"></a>      │                  │                  │
+<a id="__codelineno-103-8" name="__codelineno-103-8" href="#__codelineno-103-8"></a> metadata/schema      quality           navigation
+<a id="__codelineno-103-9" name="__codelineno-103-9" href="#__codelineno-103-9"></a>      │                  │                  │
+<a id="__codelineno-103-10" name="__codelineno-103-10" href="#__codelineno-103-10"></a> JSON Schema       markdownlint          MkDocs
+<a id="__codelineno-103-11" name="__codelineno-103-11" href="#__codelineno-103-11"></a> jsonschema         Vale
+<a id="__codelineno-103-12" name="__codelineno-103-12" href="#__codelineno-103-12"></a>                   Lychee
+<a id="__codelineno-103-13" name="__codelineno-103-13" href="#__codelineno-103-13"></a>      │                  │
+<a id="__codelineno-103-14" name="__codelineno-103-14" href="#__codelineno-103-14"></a>      └──────────────────┼──────────────────┘
+<a id="__codelineno-103-15" name="__codelineno-103-15" href="#__codelineno-103-15"></a>                         │
+<a id="__codelineno-103-16" name="__codelineno-103-16" href="#__codelineno-103-16"></a>                    pre-commit / CI
+<a id="__codelineno-103-17" name="__codelineno-103-17" href="#__codelineno-103-17"></a>                         │
+<a id="__codelineno-103-18" name="__codelineno-103-18" href="#__codelineno-103-18"></a>                         ▼
+<a id="__codelineno-103-19" name="__codelineno-103-19" href="#__codelineno-103-19"></a>                 generated knowledge
+<a id="__codelineno-103-20" name="__codelineno-103-20" href="#__codelineno-103-20"></a>                         │
+<a id="__codelineno-103-21" name="__codelineno-103-21" href="#__codelineno-103-21"></a>       catalog / links / ownership / API
+<a id="__codelineno-103-22" name="__codelineno-103-22" href="#__codelineno-103-22"></a>                         │
+<a id="__codelineno-103-23" name="__codelineno-103-23" href="#__codelineno-103-23"></a>                         ▼
+<a id="__codelineno-103-24" name="__codelineno-103-24" href="#__codelineno-103-24"></a>                ast-grep + SCIP experiments
+<a id="__codelineno-103-25" name="__codelineno-103-25" href="#__codelineno-103-25"></a>                         │
+<a id="__codelineno-103-26" name="__codelineno-103-26" href="#__codelineno-103-26"></a>                         ▼
+<a id="__codelineno-103-27" name="__codelineno-103-27" href="#__codelineno-103-27"></a>                    Proto-Atlas
+<a id="__codelineno-103-28" name="__codelineno-103-28" href="#__codelineno-103-28"></a>                         │
+<a id="__codelineno-103-29" name="__codelineno-103-29" href="#__codelineno-103-29"></a>                         ▼
+<a id="__codelineno-103-30" name="__codelineno-103-30" href="#__codelineno-103-30"></a>                       PKIR
+<a id="__codelineno-103-31" name="__codelineno-103-31" href="#__codelineno-103-31"></a>                         │
+<a id="__codelineno-103-32" name="__codelineno-103-32" href="#__codelineno-103-32"></a>                         ▼
+<a id="__codelineno-103-33" name="__codelineno-103-33" href="#__codelineno-103-33"></a>                Atlas Control Plane
+</code></pre></div>
+<p>The future stack:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>                        ATLAS
+<a id="__codelineno-104-2" name="__codelineno-104-2" href="#__codelineno-104-2"></a>                         │
+<a id="__codelineno-104-3" name="__codelineno-104-3" href="#__codelineno-104-3"></a>        ┌────────────────┼────────────────┐
+<a id="__codelineno-104-4" name="__codelineno-104-4" href="#__codelineno-104-4"></a>        │                │                │
+<a id="__codelineno-104-5" name="__codelineno-104-5" href="#__codelineno-104-5"></a>      ingest            PKIR            actions
+<a id="__codelineno-104-6" name="__codelineno-104-6" href="#__codelineno-104-6"></a>        │                │                │
+<a id="__codelineno-104-7" name="__codelineno-104-7" href="#__codelineno-104-7"></a> Pandoc/Docling      SQLite/Glean      Git
+<a id="__codelineno-104-8" name="__codelineno-104-8" href="#__codelineno-104-8"></a> Markdown/Git        Tantivy           ast-grep
+<a id="__codelineno-104-9" name="__codelineno-104-9" href="#__codelineno-104-9"></a> SCIP/ast-grep       relations         OpenRewrite
+<a id="__codelineno-104-10" name="__codelineno-104-10" href="#__codelineno-104-10"></a> Joern               evidence          agents
+<a id="__codelineno-104-11" name="__codelineno-104-11" href="#__codelineno-104-11"></a>        │                │                │
+<a id="__codelineno-104-12" name="__codelineno-104-12" href="#__codelineno-104-12"></a>        └────────────────┼────────────────┘
+<a id="__codelineno-104-13" name="__codelineno-104-13" href="#__codelineno-104-13"></a>                         │
+<a id="__codelineno-104-14" name="__codelineno-104-14" href="#__codelineno-104-14"></a>                     context/map
+<a id="__codelineno-104-15" name="__codelineno-104-15" href="#__codelineno-104-15"></a>                         │
+<a id="__codelineno-104-16" name="__codelineno-104-16" href="#__codelineno-104-16"></a>               MkDocs / Cytoscape / MCP
+</code></pre></div>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
+<p>The correct next step is not another large architecture exercise.</p>
+<p>AETHER already has a clean enough documentation taxonomy to begin development. The missing piece is a <strong>permanent, low-friction documentation control plane</strong>.</p>
+<p>P0 should immediately deploy mature OSS for:</p>
+<ul>
+<li>navigation;</li>
+<li>metadata validation;</li>
+<li>Markdown quality;</li>
+<li>terminology;</li>
+<li>links;</li>
+<li>diagrams;</li>
+<li>Git hooks;</li>
+<li>API generation;</li>
+<li>deterministic knowledge indexes.</li>
+</ul>
+<p>Pandoc and Docling remain ingestion tools rather than daily dependencies.</p>
+<p>ast-grep and SCIP become the first controlled experiments connecting documentation to real code.</p>
+<p>The evidence from those experiments determines the actual Atlas core.</p>
+<p>The future Atlas should remain thin: a control plane over specialist tools, centered on a Project Knowledge Intermediate Representation that owns identity, semantics, authority, provenance, reconciliation, and context compilation.</p>
+<p>The ultimate system is therefore not an attempt to replace Obsidian, MkDocs, SCIP, Glean, Joern, Tree-sitter, OpenRewrite, or coding agents.</p>
+<p>It is a layer above them:</p>
+<blockquote>
+<p><strong>A local-first, tool-independent project knowledge substrate that continuously compiles repository evidence into a canonical model and uses that model to keep documentation, code, decisions, context, migrations, and agents aligned.</strong></p>
+</blockquote>
+<p>That architecture gives AETHER immediate productivity and gives Atlas a path to become significantly more capable without inheriting the maintenance burden of reinventing every subsystem it orchestrates.</p>
+<hr />
+<h1 id="official-technology-references-consulted">Official Technology References Consulted</h1>
+<p>The following upstream sources were used to verify capabilities and current project direction as of 2026-08-30:</p>
+<ul>
+<li>Material for MkDocs: https://squidfunk.github.io/mkdocs-material/</li>
+<li><code>just</code>: https://github.com/casey/just</li>
+<li>pre-commit: https://pre-commit.com/</li>
+<li>Vale: https://vale.sh/</li>
+<li>markdownlint-cli2: https://github.com/DavidAnson/markdownlint-cli2</li>
+<li>Lychee: https://github.com/lycheeverse/lychee</li>
+<li>Mermaid: https://mermaid.js.org/</li>
+<li>Pandoc: https://pandoc.org/</li>
+<li>Docling: https://docling-project.github.io/docling/</li>
+<li>ast-grep: https://ast-grep.github.io/</li>
+<li>SCIP: https://github.com/scip-code/scip</li>
+<li>Griffe: https://mkdocstrings.github.io/griffe/</li>
+<li>mkdocstrings: https://mkdocstrings.github.io/</li>
+<li>TypeDoc: https://typedoc.org/</li>
+<li>Tantivy: https://github.com/quickwit-oss/tantivy</li>
+<li>Glean: https://glean.software/</li>
+<li>Joern: https://docs.joern.io/</li>
+<li>OpenRewrite: https://docs.openrewrite.org/</li>
+<li>Grok Build open-source announcement: https://x.ai/news/grok-build-open-source</li>
+<li>Grok Build repository: https://github.com/xai-org/grok-build</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

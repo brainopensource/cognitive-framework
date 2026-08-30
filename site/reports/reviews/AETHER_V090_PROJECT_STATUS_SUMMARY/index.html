@@ -1,0 +1,3317 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AETHER / Vanguard v0.9.0 — Consolidated Project Status, Benchmark Results, Failures, and Forward Ideas - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-vanguard-v090-consolidated-project-status-benchmark-results-failures-and-forward-ideas" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AETHER / Vanguard v0.9.0 — Consolidated Project Status, Benchmark Results, Failures, and Forward Ideas
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-vanguard-v090-consolidated-project-status-benchmark-results-failures-and-forward-ideas">AETHER / Vanguard v0.9.0 — Consolidated Project Status, Benchmark Results, Failures, and Forward Ideas</h1>
+<p><strong>Document type:</strong> consolidated technical status report<br />
+<strong>Scope:</strong> latest supplied project-status and benchmark reports<br />
+<strong>Snapshot basis:</strong> August 29, 2026 reports<br />
+<strong>Purpose:</strong> summarize what was built, what was tested, what worked, what failed, what was fixed, what remained open, and which future ideas emerged<br />
+<strong>Important:</strong> this document consolidates the supplied reports; it is <strong>not a fresh verification of the repository after those reports were written</strong>.</p>
+<hr />
+<h1 id="1-executive-summary">1. Executive Summary</h1>
+<p>AETHER/Vanguard reached a meaningful engineering milestone: the project is no longer only an architectural substrate. It has a working benchmark harness, real OpenRouter model execution, durable SQLite-WAL event traces, content-addressed artifacts, exterior benchmark oracles, multiple agent manifests, and enough observability to diagnose failures at the exact turn/tool/context level.</p>
+<p>The strongest result of this period was therefore not the benchmark score itself. It was that the system became sufficiently instrumented to reveal <strong>why</strong> agents were failing.</p>
+<p>The architecture remained structurally healthy in the supplied snapshot:</p>
+<ul>
+<li>the hexagonal dependency lattice remained intact;</li>
+<li>the TCB remained below its LOC ceiling;</li>
+<li>boundary, secret, and domain-blindness checks passed;</li>
+<li>real model calls were reaching OpenRouter;</li>
+<li>DeepSeek-specific tool-call formats could be parsed;</li>
+<li>patches could be applied;</li>
+<li>exterior oracles could verify them;</li>
+<li>full trajectories were recorded into durable event stores.</li>
+</ul>
+<p>At the same time, the 27-row benchmark exposed a major gap between <strong>runtime correctness</strong> and <strong>agent effectiveness</strong>.</p>
+<p>The observed 27-row result was:</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th style="text-align: right;">Rows</th>
+<th style="text-align: right;">Share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COMPLETED</code></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">14.8%</td>
+</tr>
+<tr>
+<td><code>NO_PATCH</code></td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">25.9%</td>
+</tr>
+<tr>
+<td><code>DATASET_INVALID</code></td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">59.3%</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>27</strong></td>
+<td style="text-align: right;"><strong>100%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Those numbers cannot be interpreted as a clean 14.8% benchmark pass rate because 16/27 rows were invalidated by weak challenge baselines that already satisfied their original oracle conditions.</p>
+<p>After the benchmark fixtures were hardened and several transport/model defects were fixed, the three-row canary still produced <strong>0/3 successful patches</strong> in the forensic report.</p>
+<p>The dominant remaining root cause was not the kernel, event ledger, sandbox, or provider integration.</p>
+<p>It was the conversational state representation:</p>
+<blockquote>
+<p><strong>AETHER was recording tool results durably, but the next model turn was not receiving a faithful <code>assistant → tool → assistant → tool</code> conversation history.</strong></p>
+</blockquote>
+<p>The L5 dialogue compiler collapsed dialogue fragments into a <code>"user"</code> message, while assistant tool proposals were not fed back into the next-turn context. This produced repeated reads/searches, malformed proposals, turn exhaustion, and <code>NO_PATCH</code> outcomes.</p>
+<p>The supplied reports therefore support a conservative status:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Architecture / trust substrate       HEALTHY
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Benchmark infrastructure             FUNCTIONAL
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Provider transport                    FUNCTIONAL AFTER FIXES
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Durable observability                 STRONG
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Dataset/oracle validity               REPAIRED FOR IDENTIFIED CASES
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>Basic coding capability               DEMONSTRATED ON EASY TASK
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Reliable multi-turn coding            NOT YET QUALIFIED IN LATEST FORENSIC SNAPSHOT
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>Medium/hard benchmark capability      NOT YET ESTABLISHED
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Advanced multi-agent evolution        FUTURE WORK, AFTER SINGLE-AGENT LOOP CORRECTNESS
+</code></pre></div>
+<hr />
+<h1 id="2-what-was-built">2. What Was Built</h1>
+<h2 id="21-core-aether-architecture">2.1 Core AETHER Architecture</h2>
+<p>The project retained the canonical hexagonal structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>domain ← ports ← kernel ← agency ← runtime → adapters
+</code></pre></div>
+<p>The supplied reports describe the responsibilities as:</p>
+<h3 id="domain"><code>domain/</code></h3>
+<p>Pure values and semantics:</p>
+<ul>
+<li>canonical data;</li>
+<li>JCS serialization;</li>
+<li>resource selectors;</li>
+<li>event/reducer values;</li>
+<li>no external I/O.</li>
+</ul>
+<h3 id="ports"><code>ports/</code></h3>
+<p>Structural protocols for external boundaries:</p>
+<ul>
+<li>model;</li>
+<li>sandbox;</li>
+<li>evaluator;</li>
+<li>event store;</li>
+<li>blob store;</li>
+<li>environment.</li>
+</ul>
+<h3 id="kernel"><code>kernel/</code></h3>
+<p>Trusted effect mediation:</p>
+<ul>
+<li>capability validation;</li>
+<li>effect classification;</li>
+<li>S0–S12 dispatch;</li>
+<li>budget/resource checks;</li>
+<li>provenance;</li>
+<li>monotonic attenuation.</li>
+</ul>
+<h3 id="agency"><code>agency/</code></h3>
+<p>Agent execution mechanics:</p>
+<ul>
+<li>turn loop;</li>
+<li>episode engine;</li>
+<li>context compiler;</li>
+<li>context layers L1–L5;</li>
+<li>compaction.</li>
+</ul>
+<h3 id="runtime"><code>runtime/</code></h3>
+<p>Concrete execution and integration:</p>
+<ul>
+<li>manifest composition;</li>
+<li>sessions;</li>
+<li>prompt assembly;</li>
+<li>persistence;</li>
+<li>execution profiles;</li>
+<li>event emission.</li>
+</ul>
+<h3 id="adapters"><code>adapters/</code></h3>
+<p>Concrete external implementations:</p>
+<ul>
+<li>OpenRouter;</li>
+<li>Ollama;</li>
+<li>model fakes/cassettes;</li>
+<li>filesystem/process environments;</li>
+<li>sandbox;</li>
+<li>evaluator.</li>
+</ul>
+<hr />
+<h1 id="3-trusted-core-health">3. Trusted-Core Health</h1>
+<p>The supplied benchmark-era checks reported:</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Observed result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCB budget</td>
+<td><code>1,384 / 1,438</code> logical LOC</td>
+</tr>
+<tr>
+<td>Hexagonal boundaries</td>
+<td><code>426</code> source files, <code>0</code> violations</td>
+</tr>
+<tr>
+<td>Secret scanner</td>
+<td>pass</td>
+</tr>
+<tr>
+<td>Domain blindness</td>
+<td>pass</td>
+</tr>
+<tr>
+<td>Frontier runner tests</td>
+<td><code>5/5</code> pass</td>
+</tr>
+<tr>
+<td>Model/evaluator/sandbox/event-store contracts</td>
+<td>reported passing</td>
+</tr>
+</tbody>
+</table>
+<p>The kernel therefore had only about 54 lines of LOC headroom under the stated alarm threshold.</p>
+<p>This reinforces an important architectural conclusion:</p>
+<blockquote>
+<p>The benchmark failures did not justify moving coding-specific context, benchmark, DeepSeek, or workflow logic into the trusted kernel.</p>
+</blockquote>
+<p>The failures were located in higher-level context/runtime/adaptor surfaces, where they belong.</p>
+<hr />
+<h1 id="4-agent-manifest-surface">4. Agent Manifest Surface</h1>
+<p>The benchmark work created a broader family of agent configurations rather than testing only one prompt.</p>
+<p>The supplied reports list approximately eleven v0.9-era presets or agent variants.</p>
+<h2 id="coding-variants">Coding Variants</h2>
+<ul>
+<li><code>vg-code-v090-react-control</code></li>
+<li><code>vg-code-v090-claude-shaped</code></li>
+<li><code>vg-code-v090-opencode-shaped</code></li>
+<li><code>vg-code-v090-lex-surgical</code></li>
+<li><code>vg-code-v090-lim-falsifier</code></li>
+</ul>
+<h2 id="tutor-explanation-variants">Tutor / Explanation Variants</h2>
+<ul>
+<li><code>vg-tutor-v090-v1-read-search</code></li>
+<li><code>vg-tutor-v090-v2-evidence-graph</code></li>
+</ul>
+<h2 id="research-variants">Research Variants</h2>
+<ul>
+<li><code>vg-research-v090-v1-local</code></li>
+<li><code>vg-research-v090-v2-web-corroborated</code></li>
+</ul>
+<h2 id="bug-fix-variants">Bug-Fix Variants</h2>
+<ul>
+<li><code>vg-bugfix-v090-v1-direct</code></li>
+<li><code>vg-bugfix-v090-v2-reproduce-verify</code></li>
+</ul>
+<p>The project therefore reached the point where different harness behaviors could be expressed through manifests/policies/prompts/tools without creating a new kernel.</p>
+<p>That is an important practical proof of the composition direction even though benchmark quality remained incomplete.</p>
+<hr />
+<h1 id="5-benchmark-system-built">5. Benchmark System Built</h1>
+<p>The benchmark driver became:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tools/benchmark-drivers/frontier_v090.py
+</code></pre></div>
+<p>and exposed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>--preregister
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>--dry-run
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>--live-sample
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>--live-canary
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>--live-27
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>--row ...
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>--difficulty ...
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>--class-name ...
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>--challenge ...
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>--preset ...
+</code></pre></div>
+<p>This is a useful result by itself because it creates several experiment modes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>deterministic mock
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    ↓
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>small live sample
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    ↓
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>canary
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    ↓
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>targeted failed rows
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    ↓
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>full fixed matrix
+</code></pre></div>
+<p>That progression lowers debugging cost before a full paid benchmark.</p>
+<hr />
+<h1 id="6-benchmark-challenge-ladder">6. Benchmark Challenge Ladder</h1>
+<p>The broader challenge library described in the reports spans:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Tier 1 — algorithmic primitives
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Tier 2 — state machines / routing
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Tier 3 — concurrency / synchronization
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Tier 4 — graph algorithms / pipelines
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>Tier 5 — distributed invariants
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>Tier 6 — consensus / replication
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>Tier 7 — greenfield storage engine
+</code></pre></div>
+<p>Examples include:</p>
+<ul>
+<li>LRU + TTL cache;</li>
+<li>streaming JSON parser;</li>
+<li>event bus;</li>
+<li>finite-state workflow;</li>
+<li>retry/backoff;</li>
+<li>token bucket;</li>
+<li>reader/writer lock;</li>
+<li>connection pool;</li>
+<li>DAG resolver;</li>
+<li>Merkle Patricia trie;</li>
+<li>two-phase commit;</li>
+<li>vector clocks;</li>
+<li>Raft;</li>
+<li>LSM-style key/value engine.</li>
+</ul>
+<p>The 27-row quick-run matrix did not exercise every tier. It used selected tasks and agent families as a calibration matrix.</p>
+<hr />
+<h1 id="7-exterior-oracle-isolation">7. Exterior Oracle Isolation</h1>
+<p>A significant benchmark design achievement was separating the model-visible workspace from the evaluator.</p>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>AGENT WORKSPACE
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  task
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  source code
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  no hidden oracle
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        ↓ patch
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>EXTERIOR EVALUATOR
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  sealed tests/oracle
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>  isolated temporary execution
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>  deterministic verdict
+</code></pre></div>
+<p>This avoids the agent solving the benchmark by reading the hidden evaluator directly.</p>
+<p>It also makes failures more useful because the model trajectory and evaluator truth are separate artifacts.</p>
+<hr />
+<h1 id="8-durable-flight-recorder">8. Durable Flight Recorder</h1>
+<p>The benchmark runs wrote SQLite-WAL histories such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>&lt;workspace&gt;/.vanguard/events.sqlite3
+</code></pre></div>
+<p>and content-addressed blobs under:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>&lt;workspace&gt;/.vanguard/blobs/
+</code></pre></div>
+<p>This allowed the reports to inspect:</p>
+<ul>
+<li>model input;</li>
+<li>raw model output;</li>
+<li>proposal;</li>
+<li>tool call;</li>
+<li>tool receipt;</li>
+<li>cost;</li>
+<li>prompt/completion tokens;</li>
+<li>TTFT;</li>
+<li>artifacts;</li>
+<li>terminal state.</li>
+</ul>
+<p>This became one of the most valuable capabilities of the project.</p>
+<p>Instead of observing only:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>benchmark failed
+</code></pre></div>
+<p>the team could observe:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>turn 0 → fs.read
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>turn 1 → fs.read
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>turn 2 → fs.search
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>turn 3 → fs.search
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>turn 4 → fs.read
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>...
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>terminal → abandoned
+</code></pre></div>
+<p>The architecture therefore converted “agent stupidity” from a vague impression into an inspectable systems failure.</p>
+<hr />
+<h1 id="9-benchmark-result-what-actually-happened">9. Benchmark Result: What Actually Happened</h1>
+<p>The supplied 27-row report recorded:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>4 COMPLETED
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>7 NO_PATCH
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>16 DATASET_INVALID
+</code></pre></div>
+<p>The four completed runs were all on the easiest <code>tier1_lru_ttl_cache</code> task.</p>
+<p>The reports state that medium <code>tier2_event_bus</code> and hard <code>tier3_token_bucket</code> rows did not establish successful patch capability in that matrix.</p>
+<h2 id="91-why-the-27-row-number-is-not-a-valid-final-score">9.1 Why the 27-Row Number Is Not a Valid Final Score</h2>
+<p><code>DATASET_INVALID</code> meant the original buggy baseline already passed the evaluator.</p>
+<p>Therefore those rows were invalid experiments.</p>
+<p>They should not count as:</p>
+<ul>
+<li>agent passes;</li>
+<li>agent failures;</li>
+<li>meaningful benchmark attempts.</li>
+</ul>
+<p>The only defensible conclusion from the v2 matrix is that:</p>
+<ol>
+<li>the harness could produce real successful patches on at least one easy task;</li>
+<li>the experiment design had fixture/oracle defects;</li>
+<li>multiple valid rows ended without patches;</li>
+<li>reliable medium/hard coding performance had not been established.</li>
+</ol>
+<hr />
+<h1 id="10-a-successful-real-patch-was-demonstrated">10. A Successful Real Patch Was Demonstrated</h1>
+<p>The <code>tier1_lru_ttl_cache</code> trace shows a concrete agent-generated repair.</p>
+<p>The defective expiration logic was effectively:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_time</span><span class="p">):</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttl_seconds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+<p>and the generated repair changed the semantics to compare current time with the entry lifetime.</p>
+<p>The exterior oracle reported a successful result in at least one execution.</p>
+<p>This establishes an important but narrow fact:</p>
+<blockquote>
+<p>The full stack was capable of real model → tool → patch → oracle success.</p>
+</blockquote>
+<p>The problem was reliability and multi-turn state handling, not total absence of coding functionality.</p>
+<hr />
+<h1 id="11-a-failed-execution-was-equally-valuable">11. A Failed Execution Was Equally Valuable</h1>
+<p>Another trace of the same LRU scenario consumed a large trajectory and eventually ended:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>outcome = abandoned
+</code></pre></div>
+<p>after repeated reads and repeated patch-related behavior.</p>
+<p>The reports include a run with roughly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>141,011 total episode tokens
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>~1,049,122 bytes
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>~$0.008964
+</code></pre></div>
+<p>ending without a clean terminal success.</p>
+<p>That contrast is important:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>same substrate
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>same broad task
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>sometimes patch succeeds
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>sometimes context loop degenerates
+</code></pre></div>
+<p>This points toward harness/context-state instability rather than pure task difficulty.</p>
+<hr />
+<h1 id="12-errors-discovered">12. Errors Discovered</h1>
+<p>The debugging process identified two classes of defects:</p>
+<h2 id="a-infrastructure-wire-dataset-defects">A. Infrastructure / Wire / Dataset Defects</h2>
+<p>Seven issues were reported as corrected.</p>
+<h2 id="b-agent-loop-context-defects">B. Agent-Loop / Context Defects</h2>
+<p>Several issues remained open in the latest forensic snapshot.</p>
+<hr />
+<h1 id="13-fixed-defect-1-provider-key-across-process-boundary">13. Fixed Defect #1 — Provider Key Across Process Boundary</h1>
+<h2 id="symptom">Symptom</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>instrument_error:provider_key_missing
+</code></pre></div>
+<h2 id="root-cause">Root Cause</h2>
+<p>The live benchmark runner spawned execution without ensuring the OpenRouter key was available in the relevant child execution context.</p>
+<h2 id="correction">Correction</h2>
+<p>The driver loaded the API key from project configuration / <code>.env</code> before live execution.</p>
+<h2 id="result">Result</h2>
+<p>Real model calls could proceed reliably through the benchmark process boundary.</p>
+<hr />
+<h1 id="14-fixed-defect-2-http-error-body-crash">14. Fixed Defect #2 — HTTP Error Body Crash</h1>
+<h2 id="symptom_1">Symptom</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>AttributeError:
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>'NoneType' object has no attribute 'read'
+</code></pre></div>
+<h2 id="root-cause_1">Root Cause</h2>
+<p>On some urllib failures/timeouts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">exc</span><span class="o">.</span><span class="n">fp</span>
+</code></pre></div>
+<p>was already closed or absent, but the error handler still attempted:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">exc</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="correction_1">Correction</h2>
+<p>Guard the body read:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="s2">"fp"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>        <span class="n">body</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="ow">or</span> <span class="sa">b</span><span class="s2">""</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>        <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">""</span>
+</code></pre></div>
+<h2 id="result_1">Result</h2>
+<p>A provider/network failure stopped crashing the error-handling path itself.</p>
+<hr />
+<h1 id="15-fixed-defect-3-deepseek-dsml-tool-calls">15. Fixed Defect #3 — DeepSeek DSML Tool Calls</h1>
+<p>DeepSeek sometimes returned tool invocations embedded in textual DSML markup instead of the expected standard function-call structure.</p>
+<p>Example form:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>&lt;｜DSML｜tool_calls&gt;
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>  &lt;｜DSML｜invoke ...&gt;
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>  ...
+</code></pre></div>
+<p>The adapter initially treated such output incorrectly.</p>
+<p>A DSML extraction path was implemented to recover:</p>
+<ul>
+<li>tool name;</li>
+<li>parameters;</li>
+<li>body/content.</li>
+</ul>
+<p>This is a useful general adapter lesson:</p>
+<blockquote>
+<p>Model providers can be API-compatible at the transport layer while still emitting model-specific structured output conventions.</p>
+</blockquote>
+<p>Provider adapters therefore need a normalization layer.</p>
+<hr />
+<h1 id="16-fixed-defect-4-tool-json-truncation">16. Fixed Defect #4 — Tool JSON Truncation</h1>
+<p>Whole-file patches could exceed the previous:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>max_tokens = 1024
+</code></pre></div>
+<p>and terminate in the middle of JSON/tool-call output.</p>
+<p>The reported correction raised the effective lower bound to approximately:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>4096 completion tokens
+</code></pre></div>
+<p>and added more tolerant parsing paths such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>plus fallback parsing.</p>
+<p>This removed one class of malformed tool call caused by output truncation rather than model reasoning.</p>
+<hr />
+<h1 id="17-fixed-defect-5-search-pollution-by-aethers-own-state">17. Fixed Defect #5 — Search Pollution by AETHER's Own State</h1>
+<p><code>fs.search</code> could recursively inspect:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>.vanguard/blobs/
+</code></pre></div>
+<p>and feed the agent large amounts of its own generated state, hashes, and prior outputs.</p>
+<p>This is a particularly instructive bug:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>agent searches workspace
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>→ search finds agent's previous stored context
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>→ previous context enters new context
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>→ context expands / self-contaminates
+</code></pre></div>
+<p>The fix excluded paths such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>.vanguard
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>.git
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>__pycache__
+</code></pre></div>
+<p>from normal source search.</p>
+<p>This should be treated as a general invariant:</p>
+<blockquote>
+<p>Internal runtime state should not be visible to ordinary repository search unless explicitly requested.</p>
+</blockquote>
+<hr />
+<h1 id="18-fixed-defect-6-consecutive-system-message-normalization">18. Fixed Defect #6 — Consecutive System Message Normalization</h1>
+<p>L1/L2/L3 context material could produce multiple adjacent system messages.</p>
+<p>The OpenRouter adapter was modified to merge adjacent system blocks into one root system message.</p>
+<p>This improved provider compatibility.</p>
+<p>However, it did <strong>not</strong> fix the deeper L5 dialogue-history problem described later.</p>
+<hr />
+<h1 id="19-fixed-defect-7-invalid-benchmark-oracles">19. Fixed Defect #7 — Invalid Benchmark Oracles</h1>
+<p>A major experiment-design bug was discovered:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>the baseline already passed
+</code></pre></div>
+<p>for several challenge oracles.</p>
+<p>The reports describe hardening checks for examples such as:</p>
+<ul>
+<li>event bus wildcard/unsubscribe semantics;</li>
+<li>token-bucket fractional behavior;</li>
+<li>DAG/cycle behavior.</li>
+</ul>
+<p>This converted the benchmark from:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>"did patched code pass?"
+</code></pre></div>
+<p>to the required:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>"does baseline fail AND repaired candidate pass?"
+</code></pre></div>
+<p>That distinction is essential.</p>
+<hr />
+<h1 id="20-remaining-critical-defect-l5-role-squashing">20. Remaining Critical Defect — L5 Role Squashing</h1>
+<p>The most important unresolved issue in the latest forensic report was the context-layer rendering of dialogue.</p>
+<p>The mapping contained:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">Layer</span><span class="o">.</span><span class="n">DIALOGUE</span><span class="p">:</span> <span class="s2">"user"</span>
+</code></pre></div>
+<p>and multiple L5 blocks were concatenated together.</p>
+<p>The effective conversation sent to the model looked like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>system
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>system
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>system
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>user task
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>user [all historical tool output concatenated]
+</code></pre></div>
+<p>instead of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>system
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>user task
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>assistant tool call
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>tool response
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>assistant tool call
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>tool response
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>...
+</code></pre></div>
+<p>The model therefore did not receive the conversational structure needed to understand:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>I already requested this file.
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>That response corresponds to that call.
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>I have already applied that patch.
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>Now I should test rather than read again.
+</code></pre></div>
+<hr />
+<h1 id="21-remaining-critical-defect-assistant-proposals-were-not-re-admitted">21. Remaining Critical Defect — Assistant Proposals Were Not Re-Admitted</h1>
+<p>The durable event log recorded model proposals.</p>
+<p>But the next-turn dialogue context did not preserve the assistant's corresponding tool-call message.</p>
+<p>Only the tool result was admitted into dialogue.</p>
+<p>That creates an orphaned history:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>tool result
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>tool result
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>tool result
+</code></pre></div>
+<p>without the tool calls that caused them.</p>
+<p>This is separate from the role-squashing problem.</p>
+<p>Even if L5 role rendering were corrected, the context would still be incomplete unless assistant actions were reintroduced.</p>
+<hr />
+<h1 id="22-existing-history_steps-path-was-effectively-dead">22. Existing <code>history_steps</code> Path Was Effectively Dead</h1>
+<p>The OpenRouter adapter reportedly already contained logic capable of rendering:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>assistant_tool_call
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>tool_response
+</code></pre></div>
+<p>into appropriate message roles.</p>
+<p>But:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>context["history_steps"]
+</code></pre></div>
+<p>was not being populated by the upstream context/prompt pipeline.</p>
+<p>Additionally, a pre-existing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>context["messages"]
+</code></pre></div>
+<p>path returned early.</p>
+<p>The implementation therefore contained the right lower-level rendering feature but failed to connect it to the runtime state.</p>
+<p>This is a classic integration defect:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>feature exists locally
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>≠
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>feature exists end-to-end
+</code></pre></div>
+<hr />
+<h1 id="23-remaining-contributing-issue-turn-budget">23. Remaining Contributing Issue — Turn Budget</h1>
+<p>The benchmark runner used:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>max_turns = 8
+</code></pre></div>
+<p>in the reported snapshot.</p>
+<p>For a realistic code task:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>read task
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>read file
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>read dependency
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>search
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>patch
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>test
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>inspect failure
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>repair
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>test again
+</code></pre></div>
+<p>eight turns can be consumed quickly.</p>
+<p>The reports compared this with other working experiments that used a larger 15–25 turn envelope.</p>
+<p>Increasing the turn budget would not fix role corruption.</p>
+<p>But after context fidelity is corrected, a larger or adaptive turn limit is likely necessary for meaningful multi-file tasks.</p>
+<hr />
+<h1 id="24-remaining-minor-issue-prompt-tool-mismatch">24. Remaining Minor Issue — Prompt / Tool Mismatch</h1>
+<p>The Claude-shaped prompt reportedly said:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>Use Bash for tests and git only.
+</code></pre></div>
+<p>while the actual process capability allowed specific executables such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>python3
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>pytest
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>git
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>ruff
+</code></pre></div>
+<p>A model interpreting “Bash” literally could produce:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>bash -c ...
+</code></pre></div>
+<p>which the effect selector would correctly deny.</p>
+<p>This is a useful design lesson:</p>
+<blockquote>
+<p>Prompt vocabulary, tool aliases, and actual capability selectors must describe the same executable interface.</p>
+</blockquote>
+<hr />
+<h1 id="25-why-the-agent-repeated-reads">25. Why the Agent Repeated Reads</h1>
+<p>The durable event stores provide a concrete behavioral signature.</p>
+<p>A failed run could look like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>turn 0  fs.read
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>turn 1  fs.read
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>turn 2  fs.search
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>turn 3  fs.search
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>turn 4  fs.read
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>turn 5  fs.search
+<a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>terminal malformed / abandoned
+</code></pre></div>
+<p>This is consistent with the model not having a structured memory that says:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>assistant requested X
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>tool returned Y
+</code></pre></div>
+<p>Each turn sees a large, partially flattened user-like context.</p>
+<p>The model therefore keeps rediscovering facts it already observed.</p>
+<hr />
+<h1 id="26-why-simply-raising-max_turns-is-not-enough">26. Why Simply Raising <code>max_turns</code> Is Not Enough</h1>
+<p>If the probability of progressing after each tool call is low because history is malformed, then:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>8 bad turns
+</code></pre></div>
+<p>becoming:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>20 bad turns
+</code></pre></div>
+<p>primarily increases:</p>
+<ul>
+<li>latency;</li>
+<li>context size;</li>
+<li>tokens;</li>
+<li>cost.</li>
+</ul>
+<p>The correct order of reasoning is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>history fidelity
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>→ progress detection
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>→ context efficiency
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>→ then tune turn budget
+</code></pre></div>
+<hr />
+<h1 id="27-benchmark-infrastructure-vs-agent-capability">27. Benchmark Infrastructure vs Agent Capability</h1>
+<p>This distinction reconciles apparently conflicting statements in the supplied reports.</p>
+<p>One report calls the benchmark harness:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>GREEN / ready for matrix execution
+</code></pre></div>
+<p>while another says:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>agents cannot reliably code
+</code></pre></div>
+<p>These can both be true.</p>
+<h2 id="benchmark-infrastructure-readiness">Benchmark Infrastructure Readiness</h2>
+<p>Means:</p>
+<ul>
+<li>rows can be selected;</li>
+<li>model API works;</li>
+<li>events are captured;</li>
+<li>oracles execute;</li>
+<li>results are written;</li>
+<li>errors can be classified.</li>
+</ul>
+<h2 id="agent-capability-readiness">Agent Capability Readiness</h2>
+<p>Means:</p>
+<ul>
+<li>the agent reliably performs the task;</li>
+<li>medium/hard tasks succeed;</li>
+<li>failures are not dominated by harness bugs;</li>
+<li>canary is stable;</li>
+<li>benchmark score is meaningful.</li>
+</ul>
+<p>The supplied evidence strongly supports the first.</p>
+<p>It did not yet support the second.</p>
+<hr />
+<h1 id="28-current-status-conservative-snapshot">28. Current Status — Conservative Snapshot</h1>
+<p>The most defensible state from the latest supplied reports is:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architecture boundaries</td>
+<td><strong>Healthy</strong></td>
+</tr>
+<tr>
+<td>Trusted kernel</td>
+<td><strong>Healthy, close to LOC alarm</strong></td>
+</tr>
+<tr>
+<td>Model/provider connection</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>DeepSeek DSML support</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Durable event capture</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>Content-addressed artifacts</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>Exterior oracle execution</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>Benchmark row orchestration</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>Mock/dry/live benchmark modes</td>
+<td><strong>Working</strong></td>
+</tr>
+<tr>
+<td>Search hygiene</td>
+<td><strong>Improved</strong></td>
+</tr>
+<tr>
+<td>Dataset/oracle definitions</td>
+<td><strong>Known invalid cases repaired</strong></td>
+</tr>
+<tr>
+<td>Easy coding proof</td>
+<td><strong>Demonstrated</strong></td>
+</tr>
+<tr>
+<td>Stable multi-turn dialogue</td>
+<td><strong>Not qualified in latest forensic snapshot</strong></td>
+</tr>
+<tr>
+<td>Medium/hard coding</td>
+<td><strong>Not demonstrated reliably</strong></td>
+</tr>
+<tr>
+<td>Full 27-row benchmark score</td>
+<td><strong>Not yet scientifically interpretable</strong></td>
+</tr>
+<tr>
+<td>LAM vertical coding test</td>
+<td><strong>Reported failing for same dialogue problem</strong></td>
+</tr>
+<tr>
+<td>Multi-agent / advanced controller work</td>
+<td><strong>Should be treated as post-correctness research</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="29-what-we-learned">29. What We Learned</h1>
+<h2 id="291-strong-architecture-does-not-automatically-produce-a-strong-agent">29.1 Strong Architecture Does Not Automatically Produce a Strong Agent</h2>
+<p>AETHER's:</p>
+<ul>
+<li>kernel;</li>
+<li>event sourcing;</li>
+<li>capabilities;</li>
+<li>provenance;</li>
+<li>sandbox;</li>
+<li>manifests;</li>
+</ul>
+<p>can all be correct while the agent still performs badly because the dialogue representation is wrong.</p>
+<p>The benchmark exposed this clearly.</p>
+<hr />
+<h2 id="292-context-is-runtime-state">29.2 Context Is Runtime State</h2>
+<p>For an agent, conversational context is not merely prompt formatting.</p>
+<p>It is part of its operational state.</p>
+<p>Losing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>assistant tool call
+</code></pre></div>
+<p>while keeping:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>tool result
+</code></pre></div>
+<p>is analogous to corrupting half of an event pair.</p>
+<hr />
+<h2 id="293-provider-normalization-is-a-real-engineering-layer">29.3 Provider Normalization Is a Real Engineering Layer</h2>
+<p>DeepSeek DSML demonstrated that tool-use behavior cannot be assumed identical across model families.</p>
+<p>A provider adapter should normalize:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>provider-native response
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>       ↓
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>canonical model proposal
+</code></pre></div>
+<p>before agency/runtime logic sees it.</p>
+<hr />
+<h2 id="294-benchmark-datasets-need-falsifiers-too">29.4 Benchmark Datasets Need Falsifiers Too</h2>
+<p>The <code>DATASET_INVALID</code> discovery shows that benchmark design must test the benchmark itself.</p>
+<p>Every challenge should establish:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>baseline oracle = FAIL
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>known/reference solution = PASS
+</code></pre></div>
+<p>before consuming live model calls.</p>
+<hr />
+<h2 id="295-event-sourcing-paid-off-during-debugging">29.5 Event Sourcing Paid Off During Debugging</h2>
+<p>The durable ledger made it possible to diagnose:</p>
+<ul>
+<li>repeated reads;</li>
+<li>missing patch actions;</li>
+<li>malformed proposals;</li>
+<li>token growth;</li>
+<li>cost;</li>
+<li>exact provider output;</li>
+<li>context expansion.</li>
+</ul>
+<p>This is one of the strongest practical validations of AETHER's event-centric design during this iteration.</p>
+<hr />
+<h1 id="30-benchmark-workflow-going-forward">30. Benchmark Workflow Going Forward</h1>
+<p>The quick-run guide provides a useful operational hierarchy.</p>
+<h2 id="deterministic-preflight">Deterministic Preflight</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--dry-run
+</code></pre></div>
+<h2 id="targeted-regression-rows">Targeted Regression Rows</h2>
+<p>Easy known-pass rows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--row<span class="w"> </span>v090-01<span class="w"> </span>v090-04
+</code></pre></div>
+<p>Medium calibration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--row<span class="w"> </span>v090-02<span class="w"> </span>v090-05<span class="w"> </span>v090-08
+</code></pre></div>
+<p>Hard calibration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--row<span class="w"> </span>v090-03<span class="w"> </span>v090-06<span class="w"> </span>v090-09
+</code></pre></div>
+<h2 id="live-canary">Live Canary</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--live-canary
+</code></pre></div>
+<h2 id="full-matrix">Full Matrix</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--live-27
+</code></pre></div>
+<p>The methodological lesson is:</p>
+<blockquote>
+<p>Do not pay for the full matrix while a small diagnostic slice is still failing for systemic reasons.</p>
+</blockquote>
+<hr />
+<h1 id="31-lam-mock-evaluation-track">31. LAM / Mock Evaluation Track</h1>
+<p>The quick-run material also documents a deterministic LLM API mock path.</p>
+<p>Its value is to isolate:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>runtime / harness overhead
+</code></pre></div>
+<p>from:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>provider latency / provider randomness
+</code></pre></div>
+<p>This should remain a complementary test layer.</p>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>Unit / contracts
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>    ↓
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>LAM deterministic simulation
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>    ↓
+<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>live canary
+<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>    ↓
+<a id="__codelineno-64-7" name="__codelineno-64-7" href="#__codelineno-64-7"></a>full provider benchmark
+</code></pre></div>
+<hr />
+<h1 id="32-immediate-technical-ideas-emerging-from-the-failures">32. Immediate Technical Ideas Emerging From the Failures</h1>
+<p>These are research/engineering ideas derived directly from the observed problems. They are not claimed as already implemented.</p>
+<h2 id="321-structured-dialogue-objects">32.1 Structured Dialogue Objects</h2>
+<p>Do not store L5 primarily as text fragments.</p>
+<p>Represent:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="n">AssistantToolCall</span><span class="p">(</span>
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>    <span class="n">call_id</span><span class="p">,</span>
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>    <span class="n">action</span><span class="p">,</span>
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>    <span class="n">arguments</span><span class="p">,</span>
+<a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>    <span class="n">optional_thought_ref</span><span class="p">,</span>
+<a id="__codelineno-65-6" name="__codelineno-65-6" href="#__codelineno-65-6"></a><span class="p">)</span>
+<a id="__codelineno-65-7" name="__codelineno-65-7" href="#__codelineno-65-7"></a>
+<a id="__codelineno-65-8" name="__codelineno-65-8" href="#__codelineno-65-8"></a><span class="n">ToolResponse</span><span class="p">(</span>
+<a id="__codelineno-65-9" name="__codelineno-65-9" href="#__codelineno-65-9"></a>    <span class="n">call_id</span><span class="p">,</span>
+<a id="__codelineno-65-10" name="__codelineno-65-10" href="#__codelineno-65-10"></a>    <span class="n">result_ref</span><span class="p">,</span>
+<a id="__codelineno-65-11" name="__codelineno-65-11" href="#__codelineno-65-11"></a>    <span class="n">status</span><span class="p">,</span>
+<a id="__codelineno-65-12" name="__codelineno-65-12" href="#__codelineno-65-12"></a><span class="p">)</span>
+</code></pre></div>
+<p>and render provider-specific messages later.</p>
+<hr />
+<h2 id="322-separate-durable-history-from-provider-rendering">32.2 Separate Durable History From Provider Rendering</h2>
+<p>Canonical history:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>ProposalProduced
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>EffectCompleted
+</code></pre></div>
+<p>Provider rendering:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>assistant/tool
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>assistant/function
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>model/tool
+</code></pre></div>
+<p>should be an adapter transformation.</p>
+<p>This prevents OpenAI-style role names from becoming substrate semantics.</p>
+<hr />
+<h2 id="323-no-progress-detection">32.3 No-Progress Detection</h2>
+<p>The event traces suggest explicit anti-thrashing.</p>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>    <span class="n">same_action_signature_repeated</span> <span class="o">&gt;=</span> <span class="mi">3</span>
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>    <span class="ow">and</span> <span class="n">no_new_artifact</span>
+<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>    <span class="ow">and</span> <span class="n">no_new_failure_information</span>
+<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a><span class="p">):</span>
+<a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a>    <span class="n">trigger_recovery_policy</span><span class="p">()</span>
+</code></pre></div>
+<p>Possible recovery:</p>
+<ul>
+<li>inject a concise progress summary;</li>
+<li>require a different action class;</li>
+<li>re-localize;</li>
+<li>stop rather than burn more tokens.</li>
+</ul>
+<hr />
+<h1 id="33-phase-aware-tool-availability">33. Phase-Aware Tool Availability</h1>
+<p>The reports compare Vanguard with systems where tool availability changes by stage.</p>
+<p>Possible phases:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>LOCALIZE
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>IMPLEMENT
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>VERIFY
+<a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>REPAIR
+</code></pre></div>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>LOCALIZE:
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>  read
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>  search
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>IMPLEMENT:
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>  read
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>  patch
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a>
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>VERIFY:
+<a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a>  test
+<a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a>  read
+<a id="__codelineno-70-12" name="__codelineno-70-12" href="#__codelineno-70-12"></a>
+<a id="__codelineno-70-13" name="__codelineno-70-13" href="#__codelineno-70-13"></a>REPAIR:
+<a id="__codelineno-70-14" name="__codelineno-70-14" href="#__codelineno-70-14"></a>  read
+<a id="__codelineno-70-15" name="__codelineno-70-15" href="#__codelineno-70-15"></a>  patch
+<a id="__codelineno-70-16" name="__codelineno-70-16" href="#__codelineno-70-16"></a>  test
+</code></pre></div>
+<p>This may reduce action entropy.</p>
+<p>It should be benchmarked rather than assumed to help.</p>
+<hr />
+<h1 id="34-semantic-compaction-instead-of-raw-byte-elision">34. Semantic Compaction Instead of Raw Byte Elision</h1>
+<p>The reports describe existing compaction behavior that can degrade into coarse byte elision.</p>
+<p>Future context compaction could preserve structured state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>files inspected
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>hypotheses
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>patches applied
+<a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a>tests run
+<a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>failures
+<a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a>unresolved questions
+</code></pre></div>
+<p>rather than merely:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>[X bytes elided]
+</code></pre></div>
+<p>The goal is not prettier summaries.</p>
+<p>It is maintaining enough state for the next action to be causally sensible.</p>
+<hr />
+<h1 id="35-adaptive-turn-budget">35. Adaptive Turn Budget</h1>
+<p>Instead of a universal:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>max_turns = 8
+</code></pre></div>
+<p>a future controller could derive turn allowance from:</p>
+<ul>
+<li>task class;</li>
+<li>files touched;</li>
+<li>failed tests;</li>
+<li>patch progress;</li>
+<li>remaining token/USD budget.</li>
+</ul>
+<p>Example conceptual policy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="k">if</span> <span class="n">no_progress_for</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>    <span class="n">stop</span><span class="p">()</span>
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>
+<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a><span class="k">elif</span> <span class="n">patch_exists</span> <span class="ow">and</span> <span class="n">verification_pending</span><span class="p">:</span>
+<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>    <span class="n">grant_small_extension</span><span class="p">()</span>
+<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>
+<a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a><span class="k">elif</span> <span class="n">new_failure_information</span><span class="p">:</span>
+<a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>    <span class="n">grant_repair_extension</span><span class="p">()</span>
+</code></pre></div>
+<p>This avoids both premature abandonment and unlimited wandering.</p>
+<hr />
+<h1 id="36-better-benchmark-failure-taxonomy">36. Better Benchmark Failure Taxonomy</h1>
+<p>Future reports should distinguish at least:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>PASS
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>NO_PATCH
+<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>PATCH_FAILED_ORACLE
+<a id="__codelineno-75-4" name="__codelineno-75-4" href="#__codelineno-75-4"></a>PATCH_NOT_APPLIED
+<a id="__codelineno-75-5" name="__codelineno-75-5" href="#__codelineno-75-5"></a>MODEL_MALFORMED
+<a id="__codelineno-75-6" name="__codelineno-75-6" href="#__codelineno-75-6"></a>TURN_EXHAUSTED
+<a id="__codelineno-75-7" name="__codelineno-75-7" href="#__codelineno-75-7"></a>NO_PROGRESS
+<a id="__codelineno-75-8" name="__codelineno-75-8" href="#__codelineno-75-8"></a>PROVIDER_ERROR
+<a id="__codelineno-75-9" name="__codelineno-75-9" href="#__codelineno-75-9"></a>TOOL_ERROR
+<a id="__codelineno-75-10" name="__codelineno-75-10" href="#__codelineno-75-10"></a>AUTHORITY_DENIED
+<a id="__codelineno-75-11" name="__codelineno-75-11" href="#__codelineno-75-11"></a>DATASET_INVALID
+<a id="__codelineno-75-12" name="__codelineno-75-12" href="#__codelineno-75-12"></a>INSTRUMENT_ERROR
+</code></pre></div>
+<p>This makes benchmark evolution more scientific.</p>
+<hr />
+<h1 id="37-context-efficiency-metrics">37. Context Efficiency Metrics</h1>
+<p>The LRU forensic run illustrates that tokens can grow substantially across repeated turns.</p>
+<p>Useful future metrics:</p>
+<p>[
+ProgressPer1kTokens =
+\frac{MeaningfulStateTransitions}
+{PromptTokens/1000}
+]</p>
+<p>[
+RepeatedObservationRate =
+\frac{RepeatedReadOrSearchActions}
+{AllObservationActions}
+]</p>
+<p>[
+PatchLatencyTurns =
+Turn_{first\ patch}
+-
+Turn_{first\ observation}
+]</p>
+<p>[
+VerificationLatencyTurns =
+Turn_{terminal\ verification}
+-
+Turn_{first\ patch}
+]</p>
+<p>These can reveal improvements before pass-rate changes become statistically clear.</p>
+<hr />
+<h1 id="38-cache-effectiveness-metrics">38. Cache Effectiveness Metrics</h1>
+<p>The supplied telemetry records cached token counts.</p>
+<p>Future reporting can derive:</p>
+<p>[
+CacheRatio =
+\frac{CachedPromptTokens}
+{PromptTokens}
+]</p>
+<p>along with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>cost with caching
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>estimated cost without caching
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>TTFT
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>prefix stability
+</code></pre></div>
+<p>This is especially relevant because a stable root system/tool prefix may be cheap while an ever-growing malformed L5 tail remains expensive.</p>
+<hr />
+<h1 id="39-future-coding-agent-ideas">39. Future Coding-Agent Ideas</h1>
+<p>After correcting basic dialogue/state fidelity, several directions from the reports become useful experiments.</p>
+<h2 id="evidence-first-coding">Evidence-First Coding</h2>
+<p>Use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>task
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>→ localization evidence
+<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>→ patch
+<a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a>→ verification
+</code></pre></div>
+<p>rather than unrestricted exploratory loops.</p>
+<h2 id="surgical-editing">Surgical Editing</h2>
+<p>Prefer narrow target/replacement patches where possible.</p>
+<h2 id="reproduce-then-repair">Reproduce-Then-Repair</h2>
+<p>Force:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>reproduce failure
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>→ localize
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>→ patch
+<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a>→ rerun
+</code></pre></div>
+<p>for bugfix tasks.</p>
+<h2 id="falsifier-oriented-agent">Falsifier-Oriented Agent</h2>
+<p>Use counterexamples/property tests to challenge candidate repairs.</p>
+<h2 id="external-fault-localizer">External Fault Localizer</h2>
+<p>A diagnostic subsystem can rank suspicious files/lines before the main coding model receives context.</p>
+<hr />
+<h1 id="40-future-multi-agent-ideas">40. Future Multi-Agent Ideas</h1>
+<p>The supplied project material mentions:</p>
+<ul>
+<li><code>agent.spawn</code>;</li>
+<li>hierarchical communication;</li>
+<li>planner/executor/reviewer;</li>
+<li>CEGIS;</li>
+<li>benchmark regression tracking.</li>
+</ul>
+<p>The benchmark findings imply an ordering constraint:</p>
+<blockquote>
+<p>Multi-agent complexity should not be used to compensate for a broken single-agent conversational state.</p>
+</blockquote>
+<p>Once the base loop is stable, multi-agent experiments can test:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>planner
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>   ↓ artifact
+<a id="__codelineno-79-3" name="__codelineno-79-3" href="#__codelineno-79-3"></a>executor
+<a id="__codelineno-79-4" name="__codelineno-79-4" href="#__codelineno-79-4"></a>   ↓ patch
+<a id="__codelineno-79-5" name="__codelineno-79-5" href="#__codelineno-79-5"></a>reviewer
+<a id="__codelineno-79-6" name="__codelineno-79-6" href="#__codelineno-79-6"></a>   ↓ verdict
+</code></pre></div>
+<p>while preserving the same event/effect substrate.</p>
+<hr />
+<h1 id="41-future-research-agent-ideas">41. Future Research-Agent Ideas</h1>
+<p>The presence of tutor/research manifests is useful even though the 27-row matrix mostly exposed coding-loop issues.</p>
+<p>Future research-agent evaluation should use tasks appropriate to their capabilities rather than requiring read-only agents to emit code patches.</p>
+<p>Potential evaluation dimensions:</p>
+<ul>
+<li>citation accuracy;</li>
+<li>path/symbol accuracy;</li>
+<li>evidence coverage;</li>
+<li>contradiction detection;</li>
+<li>unsupported claim rate;</li>
+<li>source corroboration;</li>
+<li>abstention quality.</li>
+</ul>
+<p>This avoids conflating:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>"cannot patch code"
+</code></pre></div>
+<p>with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>"failed its intended research task"
+</code></pre></div>
+<p>for read-only agent families.</p>
+<hr />
+<h1 id="42-benchmark-design-improvement-match-evaluator-to-agent-class">42. Benchmark Design Improvement: Match Evaluator to Agent Class</h1>
+<p>The matrix mixed:</p>
+<ul>
+<li>Coding;</li>
+<li>Tutor;</li>
+<li>Research;</li>
+<li>Bugfix;</li>
+</ul>
+<p>families.</p>
+<p>A stronger future benchmark lattice can define class-appropriate terminal success.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>Coding:
+<a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>  patch + oracle
+<a id="__codelineno-82-3" name="__codelineno-82-3" href="#__codelineno-82-3"></a>
+<a id="__codelineno-82-4" name="__codelineno-82-4" href="#__codelineno-82-4"></a>Tutor:
+<a id="__codelineno-82-5" name="__codelineno-82-5" href="#__codelineno-82-5"></a>  evidence-grounded explanation
+<a id="__codelineno-82-6" name="__codelineno-82-6" href="#__codelineno-82-6"></a>
+<a id="__codelineno-82-7" name="__codelineno-82-7" href="#__codelineno-82-7"></a>Research:
+<a id="__codelineno-82-8" name="__codelineno-82-8" href="#__codelineno-82-8"></a>  sourced synthesis
+<a id="__codelineno-82-9" name="__codelineno-82-9" href="#__codelineno-82-9"></a>
+<a id="__codelineno-82-10" name="__codelineno-82-10" href="#__codelineno-82-10"></a>Bugfix:
+<a id="__codelineno-82-11" name="__codelineno-82-11" href="#__codelineno-82-11"></a>  reproduced failure + patch + regression verification
+</code></pre></div>
+<p>The runtime remains common.</p>
+<p>The evaluator changes by task contract.</p>
+<p>This is a better test of generality than forcing every agent family through one patch objective.</p>
+<hr />
+<h1 id="43-experiment-validity-checklist">43. Experiment Validity Checklist</h1>
+<p>Before a new live benchmark row:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>[ ] baseline fails
+<a id="__codelineno-83-2" name="__codelineno-83-2" href="#__codelineno-83-2"></a>[ ] known solution passes
+<a id="__codelineno-83-3" name="__codelineno-83-3" href="#__codelineno-83-3"></a>[ ] oracle hidden from agent
+<a id="__codelineno-83-4" name="__codelineno-83-4" href="#__codelineno-83-4"></a>[ ] model identity pinned
+<a id="__codelineno-83-5" name="__codelineno-83-5" href="#__codelineno-83-5"></a>[ ] preset identity pinned
+<a id="__codelineno-83-6" name="__codelineno-83-6" href="#__codelineno-83-6"></a>[ ] task digest pinned
+<a id="__codelineno-83-7" name="__codelineno-83-7" href="#__codelineno-83-7"></a>[ ] max turns recorded
+<a id="__codelineno-83-8" name="__codelineno-83-8" href="#__codelineno-83-8"></a>[ ] tool set recorded
+<a id="__codelineno-83-9" name="__codelineno-83-9" href="#__codelineno-83-9"></a>[ ] execution profile recorded
+<a id="__codelineno-83-10" name="__codelineno-83-10" href="#__codelineno-83-10"></a>[ ] provider errors typed
+<a id="__codelineno-83-11" name="__codelineno-83-11" href="#__codelineno-83-11"></a>[ ] result artifact preserved
+<a id="__codelineno-83-12" name="__codelineno-83-12" href="#__codelineno-83-12"></a>[ ] event store preserved
+<a id="__codelineno-83-13" name="__codelineno-83-13" href="#__codelineno-83-13"></a>[ ] negative attempts preserved
+</code></pre></div>
+<p>This is one of the most important methodological improvements suggested by the experience.</p>
+<hr />
+<h1 id="44-project-result-so-far">44. Project Result So Far</h1>
+<p>The work can be summarized in four layers.</p>
+<h2 id="layer-1-substrate">Layer 1 — Substrate</h2>
+<p><strong>Result: strong.</strong></p>
+<p>AETHER has:</p>
+<ul>
+<li>governed effects;</li>
+<li>event sourcing;</li>
+<li>durable history;</li>
+<li>capability boundaries;</li>
+<li>composition;</li>
+<li>provider/sandbox/evaluator ports.</li>
+</ul>
+<h2 id="layer-2-agent-runtime">Layer 2 — Agent Runtime</h2>
+<p><strong>Result: functional but exposed an important context-state integration defect.</strong></p>
+<p>The system can:</p>
+<ul>
+<li>call models;</li>
+<li>interpret tool use;</li>
+<li>execute tools;</li>
+<li>patch files;</li>
+<li>emit events.</li>
+</ul>
+<p>But the latest forensic snapshot found poor multi-turn conversation reconstruction.</p>
+<h2 id="layer-3-benchmark-infrastructure">Layer 3 — Benchmark Infrastructure</h2>
+<p><strong>Result: substantial success.</strong></p>
+<p>The project gained:</p>
+<ul>
+<li>a reusable driver;</li>
+<li>per-row execution;</li>
+<li>canaries;</li>
+<li>dry runs;</li>
+<li>class filters;</li>
+<li>difficulty filters;</li>
+<li>exterior oracles;</li>
+<li>durable telemetry.</li>
+</ul>
+<h2 id="layer-4-agent-capability-qualification">Layer 4 — Agent Capability Qualification</h2>
+<p><strong>Result: incomplete.</strong></p>
+<p>At least one easy real coding task was solved.</p>
+<p>The available 27-row matrix was scientifically contaminated by invalid dataset rows, and the post-hardening canary still failed to establish stable coding capability.</p>
+<hr />
+<h1 id="45-errors-were-productive">45. Errors Were Productive</h1>
+<p>The benchmark effort identified concrete defects that architecture/unit tests alone did not expose:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>provider secret propagation
+<a id="__codelineno-84-2" name="__codelineno-84-2" href="#__codelineno-84-2"></a>HTTP error-path robustness
+<a id="__codelineno-84-3" name="__codelineno-84-3" href="#__codelineno-84-3"></a>model-specific tool syntax
+<a id="__codelineno-84-4" name="__codelineno-84-4" href="#__codelineno-84-4"></a>completion truncation
+<a id="__codelineno-84-5" name="__codelineno-84-5" href="#__codelineno-84-5"></a>search self-contamination
+<a id="__codelineno-84-6" name="__codelineno-84-6" href="#__codelineno-84-6"></a>system-message normalization
+<a id="__codelineno-84-7" name="__codelineno-84-7" href="#__codelineno-84-7"></a>invalid benchmark oracles
+<a id="__codelineno-84-8" name="__codelineno-84-8" href="#__codelineno-84-8"></a>dialogue role destruction
+<a id="__codelineno-84-9" name="__codelineno-84-9" href="#__codelineno-84-9"></a>missing assistant-history admission
+<a id="__codelineno-84-10" name="__codelineno-84-10" href="#__codelineno-84-10"></a>turn-budget pressure
+<a id="__codelineno-84-11" name="__codelineno-84-11" href="#__codelineno-84-11"></a>prompt/tool mismatch
+</code></pre></div>
+<p>This is a useful project-level result.</p>
+<p>The benchmark acted as an integration microscope.</p>
+<hr />
+<h1 id="46-what-should-not-be-concluded-from-these-reports">46. What Should Not Be Concluded From These Reports</h1>
+<p>The sources do <strong>not</strong> support the following claims:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>AETHER achieves a strong SWE-bench score.
+<a id="__codelineno-85-2" name="__codelineno-85-2" href="#__codelineno-85-2"></a>AETHER reliably solves medium/hard coding tasks.
+<a id="__codelineno-85-3" name="__codelineno-85-3" href="#__codelineno-85-3"></a>The 27-row result is a valid comparative benchmark score.
+<a id="__codelineno-85-4" name="__codelineno-85-4" href="#__codelineno-85-4"></a>All dialogue-history defects were already fixed.
+<a id="__codelineno-85-5" name="__codelineno-85-5" href="#__codelineno-85-5"></a>Multi-agent execution is required to improve the current benchmark.
+<a id="__codelineno-85-6" name="__codelineno-85-6" href="#__codelineno-85-6"></a>The architecture needs a rewrite.
+</code></pre></div>
+<p>The reports instead support a narrower and more useful statement:</p>
+<blockquote>
+<p>The architecture is functioning well enough that the remaining failure can be localized to concrete harness/context integration behavior rather than being dismissed as an undefined “agent intelligence” problem.</p>
+</blockquote>
+<hr />
+<h1 id="47-current-working-hypothesis">47. Current Working Hypothesis</h1>
+<p>The latest forensic evidence supports this causal chain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>assistant proposal not preserved in dialogue
+<a id="__codelineno-86-2" name="__codelineno-86-2" href="#__codelineno-86-2"></a>             +
+<a id="__codelineno-86-3" name="__codelineno-86-3" href="#__codelineno-86-3"></a>L5 fragments flattened to user role
+<a id="__codelineno-86-4" name="__codelineno-86-4" href="#__codelineno-86-4"></a>             ↓
+<a id="__codelineno-86-5" name="__codelineno-86-5" href="#__codelineno-86-5"></a>model lacks structured history
+<a id="__codelineno-86-6" name="__codelineno-86-6" href="#__codelineno-86-6"></a>             ↓
+<a id="__codelineno-86-7" name="__codelineno-86-7" href="#__codelineno-86-7"></a>repeated reads/searches
+<a id="__codelineno-86-8" name="__codelineno-86-8" href="#__codelineno-86-8"></a>             ↓
+<a id="__codelineno-86-9" name="__codelineno-86-9" href="#__codelineno-86-9"></a>context grows
+<a id="__codelineno-86-10" name="__codelineno-86-10" href="#__codelineno-86-10"></a>             ↓
+<a id="__codelineno-86-11" name="__codelineno-86-11" href="#__codelineno-86-11"></a>turn budget shrinks
+<a id="__codelineno-86-12" name="__codelineno-86-12" href="#__codelineno-86-12"></a>             ↓
+<a id="__codelineno-86-13" name="__codelineno-86-13" href="#__codelineno-86-13"></a>malformed/no-op proposal or abandonment
+<a id="__codelineno-86-14" name="__codelineno-86-14" href="#__codelineno-86-14"></a>             ↓
+<a id="__codelineno-86-15" name="__codelineno-86-15" href="#__codelineno-86-15"></a>NO_PATCH
+</code></pre></div>
+<p>Other provider and benchmark defects previously obscured this.</p>
+<p>Once those were corrected, the context-history defect became visible as the dominant blocker.</p>
+<hr />
+<h1 id="48-suggested-next-validation-logic">48. Suggested Next Validation Logic</h1>
+<p>This is not a project plan; it is the minimal falsification sequence implied by the reports.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>1. Verify assistant/tool role fidelity
+<a id="__codelineno-87-2" name="__codelineno-87-2" href="#__codelineno-87-2"></a>2. Verify assistant proposals enter next-turn context
+<a id="__codelineno-87-3" name="__codelineno-87-3" href="#__codelineno-87-3"></a>3. Run deterministic context-rendering tests
+<a id="__codelineno-87-4" name="__codelineno-87-4" href="#__codelineno-87-4"></a>4. Run LAM/mock vertical
+<a id="__codelineno-87-5" name="__codelineno-87-5" href="#__codelineno-87-5"></a>5. Run one easy live task
+<a id="__codelineno-87-6" name="__codelineno-87-6" href="#__codelineno-87-6"></a>6. Run one medium live task
+<a id="__codelineno-87-7" name="__codelineno-87-7" href="#__codelineno-87-7"></a>7. Run one hard live task
+<a id="__codelineno-87-8" name="__codelineno-87-8" href="#__codelineno-87-8"></a>8. Run 3-row canary
+<a id="__codelineno-87-9" name="__codelineno-87-9" href="#__codelineno-87-9"></a>9. Only then interpret a larger matrix
+</code></pre></div>
+<p>The goal is to prove the causal diagnosis before spending on scale.</p>
+<hr />
+<h1 id="49-minimum-success-evidence-for-the-context-fix">49. Minimum Success Evidence for the Context Fix</h1>
+<p>A corrected trajectory should look like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>assistant: fs.read(file A)
+<a id="__codelineno-88-2" name="__codelineno-88-2" href="#__codelineno-88-2"></a>tool: contents A
+<a id="__codelineno-88-3" name="__codelineno-88-3" href="#__codelineno-88-3"></a>
+<a id="__codelineno-88-4" name="__codelineno-88-4" href="#__codelineno-88-4"></a>assistant: fs.read(file B)
+<a id="__codelineno-88-5" name="__codelineno-88-5" href="#__codelineno-88-5"></a>tool: contents B
+<a id="__codelineno-88-6" name="__codelineno-88-6" href="#__codelineno-88-6"></a>
+<a id="__codelineno-88-7" name="__codelineno-88-7" href="#__codelineno-88-7"></a>assistant: patch.apply(file A)
+<a id="__codelineno-88-8" name="__codelineno-88-8" href="#__codelineno-88-8"></a>tool: patch applied
+<a id="__codelineno-88-9" name="__codelineno-88-9" href="#__codelineno-88-9"></a>
+<a id="__codelineno-88-10" name="__codelineno-88-10" href="#__codelineno-88-10"></a>assistant: proc.exec(test)
+<a id="__codelineno-88-11" name="__codelineno-88-11" href="#__codelineno-88-11"></a>tool: tests pass
+<a id="__codelineno-88-12" name="__codelineno-88-12" href="#__codelineno-88-12"></a>
+<a id="__codelineno-88-13" name="__codelineno-88-13" href="#__codelineno-88-13"></a>assistant: finish
+</code></pre></div>
+<p>rather than:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>user: task
+<a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>user: result A + result B + result C
+</code></pre></div>
+<p>A simple structural test can verify roles without any real model call.</p>
+<hr />
+<h1 id="50-longer-term-research-directions">50. Longer-Term Research Directions</h1>
+<p>Once basic qualification is stable, the reports justify investigating:</p>
+<ul>
+<li>dynamic context compilation;</li>
+<li>phase-specific tool pruning;</li>
+<li>semantic compaction;</li>
+<li>anti-thrashing;</li>
+<li>targeted model escalation;</li>
+<li>stronger code localization;</li>
+<li>deterministic mock evaluation;</li>
+<li>provider-specific normalization adapters;</li>
+<li>broader tier 4–7 challenge suites;</li>
+<li>multi-agent delegation;</li>
+<li>CEGIS-style repair;</li>
+<li>regression tracking;</li>
+<li>adaptive budgets;</li>
+<li>richer cache telemetry;</li>
+<li>harness-versus-model attribution.</li>
+</ul>
+<p>These should remain measured alternatives rather than assumed improvements.</p>
+<hr />
+<h1 id="51-consolidated-timeline-of-this-benchmark-iteration">51. Consolidated Timeline of This Benchmark Iteration</h1>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>AETHER architecture available
+<a id="__codelineno-90-2" name="__codelineno-90-2" href="#__codelineno-90-2"></a>        ↓
+<a id="__codelineno-90-3" name="__codelineno-90-3" href="#__codelineno-90-3"></a>v0.9 benchmark presets created
+<a id="__codelineno-90-4" name="__codelineno-90-4" href="#__codelineno-90-4"></a>        ↓
+<a id="__codelineno-90-5" name="__codelineno-90-5" href="#__codelineno-90-5"></a>27-row frontier driver created
+<a id="__codelineno-90-6" name="__codelineno-90-6" href="#__codelineno-90-6"></a>        ↓
+<a id="__codelineno-90-7" name="__codelineno-90-7" href="#__codelineno-90-7"></a>live OpenRouter execution attempted
+<a id="__codelineno-90-8" name="__codelineno-90-8" href="#__codelineno-90-8"></a>        ↓
+<a id="__codelineno-90-9" name="__codelineno-90-9" href="#__codelineno-90-9"></a>provider secret propagation failure discovered
+<a id="__codelineno-90-10" name="__codelineno-90-10" href="#__codelineno-90-10"></a>        ↓ FIXED
+<a id="__codelineno-90-11" name="__codelineno-90-11" href="#__codelineno-90-11"></a>HTTP error-path crash discovered
+<a id="__codelineno-90-12" name="__codelineno-90-12" href="#__codelineno-90-12"></a>        ↓ FIXED
+<a id="__codelineno-90-13" name="__codelineno-90-13" href="#__codelineno-90-13"></a>DeepSeek DSML tool format discovered
+<a id="__codelineno-90-14" name="__codelineno-90-14" href="#__codelineno-90-14"></a>        ↓ FIXED
+<a id="__codelineno-90-15" name="__codelineno-90-15" href="#__codelineno-90-15"></a>tool JSON truncation discovered
+<a id="__codelineno-90-16" name="__codelineno-90-16" href="#__codelineno-90-16"></a>        ↓ FIXED
+<a id="__codelineno-90-17" name="__codelineno-90-17" href="#__codelineno-90-17"></a>repository search polluted by .vanguard data
+<a id="__codelineno-90-18" name="__codelineno-90-18" href="#__codelineno-90-18"></a>        ↓ FIXED
+<a id="__codelineno-90-19" name="__codelineno-90-19" href="#__codelineno-90-19"></a>adjacent system message incompatibility
+<a id="__codelineno-90-20" name="__codelineno-90-20" href="#__codelineno-90-20"></a>        ↓ IMPROVED
+<a id="__codelineno-90-21" name="__codelineno-90-21" href="#__codelineno-90-21"></a>27-row matrix executed
+<a id="__codelineno-90-22" name="__codelineno-90-22" href="#__codelineno-90-22"></a>        ↓
+<a id="__codelineno-90-23" name="__codelineno-90-23" href="#__codelineno-90-23"></a>16 invalid dataset rows discovered
+<a id="__codelineno-90-24" name="__codelineno-90-24" href="#__codelineno-90-24"></a>        ↓ ORACLES HARDENED
+<a id="__codelineno-90-25" name="__codelineno-90-25" href="#__codelineno-90-25"></a>post-fix canary executed
+<a id="__codelineno-90-26" name="__codelineno-90-26" href="#__codelineno-90-26"></a>        ↓
+<a id="__codelineno-90-27" name="__codelineno-90-27" href="#__codelineno-90-27"></a>NO_PATCH / repeated reads remained
+<a id="__codelineno-90-28" name="__codelineno-90-28" href="#__codelineno-90-28"></a>        ↓
+<a id="__codelineno-90-29" name="__codelineno-90-29" href="#__codelineno-90-29"></a>SQLite trajectory forensics
+<a id="__codelineno-90-30" name="__codelineno-90-30" href="#__codelineno-90-30"></a>        ↓
+<a id="__codelineno-90-31" name="__codelineno-90-31" href="#__codelineno-90-31"></a>L5 role squashing identified
+<a id="__codelineno-90-32" name="__codelineno-90-32" href="#__codelineno-90-32"></a>        +
+<a id="__codelineno-90-33" name="__codelineno-90-33" href="#__codelineno-90-33"></a>assistant proposal omission identified
+<a id="__codelineno-90-34" name="__codelineno-90-34" href="#__codelineno-90-34"></a>        ↓
+<a id="__codelineno-90-35" name="__codelineno-90-35" href="#__codelineno-90-35"></a>current main unresolved hypothesis in supplied snapshot
+</code></pre></div>
+<hr />
+<h1 id="52-final-project-status">52. Final Project Status</h1>
+<p>The most useful way to describe this period is:</p>
+<blockquote>
+<p><strong>AETHER successfully crossed from architecture-building into empirical agent engineering.</strong></p>
+</blockquote>
+<p>The system was sophisticated enough to:</p>
+<ul>
+<li>execute real models;</li>
+<li>preserve exact trajectories;</li>
+<li>expose agent actions;</li>
+<li>isolate evaluators;</li>
+<li>reproduce errors;</li>
+<li>distinguish infrastructure failures from agent failures;</li>
+<li>find subtle context and experiment-design bugs.</li>
+</ul>
+<p>The benchmark scores themselves were not yet the success.</p>
+<p>The success was creating a substrate where failure became diagnosable.</p>
+<p>The current technical bottleneck in the latest supplied forensic snapshot was comparatively narrow:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>preserve faithful multi-turn agent history
+</code></pre></div>
+<p>not:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>replace the event architecture
+<a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a>rewrite the kernel
+<a id="__codelineno-92-3" name="__codelineno-92-3" href="#__codelineno-92-3"></a>invent a new agent framework
+</code></pre></div>
+<p>A stable single-agent turn loop with correct conversational causality is the necessary foundation for everything that follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>stronger coding
+<a id="__codelineno-93-2" name="__codelineno-93-2" href="#__codelineno-93-2"></a>→ research agents
+<a id="__codelineno-93-3" name="__codelineno-93-3" href="#__codelineno-93-3"></a>→ delegated agents
+<a id="__codelineno-93-4" name="__codelineno-93-4" href="#__codelineno-93-4"></a>→ planners/reviewers
+<a id="__codelineno-93-5" name="__codelineno-93-5" href="#__codelineno-93-5"></a>→ adaptive routing
+<a id="__codelineno-93-6" name="__codelineno-93-6" href="#__codelineno-93-6"></a>→ learned policies
+<a id="__codelineno-93-7" name="__codelineno-93-7" href="#__codelineno-93-7"></a>→ self-improvement experiments
+</code></pre></div>
+<p>The immediate scientific question left by this iteration is therefore:</p>
+<p>[
+\boxed{
+\text{Does restoring exact assistant/tool dialogue causality
+convert the observed NO_PATCH loops into stable patch-and-verify behavior?}
+}
+]</p>
+<p>Until that hypothesis is experimentally confirmed, larger architectural additions would confound the diagnosis.</p>
+<hr />
+<h1 id="appendix-a-source-reconciliation-notes">Appendix A — Source Reconciliation Notes</h1>
+<h2 id="full_project_status_and_benchsmd"><code>FULL_PROJECT_STATUS_AND_BENCHS.md</code></h2>
+<p>Useful for:</p>
+<ul>
+<li>architecture overview;</li>
+<li>agent preset inventory;</li>
+<li>challenge tiers;</li>
+<li>seven wire/dataset fixes;</li>
+<li>concrete live traces;</li>
+<li>successful LRU repair;</li>
+<li>benchmark infrastructure readiness.</li>
+</ul>
+<p>It also contains multiple attempts/traces, including both successful and abandoned behavior.</p>
+<p>Therefore its statement that the benchmark harness is <code>GREEN</code> is interpreted here as <strong>runner/instrumentation readiness</strong>, not proof of reliable agent capability.</p>
+<h2 id="full_project_status_and_benchs_bmd"><code>FULL_PROJECT_STATUS_AND_BENCHS_B.md</code></h2>
+<p>Useful as the more conservative forensic snapshot for:</p>
+<ul>
+<li>the 27-row result distribution;</li>
+<li>post-hardening 0/3 canary;</li>
+<li>L5 role squashing;</li>
+<li>missing assistant proposal recording;</li>
+<li>turn-budget concern;</li>
+<li>prompt/tool mismatch;</li>
+<li>detailed module issue map.</li>
+</ul>
+<p>This report is used as the primary basis for the consolidated “latest reported capability state”.</p>
+<h2 id="benchmark_v090_quickrunmd"><code>BENCHMARK_V090_QUICKRUN.MD</code></h2>
+<p>Useful for:</p>
+<ul>
+<li>exact driver commands;</li>
+<li>row IDs;</li>
+<li>challenge/preset mapping;</li>
+<li>targeted regressions;</li>
+<li>dry/live/canary/full execution modes;</li>
+<li>LAM/mock benchmark entrypoints.</li>
+</ul>
+<p>It is operational documentation and does not by itself prove that all benchmark defects are resolved.</p>
+<hr />
+<h1 id="appendix-b-compact-status-matrix">Appendix B — Compact Status Matrix</h1>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Status in supplied snapshot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event-sourced runtime</td>
+<td>✅ Operational</td>
+</tr>
+<tr>
+<td>SQLite-WAL trajectories</td>
+<td>✅ Operational</td>
+</tr>
+<tr>
+<td>CAS artifacts</td>
+<td>✅ Operational</td>
+</tr>
+<tr>
+<td>OpenRouter integration</td>
+<td>✅ Operational after fixes</td>
+</tr>
+<tr>
+<td>DeepSeek DSML parser</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>Sandbox/evaluator contracts</td>
+<td>✅ Reported passing</td>
+</tr>
+<tr>
+<td>Benchmark runner</td>
+<td>✅ Operational</td>
+</tr>
+<tr>
+<td>27-row orchestration</td>
+<td>✅ Operational</td>
+</tr>
+<tr>
+<td>Challenge baseline validity</td>
+<td>⚠️ Defects found; identified cases hardened</td>
+</tr>
+<tr>
+<td>Easy real patch</td>
+<td>✅ Demonstrated</td>
+</tr>
+<tr>
+<td>Multi-turn context fidelity</td>
+<td>❌ Blocking defect in latest forensic report</td>
+</tr>
+<tr>
+<td>Stable canary</td>
+<td>❌ 0/3 in latest forensic report</td>
+</tr>
+<tr>
+<td>Medium/hard coding qualification</td>
+<td>❌ Not established</td>
+</tr>
+<tr>
+<td>Full benchmark score</td>
+<td>❌ Not valid yet</td>
+</tr>
+<tr>
+<td>Advanced multi-agent capability</td>
+<td>🔬 Future experimentation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="appendix-c-core-files-implicated-by-the-benchmark-forensics">Appendix C — Core Files Implicated by the Benchmark Forensics</h1>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>vanguard/packages/agency/context/layers.py
+<a id="__codelineno-94-2" name="__codelineno-94-2" href="#__codelineno-94-2"></a>vanguard/packages/agency/context/compiler.py
+<a id="__codelineno-94-3" name="__codelineno-94-3" href="#__codelineno-94-3"></a>vanguard/packages/agency/episode/engine.py
+<a id="__codelineno-94-4" name="__codelineno-94-4" href="#__codelineno-94-4"></a>vanguard/packages/runtime/prompt_assembler.py
+<a id="__codelineno-94-5" name="__codelineno-94-5" href="#__codelineno-94-5"></a>vanguard/packages/runtime/session.py
+<a id="__codelineno-94-6" name="__codelineno-94-6" href="#__codelineno-94-6"></a>vanguard/packages/adapters/models/openrouter.py
+<a id="__codelineno-94-7" name="__codelineno-94-7" href="#__codelineno-94-7"></a>tools/benchmark-drivers/frontier_v090.py
+<a id="__codelineno-94-8" name="__codelineno-94-8" href="#__codelineno-94-8"></a>benchmarks/swe_bench/challenges.py
+</code></pre></div>
+<hr />
+<h1 id="appendix-d-fast-benchmark-commands">Appendix D — Fast Benchmark Commands</h1>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a><span class="c1"># deterministic preflight</span>
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--dry-run
+<a id="__codelineno-95-3" name="__codelineno-95-3" href="#__codelineno-95-3"></a>
+<a id="__codelineno-95-4" name="__codelineno-95-4" href="#__codelineno-95-4"></a><span class="c1"># one easy, medium, hard</span>
+<a id="__codelineno-95-5" name="__codelineno-95-5" href="#__codelineno-95-5"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--row<span class="w"> </span>v090-01<span class="w"> </span>v090-02<span class="w"> </span>v090-03
+<a id="__codelineno-95-6" name="__codelineno-95-6" href="#__codelineno-95-6"></a>
+<a id="__codelineno-95-7" name="__codelineno-95-7" href="#__codelineno-95-7"></a><span class="c1"># live canary</span>
+<a id="__codelineno-95-8" name="__codelineno-95-8" href="#__codelineno-95-8"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--live-canary
+<a id="__codelineno-95-9" name="__codelineno-95-9" href="#__codelineno-95-9"></a>
+<a id="__codelineno-95-10" name="__codelineno-95-10" href="#__codelineno-95-10"></a><span class="c1"># full matrix</span>
+<a id="__codelineno-95-11" name="__codelineno-95-11" href="#__codelineno-95-11"></a>python3<span class="w"> </span>tools/benchmark-drivers/frontier_v090.py<span class="w"> </span>--live-27
+</code></pre></div>
+<hr />
+<p><strong>End of consolidated status report.</strong></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

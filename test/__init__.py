@@ -1,12 +1,14 @@
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 _ROOT = str(Path(__file__).resolve().parent.parent)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-_WS_ROOT = os.environ.get("AETHER_WORKSPACE_ROOT", "/home/rocha/Coding/Aether-D-System-Workspace")
+_DEFAULT_WS = str(Path(tempfile.gettempdir()) / "aether_workspace")
+_WS_ROOT = os.environ.get("AETHER_WORKSPACE_ROOT", _DEFAULT_WS)
 os.environ["AETHER_WORKSPACE_ROOT"] = _WS_ROOT
 _TMP_DIR = Path(_WS_ROOT) / "tmp"
 _TMP_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,270 +1,108 @@
 ---
-id: normative-spec-index
-class: law
+id: spec.core
+canonical_id: spec.core
+class: normative
 authority: normative
-canonical_for:
-  - normative-specification
-  - invariant-registry
+truth_plane: TARGET
 status: living
+implementation_status: PARTIAL
 owner: principal-systems-architect
-version: "0.9.0b1"
-last_verified: 2026-08-28
-read_when:
-  - implementing-any-runtime-change
-  - resolving-authority-conflicts
-do_not_read_when:
-  - consulting-historical-proposals
-subordinate_to: VISION.md
-supersedes: []
-superseded_by: null
+canonical_for:
+  - normative requirements and invariant navigation
+purpose: State the compact current TARGET contract and route implementation facts to their AS_BUILT owners.
+audience:
+  - developer
+  - architect
+  - contributor
+analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
+version: 0.9.1a1
+last_verified: 2026-08-29
+normative_authority:
+  - VISION.md
+  - docs/SPEC.md
+  - docs/01_law/
+  - decision.index
+relationships:
+  - arch.system.overview
+  - decision.index
+  - execution.milestones
+  - theory.agent-substrate
+reviewer: delegated-tech-lead-block-e
+confidence: high
 ---
 
-# AETHER Normative Specification — Higgs Development Line
+# AETHER TARGET Specification
 
-Active document and software version: `0.7.3.dev0`, sourced from `pyproject.toml`.
+## Purpose
 
-## What AETHER is
+This page is the compact normative owner for the reconstructed **TARGET** contract. It does not describe implementation merely because a requirement exists. AS_BUILT structure and behavior remain owned by the [architecture](architecture/overview.md) and [reference](backend/reference/schemas.md) pages at analysis SHA `9fd444674bf3a97f2673ff36a5f5928ef046c574`.
 
-AETHER is a **general event-sourced agentic computation framework and experimental substrate**. It is
-not primarily a security-certification system, a coding harness, or a workflow engine. The
-fundamental unit is a **typed causal operation occurring within an execution lineage**. An "agent" is
-not a privileged persistent object; it is a dynamic projection over lineage, events, artifacts,
-policy, context, budget, and execution boundaries.
+RFC-2119 terms are normative. Each clause carries a Block E TARGET claim ID; the generated reconciliation register records its authority, implementation evidence, relationship, status, and gap.
 
-Events are the canonical causal history. Artifacts retain large relevant content. Projections
-reconstruct semantic state. Caches and indexes remain derived and rebuildable. The kernel stays
-minimal and domain-blind. Memory, skills, learning, topologies, and metacognition are higher-level
-projections, plugins, or policies composed from the same primitives — never new kernel semantics.
+## Identity and causal truth
 
-This identity is fixed by [`VISION.md`](../VISION.md) (Law Zero) under
-[`ADR-0095`](02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md). This specification
-translates it into current normative requirements; it does not restate or amend it.
+- **`TC-E-001`** AETHER **MUST** remain a general event-sourced agentic-computation substrate, not a domain-specific harness, workflow engine, or certification system.
+- **`TC-E-002`** The fundamental execution unit **MUST** be a typed causal operation within an execution lineage.
+- **`TC-E-003`** Durable causal events **MUST** be authoritative facts; large content **MUST** be content-addressed artifacts; projections, indexes, caches, and telemetry **MUST NOT** become a second truth.
+- **`TC-E-004`** Replay of persisted facts and probabilistic re-execution **MUST** remain distinct.
+- **`TC-E-005`** An agent **MUST** be represented as identity, policy, event-derived projection, and execution boundary. No persistent in-memory Agent object may be required for semantic continuation.
 
----
+## Trusted execution
 
-This file is the compact normative index. RFC-2119 terms (MUST, SHALL, SHOULD, MAY) are binding.
-The detailed clauses remain canonical in the linked law leaves under [`01_law/`](01_law/); this
-index intentionally keeps the axioms, invariant registry, refusals, and navigation contract in one
-small bundle. Accepted ADRs explain why a rule exists; they never weaken this law unless this index
-and the applicable law leaf are amended together. Reviews, proposals, research, and `_archive/` are
-historical evidence only.
+- **`TC-E-022`** The S0–S12 microkernel **MUST** remain a bounded, domain-blind reference monitor for admissibility, authority, generic budgets, and effect settlement.
+- **`TC-E-023`** Capability grants constrain agents; isolation policy constrains plugin code. Neither authority system may substitute for the other.
+- **`TC-E-029`** All privileged effects **MUST** preserve declared-versus-emitted identity, merge controls at the call site, persist intent before dispatch, and fail closed on forged or widened authority.
+- **`TC-E-030`** Production replay parity **MUST** reconstruct durable storage in a fresh process.
+- **`TC-E-031`** Evaluation authority **MUST** remain exterior, identity-separated, and cryptographically bound.
+- **`TC-E-032`** Plugins **MUST** be untrusted by default and isolation claims **MUST** be measured rather than asserted.
+- **`TC-E-033`** The kernel and domain **MUST** remain domain-blind and within the ratified Trusted Core budget.
 
-## Authority and precedence
+## Composition, turns, and extensibility
 
-0. [`VISION.md`](../VISION.md) is **Law Zero** (`class: charter`, `authority: constitutional`, `status: locked`). It defines architectural identity, ontology, product principles, and long-term direction for v0.7+. This specification and every leaf is subordinate to it. Conflicts resolve in favour of Vision and MUST be reconciled here, never cited as counter-authority. Vision changes only through an explicit Vision-superseding ADR (`ADR-0095`).
-1. This specification and the six `class: law`, `authority: normative` leaves in
-   [`01_law/`](01_law/) form the normative specification. No one leaf has independent precedence;
-   a change that affects more than one leaf MUST update every affected clause atomically.
-2. Append-only decisions in [`02_decisions/INDEX.md`](02_decisions/INDEX.md) record rationale and
-   amendments; an accepted ADR is binding only when reflected in the law. Sustained material
-   counter-evidence triggers review but never implicit amendment.
-3. [`03_execution/milestones.md`](03_execution/milestones.md) owns stable gates,
-   [`03_execution/backlog.md`](03_execution/backlog.md) owns stable work packages,
-   [`03_execution/sprint_active.md`](03_execution/sprint_active.md) is the sole current work board,
-   and [`03_execution/sprint_upcoming.md`](03_execution/sprint_upcoming.md) is non-authorizing staging.
-4. Architecture, contracts, protocols, engineering guides, and theory are descriptive or advisory
-   and must link back to law rather than restating it.
-5. [`_archive/`]( _archive/) is frozen provenance. It is scanned for links and secrets but excluded
-   from normal implementation context bundles.
+- **`TC-E-008`** Static composition declares available capabilities; the durable trajectory records what actually occurred. Neither graph may impersonate the other.
+- **`TC-E-038`** The sole production chain **MUST** remain `mhf.manifest/2 -> CanonicalManifest -> FrozenComposition -> ActivationPlan -> RunPlan -> EpisodeEngine`.
+- **`TC-E-039`** The canonical turn loop **MUST** remain unary and sequential except where a separately ratified, measured disposition explicitly authorizes a bounded case.
+- **`TC-E-040`** Runtime profiles **MUST** be explicit and identity-bearing in `D_R`; unavailable requested containment **MUST** fail closed.
+- **`TC-E-041`** Plugin activation **MUST** materialize a usable service or handle, or fail. Lifecycle metadata alone is not activation.
+- **`TC-E-027`** JSON Schema, JCS, and golden vectors are the wire source of truth; generated readers SHOULD replace handwritten mirrors.
+- **`TC-E-053`** Pure deterministic transforms, bounded protocol recovery with no silent execution, state-dependent tool policy, deterministic failure attribution, and fail-closed preflight are the accepted `ADR-0106` evolution seam.
 
-## Design axioms A-1…A-6
+## Delegation, topology, and budgets
 
-- **A-1 Microkernel:** the S0–S12 effect reference monitor is the bounded TCB; domain, evaluation, scheduling, models, sandboxes, and plugin code remain outside it behind typed boundaries.
-- **A-2 Two authority systems:** capability grants constrain agents; plugin isolation constrains plugin code. Neither system trusts the other's subject.
-- **A-3 Events are truth:** grants, budgets, approvals, lifecycle, evaluation, and spawn effects are durable events. Fresh-process replay, not an in-memory double fold, proves replay parity.
-- **A-4 One schema:** JSON Schema, JCS, and golden vectors are the wire source of truth; generated Python/TypeScript readers replace handwritten mirrors.
-- **A-5 Harness identity:** `D_H` hashes every behavior-affecting composition input. `D_R` adds runtime/environment/model/oracle identity and `D_X` adds dataset/protocol identity; never collapse them.
-- **A-6 Asymmetric evolution:** new authority verbs require a bound falsifier and TCB proof; all other evolution lands as packs, plugins, manifests, adapters, policies, or exterior pipelines.
+- **`TC-E-013`** `agent.spawn` **MUST** be the sole recursive-delegation primitive and re-enter the ordinary runtime through an attenuated child lineage.
+- **`TC-E-014`** Child action, resource, constraint, depth, turn, and budget authority **MUST NOT** exceed the parent.
+- **`TC-E-042`** Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; depth and turns are structural ceilings.
+- **`TC-E-017`** Topology declarations carry no authority. Ready roles **MUST** execute as ordinary mediated children and exchange dependency context through authorized artifact references.
+- **`TC-E-049`** The required direct, planner/executor/reviewer, and fork/read/merge topologies **MUST** demonstrate real effects and persisted artifact flow before acceptance.
+- **`TC-E-052`** `mhf.topology/2` is an accepted workflow seam, not authority for a second runtime or unrestricted concurrent execution.
 
-## Invariant registry I-1…I-11
+## State, memory, learning, and evidence
 
-| ID | Short invariant | Canonical detail |
-|---|---|---|
-| I-1 | One schema-generated `EffectRequest` | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
-| I-2 | Emitted equals declared; forged is rejected | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
-| I-3 | Every control merges with its call site | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
-| I-4 | Durable fresh-process replay | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#13-determinism--replay-contract) |
-| I-5 | Exterior signed judge | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#evaluator-and-verdicts) |
-| I-6 | Plugins untrusted by default | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#6-the-workload-perimeter) |
-| I-7 | Domain-blind kernel | [`01_law/DISPATCH.md`](01_law/DISPATCH.md#1-the-trusted-computing-base) |
-| I-8 | Specifications are generated or normative, never both | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
-| I-9 | Complete recovered trajectory | [`01_law/EVIDENCE.md`](01_law/EVIDENCE.md#trajectory-accounting) |
-| I-10 | Metaphors are not architecture | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#invariants-i-1--i-11) |
-| I-11 | Single sequential turn loop | [`01_law/RUNTIME.md`](01_law/RUNTIME.md#11-the-turn-state-machine) |
+- **`TC-E-018`** Memory retrieval **MUST** verify scoped, revocation-aware authorization before ranking and artifact dereference; retention never authorizes capture.
+- **`TC-E-019`** Learned compositions **MUST** be immutable, content-addressed, evaluated on held-out workloads, promoted by authority distinct from generator/evaluator, and reversibly rolled back.
+- **`TC-E-026`** `D_H`, `D_R`, and `D_X` **MUST** remain distinct identities and bind every behavior-affecting input at their respective planes.
+- **`TC-E-035`** A completed trajectory **MUST** preserve invoked-turn attribution, explicit missingness, conserved cost, and the verified pre-crash prefix.
+- **`TC-E-043`** New production event envelopes **MUST** use `mhf.event/2`; compatibility readers may accept frozen predecessors without rewriting historical identities.
+- **`TC-E-046`** Facts, artifacts, projections, telemetry, and attestations **MUST** remain distinct. Only exact-subject, digest-addressed, independently verified receipts may close mandatory gates.
 
-## Law map
+## Product and release boundary
 
-| Subject | Read this first | Use when |
-|---|---|---|
-| Dispatch, leases, failure paths | [`DISPATCH.md`](01_law/DISPATCH.md) | changing kernel, grants, isolation, or recovery gates |
-| Turn loop, events, replay, cold continuation | [`RUNTIME.md`](01_law/RUNTIME.md) | changing sessions, ledger, or runtime lifecycle |
-| Manifests, plugins, SPIs, packs | [`EXTENSIBILITY.md`](01_law/EXTENSIBILITY.md) | changing composition or plugin lifecycle |
-| Trajectories, evaluator, identities | [`EVIDENCE.md`](01_law/EVIDENCE.md) | changing verdicts, evidence, or cost accounting |
-| Statistical measurement and promotion | [`MEASUREMENT.md`](01_law/MEASUREMENT.md) | changing experiments or promotion claims |
-| Capabilities, TCB, threat model | [`SECURITY.md`](01_law/SECURITY.md) | changing trust boundaries or sandbox policy |
+- **`TC-E-047`** M-9 remains a TARGET operational beta: unified configuration and clients, packaged CLI/API/TUI/Studio, real plugin lifecycle, health/readiness, two real workflows, restart/resume, and offline-after-install behavior.
+- **`TC-E-048`** M-10 remains a TARGET final release: supported migrations, backup/restore, deployment profiles, fault injection, security/performance qualification, reproducible artifacts, soak evidence, and an exact-subject signed release envelope.
+- **`TC-E-050`** Every client start-run path **MUST** select a valid runtime profile consistently with the identity-bearing profile contract.
+- **`TC-E-051`** Client surfaces SHOULD converge on a coherent command and configuration model without moving runtime authority into the clients.
 
-## Architectural refusals
+## Explicit implementation gap summary
 
-- The sole production chain is `mhf.manifest/2 -> CanonicalManifest -> FrozenComposition ->
-  ActivationPlan -> RunPlan -> EpisodeEngine`. Compatibility formats normalize at ingress and never
-  become a second runtime value. `FrozenComposition` owns `D_H`; activation/runtime identity binds
-  it into `D_R`.
-- The runtime never executes a dynamic control-flow DAG *as a substrate authority*. `mhf.manifest/2`
-  is a static composition graph declaring the space of possibilities; the trajectory recorded in the
-  ledger is the emergent causal graph of what was actually used. The turn loop stays unary and
-  sequential (I-11) until M-7 measurement and an explicit scheduler disposition. Multi-agent behavior is
-  mediated delegation (`agent.spawn`, M-6) or a composed plugin — never a second engine.
-- **An agent is not a persistent privileged object.** `Agent = Identity + Policy + Event-Derived
-  Projection + Execution Boundary`. Runtime objects MAY hold transient optimization state, but no
-  state required for semantic continuation may exist only inside them (see
-  [`01_law/RUNTIME.md`](01_law/RUNTIME.md#15-agent-state-is-a-projection)). Target architecture;
-  M-5a closes the current gap.
-- **Memory, skills, learning, topology, scheduling, and metacognition are never kernel semantics.**
-  They land as projections, plugins, policies, or versioned configuration over the same primitives.
-  A meta-controller holds no special authority and passes through S0–S12 like any other proposer.
-- UDS and in-process dispatch share schemas and wire semantics, but in-process execution is direct,
-  zero-copy memory dispatch; it does not pay socket/serialization overhead for context bundles.
-- A turn owns an ordered list of `invocations`, so retries and escalations conserve additive costs.
-- `evaluation: none` is declared before execution and derives `unattributable_for_promotion = true`.
-  Unsigned or forged verdicts fail closed.
-- Cold continuation loads durable pre-crash events, joins the trajectory prefix, reconciles pending
-  Governor leases (no budget leak), and emits `RunRecovered` before a complete `mhf.trajectory/1` at
-  `EpisodeCompleted`.
-- M-4 product evidence (RF-95) is derived from one real-model coding run through canonical
-  composition, ordinary mediated tools, a real workspace diff, task verification, file-backed WAL,
-  trajectory, and fresh-process reconstruction. Synthetic providers, alternate drivers, stitched
-  traces, and manual event repair cannot satisfy the gate.
-- `mhf.trajectory/1` and `mhf.execution-profile/1` are frozen strict contracts. M-4 extensions write
-  `/2`; readers dual-read `/1|/2`, production writers single-write `/2`, and historical identities
-  are never rewritten.
-- Evidence-ledger failure is fatal. Required capture failure is fatal; optional degradation is
-  admissible only after a durable `capture_incomplete` fact and makes the run non-evidentiary.
-- Reproducibility distinguishes capability from executed verification. WAL and pins are
-  prerequisites; verified values require immutable run-bound receipts.
-- Causal facts, content-addressed artifacts, projections, operational telemetry, and independent
-  attestations are distinct. Package readiness and milestone acceptance are also distinct; only a
-  digest-addressed, independently accepted receipt may close a mandatory gate (ADR-0101).
-- Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; `depth` and `turns`
-  are structural ceilings. Goal events carry a digest and optional artifact reference, never raw
-  goal text. Retention uses `digests_only|standard|full` and does not authorize content capture.
-- RF-85 retains the stronger nine-row hermetic assurance contract but no longer blocks M-4 or M-5.
-  Its canonical auditor distinguishes `absent`, `invalid`, `unverifiable`, and `present_valid`; only
-  a complete envelope bound to immutable preregistration and authoritative verifiers may be
-  promotion-eligible. An unresolved S8a intent remains F-22 `undeterminable` in every profile.
-- `agent.spawn` is a generic S0–S12 effect whose post-intent child creation belongs to a runtime
-  adapter; the kernel MUST NOT branch on the verb or know child topology.
-- Scheduler claim TTL/heartbeat is coordination metadata, not budget `millis`. Concurrent physical
-  attempts are at-least-once; durable settlement is idempotent/exactly-once per command identity.
-- M-7 topology is declared component/policy data lowered to ordinary scheduling and mediated spawn.
-  A substrate workflow/topology engine requires RF-66 reversal evidence and a successor ADR.
-- M-8 memory access requires verified, scoped, revocation-aware authorization at use time;
-  authorization precedes ranking and artifact dereference. Promotion is a durable CAS over an
-  immutable composition with distinct generator, evaluator, and promoter authorities (ADR-0100).
-- Execution assurance is explicit and identity-bearing: the resolved `ExecutionProfile` MUST enter
-  `D_R`; `product`, `local`, `sandboxed`, and `hermetic` are distinct modes. Product execution MAY
-  use the host adapter with durable WAL and explicit approvals. An unavailable requested containment
-  mode MUST fail closed rather than silently falling back to the host.
-- The runtime bootstrap is the sole production seam for concrete adapter construction. Plugin
-  activation MUST materialize a service/handle or fail; lifecycle metadata without a callable service
-  is not production activation.
-- Topology readiness MUST be derived from settled causal predecessors. A ready role MUST execute as
-  an ordinary mediated M-6 child through the public runtime, and dependency context MUST cross role
-  boundaries only as authorized content-addressed references. Declared operations, lowered order,
-  transient model output, or an effect-free abandoned child MUST NOT count as executed topology work.
-- M-9 implementation MUST remain non-authorizing until M-8 has a producer-verifiable bundle and an
-  independent acceptance envelope over the exact digest. M-10 release qualification MUST consume a
-  qualified M-9 artifact and MUST bind its signed envelope to the exact source, wheel, sdist, schema,
-  migration, runtime, reducer, dependency, profile, and qualification identities.
-- External benchmark results MUST remain measurement evidence rather than runtime authority. A
-  comparative claim MUST pin the task set, repositories, sandbox, evaluator, harness, model/provider,
-  budgets, timeout, and contamination policy. Random model routing MUST NOT be used for a reproducible
-  comparison, and repeated tuning against a sealed evaluation set MUST invalidate the claim.
-- LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) MAY be used
-  as development and research assistants for Vanguard work. They are not Vanguard runtime,
-  authority, evaluator, or acceptance paths. Their outputs MUST remain advisory until a technique
-  is independently implemented behind Vanguard interfaces, preserves the kernel, capability,
-  budget, event, isolation, and evidence invariants, and passes focused falsifiers. Production
-  code MUST NOT import an external engine as a second runtime, and benchmark claims MUST use the
-  normal pinned measurement and independent-verification process.
+The TARGET contract is `PARTIAL` at the recorded AS_BUILT SHA. The most important divergences are:
 
-## v0.7+ concept lock
+- The live TypeScript `StartRun` path contradicts the valid-profile requirement ([runtime-service reference](backend/reference/runtime-service.md)).
+- Multi-role/topology mechanisms exist, but the full accepted real-effect/artifact-flow integration is only partial at the recorded SHA ([delegation architecture](backend/architecture/delegation-topology.md)).
+- The M-9 unified product/client boundary and M-10 qualification contract remain planned ([milestone gates](execution/milestones.md)).
+- Protocol-recovery, tool-policy, transform, and workflow seams exist, but the accepted `mhf.topology/2` workflow surface is not a canonical production execution path.
 
-[`VISION.md`](../VISION.md) is Law Zero; `ADR-0095` locks the architectural thesis and ADR-0097
-refines delivery sequencing without changing that thesis.
-`ADR-0094` remains in force: M-4 is the RF-95 useful, durable coding proof and RF-85 is an optional
-hermetic assurance certification. ADR-0102 records `M-5A-BASE-v2` as a contaminated unpublished
-historical ref, not a valid control. A reviewed, annotated, remotely resolvable
-`CONVERGENCE-BASE-v1` with a signed baseline manifest is the only authorized successor control.
-After that baseline, the fresh M-5b treatment and M-6 evidence work may proceed independently.
+The complete claim-by-claim result is generated in `.generated/knowledge/target-as-built-reconciliation.jsonl`; this page owns the requirements, not the reconciliation ledger.
 
-## Milestone compatibility
+## Refusals
 
-Sequencing detail and technical dependencies live in
-[`03_execution/milestones.md`](03_execution/milestones.md). Historical identifiers keep their
-historical meaning; `ADR-0095` §4 is the authoritative translation table.
-
-| Milestone | Version | Gate |
-|---|---|---|
-| M-0 | v0.6.0 | CI truth and falsifiers F-01…F-21 — complete |
-| M-1 | v0.6.0 | signed Ed25519 trust spine and verdicts — complete |
-| M-2 | v0.6.1 | one runtime, RF-23 truthful trajectory, RF-25 cold continuation — complete |
-| M-3 | v0.6.2 | graph/lifecycle contracts and layer0 removal — complete |
-| M-3C | v0.6.2 | RF-78…RF-84 canonical composition, activation, durability, evidence — complete |
-| M-4 | v0.7.x | RF-95 useful real-model coding proof, scientific capture, immutable bundle, and independent acceptance |
-| M-5a | v0.7.x | Event-derived `AgentView`, lineage/scope semantics, provenance, and accepted successor baseline |
-| M-5b | v0.7.x | RF-86/RF-98 fresh non-contaminated Formal Pack witness against `CONVERGENCE-BASE-v1` |
-| M-6 | v0.7.3.dev0 | RF-55…RF-59 canonical recursive child runtime with durable identity, conserved attenuated budgets, recovery evidence, and review |
-| M-6.5 | v0.8.x | Adaptive strategy / meta-control as policy, reducer, or plugin; measured against paired runs without it |
-| M-7 | v0.9.0 | Declarative topologies as versioned data, plus measured concurrency/parallelism where justified (M7-01 result and successor ADR) |
-| M-8 | v0.9.x | Verified durable memory and composition learning with held-out evaluation, atomic promotion, provenance, and executed rollback |
-| M-9 | 0.9.0b1 | Installable operational beta with unified clients/configuration, plugins, health, workflows, and restart/resume |
-| M-10 | 0.9.0 | Reliability, migrations, backup/restore, security/performance qualification, reproducible artifacts, and signed release proof |
-
-## Compatibility anchors for former SPEC sections
-
-The detailed body formerly carried by this file is preserved verbatim (apart from path metadata) in
-[`01_law/RUNTIME.md`](01_law/RUNTIME.md). These anchors keep existing deep links stable:
-
-## 0. Design Axioms
-
-See [axioms above](#design-axioms-a-1a-6).
-
-## 1. Layer 0 — The Microkernel
-
-See [`RUNTIME.md`](01_law/RUNTIME.md#1-layer-0--the-microkernel).
-
-## 2. Plugin Architecture & SPI Definitions
-
-See [`EXTENSIBILITY.md`](01_law/EXTENSIBILITY.md).
-
-## 3. Autonomous Execution Safety & Deterministic State
-
-See [`RUNTIME.md`](01_law/RUNTIME.md#3-autonomous-execution-safety--deterministic-state).
-
-## 4. Coding Domain Pack (first domain; foundation E2E, not this lock wave)
-
-See [`EXTENSIBILITY.md`](01_law/EXTENSIBILITY.md#read-map).
-
-## 5. Evolution Blueprint — Phase 2 (autonomous & meta-cognitive)
-
-See [`RUNTIME.md`](01_law/RUNTIME.md#5-evolution-blueprint--phase-2-autonomous--meta-cognitive).
-
-## 6. Evolution Blueprint — Phase 3 (General Task Solver)
-
-See [`RUNTIME.md`](01_law/RUNTIME.md#6-evolution-blueprint--phase-3-general-task-solver).
-
-## 7. Telemetry, Self-Tuning & Model Distillation
-
-See [`MEASUREMENT.md`](01_law/MEASUREMENT.md) and [`RUNTIME.md`](01_law/RUNTIME.md#7-telemetry-self-tuning--model-distillation).
-
-## 8. Migration Plan & CI Gates (v0.6.1)
-
-See [`03_execution/milestones.md`](03_execution/milestones.md) and [`03_execution/sprint_active.md`](03_execution/sprint_active.md).
-
-## 9. What This Specification Refuses To Build
-
-See [architectural refusals](#architectural-refusals).
-
-## Invariants I-1 … I-11
-
-See [the invariant registry](#invariant-registry-i-1i-11).
+AETHER does not authorize a second runtime, a domain-aware kernel, authoritative in-memory agent state, a workflow DAG with independent authority, self-certified promotion, silent containment downgrade, or evidence backfill. Any reversal requires current normative amendment and the required falsifiers; implementation convenience is not authority.

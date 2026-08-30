@@ -1,0 +1,8 @@
+extends: substitution
+message: "Use '%s' instead of deprecated term '%s' in current AETHER documentation."
+level: warning
+ignorecase: true
+swap:
+  Vanguard Body: Vanguard substrate
+  Vanguard Harness: MHF harness
+  Agent Instance: AgentView

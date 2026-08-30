@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-doc-metadata
+        name: Check Documentation Metadata
+        entry: python3 tools/linters/check_doc_metadata.py
+        language: system
+        files: ^(docs/|README\.md|AGENTS\.md|VISION\.md)
+        pass_filenames: false
+
+      - id: check-markdown-links
+        name: Check Markdown Links & Anchors
+        entry: python3 tools/linters/check_markdown_links.py
+        language: system
+        files: ^(docs/|README\.md|AGENTS\.md|VISION\.md)
+        pass_filenames: false
+
+      - id: markdownlint
+        name: Markdown Style & Structure Linting
+        entry: npx markdownlint-cli2
+        language: system
+        files: \.md$
+        pass_filenames: true

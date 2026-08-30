@@ -23,29 +23,29 @@ superseded_by: null
 
 Vanguard / AETHER is a Python-first recursive-agency substrate (`requires-python >= 3.10`, tested on Python 3.12 in CI) with a TypeScript/React/Ink interactive CLI (`vg`).
 
-### The Canonical Documentation Triad
-All documentation is strictly partitioned into three distinct authority tiers:
+### Documentation Hierarchy
+All documentation is partitioned into distinct authority tiers:
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ governs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                          2. THE DECISIONS (WHY)                          │
-│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ directs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
-└──────────────────────────────────────────────────────────────────────────┘
+VISION.md / AGENTS.md / docs/SPEC.md
+    Vision, Operational Rules, Compact Normative Law
+
+docs/decisions.md
+    Foundational Decision Record Index
+
+docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
+    System & Component Architecture, Reference, Product PRDs
+
+docs/execution/
+    Active Execution State (active.md) & Milestone Ladder
+
+docs/theory/ | docs/research/ | docs/reports/
+    Durable Theory | Non-Canonical Research | Technical Strategy & Audit Reports
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0097`](docs/02_decisions/0097-phase0-ratification-and-two-lane-activation.md).
-- **The Decisions**: [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md).
-- **The Execution**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) & [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md).
+- **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
+- **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
+- **The Execution**: [`docs/execution/active.md`](docs/execution/active.md).
 
 ### Hexagonal Production Lattice (`vanguard/packages/`)
 The canonical production truth lives in `vanguard/packages/`, strictly enforcing the hexagonal boundary flow:
@@ -71,7 +71,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ### Environment Setup
 ```bash
 # Python dev dependencies (repo root)
-python3 -m pip install -e '.[dev]'
+uv sync
 
 # TypeScript dev dependencies (repo root)
 npm ci
@@ -130,7 +130,7 @@ Execution sequence:
 5. **M-4–M-8**: current state, ownership, and authorization live only in the active execution board; mechanism presence never implies acceptance.
 6. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
 
-Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
+Current status belongs only in [`docs/execution/active.md`](docs/execution/active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.
 
 ---
@@ -145,34 +145,33 @@ Do not infer authorization from archived proposals, reviews, research, or comple
 
 ---
 
-## 5. Commit & Pull Request Guidelines
+## 5. Agent Implementation Rules & Required Validation Behavior
 
-- **Commit Messages**: Use concise imperative subjects with established subsystem prefixes:
-  - `feat(kernel): ...`, `fix(runtime): ...`, `test(contracts): ...`, `docs: ...`, `cleanup: ...`.
-- **PR Description**:
-  - Explain the exact behavior change and verification evidence.
-  - Cite at least one valid active requirement from `docs/SPEC.md` or active ADRs (e.g. `REQ-TRUST-001`, `REQ-LATTICE-002`).
-  - Confirm that `check_boundaries.py`, `check_tcb_budget.py`, and `scan_secrets.py` pass.
-- **Security Invariants**: Changes crossing sandbox, capability, approval, or evaluator boundaries must include corresponding security tests under `test/security/` or `test/trust/`.
+AI Agents working in this repository MUST comply with the following operational constraints:
+- **Scope Contained**: Modify code strictly within the assigned task scope.
+- **Tests Synchronized**: Update or add automated tests whenever runtime behavior or contracts change.
+- **Docs Synchronized**: Update canonical documentation when durable architecture, contract, API, workflow, configuration, or user behavior changes.
+- **No Unsolicited Docs Sprawl**: Do not edit or create documentation files when code behavior does not change. Never create scratch Markdown under `docs/`.
+- **No Custom ADRs / Reports**: Never create new ADRs for ordinary architecture updates or post-hoc Markdown implementation reports in the repository tree.
+- **No Manual Edit of Generated Artifacts**: Never manually edit rebuildable machine outputs under `.generated/knowledge/` or `.generated/diagrams/`.
+- **Validation Commands**:
+  - Run `just check` during incremental development loops.
+  - Run `just verify` before claiming task, PR, or sprint completion.
+- **Honest Status Reporting**: Agents MUST report commands actually executed and NEVER claim `PASS` for an unexecuted command. Never suppress failing assertions with `|| true`. Fix task-introduced failures before declaring completion.
 
 ---
 
-## 6. Security & Credentials
+## 6. Documentation Routing & Ownership Model
 
-- Never commit credentials, private keys, or unreviewed model output dumps.
-- Model provider API keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`) are read exclusively from environment variables and must remain unset during automated test runs.
-- Model adapters are structured as OpenRouter, Ollama, Cassette, Fake — not individual vendor files.
-
-### Environment-sensitive behavior
-
-- Keep provider API keys unset during hermetic tests; live-provider checks must be explicitly selected.
-- A missing local Ollama daemon is an environment condition, not permission to weaken an assertion.
-- `test/broken/fixtures/` contains intentional violations used to prove linters fail closed.
-
-### TypeScript CLI
-
-From the repository root, use `npm run typecheck`, `npm test`, and `npm run vg`. The CLI is a
-client of the runtime and must not duplicate domain or authority logic.
+When updating documentation, route information to its semantic owner:
+- **`docs/SPEC.md`**: Normative RFC-2119 specifications and core target requirements.
+- **`docs/architecture/`**: Global system architecture, dispatch pipeline, isolation, and system workflows.
+- **`docs/backend/`**: Microkernel, event engine, delegation, memory, and reference schemas/ports/APIs.
+- **`docs/frontend/`**: Frontend client architecture, state management, and design tokens.
+- **`docs/product/`**: Product PRDs, requirements, and user behavior.
+- **`docs/execution/active.md`**: Current sprint status, task ladder, and active authorization.
+- **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).
+- **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
 ---
 
@@ -182,9 +181,9 @@ client of the runtime and must not duplicate domain or authority logic.
 > **MANDATORY INSTRUCTION FOR ALL AI AGENTS & CONTRIBUTORS:**  
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
-> All documentation updates must strictly edit existing canonical files in the **Clean Triad**:
-> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md) or the linked leaf in [`docs/01_law/`](docs/01_law/).
-> 2. **Recording Architectural Decisions** $\to$ Add a new append-only ADR in [`docs/02_decisions/`](docs/02_decisions/).
-> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) (and [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) for macro gates).
+> All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
+> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
+> 2. **Recording Architectural Decisions** $\to$ Edit [`docs/decisions.md`](docs/decisions.md).
+> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/execution/active.md`](docs/execution/active.md).
 > 
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.

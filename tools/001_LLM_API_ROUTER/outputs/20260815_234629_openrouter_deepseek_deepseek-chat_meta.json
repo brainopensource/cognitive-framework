@@ -14,5 +14,5 @@
   },
   "cost_usd_micros": 60,
   "cost_usd": 6e-05,
-  "response_file": "/home/rocha/Coding/Aether-D-System/tools/001_LLM_API_ROUTER/outputs/20260815_234629_openrouter_deepseek_deepseek-chat_response.md"
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260815_234629_openrouter_deepseek_deepseek-chat_response.md"
 }

@@ -1,0 +1,57 @@
+{
+  "name": "@aether/client",
+  "version": "0.1.0",
+  "description": "AETHER runtime client: UDS socket, HTTP/SSE, Replay transports, and Signer ports",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./transports/socket.js": {
+      "types": "./dist/src/transports/socket.d.ts",
+      "default": "./dist/src/transports/socket.js"
+    },
+    "./transports/http.js": {
+      "types": "./dist/src/transports/http.d.ts",
+      "default": "./dist/src/transports/http.js"
+    },
+    "./transports/replay.js": {
+      "types": "./dist/src/transports/replay.d.ts",
+      "default": "./dist/src/transports/replay.js"
+    },
+    "./signers/operator-signer.js": {
+      "types": "./dist/src/signers/operator-signer.d.ts",
+      "default": "./dist/src/signers/operator-signer.js"
+    },
+    "./signers/web-signer.js": {
+      "types": "./dist/src/signers/web-signer.d.ts",
+      "default": "./dist/src/signers/web-signer.js"
+    }
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build --silent && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "@aether/contracts": "*",
+    "@aether/projections": "*",
+    "canonicalize": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,12 @@
+{"subsystem": "SUB-B-01 Domain", "package_path": "vanguard/packages/domain/", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"subsystem": "SUB-B-02 Ports", "package_path": "vanguard/packages/ports/", "canonical_owner": "docs/backend/reference/ports.md"}
+{"subsystem": "SUB-B-03 Kernel Core", "package_path": "vanguard/packages/kernel/", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"subsystem": "SUB-B-04 Agency Engine", "package_path": "vanguard/packages/agency/", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"subsystem": "SUB-B-05 Causal State", "package_path": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"subsystem": "SUB-B-06 Composition", "package_path": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"subsystem": "SUB-B-07 Delegation", "package_path": "vanguard/packages/agency/spawn.py", "canonical_owner": "docs/backend/architecture/delegation-topology.md"}
+{"subsystem": "SUB-B-08 Governed Memory", "package_path": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
+{"subsystem": "SUB-B-09 Assurance & Evaluation", "package_path": "vanguard/packages/runtime/evaluator_gateway.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"subsystem": "SUB-B-10 Domain Packs", "package_path": "packs/", "canonical_owner": "docs/backend/reference/manifests.md"}
+{"subsystem": "SUB-B-11 Application Interfaces", "package_path": "vanguard/packages/runtime/service/", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
+{"subsystem": "SUB-B-12 Schemas", "package_path": "schemas/", "canonical_owner": "docs/backend/reference/schemas.md"}

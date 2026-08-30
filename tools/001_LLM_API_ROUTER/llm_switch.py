@@ -228,7 +228,7 @@ Examples:
         },
         "cost_usd_micros": response.cost_usd_micros,
         "cost_usd": response.cost_usd_micros / 1_000_000.0,
-        "response_file": str(response_file),
+        "response_file": str(response_file.relative_to(Path(__file__).resolve().parents[2]) if response_file.is_relative_to(Path(__file__).resolve().parents[2]) else response_file.name).replace("\\", "/"),
     }
 
     meta_file.write_text(json.dumps(meta_payload, indent=2), encoding="utf-8")

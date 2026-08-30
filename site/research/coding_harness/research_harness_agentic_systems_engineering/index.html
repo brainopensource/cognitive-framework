@@ -1,0 +1,4676 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Research: Harness & Agentic Systems Engineering - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#research-harness-agentic-systems-engineering" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Research: Harness &amp; Agentic Systems Engineering
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstract
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="research-harness-agentic-systems-engineering">Research: Harness &amp; Agentic Systems Engineering</h1>
+<p><strong>Filename:</strong> <code>research_harness_agentic_systems_engineering.md</code><br />
+<strong>Document class:</strong> consolidated research corpus / technical synthesis<br />
+<strong>Scope:</strong> agentic harness engineering, general task-solving systems, multi-agent coordination, compositional runtimes, evidence, learning, context engineering, verification, provenance, and self-improving workflows<br />
+<strong>Posture:</strong> <strong>research, not development plan</strong><br />
+<strong>Source corpus:</strong> <code>001_alfa_review_full_decision.md</code>, <code>002_beta_review_full_gem_proposal.md</code>, <code>004_delta_review_full_glm53_proposal.md</code>, <code>005_epsilon_review_full_dsv4-proposal.md</code>, <code>006_fi_review_full_gptsol_proposal.md</code>, <code>007_zeta_review_full_opus_proposal.md</code>, <code>008_alfa_review_full_grok_proposal.md</code>, <code>009_beta_review_higgs_gem.md</code>, <code>010_fi_review_higgs_gpt.md</code></p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>This report consolidates the research content distributed across the AETHER/Vanguard review corpus into a single non-normative body of knowledge. The original reports mix three different kinds of material: (1) forensic observations about particular repository snapshots, (2) architectural and execution proposals, and (3) reusable scientific and engineering ideas. This document intentionally extracts the third category.</p>
+<p>The central research thesis is that <strong>agent capability is not determined by the model alone</strong>. It emerges from the interaction among model, context policy, tool surface, memory, orchestration, resource allocation, verification, state, provenance, and learning. The <strong>harness</strong> therefore becomes an independent experimental variable and, at a higher level, a search space over computational regimes.</p>
+<p>Several complementary hypotheses recur throughout the source corpus:</p>
+<ol>
+<li><strong>Harness-as-independent-variable:</strong> the same model can exhibit materially different performance under different context, tool, loop, and verification regimes.</li>
+<li><strong>Separability:</strong> the system that produces an answer should be separable from the system that judges it; evaluation becomes more trustworthy when the evaluated process cannot author or influence the authoritative verdict.</li>
+<li><strong>State-mediated coordination:</strong> multi-agent systems can coordinate through durable environmental state rather than unconstrained pairwise natural-language messaging.</li>
+<li><strong>Composition over specialization:</strong> debate, critic/reviser loops, tree search, swarms, research agents, and coding agents can be represented as compositions over reusable primitives rather than separate monolithic runtimes.</li>
+<li><strong>Evidence-complete trajectories:</strong> trustworthy action/state/evidence traces are a strategic asset for debugging, scientific comparison, routing, skill synthesis, macro compilation, and preference optimization.</li>
+<li><strong>Feasibility before optimization:</strong> capability, security, evidence, and resource ceilings form hard constraints; cost, tokens, latency, and expected quality are optimized only inside that feasible region.</li>
+<li><strong>Deterministic compounding before statistical compounding:</strong> cache exact verified work first, then compile recurring successful procedures, then learn skills/routes, and only later optimize models or harnesses statistically.</li>
+<li><strong>Measured generality:</strong> a framework is general only if materially different task domains can use the same substrate semantics without adding domain-specific authority or execution logic.</li>
+</ol>
+<p>The result is a research map rather than an implementation sequence. Competing ideas are retained as alternatives and explicit tensions, with equations, workflows, testable predictions, and references preserved for later evaluation.</p>
+<hr />
+<h1 id="1-epistemic-posture">1. Epistemic Posture</h1>
+<h2 id="11-what-this-document-is">1.1 What this document is</h2>
+<p>This document is a <strong>research notebook at architectural scale</strong>. It is intended to support future decisions by organizing:</p>
+<ul>
+<li>hypotheses;</li>
+<li>conceptual primitives;</li>
+<li>mathematical formulations;</li>
+<li>alternative architectures;</li>
+<li>agent and swarm workflows;</li>
+<li>context and memory techniques;</li>
+<li>verification and provenance methods;</li>
+<li>learning and compounding mechanisms;</li>
+<li>benchmark and experimental methodology;</li>
+<li>external papers and systems worth studying;</li>
+<li>open research questions.</li>
+</ul>
+<p>It is deliberately suitable for asking questions such as:</p>
+<blockquote>
+<p>Which coordination model should be tested?</p>
+<p>Should the loop be universal or replaceable?</p>
+<p>Is Active Inference actually useful for routing?</p>
+<p>When does multi-agent decomposition beat one stronger agent?</p>
+<p>What is the correct unit for reusable learned behavior: memory, skill, macro, workflow, or policy?</p>
+<p>Which information must be recorded to make harness experiments scientifically meaningful?</p>
+</blockquote>
+<h2 id="12-what-this-document-is-not">1.2 What this document is not</h2>
+<p>This document is <strong>not</strong>:</p>
+<ul>
+<li>a milestone roadmap;</li>
+<li>an ADR catalog;</li>
+<li>a sprint plan;</li>
+<li>a statement of current repository truth;</li>
+<li>an implementation authorization;</li>
+<li>a frozen architecture;</li>
+<li>a migration plan;</li>
+<li>a product release schedule.</li>
+</ul>
+<p>Names such as <code>M-4</code>, <code>M-7</code>, <code>ADR-008x</code>, <code>NOVA-*</code>, or particular historical branch/commit states appear in the source corpus, but are not necessary to the research ideas and are therefore omitted except where useful for provenance.</p>
+<h2 id="13-source-snapshot-caution">1.3 Source-snapshot caution</h2>
+<p>The reports span different repository snapshots and dates. Some later reports explicitly correct factual or mathematical claims from earlier reports. Therefore:</p>
+<ul>
+<li>repository-state claims should be reverified against current code before use;</li>
+<li>benchmark percentages and product-behavior claims should be treated as reported observations unless independently reproduced;</li>
+<li>proposal convergence is evidence of recurring design intuition, not proof;</li>
+<li>the equations and methods below are research candidates, not automatic normative constraints.</li>
+</ul>
+<hr />
+<h1 id="2-research-map">2. Research Map</h1>
+<p>The consolidated research can be organized into eleven interacting domains:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                     AGENTIC SYSTEMS ENGINEERING MAP                       │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  1. Harness Engineering        model ≠ agent ≠ harness                    │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  2. Composition                components, bindings, topologies            │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  3. Authority &amp; Safety         capabilities, budgets, isolation            │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  4. State &amp; Coordination       events, artifacts, stigmergy, obligations  │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  5. Context Engineering        retrieval, compression, cache alignment     │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  6. Verification              exterior judges, witnesses, evidence         │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│  7. Provenance &amp; Identity      digests, causal lineage, replay              │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  8. Adaptive Control           Pareto routing, escalation, Active Inference │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  9. Compounding                memo → macro → skill → policy/harness        │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│ 10. Multi-Agent Systems        delegation, branching, debate, swarms        │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│ 11. Scientific Method          paired trials, falsifiers, ablation, stats  │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>└────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p>These areas should not be studied independently. For example, a powerful router without trustworthy telemetry learns from bad data; a reusable macro without least-privilege inference may silently widen authority; a multi-agent topology without attribution makes it impossible to know which component helped.</p>
+<hr />
+<h1 id="3-core-research-hypotheses">3. Core Research Hypotheses</h1>
+<h2 id="h1-harness-engineering-is-a-primary-performance-variable">H1 — Harness Engineering Is a Primary Performance Variable</h2>
+<p>A useful decomposition is:</p>
+<p>[
+\text{Observed Capability}
+=
+f(
+\text{Model},
+\text{Harness},
+\text{Task},
+\text{Environment},
+\text{Evaluator}
+).
+]</p>
+<p>The harness includes:</p>
+<ul>
+<li>system/developer instructions;</li>
+<li>tool definitions;</li>
+<li>context selection;</li>
+<li>memory;</li>
+<li>retrieval;</li>
+<li>model routing;</li>
+<li>planning loop;</li>
+<li>delegation policy;</li>
+<li>stopping policy;</li>
+<li>budget;</li>
+<li>sandbox;</li>
+<li>verification;</li>
+<li>retry/escalation behavior.</li>
+</ul>
+<p>The important implication is experimental: a model benchmark that does not freeze the harness is not purely a model benchmark.</p>
+<h3 id="research-consequences">Research consequences</h3>
+<ul>
+<li>Treat harness identity as an experimental variable.</li>
+<li>Compare models under identical harnesses and harnesses under identical models.</li>
+<li>Log enough configuration to reproduce the actual informational regime.</li>
+<li>Avoid attributing a benchmark gain to the model if the harness changed simultaneously.</li>
+</ul>
+<hr />
+<h2 id="h2-the-separability-thesis">H2 — The Separability Thesis</h2>
+<p>A recurring principle across the reports is:</p>
+<blockquote>
+<p>What solved the problem should be separable from what judged the solution.</p>
+</blockquote>
+<p>Let task domain (d), task instance (x), harness (H_d), universal execution mechanism (U), and domain verifier (V_d) be separated:</p>
+<p>[
+\operatorname{Result}(d,x)
+=
+V_d\left(U(\operatorname{compile}(H_d),x)\right).
+]</p>
+<p>The research claim is not that this decomposition is universally sufficient. The claim is that it produces unusually strong properties:</p>
+<ul>
+<li>cleaner evaluation;</li>
+<li>lower reward-channel manipulation;</li>
+<li>clearer provenance;</li>
+<li>reusable execution semantics;</li>
+<li>better training labels;</li>
+<li>better failure attribution.</li>
+</ul>
+<h3 id="stronger-variant">Stronger variant</h3>
+<p>The evaluator should be:</p>
+<ul>
+<li>independently addressed;</li>
+<li>subject-bound;</li>
+<li>unable to be modified by the worker;</li>
+<li>unable to expose private reference answers to the worker;</li>
+<li>cryptographically or structurally attributable where possible.</li>
+</ul>
+<h3 id="research-question">Research question</h3>
+<p>How much robustness is gained by <strong>structural evaluator separation</strong> relative to prompt-level “self-critique” or agent-as-judge patterns?</p>
+<hr />
+<h2 id="h3-composition-is-a-better-generalization-axis-than-new-engines">H3 — Composition Is a Better Generalization Axis Than New Engines</h2>
+<p>A general agentic system can be modeled as:</p>
+<p>[
+H=(C,B,P,R,E),
+]</p>
+<p>where:</p>
+<ul>
+<li>(C): named components;</li>
+<li>(B): bindings between components;</li>
+<li>(P): policy;</li>
+<li>(R): resources and capability ceilings;</li>
+<li>(E): evaluation/witness configuration.</li>
+</ul>
+<p>The important distinction is:</p>
+<blockquote>
+<p>A <strong>bag of components</strong> is not a composition graph.</p>
+</blockquote>
+<p>A useful graph needs both nodes and explicit relationships.</p>
+<p>Examples of bindings:</p>
+<ul>
+<li>context → planner;</li>
+<li>planner → toolkit;</li>
+<li>planner → critic;</li>
+<li>candidate → evaluator;</li>
+<li>parent → child spawn grant;</li>
+<li>route → model provider;</li>
+<li>artifact → verifier.</li>
+</ul>
+<h3 id="hypothesis">Hypothesis</h3>
+<p>Many agent architectures differ primarily in component topology and policy, not in fundamental execution semantics.</p>
+<p>Potentially expressible as composition:</p>
+<ul>
+<li>ReAct;</li>
+<li>gather–act–verify;</li>
+<li>generator–critic;</li>
+<li>planner–executor–verifier;</li>
+<li>debate;</li>
+<li>tree search;</li>
+<li>best-of-N;</li>
+<li>reflection;</li>
+<li>research scout → synthesizer;</li>
+<li>hierarchical delegation;</li>
+<li>evolutionary candidate search.</li>
+</ul>
+<p>This hypothesis is falsified if a useful class of algorithms repeatedly requires a different privileged execution kernel.</p>
+<hr />
+<h2 id="h4-state-mediated-coordination-can-replace-much-peer-chatter">H4 — State-Mediated Coordination Can Replace Much Peer Chatter</h2>
+<p>The source corpus uses <strong>stigmergy</strong> as the analogy: agents coordinate by changing a shared environment rather than continuously messaging each other.</p>
+<p>Represent a shared workspace as:</p>
+<p>[
+\mathcal W=
+\langle
+\mathcal A,
+\mathcal H,
+\mathcal E,
+\mathcal T
+\rangle
+]</p>
+<p>where:</p>
+<ul>
+<li>(\mathcal A): artifacts;</li>
+<li>(\mathcal H): hypotheses / derived work state;</li>
+<li>(\mathcal E): evidence and event history;</li>
+<li>(\mathcal T): telemetry and cost.</li>
+</ul>
+<p>A more conservative interpretation is preferable:</p>
+<ul>
+<li>authoritative facts are durable events and immutable artifacts;</li>
+<li>hypotheses are derived projections;</li>
+<li>large content lives in a blob/artifact store;</li>
+<li>semantic indexes are rebuildable projections;</li>
+<li>natural-language messages, if present, are observations rather than authority.</li>
+</ul>
+<h3 id="complexity-claim-corrected">Complexity claim — corrected</h3>
+<p>A full all-to-all round can produce:</p>
+<p>[
+N(N-1)=O(N^2)
+]</p>
+<p>directed messages.</p>
+<p>State mediation does <strong>not</strong> magically prove (O(N)). A defensible bound is:</p>
+<p>[
+O(cN)
+]</p>
+<p>coordination operations per round if each of (N) agents performs at most (c) indexed state operations.</p>
+<p>The real system must still measure:</p>
+<ul>
+<li>database contention;</li>
+<li>hot keys;</li>
+<li>bytes read/written;</li>
+<li>retries;</li>
+<li>queueing;</li>
+<li>model calls;</li>
+<li>critical path;</li>
+<li>synchronization overhead.</li>
+</ul>
+<hr />
+<h2 id="h5-trustworthy-trajectories-are-a-strategic-data-asset">H5 — Trustworthy Trajectories Are a Strategic Data Asset</h2>
+<p>A useful trajectory is not merely a transcript. It should bind:</p>
+<ul>
+<li>task identity;</li>
+<li>harness identity;</li>
+<li>run identity;</li>
+<li>component/model identities;</li>
+<li>observations;</li>
+<li>proposals;</li>
+<li>authorization decisions;</li>
+<li>effects;</li>
+<li>receipts;</li>
+<li>artifacts;</li>
+<li>evaluator evidence;</li>
+<li>token/cost/latency measurements;</li>
+<li>causal and derivation lineage;</li>
+<li>error taxonomy;</li>
+<li>terminal result.</li>
+</ul>
+<p>This produces a corpus usable for:</p>
+<ul>
+<li>replay;</li>
+<li>failure localization;</li>
+<li>cost modeling;</li>
+<li>routing;</li>
+<li>skill discovery;</li>
+<li>macro mining;</li>
+<li>preference pair extraction;</li>
+<li>benchmark analysis;</li>
+<li>regression detection;</li>
+<li>scientific reproducibility.</li>
+</ul>
+<h3 id="key-rule">Key rule</h3>
+<p>Unknown cost is <strong>unknown</strong>, not zero.</p>
+<p>Fabricated zeros destroy downstream economics because they make “not measured” indistinguishable from “free”.</p>
+<hr />
+<h2 id="h6-feasibility-must-precede-optimization">H6 — Feasibility Must Precede Optimization</h2>
+<p>Resource, authority, evidence, and safety constraints should be hard gates.</p>
+<p>Only then should the system optimize:</p>
+<ul>
+<li>cost;</li>
+<li>tokens;</li>
+<li>latency;</li>
+<li>quality;</li>
+<li>information gain;</li>
+<li>reliability;</li>
+<li>throughput.</li>
+</ul>
+<p>This naturally suggests a <strong>partial-order / Pareto</strong> formulation rather than one global scalar reward.</p>
+<hr />
+<h2 id="h7-compounding-should-progress-from-deterministic-to-statistical">H7 — Compounding Should Progress From Deterministic to Statistical</h2>
+<p>The source corpus converges on a four-tier compounding ladder:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>T0  exact verified reuse
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a> ↓
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>T1  verified macro/procedure compilation
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a> ↓
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>T2  skill retrieval + routing adaptation
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a> ↓
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>T3  model/harness learning and evolution
+</code></pre></div>
+<p>The rationale is epistemic.</p>
+<p>If exact repetition can be removed deterministically, there is no reason to begin with stochastic learning. Statistical methods become valuable only after a trustworthy corpus and stable evaluation semantics exist.</p>
+<hr />
+<h1 id="4-fundamental-primitives">4. Fundamental Primitives</h1>
+<h2 id="41-artifact">4.1 Artifact</h2>
+<p>A content-addressed object produced, consumed, or transformed by execution.</p>
+<p>Examples:</p>
+<ul>
+<li>source tree;</li>
+<li>patch;</li>
+<li>test report;</li>
+<li>paper snapshot;</li>
+<li>extracted table;</li>
+<li>proof script;</li>
+<li>research report;</li>
+<li>model output;</li>
+<li>compiled macro.</li>
+</ul>
+<p>Desirable properties:</p>
+<ul>
+<li>immutable identity;</li>
+<li>provenance;</li>
+<li>content digest;</li>
+<li>policy/retention metadata;</li>
+<li>derivation refs.</li>
+</ul>
+<hr />
+<h2 id="42-event">4.2 Event</h2>
+<p>A small authoritative record of an observable occurrence.</p>
+<p>Useful separation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>event envelope      identity + ordering + causation
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>typed payload       operational fact
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>blob/artifact       large body
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>projection/index    rebuildable derived state
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>metrics warehouse   aggregate analysis
+</code></pre></div>
+<p>The event stream should not be treated as a place to dump unlimited raw content.</p>
+<hr />
+<h2 id="43-effect">4.3 Effect</h2>
+<p>An externally meaningful action:</p>
+<ul>
+<li>file mutation;</li>
+<li>process execution;</li>
+<li>network request;</li>
+<li>tool invocation;</li>
+<li>child creation;</li>
+<li>database mutation;</li>
+<li>deployment action.</li>
+</ul>
+<p>A robust system distinguishes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>proposal → authorization → intent → execution → receipt → settlement
+</code></pre></div>
+<p>This distinction is particularly important for crash recovery and idempotency.</p>
+<hr />
+<h2 id="44-capability">4.4 Capability</h2>
+<p>An explicit right to perform a class of effects against a bounded selector.</p>
+<p>Research-relevant properties:</p>
+<ul>
+<li>fail closed;</li>
+<li>least privilege;</li>
+<li>descriptor-bound;</li>
+<li>attenuated during delegation;</li>
+<li>separable from natural-language instructions.</li>
+</ul>
+<p>A child should generally satisfy:</p>
+<p>[
+C_{child}\subseteq C_{parent}.
+]</p>
+<hr />
+<h2 id="45-witness">4.5 Witness</h2>
+<p>A witness is the evidence contract used to evaluate an obligation or claim.</p>
+<p>Examples:</p>
+<ul>
+<li><code>tests_green</code>;</li>
+<li><code>proof_checks</code>;</li>
+<li><code>schema_conforms</code>;</li>
+<li><code>replay_equivalent</code>;</li>
+<li><code>citation_entails_claim</code>;</li>
+<li><code>human_signed</code>;</li>
+<li><code>panel_adjudicated</code>.</li>
+</ul>
+<p>This is broader and more reusable than a binary “grader”.</p>
+<hr />
+<h2 id="46-obligation">4.6 Obligation</h2>
+<p>One alternative research abstraction treats the schedulable unit as a typed obligation:</p>
+<p>[
+o=
+\langle
+g,w,\mathbf R_{max},d,\mathcal D,p,\kappa
+\rangle
+]</p>
+<p>with:</p>
+<ul>
+<li>goal (g);</li>
+<li>witness contract (w);</li>
+<li>resource ceiling (\mathbf R_{max});</li>
+<li>deadline (d);</li>
+<li>dependencies (\mathcal D);</li>
+<li>parent (p);</li>
+<li>protection/capability class (\kappa).</li>
+</ul>
+<p>Identity:</p>
+<p>[
+D_O=
+H(
+\operatorname{JCS}
+(g,w,\mathbf R_{max},d,\mathcal D,p,\kappa)
+).
+]</p>
+<p>A refinement operator may solve or decompose:</p>
+<p>[
+\operatorname{Refine}_r(o)
+\rightarrow
+\begin{cases}
+\widehat w(o), &amp; \text{candidate discharge},\
+{o_1,\ldots,o_m},\Gamma, &amp; \text{decomposition + composition rule}.
+\end{cases}
+]</p>
+<h3 id="research-tension">Research tension</h3>
+<p>Should <strong>obligation</strong> replace the turn as the primary system primitive, or remain an exterior scheduling abstraction over a universal turn/effect mechanism?</p>
+<p>The source corpus ultimately favors the latter, but the former remains useful as an experimental architecture.</p>
+<hr />
+<h1 id="5-resource-algebra-and-economics">5. Resource Algebra and Economics</h1>
+<h2 id="51-six-dimensional-resource-tensor">5.1 Six-Dimensional Resource Tensor</h2>
+<p>The source corpus models resources as:</p>
+<p>[
+\mathbf R=
+(r_{\$},r_{tok},r_{byte},r_{ms};r_{turn},r_{depth})
+\in
+\mathbb N^4_{add}\times\mathbb N^2_{struct}.
+]</p>
+<p>The first four are additive:</p>
+<ul>
+<li>money;</li>
+<li>tokens;</li>
+<li>bytes;</li>
+<li>charged time.</li>
+</ul>
+<p>The last two are structural:</p>
+<ul>
+<li>turns;</li>
+<li>lineage depth.</li>
+</ul>
+<p>Feasibility is component-wise:</p>
+<p>[
+\mathbf R_a\preceq\mathbf R_b
+\iff
+\bigwedge_j R_{a,j}\le R_{b,j}.
+]</p>
+<p>This is a <strong>product partial order</strong>. It intentionally prevents arbitrary statements such as “more dollars compensate for excessive depth”.</p>
+<p>For child leases:</p>
+<p>[
+\sum_i L_{i,j}+L_{remaining,j}=L_{parent,j}
+]</p>
+<p>for additive dimensions (j), while structural constraints can be:</p>
+<p>[
+turn_i\le turn_p,
+\qquad
+depth_i&lt;depth_p.
+]</p>
+<h2 id="52-why-not-one-scalar">5.2 Why not one scalar?</h2>
+<p>A scalar objective such as:</p>
+<p>[
+S = w_1Q-w_2C-w_3T-w_4L
+]</p>
+<p>is convenient but dangerous if it allows a gain in one dimension to compensate for a violated invariant.</p>
+<p>A better structure is:</p>
+<ol>
+<li>authority feasible?</li>
+<li>isolation feasible?</li>
+<li>evidence feasible?</li>
+<li>resource feasible?</li>
+<li>quality/witness floor met?</li>
+<li>Pareto comparison among feasible choices;</li>
+<li>product-specific tie breaking.</li>
+</ol>
+<hr />
+<h1 id="6-pareto-harness-and-adaptive-routing">6. Pareto Harness and Adaptive Routing</h1>
+<h2 id="61-quote-representation">6.1 Quote Representation</h2>
+<p>For obligation (o), refinement (r), model (m), context policy (b), and parallel width (k):</p>
+<p>[
+q=
+(o,r,m,b,k,
+\widehat{\mathbf c},
+\widehat p_{pass},
+\widehat I,
+\widehat q_{evidence})
+]</p>
+<p>where:</p>
+<ul>
+<li>(\widehat{\mathbf c}): predicted resource use;</li>
+<li>(\widehat p_{pass}): calibrated success probability;</li>
+<li>(\widehat I): expected information gain;</li>
+<li>(\widehat q_{evidence}): assurance/witness quality.</li>
+</ul>
+<p>The quote is advisory. Measurement settles reality.</p>
+<h2 id="62-multi-objective-allocation">6.2 Multi-objective Allocation</h2>
+<p>A scheduling epoch can be viewed as:</p>
+<p>[
+\max_x
+\left(
+\sum_q x_q\widehat p_{pass,q}V_q,
+\sum_q x_q\widehat I_q,
+-\sum_q x_q\widehat{\mathbf c}^{add}_q,
+-\operatorname{critical_path}(x)
+\right)
+]</p>
+<p>subject to:</p>
+<p>[
+\sum_qx_q\widehat c_{q,j}\le R_{remaining,j},
+\qquad
+x_q\in{0,1}
+]</p>
+<p>plus:</p>
+<ul>
+<li>capability;</li>
+<li>dependency;</li>
+<li>worker-count;</li>
+<li>exclusivity;</li>
+<li>protection;</li>
+<li>turn/depth;</li>
+<li>witness constraints.</li>
+</ul>
+<h2 id="63-execution-profiles-as-priors">6.3 Execution Profiles as Priors</h2>
+<p>Useful research profiles:</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Main objective</th>
+<th>Typical topology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flash</code></td>
+<td>low latency/cost</td>
+<td>memo/macro, then one small worker</td>
+</tr>
+<tr>
+<td><code>balanced</code></td>
+<td>cost per verified success</td>
+<td>scout/context projection → executor → verifier</td>
+</tr>
+<tr>
+<td><code>certain</code></td>
+<td>assurance</td>
+<td>independent candidates + stronger verification</td>
+</tr>
+<tr>
+<td><code>frontier</code></td>
+<td>information gain</td>
+<td>diverse controlled branches</td>
+</tr>
+<tr>
+<td><code>adaptive</code></td>
+<td>cheapest feasible policy first</td>
+<td>escalate only after evidence</td>
+</tr>
+</tbody>
+</table>
+<p>Historical proposals contain specific latency/token bands. Those are best treated as <strong>benchmark hypotheses</strong>, not architecture.</p>
+<h2 id="64-adaptive-escalation-workflow">6.4 Adaptive Escalation Workflow</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>classify task
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>   ↓
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>choose cheapest plausible profile
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>   ↓
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>execute under bounded lease
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>   ↓
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>external verification
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>   ├── pass → commit evidence
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>   └── fail → retain falsifier + workspace delta
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>                ↓
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>             escalate
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>                ↓
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>       stronger model/context/topology
+</code></pre></div>
+<p>Important idea:</p>
+<blockquote>
+<p>Carry forward the <strong>falsifier and relevant state delta</strong>, not necessarily the full transcript.</p>
+</blockquote>
+<p>This attempts to reduce context growth while preserving the information that justifies escalation.</p>
+<hr />
+<h1 id="7-active-inference-correct-separation-of-vfe-and-efe">7. Active Inference — Correct Separation of VFE and EFE</h1>
+<p>Several early reports conflated Variational Free Energy and action selection. Later reports correct this.</p>
+<h2 id="71-variational-free-energy-belief-fitting">7.1 Variational Free Energy — Belief Fitting</h2>
+<p>Let:</p>
+<ul>
+<li>(s): latent state;</li>
+<li>(o): observations/evidence;</li>
+<li>(\tau=(o_{0:T},a_{0:T-1})): trajectory;</li>
+<li>(q_\phi(s|\tau)): approximate posterior;</li>
+<li>(p_\theta(\tau,s)): generative model.</li>
+</ul>
+<p>Then:</p>
+<p>[
+\mathcal F(\phi,\theta;\tau)
+=
+\mathbb E_{q_\phi(s|\tau)}
+[
+\log q_\phi(s|\tau)
+-
+\log p_\theta(\tau,s)
+]
+]</p>
+<p>or:</p>
+<p>[
+\mathcal F
+=
+D_{KL}
+(
+q_\phi(s|\tau)
+\Vert
+p_\theta(s|\tau)
+)
+-
+\log p_\theta(\tau).
+]</p>
+<p>Interpretation:</p>
+<blockquote>
+<p>VFE updates beliefs after observations.</p>
+</blockquote>
+<h2 id="72-expected-free-energy-policy-selection">7.2 Expected Free Energy — Policy Selection</h2>
+<p>For candidate policy (\pi):</p>
+<p>[
+\mathcal G(\pi)
+=
+\mathbb E_{q(o,s|\pi)}
+[
+\log q(s|\pi)-\log p_C(o,s)
+].
+]</p>
+<p>Interpretation:</p>
+<blockquote>
+<p>EFE ranks candidate policies using pragmatic and epistemic value.</p>
+</blockquote>
+<h2 id="73-resource-constrained-form">7.3 Resource-Constrained Form</h2>
+<p>[
+\theta^*=
+\arg\min_{\theta\in\Theta}
+\left(
+\mathbb E[\mathcal G(\pi_\theta)]
++
+\sum_j \lambda_j\mathbb E[c_j(\theta)]
+\right)
+]</p>
+<p>subject to resource and safety constraints.</p>
+<h3 id="practical-mapping">Practical mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Active-Inference concept</th>
+<th>Agentic-system interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>observation</td>
+<td>ledger facts, receipts, artifacts, evaluator evidence</td>
+</tr>
+<tr>
+<td>latent state</td>
+<td>progress, failure class, dependency validity, uncertainty</td>
+</tr>
+<tr>
+<td>policy</td>
+<td>model route, context projection, topology, tool/macro choice</td>
+</tr>
+<tr>
+<td>preferences</td>
+<td>witness success + invariant preservation + budget</td>
+</tr>
+<tr>
+<td>VFE</td>
+<td>belief update</td>
+</tr>
+<tr>
+<td>EFE</td>
+<td>next-action policy ranking</td>
+</tr>
+</tbody>
+</table>
+<h3 id="research-question_1">Research question</h3>
+<p>Does EFE-based routing provide measurable advantage over:</p>
+<ul>
+<li>calibrated Bayesian expected utility;</li>
+<li>contextual bandits;</li>
+<li>Pareto heuristics;</li>
+<li>learned cost/pass regressors?</li>
+</ul>
+<p>The answer should be empirical, not terminological.</p>
+<hr />
+<h1 id="8-dynamic-informational-bottleneck">8. Dynamic Informational Bottleneck</h1>
+<p>One proposal formalizes context compilation as:</p>
+<p>[
+\mathcal B_\theta:
+\mathcal W
+\times
+\text{TaskProfile}
+\rightarrow
+\text{ContextWindow}_{\le k}.
+]</p>
+<p>This is one of the strongest general abstractions in the corpus.</p>
+<p>The model should not consume the entire state. It should consume a <strong>task-conditioned projection</strong>.</p>
+<p>Candidate input layers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>L0  immutable system / safety / task identity
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>L1  tool or interface summaries
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>L2  structural map / repository or source map
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>L3  relevant artifacts and evidence
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>L4  recent trajectory and unresolved failures
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>L5  optional skills / examples / retrieved procedures
+</code></pre></div>
+<h2 id="81-context-selection-requirements">8.1 Context selection requirements</h2>
+<p>A robust compiler should retain:</p>
+<ul>
+<li>source identities;</li>
+<li>protection labels;</li>
+<li>omissions;</li>
+<li>compaction lineage;</li>
+<li>retrieval scores/rationales;</li>
+<li>token cost by layer.</li>
+</ul>
+<h2 id="82-progressive-disclosure">8.2 Progressive disclosure</h2>
+<p>A recurring pattern:</p>
+<ol>
+<li>always-on minimal law/task identity;</li>
+<li>small descriptions of available skills/tools;</li>
+<li>load full definitions only when needed;</li>
+<li>retrieve ranked evidence/code excerpts;</li>
+<li>retain bounded recent execution state;</li>
+<li>compact old detail structurally;</li>
+<li>rehydrate exact immutable artifacts when precision is required.</li>
+</ol>
+<p>This aligns with later analysis of Claude Code and with the source corpus’s context-economy thesis.</p>
+<hr />
+<h1 id="9-context-caching-and-prefix-stability">9. Context Caching and Prefix Stability</h1>
+<p>A major practical research direction is <strong>cache-aware prompt architecture</strong>.</p>
+<h2 id="91-prefix-stability">9.1 Prefix stability</h2>
+<p>Keep recurring content byte-stable and early:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>system policy
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>→ project instructions
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>→ stable tool definitions
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>→ stable repository/source map
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>→ mutable task history
+</code></pre></div>
+<p>Potential benefits:</p>
+<ul>
+<li>provider KV/prompt-cache reuse;</li>
+<li>reduced input cost;</li>
+<li>reduced latency;</li>
+<li>less repeated tokenization.</li>
+</ul>
+<p>Historical source reports cite very large percentage improvements for specific systems. Those values should be independently benchmarked before being generalized.</p>
+<h2 id="92-cache-taxonomy">9.2 Cache taxonomy</h2>
+<p>Useful caches include:</p>
+<ul>
+<li>provider prefix cache;</li>
+<li>tokenization cache;</li>
+<li>parsed document cache;</li>
+<li>AST cache;</li>
+<li>repository index shards;</li>
+<li>deterministic model call cache;</li>
+<li>pure observation/tool cache;</li>
+<li>exact witness/evaluator cache;</li>
+<li>context-compilation cache.</li>
+</ul>
+<h3 id="cache-law">Cache law</h3>
+<blockquote>
+<p>A cache key must bind every behavior-affecting input.</p>
+</blockquote>
+<p>A cache hit should produce observable evidence:</p>
+<ul>
+<li>cache key;</li>
+<li>source artifact;</li>
+<li>age;</li>
+<li>identity inputs;</li>
+<li>validation result;</li>
+<li>hit/miss;</li>
+<li>invalidation reason.</li>
+</ul>
+<hr />
+<h1 id="10-repository-and-knowledge-mapping">10. Repository and Knowledge Mapping</h1>
+<p>Coding agents need compressed structural awareness.</p>
+<h2 id="101-astsymbol-repo-map">10.1 AST/Symbol Repo Map</h2>
+<p>Candidate pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>files
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  ↓
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Tree-Sitter / parser
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  ↓
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>symbols + signatures + imports + references
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  ↓
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>dependency graph
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>  ↓
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>ranking
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>  ↓
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>compact repo map
+</code></pre></div>
+<p>Possible ranking:</p>
+<ul>
+<li>PageRank;</li>
+<li>centrality;</li>
+<li>changed-file proximity;</li>
+<li>query-specific lexical score;</li>
+<li>symbol references;</li>
+<li>test ownership.</li>
+</ul>
+<h2 id="102-incremental-indexing">10.2 Incremental Indexing</h2>
+<p>Rather than rebuilding the full map:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git diff / file hash change
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>      ↓
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>invalidate changed shards
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>      ↓
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>reparse affected files
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>      ↓
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>update graph/index
+</code></pre></div>
+<h2 id="103-generalization-to-research">10.3 Generalization to research</h2>
+<p>The same idea extends beyond code:</p>
+<ul>
+<li>source catalog;</li>
+<li>citation graph;</li>
+<li>entity/time index;</li>
+<li>claim-to-source index;</li>
+<li>dataset schema graph;</li>
+<li>experiment lineage.</li>
+</ul>
+<hr />
+<h1 id="11-hybrid-retrieval-and-skill-memory">11. Hybrid Retrieval and Skill Memory</h1>
+<h2 id="111-dense-lexical-retrieval">11.1 Dense + Lexical Retrieval</h2>
+<p>For query (q) and skill/item (i):</p>
+<p>[
+s_d(i)=
+\frac{e(q)^Te(i)}
+{|e(q)|_2|e(i)|_2}
+]</p>
+<p>[
+s_l(i)=
+\operatorname{norm}_{[0,1]}
+(
+\operatorname{BM25}(q,i)
+)
+]</p>
+<p>combined as:</p>
+<p>[
+s(i)=
+\alpha s_d(i)
++
+\beta s_l(i)
++
+\eta L_i
++
+\zeta C_i
+-
+\kappa A_i
+]</p>
+<p>where:</p>
+<ul>
+<li>(L_i): evidence-backed lift;</li>
+<li>(C_i): reliability;</li>
+<li>(A_i): staleness/invalidation risk.</li>
+</ul>
+<p>The 384-dimensional embedding used in some proposals should be understood as one implementation profile, not a universal requirement.</p>
+<h2 id="112-hard-filters-before-similarity">11.2 Hard filters before similarity</h2>
+<p>Before semantic scoring:</p>
+<ul>
+<li>tenant/project;</li>
+<li>protection class;</li>
+<li>invalidation state;</li>
+<li>required interface;</li>
+<li>schema version;</li>
+<li>capability compatibility.</li>
+</ul>
+<p>Similarity should never override policy constraints.</p>
+<hr />
+<h1 id="12-skill-dynamics-and-evidence-weighted-retention">12. Skill Dynamics and Evidence-Weighted Retention</h1>
+<p>One candidate model uses Elo-like updates.</p>
+<p>For skill (i) vs baseline (b):</p>
+<p>[
+p_i=
+\frac{1}
+{1+10^{(\mu_b-\mu_i)/400}}
+]</p>
+<p>[
+\mu_i'
+=
+\mu_i+
+K(n_i)w_i(y_i-p_i)
+]</p>
+<p>where:</p>
+<ul>
+<li>(y_i\in{0,\frac12,1});</li>
+<li>(K(n_i)) decreases with evidence;</li>
+<li>(w_i) is attributable contribution.</li>
+</ul>
+<p>Unsigned/self-scored outcomes should have:</p>
+<p>[
+w_i=0.
+]</p>
+<p>Idle confidence can decay toward a prior:</p>
+<p>[
+\mu_i(t)
+=
+\mu_0+
+(\mu_i(t_0)-\mu_0)e^{-\lambda(t-t_0)}.
+]</p>
+<p>A conservative utility:</p>
+<p>[
+U_i
+=
+\operatorname{LCB}_{1-\alpha}(\Delta success_i)
+-\lambda_c\Delta cost_i
+-\lambda_t\Delta latency_i
+-\lambda_r risk_i.
+]</p>
+<h3 id="research-questions">Research questions</h3>
+<ul>
+<li>Elo vs Bayesian hierarchical models?</li>
+<li>Per-task-class vs global rating?</li>
+<li>How many paired trials are required before retrieval priority changes?</li>
+<li>How should correlated skills be credited?</li>
+<li>When should a skill become a deterministic macro?</li>
+</ul>
+<hr />
+<h1 id="13-stigmergic-multi-agent-coordination">13. Stigmergic Multi-Agent Coordination</h1>
+<h2 id="131-shared-state-work-protocol">13.1 Shared-State Work Protocol</h2>
+<p>A useful generic workflow:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>publish work item / obligation
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>        ↓
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>worker claims expected version + lease
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        ↓
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>compare-and-swap / exclusive claim
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        ↓
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>worker executes under attenuated authority
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        ↓
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>publish immutable artifacts + witness refs
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        ↓
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>release claim
+</code></pre></div>
+<p>Crash handling should distinguish:</p>
+<ul>
+<li>safe retry;</li>
+<li>known completed effect;</li>
+<li>unknown external effect;</li>
+<li>expired claim;</li>
+<li>unresolved durable intent.</li>
+</ul>
+<h2 id="132-why-state-mediation-may-help">13.2 Why state mediation may help</h2>
+<p>Potential benefits:</p>
+<ul>
+<li>lower social coordination noise;</li>
+<li>better provenance;</li>
+<li>reduced context duplication;</li>
+<li>asynchronous workers;</li>
+<li>easier recovery;</li>
+<li>natural work queues;</li>
+<li>measurable contention.</li>
+</ul>
+<p>Potential costs:</p>
+<ul>
+<li>stale reads;</li>
+<li>database contention;</li>
+<li>poor schema design;</li>
+<li>hidden coupling through shared mutable artifacts;</li>
+<li>loss of nuance compared with direct discussion.</li>
+</ul>
+<h2 id="133-direct-messaging-is-not-forbidden-research">13.3 Direct messaging is not forbidden research</h2>
+<p>A more nuanced position than “agents never communicate” is:</p>
+<blockquote>
+<p>Direct messages can exist as <strong>attributed observations</strong>, but should not become an alternate authority, verdict, claim, or promotion channel.</p>
+</blockquote>
+<p>This allows research into hybrid designs.</p>
+<hr />
+<h1 id="14-delegation-and-subagents">14. Delegation and Subagents</h1>
+<h2 id="141-delegation-as-an-effect">14.1 Delegation as an Effect</h2>
+<p>A strong security interpretation is to model spawn/delegation as an ordinary mediated effect rather than an ambient runtime privilege.</p>
+<p>Research invariants:</p>
+<p>[
+C_{child}\subseteq C_{parent}
+]</p>
+<p>[
+R_{child}\preceq R_{parent}
+]</p>
+<p>and explicit parent-child provenance.</p>
+<h2 id="142-context-isolation">14.2 Context Isolation</h2>
+<p>Subagents are useful because they provide:</p>
+<ul>
+<li>independent context windows;</li>
+<li>specialization;</li>
+<li>parallel exploration;</li>
+<li>reduced contamination of the main context.</li>
+</ul>
+<p>A compact return object might contain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>status
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>artifact refs
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>evidence refs
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>summary
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>open uncertainty
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>cost
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>capability/lease lineage
+</code></pre></div>
+<p>rather than the entire transcript.</p>
+<h2 id="143-research-question">14.3 Research question</h2>
+<p>When is subagent isolation better than simply giving the primary model a larger context window?</p>
+<p>Relevant variables:</p>
+<ul>
+<li>task decomposability;</li>
+<li>context overlap;</li>
+<li>model strength;</li>
+<li>tool latency;</li>
+<li>coordination overhead;</li>
+<li>verifier quality;</li>
+<li>branch independence.</li>
+</ul>
+<hr />
+<h1 id="15-agent-topologies-worth-treating-as-experimental-variables">15. Agent Topologies Worth Treating as Experimental Variables</h1>
+<h2 id="151-single-agent-gatheractverify">15.1 Single-agent gather–act–verify</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>GATHER
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  repo/source exploration
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  relevant context selection
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>      ↓
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>ACT
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>  minimal targeted operation
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>      ↓
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>VERIFY
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>  tests / proof / citation / schema / oracle
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>      ↓
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>repeat only on concrete failure
+</code></pre></div>
+<p>Advantages:</p>
+<ul>
+<li>low complexity;</li>
+<li>high attribution;</li>
+<li>good benchmark baseline.</li>
+</ul>
+<hr />
+<h2 id="152-scout-executor">15.2 Scout → Executor</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Scout
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  ↓ structured findings
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Executor
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>  ↓ candidate
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>Verifier
+</code></pre></div>
+<p>Good for tasks where discovery and mutation require different context.</p>
+<hr />
+<h2 id="153-planner-implementer-verifier">15.3 Planner → Implementer → Verifier</h2>
+<p>Useful when planning and execution authority should differ.</p>
+<p>Example:</p>
+<ul>
+<li>planner: broad read, no write;</li>
+<li>implementer: scoped write;</li>
+<li>verifier: independent execution/evaluation.</li>
+</ul>
+<hr />
+<h2 id="154-generator-critic-reviser">15.4 Generator → Critic → Reviser</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>candidate_0
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>   ↓
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>critic evidence
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>   ↓
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>revision
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>   ↓
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>external verification
+</code></pre></div>
+<p>Important distinction:</p>
+<blockquote>
+<p>The critic may improve the candidate, but should not automatically be the authoritative evaluator.</p>
+</blockquote>
+<hr />
+<h2 id="155-best-of-n-speculative-branching">15.5 Best-of-N / Speculative Branching</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>               ┌→ branch A ─┐
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>task → branch ─┼→ branch B ─┼→ common evaluator → select
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>               └→ branch C ─┘
+</code></pre></div>
+<p>Research variables:</p>
+<ul>
+<li>N;</li>
+<li>branch diversity;</li>
+<li>model diversity;</li>
+<li>shared vs isolated context;</li>
+<li>evaluator cost;</li>
+<li>pruning policy;</li>
+<li>total cost per verified pass.</li>
+</ul>
+<hr />
+<h2 id="156-debate">15.6 Debate</h2>
+<p>Debate can be modeled as cyclic component interaction.</p>
+<p>This motivates an important correction in the source corpus:</p>
+<blockquote>
+<p>A composition graph need not be acyclic.</p>
+</blockquote>
+<p>Termination can instead be bounded by:</p>
+<ul>
+<li>turns;</li>
+<li>depth;</li>
+<li>time;</li>
+<li>tokens;</li>
+<li>cost;</li>
+<li>explicit convergence rule.</li>
+</ul>
+<p>A DAG is appropriate when topology <em>defines execution order</em>. It is less appropriate when topology merely defines allowed relationships and a separate turn mechanism controls execution.</p>
+<hr />
+<h2 id="157-tree-search">15.7 Tree Search</h2>
+<p>Candidate dimensions:</p>
+<ul>
+<li>branching factor;</li>
+<li>heuristic;</li>
+<li>rollout depth;</li>
+<li>verifier frequency;</li>
+<li>branch-sharing policy;</li>
+<li>value estimate;</li>
+<li>pruning.</li>
+</ul>
+<p>Research question:</p>
+<p>Does explicit tree search beat adaptive sequential escalation once the verifier and tool environment are expensive?</p>
+<hr />
+<h2 id="158-swarm-blackboard">15.8 Swarm / Blackboard</h2>
+<p>Roles can include:</p>
+<ul>
+<li>decomposer;</li>
+<li>scout;</li>
+<li>worker;</li>
+<li>critic;</li>
+<li>verifier;</li>
+<li>synthesizer.</li>
+</ul>
+<p>The scientific question is not “does more agents help?” but:</p>
+<p>[
+\Delta Q / \Delta Cost
+]</p>
+<p>and the marginal contribution of each added role.</p>
+<hr />
+<h1 id="16-failure-attribution-and-backward-fault-isolation">16. Failure Attribution and Backward Fault Isolation</h1>
+<p>Each run can form a provenance graph:</p>
+<p>[
+G_\tau=
+(V,E_c\cup E_d\cup E_a)
+]</p>
+<p>where:</p>
+<ul>
+<li>(E_c): causation;</li>
+<li>(E_d): data/artifact derivation;</li>
+<li>(E_a): authority lineage.</li>
+</ul>
+<p>For failed claim (z), reverse slice:</p>
+<p>[
+B(z)
+=
+{v\in V\mid v\leadsto z
+\text{ through }E_c\cup E_d}.
+]</p>
+<p>Structural slicing is:</p>
+<p>[
+O(|V|+|E_c|+|E_d|).
+]</p>
+<p>A suspicion score:</p>
+<p>[
+S(v)
+=
+\mathbf 1[v\in B(z)]
+\gamma^{dist(v,z)}
+(
+\alpha q_v+\beta n_v+\chi u_v+\delta \rho_v
+)
+]</p>
+<p>can rank:</p>
+<ul>
+<li>severity;</li>
+<li>novelty;</li>
+<li>uncertainty;</li>
+<li>cost share.</li>
+</ul>
+<h3 id="critical-epistemic-distinction">Critical epistemic distinction</h3>
+<p>A reverse slice identifies <strong>possible causal ancestors</strong>, not proof of causation.</p>
+<p>Causal claims require:</p>
+<ul>
+<li>intervention;</li>
+<li>ablation;</li>
+<li>paired replay;</li>
+<li>factorial design;</li>
+<li>controlled replacement;</li>
+<li>possibly Shapley-style attribution for interacting components.</li>
+</ul>
+<hr />
+<h1 id="17-exact-witness-memoization">17. Exact Witness Memoization</h1>
+<p>The first compounding tier should be deterministic.</p>
+<p>Memo key:</p>
+<p>[
+K_{memo}
+=
+H(
+D_O
+\parallel D_{inputs}
+\parallel D_{environment}
+\parallel D_{checker}
+\parallel D_{toolchain}
+\parallel assurance
+\parallel policy_version
+).
+]</p>
+<p>A cache hit should return the original verified witness bundle by reference, not copy a verdict onto a new subject.</p>
+<p>Invalidation conditions may include:</p>
+<ul>
+<li>changed input;</li>
+<li>environment drift;</li>
+<li>checker version;</li>
+<li>revocation epoch;</li>
+<li>TTL;</li>
+<li>changed protection class;</li>
+<li>changed policy;</li>
+<li>changed toolchain.</li>
+</ul>
+<hr />
+<h1 id="18-macro-tool-compilation">18. Macro-Tool Compilation</h1>
+<p>A macro is not simply a saved prompt.</p>
+<p>It is a typed executable abstraction mined from recurring successful effect subgraphs.</p>
+<h2 id="181-research-pipeline">18.1 Research pipeline</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>verified trajectories
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>      ↓
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>find recurring causally connected effect subgraphs
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>      ↓
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>anti-unify constants into parameters
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>      ↓
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>infer interface + minimum capabilities
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>      ↓
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>synthesize workflow IR / implementation
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>      ↓
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>generate replay + adversarial/property tests
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>      ↓
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>run through ordinary authority/sandbox path
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>      ↓
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>evaluate with original witness checker
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>      ↓
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>paired comparison vs expanded baseline
+</code></pre></div>
+<h2 id="182-least-privilege-inference">18.2 Least-Privilege Inference</h2>
+<p>A conservative capability estimate:</p>
+<p>[
+C_{macro}
+=
+\operatorname{hull}
+\left(
+\bigcup_{v\in subgraph}C_v
+\right)
+\cap C_{pack}
+\cap C_{publisher}.
+]</p>
+<p>The <code>hull</code> should be the smallest expressible selector set covering required effects.</p>
+<p>Reject a macro if the permission model can only express an unacceptably broad grant.</p>
+<h2 id="183-macro-research-questions">18.3 Macro research questions</h2>
+<ul>
+<li>How much task diversity is needed before anti-unification is safe?</li>
+<li>How can secrets, benchmark answers, tenant IDs, and incidental paths be prevented from becoming compiled constants?</li>
+<li>What IR best supports polyglot execution?</li>
+<li>When is a macro better than a skill description?</li>
+<li>How should fallback to the expanded procedure be priced?</li>
+</ul>
+<hr />
+<h1 id="19-compounding-flywheel">19. Compounding Flywheel</h1>
+<p>The integrated flywheel:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>execution
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  ↓
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>evidence-complete trajectory
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>  ↓
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>exact witness reuse
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>  ↓
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>macro mining
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>  ↓
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>skill retrieval
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>  ↓
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>routing adaptation
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>  ↓
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>preference pairs
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>  ↓
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>model / harness experiments
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>  ↓
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>future execution
+</code></pre></div>
+<p>Important safety principle:</p>
+<blockquote>
+<p>Learned state may influence selection, but should not automatically widen authority or declare truth.</p>
+</blockquote>
+<hr />
+<h1 id="20-preference-optimization">20. Preference Optimization</h1>
+<h2 id="201-dpo-objective">20.1 DPO Objective</h2>
+<p>For prompt (x), preferred completion (y^+), rejected completion (y^-), policy (\pi_\theta), reference (\pi_{ref}), and temperature (\beta):</p>
+<p>[
+\mathcal L_{DPO}(\theta)
+=
+-\mathbb E
+\log
+\sigma
+\left(
+\beta
+\left[
+\log\frac{\pi_\theta(y^+|x)}{\pi_{ref}(y^+|x)}
+-
+\log\frac{\pi_\theta(y^-|x)}{\pi_{ref}(y^-|x)}
+\right]
+\right).
+]</p>
+<h2 id="202-preference-pair-quality">20.2 Preference Pair Quality</h2>
+<p>A useful pair should bind:</p>
+<ul>
+<li>identical or comparable task;</li>
+<li>common prefix until divergence;</li>
+<li>environment;</li>
+<li>oracle;</li>
+<li>seed policy;</li>
+<li>evidence-complete runs;</li>
+<li>independently verified outcomes;</li>
+<li>execution digests;</li>
+<li>explicit pair label rule.</li>
+</ul>
+<p>DPO trains against the supplied pair.</p>
+<p>It does <strong>not</strong> prove that the pair label is correct.</p>
+<hr />
+<h1 id="21-statistical-promotion-and-harness-experiments">21. Statistical Promotion and Harness Experiments</h1>
+<h2 id="211-exact-paired-mcnemar">21.1 Exact Paired McNemar</h2>
+<p>For paired binary trials:</p>
+<ul>
+<li>(b): candidate passes, baseline fails;</li>
+<li>(c): baseline passes, candidate fails;</li>
+<li>(n_d=b+c).</li>
+</ul>
+<p>Under equal marginal success:</p>
+<p>[
+B\sim \operatorname{Binomial}(n_d,\frac12).
+]</p>
+<p>Exact two-sided p-value:</p>
+<p>[
+p_{exact}
+=
+\min
+\left(
+1,
+2
+\sum_{k=0}^{\min(b,c)}
+{n_d\choose k}2^{-n_d}
+\right).
+]</p>
+<h2 id="212-better-experimental-discipline">21.2 Better experimental discipline</h2>
+<p>A candidate comparison should preregister:</p>
+<ul>
+<li>task set;</li>
+<li>endpoint;</li>
+<li>alpha;</li>
+<li>minimum detectable effect;</li>
+<li>stopping rule;</li>
+<li>multiplicity correction;</li>
+<li>handling of inconclusive/instrument-error runs;</li>
+<li>resource metrics;</li>
+<li>security invariants.</li>
+</ul>
+<p>Do not report only p-values.</p>
+<p>Also report:</p>
+<ul>
+<li>effect size;</li>
+<li>confidence interval;</li>
+<li>cost;</li>
+<li>tokens;</li>
+<li>latency;</li>
+<li>reliability;</li>
+<li>failure taxonomy.</li>
+</ul>
+<h2 id="213-aa-floor">21.3 A/A floor</h2>
+<p>Before trusting an A/B pipeline, run A/A.</p>
+<p>If identical treatments produce unstable differences, the experiment infrastructure itself is noisy.</p>
+<hr />
+<h1 id="22-harness-genome-and-evolution">22. Harness Genome and Evolution</h1>
+<p>A harness can be viewed as a genome:</p>
+<p>[
+\theta=
+(
+\text{components},
+\text{bindings},
+\text{prompts},
+\text{model routes},
+\text{context policy},
+\text{tools},
+\text{memory},
+\text{topology},
+\text{budget},
+\text{evaluation}
+).
+]</p>
+<p>Mutation operators might include:</p>
+<ul>
+<li>replace component implementation;</li>
+<li>change prompt layer;</li>
+<li>alter context budget;</li>
+<li>alter retrieval weights;</li>
+<li>change model route;</li>
+<li>add/remove critic;</li>
+<li>vary branch count;</li>
+<li>change escalation threshold;</li>
+<li>replace tool;</li>
+<li>modify stopping policy.</li>
+</ul>
+<h3 id="research-requirement">Research requirement</h3>
+<p>Do not mutate several dimensions simultaneously if the goal is causal attribution, unless using a factorial or population-search protocol designed for interactions.</p>
+<hr />
+<h1 id="23-identity-and-provenance">23. Identity and Provenance</h1>
+<p>A useful identity trinity appears throughout the corpus:</p>
+<p>[
+D_H = \text{harness/composition identity}
+]</p>
+<p>[
+D_R = \text{run-plan identity}
+]</p>
+<p>[
+D_X = \text{execution/event-chain identity}.
+]</p>
+<p>One possible harness identity:</p>
+<p>[
+D_H
+=
+H(
+\operatorname{JCS}
+(\text{resolved composition graph})
+).
+]</p>
+<p>A run identity can bind:</p>
+<ul>
+<li>task;</li>
+<li>workspace/source state;</li>
+<li>model route;</li>
+<li>budget;</li>
+<li>environment;</li>
+<li>evaluator.</li>
+</ul>
+<p>Execution identity can bind the event sequence or hash chain.</p>
+<h3 id="why-separate-them">Why separate them?</h3>
+<p>Because these answer different questions:</p>
+<ul>
+<li>“What behavior configuration was intended?”</li>
+<li>“What exact experiment/run cell was requested?”</li>
+<li>“What actually happened?”</li>
+</ul>
+<p>Collapsing them destroys useful denominators.</p>
+<hr />
+<h1 id="24-event-sourced-scientific-observability">24. Event-Sourced Scientific Observability</h1>
+<p>Scientific logging should capture observable transformations, not hidden chain-of-thought.</p>
+<p>Recommended event families:</p>
+<ul>
+<li>model request prepared;</li>
+<li>model invocation started/completed/failed;</li>
+<li>context layer selected;</li>
+<li>context transformed/compacted/rehydrated;</li>
+<li>tool request proposed/authorized/started/settled/denied;</li>
+<li>source acquired/normalized/extracted/cited;</li>
+<li>artifact created/transformed/evaluated;</li>
+<li>cache lookup/hit/miss/write/eviction;</li>
+<li>evaluator request/verdict/verification;</li>
+<li>child lifecycle and budget transfer;</li>
+<li>recovery/reconciliation.</li>
+</ul>
+<p>Useful common fields:</p>
+<ul>
+<li>project/run/episode/branch/principal;</li>
+<li>sequence;</li>
+<li>schema version;</li>
+<li>producer;</li>
+<li>causation/correlation;</li>
+<li>input/output refs;</li>
+<li>model/environment digests;</li>
+<li>capability/grant;</li>
+<li>budget reservation/settlement;</li>
+<li>timing;</li>
+<li>token/cost;</li>
+<li>error taxonomy;</li>
+<li>idempotency;</li>
+<li>terminal state.</li>
+</ul>
+<hr />
+<h1 id="25-replay-fork-resume-and-cold-recovery">25. Replay, Fork, Resume, and Cold Recovery</h1>
+<p>Append-only history enables four different operations:</p>
+<h2 id="replay">Replay</h2>
+<p>Recompute derived state from recorded events.</p>
+<h2 id="resume">Resume</h2>
+<p>Continue an interrupted run after reconstructing state.</p>
+<h2 id="fork">Fork</h2>
+<p>Create a new branch from a prior state while preserving lineage.</p>
+<h2 id="counterfactual-replay">Counterfactual Replay</h2>
+<p>Re-run from a point with one controlled change.</p>
+<p>These capabilities are particularly powerful for agent research because they make:</p>
+<ul>
+<li>ablation cheaper;</li>
+<li>bugs reproducible;</li>
+<li>alternative policies comparable;</li>
+<li>state corruption easier to detect.</li>
+</ul>
+<h3 id="important-distinction">Important distinction</h3>
+<p>Event replay does not automatically make external side effects exactly-once.</p>
+<p>Durable intent + idempotency + effect reconciliation are still required.</p>
+<hr />
+<h1 id="26-external-tool-protocols-and-mcp">26. External Tool Protocols and MCP</h1>
+<p>MCP-like protocols are useful as <strong>interoperability layers</strong>, not authority boundaries.</p>
+<p>A safe abstraction:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>external tool discovery
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>      ↓
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>normalize schema
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>      ↓
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>bind selector/capability policy
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>      ↓
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>ordinary authorization
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>      ↓
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>invoke
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>      ↓
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>receipt + provenance
+</code></pre></div>
+<p>Research questions:</p>
+<ul>
+<li>How much tool-schema context should be loaded eagerly?</li>
+<li>Can tool discovery itself be retrieved on demand?</li>
+<li>How should remote tool identity/version be hashed?</li>
+<li>What permissions should be inferred vs explicitly configured?</li>
+<li>How should MCP server changes invalidate cached behavior?</li>
+</ul>
+<hr />
+<h1 id="27-plugins-everything-is-a-plugin-vs-small-trusted-core">27. Plugins: “Everything Is a Plugin” vs Small Trusted Core</h1>
+<p>This is one of the major architectural tensions.</p>
+<h2 id="extreme-a-everything-is-a-plugin">Extreme A — Everything Is a Plugin</h2>
+<p>Potentially replaceable:</p>
+<ul>
+<li>model;</li>
+<li>loop;</li>
+<li>scheduler;</li>
+<li>memory;</li>
+<li>sandbox;</li>
+<li>tools;</li>
+<li>storage;</li>
+<li>UI;</li>
+<li>sessions.</li>
+</ul>
+<p>Advantages:</p>
+<ul>
+<li>maximal experimentation;</li>
+<li>low central coupling;</li>
+<li>broad ecosystem.</li>
+</ul>
+<p>Risks:</p>
+<ul>
+<li>inconsistent authority;</li>
+<li>multiple sources of truth;</li>
+<li>plugin-owned privileged history;</li>
+<li>unbounded trust surface.</li>
+</ul>
+<h2 id="extreme-b-small-rigid-mechanism-replaceable-exterior">Extreme B — Small Rigid Mechanism + Replaceable Exterior</h2>
+<p>Keep only trust semantics non-replaceable:</p>
+<ul>
+<li>canonicalization;</li>
+<li>authorization;</li>
+<li>capability attenuation;</li>
+<li>budget algebra;</li>
+<li>durable intent;</li>
+<li>privileged event ownership;</li>
+<li>evidence verification.</li>
+</ul>
+<p>Everything else can vary.</p>
+<h3 id="research-synthesis">Research synthesis</h3>
+<p>The reports consistently prefer:</p>
+<blockquote>
+<p><strong>flat, highly composable surface; rigid, minimal trust core.</strong></p>
+</blockquote>
+<p>But the “everything is a plugin” extreme remains valuable as a comparative research architecture.</p>
+<hr />
+<h1 id="28-universal-turn-loop-vs-pluggable-loops">28. Universal Turn Loop vs Pluggable Loops</h1>
+<p>A candidate universal loop:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>observe
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  ↓
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>propose
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  ↓
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>authorize
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>  ↓
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>effect
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>  ↓
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>receipt
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>  ↓
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>evaluate
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>  ↓
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>reflect / continue
+</code></pre></div>
+<p>Hypothesis:</p>
+<blockquote>
+<p>A large family of agent algorithms can be represented as topology + policy over this mechanism.</p>
+</blockquote>
+<p>Competing hypothesis:</p>
+<blockquote>
+<p>The loop itself should be a plugin because different domains require fundamentally different execution semantics.</p>
+</blockquote>
+<h3 id="test">Test</h3>
+<p>Collect algorithms that resist representation through the universal mechanism.</p>
+<p>Potential counterexamples to investigate:</p>
+<ul>
+<li>continuous control;</li>
+<li>real-time streaming systems;</li>
+<li>asynchronous market/event systems;</li>
+<li>differentiable planning;</li>
+<li>large distributed consensus;</li>
+<li>simulation-heavy scientific workflows;</li>
+<li>agents with persistent background processes.</li>
+</ul>
+<p>The universal-loop thesis should survive counterexamples, not slogans.</p>
+<hr />
+<h1 id="29-turn-centric-vs-obligation-centric-systems">29. Turn-Centric vs Obligation-Centric Systems</h1>
+<h2 id="turn-centric">Turn-centric</h2>
+<p>Primary unit:</p>
+<ul>
+<li>observation;</li>
+<li>proposal;</li>
+<li>effect;</li>
+<li>receipt.</li>
+</ul>
+<p>Strengths:</p>
+<ul>
+<li>simple;</li>
+<li>matches interactive agents;</li>
+<li>natural security mediation.</li>
+</ul>
+<h2 id="obligation-centric">Obligation-centric</h2>
+<p>Primary unit:</p>
+<ul>
+<li>goal;</li>
+<li>witness;</li>
+<li>dependencies;</li>
+<li>resource price;</li>
+<li>claim/lease;</li>
+<li>refinement.</li>
+</ul>
+<p>Strengths:</p>
+<ul>
+<li>scheduler-friendly;</li>
+<li>naturally supports decomposition;</li>
+<li>explicit completion semantics;</li>
+<li>work stealing;</li>
+<li>memoization.</li>
+</ul>
+<h3 id="hybrid-hypothesis">Hybrid hypothesis</h3>
+<p>Use:</p>
+<ul>
+<li>obligations for work planning/scheduling;</li>
+<li>turns/effects for execution and authority.</li>
+</ul>
+<p>This retains a single effect mechanism while allowing richer work semantics.</p>
+<hr />
+<h1 id="30-outcomedata-first-vs-substrate-first">30. Outcome/Data-First vs Substrate-First</h1>
+<p>The source corpus contains a genuine higher-level alternative.</p>
+<h2 id="substrate-first">Substrate-first</h2>
+<p>Question:</p>
+<blockquote>
+<p>What minimal trusted mechanism makes arbitrary agentic behavior safe, attributable, and reproducible?</p>
+</blockquote>
+<p>Strength:</p>
+<ul>
+<li>rigorous invariants;</li>
+<li>stable trust semantics;</li>
+<li>high-quality data.</li>
+</ul>
+<p>Risk:</p>
+<ul>
+<li>architecture may advance faster than user-visible capability.</li>
+</ul>
+<h2 id="outcomedata-first">Outcome/data-first</h2>
+<p>Question:</p>
+<blockquote>
+<p>Which informational configuration produces the best verified result per cost/token/time?</p>
+</blockquote>
+<p>Strength:</p>
+<ul>
+<li>naturally optimization-oriented;</li>
+<li>product feedback arrives early;</li>
+<li>harness search is central.</li>
+</ul>
+<p>Risk:</p>
+<ul>
+<li>evaluation and provenance may be bolted on too late;</li>
+<li>a weak corpus can make optimization self-deceptive.</li>
+</ul>
+<h2 id="convergence">Convergence</h2>
+<p>Both approaches eventually require:</p>
+<ul>
+<li>separability;</li>
+<li>component composition;</li>
+<li>state;</li>
+<li>identity;</li>
+<li>evidence;</li>
+<li>bounded resources;</li>
+<li>trustworthy trajectories.</li>
+</ul>
+<p>This makes the difference one of <strong>center of gravity</strong>, not necessarily final principles.</p>
+<hr />
+<h1 id="31-coding-agent-research-patterns">31. Coding-Agent Research Patterns</h1>
+<p>The reports identify several techniques that deserve isolated evaluation.</p>
+<h2 id="311-gatheractverify">31.1 Gather–Act–Verify</h2>
+<p>Already covered as a topology, but particularly strong for coding.</p>
+<h2 id="312-repo-map">31.2 Repo Map</h2>
+<ul>
+<li>Tree-Sitter;</li>
+<li>symbol extraction;</li>
+<li>imports/references;</li>
+<li>PageRank/centrality;</li>
+<li>changed-file bias;</li>
+<li>compact structural prompt.</li>
+</ul>
+<h2 id="313-ast-aware-patching">31.3 AST-Aware Patching</h2>
+<p>Compare:</p>
+<ul>
+<li>line replacement;</li>
+<li>unified diff;</li>
+<li>fuzzy patch;</li>
+<li>AST transformation;</li>
+<li>syntax-tree constrained edit.</li>
+</ul>
+<p>Metrics:</p>
+<ul>
+<li>patch validity;</li>
+<li>minimality;</li>
+<li>retry rate;</li>
+<li>token cost;</li>
+<li>semantic regression.</li>
+</ul>
+<h2 id="314-test-driven-feedback">31.4 Test-Driven Feedback</h2>
+<p>Tool outputs should be compressed into:</p>
+<ul>
+<li>failing test names;</li>
+<li>stack traces;</li>
+<li>assertion diffs;</li>
+<li>exit codes;</li>
+<li>changed files.</li>
+</ul>
+<p>Avoid repeatedly injecting huge raw logs.</p>
+<h2 id="315-benchmark-minimal-mode">31.5 Benchmark-Minimal Mode</h2>
+<p>DeepSeek-inspired concept:</p>
+<blockquote>
+<p>remove optional harness assistance to measure the model/tool loop cleanly.</p>
+</blockquote>
+<p>This is useful for decomposing benchmark gains.</p>
+<hr />
+<h1 id="32-research-agent-patterns">32. Research-Agent Patterns</h1>
+<p>A domain-independent researcher can be decomposed as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>question
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>   ↓
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>query planner
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>   ↓
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>parallel source scouts
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>   ↓
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>acquisition + normalization
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>   ↓
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>atomic fact / claim extraction
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>   ↓
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>citation binding
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>   ↓
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>contradiction / uncertainty analysis
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>   ↓
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>synthesis
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a>   ↓
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>exterior citation/factuality verification
+</code></pre></div>
+<p>Important properties:</p>
+<ul>
+<li>immutable source refs or snapshots;</li>
+<li>source-span citations;</li>
+<li>distinction between source statement and inference;</li>
+<li>temporal metadata;</li>
+<li>contradictory evidence retained;</li>
+<li>reproducible export.</li>
+</ul>
+<h3 id="research-metrics">Research metrics</h3>
+<ul>
+<li>citation precision;</li>
+<li>claim entailment;</li>
+<li>source diversity;</li>
+<li>contradiction recall;</li>
+<li>time freshness;</li>
+<li>retrieval cost;</li>
+<li>synthesis token cost;</li>
+<li>verifier agreement.</li>
+</ul>
+<hr />
+<h1 id="33-structured-compaction">33. Structured Compaction</h1>
+<p>Compaction should preserve state, not merely summarize prose.</p>
+<p>A compacted state may explicitly retain:</p>
+<ul>
+<li>task objective;</li>
+<li>accepted decisions;</li>
+<li>rejected hypotheses;</li>
+<li>open questions;</li>
+<li>modified artifacts;</li>
+<li>failing invariants;</li>
+<li>pending intents;</li>
+<li>evidence refs;</li>
+<li>source digests.</li>
+</ul>
+<p>Compression itself should have provenance:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>source range
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>compactor identity
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>instructions
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>output digest
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>token counts
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>rehydration link
+</code></pre></div>
+<h3 id="research-question_2">Research question</h3>
+<p>Which compaction representation preserves downstream performance best?</p>
+<p>Candidates:</p>
+<ul>
+<li>prose summary;</li>
+<li>structured JSON state;</li>
+<li>key-value decision ledger;</li>
+<li>graph summary;</li>
+<li>vector retrieval + short state;</li>
+<li>hybrid.</li>
+</ul>
+<hr />
+<h1 id="34-hooks-skills-tools-instructions-and-agents-should-remain-distinct">34. Hooks, Skills, Tools, Instructions, and Agents Should Remain Distinct</h1>
+<p>Later source analysis of Claude Code argues for a useful taxonomy.</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instructions</td>
+<td>persistent behavioral context</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td>model-interpreted reusable knowledge/procedure</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>externally executed capability</td>
+</tr>
+<tr>
+<td>Hook</td>
+<td>deterministic lifecycle-triggered automation</td>
+</tr>
+<tr>
+<td>MCP integration</td>
+<td>external tool/service protocol</td>
+</tr>
+<tr>
+<td>Subagent</td>
+<td>isolated reasoning/execution context</td>
+</tr>
+<tr>
+<td>Plugin</td>
+<td>packaging/distribution unit</td>
+</tr>
+</tbody>
+</table>
+<p>Collapsing all of these into “plugins” can hide important semantic differences.</p>
+<p>Example:</p>
+<blockquote>
+<p>A skill says <em>how</em> the model might do something. A capability decides whether it <em>may</em> do it. A hook deterministically triggers something. A tool performs an external operation.</p>
+</blockquote>
+<hr />
+<h1 id="35-security-and-isolation-research">35. Security and Isolation Research</h1>
+<p>Relevant mechanisms in the corpus include:</p>
+<ul>
+<li>capability-based authorization;</li>
+<li>rootless sandboxing;</li>
+<li>Linux Landlock;</li>
+<li>namespaces;</li>
+<li><code>no_new_privs</code>;</li>
+<li>seccomp/LSM;</li>
+<li>network denial;</li>
+<li>explicit filesystem selectors;</li>
+<li>separate evaluator boundary;</li>
+<li>typed budgets.</li>
+</ul>
+<p>Research principle:</p>
+<blockquote>
+<p>“Uses a sandbox” is not a security claim. The policy and configured arguments determine the protection.</p>
+</blockquote>
+<p>Research comparisons should test:</p>
+<ul>
+<li>host process;</li>
+<li>namespace sandbox;</li>
+<li>container;</li>
+<li>microVM;</li>
+<li>WASM;</li>
+<li>remote isolated worker.</li>
+</ul>
+<p>Metrics:</p>
+<ul>
+<li>escape surface;</li>
+<li>startup latency;</li>
+<li>memory;</li>
+<li>filesystem fidelity;</li>
+<li>network policy;</li>
+<li>portability;</li>
+<li>debugging cost.</li>
+</ul>
+<hr />
+<h1 id="36-provenance-standards-and-canonicalization">36. Provenance Standards and Canonicalization</h1>
+<p>The reports reference:</p>
+<ul>
+<li>RFC 8785 JSON Canonicalization Scheme;</li>
+<li>W3C PROV;</li>
+<li>SLSA provenance;</li>
+<li>in-toto attestation.</li>
+</ul>
+<p>Useful research question:</p>
+<blockquote>
+<p>How much of agent execution provenance should reuse existing supply-chain provenance standards versus an agent-specific event vocabulary?</p>
+</blockquote>
+<p>Potential mapping:</p>
+<ul>
+<li>entity → artifact;</li>
+<li>activity → tool/model/effect execution;</li>
+<li>agent → principal/component;</li>
+<li>derivation → artifact edge;</li>
+<li>builder → runtime/harness identity;</li>
+<li>subject → evaluated artifact/run.</li>
+</ul>
+<hr />
+<h1 id="37-research-methodology">37. Research Methodology</h1>
+<h2 id="371-evidence-hierarchy">37.1 Evidence Hierarchy</h2>
+<p>A good general hierarchy:</p>
+<ol>
+<li>directly measured execution;</li>
+<li>source code / machine-verifiable artifact;</li>
+<li>first-party technical documentation;</li>
+<li>peer-reviewed paper;</li>
+<li>preprint with released artifacts;</li>
+<li>independent reproduction;</li>
+<li>engineering report;</li>
+<li>proposal/hypothesis;</li>
+<li>anecdote.</li>
+</ol>
+<p>The order may vary by question, but the principle is:</p>
+<blockquote>
+<p>architecture should not silently promote a hypothesis into a fact.</p>
+</blockquote>
+<h2 id="372-falsifier-first-design">37.2 Falsifier-First Design</h2>
+<p>For every strong claim, write the test that could refute it.</p>
+<p>Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Falsifier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>composition graph is general</td>
+<td>topology requires engine/domain-specific branch</td>
+</tr>
+<tr>
+<td>state-mediated coordination scales</td>
+<td>coordination cost becomes dominant</td>
+</tr>
+<tr>
+<td>cold recovery is sufficient</td>
+<td>fresh process cannot reconstruct continuation</td>
+</tr>
+<tr>
+<td>macro preserves semantics</td>
+<td>replay differs under held-out inputs</td>
+</tr>
+<tr>
+<td>skill improves outcomes</td>
+<td>paired trials show no lift</td>
+</tr>
+<tr>
+<td>routing saves cost</td>
+<td>cost/pass exceeds fixed baseline</td>
+</tr>
+<tr>
+<td>second domain proves generality</td>
+<td>requires core semantic changes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="373-intervention-before-causation">37.3 Intervention Before Causation</h2>
+<p>Chronology does not imply causation.</p>
+<p>Use:</p>
+<ul>
+<li>paired replay;</li>
+<li>one-factor replacement;</li>
+<li>ablation;</li>
+<li>factorial experiments;</li>
+<li>randomized task ordering;</li>
+<li>matched seeds;</li>
+<li>counterfactual forks.</li>
+</ul>
+<h2 id="374-benchmark-contamination">37.4 Benchmark Contamination</h2>
+<p>Protect:</p>
+<ul>
+<li>hidden evaluators;</li>
+<li>test answers;</li>
+<li>benchmark fixtures;</li>
+<li>private reference outputs;</li>
+<li>training/evaluation split.</li>
+</ul>
+<p>A strong evaluation design makes contamination structurally difficult, not merely forbidden in instructions.</p>
+<hr />
+<h1 id="38-measurement-framework">38. Measurement Framework</h1>
+<p>A complete agentic-system evaluation should record multiple fronts.</p>
+<h2 id="capability">Capability</h2>
+<ul>
+<li>pass rate;</li>
+<li>task completion;</li>
+<li>exactness;</li>
+<li>robustness.</li>
+</ul>
+<h2 id="economics">Economics</h2>
+<ul>
+<li>USD;</li>
+<li>tokens;</li>
+<li>tool calls;</li>
+<li>model calls;</li>
+<li>CPU;</li>
+<li>wall time;</li>
+<li>critical path.</li>
+</ul>
+<h2 id="context">Context</h2>
+<ul>
+<li>prompt tokens by layer;</li>
+<li>cache-hit fraction;</li>
+<li>compression ratio;</li>
+<li>rehydration frequency;</li>
+<li>retrieved evidence utilization.</li>
+</ul>
+<h2 id="coordination">Coordination</h2>
+<ul>
+<li>workers;</li>
+<li>branches;</li>
+<li>messages/events;</li>
+<li>bytes;</li>
+<li>contention;</li>
+<li>retries.</li>
+</ul>
+<h2 id="reliability">Reliability</h2>
+<ul>
+<li>recovery success;</li>
+<li>duplicate-effect rate;</li>
+<li>idempotency failures;</li>
+<li>evaluator disagreement;</li>
+<li>malformed output rate.</li>
+</ul>
+<h2 id="security">Security</h2>
+<ul>
+<li>denied unauthorized effects;</li>
+<li>selector escape attempts;</li>
+<li>sandbox violations;</li>
+<li>evaluator reachability;</li>
+<li>authority widening attempts.</li>
+</ul>
+<hr />
+<h1 id="39-cost-per-verified-pass">39. Cost per Verified Pass</h1>
+<p>A strong operational metric from the source corpus:</p>
+<p>[
+CPP(s,k)
+=
+\frac{
+\sum_{\text{runs of strategy }s\text{ on class }k}
+cost_{add}(run)
+}{
+|{\text{verified passing runs}}|
+}.
+]</p>
+<p>This makes the optimization target more useful than raw success rate.</p>
+<p>A 2% quality gain at 10× cost may be undesirable for one profile and ideal for another.</p>
+<hr />
+<h1 id="40-research-tensions-matrix">40. Research Tensions Matrix</h1>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Alternative A</th>
+<th>Alternative B</th>
+<th>What to measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core architecture</td>
+<td>universal trusted mechanism</td>
+<td>everything pluggable</td>
+<td>flexibility vs trust-surface complexity</td>
+</tr>
+<tr>
+<td>Loop</td>
+<td>universal turn loop</td>
+<td>pluggable loops</td>
+<td>counterexamples, domain coverage</td>
+</tr>
+<tr>
+<td>Work unit</td>
+<td>turn/effect</td>
+<td>typed obligation</td>
+<td>decomposition, recovery, scheduler clarity</td>
+</tr>
+<tr>
+<td>Coordination</td>
+<td>peer messages</td>
+<td>shared state/stigmergy</td>
+<td>token/latency/bytes/contention</td>
+</tr>
+<tr>
+<td>Composition</td>
+<td>fixed roles/slots</td>
+<td>named graph + bindings</td>
+<td>expressiveness, complexity</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>self-critique</td>
+<td>exterior witness</td>
+<td>calibration, manipulation resistance</td>
+</tr>
+<tr>
+<td>Guardrails</td>
+<td>mandatory</td>
+<td>declared-absent vs forged</td>
+<td>generality vs evidence quality</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>static profile</td>
+<td>adaptive Pareto</td>
+<td>cost/pass, regret, calibration</td>
+</tr>
+<tr>
+<td>Planning</td>
+<td>one agent</td>
+<td>branching/subagents</td>
+<td>marginal quality per cost</td>
+</tr>
+<tr>
+<td>Learning</td>
+<td>skills</td>
+<td>macros</td>
+<td>transfer vs determinism</td>
+</tr>
+<tr>
+<td>Optimization</td>
+<td>weighted scalar</td>
+<td>partial-order Pareto</td>
+<td>invariant preservation</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>transcript</td>
+<td>structured state + retrieval</td>
+<td>long-horizon accuracy</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>full history</td>
+<td>progressive disclosure</td>
+<td>quality/token efficiency</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>eager parallelism</td>
+<td>measured selective concurrency</td>
+<td>speedup vs contention</td>
+</tr>
+<tr>
+<td>Product strategy</td>
+<td>substrate-first</td>
+<td>result/data-first</td>
+<td>time-to-capability vs scientific integrity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="41-research-questions-worth-answering">41. Research Questions Worth Answering</h1>
+<h2 id="harness">Harness</h2>
+<ol>
+<li>How much variance in benchmark performance is attributable to harness vs model?</li>
+<li>Which harness dimensions have the highest marginal effect?</li>
+<li>Are interactions between context, tools, and model tier super-additive?</li>
+<li>How portable is a good harness across model families?</li>
+</ol>
+<h2 id="context_1">Context</h2>
+<ol>
+<li>What is the optimal stable-prefix vs dynamic-context ratio?</li>
+<li>What information should survive compaction?</li>
+<li>Does graph-structured context outperform ranked text chunks?</li>
+<li>When does retrieval noise outweigh missing context?</li>
+</ol>
+<h2 id="multi-agent">Multi-agent</h2>
+<ol>
+<li>At what task complexity does multi-agent decomposition become economical?</li>
+<li>What branch diversity metric predicts best-of-N gain?</li>
+<li>Does stigmergic shared state outperform sparse direct messaging?</li>
+<li>How does evaluator cost change the optimal number of branches?</li>
+</ol>
+<h2 id="verification">Verification</h2>
+<ol>
+<li>Which witness classes correlate with true downstream success?</li>
+<li>When is an LLM critic useful as a non-authoritative signal?</li>
+<li>How much robustness is gained by physically separated evaluation?</li>
+<li>How should inconclusive evidence affect routing?</li>
+</ol>
+<h2 id="compounding">Compounding</h2>
+<ol>
+<li>What fraction of recurring trajectories can be safely compiled into macros?</li>
+<li>How many distinct examples are required before anti-unification?</li>
+<li>When should a skill become a macro?</li>
+<li>Which router-learning method gives the lowest regret under changing models?</li>
+</ol>
+<h2 id="scientific-methodology">Scientific methodology</h2>
+<ol>
+<li>What is the minimum telemetry needed to reproduce an agent run?</li>
+<li>Which event fields provide actual causal value vs logging noise?</li>
+<li>How stable are paired benchmark results across provider/model drift?</li>
+<li>How should long-horizon agent experiments handle non-stationarity?</li>
+</ol>
+<hr />
+<h1 id="42-suggested-experiment-families">42. Suggested Experiment Families</h1>
+<p>These are <strong>research experiment families</strong>, not a development schedule.</p>
+<h2 id="e1-harness-factorial-experiment">E1 — Harness Factorial Experiment</h2>
+<p>Freeze:</p>
+<ul>
+<li>task set;</li>
+<li>model;</li>
+<li>evaluator.</li>
+</ul>
+<p>Vary:</p>
+<ul>
+<li>context compiler;</li>
+<li>tool set;</li>
+<li>verification frequency;</li>
+<li>planning topology.</li>
+</ul>
+<p>Measure interaction effects.</p>
+<hr />
+<h2 id="e2-context-projection-experiment">E2 — Context Projection Experiment</h2>
+<p>Compare:</p>
+<ul>
+<li>full recent history;</li>
+<li>structured compacted state;</li>
+<li>lexical retrieval;</li>
+<li>hybrid retrieval;</li>
+<li>graph projection.</li>
+</ul>
+<p>Measure:</p>
+<ul>
+<li>pass rate;</li>
+<li>tokens;</li>
+<li>cache hit;</li>
+<li>missing-evidence errors.</li>
+</ul>
+<hr />
+<h2 id="e3-single-vs-multi-agent">E3 — Single vs Multi-Agent</h2>
+<p>Same task/model budget.</p>
+<p>Arms:</p>
+<ul>
+<li>one strong agent;</li>
+<li>scout + executor;</li>
+<li>generator + critic;</li>
+<li>best-of-3;</li>
+<li>state-mediated swarm.</li>
+</ul>
+<p>Measure CPP and critical path.</p>
+<hr />
+<h2 id="e4-state-vs-messaging">E4 — State vs Messaging</h2>
+<p>Equivalent multi-agent problem.</p>
+<p>Arm A:</p>
+<ul>
+<li>sparse direct messages.</li>
+</ul>
+<p>Arm B:</p>
+<ul>
+<li>shared durable state.</li>
+</ul>
+<p>Arm C:</p>
+<ul>
+<li>hybrid.</li>
+</ul>
+<p>Measure:</p>
+<ul>
+<li>coordination tokens;</li>
+<li>events;</li>
+<li>latency;</li>
+<li>attribution;</li>
+<li>contention;</li>
+<li>errors.</li>
+</ul>
+<hr />
+<h2 id="e5-macro-compiler">E5 — Macro Compiler</h2>
+<p>Mine recurring procedures.</p>
+<p>Compare:</p>
+<ul>
+<li>original multi-turn agent execution;</li>
+<li>compiled macro;</li>
+<li>skill prompt;</li>
+<li>deterministic script.</li>
+</ul>
+<p>Use held-out instances and adversarial parameter changes.</p>
+<hr />
+<h2 id="e6-router-comparison">E6 — Router Comparison</h2>
+<p>Compare:</p>
+<ul>
+<li>fixed profile;</li>
+<li>heuristic escalation;</li>
+<li>contextual bandit;</li>
+<li>Bayesian expected utility;</li>
+<li>EFE-inspired router;</li>
+<li>Pareto frontier + lexicographic selection.</li>
+</ul>
+<p>Measure regret and CPP.</p>
+<hr />
+<h2 id="e7-recovery">E7 — Recovery</h2>
+<p>Inject crashes:</p>
+<ul>
+<li>before external effect;</li>
+<li>after durable intent;</li>
+<li>after effect before receipt;</li>
+<li>after receipt before state reduction.</li>
+</ul>
+<p>Measure duplicate/omitted effects.</p>
+<hr />
+<h2 id="e8-evaluation-separation">E8 — Evaluation Separation</h2>
+<p>Compare:</p>
+<ul>
+<li>self-score;</li>
+<li>peer LLM judge;</li>
+<li>isolated LLM judge;</li>
+<li>deterministic checker;</li>
+<li>formal verifier;</li>
+<li>human panel.</li>
+</ul>
+<p>Measure calibration and exploitability.</p>
+<hr />
+<h1 id="43-external-systems-and-architectural-lessons">43. External Systems and Architectural Lessons</h1>
+<h2 id="431-deepseek-harness-cordis">43.1 DeepSeek Harness / Cordis</h2>
+<p>Source-corpus interpretation:</p>
+<ul>
+<li>broad configuration-driven composition;</li>
+<li>pluginized models/tools/skills/sessions/sandboxes/storage/loops/UI;</li>
+<li>append-only session history;</li>
+<li>standard/code/minimal/creator modes.</li>
+</ul>
+<p>Research lessons:</p>
+<ul>
+<li>composition is valuable;</li>
+<li>minimal benchmark mode is valuable;</li>
+<li>creator/inspection mode is valuable;</li>
+<li>unified event history is valuable.</li>
+</ul>
+<p>Research caution:</p>
+<ul>
+<li>broad pluginization should be compared with a bounded trust core;</li>
+<li>preview APIs may change;</li>
+<li>plugin extensibility is not equivalent to authority safety.</li>
+</ul>
+<hr />
+<h2 id="432-claude-code-agent-sdk">43.2 Claude Code / Agent SDK</h2>
+<p>Source-corpus interpretation:</p>
+<ul>
+<li>project instructions;</li>
+<li>skills;</li>
+<li>MCP;</li>
+<li>subagents;</li>
+<li>hooks;</li>
+<li>code intelligence;</li>
+<li>context compaction;</li>
+<li>session resume/fork.</li>
+</ul>
+<p>Research lessons:</p>
+<ul>
+<li>distinguish extension mechanisms;</li>
+<li>progressive context loading;</li>
+<li>isolate subtask contexts;</li>
+<li>stable prompt prefix;</li>
+<li>explicit compaction boundaries;</li>
+<li>deterministic hooks for automation.</li>
+</ul>
+<hr />
+<h2 id="433-codex-aider-opencode-family">43.3 Codex / Aider / OpenCode Family</h2>
+<p>Research themes highlighted in the corpus:</p>
+<ul>
+<li>repository mapping;</li>
+<li>AST/symbol extraction;</li>
+<li>incremental indexing;</li>
+<li>compact structural context;</li>
+<li>diff-oriented editing;</li>
+<li>terminal-native workflows.</li>
+</ul>
+<p>These should be studied as patterns rather than assumed exact implementations.</p>
+<hr />
+<h1 id="44-literature-and-primary-source-map">44. Literature and Primary-Source Map</h1>
+<p>The following references are reproduced from the source corpus as a research index. Inclusion means “worth investigating,” not “validated here.”</p>
+<h2 id="harness-engineering-and-agent-systems">Harness Engineering and Agent Systems</h2>
+<ul>
+<li><strong>Agentic Harness Engineering</strong> — https://arxiv.org/abs/2604.25850</li>
+<li><strong>Agent Harness Engineering: A Survey</strong> — https://picrew.github.io/LLM-Harness/main.pdf</li>
+<li><strong>Harness-Bench</strong> — https://arxiv.org/html/2605.27922v1</li>
+<li><strong>From Question Answering to Task Completion: A Survey on Agent System and Harness Design</strong> — https://arxiv.org/pdf/2606.20683</li>
+<li><strong>Harness as an Asset (CAAF)</strong> — https://arxiv.org/pdf/2604.17025</li>
+<li><strong>Anthropic multi-agent research system</strong> — https://www.anthropic.com/engineering/multi-agent-research-system</li>
+<li><strong>Asymptotic analysis with LLM primitives</strong> — https://proceedings.mlr.press/v267/meyerson25a.html</li>
+</ul>
+<h2 id="multi-agent-coordination-and-shared-state">Multi-Agent Coordination and Shared State</h2>
+<ul>
+<li><strong>LLM multi-agent blackboard</strong> — https://arxiv.org/abs/2510.01285</li>
+<li><strong>CodeCRDT</strong> — https://arxiv.org/pdf/2510.18893</li>
+<li><strong>Beyond Text-Passing: Shared Cognitive Substrates</strong> — https://openreview.net/forum?id=RRIw2L4Z1g</li>
+<li><strong>PatchBoard</strong> — https://arxiv.org/pdf/2605.29313</li>
+<li><strong>Token Coherence / MESI for MAS</strong> — https://arxiv.org/pdf/2603.15183</li>
+<li><strong>AgentFlow: Agent Dependency Graphs</strong> — https://arxiv.org/html/2607.01640</li>
+<li><strong>Declarative Data Services</strong> — https://arxiv.org/abs/2605.20690</li>
+</ul>
+<h2 id="trajectory-learning-and-credit-assignment">Trajectory Learning and Credit Assignment</h2>
+<ul>
+<li><strong>ASTRA</strong> — https://arxiv.org/abs/2601.21558</li>
+<li><strong>GraphGPO</strong> — https://arxiv.org/abs/2605.26684</li>
+<li><strong>Agent Lightning</strong> — https://arxiv.org/abs/2508.03680</li>
+<li><strong>TRACE</strong> — https://arxiv.org/abs/2607.13988</li>
+<li><strong>DMPO</strong> — https://arxiv.org/abs/2406.14868</li>
+</ul>
+<h2 id="active-inference">Active Inference</h2>
+<ul>
+<li><strong>Expected Free Energy-based Planning as Variational Inference</strong> — https://arxiv.org/abs/2504.14898</li>
+<li>Alternate source referenced in the corpus — https://arxiv.org/html/2606.20658</li>
+<li><strong>Active Inference as a Convex MDP</strong> — https://arxiv.org/pdf/2607.20152</li>
+</ul>
+<h2 id="skill-and-macro-evolution">Skill and Macro Evolution</h2>
+<ul>
+<li><strong>SkillTTA</strong> — https://arxiv.org/abs/2605.16986</li>
+<li><strong>Globalized Skill Evolution</strong> — https://arxiv.org/abs/2608.06153</li>
+<li><strong>MACRO</strong> — https://arxiv.org/abs/2603.05860</li>
+<li><strong>AlphaEvolve</strong> — https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/</li>
+<li><strong>Darwin Gödel Machine</strong> — https://openreview.net/pdf?id=pUpzQZTvGY</li>
+</ul>
+<h2 id="preference-optimization">Preference Optimization</h2>
+<ul>
+<li><strong>DPO</strong> — https://arxiv.org/abs/2305.18290</li>
+<li><strong>DMPO</strong> — https://arxiv.org/abs/2406.14868</li>
+</ul>
+<h2 id="capability-security-provenance">Capability Security / Provenance</h2>
+<ul>
+<li><strong>Progent</strong> — https://arxiv.org/abs/2504.11703</li>
+<li><strong>MiniScope</strong> — https://arxiv.org/abs/2512.11147</li>
+<li><strong>From Agent Traces to Trust</strong> — https://arxiv.org/pdf/2606.04990</li>
+<li><strong>Lingering Authority: Revocable Resource-and-Effect Capabilities</strong> — https://arxiv.org/pdf/2606.22504</li>
+<li><strong>Execution-security / TOCTOU survey referenced by source</strong> — https://arxiv.org/pdf/2607.05743</li>
+<li><strong>W3C PROV</strong> — https://www.w3.org/groups/wg/prov/publications/</li>
+<li><strong>SLSA v1.2 provenance</strong> — https://slsa.dev/spec/v1.2/provenance</li>
+<li><strong>in-toto provenance predicate</strong> — https://github.com/in-toto/attestation/blob/main/spec/predicates/provenance.md</li>
+</ul>
+<h2 id="sandbox-platform">Sandbox / Platform</h2>
+<ul>
+<li><strong>Linux Landlock</strong> — https://www.kernel.org/doc/html/latest/userspace-api/landlock.html</li>
+<li><strong>Bubblewrap</strong> — https://github.com/containers/bubblewrap</li>
+<li><strong>Bubblewrap setuid advisory referenced by source</strong> — https://github.com/containers/bubblewrap/security/advisories/GHSA-xq78-7hw4-5jvp</li>
+</ul>
+<h2 id="data-and-identity-standards">Data and Identity Standards</h2>
+<ul>
+<li><strong>JSON Schema Draft 2020-12</strong> — https://json-schema.org/draft/2020-12</li>
+<li><strong>RFC 8785 JCS</strong> — https://www.ietf.org/rfc/rfc8785.html</li>
+<li><strong>SQLite WAL</strong> — https://www.sqlite.org/wal.html</li>
+</ul>
+<h2 id="contemporary-agent-products-first-party-material">Contemporary Agent Products / First-Party Material</h2>
+<ul>
+<li><strong>DeepSeek Harness developer preview</strong> — https://deepseek.com/harness/en/</li>
+<li><strong>DeepSeek Harness repository</strong> — https://github.com/deepseek-ai/deepseek-harness</li>
+<li><strong>Claude Code extension architecture</strong> — https://code.claude.com/docs/en/features-overview</li>
+<li><strong>Claude Agent SDK loop/context management</strong> — https://code.claude.com/docs/en/agent-sdk/agent-loop</li>
+</ul>
+<hr />
+<h1 id="45-source-provenance-map">45. Source-Provenance Map</h1>
+<table>
+<thead>
+<tr>
+<th>Research theme</th>
+<th>Main source documents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>harness as independent variable</td>
+<td><code>002</code>, <code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>A-B-C-D abstraction</td>
+<td><code>002</code>, <code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>separability / exterior evaluator</td>
+<td><code>002</code>, <code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code>, <code>009</code>, <code>010</code></td>
+</tr>
+<tr>
+<td>dynamic informational bottleneck</td>
+<td><code>002</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>Pareto profiles</td>
+<td><code>002</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>six-dimensional resources</td>
+<td><code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>VFE / EFE correction</td>
+<td><code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>stigmergic state coordination</td>
+<td><code>002</code>, <code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>typed obligation abstraction</td>
+<td><code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>macro-tool compilation</td>
+<td><code>002</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>skill retrieval / Elo</td>
+<td><code>004</code>, <code>005</code>, <code>006</code>, <code>007</code></td>
+</tr>
+<tr>
+<td>DPO / paired evidence</td>
+<td><code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>exact McNemar</td>
+<td><code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>fault attribution</td>
+<td><code>004</code>, <code>005</code>, <code>006</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>named component graph</td>
+<td><code>001</code>–<code>008</code></td>
+</tr>
+<tr>
+<td>path-bag ≠ graph correction</td>
+<td><code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>universal loop tension</td>
+<td><code>004</code>, <code>005</code>, <code>006</code>, <code>007</code>, <code>008</code></td>
+</tr>
+<tr>
+<td>outcome/data-first alternative</td>
+<td><code>005</code></td>
+</tr>
+<tr>
+<td>DeepSeek / Claude / Codex analysis</td>
+<td><code>009</code>, <code>010</code></td>
+</tr>
+<tr>
+<td>indexing/caching/context</td>
+<td><code>009</code>, <code>010</code></td>
+</tr>
+<tr>
+<td>coding vs research agents</td>
+<td><code>009</code>, <code>010</code></td>
+</tr>
+<tr>
+<td>scientific event telemetry</td>
+<td><code>009</code>, <code>010</code></td>
+</tr>
+<tr>
+<td>decision synthesis / advisory-vs-law separation</td>
+<td><code>001</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="46-corrections-and-caveats-preserved-from-cross-review">46. Corrections and Caveats Preserved From Cross-Review</h1>
+<p>The consolidated corpus should retain the corrections discovered across independent reviews.</p>
+<h2 id="461-vfe-is-not-efe">46.1 VFE is not EFE</h2>
+<ul>
+<li>VFE: posterior/belief fitting.</li>
+<li>EFE: candidate policy evaluation.</li>
+</ul>
+<p>Do not call an arbitrary weighted reward “free energy”.</p>
+<h2 id="462-shared-state-does-not-prove-linear-scaling">46.2 Shared state does not prove linear scaling</h2>
+<p>State-mediated coordination can avoid the protocol of all-to-all chat, but database and synchronization costs still require measurement.</p>
+<h2 id="463-a-named-component-bag-is-not-a-graph">46.3 A named component bag is not a graph</h2>
+<p>Graph claims require explicit bindings/edges.</p>
+<h2 id="464-cycles-can-be-legitimate">46.4 Cycles can be legitimate</h2>
+<p>Critic/reviser and debate systems can be cyclic. Termination can be enforced by resource bounds rather than graph acyclicity.</p>
+<h2 id="465-unknown-economics-are-not-zero">46.5 Unknown economics are not zero</h2>
+<p>Missing cost must carry explicit missingness.</p>
+<h2 id="466-a-hash-chain-proves-integrityorder-not-semantic-truth">46.6 A hash chain proves integrity/order, not semantic truth</h2>
+<p>External verification remains necessary.</p>
+<h2 id="467-dpo-does-not-validate-preference-labels">46.7 DPO does not validate preference labels</h2>
+<p>The preference-generation process must itself be trustworthy.</p>
+<h2 id="468-approximate-chi-square-is-not-exact-mcnemar">46.8 Approximate chi-square is not “exact McNemar”</h2>
+<p>Use the exact paired binomial form when sample sizes/discordant counts justify it.</p>
+<h2 id="469-token-collapse-and-latency-percentages-are-hypotheses">46.9 Token-collapse and latency percentages are hypotheses</h2>
+<p>Historical reports include aggressive efficiency claims. Treat them as targets to reproduce, not general truths.</p>
+<h2 id="4610-multi-agent-is-not-automatically-better">46.10 Multi-agent is not automatically better</h2>
+<p>The correct objective is marginal verified value per marginal cost.</p>
+<hr />
+<h1 id="47-integrated-conceptual-architecture-research-view">47. Integrated Conceptual Architecture — Research View</h1>
+<p>The ideas can be assembled into one research architecture without implying that this is the final production design:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>                        TASK / OBLIGATION
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>                              │
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>                              ▼
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>                  ┌─────────────────────┐
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>                  │  HARNESS CONTROLLER │
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>                  │ profile / router    │
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>                  │ Pareto / EFE / bandit
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>                  └─────────┬───────────┘
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>                            │
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>                 context projection Bθ
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>                            │
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>                            ▼
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>            ┌──────────────────────────────┐
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>            │  COMPOSITION / TOPOLOGY      │
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>            │ nodes + bindings + policies  │
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>            └──────────────┬───────────────┘
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>                           │
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>                           ▼
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>             observe → propose → authorize
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>                           │
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>                           ▼
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>                       EFFECT
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>                           │
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>                           ▼
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>                       RECEIPT
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>                           │
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>              ┌────────────┴─────────────┐
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>              ▼                          ▼
+<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a>       DURABLE STATE                 EXTERIOR WITNESS
+<a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>     events + artifacts                / evaluator
+<a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>              │                          │
+<a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>              └────────────┬─────────────┘
+<a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a>                           ▼
+<a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a>                  EVIDENCE TRAJECTORY
+<a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a>                           │
+<a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a>        ┌──────────────────┼────────────────────┐
+<a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a>        ▼                  ▼                    ▼
+<a id="__codelineno-21-38" name="__codelineno-21-38" href="#__codelineno-21-38"></a>      MEMO               MACRO                SKILL
+<a id="__codelineno-21-39" name="__codelineno-21-39" href="#__codelineno-21-39"></a>        │                  │                    │
+<a id="__codelineno-21-40" name="__codelineno-21-40" href="#__codelineno-21-40"></a>        └──────────────────┼────────────────────┘
+<a id="__codelineno-21-41" name="__codelineno-21-41" href="#__codelineno-21-41"></a>                           ▼
+<a id="__codelineno-21-42" name="__codelineno-21-42" href="#__codelineno-21-42"></a>                  ROUTING / LEARNING
+<a id="__codelineno-21-43" name="__codelineno-21-43" href="#__codelineno-21-43"></a>                           │
+<a id="__codelineno-21-44" name="__codelineno-21-44" href="#__codelineno-21-44"></a>                           ▼
+<a id="__codelineno-21-45" name="__codelineno-21-45" href="#__codelineno-21-45"></a>                    NEXT EXPERIMENT
+</code></pre></div>
+<p>This integrated picture makes one research priority explicit:</p>
+<blockquote>
+<p><strong>The learning loop is only as good as the observability, attribution, and evaluation underneath it.</strong></p>
+</blockquote>
+<hr />
+<h1 id="48-final-research-synthesis">48. Final Research Synthesis</h1>
+<p>The consolidated corpus suggests that the most promising direction in agentic systems engineering is not a single “super-agent” architecture. It is a <strong>scientific substrate for exploring many agentic regimes while preserving comparable evidence</strong>.</p>
+<p>The durable ideas are:</p>
+<ol>
+<li>model capability and harness capability must be separated experimentally;</li>
+<li>composition should be declarative enough to express multiple topologies;</li>
+<li>authority should remain explicit, bounded, and independent from model reasoning;</li>
+<li>evaluation should be separated from generation whenever strong claims depend on it;</li>
+<li>state and artifacts should carry coordination and provenance, not only transcripts;</li>
+<li>context should be compiled dynamically rather than accumulated blindly;</li>
+<li>resource economics should remain multidimensional;</li>
+<li>routing should operate inside hard feasibility constraints;</li>
+<li>multi-agent structures should justify their coordination cost empirically;</li>
+<li>exact verified reuse should precede learned reuse;</li>
+<li>macros, skills, routers, and model training are different compounding mechanisms and should be evaluated separately;</li>
+<li>causal claims require intervention, not narrative explanation;</li>
+<li>replay, fork, cold recovery, and counterfactual execution are foundational research instruments;</li>
+<li>benchmarks should treat harness configuration as part of the experimental identity;</li>
+<li>the strongest meta-framework is likely one that can change almost everything about behavior while changing almost nothing about the semantics of trust, evidence, and measurement.</li>
+</ol>
+<p>The most valuable conceptual shift across the reports is therefore:</p>
+<blockquote>
+<p><strong>Do not design one agent. Design a measurable space of agentic systems.</strong></p>
+</blockquote>
+<p>In that space, coding agents, research agents, formal solvers, critics, swarms, tree searches, and future architectures become experimental points generated by different compositions, context regimes, policies, budgets, and verification structures.</p>
+<p>The scientific objective is not to declare one architecture universally superior. It is to make the system capable of answering, with attributable evidence:</p>
+<p>[
+\boxed{
+\text{Which agentic configuration solves this task class
+with the best admissible trade-off of
+quality, cost, tokens, latency, safety, and evidence?}
+}
+]</p>
+<p>That is the unifying research question behind the source corpus.</p>
+<hr />
+<h1 id="appendix-a-compact-equation-index">Appendix A — Compact Equation Index</h1>
+<h3 id="resource-tensor">Resource tensor</h3>
+<p>[
+\mathbf R=
+(r_{\$},r_{tok},r_{byte},r_{ms};r_{turn},r_{depth})
+]</p>
+<h3 id="feasibility">Feasibility</h3>
+<p>[
+\mathbf R_a\preceq\mathbf R_b
+\iff
+\forall j,\ R_{a,j}\le R_{b,j}
+]</p>
+<h3 id="vfe">VFE</h3>
+<p>[
+\mathcal F=
+\mathbb E_q[\log q-\log p]
+]</p>
+<h3 id="efe">EFE</h3>
+<p>[
+\mathcal G(\pi)=
+\mathbb E_{q(o,s|\pi)}
+[
+\log q(s|\pi)-\log p_C(o,s)
+]
+]</p>
+<h3 id="paretoefe-constrained-policy">Pareto/EFE constrained policy</h3>
+<p>[
+\theta^*=
+\arg\min_\theta
+\left(
+\mathbb E[\mathcal G(\pi_\theta)]
++
+\sum_j\lambda_j\mathbb E[c_j]
+\right)
+]</p>
+<p>subject to hard feasibility.</p>
+<h3 id="informational-bottleneck">Informational bottleneck</h3>
+<p>[
+\mathcal B_\theta:
+\mathcal W\times TaskProfile
+\to Context_{\le k}
+]</p>
+<h3 id="obligation">Obligation</h3>
+<p>[
+o=
+\langle
+g,w,\mathbf R_{max},d,\mathcal D,p,\kappa
+\rangle
+]</p>
+<h3 id="backward-slice">Backward slice</h3>
+<p>[
+B(z)=
+{v:v\leadsto z}
+]</p>
+<h3 id="hybrid-retrieval">Hybrid retrieval</h3>
+<p>[
+s(i)=
+\alpha s_d+\beta s_l+\eta L_i+\zeta C_i-\kappa A_i
+]</p>
+<h3 id="elo-update">Elo update</h3>
+<p>[
+\mu_i'=
+\mu_i+K(n_i)w_i(y_i-p_i)
+]</p>
+<h3 id="dpo">DPO</h3>
+<p>[
+\mathcal L_{DPO}
+=
+-\mathbb E\log\sigma
+\left(
+\beta[
+\log\frac{\pi_\theta(y^+|x)}{\pi_{ref}(y^+|x)}
+-
+\log\frac{\pi_\theta(y^-|x)}{\pi_{ref}(y^-|x)}
+]
+\right)
+]</p>
+<h3 id="exact-mcnemar">Exact McNemar</h3>
+<p>[
+p_{exact}
+=
+\min
+\left(
+1,
+2\sum_{k=0}^{\min(b,c)}
+{b+c\choose k}2^{-(b+c)}
+\right)
+]</p>
+<h3 id="macro-capability-hull">Macro capability hull</h3>
+<p>[
+C_{macro}
+=
+\operatorname{hull}
+\left(
+\bigcup C_v
+\right)
+\cap C_{pack}\cap C_{publisher}
+]</p>
+<h3 id="memo-key">Memo key</h3>
+<p>[
+K_{memo}
+=
+H(
+D_O\parallel
+D_{inputs}\parallel
+D_{environment}\parallel
+D_{checker}\parallel
+D_{toolchain}\parallel
+assurance\parallel
+policy
+)
+]</p>
+<h3 id="cost-per-verified-pass">Cost per verified pass</h3>
+<p>[
+CPP=
+\frac{\text{total additive cost}}
+{\text{verified passes}}
+]</p>
+<hr />
+<h1 id="appendix-b-practical-research-checklist">Appendix B — Practical Research Checklist</h1>
+<p>Before treating any new idea as better:</p>
+<ul>
+<li>[ ] Freeze task set.</li>
+<li>[ ] Freeze or explicitly vary model.</li>
+<li>[ ] Record harness identity.</li>
+<li>[ ] Record environment.</li>
+<li>[ ] Record context policy.</li>
+<li>[ ] Record tool versions.</li>
+<li>[ ] Record exact resource usage.</li>
+<li>[ ] Use an independent or clearly typed witness.</li>
+<li>[ ] Preserve baseline.</li>
+<li>[ ] Run A/A where measurement noise matters.</li>
+<li>[ ] Use paired trials when possible.</li>
+<li>[ ] Report effect size and uncertainty.</li>
+<li>[ ] Test security/trust regressions separately.</li>
+<li>[ ] Preserve failed experiments.</li>
+<li>[ ] Avoid simultaneous uncontrolled changes.</li>
+<li>[ ] Mark unknown measurements as unknown.</li>
+<li>[ ] Distinguish correlation from intervention-backed causation.</li>
+<li>[ ] Treat large efficiency claims as reproducibility targets.</li>
+<li>[ ] Keep learned policy separate from authoritative truth.</li>
+</ul>
+<hr />
+<h1 id="appendix-c-source-corpus">Appendix C — Source Corpus</h1>
+<ol>
+<li><code>001_alfa_review_full_decision.md</code> — decision synthesis and proposal disposition.</li>
+<li><code>002_beta_review_full_gem_proposal.md</code> — informational-flow primitives, Pareto profiles, stigmergic blackboard, compounding flywheel.</li>
+<li><code>004_delta_review_full_glm53_proposal.md</code> — theory, credit assignment, retrieval, DPO, statistical methodology.</li>
+<li><code>005_epsilon_review_full_dsv4-proposal.md</code> — alternative outcome/data-first framing and generality arguments.</li>
+<li><code>006_fi_review_full_gptsol_proposal.md</code> — most complete mathematical and research synthesis; obligation harness, corrected VFE/EFE, macro compilation, evidence methodology.</li>
+<li><code>007_zeta_review_full_opus_proposal.md</code> — Pareto/stigmergy/Active-Inference/macros synthesis and cross-proposal corrections.</li>
+<li><code>008_alfa_review_full_grok_proposal.md</code> — compact reconciled synthesis and obligation-market alternative.</li>
+<li><code>009_beta_review_higgs_gem.md</code> — coding/research product research; DeepSeek, Claude Code, Codex, repo mapping, prompt caching.</li>
+<li><code>010_fi_review_higgs_gpt.md</code> — later research complement on DeepSeek/Claude extension architecture, indexing, caching, context, event telemetry, and two-domain generality.</li>
+</ol>
+<hr />
+<p><strong>End of consolidated research report.</strong></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

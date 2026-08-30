@@ -1,0 +1,11 @@
+{"symbol": "Kernel", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "EpisodeEngine", "kind": "class", "defined_in": "vanguard/packages/agency/turns.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "HarnessSession", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/sqlite_store.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"symbol": "EvidenceCaptureService", "kind": "class", "defined_in": "vanguard/packages/runtime/evidence.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"symbol": "RuntimeService", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/reference/runtime-service.md"}
+{"symbol": "IPlanner", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IToolkit", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}

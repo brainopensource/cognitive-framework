@@ -1,6 +1,6 @@
 # `vg` CLI / TUI
 
-Ink client for the RuntimeService daemon. Architecture: [`docs/SPEC.md`](../../../docs/SPEC.md) · Decisions: [`docs/02_decisions/INDEX.md`](../../../docs/02_decisions/INDEX.md).
+Ink client for the RuntimeService daemon. Architecture: [`docs/SPEC.md`](../../../docs/SPEC.md) · Decisions: [`docs/decisions.md`](../../../docs/decisions.md).
 
 Requires Node ≥ 20. Do not import `vanguard/packages`.
 

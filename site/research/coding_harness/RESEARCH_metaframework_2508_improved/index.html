@@ -1,0 +1,3246 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>RESEARCH Meta-Framework 2508 — Improved Final Delta Report - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#research-meta-framework-2508-improved-final-delta-report" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              RESEARCH Meta-Framework 2508 — Improved Final Delta Report
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="research-meta-framework-2508-improved-final-delta-report">RESEARCH Meta-Framework 2508 — Improved Final Delta Report</h1>
+<p><strong>Research date:</strong> 25 August 2026<br />
+<strong>Artifact:</strong> <code>RESEARCH_metaframework_2508_improved.md</code><br />
+<strong>Purpose:</strong> Final PhD-level synthesis of the research completed on 25 August 2026, focused specifically on findings that materially extend the preceding Harness / Meta-Framework reports rather than repeating their established foundation.</p>
+<hr />
+<h1 id="1-date-and-scope">1. Date and Scope</h1>
+<p>This report is a <strong>delta-focused technical supplement</strong> to the previous Meta-Framework research.</p>
+<p>The broader program investigates the construction of a computational substrate for evolvable intelligent systems:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Immutable Kernel
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>→ Primitive Runtime
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>→ Composition / Phenotype Plane
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>→ Adaptation / Meta-Control
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>→ Evolution
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>→ Learning
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>→ Independent Evaluation
+</code></pre></div>
+<p>The objective is not to design a larger monolithic agent. It is to identify the smallest operational substrate from which agents, strategies, planners, memory systems, specialists, hierarchies, teams, and learning procedures can be composed, evaluated, mutated, selected, consolidated, and evolved.</p>
+<p>The research completed today materially changes the implementation thesis in four areas:</p>
+<ol>
+<li><strong>strategy revision is distinct from execution competence;</strong></li>
+<li><strong>architecture should increasingly be compiled from task structure rather than fixed globally;</strong></li>
+<li><strong>skill accumulation must be distinguished from genuine consolidation and abstraction;</strong></li>
+<li><strong>safe evolution requires explicit responsibility and mutation boundaries.</strong></li>
+</ol>
+<p>The research therefore moves the design one level above "self-improving harnesses" toward a framework that can detect <strong>which level of organization is failing</strong> and mutate the appropriate layer.</p>
+<hr />
+<h1 id="2-executive-summary">2. Executive Summary</h1>
+<p>The strongest new evidence is that current autonomous systems can improve execution while remaining strategically rigid.</p>
+<p>A recent empirical study of autonomous post-training agents reports that systems can operate complex training pipelines, debug implementations, retry failures, and improve local metrics while continuing to use the same high-level strategy chosen near the start of the run. The reported experience scaffolding improves execution substantially on some benchmarks, but does not reliably trigger strategy revision.</p>
+<p>This establishes a critical distinction:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Execution improvement
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>≠
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Strategic improvement
+</code></pre></div>
+<p>A system may optimize:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>actions
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>parameters
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>tool usage
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>local plans
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>retry policies
+</code></pre></div>
+<p>while failing to reconsider:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>problem representation
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>solution family
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>objective decomposition
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>training regime
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>architecture
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>search method
+</code></pre></div>
+<p>This creates a <strong>meta-level local optimum</strong>.</p>
+<p>The resulting architectural requirement is to make strategy and revision explicit, measurable, versioned objects.</p>
+<p>A second major result comes from task-conditioned orchestration work such as Eureka. Instead of using one universal architecture for every long-horizon task, the system derives local obligations and instantiates specialized structures only where they are justified. This supports the design principle:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Agent = compiled phenotype
+</code></pre></div>
+<p>rather than:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Agent = substrate primitive
+</code></pre></div>
+<p>The Meta-Framework should increasingly behave like a <strong>runtime architecture compiler</strong>.</p>
+<p>A third result comes from continual skill-learning evaluation. Sequential experience often helps, but explicit skill libraries are not always the causal source of improvement. In some settings, simple in-context adaptation performs comparably to explicit skill maintenance. Therefore:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>skill count
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>≠
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>learning
+</code></pre></div>
+<p>The scientifically important operation is <strong>consolidation</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>experience
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>→ recurring invariant
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>→ abstraction
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>→ compact procedure
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>→ held-out validation
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>→ durable promotion
+</code></pre></div>
+<p>A fourth result concerns safety. Safety Harness Evolution demonstrates that evolvable safety components become more tractable when responsibility is decomposed across explicit artifacts and trajectory evidence is used to localize failures. This strengthens the architecture rule:</p>
+<blockquote>
+<p>An artifact is safely evolvable only when its authority, responsibility, mutation scope, and evaluation contract are explicit.</p>
+</blockquote>
+<p>The revised candidate primitive set is therefore:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>OBSERVE
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>REPRESENT
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>PREDICT
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>SELECT
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>ACT
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>STORE
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>RETRIEVE
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>COMMUNICATE
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>ALLOCATE
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>VERIFY
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>EVALUATE
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>COMPOSE
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>VARY
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>CONSOLIDATE
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>REVISE
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>SCHEDULE
+</code></pre></div>
+<p><code>CONSOLIDATE</code> and <code>REVISE</code> are new explicit interfaces motivated by today's evidence.</p>
+<p>They should be implemented now as observable first-class operations, but not yet declared irreducible constitutional primitives.</p>
+<hr />
+<h1 id="3-evidence-model">3. Evidence Model</h1>
+<p>Claims use the following evidence grades:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>A — strong / replicated empirical evidence
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>B — published experimental evidence
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>C — engineering evidence / primary-source system evidence
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>D — plausible architectural hypothesis
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>E — speculation / long-range hypothesis
+</code></pre></div>
+<p>Today's strongest claims are primarily <strong>B/C</strong>.</p>
+<p>Important caution:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>paper result
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>≠
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>universal law
+</code></pre></div>
+<p>Every result should be treated as evidence for a falsifiable architectural hypothesis.</p>
+<hr />
+<h1 id="4-new-finding-1-strategic-intelligence-is-not-execution-intelligence">4. New Finding 1 — Strategic Intelligence Is Not Execution Intelligence</h1>
+<h2 id="observation">Observation</h2>
+<p>Autonomous systems can exhibit sophisticated local optimization while failing to invalidate an increasingly implausible global strategy.</p>
+<h2 id="evidence">Evidence</h2>
+<p>Recent empirical analysis of autonomous post-training trajectories reports:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>experience scaffolding
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>→ better execution
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>→ better local outcomes
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>→ little strategic reconsideration
+</code></pre></div>
+<p>Human intervention can alter the initial strategy, after which the system again tends toward local refinement.</p>
+<p><strong>Evidence grade: B.</strong></p>
+<h2 id="mechanism">Mechanism</h2>
+<p>Current loops frequently resemble:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>choose S0
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>repeat:
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    execute(S0)
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    observe
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    debug
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    tune
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    retry
+</code></pre></div>
+<p>The missing operation is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>if evidence_against(S0) accumulates:
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    generate alternative strategies
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    compare
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    branch / switch / abandon
+</code></pre></div>
+<p>The optimization landscape is hierarchical.</p>
+<p>Let:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>x = local execution parameters
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>S = strategy
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>A = architecture
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>L = learning procedure
+</code></pre></div>
+<p>Most current systems predominantly search:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>argmax_x U(x | S, A, L)
+</code></pre></div>
+<p>while deeper adaptation requires eventually searching:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>S
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>A
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>L
+</code></pre></div>
+<p>as well.</p>
+<p>This is the difference between local optimization and structural self-revision.</p>
+<hr />
+<h1 id="5-strategy-must-become-a-first-class-scientific-artifact">5. Strategy Must Become a First-Class Scientific Artifact</h1>
+<p>Strategy should not exist only as model prose.</p>
+<p>Proposed schema:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>StrategyDefinition {
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    id
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    problem_representation
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    assumptions
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    objective_decomposition
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    method_family
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    constraints
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>    predicted_observations
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>    falsification_conditions
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>    resource_model
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>    lineage
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>}
+</code></pre></div>
+<p>Runtime strategy state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>StrategyState {
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    strategy_id
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    selected_at
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    commitment_age
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    evidence_for
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    evidence_against
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    prediction_errors
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>    marginal_gain_history
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>    alternatives_considered
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    switching_cost
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>}
+</code></pre></div>
+<p>This allows the trajectory to answer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>What strategy was active?
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>Why was it selected?
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>What assumptions were made?
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>What observations contradicted it?
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Were alternatives generated?
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>Why was switching rejected?
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>How much budget was consumed after contradiction appeared?
+</code></pre></div>
+<p>Without this, strategy lock-in is invisible.</p>
+<hr />
+<h1 id="6-candidate-primitive-revise">6. Candidate Primitive — REVISE</h1>
+<p>Today's evidence justifies an explicit <code>REVISE</code> interface.</p>
+<p>Conceptual interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>RevisionDecision revise(
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    current_strategy,
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    evidence,
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    alternatives,
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    self_model,
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    remaining_budget,
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    switching_cost
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>)
+</code></pre></div>
+<p>Possible outputs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>CONTINUE
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>MODIFY
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>BRANCH
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>SWITCH
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>ABANDON
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>ESCALATE
+</code></pre></div>
+<p>Possible triggers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>diminishing marginal improvement
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>persistent prediction error
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>repeated same-family interventions
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>high evaluator disagreement
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>low confidence
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>failure recurrence
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>unexpected observations
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>excessive commitment age
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>sufficient exploration budget
+</code></pre></div>
+<p>The current hypothesis is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>REVISION
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>=
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>meta-level control over strategy selection
+</code></pre></div>
+<p>But its irreducibility remains unproven.</p>
+<p>It may ultimately reduce to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>PREDICT
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>+ EVALUATE
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>+ SELECT
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>+ VARY
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>+ REPRESENT
+</code></pre></div>
+<p>Therefore its status is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>failure-mode evidence: B
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>primitive irreducibility: D
+</code></pre></div>
+<hr />
+<h1 id="7-strategic-revision-as-value-of-computation">7. Strategic Revision as Value of Computation</h1>
+<p>Revision consumes resources and should not occur continuously.</p>
+<p>A rational controller approximates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>EVR =
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>ExpectedUtility(search_alternatives)
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>− ExpectedUtility(continue_current_strategy)
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>− RevisionCost
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>− SwitchingCost
+</code></pre></div>
+<p>Revision is justified when:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>EVR &gt; threshold
+</code></pre></div>
+<p>This connects the Meta-Framework to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>bounded rationality
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>value of computation
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>value of information
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>Bayesian model comparison
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>bandit theory
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>sequential decision processes
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>change-point detection
+</code></pre></div>
+<p>A practical early implementation can use deterministic heuristics while preserving the data required for later learned policies.</p>
+<hr />
+<h1 id="8-strategy-portfolios-instead-of-redundant-worker-populations">8. Strategy Portfolios Instead of Redundant Worker Populations</h1>
+<p>Multi-agent evidence already shows that more agents can reduce performance.</p>
+<p>Today's strategy-lock result suggests a better use for populations.</p>
+<p>Instead of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>worker_1(strategy_A)
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>worker_2(strategy_A)
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>worker_3(strategy_A)
+</code></pre></div>
+<p>use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>candidate_1(strategy_A)
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>candidate_2(strategy_B)
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>candidate_3(strategy_C)
+</code></pre></div>
+<p>This shifts the population objective from:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>execution redundancy
+</code></pre></div>
+<p>toward:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>hypothesis diversity
+</code></pre></div>
+<p>The important metric becomes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>strategic diversity per unit compute
+</code></pre></div>
+<p>This can be managed using:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>bandits
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>tournaments
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>Pareto selection
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>novelty search
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>Bayesian evidence
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>Quality Diversity
+</code></pre></div>
+<p>The resulting architecture is closer to a <strong>scientific hypothesis portfolio</strong> than a conventional swarm.</p>
+<hr />
+<h1 id="9-new-finding-2-architecture-should-be-compiled-lazily">9. New Finding 2 — Architecture Should Be Compiled Lazily</h1>
+<h2 id="evidence_1">Evidence</h2>
+<p>Eureka introduces task-conditioned orchestration based on obligation graphs and local Macro-Agent formation.</p>
+<p>Reported results include:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>170 / 170 recursive tasks completed
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>3,948 acceptance certificates
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>median model-input context:
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>9,490 → 4,005 tokens
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>65.38% repeated dependency processing avoided
+</code></pre></div>
+<p><strong>Evidence grade: B for the paper's experiments; C for architectural generalization until independently reproduced.</strong></p>
+<h2 id="mechanism_1">Mechanism</h2>
+<p>Instead of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>instantiate universal architecture
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>→ force task through fixed structure
+</code></pre></div>
+<p>use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>task evidence
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>→ derive obligations
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>→ detect architecture hotspot
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>→ instantiate minimal local structure
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>→ execute
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>→ verify
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>→ retire/recompile
+</code></pre></div>
+<p>This suggests:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>architecture = task-conditioned phenotype
+</code></pre></div>
+<hr />
+<h1 id="10-agent-should-remain-a-derived-phenotype">10. Agent Should Remain a Derived Phenotype</h1>
+<p>The stronger abstraction is not <code>Agent</code>.</p>
+<p>It is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>BoundedComputationalOrganization {
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>    composition_graph
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>    state_boundary
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>    capability_lease
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>    resource_lease
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>    model_policy
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a>    communication_endpoints
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a>}
+</code></pre></div>
+<p>An "agent" is one possible compiled form.</p>
+<p>A task may require:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>one sequential graph
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>temporary verifier
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>multiple specialists
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>market-like arbitration
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>no explicit agent boundary at all
+</code></pre></div>
+<p>Therefore the kernel and primitive runtime should not constitutionally depend on the <code>Agent</code> abstraction.</p>
+<hr />
+<h1 id="11-architecturegenome-must-include-development">11. ArchitectureGenome Must Include Development</h1>
+<p>The previous static genome model should be extended:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>ArchitectureGenome {
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>    primitive_genomes
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>    graph_constraints
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>    routing_policies
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>    memory_topology
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>    communication_topology
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>    resource_policies
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>    development_program
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a>    compilation_triggers
+<a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a>    specialization_rules
+<a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a>    retirement_rules
+<a id="__codelineno-41-13" name="__codelineno-41-13" href="#__codelineno-41-13"></a>
+<a id="__codelineno-41-14" name="__codelineno-41-14" href="#__codelineno-41-14"></a>    strategy_policy
+<a id="__codelineno-41-15" name="__codelineno-41-15" href="#__codelineno-41-15"></a>    revision_policy
+<a id="__codelineno-41-16" name="__codelineno-41-16" href="#__codelineno-41-16"></a>    consolidation_policy
+<a id="__codelineno-41-17" name="__codelineno-41-17" href="#__codelineno-41-17"></a>
+<a id="__codelineno-41-18" name="__codelineno-41-18" href="#__codelineno-41-18"></a>    lineage
+<a id="__codelineno-41-19" name="__codelineno-41-19" href="#__codelineno-41-19"></a>}
+</code></pre></div>
+<p>Example developmental rules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>IF independent branches &gt; threshold
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>THEN instantiate specialists
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>IF uncertainty high
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>AND effect risk high
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>THEN attach verifier
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a>IF repeated dependency detected
+<a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a>THEN create shared intermediate artifact
+<a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a>
+<a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a>IF strategic stagnation detected
+<a id="__codelineno-42-12" name="__codelineno-42-12" href="#__codelineno-42-12"></a>THEN spawn alternative-strategy branch
+</code></pre></div>
+<p>This creates two different evolutionary representations.</p>
+<h3 id="direct-encoding">Direct encoding</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>Genome
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>→ final graph
+</code></pre></div>
+<h3 id="developmental-encoding">Developmental encoding</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>Genome
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>→ construction rules
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>→ inspect task/environment
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>→ runtime phenotype
+</code></pre></div>
+<p>The second may scale better, but that is a testable hypothesis.</p>
+<hr />
+<h1 id="12-new-finding-3-skill-accumulation-is-not-equivalent-to-learning">12. New Finding 3 — Skill Accumulation Is Not Equivalent to Learning</h1>
+<p>ContinualSkillBench introduces an important negative control.</p>
+<p>Across sequential tasks, systems often improve.</p>
+<p>But the reported ablation shows that:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>in-context adaptation
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>≈
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>explicit skill maintenance
+</code></pre></div>
+<p>on average in some settings.</p>
+<p>Therefore three mechanisms must be separated:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>contextual adaptation
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>episodic reuse
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>procedural abstraction
+</code></pre></div>
+<p>Only the third constitutes robust skill consolidation.</p>
+<hr />
+<h1 id="13-mandatory-skill-learning-baselines">13. Mandatory Skill-Learning Baselines</h1>
+<p>Every claimed skill-learning experiment should compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>B0 isolated execution
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>B1 full-history / in-context adaptation
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>B2 episodic retrieval
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>B3 summarized memory
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>B4 explicit skill
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>B5 consolidated skill + evidence
+</code></pre></div>
+<p>Only if:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>B4/B5 &gt; B1/B2
+</code></pre></div>
+<p>on held-out transfer, context efficiency, or robustness does the skill system demonstrate independent value.</p>
+<p>This avoids attributing ordinary context effects to "learning."</p>
+<hr />
+<h1 id="14-candidate-primitive-consolidate">14. Candidate Primitive — CONSOLIDATE</h1>
+<p>The deeper operation is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>many experiences
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>→ identify invariant
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>→ remove incidental details
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>→ encode compact reusable structure
+<a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>→ estimate applicability
+<a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a>→ validate
+</code></pre></div>
+<p>This deserves an explicit interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>ConsolidationCandidate consolidate(
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>    evidence_set,
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>    existing_knowledge,
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>    target_scope,
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>    compression_budget
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>)
+</code></pre></div>
+<p>Possible output categories:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>NO_PERSISTENCE
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>EPISODE
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>SEMANTIC_FACT
+<a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a>PROCEDURE
+<a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a>SKILL
+<a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a>POLICY_UPDATE
+<a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a>WORLD_MODEL_UPDATE
+</code></pre></div>
+<p>Not every episode should survive.</p>
+<p>Selective forgetting is part of intelligent consolidation.</p>
+<hr />
+<h1 id="15-consolidation-quality">15. Consolidation Quality</h1>
+<p>A useful conceptual objective:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>ConsolidationUtility =
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>FutureUtilityGain
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>− PersistenceCost
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>− RetrievalCost
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>− InterferenceCost
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>− NegativeTransferRisk
+</code></pre></div>
+<p>Track:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>compression ratio
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>cross-task transfer
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>cross-environment transfer
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>activation precision
+<a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>activation recall
+<a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>reuse
+<a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>negative transfer
+<a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>redundancy
+<a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a>evidence quality
+</code></pre></div>
+<p>A long skill reused once may be worse than re-solving.</p>
+<p>A compact procedure used across hundreds of tasks may be highly valuable.</p>
+<hr />
+<h1 id="16-skill-fragmentation-as-a-failure-mode">16. Skill Fragmentation as a Failure Mode</h1>
+<p>Weaker systems can accumulate many narrow procedures.</p>
+<p>Define:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>SkillFragmentationIndex
+</code></pre></div>
+<p>using:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>skill count
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>mean reuse
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>median reuse
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a>semantic overlap
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>procedural overlap
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>conflict rate
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>cross-domain transfer
+<a id="__codelineno-55-8" name="__codelineno-55-8" href="#__codelineno-55-8"></a>description length
+</code></pre></div>
+<p>A healthy consolidation process should tend toward:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>experience ↑
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>reuse ↑
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>transfer ↑
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>while
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>persistent complexity grows sublinearly
+</code></pre></div>
+<p>If:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>skills ≈ tasks
+</code></pre></div>
+<p>the system is likely memorizing rather than abstracting.</p>
+<hr />
+<h1 id="17-new-finding-4-responsibility-is-a-requirement-for-safe-evolvability">17. New Finding 4 — Responsibility Is a Requirement for Safe Evolvability</h1>
+<p>Safety Harness Evolution decomposes safety across explicit artifacts and uses trajectory evidence to localize failures.</p>
+<p>The important systems lesson is broader than safety.</p>
+<p>Every evolvable component should expose:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>ResponsibilityContract {
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>    intended_responsibilities
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>    allowed_effects
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>    prohibited_effects
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>    security_properties
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>    resource_contract
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>    expected_failure_classes
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>    mutation_scope
+<a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a>    verification_requirements
+<a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a>}
+</code></pre></div>
+<p>This enables:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>failure
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>→ attribution
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>→ scoped mutation
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>→ targeted evaluation
+</code></pre></div>
+<p>rather than global rewrites.</p>
+<hr />
+<h1 id="18-evolvable-safety-policy-vs-immutable-security-authority">18. Evolvable Safety Policy vs Immutable Security Authority</h1>
+<p>Potentially evolvable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>risk heuristics
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>safety memories
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>warning rules
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>tool-selection policy
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>verification strategy
+<a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a>context filters
+</code></pre></div>
+<p>Immutable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>capability enforcement
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>sandbox
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>filesystem/network authority
+<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>resource ceilings
+<a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a>audit integrity
+<a id="__codelineno-61-6" name="__codelineno-61-6" href="#__codelineno-61-6"></a>artifact provenance
+<a id="__codelineno-61-7" name="__codelineno-61-7" href="#__codelineno-61-7"></a>evaluator authority
+<a id="__codelineno-61-8" name="__codelineno-61-8" href="#__codelineno-61-8"></a>promotion authority
+</code></pre></div>
+<p>Thus:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>evolvable safety
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>≠
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>evolvable security law
+</code></pre></div>
+<hr />
+<h1 id="19-new-finding-5-harness-evolution-has-capability-ceilings">19. New Finding 5 — Harness Evolution Has Capability Ceilings</h1>
+<p>Hierarchical Self-Improvement reports gains on some BALROG tasks but no improvement on NLE tasks beyond the frozen model's capability.</p>
+<p>This supports:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>Harness improvement can expose latent capability.
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>Harness improvement cannot guarantee creation of absent capability.
+</code></pre></div>
+<p>The Meta-Harness therefore needs a:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>CapabilityCeilingDetector
+</code></pre></div>
+<p>Signals include:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>many independent harness variants fail similarly
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>strategy diversity fails
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>marginal gain approaches zero
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>failure signature remains invariant
+<a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>stronger model succeeds under same harness
+<a id="__codelineno-65-6" name="__codelineno-65-6" href="#__codelineno-65-6"></a>new tool changes outcome sharply
+</code></pre></div>
+<p>Possible escalation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>switch model
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>add tool
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>change representation
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>retrieve external knowledge
+<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>train model
+<a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>request human input
+</code></pre></div>
+<p>This prevents endless scaffold search.</p>
+<hr />
+<h1 id="20-frozen-outer-anchor">20. Frozen Outer Anchor</h1>
+<p>Recursive improvement requires an evaluation frame that the candidate cannot rewrite.</p>
+<p>General rule:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>mutable object
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>is evaluated by
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>less mutable / externally governed object
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>M0–M3 architecture evolution
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>→ fixed Meta-Harness evaluator
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>
+<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>M4–M6 learning evolution
+<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>→ fixed experimental protocol
+<a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a>
+<a id="__codelineno-68-7" name="__codelineno-68-7" href="#__codelineno-68-7"></a>M7 mutation-policy evolution
+<a id="__codelineno-68-8" name="__codelineno-68-8" href="#__codelineno-68-8"></a>→ external scientific governance
+</code></pre></div>
+<p>The system must never simultaneously control:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>candidate
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>metric
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>evaluator
+<a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a>promotion rule
+<a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a>evidence interpretation
+</code></pre></div>
+<p>because scientific attribution collapses.</p>
+<hr />
+<h1 id="21-revised-primitive-ontology">21. Revised Primitive Ontology</h1>
+<p>Current candidate runtime primitives:</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OBSERVE</td>
+<td>acquire typed external/internal evidence</td>
+</tr>
+<tr>
+<td>REPRESENT</td>
+<td>transform/compress state</td>
+</tr>
+<tr>
+<td>PREDICT</td>
+<td>generate testable future-state expectations</td>
+</tr>
+<tr>
+<td>SELECT</td>
+<td>bounded choice</td>
+</tr>
+<tr>
+<td>ACT</td>
+<td>effect proposal/execution</td>
+</tr>
+<tr>
+<td>STORE</td>
+<td>persistence</td>
+</tr>
+<tr>
+<td>RETRIEVE</td>
+<td>contextual selection from persistence</td>
+</tr>
+<tr>
+<td>COMMUNICATE</td>
+<td>typed information transfer</td>
+</tr>
+<tr>
+<td>ALLOCATE</td>
+<td>scarce resource assignment</td>
+</tr>
+<tr>
+<td>VERIFY</td>
+<td>local obligation/contract checking</td>
+</tr>
+<tr>
+<td>EVALUATE</td>
+<td>candidate fitness measurement</td>
+</tr>
+<tr>
+<td>COMPOSE</td>
+<td>graph formation</td>
+</tr>
+<tr>
+<td>VARY</td>
+<td>mutation/recombination/synthesis</td>
+</tr>
+<tr>
+<td>CONSOLIDATE</td>
+<td>evidence-to-durable-abstraction</td>
+</tr>
+<tr>
+<td>REVISE</td>
+<td>higher-level strategic reconsideration</td>
+</tr>
+<tr>
+<td>SCHEDULE</td>
+<td>temporal/concurrent activation</td>
+</tr>
+</tbody>
+</table>
+<p>These are still hypotheses.</p>
+<p>The ontology should remain evolvable by evidence, not dogma.</p>
+<hr />
+<h1 id="22-immutable-kernel">22. Immutable Kernel</h1>
+<p>The kernel remains smaller than the cognitive substrate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>Identity
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>Authority
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>Capability Algebra
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>Resource Accounting
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>Canonical Event Integrity
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>Artifact Identity
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>Provenance
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a>Sandbox Isolation
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>Rollback
+<a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a>Evaluator Separation
+<a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a>Promotion Separation
+</code></pre></div>
+<p>The kernel should not know:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>planner
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>critic
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>skill
+<a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a>agent
+<a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>swarm
+<a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a>strategy
+<a id="__codelineno-71-7" name="__codelineno-71-7" href="#__codelineno-71-7"></a>memory architecture
+</code></pre></div>
+<p>That preserves future design-space freedom.</p>
+<hr />
+<h1 id="23-revised-event-model">23. Revised Event Model</h1>
+<p>New strategic events:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a>StrategyProposed
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>StrategySelected
+<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>StrategyEvidenceAdded
+<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a>StrategyChallenged
+<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>RevisionTriggered
+<a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a>RevisionDecision
+<a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a>StrategySwitched
+</code></pre></div>
+<p>New consolidation events:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>PatternDetected
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>ConsolidationCandidateCreated
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a>ConsolidationEvaluated
+<a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a>SkillPromoted
+<a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a>SkillRejected
+<a id="__codelineno-73-6" name="__codelineno-73-6" href="#__codelineno-73-6"></a>MemoryPromoted
+</code></pre></div>
+<p>New architecture events:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>ArchitectureNeedDetected
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>SubgraphCompiled
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>SubgraphActivated
+<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a>SubgraphRetired
+</code></pre></div>
+<p>New capability events:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>CapabilityCeilingSuspected
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>CapabilityEscalationRequested
+</code></pre></div>
+<p>Each event should preserve:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>event_id
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>run_id
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>parent_event_ids
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>actor/process
+<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a>artifact refs
+<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a>resource delta
+<a id="__codelineno-76-7" name="__codelineno-76-7" href="#__codelineno-76-7"></a>authority context
+<a id="__codelineno-76-8" name="__codelineno-76-8" href="#__codelineno-76-8"></a>evidence refs
+<a id="__codelineno-76-9" name="__codelineno-76-9" href="#__codelineno-76-9"></a>logical time
+</code></pre></div>
+<hr />
+<h1 id="24-failure-taxonomy">24. Failure Taxonomy</h1>
+<p>Before mutating, classify failure.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>F0 infrastructure
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>F1 execution
+<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>F2 tool/interface
+<a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a>F3 retrieval/context
+<a id="__codelineno-77-5" name="__codelineno-77-5" href="#__codelineno-77-5"></a>F4 tactical plan
+<a id="__codelineno-77-6" name="__codelineno-77-6" href="#__codelineno-77-6"></a>F5 strategy
+<a id="__codelineno-77-7" name="__codelineno-77-7" href="#__codelineno-77-7"></a>F6 architecture
+<a id="__codelineno-77-8" name="__codelineno-77-8" href="#__codelineno-77-8"></a>F7 knowledge
+<a id="__codelineno-77-9" name="__codelineno-77-9" href="#__codelineno-77-9"></a>F8 model capability
+<a id="__codelineno-77-10" name="__codelineno-77-10" href="#__codelineno-77-10"></a>F9 evaluator
+<a id="__codelineno-77-11" name="__codelineno-77-11" href="#__codelineno-77-11"></a>F10 security
+<a id="__codelineno-77-12" name="__codelineno-77-12" href="#__codelineno-77-12"></a>F11 consolidation
+<a id="__codelineno-77-13" name="__codelineno-77-13" href="#__codelineno-77-13"></a>F12 coordination
+</code></pre></div>
+<p>The mutation engine should receive:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>failure_class
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>+
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>responsible_component_set
+</code></pre></div>
+<p>and restrict candidate mutation accordingly.</p>
+<p>This sharply reduces search entropy.</p>
+<hr />
+<h1 id="25-revised-meta-harness">25. Revised Meta-Harness</h1>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>Evidence Collector
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>        ↓
+<a id="__codelineno-79-3" name="__codelineno-79-3" href="#__codelineno-79-3"></a>Failure Classifier
+<a id="__codelineno-79-4" name="__codelineno-79-4" href="#__codelineno-79-4"></a>        ↓
+<a id="__codelineno-79-5" name="__codelineno-79-5" href="#__codelineno-79-5"></a>Stagnation / Opportunity Detector
+<a id="__codelineno-79-6" name="__codelineno-79-6" href="#__codelineno-79-6"></a>        ↓
+<a id="__codelineno-79-7" name="__codelineno-79-7" href="#__codelineno-79-7"></a>Hypothesis Generator
+<a id="__codelineno-79-8" name="__codelineno-79-8" href="#__codelineno-79-8"></a>        ↓
+<a id="__codelineno-79-9" name="__codelineno-79-9" href="#__codelineno-79-9"></a>Alternative Strategy Generator
+<a id="__codelineno-79-10" name="__codelineno-79-10" href="#__codelineno-79-10"></a>        ↓
+<a id="__codelineno-79-11" name="__codelineno-79-11" href="#__codelineno-79-11"></a>Mutation-Surface Selector
+<a id="__codelineno-79-12" name="__codelineno-79-12" href="#__codelineno-79-12"></a>        ↓
+<a id="__codelineno-79-13" name="__codelineno-79-13" href="#__codelineno-79-13"></a>Mutation Generator
+<a id="__codelineno-79-14" name="__codelineno-79-14" href="#__codelineno-79-14"></a>        ↓
+<a id="__codelineno-79-15" name="__codelineno-79-15" href="#__codelineno-79-15"></a>Experiment Designer
+<a id="__codelineno-79-16" name="__codelineno-79-16" href="#__codelineno-79-16"></a>        ↓
+<a id="__codelineno-79-17" name="__codelineno-79-17" href="#__codelineno-79-17"></a>Candidate / Phenotype Compiler
+<a id="__codelineno-79-18" name="__codelineno-79-18" href="#__codelineno-79-18"></a>        ↓
+<a id="__codelineno-79-19" name="__codelineno-79-19" href="#__codelineno-79-19"></a>Benchmark Runner
+<a id="__codelineno-79-20" name="__codelineno-79-20" href="#__codelineno-79-20"></a>        ↓
+<a id="__codelineno-79-21" name="__codelineno-79-21" href="#__codelineno-79-21"></a>Independent Evaluator
+<a id="__codelineno-79-22" name="__codelineno-79-22" href="#__codelineno-79-22"></a>        ↓
+<a id="__codelineno-79-23" name="__codelineno-79-23" href="#__codelineno-79-23"></a>Statistical + Causal Comparator
+<a id="__codelineno-79-24" name="__codelineno-79-24" href="#__codelineno-79-24"></a>        ↓
+<a id="__codelineno-79-25" name="__codelineno-79-25" href="#__codelineno-79-25"></a>Promotion Authority
+<a id="__codelineno-79-26" name="__codelineno-79-26" href="#__codelineno-79-26"></a>        ↓
+<a id="__codelineno-79-27" name="__codelineno-79-27" href="#__codelineno-79-27"></a>Registries / Lineage
+</code></pre></div>
+<p>This is not a privileged super-agent.</p>
+<p>It is an automated experimental control system.</p>
+<hr />
+<h1 id="26-mutation-power-becomes-two-dimensional">26. Mutation Power Becomes Two-Dimensional</h1>
+<p>Existing mutation levels:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>M0 runtime parameters
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>M1 runtime policies
+<a id="__codelineno-80-3" name="__codelineno-80-3" href="#__codelineno-80-3"></a>M2 skills
+<a id="__codelineno-80-4" name="__codelineno-80-4" href="#__codelineno-80-4"></a>M3 topology
+<a id="__codelineno-80-5" name="__codelineno-80-5" href="#__codelineno-80-5"></a>M4 learning configuration
+<a id="__codelineno-80-6" name="__codelineno-80-6" href="#__codelineno-80-6"></a>M5 model parameters
+<a id="__codelineno-80-7" name="__codelineno-80-7" href="#__codelineno-80-7"></a>M6 learning algorithms
+<a id="__codelineno-80-8" name="__codelineno-80-8" href="#__codelineno-80-8"></a>M7 evolutionary mechanisms
+<a id="__codelineno-80-9" name="__codelineno-80-9" href="#__codelineno-80-9"></a>M8 experimental methodology
+</code></pre></div>
+<p>Add scope:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>S0 local
+<a id="__codelineno-81-2" name="__codelineno-81-2" href="#__codelineno-81-2"></a>S1 component
+<a id="__codelineno-81-3" name="__codelineno-81-3" href="#__codelineno-81-3"></a>S2 subgraph
+<a id="__codelineno-81-4" name="__codelineno-81-4" href="#__codelineno-81-4"></a>S3 architecture
+<a id="__codelineno-81-5" name="__codelineno-81-5" href="#__codelineno-81-5"></a>S4 population
+<a id="__codelineno-81-6" name="__codelineno-81-6" href="#__codelineno-81-6"></a>S5 evolutionary process
+</code></pre></div>
+<p>Approximate risk:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-82-1" name="__codelineno-82-1" href="#__codelineno-82-1"></a>Risk ∝
+<a id="__codelineno-82-2" name="__codelineno-82-2" href="#__codelineno-82-2"></a>MutationPower
+<a id="__codelineno-82-3" name="__codelineno-82-3" href="#__codelineno-82-3"></a>× Scope
+<a id="__codelineno-82-4" name="__codelineno-82-4" href="#__codelineno-82-4"></a>× Irreversibility
+<a id="__codelineno-82-5" name="__codelineno-82-5" href="#__codelineno-82-5"></a>× AuthorityProximity
+<a id="__codelineno-82-6" name="__codelineno-82-6" href="#__codelineno-82-6"></a>× Uncertainty
+</code></pre></div>
+<p>This produces more precise authorization.</p>
+<hr />
+<h1 id="27-strategygenome-vs-architecturegenome">27. StrategyGenome vs ArchitectureGenome</h1>
+<p>A strategy describes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-83-1" name="__codelineno-83-1" href="#__codelineno-83-1"></a>how the problem is conceptualized
+</code></pre></div>
+<p>Architecture describes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-84-1" name="__codelineno-84-1" href="#__codelineno-84-1"></a>what computational organization executes it
+</code></pre></div>
+<p>They should eventually be separable.</p>
+<p>Potential future representation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-85-1" name="__codelineno-85-1" href="#__codelineno-85-1"></a>StrategyGenome
+<a id="__codelineno-85-2" name="__codelineno-85-2" href="#__codelineno-85-2"></a>ArchitectureGenome
+</code></pre></div>
+<p>Cross experiment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-86-1" name="__codelineno-86-1" href="#__codelineno-86-1"></a>S1 + A1
+<a id="__codelineno-86-2" name="__codelineno-86-2" href="#__codelineno-86-2"></a>S1 + A2
+<a id="__codelineno-86-3" name="__codelineno-86-3" href="#__codelineno-86-3"></a>S2 + A1
+<a id="__codelineno-86-4" name="__codelineno-86-4" href="#__codelineno-86-4"></a>S2 + A2
+</code></pre></div>
+<p>This reveals whether gains arise from better strategy or better execution organization.</p>
+<hr />
+<h1 id="28-causal-attribution">28. Causal Attribution</h1>
+<p>Overall performance delta is not sufficient.</p>
+<p>Use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-87-1" name="__codelineno-87-1" href="#__codelineno-87-1"></a>same-seed replay
+<a id="__codelineno-87-2" name="__codelineno-87-2" href="#__codelineno-87-2"></a>multi-seed replication
+<a id="__codelineno-87-3" name="__codelineno-87-3" href="#__codelineno-87-3"></a>held-out tasks
+<a id="__codelineno-87-4" name="__codelineno-87-4" href="#__codelineno-87-4"></a>component ablation
+<a id="__codelineno-87-5" name="__codelineno-87-5" href="#__codelineno-87-5"></a>component swap
+<a id="__codelineno-87-6" name="__codelineno-87-6" href="#__codelineno-87-6"></a>cross-model test
+<a id="__codelineno-87-7" name="__codelineno-87-7" href="#__codelineno-87-7"></a>cross-environment test
+</code></pre></div>
+<p>For interaction effects:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-88-1" name="__codelineno-88-1" href="#__codelineno-88-1"></a>remove X
+<a id="__codelineno-88-2" name="__codelineno-88-2" href="#__codelineno-88-2"></a>replace X
+<a id="__codelineno-88-3" name="__codelineno-88-3" href="#__codelineno-88-3"></a>freeze X
+<a id="__codelineno-88-4" name="__codelineno-88-4" href="#__codelineno-88-4"></a>swap X
+<a id="__codelineno-88-5" name="__codelineno-88-5" href="#__codelineno-88-5"></a>sample component coalitions
+</code></pre></div>
+<p>Full Shapley attribution may be too expensive, but Shapley-inspired marginal analysis is practical.</p>
+<hr />
+<h1 id="29-fitness-must-include-meta-capability">29. Fitness Must Include Meta-Capability</h1>
+<p>Extend <code>FitnessVector</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-89-1" name="__codelineno-89-1" href="#__codelineno-89-1"></a>correctness
+<a id="__codelineno-89-2" name="__codelineno-89-2" href="#__codelineno-89-2"></a>generalization
+<a id="__codelineno-89-3" name="__codelineno-89-3" href="#__codelineno-89-3"></a>robustness
+<a id="__codelineno-89-4" name="__codelineno-89-4" href="#__codelineno-89-4"></a>reliability
+<a id="__codelineno-89-5" name="__codelineno-89-5" href="#__codelineno-89-5"></a>autonomy
+<a id="__codelineno-89-6" name="__codelineno-89-6" href="#__codelineno-89-6"></a>latency
+<a id="__codelineno-89-7" name="__codelineno-89-7" href="#__codelineno-89-7"></a>tokens
+<a id="__codelineno-89-8" name="__codelineno-89-8" href="#__codelineno-89-8"></a>cost
+<a id="__codelineno-89-9" name="__codelineno-89-9" href="#__codelineno-89-9"></a>compute
+<a id="__codelineno-89-10" name="__codelineno-89-10" href="#__codelineno-89-10"></a>memory
+<a id="__codelineno-89-11" name="__codelineno-89-11" href="#__codelineno-89-11"></a>recovery
+<a id="__codelineno-89-12" name="__codelineno-89-12" href="#__codelineno-89-12"></a>safety
+<a id="__codelineno-89-13" name="__codelineno-89-13" href="#__codelineno-89-13"></a>reproducibility
+<a id="__codelineno-89-14" name="__codelineno-89-14" href="#__codelineno-89-14"></a>adaptability
+<a id="__codelineno-89-15" name="__codelineno-89-15" href="#__codelineno-89-15"></a>learning efficiency
+<a id="__codelineno-89-16" name="__codelineno-89-16" href="#__codelineno-89-16"></a>
+<a id="__codelineno-89-17" name="__codelineno-89-17" href="#__codelineno-89-17"></a>strategy adaptability
+<a id="__codelineno-89-18" name="__codelineno-89-18" href="#__codelineno-89-18"></a>consolidation efficiency
+<a id="__codelineno-89-19" name="__codelineno-89-19" href="#__codelineno-89-19"></a>architecture efficiency
+<a id="__codelineno-89-20" name="__codelineno-89-20" href="#__codelineno-89-20"></a>capability-ceiling detection accuracy
+</code></pre></div>
+<p>Conceptually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-90-1" name="__codelineno-90-1" href="#__codelineno-90-1"></a>StrategyAdaptability
+<a id="__codelineno-90-2" name="__codelineno-90-2" href="#__codelineno-90-2"></a>=
+<a id="__codelineno-90-3" name="__codelineno-90-3" href="#__codelineno-90-3"></a>quality of evidence-triggered strategy switching
+<a id="__codelineno-90-4" name="__codelineno-90-4" href="#__codelineno-90-4"></a>
+<a id="__codelineno-90-5" name="__codelineno-90-5" href="#__codelineno-90-5"></a>ConsolidationEfficiency
+<a id="__codelineno-90-6" name="__codelineno-90-6" href="#__codelineno-90-6"></a>=
+<a id="__codelineno-90-7" name="__codelineno-90-7" href="#__codelineno-90-7"></a>future utility gained / durable complexity added
+<a id="__codelineno-90-8" name="__codelineno-90-8" href="#__codelineno-90-8"></a>
+<a id="__codelineno-90-9" name="__codelineno-90-9" href="#__codelineno-90-9"></a>ArchitectureEfficiency
+<a id="__codelineno-90-10" name="__codelineno-90-10" href="#__codelineno-90-10"></a>=
+<a id="__codelineno-90-11" name="__codelineno-90-11" href="#__codelineno-90-11"></a>task utility / active architecture cost
+<a id="__codelineno-90-12" name="__codelineno-90-12" href="#__codelineno-90-12"></a>
+<a id="__codelineno-90-13" name="__codelineno-90-13" href="#__codelineno-90-13"></a>CeilingDetectionAccuracy
+<a id="__codelineno-90-14" name="__codelineno-90-14" href="#__codelineno-90-14"></a>=
+<a id="__codelineno-90-15" name="__codelineno-90-15" href="#__codelineno-90-15"></a>correct stop/escalate decisions
+</code></pre></div>
+<p>These measure higher-order competence.</p>
+<hr />
+<h1 id="30-emergence-requires-null-models">30. Emergence Requires Null Models</h1>
+<p>A phenomenon should not be labeled emergent unless it is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-91-1" name="__codelineno-91-1" href="#__codelineno-91-1"></a>not explicitly prescribed
+<a id="__codelineno-91-2" name="__codelineno-91-2" href="#__codelineno-91-2"></a>reproducible
+<a id="__codelineno-91-3" name="__codelineno-91-3" href="#__codelineno-91-3"></a>functionally useful
+<a id="__codelineno-91-4" name="__codelineno-91-4" href="#__codelineno-91-4"></a>causally beneficial
+<a id="__codelineno-91-5" name="__codelineno-91-5" href="#__codelineno-91-5"></a>transferable
+<a id="__codelineno-91-6" name="__codelineno-91-6" href="#__codelineno-91-6"></a>robust to null controls
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-92-1" name="__codelineno-92-1" href="#__codelineno-92-1"></a>spontaneous specialization
+<a id="__codelineno-92-2" name="__codelineno-92-2" href="#__codelineno-92-2"></a>novel communication protocol
+<a id="__codelineno-92-3" name="__codelineno-92-3" href="#__codelineno-92-3"></a>new reusable abstraction
+<a id="__codelineno-92-4" name="__codelineno-92-4" href="#__codelineno-92-4"></a>adaptive topology
+<a id="__codelineno-92-5" name="__codelineno-92-5" href="#__codelineno-92-5"></a>strategy diversification
+<a id="__codelineno-92-6" name="__codelineno-92-6" href="#__codelineno-92-6"></a>exaptation
+</code></pre></div>
+<p>Controls:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-93-1" name="__codelineno-93-1" href="#__codelineno-93-1"></a>remove role labels
+<a id="__codelineno-93-2" name="__codelineno-93-2" href="#__codelineno-93-2"></a>randomize identities
+<a id="__codelineno-93-3" name="__codelineno-93-3" href="#__codelineno-93-3"></a>scramble messages
+<a id="__codelineno-93-4" name="__codelineno-93-4" href="#__codelineno-93-4"></a>freeze topology
+<a id="__codelineno-93-5" name="__codelineno-93-5" href="#__codelineno-93-5"></a>equalize compute
+<a id="__codelineno-93-6" name="__codelineno-93-6" href="#__codelineno-93-6"></a>repeat across seeds
+</code></pre></div>
+<p>Emergence is an empirical claim.</p>
+<hr />
+<h1 id="31-persistent-adaptation-is-a-security-surface">31. Persistent Adaptation Is a Security Surface</h1>
+<p>Any artifact capable of changing future behavior should include:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-94-1" name="__codelineno-94-1" href="#__codelineno-94-1"></a>provenance
+<a id="__codelineno-94-2" name="__codelineno-94-2" href="#__codelineno-94-2"></a>creator
+<a id="__codelineno-94-3" name="__codelineno-94-3" href="#__codelineno-94-3"></a>evidence
+<a id="__codelineno-94-4" name="__codelineno-94-4" href="#__codelineno-94-4"></a>scope
+<a id="__codelineno-94-5" name="__codelineno-94-5" href="#__codelineno-94-5"></a>confidence
+<a id="__codelineno-94-6" name="__codelineno-94-6" href="#__codelineno-94-6"></a>security state
+<a id="__codelineno-94-7" name="__codelineno-94-7" href="#__codelineno-94-7"></a>promotion state
+<a id="__codelineno-94-8" name="__codelineno-94-8" href="#__codelineno-94-8"></a>expiry/decay
+<a id="__codelineno-94-9" name="__codelineno-94-9" href="#__codelineno-94-9"></a>compatibility
+</code></pre></div>
+<p>Persistent artifacts need:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-95-1" name="__codelineno-95-1" href="#__codelineno-95-1"></a>quarantine
+<a id="__codelineno-95-2" name="__codelineno-95-2" href="#__codelineno-95-2"></a>revocation
+<a id="__codelineno-95-3" name="__codelineno-95-3" href="#__codelineno-95-3"></a>rollback
+<a id="__codelineno-95-4" name="__codelineno-95-4" href="#__codelineno-95-4"></a>supersession
+<a id="__codelineno-95-5" name="__codelineno-95-5" href="#__codelineno-95-5"></a>conflict tracking
+</code></pre></div>
+<p>Repeated model-generated content is not validated knowledge.</p>
+<hr />
+<h1 id="32-revised-minimum-viable-meta-framework">32. Revised Minimum Viable Meta-Framework</h1>
+<p>The MVP is an <strong>experimental operating system for evolvable computation</strong>.</p>
+<p>Required modules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-96-1" name="__codelineno-96-1" href="#__codelineno-96-1"></a>Primitive Registry
+<a id="__codelineno-96-2" name="__codelineno-96-2" href="#__codelineno-96-2"></a>Composition Graph
+<a id="__codelineno-96-3" name="__codelineno-96-3" href="#__codelineno-96-3"></a>Canonical Event System
+<a id="__codelineno-96-4" name="__codelineno-96-4" href="#__codelineno-96-4"></a>Trajectory DAG
+<a id="__codelineno-96-5" name="__codelineno-96-5" href="#__codelineno-96-5"></a>Artifact Store
+<a id="__codelineno-96-6" name="__codelineno-96-6" href="#__codelineno-96-6"></a>Model Gateway
+<a id="__codelineno-96-7" name="__codelineno-96-7" href="#__codelineno-96-7"></a>Sandbox
+<a id="__codelineno-96-8" name="__codelineno-96-8" href="#__codelineno-96-8"></a>Budget Ledger
+<a id="__codelineno-96-9" name="__codelineno-96-9" href="#__codelineno-96-9"></a>
+<a id="__codelineno-96-10" name="__codelineno-96-10" href="#__codelineno-96-10"></a>Hypothesis Registry
+<a id="__codelineno-96-11" name="__codelineno-96-11" href="#__codelineno-96-11"></a>Experiment Registry
+<a id="__codelineno-96-12" name="__codelineno-96-12" href="#__codelineno-96-12"></a>Evaluator Registry
+<a id="__codelineno-96-13" name="__codelineno-96-13" href="#__codelineno-96-13"></a>
+<a id="__codelineno-96-14" name="__codelineno-96-14" href="#__codelineno-96-14"></a>Strategy Registry
+<a id="__codelineno-96-15" name="__codelineno-96-15" href="#__codelineno-96-15"></a>Revision Interface
+<a id="__codelineno-96-16" name="__codelineno-96-16" href="#__codelineno-96-16"></a>
+<a id="__codelineno-96-17" name="__codelineno-96-17" href="#__codelineno-96-17"></a>Memory Registry
+<a id="__codelineno-96-18" name="__codelineno-96-18" href="#__codelineno-96-18"></a>Skill Registry
+<a id="__codelineno-96-19" name="__codelineno-96-19" href="#__codelineno-96-19"></a>Consolidation Interface
+<a id="__codelineno-96-20" name="__codelineno-96-20" href="#__codelineno-96-20"></a>
+<a id="__codelineno-96-21" name="__codelineno-96-21" href="#__codelineno-96-21"></a>ArchitectureGenome
+<a id="__codelineno-96-22" name="__codelineno-96-22" href="#__codelineno-96-22"></a>Architecture Compiler
+<a id="__codelineno-96-23" name="__codelineno-96-23" href="#__codelineno-96-23"></a>
+<a id="__codelineno-96-24" name="__codelineno-96-24" href="#__codelineno-96-24"></a>Mutation Engine
+<a id="__codelineno-96-25" name="__codelineno-96-25" href="#__codelineno-96-25"></a>Population Registry
+<a id="__codelineno-96-26" name="__codelineno-96-26" href="#__codelineno-96-26"></a>Selection Engine
+<a id="__codelineno-96-27" name="__codelineno-96-27" href="#__codelineno-96-27"></a>Lineage Graph
+<a id="__codelineno-96-28" name="__codelineno-96-28" href="#__codelineno-96-28"></a>
+<a id="__codelineno-96-29" name="__codelineno-96-29" href="#__codelineno-96-29"></a>Promotion Controller
+<a id="__codelineno-96-30" name="__codelineno-96-30" href="#__codelineno-96-30"></a>Observability
+</code></pre></div>
+<p>Initial autonomous mutation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-97-1" name="__codelineno-97-1" href="#__codelineno-97-1"></a>M0–M3
+</code></pre></div>
+<p>Protected:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-98-1" name="__codelineno-98-1" href="#__codelineno-98-1"></a>kernel
+<a id="__codelineno-98-2" name="__codelineno-98-2" href="#__codelineno-98-2"></a>security enforcement
+<a id="__codelineno-98-3" name="__codelineno-98-3" href="#__codelineno-98-3"></a>evaluator authority
+<a id="__codelineno-98-4" name="__codelineno-98-4" href="#__codelineno-98-4"></a>promotion authority
+<a id="__codelineno-98-5" name="__codelineno-98-5" href="#__codelineno-98-5"></a>model weights
+<a id="__codelineno-98-6" name="__codelineno-98-6" href="#__codelineno-98-6"></a>learning algorithms
+<a id="__codelineno-98-7" name="__codelineno-98-7" href="#__codelineno-98-7"></a>experimental methodology
+</code></pre></div>
+<hr />
+<h1 id="33-top-10-experiments">33. Top 10 Experiments</h1>
+<h2 id="e1-strategy-lock-in">E1 — Strategy Lock-In</h2>
+<p>Construct problems with deceptive local optima.</p>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a>ordinary replanning
+<a id="__codelineno-99-2" name="__codelineno-99-2" href="#__codelineno-99-2"></a>reflection
+<a id="__codelineno-99-3" name="__codelineno-99-3" href="#__codelineno-99-3"></a>periodic revision
+<a id="__codelineno-99-4" name="__codelineno-99-4" href="#__codelineno-99-4"></a>stagnation-triggered revision
+<a id="__codelineno-99-5" name="__codelineno-99-5" href="#__codelineno-99-5"></a>strategic population
+</code></pre></div>
+<p>Primary metric:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a>strategic regret
+</code></pre></div>
+<h2 id="e2-strategy-diversity-vs-worker-count">E2 — Strategy Diversity vs Worker Count</h2>
+<p>Equal total compute.</p>
+<p>Compare one strategy with N workers against N competing strategies.</p>
+<h2 id="e3-minimal-architecture-compilation">E3 — Minimal Architecture Compilation</h2>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>universal architecture
+<a id="__codelineno-101-2" name="__codelineno-101-2" href="#__codelineno-101-2"></a>static template routing
+<a id="__codelineno-101-3" name="__codelineno-101-3" href="#__codelineno-101-3"></a>runtime architecture compilation
+</code></pre></div>
+<h2 id="e4-direct-vs-developmental-genome">E4 — Direct vs Developmental Genome</h2>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a>final graph evolution
+<a id="__codelineno-102-2" name="__codelineno-102-2" href="#__codelineno-102-2"></a>vs
+<a id="__codelineno-102-3" name="__codelineno-102-3" href="#__codelineno-102-3"></a>graph-construction-rule evolution
+</code></pre></div>
+<h2 id="e5-skill-reality-test">E5 — Skill Reality Test</h2>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>isolated
+<a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>history-only
+<a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>episodic memory
+<a id="__codelineno-103-4" name="__codelineno-103-4" href="#__codelineno-103-4"></a>summary
+<a id="__codelineno-103-5" name="__codelineno-103-5" href="#__codelineno-103-5"></a>explicit skill
+<a id="__codelineno-103-6" name="__codelineno-103-6" href="#__codelineno-103-6"></a>consolidated skill
+</code></pre></div>
+<h2 id="e6-skill-compression-frontier">E6 — Skill Compression Frontier</h2>
+<p>Measure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>persistent complexity
+<a id="__codelineno-104-2" name="__codelineno-104-2" href="#__codelineno-104-2"></a>vs
+<a id="__codelineno-104-3" name="__codelineno-104-3" href="#__codelineno-104-3"></a>held-out utility
+</code></pre></div>
+<h2 id="e7-capability-ceiling-detection">E7 — Capability Ceiling Detection</h2>
+<p>Mix tasks solvable by harness changes with tasks requiring new model/tool capability.</p>
+<h2 id="e8-responsibility-guided-safety-evolution">E8 — Responsibility-Guided Safety Evolution</h2>
+<p>Inject localized failures and test scoped repair.</p>
+<h2 id="e9-causal-mutation-attribution">E9 — Causal Mutation Attribution</h2>
+<p>Compare naïve candidate deltas against component ablation and swaps.</p>
+<h2 id="e10-meta-evolution-with-frozen-anchor">E10 — Meta-Evolution with Frozen Anchor</h2>
+<p>Allow mutation-policy adaptation while evaluator, promotion, and security remain immutable.</p>
+<hr />
+<h1 id="34-falsification-matrix">34. Falsification Matrix</h1>
+<table>
+<thead>
+<tr>
+<th>Hypothesis</th>
+<th>Supporting evidence</th>
+<th>Falsification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>explicit revision improves strategic adaptation</td>
+<td>post-training strategy-lock evidence</td>
+<td>no gain over ordinary replanning</td>
+</tr>
+<tr>
+<td>dynamic architecture compilation improves efficiency</td>
+<td>Eureka</td>
+<td>static templates dominate after overhead</td>
+</tr>
+<tr>
+<td>explicit skills produce durable abstraction</td>
+<td>selective skill-benchmark gains</td>
+<td>context-only matches on transfer/cost</td>
+</tr>
+<tr>
+<td>responsibility decomposition improves safe evolution</td>
+<td>SHE</td>
+<td>composition effects defeat localization</td>
+</tr>
+<tr>
+<td>harness evolution exposes latent capability</td>
+<td>HSI / AHE family</td>
+<td>no gain over simple search baseline</td>
+</tr>
+<tr>
+<td>harness evolution has model ceilings</td>
+<td>HSI negative NLE result</td>
+<td>harness crosses repeated frozen-model ceiling</td>
+</tr>
+<tr>
+<td>strategic populations help escape local optima</td>
+<td>lock-in evidence + evolutionary logic</td>
+<td>duplicated execution dominates</td>
+</tr>
+<tr>
+<td>developmental genomes improve evolvability</td>
+<td>developmental hypothesis</td>
+<td>direct graph evolution dominates transfer/search</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="35-what-should-not-be-hard-coded">35. What Should Not Be Hard-Coded</h1>
+<p>Current evidence argues against making these constitutional primitives:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a>planner
+<a id="__codelineno-105-2" name="__codelineno-105-2" href="#__codelineno-105-2"></a>critic
+<a id="__codelineno-105-3" name="__codelineno-105-3" href="#__codelineno-105-3"></a>reflection loop
+<a id="__codelineno-105-4" name="__codelineno-105-4" href="#__codelineno-105-4"></a>fixed agent boundary
+<a id="__codelineno-105-5" name="__codelineno-105-5" href="#__codelineno-105-5"></a>fixed agent count
+<a id="__codelineno-105-6" name="__codelineno-105-6" href="#__codelineno-105-6"></a>hierarchy
+<a id="__codelineno-105-7" name="__codelineno-105-7" href="#__codelineno-105-7"></a>swarm
+<a id="__codelineno-105-8" name="__codelineno-105-8" href="#__codelineno-105-8"></a>permanent skill injection
+<a id="__codelineno-105-9" name="__codelineno-105-9" href="#__codelineno-105-9"></a>fixed memory topology
+<a id="__codelineno-105-10" name="__codelineno-105-10" href="#__codelineno-105-10"></a>fixed communication protocol
+<a id="__codelineno-105-11" name="__codelineno-105-11" href="#__codelineno-105-11"></a>fixed architecture
+</code></pre></div>
+<p>These should remain derived, learned, compiled, or evolved.</p>
+<p>The substrate should hard-code only:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>execution semantics
+<a id="__codelineno-106-2" name="__codelineno-106-2" href="#__codelineno-106-2"></a>authority
+<a id="__codelineno-106-3" name="__codelineno-106-3" href="#__codelineno-106-3"></a>resources
+<a id="__codelineno-106-4" name="__codelineno-106-4" href="#__codelineno-106-4"></a>identity
+<a id="__codelineno-106-5" name="__codelineno-106-5" href="#__codelineno-106-5"></a>causal evidence
+<a id="__codelineno-106-6" name="__codelineno-106-6" href="#__codelineno-106-6"></a>reproducibility
+<a id="__codelineno-106-7" name="__codelineno-106-7" href="#__codelineno-106-7"></a>safe effects
+<a id="__codelineno-106-8" name="__codelineno-106-8" href="#__codelineno-106-8"></a>scientific evaluation
+</code></pre></div>
+<hr />
+<h1 id="36-operational-definition-of-intelligence">36. Operational Definition of Intelligence</h1>
+<p>For the Meta-Framework, intelligence should be measured behaviorally.</p>
+<p>A system becomes more intelligent when, under controlled resources, it improves its ability to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a>solve novel problems
+<a id="__codelineno-107-2" name="__codelineno-107-2" href="#__codelineno-107-2"></a>learn from fewer experiences
+<a id="__codelineno-107-3" name="__codelineno-107-3" href="#__codelineno-107-3"></a>transfer abstractions
+<a id="__codelineno-107-4" name="__codelineno-107-4" href="#__codelineno-107-4"></a>select strategies
+<a id="__codelineno-107-5" name="__codelineno-107-5" href="#__codelineno-107-5"></a>detect strategy failure
+<a id="__codelineno-107-6" name="__codelineno-107-6" href="#__codelineno-107-6"></a>adapt architecture
+<a id="__codelineno-107-7" name="__codelineno-107-7" href="#__codelineno-107-7"></a>recover from failure
+<a id="__codelineno-107-8" name="__codelineno-107-8" href="#__codelineno-107-8"></a>allocate resources rationally
+<a id="__codelineno-107-9" name="__codelineno-107-9" href="#__codelineno-107-9"></a>exploit new affordances
+<a id="__codelineno-107-10" name="__codelineno-107-10" href="#__codelineno-107-10"></a>maintain calibration
+</code></pre></div>
+<p>while preserving:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>reliability
+<a id="__codelineno-108-2" name="__codelineno-108-2" href="#__codelineno-108-2"></a>safety
+<a id="__codelineno-108-3" name="__codelineno-108-3" href="#__codelineno-108-3"></a>reproducibility
+</code></pre></div>
+<p>This defines a measurable capability frontier.</p>
+<hr />
+<h1 id="37-final-architectural-synthesis">37. Final Architectural Synthesis</h1>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>IMMUTABLE KERNEL
+<a id="__codelineno-109-2" name="__codelineno-109-2" href="#__codelineno-109-2"></a>identity
+<a id="__codelineno-109-3" name="__codelineno-109-3" href="#__codelineno-109-3"></a>authority
+<a id="__codelineno-109-4" name="__codelineno-109-4" href="#__codelineno-109-4"></a>budgets
+<a id="__codelineno-109-5" name="__codelineno-109-5" href="#__codelineno-109-5"></a>integrity
+<a id="__codelineno-109-6" name="__codelineno-109-6" href="#__codelineno-109-6"></a>provenance
+<a id="__codelineno-109-7" name="__codelineno-109-7" href="#__codelineno-109-7"></a>sandbox
+<a id="__codelineno-109-8" name="__codelineno-109-8" href="#__codelineno-109-8"></a>rollback
+<a id="__codelineno-109-9" name="__codelineno-109-9" href="#__codelineno-109-9"></a>evaluator separation
+<a id="__codelineno-109-10" name="__codelineno-109-10" href="#__codelineno-109-10"></a>        ↓
+<a id="__codelineno-109-11" name="__codelineno-109-11" href="#__codelineno-109-11"></a>PRIMITIVE RUNTIME
+<a id="__codelineno-109-12" name="__codelineno-109-12" href="#__codelineno-109-12"></a>observe
+<a id="__codelineno-109-13" name="__codelineno-109-13" href="#__codelineno-109-13"></a>represent
+<a id="__codelineno-109-14" name="__codelineno-109-14" href="#__codelineno-109-14"></a>predict
+<a id="__codelineno-109-15" name="__codelineno-109-15" href="#__codelineno-109-15"></a>select
+<a id="__codelineno-109-16" name="__codelineno-109-16" href="#__codelineno-109-16"></a>act
+<a id="__codelineno-109-17" name="__codelineno-109-17" href="#__codelineno-109-17"></a>store
+<a id="__codelineno-109-18" name="__codelineno-109-18" href="#__codelineno-109-18"></a>retrieve
+<a id="__codelineno-109-19" name="__codelineno-109-19" href="#__codelineno-109-19"></a>communicate
+<a id="__codelineno-109-20" name="__codelineno-109-20" href="#__codelineno-109-20"></a>allocate
+<a id="__codelineno-109-21" name="__codelineno-109-21" href="#__codelineno-109-21"></a>verify
+<a id="__codelineno-109-22" name="__codelineno-109-22" href="#__codelineno-109-22"></a>schedule
+<a id="__codelineno-109-23" name="__codelineno-109-23" href="#__codelineno-109-23"></a>        ↓
+<a id="__codelineno-109-24" name="__codelineno-109-24" href="#__codelineno-109-24"></a>COMPOSITION / PHENOTYPE
+<a id="__codelineno-109-25" name="__codelineno-109-25" href="#__codelineno-109-25"></a>dynamic graphs
+<a id="__codelineno-109-26" name="__codelineno-109-26" href="#__codelineno-109-26"></a>agents
+<a id="__codelineno-109-27" name="__codelineno-109-27" href="#__codelineno-109-27"></a>specialists
+<a id="__codelineno-109-28" name="__codelineno-109-28" href="#__codelineno-109-28"></a>teams
+<a id="__codelineno-109-29" name="__codelineno-109-29" href="#__codelineno-109-29"></a>        ↓
+<a id="__codelineno-109-30" name="__codelineno-109-30" href="#__codelineno-109-30"></a>META-CONTROL
+<a id="__codelineno-109-31" name="__codelineno-109-31" href="#__codelineno-109-31"></a>self-model
+<a id="__codelineno-109-32" name="__codelineno-109-32" href="#__codelineno-109-32"></a>revision
+<a id="__codelineno-109-33" name="__codelineno-109-33" href="#__codelineno-109-33"></a>consolidation
+<a id="__codelineno-109-34" name="__codelineno-109-34" href="#__codelineno-109-34"></a>strategy management
+<a id="__codelineno-109-35" name="__codelineno-109-35" href="#__codelineno-109-35"></a>capability-ceiling detection
+<a id="__codelineno-109-36" name="__codelineno-109-36" href="#__codelineno-109-36"></a>        ↓
+<a id="__codelineno-109-37" name="__codelineno-109-37" href="#__codelineno-109-37"></a>EVOLUTION
+<a id="__codelineno-109-38" name="__codelineno-109-38" href="#__codelineno-109-38"></a>variation
+<a id="__codelineno-109-39" name="__codelineno-109-39" href="#__codelineno-109-39"></a>populations
+<a id="__codelineno-109-40" name="__codelineno-109-40" href="#__codelineno-109-40"></a>selection
+<a id="__codelineno-109-41" name="__codelineno-109-41" href="#__codelineno-109-41"></a>architecture genomes
+<a id="__codelineno-109-42" name="__codelineno-109-42" href="#__codelineno-109-42"></a>development programs
+<a id="__codelineno-109-43" name="__codelineno-109-43" href="#__codelineno-109-43"></a>        ↓
+<a id="__codelineno-109-44" name="__codelineno-109-44" href="#__codelineno-109-44"></a>LEARNING
+<a id="__codelineno-109-45" name="__codelineno-109-45" href="#__codelineno-109-45"></a>policy/model adaptation
+<a id="__codelineno-109-46" name="__codelineno-109-46" href="#__codelineno-109-46"></a>harness-native training
+<a id="__codelineno-109-47" name="__codelineno-109-47" href="#__codelineno-109-47"></a>        ↓
+<a id="__codelineno-109-48" name="__codelineno-109-48" href="#__codelineno-109-48"></a>INDEPENDENT SCIENTIFIC EVALUATION
+<a id="__codelineno-109-49" name="__codelineno-109-49" href="#__codelineno-109-49"></a>benchmarks
+<a id="__codelineno-109-50" name="__codelineno-109-50" href="#__codelineno-109-50"></a>hidden tests
+<a id="__codelineno-109-51" name="__codelineno-109-51" href="#__codelineno-109-51"></a>statistics
+<a id="__codelineno-109-52" name="__codelineno-109-52" href="#__codelineno-109-52"></a>replication
+<a id="__codelineno-109-53" name="__codelineno-109-53" href="#__codelineno-109-53"></a>promotion
+</code></pre></div>
+<p><code>COMPOSE</code>, <code>VARY</code>, <code>CONSOLIDATE</code>, <code>REVISE</code>, and <code>EVALUATE</code> remain typed interfaces across these conceptual layers.</p>
+<hr />
+<h1 id="38-principal-scientific-conclusion">38. Principal Scientific Conclusion</h1>
+<p>The critical question has changed from:</p>
+<blockquote>
+<p>How can the system improve its behavior?</p>
+</blockquote>
+<p>to:</p>
+<blockquote>
+<p><strong>How can the system detect that the representation, strategy, architecture, or learning process generating its behavior is itself the object that must change?</strong></p>
+</blockquote>
+<p>That distinction defines progressively deeper adaptation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a>changes actions
+<a id="__codelineno-110-2" name="__codelineno-110-2" href="#__codelineno-110-2"></a>→ adaptive
+<a id="__codelineno-110-3" name="__codelineno-110-3" href="#__codelineno-110-3"></a>
+<a id="__codelineno-110-4" name="__codelineno-110-4" href="#__codelineno-110-4"></a>changes procedures
+<a id="__codelineno-110-5" name="__codelineno-110-5" href="#__codelineno-110-5"></a>→ learning
+<a id="__codelineno-110-6" name="__codelineno-110-6" href="#__codelineno-110-6"></a>
+<a id="__codelineno-110-7" name="__codelineno-110-7" href="#__codelineno-110-7"></a>changes strategies
+<a id="__codelineno-110-8" name="__codelineno-110-8" href="#__codelineno-110-8"></a>→ metacognitive adaptation
+<a id="__codelineno-110-9" name="__codelineno-110-9" href="#__codelineno-110-9"></a>
+<a id="__codelineno-110-10" name="__codelineno-110-10" href="#__codelineno-110-10"></a>changes architectures
+<a id="__codelineno-110-11" name="__codelineno-110-11" href="#__codelineno-110-11"></a>→ structural evolution
+<a id="__codelineno-110-12" name="__codelineno-110-12" href="#__codelineno-110-12"></a>
+<a id="__codelineno-110-13" name="__codelineno-110-13" href="#__codelineno-110-13"></a>changes learning mechanisms
+<a id="__codelineno-110-14" name="__codelineno-110-14" href="#__codelineno-110-14"></a>→ meta-learning
+<a id="__codelineno-110-15" name="__codelineno-110-15" href="#__codelineno-110-15"></a>
+<a id="__codelineno-110-16" name="__codelineno-110-16" href="#__codelineno-110-16"></a>changes how hypotheses and experiments are generated
+<a id="__codelineno-110-17" name="__codelineno-110-17" href="#__codelineno-110-17"></a>→ automated science
+</code></pre></div>
+<p>None of these count as real improvement unless independent evaluation demonstrates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>causality
+<a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>generalization
+<a id="__codelineno-111-3" name="__codelineno-111-3" href="#__codelineno-111-3"></a>resource-normalized gain
+<a id="__codelineno-111-4" name="__codelineno-111-4" href="#__codelineno-111-4"></a>reproducibility
+<a id="__codelineno-111-5" name="__codelineno-111-5" href="#__codelineno-111-5"></a>safety
+</code></pre></div>
+<p>The target is therefore not an unconstrained self-modifying agent.</p>
+<p>It is a <strong>scientifically governed evolutionary computational substrate</strong> capable of generating, testing, retaining, recombining, and discarding increasingly sophisticated organizations of computation.</p>
+<hr />
+<h1 id="39-primary-sources-25-august-delta">39. Primary Sources — 25 August Delta</h1>
+<ol>
+<li>
+<p><strong>What is Missing from AI Post-Training AI: An Empirical Analysis</strong><br />
+   https://arxiv.org/abs/2608.19072</p>
+</li>
+<li>
+<p><strong>Eureka: Task-Conditioned Meta-Agent Orchestration for Scientific Discovery</strong><br />
+   https://arxiv.org/abs/2608.19047</p>
+</li>
+<li>
+<p><strong>ContinualSkillBench: Can LLM Agents Truly Evolve Their Capabilities?</strong><br />
+   https://arxiv.org/abs/2608.03874</p>
+</li>
+<li>
+<p><strong>Hierarchical Self-Improvement: A Framework for Task-Specific Evolvable Agent Harnesses</strong><br />
+   https://arxiv.org/abs/2608.08466</p>
+</li>
+<li>
+<p><strong>SHE: Trajectory-driven Safety Harness Evolution for LLM Agents</strong><br />
+   https://arxiv.org/abs/2608.09885</p>
+</li>
+<li>
+<p><strong>Co-Evolution in Agentic Systems: Toward Self-Directed Evolution Beyond Human Design</strong><br />
+   https://arxiv.org/abs/2608.10299</p>
+</li>
+<li>
+<p><strong>Tree-of-Experience: Hierarchical Experience Management for Self-Evolving Agents</strong><br />
+   https://arxiv.org/abs/2608.09044</p>
+</li>
+<li>
+<p><strong>Metacognition in LLMs: Foundations, Progress, and Opportunities</strong><br />
+   https://arxiv.org/abs/2607.11881</p>
+</li>
+</ol>
+<h2 id="foundation-carried-forward-from-previous-research">Foundation carried forward from previous research</h2>
+<ol>
+<li>
+<p>Agentic Harness Engineering<br />
+   https://arxiv.org/abs/2604.25850</p>
+</li>
+<li>
+<p>Evo-Harness<br />
+    https://arxiv.org/abs/2608.15071</p>
+</li>
+<li>
+<p>LEGO-RL<br />
+    https://arxiv.org/abs/2608.17393</p>
+</li>
+<li>
+<p>Agent Lightning v1.0<br />
+    https://arxiv.org/abs/2608.17528</p>
+</li>
+<li>
+<p>AI4AI-Bench<br />
+    https://arxiv.org/abs/2608.20318</p>
+</li>
+<li>
+<p>AEvo<br />
+    https://arxiv.org/abs/2605.13821</p>
+</li>
+<li>
+<p>MetaSkill-Evolve<br />
+    https://arxiv.org/abs/2607.05297</p>
+</li>
+<li>
+<p>Loreley<br />
+    https://arxiv.org/abs/2608.19703</p>
+</li>
+<li>
+<p>POET<br />
+    https://arxiv.org/abs/1901.01753</p>
+</li>
+<li>
+<p>MAP-Elites<br />
+    https://arxiv.org/abs/1504.04909</p>
+</li>
+</ol>
+<hr />
+<h1 id="40-recommended-next-research-cycle">40. Recommended Next Research Cycle</h1>
+<p>The next cycle should focus narrowly on unresolved mechanisms.</p>
+<h2 id="strategy-revision">Strategy revision</h2>
+<p>Study:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a>Bayesian online change-point detection
+<a id="__codelineno-112-2" name="__codelineno-112-2" href="#__codelineno-112-2"></a>non-stationary bandits
+<a id="__codelineno-112-3" name="__codelineno-112-3" href="#__codelineno-112-3"></a>meta-level MCTS
+<a id="__codelineno-112-4" name="__codelineno-112-4" href="#__codelineno-112-4"></a>value of computation
+<a id="__codelineno-112-5" name="__codelineno-112-5" href="#__codelineno-112-5"></a>hypothesis portfolios
+<a id="__codelineno-112-6" name="__codelineno-112-6" href="#__codelineno-112-6"></a>formal switching criteria
+</code></pre></div>
+<p>Central question:</p>
+<blockquote>
+<p>How can a system recognize that excellent local execution is occurring inside the wrong strategic frame?</p>
+</blockquote>
+<h2 id="developmental-architecture">Developmental architecture</h2>
+<p>Study:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>graph grammars
+<a id="__codelineno-113-2" name="__codelineno-113-2" href="#__codelineno-113-2"></a>HyperNEAT
+<a id="__codelineno-113-3" name="__codelineno-113-3" href="#__codelineno-113-3"></a>indirect encodings
+<a id="__codelineno-113-4" name="__codelineno-113-4" href="#__codelineno-113-4"></a>developmental programs
+<a id="__codelineno-113-5" name="__codelineno-113-5" href="#__codelineno-113-5"></a>neural cellular automata
+<a id="__codelineno-113-6" name="__codelineno-113-6" href="#__codelineno-113-6"></a>morphogenetic computation
+<a id="__codelineno-113-7" name="__codelineno-113-7" href="#__codelineno-113-7"></a>program-generating programs
+</code></pre></div>
+<h2 id="consolidation-science">Consolidation science</h2>
+<p>Determine when experience should become:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>nothing
+<a id="__codelineno-114-2" name="__codelineno-114-2" href="#__codelineno-114-2"></a>episode
+<a id="__codelineno-114-3" name="__codelineno-114-3" href="#__codelineno-114-3"></a>semantic memory
+<a id="__codelineno-114-4" name="__codelineno-114-4" href="#__codelineno-114-4"></a>procedure
+<a id="__codelineno-114-5" name="__codelineno-114-5" href="#__codelineno-114-5"></a>skill
+<a id="__codelineno-114-6" name="__codelineno-114-6" href="#__codelineno-114-6"></a>policy
+<a id="__codelineno-114-7" name="__codelineno-114-7" href="#__codelineno-114-7"></a>world-model update
+</code></pre></div>
+<h2 id="capability-ceiling-detection">Capability ceiling detection</h2>
+<p>Develop statistical tests distinguishing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a>bad harness
+<a id="__codelineno-115-2" name="__codelineno-115-2" href="#__codelineno-115-2"></a>from
+<a id="__codelineno-115-3" name="__codelineno-115-3" href="#__codelineno-115-3"></a>insufficient underlying capability
+</code></pre></div>
+<h2 id="strategic-populations">Strategic populations</h2>
+<p>Test populations of:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>hypotheses
+<a id="__codelineno-116-2" name="__codelineno-116-2" href="#__codelineno-116-2"></a>world models
+<a id="__codelineno-116-3" name="__codelineno-116-3" href="#__codelineno-116-3"></a>strategies
+</code></pre></div>
+<p>rather than duplicated worker agents.</p>
+<h2 id="scientific-attribution">Scientific attribution</h2>
+<p>Develop efficient intervention methods for architecture-component causality without exhaustive combinatorial ablation.</p>
+<hr />
+<h1 id="41-final-answer-to-the-research-question">41. Final Answer to the Research Question</h1>
+<p>The smallest currently defensible substrate is not a catalog of human-inspired cognitive faculties.</p>
+<p>It is a set of typed computational operations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a>OBSERVE
+<a id="__codelineno-117-2" name="__codelineno-117-2" href="#__codelineno-117-2"></a>REPRESENT
+<a id="__codelineno-117-3" name="__codelineno-117-3" href="#__codelineno-117-3"></a>PREDICT
+<a id="__codelineno-117-4" name="__codelineno-117-4" href="#__codelineno-117-4"></a>SELECT
+<a id="__codelineno-117-5" name="__codelineno-117-5" href="#__codelineno-117-5"></a>ACT
+<a id="__codelineno-117-6" name="__codelineno-117-6" href="#__codelineno-117-6"></a>STORE
+<a id="__codelineno-117-7" name="__codelineno-117-7" href="#__codelineno-117-7"></a>RETRIEVE
+<a id="__codelineno-117-8" name="__codelineno-117-8" href="#__codelineno-117-8"></a>COMMUNICATE
+<a id="__codelineno-117-9" name="__codelineno-117-9" href="#__codelineno-117-9"></a>ALLOCATE
+<a id="__codelineno-117-10" name="__codelineno-117-10" href="#__codelineno-117-10"></a>VERIFY
+<a id="__codelineno-117-11" name="__codelineno-117-11" href="#__codelineno-117-11"></a>EVALUATE
+<a id="__codelineno-117-12" name="__codelineno-117-12" href="#__codelineno-117-12"></a>COMPOSE
+<a id="__codelineno-117-13" name="__codelineno-117-13" href="#__codelineno-117-13"></a>VARY
+<a id="__codelineno-117-14" name="__codelineno-117-14" href="#__codelineno-117-14"></a>CONSOLIDATE
+<a id="__codelineno-117-15" name="__codelineno-117-15" href="#__codelineno-117-15"></a>REVISE
+<a id="__codelineno-117-16" name="__codelineno-117-16" href="#__codelineno-117-16"></a>SCHEDULE
+</code></pre></div>
+<p>executing under immutable laws:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>identity
+<a id="__codelineno-118-2" name="__codelineno-118-2" href="#__codelineno-118-2"></a>authority
+<a id="__codelineno-118-3" name="__codelineno-118-3" href="#__codelineno-118-3"></a>resource conservation
+<a id="__codelineno-118-4" name="__codelineno-118-4" href="#__codelineno-118-4"></a>event/artifact integrity
+<a id="__codelineno-118-5" name="__codelineno-118-5" href="#__codelineno-118-5"></a>provenance
+<a id="__codelineno-118-6" name="__codelineno-118-6" href="#__codelineno-118-6"></a>sandbox isolation
+<a id="__codelineno-118-7" name="__codelineno-118-7" href="#__codelineno-118-7"></a>rollback
+<a id="__codelineno-118-8" name="__codelineno-118-8" href="#__codelineno-118-8"></a>evaluator independence
+<a id="__codelineno-118-9" name="__codelineno-118-9" href="#__codelineno-118-9"></a>promotion independence
+</code></pre></div>
+<p>From these, agents, planners, memory structures, skills, organizations, and strategies should be instantiated as phenotypes.</p>
+<p>The scientific proof process is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a>Observation
+<a id="__codelineno-119-2" name="__codelineno-119-2" href="#__codelineno-119-2"></a>→ Hypothesis
+<a id="__codelineno-119-3" name="__codelineno-119-3" href="#__codelineno-119-3"></a>→ Controlled Intervention
+<a id="__codelineno-119-4" name="__codelineno-119-4" href="#__codelineno-119-4"></a>→ Candidate
+<a id="__codelineno-119-5" name="__codelineno-119-5" href="#__codelineno-119-5"></a>→ Reproducible Execution
+<a id="__codelineno-119-6" name="__codelineno-119-6" href="#__codelineno-119-6"></a>→ Independent Evaluation
+<a id="__codelineno-119-7" name="__codelineno-119-7" href="#__codelineno-119-7"></a>→ Causal Comparison
+<a id="__codelineno-119-8" name="__codelineno-119-8" href="#__codelineno-119-8"></a>→ Held-Out Replication
+<a id="__codelineno-119-9" name="__codelineno-119-9" href="#__codelineno-119-9"></a>→ Promote / Reject / Inconclusive
+</code></pre></div>
+<p>Improvement is not established by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a>reflection
+<a id="__codelineno-120-2" name="__codelineno-120-2" href="#__codelineno-120-2"></a>skill accumulation
+<a id="__codelineno-120-3" name="__codelineno-120-3" href="#__codelineno-120-3"></a>more agents
+<a id="__codelineno-120-4" name="__codelineno-120-4" href="#__codelineno-120-4"></a>more tokens
+<a id="__codelineno-120-5" name="__codelineno-120-5" href="#__codelineno-120-5"></a>larger architecture
+<a id="__codelineno-120-6" name="__codelineno-120-6" href="#__codelineno-120-6"></a>single-benchmark gain
+</code></pre></div>
+<p>It is established only when a versioned intervention produces a reproducible, resource-normalized, causally attributable improvement that transfers beyond the exact conditions that generated it while preserving immutable safety constraints.</p>
+<p>The long-term objective is therefore <strong>autonomous, evidence-governed scientific evolution of computational organization</strong>.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

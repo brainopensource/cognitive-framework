@@ -45,15 +45,15 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0103`](docs/02_decisions/0103-progress-projection-and-checkpoint-contract.md) and [`0099`](docs/02_decisions/0099-m7-topology-scheduler-disposition.md) |
+| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
 | **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | [`sprint_active.md`](docs/03_execution/sprint_active.md) is the sole current-state source; status is not duplicated here. |
+| **Current status** | [`docs/execution/active.md`](docs/execution/active.md) is the sole current-state source; status is not duplicated here. |
 | **Roadmap** | M-4 → M-5a → {M-5b ∥ accepted M-6} → M-6.5 → M-7 → M-8 → M-9 `0.9.0b1` → M-10 `0.9.0` |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Active board](https://img.shields.io/badge/Status-sprint__active-orange.svg)](docs/03_execution/sprint_active.md)
+[![Active board](https://img.shields.io/badge/Status-active.md-orange.svg)](docs/execution/active.md)
 
 ## 1. What exists today vs the locked target
 
@@ -90,7 +90,7 @@ Mechanism presence is not milestone acceptance; the active board cites the evide
 6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`.
 7. Run SWE-Bench optimization as a separate preregistered measurement program.
 
-LIM (`tools/006_LLM_INT_MACHINE/`) and LEX (`/home/rocha/Coding/LEX_LLM_EXECUTION/`) may assist
+LIM (`tools/006_LLM_INT_MACHINE/`) and LEX research harnesses may assist
 development and research. They never provide Vanguard runtime or acceptance authority; adopted
 techniques must be independently implemented behind Vanguard interfaces and verified by tests,
 falsifiers, and the normal evidence gates.
@@ -100,12 +100,12 @@ falsifiers, and the normal evidence gates.
 | # | Layer | Documents |
 |---|---|---|
 | 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/01_law/`](docs/01_law/) |
-| 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) |
-| 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` |
-| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md) |
-| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md); [`sprint_upcoming.md`](docs/03_execution/sprint_upcoming.md) is staging |
-| 6 | **Communication** | this README, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/) |
+| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) |
+| 2 | **Decisions (binding)** | [`docs/decisions.md`](docs/decisions.md) |
+| 3 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) |
+| 4 | **Product PRDs** | [`docs/product/`](docs/product/) |
+| 5 | **Active Execution** | [`docs/execution/active.md`](docs/execution/active.md); [`docs/execution/milestones.md`](docs/execution/milestones.md) |
+| 6 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
 of its own.
@@ -114,10 +114,9 @@ of its own.
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
-3. [`docs/01_law/`](docs/01_law/) — detailed contracts (`DISPATCH`, `RUNTIME`, `EXTENSIBILITY`, `EVIDENCE`, `MEASUREMENT`, `SECURITY`).
-4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — accepted ADRs through `0102`.
-5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md), then [`sprint_active.md`](docs/03_execution/sprint_active.md).
-6. [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — as-built map, navigational only.
+3. [`docs/decisions.md`](docs/decisions.md) — accepted ADRs and decision index.
+4. [`docs/execution/active.md`](docs/execution/active.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md).
+5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
 
 ---
 
@@ -187,8 +186,8 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ## 5. Roadmap & Execution Status
 
-Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md). Authorization:
-[`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
+Sequencing: [`docs/execution/milestones.md`](docs/execution/milestones.md). Authorization:
+[`docs/execution/active.md`](docs/execution/active.md).
 
 Stable dependency order is `C0 -> {M-4, M-5a}`, `M-5a -> M-5b`, `M-4 -> M-6`,
 `M-6 -> {M-6.5, M-7}`, and `{M-6.5, M-7} -> M-8`. Exact current state and permitted parallel work
@@ -235,33 +234,58 @@ Historical milestone identifiers keep their meaning; `ADR-0095` §4 is the trans
 
 ## 7. Developer & Reviewer Commands
 
-### Python Environment (Python 3.10+)
+### Practical Development Loop (`just`)
+
+The repository uses `just` to expose clean, repository-owned validation commands.
+
 ```bash
-# Install editable package with dev dependencies
-python3 -m pip install -e '.[dev]'
+# 1. Normal local development check (fast)
+just check
 
-# Run focused production kernel tests
-python3 -m unittest discover -s test/kernel -t .
+# 2. Browse local documentation with live rendering (MkDocs + Mermaid)
+just docs-serve
 
-# Run contract tests
-python3 -m unittest discover -s test/contracts -t .
+# 3. Validate documentation structure, frontmatter, links, and linting
+just docs-check
 
-# Run agency turn engine tests
-python3 -m unittest discover -s test/agency -t .
+# 4. Strict MkDocs site build
+just docs-build
 
-# Run domain pack tests
-python3 -m unittest discover -s test/packs -t .
+# 5. Regenerate machine-readable knowledge base (.generated/knowledge/)
+just docs-knowledge
 
-# Run static architectural linters
-python3 tools/linters/check_boundaries.py       # Hexagonal lattice enforcement
-python3 tools/linters/check_tcb_budget.py       # TCB kernel LOC budget check
-python3 tools/linters/scan_secrets.py           # Secret & credential leak scanner
-python3 tools/linters/check_domain_blindness.py # Kernel domain blindness (I-7)
-python3 tools/linters/check_isolation_policy.py # Sandbox isolation policy (I-6)
-python3 tools/linters/check_falsifier_ids.py    # RF namespace and allocation integrity
-python3 tools/linters/check_markdown_links.py   # Documentation link integrity
-python3 tools/linters/check_stale_paths.py      # Stale path reference checker
+# 6. Complete documentation qualification gate
+just docs-full
+
+# 7. Complete local/CI qualification gate (run before PR completion / sprint closure)
+just verify
 ```
+
+### Python Environment (`uv`)
+`pyproject.toml` and `uv.lock` are the canonical Python dependency surfaces.
+
+```bash
+# Synchronize environment with locked dependencies
+uv sync
+
+# Add or remove a package
+uv add <package>
+uv remove <package>
+
+# Run commands within the uv virtual environment
+uv run <command>
+```
+
+### Validation Workflow Summary
+
+| Situation | Command | Scope & Behavior |
+|---|---|---|
+| **Normal development** | `just check` | Fast architectural linters, TCB budget, and doc metadata checks |
+| **Browse documentation** | `just docs-serve` | Serve MkDocs site with live Mermaid rendering at `localhost:8000` |
+| **Validate documentation** | `just docs-check` | Frontmatter validation, link/anchor checks, and markdownlint |
+| **Before PR / Task completion** | `just verify` | Complete local/CI gate: locks, linters, tests, typecheck, docs-full |
+| **Sprint / Milestone closure** | `just verify` | Complete repository qualification gate |
+| **Release qualification** | `python3 tools/release_qualification.py` | Signed release envelope and external git receipt verification |
 
 ### TypeScript CLI Environment (Node.js 20+)
 ```bash
@@ -294,4 +318,56 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files; current execution state lives only in
-[`sprint_active.md`](docs/03_execution/sprint_active.md).
+[`active.md`](docs/execution/active.md).
+
+
+## 10. Mental models worth internalising
+
+- **The episode is the program.** There is no workflow engine, no topology language, no graph
+  validator — there is a loop that observes, proposes, gets authorised, acts, and reduces. If you find
+  yourself declaring a shape for the work *before* the work runs, you are building the thing
+  `docs/SPEC.md` §1.1 (loop-over-DAG inversion) rejects.
+- **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
+  effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
+  logical mediator in the host language is not containment — see `docs/01_law/DISPATCH.md` §6 before
+  writing anything near this.
+- **Content informs, never authorises.** Untrusted content may inform work; it must never authorise a
+  capability-widening effect. This has failed silently twice in this project's history (see
+  `docs/01_law/DISPATCH.md` §5.2) — read that section before touching provenance code.
+- **The verifier is outside everything.** No cognition or adapter module may import the evaluator gate
+  or reason about its internals. If your change needs the evaluator's logic to be visible from agent
+  code, the design is wrong, not the import lint.
+- **A gate that cannot fail is not a gate.** Every control needs a must-fail counterpart proving it can
+  actually deny. A green suite over unwired code is worse than no control — it manufactures false
+  assurance.
+- **One document is normative per contract.** If you're about to write a second source of truth for
+  something `docs/SPEC.md` already owns, stop — extend the section, don't fork it.
+- **Minimise what must be simultaneously correct.** Layer 0 has an LOC target for exactly this reason —
+  correctness argument size, not code golf.
+- **Polyglot plugins live outside the trusted computing base.** The wire schema (JSON Schema + JCS) *is*
+  the narrow waist between languages; there is no other legitimate cross-language coupling.
+- **Adding a domain must not touch the core.** `grep -rE "coding|pytest|ast" layer0/` is expected to
+  return nothing, always. If your PR breaks that grep, the code is in the wrong package.
+
+## Testing taxonomy (kept intact from VG-01 §4)
+
+Three kinds, and the distinction matters when you're deciding what a new test should be:
+
+- **Mock** — no I/O, no clock, no randomness; deterministic by construction. Fast, runs on every commit.
+- **Cassette** — a recorded real interaction (model call, network response) replayed deterministically.
+  Proves the code handles a real shape of response without needing a live credential in CI.
+- **Live** — an actual external call. Rare, gated, and never a prerequisite for a merge unless the PR
+  explicitly says so.
+
+**Satisfiability check:** before writing a test asserting a property, ask whether the property is
+actually reachable given the test's own setup. A test that can only ever pass (or can only ever be
+vacuously satisfied) is not testing anything — this is how historical ADR-0028's span-reset defect
+shipped with a green suite.
+
+## Where things live
+
+Read `docs/SPEC.md` §1 for the target Layer-0 lattice and the current (as-built) seven-package lattice
+(`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/check_boundaries.py`.
+Manifest authoring (harness.yaml, plugin.yaml) is specified in `docs/SPEC.md` §2. Measurement rules
+(paired designs, McNemar, the A/A floor) are in `docs/01_law/MEASUREMENT.md` — read it before proposing
+any A/B claim.

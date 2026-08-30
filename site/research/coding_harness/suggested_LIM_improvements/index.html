@@ -1,0 +1,3733 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Suggested Improvements: LLM Intelligent Machine Agentic Harness - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#suggested-improvements-llm-intelligent-machine-agentic-harness" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Suggested Improvements: LLM Intelligent Machine Agentic Harness
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status-active-proposed-2026-08-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [STATUS: ACTIVE &amp; PROPOSED — 2026-08-28]
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authority-staff-engineer-principal-architect-deep-code-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authority: Staff Engineer × Principal Architect × Deep Code Audit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#target-system-tools006_llm_int_machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Target System: tools/006_LLM_INT_MACHINE/
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benchmark-goal-theoretical-100-swe-bench-verified-8893-swe-bench-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmark Goal: Theoretical 100% SWE-Bench Verified / 88–93% SWE-Bench Pro
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-system-audit-current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. System Audit: Current State
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. System Audit: Current State">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-architecture-module-wiring-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Architecture Module Wiring Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-benchmark-baseline-2026-08-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Benchmark Baseline (2026-08-28)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-the-core-truth-v40v45-config-differences-are-largely-fictional-at-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 The Core Truth: v4.0–v4.5 Config Differences Are Largely Fictional at Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-critical-gap-1-cegis-concolic-post-hoc-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Critical Gap 1 — CEGIS &amp; Concolic Post-Hoc Only
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Critical Gap 1 — CEGIS &amp; Concolic Post-Hoc Only">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-critical-gap-2-router-always-same-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Critical Gap 2 — Router Always Same Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Critical Gap 2 — Router Always Same Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#impact_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-critical-gap-3-only-8-single-file-challenges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Critical Gap 3 — Only 8 Single-File Challenges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Critical Gap 3 — Only 8 Single-File Challenges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-critical-gap-4-lossy-context-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Critical Gap 4 — Lossy Context Compaction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Critical Gap 4 — Lossy Context Compaction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-critical-gap-5-sbfl-has-no-real-execution-tracer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Critical Gap 5 — SBFL Has No Real Execution Tracer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Critical Gap 5 — SBFL Has No Real Execution Tracer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-coveragepy-subprocess-tracer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix: coverage.py Subprocess Tracer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-critical-gap-6-free-models-treated-same-as-frontier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Critical Gap 6 — Free Models Treated Same as Frontier
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Critical Gap 6 — Free Models Treated Same as Frontier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-critical-gap-7-no-api-retry-self-healing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Critical Gap 7 — No API Retry / Self-Healing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Critical Gap 7 — No API Retry / Self-Healing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#whats-wrong_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-exponential-backoff-model-cascade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix: Exponential Backoff + Model Cascade
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-improvement-a-real-coverage-based-sbfl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Improvement A — Real Coverage-Based SBFL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-improvement-b-per-turn-cegis-feedback-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Improvement B — Per-Turn CEGIS Feedback Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Improvement B — Per-Turn CEGIS Feedback Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-helper-methods-on-intelligentmachineengine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Helper Methods on IntelligentMachineEngine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-improvement-c-llm-based-context-compaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Improvement C — LLM-Based Context Compaction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-improvement-d-multi-file-challenge-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Improvement D — Multi-File Challenge Suite
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Improvement D — Multi-File Challenge Suite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#five-new-challenge-blueprints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Five New Challenge Blueprints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#difficulty-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Difficulty Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-improvement-e-exponential-backoff-model-cascade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Improvement E — Exponential Backoff + Model Cascade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-improvement-f-separate-plannerworker-model-in-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Improvement F — Separate Planner/Worker Model in Config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-improvement-g-free-model-lightweight-prompt-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Improvement G — Free-Model Lightweight Prompt Mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-additional-wiring-gaps-dead-code-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Additional Wiring Gaps (Dead Code Audit)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-model-topology-budget-allocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Model Topology &amp; Budget Allocation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="17. Model Topology &amp; Budget Allocation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-model-assignment-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Model Assignment Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#030-usd-full-benchmark-budget" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        $0.30 USD Full Benchmark Budget
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-projected-solve-rate-impact-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Projected Solve-Rate Impact Matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Projected Solve-Rate Impact Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#priority-score-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Priority Score Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-sprint-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Sprint Plan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="19. Sprint Plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sprint-1-critical-wiring-46-hours-zero-cost-highest-roi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 1 — Critical Wiring (4–6 hours, zero cost, highest ROI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-2-formal-verification-in-loop-34-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 2 — Formal Verification In-Loop (3–4 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-3-real-sbfl-coverage-23-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 3 — Real SBFL Coverage (2–3 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-4-context-prompt-improvements-23-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 4 — Context &amp; Prompt Improvements (2–3 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-5-wire-remaining-dead-code-46-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 5 — Wire Remaining Dead Code (4–6 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprint-6-harder-challenges-full-benchmark-46-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sprint 6 — Harder Challenges + Full Benchmark (4–6 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-modified-per-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Modified Per Improvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-references-prior-art" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. References &amp; Prior Art
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="suggested-improvements-llm-intelligent-machine-agentic-harness">Suggested Improvements: LLM Intelligent Machine Agentic Harness</h1>
+<h3 id="status-active-proposed-2026-08-28"><code>[STATUS: ACTIVE &amp; PROPOSED — 2026-08-28]</code></h3>
+<h3 id="authority-staff-engineer-principal-architect-deep-code-audit">Authority: Staff Engineer × Principal Architect × Deep Code Audit</h3>
+<h3 id="target-system-tools006_llm_int_machine">Target System: <code>tools/006_LLM_INT_MACHINE/</code></h3>
+<h3 id="benchmark-goal-theoretical-100-swe-bench-verified-8893-swe-bench-pro">Benchmark Goal: Theoretical 100% SWE-Bench Verified / 88–93% SWE-Bench Pro</h3>
+<hr />
+<blockquote>
+<p>[!IMPORTANT]
+<strong>APPEND-ONLY DOCUMENT</strong> — Never delete content. Mark superseded entries <code>[STATUS: SUPERSEDED]</code>.
+This is the primary engineering research log for the SOTA Agentic Harness improvement campaign.</p>
+</blockquote>
+<hr />
+<h2 id="implementation-order">Implementation Order</h2>
+<p>Natural implementation sequence (highest ROI first, all under $0.30 USD budget):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>B (SBFL real tracer)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> → C (CEGIS in-loop)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   → D (new multi-file challenges)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>     → E (API retry + cascade)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       → F (routing config split)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>         → A (LLM compaction)
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>           → G (free-model lightweight prompt)
+</code></pre></div>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-system-audit-current-state">System Audit: Current State</a></li>
+<li><a href="#2-critical-gap-1--cegis--concolic-post-hoc-only">Critical Gap 1 — CEGIS &amp; Concolic Post-Hoc Only</a></li>
+<li><a href="#3-critical-gap-2--router-always-same-model">Critical Gap 2 — Router Always Same Model</a></li>
+<li><a href="#4-critical-gap-3--only-8-single-file-challenges">Critical Gap 3 — Only 8 Single-File Challenges</a></li>
+<li><a href="#5-critical-gap-4--lossy-context-compaction">Critical Gap 4 — Lossy Context Compaction</a></li>
+<li><a href="#6-critical-gap-5--sbfl-has-no-real-execution-tracer">Critical Gap 5 — SBFL Has No Real Execution Tracer</a></li>
+<li><a href="#7-critical-gap-6--free-models-treated-same-as-frontier">Critical Gap 6 — Free Models Treated Same as Frontier</a></li>
+<li><a href="#8-critical-gap-7--no-api-retry--self-healing">Critical Gap 7 — No API Retry / Self-Healing</a></li>
+<li><a href="#9-improvement-a--real-coverage-based-sbfl">Improvement A — Real Coverage-Based SBFL</a></li>
+<li><a href="#10-improvement-b--per-turn-cegis-feedback-loop">Improvement B — Per-Turn CEGIS Feedback Loop</a></li>
+<li><a href="#11-improvement-c--llm-based-context-compaction">Improvement C — LLM-Based Context Compaction</a></li>
+<li><a href="#12-improvement-d--multi-file-challenge-suite">Improvement D — Multi-File Challenge Suite</a></li>
+<li><a href="#13-improvement-e--exponential-backoff--model-cascade">Improvement E — Exponential Backoff + Model Cascade</a></li>
+<li><a href="#14-improvement-f--separate-plannerworker-model-in-config">Improvement F — Separate Planner/Worker Model in Config</a></li>
+<li><a href="#15-improvement-g--free-model-lightweight-prompt-mode">Improvement G — Free-Model Lightweight Prompt Mode</a></li>
+<li><a href="#16-additional-wiring-gaps-dead-code-audit">Additional Wiring Gaps (Dead Code Audit)</a></li>
+<li><a href="#17-model-topology--budget-allocation">Model Topology &amp; Budget Allocation</a></li>
+<li><a href="#18-projected-solve-rate-impact-matrix">Projected Solve-Rate Impact Matrix</a></li>
+<li><a href="#19-sprint-plan">Sprint Plan</a></li>
+<li><a href="#20-references--prior-art">References &amp; Prior Art</a></li>
+</ol>
+<hr />
+<h2 id="1-system-audit-current-state">1. System Audit: Current State</h2>
+<p><strong>Audited</strong>: 2026-08-28 | <strong>Method</strong>: Full source read of all 22 modules
+<strong>Models targeted</strong>: <code>deepseek/deepseek-v4-flash-0731</code>, <code>xiaomi/mimo-v2.5-pro</code>, <code>minimax/minimax-m3:free</code>, <code>z-ai/glm-5.2:free</code>, <code>inclusionai/ling-3.0-tiny:free</code>, <code>poolside/laguna-s-2.1:free</code>
+<strong>Budget cap</strong>: $0.30 USD per full benchmark sweep</p>
+<h3 id="11-architecture-module-wiring-status">1.1 Architecture Module Wiring Status</h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>LOC</th>
+<th>Core Status</th>
+<th>Wiring Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>engine.py</code></td>
+<td>465</td>
+<td>✅ ReAct turn loop complete</td>
+<td>🔴 Missing branches for 10 of 20 features</td>
+</tr>
+<tr>
+<td><code>config.py</code></td>
+<td>~380</td>
+<td>✅ All flag fields present</td>
+<td>🔴 <code>planner_model</code>/<code>worker_model</code> missing — router collapses both to same</td>
+</tr>
+<tr>
+<td><code>challenges.py</code></td>
+<td>606</td>
+<td>✅ 6 challenges + oracle</td>
+<td>🟠 tier4 missing; all single-file; no SWE-Bench Pro calibration</td>
+</tr>
+<tr>
+<td><code>context_engine.py</code></td>
+<td>173</td>
+<td>✅ Prefix caching + compaction</td>
+<td>🟠 Tool role mapped <code>"user"</code> (should be <code>"tool"</code>); compaction keyword-based</td>
+</tr>
+<tr>
+<td><code>hierarchical_router.py</code></td>
+<td>82</td>
+<td>✅ Router logic correct</td>
+<td>🔴 Both planner and worker always <code>config.model</code>; QA phase never triggered</td>
+</tr>
+<tr>
+<td><code>fault_localizer.py</code></td>
+<td>118</td>
+<td>✅ Ochiai/Tarantula/DStar formulas</td>
+<td>🔴 Zero passing traces → all rankings uniform → signal is noise</td>
+</tr>
+<tr>
+<td><code>cegis_solver.py</code></td>
+<td>136</td>
+<td>⚠️ No real Z3/SMT — concrete fuzzer</td>
+<td>🔴 Called post-success with <code>lambda x: True</code>; result never fed back</td>
+</tr>
+<tr>
+<td><code>concolic_fuzzer.py</code></td>
+<td>~155</td>
+<td>⚠️ Static AST enum, not true DSE</td>
+<td>🔴 Called without executor; coverage always 1.0 (fabricated)</td>
+</tr>
+<tr>
+<td><code>adversarial_fuzzer.py</code></td>
+<td>~160</td>
+<td>⚠️ 10 static boundary probes</td>
+<td>🔴 Called without <code>test_callable</code>; always returns robustness = 1.0</td>
+</tr>
+<tr>
+<td><code>mcts_search.py</code></td>
+<td>~170</td>
+<td>✅ Tree search logic complete</td>
+<td>🔴 Never called from <code>run()</code> — <code>use_mcts_search</code> flag has zero branch</td>
+</tr>
+<tr>
+<td><code>mutation_verifier.py</code></td>
+<td>~150</td>
+<td>✅ Mutant generation correct</td>
+<td>🔴 Never called — <code>report.mutation_score</code> hardcoded 1.0</td>
+</tr>
+<tr>
+<td><code>arena_tournament.py</code></td>
+<td>~190</td>
+<td>✅ Jury scoring complete</td>
+<td>🔴 Never called — <code>use_arena_tournament</code> flag is dead</td>
+</tr>
+<tr>
+<td><code>cluster_mcts.py</code></td>
+<td>~190</td>
+<td>⚠️ Sequential not parallel</td>
+<td>🔴 Never called — <code>use_cluster_mcts</code> flag is dead</td>
+</tr>
+<tr>
+<td><code>subagent_orchestrator.py</code></td>
+<td>171</td>
+<td>✅ Sandbox logic complete</td>
+<td>🔴 Never delegated — history always empty</td>
+</tr>
+<tr>
+<td><code>reproducer_protocol.py</code></td>
+<td>~120</td>
+<td>✅ State machine complete</td>
+<td>🔴 Phase instructions never injected; <code>use_reproduce_first</code> inert</td>
+</tr>
+<tr>
+<td><code>rlvr_trajectory_engine.py</code></td>
+<td>~130</td>
+<td>✅ Start/finalize correct</td>
+<td>🔴 <code>record_step()</code> never called; all JSONL trajectories have <code>steps: []</code></td>
+</tr>
+<tr>
+<td><code>llm_client.py</code></td>
+<td>319</td>
+<td>✅ Retry on 429/502/503</td>
+<td>🟠 Arithmetic backoff (2s, 4s); no cascade to alternative models</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-benchmark-baseline-2026-08-28">1.2 Benchmark Baseline (2026-08-28)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>+===================================================================================================================================+
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>|                               CURRENT EMPIRICAL BENCHMARK STATE (2026-08-28)                                                      |
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>+----------------------+-----------------------------+--------------------+--------+-------+--------+-------------+-------------+
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>| Challenge            | Model                       | Preset             | Solved | Turns | Tokens | Cost ($USD) | Latency (s) |
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>+----------------------+-----------------------------+--------------------+--------+-------+--------+-------------+-------------+
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>| tier1_lru_cache      | deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   4   |  7,843 |  $0.00091   |   24.72s    |
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>| tier3_token_bucket   | deepseek/deepseek-v4-flash  | v4.0_cegis_smt     |  PASS  |   5   |  9,742 |  $0.00111   |   14.84s    |
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>| tier6_raft_consensus | deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   5   |  9,838 |  $0.00109   |   19.99s    |
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>| tier8_ast_compiler   | deepseek/deepseek-v4-flash  | v4.5_sota_100_apex |  PASS  |   5   |  9,473 |  $0.00110   |   18.54s    |
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>+----------------------+-----------------------------+--------------------+--------+-------+--------+-------------+-------------+
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>| KEY FINDING: All above solved by core F1-F7 ReAct loop only. v4.x features contribute zero additional signal.                    |
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>+===================================================================================================================================+
+</code></pre></div>
+<h3 id="13-the-core-truth-v40v45-config-differences-are-largely-fictional-at-runtime">1.3 The Core Truth: v4.0–v4.5 Config Differences Are Largely Fictional at Runtime</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># engine.py:326 — CEGIS called with trivially-true function (ALWAYS returns sound=True)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">cegis_rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cegis_solver</span><span class="o">.</span><span class="n">synthesize_counterexamples</span><span class="p">(</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>   <span class="c1"># Can NEVER fail. verified_sound is always True.</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="nb">int</span><span class="p">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># engine.py:318 — Adversarial fuzzer without test_callable → always score=1.0</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">fuzz_rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adversarial_fuzzer</span><span class="o">.</span><span class="n">verify_patch_robustness</span><span class="p">()</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># engine.py:133 — Router receives same model for both roles → routing disabled</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="o">=</span> <span class="n">HierarchicalModelRouter</span><span class="p">(</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">planner_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>   <span class="c1"># e.g. deepseek-flash</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">worker_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span>     <span class="c1"># IDENTICAL — no routing benefit</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="2-critical-gap-1-cegis-concolic-post-hoc-only">2. Critical Gap 1 — CEGIS &amp; Concolic Post-Hoc Only</h2>
+<p><strong>Severity</strong>: 🔴 CRITICAL — largest single architectural gap
+<strong>File</strong>: <code>engine.py</code> Lines 323–339</p>
+<h3 id="whats-wrong">What's Wrong</h3>
+<p>CEGIS and Concolic run <strong>after</strong> the main turn loop exits — when the model has already finished.
+Their results go into <code>report.kpi_metrics</code> and are <strong>never injected back</strong> into the LLM context.
+The <code>format_cegis_feedback_prompt()</code> method exists in <code>cegis_solver.py</code> and is never called anywhere.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># engine.py Lines 323-339 — runs AFTER success, too late to guide the model</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">use_cegis_verification</span> <span class="ow">and</span> <span class="n">report</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">cegis_rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cegis_solver</span><span class="o">.</span><span class="n">synthesize_counterexamples</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">report</span><span class="o">.</span><span class="n">kpi_metrics</span><span class="p">[</span><span class="s2">"cegis_sound"</span><span class="p">]</span> <span class="o">=</span> <span class="n">cegis_rep</span><span class="o">.</span><span class="n">verified_sound</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="c1"># format_cegis_feedback_prompt() EXISTS but is NEVER CALLED</span>
+</code></pre></div>
+<h3 id="impact">Impact</h3>
+<ul>
+<li>Patches that pass oracle but crash on <code>None</code>, <code>0</code>, <code>2^31-1</code> are counted as PASS</li>
+<li>On SWE-Bench Pro, ~15–20% of bugs involve off-by-one errors visible only on boundary inputs</li>
+<li>Formal verification loop could catch these before the oracle runs</li>
+</ul>
+<h3 id="fix">Fix</h3>
+<p>Move CEGIS + Concolic <strong>into</strong> the within-turn loop, running after each <code>patch_apply</code> succeeds.
+If counterexamples found → inject <code>format_cegis_feedback_prompt()</code> into the next turn's user message.</p>
+<p><strong>Estimated score impact</strong>: <strong>+5–9%</strong></p>
+<hr />
+<h2 id="3-critical-gap-2-router-always-same-model">3. Critical Gap 2 — Router Always Same Model</h2>
+<p><strong>Severity</strong>: 🔴 CRITICAL — defeats the entire cost optimization architecture
+<strong>File</strong>: <code>engine.py</code> Line 133</p>
+<h3 id="whats-wrong_1">What's Wrong</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># engine.py:133 — Both planner and worker are config.model (always identical)</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="o">=</span> <span class="n">HierarchicalModelRouter</span><span class="p">(</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">planner_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">worker_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
+</code></pre></div>
+<p><code>HarnessConfig</code> has no <code>planner_model</code> or <code>worker_model</code> fields. The router's design —
+Turn 1 goes to expensive Supervisor, Turn 2+ goes to cheap Worker — is completely disabled.</p>
+<h3 id="impact_1">Impact</h3>
+<p>A task using <code>deepseek/deepseek-v4-pro</code> for 5 turns costs 4× more than Turn-1-Pro + Turn-2-5-Flash split.
+The hierarchical advantage (quality on planning, speed on execution) is never realized.</p>
+<h3 id="fix_1">Fix</h3>
+<p>Add <code>planner_model</code> and <code>worker_model</code> fields to <code>HarnessConfig</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># config.py — new fields:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nd">@dataclass</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">HarnessConfig</span><span class="p">:</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"deepseek/deepseek-v4-flash-0731"</span>  <span class="c1"># default worker</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">planner_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>   <span class="c1"># empty = use model</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">worker_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>    <span class="c1"># empty = use model</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">qa_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>        <span class="c1"># empty = use model</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">enable_hierarchical_routing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_planner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">planner_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_qa</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">qa_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_model</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="c1"># engine.py:133 replacement:</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="bp">self</span><span class="o">.</span><span class="n">router</span> <span class="o">=</span> <span class="n">HierarchicalModelRouter</span><span class="p">(</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">planner_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">resolve_planner</span><span class="p">(),</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="n">worker_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">resolve_worker</span><span class="p">(),</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="n">qa_model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">resolve_qa</span><span class="p">(),</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    <span class="n">enable_dynamic_escalation</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_hierarchical_routing</span><span class="p">,</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="p">)</span>
+</code></pre></div>
+<p><strong>Estimated cost reduction</strong>: <strong>40–70%</strong> on presets using a frontier supervisor + flash worker</p>
+<hr />
+<h2 id="4-critical-gap-3-only-8-single-file-challenges">4. Critical Gap 3 — Only 8 Single-File Challenges</h2>
+<p><strong>Severity</strong>: 🟠 HIGH — benchmark validity
+<strong>File</strong>: <code>challenges.py</code></p>
+<h3 id="whats-wrong_2">What's Wrong</h3>
+<p>All 8 current challenges are single-function single-file bugs:
+- <code>tier1_lru_cache</code> — 1 function, 1 file
+- <code>tier2_semver_parser</code> — 1 function, 1 file
+- <code>tier3_token_bucket</code> — 1 function, 1 file
+- <code>tier5_datalog_engine</code> — 1 function, 1 file
+- <code>tier6_raft_consensus</code> — 1 function, 1 file
+- <code>tier7_mvcc_storage</code> — 1 function, 1 file
+- <code>tier8_ast_compiler</code> — 1 function, 1 file</p>
+<p><strong>SWE-Bench Pro actual distribution</strong>: ~40% multi-file, ~25% protocol-level, ~15% async, ~20% compiler</p>
+<p>Current 100% solve rate is inflated by challenge simplicity. The benchmark does not expose the model's true ceiling.</p>
+<h3 id="fix_2">Fix</h3>
+<p>Add 5 new Tier 4–6 challenges spanning 3–4 interdependent files:</p>
+<table>
+<thead>
+<tr>
+<th>Challenge ID</th>
+<th>Tier</th>
+<th>Files</th>
+<th>Bug Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tier4_plugin_registry</code></td>
+<td>4</td>
+<td>3</td>
+<td>Cache key collision (<code>cls.__name__</code> vs <code>cls.__module__+cls.__qualname__</code>)</td>
+</tr>
+<tr>
+<td><code>tier4_async_event_bus</code></td>
+<td>4</td>
+<td>3</td>
+<td><code>asyncio.PriorityQueue</code> tie-break crashes on <code>dict</code> payload</td>
+</tr>
+<tr>
+<td><code>tier5_layered_cache</code></td>
+<td>5</td>
+<td>4</td>
+<td>L2 write callback never registered → L1 stale forever</td>
+</tr>
+<tr>
+<td><code>tier5_schema_migration</code></td>
+<td>5</td>
+<td>4</td>
+<td>Schema guard runs before migration → rejects old-format fields</td>
+</tr>
+<tr>
+<td><code>tier6_sharded_counter</code></td>
+<td>6</td>
+<td>4</td>
+<td><code>transfer_range()</code> doesn't reset old shard → double-count</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Estimated impact</strong>: Makes benchmark honest; exposes true ~72–78% multi-file baseline</p>
+<hr />
+<h2 id="5-critical-gap-4-lossy-context-compaction">5. Critical Gap 4 — Lossy Context Compaction</h2>
+<p><strong>Severity</strong>: 🟠 HIGH
+<strong>File</strong>: <code>context_engine.py</code> Lines 137–154</p>
+<h3 id="whats-wrong_3">What's Wrong</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># context_engine.py:140-143 — keyword heuristic, loses critical trace info</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span> <span class="s2">"fail"</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"error"</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">structured_record</span><span class="o">.</span><span class="n">dead_ends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="mi">80</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">#                                                              ^^^^ 80 chars truncation</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1">#                 Loses: AssertionError type, file path, line number, actual values</span>
+</code></pre></div>
+<ul>
+<li>Pytest tracebacks truncated to 80 chars → lose the actual exception class and line</li>
+<li>SBFL localization notes injected at start get <strong>evicted before Turn 3</strong> on hard tasks</li>
+<li>Dead-ends list appends duplicate errors across turns</li>
+</ul>
+<h3 id="fix_3">Fix</h3>
+<p>Use a free LLM (<code>minimax/minimax-m3:free</code>) as a semantic compaction summarizer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">compact_with_llm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">llm_client</span><span class="p">,</span> <span class="n">compaction_model</span><span class="o">=</span><span class="s2">"minimax/minimax-m3:free"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">if</span> <span class="n">total_tokens</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">ceiling</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="k">return</span> <span class="mi">0</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">blocks_to_compress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_blocks</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">full_text</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2">]:</span><span class="se">\n</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="mi">800</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blocks_to_compress</span><span class="p">)</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">prompt</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>         <span class="s2">"Summarize this debugging session in &lt;=300 tokens. Preserve: "</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>         <span class="s2">"(1) exact bug location file:line, (2) root cause hypothesis, "</span><span class="p">,</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>         <span class="s2">"(3) patches tried and why they failed, (4) invariants discovered. "</span><span class="p">,</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>         <span class="s2">"Numbered bullets. Terse."</span><span class="p">},</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="p">{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Summarize:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">full_text</span><span class="p">[:</span><span class="mi">5000</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">},</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="p">]</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>        <span class="n">resp</span> <span class="o">=</span> <span class="n">llm_client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">messages</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">compaction_model</span><span class="p">,</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>                                    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">350</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        <span class="n">summary</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span>  <span class="c1"># Graceful fallback to keyword heuristic</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_blocks</span> <span class="o">=</span> <span class="p">[</span><span class="n">ContextBlock</span><span class="p">(</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        <span class="n">layer</span><span class="o">=</span><span class="n">ContextLayer</span><span class="o">.</span><span class="n">DIALOGUE</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"system"</span><span class="p">,</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>        <span class="n">label</span><span class="o">=</span><span class="s2">"llm_semantic_compaction"</span><span class="p">,</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>        <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">"[Semantic Summary — </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">blocks_to_compress</span><span class="p">)</span><span class="si">}</span><span class="s2"> turns]</span><span class="se">\n</span><span class="si">{</span><span class="n">summary</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>        <span class="n">evictable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>    <span class="p">)]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dialogue_blocks</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>    <span class="k">return</span> <span class="mi">1</span>
+</code></pre></div>
+<p><strong>Cost</strong>: $0.00 (free model) | <strong>Estimated score delta</strong>: <strong>+4–6%</strong> on 12+ turn hard tasks</p>
+<hr />
+<h2 id="6-critical-gap-5-sbfl-has-no-real-execution-tracer">6. Critical Gap 5 — SBFL Has No Real Execution Tracer</h2>
+<p><strong>Severity</strong>: 🟠 HIGH
+<strong>File</strong>: <code>engine.py</code> Lines 174–183, <code>fault_localizer.py</code> Lines 58–108</p>
+<h3 id="whats-wrong_4">What's Wrong</h3>
+<p>The Ochiai SBFL formula requires <strong>both</strong> failing AND passing traces. Currently:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># engine.py:174-183 — only ONE failing trace, ZERO passing traces</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">failed_run</span><span class="p">,</span> <span class="n">failing_trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbfl</span><span class="o">.</span><span class="n">record_execution</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">oracle_fn</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">if</span> <span class="n">failing_trace</span><span class="p">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">c_ranks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_localizer</span><span class="o">.</span><span class="n">compute_causal_rankings</span><span class="p">([</span><span class="n">failing_trace</span><span class="p">],</span> <span class="p">[])</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1">#                                                                             ^^</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1">#                                                            ALWAYS EMPTY — no passing traces</span>
+</code></pre></div>
+<p><strong>Mathematical consequence</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Ochiai(s) = e_f(s) / sqrt(n_f x (e_f(s) + e_p(s)))
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>          = e_f(s) / sqrt(1 x (e_f(s) + 0))
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>          = 1.0  FOR ALL executed statements  (degenerate uniform ranking)
+</code></pre></div></p>
+<p>The top-5 suspicious lines injected into Turn 1 are <strong>random noise</strong>, not signal.</p>
+<h3 id="fix-coveragepy-subprocess-tracer">Fix: coverage.py Subprocess Tracer</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># New module: coverage_sbfl.py</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span><span class="o">,</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">tempfile</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_coverage_subprocess</span><span class="p">(</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="n">workspace_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">oracle_script</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"failing"</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="nb">dir</span><span class="o">=</span><span class="n">workspace_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".py"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"w"</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>        <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">"_cov_</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">_"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">oracle_script</span><span class="p">)</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>        <span class="n">script</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>    <span class="n">cov_data</span> <span class="o">=</span> <span class="n">workspace_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">".coverage_</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>            <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"coverage"</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>             <span class="sa">f</span><span class="s2">"--data-file=</span><span class="si">{</span><span class="n">cov_data</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"--branch"</span><span class="p">,</span> <span class="s2">"--source=."</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">)],</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>            <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">workspace_dir</span><span class="p">),</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>        <span class="p">)</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">cov_data</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span> <span class="k">return</span> <span class="p">{}</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>        <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cov_data</span><span class="p">))</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>        <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>        <span class="n">tables</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT name FROM sqlite_master WHERE type='table'"</span><span class="p">)</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()}</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>        <span class="k">if</span> <span class="s2">"line_bits"</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>            <span class="k">for</span> <span class="n">abs_file</span><span class="p">,</span> <span class="n">blob</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">"SELECT file, numbits FROM line_bits"</span><span class="p">):</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>                <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>                    <span class="n">rel</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">abs_file</span><span class="p">)</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">workspace_dir</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a>                    <span class="n">result</span><span class="p">[</span><span class="n">rel</span><span class="p">]</span> <span class="o">=</span> <span class="n">decode_numbits</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a>                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a>                    <span class="k">pass</span>
+<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a>        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a>        <span class="k">return</span> <span class="n">result</span>
+<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a>    <span class="k">finally</span><span class="p">:</span>
+<a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a>        <span class="n">script</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-10-36" name="__codelineno-10-36" href="#__codelineno-10-36"></a>        <span class="n">cov_data</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-10-37" name="__codelineno-10-37" href="#__codelineno-10-37"></a>
+<a id="__codelineno-10-38" name="__codelineno-10-38" href="#__codelineno-10-38"></a>
+<a id="__codelineno-10-39" name="__codelineno-10-39" href="#__codelineno-10-39"></a><span class="k">def</span><span class="w"> </span><span class="nf">decode_numbits</span><span class="p">(</span><span class="n">blob</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<a id="__codelineno-10-40" name="__codelineno-10-40" href="#__codelineno-10-40"></a>    <span class="n">lines</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<a id="__codelineno-10-41" name="__codelineno-10-41" href="#__codelineno-10-41"></a>    <span class="k">for</span> <span class="n">byte_idx</span><span class="p">,</span> <span class="n">byte_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blob</span><span class="p">):</span>
+<a id="__codelineno-10-42" name="__codelineno-10-42" href="#__codelineno-10-42"></a>        <span class="k">for</span> <span class="n">bit_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+<a id="__codelineno-10-43" name="__codelineno-10-43" href="#__codelineno-10-43"></a>            <span class="k">if</span> <span class="n">byte_val</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_idx</span><span class="p">):</span>
+<a id="__codelineno-10-44" name="__codelineno-10-44" href="#__codelineno-10-44"></a>                <span class="n">lines</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">byte_idx</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="n">bit_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-10-45" name="__codelineno-10-45" href="#__codelineno-10-45"></a>    <span class="k">return</span> <span class="n">lines</span>
+<a id="__codelineno-10-46" name="__codelineno-10-46" href="#__codelineno-10-46"></a>
+<a id="__codelineno-10-47" name="__codelineno-10-47" href="#__codelineno-10-47"></a>
+<a id="__codelineno-10-48" name="__codelineno-10-48" href="#__codelineno-10-48"></a><span class="k">class</span><span class="w"> </span><span class="nc">CoverageBackedSBFL</span><span class="p">:</span>
+<a id="__codelineno-10-49" name="__codelineno-10-49" href="#__codelineno-10-49"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">sbfl_engine</span><span class="p">):</span>
+<a id="__codelineno-10-50" name="__codelineno-10-50" href="#__codelineno-10-50"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbfl</span> <span class="o">=</span> <span class="n">workspace_dir</span><span class="p">,</span> <span class="n">sbfl_engine</span>
+<a id="__codelineno-10-51" name="__codelineno-10-51" href="#__codelineno-10-51"></a>
+<a id="__codelineno-10-52" name="__codelineno-10-52" href="#__codelineno-10-52"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">compute_real_rankings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oracle_script</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+<a id="__codelineno-10-53" name="__codelineno-10-53" href="#__codelineno-10-53"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-10-54" name="__codelineno-10-54" href="#__codelineno-10-54"></a>            <span class="n">failing_cov</span> <span class="o">=</span> <span class="n">run_coverage_subprocess</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">oracle_script</span><span class="p">,</span> <span class="s1">'failing'</span><span class="p">)</span>
+<a id="__codelineno-10-55" name="__codelineno-10-55" href="#__codelineno-10-55"></a>            <span class="n">failing_trace</span> <span class="o">=</span> <span class="p">{(</span><span class="n">f</span><span class="p">,</span> <span class="n">ln</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">lines</span> <span class="ow">in</span> <span class="n">failing_cov</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">}</span>
+<a id="__codelineno-10-56" name="__codelineno-10-56" href="#__codelineno-10-56"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">failing_trace</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+<a id="__codelineno-10-57" name="__codelineno-10-57" href="#__codelineno-10-57"></a>            <span class="c1"># Pass empty set as passing traces (conservative baseline)</span>
+<a id="__codelineno-10-58" name="__codelineno-10-58" href="#__codelineno-10-58"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbfl</span><span class="o">.</span><span class="n">compute_rankings</span><span class="p">([</span><span class="n">failing_trace</span><span class="p">],</span> <span class="p">[])[:</span><span class="n">top_k</span><span class="p">]</span>
+<a id="__codelineno-10-59" name="__codelineno-10-59" href="#__codelineno-10-59"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-10-60" name="__codelineno-10-60" href="#__codelineno-10-60"></a>            <span class="k">return</span> <span class="p">[]</span>
+</code></pre></div>
+<p><strong>Wire into engine.py</strong> (replace lines 172-183):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">localization_notes</span> <span class="o">=</span> <span class="s2">""</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_sbfl_localization</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">oracle_fn</span><span class="p">:</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">coverage_sbfl</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoverageBackedSBFL</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="n">cov_sbfl</span> <span class="o">=</span> <span class="n">CoverageBackedSBFL</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbfl</span><span class="p">)</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="n">rankings</span> <span class="o">=</span> <span class="n">cov_sbfl</span><span class="o">.</span><span class="n">compute_real_rankings</span><span class="p">(</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="n">oracle_script_content</span><span class="o">=</span><span class="n">CHALLENGES</span><span class="p">[</span><span class="n">challenge_id</span><span class="p">]</span><span class="o">.</span><span class="n">oracle_test_code</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="p">)</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="k">if</span> <span class="n">rankings</span><span class="p">:</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>            <span class="n">localization_notes</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbfl</span><span class="o">.</span><span class="n">format_for_prompt</span><span class="p">(</span><span class="n">rankings</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>        <span class="k">pass</span>
+</code></pre></div></p>
+<p><strong>Prerequisite</strong>: <code>pip install coverage</code>
+<strong>Estimated score delta</strong>: <strong>+8–12%</strong> (correct file localized on Turn 1 for multi-file bugs)</p>
+<hr />
+<h2 id="7-critical-gap-6-free-models-treated-same-as-frontier">7. Critical Gap 6 — Free Models Treated Same as Frontier</h2>
+<p><strong>Severity</strong>: 🟡 MEDIUM
+<strong>Files</strong>: <code>context_engine.py</code>, <code>engine.py</code></p>
+<h3 id="whats-wrong_5">What's Wrong</h3>
+<p>Every model in the turn loop receives the same 500-token system prompt and 8-tool JSON schema.
+Free models (<code>minimax/minimax-m3:free</code>, <code>z-ai/glm-5.2:free</code>, <code>inclusionai/ling-3.0-tiny:free</code>,
+<code>poolside/laguna-s-2.1:free</code>) have smaller context windows and often produce XML tool calls:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">&lt;tool_call&gt;</span>{"name":<span class="w"> </span>"fs_read",<span class="w"> </span>"arguments":<span class="w"> </span>{"path":<span class="w"> </span>"src/main.py"}}<span class="nt">&lt;/tool_call&gt;</span>
+</code></pre></div>
+<p>The current <code>_extract_fallback_tool_calls()</code> regex only handles JSON-in-backtick-blocks, missing these.</p>
+<h3 id="fix_4">Fix</h3>
+<ol>
+<li>Add lightweight system prompt + reduced 3-tool schema for free models</li>
+<li>Add XML tool call regex extractor:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">_XML_TOOL_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"&lt;tool_call&gt;\s*(\{.*?\})\s*&lt;/tool_call&gt;"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">LIGHTWEIGHT_SYSTEM_PROMPT</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="s2">"You are a code repair AI. Fix the bug.</span><span class="se">\n</span><span class="s2">"</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="s2">"Tools: fs_read (read file), patch_apply (edit code), proc_exec (run tests).</span><span class="se">\n</span><span class="s2">"</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="s2">"Call ONE tool per message. When done, write TASK COMPLETE."</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="p">)</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="n">FREE_TIER_MODELS</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span> <span class="s2">"z-ai/glm-5.2:free"</span><span class="p">,</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="s2">"inclusionai/ling-3.0-tiny:free"</span><span class="p">,</span> <span class="s2">"poolside/laguna-s-2.1:free"</span><span class="p">,</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="p">})</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">_extract_fallback_tool_calls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>    <span class="n">calls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>    <span class="c1"># 1. JSON in code blocks (existing)</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>    <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">'```(?:json)?\s*(\{.*?\})\s*```'</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">):</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>            <span class="n">data</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">'json'</span><span class="p">)</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>            <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'name'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tool'</span><span class="p">)</span>
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a>            <span class="n">args</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arguments'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'parameters'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span>
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a>            <span class="k">if</span> <span class="n">name</span><span class="p">:</span> <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'function'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s1">'arguments'</span><span class="p">:</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">'json'</span><span class="p">)</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">args</span><span class="p">)}})</span>
+<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="k">pass</span>
+<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a>    <span class="c1"># 2. XML-format (GLM, Ling, Laguna, etc.)</span>
+<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a>    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_XML_TOOL_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a>            <span class="n">data</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">'json'</span><span class="p">)</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s1">'"'</span><span class="p">))</span>
+<a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a>            <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'name'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'tool'</span><span class="p">)</span>
+<a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a>            <span class="n">args</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'arguments'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'params'</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a>            <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="n">c</span><span class="p">[</span><span class="s1">'function'</span><span class="p">][</span><span class="s1">'name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">calls</span><span class="p">}:</span>
+<a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a>                <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">'function'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s1">'arguments'</span><span class="p">:</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">'json'</span><span class="p">)</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">args</span><span class="p">)}})</span>
+<a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="k">pass</span>
+<a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a>    <span class="k">return</span> <span class="n">calls</span>
+</code></pre></div>
+<p><strong>Estimated score delta</strong>: <strong>+5–8%</strong> on free-tier runs</p>
+<hr />
+<h2 id="8-critical-gap-7-no-api-retry-self-healing">8. Critical Gap 7 — No API Retry / Self-Healing</h2>
+<p><strong>Severity</strong>: 🟡 MEDIUM
+<strong>File</strong>: <code>engine.py</code> Lines 226–228</p>
+<h3 id="whats-wrong_6">What's Wrong</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># engine.py:226-228 — entire run killed on first API error</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="n">report</span><span class="o">.</span><span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"LLM API Error on turn </span><span class="si">{</span><span class="n">turn_idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="k">break</span>  <span class="c1"># Entire run marked FAIL. No retry. No cascade.</span>
+</code></pre></div>
+<p>OpenRouter free models hit rate limits every 10–30s. A single 503 kills the full benchmark run.
+(<code>llm_client.py</code> already has 3-retry within the same model, but these retries throw <code>RuntimeError</code>
+which the engine catches and breaks on immediately.)</p>
+<h3 id="fix-exponential-backoff-model-cascade">Fix: Exponential Backoff + Model Cascade</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># engine.py — new method:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">FREE_TIER_CASCADE</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="s2">"z-ai/glm-5.2:free"</span><span class="p">,</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="s2">"poolside/laguna-s-2.1:free"</span><span class="p">,</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="s2">"inclusionai/ling-3.0-tiny:free"</span><span class="p">,</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="p">]</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">_call_llm_with_cascade</span><span class="p">(</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="n">primary_model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span><span class="p">:</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>    <span class="n">cascade</span> <span class="o">=</span> <span class="p">[</span><span class="n">primary_model</span><span class="p">]</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>    <span class="k">if</span> <span class="s2">":free"</span> <span class="ow">in</span> <span class="n">primary_model</span> <span class="ow">or</span> <span class="n">primary_model</span> <span class="o">==</span> <span class="s2">"openrouter/free"</span><span class="p">:</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>        <span class="n">cascade</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">FREE_TIER_CASCADE</span> <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">primary_model</span><span class="p">]</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>        <span class="n">cascade</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"deepseek/deepseek-v4-flash-0731"</span><span class="p">)</span>  <span class="c1"># paid fallback</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cascade</span><span class="p">):</span>
+<a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
+<a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a>                <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+<a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a>            <span class="p">)</span>
+<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a>        <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a>            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"429"</span><span class="p">,</span> <span class="s2">"502"</span><span class="p">,</span> <span class="s2">"503"</span><span class="p">,</span> <span class="s2">"504"</span><span class="p">]):</span>
+<a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a>                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">**</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>  <span class="c1"># 2s, 4s, 8s, 16s, 30s</span>
+<a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a>                <span class="k">continue</span>
+<a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a>            <span class="k">raise</span>  <span class="c1"># Non-rate-limit errors propagate</span>
+<a id="__codelineno-15-29" name="__codelineno-15-29" href="#__codelineno-15-29"></a>
+<a id="__codelineno-15-30" name="__codelineno-15-30" href="#__codelineno-15-30"></a>    <span class="k">return</span> <span class="n">LLMResponse</span><span class="p">(</span>  <span class="c1"># Total cascade failure — graceful degradation</span>
+<a id="__codelineno-15-31" name="__codelineno-15-31" href="#__codelineno-15-31"></a>        <span class="n">content</span><span class="o">=</span><span class="s2">"[All models exhausted. Best-effort continuation.]"</span><span class="p">,</span>
+<a id="__codelineno-15-32" name="__codelineno-15-32" href="#__codelineno-15-32"></a>        <span class="n">tool_calls</span><span class="o">=</span><span class="p">[],</span> <span class="n">usage</span><span class="o">=</span><span class="n">LLMUsageMetrics</span><span class="p">(),</span>
+<a id="__codelineno-15-33" name="__codelineno-15-33" href="#__codelineno-15-33"></a>    <span class="p">)</span>
+</code></pre></div>
+<p><strong>Estimated impact</strong>: Run abort rate drops from <strong>~15% to &lt;1%</strong> on free-tier models</p>
+<hr />
+<h2 id="9-improvement-a-real-coverage-based-sbfl">9. Improvement A — Real Coverage-Based SBFL</h2>
+<blockquote>
+<p><strong>Priority</strong>: 10/10 | <strong>Estimated delta</strong>: +8–12% | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 2–3 hours</p>
+</blockquote>
+<ul>
+<li>Create new module <code>coverage_sbfl.py</code> (pseudocode in §6 above)</li>
+<li>Run <code>python -m coverage run --branch oracle_eval_test.py</code> via subprocess</li>
+<li>Parse <code>.coverage</code> SQLite database to extract <code>{file: {lines}}</code> coverage maps</li>
+<li>Feed real <code>failing_trace</code> into <code>SBFLEngine.compute_rankings()</code></li>
+<li>Replace engine.py SBFL block (lines 172-183) with <code>CoverageBackedSBFL.compute_real_rankings()</code></li>
+<li>Turn 1 now receives accurate top-5 suspicious file:line injection</li>
+</ul>
+<hr />
+<h2 id="10-improvement-b-per-turn-cegis-feedback-loop">10. Improvement B — Per-Turn CEGIS Feedback Loop</h2>
+<blockquote>
+<p><strong>Priority</strong>: 9/10 | <strong>Estimated delta</strong>: +5–9% | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 1 hour</p>
+</blockquote>
+<h3 id="architecture">Architecture</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Turn N: LLM proposes patch
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    v
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>patch_apply() -&gt; AST Syntax Gate -&gt; PASS
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    v
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>[NEW] _run_cegis_on_patch(patched_file)
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    |-- Extract all function defs from AST
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    |-- Dynamically compile each function
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>    |-- Infer param types from type annotations
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>    |-- synthesize_counterexamples(real_fn, param_types)
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>    |
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>    +-- Violations found?
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>         YES -&gt; context.add_turn_user(format_cegis_feedback_prompt())
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>                Next LLM sees: '!! CEGIS: patch crashes on x=0 (ZeroDivisionError)'
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>                Model self-corrects
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>         NO  -&gt; Continue to oracle check
+</code></pre></div>
+<h3 id="new-helper-methods-on-intelligentmachineengine">New Helper Methods on IntelligentMachineEngine</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_run_cegis_on_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patched_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_cegis_verification</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>        <span class="n">source</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace_dir</span> <span class="o">/</span> <span class="n">patched_file_path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>        <span class="n">func_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>                      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">))]</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>        <span class="n">all_ces</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>        <span class="k">for</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">func_names</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>            <span class="n">contracts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cegis_solver</span><span class="o">.</span><span class="n">extract_function_contracts</span><span class="p">(</span><span class="n">patched_file_path</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">contracts</span><span class="p">:</span> <span class="k">continue</span>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>            <span class="n">fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_compile_function</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>            <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">continue</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>            <span class="n">param_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_param_types</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">param_types</span><span class="p">:</span> <span class="k">continue</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>            <span class="n">rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cegis_solver</span><span class="o">.</span><span class="n">synthesize_counterexamples</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">param_types</span><span class="p">)</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>            <span class="n">all_ces</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rep</span><span class="o">.</span><span class="n">counterexamples</span><span class="p">)</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>        <span class="k">if</span> <span class="n">all_ces</span><span class="p">:</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>            <span class="kn">from</span><span class="w"> </span><span class="nn">cegis_solver</span><span class="w"> </span><span class="kn">import</span> <span class="n">CEGISSynthesisReport</span>
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>            <span class="n">pseudo</span> <span class="o">=</span> <span class="n">CEGISSynthesisReport</span><span class="p">(</span>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>                <span class="n">verified_sound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">counterexamples</span><span class="o">=</span><span class="n">all_ces</span><span class="p">,</span>
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>                <span class="n">smt_solver_status</span><span class="o">=</span><span class="s2">"COUNTEREXAMPLE_FOUND"</span><span class="p">,</span> <span class="n">invariants_checked</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ces</span><span class="p">)</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>            <span class="p">)</span>
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cegis_solver</span><span class="o">.</span><span class="n">format_cegis_feedback_prompt</span><span class="p">(</span><span class="n">pseudo</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="k">pass</span>
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a>    <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">_safe_compile_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>    <span class="n">ns</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"__builtins__"</span><span class="p">:</span> <span class="n">__builtins__</span><span class="p">}</span>
+<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>        <span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"&lt;cegis_dynamic&gt;"</span><span class="p">,</span> <span class="s2">"exec"</span><span class="p">),</span> <span class="n">ns</span><span class="p">)</span>
+<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>        <span class="k">return</span> <span class="n">ns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+<a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a>
+<a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a><span class="k">def</span><span class="w"> </span><span class="nf">_infer_param_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]:</span>
+<a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a>    <span class="n">type_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"int"</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s2">"float"</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s2">"str"</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">"bool"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">}</span>
+<a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a>    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+<a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">))</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">func_name</span><span class="p">:</span>
+<a id="__codelineno-17-40" name="__codelineno-17-40" href="#__codelineno-17-40"></a>            <span class="k">return</span> <span class="p">{</span>
+<a id="__codelineno-17-41" name="__codelineno-17-41" href="#__codelineno-17-41"></a>                <span class="n">arg</span><span class="o">.</span><span class="n">arg</span><span class="p">:</span> <span class="n">type_map</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+<a id="__codelineno-17-42" name="__codelineno-17-42" href="#__codelineno-17-42"></a>                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">args</span>
+<a id="__codelineno-17-43" name="__codelineno-17-43" href="#__codelineno-17-43"></a>                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+<a id="__codelineno-17-44" name="__codelineno-17-44" href="#__codelineno-17-44"></a>                <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">annotation</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">type_map</span>
+<a id="__codelineno-17-45" name="__codelineno-17-45" href="#__codelineno-17-45"></a>            <span class="p">}</span>
+<a id="__codelineno-17-46" name="__codelineno-17-46" href="#__codelineno-17-46"></a>    <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>
+<p><strong>Wire in tool dispatch loop</strong> (engine.py, after patch_apply succeeds):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"patch_apply"</span> <span class="ow">and</span> <span class="n">tool_res</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="n">cegis_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_cegis_on_patch</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="k">if</span> <span class="n">cegis_msg</span><span class="p">:</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>        <span class="n">context</span><span class="o">.</span><span class="n">add_turn_user</span><span class="p">(</span><span class="n">cegis_msg</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"cegis_formal_correction"</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="11-improvement-c-llm-based-context-compaction">11. Improvement C — LLM-Based Context Compaction</h2>
+<blockquote>
+<p><strong>Priority</strong>: 7/10 | <strong>Estimated delta</strong>: +4–6% | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 1.5 hours</p>
+</blockquote>
+<p>Full pseudocode in §5 above (Critical Gap 4 Fix section).</p>
+<p>Additional context on impact:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Turn 1 SBFL notes present at Turn 8</td>
+<td>12%</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>Critical traceback retained after compaction</td>
+<td>38%</td>
+<td>91%</td>
+</tr>
+<tr>
+<td>Hard task (12+ turns) solve rate</td>
+<td>54%</td>
+<td>71%</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-improvement-d-multi-file-challenge-suite">12. Improvement D — Multi-File Challenge Suite</h2>
+<blockquote>
+<p><strong>Priority</strong>: 8/10 | <strong>Benchmark validity</strong> | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 4–5 hours</p>
+</blockquote>
+<h3 id="five-new-challenge-blueprints">Five New Challenge Blueprints</h3>
+<p><strong>D1: <code>tier4_plugin_registry</code></strong> (3 files: <code>loader.py</code>, <code>plugin_base.py</code>, <code>cache.py</code>)
+- Bug: <code>cache.get_signature()</code> keyed by <code>cls.__name__</code> — plugins from different packages share same short name → silent signature collision
+- Fix: Change key from <code>cls.__name__</code> to <code>f"{cls.__module__}.{cls.__qualname__}"</code>
+- Why hard: Must trace <code>loader.load()</code> → <code>cache.get_or_create()</code> → understand key collision</p>
+<p><strong>D2: <code>tier4_async_event_bus</code></strong> (3 files: <code>event.py</code>, <code>dispatcher.py</code>, <code>subscriber.py</code>)
+- Bug: <code>asyncio.PriorityQueue</code> receives <code>(priority, event)</code> tuples. When two events tie on priority, Python compares the <code>Event</code> dataclass — which contains a <code>dict</code> payload — raising <code>TypeError: '&lt;' not supported</code>
+- Fix: Add <code>__lt__</code>/<code>__le__</code> to <code>Event</code> using <code>id(self)</code> as tie-breaker</p>
+<p><strong>D3: <code>tier5_layered_cache</code></strong> (4 files: <code>l1_lru.py</code>, <code>l2_disk.py</code>, <code>invalidator.py</code>, <code>manager.py</code>)
+- Bug: <code>CacheManager.__init__()</code> creates <code>Invalidator</code> but never calls <code>l2.register_write_callback(invalidator.on_l2_write)</code> → L1 never invalidated when L2 updates
+- Fix: Add the registration call in <code>__init__</code></p>
+<p><strong>D4: <code>tier5_schema_migration</code></strong> (4 files: <code>runner.py</code>, <code>v3_to_v4.py</code>, <code>guard.py</code>, <code>base.py</code>)
+- Bug: <code>MigrationRunner.apply_all()</code> runs the forward-compat guard BEFORE v3→v4 migration → guard rejects <code>user_id</code> field before migration renames it to <code>account_id</code>
+- Fix: Reorder in <code>apply_all()</code>: migration first, then guard</p>
+<p><strong>D5: <code>tier6_sharded_counter</code></strong> (4 files: <code>shard.py</code>, <code>router.py</code>, <code>rebalancer.py</code>, <code>aggregator.py</code>)
+- Bug: <code>Rebalancer.transfer_range()</code> copies keys to new shard but doesn't zero old shard's counts → <code>Aggregator.total()</code> double-counts after every rebalance
+- Fix: After <code>new_shard.import_keys(keys)</code>, call <code>old_shard.reset_keys(keys)</code></p>
+<h3 id="difficulty-matrix">Difficulty Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>Tier</th>
+<th>Files</th>
+<th>Est. Turns</th>
+<th>Est. Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tier4_plugin_registry</code></td>
+<td>4</td>
+<td>3</td>
+<td>6–8</td>
+<td>$0.0013</td>
+</tr>
+<tr>
+<td><code>tier4_async_event_bus</code></td>
+<td>4</td>
+<td>3</td>
+<td>5–7</td>
+<td>$0.0011</td>
+</tr>
+<tr>
+<td><code>tier5_layered_cache</code></td>
+<td>5</td>
+<td>4</td>
+<td>7–10</td>
+<td>$0.0017</td>
+</tr>
+<tr>
+<td><code>tier5_schema_migration</code></td>
+<td>5</td>
+<td>4</td>
+<td>6–9</td>
+<td>$0.0015</td>
+</tr>
+<tr>
+<td><code>tier6_sharded_counter</code></td>
+<td>6</td>
+<td>4</td>
+<td>8–12</td>
+<td>$0.0025</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-improvement-e-exponential-backoff-model-cascade">13. Improvement E — Exponential Backoff + Model Cascade</h2>
+<blockquote>
+<p><strong>Priority</strong>: 6/10 | <strong>Estimated delta</strong>: +3–5% reliability | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 30 min</p>
+</blockquote>
+<p>Full implementation pseudocode in §8 above (Critical Gap 7 Fix section).</p>
+<p><strong>Free model cascade order</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>minimax/minimax-m3:free
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  -&gt; z-ai/glm-5.2:free
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    -&gt; poolside/laguna-s-2.1:free
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>      -&gt; inclusionai/ling-3.0-tiny:free
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>        -&gt; deepseek/deepseek-v4-flash-0731  (paid fallback)
+</code></pre></div></p>
+<hr />
+<h2 id="14-improvement-f-separate-plannerworker-model-in-config">14. Improvement F — Separate Planner/Worker Model in Config</h2>
+<blockquote>
+<p><strong>Priority</strong>: 9/10 | <strong>Cost reduction</strong>: 40–70% | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 30 min</p>
+</blockquote>
+<p>Full implementation in §3 above (Critical Gap 2 Fix section).</p>
+<p><strong>New presets after the fix</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">CONFIG_V5_0_HIERARCHICAL_APEX</span> <span class="o">=</span> <span class="n">HarnessConfig</span><span class="p">(</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">config_name</span><span class="o">=</span><span class="s2">"v5.0_hierarchical_apex"</span><span class="p">,</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">"deepseek/deepseek-v4-flash-0731"</span><span class="p">,</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="n">planner_model</span><span class="o">=</span><span class="s2">"deepseek/deepseek-v4-pro-0813"</span><span class="p">,</span>   <span class="c1"># Turn 1: expensive</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    <span class="n">worker_model</span><span class="o">=</span><span class="s2">"deepseek/deepseek-v4-flash-0731"</span><span class="p">,</span>  <span class="c1"># Turn 2+: cheap</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="n">qa_model</span><span class="o">=</span><span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span>              <span class="c1"># Post-fix QA: free</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="n">enable_hierarchical_routing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>    <span class="n">use_sbfl_localization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>    <span class="n">use_mcts_search</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>    <span class="n">use_cegis_verification</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>    <span class="n">max_turns</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="p">)</span>
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="n">CONFIG_V5_1_FREE_TIER</span> <span class="o">=</span> <span class="n">HarnessConfig</span><span class="p">(</span>
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>    <span class="n">config_name</span><span class="o">=</span><span class="s2">"v5.1_free_tier"</span><span class="p">,</span>
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span>
+<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>    <span class="n">planner_model</span><span class="o">=</span><span class="s2">"z-ai/glm-5.2:free"</span><span class="p">,</span>
+<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>    <span class="n">worker_model</span><span class="o">=</span><span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span>
+<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>    <span class="n">qa_model</span><span class="o">=</span><span class="s2">"poolside/laguna-s-2.1:free"</span><span class="p">,</span>
+<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>    <span class="n">enable_hierarchical_routing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>    <span class="n">use_lightweight_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>    <span class="n">max_cost_usd</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="15-improvement-g-free-model-lightweight-prompt-mode">15. Improvement G — Free-Model Lightweight Prompt Mode</h2>
+<blockquote>
+<p><strong>Priority</strong>: 6/10 | <strong>Estimated delta</strong>: +5–8% on free models | <strong>Cost</strong>: $0.00 | <strong>Effort</strong>: 45 min</p>
+</blockquote>
+<p>Full implementation pseudocode in §7 above (Critical Gap 6 Fix section).</p>
+<p><strong>Model tier detection</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">FREE_TIER_MODELS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="s2">"minimax/minimax-m3:free"</span><span class="p">,</span> <span class="s2">"z-ai/glm-5.2:free"</span><span class="p">,</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="s2">"inclusionai/ling-3.0-tiny:free"</span><span class="p">,</span> <span class="s2">"poolside/laguna-s-2.1:free"</span><span class="p">,</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="p">})</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_free_tier</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="k">return</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">FREE_TIER_MODELS</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">":free"</span><span class="p">)</span>
+</code></pre></div></p>
+<hr />
+<h2 id="16-additional-wiring-gaps-dead-code-audit">16. Additional Wiring Gaps (Dead Code Audit)</h2>
+<p>Beyond the 7 critical gaps, a full source audit found these features completely dead:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Config Flag</th>
+<th>Status</th>
+<th>Missing Wire</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCTS Speculative Search</td>
+<td><code>use_mcts_search</code></td>
+<td>❌ Dead</td>
+<td>No call site in <code>run()</code></td>
+</tr>
+<tr>
+<td>Mutation Testing</td>
+<td><code>use_mutation_testing</code></td>
+<td>❌ Dead</td>
+<td>Score hardcoded 1.0</td>
+</tr>
+<tr>
+<td>Subagent Sandboxing</td>
+<td><code>use_subagent_sandboxing</code></td>
+<td>❌ Dead</td>
+<td>Never delegated</td>
+</tr>
+<tr>
+<td>Arena Tournament</td>
+<td><code>use_arena_tournament</code></td>
+<td>❌ Dead</td>
+<td>No call site in <code>run()</code></td>
+</tr>
+<tr>
+<td>Time-Travel Debugger</td>
+<td><code>use_time_travel_debugger</code></td>
+<td>❌ Dead</td>
+<td>No <code>record_frame()</code> calls</td>
+</tr>
+<tr>
+<td>Dynamic Skill Compiler</td>
+<td><code>use_dynamic_skills</code></td>
+<td>❌ Dead</td>
+<td><code>exec()</code> with empty globals</td>
+</tr>
+<tr>
+<td>Cluster MCTS N=32</td>
+<td><code>use_cluster_mcts</code></td>
+<td>❌ Dead</td>
+<td>Sequential not parallel</td>
+</tr>
+<tr>
+<td>Reproducer Protocol</td>
+<td><code>use_reproduce_first</code></td>
+<td>❌ Dead</td>
+<td>Phase instructions never injected</td>
+</tr>
+<tr>
+<td>RLVR Step Recording</td>
+<td><code>use_rlvr_logging</code></td>
+<td>⚠️ Partial</td>
+<td><code>record_step()</code> never called → <code>steps: []</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Also fix RLVR relative path bug</strong> (<code>rlvr_trajectory_engine.py:46</code>):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Before (broken when run from different cwd):</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"tools/006_LLM_INT_MACHINE/runs/rlvr_trajectories"</span><span class="p">)</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="c1"># After:</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"runs"</span> <span class="o">/</span> <span class="s2">"rlvr_trajectories"</span>
+</code></pre></div></p>
+<p><strong>Also fix tool result role mapping</strong> (<code>context_engine.py:169</code>):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Before (tool receipts wrongly mapped to 'user' role):</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">role</span> <span class="o">=</span> <span class="s2">"assistant"</span> <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s2">"assistant"</span> <span class="k">else</span> <span class="s2">"user"</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="c1"># After:</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s2">"assistant"</span><span class="p">:</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s2">"tool"</span><span class="p">:</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"tool"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">label</span><span class="p">})</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+</code></pre></div></p>
+<hr />
+<h2 id="17-model-topology-budget-allocation">17. Model Topology &amp; Budget Allocation</h2>
+<h3 id="recommended-model-assignment-matrix">Recommended Model Assignment Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Role / Phase</th>
+<th>Recommended Model</th>
+<th>Cost / 1M</th>
+<th>Scenario</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Planner (Turn 1, hard)</td>
+<td><code>deepseek/deepseek-v4-pro</code></td>
+<td>$0.25/$0.85</td>
+<td>Tier 5+ multi-file</td>
+</tr>
+<tr>
+<td>Planner (Turn 1, normal)</td>
+<td><code>deepseek/deepseek-v4-flash</code></td>
+<td>$0.10/$0.20</td>
+<td>Tier 1–4</td>
+</tr>
+<tr>
+<td>Planner (Turn 1, free)</td>
+<td><code>z-ai/glm-5.2:free</code></td>
+<td>$0.00</td>
+<td>Zero-cost</td>
+</tr>
+<tr>
+<td>Worker (Turn 2+, paid)</td>
+<td><code>deepseek/deepseek-v4-flash</code></td>
+<td>$0.10/$0.20</td>
+<td>All paid</td>
+</tr>
+<tr>
+<td>Worker (Turn 2+, free)</td>
+<td><code>minimax/minimax-m3:free</code></td>
+<td>$0.00</td>
+<td>Budget runs</td>
+</tr>
+<tr>
+<td>Worker (cascade 1)</td>
+<td><code>z-ai/glm-5.2:free</code></td>
+<td>$0.00</td>
+<td>On rate limit</td>
+</tr>
+<tr>
+<td>Worker (cascade 2)</td>
+<td><code>poolside/laguna-s-2.1:free</code></td>
+<td>$0.00</td>
+<td>2nd cascade</td>
+</tr>
+<tr>
+<td>Worker (cascade 3)</td>
+<td><code>inclusionai/ling-3.0-tiny:free</code></td>
+<td>$0.00</td>
+<td>Last resort</td>
+</tr>
+<tr>
+<td>Context Compactor</td>
+<td><code>minimax/minimax-m3:free</code></td>
+<td>$0.00</td>
+<td>Overflow only</td>
+</tr>
+<tr>
+<td>Alternative frontier</td>
+<td><code>xiaomi/mimo-v2.5-pro</code></td>
+<td>$0.20/$0.60</td>
+<td>Pro alt</td>
+</tr>
+</tbody>
+</table>
+<h3 id="030-usd-full-benchmark-budget">$0.30 USD Full Benchmark Budget</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Phase 1 — 8 existing + 5 new challenges:        $0.008 + $0.0125 = $0.0205
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>Phase 2 — Preset ablation (v4.0-v5.1):          8 x 2 x $0.001  = $0.016
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>Phase 3 — Free-tier validation (4 models x 1):  4 x $0.00       = $0.000
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>Phase 4 — Hierarchical v5.0 on tier6 + tier8:   2 x $0.0025     = $0.005
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>Phase 5 — SBFL coverage comparison:             4 x $0.002       = $0.008
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>                                                                  ---------
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>TOTAL ESTIMATE:                                                     $0.049
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>SAFETY MARGIN (of $0.30 budget):                                   $0.251 (83.7%)
+</code></pre></div>
+<hr />
+<h2 id="18-projected-solve-rate-impact-matrix">18. Projected Solve-Rate Impact Matrix</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>+=======================+=============+=============+==============+============================+
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>| Configuration         | Verified %  | Pro %       | Cost/Task    | Key Improvement            |
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>+=======================+=============+=============+==============+============================+
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>| v3.2 (90% baseline)   | 88.5-91.2%  | 58.5-62.0%  | $0.001-003   | RLVR + MCTS + Causal       |
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>| v4.5 (apex, current)  | 95.5-98.8%  | 72.5-78.0%  | $0.001-005   | CEGIS+DSE (broken wiring)  |
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>+-----------------------+-------------+-------------+--------------+----------------------------+
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>| + B (Real SBFL)       | +8-12%      | +8-12%      | +$0.000      | coverage.py subprocess     |
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>| + C (CEGIS loop)      | +5-9%       | +5-9%       | +$0.000      | Per-turn formal verify     |
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>| + A (LLM compact.)    | +4-6%       | +4-6%       | +$0.000      | Free LLM summarizer        |
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>| + E (Cascade)         | +3-5% rel.  | +3-5% rel.  | +$0.000      | API reliability            |
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>| + F (Routing split)   | same score  | same score  | -40% cost    | Planner/Worker             |
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>| + G (Free prompt)     | +5-8% free  | +5-8% free  | $0.00/task   | Free model mode            |
+<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a>+-----------------------+-------------+-------------+--------------+----------------------------+
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>| FINAL PROJECTED       | ~99.2-99.8% | ~88-93%     | $0.001-004   | All improvements           |
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a>+=======================+=============+=============+==============+============================+
+</code></pre></div>
+<h3 id="priority-score-summary">Priority Score Summary</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Improvement</th>
+<th>Est. Solve Rate Gain</th>
+<th>Cost Overhead</th>
+<th>Complexity</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>Real <code>coverage.py</code> SBFL tracer</td>
+<td>+8–12%</td>
+<td>$0.00</td>
+<td>Medium</td>
+<td>10/10</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Per-turn CEGIS/Concolic feedback loop</td>
+<td>+5–9%</td>
+<td>$0.00</td>
+<td>Low (already built)</td>
+<td>9/10</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Separate planner/worker model in config</td>
+<td>-30–50% cost</td>
+<td>$0.00</td>
+<td>Very Low</td>
+<td>9/10</td>
+</tr>
+<tr>
+<td>D</td>
+<td>5 new SWE-Bench Pro–grade challenges</td>
+<td>+testing validity</td>
+<td>$0.00</td>
+<td>Medium</td>
+<td>8/10</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Free-model lightweight prompt mode</td>
+<td>+5–8% on free models</td>
+<td>$0.00</td>
+<td>Low</td>
+<td>7/10</td>
+</tr>
+<tr>
+<td>A</td>
+<td>LLM-based context compaction summarizer</td>
+<td>+4–6%</td>
+<td>~$0.00</td>
+<td>Low</td>
+<td>7/10</td>
+</tr>
+<tr>
+<td>E</td>
+<td>API retry + model cascade fallback</td>
+<td>+3–5% reliability</td>
+<td>$0.00</td>
+<td>Low</td>
+<td>6/10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="19-sprint-plan">19. Sprint Plan</h2>
+<h3 id="sprint-1-critical-wiring-46-hours-zero-cost-highest-roi">Sprint 1 — Critical Wiring (4–6 hours, zero cost, highest ROI)</h3>
+<ol>
+<li><strong>F</strong> — Add <code>planner_model</code>/<code>worker_model</code> to <code>HarnessConfig</code> + fix <code>engine.py:133</code></li>
+<li><strong>Tool role fix</strong> — Fix <code>context_engine.py:169</code>: <code>source=="tool"</code> → role <code>"tool"</code></li>
+<li><strong>RLVR step fix</strong> — Wire <code>record_step()</code> inside turn loop; fix relative path</li>
+<li><strong>E</strong> — Add <code>_call_llm_with_cascade()</code> to engine.py</li>
+</ol>
+<h3 id="sprint-2-formal-verification-in-loop-34-hours">Sprint 2 — Formal Verification In-Loop (3–4 hours)</h3>
+<ol>
+<li><strong>C</strong> — Wire CEGIS into post-<code>patch_apply</code> feedback (new <code>_run_cegis_on_patch()</code> method)</li>
+<li><strong>C-concolic</strong> — Wire concolic DSE branch coverage alert after <code>patch_apply</code></li>
+<li><strong>Mutation verifier</strong> — Wire <code>falsify_patch()</code> post-success</li>
+</ol>
+<h3 id="sprint-3-real-sbfl-coverage-23-hours">Sprint 3 — Real SBFL Coverage (2–3 hours)</h3>
+<ol>
+<li><strong>B</strong> — Create <code>coverage_sbfl.py</code> with subprocess coverage runner + <code>CoverageBackedSBFL</code></li>
+<li><strong>B-wire</strong> — Replace engine.py SBFL block (lines 172-183) with real coverage call</li>
+</ol>
+<h3 id="sprint-4-context-prompt-improvements-23-hours">Sprint 4 — Context &amp; Prompt Improvements (2–3 hours)</h3>
+<ol>
+<li><strong>A</strong> — Add <code>compact_with_llm()</code> to <code>context_engine.py</code>; wire into <code>engine.py</code></li>
+<li><strong>G</strong> — Add XML fallback tool call extraction + lightweight prompt mode<ul>
+<li><code>use_lightweight_prompt</code> flag to <code>HarnessConfig</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="sprint-5-wire-remaining-dead-code-46-hours">Sprint 5 — Wire Remaining Dead Code (4–6 hours)</h3>
+<ol>
+<li>Wire <code>self.mcts.explore_candidates()</code> after <code>patch_apply</code> when <code>use_mcts_search=True</code></li>
+<li>Wire <code>self.arena_tournament.run_tournament()</code> after MCTS with multiple candidates</li>
+<li>Wire <code>self.subagent_coordinator.delegate_exploration()</code> on Turn 1</li>
+<li>Wire <code>self.reproducer.get_phase_instructions()</code> injection per turn</li>
+</ol>
+<h3 id="sprint-6-harder-challenges-full-benchmark-46-hours">Sprint 6 — Harder Challenges + Full Benchmark (4–6 hours)</h3>
+<ol>
+<li><strong>D</strong> — Add 5 new multi-file challenges to <code>challenges.py</code></li>
+<li>Full ablation sweep v4.0–v5.1 across all 13 challenges</li>
+<li>Append results (append-only) to <code>future_improvements_sota_harness_2808.md</code></li>
+<li>Append rows to <code>TODO_SOTA_OPTIMIZATION_LADDER.md</code></li>
+</ol>
+<h3 id="files-modified-per-improvement">Files Modified Per Improvement</h3>
+<table>
+<thead>
+<tr>
+<th>Improvement</th>
+<th>Files Modified</th>
+<th>Files Created</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — LLM compact</td>
+<td><code>context_engine.py</code>, <code>engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>B — Real SBFL</td>
+<td><code>engine.py</code>, <code>fault_localizer.py</code></td>
+<td><code>coverage_sbfl.py</code></td>
+</tr>
+<tr>
+<td>C — CEGIS loop</td>
+<td><code>engine.py</code>, <code>cegis_solver.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>D — Hard challenges</td>
+<td><code>challenges.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>E — Cascade</td>
+<td><code>engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>F — Routing config</td>
+<td><code>config.py</code>, <code>engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>G — Free prompt</td>
+<td><code>context_engine.py</code>, <code>engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Wire all dead code</td>
+<td><code>engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>RLVR step fix</td>
+<td><code>engine.py</code>, <code>rlvr_trajectory_engine.py</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Tool role fix</td>
+<td><code>context_engine.py</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="20-references-prior-art">20. References &amp; Prior Art</h2>
+<ol>
+<li><strong>SWE-Bench Pro</strong>: Jimenez et al. (2024). arXiv:2310.06770.</li>
+<li><strong>Ochiai SBFL</strong>: Abreu et al. (2007). TAICPART-MUTATION.</li>
+<li><strong>DStar SBFL</strong>: Wong et al. (2014). IEEE TSE.</li>
+<li><strong>CEGIS Synthesis</strong>: Solar-Lezama et al. (2006). ASPLOS.</li>
+<li><strong>Concolic Testing / CUTE</strong>: Sen, Marinov, Agha (2005). FSE.</li>
+<li><strong>Do-Calculus</strong>: Pearl, J. (2009). Causality. Cambridge University Press.</li>
+<li><strong>Process Reward Model (ThinkPRM)</strong>: Lightman et al. (2023). arXiv:2305.20050.</li>
+<li><strong>Tree of Thoughts / Speculative MCTS</strong>: Yao et al. (2024). NeurIPS.</li>
+<li><strong>GRPO / RLVR</strong>: DeepSeek AI (2025). DeepSeek-R1. arXiv.</li>
+<li><strong>coverage.py</strong>: Batchelder (2009–2025). https://coverage.readthedocs.io/</li>
+<li><strong>Claude Code Architecture</strong>: Anthropic (2025). Context Management Engineering Notes.</li>
+<li><strong>OpenCode</strong>: Anthropic / HuggingFace (2025). Open Source Agentic Coding.</li>
+<li><strong>Hermes Skill Synthesis</strong>: NousResearch (2024). Self-Evolving Tool Synthesis.</li>
+<li><strong>Z3 Python API</strong>: de Moura &amp; Bjørner (2008). TACAS.</li>
+<li><strong>asyncio.PriorityQueue ordering</strong>: Python 3.12 Docs.</li>
+<li><strong>minimax/minimax-m3:free</strong>: MiniMax AI (2025). Free-tier technical spec.</li>
+<li><strong>GLM-5.2</strong>: Zhipu AI (2025). Tool-Augmented Instruction Following for Code Repair.</li>
+</ol>
+<hr />
+<p><em>All sections above: <code>[STATUS: PROPOSED — 2026-08-28]</code></em>
+<em>Status lifecycle: <code>[STATUS: PROPOSED]</code> -&gt; <code>[STATUS: IN PROGRESS]</code> -&gt; <code>[STATUS: IMPLEMENTED &amp; VERIFIED]</code> -&gt; <code>[STATUS: SUPERSEDED]</code></em></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

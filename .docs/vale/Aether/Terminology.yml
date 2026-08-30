@@ -1,0 +1,8 @@
+extends: existence
+message: "Verify usage of canonical domain term '%s'."
+level: suggestion
+tokens:
+  - AgentView
+  - RuntimeService
+  - EpisodeEngine
+  - ActionReceipt

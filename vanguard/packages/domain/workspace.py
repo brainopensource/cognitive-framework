@@ -39,7 +39,10 @@ def _discover_workspace_root() -> Path | None:
                         _, _, value = line.partition("=")
                         value = value.strip().strip('"').strip("'")
                         if value:
-                            return Path(value)
+                            target = Path(value)
+                            if not target.is_absolute():
+                                target = (cfg.parent.parent / target).resolve()
+                            return target
             parent = candidate.parent
             if parent == candidate:
                 break

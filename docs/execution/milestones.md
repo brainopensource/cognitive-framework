@@ -13,8 +13,8 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.2a0
+analysis_subject_sha: c14be3c9d3b2ba9b7bacefec235eddab1bf1e304
+version: 0.9.2a1
 last_verified: 2026-08-30
 normative_authority:
   - docs/03_execution/milestones.md
@@ -55,7 +55,9 @@ This page owns stable outcomes and gate predicates. It does not own current pack
 
 ## Current-status caveat
 
-The active authority corpus contains inconsistent M-7/M-8 and baseline status statements (`CONFLICT-E-002` and `CONFLICT-E-003`). This page therefore publishes stable gates only. It does not select a current completion state; see [execution.active](active.md) and the generated conflict register.
+This page publishes stable gates only. The exact current disposition is owned by
+[execution.active](active.md), which records M-8 and later as unaccepted until
+the required producer-verifiable and independent receipts exist.
 
 ## v0.9.2 capability-wave overlay
 
@@ -74,3 +76,21 @@ existing M-4–M-10 gates without silently closing them.
 
 No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.
+
+## SWE-P0–SWE-P5 parallel program
+
+The SWE program is evidence work, not a milestone shortcut. It does not authorize
+or close M-9 or M-10.
+
+| Program | Outcome | Required gate |
+|---|---|---|
+| SWE-P0 | Instrument-valid harness | Isolated materialization, trajectory linkage, evaluator validity, secret boundary |
+| SWE-P1 | Honest baseline | Preregistered corpus/model/cost policy and explicit missingness |
+| SWE-P2 | Harness experiments | Controlled context/tool/recovery experiments with attributable receipts |
+| SWE-P3 | Model/harness optimization | Predeclared optimization and held-out comparison without contamination |
+| SWE-P4 | Controlled larger run | Budgeted larger sample, independent audit, reproducible subject identity |
+| SWE-P5 | Official evaluation | Official benchmark procedure and receipt; local runs are never official |
+
+Only SWE-P5 may support an official SWE-bench claim, and only for its evaluated
+subject and protocol. A local canary or green test suite is never an official
+SWE-bench result.

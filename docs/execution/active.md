@@ -13,8 +13,8 @@ purpose: Represent current execution intent exactly as the active board states i
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.2a0
+analysis_subject_sha: c14be3c9d3b2ba9b7bacefec235eddab1bf1e304
+version: 0.9.2a1
 last_verified: 2026-08-30
 normative_authority:
   - docs/03_execution/sprint_active.md
@@ -30,7 +30,9 @@ confidence: high
 
 ## Authoritative source
 
-`docs/03_execution/sprint_active.md` declares itself the sole current execution board. This candidate view does not turn its package state into architecture or normative law.
+This file is the current execution board for the repository subject named by
+`analysis_subject_sha`. Generated indexes and historical reports route work but
+do not override this board, source, tests, or receipts.
 
 ## Uncontested current controls
 
@@ -44,21 +46,30 @@ confidence: high
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `WP-A3` | `IN_PROGRESS` | Repair abandoned multi-role lineages and publish M-7 evidence only after real artifact flow |
-| B | `WP-B4` | `PACKAGE_READY` | Close baseline, M-5b, M-6.5, and independently accepted M-8 evidence dependencies in order |
+| A | `FIN-A1` | `IN_PROGRESS` | Obtain an exact producer-verifiable M-8 bundle and independent acceptance |
+| B | `FIN-B1` | `READY` | Produce/audit M-8 memory, learning, promotion, and rollback evidence without changing normative contracts |
 
-## Unresolved status conflicts
+## Reconciled state on the exact subject
 
-The same active board later reports verified `passed` bundles for M-7 and M-8, while its current-package table and critical path still describe both as unfinished. It also describes `CONVERGENCE-BASE-v1` as published while the stable milestones document says the tag is absent and M-8 has no published bundle.
+The subject is `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304` with tree
+`365befc73c29284702abaee0ff4efdcbaa8751d1`; local and remote branch refs agree.
+W-092-0–4 are present in its ancestry. `CONVERGENCE-BASE-v1` is an annotated,
+remote tag at commit `532abf16defb23a0d91259f45aa7042c9b2bae6d`, tag object
+`ee80748872104f06c927e098fd5392b139ea7251`, and tree
+`a7af1b9ffee03c2f0f20244ca37ec3aec78f5515`.
 
-These are `UNRESOLVED` authority conflicts, not permission to choose the most favorable state. Until the active execution authority is corrected atomically:
+- W-092-5 remains `BLOCKED`: full suite `2348 tests, 0 failures, 0 errors,
+  20 skips`; equivalent checks and MkDocs strict passed, but `just` is absent,
+  no signed release envelope/external Git receipt exists, and the canary driver
+  executed two episodes per task despite the one-attempt preregistration.
+- M-5a has a named baseline/tag artifact. M-5b, M-6, M-6.5, M-7, and M-8 are
+  not accepted here without exact producer-verifiable bundles and independent
+  receipts. Mechanism and focused green tests are not closure.
+- M-9 and M-10 are not authorized. No SWE-bench or release claim is made.
 
-- treat the package table as the declared work assignment;
-- treat individual verifier rows only as claims about the named bundle;
-- do not infer milestone acceptance where the board's own predicates disagree;
-- do not advance M-9 from staging based on this candidate page.
-
-The exact conflicts and required governance follow-up are recorded as `CONFLICT-E-002` through `CONFLICT-E-004` in `.generated/knowledge/target-conflicts.jsonl`.
+Prior stale conflict statements tied to older candidate subjects are superseded
+for current execution by this exact-subject disposition; historical artifacts
+remain immutable.
 
 ## Stable package contracts
 
@@ -110,31 +121,45 @@ seam at a time.
 
 ### W-092-5 qualification disposition (exact subject)
 
-As of the reconciled integration commit `1160e1f` on
-`feat/beta-release_electroweak-v091`, W-092-5 is **BLOCKED**, not PASS. The
-working tree contains the contributor patches under review, so this disposition
-is bound to the exact tree captured by the integration owner rather than to a
-different contributor report.
+As of `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304` on
+`feat/beta-release_electroweak-v091`, W-092-5 is **BLOCKED**, not PASS.
 
 - Deterministic LAM: 27/27 rows completed, non-empirical only.
 - Focused gates: kernel 97/97; contracts 417/417; agency 126/126; packs 67/67;
   adapters 154/154 (2 skips); benchmarks 29/29; tools 97/97.
-- Runtime: 641 tests produced 4 failures, 18 errors, and 7 skips in the
-  restricted environment. The 18 socket-related errors are environmental
-  `PermissionError` failures; a privileged targeted service/gateway run passed
-  17/17. The remaining dogfood failures are not release evidence.
-- Security: 1 failure in process-group timeout behavior. M-7 falsifiers remain
-  10 failures and are outside current v0.9.2 authorization.
-- Final full-suite run on this exact code subject: 2,348 tests, 55 failures,
-  39 errors, and 20 skips. The broader failures include pre-existing
-  M-5/M-6.5/M-7 falsifiers, LAM/sandbox integrations, dogfood, and security;
-  they are not release evidence.
-- `just` 1.58.0 was executed from the project tool cache. `just check` passed;
-  `just verify` reached the strict documentation build and was blocked by the
-  pre-existing missing navigation target and broken research anchors.
-- Release qualification was not run because no real subject, evidence envelope,
-  and git receipt inputs exist; no placeholders were created.
+- Full-suite run: `2348` tests, `0` failures, `0` errors, `20` skips, `109.161s`.
+- `just check`/`just verify` were not executable (`just` absent, exit 127);
+  underlying checks passed with the `uv` cache redirected to `/tmp`, and MkDocs
+  strict passed.
+- Real-model canary: three `NO_PATCH` tasks, valid baseline evaluator,
+  linked trajectories, observed cost `USD 0.002308`; the driver opened two
+  episodes per task (`max_attempts=2`), so this is not a one-attempt result.
+- Release qualification was not run: signed envelope and independent external
+  Git receipt are absent; no placeholders were created.
 
 This records qualification state only. It does not close M-4–M-10, SWE-bench,
 or a release candidate, and it does not change any TARGET/PLANNED architecture
 label to AS_BUILT.
+
+## Final sprint authorization (Wave 0)
+
+Both lanes have WIP=1. Progression depends on predicates and exact receipts.
+Only one owner may edit a file, event family, schema, or composition seam at a
+time; Dev B may not change normative contracts.
+
+| Lane | Package | Owner | Entry predicate | Exit predicate |
+|---|---|---|---|---|
+| A | `FIN-A1` | Dev A | M-8 mechanism/integration available | Exact M-8 producer bundle independently accepted |
+| A | `FIN-A2` | Dev A | M-8 accepted | Installable beta, health, workflows, restart/resume, offline-after-install qualified |
+| A | `FIN-A3` | Dev A | M-9 accepted | Migration, fault, security, performance, backup/restore and reproducibility qualified |
+| A | `FIN-A4` | Dev A | M-10 candidate exists | Exact-subject release qualification passes |
+| A | `SWE-A1` | Dev A | SWE-P0/P1 receipts exist | Experiment architecture/promotion decisions recorded without closing M-9/M-10 |
+| B | `FIN-B1` | Dev B | M-8 evidence ownership assigned | Memory/learning/rollback evidence is producer-verifiable and auditable |
+| B | `FIN-B2` | Dev B | M-8 accepted | M-9 operational fixtures pass without normative changes |
+| B | `FIN-B3` | Dev B | M-9 accepted | M-10 qualification fixtures pass |
+| B | `SWE-B1` | Dev B | SWE-P0 scope frozen | Official benchmark adapter emits attributable receipts |
+| B | `SWE-B2` | Dev B | SWE-P1 baseline honest | Harness experiments retain control/treatment evidence |
+| B | `SWE-B3` | Dev B | Candidate evidence exists | Independent evidence audit completes; Dev B cannot self-accept |
+
+M-9 remains blocked until M-8 is independently accepted. M-10 remains blocked
+until M-9 is accepted. SWE-P0–P5 are parallel, non-authorizing evidence work.

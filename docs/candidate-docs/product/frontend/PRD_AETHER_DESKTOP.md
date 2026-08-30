@@ -34,7 +34,7 @@ AETHER Desktop adheres strictly to a clean conversational layout while deliverin
 | Dimension | AS_BUILT (Repository Evidence) | TARGET (Electroweak Baseline) | Strategic Gap & Action |
 |---|---|---|---|
 | **Packaging & Native Shell** | Browser-only prototype (`vanguard/clients/studio/`) served over custom Node server. | Native desktop application packaged with **Tauri 2** (WebKit on macOS/Linux, WebView2 on Windows). | Package frontend with Tauri 2; eliminate Node.js runtime dependency on user machines. |
-| **UI Framework & Footprint** | React 18 with high memory overhead and custom CSS in Studio. | **SolidJS** + **Vite** on **Bun**, utilizing fine-grained reactive primitives and semantic tokens. | Migrate UI components to SolidJS for low memory usage and responsive rendering. |
+| **UI Framework & Footprint** | React 18 with custom CSS in Studio (runtime overhead not yet formally benchmarked). | **SolidJS** + **Vite** on **Bun**, utilizing fine-grained reactive primitives and semantic tokens. | Migrate UI components to SolidJS for targeted low memory usage and responsive rendering. |
 | **UX & Layout Model** | Sprawling dashboard with 22 disparate engineering views (`StudioApp.tsx`). | Minimalist conversation-first desktop layout with progressive disclosure cards and slide-out drawers. | Refactor into clean two-pane layout: conversation sidebar + active chat/evidence transcript. |
 | **Key & Secret Storage** | In-memory web signer with non-persistent session keys (`WebCryptoSigner`). | Native OS Keychain integration (macOS Keychain, Windows Credential Manager, Secret Service API). | Implement secure keychain storage via thin Tauri Rust bridge. |
 

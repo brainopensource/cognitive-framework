@@ -39,7 +39,7 @@
   },
   "conflict_dispositions_count": 4,
   "current_branch": "docs/convergenc-electroweak-v091",
-  "current_head": "460523d518d35140e55eb564f1253e6c56641123",
+  "current_head": "8614a03ba1b6c27049e45d2f822771b63be05c40",
   "exit_gate": "PASS",
   "findings_summary": {
     "critical": 0,
@@ -75,6 +75,6 @@
     "status": "CONFIRMED",
     "unindexed_decisions_handled": "CONFIRMED (unindexed duplicate ADR-0106 preserved without elevation)"
   },
-  "timestamp_utc": "2026-08-30T02:07:08.249296+00:00",
+  "timestamp_utc": "2026-08-30T02:36:14.779138+00:00",
   "verdict": "READY_FOR_GOVERNANCE_RATIFICATION"
 }

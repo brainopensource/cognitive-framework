@@ -36,7 +36,7 @@ normative_authority:
   - VISION.md
   - docs/SPEC.md
   - docs/01_law/
-  - docs/02_decisions/INDEX.md
+  - decision.index
   - docs/03_execution/sprint_active.md
 relationships:
   - arch.system.overview

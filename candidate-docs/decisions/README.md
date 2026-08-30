@@ -2,68 +2,180 @@
 id: decision.index
 canonical_id: decision.index
 class: decision
-authority: binding-decision-navigation
+authority: current-decision-navigation
 truth_plane: TARGET
 status: living
-implementation_status: UNRESOLVED
-owner: repository-governance
+implementation_status: IMPLEMENTED
+owner: principal-systems-architect
 canonical_for:
-  - active rationale navigation
-  - supersession links
-purpose: Navigate current accepted architectural decisions while preserving immutable ADR provenance and unresolved index defects.
+  - foundational architectural decisions
+  - architectural rationale and trade-offs
+purpose: Record the non-obvious philosophical choices, trade-offs, rejected alternatives, and reversal conditions governing AETHER.
 audience:
   - architect
+  - developer
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
+  - auditor
 version: 0.9.1a1
 last_verified: 2026-08-29
 normative_authority:
-  - docs/02_decisions/INDEX.md
+  - ../SPEC.md
 relationships:
   - spec.core
-  - execution.milestones
-reviewer: delegated-tech-lead-block-e
+  - arch.system.overview
+  - arch.trust.kernel
+  - arch.agency.turns
+  - arch.state.causal
+  - arch.composition.extensibility
+  - arch.orchestration.delegation
+  - arch.memory.learning
+  - arch.assurance.evaluation
+reviewer: principal-systems-architect
 confidence: high
 ---
 
-# Current Decision Navigation
+# Architectural Decisions & Philosophical Rationale
 
-## Authority and provenance
+This document is the single canonical repository for the foundational architectural choices and trade-offs governing AETHER. It answers strictly **why** non-obvious directions were chosen over defensible alternatives.
 
-This TARGET page is a navigation and rationale view. The immutable records under `docs/02_decisions/` remain the decision provenance; this candidate neither rewrites nor replaces them. Law Zero and the normative specification outrank every ADR. An accepted ADR is binding only within that hierarchy and, where it changes law, only when the law is amended consistently.
+Normative requirements belong exclusively to [`spec.core`](../SPEC.md), implementation structure to [`architecture`](../architecture/overview.md) and [`reference`](../reference/schemas.md), and execution status to [`execution.active`](../execution/active.md).
 
-## Current accepted decision families
+---
 
-| Family | Indexed ADRs | Current rationale owned |
-|---|---|---|
-| Runtime convergence and trust foundation | `0069`–`0076` | Python-first canonical lattice, recursive substrate, ledger authority, identity trinity, exterior evaluator, typed budgets, canonical artifacts |
-| Evolution contracts | `0077`–`0085` | Named composition graph, complete trajectories, evidence missingness, mediated spawn, plugin lifecycle, universal turn loop, profile/strategy reservations |
-| Repository governance | `0086`–`0087` | Historical ADR recovery and documentation authority topology |
-| M-3C through M-8 concept lock | `0088` | One composition/activation/run path and bounded future seams; milestone sequencing is superseded where indexed |
-| Product runtime profiles | `0089` | Explicit assurance profiles, bootstrap authority, real activation, generic entrypoint, durable streaming |
-| Delegation and measurement | `0090`–`0094` | Child event ownership, child-state identity, measurement boundary, release baseline, product-first M-4 |
-| Constitutional authority | `0095`–`0098` | Vision as Law Zero, proof-honest evidence, two-lane activation, strict event `/2` evolution |
-| Scheduler, memory, evidence, and convergence | `0099`–`0105` | Sequential scheduler disposition, M-8 memory/promotion, receipt-backed acceptance, successor baseline, progress projection, verifier separation, Governor thread safety |
-| Transform and recovery seam | indexed `0106` | Deterministic transforms, bounded protocol recovery, state-dependent tool policy, failure attribution, preflight, and `mhf.topology/2` seam |
+## DEC-01 — General Agentic Substrate over Domain-Specific Harness or Workflow Engine
 
-## Supersession and amendment edges
+**Decision:** AETHER is intentionally designed as a general event-sourced agentic computation substrate rather than a workflow engine, coding harness, or domain-specific application.
 
-- `ADR-0095` makes `VISION.md` Law Zero and supersedes conflicting roadmap identity or sequencing.
-- `ADR-0094` replaces `ADR-0088`'s former M-4 blocking dependence on RF-85; RF-85 remains optional assurance.
-- `ADR-0097` refines M-5b/M-6 sequencing without changing milestone meaning.
-- `ADR-0102` supersedes the invalid `M-5A-BASE-v2` baseline claims in `ADR-0097` and `ADR-0098`.
-- `ADR-0104` supersedes active human/process approval dependencies while preserving product-time operator approval and independent verifier identity.
-- `ADR-0099` records `SEQUENTIAL_CONFIRMED`; `ADR-0105` adds defensive Governor thread safety without authorizing concurrency.
+**Rationale:** Hardcoding workflow DAGs or domain semantics into the substrate constrains future cognitive topologies and couples low-level execution to ephemeral task structures. Substrate primitives must remain universally reusable.
 
-## Unresolved authority defect
+**Rejected alternative:** A specialized workflow DAG orchestrator or language-model-specific coding harness with hardcoded task phases.
 
-`CONFLICT-E-001` is unresolved: two files declare accepted ADR number `0106`.
+**Reversal condition:** Empirically demonstrable proof that general substrate primitives cannot express required agentic topologies without unacceptable overhead or ergonomic burden.
 
-- `docs/02_decisions/INDEX.md` indexes `0106-deterministic-transform-algebra-and-protocol-recovery.md`.
-- `0106-evo14-readonly-concurrency-authorized-by-measurement.md` is accepted-labelled but is absent from the index and duplicates the identifier while narrowly claiming to amend `ADR-0099`.
+**Canonical owners:** [`spec.core`](../SPEC.md), [`arch.system.overview`](../architecture/overview.md) *(Provenance: ADR-0069, ADR-0095)*
 
-The indexed record is used for TARGET claims. The unindexed duplicate is preserved as conflicting provenance and does **not** authorize concurrency in this reconstruction. Resolving the duplicate requires ADR governance; this page does not renumber, rewrite, or choose a new decision identity.
+---
 
-## Retrieval rule
+## DEC-02 — Domain-Blind Minimal Trusted Computing Base (TCB)
 
-Use the [TARGET specification](../SPEC.md) for obligations, the AS_BUILT architecture pages for implementation, and the immutable ADR body for rationale. An ADR title or accepted status never proves that its mechanism exists or has passed an execution gate.
+**Decision:** The privileged execution kernel is strictly domain-blind, dependency-free, and capped at an auditable code budget ($\le 1438$ logical LOC).
+
+**Rationale:** Privilege escalation, mediation flaws, and non-deterministic leaks scale with TCB complexity. A small reference monitor operating solely on generic action descriptors, scopes, and budgets ensures formal and human auditability.
+
+**Rejected alternative:** Embedding agent memory, model heuristics, or task domain validation directly inside the kernel dispatch path.
+
+**Reversal condition:** Formal mathematical proof that dynamic multi-tenant agent mediation requires domain-aware kernel operations that cannot be safely expressed via user-space capability attenuation.
+
+**Canonical owners:** [`spec.core`](../SPEC.md), [`arch.trust.kernel`](../architecture/kernel.md) *(Provenance: ADR-0069, ADR-0074, ADR-0096)*
+
+---
+
+## DEC-03 — Authoritative Causal History over Mutable In-Memory State
+
+**Decision:** Authoritative state is defined strictly by the append-only causal event stream; all in-memory objects, projection graphs, and caches are disposable views.
+
+**Rationale:** Mutable in-memory state creates competing truths across crashes, restarts, and distributed processes. Deterministic event folding over an append-only log guarantees crash consistency, provenance auditability, and cold replayability.
+
+**Rejected alternative:** Object-oriented persistence where state machines mutate in-place and serialize periodic snapshots.
+
+**Reversal condition:** Workload evidence demonstrating that deterministic event folding cannot meet latency budgets even when assisted by discardable checkpoint caches.
+
+**Canonical owners:** [`arch.state.causal`](../architecture/causal-state.md), [`ref.events`](../reference/events.md) *(Provenance: ADR-0071, ADR-0096, ADR-0098)*
+
+---
+
+## DEC-04 — Agent as Ephemeral Projection over Persistent Entity
+
+**Decision:** An agent is an ephemeral identity, policy, and causal projection boundary, not a long-running, stateful in-memory process.
+
+**Rationale:** Stateful agent processes leak memory, fail across process boundaries, and complicate multi-agent coordination. Reconstructing agent perspective on demand from event lineage guarantees stateless resumption and recovery.
+
+**Rejected alternative:** Persistent thread-per-agent or actor-per-agent daemons retaining in-memory cognitive state.
+
+**Reversal condition:** Evidence that cognitive streaming continuation requires low-latency in-memory state that cannot be reconstructed via prefix-cached token buffers.
+
+**Canonical owners:** [`arch.agency.turns`](../architecture/agency.md), [`arch.state.causal`](../architecture/causal-state.md) *(Provenance: ADR-0070, ADR-0095, ADR-0096)*
+
+---
+
+## DEC-05 — Static Composition Distinct from Observed Trajectory
+
+**Decision:** Declarative composition (`mhf.manifest/2`) declares available capabilities; the durable event trajectory records what actually occurred. Neither may impersonate the other.
+
+**Rationale:** Conflating declared intent with observed execution prevents truthful post-mortem auditing, hides runtime attenuation, and allows unverified declarations to pass as evidence.
+
+**Rejected alternative:** Dynamic manifest mutation during execution to reflect intermediate turn outcomes.
+
+**Reversal condition:** None; maintaining declared versus observed separation is an inviolable architectural auditability invariant.
+
+**Canonical owners:** [`arch.composition.extensibility`](../architecture/composition-extensibility.md), [`ref.manifests`](../reference/manifests.md) *(Provenance: ADR-0077, ADR-0088)*
+
+---
+
+## DEC-06 — Authority Exclusion from Topology Declarations
+
+**Decision:** Topology graphs and role declarations carry zero intrinsic authority; all child agents and workflows re-enter mediated kernel dispatch.
+
+**Rationale:** Workflow definitions and role graphs are untrusted inputs. Treating DAG edges or role names as capability grants creates privilege escalation vulnerabilities.
+
+**Rejected alternative:** Direct inter-agent peer invocation bypassing kernel reference monitoring.
+
+**Reversal condition:** Hardware-enforced cryptographic capabilities that render software kernel reference monitoring redundant.
+
+**Canonical owners:** [`arch.orchestration.delegation`](../architecture/delegation-topology.md), [`spec.core`](../SPEC.md) *(Provenance: ADR-0080, ADR-0099)*
+
+---
+
+## DEC-07 — Exterior Evaluator and Promotion Authority
+
+**Decision:** Evaluation, grading, and memory promotion authority must remain exterior to the agent cognition loop and bound to independent cryptographic identities.
+
+**Rationale:** Systems cannot self-certify. Self-grading agents create self-fulfilling reward loops, conceal alignment failures, and introduce catastrophic bias into persistent memory.
+
+**Rejected alternative:** Self-evaluating agent turns where agents score and commit their own learned skills.
+
+**Reversal condition:** Theoretical proof that self-referential cognitive systems can prevent reward hacking without external ground truth.
+
+**Canonical owners:** [`arch.assurance.evaluation`](../architecture/assurance-evaluation.md), [`arch.memory.learning`](../architecture/memory-learning.md) *(Provenance: ADR-0072, ADR-0079, ADR-0100, ADR-0104)*
+
+---
+
+## DEC-08 — Sequential Turn Simplicity until Concurrency Proves Value
+
+**Decision:** The canonical turn loop and topology execution remain strictly unary and sequential by default; concurrent dispatch is admitted only when justified by measured wall-time advantage on provably disjoint operations.
+
+**Rationale:** Unrestricted concurrency introduces non-determinism, race conditions in budget accounting, replay divergence, and complex recovery semantics without guaranteed performance improvement.
+
+**Rejected alternative:** Default asynchronous / multi-threaded turn dispatch across all agent nodes.
+
+**Reversal condition:** Preregistered empirical benchmark evidence demonstrating $\ge 20\%$ median wall-time reduction with byte-identical result ordering on disjoint, read-only operations.
+
+**Canonical owners:** [`arch.agency.turns`](../architecture/agency.md), [`arch.orchestration.delegation`](../architecture/delegation-topology.md) *(Provenance: ADR-0070, ADR-0099, ADR-0105, indexed ADR-0106)*
+
+---
+
+## DEC-09 — Orthogonal Separation of Capability Grants and Plugin Isolation
+
+**Decision:** Agent capability grants (attenuated S0–S12 permissions) and plugin isolation policies (OS sandboxing/containerization) are enforced as independent, orthogonal boundaries.
+
+**Rationale:** Model safety (what an agent is allowed to request) and process security (what plugin binaries can execute on the host) protect against different threat vectors. Neither can substitute for the other.
+
+**Rejected alternative:** Relying exclusively on process sandboxing to restrict agent actions, or relying exclusively on model-level capability tokens to contain untrusted binaries.
+
+**Reversal condition:** A unified capability-secure OS substrate where user-space process execution and cognitive model calls share a single hardware capability architecture.
+
+**Canonical owners:** [`arch.trust.kernel`](../architecture/kernel.md), [`arch.composition.extensibility`](../architecture/composition-extensibility.md) *(Provenance: ADR-0072, ADR-0074)*
+
+---
+
+## DEC-10 — Authorization-Before-Ranking in Memory Retrieval
+
+**Decision:** Memory retrieval must verify principal access scope, category isolation, and legal hold/revocation *before* relevance ranking and artifact dereference.
+
+**Rationale:** Post-ranking filtering leaks existence and metadata of unauthorized memory entries through relevance score distortions and token side-channels.
+
+**Rejected alternative:** Retrieve-and-rank first, followed by downstream output filtering of unauthorized documents.
+
+**Reversal condition:** Zero-knowledge cryptographic vector search that provably prevents cross-principal information leakage during un-authenticated indexing.
+
+**Canonical owners:** [`arch.memory.learning`](../architecture/memory-learning.md), [`ref.artifacts`](../reference/artifacts-memory.md) *(Provenance: ADR-0096, ADR-0100)*

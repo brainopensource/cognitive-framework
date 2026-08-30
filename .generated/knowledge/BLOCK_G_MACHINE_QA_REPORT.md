@@ -1,6 +1,6 @@
 # Block G — Generated Machine Layer and Mechanical QA
 
-- Reconstruction HEAD: `d8abc8c35e9022029a5badc4ef4027fa181ab1d8`
+- Reconstruction HEAD: `8614a03ba1b6c27049e45d2f822771b63be05c40`
 - AS_BUILT analysis subject: `9fd444674bf3a97f2673ff36a5f5928ef046c574`
 - Canonical pages: **30**
 
@@ -15,11 +15,11 @@
 - Metadata: `PASS`
 - Canonical IDs: `PASS`
 - Canonical ownership: `PASS`
-- Links/fragments: `PASS`
+- Links/fragments: `FAIL`
 - Relations/code map: `PASS` / `PASS`
-- AS_BUILT/TARGET traceability: `PASS`
+- AS_BUILT/TARGET traceability: `FAIL`
 - Retrieval: **15/16 (93.8%)**, threshold 90%
-- Mechanical validation errors: **0**
+- Mechanical validation errors: **12**
 - Repository linters: metadata, links, stale paths, falsifier IDs, and secret scan passed; the existing doc-budget check reports the known unrelated `docs/SPEC.md` 270/250 exception.
 
 ## Tool and scope controls
@@ -34,6 +34,6 @@
 
 ## Block G gate
 
-`BLOCK G EXIT GATE: PASS`
+`BLOCK G EXIT GATE: FAIL`
 
 Non-critical authority conflicts remain in `conflicts.jsonl` for Block H; they do not represent hidden omissions.

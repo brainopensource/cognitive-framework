@@ -4,7 +4,6 @@ class: product
 authority: proposal
 canonical_for:
   - aether-cli-product-requirements
-  - cli-command-taxonomy-and-contracts
 status: proposed
 owner: product-architecture
 version: "0.1.0"
@@ -12,7 +11,7 @@ last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_CLI.md
 subordinate_to:
   - product.frontend.platform
-  - ../../SPEC.md
+  - ../../../SPEC.md
 ---
 
 # Product Requirements Document: AETHER CLI (Headless Automation & CI)
@@ -33,10 +32,10 @@ The CLI operates purely as a command dispatcher and structured stream transmitte
 
 | Dimension | AS_BUILT (Repository Evidence) | TARGET (Electroweak Baseline) | Strategic Gap & Action |
 |---|---|---|---|
-| **Runtime & Packaging** | Node.js + `tsx` runtime (`vanguard/clients/cli/package.json`), running interpreted TypeScript. | Standalone compiled native binary built with **Bun** (`bun build --compile`). | Migrate build pipeline to Bun for instant $<15\text{ ms}$ cold startup. |
-| **Command Implementation** | Mixed legacy handlers in `vanguard/clients/cli/src/commands/legacy.tsx` with Ink dependencies. | Clean command handlers in `@aether/cli` relying purely on `@aether/client` SDK. | Remove all React/Ink imports from CLI command execution paths. |
+| **Runtime & Packaging** | Node.js + `tsx` runtime (`vanguard/clients/cli/package.json`), running interpreted TypeScript. | Standalone compiled native binary built with **Bun** (`bun build --compile`). | Migrate build pipeline to Bun to achieve low cold startup latency for automation. |
+| **Command Implementation** | Mixed legacy handlers in `vanguard/clients/cli/src/commands/legacy.tsx` with Ink dependencies. | Clean command handlers in `@aether/cli` relying purely on `@aether/client` SDK. | Remove all React/Ink dependencies from CLI command execution paths. |
 | **Streaming Output** | Basic console logging with partial JSON flags. | Strict dual-mode output: Human-readable ANSI summaries vs Line-delimited NDJSON streams (`--ndjson`). | Implement strict NDJSON event streaming to `stdout` with diagnostics on `stderr`. |
-| **Exit Code Protocol** | Ad-hoc exit codes (0 for success, 1 for error). | Formally specified POSIX exit code taxonomy (0–6, 130) matching machine-verifiable failure classes. | Standardize exit codes across all commands and automated tests. |
+| **Exit Code Protocol** | Ad-hoc exit codes (0 for success, 1 for error). | Formally specified exit code contract (0–6, 130) matching machine-verifiable failure classes. | Standardize exit codes across all commands and automated tests. |
 
 ---
 
@@ -48,7 +47,7 @@ The CLI operates purely as a command dispatcher and structured stream transmitte
 
 ---
 
-## 4. Command Taxonomy & Grammar
+## 4. Proposed Command Taxonomy & Grammar (Product Scope)
 
 ```text
 aether [command] [subcommand] [flags]
@@ -108,6 +107,8 @@ aether doctor [--json]
 aether daemon start|stop|status
 ```
 
+*Note: The exact command-line options, argument parsing conventions, and formatting schemas belong to future reference documentation (`docs/reference/frontend/cli-commands.md`).*
+
 ---
 
 ## 5. Machine-Readable Output Formats
@@ -151,9 +152,9 @@ When `--ndjson` is specified, each emitted `EventEnvelope` is written as a singl
 
 ---
 
-## 6. POSIX Exit Code Specification
+## 6. AETHER CLI Exit Code Contract
 
-The CLI MUST adhere to strict, deterministic exit codes:
+The CLI MUST adhere to a deterministic, structured exit code contract:
 
 | Code | Label | Trigger Condition |
 |---:|---|---|
@@ -175,10 +176,12 @@ The CLI MUST adhere to strict, deterministic exit codes:
 
 ---
 
-## 8. Non-Functional & Performance Budgets
+## 8. Provisional Performance Targets
 
-- **Cold Startup Latency**: Binary invocation to version/help output $<15\text{ ms}$ under Bun.
-- **Memory Consumption**: Resident Set Size (RSS) $<35\text{ MB}$ during active NDJSON streaming.
+The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+
+- **Cold Startup Latency**: Provisional target of $<15\text{ ms}$ for binary invocation to version/help output under Bun on reference hardware.
+- **Memory Consumption**: Provisional target of Resident Set Size (RSS) $<35\text{ MB}$ during active NDJSON streaming.
 - **Zero VDOM / React Footprint**: The CLI binary MUST contain zero React, VDOM, or UI framework dependencies.
 
 ---
@@ -191,9 +194,9 @@ The CLI MUST adhere to strict, deterministic exit codes:
 
 ---
 
-## 10. Deferred Documentation & Canonical References
+## 10. Candidate Future Documents & Ownership References
 
-- **Future Architecture Owner**: `docs/architecture/frontend/cli-architecture.md`
-- **Future Reference Owner**: `docs/reference/frontend/cli-commands.md`
-- **Future Decisions Owner**: `docs/decisions/frontend/0108-cli-headless-posix-standard.md`
-- **Future Execution Owner**: `docs/execution/frontend/cli-backlog.md`
+- **Candidate Architecture Owner**: `docs/architecture/frontend/cli-architecture.md`
+- **Candidate Reference Owner**: `docs/reference/frontend/cli-commands.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/0108-cli-headless-posix-standard.md`
+- **Candidate Execution Owner**: `docs/execution/frontend/cli-backlog.md`

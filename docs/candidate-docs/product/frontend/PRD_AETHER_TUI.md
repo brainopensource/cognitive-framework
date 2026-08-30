@@ -4,7 +4,6 @@ class: product
 authority: proposal
 canonical_for:
   - aether-tui-product-requirements
-  - terminal-cockpit-ux-and-streaming
 status: proposed
 owner: product-architecture
 version: "0.1.0"
@@ -12,20 +11,20 @@ last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_AETHER_TUI.md
 subordinate_to:
   - product.frontend.platform
-  - ../../SPEC.md
+  - ../../../SPEC.md
 ---
 
 # Product Requirements Document: AETHER TUI (Terminal Cockpit)
 
 ## 1. Executive Summary & Product Thesis
 
-**AETHER TUI** is the interactive, keyboard-driven terminal cockpit for the AETHER substrate. It is designed for developers, systems researchers, and power users who demand ultra-fast, conversation-first interaction inside terminal emulators, SSH sessions, and developer workstations.
+**AETHER TUI** is the interactive, keyboard-driven terminal cockpit for the AETHER substrate. It is designed for developers, systems researchers, and power users who demand fast, conversation-first interaction inside terminal emulators, SSH sessions, and developer workstations.
 
 ### 1.1 Core Thesis
 
-> **The TUI is an ultra-fast, conversational cockpit: it delivers real-time token streaming, progressive activity disclosure, and in-terminal cryptographic approvals with sub-16ms reactive cell updates.**
+> **The TUI is an ultra-fast, conversational cockpit: it delivers real-time token streaming, progressive activity disclosure, and in-terminal cryptographic approvals with fine-grained reactive terminal cell updates.**
 
-By combining **SolidJS** and **OpenTUI**, the TUI eliminates the performance bottlenecks of virtual DOM reconcilers on terminal buffers, providing rock-solid 60 fps rendering during high-volume token streams.
+By combining **SolidJS** and **OpenTUI**, the TUI aims to avoid the overhead of full-tree virtual DOM reconciliation over terminal buffers, targeting high responsiveness during high-frequency token streams.
 
 ---
 
@@ -33,10 +32,10 @@ By combining **SolidJS** and **OpenTUI**, the TUI eliminates the performance bot
 
 | Dimension | AS_BUILT (Repository Evidence) | TARGET (Electroweak Baseline) | Strategic Gap & Action |
 |---|---|---|---|
-| **Terminal Rendering Engine** | React 18 + Ink (`ink@^5.1.0`), re-rendering full component trees and incurring high CPU usage during streaming. | **OpenTUI** + **SolidJS** on **Bun**, rendering via fine-grained reactive terminal cell buffers. | Replace Ink with OpenTUI + SolidJS; eliminate full-tree VDOM diffing. |
-| **Interactive Approvals** | Minimal prompt in `ApprovalInterceptor.tsx` with basic text diff rendering. | Dedicated Approval Deck with interactive unified diff browser and one-key Ed25519 signing. | Implement dedicated terminal diff viewer and secure cryptographic signing flows. |
+| **Terminal Rendering Engine** | React 18 + Ink (`ink@^5.1.0`), which relies on React VDOM reconciliation over terminal cells. | **OpenTUI** + **SolidJS** on **Bun**, rendering via fine-grained reactive terminal cell buffers. | Replace Ink with OpenTUI + SolidJS to address rendering latency hypotheses during streaming. |
+| **Interactive Approvals** | Minimal prompt in `ApprovalInterceptor.tsx` with basic text diff rendering. | Dedicated Governance Deck with interactive unified diff browser and one-key Ed25519 signing. | Implement dedicated terminal diff viewer and secure cryptographic signing flows. |
 | **Progressive Disclosure** | Flat transcript window with limited folding and no collapsible tool activity cards. | Progressive disclosure hierarchy: compact folded summaries by default, expandable to full diffs/spans. | Build collapsible card primitives (`ui-tui`) for file changes, tool runs, and test outputs. |
-| **Keyboard Grammar** | Basic readline input with limited navigation shortcuts. | Comprehensive Vim/standard keybinding grammar (modal navigation, transcript scrolling, command palette). | Implement modal focus system (`FocusManager`) and customizable keybinding maps. |
+| **Keyboard Grammar** | Basic readline input with limited navigation shortcuts. | Comprehensive modal keybinding grammar (navigation, transcript scrolling, command palette). | Implement modal focus management and customizable keybinding maps. |
 
 ---
 
@@ -93,11 +92,11 @@ By combining **SolidJS** and **OpenTUI**, the TUI eliminates the performance bot
 
 ---
 
-## 5. Navigation & Keyboard Grammar
+## 5. Navigation & Keyboard Grammar (Product Scope)
 
 The TUI supports an intuitive modal navigation model:
 
-| Keybinding | Active Scope | Operation / Action |
+| Proposed Keybinding | Active Scope | Operation / Action |
 |---|---|---|
 | `Enter` | Composer | Submit draft prompt to active agent session. |
 | `Shift+Enter` / `Alt+Enter`| Composer | Insert newline without submitting. |
@@ -113,14 +112,16 @@ The TUI supports an intuitive modal navigation model:
 | `d` | Approval Deck | Open interactive side-by-side terminal diff viewer. |
 | `Esc` | Modal / Diff | Close diff viewer or command palette and return to Composer. |
 
+*Note: The complete, customizable keybinding map and terminal capability matrix belong to future reference documentation (`docs/reference/frontend/tui-keybindings.md`).*
+
 ---
 
 ## 6. Real-Time Streaming & Progressive Disclosure
 
-### 6.1 Token Streaming Invariants
+### 6.1 Token Streaming Requirements
 
-- **Incremental Token Updates**: Words and code tokens MUST stream directly into the active turn card without triggering re-layouts of historical messages.
-- **Activity Folding**: High-volume tool events (file reads, grep scans, AST parses) MUST be grouped into single-line folded activity cards:
+- **Incremental Token Updates**: Text and code tokens MUST stream into the active turn card without triggering layout instability in historical messages.
+- **Activity Folding**: High-volume tool events (file reads, search scans, AST queries) MUST be grouped into single-line folded activity cards:
   - *Folded*: `▸ Read 8 files [0.14s]`
   - *Expanded*: Lists individual file paths, byte sizes, and read latencies.
 - **Diff Presentation**: File patches MUST be syntax-highlighted using ANSI 24-bit TrueColor sequences with green additions, red deletions, and neutral context headers.
@@ -131,19 +132,21 @@ The TUI supports an intuitive modal navigation model:
 
 When the runtime requests approval for an effect:
 
-1. **Audio/Visual Alert**: The status bar pulses with the warning color, and an optional terminal bell (`\a`) is emitted if configured.
+1. **Visual Notification**: The status bar signals the pending approval state.
 2. **Challenge Display**: The Governance Deck renders the action name, target path, and normalized patch diff.
 3. **One-Key Signing**: Pressing `y` triggers the local `SignerPort`, signs the canonical RFC 8785 JSON bytes with the operator's Ed25519 key, and dispatches `ResolveApproval` to `RuntimeService`.
 
 ---
 
-## 8. Non-Functional & Performance Budgets
+## 8. Provisional Performance Targets
 
-- **First Frame Paint**: Cold binary launch to interactive shell $<40\text{ ms}$.
-- **Keystroke Input Latency**: Keystroke to terminal cell buffer update $<12\text{ ms}$.
-- **Streaming Frame Rate**: Solid 60 fps during continuous token streaming; zero terminal flickering.
-- **Terminal Resize Latency**: Full layout reflow $<16\text{ ms}$ on `SIGWINCH`.
-- **Memory Footprint**: Resident Set Size (RSS) $<45\text{ MB}$ during active sessions.
+The following values represent **provisional engineering budgets (TARGET thresholds)** subject to verification via automated performance benchmarks:
+
+- **First Frame Paint**: Provisional target of $<40\text{ ms}$ from binary launch to interactive shell on reference systems.
+- **Keystroke Input Latency**: Provisional target of $<12\text{ ms}$ from keypress to terminal cell buffer update.
+- **Streaming Frame Rate**: Target 60 fps rendering during continuous token streaming.
+- **Terminal Resize Latency**: Target layout reflow $<16\text{ ms}$ on `SIGWINCH`.
+- **Memory Footprint**: Target Resident Set Size (RSS) $<45\text{ MB}$ during active sessions.
 
 ---
 
@@ -155,9 +158,9 @@ When the runtime requests approval for an effect:
 
 ---
 
-## 10. Deferred Documentation & Canonical References
+## 10. Candidate Future Documents & Ownership References
 
-- **Future Architecture Owner**: `docs/architecture/frontend/tui-opentui-architecture.md`
-- **Future Reference Owner**: `docs/reference/frontend/tui-keybindings.md`
-- **Future Decisions Owner**: `docs/decisions/frontend/0109-opentui-solid-selection.md`
-- **Future Execution Owner**: `docs/execution/frontend/tui-backlog.md`
+- **Candidate Architecture Owner**: `docs/architecture/frontend/tui-opentui-architecture.md`
+- **Candidate Reference Owner**: `docs/reference/frontend/tui-keybindings.md`
+- **Candidate Decisions Owner**: `docs/decisions/frontend/0109-opentui-solid-selection.md`
+- **Candidate Execution Owner**: `docs/execution/frontend/tui-backlog.md`

@@ -1,0 +1,10 @@
+{"ambiguity_resolved": "overview owns AS_BUILT identity; SPEC owns later normative identity", "expected_canonical_owner": "arch.system.overview", "question": "What is AETHER?", "secondary_links": ["nav.home", "spec.core"]}
+{"expected_canonical_owner": "arch.runtime.execution", "question": "How does the runtime execute a request?", "secondary_links": ["arch.agency.turns", "arch.trust.kernel"]}
+{"expected_canonical_owner": "arch.trust.kernel", "question": "What does the kernel own?", "secondary_links": ["ref.events", "ref.ports"]}
+{"expected_canonical_owner": "arch.agency.turns", "question": "How are agents represented/executed?", "secondary_links": ["arch.orchestration.delegation", "theory.agent-substrate"]}
+{"expected_canonical_owner": "arch.state.causal", "question": "How do events/state/artifacts interact?", "secondary_links": ["ref.events", "ref.artifacts"]}
+{"expected_canonical_owner": "ref.schemas", "question": "Where is an exact schema or protocol?", "secondary_links": ["ref.ports", "ref.runtime-service"]}
+{"expected_canonical_owner": "guide.compose-agent", "question": "How do I add an agent/tool/plugin/adapter?", "secondary_links": ["guide.add-pack-tool", "guide.add-adapter-provider", "ref.manifests"]}
+{"ambiguity_resolved": "AS_BUILT owner and deferred TARGET owner are explicitly separate", "expected_canonical_owner": "arch.system.overview", "question": "What is implemented versus only required?", "secondary_links": ["spec.core"]}
+{"deferred_until_block_e": true, "expected_canonical_owner": "decision.index", "question": "Where is a specific architectural decision owned?", "secondary_links": []}
+{"deferred_until_block_e": true, "expected_canonical_owner": "execution.active", "question": "What is currently active execution work?", "secondary_links": ["execution.milestones"]}

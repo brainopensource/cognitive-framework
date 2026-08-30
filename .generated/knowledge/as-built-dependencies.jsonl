@@ -1,0 +1,15 @@
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "ports -> domain", "evidence_ids": ["E-B-017"], "from": "SUB-B-02", "kind": "imports", "to": "SUB-B-01"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "kernel -> domain", "evidence_ids": ["E-B-013", "E-B-017"], "from": "SUB-B-03", "kind": "imports", "to": "SUB-B-01"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "kernel -> ports", "evidence_ids": ["E-B-013", "E-B-017"], "from": "SUB-B-03", "kind": "imports", "to": "SUB-B-02"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "agency -> kernel", "evidence_ids": ["E-B-019"], "from": "SUB-B-04", "kind": "dispatches-through", "to": "SUB-B-03"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "runtime -> agency", "evidence_ids": ["E-B-024", "E-B-026"], "from": "SUB-B-06", "kind": "constructs", "to": "SUB-B-04"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "runtime -> kernel", "evidence_ids": ["E-B-026"], "from": "SUB-B-06", "kind": "wires", "to": "SUB-B-03"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "runtime -> causal-state", "evidence_ids": ["E-B-026", "E-B-027"], "from": "SUB-B-06", "kind": "persists-via", "to": "SUB-B-05"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "runtime -> packs/manifests", "evidence_ids": ["E-B-021"], "from": "SUB-B-06", "kind": "composes", "to": "SUB-B-10"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "runtime -> evaluation", "evidence_ids": ["E-B-041"], "from": "SUB-B-06", "kind": "evaluates-via", "to": "SUB-B-09"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "child runtime -> canonical runtime", "evidence_ids": ["E-B-033"], "from": "SUB-B-07", "kind": "re-enters", "to": "SUB-B-06"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "memory adapters -> ports", "evidence_ids": ["E-B-037", "E-B-038"], "from": "SUB-B-08", "kind": "implements-ports", "to": "SUB-B-02"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "packs -> ports", "evidence_ids": ["E-B-012", "E-B-053"], "from": "SUB-B-10", "kind": "declares-spis", "to": "SUB-B-02"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "clients/services -> runtime", "evidence_ids": ["E-B-042", "E-B-045", "E-B-048"], "from": "SUB-B-11", "kind": "invokes", "to": "SUB-B-06"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "clients/services -> schemas", "evidence_ids": ["E-B-044", "E-B-049"], "from": "SUB-B-11", "kind": "conforms-to", "to": "SUB-B-12"}
+{"analysis_subject_sha": "9fd444674bf3a97f2673ff36a5f5928ef046c574", "direction": "stores -> ports", "evidence_ids": ["E-B-028", "E-B-031"], "from": "SUB-B-05", "kind": "implements-ports", "to": "SUB-B-02"}

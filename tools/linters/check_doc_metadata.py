@@ -11,6 +11,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 
 DOC_PATTERNS = (
     "README.md",
+    "candidate-docs/**/*.md",
     "AGENTS.md",
     "docs/README.md",
     "docs/SPEC.md",
@@ -49,6 +50,9 @@ VALID_CLASSES = {
     "theory",
     "how-to",
     "reference",
+    "normative",
+    "meta",
+    "product",
 }
 
 VALID_AUTHORITIES = {

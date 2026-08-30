@@ -1,0 +1,105 @@
+{
+  "artifactRefs": [],
+  "claim": "acceptance:M-7",
+  "digest": "sha256:696c54d8158d0d5c89acdb074d6226704bcf55642cd08ac954d16fafd69826e2",
+  "environment": {
+    "reviewerPublicKey": "tqlbr760xpdZxgusEeqFQLYdSJRGCJIcr8LblfQ7Yfw="
+  },
+  "materials": [
+    {
+      "digest": "sha256:8f792d182f678d4a3fa68d8c3f471f77706170bb771fc76032b066480315784f",
+      "name": "adr_0099",
+      "ref": "docs/02_decisions/0099-m7-topology-scheduler-disposition.md",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:ea92334ef519916be2846bcf97095a2c0cbc9fbad5f16a03de7a269ac218ecf4",
+      "name": "falsifier_suite",
+      "ref": "test/falsifiers/test_m7_topology_and_independence.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:be35cb96a4c7783d97980b3bd91971ae8d4a22faad24b0d7e7ece05028980822",
+      "name": "independence",
+      "ref": "lab/m701_independence.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:bc4d93f92e79e14f104733a57bf0b5cda1a12c7c730a9cf69808ead081bac954",
+      "name": "m701_suite",
+      "ref": "test/falsifiers/test_m701_recorded_workload.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+      "name": "pack",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:54d9ad721d9ccaf1fd94e25e53de73a9afc2eca7972f4328ee903913c787d770",
+      "name": "run_plan",
+      "ref": "vanguard/packages/runtime/run_plan.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+      "name": "runtime",
+      "ref": "vanguard/packages/runtime/root.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:939aabefe87f4303545b32dfe4f1351c306da5ea2561df39e0819c671b15dcc2",
+      "name": "schema_topology",
+      "ref": "schemas/mhf/topology.schema.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:63e7b2540d7e88769a359cb400a83afc5116b3e2e872bee2392a9e16d003cadb",
+      "name": "topology",
+      "ref": "vanguard/packages/runtime/topology.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:ab67461db46014444ba820f3e9fbe4a70cb27b5ac2ed0e3bbb0dfb500778a915",
+      "name": "topology_analysis",
+      "ref": "lab/topology_analysis.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:4787a93ff1a0bea866d21961b68fd73de14a1e5620acd193a21a6e902d27dbca",
+      "name": "falsifier_report",
+      "ref": "artifacts/M-7-topology-order12/falsifier-report.json",
+      "scheme": "raw-sha256"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "artifactRoot": "artifacts/M-7-topology-order12",
+    "branch": "HEAD",
+    "commit": "42af5fd331df8d923757772d38ddf98ca8489761",
+    "dirty": false,
+    "eventSchema": "mhf.event/2",
+    "packDigest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+    "reducer": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "reportDigest": "sha256:4787a93ff1a0bea866d21961b68fd73de14a1e5620acd193a21a6e902d27dbca",
+    "runtime": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+    "runtimeDigest": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "c4afa048b540042d6dd8a7c18ec98be0a2d52767"
+  },
+  "producer": {
+    "identity": "aether-evidence-reviewer",
+    "keyId": "aether-evidence-reviewer-1",
+    "role": "reviewer"
+  },
+  "protocol": "aether.evidence.acceptance/1",
+  "run": {
+    "acceptedEvidenceDigest": "sha256:191436d04c37d2e3330b69718f4db1a6b50e521d2d8c456ec56f128300bf4fab"
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:QDHF7k277R2KP/OLGqPC2bDDj+pXUDfSqnqT+M8JRRQdr2/RjRWX+wV715pu74dUifem6cr6me8c6S5FkotwBQ==",
+  "subject": [
+    "sha256:191436d04c37d2e3330b69718f4db1a6b50e521d2d8c456ec56f128300bf4fab"
+  ]
+}

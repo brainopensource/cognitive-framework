@@ -1,0 +1,124 @@
+{
+  "artifactRefs": [],
+  "claim": "M-5b",
+  "detail": "Graph coloring material domain, exterior oracle, and daemon signature are verified; M-5A-BASE-v2 is verified CONTAMINATED_UNPUBLISHED; outcome is recorded undeterminable pending Leadership creation and remote resolution of the CONVERGENCE-BASE-v1 successor baseline tag.",
+  "digest": "sha256:cb0a3956097c92191fc0bcfc035721827209da291b976737a9e2866e353372fb",
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "materials": [
+    {
+      "digest": "sha256:3865d9cb8861f5b91f722617a908130110205ec9bee0a2f5a25321f2c286a26a",
+      "name": "packs/formal-graph-coloring/manifest.json",
+      "ref": "packs/formal-graph-coloring/manifest.json"
+    },
+    {
+      "digest": "sha256:63bc297cc4557a127efb099d2cb981c9ddbdf784e5eb65610a17861a17061324",
+      "name": "packs/formal-graph-coloring/tasks/gc-001.graph.json",
+      "ref": "packs/formal-graph-coloring/tasks/gc-001.graph.json"
+    },
+    {
+      "digest": "sha256:f0de790e06d45701bd625fce34d2323f47eaf561de816a0bc658a487e7508600",
+      "name": "packs/formal-graph-coloring/tasks/gc-001.witness.json",
+      "ref": "packs/formal-graph-coloring/tasks/gc-001.witness.json"
+    },
+    {
+      "digest": "sha256:9852181f02107e4ba31ef3e5ee8217bf856437446b3dd6146b36c5de67ac0296",
+      "name": "packs/formal-graph-coloring/tasks/registry.json",
+      "ref": "packs/formal-graph-coloring/tasks/registry.json"
+    },
+    {
+      "digest": "sha256:dff66bfbddc1a3b092cb3d2ea02c88dba393fc29d8bf2fd650bb6a65e96a849f",
+      "name": "schemas/mhf/baseline.schema.json",
+      "ref": "schemas/mhf/baseline.schema.json"
+    },
+    {
+      "digest": "sha256:161bd6d33b7e4b5c39498862eab0837ec20d8c3ec18dbd20244372fd1281ea66",
+      "name": "test/contracts/test_baseline_manifest_verifier.py",
+      "ref": "test/contracts/test_baseline_manifest_verifier.py"
+    },
+    {
+      "digest": "sha256:fc9b96c3c6ff4d6a471173291002f5cb08f55c3be209a4be295fcb27fd92aee2",
+      "name": "test/falsifiers/test_graph_coloring_material_run.py",
+      "ref": "test/falsifiers/test_graph_coloring_material_run.py"
+    },
+    {
+      "digest": "sha256:0bf38d3690d3784ac4e75b6ec6bd7a55eee9aad107a2d20bfd1a42653a265219",
+      "name": "test/falsifiers/test_graph_coloring_signed_verdict.py",
+      "ref": "test/falsifiers/test_graph_coloring_signed_verdict.py"
+    },
+    {
+      "digest": "sha256:10ab3391d3f81a5bf1bed222028b058d2ccb97c3a4bc8dcf25f51e63012985f8",
+      "name": "test/falsifiers/test_m5a_baseline_forensics.py",
+      "ref": "test/falsifiers/test_m5a_baseline_forensics.py"
+    },
+    {
+      "digest": "sha256:5aaaff1d65c8a6555f2b34f79004ff9a59850e793baeb7a30f168112899ff2c8",
+      "name": "test/falsifiers/test_rf98_kernel_neutrality.py",
+      "ref": "test/falsifiers/test_rf98_kernel_neutrality.py"
+    },
+    {
+      "digest": "sha256:22e944200fb1f976afb4d3fad5ea007dadef3c109eb733decd503e5ea84337c1",
+      "name": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py",
+      "ref": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py"
+    },
+    {
+      "digest": "sha256:199c16af6a5d021f47d30bbfefcdf617176a094b8e157934aa296b0a9c14a3e8",
+      "name": "vanguard/packages/domain/evidence/baseline.py",
+      "ref": "vanguard/packages/domain/evidence/baseline.py"
+    }
+  ],
+  "outcome": "undeterminable",
+  "pins": {
+    "branch": "feat_higgs_M4_M8",
+    "commit": "d4a9644788d3a16c9592de307e7dc41ce822ed60",
+    "dirty": true,
+    "eventSchema": "mhf.event/2",
+    "reducer": "sha256:d20ca6c94088fb997e5faa7781264f800fbedc3b366336e8a4ab9c78a1463379",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "f852e30f29c94b44772d39b72a40cfb30786af23"
+  },
+  "producer": {
+    "identity": "dev-b",
+    "keyId": "dev-b-key",
+    "role": "producer"
+  },
+  "protocol": "aether.m5b.formal-generality-proof/1",
+  "run": {
+    "contaminatedBaseline": {
+      "disposition": "CONTAMINATED_UNPUBLISHED",
+      "forensicsVerified": true,
+      "ref": "M-5A-BASE-v2"
+    },
+    "domain": "formal-graph-coloring",
+    "evaluatedVectors": [
+      "gc-001.witness.json",
+      "gc-001.invalid-edge-conflict.json",
+      "gc-001.invalid-incomplete.json",
+      "gc-001.invalid-range.json",
+      "gc-001.invalid-malformed.json",
+      "gc-001.invalid-duplicate.json",
+      "gc-001.invalid-disordered-graph.json"
+    ],
+    "evaluatorDaemonProtocol": "formal-graph-coloring-v1",
+    "evaluatorVerdictSigned": true,
+    "exteriorOracle": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py",
+    "kernelNeutrality": {
+      "leaks": [],
+      "status": "neutral"
+    },
+    "successorBaseline": {
+      "id": "CONVERGENCE-BASE-v1",
+      "status": "PENDING_LEADERSHIP_REMOTE_TAG"
+    }
+  },
+  "schema": "aether.evidence/1",
+  "signature": "J35l+bIoaF0+Gf2cT0XjNqAiveThXkvdnJJD8hQhyVlwN5saFhhnS9O11xP1RQTrCXfphuXYYTSVmQjGOtGMCg==",
+  "subject": [
+    "package:WP-B1",
+    "milestone:M-5b",
+    "milestone:M-5a"
+  ]
+}

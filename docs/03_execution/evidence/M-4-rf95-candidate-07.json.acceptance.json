@@ -1,0 +1,104 @@
+{
+  "artifactRefs": [],
+  "claim": "acceptance:RF-95",
+  "digest": "sha256:70cd69487cd8a42c07e0586b635645bd5492f2cf7aeb73856214e99538aca2f2",
+  "environment": {
+    "reviewerPublicKey": "tqlbr760xpdZxgusEeqFQLYdSJRGCJIcr8LblfQ7Yfw="
+  },
+  "materials": [
+    {
+      "digest": "sha256:ce00e84f9d6ac942b9d9c984b5945285c2577a3366b7e81d7668a00fd74c8207",
+      "name": "preregistration",
+      "ref": "artifacts/M-4-rf95-candidate-07/RF-95-candidate-07.prereg",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:90034d38f362dfe0ddc652487376ab2f30d1be71abc112960bb992f1994b0e61",
+      "name": "ledger",
+      "ref": "artifacts/M-4-rf95-candidate-07/events.sqlite3",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:2f306120628f17ab785789efa688d7e1a42b5e4f47b4548549f65d45d00b40d6",
+      "name": "trajectory",
+      "ref": "artifacts/M-4-rf95-candidate-07/trajectory.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:cef0282747e544c8a735d5ce72e761bd09508773bfbd63fc3c84f3ad38f56112",
+      "name": "cold_reconstruction",
+      "ref": "artifacts/M-4-rf95-candidate-07/cold-reconstruction.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:af79cf1b03cd9f634c1a825eedda9233165c65c7662c05f67bbf8e4463053811",
+      "name": "workload",
+      "ref": "artifacts/M-4-rf95-candidate-07/workload.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:215d2412d806bfe3114b2c1d2149e49b632a889349907597e2e162cc66ea4c09",
+      "name": "runtime",
+      "ref": "vanguard/packages/runtime/root.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+      "name": "pack",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:c8f4355e8aa2211c7acf787207bfabcda682de587ef80ead3402fa0c9a41fe60",
+      "name": "configuration",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/budget-policy.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:45aec56d9786e4b80f1e20dc8e51e1fed43b1b8e24b5faf0a588c7a6430b6b33",
+      "name": "schema_event",
+      "ref": "schemas/mhf/event_envelope_v2.schema.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:3f911b187cac62d4b8b4479bdf56ceda730e8a7f2a20cf0b33c84c144db5f5a3",
+      "name": "schema_trajectory",
+      "ref": "schemas/mhf/trajectory_v2.schema.json",
+      "scheme": "raw-sha256"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "artifactRoot": "artifacts/M-4-rf95-candidate-07",
+    "branch": "HEAD",
+    "commit": "7a3adb154fa98352a3864483bde6a14f144515de",
+    "configurationDigest": "sha256:c8f4355e8aa2211c7acf787207bfabcda682de587ef80ead3402fa0c9a41fe60",
+    "dirty": false,
+    "eventSchema": "mhf.event/2",
+    "packDigest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+    "reducer": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "runtime": "sha256:215d2412d806bfe3114b2c1d2149e49b632a889349907597e2e162cc66ea4c09",
+    "runtimeDigest": "sha256:215d2412d806bfe3114b2c1d2149e49b632a889349907597e2e162cc66ea4c09",
+    "schemaDigests": {
+      "schema_event": "sha256:45aec56d9786e4b80f1e20dc8e51e1fed43b1b8e24b5faf0a588c7a6430b6b33",
+      "schema_trajectory": "sha256:3f911b187cac62d4b8b4479bdf56ceda730e8a7f2a20cf0b33c84c144db5f5a3"
+    },
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "5a3ccd5aef72aeba6b29e9451bdf17ada526a42e",
+    "workloadDigest": "sha256:af79cf1b03cd9f634c1a825eedda9233165c65c7662c05f67bbf8e4463053811"
+  },
+  "producer": {
+    "identity": "aether-evidence-reviewer",
+    "keyId": "aether-evidence-reviewer-1",
+    "role": "reviewer"
+  },
+  "protocol": "aether.evidence.acceptance/1",
+  "run": {
+    "acceptedEvidenceDigest": "sha256:a39acadca34d34fd70cebca7b5212e90bb8a37396195997167f1c8a25337b8dd"
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:OWzQz1GM6KhiXkaEaEZp/pARUbulOy3phqM7CLbnQ664ZK+yULFcKoODsQ0sWLWBdCKVOJpAV6yi62fBDeE0Cw==",
+  "subject": [
+    "sha256:a39acadca34d34fd70cebca7b5212e90bb8a37396195997167f1c8a25337b8dd"
+  ]
+}

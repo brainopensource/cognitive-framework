@@ -1,0 +1,176 @@
+{
+  "artifactRefs": [
+    "artifacts/M-7-topology-order11"
+  ],
+  "claim": "M-7",
+  "detail": "Topology lowering, fail-closed rejection, the ADR-0099 SEQUENTIAL_CONFIRMED disposition and live M7-01 independence are verified, and role operations now execute as real M-6 children bound to the root episode in causal order with CAS-resolved role-to-role artifact flows.",
+  "digest": "sha256:9bef61394c06d5145674f5b70897f1429771dcb1b7a49f29ccea86d48207997a",
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "materials": [
+    {
+      "digest": "sha256:8f792d182f678d4a3fa68d8c3f471f77706170bb771fc76032b066480315784f",
+      "name": "adr_0099",
+      "ref": "docs/02_decisions/0099-m7-topology-scheduler-disposition.md",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:ea92334ef519916be2846bcf97095a2c0cbc9fbad5f16a03de7a269ac218ecf4",
+      "name": "falsifier_suite",
+      "ref": "test/falsifiers/test_m7_topology_and_independence.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:be35cb96a4c7783d97980b3bd91971ae8d4a22faad24b0d7e7ece05028980822",
+      "name": "independence",
+      "ref": "lab/m701_independence.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:bc4d93f92e79e14f104733a57bf0b5cda1a12c7c730a9cf69808ead081bac954",
+      "name": "m701_suite",
+      "ref": "test/falsifiers/test_m701_recorded_workload.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+      "name": "pack",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:54d9ad721d9ccaf1fd94e25e53de73a9afc2eca7972f4328ee903913c787d770",
+      "name": "run_plan",
+      "ref": "vanguard/packages/runtime/run_plan.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+      "name": "runtime",
+      "ref": "vanguard/packages/runtime/root.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:939aabefe87f4303545b32dfe4f1351c306da5ea2561df39e0819c671b15dcc2",
+      "name": "schema_topology",
+      "ref": "schemas/mhf/topology.schema.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:63e7b2540d7e88769a359cb400a83afc5116b3e2e872bee2392a9e16d003cadb",
+      "name": "topology",
+      "ref": "vanguard/packages/runtime/topology.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:ab67461db46014444ba820f3e9fbe4a70cb27b5ac2ed0e3bbb0dfb500778a915",
+      "name": "topology_analysis",
+      "ref": "lab/topology_analysis.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:06d9a80569f8f1523a0892a9c0c5fc460d265a9014a48b6f49723143a90d72d7",
+      "name": "falsifier_report",
+      "ref": "artifacts/M-7-topology-order11/falsifier-report.json",
+      "scheme": "raw-sha256"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "artifactRoot": "artifacts/M-7-topology-order11",
+    "branch": "HEAD",
+    "commit": "e90bba0e94612611061be24ea55de0cbc182ba7f",
+    "dirty": false,
+    "eventSchema": "mhf.event/2",
+    "packDigest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+    "reducer": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "reportDigest": "sha256:06d9a80569f8f1523a0892a9c0c5fc460d265a9014a48b6f49723143a90d72d7",
+    "runtime": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+    "runtimeDigest": "sha256:cf74c66df06c781bedf4d263b1a7ad4719e6e388150c5e36fc5fb00bb9aa1096",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "df8b2083873dbc53c7b05679213edf6e4957446f"
+  },
+  "producer": {
+    "identity": "dev-a",
+    "keyId": "dev-a-evidence-1",
+    "role": "producer"
+  },
+  "protocol": "aether.m7.topology-and-scheduler-disposition/1",
+  "run": {
+    "adr": "ADR-0099",
+    "artifactFlowBinding": "settled child evidenceRefs are checked against the configured CAS before becoming the next role's artifactRefs; artifact flows are therefore observable",
+    "artifactFlowsExercised": true,
+    "concurrencyAuthorized": false,
+    "falsifiers": {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test.falsifiers.test_m7_topology_and_independence",
+        "test.falsifiers.test_m701_recorded_workload",
+        "test.falsifiers.test_m7_topology_execution",
+        "-v"
+      ],
+      "cwd": ".",
+      "failures": 0,
+      "fresh_process": true,
+      "markers": {
+        "analysis_only": true,
+        "artifact_flows_exercised": true,
+        "authority_rejected": true,
+        "causal_order_honoured": true,
+        "children_bound_to_root": true,
+        "children_never_get_spawn": true,
+        "cold_reconstructs_tree": true,
+        "cycles_rejected": true,
+        "digest_stable": true,
+        "direct_form_does_real_work": true,
+        "distinct_structures": true,
+        "forms_execute": true,
+        "independence_measured": true,
+        "intent_keys_topology_bound": true,
+        "lowering_is_not_concurrency": true,
+        "m701_live_path": true,
+        "missing_resource_named": true,
+        "one_runtime_shape": true,
+        "recorded_timestamps": true,
+        "role_operations_executed": true,
+        "roles_run_once": true,
+        "sequential_not_overlapped": true,
+        "three_topologies": true,
+        "unobserved_not_invented": true,
+        "unreachable_role_visible": true
+      },
+      "modules": [
+        "test.falsifiers.test_m7_topology_and_independence",
+        "test.falsifiers.test_m701_recorded_workload",
+        "test.falsifiers.test_m7_topology_execution"
+      ],
+      "output_digest": "sha256:81b4aa074ac8ef3ab887d2876b92e445589faba4d9113b2a0c19400048da50b5",
+      "returncode": 0,
+      "schema": "aether.m7-falsifier-report/1",
+      "stderr_digest": "sha256:81b4aa074ac8ef3ab887d2876b92e445589faba4d9113b2a0c19400048da50b5",
+      "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": 40
+    },
+    "m701MeasuredOn": "live canonical Runtime.execute_harness run",
+    "roleExecutionBridge": "runtime.root._TopologyModel -> agent.spawn",
+    "roleOperationsExecuted": true,
+    "schedulerDisposition": "SEQUENTIAL_CONFIRMED",
+    "topologies": [
+      "direct",
+      "planner-executor-reviewer",
+      "fork-read-merge"
+    ]
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:XnuiVXAN/sqlOHguZNUEUMhwO1ym7IpWX6MEl0hkTlYzYsvLZyQVxEwJXXpcWtjWUvK/TrWUytH4qoz/CYwfDA==",
+  "subject": [
+    "package:WP-A3",
+    "package:WP-B3",
+    "milestone:M-7"
+  ]
+}

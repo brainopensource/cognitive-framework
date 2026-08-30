@@ -1,0 +1,142 @@
+{
+  "artifactRefs": [
+    "artifacts/M-6-canonical-recursion-order10"
+  ],
+  "claim": "M-6",
+  "digest": "sha256:2ae950dc68a0bda92b3cf1bb1f6558f9aec1ba458f4ccf19dc130099e7de67ff",
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "materials": [
+    {
+      "digest": "sha256:67ce6ac4f23db60bf01efb7257d91312c74519ed9409caed957a10942bb4a3a9",
+      "name": "child_port",
+      "ref": "vanguard/packages/ports/child_runtime.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:91cb2cb694fe929fdc1bfe6eccadaab5e58cf1b538815503beb478513fde3eeb",
+      "name": "child_runtime",
+      "ref": "vanguard/packages/runtime/child_runtime.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:c8f4355e8aa2211c7acf787207bfabcda682de587ef80ead3402fa0c9a41fe60",
+      "name": "configuration",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/budget-policy.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:437221c4115312c2d805fd5949e7f2fe7380dae98d2d9060f40ba28bb1db541f",
+      "name": "delegation",
+      "ref": "vanguard/packages/runtime/delegation.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:86f9508fa2de701ea6b4dc704aa1d63113c8c25aebe3bf8ff7b5328f01dab07a",
+      "name": "falsifier_suite",
+      "ref": "test/falsifiers/test_rf101_rf112_canonical_recursion.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+      "name": "pack",
+      "ref": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:b358a71d2e2fc7f59a45af1b4aea0f18240ab686ac43e48d24126f81b0e0ed63",
+      "name": "recovery",
+      "ref": "vanguard/packages/runtime/ledger/recovery.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:588e024a6700a5943d6719bf529af738e2762ef69337eec101670313d49eaa2c",
+      "name": "runtime",
+      "ref": "vanguard/packages/runtime/root.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:45aec56d9786e4b80f1e20dc8e51e1fed43b1b8e24b5faf0a588c7a6430b6b33",
+      "name": "schema_event",
+      "ref": "schemas/mhf/event_envelope_v2.schema.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:3f911b187cac62d4b8b4479bdf56ceda730e8a7f2a20cf0b33c84c144db5f5a3",
+      "name": "schema_trajectory",
+      "ref": "schemas/mhf/trajectory_v2.schema.json",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:39ac749cf79194dcbce5f1b6e31c81a805c41a0e48c34c3c0151742805b1351f",
+      "name": "wiring",
+      "ref": "vanguard/packages/runtime/wiring.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:b17657d6cabd0dd6b7b2e8bcc6fa9a5617c135488ba33b6ad39ab9f8da9d6f86",
+      "name": "falsifier_report",
+      "ref": "artifacts/M-6-canonical-recursion-order10/falsifier-report.json",
+      "scheme": "raw-sha256"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "artifactRoot": "artifacts/M-6-canonical-recursion-order10",
+    "branch": "HEAD",
+    "commit": "3e8b081d5e74ffb9c5beaa21fbbe218031080c3a",
+    "configurationDigest": "sha256:c8f4355e8aa2211c7acf787207bfabcda682de587ef80ead3402fa0c9a41fe60",
+    "dirty": false,
+    "eventSchema": "mhf.event/2",
+    "packDigest": "sha256:830b9324a06f6c2b0b45bdcfc7755c59ef0cca113d87f73d80311124a66d85bb",
+    "reducer": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "reportDigest": "sha256:b17657d6cabd0dd6b7b2e8bcc6fa9a5617c135488ba33b6ad39ab9f8da9d6f86",
+    "runtime": "sha256:588e024a6700a5943d6719bf529af738e2762ef69337eec101670313d49eaa2c",
+    "runtimeDigest": "sha256:588e024a6700a5943d6719bf529af738e2762ef69337eec101670313d49eaa2c",
+    "schemaDigests": {
+      "schema_event": "sha256:45aec56d9786e4b80f1e20dc8e51e1fed43b1b8e24b5faf0a588c7a6430b6b33",
+      "schema_trajectory": "sha256:3f911b187cac62d4b8b4479bdf56ceda730e8a7f2a20cf0b33c84c144db5f5a3"
+    },
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "cfc14512d667dbe2bbbd8695ecb62cd376ebc92a"
+  },
+  "producer": {
+    "identity": "dev-b",
+    "keyId": "dev-b-evidence-1",
+    "role": "producer"
+  },
+  "protocol": "aether.m6.canonical-recursion/1",
+  "run": {
+    "childIdScheme": "aether.child_id/1",
+    "falsifiers": {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test.falsifiers.test_rf101_rf112_canonical_recursion",
+        "-v"
+      ],
+      "cwd": ".",
+      "depth_3": true,
+      "failures": 0,
+      "fresh_process": true,
+      "kill_tree": true,
+      "output_digest": "sha256:7ac2fbd3f92f884ebc200d47e94f1c66da823ff39c03eaa4a6fb0b8c72559f1b",
+      "returncode": 0,
+      "schema": "aether.m6-falsifier-report/1",
+      "stderr_digest": "sha256:7ac2fbd3f92f884ebc200d47e94f1c66da823ff39c03eaa4a6fb0b8c72559f1b",
+      "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": 57
+    },
+    "syntheticSuccessRemoved": true
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:bhBOGdRskerqj78cuBU+QiK5fqjbr5uGIkAOoU05yiF1qk7lizhtbKoqquJsUXwrOT9THWO7KuueArgaHseFBg==",
+  "subject": [
+    "package:WP-A1",
+    "milestone:M-6"
+  ]
+}

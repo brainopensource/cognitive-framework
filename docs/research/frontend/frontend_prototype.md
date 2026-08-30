@@ -1,14 +1,11 @@
 ---
-id: frontend-prototype-brainstorm
-class: research
-authority: non-authorizing
-canonical_for: []
-status: draft
-owner: product-architecture
-version: "0.1.0"
-last_verified: 2026-08-24
-supersedes: []
-superseded_by: null
+id: research.frontend-prototype
+kind: research
+status: experiment
+authority: non-canonical
+summary: "Exploratory research and pilot architecture for AETHER Observatory frontend prototype."
+topic:
+  - frontend
 ---
 
 # AETHER Observatory — Frontend Prototype and Pilot Architecture

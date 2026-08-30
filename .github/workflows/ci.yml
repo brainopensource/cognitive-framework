@@ -24,16 +24,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
       - uses: actions/setup-node@v4
         with:
           node-version: '22.18'
 
       - name: Hermetic provider-key preflight
-        run: python3 tools/linters/check_test_hygiene.py
+        run: uv run python3 tools/linters/check_test_hygiene.py
 
       - name: Install locked dependencies
         run: |
-          python3 -m pip install -r requirements.lock
+          uv sync --frozen
           npm ci
 
       - name: Install rootless sandbox runtime

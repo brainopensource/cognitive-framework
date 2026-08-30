@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-agentic-coding-builder-framework-b
+kind: research
+status: reference
+authority: non-canonical
+summary: "SOTA research on harness agentic coding builder architecture and meta-cognition framework."
+topic:
+  - coding-harness
+---
 # Harness Agentic Coding Builder — Research & Framework B
 
 ## Estado da arte, arquitetura de Harness Builder e aplicação ao AETHER/Vanguard para meta-cognição, Meta-Harness e evolução autoaperfeiçoável de alta ordem

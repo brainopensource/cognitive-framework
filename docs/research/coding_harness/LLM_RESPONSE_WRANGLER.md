@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-llm-response-wrangler
+kind: research
+status: reference
+authority: non-canonical
+summary: "Architectural recommendations and research for LLM response wrangling."
+topic:
+  - coding-harness
+---
  # Final architectural recommendation
 
   Your proposal is feasible, with one refinement:

@@ -74,7 +74,7 @@ From the repository root:
 
 ```bash
 # 1. Install Python dev package in editable mode
-python3 -m pip install -e ".[dev]"
+uv sync
 
 # 2. Install TypeScript dependencies and build client binaries
 npm ci

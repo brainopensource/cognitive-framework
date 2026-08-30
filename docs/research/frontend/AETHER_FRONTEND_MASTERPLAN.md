@@ -1,3 +1,12 @@
+---
+id: research.frontend-aether-frontend-masterplan
+kind: research
+status: reference
+authority: non-canonical
+summary: "Research masterplan for TypeScript CLI, TUI, Observatory app, and Agent Development Studio."
+topic:
+  - frontend
+---
 # AETHER Frontend Masterplan
 
 ## TypeScript CLI, TUI, Observatory App and Agent Development Studio

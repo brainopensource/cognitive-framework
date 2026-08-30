@@ -1,3 +1,12 @@
+---
+id: research.ai-openrouter-llm-models-suggested
+kind: research
+status: reference
+authority: non-canonical
+summary: "SOTA reference guide and suggestions for OpenRouter LLM models."
+topic:
+  - ai-models
+---
 # OpenRouter LLM Models: Suggested SOTA Reference
 
 ## 0. Free Models

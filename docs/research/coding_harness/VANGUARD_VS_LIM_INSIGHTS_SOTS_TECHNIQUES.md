@@ -1,27 +1,11 @@
 ---
-id: vanguard-vs-lim-insights-sota-techniques
-class: research-report
-authority: reference-analysis
-status: ratified-frontier
-owner: substrate-architecture-group
-version: "2.0.0"
-date: "2026-08-28"
-tags:
-  - vanguard-substrate
-  - llm-int-machine
-  - claude-code-cli
-  - deepseek-v4-flash
-  - swe-bench-pro
-  - ablation-benchmarking
-  - prefix-caching
-  - dual-loop-reproducer
-  - mcts-program-repair
-  - ast-preflight
-  - fault-localization
-  - lattice-attenuation
-  - jcs-canonicalization
-  - mutation-testing
-  - compound-agency
+id: research.coding-harness-vanguard-vs-lim-insights
+kind: research
+status: reference
+authority: non-canonical
+summary: "Empirical insights, SOTA techniques, and comparative reference analysis of Vanguard vs LIM."
+topic:
+  - coding-harness
 ---
 
 # Vanguard vs. LIM (006_LLM_INT_MACHINE): Empirical Insights, SOTA Techniques, Compound Agency, and Architectural Synthesis

@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-agentic-systems-engineering
+kind: research
+status: reference
+authority: non-canonical
+summary: "Comprehensive research on harness and agentic systems engineering for coding agents."
+topic:
+  - coding-harness
+---
 # Research: Harness & Agentic Systems Engineering
 
 **Filename:** `research_harness_agentic_systems_engineering.md`  

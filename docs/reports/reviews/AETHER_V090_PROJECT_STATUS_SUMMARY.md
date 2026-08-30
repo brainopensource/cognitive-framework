@@ -1,3 +1,13 @@
+---
+id: report.reviews-aether-v090-project-status-summary
+kind: report
+status: reference
+authority: non-canonical
+summary: "Consolidated technical status report and review for AETHER v0.9.0."
+topic:
+  - project-status
+  - reviews
+---
 # AETHER / Vanguard v0.9.0 — Consolidated Project Status, Benchmark Results, Failures, and Forward Ideas
 
 **Document type:** consolidated technical status report  

@@ -13,7 +13,7 @@ This directory contains the automated test suite for the Vanguard / AETHER runti
 ### Setup
 ```bash
 # Python dev dependencies (repo root)
-python3 -m pip install -e '.[dev]'
+uv sync
 
 # TypeScript dev dependencies (repo root)
 npm ci

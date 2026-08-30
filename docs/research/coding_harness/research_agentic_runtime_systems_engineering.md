@@ -1,3 +1,13 @@
+---
+id: research.coding-harness-agentic-runtime-systems-engineering
+kind: research
+status: reference
+authority: non-canonical
+summary: "Systems engineering research on causal execution, runtime architecture, and fault localization."
+topic:
+  - coding-harness
+  - runtime
+---
 # Research: Agentic Runtime Systems Engineering
 
 ## Causal Execution, Runtime Architecture, Recovery, Performance, Plugins, Memory, Fault Localization, and Tool-Oriented Agent Design

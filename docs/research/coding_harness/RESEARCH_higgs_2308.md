@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-higgs-2308
+kind: research
+status: reference
+authority: non-canonical
+summary: "Technical implications and research synthesis of 2308 research harness for AETHER."
+topic:
+  - coding-harness
+---
 # 2308 Research Harness --- Technical Implications for AETHER / Vanguard
 
 **Date:** 2026-08-23\

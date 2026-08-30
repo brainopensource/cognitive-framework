@@ -1,3 +1,13 @@
+---
+id: research.coding-harness-llm-benchmarkings
+kind: research
+status: historical-reference
+authority: non-canonical
+summary: "Benchmarks and evaluations for open-weights and free LLM models on local hardware."
+topic:
+  - coding-harness
+  - benchmarks
+---
 # TOP LLMs: MODELOS GRATUITOS E OPEN-WEIGHTS (HARDWARE: RX 9060 16GB VRAM + 32GB RAM + RYZEN 7 5800X3D)
 
 > **NON-NORMATIVE / FROZEN PROVENANCE**

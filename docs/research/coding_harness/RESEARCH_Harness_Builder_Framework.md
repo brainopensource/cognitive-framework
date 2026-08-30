@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-builder-framework
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Product requirements document and research for the Harness Builder Framework."
+topic:
+  - coding-harness
+---
 # Product Requirements Document (PRD)
 
 ## Harness Builder Framework & Agentic Autonomous Project

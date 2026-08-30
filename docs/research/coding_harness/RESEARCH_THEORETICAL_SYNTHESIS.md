@@ -1,14 +1,11 @@
 ---
-id: REF-06-M5
-file: WAVE_6_SOTA_RESEARCH_AND_THEORETICAL_SYNTHESIS.md
-title: "Wave 6: SOTA Research & Theoretical Synthesis for Meta-Cognition, Active Inference & Dynamic Skill Synthesis"
-version: 1.0.0
-status: NORMATIVE-RESEARCH
-authority_scope: >
-  Theoretical foundations, mathematical optimization models, decoupled software architectures,
-  and empirical validation protocols for Wave 6 (Milestone M5: Meta-Cognition & Evolutionary Tuning).
-authors: [Senior AI Specialist (PhD in Machine Learning / Cognitive Systems), Chief Architect]
-last_reviewed: 2026-08-19
+id: research.coding-harness-theoretical-synthesis
+kind: research
+status: reference
+authority: non-canonical
+summary: "SOTA research and theoretical synthesis for meta-cognition and skill synthesis."
+topic:
+  - coding-harness
 ---
 
 # Wave 6: SOTA Research & Theoretical Synthesis for Meta-Cognition & Skill Synthesis

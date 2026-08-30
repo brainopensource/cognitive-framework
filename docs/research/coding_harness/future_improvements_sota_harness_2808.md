@@ -1,29 +1,11 @@
 ---
-id: future-improvements-sota-harness-2808
-class: research-report
-authority: reference-analysis
-status: ratified-frontier-master
-owner: substrate-architecture-group
-version: "3.0.0"
-date: "2026-08-28"
-tags:
-  - future-harness-architecture
-  - master-traceability-report
-  - test-time-compute-scaling
-  - process-reward-models
-  - swe-rl-reinforcement-learning
-  - agent-rlvr-verifiable-rewards
-  - neuro-symbolic-smt-repair
-  - monte-carlo-tree-search
-  - dynamic-program-slicing
-  - spectrum-fault-localization
-  - mutation-testing-evalplus
-  - tree-sitter-code-graphs
-  - subagent-isolation-sandboxes
-  - hierarchical-planner-worker
-  - probability-of-success-index
-  - empirical-benchmark-matrices
-  - decision-traceability-log
+id: research.coding-harness-future-improvements-sota-harness-2808
+kind: research
+status: reference
+authority: non-canonical
+summary: "Master frontier research and synthesis manual on next-generation autonomous harness design."
+topic:
+  - coding-harness
 ---
 
 # Master Frontier Research, Architectural Traceability & Next-Generation Autonomous Coding Harness Manual

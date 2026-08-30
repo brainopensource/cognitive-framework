@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-dekas-claude-prototype
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Technical blueprint for DEKAS domain-blind event kernel for agentic systems."
+topic:
+  - coding-harness
+---
 # DEKAS — Domain-blind Event Kernel for Agentic Systems
 
 **A technical blueprint for a universal, event-native agentic substrate**

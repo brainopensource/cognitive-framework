@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-proposal-hy3-improved
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Proposals and suggestions for restructuring reference files in docs."
+topic:
+  - coding-harness
+---
 # Suggestion — What we should do with `docs/06_references/`
 
 **Author:** analysis pass over the 9 reference files (no code changed).

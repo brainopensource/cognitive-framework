@@ -1,12 +1,11 @@
 ---
-id: ARCHON-090-PROTOTYPE
-class: architectural-blueprint
-authority: brainstorm-reference
-status: proposal-prototype
-owner: core-architecture-guild
-version: "0.9.0-alpha"
-created_at: 2026-08-28
-tags: [agentic-systems, sota-harness, event-native, mcts, pareto-telemetry, greenfield-tdd, sbfl]
+id: research.coding-harness-archon-gemini-prototype
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Architectural blueprint and prototype research for Project ARCHON agentic substrate."
+topic:
+  - coding-harness
 ---
 
 # 🏛️ Project ARCHON: Universal Event-Native Agentic Systems Substrate & SOTA Autonomous Coding Harness

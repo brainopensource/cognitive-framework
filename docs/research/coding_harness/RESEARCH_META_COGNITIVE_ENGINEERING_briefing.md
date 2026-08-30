@@ -1,3 +1,13 @@
+---
+id: research.coding-harness-meta-cognitive-engineering-briefing
+kind: research
+status: reference
+authority: non-canonical
+summary: "Executive briefing on meta-cognitive engineering and learning paradigms for AETHER."
+topic:
+  - coding-harness
+  - meta-cognition
+---
 # AETHER pós-v1.0: Meta-Engenharia do Conhecimento e do Aprendizado (Briefing Executivo)
 
 ## 1. A Mudança de Paradigma

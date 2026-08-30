@@ -1,21 +1,12 @@
 ---
-id: vanguard-swe-bench-agentic-metaframework-report
-class: research-report
-authority: reference-analysis
-status: ratified-frontier
-owner: substrate-architecture-group
-version: "1.0.0"
-date: "2026-08-28"
-tags:
-  - swe-bench-pro
-  - claude-code-cli
-  - agentic-coding-substrate
-  - vanguard-aether
-  - recursive-agency
-  - tree-sitter-lsp
-  - capability-security
-  - fault-localization
-  - mcts-program-repair
+id: research.coding-harness-vanguard-frontier-swe-bench-report
+kind: research
+status: reference
+authority: non-canonical
+summary: "Research synthesis on SWE-Bench benchmarks and agentic meta-framework architecture."
+topic:
+  - coding-harness
+  - benchmarks
 ---
 
 # Vanguard Frontier: Architectural Synthesis, SWE-Bench Pro Mastery, and Next-Generation Agentic Coding Meta-Frameworks

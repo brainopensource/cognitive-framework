@@ -71,7 +71,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 ### Environment Setup
 ```bash
 # Python dev dependencies (repo root)
-python3 -m pip install -e '.[dev]'
+uv sync
 
 # TypeScript dev dependencies (repo root)
 npm ci

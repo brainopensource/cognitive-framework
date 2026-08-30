@@ -1,15 +1,11 @@
 ---
-id: ARCH-TREATISE-01
-file: vanguard_body_detailed.md
-title: "Vanguard / GTS Architecture, Epistemic Cognition & The Evolutionary Blueprint of Living Autonomous Intelligence"
-version: 1.0.0
-status: LIVING-TREATISE
-authority_scope: >
-  Comprehensive scientific and architectural treatise synthesizing computational physics,
-  formal verification, biological emergence, context economics, neuro-symbolic cognition,
-  and the evolutionary trajectory from deterministic harnesses to self-improving sovereign intelligence.
-owners: [Project Lead, Tech Lead, Senior Principal Architect]
-last_reviewed: 2026-08-18
+id: research.coding-harness-vanguard-body-detailed
+kind: research
+status: reference
+authority: non-canonical
+summary: "Architectural treatise on Vanguard/GTS architecture, epistemic cognition, and agent evolutionary blueprint."
+topic:
+  - coding-harness
 ---
 
 # Vanguard / GTS Architecture, Epistemic Cognition & The Evolutionary Blueprint of Living Autonomous Intelligence

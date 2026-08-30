@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-meta-framework-2408
+kind: research
+status: reference
+authority: non-canonical
+summary: "Research report on evolvable agentic systems and meta-framework architecture."
+topic:
+  - coding-harness
+---
 # RESEARCH META FRAMEWORK 2408
 
 ## PhD-Level Research Report on Evolvable Agentic Systems

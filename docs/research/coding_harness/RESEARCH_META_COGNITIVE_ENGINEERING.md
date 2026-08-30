@@ -1,3 +1,13 @@
+---
+id: research.coding-harness-meta-cognitive-engineering
+kind: research
+status: reference
+authority: non-canonical
+summary: "Exploratory research on meta-cognitive knowledge engineering and self-improving agent systems."
+topic:
+  - coding-harness
+  - meta-cognition
+---
 # AETHER pós-v1.0: da engenharia de agentes à Meta-Engenharia do Conhecimento e do Aprendizado
 
 A direção que eu adotaria é mais radical do que simplesmente adicionar “metacognition”, “self-improvement” ou “swarm intelligence” ao AETHER.

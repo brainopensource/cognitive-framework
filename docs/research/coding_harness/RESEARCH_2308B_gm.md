@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-2308b-gm
+kind: research
+status: reference
+authority: non-canonical
+summary: "Research on foundations, architectures, algorithms, and experimental methodology for coding harnesses."
+topic:
+  - coding-harness
+---
 # RESEARCH_2308B_gm: Foundations, Architectures, Algorithms, and Experimental Methods for Evolvable Agentic Systems
 
 **Date:** 2026-08-23  

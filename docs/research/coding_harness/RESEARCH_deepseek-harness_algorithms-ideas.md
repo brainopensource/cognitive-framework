@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-deepseek-algorithms-ideas
+kind: research
+status: reference
+authority: non-canonical
+summary: "Reverse engineering playbook and algorithmic ideas for deepseek coding harness."
+topic:
+  - coding-harness
+---
 # 1. AI-Powered Reverse Engineering Playbook (Step-by-Step)
 
   Here is how you use AI subagents to systematically break down their repository and map it directly to Vanguard in 4 steps:

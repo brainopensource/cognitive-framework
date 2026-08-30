@@ -238,7 +238,7 @@ Historical milestone identifiers keep their meaning; `ADR-0095` §4 is the trans
 ### Python Environment (Python 3.10+)
 ```bash
 # Install editable package with dev dependencies
-python3 -m pip install -e '.[dev]'
+uv sync
 
 # Run focused production kernel tests
 python3 -m unittest discover -s test/kernel -t .

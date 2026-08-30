@@ -1,19 +1,11 @@
 ---
-id: frontend-prototype-final-integrated
-class: research
-authority: non-authorizing
-status: final-brainstorm
-owner: product-and-systems-architecture
-version: "1.0.0"
-created: 2026-08-24
-read_when:
-  - designing-the-substrate-frontend
-  - planning-a-gui-pilot-for-aether-higgs
-do_not_read_when:
-  - resolving-authority-conflicts
-  - implementing-runtime-law
-supersedes: []
-superseded_by: null
+id: research.frontend-prototype-beta-gem
+kind: research
+status: experiment
+authority: non-canonical
+summary: "Integrated frontend prototype research, PRD, and engineering roadmap."
+topic:
+  - frontend
 ---
 
 # AETHER Observatory — Final Integrated Frontend Prototype, PRD, and Engineering Specification

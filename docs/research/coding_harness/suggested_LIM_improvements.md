@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-suggested-lim-improvements
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Proposed improvements and active suggestions for LLM intelligent machine agentic harness."
+topic:
+  - coding-harness
+---
 # Suggested Improvements: LLM Intelligent Machine Agentic Harness
 
 ### `[STATUS: ACTIVE & PROPOSED — 2026-08-28]`

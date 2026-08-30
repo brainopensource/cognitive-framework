@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-proposal-glm-harness-beta
+kind: research
+status: proposal
+authority: non-canonical
+summary: "Independent advisory review and proposal for GLM harness integration."
+topic:
+  - coding-harness
+---
 # GLM Review — v0.6.1 BETA
 
 **Classification:** Independent advisory review (external model assessment).

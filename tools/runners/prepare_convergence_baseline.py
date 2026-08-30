@@ -92,7 +92,7 @@ def package_version(root: Path) -> str:
 
 def dependency_lock_digest(root: Path) -> tuple[str, str]:
     """Digest the dependency lock, naming which file was used."""
-    for candidate in ("requirements.lock", "uv.lock", "pyproject.toml"):
+    for candidate in ("uv.lock", "pyproject.toml"):
         path = root / candidate
         if path.is_file():
             return candidate, _digest_file(path)

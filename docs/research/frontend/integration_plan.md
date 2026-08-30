@@ -1,16 +1,11 @@
 ---
-id: frontend-runtime-integration-plan
-class: archive
-authority: advisory
-status: frozen
-owner: frontend-runtime-integration
-version: "0.2.0"
-last_verified: 2026-08-27
-canonical_for: []
-subordinate_to:
-  - ../../../../VISION.md
-  - ../../../SPEC.md
-  - ../../../03_execution/milestones.md
+id: research.frontend-integration-plan
+kind: research
+status: historical-reference
+authority: non-canonical
+summary: "Frontend-to-runtime integration dossier and archival reference."
+topic:
+  - frontend
 ---
 
 # AETHER / Vanguard frontend-to-runtime integration dossier

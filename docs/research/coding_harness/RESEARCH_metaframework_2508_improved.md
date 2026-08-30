@@ -1,3 +1,12 @@
+---
+id: research.coding-harness-metaframework-2508-improved
+kind: research
+status: reference
+authority: non-canonical
+summary: "Improved delta report on meta-framework research for evolvable agent systems."
+topic:
+  - coding-harness
+---
 # RESEARCH Meta-Framework 2508 — Improved Final Delta Report
 
 **Research date:** 25 August 2026  

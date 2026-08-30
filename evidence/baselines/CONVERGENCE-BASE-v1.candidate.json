@@ -1,7 +1,7 @@
 {
   "baseline_id": "CONVERGENCE-BASE-v1",
   "candidate": {
-    "dependencyLockFile": "requirements.lock",
+    "dependencyLockFile": "uv.lock",
     "prohibitedPathDigests": {
       "vanguard/packages/domain": "sha256:9196daff5174aa218d13e880028c7cfe87751a0a35a1162afce4461c77b8b2fc",
       "vanguard/packages/kernel": "sha256:eab692fd9a3c7d60a31ea62a8144d677e520ab1fd5d0043f70bd2618c7cc9c02",

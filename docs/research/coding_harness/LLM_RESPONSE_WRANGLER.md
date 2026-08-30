@@ -715,6 +715,7 @@ topic:
 
   A strong initial retrieval score is:
 
+```text
   score = (
       0.30 * lexical_match
       + 0.25 * symbol_match
@@ -723,6 +724,7 @@ topic:
       + 0.10 * test_reference_match
       + 0.05 * recency_need
   )
+```
 
   All terms should be normalized to the interval from zero to one.
 

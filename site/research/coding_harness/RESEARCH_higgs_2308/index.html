@@ -1,0 +1,2850 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>2308 Research Harness --- Technical Implications for AETHER / Vanguard - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#2308-research-harness-technical-implications-for-aether-vanguard" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              2308 Research Harness --- Technical Implications for AETHER / Vanguard
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Executive Thesis
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="2308-research-harness-technical-implications-for-aether-vanguard">2308 Research Harness --- Technical Implications for AETHER / Vanguard</h1>
+<p><strong>Date:</strong> 2026-08-23\
+<strong>Purpose:</strong> Convert the 23 August agentic-harness research into
+concrete architectural decisions, implementation requirements,
+experiments, and development sequencing for a reusable Harness Builder
+and future Meta-Harness.</p>
+<hr />
+<h2 id="1-executive-thesis">1. Executive Thesis</h2>
+<p>The 23 August research materially sharpens the architecture around one
+principle:</p>
+<blockquote>
+<p><strong>Execution, adaptation, and learning must be separable planes
+connected by causal evidence, not collapsed into one self-modifying
+agent loop.</strong></p>
+</blockquote>
+<p>The most relevant research signals are:</p>
+<ol>
+<li><strong>Evo-Harness:</strong> externally grounded feedback outperforms model
+    self-judgment for evolving reusable harness knowledge.
+    Self-generated feedback can degrade performance.</li>
+<li><strong>ClawGym II:</strong> model optimization can occur through an existing
+    harness by intercepting model calls and reconstructing trajectories,
+    without moving the environment loop into the trainer.</li>
+<li><strong>AI4AI-Bench:</strong> actual recursive algorithmic improvement is
+    substantially harder than prompt, harness, data, or hyperparameter
+    optimization; most current agents avoid changing the learning rule.</li>
+<li><strong>@skills:</strong> procedural knowledge is becoming a context-allocation
+    problem. Large skill libraries should be paged/retrieved rather than
+    permanently injected.</li>
+<li><strong>DeepSeek Harness field failures:</strong> provider serialization,
+    reasoning channels, and tool-call ordering can corrupt semantics if
+    the internal event representation is not canonical.</li>
+<li><strong>Terminal-Bench / long-horizon evaluation:</strong> quality must be
+    optimized jointly with cost, tokens, latency, verification
+    expenditure, and resource consumption.</li>
+</ol>
+<p>The practical consequence is that Vanguard should not implement
+"self-improvement" as an introspective model that rewrites itself. It
+should implement an <strong>experimental control system</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Execution
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Causal Trajectory
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>External Evidence
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    ↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Candidate Adaptation
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    ↓
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Controlled Evaluation
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    ↓
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>Promotion / Rejection / Inconclusive
+</code></pre></div>
+<p>This architecture creates a continuous path from the first Coding
+Harness to procedural learning, automated harness engineering,
+harness-native RL, and eventually algorithm-level experimentation
+without requiring a rewrite of the substrate.</p>
+<hr />
+<h1 id="2-the-three-plane-architecture">2. The Three-Plane Architecture</h1>
+<p>The research supports an explicit separation into three planes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>┌──────────────────────────────────────────────┐
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│ LEARNING PLANE                              │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│ model post-training, RL, algorithm research │
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>└───────────────────┬──────────────────────────┘
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>                    │ consumes trajectories
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                    │ returns versioned models
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>┌───────────────────▼──────────────────────────┐
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│ ADAPTATION PLANE                            │
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│ skills, memory, retrieval, policy evolution │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│ candidate generation, experiment planning   │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>└───────────────────┬──────────────────────────┘
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>                    │ proposes configuration
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>                    │ never grants authority
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>┌───────────────────▼──────────────────────────┐
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│ EXECUTION PLANE                             │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│ kernel, runtime, tools, sandbox, budgets     │
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│ canonical events, verification, effects     │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>└──────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="21-execution-plane">2.1 Execution Plane</h2>
+<p>This plane must remain deterministic enough to answer:</p>
+<ul>
+<li>What happened?</li>
+<li>Which component caused it?</li>
+<li>Which authority permitted it?</li>
+<li>What resources were consumed?</li>
+<li>What evidence proves the outcome?</li>
+</ul>
+<p>It owns mechanisms, not cognition.</p>
+<p>Recommended trusted responsibilities:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Identity
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Run lineage
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Capability algebra
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Budget accounting
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Canonical event semantics
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>Artifact addressing
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>Effect mediation
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>Plugin lifecycle
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>Sandbox boundary
+</code></pre></div>
+<p>The execution plane should not decide whether a repository-search
+strategy is intelligent, whether a skill is useful, or whether a model
+should reflect. Those are policies.</p>
+<h2 id="22-adaptation-plane">2.2 Adaptation Plane</h2>
+<p>The adaptation plane changes <em>how</em> the substrate solves tasks without
+changing the substrate's fundamental authority semantics.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>retrieval policy
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>context packing
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>compaction
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>verification strategy
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>model routing
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>retry policy
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>procedural skills
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>memory consolidation
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>multi-agent composition
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>search strategy
+</code></pre></div>
+<p>This is the correct initial home of the Meta-Harness.</p>
+<h2 id="23-learning-plane">2.3 Learning Plane</h2>
+<p>The learning plane changes the model or eventually the learning
+algorithm itself.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>SFT
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>DPO
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>PPO / GRPO
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>trajectory-based RL
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>curriculum generation
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>model distillation
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>loss-function changes
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>optimizer changes
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>training-algorithm experiments
+</code></pre></div>
+<p>It should consume evidence emitted by the runtime rather than own
+runtime semantics.</p>
+<hr />
+<h1 id="3-finding-grounded-feedback-must-govern-adaptation">3. Finding: Grounded Feedback Must Govern Adaptation</h1>
+<h2 id="31-research-result">3.1 Research result</h2>
+<p>Evo-Harness reports a critical negative result: self-generated feedback
+can perform worse than no harness evolution.</p>
+<p>For Claude Opus 4.6:</p>
+<p>Feedback regime               CL-Bench   SWE-bench Lite</p>
+<hr />
+<p>No evolution                     29.54            63.67
+  Self-generated feedback          27.96            61.67
+  Minimal external feedback        29.86            67.33
+  Grounded diagnostics             34.02            67.00</p>
+<p>The architectural importance is larger than the exact benchmark values.</p>
+<p>A language model's interpretation of its own trajectory is <strong>not an
+authoritative observation of success</strong>.</p>
+<h2 id="32-consequence">3.2 Consequence</h2>
+<p>Reflection must have epistemic status equivalent to a hypothesis.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Model:
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>"I should always run X before Y."
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ↓
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>CandidateLesson
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>confidence = model-estimated
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>evidence = none
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        ↓
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>Evaluator:
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>held-out executions
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>tests
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>resource measurements
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>failure analysis
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        ↓
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>PromotedSkill / RejectedCandidate
+</code></pre></div>
+<p>Therefore:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>reflection != memory
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>reflection != truth
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>reflection != promotion
+</code></pre></div>
+<h2 id="33-required-artifact-types">3.3 Required artifact types</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">CandidateInsight</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">EvidenceRecord</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">SkillCandidate</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">SkillVersion</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">EvaluationResult</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">PromotionDecision</span>
+</code></pre></div>
+<p>A candidate insight should carry provenance:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">candidate_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ci_...</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nt">source_run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">run_...</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nt">source_events</span><span class="p">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">evt_...</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nt">claim</span><span class="p">:</span><span class="w"> </span><span class="s">"..."</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repository | domain | global</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nt">confidence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.71</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nt">evidence_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unverified</span>
+</code></pre></div>
+<p>Promotion should create a different immutable artifact rather than
+mutate the candidate in place.</p>
+<h2 id="34-what-vanguard-should-do">3.4 What Vanguard should do</h2>
+<p>Implement the memory pipeline as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Trajectory
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>→ Evidence Extraction
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>→ Candidate Insight
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>→ Candidate Skill
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>→ Held-Out Evaluation
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>→ Promotion Controller
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>→ Skill Registry
+</code></pre></div>
+<p>Do <strong>not</strong> initially implement:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Trajectory
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>→ Reflection
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>→ append to MEMORY.md
+</code></pre></div>
+<p>That architecture creates an uncontrolled positive-feedback loop.</p>
+<hr />
+<h1 id="4-finding-trajectories-are-the-central-scientific-asset">4. Finding: Trajectories Are the Central Scientific Asset</h1>
+<p>ClawGym II, LEGO-RL, Agent Lightning, AHE, and Evo-Harness independently
+increase the value of complete trajectories.</p>
+<p>The trajectory is no longer merely debugging telemetry. It is
+simultaneously:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>debugging record
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>benchmark evidence
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>cost record
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>causal graph
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>training sample
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>skill-generation source
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>harness-evolution evidence
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>reproducibility artifact
+</code></pre></div>
+<h2 id="41-required-event-envelope">4.1 Required event envelope</h2>
+<p>A useful minimum is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">EventEnvelope</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="n">event_id</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="n">parent_event_id</span><span class="p">,</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="n">logical_time</span><span class="p">,</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="n">wall_time</span><span class="p">,</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="n">event_type</span><span class="p">,</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="n">actor_id</span><span class="p">,</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="n">component_id</span><span class="p">,</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="n">payload_ref</span><span class="p">,</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">    </span><span class="n">input_artifact_refs</span><span class="p">,</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="n">output_artifact_refs</span><span class="p">,</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="n">budget_delta</span><span class="p">,</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span><span class="n">capability_context</span><span class="p">,</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="p">}</span>
+</code></pre></div>
+<p>Large payloads should not be duplicated into the event stream. Store
+them content-addressably and reference them.</p>
+<h2 id="42-run-identity">4.2 Run identity</h2>
+<p>Every run should freeze:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>HarnessDefinition ID
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>Model ID
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>Provider ID
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>Model capability profile
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>Prompt/system artifact IDs
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>Tool schema versions
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>Search policy version
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>Context policy version
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>Compaction policy version
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>Verification policy version
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>Sandbox profile
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>Evaluator version
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>Budget profile
+</code></pre></div>
+<p>Otherwise future experiments cannot distinguish a model improvement from
+a harness/configuration change.</p>
+<hr />
+<h1 id="5-finding-prefix-addressed-trajectories-solve-two-problems-at-once">5. Finding: Prefix-Addressed Trajectories Solve Two Problems at Once</h1>
+<p>ClawGym II reconstructs model-call trajectories as prefix trees for RL.</p>
+<p>This is also the correct storage primitive for multi-agent execution.</p>
+<p>Consider:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Parent:
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>A → B → C
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>Child 1:
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>A → B → C → D → E
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>Child 2:
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>A → B → C → F → G
+</code></pre></div>
+<p>A naïve transcript architecture stores the shared prefix three times.</p>
+<p>A persistent trajectory graph stores:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>A
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>└── B
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    └── C
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>        ├── D
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>        │   └── E
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>        └── F
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>            └── G
+</code></pre></div>
+<h2 id="51-why-this-matters">5.1 Why this matters</h2>
+<p>This reduces:</p>
+<ul>
+<li>duplicated disk state;</li>
+<li>duplicated serialization;</li>
+<li>copied compacted contexts;</li>
+<li>memory amplification;</li>
+<li>ambiguity in parent/child lineage.</li>
+</ul>
+<p>It also creates a natural RL representation because divergence points
+become explicit.</p>
+<h2 id="52-recommended-structure">5.2 Recommended structure</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">TrajectoryNode</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="n">id</span><span class="p">,</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="n">parent_id</span><span class="p">,</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="n">event_segment_ref</span><span class="p">,</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="n">state_digest</span><span class="p">,</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>A child run receives:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">SpawnLease</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span><span class="n">parent_node</span><span class="p">,</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="n">context_projection</span><span class="p">,</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="n">capability_set</span><span class="p">,</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">    </span><span class="n">token_budget</span><span class="p">,</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">    </span><span class="n">money_budget</span><span class="p">,</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="n">time_budget</span><span class="p">,</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="n">storage_budget</span><span class="p">,</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>It does <strong>not</strong> receive an independently copied parent transcript.</p>
+<hr />
+<h1 id="6-finding-the-model-gateway-should-become-a-first-class-runtime-seam">6. Finding: The Model Gateway Should Become a First-Class Runtime Seam</h1>
+<p>Harness-native RL papers converge on interception at the model boundary.</p>
+<p>Therefore all inference should flow through:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Runtime
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  ↓
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>ModelGateway
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  ↓
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>ProviderAdapter
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>  ↓
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>Provider
+</code></pre></div>
+<p>The gateway is not merely a convenience wrapper.</p>
+<p>It should own cross-provider inference semantics:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>request identity
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>provider capability negotiation
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>model identity
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>retry metadata
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>cache metadata
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>token accounting
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>cost accounting
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>latency
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>raw response
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>canonical response
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>trajectory linkage
+</code></pre></div>
+<h2 id="61-why-this-matters-now">6.1 Why this matters now</h2>
+<p>Even without RL, this gives:</p>
+<ul>
+<li>deterministic mockability;</li>
+<li>provider substitution;</li>
+<li>benchmark replay;</li>
+<li>cache experiments;</li>
+<li>cost measurement;</li>
+<li>failure injection;</li>
+<li>trace correlation.</li>
+</ul>
+<p>Later, an external trainer can intercept exactly this seam:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Harness → ModelGateway → Training Proxy → Policy
+</code></pre></div>
+<p>No kernel redesign is required.</p>
+<hr />
+<h1 id="7-finding-provider-wire-formats-must-never-define-internal-semantics">7. Finding: Provider Wire Formats Must Never Define Internal Semantics</h1>
+<p>DeepSeek Harness reports illustrate a class of adapter failure where
+provider serialization changes causal ordering or event classification.</p>
+<p>The internal model must therefore be canonical.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Canonical Event Graph
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>        │
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>        ├── OpenRouter serializer
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>        ├── OpenAI serializer
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        ├── Anthropic serializer
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        ├── local-model serializer
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>        └── UI renderer
+</code></pre></div>
+<p>Not:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Provider JSON
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>    ↓
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>becomes authoritative runtime state
+</code></pre></div>
+<h2 id="71-canonical-message-algebra">7.1 Canonical message algebra</h2>
+<p>At minimum:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>SystemInstruction
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>UserMessage
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>AssistantText
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>ReasoningSegment
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>ToolCall
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>ToolObservation
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>RuntimeEvent
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>EvaluatorObservation
+</code></pre></div>
+<p>A provider adapter should be approximately a pure function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>CanonicalConversation
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>        ↓
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>serialize(provider_capabilities)
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>        ↓
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>ProviderRequest
+</code></pre></div>
+<p>and:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>ProviderResponse
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>        ↓
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>parse + validate
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>        ↓
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>CanonicalEvents
+</code></pre></div>
+<h2 id="72-important-invariant">7.2 Important invariant</h2>
+<p>If:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>AssistantToolCall → ToolObservation
+</code></pre></div>
+<p>is causal in the canonical graph, provider serialization cannot reorder
+a user message between them unless that provider's semantics explicitly
+require a transformation that preserves equivalence.</p>
+<p>This should be contract-tested.</p>
+<hr />
+<h1 id="8-finding-skills-need-paging-versioning-and-compatibility-evidence">8. Finding: Skills Need Paging, Versioning, and Compatibility Evidence</h1>
+<p>The skill ecosystem is scaling faster than context windows should be
+expected to absorb.</p>
+<p>The correct abstraction is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>SkillArtifact
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>≠
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>SkillActivationPolicy
+</code></pre></div>
+<p>A skill can exist without being active.</p>
+<h2 id="81-proposed-skill-schema">8.1 Proposed skill schema</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nt">skill_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">skill_python_test_localization</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="nt">scope</span><span class="p">:</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">  </span><span class="nt">domain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">software_engineering</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">  </span><span class="nt">languages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">python</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="nt">artifact</span><span class="p">:</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">  </span><span class="nt">content_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sha256:...</span>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>
+<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="nt">activation</span><span class="p">:</span>
+<a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a><span class="w">  </span><span class="nt">tags</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a><span class="w">  </span><span class="nt">lexical_terms</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a><span class="w">  </span><span class="nt">embedding_ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a><span class="w">  </span><span class="nt">auto_trigger_eligible</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a>
+<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a><span class="nt">requirements</span><span class="p">:</span>
+<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a><span class="w">  </span><span class="nt">capabilities</span><span class="p">:</span>
+<a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">filesystem.read</span>
+<a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shell.execute</span>
+<a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a>
+<a id="__codelineno-28-23" name="__codelineno-28-23" href="#__codelineno-28-23"></a><span class="nt">evidence</span><span class="p">:</span>
+<a id="__codelineno-28-24" name="__codelineno-28-24" href="#__codelineno-28-24"></a><span class="w">  </span><span class="nt">evaluations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-25" name="__codelineno-28-25" href="#__codelineno-28-25"></a><span class="w">  </span><span class="nt">compatible_models</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a><span class="w">  </span><span class="nt">incompatible_models</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-28-27" name="__codelineno-28-27" href="#__codelineno-28-27"></a>
+<a id="__codelineno-28-28" name="__codelineno-28-28" href="#__codelineno-28-28"></a><span class="nt">state</span><span class="p">:</span>
+<a id="__codelineno-28-29" name="__codelineno-28-29" href="#__codelineno-28-29"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">candidate | promoted | quarantined | deprecated</span>
+</code></pre></div>
+<h2 id="82-retrieval-pipeline">8.2 Retrieval pipeline</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Task
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a> ↓
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>cheap lexical / structural filter
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a> ↓
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>candidate skill IDs
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a> ↓
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>semantic reranking
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a> ↓
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>policy gate
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a> ↓
+<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>load selected skill bodies
+<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a> ↓
+<a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a>Context Compiler
+</code></pre></div>
+<p>Only selected skill content enters the model context.</p>
+<h2 id="83-compatibility-is-contextual">8.3 Compatibility is contextual</h2>
+<p>Evo-Harness indicates that a skill useful with one solver/model can fail
+to help another.</p>
+<p>Therefore the score should approximate:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>Utility(skill | model, harness, task_distribution)
+</code></pre></div>
+<p>rather than:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>Utility(skill)
+</code></pre></div>
+<p>This means the Skill Registry needs compatibility evidence, not a single
+global quality number.</p>
+<hr />
+<h1 id="9-finding-self-improvement-requires-a-mutation-taxonomy">9. Finding: Self-Improvement Requires a Mutation Taxonomy</h1>
+<p>AI4AI-Bench demonstrates why "the system improved itself" is
+scientifically insufficient.</p>
+<p>We must identify <strong>what changed</strong>.</p>
+<p>Recommended taxonomy:</p>
+<p>Class   Mutation surface           Example</p>
+<hr />
+<p>M0      Runtime configuration      token budget
+  M1      Runtime policy             retrieval top-k
+  M2      Procedural knowledge       debugging skill
+  M3      Harness composition        verification plugin
+  M4      Training configuration     curriculum
+  M5      Model parameters           RL/SFT
+  M6      Learning algorithm         loss/update rule
+  M7      Experimental methodology   experiment-generation policy</p>
+<p>This makes improvement attribution explicit.</p>
+<h2 id="91-promotion-strength-should-increase-with-mutation-power">9.1 Promotion strength should increase with mutation power</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>M0/M1
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>→ cheap benchmark
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>M2/M3
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>→ held-out benchmark + compatibility tests
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>M4/M5
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>→ isolated training + benchmark suite
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a>M6
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>→ hidden evaluator + clean replay from scratch
+<a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a>
+<a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a>M7
+<a id="__codelineno-32-14" name="__codelineno-32-14" href="#__codelineno-32-14"></a>→ independent evaluator and strict authority separation
+</code></pre></div>
+<p>The Meta-Harness should initially operate only on M1--M3.</p>
+<hr />
+<h1 id="10-meta-harness-as-experimental-control-system">10. Meta-Harness as Experimental Control System</h1>
+<p>The Meta-Harness should not be a privileged super-agent.</p>
+<p>It should be a composition of ordinary components operating under
+stricter experimental rules.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Evidence Extractor
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>      ↓
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>Candidate Generator
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>      ↓
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>Experiment Planner
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>      ↓
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>Candidate HarnessDefinition
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>      ↓
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a>Benchmark Runner
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a>      ↓
+<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a>External Evaluator
+<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a>      ↓
+<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a>Statistical Comparator
+<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a>      ↓
+<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a>Promotion Controller
+</code></pre></div>
+<h2 id="101-candidate-contract">10.1 Candidate contract</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="nt">candidate_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hc_0142</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="nt">base_harness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">H_0041</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="nt">mutation_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">M1</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="nt">changes</span><span class="p">:</span>
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="w">  </span><span class="nt">retrieval.top_k</span><span class="p">:</span>
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span>
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>
+<a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a><span class="nt">hypothesis</span><span class="p">:</span>
+<a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a><span class="w">  </span><span class="nt">success_rate_delta</span><span class="p">:</span><span class="w"> </span><span class="s">"&gt;=</span><span class="nv"> </span><span class="s">0"</span>
+<a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a><span class="w">  </span><span class="nt">token_delta</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;</span><span class="nv"> </span><span class="s">-8%"</span>
+<a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a><span class="w">  </span><span class="nt">latency_delta</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;</span><span class="nv"> </span><span class="s">-5%"</span>
+<a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a>
+<a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a><span class="nt">falsification</span><span class="p">:</span>
+<a id="__codelineno-34-17" name="__codelineno-34-17" href="#__codelineno-34-17"></a><span class="w">  </span><span class="nt">success_rate_delta</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;</span><span class="nv"> </span><span class="s">-1pp"</span>
+<a id="__codelineno-34-18" name="__codelineno-34-18" href="#__codelineno-34-18"></a>
+<a id="__codelineno-34-19" name="__codelineno-34-19" href="#__codelineno-34-19"></a><span class="nt">benchmark</span><span class="p">:</span>
+<a id="__codelineno-34-20" name="__codelineno-34-20" href="#__codelineno-34-20"></a><span class="w">  </span><span class="nt">suite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">coding_core_v3</span>
+<a id="__codelineno-34-21" name="__codelineno-34-21" href="#__codelineno-34-21"></a><span class="w">  </span><span class="nt">seed_set</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-34-22" name="__codelineno-34-22" href="#__codelineno-34-22"></a>
+<a id="__codelineno-34-23" name="__codelineno-34-23" href="#__codelineno-34-23"></a><span class="nt">rollback</span><span class="p">:</span>
+<a id="__codelineno-34-24" name="__codelineno-34-24" href="#__codelineno-34-24"></a><span class="w">  </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">H_0041</span>
+</code></pre></div>
+<p>The hypothesis exists <strong>before execution</strong>.</p>
+<p>This creates decision observability and prevents post-hoc
+rationalization.</p>
+<hr />
+<h1 id="11-evaluation-must-be-external-but-also-versioned">11. Evaluation Must Be External but Also Versioned</h1>
+<p>External evaluation prevents the candidate from declaring itself
+successful.</p>
+<p>However, benchmark evolution shows evaluators can also contain defects.</p>
+<p>Therefore:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>Evaluator != oracle
+</code></pre></div>
+<p>Every result must reference:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>evaluator_id
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>evaluator_version
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>test_suite_hash
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>environment_hash
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>resource_profile
+</code></pre></div>
+<p>If evaluator v3 fixes a benchmark defect, historical results remain
+interpretable.</p>
+<h2 id="111-outcome-algebra">11.1 Outcome algebra</h2>
+<p>Avoid Boolean-only results.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>PASS
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>FAIL
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>PARTIAL
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>INCONCLUSIVE
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>INFRA_FAILURE
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>SECURITY_FAILURE
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>BUDGET_EXHAUSTED
+</code></pre></div>
+<p>This prevents infrastructure failures from contaminating capability
+measurements.</p>
+<hr />
+<h1 id="12-verification-should-be-cost-aware">12. Verification Should Be Cost-Aware</h1>
+<p>Long-horizon benchmark observations indicate agents can waste
+substantial compute repeatedly executing full test suites.</p>
+<p>Verification should therefore be a scheduler.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>Patch
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a> ↓
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>Static checks
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a> ↓
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>Targeted unit tests
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a> ↓
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>Changed-area tests
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a> ↓
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>Integration tests
+<a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a> ↓
+<a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>Full suite
+</code></pre></div>
+<p>Escalation depends on:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>change scope
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>dependency graph
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>risk
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>previous failures
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>test cost
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>remaining budget
+</code></pre></div>
+<h2 id="121-verification-policy-interface">12.1 Verification policy interface</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">VerificationPolicy</span><span class="p">:</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">next_checks</span><span class="p">(</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>        <span class="n">change_set</span><span class="p">,</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>        <span class="n">evidence</span><span class="p">,</span>
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>        <span class="n">budget</span><span class="p">,</span>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>        <span class="n">dependency_graph</span><span class="p">,</span>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TestAction</span><span class="p">]:</span>
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>        <span class="o">...</span>
+</code></pre></div>
+<p>This remains replaceable policy, not kernel logic.</p>
+<hr />
+<h1 id="13-metrics-optimize-a-vector-not-a-leaderboard-number">13. Metrics: Optimize a Vector, Not a Leaderboard Number</h1>
+<p>Terminal-Bench economics show large cost differences among
+high-performing systems.</p>
+<p>The substrate should preserve raw metrics:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>task_success
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>partial_success
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>cost_usd
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>input_tokens
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>output_tokens
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>cached_tokens
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>wall_clock
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>model_latency
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>tool_latency
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a>tool_calls
+<a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a>failed_tool_calls
+<a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a>retries
+<a id="__codelineno-41-13" name="__codelineno-41-13" href="#__codelineno-41-13"></a>spawn_count
+<a id="__codelineno-41-14" name="__codelineno-41-14" href="#__codelineno-41-14"></a>peak_context
+<a id="__codelineno-41-15" name="__codelineno-41-15" href="#__codelineno-41-15"></a>compactions
+<a id="__codelineno-41-16" name="__codelineno-41-16" href="#__codelineno-41-16"></a>artifact_bytes
+<a id="__codelineno-41-17" name="__codelineno-41-17" href="#__codelineno-41-17"></a>peak_memory
+<a id="__codelineno-41-18" name="__codelineno-41-18" href="#__codelineno-41-18"></a>sandbox_startup
+<a id="__codelineno-41-19" name="__codelineno-41-19" href="#__codelineno-41-19"></a>tests_executed
+<a id="__codelineno-41-20" name="__codelineno-41-20" href="#__codelineno-41-20"></a>verification_time
+<a id="__codelineno-41-21" name="__codelineno-41-21" href="#__codelineno-41-21"></a>security_violations
+</code></pre></div>
+<p>Then compute profiles:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>MaxQuality
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>Balanced
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>LowCost
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>LowLatency
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>LocalOnly
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>HighAssurance
+</code></pre></div>
+<p>A Meta-Harness should search Pareto fronts rather than hard-code one
+universal weighted objective.</p>
+<hr />
+<h1 id="14-recommended-component-boundaries">14. Recommended Component Boundaries</h1>
+<h2 id="kernel">Kernel</h2>
+<p>Keep small:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>identity
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>authority
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>budget conservation
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>canonical event semantics
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>effect mediation
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>artifact identity
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a>plugin lifecycle
+</code></pre></div>
+<h2 id="runtime">Runtime</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>scheduler
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>model gateway
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>tool executor
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>sandbox
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>context compiler
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>trajectory recorder
+<a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>verification engine
+</code></pre></div>
+<h2 id="replaceable-policy">Replaceable policy</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>planning
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>retrieval
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a>search
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>AST strategy
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>compaction
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>memory
+<a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>skills
+<a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a>retry
+<a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a>model routing
+<a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a>verification policy
+<a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a>multi-agent topology
+</code></pre></div>
+<h2 id="meta-harness">Meta-Harness</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>evidence extraction
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>candidate generation
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>skill compilation
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>experiment planning
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>harness mutation
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a>comparison
+<a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a>promotion
+<a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a>rollback
+</code></pre></div>
+<h2 id="external-learning">External learning</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>trajectory conversion
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>prefix-tree construction
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>reward mapping
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>SFT / DPO / RL
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>model registry
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>training-algorithm experiments
+</code></pre></div>
+<hr />
+<h1 id="15-immediate-development-priorities">15. Immediate Development Priorities</h1>
+<h2 id="p0-measurement-spine">P0 --- Measurement spine</h2>
+<p>Implement first:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>HarnessDefinitionID
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>RunID
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>EventID
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>ArtifactID
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>ModelCall
+<a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>ToolCall
+<a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>BudgetDelta
+<a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>SpawnLineage
+<a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a>EvaluationResult
+</code></pre></div>
+<p><strong>Acceptance criterion:</strong> a completed run can be reconstructed
+sufficiently to explain every external effect and final evaluation.</p>
+<h2 id="p0-canonical-event-algebra">P0 --- Canonical event algebra</h2>
+<p>Provider adapters must not own durable semantics.</p>
+<p>Contract-test:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>canonical → provider → canonical
+</code></pre></div>
+<p>for representative tool-call and reasoning cases.</p>
+<h2 id="p0-model-gateway">P0 --- Model Gateway</h2>
+<p>Centralize:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>provider negotiation
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>request identity
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>cache metadata
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>cost
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>tokens
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>latency
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>retry
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>trajectory linkage
+</code></pre></div>
+<p>This also enables cheap mocked OpenRouter/provider replay during harness
+optimization.</p>
+<h2 id="p0-prefix-addressed-trajectories">P0 --- Prefix-addressed trajectories</h2>
+<p>Implement immutable branchable histories before multi-agent fan-out
+becomes deeply embedded.</p>
+<h2 id="p0-grounded-knowledge-promotion">P0 --- Grounded knowledge promotion</h2>
+<p>Implement candidate/quarantine/promoted states for memories and skills.</p>
+<p>No model-generated lesson should become globally authoritative without
+evaluation.</p>
+<hr />
+<h1 id="16-near-term-experimental-program">16. Near-Term Experimental Program</h1>
+<h2 id="experiment-a-grounded-adaptation">Experiment A --- Grounded adaptation</h2>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>A. no persistent adaptation
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>B. self-reflection persistence
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>C. externally grounded skill persistence
+</code></pre></div>
+<p>Use identical model, task distribution, and budgets.</p>
+<p>Primary hypothesis:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>Utility(C) &gt; Utility(A) &gt;= Utility(B)
+</code></pre></div>
+<p>This tests whether Evo-Harness's central result transfers to our
+substrate.</p>
+<h2 id="experiment-b-harness-effect">Experiment B --- Harness effect</h2>
+<p>Fixed model, fixed tasks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>H0 minimal shell/editor
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>H1 Vanguard base
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>H2 + structured repository retrieval
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>H3 + verification scheduler
+<a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>H4 + retrieval + verification
+</code></pre></div>
+<p>Measure the complete quality/cost vector.</p>
+<h2 id="experiment-c-skill-paging">Experiment C --- Skill paging</h2>
+<p>Build 100--500 procedural skills and compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>all resident
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>lexical retrieval
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>embedding retrieval
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>hybrid retrieval
+<a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a>explicit references
+</code></pre></div>
+<p>Measure activation precision, recall, tokens, latency, success, and
+interference.</p>
+<h2 id="experiment-d-spawn-scaling">Experiment D --- Spawn scaling</h2>
+<p>Run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>1 / 2 / 4 / 8 / 16 children
+</code></pre></div>
+<p>Measure physical storage and memory.</p>
+<p>Desired property:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>physical_growth ≈ unique_child_delta
+</code></pre></div>
+<p>not:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>physical_growth ≈ children × parent_history
+</code></pre></div>
+<h2 id="experiment-e-verification-economics">Experiment E --- Verification economics</h2>
+<p>Compare:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a>full suite always
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>targeted-first escalation
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>model-selected tests
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>dependency-derived tests
+</code></pre></div>
+<p>Optimize success per verification second and success per dollar.</p>
+<hr />
+<h1 id="17-what-not-to-build-yet">17. What Not to Build Yet</h1>
+<p>The research argues against prematurely implementing several attractive
+but weakly justified features.</p>
+<p>Do not make these core primitives yet:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>Swarm engine
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a>Debate engine
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>Reflection engine
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a>Global vector memory
+<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>Self-modifying kernel
+<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>Built-in RL trainer
+<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a>Automatic unrestricted skill promotion
+<a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a>Evaluator plugins controlled by candidate agents
+</code></pre></div>
+<p>They can all be expressed later through ordinary policies, plugins,
+artifacts, or external systems.</p>
+<p>The substrate should first prove:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a>correct execution
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>causal observability
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>resource conservation
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>replaceability
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>evaluation integrity
+</code></pre></div>
+<hr />
+<h1 id="18-development-sequence-toward-meta-cognition">18. Development Sequence Toward Meta-Cognition</h1>
+<p>A credible progression is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>Stage 1
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a>Reliable Coding Harness
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>        ↓
+<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a>Stage 2
+<a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a>Typed causal trajectories
+<a id="__codelineno-61-6" name="__codelineno-61-6" href="#__codelineno-61-6"></a>        ↓
+<a id="__codelineno-61-7" name="__codelineno-61-7" href="#__codelineno-61-7"></a>Stage 3
+<a id="__codelineno-61-8" name="__codelineno-61-8" href="#__codelineno-61-8"></a>Benchmark + external evaluation
+<a id="__codelineno-61-9" name="__codelineno-61-9" href="#__codelineno-61-9"></a>        ↓
+<a id="__codelineno-61-10" name="__codelineno-61-10" href="#__codelineno-61-10"></a>Stage 4
+<a id="__codelineno-61-11" name="__codelineno-61-11" href="#__codelineno-61-11"></a>Grounded memory / skill compilation
+<a id="__codelineno-61-12" name="__codelineno-61-12" href="#__codelineno-61-12"></a>        ↓
+<a id="__codelineno-61-13" name="__codelineno-61-13" href="#__codelineno-61-13"></a>Stage 5
+<a id="__codelineno-61-14" name="__codelineno-61-14" href="#__codelineno-61-14"></a>Automated harness experiments
+<a id="__codelineno-61-15" name="__codelineno-61-15" href="#__codelineno-61-15"></a>        ↓
+<a id="__codelineno-61-16" name="__codelineno-61-16" href="#__codelineno-61-16"></a>Stage 6
+<a id="__codelineno-61-17" name="__codelineno-61-17" href="#__codelineno-61-17"></a>Meta-Harness candidate optimization
+<a id="__codelineno-61-18" name="__codelineno-61-18" href="#__codelineno-61-18"></a>        ↓
+<a id="__codelineno-61-19" name="__codelineno-61-19" href="#__codelineno-61-19"></a>Stage 7
+<a id="__codelineno-61-20" name="__codelineno-61-20" href="#__codelineno-61-20"></a>Harness-native model post-training
+<a id="__codelineno-61-21" name="__codelineno-61-21" href="#__codelineno-61-21"></a>        ↓
+<a id="__codelineno-61-22" name="__codelineno-61-22" href="#__codelineno-61-22"></a>Stage 8
+<a id="__codelineno-61-23" name="__codelineno-61-23" href="#__codelineno-61-23"></a>Cross-harness policy learning
+<a id="__codelineno-61-24" name="__codelineno-61-24" href="#__codelineno-61-24"></a>        ↓
+<a id="__codelineno-61-25" name="__codelineno-61-25" href="#__codelineno-61-25"></a>Stage 9
+<a id="__codelineno-61-26" name="__codelineno-61-26" href="#__codelineno-61-26"></a>Training-algorithm experiments
+<a id="__codelineno-61-27" name="__codelineno-61-27" href="#__codelineno-61-27"></a>        ↓
+<a id="__codelineno-61-28" name="__codelineno-61-28" href="#__codelineno-61-28"></a>Stage 10
+<a id="__codelineno-61-29" name="__codelineno-61-29" href="#__codelineno-61-29"></a>Recursive scientific experimentation
+</code></pre></div>
+<p>The key property is continuity: each stage consumes abstractions already
+required by the previous stage.</p>
+<p>Meta-Cognition therefore does not require a separate monolithic
+"cognitive architecture." It can emerge as coordinated experimental
+control over:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>state
+<a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>knowledge
+<a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>policies
+<a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>models
+<a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>experiments
+<a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a>evaluations
+</code></pre></div>
+<hr />
+<h1 id="19-definition-of-self-improvement-for-the-project">19. Definition of Self-Improvement for the Project</h1>
+<p>A useful formal definition is:</p>
+<blockquote>
+<p>A system self-improves when evidence generated by its executions
+causes a versioned change to a future decision-making component, and
+that change is independently demonstrated to improve an explicit
+objective under controlled evaluation.</p>
+</blockquote>
+<p>This excludes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>longer prompts
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>unverified reflection
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a>session-local adaptation
+<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a>model claiming it learned
+<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a>manual cherry-picking
+<a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a>benchmark leakage
+</code></pre></div>
+<p>It includes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>promoted skills
+<a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>better retrieval policies
+<a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>better verification policies
+<a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>new harness compositions
+<a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>post-trained models
+<a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>improved training algorithms
+</code></pre></div>
+<p>provided the improvement is externally measured.</p>
+<hr />
+<h1 id="20-core-invariants">20. Core Invariants</h1>
+<p>The following invariants should be treated as architecture-level
+constraints.</p>
+<h3 id="invariant-1-authority-is-deterministic">Invariant 1 --- Authority is deterministic</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>model proposal != permission
+</code></pre></div>
+<h3 id="invariant-2-evidence-is-external-to-reflection">Invariant 2 --- Evidence is external to reflection</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>model belief != evaluator evidence
+</code></pre></div>
+<h3 id="invariant-3-every-adaptation-is-versioned">Invariant 3 --- Every adaptation is versioned</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>mutation → new artifact
+</code></pre></div>
+<p>Never silently overwrite the incumbent.</p>
+<h3 id="invariant-4-every-run-is-attributable">Invariant 4 --- Every run is attributable</h3>
+<p>The system must reconstruct:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>model + harness + policy + tools + environment + evaluator
+</code></pre></div>
+<h3 id="invariant-5-child-authority-is-attenuated">Invariant 5 --- Child authority is attenuated</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>Capabilities(child) ⊆ Capabilities(parent)
+</code></pre></div>
+<h3 id="invariant-6-resource-budgets-are-conserved">Invariant 6 --- Resource budgets are conserved</h3>
+<p>A child cannot create budget unavailable to the parent.</p>
+<h3 id="invariant-7-provider-representation-is-not-canonical-state">Invariant 7 --- Provider representation is not canonical state</h3>
+<p>Adapters serialize semantics; they do not define them.</p>
+<h3 id="invariant-8-promotion-is-independent-from-candidate-generation">Invariant 8 --- Promotion is independent from candidate generation</h3>
+<p>The component proposing an improvement cannot unilaterally certify it.</p>
+<hr />
+<h1 id="21-final-architecture">21. Final Architecture</h1>
+<p>The 23 August research does not justify expanding the trusted kernel. It
+justifies making the surrounding system more experimentally powerful.</p>
+<p>The target structure is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>                    ┌──────────────────────┐
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a>                    │ External Trainer     │
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a>                    │ SFT / DPO / RL / RSI │
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a>                    └──────────▲───────────┘
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a>                               │
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a>                       trajectory export
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a>                               │
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a>┌────────────────────────────────────────────────────┐
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a>│ META-HARNESS                                       │
+<a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a>│                                                    │
+<a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a>│ Evidence → Candidate → Experiment → Compare        │
+<a id="__codelineno-70-12" name="__codelineno-70-12" href="#__codelineno-70-12"></a>│                         ↓                          │
+<a id="__codelineno-70-13" name="__codelineno-70-13" href="#__codelineno-70-13"></a>│                   Promote / Reject                 │
+<a id="__codelineno-70-14" name="__codelineno-70-14" href="#__codelineno-70-14"></a>└───────────────────────┬────────────────────────────┘
+<a id="__codelineno-70-15" name="__codelineno-70-15" href="#__codelineno-70-15"></a>                        │ versioned policies
+<a id="__codelineno-70-16" name="__codelineno-70-16" href="#__codelineno-70-16"></a>┌───────────────────────▼────────────────────────────┐
+<a id="__codelineno-70-17" name="__codelineno-70-17" href="#__codelineno-70-17"></a>│ HARNESS / POLICY LAYER                             │
+<a id="__codelineno-70-18" name="__codelineno-70-18" href="#__codelineno-70-18"></a>│ retrieval · skills · memory · planning · verify    │
+<a id="__codelineno-70-19" name="__codelineno-70-19" href="#__codelineno-70-19"></a>│ routing · compaction · orchestration               │
+<a id="__codelineno-70-20" name="__codelineno-70-20" href="#__codelineno-70-20"></a>└───────────────────────┬────────────────────────────┘
+<a id="__codelineno-70-21" name="__codelineno-70-21" href="#__codelineno-70-21"></a>                        │
+<a id="__codelineno-70-22" name="__codelineno-70-22" href="#__codelineno-70-22"></a>┌───────────────────────▼────────────────────────────┐
+<a id="__codelineno-70-23" name="__codelineno-70-23" href="#__codelineno-70-23"></a>│ RUNTIME                                            │
+<a id="__codelineno-70-24" name="__codelineno-70-24" href="#__codelineno-70-24"></a>│ scheduler · gateway · tools · sandbox · context    │
+<a id="__codelineno-70-25" name="__codelineno-70-25" href="#__codelineno-70-25"></a>│ trajectories · verification                        │
+<a id="__codelineno-70-26" name="__codelineno-70-26" href="#__codelineno-70-26"></a>└───────────────────────┬────────────────────────────┘
+<a id="__codelineno-70-27" name="__codelineno-70-27" href="#__codelineno-70-27"></a>                        │
+<a id="__codelineno-70-28" name="__codelineno-70-28" href="#__codelineno-70-28"></a>┌───────────────────────▼────────────────────────────┐
+<a id="__codelineno-70-29" name="__codelineno-70-29" href="#__codelineno-70-29"></a>│ KERNEL                                             │
+<a id="__codelineno-70-30" name="__codelineno-70-30" href="#__codelineno-70-30"></a>│ identity · authority · budgets · events · effects  │
+<a id="__codelineno-70-31" name="__codelineno-70-31" href="#__codelineno-70-31"></a>│ artifacts · lifecycle                              │
+<a id="__codelineno-70-32" name="__codelineno-70-32" href="#__codelineno-70-32"></a>└────────────────────────────────────────────────────┘
+</code></pre></div>
+<p>The scientific loop becomes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>Build
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>→ Execute
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>→ Observe
+<a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a>→ Measure
+<a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>→ Hypothesize
+<a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a>→ Mutate
+<a id="__codelineno-71-7" name="__codelineno-71-7" href="#__codelineno-71-7"></a>→ Re-run
+<a id="__codelineno-71-8" name="__codelineno-71-8" href="#__codelineno-71-8"></a>→ Falsify
+<a id="__codelineno-71-9" name="__codelineno-71-9" href="#__codelineno-71-9"></a>→ Promote
+<a id="__codelineno-71-10" name="__codelineno-71-10" href="#__codelineno-71-10"></a>→ Generalize
+</code></pre></div>
+<p>That loop is the most important capability to construct. Once it exists,
+memory, skills, multi-agent policies, model training, and eventually
+algorithmic self-improvement become different experimental surfaces over
+the same substrate rather than independent architectures.</p>
+<hr />
+<h1 id="22-decision-summary">22. Decision Summary</h1>
+<p>For the next implementation cycle:</p>
+<ol>
+<li><strong>Build causal measurement before sophisticated cognition.</strong></li>
+<li><strong>Make Model Gateway a stable first-class seam.</strong></li>
+<li><strong>Store histories as immutable branchable trajectory graphs.</strong></li>
+<li><strong>Separate canonical events from provider serialization.</strong></li>
+<li><strong>Treat reflection as hypothesis, never evidence.</strong></li>
+<li><strong>Require external grounding before promoting memory or skills.</strong></li>
+<li><strong>Separate SkillArtifact from SkillActivationPolicy.</strong></li>
+<li><strong>Introduce explicit mutation classes.</strong></li>
+<li><strong>Keep Meta-Harness outside the trusted kernel.</strong></li>
+<li><strong>Keep model training external but make trajectories
+    training-ready.</strong></li>
+<li><strong>Version evaluators and benchmark environments.</strong></li>
+<li><strong>Optimize quality, cost, latency, tokens, and verification
+    jointly.</strong></li>
+<li><strong>Delay unrestricted self-modification until controlled lower-level
+    adaptation is empirically reliable.</strong></li>
+</ol>
+<p>The near-term objective is therefore not "build Meta-Cognition." It is
+to build the <strong>causal, evidentiary and experimental substrate from which
+Meta-Cognition can be developed without sacrificing reproducibility,
+authority boundaries, or scientific validity.</strong></p>
+<hr />
+<h2 id="research-basis">Research Basis</h2>
+<p>This technical interpretation is based primarily on the 23 August
+research corpus covering:</p>
+<ul>
+<li><strong>AI4AI-Bench: Benchmarking LLM Agents in Algorithmic Design for
+    Recursive Self-Improvement</strong> --- 2026.</li>
+<li><strong>ClawGym II: Exploring Black-Box RL on Agent Harness</strong> --- 2026.</li>
+<li><strong>Evo-Harness: Context-to-Harness Skill Compilation for
+    Self-Evolving Agents</strong> --- 2026.</li>
+<li><strong>@skills: Attention Is All You Have</strong> --- 2026.</li>
+<li><strong>Demystifying Agent Skills: Why They Work---Until They Don't</strong> ---
+    2026.</li>
+<li><strong>DeepSeek Harness</strong> architecture and current adapter-level field
+    reports.</li>
+<li><strong>Terminal-Bench 2.1</strong> and <strong>Terminal-Bench Challenges</strong>.</li>
+<li>Supporting continuity from <strong>Agentic Harness Engineering</strong>,
+    <strong>LEGO-RL</strong>, <strong>Agent Lightning v1.0</strong>, and <strong>EvoHarness-RL</strong>.</li>
+</ul>
+<p>The quantitative values in this document are paper-author-reported
+unless explicitly originating from an audited benchmark. They should be
+treated as evidence for architectural hypotheses, not as universal
+performance guarantees.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

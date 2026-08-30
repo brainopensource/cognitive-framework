@@ -1,0 +1,4991 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AETHER Frontend Masterplan - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-frontend-masterplan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AETHER Frontend Masterplan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#typescript-cli-tui-observatory-app-and-agent-development-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TypeScript CLI, TUI, Observatory App and Agent Development Studio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0-executive-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Executive decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-product-thesis-and-success-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Product thesis and success definition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Product thesis and success definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-product-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Product thesis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-target-user-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Target user modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-product-level-acceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Product-level acceptance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-constitutional-architectural-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Constitutional architectural boundaries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Constitutional architectural boundaries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-backend-authority-retained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Backend authority retained
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-frontend-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Frontend responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-explicit-refusals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Explicit refusals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-product-surfaces-and-information-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Product surfaces and information architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Product surfaces and information architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-unified-application-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Unified application model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-primary-navigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Primary navigation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-progressive-disclosure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Progressive disclosure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-typescript-workspace-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. TypeScript workspace architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. TypeScript workspace architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-recommended-repository-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Recommended repository shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-dependency-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Dependency rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-technology-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Technology decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-backend-client-gateway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Backend client gateway
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Backend client gateway">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-gateway-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Gateway resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-command-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Command envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-command-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Command response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-query-envelope-and-pagination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Query envelope and pagination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-event-streaming-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Event streaming protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-error-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Error contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-contract-generation-and-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Contract generation and compatibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Contract generation and compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-single-schema-authority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Single schema authority
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-build-time-drift-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Build-time drift gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-compatibility-negotiation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Compatibility negotiation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-shared-typescript-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Shared TypeScript SDK
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Shared TypeScript SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-public-sdk-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Public SDK boundary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-run-lifecycle-pseudocode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Run lifecycle pseudocode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-client-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Client caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-cli-masterplan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. CLI masterplan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. CLI masterplan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-cli-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 CLI principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-command-taxonomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Command taxonomy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-cli-output-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 CLI output contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-external-product-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 External product validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-tui-masterplan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. TUI masterplan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. TUI masterplan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-tui-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 TUI views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-interaction-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Interaction rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-studio-app-masterplan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Studio App masterplan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Studio App masterplan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-app-shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 App shell
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-run-console" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Run Console
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-execution-observatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Execution Observatory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 Execution Observatory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#timeline-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timeline view
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#causal-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causal graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-inspector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime inspector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-forensic-inspector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Event forensic inspector
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-architecture-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Architecture Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-context-and-memory-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Context and Memory Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#106-artifact-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.6 Artifact Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#107-lineage-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.7 Lineage Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#108-workflow-and-topology-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.8 Workflow and Topology Studio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#109-agent-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.9 Agent Builder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1010-agent-catalog-and-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.10 Agent Catalog and use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1011-experiment-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.11 Experiment Lab
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1012-metacognition-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.12 Metacognition view
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1013-skills-and-self-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.13 Skills and self-improvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1014-feature-development-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.14 Feature Development workspace
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-uiux-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. UI/UX system
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. UI/UX system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Design principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-semantic-visual-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Semantic visual language
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-core-component-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Core component inventory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-accessibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Accessibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-state-management-and-frontend-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. State management and frontend projections
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. State management and frontend projections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-state-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 State classes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-projection-update-pseudocode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Projection update pseudocode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-graph-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Graph normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-security-and-capability-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Security and capability UX
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Security and capability UX">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Threat model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-security-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Security controls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-approval-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Approval UX
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-observability-diagnostics-and-bug-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Observability, diagnostics and bug discovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Observability, diagnostics and bug discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-required-observability-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Required observability data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-automated-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 Automated diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-run-diff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Run diff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Testing strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Testing strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-test-pyramid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 Test pyramid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152-contract-testkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.2 Contract testkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153-ui-replay-equivalence-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.3 UI replay equivalence gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#154-clean-room-product-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.4 Clean-room product gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-performance-and-scalability-budgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Performance and scalability budgets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Performance and scalability budgets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-frontend-budgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 Frontend budgets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-backpressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 Backpressure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-packaging-and-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Packaging and deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="17. Packaging and deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#171-deliverables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17.1 Deliverables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#172-local-launch-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17.2 Local launch model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#173-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17.3 Versioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-development-workflow-and-engineering-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Development workflow and engineering standards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Development workflow and engineering standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#181-definition-of-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.1 Definition of ready
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#182-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.2 Definition of done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#183-pull-request-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.3 Pull-request boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#184-documentation-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18.4 Documentation set
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-delivery-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Delivery roadmap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="19. Delivery roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-f0-contract-and-gateway-foundation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F0 — Contract and gateway foundation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f1-product-cli-and-m-4-observatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F1 — Product CLI and M-4 Observatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f2-tui-and-m-5a-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F2 — TUI and M-5a projections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f3-agent-builder-and-m-6-lineage-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F3 — Agent Builder and M-6 lineage operation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f4-studio-observatory-and-m-65" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F4 — Studio Observatory and M-6.5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f5-workflow-studio-and-m-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F5 — Workflow Studio and M-7
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f6-memory-skills-and-m-8-product-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F6 — Memory, Skills and M-8 product gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-f7-hardening-after-m-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase F7 — Hardening after M-8
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-work-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. Work packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#21-canonical-user-journeys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21. Canonical user journeys
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="21. Canonical user journeys">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#211-create-a-new-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21.1 Create a new agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212-use-an-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21.2 Use an agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#213-improve-aether" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21.3 Improve AETHER
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#214-propose-and-promote-a-skill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21.4 Propose and promote a skill
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#215-mixed-coding-and-research-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        21.5 Mixed coding and research agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22-product-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22. Product metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23-risks-and-mitigations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        23. Risks and mitigations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24-final-acceptance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24. Final acceptance checklist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="24. Final acceptance checklist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-product" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent product
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observatory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observatory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflows-and-experimentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflows and experimentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#self-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-improvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-final-directive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        25. Final directive
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-frontend-masterplan">AETHER Frontend Masterplan</h1>
+<h2 id="typescript-cli-tui-observatory-app-and-agent-development-studio">TypeScript CLI, TUI, Observatory App and Agent Development Studio</h2>
+<p><strong>Status:</strong> Proposed implementation authority<br />
+<strong>Target:</strong> AETHER v0.7 Higgs through the M-8 MVP, with bounded compatibility for M-9/M-10<br />
+<strong>Audience:</strong> Principal/Staff engineers, senior frontend/backend engineers, product engineering, UX, QA, AI systems research<br />
+<strong>Normative language:</strong> <code>MUST</code>, <code>MUST NOT</code>, <code>SHOULD</code>, <code>MAY</code> carry their RFC 2119 meanings<br />
+<strong>Primary outcome:</strong> a complete product surface for creating, running, observing, validating and improving AETHER agents without creating a second runtime, ledger or source of truth.</p>
+<hr />
+<h2 id="0-executive-decision">0. Executive decision</h2>
+<p>AETHER needs one coherent product system with three TypeScript surfaces:</p>
+<ol>
+<li><strong>CLI</strong> — automation, scripting, packaging, CI and headless use.</li>
+<li><strong>TUI</strong> — low-friction interactive agent operation and live observability in a terminal.</li>
+<li><strong>App / Studio</strong> — visual agent construction, workflow inspection, scientific comparison, debugging and controlled promotion of improvements.</li>
+</ol>
+<p>All three surfaces MUST consume the same generated contracts and the same TypeScript SDK. They are clients of the existing AETHER Runtime; none may implement agent loops, capability authorization, event authority, scheduling truth, ledger semantics or metacognitive authority locally.</p>
+<p>The frontend is not a decorative dashboard. It is simultaneously:</p>
+<ul>
+<li>a product interface for coding, research and mixed-agent workloads;</li>
+<li>an observability instrument for causal trajectories;</li>
+<li>a development environment for packs, plugins, policies, skills and topologies;</li>
+<li>an experimental workbench for replay, comparison, ablation and falsification;</li>
+<li>an operations console for capabilities, budgets, failures and recovery;</li>
+<li>a controlled interface for proposing, evaluating, promoting and rolling back improvements.</li>
+</ul>
+<p>The architectural rule is:</p>
+<blockquote>
+<p>The backend owns facts and admissibility; the frontend owns interaction, visualization and user intent.</p>
+</blockquote>
+<p>The first useful vertical slice MUST exist before the complete visual studio: start a coding run, stream events, show trajectory state, inspect artifacts and return a verified result. Each later milestone enriches that slice rather than creating a new product.</p>
+<hr />
+<h2 id="1-product-thesis-and-success-definition">1. Product thesis and success definition</h2>
+<h3 id="11-product-thesis">1.1 Product thesis</h3>
+<p>AETHER becomes valuable when a user can do five things without reading its source code:</p>
+<ol>
+<li>describe or select an agent composition;</li>
+<li>grant bounded capabilities and budgets;</li>
+<li>run a real task against an isolated workspace;</li>
+<li>understand what happened through causal evidence;</li>
+<li>compare and improve the composition without corrupting the evidence.</li>
+</ol>
+<p>The product must make the distinction between <strong>composition</strong> and <strong>trajectory</strong> explicit. Composition defines the available policies, plugins, tools, models, limits, topologies and context providers. Trajectory records which possibilities were actually used, in what causal order, with which artifacts, costs and outcomes.</p>
+<h3 id="12-target-user-modes">1.2 Target user modes</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Primary user</th>
+<th>Main job</th>
+<th>Default surface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Operator</td>
+<td>developer/researcher</td>
+<td>run an existing agent safely</td>
+<td>CLI or TUI</td>
+</tr>
+<tr>
+<td>Builder</td>
+<td>agent engineer</td>
+<td>create packs, policies, tools and topologies</td>
+<td>Studio</td>
+</tr>
+<tr>
+<td>Investigator</td>
+<td>AETHER developer</td>
+<td>debug runtime, events, projections and recovery</td>
+<td>Observatory</td>
+</tr>
+<tr>
+<td>Scientist</td>
+<td>evaluator/researcher</td>
+<td>design trials, compare variants and falsify claims</td>
+<td>Experiment Lab</td>
+</tr>
+<tr>
+<td>Promoter</td>
+<td>authorized reviewer</td>
+<td>approve or roll back compositions/skills</td>
+<td>Governance view</td>
+</tr>
+<tr>
+<td>Integrator</td>
+<td>product/CI engineer</td>
+<td>embed AETHER through stable contracts</td>
+<td>CLI and SDK</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-product-level-acceptance">1.3 Product-level acceptance</h3>
+<p>The frontend program is complete only when:</p>
+<ul>
+<li>a clean external repository can install or invoke the AETHER client without importing repository internals;</li>
+<li>the same agent can be run from CLI, TUI and App with semantically equivalent requests;</li>
+<li>all surfaces display event-derived state and never maintain an independent truth;</li>
+<li>coding, research and at least one mixed-agent composition execute through the same Runtime;</li>
+<li>a run can be inspected, replayed, compared, exported and independently evaluated;</li>
+<li>a new agent can be assembled from declared components without changing Kernel code;</li>
+<li>errors, authorization failures, missing evidence and partial recovery are visible rather than hidden;</li>
+<li>an improvement proposal cannot be promoted from the ordinary run UI without evaluation evidence and promoter authority;</li>
+<li>held-out validation demonstrates product utility outside the AETHER repository.</li>
+</ul>
+<hr />
+<h2 id="2-constitutional-architectural-boundaries">2. Constitutional architectural boundaries</h2>
+<h3 id="21-backend-authority-retained">2.1 Backend authority retained</h3>
+<p>The frontend MUST preserve the existing dependency and authority lattice:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>domain &lt;- ports &lt;- kernel &lt;- agency &lt;- runtime -&gt; adapters
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                                      ^
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                                      |
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                                client gateway
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                      |
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                      TypeScript SDK / CLI / TUI / App
+</code></pre></div>
+<p>The backend remains authoritative for:</p>
+<ul>
+<li>append-only causal events;</li>
+<li>content-addressed artifacts;</li>
+<li>capability grants, attenuation and effect authorization;</li>
+<li>execution scopes, budgets and lineage identity;</li>
+<li>composition freezing and activation;</li>
+<li>effect dispatch, settlement, recovery and idempotency;</li>
+<li>deterministic projections such as <code>AgentView</code>;</li>
+<li>topology lowering and scheduler mechanism;</li>
+<li>memory access enforcement and promotion authority;</li>
+<li>evidence production and milestone gates.</li>
+</ul>
+<h3 id="22-frontend-responsibilities">2.2 Frontend responsibilities</h3>
+<p>The frontend owns:</p>
+<ul>
+<li>user intent capture and validation before submission;</li>
+<li>accessible representation of compositions and schemas;</li>
+<li>event-stream consumption and causal visualization;</li>
+<li>local interaction state such as panels, filters and drafts;</li>
+<li>optimistic UX only for non-authoritative drafts;</li>
+<li>artifact preview and safe diff rendering;</li>
+<li>agent, topology, experiment and policy editors;</li>
+<li>request formation for authorized backend commands;</li>
+<li>comparison of backend-produced projections and evidence;</li>
+<li>export, reports, links and navigation.</li>
+</ul>
+<h3 id="23-explicit-refusals">2.3 Explicit refusals</h3>
+<p>The frontend MUST NOT:</p>
+<ul>
+<li>invent, rewrite or reorder ledger facts;</li>
+<li>infer completion when the backend reports an open gate;</li>
+<li>execute tools directly to bypass Kernel dispatch;</li>
+<li>store hidden prompts, memory or skills outside declared backend stores;</li>
+<li>own a competing workflow engine or scheduler;</li>
+<li>model metacognition as a privileged UI-only agent;</li>
+<li>treat telemetry timestamps as causal ordering;</li>
+<li>mutate a historical event or artifact;</li>
+<li>grant itself capabilities;</li>
+<li>promote a skill or composition using client-side scores alone;</li>
+<li>use a visual graph as execution truth; graphs are projections or configuration drafts;</li>
+<li>silently retry non-idempotent commands;</li>
+<li>couple coding-specific UI ontology to generic runtime contracts.</li>
+</ul>
+<hr />
+<h2 id="3-product-surfaces-and-information-architecture">3. Product surfaces and information architecture</h2>
+<h3 id="31-unified-application-model">3.1 Unified application model</h3>
+<p>The product family SHOULD be presented as <strong>AETHER Studio</strong>, containing modes rather than separate conceptual products:</p>
+<ul>
+<li><strong>Run</strong> — task execution and operator console.</li>
+<li><strong>Agents</strong> — catalog, creation, composition and versioning.</li>
+<li><strong>Observe</strong> — events, trajectory, lineages, artifacts and runtime state.</li>
+<li><strong>Workflows</strong> — topology editor and realized causal graph comparison.</li>
+<li><strong>Context</strong> — selected context, compaction, provenance, retrieval and memory.</li>
+<li><strong>Skills</strong> — candidates, active versions, evidence, promotion and rollback.</li>
+<li><strong>Experiments</strong> — paired runs, ablations, held-out sets and reports.</li>
+<li><strong>System</strong> — plugins, adapters, providers, schemas, capabilities and health.</li>
+<li><strong>Development</strong> — contract tests, replay, fixtures, diagnostics and links to source/docs.</li>
+</ul>
+<h3 id="32-primary-navigation">3.2 Primary navigation</h3>
+<p>The main navigation MUST be task-oriented and stable:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Question answered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runs</td>
+<td>What is running, completed, blocked or failed?</td>
+</tr>
+<tr>
+<td>Agents</td>
+<td>What can I run or create?</td>
+</tr>
+<tr>
+<td>Studio</td>
+<td>How is this composition assembled?</td>
+</tr>
+<tr>
+<td>Observatory</td>
+<td>What happened internally and why?</td>
+</tr>
+<tr>
+<td>Experiments</td>
+<td>Is variant B actually better than A?</td>
+</tr>
+<tr>
+<td>Skills &amp; Memory</td>
+<td>What knowledge is available, used, proposed or promoted?</td>
+</tr>
+<tr>
+<td>Artifacts</td>
+<td>What durable outputs exist and where did they come from?</td>
+</tr>
+<tr>
+<td>Governance</td>
+<td>Who authorized, evaluated or promoted this change?</td>
+</tr>
+<tr>
+<td>System</td>
+<td>Are Runtime, providers, stores and plugins healthy?</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-progressive-disclosure">3.3 Progressive disclosure</h3>
+<p>The UI MUST support three information depths:</p>
+<ul>
+<li><strong>Essential:</strong> task, current phase, outcome, cost, elapsed time and blocking action.</li>
+<li><strong>Technical:</strong> model calls, tools, context, lineages, artifacts, failures and projections.</li>
+<li><strong>Forensic:</strong> raw event envelope, digests, causation/correlation, writer role, grant, policy version, schema and evidence references.</li>
+</ul>
+<p>The default user view must remain usable. Forensic data must be one click away and copyable, not continuously dumped into the main interface.</p>
+<hr />
+<h2 id="4-typescript-workspace-architecture">4. TypeScript workspace architecture</h2>
+<h3 id="41-recommended-repository-shape">4.1 Recommended repository shape</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>frontend/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  apps/
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    cli/                    # headless commands and CI surface
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    tui/                    # interactive terminal client
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    studio/                 # React web/local application
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    desktop/                # optional thin desktop shell; no domain logic
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  packages/
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    contracts/              # generated wire types and schema validators
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    sdk/                    # transport-independent AETHER client
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    command-model/          # typed command builders and idempotency
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    projection-model/       # read models consumed by all clients
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    graph-model/            # causal/topology graph normalization
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    experiment-model/       # trial definitions and statistical summaries
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    ui-system/              # tokens, accessibility and shared components
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    observability-ui/       # timeline, event, lineage and artifact components
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    agent-builder/          # manifest/topology/policy editing components
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    testkit/                # fixtures, fake gateway, contract/golden helpers
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>  tooling/
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    codegen/                # JSON Schema/OpenAPI/event catalog generation
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    contract-check/         # drift detection
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>  docs/
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    frontend/               # UX contracts, ADRs, runbooks
+</code></pre></div>
+<h3 id="42-dependency-rules">4.2 Dependency rules</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>apps -&gt; feature packages -&gt; sdk/projection-model -&gt; contracts
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                    graph-model -&gt; contracts
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                    ui-system   -&gt; no domain imports
+</code></pre></div>
+<p>Rules:</p>
+<ul>
+<li><code>contracts</code> MUST NOT import any application package.</li>
+<li><code>sdk</code> MUST NOT import React, terminal libraries or app state.</li>
+<li><code>projection-model</code> MUST contain no network code.</li>
+<li>UI packages MUST consume stable view models, not raw backend internals.</li>
+<li>applications MAY compose packages but MUST NOT duplicate domain contracts.</li>
+<li>generated code MUST be committed or deterministically generated in CI.</li>
+<li>handwritten wire types that duplicate backend schemas are forbidden.</li>
+</ul>
+<h3 id="43-technology-decision">4.3 Technology decision</h3>
+<p>The default implementation SHOULD use:</p>
+<ul>
+<li>TypeScript in strict mode;</li>
+<li>a workspace package manager with lockfile and reproducible builds;</li>
+<li>Node.js for CLI, TUI and local integration;</li>
+<li>React for the visual App;</li>
+<li>a lightweight local web deployment as the first App target;</li>
+<li>an optional desktop shell only after the web/local application is stable;</li>
+<li>a terminal rendering library with React-style composition for the TUI;</li>
+<li>JSON Schema-derived runtime validation;</li>
+<li>Server-Sent Events for ordered one-way run updates initially;</li>
+<li>WebSocket only for demonstrably bidirectional interactive flows that SSE plus commands cannot serve;</li>
+<li>indexed local cache only for rebuildable frontend projections and offline browsing.</li>
+</ul>
+<p>The desktop wrapper MUST remain replaceable. No backend authority or AETHER semantics may be placed in Electron-, Tauri- or browser-specific code.</p>
+<hr />
+<h2 id="5-backend-client-gateway">5. Backend client gateway</h2>
+<h3 id="51-purpose">5.1 Purpose</h3>
+<p>The existing Python Runtime needs a thin <strong>Client Gateway</strong> above the public composition path. It adapts frontend requests to existing application services; it does not become a new orchestrator.</p>
+<p>Gateway responsibilities:</p>
+<ul>
+<li>authenticate the local or remote client;</li>
+<li>validate commands against versioned schemas;</li>
+<li>attach request and idempotency identities;</li>
+<li>invoke the single canonical Runtime composition/activation path;</li>
+<li>expose read-only projections and artifacts under capability checks;</li>
+<li>stream committed events and correlated telemetry;</li>
+<li>return explicit accepted/rejected/conflict responses;</li>
+<li>negotiate contract versions;</li>
+<li>expose health and compatibility information.</li>
+</ul>
+<h3 id="52-gateway-resources">5.2 Gateway resources</h3>
+<p>The minimum resource model is:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Commands</th>
+<th>Queries/streams</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composition</td>
+<td>draft, validate, freeze, activate</td>
+<td>list, get, diff, compatibility</td>
+</tr>
+<tr>
+<td>Agent definition</td>
+<td>create draft, validate, version</td>
+<td>catalog, detail, dependencies</td>
+</tr>
+<tr>
+<td>Run</td>
+<td>start, pause-request, resume, cancel</td>
+<td>status, projection, event stream</td>
+</tr>
+<tr>
+<td>Lineage</td>
+<td>spawn request through run authority</td>
+<td>tree, scope, budget, projection</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>create through authorized service</td>
+<td>metadata, verified content, refs</td>
+</tr>
+<tr>
+<td>Topology</td>
+<td>validate, freeze</td>
+<td>graph, lowered plan, realized graph</td>
+</tr>
+<tr>
+<td>Experiment</td>
+<td>create, launch, stop</td>
+<td>trials, metrics, evidence, report</td>
+</tr>
+<tr>
+<td>Skill candidate</td>
+<td>propose, evaluate request</td>
+<td>lifecycle, evidence, composition impact</td>
+</tr>
+<tr>
+<td>Promotion</td>
+<td>request</td>
+<td>status, attestation, rollback state</td>
+</tr>
+<tr>
+<td>System</td>
+<td>enable/disable declared plugin through config workflow</td>
+<td>health, capabilities, schemas</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-command-envelope">5.3 Command envelope</h3>
+<p>All mutating client requests MUST use a versioned command envelope:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kr">type</span><span class="w"> </span><span class="nx">CommandEnvelope</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Readonly</span><span class="o">&lt;</span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nx">schemaVersion</span><span class="o">:</span><span class="w"> </span><span class="s2">"aether.command/1"</span><span class="p">;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nx">commandId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nx">idempotencyKey</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nx">commandType</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nx">requestedAt</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nx">actor</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">principalId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">sessionId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">projectId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">runId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">lineageId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nx">expectedVersion?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nx">capabilityReference?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="kt">T</span><span class="p">;</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<p>Semantics:</p>
+<ul>
+<li><code>commandId</code> identifies the request fact from the client perspective.</li>
+<li><code>idempotencyKey</code> is mandatory for retryable submission.</li>
+<li><code>expectedVersion</code> enables compare-and-swap for mutable configuration drafts and promotion pointers.</li>
+<li>the gateway MUST return rejection if the client contract is unsupported.</li>
+<li>acceptance means the command entered backend processing; it does not mean the requested outcome occurred.</li>
+</ul>
+<h3 id="54-command-response">5.4 Command response</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kr">type</span><span class="w"> </span><span class="nx">CommandResult</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">"accepted"</span><span class="p">;</span><span class="w"> </span><span class="nx">commandId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">operationRef</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">streamCursor?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">"rejected"</span><span class="p">;</span><span class="w"> </span><span class="nx">commandId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">AetherProblem</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s2">"conflict"</span><span class="p">;</span><span class="w"> </span><span class="nx">commandId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">currentVersion</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">AetherProblem</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+<h3 id="55-query-envelope-and-pagination">5.5 Query envelope and pagination</h3>
+<p>Queries MUST return:</p>
+<ul>
+<li><code>schemaVersion</code>;</li>
+<li>resource identity and version;</li>
+<li>projection coverage cursor;</li>
+<li>reducer/schema pins when relevant;</li>
+<li>page cursor rather than page number for ordered event collections;</li>
+<li>explicit completeness (<code>complete</code>, <code>partial</code>, <code>degraded</code>);</li>
+<li>warnings for missing artifacts, invalid checkpoints or unavailable telemetry.</li>
+</ul>
+<h3 id="56-event-streaming-protocol">5.6 Event streaming protocol</h3>
+<p>The client stream MUST distinguish durable facts from operational telemetry:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kr">type</span><span class="w"> </span><span class="nx">StreamMessage</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="s2">"event"</span><span class="p">;</span><span class="w"> </span><span class="nx">cursor</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">EventEnvelope</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="s2">"projection"</span><span class="p">;</span><span class="w"> </span><span class="nx">cursor</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">projection</span><span class="o">:</span><span class="w"> </span><span class="kt">ProjectionDelta</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="s2">"telemetry"</span><span class="p">;</span><span class="w"> </span><span class="nx">cursor</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">sample</span><span class="o">:</span><span class="w"> </span><span class="kt">TelemetrySample</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">channel</span><span class="o">:</span><span class="w"> </span><span class="s2">"control"</span><span class="p">;</span><span class="w"> </span><span class="nx">cursor</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamControl</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+<p>Rules:</p>
+<ul>
+<li><code>event</code> contains committed causal facts only.</li>
+<li><code>projection</code> is rebuildable and MUST identify coverage through an event.</li>
+<li><code>telemetry</code> is correlated evidence and MUST NOT alter causal order.</li>
+<li><code>control</code> communicates heartbeat, resync requirements, retention gaps and schema changes.</li>
+<li>cursors MUST support reconnect and resume.</li>
+<li>duplicates are allowed across reconnect; clients deduplicate by stable identity.</li>
+<li>gaps require a resync query; clients must not interpolate missing events.</li>
+<li>out-of-order physical delivery must not be shown as causal order.</li>
+</ul>
+<h3 id="57-error-contract">5.7 Error contract</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kr">type</span><span class="w"> </span><span class="nx">AetherProblem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Readonly</span><span class="o">&lt;</span><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nx">detail</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nx">retryability</span><span class="o">:</span><span class="w"> </span><span class="s2">"never"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"safe-idempotent"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"after-user-action"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="nx">correlationId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nx">causes?</span><span class="o">:</span><span class="w"> </span><span class="kt">readonly</span><span class="w"> </span><span class="nx">AetherProblem</span><span class="p">[];</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nx">remediation?</span><span class="o">:</span><span class="w"> </span><span class="kt">readonly</span><span class="w"> </span><span class="nx">RemediationAction</span><span class="p">[];</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="nx">evidenceRefs?</span><span class="o">:</span><span class="w"> </span><span class="kt">readonly</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<p>The UI MUST show what failed, where, whether retry is safe, and which evidence supports the diagnosis. Stack traces are developer-only and must be scrubbed before ordinary display.</p>
+<hr />
+<h2 id="6-contract-generation-and-compatibility">6. Contract generation and compatibility</h2>
+<h3 id="61-single-schema-authority">6.1 Single schema authority</h3>
+<p>Backend JSON Schemas and accepted protocol documents are the source of truth. A code-generation pipeline MUST produce:</p>
+<ul>
+<li>TypeScript wire types;</li>
+<li>runtime validators;</li>
+<li>discriminated unions for event kinds;</li>
+<li>payload type maps;</li>
+<li>schema identifiers and version registries;</li>
+<li>test vectors and example fixtures;</li>
+<li>human-readable event catalog metadata.</li>
+</ul>
+<h3 id="62-build-time-drift-gate">6.2 Build-time drift gate</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>read backend schema registry
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>-&gt; normalize schemas
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>-&gt; generate TypeScript contracts
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>-&gt; compile strict
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>-&gt; validate golden vectors
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>-&gt; compare generated tree with committed tree
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>-&gt; fail CI on unexplained diff
+</code></pre></div>
+<p>Any new event kind requires the backend's complete kind package before frontend support: schema, authority, reducer handling or justified no-op, golden vector and documentation. The frontend must not accept a free-form event kind merely to avoid updating its types.</p>
+<h3 id="63-compatibility-negotiation">6.3 Compatibility negotiation</h3>
+<p>On connection, the SDK performs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>client supported contract set
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>-&gt; gateway compatibility response
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>-&gt; exact common versions
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>-&gt; optional degraded feature set
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>-&gt; reject if safety-critical contract has no common version
+</code></pre></div>
+<p>Unknown additive fields MAY be preserved. Unknown semantic event kinds MUST cause a visible compatibility failure for projections that require them. Historical <code>/1</code> events can be read through backend-normalized projections; the frontend SHOULD not independently recreate backend migration semantics.</p>
+<hr />
+<h2 id="7-shared-typescript-sdk">7. Shared TypeScript SDK</h2>
+<h3 id="71-public-sdk-boundary">7.1 Public SDK boundary</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">interface</span><span class="w"> </span><span class="nx">AetherClient</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nx">system</span><span class="o">:</span><span class="w"> </span><span class="kt">SystemClient</span><span class="p">;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nx">compositions</span><span class="o">:</span><span class="w"> </span><span class="kt">CompositionClient</span><span class="p">;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nx">agents</span><span class="o">:</span><span class="w"> </span><span class="kt">AgentCatalogClient</span><span class="p">;</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nx">runs</span><span class="o">:</span><span class="w"> </span><span class="kt">RunClient</span><span class="p">;</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nx">artifacts</span><span class="o">:</span><span class="w"> </span><span class="kt">ArtifactClient</span><span class="p">;</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nx">experiments</span><span class="o">:</span><span class="w"> </span><span class="kt">ExperimentClient</span><span class="p">;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nx">skills</span><span class="o">:</span><span class="w"> </span><span class="kt">SkillClient</span><span class="p">;</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nx">governance</span><span class="o">:</span><span class="w"> </span><span class="kt">GovernanceClient</span><span class="p">;</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">}</span>
+</code></pre></div>
+<p>The SDK MUST support local HTTP, authenticated remote HTTP and an in-process test transport. Surface applications receive the interface, never construct fetch calls directly.</p>
+<h3 id="72-run-lifecycle-pseudocode">7.2 Run lifecycle pseudocode</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>function startRun(draft):
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  validate draft locally using generated schema
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  request backend validation
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  if invalid: return structured issues
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  freeze composition or resolve immutable composition reference
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>  submit StartRun with idempotency key
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>  receive accepted operation reference
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  subscribe from returned cursor
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>  fold incoming projection deltas into UI read model
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>  on gap: pause live claim, resync authoritative projection, resume
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>  on terminal: fetch final projection, evidence summary and artifacts
+</code></pre></div>
+<h3 id="73-client-caching">7.3 Client caching</h3>
+<p>Client caches are convenience projections only. Every cached object MUST retain:</p>
+<ul>
+<li>backend resource version;</li>
+<li>projection coverage cursor;</li>
+<li>fetched time;</li>
+<li>contract version;</li>
+<li>completeness state;</li>
+<li>invalidation relation.</li>
+</ul>
+<p>Cache loss must not affect backend correctness. Offline mode may inspect previously fetched runs but must visibly mark them as snapshots and forbid authoritative mutations.</p>
+<hr />
+<h2 id="8-cli-masterplan">8. CLI masterplan</h2>
+<h3 id="81-cli-principles">8.1 CLI principles</h3>
+<p>The CLI is the canonical automation surface. It MUST be deterministic, scriptable, composable and usable in CI. Human-friendly output is default for interactive terminals; machine-readable output is stable under <code>--output json</code>.</p>
+<h3 id="82-command-taxonomy">8.2 Command taxonomy</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>aether init
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>aether doctor
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>aether login / context
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>aether agent list|show|create|validate|pack|publish
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>aether composition validate|freeze|diff|activate
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>aether run start|watch|inspect|cancel|resume|replay|export
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>aether lineage tree|inspect
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>aether event tail|show|verify
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>aether artifact list|get|verify
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>aether topology validate|render|lower|compare
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>aether experiment create|run|watch|compare|report
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>aether skill list|inspect|propose|evaluate|promote|rollback
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>aether plugin list|inspect|validate|enable|disable
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>aether schema list|show|check
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>aether test contract|replay|falsifier|integration|product-gate
+</code></pre></div>
+<h3 id="83-cli-output-contract">8.3 CLI output contract</h3>
+<ul>
+<li>exit code <code>0</code>: command completed successfully;</li>
+<li>exit code <code>2</code>: user input/schema error;</li>
+<li>exit code <code>3</code>: authorization or capability rejection;</li>
+<li>exit code <code>4</code>: conflict/version mismatch;</li>
+<li>exit code <code>5</code>: backend unavailable;</li>
+<li>exit code <code>6</code>: run completed with failed task outcome;</li>
+<li>exit code <code>7</code>: evidence or verification failure;</li>
+<li>other codes are reserved and documented.</li>
+</ul>
+<p>Every JSON output MUST include <code>schemaVersion</code>, <code>status</code>, <code>correlationId</code> and either <code>data</code> or <code>error</code>.</p>
+<h3 id="84-external-product-validation">8.4 External product validation</h3>
+<p>The CLI package MUST be tested in a clean consumer workspace:</p>
+<ol>
+<li>install the released client and pinned backend package/container;</li>
+<li>initialize a new project outside the AETHER repository;</li>
+<li>select the coding composition;</li>
+<li>grant workspace-scoped capabilities;</li>
+<li>execute a held-out coding task;</li>
+<li>run consumer tests;</li>
+<li>export trajectory, artifacts and evaluation;</li>
+<li>verify that no AETHER source-tree import or fixture was used.</li>
+</ol>
+<p>This is a product gate, not merely an integration test.</p>
+<hr />
+<h2 id="9-tui-masterplan">9. TUI masterplan</h2>
+<h3 id="91-purpose">9.1 Purpose</h3>
+<p>The TUI provides the shortest path from CLI operation to interactive product. It should be developed before the full Studio reaches feature parity because it reveals backend integration defects with minimal presentation overhead.</p>
+<h3 id="92-layout">9.2 Layout</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Top bar: project | composition | run | connection | budget | cost
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>Left: runs / agents / lineages / tasks
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Center: conversation or event timeline
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>Right: context / tool / artifact / projection inspector
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>Bottom: command palette, approvals, errors and current operation
+</code></pre></div>
+<h3 id="93-tui-views">9.3 TUI views</h3>
+<ul>
+<li>Run console with user input and structured agent responses.</li>
+<li>Event tail with filtering by lineage, kind, writer and status.</li>
+<li>Child-lineage tree with independent budgets and terminals.</li>
+<li>Artifact list and safe text/diff preview.</li>
+<li>Context summary showing selected sources, tokens, compaction and retrieval provenance.</li>
+<li>Capability/approval queue with explicit scope and consequence.</li>
+<li>Runtime health and provider state.</li>
+<li>Compact experiment comparison.</li>
+</ul>
+<h3 id="94-interaction-rules">9.4 Interaction rules</h3>
+<ul>
+<li>keyboard-first operation and command palette;</li>
+<li>no mouse dependency;</li>
+<li>shortcuts displayed contextually;</li>
+<li>confirmation for capability expansion, cancellation and promotion;</li>
+<li>streaming content must not move focus or destroy scroll position;</li>
+<li>errors stay anchored to the operation that caused them;</li>
+<li>raw events are inspectable without flooding the main conversation;</li>
+<li>terminal width degradation must remain functional down to a documented minimum.</li>
+</ul>
+<hr />
+<h2 id="10-studio-app-masterplan">10. Studio App masterplan</h2>
+<h3 id="101-app-shell">10.1 App shell</h3>
+<p>The App is a React/TypeScript local web application first. It uses a three-region shell:</p>
+<ul>
+<li>navigation rail for product areas;</li>
+<li>primary workspace for the selected graph, timeline or editor;</li>
+<li>contextual inspector for the selected entity.</li>
+</ul>
+<p>A persistent run strip shows active run, lineage, phase, budget, cost, warnings and connection state. Deep links MUST address stable identities: project, composition, run, lineage, event, artifact, skill or experiment.</p>
+<h3 id="102-run-console">10.2 Run Console</h3>
+<p>Purpose: operate coding, research or mixed agents.</p>
+<p>Components:</p>
+<ul>
+<li>task composer with attachments and workspace selection;</li>
+<li>composition selector with immutable version display;</li>
+<li>capability and budget preview;</li>
+<li>live response stream;</li>
+<li>current phase and strategy indicator;</li>
+<li>tool/effect cards;</li>
+<li>approval requests;</li>
+<li>verification and final outcome panel;</li>
+<li>export and reproduce actions.</li>
+</ul>
+<p>The conversation is a view of a run, not the run's source of truth. Reloading the page must reconstruct it from projections and artifacts.</p>
+<h3 id="103-execution-observatory">10.3 Execution Observatory</h3>
+<p>The Observatory is the central development instrument.</p>
+<h4 id="timeline-view">Timeline view</h4>
+<p>Displays durable events in physical append order while rendering causal relations separately. Filters include:</p>
+<ul>
+<li>lineage and ancestry;</li>
+<li>event kind and semantic family;</li>
+<li>writer role and policy version;</li>
+<li>operation and idempotency identity;</li>
+<li>success/failure/recovery;</li>
+<li>capability grant and approval;</li>
+<li>artifact production;</li>
+<li>model/tool/context/meta-controller activity.</li>
+</ul>
+<p>Each row shows identity, causal parent, logical time, wall time when available, writer, kind, summary and evidence state.</p>
+<h4 id="causal-graph">Causal graph</h4>
+<p>Nodes represent events, operations, lineages or artifacts depending on zoom. Edges represent causation, correlation, ancestry, artifact production/consumption or declared topology relations. Physical sequence MUST NOT be rendered as causal dependence unless the relation exists.</p>
+<h4 id="runtime-inspector">Runtime inspector</h4>
+<p>Shows:</p>
+<ul>
+<li><code>AgentView</code> and coverage cursor;</li>
+<li>goal, plan revisions, strategy and progress;</li>
+<li>settled effects and failures;</li>
+<li>budget allocation and consumption;</li>
+<li>children and terminal states;</li>
+<li>checkpoint selected and suffix folded;</li>
+<li>active composition and policy pins;</li>
+<li>capabilities and attenuation chain.</li>
+</ul>
+<h4 id="event-forensic-inspector">Event forensic inspector</h4>
+<p>Tabs:</p>
+<ol>
+<li>Summary.</li>
+<li>Payload validated against schema.</li>
+<li>Causation/correlation/lineage.</li>
+<li>Authority and capability basis.</li>
+<li>Artifacts and digests.</li>
+<li>Reducer/projection impact.</li>
+<li>Related telemetry.</li>
+<li>Raw canonical envelope.</li>
+</ol>
+<h3 id="104-architecture-explorer">10.4 Architecture Explorer</h3>
+<p>This view answers “Kernel versus plugin” without requiring source reading.</p>
+<p>It shows a static component dependency view and overlays realized run activity:</p>
+<ul>
+<li>domain and ports as contracts;</li>
+<li>Kernel as admissibility/effect reference monitor;</li>
+<li>agency as policies/context/decision support;</li>
+<li>Runtime as composition and execution mechanism;</li>
+<li>adapters as environment bindings;</li>
+<li>packs/plugins as domain behavior;</li>
+<li>clients as external surfaces.</li>
+</ul>
+<p>Selecting a run highlights only components used by that run. Selecting an event highlights its writer, consumers, schema and affected projection. Links MAY open the corresponding documentation or source file when repository metadata is available.</p>
+<h3 id="105-context-and-memory-explorer">10.5 Context and Memory Explorer</h3>
+<p>The view MUST distinguish:</p>
+<ul>
+<li>candidate context;</li>
+<li>selected context;</li>
+<li>compacted context;</li>
+<li>retrieved experience;</li>
+<li>validated knowledge;</li>
+<li>project memory;</li>
+<li>session state derived from ledger;</li>
+<li>active skills.</li>
+</ul>
+<p>For each context item display source identity, policy, parameters digest, token contribution, inclusion reason when available, provenance, retention class and artifact link. “Used in prompt” must be derived from recorded selection/output identity, not guessed from availability.</p>
+<h3 id="106-artifact-explorer">10.6 Artifact Explorer</h3>
+<p>Features:</p>
+<ul>
+<li>role/schema/producer filtering;</li>
+<li>content digest verification;</li>
+<li>provenance graph;</li>
+<li>safe preview for text, JSON, patches, reports and snapshots;</li>
+<li>side-by-side diff;</li>
+<li>missing-content explanation for digest-only retention;</li>
+<li>retention and legal-hold status;</li>
+<li>references to producing and consuming events;</li>
+<li>export with a manifest of identities and hashes.</li>
+</ul>
+<h3 id="107-lineage-explorer">10.7 Lineage Explorer</h3>
+<p>Shows nested executions rather than pretending every child is a chat persona. Each lineage card contains goal, parent, scope, budget, capability subset, context configuration, status, result and evidence. The tree supports collapse, critical-path highlighting, orphan/recovery state and parent-child artifact flow.</p>
+<h3 id="108-workflow-and-topology-studio">10.8 Workflow and Topology Studio</h3>
+<p>The editor manipulates versioned <code>mhf.topology/1</code> configuration drafts. It must distinguish:</p>
+<ul>
+<li><strong>Declared topology:</strong> permitted roles, relations and artifact flows.</li>
+<li><strong>Lowered run plan:</strong> backend-produced execution templates.</li>
+<li><strong>Realized trajectory:</strong> what actually occurred.</li>
+</ul>
+<p>The UI MUST never execute directly from its graph. Saving produces a versioned draft; validation and lowering occur in the backend. Required editor functions:</p>
+<ul>
+<li>role creation and policy binding;</li>
+<li>scope and budget templates;</li>
+<li><code>may_delegate_to</code>, <code>reviews</code> and <code>merges_into</code> relations;</li>
+<li>artifact-flow schema selection;</li>
+<li>entry role;</li>
+<li>capability conflict checks;</li>
+<li>unreachable-role and cycle diagnostics where applicable;</li>
+<li>visual diff between topology versions;</li>
+<li>simulation preview based on backend lowering, explicitly marked non-execution;</li>
+<li>comparison of declared versus realized graph.</li>
+</ul>
+<h3 id="109-agent-builder">10.9 Agent Builder</h3>
+<p>An agent definition is a composition preset, not a new core class.</p>
+<p>The builder guides the user through:</p>
+<ol>
+<li>identity, purpose and domain pack;</li>
+<li>model policy and fallback rules;</li>
+<li>tools/plugins and capabilities;</li>
+<li>context providers and compaction strategy;</li>
+<li>memory/retrieval policy;</li>
+<li>evaluator and terminal conditions;</li>
+<li>execution profile and budgets;</li>
+<li>optional topology and meta-controller;</li>
+<li>test fixtures and evaluation suite;</li>
+<li>validation, freeze and version.</li>
+</ol>
+<p>The builder MUST provide an “architecture placement” explanation for every extension: pack, plugin, adapter, policy, projection or Runtime mechanism. Any proposal requiring Kernel modification is blocked and routed to architectural review.</p>
+<h3 id="1010-agent-catalog-and-use">10.10 Agent Catalog and use</h3>
+<p>Catalog entries include:</p>
+<ul>
+<li>immutable version and content digest;</li>
+<li>domain and supported task types;</li>
+<li>required capabilities and providers;</li>
+<li>default and maximum budgets;</li>
+<li>compatibility range;</li>
+<li>evaluation evidence and known limitations;</li>
+<li>dependencies, skills and topology;</li>
+<li>publisher/provenance;</li>
+<li>example tasks;</li>
+<li>deprecation/revocation state.</li>
+</ul>
+<p>Running an agent requires selecting an immutable version or an explicitly tracked channel. The UI displays the exact resolved composition digest before execution.</p>
+<h3 id="1011-experiment-lab">10.11 Experiment Lab</h3>
+<p>The Lab supports scientific comparison without turning the browser into the evaluator.</p>
+<p>Features:</p>
+<ul>
+<li>fixed and held-out task-set registration;</li>
+<li>baseline and treatment composition selection;</li>
+<li>controlled variable declaration;</li>
+<li>seeds, repetitions and budgets;</li>
+<li>paired-run launch;</li>
+<li>ablation of one component at a time;</li>
+<li>primary metric and regression budgets;</li>
+<li>run eligibility and evidence completeness;</li>
+<li>result distributions and confidence/calibration views;</li>
+<li>trajectory diff and failure clustering;</li>
+<li>signed report artifact access;</li>
+<li>decision record: accept, reject, inconclusive or redesign.</li>
+</ul>
+<p>The UI MUST prevent a comparison from being labeled causal when multiple undeclared dimensions changed.</p>
+<h3 id="1012-metacognition-view">10.12 Metacognition view</h3>
+<p>Metacognition is visualized as an ordinary derived loop:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>AgentView + ProgressProjection + confidence evidence
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>-&gt; MetaController assessment
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>-&gt; optional StrategyDirective
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>-&gt; ordinary proposal and authorization
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>-&gt; effect/event/result
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>-&gt; later evaluation
+</code></pre></div>
+<p>Display:</p>
+<ul>
+<li>observed progress signals;</li>
+<li>confidence records and calibration basis;</li>
+<li>controller identity/version;</li>
+<li>considered or emitted directive when recorded;</li>
+<li>strategy change attribution;</li>
+<li>cost of intervention;</li>
+<li>outcome difference in paired trials.</li>
+</ul>
+<p>The view MUST label reflection without external evidence as a claim, not a fact.</p>
+<h3 id="1013-skills-and-self-improvement">10.13 Skills and self-improvement</h3>
+<p>The lifecycle UI is a gated pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>trajectory corpus
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>-&gt; analysis/failure clusters
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>-&gt; candidate skill
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>-&gt; isolated evaluation
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>-&gt; promotion proposal
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>-&gt; independent review
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>-&gt; new composition version
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>-&gt; canary/held-out validation
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>-&gt; promote or rollback
+</code></pre></div>
+<p>Required views:</p>
+<ul>
+<li>candidate origin and generating evidence;</li>
+<li>exact skill artifact and version;</li>
+<li>generator/evaluator/promoter separation;</li>
+<li>affected contexts and risk level;</li>
+<li>presence-only, invocation, grounding, verification and transfer tests;</li>
+<li>gross gains, regressions and residual failures;</li>
+<li>active composition pointer;</li>
+<li>rollback control with expected-version guard;</li>
+<li>audit history.</li>
+</ul>
+<p>Ordinary agents may propose candidates. Only authorized governance commands can promote.</p>
+<h3 id="1014-feature-development-workspace">10.14 Feature Development workspace</h3>
+<p>This workspace connects product behavior to engineering work:</p>
+<ul>
+<li>run/event/artifact permalink capture;</li>
+<li>“create bug report” draft populated with identities and environment pins;</li>
+<li>expected versus actual projection comparison;</li>
+<li>contract/schema validation results;</li>
+<li>replay parity result;</li>
+<li>linked ADR/spec/milestone/task metadata;</li>
+<li>regression test fixture export with sensitive-content review;</li>
+<li>benchmark comparison;</li>
+<li>feature flag/composition version correlation.</li>
+</ul>
+<p>It MUST avoid automatically exporting secrets, raw private context or unrestricted workspaces.</p>
+<hr />
+<h2 id="11-uiux-system">11. UI/UX system</h2>
+<h3 id="111-design-principles">11.1 Design principles</h3>
+<ol>
+<li><strong>Causality before animation.</strong> Visual effects never imply unsupported order.</li>
+<li><strong>Truth state is explicit.</strong> Fact, projection, telemetry, claim and attestation use distinct visual semantics.</li>
+<li><strong>Failure is first-class.</strong> Rejections, gaps and degraded reconstruction remain visible.</li>
+<li><strong>Identity is navigable.</strong> Every significant entity has a stable permalink and copyable identity.</li>
+<li><strong>Progressive disclosure.</strong> Operators see outcomes; investigators can reach raw contracts.</li>
+<li><strong>Comparison over impression.</strong> Improvements are shown against baselines and regression budgets.</li>
+<li><strong>Safe action design.</strong> Scope, authority and consequences precede destructive or privileged actions.</li>
+<li><strong>Keyboard-first expert workflows.</strong> Command palette and shortcuts complement pointer interaction.</li>
+</ol>
+<h3 id="112-semantic-visual-language">11.2 Semantic visual language</h3>
+<table>
+<thead>
+<tr>
+<th>Semantic class</th>
+<th>Visual treatment</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Durable fact</td>
+<td>solid node/line</td>
+<td>committed event, artifact fact</td>
+</tr>
+<tr>
+<td>Projection</td>
+<td>outlined panel with coverage</td>
+<td>AgentView, progress view</td>
+</tr>
+<tr>
+<td>Telemetry</td>
+<td>dotted/secondary trace</td>
+<td>latency, CPU, live token rate</td>
+</tr>
+<tr>
+<td>Claim</td>
+<td>labeled assertion badge</td>
+<td>confidence self-report</td>
+</tr>
+<tr>
+<td>Attestation</td>
+<td>signed/verified badge</td>
+<td>independent evaluation</td>
+</tr>
+<tr>
+<td>Draft</td>
+<td>editable neutral surface</td>
+<td>topology or composition draft</td>
+</tr>
+<tr>
+<td>Rejection/failure</td>
+<td>persistent error state</td>
+<td>capability rejection, failed effect</td>
+</tr>
+<tr>
+<td>Degraded/missing</td>
+<td>warning with reason</td>
+<td>missing blob, invalid checkpoint</td>
+</tr>
+</tbody>
+</table>
+<p>Color MUST NOT be the sole discriminator. Icons, labels and patterns are required.</p>
+<h3 id="113-core-component-inventory">11.3 Core component inventory</h3>
+<ul>
+<li><code>IdentityLink</code></li>
+<li><code>SchemaBadge</code></li>
+<li><code>AuthorityBadge</code></li>
+<li><code>CapabilityScopeView</code></li>
+<li><code>BudgetMeter</code></li>
+<li><code>EvidenceState</code></li>
+<li><code>RunStateChip</code></li>
+<li><code>EventRow</code></li>
+<li><code>EventInspector</code></li>
+<li><code>CausalGraph</code></li>
+<li><code>LineageTree</code></li>
+<li><code>ArtifactPreview</code></li>
+<li><code>ProjectionCoverage</code></li>
+<li><code>ContextContribution</code></li>
+<li><code>StrategyChangeCard</code></li>
+<li><code>ExperimentComparison</code></li>
+<li><code>PromotionGate</code></li>
+<li><code>ProblemPanel</code></li>
+<li><code>CommandConfirmation</code></li>
+<li><code>ConnectionAndGapIndicator</code></li>
+</ul>
+<p>Each component must document input view model, empty/loading/error/degraded states, accessibility behavior, performance limits and test fixtures.</p>
+<h3 id="114-accessibility">11.4 Accessibility</h3>
+<p>The App MUST meet WCAG AA expectations:</p>
+<ul>
+<li>complete keyboard navigation;</li>
+<li>visible focus and skip navigation;</li>
+<li>screen-reader labels for graph equivalents;</li>
+<li>tabular fallback for every graph;</li>
+<li>reduced-motion mode;</li>
+<li>high-contrast mode;</li>
+<li>non-color semantic distinctions;</li>
+<li>live-region discipline for streaming updates;</li>
+<li>pause/freeze controls for rapidly updating timelines.</li>
+</ul>
+<hr />
+<h2 id="12-state-management-and-frontend-projections">12. State management and frontend projections</h2>
+<h3 id="121-state-classes">12.1 State classes</h3>
+<p>Frontend state is divided into:</p>
+<ol>
+<li><strong>Authoritative snapshots:</strong> fetched backend projections and resources.</li>
+<li><strong>Stream deltas:</strong> committed updates awaiting integration.</li>
+<li><strong>Drafts:</strong> unsaved agent/topology/experiment definitions.</li>
+<li><strong>Ephemeral UI state:</strong> selection, layout, filters and open panels.</li>
+<li><strong>Cached history:</strong> rebuildable offline snapshots.</li>
+</ol>
+<p>These classes MUST not be placed in one undifferentiated global store.</p>
+<h3 id="122-projection-update-pseudocode">12.2 Projection update pseudocode</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>onStreamMessage(message):
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  validate message contract
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>  if duplicate identity: ignore
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>  if cursor gap: mark view degraded; request authoritative resync
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>  if durable event: append to local event index only
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>  if projection delta:
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>      require base version matches local projection
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>      apply delta immutably
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>      update coverage cursor
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>  if telemetry: store in bounded time window
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>  never derive backend terminal truth solely from UI timers
+</code></pre></div>
+<h3 id="123-graph-normalization">12.3 Graph normalization</h3>
+<p>The graph model converts multiple backend resources into a stable frontend representation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kr">type</span><span class="w"> </span><span class="nx">GraphNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Readonly</span><span class="o">&lt;</span><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nx">kind</span><span class="o">:</span><span class="w"> </span><span class="s2">"event"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"operation"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"lineage"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"artifact"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"role"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"component"</span><span class="p">;</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="nx">status?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span><span class="nx">refs</span><span class="o">:</span><span class="w"> </span><span class="kt">readonly</span><span class="w"> </span><span class="kt">string</span><span class="p">[];</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">  </span><span class="nx">semanticClass</span><span class="o">:</span><span class="w"> </span><span class="s2">"fact"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"projection"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"telemetry"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"draft"</span><span class="p">;</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="kr">type</span><span class="w"> </span><span class="nx">GraphEdge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Readonly</span><span class="o">&lt;</span><span class="p">{</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">  </span><span class="nx">source</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">  </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">  </span><span class="nx">relation</span><span class="o">:</span><span class="w"> </span><span class="s2">"causes"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"correlates"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"parent"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"produces"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"consumes"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"permits"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"reviews"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"merges"</span><span class="p">;</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">  </span><span class="nx">authoritative</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<p>Layout coordinates are ephemeral UI state and never enter backend topology or evidence.</p>
+<hr />
+<h2 id="13-security-and-capability-ux">13. Security and capability UX</h2>
+<h3 id="131-threat-model">13.1 Threat model</h3>
+<p>The product must assume:</p>
+<ul>
+<li>untrusted task text and repository content;</li>
+<li>prompt injection in documents and tool output;</li>
+<li>malicious or defective plugins;</li>
+<li>secrets in environment, artifacts or logs;</li>
+<li>capability escalation attempts;</li>
+<li>replayed or duplicated commands;</li>
+<li>compromised client cache;</li>
+<li>cross-project data leakage;</li>
+<li>misleading self-evaluation;</li>
+<li>unauthorized skill promotion.</li>
+</ul>
+<h3 id="132-security-controls">13.2 Security controls</h3>
+<ul>
+<li>local gateway binds to loopback by default;</li>
+<li>remote access requires authenticated encrypted transport;</li>
+<li>short-lived session credentials are stored using platform facilities;</li>
+<li>commands are idempotent and actor-attributed;</li>
+<li>capability requests display resource selector, sink, duration and budget;</li>
+<li>workspace grants are path-scoped and normalized by the backend;</li>
+<li>artifact previews sandbox active content;</li>
+<li>secrets are redacted at gateway and rendering boundaries;</li>
+<li>plugin manifests and signatures are visible;</li>
+<li>frontend never receives provider secrets when proxy execution suffices;</li>
+<li>promotion controls require fresh authorization and expected-version checks;</li>
+<li>audit export omits sensitive content by default while preserving digests.</li>
+</ul>
+<h3 id="133-approval-ux">13.3 Approval UX</h3>
+<p>Approval dialogs MUST answer:</p>
+<ul>
+<li>what operation is proposed;</li>
+<li>which agent/lineage requested it;</li>
+<li>which resources and sinks are affected;</li>
+<li>what capability and budget are requested;</li>
+<li>why the operation is needed when rationale exists;</li>
+<li>whether it is one-shot, session-scoped or persistent;</li>
+<li>what alternatives exist: deny, narrow, allow once, allow scoped;</li>
+<li>what evidence and policy produced the request.</li>
+</ul>
+<p>The UI must never offer “always allow” without a precise revocable scope.</p>
+<hr />
+<h2 id="14-observability-diagnostics-and-bug-discovery">14. Observability, diagnostics and bug discovery</h2>
+<h3 id="141-required-observability-data">14.1 Required observability data</h3>
+<p>The App should expose, when recorded:</p>
+<ul>
+<li>selected context and compaction identities;</li>
+<li>model/provider identity and attestation state;</li>
+<li>tool calls, selectors, sinks and settlement;</li>
+<li>retries, failures and recovery actions;</li>
+<li>tokens, cost, latency and cache behavior;</li>
+<li>artifact production and verification;</li>
+<li>strategy and progress changes;</li>
+<li>lineage spawning, return and budget conservation;</li>
+<li>topology version and lowering result;</li>
+<li>retrieval provenance and skill usage;</li>
+<li>evaluation, promotion and rollback evidence.</li>
+</ul>
+<h3 id="142-automated-diagnostics">14.2 Automated diagnostics</h3>
+<p>Diagnostics are rules over projections and evidence, not new authority. Initial detectors:</p>
+<ul>
+<li>stream gap or duplicate settlement;</li>
+<li>unresolved effect beyond policy threshold;</li>
+<li>child budget conservation mismatch;</li>
+<li>capability reference missing from an effect;</li>
+<li>artifact fact with unavailable required blob;</li>
+<li>checkpoint mismatch and cold-fold fallback;</li>
+<li>repeated action signature/stall;</li>
+<li>context compaction without provenance;</li>
+<li>declared topology role never realized;</li>
+<li>skill retrieved but not grounded or verified;</li>
+<li>terminal success without required verifier evidence;</li>
+<li>promotion pointer/evidence mismatch;</li>
+<li>UI/backend schema incompatibility.</li>
+</ul>
+<p>Every diagnostic returns severity, basis, affected identities, confidence, remediation and whether it is deterministic or heuristic.</p>
+<h3 id="143-run-diff">14.3 Run diff</h3>
+<p>Run comparison aligns trajectories by semantic operation and causation, not merely array index. It shows:</p>
+<ul>
+<li>composition differences;</li>
+<li>context and retrieval differences;</li>
+<li>model/tool/strategy divergence point;</li>
+<li>cost and latency deltas;</li>
+<li>outcome and verifier deltas;</li>
+<li>artifact differences;</li>
+<li>causal subgraphs unique to each run.</li>
+</ul>
+<p>When alignment is uncertain, the UI must show ambiguity rather than force a false match.</p>
+<hr />
+<h2 id="15-testing-strategy">15. Testing strategy</h2>
+<h3 id="151-test-pyramid">15.1 Test pyramid</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Required tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contracts</td>
+<td>schema vectors, discriminated unions, backward compatibility</td>
+</tr>
+<tr>
+<td>Pure models</td>
+<td>reducers, graph normalization, formatting, diff alignment</td>
+</tr>
+<tr>
+<td>SDK</td>
+<td>command idempotency, cursor reconnect, gap recovery, problem mapping</td>
+</tr>
+<tr>
+<td>Components</td>
+<td>all states, accessibility, keyboard behavior, large fixtures</td>
+</tr>
+<tr>
+<td>Feature integration</td>
+<td>mocked gateway plus golden trajectories</td>
+</tr>
+<tr>
+<td>Backend integration</td>
+<td>real gateway against isolated stores/providers</td>
+</tr>
+<tr>
+<td>Replay</td>
+<td>cold reconstruction and UI equivalence from recorded run</td>
+</tr>
+<tr>
+<td>Product E2E</td>
+<td>clean external workspace and real task</td>
+</tr>
+<tr>
+<td>Scientific validation</td>
+<td>baseline/treatment and held-out evidence</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>injection, scope escape, secret leakage, unauthorized promotion</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>large ledger, graph virtualization, stream burst, artifact preview</td>
+</tr>
+</tbody>
+</table>
+<h3 id="152-contract-testkit">15.2 Contract testkit</h3>
+<p>The shared testkit MUST provide:</p>
+<ul>
+<li>valid and invalid command fixtures;</li>
+<li>event-envelope golden vectors;</li>
+<li>M-4 trajectory fixture;</li>
+<li>M-5a checkpoint and cold-reconstruction fixture;</li>
+<li>M-6 nested lineage and recovery fixture;</li>
+<li>M-6.5 strategy-change comparison fixture;</li>
+<li>M-7 declared/lowered/realized topology fixtures;</li>
+<li>M-8 candidate/promotion/rollback fixture;</li>
+<li>deterministic fake clock and cursor stream;</li>
+<li>gap, duplication and reconnect scenarios;</li>
+<li>redacted sensitive artifact examples.</li>
+</ul>
+<h3 id="153-ui-replay-equivalence-gate">15.3 UI replay equivalence gate</h3>
+<p>For a pinned recorded run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>live stream -&gt; final frontend view model A
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>cold backend projection + event query -&gt; frontend view model B
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>assert semantic A == B
+</code></pre></div>
+<p>This catches hidden dependence on transient websocket/SSE timing.</p>
+<h3 id="154-clean-room-product-gate">15.4 Clean-room product gate</h3>
+<p>The final M-8 frontend gate MUST run outside the monorepo against a sealed task set. Required variants:</p>
+<ul>
+<li>coding agent on a fresh software repository;</li>
+<li>research agent on a documented evidence task;</li>
+<li>mixed planner/researcher/coder/critic composition;</li>
+<li>restart during an active run;</li>
+<li>denied capability path;</li>
+<li>promoted skill followed by injected regression and rollback.</li>
+</ul>
+<p>The gate captures installation time, time-to-first-run, success rate, cost, latency, operator interventions, replay quality and evidence completeness.</p>
+<hr />
+<h2 id="16-performance-and-scalability-budgets">16. Performance and scalability budgets</h2>
+<h3 id="161-frontend-budgets">16.1 Frontend budgets</h3>
+<p>Targets must be calibrated with real fixtures, but the implementation begins with these engineering constraints:</p>
+<ul>
+<li>first useful local screen in approximately two seconds on a development machine;</li>
+<li>visible reaction to a committed event within 250 ms excluding backend/network latency;</li>
+<li>event timeline virtualized beyond 1,000 rows;</li>
+<li>interactive filtering for 100,000 indexed event summaries;</li>
+<li>graph defaults to aggregation above 2,000 visible nodes;</li>
+<li>telemetry buffers bounded by time and count;</li>
+<li>artifact previews streamed and size-limited;</li>
+<li>no full-ledger load to show a run list;</li>
+<li>projection queries prefer checkpoint plus suffix;</li>
+<li>expensive graph layout runs off the main UI thread;</li>
+<li>reconnect does not refetch retained artifacts unnecessarily.</li>
+</ul>
+<h3 id="162-backpressure">16.2 Backpressure</h3>
+<p>During event bursts:</p>
+<ul>
+<li>durable facts are never dropped;</li>
+<li>UI rendering may batch updates;</li>
+<li>telemetry may be sampled according to declared policy;</li>
+<li>the current operation and terminal events receive priority;</li>
+<li>control messages expose lag;</li>
+<li>the client requests resync if its bounded queue cannot preserve correctness.</li>
+</ul>
+<hr />
+<h2 id="17-packaging-and-deployment">17. Packaging and deployment</h2>
+<h3 id="171-deliverables">17.1 Deliverables</h3>
+<p>The product SHOULD ship as:</p>
+<ul>
+<li><code>@aether/contracts</code> — generated contracts;</li>
+<li><code>@aether/sdk</code> — programmatic TypeScript client;</li>
+<li><code>@aether/cli</code> — executable CLI;</li>
+<li><code>@aether/tui</code> — terminal application;</li>
+<li><code>@aether/studio</code> — static/local web App;</li>
+<li>optional desktop distribution wrapping the same Studio build;</li>
+<li>backend Python package and/or container with the Client Gateway;</li>
+<li>example coding, research and mixed composition packs;</li>
+<li>clean-room validation kit.</li>
+</ul>
+<h3 id="172-local-launch-model">17.2 Local launch model</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>aether studio
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>-&gt; verify backend compatibility
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>-&gt; start or connect to local gateway
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>-&gt; serve/open Studio
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>-&gt; display health and composition catalog
+</code></pre></div>
+<p>The launcher must show exact frontend/backend versions, schema compatibility, project boundary and data location. Startup failure must provide actionable diagnosis.</p>
+<h3 id="173-versioning">17.3 Versioning</h3>
+<ul>
+<li>contracts use explicit schema identifiers independent from package versions;</li>
+<li>packages follow semantic versioning;</li>
+<li>agent compositions, topologies, policies and skills use immutable content identity plus human version;</li>
+<li>Studio features declare required backend capabilities;</li>
+<li>unsupported features are disabled with a reason, not allowed to fail later;</li>
+<li>the CLI JSON contract receives its own version.</li>
+</ul>
+<hr />
+<h2 id="18-development-workflow-and-engineering-standards">18. Development workflow and engineering standards</h2>
+<h3 id="181-definition-of-ready">18.1 Definition of ready</h3>
+<p>A frontend task is ready only when it contains:</p>
+<ul>
+<li>user outcome;</li>
+<li>backend authority/source contract;</li>
+<li>input/output schemas;</li>
+<li>target view model;</li>
+<li>loading/empty/error/degraded states;</li>
+<li>capability/security impact;</li>
+<li>accessibility acceptance;</li>
+<li>performance fixture;</li>
+<li>test plan;</li>
+<li>milestone and evidence reference.</li>
+</ul>
+<h3 id="182-definition-of-done">18.2 Definition of done</h3>
+<p>A feature is done when:</p>
+<ul>
+<li>generated contracts compile with no drift;</li>
+<li>SDK behavior is transport-independent;</li>
+<li>CLI/TUI/App semantics agree where applicable;</li>
+<li>component and integration tests cover failure/degraded paths;</li>
+<li>keyboard and screen-reader behavior is verified;</li>
+<li>observability shows relevant identities and evidence;</li>
+<li>documentation and example workflows are updated;</li>
+<li>no backend authority is duplicated;</li>
+<li>product metrics are emitted as telemetry, not ledger facts unless causally required;</li>
+<li>a clean build and package installation succeed;</li>
+<li>the relevant product or milestone gate passes.</li>
+</ul>
+<h3 id="183-pull-request-boundaries">18.3 Pull-request boundaries</h3>
+<p>Keep separate commits/PRs for:</p>
+<ul>
+<li>backend gateway contracts;</li>
+<li>schema/code generation;</li>
+<li>SDK;</li>
+<li>shared UI system;</li>
+<li>CLI;</li>
+<li>TUI;</li>
+<li>Studio feature;</li>
+<li>experimental visualization;</li>
+<li>backend/research changes.</li>
+</ul>
+<p>Frontend work MUST remain reviewable independently from changes that claim scientific lift.</p>
+<h3 id="184-documentation-set">18.4 Documentation set</h3>
+<p>The implementation should maintain:</p>
+<ul>
+<li>frontend architecture ADR;</li>
+<li>Client Gateway protocol;</li>
+<li>contract/version registry;</li>
+<li>UI semantic language;</li>
+<li>component catalog;</li>
+<li>CLI reference;</li>
+<li>observability and evidence guide;</li>
+<li>agent-building guide;</li>
+<li>experiment and promotion guide;</li>
+<li>threat model;</li>
+<li>deployment/runbook;</li>
+<li>product validation reports.</li>
+</ul>
+<hr />
+<h2 id="19-delivery-roadmap">19. Delivery roadmap</h2>
+<h3 id="phase-f0-contract-and-gateway-foundation">Phase F0 — Contract and gateway foundation</h3>
+<p><strong>Goal:</strong> make the backend safely consumable without UI-specific imports.</p>
+<p>Deliverables:</p>
+<ul>
+<li>frontend architecture ADR and authority boundary;</li>
+<li>Client Gateway with compatibility handshake;</li>
+<li>generated TypeScript contract pipeline;</li>
+<li>SDK transports and problem contract;</li>
+<li>run start/query/event-stream vertical slice;</li>
+<li>fake gateway and golden trajectory fixtures;</li>
+<li>clean workspace bootstrap.</li>
+</ul>
+<p>Exit gate: a TypeScript script starts a real isolated run, reconnects, retrieves final projection and verifies an artifact.</p>
+<h3 id="phase-f1-product-cli-and-m-4-observatory">Phase F1 — Product CLI and M-4 Observatory</h3>
+<p><strong>Goal:</strong> expose immediate product value and trajectory evidence.</p>
+<p>Deliverables:</p>
+<ul>
+<li>installable CLI;</li>
+<li>coding agent start/watch/inspect/export;</li>
+<li>event tail, artifact inspection and verification;</li>
+<li>external clean-repository coding test;</li>
+<li>M-4 context, model, tool, cost, failure and outcome views;</li>
+<li>product-gate report.</li>
+</ul>
+<p>Exit gate: held-out coding task completed from outside the AETHER repository with evidence export.</p>
+<h3 id="phase-f2-tui-and-m-5a-projections">Phase F2 — TUI and M-5a projections</h3>
+<p><strong>Goal:</strong> interactive operation over event-derived state.</p>
+<p>Deliverables:</p>
+<ul>
+<li>run console, event timeline and inspector;</li>
+<li>AgentView projection panel;</li>
+<li>checkpoint/reconstruction diagnostics;</li>
+<li>context provenance and compaction view;</li>
+<li>reconnect/gap recovery UX;</li>
+<li>coding and formal/non-coding agent selection.</li>
+</ul>
+<p>Exit gate: live and cold-reconstructed TUI state are semantically equal.</p>
+<h3 id="phase-f3-agent-builder-and-m-6-lineage-operation">Phase F3 — Agent Builder and M-6 lineage operation</h3>
+<p><strong>Goal:</strong> create and operate reusable agents and recursive teams.</p>
+<p>Deliverables:</p>
+<ul>
+<li>agent catalog and version detail;</li>
+<li>guided composition builder;</li>
+<li>capability/budget preview;</li>
+<li>nested-lineage tree and recovery states;</li>
+<li>child budget/conservation diagnostics;</li>
+<li>coding, research and mixed agent examples.</li>
+</ul>
+<p>Exit gate: a user creates a new agent composition without Kernel change and runs it with a real child lineage.</p>
+<h3 id="phase-f4-studio-observatory-and-m-65">Phase F4 — Studio Observatory and M-6.5</h3>
+<p><strong>Goal:</strong> debug and measure adaptive behavior.</p>
+<p>Deliverables:</p>
+<ul>
+<li>visual timeline, causal graph and architecture overlay;</li>
+<li>progress/confidence/meta-controller views;</li>
+<li>run diff and paired-trial UI;</li>
+<li>bug-report evidence bundle;</li>
+<li>explicit negative/inconclusive experiment states.</li>
+</ul>
+<p>Exit gate: a strategy intervention can be traced from signals to directive to outcome and compared against control.</p>
+<h3 id="phase-f5-workflow-studio-and-m-7">Phase F5 — Workflow Studio and M-7</h3>
+<p><strong>Goal:</strong> define topology as data and compare it with execution.</p>
+<p>Deliverables:</p>
+<ul>
+<li>topology schema editor;</li>
+<li>backend validation/lowering preview;</li>
+<li>declared/lowered/realized graph modes;</li>
+<li>direct, planner/executor and critic/reviser templates;</li>
+<li>scheduler/concurrency evidence dashboard;</li>
+<li>ADR-0099 evidence navigation.</li>
+</ul>
+<p>Exit gate: three topologies execute through one Runtime and are correctly visualized without workflow authority in the frontend.</p>
+<h3 id="phase-f6-memory-skills-and-m-8-product-gate">Phase F6 — Memory, Skills and M-8 product gate</h3>
+<p><strong>Goal:</strong> expose provenance-safe learning and complete the MVP.</p>
+<p>Deliverables:</p>
+<ul>
+<li>context/memory/experience explorer;</li>
+<li>retrieval provenance;</li>
+<li>skill candidate/evaluation/promotion/rollback lifecycle;</li>
+<li>governance separation and signed evidence display;</li>
+<li>clean-room coding, research and mixed-agent validation;</li>
+<li>packaged CLI, TUI and Studio beta;</li>
+<li>tested upgrade and rollback.</li>
+</ul>
+<p>Exit gate: measured held-out lift for at least one promoted composition, provenance visible, injected regression detected, rollback tested, and Kernel neutrality evidenced.</p>
+<h3 id="phase-f7-hardening-after-m-8">Phase F7 — Hardening after M-8</h3>
+<p>This phase is allowed to prepare M-9 compatibility but not implement speculative M-9/M-10 ontology.</p>
+<p>Deliverables:</p>
+<ul>
+<li>performance and accessibility hardening;</li>
+<li>remote/multi-user authorization where required;</li>
+<li>plugin developer kit;</li>
+<li>stable public SDK;</li>
+<li>desktop packaging decision based on measured need;</li>
+<li>migration support and long-running operational testing.</li>
+</ul>
+<hr />
+<h2 id="20-work-packages">20. Work packages</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Package</th>
+<th>Depends on</th>
+<th>Principal output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FE-001</td>
+<td>Frontend authority ADR</td>
+<td>convergence</td>
+<td>fixed boundary and refusals</td>
+</tr>
+<tr>
+<td>FE-002</td>
+<td>Client Gateway protocol</td>
+<td>FE-001</td>
+<td>versioned commands/queries/streams</td>
+</tr>
+<tr>
+<td>FE-003</td>
+<td>Schema-to-TypeScript codegen</td>
+<td>FE-002</td>
+<td>generated contracts and validators</td>
+</tr>
+<tr>
+<td>FE-004</td>
+<td>TypeScript SDK</td>
+<td>FE-003</td>
+<td>transport-independent client</td>
+</tr>
+<tr>
+<td>FE-005</td>
+<td>Fake gateway/testkit</td>
+<td>FE-003</td>
+<td>deterministic frontend testing</td>
+</tr>
+<tr>
+<td>FE-006</td>
+<td>CLI foundation</td>
+<td>FE-004</td>
+<td>automation surface</td>
+</tr>
+<tr>
+<td>FE-007</td>
+<td>External coding gate</td>
+<td>FE-006, M-4</td>
+<td>clean-room product evidence</td>
+</tr>
+<tr>
+<td>FE-008</td>
+<td>TUI foundation</td>
+<td>FE-004</td>
+<td>interactive terminal product</td>
+</tr>
+<tr>
+<td>FE-009</td>
+<td>Event/trajectory views</td>
+<td>FE-005, M-4</td>
+<td>timeline and forensic inspector</td>
+</tr>
+<tr>
+<td>FE-010</td>
+<td>Projection/replay views</td>
+<td>FE-009, M-5a</td>
+<td>AgentView and checkpoint diagnostics</td>
+</tr>
+<tr>
+<td>FE-011</td>
+<td>Agent catalog/builder</td>
+<td>FE-004</td>
+<td>versioned compositions</td>
+</tr>
+<tr>
+<td>FE-012</td>
+<td>Lineage explorer</td>
+<td>FE-010, M-6</td>
+<td>nested execution operation</td>
+</tr>
+<tr>
+<td>FE-013</td>
+<td>Studio shell/design system</td>
+<td>FE-004</td>
+<td>accessible visual foundation</td>
+</tr>
+<tr>
+<td>FE-014</td>
+<td>Causal graph/architecture view</td>
+<td>FE-009, FE-013</td>
+<td>internal-system visualization</td>
+</tr>
+<tr>
+<td>FE-015</td>
+<td>Experiment Lab</td>
+<td>FE-010, M-6.5</td>
+<td>paired trials and run diff</td>
+</tr>
+<tr>
+<td>FE-016</td>
+<td>Topology Studio</td>
+<td>FE-012, M-7</td>
+<td>declared/lowered/realized graphs</td>
+</tr>
+<tr>
+<td>FE-017</td>
+<td>Context/memory explorer</td>
+<td>FE-010, M-8</td>
+<td>retrieval provenance</td>
+</tr>
+<tr>
+<td>FE-018</td>
+<td>Skill/governance pipeline</td>
+<td>FE-015, M-8</td>
+<td>promotion and rollback UI</td>
+</tr>
+<tr>
+<td>FE-019</td>
+<td>Mixed-agent templates</td>
+<td>FE-011, FE-016</td>
+<td>coding/research collaboration</td>
+</tr>
+<tr>
+<td>FE-020</td>
+<td>M-8 product acceptance</td>
+<td>all above</td>
+<td>packaged beta and evidence</td>
+</tr>
+</tbody>
+</table>
+<p>Parallelization rule: contract/SDK work precedes surface divergence. CLI and design-system work may proceed in parallel after FE-004. Each capability is first integrated through the SDK, then rendered in surfaces.</p>
+<hr />
+<h2 id="21-canonical-user-journeys">21. Canonical user journeys</h2>
+<h3 id="211-create-a-new-agent">21.1 Create a new agent</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>open Agent Builder
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>-&gt; choose domain pack or generic starting point
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>-&gt; declare model policy, tools, context, evaluator and budgets
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>-&gt; select capabilities and inspect effective scope
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>-&gt; optionally bind topology/meta-controller/memory policy
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>-&gt; validate schemas and compatibility in backend
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>-&gt; run contract and smoke fixtures
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>-&gt; freeze immutable composition version
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>-&gt; publish to catalog with evidence and limitations
+</code></pre></div>
+<h3 id="212-use-an-agent">21.2 Use an agent</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>select immutable agent version
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>-&gt; select isolated project/workspace
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>-&gt; describe task and attach inputs
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>-&gt; review capability and budget request
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>-&gt; start run
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>-&gt; observe response, effects, lineages and artifacts
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>-&gt; resolve approvals if needed
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>-&gt; receive outcome and verifier result
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>-&gt; export/replay/compare
+</code></pre></div>
+<h3 id="213-improve-aether">21.3 Improve AETHER</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>identify unexpected behavior in Observatory
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>-&gt; pin run/event/artifact/composition identities
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>-&gt; reproduce from ledger or re-execute controlled variant
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>-&gt; classify contract, mechanism, policy, pack, adapter or UI defect
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>-&gt; export minimal evidence fixture
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>-&gt; implement change in correct layer
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>-&gt; run contract/replay/falsifier/product tests
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>-&gt; compare regression metrics
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>-&gt; attach evidence to PR and milestone gate
+</code></pre></div>
+<h3 id="214-propose-and-promote-a-skill">21.4 Propose and promote a skill</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>analyze trajectory corpus
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>-&gt; produce versioned candidate artifact
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>-&gt; evaluate in isolated treatment
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>-&gt; compare against baseline/held-out work
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>-&gt; independent evaluator attests evidence
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>-&gt; promoter reviews regression budget and provenance
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>-&gt; create new composition version using CAS
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>-&gt; canary/validate
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>-&gt; promote or rollback
+</code></pre></div>
+<h3 id="215-mixed-coding-and-research-agents">21.5 Mixed coding and research agents</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>research lineage gathers evidence and produces cited artifact
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>-&gt; planner consumes artifact through declared flow
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>-&gt; coding lineage implements bounded change
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>-&gt; verifier lineage tests implementation
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>-&gt; critic reviews evidence and patch
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>-&gt; parent synthesizes outcome
+</code></pre></div>
+<p>Every step uses ordinary nested lineages, artifacts and capabilities. “Researcher”, “coder” and “critic” are policies/roles in compositions, not Kernel entities.</p>
+<hr />
+<h2 id="22-product-metrics">22. Product metrics</h2>
+<p>The frontend program should measure:</p>
+<ul>
+<li>time to install and first successful run;</li>
+<li>task success and verified success;</li>
+<li>operator interventions and approval burden;</li>
+<li>cost, tokens and latency per successful outcome;</li>
+<li>recovery success after restart;</li>
+<li>evidence completeness;</li>
+<li>replay/reconstruction parity;</li>
+<li>agent creation time and validation failures;</li>
+<li>percentage of runs explainable to the relevant causal event/artifact;</li>
+<li>plugin/agent compatibility failures caught before execution;</li>
+<li>regressions caught before promotion;</li>
+<li>frontend crash/error rate and stream gap rate;</li>
+<li>accessibility and keyboard task completion;</li>
+<li>clean-room success outside the source repository.</li>
+</ul>
+<p>These metrics must be correlated with composition and contract versions. Product analytics must not leak private task content.</p>
+<hr />
+<h2 id="23-risks-and-mitigations">23. Risks and mitigations</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Consequence</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend becomes second runtime</td>
+<td>divergent truth</td>
+<td>gateway-only commands; projections-only reads</td>
+</tr>
+<tr>
+<td>Graph implies false causality</td>
+<td>incorrect debugging</td>
+<td>typed edge semantics; sequence distinct from cause</td>
+</tr>
+<tr>
+<td>Handwritten contract drift</td>
+<td>runtime failures</td>
+<td>schema generation and CI drift gate</td>
+</tr>
+<tr>
+<td>Dashboard bloat precedes product</td>
+<td>delayed validation</td>
+<td>CLI/TUI vertical slice and external gate first</td>
+</tr>
+<tr>
+<td>Huge ledgers freeze UI</td>
+<td>unusable observability</td>
+<td>pagination, virtualization, aggregation, worker layout</td>
+</tr>
+<tr>
+<td>Client cache treated as truth</td>
+<td>stale/unsafe decisions</td>
+<td>coverage/version labels and resync</td>
+</tr>
+<tr>
+<td>Plugin leaks secrets</td>
+<td>security incident</td>
+<td>sandbox, capability scopes, scrubbed previews</td>
+</tr>
+<tr>
+<td>Self-evaluation promotes itself</td>
+<td>epistemic failure</td>
+<td>generator/evaluator/promoter separation</td>
+</tr>
+<tr>
+<td>Agent Builder hardcodes coding</td>
+<td>lost generality</td>
+<td>generic composition contracts plus domain packs</td>
+</tr>
+<tr>
+<td>Desktop wrapper locks architecture</td>
+<td>maintenance burden</td>
+<td>web-first App and replaceable shell</td>
+</tr>
+<tr>
+<td>UI claims milestone completion</td>
+<td>false governance</td>
+<td>backend evidence/gate status only</td>
+</tr>
+<tr>
+<td>Testing inside AETHER contaminates result</td>
+<td>invalid product evidence</td>
+<td>clean external consumer and sealed tasks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="24-final-acceptance-checklist">24. Final acceptance checklist</h2>
+<h3 id="architecture">Architecture</h3>
+<ul>
+<li>[ ] One backend Runtime, ledger and composition path remain authoritative.</li>
+<li>[ ] CLI, TUI and App use the same SDK and generated contracts.</li>
+<li>[ ] No frontend package imports backend implementation internals.</li>
+<li>[ ] Topology, metacognition, memory and skills remain derived capabilities.</li>
+</ul>
+<h3 id="agent-product">Agent product</h3>
+<ul>
+<li>[ ] Coding, research and mixed agents are cataloged and runnable.</li>
+<li>[ ] New agent compositions can be created without Kernel changes.</li>
+<li>[ ] Capabilities, budgets and immutable versions are visible before execution.</li>
+<li>[ ] External clean-project installation and execution pass.</li>
+</ul>
+<h3 id="observatory">Observatory</h3>
+<ul>
+<li>[ ] Timeline distinguishes append order, causation and telemetry.</li>
+<li>[ ] Kernel, Runtime, adapters, packs and plugins can be inspected.</li>
+<li>[ ] Lineages, context, artifacts, projections and recovery are navigable.</li>
+<li>[ ] Live and cold-reconstructed views are equivalent.</li>
+</ul>
+<h3 id="workflows-and-experimentation">Workflows and experimentation</h3>
+<ul>
+<li>[ ] Declared, lowered and realized topology views are distinct.</li>
+<li>[ ] Paired runs and one-variable ablations are supported.</li>
+<li>[ ] Negative and inconclusive findings are representable.</li>
+<li>[ ] Run diff exposes divergence and uncertainty.</li>
+</ul>
+<h3 id="self-improvement">Self-improvement</h3>
+<ul>
+<li>[ ] Candidate generation, evaluation and promotion authorities are separated.</li>
+<li>[ ] Retrieval and skill use show provenance.</li>
+<li>[ ] Held-out lift is measured.</li>
+<li>[ ] Promotion and real rollback are tested.</li>
+</ul>
+<h3 id="quality">Quality</h3>
+<ul>
+<li>[ ] Contract, integration, replay, security, accessibility and performance gates pass.</li>
+<li>[ ] Errors and degraded states are explicit and actionable.</li>
+<li>[ ] Packages, docs and examples are independently installable.</li>
+<li>[ ] M-8 product evidence is accepted, not merely marked package-ready.</li>
+</ul>
+<hr />
+<h2 id="25-final-directive">25. Final directive</h2>
+<p>Implement this frontend as an external product and scientific interface over AETHER's existing substrate. Start with the contract gateway, SDK and clean-room CLI proof; add the TUI for continuous operational feedback; then build the Studio around the same projections and commands. Every visual feature must answer one of four questions: what was configured, what happened, why it was admissible, and what evidence supports the outcome.</p>
+<p>The completed system should make AETHER tangible. A developer will be able to build an agent, run it, observe its causal trajectory, inspect context and artifacts, understand Kernel-versus-plugin responsibility, reproduce failures, compare strategies and topologies, validate generality, and promote improvements under evidence and rollback. The frontend therefore closes the gap between a rigorous event-sourced framework and a useful family of coding, research and mixed-agent products—without weakening the small, domain-blind and scientifically falsifiable foundation that gives AETHER its long-term value.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

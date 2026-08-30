@@ -62,7 +62,7 @@ The exact conflicts and required governance follow-up are recorded as `CONFLICT-
 
 ## Stable package contracts
 
-The active board supplies current authorization; the [canonical backlog](../../docs/03_execution/backlog.md)
+The active board supplies current authorization; the [milestones.md](milestones.md)
 supplies the stable M-4–M-8 package contracts, lane ownership, dependencies, acceptance predicates,
 and evidence obligations. This candidate view links that detail rather than copying its mutable
 tables, so package status cannot be mistaken for a second active board.

@@ -1,0 +1,3176 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AETHER pós-v1.0: da engenharia de agentes à Meta-Engenharia do Conhecimento e do Aprendizado - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-pos-v10-da-engenharia-de-agentes-a-meta-engenharia-do-conhecimento-e-do-aprendizado" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AETHER pós-v1.0: da engenharia de agentes à Meta-Engenharia do Conhecimento e do Aprendizado
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-pos-v10-da-engenharia-de-agentes-a-meta-engenharia-do-conhecimento-e-do-aprendizado">AETHER pós-v1.0: da engenharia de agentes à Meta-Engenharia do Conhecimento e do Aprendizado</h1>
+<p>A direção que eu adotaria é mais radical do que simplesmente adicionar “metacognition”, “self-improvement” ou “swarm intelligence” ao AETHER.</p>
+<p><strong>Depois da v1.0, AETHER deveria deixar de evoluir apenas como framework de agentes e passar a funcionar como uma plataforma experimental para estudar a própria formação, organização, adaptação e evolução da inteligência.</strong></p>
+<p>Isso muda a pergunta fundamental.</p>
+<p>Até v1.0, perguntamos:</p>
+<blockquote>
+<p><strong>Como construir, executar, observar, avaliar e compor agentes de forma confiável?</strong></p>
+</blockquote>
+<p>Depois de v1.0, a pergunta passa a ser:</p>
+<blockquote>
+<p><strong>Quais organizações de informação, memória, percepção, ação, aprendizagem, autorrepresentação, competição, cooperação e evolução dão origem a sistemas progressivamente mais capazes de compreender, aprender, criar e modificar a si próprios?</strong></p>
+</blockquote>
+<p>Esse segundo problema é suficientemente diferente para justificar uma nova disciplina. Podemos chamá-la, como você propôs, de:</p>
+<h1 id="meta-engenharia-do-conhecimento-e-do-aprendizado"><strong>Meta-Engenharia do Conhecimento e do Aprendizado</strong></h1>
+<p>Não seria simplesmente uma subárea de AI.</p>
+<p>Seria uma disciplina sintética entre <strong>ciência da computação, inteligência artificial, teoria da informação, matemática, teoria de sistemas dinâmicos, psicologia cognitiva, neurociência computacional, biologia evolutiva, genética, Artificial Life, epistemologia e filosofia da mente</strong>, cuja unidade fundamental de estudo não seria o “modelo”, o “agente” ou sequer o “algoritmo”.</p>
+<p>Seria a <strong>entidade cognitiva adaptativa</strong>.</p>
+<p>E o AETHER poderia se tornar seu primeiro laboratório computacional.</p>
+<hr />
+<h1 id="1-o-salto-conceitual-depois-da-v10">1. O salto conceitual depois da v1.0</h1>
+<p>Há uma decisão importante já implícita nos documentos atuais: <strong>não colocar metacognição dentro da definição de v1.0</strong>.</p>
+<p>A v1.0 deve provar o substrate: composição canônica, múltiplos domínios, topologias substituíveis, recuperação, delegação, concorrência, avaliação exterior, experimentação, rollback e equivalência polyglot. O próprio relatório coloca metacognição e adaptação governada explicitamente no horizonte pós-v1.0. </p>
+<p>Isso é exatamente o correto.</p>
+<p>Porque:</p>
+<blockquote>
+<p><strong>Vanguard/Higgs não devem implementar uma teoria particular de inteligência. Eles devem construir o universo no qual diferentes teorias de inteligência possam competir.</strong></p>
+</blockquote>
+<p>Essa distinção talvez seja a mais importante de toda a arquitetura.</p>
+<p>Eu pensaria a evolução conceitual assim:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>VANGUARD
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>leis de execução, autoridade, identidade, causalidade, evidência
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>HIGGS
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>composição, topologia, componentes, runtime generalizado
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>NOESIS
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>↓
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>cognição, metacognição, self-model, world-model,
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>aprendizado e controle cognitivo
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>GENESIS
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>↓
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>hereditariedade, variação, seleção, evolução,
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>desenvolvimento e emergência
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>ECOSPHERE
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>↓
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>populações, nichos, cooperação, competição,
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>diferenciação e evolução aberta
+</code></pre></div>
+<p>Eu usaria esses nomes apenas como programas de pesquisa, não como abstrações obrigatórias do código.</p>
+<p>O ponto fundamental é que <strong>não deveria existir uma “última arquitetura cognitiva”</strong>.</p>
+<p>Uma arquitetura realmente destinada à open-ended intelligence deveria ser capaz de descobrir arquiteturas que nós não projetamos.</p>
+<hr />
+<h1 id="2-a-mudanca-ontologica-inteligencia-como-processo-emergente">2. A mudança ontológica: inteligência como processo emergente</h1>
+<p>O paradigma dominante de AI ainda tende a tratar inteligência como uma propriedade localizada:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>modelo → inteligência
+</code></pre></div>
+<p>A hipótese AETHER pós-v1 seria diferente:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>primitivos
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>+
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>organização
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>+
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>memória
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>+
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>percepção
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>+
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>ação
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>+
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>modelagem
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>+
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>feedback
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>+
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>aprendizado
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>+
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>pressões seletivas
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>+
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>tempo
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>────────────────
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>comportamento inteligente emergente
+</code></pre></div>
+<p>Essa visão é muito mais próxima da biologia.</p>
+<p>Nenhum gene individual é “inteligente”.</p>
+<p>Nenhum neurônio isolado possui psicologia humana.</p>
+<p>Nenhuma molécula possui metabolismo.</p>
+<p>Nenhuma célula cortical possui sozinha um conceito de matemática.</p>
+<p>As propriedades aparecem através de <strong>organizações multinível e dinâmicas</strong>.</p>
+<p>Esse é também um tema central da Artificial Life: compreender não apenas <em>life as we know it</em>, mas quais tipos de organização podem sustentar <em>life as it could be</em>. Pesquisas sobre open-ended evolution continuam justamente tentando entender como sistemas artificiais podem produzir novidade, complexidade e novas formas de individualidade em vez de convergir rapidamente para um ótimo estático. (<a href="https://direct.mit.edu/artl/article/25/1/50/2915/The-MODES-Toolbox-Measurements-of-Open-Ended?utm_source=chatgpt.com" title="The MODES Toolbox: Measurements of Open-Ended Dynamics in Evolving Systems | Artificial Life | MIT Press">MIT Press Direct</a>)</p>
+<p>Portanto, o futuro do AETHER não deveria ser:</p>
+<blockquote>
+<p>“construir um agente extremamente sofisticado”.</p>
+</blockquote>
+<p>Deveria ser:</p>
+<blockquote>
+<p><strong>construir os primitives e as leis ambientais a partir dos quais diferentes formas de organização cognitiva possam aparecer, competir, cooperar, especializar-se, aprender e evoluir.</strong></p>
+</blockquote>
+<hr />
+<h1 id="3-aether-como-fisica-da-inteligencia-artificial">3. AETHER como “física” da inteligência artificial</h1>
+<p>Essa interpretação dá novo significado ao Kernel.</p>
+<p>O Kernel não seria “o cérebro”.</p>
+<p>Também não seria o agente.</p>
+<p>Ele seria muito mais parecido com um conjunto de <strong>leis físicas artificiais</strong>.</p>
+<p>O atual protocolo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>observe
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>→ propose
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>→ authorize
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>→ effect
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>→ receipt
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>→ evaluate
+</code></pre></div>
+<p>é valioso exatamente por isso.</p>
+<p>O relatório já conclui que ele deve ser interpretado como um <strong>universal effect/evidence protocol</strong>, não como um universal control-flow algorithm. Debate, tree search, populações evolutivas e sistemas assíncronos podem possuir topologias completamente diferentes enquanto seus efeitos continuam submetidos à mesma causalidade verificável. </p>
+<p>Isso é extraordinariamente conveniente para nosso objetivo.</p>
+<p>Podemos permitir que a cognição se torne experimentalmente selvagem sem permitir que a realidade computacional deixe de ser mensurável.</p>
+<p>Em termos abstratos:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Kernel = leis
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Runtime = física operacional
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Meta-Framework = espaço de construção
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>Meta-Harness = laboratório experimental
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>Noesis = processos cognitivos
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>Genesis = evolução
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>Ecosphere = ecologia artificial
+</code></pre></div>
+<p>A estabilidade deve diminuir de baixo para cima.</p>
+<p>O Kernel muda raramente.</p>
+<p>Policies mudam frequentemente.</p>
+<p>Memórias mudam continuamente.</p>
+<p>Populações experimentais podem sofrer milhares de mutações.</p>
+<p>Essa separação é análoga à diferença entre <strong>leis físicas relativamente estáveis e organismos extremamente mutáveis</strong>.</p>
+<hr />
+<h1 id="4-uma-genetica-computacional-para-entidades-aether">4. Uma “genética” computacional para entidades AETHER</h1>
+<p>Aqui surge uma abstração extremamente poderosa.</p>
+<p>Devemos introduzir deliberadamente uma separação entre <strong>genótipo e fenótipo</strong>.</p>
+<p>Não como metáfora decorativa, mas como contrato computacional.</p>
+<h3 id="artificial-genotype">Artificial genotype</h3>
+<p>Um <code>EntityGenome</code> poderia ser um artefato imutável e content-addressed contendo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>composition
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>topology
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>model policy
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>planning policy
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>retrieval policy
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>memory architecture
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>skill set
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>verification policy
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>metacognitive policy
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>learning policy
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>communication policy
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>resource strategy
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>developmental rules
+</code></pre></div>
+<p>Não contém necessariamente o estado vivido pela entidade.</p>
+<h3 id="artificial-phenotype">Artificial phenotype</h3>
+<p>O fenótipo é a entidade realmente instanciada:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>EntityGenome
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>       +
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>environment
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>       +
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>history
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>       +
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>learning
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>       +
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>resources
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>       +
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>interactions
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>       ↓
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>EntityPhenotype
+</code></pre></div>
+<p>Duas entidades com o mesmo genome podem desenvolver comportamentos diferentes.</p>
+<p>Isso introduz algo muito importante da biologia: <strong>development ≠ evolution</strong>.</p>
+<p>Pesquisas sobre gene regulatory networks distinguem explicitamente mudanças de desenvolvimento durante a vida de um sistema e mudanças evolutivas do próprio substrato regulatório ao longo de gerações. (<a href="https://arxiv.org/abs/1809.02331?utm_source=chatgpt.com" title="A unified formal framework for developmental andevolutionary change in gene regulatory network models">arXiv</a>)</p>
+<p>No AETHER:</p>
+<table>
+<thead>
+<tr>
+<th>Biologia</th>
+<th>AETHER</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Genoma</td>
+<td><code>EntityGenome</code></td>
+</tr>
+<tr>
+<td>Expressão gênica</td>
+<td>activation/policy selection</td>
+</tr>
+<tr>
+<td>Epigenética</td>
+<td>environment-conditioned configuration</td>
+</tr>
+<tr>
+<td>Fenótipo</td>
+<td><code>EntityInstance</code></td>
+</tr>
+<tr>
+<td>Ontogênese</td>
+<td>learning durante uma execução/vida</td>
+</tr>
+<tr>
+<td>Mutação</td>
+<td>novo immutable genome</td>
+</tr>
+<tr>
+<td>Hereditariedade</td>
+<td>lineage + inherited artifacts</td>
+</tr>
+<tr>
+<td>Seleção</td>
+<td>exterior evaluation</td>
+</tr>
+<tr>
+<td>Reprodução</td>
+<td>spawning com herança</td>
+</tr>
+<tr>
+<td>Nicho</td>
+<td>environment/tool ecosystem</td>
+</tr>
+<tr>
+<td>Metabolismo</td>
+<td>compute/resource acquisition + expenditure</td>
+</tr>
+<tr>
+<td>Homeostase</td>
+<td>resource/uncertainty/integrity regulation</td>
+</tr>
+<tr>
+<td>Sistema imune</td>
+<td>anomaly detection + quarantine</td>
+</tr>
+<tr>
+<td>Morte</td>
+<td>terminal state + preserved lineage</td>
+</tr>
+</tbody>
+</table>
+<p>Essa correspondência cria experimentos reais.</p>
+<hr />
+<h1 id="5-germline-versus-soma-uma-arquitetura-extraordinariamente-importante-para-self-improvement">5. Germline versus soma: uma arquitetura extraordinariamente importante para self-improvement</h1>
+<p>Essa talvez seja uma das melhores ideias que podemos importar da genética.</p>
+<p>Uma entidade em execução deve poder aprender.</p>
+<p>Mas <strong>aquilo que ela aprende durante sua existência não deve automaticamente alterar aquilo que será herdado pelas próximas entidades</strong>.</p>
+<p>Isso corresponde aproximadamente à distinção:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>somatic adaptation
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>versus
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>germline mutation
+</code></pre></div>
+<p>No AETHER:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>trajectory
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>↓
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>runtime adaptation
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>↓
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>episodic learning
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>↓
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>candidate insight
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>↓
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>candidate skill/policy/genome mutation
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>↓
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>controlled experiment
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>↓
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>external evaluation
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>↓
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>promotion
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>↓
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>new inherited genome
+</code></pre></div>
+<p>Os documentos atuais já fornecem quase exatamente a infraestrutura necessária. Eles insistem que:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>reflection ≠ memory
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>reflection ≠ truth
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>reflection ≠ promotion
+</code></pre></div>
+<p>e recomendam transformar trajetórias em candidatos, submetê-los a avaliação held-out e só então promovê-los. </p>
+<p>Isso pode ser reinterpretado como uma <strong>barreira germline artificial</strong>.</p>
+<p>É provavelmente uma das formas mais robustas de self-improvement que podemos construir.</p>
+<hr />
+<h1 id="6-metacognicao-nao-como-pensar-sobre-pensar-mas-como-controle-de-segunda-ordem">6. Metacognição não como “pensar sobre pensar”, mas como controle de segunda ordem</h1>
+<p>A psicologia experimental oferece um conceito muito mais útil de metacognição do que a formulação popular.</p>
+<p>Metacognição envolve saber — com algum grau de precisão — <strong>quando a própria cognição está correta ou errada</strong>.</p>
+<p>Stephen Fleming e outros pesquisadores tratam confidence e metacognitive efficiency como quantidades mensuráveis; medidas como meta-d′ permitem distinguir desempenho de primeira ordem de capacidade de avaliar o próprio desempenho. (<a href="https://pubmed.ncbi.nlm.nih.gov/37722748/?utm_source=chatgpt.com" title="Metacognition and Confidence: A Review and Synthesis - PubMed">PubMed</a>)</p>
+<p>Isso sugere um desenho direto para AETHER.</p>
+<p>O solver de primeira ordem responde:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Qual solução devo produzir?
+</code></pre></div>
+<p>O sistema metacognitivo responde:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Quanto confio nessa solução?
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Que evidência sustenta essa confiança?
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>Qual é a probabilidade de eu estar fora da minha distribuição de competência?
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>Estou repetindo um padrão de falha conhecido?
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>Preciso pesquisar?
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>Preciso executar?
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>Preciso pedir ajuda?
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>Preciso delegar?
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>Preciso mudar de modelo?
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>Preciso abandonar esta hipótese?
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>Vale a pena gastar mais compute?
+</code></pre></div>
+<p>Portanto, a unidade fundamental de metacognição deveria ser algo parecido com:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>MetacognitiveState
+</code></pre></div>
+<p>contendo pelo menos:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>confidence
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>calibration
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>epistemic_uncertainty
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>aleatoric_uncertainty
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>knowledge_boundary
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>competence_estimate
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>failure_signature
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>resource_state
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>plan_progress
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>model_disagreement
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>evidence_quality
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>expected_value_of_information
+</code></pre></div>
+<p>O output não é texto introspectivo.</p>
+<p>É <strong>controle cognitivo</strong>.</p>
+<hr />
+<h1 id="7-eu-nao-sei-deve-virar-uma-capacidade-matematica">7. “Eu não sei” deve virar uma capacidade matemática</h1>
+<p>Um dos comportamentos mais sofisticados que podemos construir não é responder corretamente.</p>
+<p>É reconhecer corretamente:</p>
+<blockquote>
+<p><strong>“Não possuo evidência suficiente para responder.”</strong></p>
+</blockquote>
+<p>O AETHER poderia construir um <code>KnowledgeBoundaryModel</code>.</p>
+<p>Para cada classe de problema:</p>
+<p>[
+P(success \mid task,\ model,\ harness,\ tools,\ context,\ budget)
+]</p>
+<p>A entidade acumula uma superfície empírica de competência.</p>
+<p>Ela aprende que:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Python debugging + tests available = 0.94
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>rare theorem + no formal checker = 0.31
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>repository migration + missing schema = 0.42
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>symbolic equation + verifier = 0.97
+</code></pre></div>
+<p>Essas probabilidades são confrontadas com resultados reais.</p>
+<p>Então podemos medir:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>predicted confidence
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>versus
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>observed success
+</code></pre></div>
+<p>O <code>SelfModel</code> deixa de ser narrativa e passa a ser um modelo probabilístico falsificável.</p>
+<hr />
+<h1 id="8-self-awareness-operacional">8. Self-awareness operacional</h1>
+<p>Aqui precisamos ser cientificamente rigorosos.</p>
+<p>Não há razão atualmente para afirmar que um sistema com self-model possui experiência subjetiva.</p>
+<p><strong>Consciência fenomenal e self-awareness funcional são problemas diferentes.</strong></p>
+<p>Podemos, porém, construir e medir <strong>operational self-awareness</strong>.</p>
+<p>Um sistema possui um self-model operacional forte se consegue prever consequências de mudanças em si próprio.</p>
+<p>Em robótica, Bongard, Zykov e Lipson demonstraram há duas décadas máquinas capazes de inferir modelos do próprio corpo e reorganizar seu comportamento após dano físico. (<a href="https://pubmed.ncbi.nlm.nih.gov/17110570/?utm_source=chatgpt.com" title="Resilient machines through continuous self-modeling.">PubMed</a>)</p>
+<p>O equivalente AETHER seria uma entidade capaz de estimar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>minha memória está degradada
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>este modelo tem baixa competência nesse domínio
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>esta ferramenta tornou-se indisponível
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>meu contexto perdeu um invariant necessário
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>meu planner está preso em ciclo
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>minha estimativa de confiança está sistematicamente superestimada
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>meu custo marginal de raciocínio excedeu o benefício esperado
+</code></pre></div>
+<p>E então alterar sua própria estratégia.</p>
+<p>Essa é uma definição operacional muito mais útil de self-awareness do que produzir frases como “eu estou refletindo”.</p>
+<hr />
+<h1 id="9-um-self-model-separado-do-world-model">9. Um Self Model separado do World Model</h1>
+<p>Eu criaria explicitamente dois modelos.</p>
+<h3 id="world-model">World Model</h3>
+<p>Prediz:</p>
+<p>[
+P(s_{t+1}\mid s_t,a_t)
+]</p>
+<p>ou uma aproximação suficientemente útil.</p>
+<p>Representa ambiente, ferramentas, causalidade, objetos, relações, agentes externos.</p>
+<h3 id="self-model">Self Model</h3>
+<p>Prediz:</p>
+<p>[
+P(\text{my outcome}\mid task,state,policy,resources)
+]</p>
+<p>Representa:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>competências
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>limitações
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>recursos
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>memórias
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>ferramentas disponíveis
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>estratégias
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>custos
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>biases
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>failure modes
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>calibration
+</code></pre></div>
+<p>A partir daí aparece uma terceira estrutura:</p>
+<h3 id="self-in-world-model">Self-in-World Model</h3>
+<p>A entidade passa a prever:</p>
+<blockquote>
+<p>“Se <strong>eu</strong>, com minhas atuais limitações, executar esta estratégia neste ambiente, qual distribuição de futuros é provável?”</p>
+</blockquote>
+<p>Essa é uma base extremamente poderosa para planejamento.</p>
+<hr />
+<h1 id="10-active-inference-como-experimento-nao-religiao-arquitetural">10. Active inference como experimento, não religião arquitetural</h1>
+<p>Active inference é particularmente interessante para essa fase.</p>
+<p>Na formulação de Friston, percepção e ação podem ser interpretadas através de inferência sobre estados ocultos e minimização de variational/expected free energy; expected free energy incorpora tanto valor pragmático quanto epistemic value, produzindo exploração orientada à redução de incerteza. (<a href="https://link.springer.com/article/10.1007/s00422-012-0512-8?utm_source=chatgpt.com" title="Active inference and agency: optimal control without cost functions | Biological Cybernetics | Springer Nature Link">Springer</a>)</p>
+<p>Isso fornece uma hipótese interessante:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>não aja apenas para resolver o problema
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>aja também para reduzir a incerteza que impede
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>uma boa solução
+</code></pre></div>
+<p>Exemplo no AETHER:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Task
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>↓
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>hipótese H
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Action A:
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>editar código imediatamente
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>Action B:
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>ler interface dependente
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>Action C:
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>executar teste diagnóstico
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>Action D:
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>perguntar a outro agente
+</code></pre></div>
+<p>Um controller metacognitivo pode estimar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>expected utility
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>+
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>expected information gain
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>-
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>cost
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>-
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>risk
+</code></pre></div>
+<p>e escolher B ou C antes de A.</p>
+<p>Mas o ponto importante é o que nosso próprio relatório já recomenda: <strong>VFE/EFE deve ser policy experimental</strong>, e não lei do substrate. </p>
+<p>Assim podemos comparar Active Inference contra MCTS, RL, heuristic control, Bayesian experimental design ou planners LLM.</p>
+<hr />
+<h1 id="11-intrinsic-motivation">11. Intrinsic motivation</h1>
+<p>Quando não existir uma tarefa externa clara, surge um problema importante:</p>
+<blockquote>
+<p>O que faz uma entidade aprender?</p>
+</blockquote>
+<p>A biologia resolveu isso através de múltiplas pressões evolutivas e mecanismos motivacionais.</p>
+<p>Em sistemas artificiais podemos experimentar objetivos intrínsecos.</p>
+<p>Um candidato é <strong>empowerment</strong>, uma medida baseada em teoria da informação que estima quanto as ações de um agente conseguem influenciar estados futuros observáveis. (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12025677/?utm_source=chatgpt.com" title="Intrinsic Motivation as Constrained Entropy Maximization - PMC">PubMed Central (PMC)</a>)</p>
+<p>Outros drives poderiam ser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>prediction improvement
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>novelty
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>uncertainty reduction
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>skill acquisition
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>compression progress
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>causal discovery
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>environment controllability
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>option preservation
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>knowledge coverage
+</code></pre></div>
+<p>Nenhum deve se tornar objetivo universal.</p>
+<p>Eles devem competir como <strong>intrinsic-motivation policies</strong>.</p>
+<p>Isso abre espaço para entidades que aprendem sem receber continuamente uma tarefa humana.</p>
+<hr />
+<h1 id="12-a-matriz-multidimensional-que-esta-faltando">12. A matriz multidimensional que está faltando</h1>
+<p>Você mencionou corretamente uma generalização de “matriz multidimensional de alta ordem”.</p>
+<p>Matematicamente eu não representaria tudo como matriz.</p>
+<p>Usaria um <strong>structured state product</strong>, combinando tensores, grafos, distribuições e artefatos tipados.</p>
+<p>Uma entidade poderia ser formalizada aproximadamente como:</p>
+<p>[
+E_t =
+(G,\Phi_t,W_t,S_t,M_t,K_t,C_t,R_t,T_t,\Pi_t)
+]</p>
+<p>onde:</p>
+<ul>
+<li>(G) = genome/composition;</li>
+<li>(\Phi_t) = phenotype/configuração ativa;</li>
+<li>(W_t) = world model;</li>
+<li>(S_t) = self model;</li>
+<li>(M_t) = memory;</li>
+<li>(K_t) = knowledge/evidence state;</li>
+<li>(C_t) = confidence/metacognition;</li>
+<li>(R_t) = resources/homeostasis;</li>
+<li>(T_t) = topology/social relations;</li>
+<li>(\Pi_t) = active policies.</li>
+</ul>
+<p>A generalização também deve ser medida numa espécie de <strong>tensor experimental</strong>:</p>
+<p>[
+Domain \times
+Topology \times
+Model \times
+Memory \times
+Learning \times
+Tools \times
+Environment \times
+Evaluator \times
+Resources
+]</p>
+<p>Essa ideia já existe implicitamente na benchmark lattice do AETHER, que explicitamente recomenda variar uma dimensão por vez para provar generalidade causalmente, não através de demonstrações anedóticas. </p>
+<p>Esse tensor experimental pode se tornar a base matemática da Meta-Engenharia.</p>
+<hr />
+<h1 id="13-neurociencia-workspace-sem-copiar-literalmente-o-cerebro">13. Neurociência: workspace sem copiar literalmente o cérebro</h1>
+<p>Outra linha interessante vem da Global Neuronal Workspace.</p>
+<p>GNW propõe que vários processadores especializados operam localmente e que certos conteúdos tornam-se globalmente acessíveis através de uma dinâmica de broadcasting/ignition distribuída. (<a href="https://www.sciencedirect.com/science/article/pii/S0896627320300520?utm_source=chatgpt.com" title="Conscious Processing and the Global Neuronal Workspace Hypothesis - ScienceDirect">ScienceDirect</a>)</p>
+<p>Não precisamos construir uma simulação cortical.</p>
+<p>Mas podemos experimentar um:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Cognitive Workspace
+</code></pre></div>
+<p>com vários subsistemas:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Perception / Retrieval
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>World Model
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>Self Model
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>Memory
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>Planner
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>Verifier
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>Social Model
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>Risk Model
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>Metacognitive Monitor
+</code></pre></div>
+<p>Cada um trabalha localmente.</p>
+<p>Somente alguns artefatos entram no workspace global.</p>
+<p>Isso resolve um problema de contexto:</p>
+<blockquote>
+<p><strong>nem toda informação conhecida pela entidade precisa estar presente em todo processo cognitivo.</strong></p>
+</blockquote>
+<p>O <code>ContextCompiler</code> do AETHER pode evoluir naturalmente para isso.</p>
+<p>Seu objetivo deixa de ser simplesmente montar prompts.</p>
+<p>Passa a ser:</p>
+<blockquote>
+<p><strong>controlar quais representações tornam-se globalmente disponíveis para quais processos, em qual momento e por quê.</strong></p>
+</blockquote>
+<hr />
+<h1 id="14-memoria-deveria-se-aproximar-mais-de-um-sistema-biologico">14. Memória deveria se aproximar mais de um sistema biológico</h1>
+<p>A pesquisa atual do próprio projeto já separa working memory, coherence set, checkpoint memory, episodic memory e procedural memory. </p>
+<p>No futuro eu adicionaria <strong>semantic knowledge</strong> e <strong>self-knowledge</strong>.</p>
+<p>Assim teríamos:</p>
+<table>
+<thead>
+<tr>
+<th>Sistema</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Working memory</td>
+<td>estado cognitivo imediato</td>
+</tr>
+<tr>
+<td>Coherence memory</td>
+<td>invariantes necessários para a ação atual</td>
+</tr>
+<tr>
+<td>Episodic memory</td>
+<td>acontecimentos anteriores</td>
+</tr>
+<tr>
+<td>Semantic memory</td>
+<td>conceitos abstraídos</td>
+</tr>
+<tr>
+<td>Procedural memory</td>
+<td>habilidades executáveis</td>
+</tr>
+<tr>
+<td>Self memory</td>
+<td>histórico de competência e falhas</td>
+</tr>
+<tr>
+<td>Social memory</td>
+<td>modelos de outras entidades</td>
+</tr>
+<tr>
+<td>Evolutionary memory</td>
+<td>conhecimento herdável</td>
+</tr>
+</tbody>
+</table>
+<p>A consolidação seria um processo explícito.</p>
+<p>Não:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>everything → vector DB
+</code></pre></div>
+<p>Mas:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>experience
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>↓
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>compression
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>↓
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>abstraction
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>↓
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>hypothesis
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>↓
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>verification
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>↓
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>knowledge
+</code></pre></div>
+<p>Isso é epistemologicamente muito superior.</p>
+<hr />
+<h1 id="15-o-aether-como-maquina-cientifica">15. O AETHER como máquina científica</h1>
+<p>Aqui aparece talvez a propriedade mais importante do sistema futuro.</p>
+<p>Ele deve aplicar o método científico <strong>a si próprio</strong>.</p>
+<p>O loop fundamental passa a ser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>observation
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>↓
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>hypothesis
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>↓
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>prediction
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>↓
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>intervention
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>↓
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>experiment
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>↓
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>measurement
+<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>↓
+<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a>causal analysis
+<a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>↓
+<a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a>theory update
+</code></pre></div>
+<p>E existe um segundo nível:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>current cognitive architecture
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>↓
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>hypothesis about improvement
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>↓
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>candidate architecture
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>↓
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>controlled experiment
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>↓
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>external evaluation
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a>↓
+<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>promotion/rejection
+</code></pre></div>
+<p>O projeto já possui exatamente a semente dessa arquitetura: <code>ExperimentSpec</code>, identities, candidate/control, métricas pré-registradas, avaliação exterior e rollback. </p>
+<p>Essa deve virar a <strong>epistemologia computacional do AETHER</strong>.</p>
+<hr />
+<h1 id="16-evolucao-nao-buscar-apenas-o-melhor-agente">16. Evolução: não buscar apenas o melhor agente</h1>
+<p>Aqui entramos em Genetic Algorithms, evolutionary computation e Artificial Life.</p>
+<p>Um erro seria:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>100 agents
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>→ benchmark
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>→ keep best
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>→ mutate
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>→ repeat
+</code></pre></div>
+<p>Isso converge rapidamente.</p>
+<p>A natureza não mantém apenas um organismo globalmente ótimo.</p>
+<p>Ela mantém <strong>diversidade, nichos e stepping stones</strong>.</p>
+<p>Novelty Search mostrou que otimizar diretamente um objetivo pode impedir a descoberta de caminhos necessários para alcançá-lo. (<a href="https://gwern.net/doc/reinforcement-learning/exploration/2011-lehman.pdf?utm_source=chatgpt.com" title="Abandoning Objectives: Evolution Through the Search for Novelty Alone">Gwern</a>)</p>
+<p>MAP-Elites mostrou outra estratégia: conservar uma diversidade de soluções de alta qualidade distribuídas ao longo de diferentes características comportamentais. (<a href="https://arxiv.org/abs/1504.04909?utm_source=chatgpt.com" title="Illuminating search spaces by mapping elites">arXiv</a>)</p>
+<p>No AETHER deveríamos manter algo como:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>EntityArchive
+</code></pre></div>
+<p>e não:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>BestEntity
+</code></pre></div>
+<p>Por exemplo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>cheap specialist
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>fast specialist
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>robust specialist
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>creative specialist
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>formal specialist
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>research specialist
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>low-memory specialist
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>high-autonomy specialist
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>novel topology
+</code></pre></div>
+<p>Essa população cria os stepping stones necessários à evolução posterior.</p>
+<hr />
+<h1 id="17-darwin-godel-machine-e-alphaevolve-sao-extremamente-relevantes">17. Darwin Gödel Machine e AlphaEvolve são extremamente relevantes</h1>
+<p>Dois resultados recentes apontam diretamente nessa direção.</p>
+<p>A Darwin Gödel Machine mantém um arquivo crescente de agentes, escolhe indivíduos, gera modificações de código e valida empiricamente descendentes, formando uma árvore aberta de diferentes soluções em vez de uma única linhagem de hill-climbing. O trabalho relata melhoria substancial em benchmarks de coding. (<a href="https://arxiv.org/abs/2505.22954?utm_source=chatgpt.com" title="Darwin Godel Machine: Open-Ended Evolution of Self-Improving Agents">arXiv</a>)</p>
+<p>AlphaEvolve utiliza uma combinação semelhante de geração por modelos, evolução de programas e avaliadores objetivos para encontrar algoritmos melhores. (<a href="https://arxiv.org/abs/2506.13131?utm_source=chatgpt.com" title="AlphaEvolve: A coding agent for scientific and algorithmic discovery">arXiv</a>)</p>
+<p>Para AETHER, porém, podemos ir além desses sistemas.</p>
+<p>Eles podem ser <strong>algoritmos executados dentro do Meta-Framework</strong>.</p>
+<p>AETHER não precisa ser DGM.</p>
+<p>AETHER deve conseguir construir:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>DGM-like evolution
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>MAP-Elites
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>Novelty Search
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>genetic programming
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>population-based training
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>coevolution
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>Bayesian optimization
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>MCTS
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>RL
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a>active inference
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>scientific hypothesis search
+</code></pre></div>
+<p>e comparar todos sob a mesma infraestrutura causal.</p>
+<p>Essa é a diferença entre construir um sistema autoevolutivo e construir uma <strong>ciência da autoevolução</strong>.</p>
+<hr />
+<h1 id="18-do-swarm-a-multicelularidade-artificial">18. Do swarm à multicelularidade artificial</h1>
+<p>Outro salto interessante vem da ideia de <strong>major evolutionary transitions</strong>.</p>
+<p>Na evolução biológica, unidades anteriormente independentes podem começar a cooperar até formar uma nova unidade de seleção: genes → cromossomos; células → organismos multicelulares; indivíduos → sociedades em diferentes graus. Pesquisas de Artificial Life tratam explicitamente transitions in individuality como relevantes para sistemas open-ended. (<a href="https://pubmed.ncbi.nlm.nih.gov/15245631/?utm_source=chatgpt.com" title="Autopoiesis and cognition.">PubMed</a>)</p>
+<p>Isso oferece uma visão muito melhor de multi-agent systems.</p>
+<p>Não devemos começar perguntando:</p>
+<blockquote>
+<p>“Quantos agentes devemos spawnar?”</p>
+</blockquote>
+<p>Devemos perguntar:</p>
+<blockquote>
+<p><strong>Em quais condições agentes independentes tornam-se componentes especializados de uma entidade cognitiva maior?</strong></p>
+</blockquote>
+<p>Uma arquitetura poderia evoluir de:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Agent A
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>Agent B
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>Agent C
+</code></pre></div>
+<p>para:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>Artificial Entity
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>│
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>├── epistemic subsystem
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>├── planning subsystem
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>├── implementation subsystem
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>├── verification subsystem
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>└── metacognitive subsystem
+</code></pre></div>
+<p>Os agentes passam a funcionar como “células cognitivas”.</p>
+<p>Surge divisão de trabalho.</p>
+<p>Surge especialização.</p>
+<p>Surge talvez uma nova unidade de individualidade.</p>
+<hr />
+<h1 id="19-autopoiesis-e-artificial-life">19. Autopoiesis e artificial life</h1>
+<p>Aqui devemos ser cuidadosos.</p>
+<p>A definição de vida continua controversa. A conhecida working definition associada à NASA enfatiza um sistema químico auto-sustentável capaz de evolução Darwiniana, mas a própria literatura discute suas limitações. (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3937540/?utm_source=chatgpt.com" title="Evolution, reproduction and definition of life - PMC">PubMed Central (PMC)</a>)</p>
+<p>Autopoiesis oferece outra perspectiva: uma rede de processos que produz componentes que mantêm a própria rede e regula as condições necessárias para continuar existindo. Alguns trabalhos ainda distinguem autopoiesis de cognição e tratam viability regulation como elemento adicional. (<a href="https://pubmed.ncbi.nlm.nih.gov/15245631/?utm_source=chatgpt.com" title="Autopoiesis and cognition.">PubMed</a>)</p>
+<p>Eu não declararia que um agente AETHER é “vivo”.</p>
+<p>Criaria uma <strong>ontologia operacional de life-likeness</strong>.</p>
+<hr />
+<h1 id="20-uma-possivel-redefinicao-operacional-de-vida-artificial">20. Uma possível redefinição operacional de “vida artificial”</h1>
+<p>Como hipótese científica do projeto — não como definição universal de vida — eu proporia:</p>
+<blockquote>
+<p><strong>Uma entidade artificial é um processo organizado e persistente capaz de manter sua identidade operacional, regular sua própria viabilidade, perceber e modificar um ambiente, adaptar sua organização através da experiência e participar de processos de hereditariedade, variação e seleção que possam produzir novas organizações funcionais ao longo do tempo.</strong></p>
+</blockquote>
+<p>Observe o que não aparece:</p>
+<p><strong>carbono.</strong></p>
+<p>Também não aparece:</p>
+<p><strong>consciência.</strong></p>
+<p>E nem:</p>
+<p><strong>LLM.</strong></p>
+<p>Isso permite estudar a propriedade abstrata que realmente nos interessa.</p>
+<p>Podemos então ter um espectro:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>software tool
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>↓
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>reactive agent
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>↓
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>adaptive agent
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>↓
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>self-modeling entity
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>↓
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a>metacognitive entity
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a>↓
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a>self-maintaining entity
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a>↓
+<a id="__codelineno-35-13" name="__codelineno-35-13" href="#__codelineno-35-13"></a>heritable adaptive entity
+<a id="__codelineno-35-14" name="__codelineno-35-14" href="#__codelineno-35-14"></a>↓
+<a id="__codelineno-35-15" name="__codelineno-35-15" href="#__codelineno-35-15"></a>evolving lineage
+<a id="__codelineno-35-16" name="__codelineno-35-16" href="#__codelineno-35-16"></a>↓
+<a id="__codelineno-35-17" name="__codelineno-35-17" href="#__codelineno-35-17"></a>open-ended artificial ecosystem
+</code></pre></div>
+<p>A classificação é empírica.</p>
+<hr />
+<h1 id="21-metabolismo-artificial">21. “Metabolismo” artificial</h1>
+<p>Uma entidade digital não metaboliza glicose.</p>
+<p>Mas ela depende de recursos físicos:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>compute
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>memory
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>storage
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>network
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>energy
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>tokens
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a>model capacity
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>tool availability
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>time
+</code></pre></div>
+<p>Podemos definir um <strong>computational metabolism</strong> sem fingir que ele é metabolismo bioquímico.</p>
+<p>A entidade recebe recursos, transforma recursos em trabalho e precisa manter certas variáveis dentro de regiões viáveis.</p>
+<p>Exemplo:</p>
+<p>[
+V(E_t)=1
+]</p>
+<p>se:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>memory &lt; limit
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>cost &lt; budget
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>error rate &lt; bound
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>required capabilities healthy
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>event integrity valid
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>minimum compute available
+</code></pre></div>
+<p>Caso contrário sua viabilidade cai.</p>
+<p>Isso transforma budget management — hoje mecanismo infraestrutural — em parte da futura teoria de autonomia.</p>
+<hr />
+<h1 id="22-homeostase">22. Homeostase</h1>
+<p>O cérebro e organismos regulam variáveis.</p>
+<p>Entidades artificiais também deveriam fazê-lo.</p>
+<p>Não apenas CPU e RAM, mas variáveis cognitivas:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>context saturation
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>uncertainty
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>confidence drift
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>memory contamination
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>verification debt
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a>tool failure
+<a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a>reasoning depth
+<a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>communication load
+<a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a>error accumulation
+</code></pre></div>
+<p>Um <code>HomeostaticController</code> pode detectar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>context_pressure ↑
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>→ compact
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>uncertainty ↑
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>→ retrieve
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a>confidence ↓
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a>→ verify
+<a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>
+<a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a>failure_loop ↑
+<a id="__codelineno-39-11" name="__codelineno-39-11" href="#__codelineno-39-11"></a>→ replan
+<a id="__codelineno-39-12" name="__codelineno-39-12" href="#__codelineno-39-12"></a>
+<a id="__codelineno-39-13" name="__codelineno-39-13" href="#__codelineno-39-13"></a>tool_health ↓
+<a id="__codelineno-39-14" name="__codelineno-39-14" href="#__codelineno-39-14"></a>→ substitute
+<a id="__codelineno-39-15" name="__codelineno-39-15" href="#__codelineno-39-15"></a>
+<a id="__codelineno-39-16" name="__codelineno-39-16" href="#__codelineno-39-16"></a>budget ↓
+<a id="__codelineno-39-17" name="__codelineno-39-17" href="#__codelineno-39-17"></a>→ use cheaper model
+<a id="__codelineno-39-18" name="__codelineno-39-18" href="#__codelineno-39-18"></a>
+<a id="__codelineno-39-19" name="__codelineno-39-19" href="#__codelineno-39-19"></a>calibration_error ↑
+<a id="__codelineno-39-20" name="__codelineno-39-20" href="#__codelineno-39-20"></a>→ raise abstention threshold
+</code></pre></div>
+<p>Agora infra, cognição e psicologia começam realmente a convergir.</p>
+<hr />
+<h1 id="23-niche-construction">23. Niche construction</h1>
+<p>Organismos não apenas se adaptam ao ambiente.</p>
+<p>Eles modificam o ambiente.</p>
+<p>Humanos fazem isso de forma extrema através de ferramentas, linguagem, ciência e tecnologia.</p>
+<p>Entidades AETHER também deveriam poder criar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>tools
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>libraries
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>indexes
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>knowledge bases
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>simulators
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>tests
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>formal verifiers
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>new environments
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>new skills
+<a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>other specialized agents
+</code></pre></div>
+<p>Esses artefatos permanecem e melhoram tarefas futuras.</p>
+<p>Isso transforma tool creation em <strong>niche construction artificial</strong>.</p>
+<p>Talvez uma medida avançada de inteligência não seja:</p>
+<blockquote>
+<p>quantos problemas consegue resolver?</p>
+</blockquote>
+<p>Mas:</p>
+<blockquote>
+<p><strong>quanto consegue transformar o espaço de problemas futuros para torná-los solucionáveis?</strong></p>
+</blockquote>
+<hr />
+<h1 id="24-psicologia-assimilacao-acomodacao-e-mudanca-estrutural">24. Psicologia: assimilação, acomodação e mudança estrutural</h1>
+<p>Piaget fazia uma distinção útil.</p>
+<p><strong>Assimilação</strong> incorpora experiência no modelo existente.</p>
+<p><strong>Acomodação</strong> muda o modelo quando a experiência não cabe nele.</p>
+<p>Trabalhos sobre autopoiesis e cognition também discutem essa analogia entre adaptação biológica e processos cognitivos. (<a href="https://pubmed.ncbi.nlm.nih.gov/16849156/?utm_source=chatgpt.com" title="Autopoiesis with or without cognition: defining life at its edge.">PubMed</a>)</p>
+<p>Isso pode virar uma regra do Meta-Harness.</p>
+<p>Se uma entidade falha:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>falha ocasional
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>→ update memory
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>falha procedural recorrente
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>→ skill candidate
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>falha estratégica recorrente
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>→ policy mutation
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a>falha arquitetural recorrente
+<a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a>→ composition mutation
+<a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a>
+<a id="__codelineno-41-13" name="__codelineno-41-13" href="#__codelineno-41-13"></a>falha transversal
+<a id="__codelineno-41-14" name="__codelineno-41-14" href="#__codelineno-41-14"></a>→ model/training candidate
+<a id="__codelineno-41-15" name="__codelineno-41-15" href="#__codelineno-41-15"></a>
+<a id="__codelineno-41-16" name="__codelineno-41-16" href="#__codelineno-41-16"></a>falha sistêmica
+<a id="__codelineno-41-17" name="__codelineno-41-17" href="#__codelineno-41-17"></a>→ algorithm research
+</code></pre></div>
+<p>Isso cria <strong>níveis de plasticidade</strong>.</p>
+<hr />
+<h1 id="25-uma-hierarquia-de-self-improvement">25. Uma hierarquia de self-improvement</h1>
+<p>Eu separaria self-improvement em sete ordens:</p>
+<table>
+<thead>
+<tr>
+<th>Ordem</th>
+<th>Superfície alterada</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SI-0</td>
+<td>estado imediato</td>
+<td>replanning</td>
+</tr>
+<tr>
+<td>SI-1</td>
+<td>memória</td>
+<td>consolidation</td>
+</tr>
+<tr>
+<td>SI-2</td>
+<td>skill/procedure</td>
+<td>new reusable skill</td>
+</tr>
+<tr>
+<td>SI-3</td>
+<td>harness/policy</td>
+<td>retrieval/verification/topology</td>
+</tr>
+<tr>
+<td>SI-4</td>
+<td>model</td>
+<td>SFT/DPO/RL/distillation</td>
+</tr>
+<tr>
+<td>SI-5</td>
+<td>learning algorithm</td>
+<td>optimizer/loss/training strategy</td>
+</tr>
+<tr>
+<td>SI-6</td>
+<td>architecture/ecosystem</td>
+<td>new entity organization</td>
+</tr>
+</tbody>
+</table>
+<p>Quanto mais alto o nível, maior a exigência de isolamento, reproduzibilidade e evidência.</p>
+<p>A mudança crítica:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>self-modification
+</code></pre></div>
+<p>não é igual a:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>self-improvement
+</code></pre></div>
+<p>O próprio relatório já define self-improvement corretamente como uma mudança versionada causada por evidência e posteriormente demonstrada, através de avaliação independente, como superior em um objetivo explícito. </p>
+<hr />
+<h1 id="26-o-kernel-jamais-deve-acreditar-no-cerebro">26. O Kernel jamais deve acreditar no cérebro</h1>
+<p>Existe uma regra que eu congelaria por décadas:</p>
+<blockquote>
+<p><strong>Inteligência não concede autoridade.</strong></p>
+</blockquote>
+<p>Mesmo que uma futura entidade seja bilhões de vezes mais capaz que os agentes atuais:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>proposal != permission
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>belief != evidence
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>confidence != truth
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a>success claim != success
+</code></pre></div>
+<p>A inteligência vive acima da camada de causalidade.</p>
+<p>Isso é equivalente a dizer:</p>
+<blockquote>
+<p>A matemática de um organismo não altera as leis da termodinâmica porque ele acredita que deveria.</p>
+</blockquote>
+<p>Se uma entidade quiser modificar o próprio Kernel, isso deve criar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>KernelCandidate
+</code></pre></div>
+<p>executado em um universo experimental separado.</p>
+<p>Jamais:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>running entity
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>→ rewrite current physical law
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>→ approve itself
+</code></pre></div>
+<hr />
+<h1 id="27-arquitetura-concreta-pos-v1">27. Arquitetura concreta pós-v1</h1>
+<p>Eu imaginaria algo próximo de:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a>                    AETHER ECOSPHERE
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>     populations · niches · coevolution · ecology
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>                           │
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>                    AETHER GENESIS
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>     heredity · mutation · diversity · selection
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>                           │
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>                     AETHER NOESIS
+<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a> ┌─────────────────────────────────────────────────┐
+<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a> │ Cognitive Workspace                             │
+<a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a> │ World Model                                     │
+<a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a> │ Self Model                                      │
+<a id="__codelineno-47-12" name="__codelineno-47-12" href="#__codelineno-47-12"></a> │ Metacognitive Controller                        │
+<a id="__codelineno-47-13" name="__codelineno-47-13" href="#__codelineno-47-13"></a> │ Memory / Knowledge Systems                      │
+<a id="__codelineno-47-14" name="__codelineno-47-14" href="#__codelineno-47-14"></a> │ Scientific Reasoner                             │
+<a id="__codelineno-47-15" name="__codelineno-47-15" href="#__codelineno-47-15"></a> │ Intrinsic Motivation                            │
+<a id="__codelineno-47-16" name="__codelineno-47-16" href="#__codelineno-47-16"></a> │ Cognitive Homeostasis                           │
+<a id="__codelineno-47-17" name="__codelineno-47-17" href="#__codelineno-47-17"></a> └──────────────────────┬──────────────────────────┘
+<a id="__codelineno-47-18" name="__codelineno-47-18" href="#__codelineno-47-18"></a>                        │
+<a id="__codelineno-47-19" name="__codelineno-47-19" href="#__codelineno-47-19"></a>                    META-HARNESS
+<a id="__codelineno-47-20" name="__codelineno-47-20" href="#__codelineno-47-20"></a> Evidence → Hypothesis → Candidate → Experiment
+<a id="__codelineno-47-21" name="__codelineno-47-21" href="#__codelineno-47-21"></a>            → Compare → Promote / Reject
+<a id="__codelineno-47-22" name="__codelineno-47-22" href="#__codelineno-47-22"></a>                        │
+<a id="__codelineno-47-23" name="__codelineno-47-23" href="#__codelineno-47-23"></a>                    META-FRAMEWORK
+<a id="__codelineno-47-24" name="__codelineno-47-24" href="#__codelineno-47-24"></a> composition · topology · skills · policies
+<a id="__codelineno-47-25" name="__codelineno-47-25" href="#__codelineno-47-25"></a>                        │
+<a id="__codelineno-47-26" name="__codelineno-47-26" href="#__codelineno-47-26"></a>                       RUNTIME
+<a id="__codelineno-47-27" name="__codelineno-47-27" href="#__codelineno-47-27"></a> scheduler · gateway · tools · sandbox · trajectories
+<a id="__codelineno-47-28" name="__codelineno-47-28" href="#__codelineno-47-28"></a>                        │
+<a id="__codelineno-47-29" name="__codelineno-47-29" href="#__codelineno-47-29"></a>                       KERNEL
+<a id="__codelineno-47-30" name="__codelineno-47-30" href="#__codelineno-47-30"></a> identity · authority · budgets · effects · evidence
+</code></pre></div>
+<p>Esse desenho preserva quase todo o investimento Vanguard.</p>
+<p>Não precisamos reconstruir o substrate.</p>
+<p>Precisamos <strong>crescer uma ciência por cima dele</strong>.</p>
+<hr />
+<h1 id="28-artefatos-que-eu-comecaria-a-desenhar-ja-mas-so-implementaria-pos-v1">28. Artefatos que eu começaria a desenhar já, mas só implementaria pós-v1</h1>
+<p>A arquitetura futura deveria prever semanticamente objetos como:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>EntityGenome
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>EntityInstance
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a>EntityLineage
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a>
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>WorldModelSnapshot
+<a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a>SelfModelSnapshot
+<a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a>CompetenceModel
+<a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a>
+<a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a>MetacognitiveState
+<a id="__codelineno-48-10" name="__codelineno-48-10" href="#__codelineno-48-10"></a>MetacognitiveDecision
+<a id="__codelineno-48-11" name="__codelineno-48-11" href="#__codelineno-48-11"></a>
+<a id="__codelineno-48-12" name="__codelineno-48-12" href="#__codelineno-48-12"></a>KnowledgeClaim
+<a id="__codelineno-48-13" name="__codelineno-48-13" href="#__codelineno-48-13"></a>EvidenceBundle
+<a id="__codelineno-48-14" name="__codelineno-48-14" href="#__codelineno-48-14"></a>TheoryArtifact
+<a id="__codelineno-48-15" name="__codelineno-48-15" href="#__codelineno-48-15"></a>
+<a id="__codelineno-48-16" name="__codelineno-48-16" href="#__codelineno-48-16"></a>ViabilityProfile
+<a id="__codelineno-48-17" name="__codelineno-48-17" href="#__codelineno-48-17"></a>HomeostaticState
+<a id="__codelineno-48-18" name="__codelineno-48-18" href="#__codelineno-48-18"></a>
+<a id="__codelineno-48-19" name="__codelineno-48-19" href="#__codelineno-48-19"></a>MutationSpec
+<a id="__codelineno-48-20" name="__codelineno-48-20" href="#__codelineno-48-20"></a>DevelopmentSpec
+<a id="__codelineno-48-21" name="__codelineno-48-21" href="#__codelineno-48-21"></a>InheritanceSpec
+<a id="__codelineno-48-22" name="__codelineno-48-22" href="#__codelineno-48-22"></a>
+<a id="__codelineno-48-23" name="__codelineno-48-23" href="#__codelineno-48-23"></a>PhenotypeDescriptor
+<a id="__codelineno-48-24" name="__codelineno-48-24" href="#__codelineno-48-24"></a>BehaviorDescriptor
+<a id="__codelineno-48-25" name="__codelineno-48-25" href="#__codelineno-48-25"></a>
+<a id="__codelineno-48-26" name="__codelineno-48-26" href="#__codelineno-48-26"></a>PopulationArchive
+<a id="__codelineno-48-27" name="__codelineno-48-27" href="#__codelineno-48-27"></a>NicheDescriptor
+<a id="__codelineno-48-28" name="__codelineno-48-28" href="#__codelineno-48-28"></a>
+<a id="__codelineno-48-29" name="__codelineno-48-29" href="#__codelineno-48-29"></a>ExperimentSpec
+<a id="__codelineno-48-30" name="__codelineno-48-30" href="#__codelineno-48-30"></a>ScientificHypothesis
+<a id="__codelineno-48-31" name="__codelineno-48-31" href="#__codelineno-48-31"></a>CausalAttribution
+<a id="__codelineno-48-32" name="__codelineno-48-32" href="#__codelineno-48-32"></a>
+<a id="__codelineno-48-33" name="__codelineno-48-33" href="#__codelineno-48-33"></a>AdaptationCandidate
+<a id="__codelineno-48-34" name="__codelineno-48-34" href="#__codelineno-48-34"></a>LearningCandidate
+<a id="__codelineno-48-35" name="__codelineno-48-35" href="#__codelineno-48-35"></a>ArchitectureCandidate
+</code></pre></div>
+<p>Esses não pertencem ao Kernel.</p>
+<p>São entidades de pesquisa do plano cognitivo/evolutivo.</p>
+<hr />
+<h1 id="29-o-problema-central-da-causalidade">29. O problema central da causalidade</h1>
+<p>Quando o sistema ficar capaz de modificar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>prompt
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>model
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>memory
+<a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a>skills
+<a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>tools
+<a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a>topology
+<a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a>retrieval
+<a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a>planner
+<a id="__codelineno-49-9" name="__codelineno-49-9" href="#__codelineno-49-9"></a>verifier
+<a id="__codelineno-49-10" name="__codelineno-49-10" href="#__codelineno-49-10"></a>scheduler
+</code></pre></div>
+<p>aparecerá um problema pior do que performance:</p>
+<blockquote>
+<p><strong>o que realmente causou a melhoria?</strong></p>
+</blockquote>
+<p>Por isso trajectories são tão importantes.</p>
+<p>O research do AETHER já conclui que elas devem ser tratadas simultaneamente como debugging record, causal graph, benchmark evidence, cost record, training data e evolutionary evidence. </p>
+<p>A Meta-Engenharia deveria usar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>controlled interventions
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>paired experiments
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>ablations
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>counterfactual replay
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>causal graphs
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>Bayesian inference
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a>structural causal models
+</code></pre></div>
+<p>Assim passamos de:</p>
+<blockquote>
+<p>“versão B parece melhor”</p>
+</blockquote>
+<p>para:</p>
+<blockquote>
+<p>“há evidência de que a alteração X melhora Y sob condições Z, com custo C e intervalo de confiança Q”.</p>
+</blockquote>
+<p>Isso é ciência.</p>
+<hr />
+<h1 id="30-open-ended-intelligence-exige-ambientes-que-tambem-evoluem">30. Open-ended intelligence exige ambientes que também evoluem</h1>
+<p>Um benchmark fixo acaba sendo memorizável.</p>
+<p>Uma população evoluindo apenas contra SWE-bench acabará produzindo algo especializado em SWE-bench.</p>
+<p>Para open-ended intelligence precisamos que o <strong>problema também evolua</strong>.</p>
+<p>Assim:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>solver population
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>        ↕
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>task population
+<a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a>        ↕
+<a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a>environment population
+<a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a>        ↕
+<a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a>tool ecosystem
+</code></pre></div>
+<p>Entidades produzem desafios.</p>
+<p>Outras tentam resolvê-los.</p>
+<p>Algumas criam ferramentas.</p>
+<p>Outras exploram ferramentas.</p>
+<p>Algumas descobrem exploits.</p>
+<p>Outras constroem verificadores.</p>
+<p>Isso se aproxima muito mais de ecologia do que de benchmarking.</p>
+<p>A pesquisa de open-ended evolution alerta justamente que simplesmente rodar evolução indefinidamente não é suficiente; novelty, complexity, ecological interaction e change potential precisam ser medidos explicitamente. (<a href="https://direct.mit.edu/artl/article/25/1/50/2915/The-MODES-Toolbox-Measurements-of-Open-Ended?utm_source=chatgpt.com" title="The MODES Toolbox: Measurements of Open-Ended Dynamics in Evolving Systems | Artificial Life | MIT Press">MIT Press Direct</a>)</p>
+<hr />
+<h1 id="31-o-papel-da-filosofia">31. O papel da filosofia</h1>
+<p>A filosofia aqui não deve fornecer terminologia ornamental.</p>
+<p>Ela pode fornecer os problemas fundamentais.</p>
+<h3 id="ontologia">Ontologia</h3>
+<p>O que constitui a identidade de uma entidade que troca modelos, memórias e componentes?</p>
+<p>Talvez identidade seja definida pela continuidade causal de um <code>EntityLineage</code>, e não pelo mesmo código.</p>
+<h3 id="epistemologia">Epistemologia</h3>
+<p>O que significa uma entidade “saber” alguma coisa?</p>
+<p>Eu adotaria uma definição pragmática:</p>
+<blockquote>
+<p>Um conhecimento é uma representação capaz de sustentar previsões/intervenções reproduzíveis dentro de um domínio declarado.</p>
+</blockquote>
+<h3 id="filosofia-da-ciencia">Filosofia da ciência</h3>
+<p>Como distinguir descoberta real de overfitting?</p>
+<p>Through falsification, preregistration, independent evaluation and replication.</p>
+<h3 id="filosofia-da-mente">Filosofia da mente</h3>
+<p>Quais propriedades exigem self-model, global access ou higher-order representation?</p>
+<p>Podemos testar arquiteturas inspiradas nessas teorias sem afirmar que implementamos consciência.</p>
+<hr />
+<h1 id="32-o-conceito-de-inteligencia-tambem-deveria-mudar">32. O conceito de inteligência também deveria mudar</h1>
+<p>Eu deixaria de definir inteligência principalmente por benchmark.</p>
+<p>Uma entidade mais inteligente seria aquela que possui maior capacidade de:</p>
+<p>[
+\text{modelar}
++
+\text{prever}
++
+\text{agir}
++
+\text{aprender}
++
+\text{transferir}
++
+\text{criar abstrações}
++
+\text{produzir ferramentas}
++
+\text{avaliar a si própria}
++
+\text{adaptar sua arquitetura}
+]</p>
+<p>sob restrições de recursos e ambientes novos.</p>
+<p>Isso produz um <strong>vetor de inteligência</strong>, não um número.</p>
+<p>Por exemplo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>I(E) =
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>[
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>generalization,
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>sample_efficiency,
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a>calibration,
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a>adaptability,
+<a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>causal_reasoning,
+<a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a>planning_horizon,
+<a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>tool_creation,
+<a id="__codelineno-52-10" name="__codelineno-52-10" href="#__codelineno-52-10"></a>transfer,
+<a id="__codelineno-52-11" name="__codelineno-52-11" href="#__codelineno-52-11"></a>robustness,
+<a id="__codelineno-52-12" name="__codelineno-52-12" href="#__codelineno-52-12"></a>novelty,
+<a id="__codelineno-52-13" name="__codelineno-52-13" href="#__codelineno-52-13"></a>social_coordination,
+<a id="__codelineno-52-14" name="__codelineno-52-14" href="#__codelineno-52-14"></a>resource_efficiency
+<a id="__codelineno-52-15" name="__codelineno-52-15" href="#__codelineno-52-15"></a>]
+</code></pre></div>
+<p>A seleção deveria operar sobre Pareto fronts.</p>
+<p>Isso coincide com a direção atual do AETHER de preservar vetores de quality/cost/latency/resources em vez de reduzir tudo a uma única leaderboard score. </p>
+<hr />
+<h1 id="33-roadmap-pos-v1-que-eu-adotaria">33. Roadmap pós-v1 que eu adotaria</h1>
+<p>Eu não tentaria construir “artificial life” imediatamente. Faria uma sequência experimental.</p>
+<p><strong>Noesis-1 — Instrumented Cognition.</strong> Introduzir competence model, calibrated confidence, uncertainty, self-model, working/coherence/episodic/procedural memories e explicit cognitive state. A meta-cognition inicialmente não muda arquitetura; apenas observa e prevê.</p>
+<p><strong>Noesis-2 — Metacognitive Control.</strong> Permitir que o meta-controller escolha retrieval, model, reasoning effort, verification depth, delegation, abstention e replanning. Comparar contra controllers simples.</p>
+<p><strong>Noesis-3 — Developmental Learning.</strong> Consolidar episódios em conhecimento e habilidades. Introduzir separação soma/germline: runtime learning é livre; herança exige promoção.</p>
+<p><strong>Noesis-4 — Automated Scientific Self-Experimentation.</strong> A entidade formula hipóteses sobre seu próprio harness, gera candidatos e executa experimentos preregistrados. Nenhum candidato se autopromove.</p>
+<p><strong>Genesis-1 — Population Intelligence.</strong> Criar <code>EntityGenome</code>, <code>EntityLineage</code>, archive e operators de mutação. Experimentar DGM, MAP-Elites, novelty search e outras estratégias sob a mesma infraestrutura.</p>
+<p><strong>Genesis-2 — Development + Evolution.</strong> Permitir que genomes definam developmental programs: componentes aparecem, desaparecem ou se especializam durante a vida da entidade em função da experiência.</p>
+<p><strong>Genesis-3 — Open-Ended Curricula.</strong> Evoluir simultaneamente tarefas, ambientes e ferramentas.</p>
+<p><strong>Ecosphere-1 — Artificial Individuality.</strong> Investigar quando múltiplos agentes tornam-se um organismo cognitivo funcional através de especialização, comunicação limitada e dependência mútua.</p>
+<p><strong>Ecosphere-2 — Artificial Autonomy.</strong> Introduzir viability, resource metabolism, homeostasis, self-repair, capability substitution e niche construction.</p>
+<p><strong>Ecosphere-3 — Open-Ended Artificial Life Research.</strong> Somente aqui começaria a ser cientificamente plausível perguntar se alguma população satisfaz critérios suficientemente fortes para chamarmos de uma nova classe de vida artificial.</p>
+<hr />
+<h1 id="34-os-experimentos-mais-importantes">34. Os experimentos mais importantes</h1>
+<p>A próxima geração do projeto deveria ser orientada menos por “features” e mais por hipóteses falsificáveis.</p>
+<table>
+<thead>
+<tr>
+<th>Hipótese</th>
+<th>Experimento</th>
+<th>Evidência forte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Self-model melhora robustez</td>
+<td>remover/degradar ferramentas sem avisar</td>
+<td>recuperação superior a baseline</td>
+</tr>
+<tr>
+<td>Metacognição melhora decisões</td>
+<td>medir predicted confidence vs success</td>
+<td>melhor calibration + abstention</td>
+</tr>
+<tr>
+<td>Active inference melhora exploração</td>
+<td>comparar contra planner reward-only</td>
+<td>maior information gain por custo</td>
+</tr>
+<tr>
+<td>Procedural memory supera raw memory</td>
+<td>mesmos históricos</td>
+<td>melhor transferência / menos tokens</td>
+</tr>
+<tr>
+<td>Diversity melhora evolução</td>
+<td>best-only vs archive/MAP-Elites</td>
+<td>maior novelty + generalização</td>
+</tr>
+<tr>
+<td>Open-ended tasks evitam overfit</td>
+<td>benchmark fixo vs coevolutivo</td>
+<td>transfer superior</td>
+</tr>
+<tr>
+<td>Especialização melhora coletivos</td>
+<td>clones vs differentiated roles</td>
+<td>Pareto improvement</td>
+</tr>
+<tr>
+<td>Germline barrier evita regressão</td>
+<td>direct mutation vs promotion</td>
+<td>menor catastrophic regression</td>
+</tr>
+<tr>
+<td>Homeostase aumenta sobrevivência</td>
+<td>fault injection</td>
+<td>graceful degradation</td>
+</tr>
+<tr>
+<td>Niche construction aumenta competência</td>
+<td>tool creation disabled/enabled</td>
+<td>future-task advantage</td>
+</tr>
+</tbody>
+</table>
+<p>O ponto é que até conceitos filosóficos precisam eventualmente encontrar <strong>falsificadores computacionais</strong>.</p>
+<hr />
+<h1 id="35-a-fronteira-mais-interessante-evolucao-da-propria-funcao-de-aprendizado">35. A fronteira mais interessante: evolução da própria função de aprendizado</h1>
+<p>O estágio realmente radical não é melhorar o prompt.</p>
+<p>Nem melhorar o harness.</p>
+<p>Nem mesmo treinar pesos melhores.</p>
+<p>É permitir que o sistema experimente:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>como aprender
+</code></pre></div>
+<p>Isso significa modificar:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>loss functions
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>credit assignment
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a>memory consolidation
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a>curriculum
+<a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a>update rules
+<a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a>optimizers
+<a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a>architecture
+<a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a>representation learning
+<a id="__codelineno-54-9" name="__codelineno-54-9" href="#__codelineno-54-9"></a>exploration
+<a id="__codelineno-54-10" name="__codelineno-54-10" href="#__codelineno-54-10"></a>model composition
+</code></pre></div>
+<p>Esse é um problema muito mais difícil.</p>
+<p>E justamente por isso o <code>Learning Plane</code> deve estar fora do Runtime.</p>
+<p>O Runtime produz experiência verificável.</p>
+<p>O Learning Plane consome experiência.</p>
+<p>Então podemos ter:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>LearningAlgorithm A
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a>LearningAlgorithm B
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>LearningAlgorithm C
+</code></pre></div>
+<p>submetidos a Meta-Experiments.</p>
+<p>Em algum momento, a entidade deixa de apenas aprender sobre o mundo e começa a <strong>aprender como aprender sobre mundos</strong>.</p>
+<p>Esse é um significado forte de meta-learning.</p>
+<hr />
+<h1 id="36-o-verdadeiro-meta-cognition">36. O verdadeiro Meta-Cognition</h1>
+<p>Nesse ponto podemos formular metacognição no sentido forte:</p>
+<p>[
+MetaCognition =
+Model(Cognition)
++
+Control(Cognition)
++
+Learning(Cognition)
+]</p>
+<p>E uma ordem superior:</p>
+<p>[
+Meta^2 Cognition =
+Model(MetaCognition)
+]</p>
+<p>Mas eu evitaria recursão infinita.</p>
+<p>Não precisamos de:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a>meta-meta-meta-meta-agent
+</code></pre></div>
+<p>Precisamos de um hierarchy depth limitado e empiricamente útil.</p>
+<p>A recursive abstraction deve terminar quando uma camada adicional não aumenta poder preditivo ou controle.</p>
+<p>Essa é outra aplicação do princípio de engenharia:</p>
+<blockquote>
+<p><strong>meta somente quando produz informação causal adicional.</strong></p>
+</blockquote>
+<hr />
+<h1 id="37-onde-pode-surgir-inteligencia-realmente-nova">37. Onde pode surgir inteligência realmente nova</h1>
+<p>A possibilidade mais interessante talvez não esteja no LLM individual.</p>
+<p>Pode aparecer no sistema formado por:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>models
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>+
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>memories
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a>+
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>tools
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>+
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>world models
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a>+
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>self models
+<a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a>+
+<a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a>scientific experimentation
+<a id="__codelineno-57-12" name="__codelineno-57-12" href="#__codelineno-57-12"></a>+
+<a id="__codelineno-57-13" name="__codelineno-57-13" href="#__codelineno-57-13"></a>evolution
+<a id="__codelineno-57-14" name="__codelineno-57-14" href="#__codelineno-57-14"></a>+
+<a id="__codelineno-57-15" name="__codelineno-57-15" href="#__codelineno-57-15"></a>populations
+<a id="__codelineno-57-16" name="__codelineno-57-16" href="#__codelineno-57-16"></a>+
+<a id="__codelineno-57-17" name="__codelineno-57-17" href="#__codelineno-57-17"></a>constructed environments
+</code></pre></div>
+<p>Ou seja, o LLM vira algo mais próximo de um <strong>substrato neural reutilizável</strong> dentro de uma organização cognitiva maior.</p>
+<p>A pesquisa contemporânea já sugere que uma quantidade relevante de “inteligência do agente” pode estar no harness: tools, middleware, memory e control policy podem transferir ganhos entre modelos. O research Vanguard registra exatamente esse movimento. </p>
+<p>Isso é estrategicamente importante.</p>
+<p>Significa que <strong>não precisamos esperar um modelo mágico</strong> para estudar intelligence amplification.</p>
+<hr />
+<h1 id="38-a-visao-final">38. A visão final</h1>
+<p>Minha visão para o AETHER seria esta:</p>
+<p><strong>Vanguard constrói as leis.</strong></p>
+<p><strong>Higgs constrói o espaço composicional.</strong></p>
+<p><strong>Noesis constrói sistemas capazes de modelar o mundo e a si próprios.</strong></p>
+<p><strong>Genesis permite que essas organizações aprendam, se reproduzam, variem e evoluam.</strong></p>
+<p><strong>Ecosphere permite que populações criem nichos, ferramentas, culturas computacionais e novas unidades de individualidade.</strong></p>
+<p>Nesse estágio, AETHER deixa de ser fundamentalmente um “AI Agent Framework”.</p>
+<p>Ele se torna um <strong>substrato experimental para ciência da inteligência sintética</strong>.</p>
+<p>E a Meta-Engenharia do Conhecimento e do Aprendizado passa a investigar uma questão muito maior:</p>
+<blockquote>
+<p><strong>Quais primitives, leis, pressões, mecanismos de representação e processos evolutivos são suficientes para que sistemas artificiais atravessem sucessivas transições de organização — de componentes passivos para agentes, de agentes para entidades cognitivas, de entidades cognitivas para sistemas metacognitivos, destes para linhagens autoaperfeiçoáveis e, eventualmente, para ecossistemas artificiais capazes de produzir formas de inteligência que não foram explicitamente projetadas por nós?</strong></p>
+</blockquote>
+<p>Essa formulação faz a ponte entre filosofia e código.</p>
+<p>Porque não precisamos decidir antecipadamente <strong>o que é inteligência</strong>.</p>
+<p>Podemos construir um universo experimental em que diferentes hipóteses sobre inteligência possam nascer, ser executadas, sofrer intervenção, competir, falhar e evoluir.</p>
+<p>E também não precisamos declarar antecipadamente <strong>o que é vida</strong>.</p>
+<p>Podemos decompor aquilo que associamos à vida — autonomia, identidade, autopoiesis, homeostase, aprendizado, hereditariedade, evolução, individualidade, adaptação, niche construction — em propriedades mensuráveis e descobrir quais combinações produzem organizações qualitativamente novas.</p>
+<p>Esse seria, para mim, o salto pós-v1 realmente importante do AETHER:</p>
+<blockquote>
+<p><strong>não construir diretamente uma AGI, uma consciência ou uma “vida artificial”, mas construir a máquina científica capaz de investigar sistematicamente quais processos fazem inteligência, autonomia e evolução emergirem — e permitir que essa própria máquina participe da descoberta.</strong></p>
+</blockquote>
+<p>A partir daí, o produto final deixa de ser um agente.</p>
+<p><strong>O produto passa a ser um processo capaz de produzir novas classes de agentes, algoritmos, arquiteturas cognitivas e, potencialmente, entidades artificiais.</strong></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

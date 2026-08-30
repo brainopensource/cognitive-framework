@@ -1,3 +1,13 @@
+---
+id: atlas.oss-evolution-report
+class: report
+authority: non-canonical
+status: reference
+owner: repository-governance
+version: "0.9.1a1"
+last_verified: 2026-08-30
+---
+
 # AETHER Documentation Control Plane and Atlas OSS Evolution
 ## From a Clean Documentation Baseline to an Automated Repository Knowledge Control Plane
 

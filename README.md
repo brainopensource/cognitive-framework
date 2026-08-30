@@ -45,15 +45,15 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0103`](docs/02_decisions/0103-progress-projection-and-checkpoint-contract.md) and [`0099`](docs/02_decisions/0099-m7-topology-scheduler-disposition.md) |
+| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
 | **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | [`sprint_active.md`](docs/03_execution/sprint_active.md) is the sole current-state source; status is not duplicated here. |
+| **Current status** | [`docs/execution/active.md`](docs/execution/active.md) is the sole current-state source; status is not duplicated here. |
 | **Roadmap** | M-4 → M-5a → {M-5b ∥ accepted M-6} → M-6.5 → M-7 → M-8 → M-9 `0.9.0b1` → M-10 `0.9.0` |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Active board](https://img.shields.io/badge/Status-sprint__active-orange.svg)](docs/03_execution/sprint_active.md)
+[![Active board](https://img.shields.io/badge/Status-active.md-orange.svg)](docs/execution/active.md)
 
 ## 1. What exists today vs the locked target
 
@@ -100,12 +100,12 @@ falsifiers, and the normal evidence gates.
 | # | Layer | Documents |
 |---|---|---|
 | 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md), [`docs/01_law/`](docs/01_law/) |
-| 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) |
-| 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` |
-| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md) |
-| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md); [`sprint_upcoming.md`](docs/03_execution/sprint_upcoming.md) is staging |
-| 6 | **Communication** | this README, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/) |
+| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) |
+| 2 | **Decisions (binding)** | [`docs/decisions.md`](docs/decisions.md) |
+| 3 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) |
+| 4 | **Product PRDs** | [`docs/product/`](docs/product/) |
+| 5 | **Active Execution** | [`docs/execution/active.md`](docs/execution/active.md); [`docs/execution/milestones.md`](docs/execution/milestones.md) |
+| 6 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
 of its own.
@@ -114,10 +114,9 @@ of its own.
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
-3. [`docs/01_law/`](docs/01_law/) — detailed contracts (`DISPATCH`, `RUNTIME`, `EXTENSIBILITY`, `EVIDENCE`, `MEASUREMENT`, `SECURITY`).
-4. [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md) — accepted ADRs through `0102`.
-5. [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md), then [`sprint_active.md`](docs/03_execution/sprint_active.md).
-6. [`docs/04_architecture/overview.md`](docs/04_architecture/overview.md) — as-built map, navigational only.
+3. [`docs/decisions.md`](docs/decisions.md) — accepted ADRs and decision index.
+4. [`docs/execution/active.md`](docs/execution/active.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md).
+5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
 
 ---
 
@@ -187,8 +186,8 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ## 5. Roadmap & Execution Status
 
-Sequencing: [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md). Authorization:
-[`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
+Sequencing: [`docs/execution/milestones.md`](docs/execution/milestones.md). Authorization:
+[`docs/execution/active.md`](docs/execution/active.md).
 
 Stable dependency order is `C0 -> {M-4, M-5a}`, `M-5a -> M-5b`, `M-4 -> M-6`,
 `M-6 -> {M-6.5, M-7}`, and `{M-6.5, M-7} -> M-8`. Exact current state and permitted parallel work
@@ -294,7 +293,7 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files; current execution state lives only in
-[`sprint_active.md`](docs/03_execution/sprint_active.md).
+[`active.md`](docs/execution/active.md).
 
 
 ## 10. Mental models worth internalising

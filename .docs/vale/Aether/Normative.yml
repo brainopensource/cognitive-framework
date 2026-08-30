@@ -1,0 +1,8 @@
+extends: existence
+message: "Normative RFC-2119 keyword '%s' must appear in upper case when specifying target requirements."
+level: warning
+ignorecase: false
+tokens:
+  - \bmust\b
+  - \bshould\b
+  - \bmay\b

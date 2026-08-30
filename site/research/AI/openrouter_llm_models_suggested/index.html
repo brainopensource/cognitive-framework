@@ -1,0 +1,2662 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>OpenRouter LLM Models: Suggested SOTA Reference - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#openrouter-llm-models-suggested-sota-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OpenRouter LLM Models: Suggested SOTA Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../atlas/AETHER_DOCUMENTATION_CONTROL_PLANE_AND_ATLAS_OSS_EVOLUTION_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Atlas Control Plane Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-free-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Free Models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-verified-low-cost-paid-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Verified Low-Cost Paid Models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-great-paid-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Great Paid Models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-elite-top-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Elite Top Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Elite Top Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iq-tier-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IQ Tier Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#capability-tier-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Capability Tier Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="openrouter-llm-models-suggested-sota-reference">OpenRouter LLM Models: Suggested SOTA Reference</h1>
+<h2 id="0-free-models">0. Free Models</h2>
+<ul>
+<li>openrouter/free</li>
+<li>minimax/minimax-m3:free</li>
+<li>z-ai/glm-5.2:free</li>
+<li>inclusionai/ling-3.0-tiny:free</li>
+<li>poolside/laguna-s-2.1:free</li>
+<li>cohere/north-mini-code:free</li>
+<li>google/gemma-4-26b-a4b-it:free</li>
+<li>nvidia/nemotron-3-super-120b-a12b:free</li>
+<li>openai/gpt-oss-20b:free</li>
+</ul>
+<h2 id="1-verified-low-cost-paid-models">1. Verified Low-Cost Paid Models</h2>
+<ul>
+<li>qwen/qwen3.7-flash</li>
+<li>qwen/qwen3.6-35b-a3b</li>
+<li>deepseek/deepseek-v4-flash-0731 (v2 coding)</li>
+<li>deepseek/deepseek-v4-flash (v2 0423)</li>
+<li>z-ai/glm-5.3-flash</li>
+<li>openai/gpt-5.6-luna</li>
+<li>qwen/qwen3.8-27b</li>
+<li>stepfun/step-3.7-flash</li>
+<li>xiaomi/mimo-v2.5</li>
+<li>xiaomi/mimo-v2.5-pro</li>
+<li>minimax/minimax-m3</li>
+<li>tencent/hy3-preview</li>
+<li>upstage/solar-pro4</li>
+<li>moonshotai/kimi-k2.7-code</li>
+</ul>
+<h2 id="2-great-paid-models">2. Great Paid Models</h2>
+<ul>
+<li>google/gemini-3.7-flash</li>
+<li>deepseek/deepseek-v4-pro</li>
+<li>moonshotai/kimi-k3</li>
+<li>z-ai/glm-5.3</li>
+<li>qwen/qwen3.8-max</li>
+<li>meta/muse-spark-1.2</li>
+</ul>
+<h2 id="3-elite-top-models">3. Elite Top Models</h2>
+<ul>
+<li>
+<p>openai/gpt-5.6-sol</p>
+</li>
+<li>
+<p>deepseek-coder-v2:16b-instruct-q5</p>
+</li>
+</ul>
+<h3 id="iq-tier-benchmarks">IQ Tier Benchmarks</h3>
+<table>
+<thead>
+<tr>
+<th>IQ</th>
+<th>Capability Tier</th>
+<th>Real OpenRouter Model</th>
+<th>Real ms</th>
+<th>LAM ms</th>
+<th>Real Cost</th>
+<th>Parity Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IQ 0</td>
+<td>SWE Basics</td>
+<td><code>openrouter/free</code></td>
+<td>3792 ms</td>
+<td>0.10 ms</td>
+<td>$0.000000</td>
+<td>90 / 100</td>
+</tr>
+<tr>
+<td>IQ 1</td>
+<td>SWE Easy</td>
+<td><code>poolside/laguna-s-2.1:free</code></td>
+<td>15977 ms</td>
+<td>0.09 ms</td>
+<td>$0.000000</td>
+<td>90 / 100</td>
+</tr>
+<tr>
+<td>IQ 2</td>
+<td>SWE Medium</td>
+<td><code>nvidia/nemotron-3-super-120b-a12b:free</code></td>
+<td>1453 ms</td>
+<td>0.09 ms</td>
+<td>$0.000000</td>
+<td>95 / 100</td>
+</tr>
+<tr>
+<td>IQ 3</td>
+<td>SWE Advanced</td>
+<td><code>stealth/ox-alpha</code></td>
+<td>3479 ms</td>
+<td>0.07 ms</td>
+<td>$0.000000</td>
+<td>95 / 100</td>
+</tr>
+<tr>
+<td>IQ 4</td>
+<td>SWE Pro Entry</td>
+<td><code>deepseek/deepseek-v4-flash</code></td>
+<td>3386 ms</td>
+<td>0.07 ms</td>
+<td>$0.000059</td>
+<td>95 / 100</td>
+</tr>
+<tr>
+<td>IQ 5</td>
+<td>SWE Pro Hard</td>
+<td><code>openai/gpt-5.6-luna</code></td>
+<td>2363 ms</td>
+<td>0.07 ms</td>
+<td>$0.000068</td>
+<td>95 / 100</td>
+</tr>
+</tbody>
+</table>
+<h3 id="capability-tier-benchmarks">Capability Tier Benchmarks</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Capability Tier</th>
+<th>Real OpenRouter Model</th>
+<th>Real ms</th>
+<th>LAM ms</th>
+<th>Real Cost</th>
+<th>Parity Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tier 0</td>
+<td>SWE Basics</td>
+<td><code>openrouter/free</code></td>
+<td>27348 ms</td>
+<td>0.08 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 1</td>
+<td>SWE Easy</td>
+<td><code>poolside/laguna-s-2.1:free</code></td>
+<td>5833 ms</td>
+<td>0.07 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 2</td>
+<td>SWE Medium</td>
+<td><code>nvidia/nemotron-3-super-120b-a12b:free</code></td>
+<td>1270 ms</td>
+<td>0.06 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 3</td>
+<td>SWE Advanced</td>
+<td><code>stealth/ox-alpha</code></td>
+<td>7540 ms</td>
+<td>0.05 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 4</td>
+<td>SWE Complex</td>
+<td><code>deepseek/deepseek-v4-flash</code></td>
+<td>5406 ms</td>
+<td>0.05 ms</td>
+<td>$0.000082</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 5</td>
+<td>SWE Concurrency</td>
+<td><code>deepseek/deepseek-v4-flash</code></td>
+<td>4679 ms</td>
+<td>0.05 ms</td>
+<td>$0.000090</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 6</td>
+<td>SWE Consensus</td>
+<td><code>stealth/ox-alpha</code></td>
+<td>2905 ms</td>
+<td>0.05 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 7</td>
+<td>Pro Entry</td>
+<td><code>stealth/ox-alpha</code></td>
+<td>13117 ms</td>
+<td>0.06 ms</td>
+<td>$0.000000</td>
+<td>93 / 100</td>
+</tr>
+<tr>
+<td>Tier 8</td>
+<td>Pro Mid</td>
+<td><code>stealth/ox-alpha</code></td>
+<td>12520 ms</td>
+<td>0.05 ms</td>
+<td>$0.000000</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 9</td>
+<td>Pro Hard</td>
+<td><code>openai/gpt-5.6-luna</code></td>
+<td>2743 ms</td>
+<td>0.07 ms</td>
+<td>$0.000068</td>
+<td>98 / 100</td>
+</tr>
+<tr>
+<td>Tier 10</td>
+<td>Pro Frontier</td>
+<td><code>openai/gpt-5.6-luna</code></td>
+<td>2116 ms</td>
+<td>0.05 ms</td>
+<td>$0.000117</td>
+<td>93 / 100</td>
+</tr>
+</tbody>
+</table>
+<p>┌──────┬──────────────────┬──────────────────────────────────────────┬──────────┬───────────┬──────────────┬──────────────┐
+    │ IQ   │ Capability Tier  │ Real OpenRouter Model                    │ Real ms  │ LAM ms    │ Real Cost    │ Parity Score │
+    ├──────┼──────────────────┼──────────────────────────────────────────┼──────────┼───────────┼──────────────┼──────────────┤
+    │ IQ 0 │ SWE Basics       │ <code>openrouter/free</code>                        │ 3792 ms  │ 0.10 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 1 │ SWE Easy         │ <code>poolside/laguna-s-2.1:free</code>             │ 15977 ms │ 0.09 ms   │ $0.000000    │ 90 / 100     │
+    │ IQ 2 │ SWE Medium       │ <code>nvidia/nemotron-3-super-120b-a12b:free</code> │ 1453 ms  │ 0.09 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 3 │ SWE Advanced     │ <code>stealth/ox-alpha</code>                       │ 3479 ms  │ 0.07 ms   │ $0.000000    │ 95 / 100     │
+    │ IQ 4 │ SWE Pro Entry    │ <code>deepseek/deepseek-v4-flash</code>             │ 3386 ms  │ 0.07 ms   │ $0.000059    │ 95 / 100     │
+    │ IQ 5 │ SWE Pro Hard     │ <code>openai/gpt-5.6-luna</code>                    │ 2363 ms  │ 0.07 ms   │ $0.000068    │ 95 / 100     │
+    └──────┴──────────────────┴──────────────────────────────────────────┴──────────┴───────────┴──────────────┴──────────────┘</p>
+<div class="highlight"><pre><span></span><code>┌─────────┬──────────────────┬──────────────────────────────────────────┬───────────┬───────────┬──────────────┬──────────────┐
+│ Tier    │ Capability Tier  │ Real OpenRouter Model                    │ Real ms   │ LAM ms    │ Real Cost    │ Parity Score │
+├─────────┼──────────────────┼──────────────────────────────────────────┼───────────┼───────────┼──────────────┼──────────────┤
+│ Tier 0  │ SWE Basics       │ `openrouter/free`                        │ 27348 ms  │ 0.08 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 1  │ SWE Easy         │ `poolside/laguna-s-2.1:free`             │ 5833 ms   │ 0.07 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 2  │ SWE Medium       │ `nvidia/nemotron-3-super-120b-a12b:free` │ 1270 ms   │ 0.06 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 3  │ SWE Advanced     │ `stealth/ox-alpha`                       │ 7540 ms   │ 0.05 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 4  │ SWE Complex      │ `deepseek/deepseek-v4-flash`             │ 5406 ms   │ 0.05 ms   │ $0.000082    │ 98 / 100     │
+│ Tier 5  │ SWE Concurrency  │ `deepseek/deepseek-v4-flash`             │ 4679 ms   │ 0.05 ms   │ $0.000090    │ 98 / 100     │
+│ Tier 6  │ SWE Consensus    │ `stealth/ox-alpha`                       │ 2905 ms   │ 0.05 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 7  │ Pro Entry        │ `stealth/ox-alpha`                       │ 13117 ms  │ 0.06 ms   │ $0.000000    │ 93 / 100     │
+│ Tier 8  │ Pro Mid          │ `stealth/ox-alpha`                       │ 12520 ms  │ 0.05 ms   │ $0.000000    │ 98 / 100     │
+│ Tier 9  │ Pro Hard         │ `openai/gpt-5.6-luna`                    │ 2743 ms   │ 0.07 ms   │ $0.000068    │ 98 / 100     │
+│ Tier 10 │ Pro Frontier     │ `openai/gpt-5.6-luna`                    │ 2116 ms   │ 0.05 ms   │ $0.000117    │ 93 / 100     │
+└─────────┴──────────────────┴──────────────────────────────────────────┴───────────┴───────────┴──────────────┴──────────────┘
+</code></pre></div>
+<h1 id="bench-lm-september-2026">BENCH LM - SEPTEMBER 2026</h1>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Model</th>
+<th>Vendor</th>
+<th>Status</th>
+<th>Type</th>
+<th>Context</th>
+<th>Price</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Claude Mythos 5</td>
+<td>Anthropic</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M+</td>
+<td>$10.00 / $50.00</td>
+<td>83.4</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Claude Fable 5</td>
+<td>Anthropic</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M+</td>
+<td>$10.00 / $50.00</td>
+<td>83.15</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Claude Opus 5</td>
+<td>Anthropic</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>—</td>
+<td>$5.00 / $25.00</td>
+<td>83.06</td>
+</tr>
+<tr>
+<td>4</td>
+<td>GPT-5.6 Sol</td>
+<td>OpenAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1.05M</td>
+<td>$5.00 / $30.00</td>
+<td>82.2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Kimi K3</td>
+<td>Moonshot AI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1.05M</td>
+<td>$3.00 / $15.00</td>
+<td>80.61</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Qwen3.8 Max</td>
+<td>Alibaba</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>79.22</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Hy4 preview</td>
+<td>Tencent</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$0.00 / $0.00</td>
+<td>79.16</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Muse Spark 1.1</td>
+<td>Meta</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>77.14</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Claude Opus 4.8</td>
+<td>Anthropic</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$5.00 / $25.00</td>
+<td>76.6</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Gemini 3.6 Flash</td>
+<td>Google</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$1.50 / $7.50</td>
+<td>75.66</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Grok 4.5</td>
+<td>xAI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>500K</td>
+<td>$2.00 / $6.00</td>
+<td>75.65</td>
+</tr>
+<tr>
+<td>12</td>
+<td>GPT-5.4</td>
+<td>OpenAI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1.05M</td>
+<td>$2.50 / $15.00</td>
+<td>73.56</td>
+</tr>
+<tr>
+<td>13</td>
+<td>GPT-5.6 Terra</td>
+<td>OpenAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1.05M</td>
+<td>$2.50 / $15.00</td>
+<td>72.95</td>
+</tr>
+<tr>
+<td>14</td>
+<td>GPT-5.5</td>
+<td>OpenAI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$5.00 / $30.00</td>
+<td>72.92</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Claude Opus 4.7 (Adaptive)</td>
+<td>Anthropic</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$5.00 / $25.00</td>
+<td>72.58</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Qwen3.8-27B</td>
+<td>Alibaba</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>262K</td>
+<td>$0.00 / $0.00</td>
+<td>72.51</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Claude Opus 4.7</td>
+<td>Anthropic</td>
+<td>Current</td>
+<td>Standard</td>
+<td>1M</td>
+<td>$5.00 / $25.00</td>
+<td>72.33</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Qwen3.7 Max</td>
+<td>Alibaba</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>71.79</td>
+</tr>
+<tr>
+<td>19</td>
+<td>Muse Spark</td>
+<td>Meta</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>262K</td>
+<td>Not listed</td>
+<td>71.02</td>
+</tr>
+<tr>
+<td>20</td>
+<td>MiMo-V2.5-Pro</td>
+<td>Xiaomi</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>69.41</td>
+</tr>
+<tr>
+<td>21</td>
+<td>MiniMax M3</td>
+<td>MiniMax</td>
+<td>Current</td>
+<td>Standard</td>
+<td>1M</td>
+<td>$0.30 / $1.20</td>
+<td>68.73</td>
+</tr>
+<tr>
+<td>22</td>
+<td>dots3-note Preview</td>
+<td>Dots Studio</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>512K</td>
+<td>$0.00 / $0.00</td>
+<td>68.66</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Ornith-1.5-397B</td>
+<td>Ornith AI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>262K</td>
+<td>$0.00 / $0.00</td>
+<td>68.6</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Claude Opus 4.6</td>
+<td>Anthropic</td>
+<td>Superseded</td>
+<td>Standard</td>
+<td>1M</td>
+<td>$5.00 / $25.00</td>
+<td>68.26</td>
+</tr>
+<tr>
+<td>25</td>
+<td>Hy3</td>
+<td>Tencent</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>256K</td>
+<td>$0.00 / $0.00</td>
+<td>68.16</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Gemini 3 Pro</td>
+<td>Google</td>
+<td>Established</td>
+<td>Standard</td>
+<td>2M</td>
+<td>$2.00 / $12.00</td>
+<td>67.64</td>
+</tr>
+<tr>
+<td>27</td>
+<td>GPT-5.6 Luna</td>
+<td>OpenAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1.05M</td>
+<td>$1.00 / $6.00</td>
+<td>67.35</td>
+</tr>
+<tr>
+<td>28</td>
+<td>GPT-5.2 Pro</td>
+<td>OpenAI</td>
+<td>Established</td>
+<td>Reasoning</td>
+<td>400K</td>
+<td>$21.00 / $168.00</td>
+<td>67.3</td>
+</tr>
+<tr>
+<td>29</td>
+<td>MiMo-V2-Pro</td>
+<td>Xiaomi</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>67.15</td>
+</tr>
+<tr>
+<td>30</td>
+<td>GLM-5.1</td>
+<td>Z.AI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>203K</td>
+<td>$1.40 / $4.40</td>
+<td>67.04</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Inkling</td>
+<td>Thinking Machines Lab</td>
+<td>Current</td>
+<td>Standard</td>
+<td>1M</td>
+<td>$1.87 / $4.68</td>
+<td>67.02</td>
+</tr>
+<tr>
+<td>32</td>
+<td>GPT-5.4 nano</td>
+<td>OpenAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>400K</td>
+<td>$0.20 / $1.25</td>
+<td>66.78</td>
+</tr>
+<tr>
+<td>33</td>
+<td>GLM-5-Turbo</td>
+<td>Z.AI</td>
+<td>Established</td>
+<td>Reasoning</td>
+<td>200K</td>
+<td>$1.20 / $4.00</td>
+<td>66.3</td>
+</tr>
+<tr>
+<td>34</td>
+<td>GPT-5.3 Codex</td>
+<td>OpenAI</td>
+<td>Established</td>
+<td>Reasoning</td>
+<td>400K</td>
+<td>$1.75 / $14.00</td>
+<td>66.16</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Qwen3.7 Plus</td>
+<td>Alibaba</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>65.93</td>
+</tr>
+<tr>
+<td>36</td>
+<td>GLM-5</td>
+<td>Z.AI</td>
+<td>Superseded</td>
+<td>Standard</td>
+<td>200K</td>
+<td>$1.00 / $3.20</td>
+<td>65.89</td>
+</tr>
+<tr>
+<td>37</td>
+<td>Gemini 3.5 Flash-Lite</td>
+<td>Google</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$0.30 / $2.50</td>
+<td>65.5</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Claude Opus 4.6 (Adaptive)</td>
+<td>Anthropic</td>
+<td>Established</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>65.06</td>
+</tr>
+<tr>
+<td>39</td>
+<td>Claude Sonnet 5</td>
+<td>Anthropic</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$2.00 / $10.00</td>
+<td>65.02</td>
+</tr>
+<tr>
+<td>40</td>
+<td>Qwen3.6 Plus</td>
+<td>Alibaba</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>Not listed</td>
+<td>64.99</td>
+</tr>
+<tr>
+<td>41</td>
+<td>Claude Sonnet 4.6</td>
+<td>Anthropic</td>
+<td>Superseded</td>
+<td>Standard</td>
+<td>200K</td>
+<td>$3.00 / $15.00</td>
+<td>64.77</td>
+</tr>
+<tr>
+<td>42</td>
+<td>Gemini 3.5 Flash</td>
+<td>Google</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$1.50 / $9.00</td>
+<td>64.73</td>
+</tr>
+<tr>
+<td>43</td>
+<td>GPT-5.5 Pro</td>
+<td>OpenAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$30.00 / $180.00</td>
+<td>64.43</td>
+</tr>
+<tr>
+<td>44</td>
+<td>Grok 4.3</td>
+<td>xAI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$1.25 / $2.50</td>
+<td>64.25</td>
+</tr>
+<tr>
+<td>45</td>
+<td>Inkling-Small</td>
+<td>Thinking Machines Lab</td>
+<td>Current</td>
+<td>Standard</td>
+<td>1M</td>
+<td>$0.58 / $1.44</td>
+<td>64.02</td>
+</tr>
+<tr>
+<td>46</td>
+<td>Claude Opus 4.5</td>
+<td>Anthropic</td>
+<td>Established</td>
+<td>Standard</td>
+<td>200K</td>
+<td>$5.00 / $25.00</td>
+<td>63.91</td>
+</tr>
+<tr>
+<td>47</td>
+<td>Grok 4.6</td>
+<td>xAI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>500K</td>
+<td>$2.00 / $6.00</td>
+<td>63.42</td>
+</tr>
+<tr>
+<td>48</td>
+<td>GLM-5.2</td>
+<td>Z.AI</td>
+<td>Superseded</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$1.40 / $4.40</td>
+<td>63.4</td>
+</tr>
+<tr>
+<td>49</td>
+<td>MiniMax M2.7</td>
+<td>MiniMax</td>
+<td>Superseded</td>
+<td>Standard</td>
+<td>200K</td>
+<td>$0.30 / $1.20</td>
+<td>63.29</td>
+</tr>
+<tr>
+<td>50</td>
+<td>GLM-5.3</td>
+<td>Z.AI</td>
+<td>Current</td>
+<td>Reasoning</td>
+<td>1M</td>
+<td>$0.00 / $0.00</td>
+<td>62.84</td>
+</tr>
+</tbody>
+</table>
+<p><em>Showing 50 of 400</em></p>
+<p>───────────────────────────────┼──────────────────────┼──────────────────┼────────────┼────────────┼───────┼────────────┼─────────────┼────────────────────────────────────────────────
+   nvidia/nemotron-3-super       │ LRU TTL Expiry Bug   │ 398.90 ms        │ YES        │ YES        │ 1.0   │ 404        │ $0.000000   │ "The method now correctly checks whether the
+                                 │                      │                  │            │            │       │            │             │ entry’s time-to-live has elapsed based on..."
+   nvidia/nemotron-3-super       │ Mutex Race Condition │ 396.41 ms        │ YES        │ YES        │ 1.0   │ 412        │ $0.000000   │ "The function get_or_set(key, val) has a
+                                 │                      │                  │            │            │       │            │             │ check-then-act race condition. With lock..."
+   nvidia/nemotron-3.5-lightning │ LRU TTL Expiry Bug   │ 442.12 ms        │ YES        │ YES        │ 1.0   │ 404        │ $0.000000   │ "Role: Vanguard CodeFix &amp; Critic-Reviser. The
+                                 │                      │                  │            │            │       │            │             │ bug is that is_expired always returns
+                                 │                      │                  │            │            │       │            │             │ False..."
+   nvidia/nemotron-3.5-lightning │ Mutex Race Condition │ 470.93 ms        │ YES        │ YES        │ 1.0   │ 412        │ $0.000000   │ "Role: Vanguard CodeFix &amp; Critic-Reviser.
+                                 │         </p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -13,4 +13,4 @@ This is the **sole canonical runtime** (`ADR-0069`); the former Layer-0 copy-for
 Entry points: `packages/runtime/root.py` (composition), `packages/agency/episode/engine.py` (`EpisodeEngine` / `spawn()`), `clients/cli/src/main.tsx` (`vg`), evaluator `packages/adapters/evaluators/daemon.py`.
 
 Current milestone authorization is recorded only in
-[`../docs/03_execution/sprint_active.md`](../docs/03_execution/sprint_active.md). Map: [`../README.md`](../README.md).
+[`docs/execution/active.md`](../docs/execution/active.md). Map: [`../README.md`](../README.md).

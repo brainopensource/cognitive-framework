@@ -23,29 +23,29 @@ superseded_by: null
 
 Vanguard / AETHER is a Python-first recursive-agency substrate (`requires-python >= 3.10`, tested on Python 3.12 in CI) with a TypeScript/React/Ink interactive CLI (`vg`).
 
-### The Canonical Documentation Triad
-All documentation is strictly partitioned into three distinct authority tiers:
+### Documentation Hierarchy
+All documentation is partitioned into distinct authority tiers:
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────┐
-│                             1. THE LAW (WHAT)                            │
-│  docs/SPEC.md (+ docs/01_law/) — Pure RFC-2119 Normative Specification │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ governs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                          2. THE DECISIONS (WHY)                          │
-│  docs/02_decisions/ — Immutable, append-only Architecture Decision Records │
-└────────────────────────────────────┬─────────────────────────────────────┘
-                                     │ directs
-┌────────────────────────────────────▼─────────────────────────────────────┐
-│                        3. THE EXECUTION (HOW & NOW)                      │
-│  docs/03_execution/sprint_active.md — Single living board & milestone ladder│
-└──────────────────────────────────────────────────────────────────────────┘
+VISION.md / AGENTS.md / docs/SPEC.md
+    Vision, Operational Rules, Compact Normative Law
+
+docs/decisions.md
+    Foundational Decision Record Index
+
+docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
+    System & Component Architecture, Reference, Product PRDs
+
+docs/execution/
+    Active Execution State (active.md) & Milestone Ladder
+
+docs/theory/ | docs/research/ | docs/reports/
+    Durable Theory | Non-Canonical Research | Technical Strategy & Audit Reports
 ```
 
-- **The Law**: [`docs/SPEC.md`](docs/SPEC.md) + detailed leaves in [`docs/01_law/`](docs/01_law/) + accepted ADRs indexed through [`0097`](docs/02_decisions/0097-phase0-ratification-and-two-lane-activation.md).
-- **The Decisions**: [`docs/02_decisions/INDEX.md`](docs/02_decisions/INDEX.md).
-- **The Execution**: [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) & [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md).
+- **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
+- **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
+- **The Execution**: [`docs/execution/active.md`](docs/execution/active.md).
 
 ### Hexagonal Production Lattice (`vanguard/packages/`)
 The canonical production truth lives in `vanguard/packages/`, strictly enforcing the hexagonal boundary flow:
@@ -130,7 +130,7 @@ Execution sequence:
 5. **M-4–M-8**: current state, ownership, and authorization live only in the active execution board; mechanism presence never implies acceptance.
 6. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
 
-Current status belongs only in [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md).
+Current status belongs only in [`docs/execution/active.md`](docs/execution/active.md).
 Do not infer authorization from archived proposals, reviews, research, or completed sprint records.
 
 ---
@@ -182,9 +182,9 @@ client of the runtime and must not duplicate domain or authority logic.
 > **MANDATORY INSTRUCTION FOR ALL AI AGENTS & CONTRIBUTORS:**  
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
-> All documentation updates must strictly edit existing canonical files in the **Clean Triad**:
-> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md) or the linked leaf in [`docs/01_law/`](docs/01_law/).
-> 2. **Recording Architectural Decisions** $\to$ Add a new append-only ADR in [`docs/02_decisions/`](docs/02_decisions/).
-> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) (and [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md) for macro gates).
+> All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
+> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
+> 2. **Recording Architectural Decisions** $\to$ Edit [`docs/decisions.md`](docs/decisions.md).
+> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/execution/active.md`](docs/execution/active.md).
 > 
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.

@@ -11,7 +11,7 @@ topic:
 # AETHER Observatory — Final Integrated Frontend Prototype, PRD, and Engineering Specification
 
 > **Authority note.** This document is `_archive/brainstorm`. It is *evidence and intent*, never law.
-> Nothing here amends [`docs/SPEC.md`](../../SPEC.md) or the six leaves in [`docs/01_law/`](../../01_law/).
+> Nothing here amends [`docs/SPEC.md`](../../SPEC.md).
 > Where this document and law disagree, law wins and this document is wrong. Every backend change
 > proposed in the final chapter is a *proposal requiring an ADR*, not an authorization.
 

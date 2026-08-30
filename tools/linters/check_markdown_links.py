@@ -21,7 +21,7 @@ LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 FILE_URL = re.compile(r"file://[^\s)>\"]+")
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 
-SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__", "_archive"}
+SKIP_PARTS = {".git", "node_modules", ".venv", "__pycache__", "_archive", "research", "reports"}
 DOC_GLOBS = (
     "README.md",
     "AGENTS.md",

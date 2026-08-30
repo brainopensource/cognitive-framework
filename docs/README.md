@@ -205,4 +205,3 @@ Every durable architectural and operational fact has exactly one canonical owner
 
 ### Theory & Research (`candidate-docs/theory/`, `candidate-docs/research/`)
 - [Agent Substrate Theory](theory/agent-substrate.md) (`theory.agent-substrate`)
-- [Research & Benchmarks Directory](research/README.md) (`nav.research`)

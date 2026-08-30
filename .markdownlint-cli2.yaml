@@ -1,0 +1,13 @@
+config:
+  default: false
+  MD003: false
+  MD004: false
+  MD005: false
+  MD007: false
+  MD010: false
+  MD018: true
+  MD019: true
+  MD023: false
+  MD030: false
+  MD035: false
+  MD037: true

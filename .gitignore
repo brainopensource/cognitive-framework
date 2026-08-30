@@ -26,3 +26,4 @@ tools/005_SWE_VERIFIED_REPO/
 .lda/index.db
 .lda/index.db-shm
 .lda/index.db-wal
+.draft/todo/beta_delivery.md

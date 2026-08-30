@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { RuntimeClient } from "@vanguard/client-core";
+import type { RuntimeClient } from "@vanguard/client-core/contract/types.js";
 import { ColumnarEventStore } from "../store/event-store.js";
 import { initialStudioFold, StudioFoldEngine, type StudioFold } from "../store/fold.js";
 import { INITIAL_SESSION_STATE, type StudioSessionState } from "../store/session.js";

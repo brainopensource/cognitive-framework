@@ -2,7 +2,7 @@
  * AUTO-GENERATED: Observatory Architecture Overlay
  */
 import React from "react";
-import type { GraphNode, GraphEdge } from "@vanguard/client-core";
+import type { GraphNode, GraphEdge } from "@vanguard/client-core/application/graph-model.js";
 
 export interface ArchitectureOverlayProps {
   readonly nodes: readonly GraphNode[];

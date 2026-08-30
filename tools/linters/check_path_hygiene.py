@@ -29,6 +29,7 @@ IGNORED_DIRS = {
     ".coverage",
     ".vanguard",
     ".lda",
+    ".draft",
     "dev_context_logs",
 }
 

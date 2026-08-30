@@ -1,4 +1,20 @@
-export * from "@vanguard/client-core";
+export * from "@vanguard/client-core/contract/types.js";
+export * from "@vanguard/client-core/contract/parse.js";
+export * from "@vanguard/client-core/adapters/web-signer.js";
+export * from "@vanguard/client-core/adapters/fake.js";
+export * from "@vanguard/client-core/adapters/http.js";
+export * from "@vanguard/client-core/application/run-view.js";
+export * from "@vanguard/client-core/application/approvals.js";
+export * from "@vanguard/client-core/application/budget.js";
+export * from "@vanguard/client-core/application/coding-types.js";
+export * from "@vanguard/client-core/application/coding-receipts.js";
+export * from "@vanguard/client-core/application/corrections.js";
+export * from "@vanguard/client-core/application/selectors.js";
+export * from "@vanguard/client-core/application/trace-graph.js";
+export * from "@vanguard/client-core/application/subscribe-run.js";
+export * from "@vanguard/client-core/application/projection-model.js";
+export * from "@vanguard/client-core/application/graph-model.js";
+export * from "@vanguard/client-core/application/mcnemar.js";
 
 export type SourceClass =
   | "ledgered"

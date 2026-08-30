@@ -389,8 +389,8 @@ export class FrontendAppController {
           conversations: nextConversations,
           recentWorkspaces: nextRecents,
           activeConversationId: activeConv?.id ?? s.activeConversationId,
-          currentWorkspace: activeConv?.workspacePath || s.currentWorkspace,
-          selectedAgentId: activeConv?.agentId || s.selectedAgentId,
+          currentWorkspace: nextRecents[0] || (activeConv?.workspacePath !== "." ? activeConv?.workspacePath : undefined) || nextSettings.general?.defaultWorkspace || s.currentWorkspace,
+          selectedAgentId: activeConv?.agentId || nextSettings.general?.defaultAgent || s.selectedAgentId,
         };
       });
 

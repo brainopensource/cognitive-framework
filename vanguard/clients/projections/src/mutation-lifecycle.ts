@@ -114,7 +114,7 @@ export function reduceMultiFileDiff(events: EventEnvelope[]): MultiFileDiffModel
       if (diff) {
         unifiedDiff = diff;
       }
-    } else if (kind === "FileModified" || kind === "PatchGenerated") {
+    } else if (kind === "FileModified" || kind === "PatchGenerated" || kind === "ToolCallRequested") {
       const diff = String(payload.diff ?? payload.unifiedDiff ?? payload.patch ?? "");
       if (diff) {
         unifiedDiff = diff;

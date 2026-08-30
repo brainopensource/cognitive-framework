@@ -27,7 +27,7 @@ export function toConversationTurns(envelopes: readonly EventEnvelope[]): Conver
     const kind = env.payload.kind;
 
     if (kind === "GoalDeclared" || kind === "UserPromptSubmitted") {
-      const userText = String(env.payload.goal ?? env.payload.prompt ?? env.payload.text ?? "");
+      const userText = String(env.payload.goal ?? env.payload.prompt ?? env.payload.brief ?? env.payload.text ?? "");
       turns.push({
         id: `user-${env.eventId}`,
         speaker: "user",

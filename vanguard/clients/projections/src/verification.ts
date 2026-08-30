@@ -19,6 +19,7 @@ export function reduceVerificationSummaries(events: EventEnvelope[]): Verificati
       kind === "TestsPassed" ||
       kind === "TestsFailed" ||
       kind === "VerificationPassed" ||
+      kind === "VerificationSucceeded" ||
       kind === "VerificationFailed" ||
       kind === "LintExecuted" ||
       kind === "TypecheckExecuted" ||
@@ -41,9 +42,11 @@ export function reduceVerificationSummaries(events: EventEnvelope[]): Verificati
       if (
         kind === "TestsPassed" ||
         kind === "VerificationPassed" ||
+        kind === "VerificationSucceeded" ||
         payload.status === "passed" ||
         payload.exitCode === 0 ||
-        payload.passed === true
+        payload.passed === true ||
+        (typeof payload.passed === "number" && payload.passed > 0 && !payload.failed)
       ) {
         status = "pass";
       } else if (

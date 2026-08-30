@@ -1,6 +1,7 @@
 {
   "name": "@aether/contracts",
   "version": "0.1.0",
+  "private": true,
   "description": "AETHER canonical contracts, types, schema readers, and JCS canonicalization",
   "license": "Apache-2.0",
   "type": "module",

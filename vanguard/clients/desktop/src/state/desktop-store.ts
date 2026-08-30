@@ -2,6 +2,7 @@ import {
   FrontendAppController,
   type AppControllerState,
   type ConversationRecord,
+  ManagedRuntimeHost,
 } from "@aether/client";
 import {
   emptyRunSnapshot,
@@ -136,6 +137,7 @@ export type DesktopStoreOptions =
 export class DesktopStore {
   public readonly controller: FrontendAppController;
   public readonly bridge: NativePlatformBridge;
+  public readonly managedRuntime: ManagedRuntimeHost;
   public readonly state: Signal<DesktopStoreState>;
   private unsubscribeController?: () => void;
   private lastNotifiedApprovalId?: string;
@@ -146,6 +148,22 @@ export class DesktopStore {
     const controllerParam = isDirectState ? undefined : (options as any).controller;
     const clientParam = isDirectState ? undefined : (options as any).client;
     this.bridge = (options as any)?.bridge ?? new TauriNativeBridge();
+    this.managedRuntime = new ManagedRuntimeHost({
+      onEvent: (event) => {
+        if (event.type === "status_changed") {
+          this.update((s) => ({
+            ...s,
+            connectionState:
+              event.status === "RUNNING"
+                ? "connected"
+                : event.status === "INCOMPATIBLE"
+                ? "incompatible"
+                : "connecting",
+            statusMessage: event.detail ?? s.statusMessage,
+          }));
+        }
+      },
+    });
 
     this.controller =
       controllerParam ??
@@ -443,9 +461,23 @@ export class DesktopStore {
     }
   }
 
-  public destroy(): void {
+  public async startManagedRuntime(): Promise<void> {
+    try {
+      const { client } = await this.managedRuntime.ensureRunning();
+      this.controller.setClient(client);
+    } catch (err) {
+      this.update((s) => ({
+        ...s,
+        connectionState: "unavailable",
+        statusMessage: `Runtime startup error: ${String(err)}`,
+      }));
+    }
+  }
+
+  public async destroy(): Promise<void> {
     if (this.unsubscribeController) {
       this.unsubscribeController();
     }
+    await this.managedRuntime.shutdown();
   }
 }

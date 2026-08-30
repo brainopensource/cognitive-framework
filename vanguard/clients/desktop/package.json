@@ -1,6 +1,7 @@
 {
   "name": "@aether/desktop",
   "version": "0.1.0",
+  "private": true,
   "description": "AETHER native desktop application and developer workspace",
   "license": "Apache-2.0",
   "type": "module",

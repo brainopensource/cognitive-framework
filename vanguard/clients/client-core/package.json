@@ -1,6 +1,7 @@
 {
   "name": "@vanguard/client-core",
   "version": "0.4.1-beta",
+  "private": true,
   "description": "Vanguard client core: contracts, parsers, adapters, signers, and reducers",
   "license": "Apache-2.0",
   "type": "module",

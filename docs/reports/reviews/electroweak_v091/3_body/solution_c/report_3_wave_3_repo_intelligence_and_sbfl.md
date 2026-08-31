@@ -35,7 +35,7 @@ Target:      Sub-50ms Fault Localization, 40-60% Context Token Reduction, Root-C
 
 In SWE-bench and large-scale repository engineering, **lexical grep searches waste up to 60% of context tokens** on false-positive matches (comments, test fixtures, string literals). Furthermore, when tests fail, LLMs frequently guess root causes across hundreds of source files.
 
-Solution C eliminates this inefficiency by implementing a **dual-engine intelligence layer** via the [`vanguard.packages.ports.index.IndexPort`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/ports/index.py) interface:
+Solution C eliminates this inefficiency by implementing a **dual-engine intelligence layer** via the `vanguard.packages.ports.index.IndexPort` interface:
 1. **Tree-sitter AST Symbol Graph (`ASTSymbolIndexer`)**: Parses classes, methods, signatures, docstrings, and call-graph dependencies with sub-10ms query times.
 2. **Spectrum-Based Fault Localization (`SBFLFaultLocalizer`)**: Analyzes test execution traces to compute statement suspiciousness using Ochiai, DStar ($* = 2$), and Tarantula formulas, presenting the LLM with the exact top-5 most suspicious lines of code.
 

@@ -1,65 +1,30 @@
 {
-  "broken_links": 0,
-  "bytes": 8757041,
-  "canonical_docs": 0,
-  "code_mappings": 12,
-  "documents": 1391,
-  "estimated_tokens": 2073276,
-  "largest_docs": [
-    {
-      "bytes": 95956,
-      "estimated_tokens": 20584,
-      "kind": "doc",
-      "lines": 1585,
-      "path": "docs/research/coding_harness/DEKAS_claude_prototype.md",
-      "title": "DEKAS \u2014 Domain-blind Event Kernel for Agentic Systems",
-      "words": 13521
-    },
-    {
-      "bytes": 92170,
-      "estimated_tokens": 19846,
-      "kind": "doc",
-      "lines": 1496,
-      "path": "docs/research/frontend/frontend_prototype_beta_gem.md",
-      "title": "AETHER Observatory \u2014 Final Integrated Frontend Prototype, PRD, and Engineering Specification",
-      "words": 12811
-    },
-    {
-      "bytes": 65884,
-      "estimated_tokens": 16471,
-      "kind": "code",
-      "language": "Python",
-      "lines": 1148,
-      "path": "benchmarks/swe_bench/domain_challenges.py",
-      "title": "domain_challenges.py",
-      "words": 5489
-    },
-    {
-      "bytes": 95597,
-      "estimated_tokens": 16373,
-      "kind": "doc",
-      "lines": 1260,
-      "path": "docs/research/coding_harness/future_improvements_sota_harness_2808.md",
-      "title": "Master Frontier Research, Architectural Traceability & Next-Generation Autonomous Coding Harness Manual",
-      "words": 8922
-    },
-    {
-      "bytes": 74638,
-      "estimated_tokens": 15568,
-      "kind": "doc",
-      "lines": 3166,
-      "path": "docs/research/coding_harness/research_harness_agentic_systems_engineering.md",
-      "title": "Research: Harness & Agentic Systems Engineering",
-      "words": 9657
-    }
-  ],
-  "lines": 220061,
-  "links": 225,
-  "non_canonical_docs": 1391,
+  "bytes": 2597691,
+  "database_stats": {
+    "documents": 0,
+    "entities": 0,
+    "files": 0,
+    "relations": 0,
+    "symbols": 0
+  },
+  "documents": 0,
+  "estimated_tokens": 512050,
+  "index_hint": "fact graph is empty; run 'uv run lda index' or use tools/docs_rag_v0.py",
+  "lines": 62555,
   "providers": [
     "filesystem",
-    "knowledge",
-    "git"
+    "markdown",
+    "code_ast",
+    "git",
+    "knowledge"
   ],
-  "symbols": 11
+  "relations": 0,
+  "root": "/home/rocha/Coding/Aether-D-System",
+  "status": "DEGRADED_EMPTY_INDEX",
+  "symbols": 0,
+  "topology": {
+    "entities": [],
+    "languages": [],
+    "relations": []
+  }
 }

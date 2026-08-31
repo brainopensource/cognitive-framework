@@ -65,9 +65,9 @@ graph TD
 
 ### 1.1 Core Tenets of Solution C
 
-1. **Zero Kernel Mutation**: The Trusted Computing Base ([`vanguard/packages/kernel/`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/kernel)) remains $\le 1438$ LOC, completely domain-blind, and mathematically immutable.
-2. **App-Layer Encapsulation**: The entire end-to-end agent intelligence, task classification, multi-stage planning, and recovery loops reside within [`vanguard/packages/apps/coding_max/`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/apps).
-3. **Clean Pack Decoupling**: The [`packs/code-default/`](file:///home/rocha/Coding/Aether-D-System/packs/code-default) package provides purely declarative tools and schemas without becoming an unmaintainable orchestration monolith.
+1. **Zero Kernel Mutation**: The Trusted Computing Base (`vanguard/packages/kernel/`) remains $\le 1438$ LOC, completely domain-blind, and mathematically immutable.
+2. **App-Layer Encapsulation**: The entire end-to-end agent intelligence, task classification, multi-stage planning, and recovery loops reside within `vanguard/packages/apps/coding_max/`.
+3. **Clean Pack Decoupling**: The `packs/code-default/` package provides purely declarative tools and schemas without becoming an unmaintainable orchestration monolith.
 4. **Adaptive Effort (Min Orchestration / Max Intelligence)**:
    * **C0/C1 (Trivial/Localized)**: Fast-path execution (`Search -> Edit -> Verify -> Done`) in $\le 2$ turns.
    * **C2/C3 (Medium/Complex SWE-bench)**: Full cognitive harness (AST Index -> Fault Localization -> DAG Plan -> Surgical Patch -> Multi-Tier Verification).
@@ -527,8 +527,7 @@ if __name__ == "__main__":
 ## 10. Summary of Wave 1 Deliverables
 
 * **Architectural Blueprint**: Strict separation of concern across all 7 layers.
-* **Production Application Service**: [`CodingMaxAppService`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/apps) fully specified in Python 3.10+.
+* **Production Application Service**: `CodingMaxAppService` fully specified in Python 3.10+.
 * **Preset Catalog**: 4 specialized operating modes for Turbo, Deep SWE-bench, Swarm, and Repro.
 * **Cryptographic & Causal Integrity**: Full binding to Event Sourcing, RFC 8785 JCS, and `aether.evidence/1` envelopes.
 * **Tri-Substrate Synthesis**: Unification of Vanguard state, LEX PTY execution, and LIM fault localization.
-

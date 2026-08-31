@@ -33,7 +33,7 @@ Target:      100% Extensible Multi-Domain Autonomy, Unified CLI Experience, Zero
 
 ## 1. Executive Summary & The Product Suite Philosophy
 
-A true general agentic substrate does not force every domain into a single monolithic codebase. Instead, **each product application is a lightweight composition layer** in [`vanguard/packages/apps/`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/apps) that selects domain packs, injects specific metacognitive policies, and binds the appropriate model adapters:
+A true general agentic substrate does not force every domain into a single monolithic codebase. Instead, **each product application is a lightweight composition layer** in `vanguard/packages/apps/` that selects domain packs, injects specific metacognitive policies, and binds the appropriate model adapters:
 
 ```mermaid
 graph TD

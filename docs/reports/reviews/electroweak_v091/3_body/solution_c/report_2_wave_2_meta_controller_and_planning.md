@@ -37,7 +37,7 @@ In Vanguard / AETHER, **Metacognition is policy, never a kernel primitive**. It 
 
 Solution C implements this via two tightly coupled, deterministic components in `apps/coding_max/`:
 1. **`DeterministicTaskClassifier`**: A sub-millisecond, zero-token complexity engine that routes tasks into discrete classes $C \in \{C_0, C_1, C_2, C_3, C_4\}$.
-2. **`CodingMaxMetaController`**: A stateful policy implementing [`vanguard.packages.ports.meta_controller.MetaControllerPort`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/ports/meta_controller.py), validated by the runtime's fail-closed `guarded_consult` bridge.
+2. **`CodingMaxMetaController`**: A stateful policy implementing `vanguard.packages.ports.meta_controller.MetaControllerPort`, validated by the runtime's fail-closed `guarded_consult` bridge.
 
 ```mermaid
 graph TD

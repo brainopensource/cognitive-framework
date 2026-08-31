@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.solution_a.full_code_manifest_wave-3
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # Full Code Manifest — Wave 3
 
 ## Escopo
@@ -467,4 +482,3 @@ index 0000000..aa996f6
 ## O que não é alegado
 
 Não foi executado benchmark SWE-bench, canary real, full suite nem qualificação M-8/M-9. LAM, LDA/Atlas, reviewer multiagente, patch tournament e paralelismo competitivo não foram ativados porque exigem integração/evidência própria e não pertencem ao caminho crítico single-agent validado nesta entrega.
-

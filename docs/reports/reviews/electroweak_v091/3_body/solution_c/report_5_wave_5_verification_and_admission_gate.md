@@ -36,7 +36,7 @@ Target:      Zero Hallucinated Completions, Sub-0.2ms Syntax Feedback, Anti-Coll
 In unconstrained agent systems, **over 35% of failed SWE-bench episodes occur because the model declares "I have fixed the issue" without applying patches or verifying the test suite**. Furthermore, trivial indentation or syntax errors consume full LLM turns when evaluated through slow subprocess test runners.
 
 Solution C enforces a **closed-loop verification spine**:
-1. **Admission Gate ([`AdmissionGate`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/admission_gate.py))**: Intercepts final completion proposals fail-closed. If source files were not modified (`MISSING_SOURCE_PATCH`) or if verification tests were not executed on the exact tree (`VERIFICATION_STALE`), completion is rejected with an actionable prompt correction.
+1. **Admission Gate (`AdmissionGate`)**: Intercepts final completion proposals fail-closed. If source files were not modified (`MISSING_SOURCE_PATCH`) or if verification tests were not executed on the exact tree (`VERIFICATION_STALE`), completion is rejected with an actionable prompt correction.
 2. **Multi-Tier Verification Pipeline (L0–L3)**:
    * **L0 Syntax Gate (<0.2ms)**: In-process AST parse returning syntax errors before touching the disk or invoking shell commands.
    * **L1 Fast Linter (10–50ms)**: Lightweight linter (e.g. `ruff`) catching undefined variables.

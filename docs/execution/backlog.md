@@ -8,8 +8,8 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: 0.9.2a1
-last_verified: 2026-08-30
+version: 0.9.2a2
+last_verified: 2026-08-31
 purpose: Track proposed, approved, in-progress, blocked, and deferred capability packages and engineering work outside the active sprint WIP=1 constraint.
 audience:
   - contributor
@@ -139,16 +139,104 @@ graph LR
 | **ALG-02** | SBFL Multi-Metric Fault Localization Suite | `ports/index` | Lane B | `PROPOSED` | M-8+ | Multi-metric suspiciousness scoring: DStar ($* = 2$), Tarantula, and Ochiai. |
 | **ALG-03** | Formal State-Hash Anti-Thrashing FSM | `agency/episode` | Lane A | `PROPOSED` | W-092-4 | Signature hashing $H(\text{tool}, \text{args}, \text{state})$; triggers `ERR_THRASHING_LOOP` recovery. |
 
+### 2.9 Coding Max Convergence Epic
+
+This epic is the accepted planning disposition of the three Electroweak
+solutions. It does not authorize copying executable prototypes from the report
+tree. Production changes must be re-derived against current ports, boundaries,
+source, and tests.
+
+The architecture rule is **thin app, thick declarative composition**:
+`apps/coding_max` owns request/result ergonomics and preset selection;
+`packs/code-default` owns coding cognition and policy; runtime remains the only
+composition/lifecycle authority; infrastructure stays behind generic ports.
+
+| ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
+|---|---|---|---|---|---|
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `APPROVED` | EWK-Q disposition | `fast`, `balanced`, and `max` are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator |
+| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, `adapters`, code-pack bindings | `APPROVED` | CMX-01 | Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import `apps` |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `APPROVED` | CMX-01, CMX-02 | A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects |
+| **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `APPROVED` | CMX-03 | Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission |
+| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `APPROVED` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
+| **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `PROPOSED` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
+| **CMX-07** | Repository-scale qualification | benchmark program | `PROPOSED` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
+| **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `PROPOSED` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
+
+#### Preset contract
+
+Presets change policy and ceilings, not runtime identity or authority. Numeric
+ceilings are calibrated later; their behavioral meanings are locked now.
+
+| Preset | Required behavior | Excluded by default |
+|---|---|---|
+| `fast` | One primary worker; cheap deterministic discovery; direct inspect/edit/targeted-verify loop; escalate while preserving discoveries and failed attempts | LLM planner, specialist children, branch search, full repository indexing |
+| `balanced` | Explicit plan/TODO, progressive context, dependency/test mapping, targeted then affected verification, durable resume, conditional reviewer for declared risk | Swarm/concurrency, mutation, branch search, self-modification |
+| `max` | All empirically accepted balanced mechanisms with larger bounded context/turn/model ceilings, broad verification, and optional mediated specialist roles when their gate is accepted | Unbounded compute, automatic authority expansion, mandatory swarm/SBFL/mutation |
+
+Escalation is monotonic in compute but never in capability. The
+`fast -> balanced -> max` path may spend a larger pre-authorized budget and add policy components, but it
+cannot widen filesystem, network, command, evaluator, or child authority.
+
+#### Task-specific completion policy
+
+| Task class | Minimum completion evidence |
+|---|---|
+| Existing bug or failing test | Reproducer fails on the baseline when feasible, passes on the postimage, and affected regression checks pass |
+| Multi-file feature/refactor/migration | Every implicated interface is inspected; change-surface closure is recorded; targeted and affected checks pass; migration compatibility is tested when applicable |
+| Greenfield | Scaffold baseline is recorded; build/syntax succeeds; at least one executable smoke or contract test created for the requested behavior passes on the postimage |
+| Repository without tests | The pack declares an explicit acceptance command or creates the smallest executable harness; successful syntax/build alone is insufficient for behavioral completion |
+| Analysis/documentation/read-only | A read-only preset applies an explicit requirements checklist; no fabricated patch or test count is required |
+
+Manual review may supplement these policies but cannot replace an applicable
+automated check or an exterior evaluator verdict.
+
+#### Explicitly deferred experiments
+
+The following are not Coding Max prerequisites: swarm concurrency, beam/branch
+search, ToolScript, SBFL, AST mutation testing, speculative auto-rollback,
+trajectory distillation, capsule promotion, and self-modification. Each requires
+a separate preregistered control/treatment experiment. It advances only when it
+improves task success or cost-adjusted success without exceeding the declared
+reliability regression budget.
+
+#### Definition of Ready
+
+A CMX package may enter `active.md` only when its exact source owner, public
+contract, negative falsifier, migration impact, measurement subject, and rollback
+path are named. A report-tree path or code snippet is never a production owner.
+
+#### Definition of Done
+
+A CMX package is done only when current-source unit and integration tests pass,
+the boundary and TCB gates remain green, cold reconstruction is tested when
+state changes, canonical docs and generated knowledge are synchronized, and any
+capability or performance claim is supported by an exact-subject receipt.
+
 ---
 
 ## 3. Prioritized Next-Up Queue (Staging for active.md)
 
-When current `active.md` packages (`FIN-A1` / `FIN-B1`) complete, the next packages admitted to the active sprint are:
+The dependency-ordered queue is:
 
-1. **`REL-01` (Wave H0 Tooling Cleanup)** $\to$ Dev B removes urllib and synthetic dry-run data.
-2. **`REL-02` (Wave H1 Canary Manifest)** $\to$ Dev B freezes 10 content-addressed tasks with external evaluators.
-3. **`TLS-04` (AST Syntax Pre-Flight Gate)** $\to$ Dev A integrates <0.2ms syntax check into patch tool.
-4. **`DOC-04` (Griffe Python API Docs)** $\to$ Dev A wires `mkdocstrings` into `mkdocs.yml`.
+1. **`REL-01` (H0 evidence integrity)** — remove direct provider HTTP and
+   synthetic result metrics from the admissible path; use runtime adapters and
+   an exterior oracle.
+2. **`REL-02` (H1 frozen canary)** — freeze executable, content-addressed,
+   single-attempt tasks and explicit missingness before any live run.
+3. **`FIN-A1` / `W-092-5` disposition** — independently accept a valid M-8
+   bundle or record a negative/undeterminable result without threshold changes.
+4. **`CMX-01` through `CMX-05`** — deliver the Coding Max vertical slice in
+   dependency order.
+5. **`CMX-07`** — qualify the vertical slice before enabling optional
+   orchestration.
+6. **`CMX-06` and experimental features** — admit one treatment at a time only
+   after a preregistered ablation.
+7. **`CMX-08`** — qualify the supported first-party agent portfolio on the road
+   to 1.0 after M-10.
+
+`TLS-04` may be absorbed into CMX-04 if its measured latency and defect-catch
+rate justify the seam. `DOC-04` remains approved but is not on the critical
+product path.
 
 ---
 

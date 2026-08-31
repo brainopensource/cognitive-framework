@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.solution_b.full_code_3manifestforge_wave-7
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # full_code_3manifestforge — Wave 7
 ## Repository Intelligence: Providers Determinísticos (código integral)
 

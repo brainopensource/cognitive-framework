@@ -13,9 +13,9 @@ purpose: Represent current execution intent exactly as the active board states i
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: c14be3c9d3b2ba9b7bacefec235eddab1bf1e304
-version: 0.9.2a1
-last_verified: 2026-08-30
+analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
+version: 0.9.2a2
+last_verified: 2026-08-31
 normative_authority:
   - docs/03_execution/sprint_active.md
   - docs/03_execution/backlog.md
@@ -23,7 +23,7 @@ relationships:
   - execution.milestones
   - execution.backlog
   - decision.index
-reviewer: delegated-tech-lead-block-e
+reviewer: principal-architecture-convergence-review
 confidence: high
 ---
 
@@ -47,30 +47,36 @@ do not override this board, source, tests, or receipts.
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `FIN-A1` | `IN_PROGRESS` | Obtain an exact producer-verifiable M-8 bundle and independent acceptance |
-| B | `FIN-B1` | `READY` | Produce/audit M-8 memory, learning, promotion, and rollback evidence without changing normative contracts |
+| A | `FIN-A1` | `BLOCKED` | Hold the M-8 acceptance boundary; review only an exact producer bundle emitted by the repaired benchmark path |
+| B | `REL-01` / `H0` | `IN_PROGRESS` | Replace the synthetic/direct-HTTP held-out runner path with runtime-adapter execution and honest missingness |
 
 ## Reconciled state on the exact subject
 
-The subject is `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304` with tree
-`365befc73c29284702abaee0ff4efdcbaa8751d1`; local and remote branch refs agree.
-W-092-0–4 are present in its ancestry. `CONVERGENCE-BASE-v1` is an annotated,
-remote tag at commit `532abf16defb23a0d91259f45aa7042c9b2bae6d`, tag object
-`ee80748872104f06c927e098fd5392b139ea7251`, and tree
-`a7af1b9ffee03c2f0f20244ca37ec3aec78f5515`.
+The clean local and remote branch subject is
+`d639ec4bda5ea7d8836a182393498a31fc43ea1a`. The generated Tier-1 context names
+`7d46c7f5528cf23a7b6cfcd6e02ece4d7f32e6a0`, while generated knowledge and
+several canonical architecture headers name still older subjects. Navigation
+artifacts are therefore usable only as routing hints until regenerated from
+this exact subject.
 
-- W-092-5 remains `BLOCKED`: full suite `2348 tests, 0 failures, 0 errors,
-  20 skips`; equivalent checks and MkDocs strict passed, but `just` is absent,
-  no signed release envelope/external Git receipt exists, and the canary driver
-  executed two episodes per task despite the one-attempt preregistration.
-- M-5a has a named baseline/tag artifact. M-5b, M-6, M-6.5, M-7, and M-8 are
-  not accepted here without exact producer-verifiable bundles and independent
-  receipts. Mechanism and focused green tests are not closure.
-- M-9 and M-10 are not authorized. No SWE-bench or release claim is made.
+The current source contains the generic completion-admission, protocol-recovery,
+L1-L5 context, reconstructible coding-state, meta-controller, index-port,
+delegation, topology, artifact, memory, and learning mechanisms. Focused tests
+for admission/recovery, coding state, context policy, runtime meta-control, and
+the M-8 runner pass, and the boundary and TCB checks pass. This demonstrates
+mechanism presence only.
 
-Prior stale conflict statements tied to older candidate subjects are superseded
-for current execution by this exact-subject disposition; historical artifacts
-remain immutable.
+The committed M-8 held-out runner is not admissible empirical evidence yet:
+
+- dry-run outcomes, token counts, costs, and lift are synthesized;
+- live execution calls OpenRouter directly instead of the official runtime
+  model adapter and does not execute the AETHER harness or an exterior oracle;
+- live mode contains an unresolved `title` name in prompt construction;
+- non-empty model prose is treated as passed, grounded, and verified;
+- no producer-signed exact-subject bundle or independent acceptance exists.
+
+Consequently M-8 remains blocked, M-9/M-10 remain unauthorized, and no
+SWE-bench or release claim is made.
 
 ## Stable package contracts
 
@@ -79,150 +85,190 @@ supplies the stable M-4–M-8 package contracts, lane ownership, dependencies, a
 and evidence obligations. This candidate view links that detail rather than copying its mutable
 tables, so package status cannot be mistaken for a second active board.
 
-## Vanguard v0.9.2 documentation and implementation waves
+## Three-solution convergence decision
 
-The repository owner authorized the v0.9.2 documentation and implementation-planning pass on
-2026-08-30. This authorization does not resolve the M-7/M-8 acceptance conflicts above and does
-not authorize M-9 or M-10 promotion. Work MUST preserve the existing trust spine and MUST NOT
-claim benchmark or milestone acceptance from mechanism presence.
+The review corpus under `docs/reports/reviews/electroweak_v091/3_body/` is
+non-canonical design input. None of the three solutions is authorized for
+wholesale application.
 
-Two contributor roles may work concurrently:
+| Proposal | Adopt | Reject or defer | Disposition |
+|---|---|---|---|
+| Solution A | Pack-local presets, deterministic fast path, explicit plan/TODO artifacts, conditional review, feature-gated rollout | Parallel tool runtime, duplicate durable store, branch search, mutation, capsules, and distillation before measured lift | Behavioral source for pack policy; not a file-level patch plan |
+| Solution B | Provider-neutral repository intelligence, epoch-safe progressive context, evidence-gated TODO transitions, non-identical recovery, fast-to-deep escalation that preserves discoveries | Adapter-to-app imports, host subprocess verification, large application-side coordinator, and direct copy of its report-tree prototype | Primary control-model reference after boundary repair |
+| Solution C | Thin product application concept, deterministic complexity classes, layered verification, SBFL and mutation as testable hypotheses, single-attempt qualification discipline | Unsupported performance/benchmark statistics, invented APIs, premature product-family expansion, auto-rollback, and mandatory swarm/SBFL/mutation | Product direction and experiment backlog only |
 
-- **Dev A — Senior Principal:** owns cross-cutting architecture, contracts, integration,
-  experiment design, difficult migrations, and final review. Dev A may work across the authorized
-  v0.9.2 scope but remains bound by the SPEC, decisions, architectural boundaries, evidence gates,
-  and WIP rules.
-- **Dev B — Standard implementation contributor:** owns bounded implementation packages,
-  synchronized tests, fixtures, adapters, instrumentation, and documentation corrections assigned
-  by Dev A or this board. Dev B MUST NOT independently change normative contracts, trust
-  boundaries, event identities, or milestone predicates.
+The selected architecture is **thin app, thick declarative composition**:
 
-Parallelism applies between independent work packages, not within a shared authority surface.
-Only one contributor may edit a given canonical document, schema, event family, or composition
-seam at a time.
+```text
+vg / API
+  -> apps/coding_max            thin request/result facade and preset selection
+  -> runtime                    the only composition, lifecycle and ledger authority
+  -> code-default composition   planner, context policy, coding recovery and admission policy
+  -> ports                      generic model/index/sandbox/store contracts
+  -> adapters                   infrastructure implementations; never import apps or coding policy
+```
 
-| Wave | Outcome | Dev A lead package | Dev B supporting package | Entry gate | Exit gate | Status |
-|---|---|---|---|---|---|---|
-| W-092-0 | Canonical contracts and navigable implementation map | Reconcile SPEC, decisions, architecture ownership, context/verification/recovery contracts | Validate links, paths, generated-index freshness and executable examples | Review evidence is available; no production mutation required | Canonical owners agree; no target is described as AS_BUILT; indexes have explicit fallback rules | `DONE` (Merged in Ancestry) |
-| W-092-1 | Correct benchmark evidence and projection semantics | Evidence identity, benchmark validity, `AgentView` compatibility design and review | Fixtures, result persistence, reducer vectors and retained-ledger regression | W-092-0 contracts merged | Zero invalid development fixtures; every result links trajectory; current events fold to exact actions/budgets | `DONE` (Merged in Ancestry) |
-| W-092-2 | Verification-admitted coding loop | Completion-admission seam and framework/harness boundary | LAM scenarios, test parsing, zero-test and stale-verification cases | W-092-1 evidence linkage green | Applicable patched tasks cannot complete without fresh successful verification | `DONE` (AdmissionGate Green) |
-| W-092-3 | Bounded context and durable coding state | Provider-neutral context integration and task-state projection | Deterministic index fallback, ranking fixtures, token/duplicate-read telemetry | W-092-2 loop green | Controlled A/B meets preregistered token/turn threshold without success regression | `DONE` (L1-L5 Radix Integrated) |
-| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Cross-cutting recovery and semantic-resume integration | Range/list/symbol tools, patch corpus, typed failure fixtures, adapter profiles | W-092-3 treatment accepted or rejected with evidence | Patch/recovery acceptance targets pass; retries are bounded; resume restores durable next-action state | `DONE` (RecoveryPolicy Green) |
-| W-092-5 | Qualification and release closure | Controlled real-model canary, larger sample decision, release evidence review | Deterministic/local matrix execution, artifact audit, docs-as-built synchronization | W-092-1–4 exact-subject receipts available | Release claim matches evidence; `just check` and `just verify` pass on exact candidate; no SWE claim without official qualification | `ACTIVE` (Blocked on Empirical Canary) |
+No second runtime, event system, tool broker, persistence store, evaluator, or
+authority path may be introduced. Repository-intelligence tools must be backed
+by `IndexPort` or another generic port. Commands and tests must execute through
+the mediated environment/sandbox path. Large state remains content-addressed
+artifacts referenced by ledger events; `CodingTaskState` remains a projection.
 
-### Immediate authorized queue
+## Authorized closure sequence
 
-1. **Reconcile Wave H0 (Tooling Integrity)**: Ensure `benchmarks/m8_heldout/runner.py` routes through official runtime adapters and emits zero synthetic lift/metrics in dry-run mode.
-2. **Publish Wave H1 Canary Manifest**: Dev B freezes 10 content-addressed, executable tasks (`max_attempts=1`) with independent external evaluators.
-3. **Execute Single-Attempt Live Canary**: Run the frozen 10-task canary with OpenRouter under strict token and USD budget ceilings.
-4. **Independent Evaluator Audit**: Dev B evaluates raw trajectories and patches independently (acceptance target: $\ge 8/10$ applicable patches, $\ge 6/10$ external passes).
+### Sprint EWK-Q — evidence integrity and current sprint closure
 
-### W-092-5 qualification disposition (exact subject)
+This is the only active implementation sprint. Coding Max feature expansion is
+staged in the backlog until this sprint exits.
 
-As of `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304` on
-`feat/beta-release_electroweak-v091`, W-092-5 is **BLOCKED**, not PASS.
+| Order | Package | Owner | Deliverable | Exit predicate |
+|---:|---|---|---|---|
+| 1 | `REL-01/H0` | Lane B | Runtime-adapter benchmark driver; executable materialized tasks; exterior oracle; structural-only dry run | Dry-run emits no lift/cost/success; live fixture proves exact task, patch, trajectory and evaluator linkage |
+| 2 | `REL-02/H1` | Lane B | Frozen content-addressed canary with `max_attempts=1` and explicit missingness | Manifest digest is fixed before live execution; invalid/unavailable tasks cannot count as failures or passes |
+| 3 | `FIN-A1` | Lane A | Producer-signed M-8 bundle and independent disposition | Protocol, promotion separation, and rollback evidence are valid on one subject; the independent verdict is accepted as positive, negative, or undeterminable without reinterpretation |
+| 4 | `W-092-5` | Both | Exact-subject qualification record | Required checks execute; claims match receipts; no local canary is called official SWE-bench |
 
-- Deterministic LAM: 27/27 rows completed, non-empirical only.
-- Focused gates: kernel 97/97; contracts 417/417; agency 126/126; packs 67/67;
-  adapters 154/154 (2 skips); benchmarks 29/29; tools 97/97.
-- Full-suite run: `2348` tests, `0` failures, `0` errors, `20` skips, `109.161s`.
-- `just check`/`just verify` were not executable (`just` absent, exit 127);
-  underlying checks passed with the `uv` cache redirected to `/tmp`, and MkDocs
-  strict passed.
-- Real-model canary: three `NO_PATCH` tasks, valid baseline evaluator,
-  linked trajectories, observed cost `USD 0.002308`; the driver opened two
-  episodes per task (`max_attempts=2`), so this is not a one-attempt result.
-- Release qualification was not run: signed envelope and independent external
-  Git receipt are absent; no placeholders were created.
+Sprint EWK-Q closes when all four integrity predicates pass; the empirical
+treatment need not be positive. If it is negative or undeterminable under the
+preregistration, record that result and keep M-8 blocked; do not tune the
+threshold or manufacture replacement data. Product capability work may then be
+scheduled, but M-9 promotion remains blocked until M-8 is actually accepted.
 
-This records qualification state only. It does not close M-4–M-10, SWE-bench,
-or a release candidate, and it does not change any TARGET/PLANNED architecture
-label to AS_BUILT.
+### Next-session implementation packet: `REL-01/H0`
 
-## Final sprint authorization (Wave 0)
+The next developer starts here; no new architecture pass is required.
 
-Both lanes have WIP=1. Progression depends on predicates and exact receipts.
-Only one owner may edit a file, event family, schema, or composition seam at a
-time; Dev B may not change normative contracts.
+**Required reading and source order**
 
-| Lane | Package | Owner | Entry predicate | Exit predicate |
-|---|---|---|---|---|
-| A | `FIN-A1` | Dev A | M-8 mechanism/integration available | Exact M-8 producer bundle independently accepted |
-| A | `FIN-A2` | Dev A | M-8 accepted | Installable beta, health, workflows, restart/resume, offline-after-install qualified |
-| A | `FIN-A3` | Dev A | M-9 accepted | Migration, fault, security, performance, backup/restore and reproducibility qualified |
-| A | `FIN-A4` | Dev A | M-10 candidate exists | Exact-subject release qualification passes |
-| A | `SWE-A1` | Dev A | SWE-P0/P1 receipts exist | Experiment architecture/promotion decisions recorded without closing M-9/M-10 |
-| B | `FIN-B1` | Dev B | M-8 evidence ownership assigned | Memory/learning/rollback evidence is producer-verifiable and auditable |
-| B | `FIN-B2` | Dev B | M-8 accepted | M-9 operational fixtures pass without normative changes |
-| B | `FIN-B3` | Dev B | M-9 accepted | M-10 qualification fixtures pass |
-| B | `SWE-B1` | Dev B | SWE-P0 scope frozen | Official benchmark adapter emits attributable receipts |
-| B | `SWE-B2` | Dev B | SWE-P1 baseline honest | Harness experiments retain control/treatment evidence |
-| B | `SWE-B3` | Dev B | Candidate evidence exists | Independent evidence audit completes; Dev B cannot self-accept |
+1. `docs/execution/active.md` (this package and current authorization).
+2. `benchmarks/m8_heldout/artifacts/preregistration.json` and
+   `benchmarks/m8_heldout/fixtures/workload.json` (frozen protocol inputs).
+3. `benchmarks/m8_heldout/runner.py` and
+   `test/benchmarks/test_m8_heldout_runner.py` (defective implementation and
+   executable falsifiers).
+4. `vanguard/packages/adapters/models/openrouter.py`,
+   `vanguard/packages/runtime/model_selection.py`, and the canonical runtime
+   entrypoint (official model/harness path).
+5. `vanguard/packages/runtime/evaluator_gateway.py` and evaluator port/adapter
+   contracts (exterior verdict path).
+6. Reverse-route every production file before editing and update its mapped
+   canonical owner; report degraded navigation if the index subject is stale.
 
-M-9 remains blocked until M-8 is independently accepted. M-10 remains blocked
-until M-9 is accepted. SWE-P0–P5 are parallel, non-authorizing evidence work.
+**Implementation requirements**
 
-## Dev B independent handoff disposition
+- Delete the runner's direct `urllib` provider client. Inject or compose the
+  official model adapter through the runtime path without exposing credentials.
+- Replace generated task outcomes with real workspace materialization, one
+  AETHER run, a pure unified patch, and an exterior evaluator verdict bound to
+  the exact task/base commit/workspace/trajectory/patch digests.
+- Make dry-run a structural preflight only. It reports `NOT_RUN`/missing values
+  for success, lift, tokens, cost, latency, promotion, and rollback; zero is not
+  a substitute for missing empirical data.
+- Enforce `max_attempts=1` at the driver boundary. Transport retries may recover
+  the same provider request, but may not open a second episode or task attempt.
+- Treat unavailable, invalid, timed-out, provider-failed, no-patch, patch-
+  rejected, and evaluator-failed tasks as distinct typed dispositions. Only an
+  applicable exterior pass counts as passed.
+- Remove the undefined live-mode `title` reference and reject malformed task
+  records during preflight rather than during paid execution.
+- Enforce aggregate and per-task USD/token/time ceilings before each call and
+  persist observed provider usage; never recompute observed cost from a local
+  price constant when provider billing is available.
+- Emit a producer-verifiable bundle only after every referenced artifact exists
+  and its digest resolves. Promotion and rollback receipts remain separate from
+  benchmark production and independent evaluation.
 
-The Dev B Wave 0 handoff was received and audited against this subject. It is
-accepted as an audit input, not as milestone acceptance. Its classifications of
-M-6, M-7, and M-8 as `INTEGRATED` describe mechanism/integration only; the
-required producer bundles and independent acceptance receipts remain absent.
+**Minimum falsifier matrix**
 
-The audit corrections are:
+| Falsifier | Expected result |
+|---|---|
+| Dry-run with all fixtures present | Structural PASS; all empirical fields missing; no lift or promotion verdict |
+| Non-empty model prose with no patch | `NO_PATCH`, never passed/grounded/verified |
+| Patch applies but exterior tests fail | evaluator failure; task not passed |
+| Zero tests collected | verification failure |
+| Second episode requested | driver rejects the attempt |
+| Provider unavailable or budget exhausted | typed missingness; denominator policy follows preregistration |
+| Task/base commit or artifact digest tampered | bundle verification fails closed |
+| Credential appears in prompt, event, patch, log, or artifact | stop-ship |
+| Fake official runtime adapter and evaluator | hermetic integration test proves wiring without network |
 
-- The real parent of this subject is
-  `c14be3c9d3b2ba9b7bacefec235eddab1bf1e304`; prose such as
-  `Aether-D-System` is not a Git identity.
-- `just check`/`just verify` are not PASS in this environment: `just` is not
-  installed and the direct command exits `127`.
-- `check_baseline_manifest.py` returned `FAIL`/`UNVERIFIED`, reporting remote
-  tag resolution, dependency digest, and reducer-pin mismatches. The baseline
-  is therefore not accepted on the current subject.
-- The fresh M-8 proof returned `59` tests and `0` failures, which verifies
-  mechanisms and falsifiers only. The fresh M-7 proof returned `40` tests and
-  `6` failures, so M-7 cannot be reported as closed.
-- `.draft/todo/beta_delivery.md` is an existing untracked contributor artifact
-  and is preserved; the working tree is consequently not clean until its
-  owner disposes of it.
+The package handoff must include commands actually run, exact counts, remaining
+failures, and the resulting subject digest. Live OpenRouter execution is not
+required to merge H0; it begins only after H0's hermetic adapter/evaluator path
+and H1's frozen manifest are independently reviewed.
 
-The first Dev B package remains `FIN-B1`, but Wave 1 is not started by this
-board because no Wave 1 implementation prompt or accepted M-8 bundle exists.
+### Next product sprint — Coding Max vertical slice
 
-## Wave 1 / FIN-A1 disposition
+This sprint becomes active only after EWK-Q disposition frees both WIP lanes.
+It is designed to produce one useful first-party agent while strengthening the
+general framework through existing seams.
 
-FIN-A1 was evaluated against remote exact subject
-`49a0a4a3b30525d3775501ab05c1dcdd1e9f262e` (tree
-`027e58c9746684c283900896245118e813550281`, parent
-`b9e936c7e244d59c32df0e4a8c6078b0839233d5`) and remains `BLOCKED`. The M-8
-proof runner completed in a fresh process with `59` tests, `0` failures, and
-`34/34` required markers; the focused memory/runtime suite completed `25`
-tests and the cold-restart suite `29` tests, all green. These are mechanism
-and falsifier observations, not milestone acceptance.
+| Order | Package | Primary location | Required outcome |
+|---:|---|---|---|
+| 1 | `CMX-01` composition delta | `packs/code-default/`, existing manifests | Reconcile current mechanisms with one `fast`, one `balanced`, and one `max` policy; no duplicate coordinator or store |
+| 2 | `CMX-02` repository intelligence | `ports/index.py`, adapters, code-pack tool bindings | Search, symbol, dependency, test mapping and repository map with deterministic fallback, provenance and path containment |
+| 3 | `CMX-03` durable work loop | code-pack planner/context/recovery policy + existing runtime projection | Understand/explore/localize/plan/edit/verify/recover/complete; resume restores the next action and failed-attempt memory |
+| 4 | `CMX-04` multi-file and greenfield | code-pack policy and fixtures | Change-surface closure, affected-test selection, scaffold/baseline policy, explicit non-test evidence rules, and no silent verification bypass |
+| 5 | `CMX-05` product facade | `vanguard/packages/apps/coding_max/` + shared application service | `vg code` and API invoke the same composition and expose status, resume, evidence and cost without owning execution |
+| 6 | `CMX-06` qualification | hermetic fixtures + controlled live canary | Internal repository-scale bug, multi-file feature, and greenfield tasks pass; cost/turn/token regressions are reported |
 
-The acceptance prerequisites are not present:
+The sprint stop-ship conditions are path escape, capability or budget expansion,
+direct model/provider HTTP in product logic, host subprocess execution outside
+the environment port, zero-test/stale-receipt admission, duplicated effects on
+resume, synthetic benchmark metrics, missing trajectory links, or an adapter
+importing `apps`.
 
-- no executable, preregistered held-out workload/corpus for the required
-  control/treatment study exists in the current subject. The available M-8
-  runner uses deterministic test doubles, so it cannot supply empirical
-  real-model observations, cost, tokens, or latency;
-- no producer-signed M-8 bundle, promotion receipt, or executed rollback
-  receipt has been deposited;
-- no independent verifier input can be issued by Dev A;
-- a local untracked `benchmarks/m8_heldout/runner.py` and its test were found,
-  but they are not part of this exact subject and are not admissible evidence:
-  the runner synthesizes outcomes, embeds a default key, and fails the
-  repository boundary linter. They were not executed or integrated;
-- the current working tree contains unrelated Dev B changes. The full suite
-  was therefore not attributable to the exact subject: it included local
-  untracked tests and returned `45` failures and `39` errors under the
-  restricted UDS environment.
+## First-party agent portfolio toward 1.0
 
-The canonical threshold remains `0.05` held-out lift with the existing
-regression budget `0.02`; it was not changed or applied post hoc. No external
-model call was made for FIN-A1, so there are no new canary tokens, cost, or
-latency records to report. The prior frontier canary is not substituted for
-this study because it used the wrong workload and a two-episode driver policy.
+The framework is not complete merely because custom agents are theoretically
+composable. The supported portfolio must dogfood the same public composition
+contract:
 
-No synthetic runner result is promoted to held-out lift, and no M-8 acceptance
-claim is made. M-9 remains unauthorized.
+1. **Coding Max** — write-capable autonomous engineering agent; first release
+   priority and the only agent allowed to block the Coding Max sprint.
+2. **Code Reviewer** — read-only or patch-suggesting critic using sequential
+   mediated child lineages; it cannot override failed verification.
+3. **Research** — bounded evidence-producing agent with explicit egress policy
+   and citation artifacts; no web capability is implied until the port exists.
+4. **Tutor** — read-only repository explainer proving a different completion
+   policy and context organization on the same framework.
+
+Research, Reviewer, and Tutor are reference-product gates for 1.0, not reasons
+to delay the first useful Coding Max vertical slice. Swarm, branch search,
+SBFL, mutation testing, ToolScript, skill distillation, and self-modification
+remain opt-in experiments until preregistered ablations show lift exceeding
+their cost and reliability burden.
+
+## 1.0 release horizon
+
+M-9 and M-10 retain their existing `0.9.0b1` and `0.9.0` meanings. A future
+1.0 release is non-authorizing until M-10 closes. Its minimum gate is:
+
+- a stable, documented public composition/port contract with compatibility tests;
+- installable Coding Max plus at least two supported non-coding reference agents;
+- repository-scale bugfix, multi-file, and greenfield qualification with exact
+  model, cost, token, latency and evaluator disclosure;
+- restart/resume, migration, backup/restore, security, performance and soak
+  evidence on the exact release subject;
+- no SOTA claim without an official or independently reproducible benchmark and
+  ablations that isolate harness lift from model lift.
+
+## Locked decisions and deliberately open variables
+
+The next session MUST NOT reopen these decisions without contradictory current
+source evidence or a formal architecture change:
+
+- hybrid disposition: B control model + A rollout discipline + measured C ideas;
+- thin app, thick composition; one runtime, ledger, tool path, store and evaluator;
+- coding policy outside kernel; infrastructure adapters do not import apps;
+- sequential execution by default; delegation is mediated and budget-attenuated;
+- completion requires task-appropriate fresh evidence; model prose is never verification;
+- durable state is event/artifact-derived; resume cannot duplicate settled effects;
+- optional intelligence providers enrich observations but never control authority;
+- M-8/M-9/M-10 and official benchmark claims remain evidence-gated.
+
+These variables remain intentionally open because evidence, not architecture,
+must select them: exact preset token/turn/USD ceilings, context-ranking weights,
+model routes, SBFL metric, reviewer trigger rate, concurrency, branch width, and
+mutation intensity. Each receives a conservative default in its implementation
+package and may change only through a preregistered measurement with rollback.

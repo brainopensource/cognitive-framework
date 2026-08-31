@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.solution_a.full_code_manifest_wave-10-final-integration-release
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # Full Code Manifest — Wave 10: Integração Final, Migração e Release do Coding Harness
 
 ## 0. Finalidade
@@ -1068,4 +1083,3 @@ Cada run deve expor: task/profile/preset, feature flags, composition/run digests
 ## 19. Definition of Done final
 
 O harness está implementado quando o caminho causal completo funciona em repositório real, sobre Vanguard, com patch transacional, verificação externa, recuperação, resume fresh-process, artifacts/trajectory e budgets corretos. Está qualificado quando canary e release gates passam. É SOTA apenas quando benchmark oficial/reprodutível e ablations sustentam a afirmação.
-

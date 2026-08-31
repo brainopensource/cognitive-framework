@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.solution_a.full_code_manifest_wave-4-runtime-integration
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # Full Code Manifest — Wave 4: Integração Executável Coding Max → Vanguard
 
 ## 0. Identidade e resultado

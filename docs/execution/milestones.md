@@ -13,9 +13,9 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: c14be3c9d3b2ba9b7bacefec235eddab1bf1e304
-version: 0.9.2a1
-last_verified: 2026-08-30
+analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
+version: 0.9.2a2
+last_verified: 2026-08-31
 normative_authority:
   - docs/03_execution/milestones.md
   - docs/SPEC.md#milestone-compatibility
@@ -77,6 +77,26 @@ existing M-4–M-10 gates without silently closing them.
 
 No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.
+
+## Post-M-10 1.0 qualification horizon
+
+M-9 and M-10 keep their existing beta and `0.9.0` meanings. The following
+outcomes define a non-authorizing 1.0 horizon; they do not create new active
+milestones or permit work that M-8/M-9/M-10 currently block.
+
+| Horizon outcome | Acceptance boundary |
+|---|---|
+| Stable agent framework | Public manifest, port, application-service, event, artifact, resume, and compatibility contracts are documented and tested; a first-party app does not own a second runtime |
+| Useful Coding Max product | Repository-scale bugfix, multi-file, migration, and greenfield tasks produce real patches and fresh verification through mediated effects with exact cost/latency/token evidence |
+| Reference-agent proof | Coding Max and at least two non-coding supported agents install and run through the same composition contract with domain-specific policies outside the kernel |
+| Operational 1.0 candidate | Upgrade/migration, backup/restore, restart/resume, offline-after-install, fault, security, performance, soak, and reproducible-build gates pass on the exact candidate |
+| Honest capability claim | Any SOTA or SWE-bench claim names the official/reproducible protocol, exact model and subject, missingness, cost, evaluator, and harness-vs-model ablation |
+
+Coding Max is delivered using the **thin app, thick declarative composition**
+boundary recorded in [active.md](active.md) and [backlog.md](backlog.md). A new
+kernel primitive, runtime, store, tool broker, or evaluator is a failed horizon
+gate unless independently justified as a general framework contract through the
+normal decision and falsifier process.
 
 ## SWE-P0–SWE-P5 parallel program
 

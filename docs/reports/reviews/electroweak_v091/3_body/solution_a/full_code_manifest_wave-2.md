@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.solution_a.full_code_manifest_wave-2
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # Full Code Manifest — Wave 2
 
 ## Escopo
@@ -235,4 +250,3 @@ index 0000000..2547100
 ## Limites explícitos
 
 O fallback não pretende substituir SCIP/tree-sitter/LDA; ele garante operação degradada correta. Cache persistente e proveniência externa devem reutilizar artifact store e identidade de run existentes quando integrados ao executor real.
-

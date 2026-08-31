@@ -17,9 +17,9 @@ audience:
   - developer
   - architect
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-08-29
+analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
+version: 0.9.2a2
+last_verified: 2026-08-31
 evidence:
   - E-B-010
   - E-B-019
@@ -42,7 +42,7 @@ This document is the canonical architecture owner for the `EpisodeEngine` sequen
 ## Scope
 - Episode identity and lifecycle states.
 - The step-by-step turn loop: Observe $	o$ Compile $	o$ Propose $	o$ Authorize $	o$ Dispatch $	o$ Ingest.
-- Layered context compiler architecture (`ContextCompiler`) and compaction strategies.
+- Layered L1-L5 context compiler architecture (`ContextCompiler`) and compaction strategies.
 - Protocol recovery mechanisms for malformed model outputs (`protocol_recovery.py`).
 - Hand-off interface between `agency` and `kernel.dispatch`.
 
@@ -52,8 +52,8 @@ This document is the canonical architecture owner for the `EpisodeEngine` sequen
 - External evaluation scoring and verdicts (owned by [`arch.assurance.evaluation`](assurance-evaluation.md)).
 
 ## AS_BUILT Status
-- `IMPLEMENTED` — Fully functional bounded sequential episode engine implemented in `vanguard.packages.agency`.
-- `PARTIAL` — Protocol recovery and generic context compaction are implemented, but the coding-specific plan, verification-admission, classified recovery, and durable task-state loop described in Section 6 are **v0.9.2 targets**, not current behavior.
+- `IMPLEMENTED` — The bounded sequential episode engine, L1-L5 compiler, injected protocol-recovery pipeline, generic completion-admission callback, and runtime meta-controller consultation are integrated on the canonical run path.
+- `PARTIAL` — `CodingTaskState` and code-pack repository/context/verification middleware exist as mechanisms, but one end-to-end Coding Max composition does not yet integrate the complete durable plan, classified task recovery, multi-file/greenfield policy, and product qualification described in Section 6.
 
 ---
 
@@ -90,25 +90,27 @@ Each turn in `EpisodeEngine.step()` executes a sequential cognition cycle (`INV-
 
 ## 3. Layered Context Architecture (`ContextCompiler`)
 
-The context compiler organizes prompt tokens into four distinct, prefix-stable layers:
+The context compiler organizes prompt tokens into five layers ordered by mutation rate:
 
 ```text
 +-------------------------------------------------------------+
-| Layer 1 (L1): System Invariants & Substrate Rules           | (Frozen at build)
+| Layer 1 (L1): System Role & Output Contract                 | (Frozen at build)
 +-------------------------------------------------------------+
-| Layer 2 (L2): Agent Role Persona & Pack Instructions        | (Frozen at composition)
+| Layer 2 (L2): Active Tool Specifications                    | (Frozen at composition)
 +-------------------------------------------------------------+
-| Layer 3 (L3): Active Tool Specifications & Schema Prompts   | (Frozen at session start)
+| Layer 3 (L3): Environment Conventions & Retrieved Priors    | (Frozen within task)
 +-------------------------------------------------------------+
-| Layer 4 (L4): Dynamic Turn Observations & Message History   | (Compacted dynamically)
+| Layer 4 (L4): Task Brief & Stable Task Notes                | (Stable within task)
++-------------------------------------------------------------+
+| Layer 5 (L5): Turns, Results & Dynamic Notes                | (Compacted dynamically)
 +-------------------------------------------------------------+
 ```
 
 ### Prefix Stability & KV-Caching
-Layers L1–L3 are deterministically hashed and remain byte-identical across turns, maximizing prompt cache hit rates on upstream LLM inference providers.
+Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone.
 
 ### Context Compaction
-When Layer 4 approaches the token budget ceiling, `CompactionEngine` applies structured compaction:
+When the context approaches the token budget ceiling, `CompactionEngine` applies structured compaction to L5 while preserving higher layers:
 - Summarizes older observation blocks.
 - Preserves the initial user brief and the $N$ most recent turn receipts.
 - Emits a `ContextCompacted` event to ensure reproducibility.
@@ -141,9 +143,12 @@ Episodes conclude with one of the following terminal states:
 
 ---
 
-## 6. v0.9.2 Target: Coding Harness Control Loop
+## 6. Coding Harness Control Loop
 
-> **TARGET / PLANNED — not AS_BUILT.** This section fixes the intended ownership and behavioral contract for v0.9.2 implementation. It does not assert that the current `EpisodeEngine` enforces these transitions.
+> **PARTIAL AS_BUILT / PRODUCT TARGET.** Generic completion admission,
+> protocol recovery, context layering, meta-control, and mediated execution are
+> integrated. The complete Coding Max product loop remains a staged code-pack
+> and application composition, not a new agency engine.
 
 Vanguard owns the generic bounded turn, dispatch, event-observation, budget, and completion-admission seams. Coding semantics remain above the substrate in the code pack/harness: repository discovery, patch state, test selection, test-result interpretation, and the definition of an applicable coding verification. No coding vocabulary or repository-intelligence dependency belongs in the domain-blind kernel.
 
@@ -222,12 +227,25 @@ NO_PROGRESS             PREMATURE_FINISH
 
 Each class has a bounded retry limit and a recovery action. A retry is admissible only when the failure is retryable, budget remains, and the next action or information state differs materially. Repeating the same action with the same arguments against unchanged state is `NO_PROGRESS`, not recovery. Provider adapters may perform transport retries; the harness separately decides whether a failed turn or task action should be retried.
 
-### 6.4 Planned implementation and falsifiers
+### 6.4 Current ownership, remaining integration and falsifiers
 
-- **Generic framework seam**: completion-admission result and typed recovery decision in `vanguard/packages/agency/episode/`.
-- **Coding ownership**: state reducer, repository context selection, verification policy, and failure interpretation in the code pack/harness.
-- **Runtime binding**: manifest-selected context and admission policies in `vanguard/packages/runtime/session.py`.
-- **Required falsifiers**: premature finish, zero-test success, stale verification after edit, partial patch, repeated identical action, failed-test repair, and fresh-process reconstruction of the next action.
+- **Generic framework seams (AS_BUILT)**: completion-admission result and typed
+  protocol recovery in `vanguard/packages/agency/episode/`; L1-L5 compilation
+  in `vanguard/packages/agency/context/`; guarded meta-control and manifest
+  binding in `vanguard/packages/runtime/session.py`.
+- **Coding mechanisms (AS_BUILT, not one accepted product loop)**:
+  `CodingTaskState`, context ranking, symbol/import analysis, multi-file
+  completeness, test-output parsing, and verification gating.
+- **Coding Max ownership (TARGET)**: task classification, plan/TODO policy,
+  repository context selection, domain failure interpretation, verification
+  applicability, greenfield evidence policy, and fast/balanced/max presets in
+  the code pack; a thin `apps/coding_max` facade selects and invokes the
+  composition.
+- **Required falsifiers**: premature finish, zero-test success, stale
+  verification after edit, partial patch, repeated identical action, failed-test
+  repair, path escape, adapter-to-app import, host subprocess bypass,
+  multi-file omission, greenfield silent bypass, and fresh-process
+  reconstruction of the next action.
 
 ---
 

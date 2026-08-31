@@ -1,3 +1,18 @@
+---
+id: report.electroweak.3_body.3-manifest-body-case
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+purpose: Non-canonical candidate input to the Coding Max architecture convergence review.
+audience:
+  - contributor
+  - architect
+---
+
 # AETHER / Vanguard — Coding Max Harness Implementation Specification
 
 **Role:** Principal Software Engineer, Staff Agentic Systems Architect, Coding-Harness Engineer, Runtime Engineer, SWE-bench Specialist, Technical Lead

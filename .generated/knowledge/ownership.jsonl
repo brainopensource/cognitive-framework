@@ -39,6 +39,7 @@
 {"canonical_id": "ref.schemas", "canonical_owner_path": "docs/backend/reference/schemas.md", "owner": "domain-wire"}
 {"canonical_id": "decision.index", "canonical_owner_path": "docs/decisions.md", "owner": "principal-systems-architect"}
 {"canonical_id": "execution.active", "canonical_owner_path": "docs/execution/active.md", "owner": "repository-governance"}
+{"canonical_id": "execution.backlog", "canonical_owner_path": "docs/execution/backlog.md", "owner": "repository-governance"}
 {"canonical_id": "execution.milestones", "canonical_owner_path": "docs/execution/milestones.md", "owner": "repository-governance"}
 {"canonical_id": "nav.frontend", "canonical_owner_path": "docs/frontend/README.md", "owner": "frontend-architecture"}
 {"canonical_id": "frontend-prd-placement-manifest", "canonical_owner_path": "docs/product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md", "owner": "product-architecture"}
@@ -47,7 +48,17 @@
 {"canonical_id": "product.frontend.lab", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_LAB.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.tui", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_TUI.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.platform", "canonical_owner_path": "docs/product/frontend/PRD_FRONTEND_PLATFORM.md", "owner": "product-architecture"}
-{"canonical_id": "report.reviews-aether-v090-project-status-summary", "canonical_owner_path": "docs/reports/reviews/AETHER_V090_PROJECT_STATUS_SUMMARY.md", "owner": "repository-governance"}
+{"canonical_id": "3-manifest-body-case", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/3-manifest-body-case.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-1", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-1.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-10-final-integration-release", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-10-final-integration-release.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-2", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-2.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-3", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-3.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-4-runtime-integration", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-4-runtime-integration.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-5-workspace-tools-verification", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-5-workspace-tools-verification.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-6-durable-state-checkpoint-resume", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-6-durable-state-checkpoint-resume.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-7-forge-chimera-metamorphosis", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-7-forge-chimera-metamorphosis.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-8-intelligence-lam-swebench-qualification", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-8-intelligence-lam-swebench-qualification.md", "owner": "repository-governance"}
+{"canonical_id": "full_code_manifest_wave-9-toolscript-specialists-reviewer", "canonical_owner_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-9-toolscript-specialists-reviewer.md", "owner": "repository-governance"}
 {"canonical_id": "research.ai-openrouter-llm-models-suggested", "canonical_owner_path": "docs/research/AI/openrouter_llm_models_suggested.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-archon-gemini-prototype", "canonical_owner_path": "docs/research/coding_harness/ARCHON_gemini_prototype.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-dekas-claude-prototype", "canonical_owner_path": "docs/research/coding_harness/DEKAS_claude_prototype.md", "owner": "repository-governance"}

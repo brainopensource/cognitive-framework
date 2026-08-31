@@ -41,7 +41,12 @@ def _snapshot(ctx: AtlasContext):
     links = _rows(ctx, "links.jsonl")
 
     total = {
-        "status": "HEALTHY",
+        "status": "HEALTHY" if stats.get("files", 0) > 0 else "DEGRADED_EMPTY_INDEX",
+        "index_hint": (
+            "fact graph populated"
+            if stats.get("files", 0) > 0
+            else "fact graph is empty; run 'uv run lda index' or use tools/docs_rag_v0.py"
+        ),
         "root": str(ctx.root),
         "database_stats": stats,
         "topology": topo,
@@ -119,8 +124,16 @@ def main(argv=None):
     elif args.command == "query":
         fts_res = query_repository(repo_root, args.query)
         if not fts_res:
-            # Fallback to catalog rows
-            fts_res = [r for r in _rows(ctx, "catalog.jsonl") if args.query.lower() in json.dumps(r).lower()]
+            # Fallback to authority-scored catalog routing (same ranker as the
+            # context compiler), since FTS row content is metadata-only.
+            from dataclasses import asdict
+
+            from .core.ranking import catalog_fallback_candidates, load_catalog_metadata
+
+            fts_res = [
+                asdict(c)
+                for c in catalog_fallback_candidates(args.query, load_catalog_metadata(repo_root))
+            ]
         result = fts_res
     elif args.command == "symbol":
         result = get_symbol_details(repo_root, args.symbol)
@@ -137,10 +150,24 @@ def main(argv=None):
         result = next((r for r in _rows(ctx, "catalog.jsonl") if args.target in {r.get("path"), r.get("canonical_id")}), {"error": "not found", "target": args.target})
     elif args.command == "doctor":
         storage = get_storage(repo_root)
+        index_stats = storage.get_stats()
+        index_healthy = (
+            index_stats.get("files", 0) > 0
+            and index_stats.get("documents", 0) > 0
+        )
         result = {
             "root": str(repo_root),
             "storage_db": str(storage.db_path),
             "db_exists": storage.db_path.exists(),
+            "index_rows": index_stats,
+            "index_healthy": index_healthy,
+            "index_hint": (
+                "index is populated"
+                if index_healthy
+                else "index is EMPTY or cold; run 'uv run lda index' — agents should "
+                     "verify .generated/knowledge/report.json status=VALIDATED first and "
+                     "fall back to tools/docs_rag_v0.py when unhealthy"
+            ),
             "required": ["python3", "sqlite3"],
             "optional": {
                 "mkdocs": shutil.which("mkdocs") is not None,

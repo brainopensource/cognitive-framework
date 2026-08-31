@@ -21,6 +21,7 @@ normative_authority:
   - docs/03_execution/backlog.md
 relationships:
   - execution.milestones
+  - execution.backlog
   - decision.index
 reviewer: delegated-tech-lead-block-e
 confidence: high
@@ -100,24 +101,21 @@ Parallelism applies between independent work packages, not within a shared autho
 Only one contributor may edit a given canonical document, schema, event family, or composition
 seam at a time.
 
-| Wave | Outcome | Dev A lead package | Dev B supporting package | Entry gate | Exit gate |
-|---|---|---|---|---|---|
-| W-092-0 | Canonical contracts and navigable implementation map | Reconcile SPEC, decisions, architecture ownership, context/verification/recovery contracts | Validate links, paths, generated-index freshness and executable examples | Review evidence is available; no production mutation required | Canonical owners agree; no target is described as AS_BUILT; indexes have explicit fallback rules |
-| W-092-1 | Correct benchmark evidence and projection semantics | Evidence identity, benchmark validity, `AgentView` compatibility design and review | Fixtures, result persistence, reducer vectors and retained-ledger regression | W-092-0 contracts merged | Zero invalid development fixtures; every result links trajectory; current events fold to exact actions/budgets |
-| W-092-2 | Verification-admitted coding loop | Completion-admission seam and framework/harness boundary | LAM scenarios, test parsing, zero-test and stale-verification cases | W-092-1 evidence linkage green | Applicable patched tasks cannot complete without fresh successful verification |
-| W-092-3 | Bounded context and durable coding state | Provider-neutral context integration and task-state projection | Deterministic index fallback, ranking fixtures, token/duplicate-read telemetry | W-092-2 loop green | Controlled A/B meets preregistered token/turn threshold without success regression |
-| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Cross-cutting recovery and semantic-resume integration | Range/list/symbol tools, patch corpus, typed failure fixtures, adapter profiles | W-092-3 treatment accepted or rejected with evidence | Patch/recovery acceptance targets pass; retries are bounded; resume restores durable next-action state |
-| W-092-5 | Qualification and release closure | Controlled real-model canary, larger sample decision, release evidence review | Deterministic/local matrix execution, artifact audit, docs-as-built synchronization | W-092-1–4 exact-subject receipts available | Release claim matches evidence; `just check` and `just verify` pass on exact candidate; no SWE claim without official qualification |
+| Wave | Outcome | Dev A lead package | Dev B supporting package | Entry gate | Exit gate | Status |
+|---|---|---|---|---|---|---|
+| W-092-0 | Canonical contracts and navigable implementation map | Reconcile SPEC, decisions, architecture ownership, context/verification/recovery contracts | Validate links, paths, generated-index freshness and executable examples | Review evidence is available; no production mutation required | Canonical owners agree; no target is described as AS_BUILT; indexes have explicit fallback rules | `DONE` (Merged in Ancestry) |
+| W-092-1 | Correct benchmark evidence and projection semantics | Evidence identity, benchmark validity, `AgentView` compatibility design and review | Fixtures, result persistence, reducer vectors and retained-ledger regression | W-092-0 contracts merged | Zero invalid development fixtures; every result links trajectory; current events fold to exact actions/budgets | `DONE` (Merged in Ancestry) |
+| W-092-2 | Verification-admitted coding loop | Completion-admission seam and framework/harness boundary | LAM scenarios, test parsing, zero-test and stale-verification cases | W-092-1 evidence linkage green | Applicable patched tasks cannot complete without fresh successful verification | `DONE` (AdmissionGate Green) |
+| W-092-3 | Bounded context and durable coding state | Provider-neutral context integration and task-state projection | Deterministic index fallback, ranking fixtures, token/duplicate-read telemetry | W-092-2 loop green | Controlled A/B meets preregistered token/turn threshold without success regression | `DONE` (L1-L5 Radix Integrated) |
+| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Cross-cutting recovery and semantic-resume integration | Range/list/symbol tools, patch corpus, typed failure fixtures, adapter profiles | W-092-3 treatment accepted or rejected with evidence | Patch/recovery acceptance targets pass; retries are bounded; resume restores durable next-action state | `DONE` (RecoveryPolicy Green) |
+| W-092-5 | Qualification and release closure | Controlled real-model canary, larger sample decision, release evidence review | Deterministic/local matrix execution, artifact audit, docs-as-built synchronization | W-092-1–4 exact-subject receipts available | Release claim matches evidence; `just check` and `just verify` pass on exact candidate; no SWE claim without official qualification | `ACTIVE` (Blocked on Empirical Canary) |
 
 ### Immediate authorized queue
 
-1. Complete W-092-0 and validate the canonical cross-links.
-2. Start W-092-1 with benchmark preflight/evidence persistence and `AgentView` reducer vectors in
-   parallel, because they have disjoint production owners.
-3. Do not start W-092-3 or later production integration before the W-092-2 completion contract is
-   executable; design and fixtures may be prepared independently.
-4. Keep delegation/concurrency optimization outside the v0.9.2 critical path until the
-   single-agent verification loop has a measured baseline.
+1. **Reconcile Wave H0 (Tooling Integrity)**: Ensure `benchmarks/m8_heldout/runner.py` routes through official runtime adapters and emits zero synthetic lift/metrics in dry-run mode.
+2. **Publish Wave H1 Canary Manifest**: Dev B freezes 10 content-addressed, executable tasks (`max_attempts=1`) with independent external evaluators.
+3. **Execute Single-Attempt Live Canary**: Run the frozen 10-task canary with OpenRouter under strict token and USD budget ceilings.
+4. **Independent Evaluator Audit**: Dev B evaluates raw trajectories and patches independently (acceptance target: $\ge 8/10$ applicable patches, $\ge 6/10$ external passes).
 
 ### W-092-5 qualification disposition (exact subject)
 

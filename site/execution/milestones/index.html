@@ -16,7 +16,7 @@
         <link rel="prev" href="../active/">
       
       
-        <link rel="next" href="../../theory/agent-substrate/">
+        <link rel="next" href="../backlog/">
       
       
         
@@ -2481,6 +2481,8 @@
       
         
       
+        
+      
     
     
     
@@ -2685,10 +2687,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#swe-p0swe-p5-parallel-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SWE-P0–SWE-P5 parallel program
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
     </li>
   
 
@@ -2803,26 +2851,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reports/reviews/AETHER_V090_PROJECT_STATUS_SUMMARY/" class="md-nav__link">
+      <a href="../../reports/benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Project Status Summary
+    Benchmark Report
   
 
     
   </span>
   
-  
-    
-  
-  
-    <span class="md-status md-status--reference"></span>
-  
-
   
 
       </a>
@@ -4133,6 +4174,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#swe-p0swe-p5-parallel-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SWE-P0–SWE-P5 parallel program
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4159,6 +4211,7 @@
 <th>Milestone</th>
 <th>TARGET outcome</th>
 <th>Acceptance boundary</th>
+<th>Execution Status</th>
 </tr>
 </thead>
 <tbody>
@@ -4166,51 +4219,61 @@
 <td>M-0–M-3C</td>
 <td>Trust foundation and canonical composition</td>
 <td>Historical completion anchors remain preserved; successor changes require explicit ADR and falsifier</td>
+<td><code>DONE</code> (Verified &amp; Frozen)</td>
 </tr>
 <tr>
 <td>M-4</td>
 <td>Useful real-model coding proof with durable causal evidence</td>
 <td>Exact immutable RF-95 bundle plus valid acceptance; RF-85 remains optional assurance</td>
+<td><code>DONE</code> (RF-95 Base Tagged)</td>
 </tr>
 <tr>
 <td>M-5a</td>
 <td>Event-derived <code>AgentView</code> and accepted successor baseline</td>
 <td>Replay evidence and verified <code>CONVERGENCE-BASE-v1</code> predicates</td>
+<td><code>DONE</code> (Base Reconciled)</td>
 </tr>
 <tr>
 <td>M-5b</td>
 <td>Independent domain-generality witness</td>
 <td>RF-86/RF-98 against the uncontaminated successor baseline</td>
+<td><code>MECHANISM AS_BUILT</code> (Awaiting Handoff)</td>
 </tr>
 <tr>
 <td>M-6</td>
 <td>Mediated recursive delegation</td>
 <td>Depth-three cold reconstruction, attenuation, budget conservation, recovery, signed evidence</td>
+<td><code>MECHANISM AS_BUILT</code> (59 tests green)</td>
 </tr>
 <tr>
 <td>M-6.5</td>
 <td>Measured adaptive strategy</td>
 <td>Valid paired-study disposition; controller remains off unless profile-specific evidence authorizes it</td>
+<td><code>MECHANISM AS_BUILT</code> (Controller Off)</td>
 </tr>
 <tr>
 <td>M-7</td>
 <td>Declarative multi-role topology through one runtime</td>
 <td>Three real-effect topologies, persisted artifact flow, and explicit scheduler disposition</td>
+<td><code>MECHANISM AS_BUILT</code> (40 tests, 6 skips)</td>
 </tr>
 <tr>
 <td>M-8</td>
 <td>Durable memory and governed learning MVP</td>
 <td>Authorization, recovery, retention, held-out lift, separated promotion authority, and executed rollback receipts</td>
+<td><code>BLOCKED</code> (Awaiting empirical held-out lift &gt;=0.05)</td>
 </tr>
 <tr>
 <td>M-9</td>
 <td>Installable operational beta <code>0.9.0b1</code></td>
 <td>Qualified M-1–M-8 evidence, unified product surfaces, health, two workflows, restart/resume, offline-after-install</td>
+<td><code>UNAUTHORIZED</code> (Blocked on M-8)</td>
 </tr>
 <tr>
 <td>M-10</td>
 <td>Final <code>0.9.0</code> release</td>
 <td>Migration, backup/restore, fault/security/performance qualification, reproducible artifacts, soak, exact-subject signed envelope</td>
+<td><code>UNAUTHORIZED</code> (Blocked on M-9)</td>
 </tr>
 </tbody>
 </table>
@@ -4223,7 +4286,9 @@
 <li>M-10 closes only when <code>./ci/release_qualify.sh</code> exits <code>0</code> for the exact candidate and emits a subject-matching signed envelope.</li>
 </ul>
 <h2 id="current-status-caveat">Current-status caveat</h2>
-<p>The active authority corpus contains inconsistent M-7/M-8 and baseline status statements (<code>CONFLICT-E-002</code> and <code>CONFLICT-E-003</code>). This page therefore publishes stable gates only. It does not select a current completion state; see <a href="../active/">execution.active</a> and the generated conflict register.</p>
+<p>This page publishes stable gates only. The exact current disposition is owned by
+<a href="../active/">execution.active</a>, which records M-8 and later as unaccepted until
+the required producer-verifiable and independent receipts exist.</p>
 <h2 id="v092-capability-wave-overlay">v0.9.2 capability-wave overlay</h2>
 <p>Vanguard v0.9.2 is an implementation and qualification overlay, not a replacement milestone
 ladder. Its waves are routed through <a href="../active/">execution.active</a> and contribute evidence to the
@@ -4234,43 +4299,97 @@ existing M-4–M-10 gates without silently closing them.</p>
 <th>Capability wave</th>
 <th>Stable outcome</th>
 <th>Required evidence</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>W-092-0</td>
-<td>Canonical context, completion, verification, recovery, patch, and trajectory contracts</td>
+<td>Canonical contracts and navigable implementation map</td>
 <td>Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks</td>
+<td><code>DONE</code> (Merged in Ancestry)</td>
 </tr>
 <tr>
 <td>W-092-1</td>
 <td>Valid benchmark subjects and lossless trajectory/projection evidence</td>
 <td>Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors</td>
+<td><code>DONE</code> (Merged in Ancestry)</td>
 </tr>
 <tr>
 <td>W-092-2</td>
 <td>Coding completion admitted only by fresh applicable verification</td>
 <td>Deterministic failure scenarios, local challenge receipts, exterior evaluator kept independent</td>
+<td><code>DONE</code> (AdmissionGate Green)</td>
 </tr>
 <tr>
 <td>W-092-3</td>
 <td>Bounded provider-neutral repository context and durable coding state</td>
 <td>Control/treatment trajectories with task, index, context and prompt identities</td>
+<td><code>DONE</code> (L1-L5 Radix Integrated)</td>
 </tr>
 <tr>
 <td>W-092-4</td>
-<td>Reliable observation, patching, typed recovery and semantic resume</td>
+<td>Tool, patch, recovery, resume, and provider reliability</td>
 <td>Patch corpus, injected-failure study, cold-restart parity and provider contract tests</td>
+<td><code>DONE</code> (ProtocolRecoveryPolicy Green)</td>
 </tr>
 <tr>
 <td>W-092-5</td>
 <td>Evidence-qualified release disposition</td>
 <td>Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary</td>
+<td><code>ACTIVE</code> (Blocked on Empirical Canary)</td>
 </tr>
 </tbody>
 </table>
 <p>No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.</p>
+<h2 id="swe-p0swe-p5-parallel-program">SWE-P0–SWE-P5 parallel program</h2>
+<p>The SWE program is evidence work, not a milestone shortcut. It does not authorize
+or close M-9 or M-10.</p>
+<table>
+<thead>
+<tr>
+<th>Program</th>
+<th>Outcome</th>
+<th>Required gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SWE-P0</td>
+<td>Instrument-valid harness</td>
+<td>Isolated materialization, trajectory linkage, evaluator validity, secret boundary</td>
+</tr>
+<tr>
+<td>SWE-P1</td>
+<td>Honest baseline</td>
+<td>Preregistered corpus/model/cost policy and explicit missingness</td>
+</tr>
+<tr>
+<td>SWE-P2</td>
+<td>Harness experiments</td>
+<td>Controlled context/tool/recovery experiments with attributable receipts</td>
+</tr>
+<tr>
+<td>SWE-P3</td>
+<td>Model/harness optimization</td>
+<td>Predeclared optimization and held-out comparison without contamination</td>
+</tr>
+<tr>
+<td>SWE-P4</td>
+<td>Controlled larger run</td>
+<td>Budgeted larger sample, independent audit, reproducible subject identity</td>
+</tr>
+<tr>
+<td>SWE-P5</td>
+<td>Official evaluation</td>
+<td>Official benchmark procedure and receipt; local runs are never official</td>
+</tr>
+</tbody>
+</table>
+<p>Only SWE-P5 may support an official SWE-bench claim, and only for its evaluated
+subject and protocol. A local canary or green test suite is never an official
+SWE-bench result.</p>
 
 
 

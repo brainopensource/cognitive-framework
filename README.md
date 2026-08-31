@@ -123,6 +123,19 @@ of its own.
 For implementation and review work, use the repository's generated intelligence to route a small,
 task-specific context before opening source broadly:
 
+```bash
+# 0. Bootstrap state (gates, headroom, known failures)
+cat dev_context_logs/context_summary.md
+
+# 1. Route a task to its canonical documents, inside a token budget
+python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
+
+# 2. Reverse route a code path to its canonical owner documentation + symbols
+python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
+```
+
+Or the equivalent artifact flow, if you prefer reading the raw JSONL projections:
+
 ```text
 dev_context_logs/context_summary.{md,json}
     -> .generated/knowledge/code-map.jsonl

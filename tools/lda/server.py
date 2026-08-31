@@ -17,14 +17,17 @@ def get_html() -> str:
     return HTML_PATH.read_text(encoding="utf-8")
 
 def rescan_catalog(ctx):
+    """Read-only filesystem scan for dashboard display.
+
+    This MUST NOT write `.generated/knowledge/catalog.jsonl`: that file is the
+    canonical knowledge base of record, emitted exclusively by
+    `tools/generate_knowledge_base.py` (`just docs-knowledge`). A previous
+    version of this endpoint overwrote the canonical 89-row catalog with a
+    1391-row non-canonical filesystem scan, violating the single-emitter rule.
+    """
     provider = fs_provider.FilesystemProvider()
     res = provider.collect(ctx)
-    entities = [e.metadata for e in res.entities if e.metadata.get("path")]
-    cat_path = ctx.knowledge / "catalog.jsonl"
-    if cat_path.parent.exists():
-        lines = [json.dumps(d) for d in entities]
-        cat_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
-    return entities
+    return [e.metadata for e in res.entities if e.metadata.get("path")]
 
 class Handler(BaseHTTPRequestHandler):
     ctx = None

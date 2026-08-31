@@ -1,0 +1,5233 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Full Code Manifest — Wave 7: Forge, Chimera e Metamorfose Governada - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#full-code-manifest-wave-7-forge-chimera-e-metamorfose-governada" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Full Code Manifest — Wave 7: Forge, Chimera e Metamorfose Governada
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-resultado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Resultado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-loops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Loops
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-novo-arquivo-packscode-defaultcoding_maxreflexpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Novo arquivo: packs/code-default/coding_max/reflex.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-novo-arquivo-packscode-defaultcoding_maxbranch_searchpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Novo arquivo: packs/code-default/coding_max/branch_search.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-novo-arquivo-packscode-defaultcoding_maxmutationpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Novo arquivo: packs/code-default/coding_max/mutation.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-novo-arquivo-packscode-defaultcoding_maxcapsulespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Novo arquivo: packs/code-default/coding_max/capsules.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-diff-obrigatorio-em-capsulespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Diff obrigatório em capsules.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-integracao-com-topologia-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Integração com topologia real
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-testes-testpackscode_defaulttest_metamorphosispy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Testes: test/packs/code_default/test_metamorphosis.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-metamorphosis-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Metamorphosis surface
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-search-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Search policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-falsifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Falsifiers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-ordem-de-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Ordem de implementação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-checklist-phdsota-por-simbolo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Checklist PhD/SOTA por símbolo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-acceptance-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Acceptance gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Definition of Done
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="full-code-manifest-wave-7-forge-chimera-e-metamorfose-governada">Full Code Manifest — Wave 7: Forge, Chimera e Metamorfose Governada</h1>
+<h2 id="0-resultado">0. Resultado</h2>
+<p>Implementar test-time scaling, branching, reflexão, mutação de composição e cápsulas de estratégia como plugins/policies do pack. Metamorfose significa trocar configuração, topologia, contexto, prompt, route e recovery dentro de capabilities e budgets imutáveis; nunca alterar kernel, elevar autoridade ou autopromover aprendizado.</p>
+<h2 id="1-loops">1. Loops</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>L0 Engineering: explore → patch → verify → repair
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>L1 Search: fork hypotheses → isolated candidates → external score → select
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>L2 Evolution: propose mutation → offline evaluation → governance → promote/rollback
+</code></pre></div>
+<h2 id="2-novo-arquivo-packscode-defaultcoding_maxreflexpy">2. Novo arquivo: <code>packs/code-default/coding_max/reflex.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">ReflexTrigger</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">NO_PROGRESS</span> <span class="o">=</span> <span class="s2">"no_progress"</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">CONTEXT_MISS</span> <span class="o">=</span> <span class="s2">"context_miss"</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">PATCH_CONFLICT</span> <span class="o">=</span> <span class="s2">"patch_conflict"</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">TEST_REGRESSION</span> <span class="o">=</span> <span class="s2">"test_regression"</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">HIGH_UNCERTAINTY</span> <span class="o">=</span> <span class="s2">"high_uncertainty"</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">BUDGET_PRESSURE</span> <span class="o">=</span> <span class="s2">"budget_pressure"</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="k">class</span><span class="w"> </span><span class="nc">ReflexDirective</span><span class="p">:</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">trigger</span><span class="p">:</span> <span class="n">ReflexTrigger</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="n">parameters</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="n">expected_cost</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">ReflexController</span><span class="p">:</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">decide</span><span class="p">(</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">failure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repeated_signal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">uncertainty</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>        <span class="n">remaining_budget</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">context_misses</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReflexDirective</span><span class="p">:</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>        <span class="n">turns</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">remaining_budget</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"turns"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>        <span class="n">tokens</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">remaining_budget</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tokens"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>        <span class="k">if</span> <span class="n">turns</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">tokens</span> <span class="o">&lt;</span> <span class="mi">2000</span><span class="p">:</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>            <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>                <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">BUDGET_PRESSURE</span><span class="p">,</span> <span class="s2">"narrow_and_verify"</span><span class="p">,</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>                <span class="p">{</span><span class="s2">"verification"</span><span class="p">:</span> <span class="s2">"targeted"</span><span class="p">},</span> <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)},</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>                <span class="s2">"preserve enough budget for externally observed verification"</span><span class="p">,</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>            <span class="p">)</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>        <span class="k">if</span> <span class="n">repeated_signal</span><span class="p">:</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>            <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>                <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">NO_PROGRESS</span><span class="p">,</span> <span class="s2">"fork_hypotheses"</span><span class="p">,</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>                <span class="p">{</span><span class="s2">"branches"</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">12000</span><span class="p">)},</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>                <span class="s2">"identical progress signal requires non-identical search"</span><span class="p">,</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>            <span class="p">)</span>
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>        <span class="k">if</span> <span class="n">failure</span> <span class="o">==</span> <span class="s2">"context"</span> <span class="ow">or</span> <span class="n">context_misses</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>            <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>                <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">CONTEXT_MISS</span><span class="p">,</span> <span class="s2">"expand_repository_evidence"</span><span class="p">,</span>
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>                <span class="p">{</span><span class="s2">"signals"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"symbols"</span><span class="p">,</span> <span class="s2">"tests"</span><span class="p">,</span> <span class="s2">"dependencies"</span><span class="p">]},</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>                <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">6000</span><span class="p">)},</span>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>                <span class="s2">"missing evidence is cheaper to fix than escalating model"</span><span class="p">,</span>
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>            <span class="p">)</span>
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>        <span class="k">if</span> <span class="n">failure</span> <span class="o">==</span> <span class="s2">"patch"</span><span class="p">:</span>
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>            <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>                <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">PATCH_CONFLICT</span><span class="p">,</span> <span class="s2">"rebase_patch"</span><span class="p">,</span> <span class="p">{},</span>
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>                <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">4000</span><span class="p">)},</span> <span class="s2">"patch subject changed"</span><span class="p">,</span>
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>            <span class="p">)</span>
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>        <span class="k">if</span> <span class="n">failure</span> <span class="o">==</span> <span class="s2">"test"</span><span class="p">:</span>
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>            <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>                <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">TEST_REGRESSION</span><span class="p">,</span> <span class="s2">"counterexample_branch"</span><span class="p">,</span>
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>                <span class="p">{</span><span class="s2">"branches"</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)},</span>
+<a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>                <span class="s2">"seek independent diagnosis before another edit"</span><span class="p">,</span>
+<a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>            <span class="p">)</span>
+<a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>        <span class="k">return</span> <span class="n">ReflexDirective</span><span class="p">(</span>
+<a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>            <span class="n">ReflexTrigger</span><span class="o">.</span><span class="n">HIGH_UNCERTAINTY</span><span class="p">,</span> <span class="s2">"escalate_model"</span><span class="p">,</span> <span class="p">{},</span>
+<a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>            <span class="p">{</span><span class="s2">"turns"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"tokens"</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="mi">16000</span><span class="p">)},</span> <span class="s2">"remaining ambiguity requires stronger inference"</span><span class="p">,</span>
+<a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>        <span class="p">)</span>
+</code></pre></div>
+<h2 id="3-novo-arquivo-packscode-defaultcoding_maxbranch_searchpy">3. Novo arquivo: <code>packs/code-default/coding_max/branch_search.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">BranchSpec</span><span class="p">:</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">branch_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">hypothesis</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">route</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">budget</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">capability_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">BranchResult</span><span class="p">:</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">branch_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">patch_digest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="n">verification_digest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="n">tests_passed</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="n">tests_failed</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">regression_count</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">cost</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="n">state_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="nd">@property</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">admissible</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_digest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">verification_digest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests_failed</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests_passed</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="k">class</span><span class="w"> </span><span class="nc">BranchSelector</span><span class="p">:</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">BranchResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>        <span class="k">return</span> <span class="p">(</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>            <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">admissible</span><span class="p">),</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            <span class="o">-</span><span class="n">result</span><span class="o">.</span><span class="n">regression_count</span><span class="p">,</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>            <span class="n">result</span><span class="o">.</span><span class="n">tests_passed</span><span class="p">,</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>            <span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">cost</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tokens"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>            <span class="n">result</span><span class="o">.</span><span class="n">branch_id</span><span class="p">,</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>        <span class="p">)</span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BranchResult</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BranchResult</span><span class="p">:</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no branch results"</span><span class="p">)</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>        <span class="n">ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>        <span class="n">winner</span> <span class="o">=</span> <span class="n">ordered</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">winner</span><span class="o">.</span><span class="n">admissible</span><span class="p">:</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"no externally verified candidate"</span><span class="p">)</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>        <span class="k">return</span> <span class="n">winner</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="k">class</span><span class="w"> </span><span class="nc">BoundedBranchSearch</span><span class="p">:</span>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spawn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">BranchSpec</span><span class="p">],</span> <span class="n">BranchResult</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_branches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">spawn</span> <span class="o">=</span> <span class="n">spawn</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">max_branches</span> <span class="o">=</span> <span class="n">max_branches</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">BranchSelector</span><span class="p">()</span>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specs</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">BranchSpec</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BranchResult</span><span class="p">:</span>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_branches</span><span class="p">:</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"branch ceiling exceeded"</span><span class="p">)</span>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="n">spec</span><span class="o">.</span><span class="n">capability_digest</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">})</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"branches must share attenuated capability ceiling"</span><span class="p">)</span>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>        <span class="n">results</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">specs</span><span class="p">)</span>
+<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="4-novo-arquivo-packscode-defaultcoding_maxmutationpy">4. Novo arquivo: <code>packs/code-default/coding_max/mutation.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">ALLOWED_MUTATIONS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="s2">"prompt.template"</span><span class="p">,</span> <span class="s2">"context.weights"</span><span class="p">,</span> <span class="s2">"context.budget"</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="s2">"model.route"</span><span class="p">,</span> <span class="s2">"recovery.threshold"</span><span class="p">,</span> <span class="s2">"review.threshold"</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="s2">"parallel.branches"</span><span class="p">,</span> <span class="s2">"verification.level"</span><span class="p">,</span> <span class="s2">"planning.enabled"</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">})</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">ManifestMutation</span><span class="p">:</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">mutation_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="n">before</span><span class="p">:</span> <span class="n">Any</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="n">after</span><span class="p">:</span> <span class="n">Any</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="n">rationale</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>    <span class="n">expected_budget_delta</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="k">class</span><span class="w"> </span><span class="nc">MutationRejected</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span> <span class="k">pass</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">ManifestMutator</span><span class="p">:</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">manifest</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">mutations</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ManifestMutation</span><span class="p">],</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="o">*</span><span class="p">,</span> <span class="n">budget_ceiling</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">capability_digest_before</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="n">capability_digest_after</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>        <span class="k">if</span> <span class="n">capability_digest_before</span> <span class="o">!=</span> <span class="n">capability_digest_after</span><span class="p">:</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>            <span class="k">raise</span> <span class="n">MutationRejected</span><span class="p">(</span><span class="s2">"mutation cannot change capability ceiling"</span><span class="p">)</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">_deep_copy</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>        <span class="n">total</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"turns"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"usd_micros"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>        <span class="k">for</span> <span class="n">mutation</span> <span class="ow">in</span> <span class="n">mutations</span><span class="p">:</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>            <span class="k">if</span> <span class="n">mutation</span><span class="o">.</span><span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_MUTATIONS</span><span class="p">:</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>                <span class="k">raise</span> <span class="n">MutationRejected</span><span class="p">(</span><span class="sa">f</span><span class="s2">"path not mutable: </span><span class="si">{</span><span class="n">mutation</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">mutation</span><span class="o">.</span><span class="n">expected_budget_delta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>                <span class="n">total</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>            <span class="n">_set_path</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">mutation</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">mutation</span><span class="o">.</span><span class="n">before</span><span class="p">,</span> <span class="n">mutation</span><span class="o">.</span><span class="n">after</span><span class="p">)</span>
+<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">total</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>            <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">budget_ceiling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>                <span class="k">raise</span> <span class="n">MutationRejected</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mutation budget exceeds </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>        <span class="k">return</span> <span class="n">result</span>
+<a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>
+<a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="k">def</span><span class="w"> </span><span class="nf">_deep_copy</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span> <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_deep_copy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="k">return</span> <span class="p">[</span><span class="n">_deep_copy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+<a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>    <span class="k">return</span> <span class="n">value</span>
+<a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>
+<a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a><span class="k">def</span><span class="w"> </span><span class="nf">_set_path</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">replacement</span><span class="p">):</span>
+<a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>    <span class="n">parts</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+<a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>    <span class="n">node</span> <span class="o">=</span> <span class="n">root</span>
+<a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+<a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>        <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>    <span class="n">leaf</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">leaf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
+<a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>        <span class="k">raise</span> <span class="n">MutationRejected</span><span class="p">(</span><span class="sa">f</span><span class="s2">"stale mutation at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>    <span class="n">node</span><span class="p">[</span><span class="n">leaf</span><span class="p">]</span> <span class="o">=</span> <span class="n">replacement</span>
+</code></pre></div>
+<h2 id="5-novo-arquivo-packscode-defaultcoding_maxcapsulespy">5. Novo arquivo: <code>packs/code-default/coding_max/capsules.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">StrategyCapsule</span><span class="p">:</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">capsule_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">task_family</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">mutation_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">training_subjects</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">heldout_subjects</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">lift</span><span class="p">:</span> <span class="nb">float</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">regression</span><span class="p">:</span> <span class="nb">float</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">evidence_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"candidate"</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="k">class</span><span class="w"> </span><span class="nc">CapsuleRegistry</span><span class="p">:</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StrategyCapsule</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">propose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsule</span><span class="p">:</span> <span class="n">StrategyCapsule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>        <span class="k">if</span> <span class="n">capsule</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">"candidate"</span><span class="p">:</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"new capsule must be candidate"</span><span class="p">)</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">capsule</span><span class="o">.</span><span class="n">training_subjects</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">capsule</span><span class="o">.</span><span class="n">heldout_subjects</span><span class="p">):</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"training/heldout leakage"</span><span class="p">)</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule</span><span class="o">.</span><span class="n">capsule_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">capsule</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">eligible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsule_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">min_lift</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">max_regression</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule_id</span><span class="p">]</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">evidence_digest</span><span class="p">)</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">lift</span> <span class="o">&gt;=</span> <span class="n">min_lift</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">regression</span> <span class="o">&lt;=</span> <span class="n">max_regression</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">promote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsule_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">approval_digest</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StrategyCapsule</span><span class="p">:</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">approval_digest</span><span class="p">:</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"external approval required"</span><span class="p">)</span>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule_id</span><span class="p">]</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">eligible</span><span class="p">(</span><span class="n">capsule_id</span><span class="p">,</span> <span class="n">min_lift</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">max_regression</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"capsule does not meet preregistered thresholds"</span><span class="p">)</span>
+<a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>        <span class="n">promoted</span> <span class="o">=</span> <span class="n">StrategyCapsule</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">row</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"promoted"</span><span class="p">})</span>
+<a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">promoted</span>
+<a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>        <span class="k">return</span> <span class="n">promoted</span>
+<a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>
+<a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">rollback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capsule_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">reason_digest</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StrategyCapsule</span><span class="p">:</span>
+<a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">reason_digest</span><span class="p">:</span>
+<a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"rollback evidence required"</span><span class="p">)</span>
+<a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule_id</span><span class="p">]</span>
+<a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>        <span class="n">rolled</span> <span class="o">=</span> <span class="n">StrategyCapsule</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">row</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"rolled_back"</span><span class="p">})</span>
+<a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">capsule_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">rolled</span>
+<a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>        <span class="k">return</span> <span class="n">rolled</span>
+</code></pre></div>
+<p>Nota: como dataclasses com <code>slots=True</code> não expõem <code>__dict__</code>, a implementação real deve usar <code>dataclasses.replace(row, status=...)</code>; o teste abaixo torna essa correção obrigatória.</p>
+<h2 id="6-diff-obrigatorio-em-capsulespy">6. Diff obrigatório em <code>capsules.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gi">+from dataclasses import dataclass, replace</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gd">-        promoted = StrategyCapsule(**{**row.__dict__, "status": "promoted"})</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gi">+        promoted = replace(row, status="promoted")</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gd">-        rolled = StrategyCapsule(**{**row.__dict__, "status": "rolled_back"})</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="gi">+        rolled = replace(row, status="rolled_back")</span>
+</code></pre></div>
+<h2 id="7-integracao-com-topologia-real">7. Integração com topologia real</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gu">@@ coordinator.py</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="gi">+    if directive.action in {"fork_hypotheses", "counterexample_branch"}:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="gi">+        specs = fork_policy.build_specs(</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="gi">+            task=task, parent_budget=remaining_budget,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="gi">+            parent_capability_digest=capability_digest,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="gi">+            count=int(directive.parameters.get("branches", 2)),</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="gi">+        )</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="gi">+        winner = branch_search.run(specs)</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="gi">+        workspace.import_verified_patch(winner.patch_digest)</span>
+</code></pre></div>
+<p>Cada branch deve ser lowered por <code>vanguard/packages/runtime/topology.py</code> e executada por <code>RuntimeChildRunner</code>; a função acima nunca pode abrir subprocesso de agente diretamente.</p>
+<h2 id="8-testes-testpackscode_defaulttest_metamorphosispy">8. Testes: <code>test/packs/code_default/test_metamorphosis.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">coding_max.branch_search</span><span class="w"> </span><span class="kn">import</span> <span class="n">BranchResult</span><span class="p">,</span> <span class="n">BranchSelector</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">coding_max.mutation</span><span class="w"> </span><span class="kn">import</span> <span class="n">ManifestMutation</span><span class="p">,</span> <span class="n">ManifestMutator</span><span class="p">,</span> <span class="n">MutationRejected</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">MetamorphosisTests</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_verified_candidate_beats_unverified_cheaper_candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="n">selector</span> <span class="o">=</span> <span class="n">BranchSelector</span><span class="p">()</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="n">verified</span> <span class="o">=</span> <span class="n">BranchResult</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">,</span> <span class="s2">"verify"</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">5000</span><span class="p">},</span> <span class="s2">"state-a"</span><span class="p">)</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="n">cheap</span> <span class="o">=</span> <span class="n">BranchResult</span><span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">100</span><span class="p">},</span> <span class="s2">"state-b"</span><span class="p">)</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">((</span><span class="n">cheap</span><span class="p">,</span> <span class="n">verified</span><span class="p">))</span><span class="o">.</span><span class="n">branch_id</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">)</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_capability_change_is_rejected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>        <span class="n">mutation</span> <span class="o">=</span> <span class="n">ManifestMutation</span><span class="p">(</span><span class="s2">"m1"</span><span class="p">,</span> <span class="s2">"context.budget"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="s2">"more evidence"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">})</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">MutationRejected</span><span class="p">):</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>            <span class="n">ManifestMutator</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>                <span class="p">{</span><span class="s2">"context"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"budget"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}},</span> <span class="p">(</span><span class="n">mutation</span><span class="p">,),</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>                <span class="n">budget_ceiling</span><span class="o">=</span><span class="p">{</span><span class="s2">"tokens"</span><span class="p">:</span> <span class="mi">5000</span><span class="p">},</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>                <span class="n">capability_digest_before</span><span class="o">=</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">capability_digest_after</span><span class="o">=</span><span class="s2">"b"</span><span class="p">,</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>            <span class="p">)</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_unknown_mutation_path_is_rejected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>        <span class="n">mutation</span> <span class="o">=</span> <span class="n">ManifestMutation</span><span class="p">(</span><span class="s2">"m1"</span><span class="p">,</span> <span class="s2">"kernel.policy"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"escape"</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">MutationRejected</span><span class="p">):</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>            <span class="n">ManifestMutator</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>                <span class="p">{},</span> <span class="p">(</span><span class="n">mutation</span><span class="p">,),</span> <span class="n">budget_ceiling</span><span class="o">=</span><span class="p">{},</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>                <span class="n">capability_digest_before</span><span class="o">=</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">capability_digest_after</span><span class="o">=</span><span class="s2">"a"</span><span class="p">,</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>            <span class="p">)</span>
+</code></pre></div>
+<h2 id="9-metamorphosis-surface">9. Metamorphosis surface</h2>
+<table>
+<thead>
+<tr>
+<th>Mutable</th>
+<th style="text-align: right;">Online?</th>
+<th>Gate</th>
+<th>Rollback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prompt template</td>
+<td style="text-align: right;">yes, per run</td>
+<td>budget/capability</td>
+<td>discard run config</td>
+</tr>
+<tr>
+<td>context weights</td>
+<td style="text-align: right;">yes</td>
+<td>token ceiling</td>
+<td>prior weights</td>
+</tr>
+<tr>
+<td>model route</td>
+<td style="text-align: right;">yes</td>
+<td>provider/policy</td>
+<td>previous route</td>
+</tr>
+<tr>
+<td>recovery threshold</td>
+<td style="text-align: right;">yes</td>
+<td>bounded attempts</td>
+<td>previous threshold</td>
+</tr>
+<tr>
+<td>reviewer threshold</td>
+<td style="text-align: right;">yes</td>
+<td>cost ceiling</td>
+<td>previous threshold</td>
+</tr>
+<tr>
+<td>branch count</td>
+<td style="text-align: right;">yes</td>
+<td>depth/turn budget</td>
+<td>sequential</td>
+</tr>
+<tr>
+<td>verification level</td>
+<td style="text-align: right;">yes</td>
+<td>never below required</td>
+<td>prior level</td>
+</tr>
+<tr>
+<td>learned capsule</td>
+<td style="text-align: right;">no direct</td>
+<td>heldout + approval</td>
+<td>registry rollback</td>
+</tr>
+<tr>
+<td>kernel code</td>
+<td style="text-align: right;">no</td>
+<td>forbidden</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>capabilities</td>
+<td style="text-align: right;">attenuation only</td>
+<td>kernel</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-search-policy">10. Search policy</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>fork only when expected value &gt; marginal cost
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>prune branch on budget denial, invalid patch, zero tests or dominated score
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>merge only structured artifacts, never full transcripts
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>winner must be reverified on parent workspace
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>all child authority is attenuated
+</code></pre></div>
+<h2 id="11-falsifiers">11. Falsifiers</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Attack</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>META-001</td>
+<td>mutation adds tool capability</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-002</td>
+<td>mutation increases total budget</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-003</td>
+<td>branch uses different capability digest</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-004</td>
+<td>branch writes parent workspace</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-005</td>
+<td>unverified patch wins on model confidence</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-006</td>
+<td>capsule promotes itself</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-007</td>
+<td>training subject appears in heldout</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-008</td>
+<td>threshold changed post hoc</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-009</td>
+<td>rollback lacks evidence</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-010</td>
+<td>full transcript merged</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-011</td>
+<td>fork count exceeds ceiling</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-012</td>
+<td>child cost not settled</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-013</td>
+<td>child route uses forbidden paid model</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-014</td>
+<td>reviewer always-on despite preset</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-015</td>
+<td>no-progress repeats identical branch</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-016</td>
+<td>kernel mutation path requested</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-017</td>
+<td>event identity mutated</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-018</td>
+<td>artifact provenance missing</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-019</td>
+<td>branch result missing state digest</td>
+<td>reject/fail closed</td>
+</tr>
+<tr>
+<td>META-020</td>
+<td>parent completion skips reverify</td>
+<td>reject/fail closed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12-ordem-de-implementacao">12. Ordem de implementação</h2>
+<ol>
+<li>ReflexController determinístico.</li>
+<li>Branch result/selector.</li>
+<li>Lowering via topology/child runtime.</li>
+<li>Worktree isolation por branch.</li>
+<li>Parent re-verification.</li>
+<li>Declarative mutator.</li>
+<li>Capsule candidate registry.</li>
+<li>Heldout evaluation pipeline.</li>
+<li>External promotion receipt.</li>
+<li>Rollback drill.</li>
+</ol>
+<h2 id="13-checklist-phdsota-por-simbolo">13. Checklist PhD/SOTA por símbolo</h2>
+<ul>
+<li>[ ] META-R001 — <code>ReflexController.decide</code>: deterministic.</li>
+<li>[ ] META-R002 — <code>ReflexController.decide</code>: budget bounded.</li>
+<li>[ ] META-R003 — <code>ReflexController.decide</code>: authority attenuated.</li>
+<li>[ ] META-R004 — <code>ReflexController.decide</code>: failure typed.</li>
+<li>[ ] META-R005 — <code>ReflexController.decide</code>: artifact provenance.</li>
+<li>[ ] META-R006 — <code>ReflexController.decide</code>: idempotent replay.</li>
+<li>[ ] META-R007 — <code>ReflexController.decide</code>: no transcript merge.</li>
+<li>[ ] META-R008 — <code>ReflexController.decide</code>: cost settled.</li>
+<li>[ ] META-R009 — <code>ReflexController.decide</code>: timeout bounded.</li>
+<li>[ ] META-R010 — <code>ReflexController.decide</code>: offline test.</li>
+<li>[ ] META-R011 — <code>ReflexController.decide</code>: adversarial test.</li>
+<li>[ ] META-R012 — <code>ReflexController.decide</code>: success test.</li>
+<li>[ ] META-R013 — <code>ReflexController.decide</code>: tie deterministic.</li>
+<li>[ ] META-R014 — <code>ReflexController.decide</code>: stale input rejected.</li>
+<li>[ ] META-R015 — <code>ReflexController.decide</code>: unknown field rejected.</li>
+<li>[ ] META-R016 — <code>ReflexController.decide</code>: provider failure isolated.</li>
+<li>[ ] META-R017 — <code>ReflexController.decide</code>: parent reverify.</li>
+<li>[ ] META-R018 — <code>ReflexController.decide</code>: rollback tested.</li>
+<li>[ ] META-R019 — <code>ReflexController.decide</code>: heldout leakage blocked.</li>
+<li>[ ] META-R020 — <code>ReflexController.decide</code>: threshold preregistered.</li>
+<li>[ ] META-R021 — <code>ReflexController.decide</code>: no self-promotion.</li>
+<li>[ ] META-R022 — <code>ReflexController.decide</code>: no kernel import.</li>
+<li>[ ] META-R023 — <code>ReflexController.decide</code>: no direct subprocess.</li>
+<li>[ ] META-R024 — <code>ReflexController.decide</code>: state digest retained.</li>
+<li>[ ] META-R025 — <code>ReflexController.decide</code>: route digest retained.</li>
+<li>[ ] META-R026 — <code>BranchSelector.score</code>: deterministic.</li>
+<li>[ ] META-R027 — <code>BranchSelector.score</code>: budget bounded.</li>
+<li>[ ] META-R028 — <code>BranchSelector.score</code>: authority attenuated.</li>
+<li>[ ] META-R029 — <code>BranchSelector.score</code>: failure typed.</li>
+<li>[ ] META-R030 — <code>BranchSelector.score</code>: artifact provenance.</li>
+<li>[ ] META-R031 — <code>BranchSelector.score</code>: idempotent replay.</li>
+<li>[ ] META-R032 — <code>BranchSelector.score</code>: no transcript merge.</li>
+<li>[ ] META-R033 — <code>BranchSelector.score</code>: cost settled.</li>
+<li>[ ] META-R034 — <code>BranchSelector.score</code>: timeout bounded.</li>
+<li>[ ] META-R035 — <code>BranchSelector.score</code>: offline test.</li>
+<li>[ ] META-R036 — <code>BranchSelector.score</code>: adversarial test.</li>
+<li>[ ] META-R037 — <code>BranchSelector.score</code>: success test.</li>
+<li>[ ] META-R038 — <code>BranchSelector.score</code>: tie deterministic.</li>
+<li>[ ] META-R039 — <code>BranchSelector.score</code>: stale input rejected.</li>
+<li>[ ] META-R040 — <code>BranchSelector.score</code>: unknown field rejected.</li>
+<li>[ ] META-R041 — <code>BranchSelector.score</code>: provider failure isolated.</li>
+<li>[ ] META-R042 — <code>BranchSelector.score</code>: parent reverify.</li>
+<li>[ ] META-R043 — <code>BranchSelector.score</code>: rollback tested.</li>
+<li>[ ] META-R044 — <code>BranchSelector.score</code>: heldout leakage blocked.</li>
+<li>[ ] META-R045 — <code>BranchSelector.score</code>: threshold preregistered.</li>
+<li>[ ] META-R046 — <code>BranchSelector.score</code>: no self-promotion.</li>
+<li>[ ] META-R047 — <code>BranchSelector.score</code>: no kernel import.</li>
+<li>[ ] META-R048 — <code>BranchSelector.score</code>: no direct subprocess.</li>
+<li>[ ] META-R049 — <code>BranchSelector.score</code>: state digest retained.</li>
+<li>[ ] META-R050 — <code>BranchSelector.score</code>: route digest retained.</li>
+<li>[ ] META-R051 — <code>BranchSelector.select</code>: deterministic.</li>
+<li>[ ] META-R052 — <code>BranchSelector.select</code>: budget bounded.</li>
+<li>[ ] META-R053 — <code>BranchSelector.select</code>: authority attenuated.</li>
+<li>[ ] META-R054 — <code>BranchSelector.select</code>: failure typed.</li>
+<li>[ ] META-R055 — <code>BranchSelector.select</code>: artifact provenance.</li>
+<li>[ ] META-R056 — <code>BranchSelector.select</code>: idempotent replay.</li>
+<li>[ ] META-R057 — <code>BranchSelector.select</code>: no transcript merge.</li>
+<li>[ ] META-R058 — <code>BranchSelector.select</code>: cost settled.</li>
+<li>[ ] META-R059 — <code>BranchSelector.select</code>: timeout bounded.</li>
+<li>[ ] META-R060 — <code>BranchSelector.select</code>: offline test.</li>
+<li>[ ] META-R061 — <code>BranchSelector.select</code>: adversarial test.</li>
+<li>[ ] META-R062 — <code>BranchSelector.select</code>: success test.</li>
+<li>[ ] META-R063 — <code>BranchSelector.select</code>: tie deterministic.</li>
+<li>[ ] META-R064 — <code>BranchSelector.select</code>: stale input rejected.</li>
+<li>[ ] META-R065 — <code>BranchSelector.select</code>: unknown field rejected.</li>
+<li>[ ] META-R066 — <code>BranchSelector.select</code>: provider failure isolated.</li>
+<li>[ ] META-R067 — <code>BranchSelector.select</code>: parent reverify.</li>
+<li>[ ] META-R068 — <code>BranchSelector.select</code>: rollback tested.</li>
+<li>[ ] META-R069 — <code>BranchSelector.select</code>: heldout leakage blocked.</li>
+<li>[ ] META-R070 — <code>BranchSelector.select</code>: threshold preregistered.</li>
+<li>[ ] META-R071 — <code>BranchSelector.select</code>: no self-promotion.</li>
+<li>[ ] META-R072 — <code>BranchSelector.select</code>: no kernel import.</li>
+<li>[ ] META-R073 — <code>BranchSelector.select</code>: no direct subprocess.</li>
+<li>[ ] META-R074 — <code>BranchSelector.select</code>: state digest retained.</li>
+<li>[ ] META-R075 — <code>BranchSelector.select</code>: route digest retained.</li>
+<li>[ ] META-R076 — <code>BoundedBranchSearch.run</code>: deterministic.</li>
+<li>[ ] META-R077 — <code>BoundedBranchSearch.run</code>: budget bounded.</li>
+<li>[ ] META-R078 — <code>BoundedBranchSearch.run</code>: authority attenuated.</li>
+<li>[ ] META-R079 — <code>BoundedBranchSearch.run</code>: failure typed.</li>
+<li>[ ] META-R080 — <code>BoundedBranchSearch.run</code>: artifact provenance.</li>
+<li>[ ] META-R081 — <code>BoundedBranchSearch.run</code>: idempotent replay.</li>
+<li>[ ] META-R082 — <code>BoundedBranchSearch.run</code>: no transcript merge.</li>
+<li>[ ] META-R083 — <code>BoundedBranchSearch.run</code>: cost settled.</li>
+<li>[ ] META-R084 — <code>BoundedBranchSearch.run</code>: timeout bounded.</li>
+<li>[ ] META-R085 — <code>BoundedBranchSearch.run</code>: offline test.</li>
+<li>[ ] META-R086 — <code>BoundedBranchSearch.run</code>: adversarial test.</li>
+<li>[ ] META-R087 — <code>BoundedBranchSearch.run</code>: success test.</li>
+<li>[ ] META-R088 — <code>BoundedBranchSearch.run</code>: tie deterministic.</li>
+<li>[ ] META-R089 — <code>BoundedBranchSearch.run</code>: stale input rejected.</li>
+<li>[ ] META-R090 — <code>BoundedBranchSearch.run</code>: unknown field rejected.</li>
+<li>[ ] META-R091 — <code>BoundedBranchSearch.run</code>: provider failure isolated.</li>
+<li>[ ] META-R092 — <code>BoundedBranchSearch.run</code>: parent reverify.</li>
+<li>[ ] META-R093 — <code>BoundedBranchSearch.run</code>: rollback tested.</li>
+<li>[ ] META-R094 — <code>BoundedBranchSearch.run</code>: heldout leakage blocked.</li>
+<li>[ ] META-R095 — <code>BoundedBranchSearch.run</code>: threshold preregistered.</li>
+<li>[ ] META-R096 — <code>BoundedBranchSearch.run</code>: no self-promotion.</li>
+<li>[ ] META-R097 — <code>BoundedBranchSearch.run</code>: no kernel import.</li>
+<li>[ ] META-R098 — <code>BoundedBranchSearch.run</code>: no direct subprocess.</li>
+<li>[ ] META-R099 — <code>BoundedBranchSearch.run</code>: state digest retained.</li>
+<li>[ ] META-R100 — <code>BoundedBranchSearch.run</code>: route digest retained.</li>
+<li>[ ] META-R101 — <code>ManifestMutator.apply</code>: deterministic.</li>
+<li>[ ] META-R102 — <code>ManifestMutator.apply</code>: budget bounded.</li>
+<li>[ ] META-R103 — <code>ManifestMutator.apply</code>: authority attenuated.</li>
+<li>[ ] META-R104 — <code>ManifestMutator.apply</code>: failure typed.</li>
+<li>[ ] META-R105 — <code>ManifestMutator.apply</code>: artifact provenance.</li>
+<li>[ ] META-R106 — <code>ManifestMutator.apply</code>: idempotent replay.</li>
+<li>[ ] META-R107 — <code>ManifestMutator.apply</code>: no transcript merge.</li>
+<li>[ ] META-R108 — <code>ManifestMutator.apply</code>: cost settled.</li>
+<li>[ ] META-R109 — <code>ManifestMutator.apply</code>: timeout bounded.</li>
+<li>[ ] META-R110 — <code>ManifestMutator.apply</code>: offline test.</li>
+<li>[ ] META-R111 — <code>ManifestMutator.apply</code>: adversarial test.</li>
+<li>[ ] META-R112 — <code>ManifestMutator.apply</code>: success test.</li>
+<li>[ ] META-R113 — <code>ManifestMutator.apply</code>: tie deterministic.</li>
+<li>[ ] META-R114 — <code>ManifestMutator.apply</code>: stale input rejected.</li>
+<li>[ ] META-R115 — <code>ManifestMutator.apply</code>: unknown field rejected.</li>
+<li>[ ] META-R116 — <code>ManifestMutator.apply</code>: provider failure isolated.</li>
+<li>[ ] META-R117 — <code>ManifestMutator.apply</code>: parent reverify.</li>
+<li>[ ] META-R118 — <code>ManifestMutator.apply</code>: rollback tested.</li>
+<li>[ ] META-R119 — <code>ManifestMutator.apply</code>: heldout leakage blocked.</li>
+<li>[ ] META-R120 — <code>ManifestMutator.apply</code>: threshold preregistered.</li>
+<li>[ ] META-R121 — <code>ManifestMutator.apply</code>: no self-promotion.</li>
+<li>[ ] META-R122 — <code>ManifestMutator.apply</code>: no kernel import.</li>
+<li>[ ] META-R123 — <code>ManifestMutator.apply</code>: no direct subprocess.</li>
+<li>[ ] META-R124 — <code>ManifestMutator.apply</code>: state digest retained.</li>
+<li>[ ] META-R125 — <code>ManifestMutator.apply</code>: route digest retained.</li>
+<li>[ ] META-R126 — <code>_set_path</code>: deterministic.</li>
+<li>[ ] META-R127 — <code>_set_path</code>: budget bounded.</li>
+<li>[ ] META-R128 — <code>_set_path</code>: authority attenuated.</li>
+<li>[ ] META-R129 — <code>_set_path</code>: failure typed.</li>
+<li>[ ] META-R130 — <code>_set_path</code>: artifact provenance.</li>
+<li>[ ] META-R131 — <code>_set_path</code>: idempotent replay.</li>
+<li>[ ] META-R132 — <code>_set_path</code>: no transcript merge.</li>
+<li>[ ] META-R133 — <code>_set_path</code>: cost settled.</li>
+<li>[ ] META-R134 — <code>_set_path</code>: timeout bounded.</li>
+<li>[ ] META-R135 — <code>_set_path</code>: offline test.</li>
+<li>[ ] META-R136 — <code>_set_path</code>: adversarial test.</li>
+<li>[ ] META-R137 — <code>_set_path</code>: success test.</li>
+<li>[ ] META-R138 — <code>_set_path</code>: tie deterministic.</li>
+<li>[ ] META-R139 — <code>_set_path</code>: stale input rejected.</li>
+<li>[ ] META-R140 — <code>_set_path</code>: unknown field rejected.</li>
+<li>[ ] META-R141 — <code>_set_path</code>: provider failure isolated.</li>
+<li>[ ] META-R142 — <code>_set_path</code>: parent reverify.</li>
+<li>[ ] META-R143 — <code>_set_path</code>: rollback tested.</li>
+<li>[ ] META-R144 — <code>_set_path</code>: heldout leakage blocked.</li>
+<li>[ ] META-R145 — <code>_set_path</code>: threshold preregistered.</li>
+<li>[ ] META-R146 — <code>_set_path</code>: no self-promotion.</li>
+<li>[ ] META-R147 — <code>_set_path</code>: no kernel import.</li>
+<li>[ ] META-R148 — <code>_set_path</code>: no direct subprocess.</li>
+<li>[ ] META-R149 — <code>_set_path</code>: state digest retained.</li>
+<li>[ ] META-R150 — <code>_set_path</code>: route digest retained.</li>
+<li>[ ] META-R151 — <code>CapsuleRegistry.propose</code>: deterministic.</li>
+<li>[ ] META-R152 — <code>CapsuleRegistry.propose</code>: budget bounded.</li>
+<li>[ ] META-R153 — <code>CapsuleRegistry.propose</code>: authority attenuated.</li>
+<li>[ ] META-R154 — <code>CapsuleRegistry.propose</code>: failure typed.</li>
+<li>[ ] META-R155 — <code>CapsuleRegistry.propose</code>: artifact provenance.</li>
+<li>[ ] META-R156 — <code>CapsuleRegistry.propose</code>: idempotent replay.</li>
+<li>[ ] META-R157 — <code>CapsuleRegistry.propose</code>: no transcript merge.</li>
+<li>[ ] META-R158 — <code>CapsuleRegistry.propose</code>: cost settled.</li>
+<li>[ ] META-R159 — <code>CapsuleRegistry.propose</code>: timeout bounded.</li>
+<li>[ ] META-R160 — <code>CapsuleRegistry.propose</code>: offline test.</li>
+<li>[ ] META-R161 — <code>CapsuleRegistry.propose</code>: adversarial test.</li>
+<li>[ ] META-R162 — <code>CapsuleRegistry.propose</code>: success test.</li>
+<li>[ ] META-R163 — <code>CapsuleRegistry.propose</code>: tie deterministic.</li>
+<li>[ ] META-R164 — <code>CapsuleRegistry.propose</code>: stale input rejected.</li>
+<li>[ ] META-R165 — <code>CapsuleRegistry.propose</code>: unknown field rejected.</li>
+<li>[ ] META-R166 — <code>CapsuleRegistry.propose</code>: provider failure isolated.</li>
+<li>[ ] META-R167 — <code>CapsuleRegistry.propose</code>: parent reverify.</li>
+<li>[ ] META-R168 — <code>CapsuleRegistry.propose</code>: rollback tested.</li>
+<li>[ ] META-R169 — <code>CapsuleRegistry.propose</code>: heldout leakage blocked.</li>
+<li>[ ] META-R170 — <code>CapsuleRegistry.propose</code>: threshold preregistered.</li>
+<li>[ ] META-R171 — <code>CapsuleRegistry.propose</code>: no self-promotion.</li>
+<li>[ ] META-R172 — <code>CapsuleRegistry.propose</code>: no kernel import.</li>
+<li>[ ] META-R173 — <code>CapsuleRegistry.propose</code>: no direct subprocess.</li>
+<li>[ ] META-R174 — <code>CapsuleRegistry.propose</code>: state digest retained.</li>
+<li>[ ] META-R175 — <code>CapsuleRegistry.propose</code>: route digest retained.</li>
+<li>[ ] META-R176 — <code>CapsuleRegistry.eligible</code>: deterministic.</li>
+<li>[ ] META-R177 — <code>CapsuleRegistry.eligible</code>: budget bounded.</li>
+<li>[ ] META-R178 — <code>CapsuleRegistry.eligible</code>: authority attenuated.</li>
+<li>[ ] META-R179 — <code>CapsuleRegistry.eligible</code>: failure typed.</li>
+<li>[ ] META-R180 — <code>CapsuleRegistry.eligible</code>: artifact provenance.</li>
+<li>[ ] META-R181 — <code>CapsuleRegistry.eligible</code>: idempotent replay.</li>
+<li>[ ] META-R182 — <code>CapsuleRegistry.eligible</code>: no transcript merge.</li>
+<li>[ ] META-R183 — <code>CapsuleRegistry.eligible</code>: cost settled.</li>
+<li>[ ] META-R184 — <code>CapsuleRegistry.eligible</code>: timeout bounded.</li>
+<li>[ ] META-R185 — <code>CapsuleRegistry.eligible</code>: offline test.</li>
+<li>[ ] META-R186 — <code>CapsuleRegistry.eligible</code>: adversarial test.</li>
+<li>[ ] META-R187 — <code>CapsuleRegistry.eligible</code>: success test.</li>
+<li>[ ] META-R188 — <code>CapsuleRegistry.eligible</code>: tie deterministic.</li>
+<li>[ ] META-R189 — <code>CapsuleRegistry.eligible</code>: stale input rejected.</li>
+<li>[ ] META-R190 — <code>CapsuleRegistry.eligible</code>: unknown field rejected.</li>
+<li>[ ] META-R191 — <code>CapsuleRegistry.eligible</code>: provider failure isolated.</li>
+<li>[ ] META-R192 — <code>CapsuleRegistry.eligible</code>: parent reverify.</li>
+<li>[ ] META-R193 — <code>CapsuleRegistry.eligible</code>: rollback tested.</li>
+<li>[ ] META-R194 — <code>CapsuleRegistry.eligible</code>: heldout leakage blocked.</li>
+<li>[ ] META-R195 — <code>CapsuleRegistry.eligible</code>: threshold preregistered.</li>
+<li>[ ] META-R196 — <code>CapsuleRegistry.eligible</code>: no self-promotion.</li>
+<li>[ ] META-R197 — <code>CapsuleRegistry.eligible</code>: no kernel import.</li>
+<li>[ ] META-R198 — <code>CapsuleRegistry.eligible</code>: no direct subprocess.</li>
+<li>[ ] META-R199 — <code>CapsuleRegistry.eligible</code>: state digest retained.</li>
+<li>[ ] META-R200 — <code>CapsuleRegistry.eligible</code>: route digest retained.</li>
+<li>[ ] META-R201 — <code>CapsuleRegistry.promote</code>: deterministic.</li>
+<li>[ ] META-R202 — <code>CapsuleRegistry.promote</code>: budget bounded.</li>
+<li>[ ] META-R203 — <code>CapsuleRegistry.promote</code>: authority attenuated.</li>
+<li>[ ] META-R204 — <code>CapsuleRegistry.promote</code>: failure typed.</li>
+<li>[ ] META-R205 — <code>CapsuleRegistry.promote</code>: artifact provenance.</li>
+<li>[ ] META-R206 — <code>CapsuleRegistry.promote</code>: idempotent replay.</li>
+<li>[ ] META-R207 — <code>CapsuleRegistry.promote</code>: no transcript merge.</li>
+<li>[ ] META-R208 — <code>CapsuleRegistry.promote</code>: cost settled.</li>
+<li>[ ] META-R209 — <code>CapsuleRegistry.promote</code>: timeout bounded.</li>
+<li>[ ] META-R210 — <code>CapsuleRegistry.promote</code>: offline test.</li>
+<li>[ ] META-R211 — <code>CapsuleRegistry.promote</code>: adversarial test.</li>
+<li>[ ] META-R212 — <code>CapsuleRegistry.promote</code>: success test.</li>
+<li>[ ] META-R213 — <code>CapsuleRegistry.promote</code>: tie deterministic.</li>
+<li>[ ] META-R214 — <code>CapsuleRegistry.promote</code>: stale input rejected.</li>
+<li>[ ] META-R215 — <code>CapsuleRegistry.promote</code>: unknown field rejected.</li>
+<li>[ ] META-R216 — <code>CapsuleRegistry.promote</code>: provider failure isolated.</li>
+<li>[ ] META-R217 — <code>CapsuleRegistry.promote</code>: parent reverify.</li>
+<li>[ ] META-R218 — <code>CapsuleRegistry.promote</code>: rollback tested.</li>
+<li>[ ] META-R219 — <code>CapsuleRegistry.promote</code>: heldout leakage blocked.</li>
+<li>[ ] META-R220 — <code>CapsuleRegistry.promote</code>: threshold preregistered.</li>
+<li>[ ] META-R221 — <code>CapsuleRegistry.promote</code>: no self-promotion.</li>
+<li>[ ] META-R222 — <code>CapsuleRegistry.promote</code>: no kernel import.</li>
+<li>[ ] META-R223 — <code>CapsuleRegistry.promote</code>: no direct subprocess.</li>
+<li>[ ] META-R224 — <code>CapsuleRegistry.promote</code>: state digest retained.</li>
+<li>[ ] META-R225 — <code>CapsuleRegistry.promote</code>: route digest retained.</li>
+<li>[ ] META-R226 — <code>CapsuleRegistry.rollback</code>: deterministic.</li>
+<li>[ ] META-R227 — <code>CapsuleRegistry.rollback</code>: budget bounded.</li>
+<li>[ ] META-R228 — <code>CapsuleRegistry.rollback</code>: authority attenuated.</li>
+<li>[ ] META-R229 — <code>CapsuleRegistry.rollback</code>: failure typed.</li>
+<li>[ ] META-R230 — <code>CapsuleRegistry.rollback</code>: artifact provenance.</li>
+<li>[ ] META-R231 — <code>CapsuleRegistry.rollback</code>: idempotent replay.</li>
+<li>[ ] META-R232 — <code>CapsuleRegistry.rollback</code>: no transcript merge.</li>
+<li>[ ] META-R233 — <code>CapsuleRegistry.rollback</code>: cost settled.</li>
+<li>[ ] META-R234 — <code>CapsuleRegistry.rollback</code>: timeout bounded.</li>
+<li>[ ] META-R235 — <code>CapsuleRegistry.rollback</code>: offline test.</li>
+<li>[ ] META-R236 — <code>CapsuleRegistry.rollback</code>: adversarial test.</li>
+<li>[ ] META-R237 — <code>CapsuleRegistry.rollback</code>: success test.</li>
+<li>[ ] META-R238 — <code>CapsuleRegistry.rollback</code>: tie deterministic.</li>
+<li>[ ] META-R239 — <code>CapsuleRegistry.rollback</code>: stale input rejected.</li>
+<li>[ ] META-R240 — <code>CapsuleRegistry.rollback</code>: unknown field rejected.</li>
+<li>[ ] META-R241 — <code>CapsuleRegistry.rollback</code>: provider failure isolated.</li>
+<li>[ ] META-R242 — <code>CapsuleRegistry.rollback</code>: parent reverify.</li>
+<li>[ ] META-R243 — <code>CapsuleRegistry.rollback</code>: rollback tested.</li>
+<li>[ ] META-R244 — <code>CapsuleRegistry.rollback</code>: heldout leakage blocked.</li>
+<li>[ ] META-R245 — <code>CapsuleRegistry.rollback</code>: threshold preregistered.</li>
+<li>[ ] META-R246 — <code>CapsuleRegistry.rollback</code>: no self-promotion.</li>
+<li>[ ] META-R247 — <code>CapsuleRegistry.rollback</code>: no kernel import.</li>
+<li>[ ] META-R248 — <code>CapsuleRegistry.rollback</code>: no direct subprocess.</li>
+<li>[ ] META-R249 — <code>CapsuleRegistry.rollback</code>: state digest retained.</li>
+<li>[ ] META-R250 — <code>CapsuleRegistry.rollback</code>: route digest retained.</li>
+<li>[ ] META-R251 — <code>fork_policy.build_specs</code>: deterministic.</li>
+<li>[ ] META-R252 — <code>fork_policy.build_specs</code>: budget bounded.</li>
+<li>[ ] META-R253 — <code>fork_policy.build_specs</code>: authority attenuated.</li>
+<li>[ ] META-R254 — <code>fork_policy.build_specs</code>: failure typed.</li>
+<li>[ ] META-R255 — <code>fork_policy.build_specs</code>: artifact provenance.</li>
+<li>[ ] META-R256 — <code>fork_policy.build_specs</code>: idempotent replay.</li>
+<li>[ ] META-R257 — <code>fork_policy.build_specs</code>: no transcript merge.</li>
+<li>[ ] META-R258 — <code>fork_policy.build_specs</code>: cost settled.</li>
+<li>[ ] META-R259 — <code>fork_policy.build_specs</code>: timeout bounded.</li>
+<li>[ ] META-R260 — <code>fork_policy.build_specs</code>: offline test.</li>
+<li>[ ] META-R261 — <code>fork_policy.build_specs</code>: adversarial test.</li>
+<li>[ ] META-R262 — <code>fork_policy.build_specs</code>: success test.</li>
+<li>[ ] META-R263 — <code>fork_policy.build_specs</code>: tie deterministic.</li>
+<li>[ ] META-R264 — <code>fork_policy.build_specs</code>: stale input rejected.</li>
+<li>[ ] META-R265 — <code>fork_policy.build_specs</code>: unknown field rejected.</li>
+<li>[ ] META-R266 — <code>fork_policy.build_specs</code>: provider failure isolated.</li>
+<li>[ ] META-R267 — <code>fork_policy.build_specs</code>: parent reverify.</li>
+<li>[ ] META-R268 — <code>fork_policy.build_specs</code>: rollback tested.</li>
+<li>[ ] META-R269 — <code>fork_policy.build_specs</code>: heldout leakage blocked.</li>
+<li>[ ] META-R270 — <code>fork_policy.build_specs</code>: threshold preregistered.</li>
+<li>[ ] META-R271 — <code>fork_policy.build_specs</code>: no self-promotion.</li>
+<li>[ ] META-R272 — <code>fork_policy.build_specs</code>: no kernel import.</li>
+<li>[ ] META-R273 — <code>fork_policy.build_specs</code>: no direct subprocess.</li>
+<li>[ ] META-R274 — <code>fork_policy.build_specs</code>: state digest retained.</li>
+<li>[ ] META-R275 — <code>fork_policy.build_specs</code>: route digest retained.</li>
+<li>[ ] META-R276 — <code>RuntimeChildRunner.run_child</code>: deterministic.</li>
+<li>[ ] META-R277 — <code>RuntimeChildRunner.run_child</code>: budget bounded.</li>
+<li>[ ] META-R278 — <code>RuntimeChildRunner.run_child</code>: authority attenuated.</li>
+<li>[ ] META-R279 — <code>RuntimeChildRunner.run_child</code>: failure typed.</li>
+<li>[ ] META-R280 — <code>RuntimeChildRunner.run_child</code>: artifact provenance.</li>
+<li>[ ] META-R281 — <code>RuntimeChildRunner.run_child</code>: idempotent replay.</li>
+<li>[ ] META-R282 — <code>RuntimeChildRunner.run_child</code>: no transcript merge.</li>
+<li>[ ] META-R283 — <code>RuntimeChildRunner.run_child</code>: cost settled.</li>
+<li>[ ] META-R284 — <code>RuntimeChildRunner.run_child</code>: timeout bounded.</li>
+<li>[ ] META-R285 — <code>RuntimeChildRunner.run_child</code>: offline test.</li>
+<li>[ ] META-R286 — <code>RuntimeChildRunner.run_child</code>: adversarial test.</li>
+<li>[ ] META-R287 — <code>RuntimeChildRunner.run_child</code>: success test.</li>
+<li>[ ] META-R288 — <code>RuntimeChildRunner.run_child</code>: tie deterministic.</li>
+<li>[ ] META-R289 — <code>RuntimeChildRunner.run_child</code>: stale input rejected.</li>
+<li>[ ] META-R290 — <code>RuntimeChildRunner.run_child</code>: unknown field rejected.</li>
+<li>[ ] META-R291 — <code>RuntimeChildRunner.run_child</code>: provider failure isolated.</li>
+<li>[ ] META-R292 — <code>RuntimeChildRunner.run_child</code>: parent reverify.</li>
+<li>[ ] META-R293 — <code>RuntimeChildRunner.run_child</code>: rollback tested.</li>
+<li>[ ] META-R294 — <code>RuntimeChildRunner.run_child</code>: heldout leakage blocked.</li>
+<li>[ ] META-R295 — <code>RuntimeChildRunner.run_child</code>: threshold preregistered.</li>
+<li>[ ] META-R296 — <code>RuntimeChildRunner.run_child</code>: no self-promotion.</li>
+<li>[ ] META-R297 — <code>RuntimeChildRunner.run_child</code>: no kernel import.</li>
+<li>[ ] META-R298 — <code>RuntimeChildRunner.run_child</code>: no direct subprocess.</li>
+<li>[ ] META-R299 — <code>RuntimeChildRunner.run_child</code>: state digest retained.</li>
+<li>[ ] META-R300 — <code>RuntimeChildRunner.run_child</code>: route digest retained.</li>
+</ul>
+<h2 id="14-acceptance-gates">14. Acceptance gates</h2>
+<ul>
+<li>[ ] Simple tasks continuam sequenciais.</li>
+<li>[ ] Fork somente sob trigger mensurável.</li>
+<li>[ ] Branches usam workspaces isolados.</li>
+<li>[ ] Child budgets são subconjuntos conservados.</li>
+<li>[ ] Seleção usa tests/regression/cost, não confiança textual.</li>
+<li>[ ] Winner é reexecutado/verificado no parent.</li>
+<li>[ ] Mutação não altera capability digest.</li>
+<li>[ ] Capsule não promove sem heldout e aprovação.</li>
+<li>[ ] Rollback é executável e deixa receipt.</li>
+<li>[ ] Ablation mostra valor ou feature é removida.</li>
+</ul>
+<h2 id="15-definition-of-done">15. Definition of Done</h2>
+<p>A onda fecha quando a mesma composição pode metamorfosear estratégia sob budget, explorar candidatos isolados, escolher por evidência e reverter aprendizado sem alterar o substrato. Metamorfose sem gates é corrupção; branching sem ganho medido é custo inútil.</p>
+<ul>
+<li>[ ] META-X709 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X710 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X711 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X712 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X713 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X714 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X715 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X716 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X717 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X718 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X719 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X720 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X721 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X722 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X723 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X724 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X725 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X726 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X727 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X728 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X729 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X730 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X731 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X732 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X733 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X734 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X735 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X736 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X737 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X738 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X739 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X740 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X741 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X742 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X743 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X744 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X745 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X746 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X747 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X748 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X749 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X750 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X751 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X752 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X753 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X754 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X755 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X756 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X757 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X758 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X759 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X760 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X761 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X762 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X763 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X764 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X765 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X766 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X767 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X768 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X769 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X770 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X771 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X772 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X773 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X774 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X775 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X776 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X777 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X778 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X779 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X780 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X781 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X782 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X783 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X784 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X785 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X786 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X787 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X788 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X789 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X790 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X791 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X792 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X793 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X794 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X795 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X796 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X797 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X798 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X799 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X800 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X801 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X802 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X803 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X804 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X805 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X806 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X807 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X808 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X809 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X810 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X811 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X812 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X813 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X814 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X815 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X816 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X817 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X818 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X819 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X820 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X821 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X822 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X823 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X824 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X825 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X826 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X827 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X828 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X829 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X830 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X831 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X832 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X833 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X834 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X835 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X836 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X837 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X838 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X839 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X840 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X841 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X842 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X843 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+<li>[ ] META-X844 — Falsificar propriedade evolutiva remanescente antes de ativar.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -121,9 +121,10 @@ nav:
   - Execution:
       - Active Execution: execution/active.md
       - Milestones: execution/milestones.md
+      - Backlog: execution/backlog.md
   - Theory & Reports:
       - Theory: theory/agent-substrate.md
-      - Project Status Summary: reports/reviews/AETHER_V090_PROJECT_STATUS_SUMMARY.md
+      - Benchmark Report: reports/benchmark/main/BENCHMARK_V090_FULL.MD
   - Research:
       - AI Models: research/AI/openrouter_llm_models_suggested.md
       - Coding Harness:

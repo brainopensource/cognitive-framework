@@ -65,6 +65,38 @@ Load only the entries, files, and sections needed for the assigned task. Do not 
 indexes, broad source trees, or all Tier-2 logs into the context window when a targeted query is
 sufficient.
 
+#### Executable Retrieval Recipe (Mandatory Starting Sequence)
+
+For any implementation, review, or bugfix task, agents MUST begin with this token-bounded
+sequence before broad exploration. Each step answers a specific development question:
+
+```bash
+# Step 0 — Bootstrap state: which gates must stay green? what is already failing?
+cat dev_context_logs/context_summary.md          # refresh first with: make dev-context
+
+# Step 1 — Route the task: which subsystem, which canonical documents, what fits the budget?
+python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
+
+# Step 2 — Reverse routing when starting from a code path you must modify:
+#          which documents am I obliged to read and keep synchronized?
+python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
+
+# Step 3 — Pin entry symbols, then read only the canonical owner + targeted ranges
+grep "<Symbol>" .generated/knowledge/symbols.jsonl
+```
+
+- Step 0 answers: *which gates, headrooms, and failure signatures are already known?*
+- Step 1 answers: *which subsystem owns the task and which canonical owner documents apply?*
+- Step 2 answers: *what is the canonical documentation debt attached to the file I will edit?*
+- Step 3 answers: *which existing classes/protocols must my change extend without breaking?*
+
+**Health check before trust**: `.generated/knowledge/report.json` must report
+`"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm
+`uv run lda doctor --json` reports `"index_healthy": true`. Otherwise, report the degraded
+navigation mode and fall back deterministically to `rg --files`, targeted `rg`, canonical
+documents, source, and tests. A worked example of the full sequence is in
+[`docs/README.md`](docs/README.md) (§ Worked Example).
+
 The authority rule is:
 
 ```text
@@ -191,6 +223,7 @@ AI Agents working in this repository MUST comply with the following operational 
 - **Scope Contained**: Modify code strictly within the assigned task scope.
 - **Tests Synchronized**: Update or add automated tests whenever runtime behavior or contracts change.
 - **Docs Synchronized**: Update canonical documentation when durable architecture, contract, API, workflow, configuration, or user behavior changes.
+- **Knowledge-Base Synchronized**: Touching code under `vanguard/packages/<subsystem>/` requires consulting `.generated/knowledge/code-map.jsonl` for that path (or `python3 tools/docs_rag_v0.py --file <path>`), updating the mapped canonical-owner documentation, and regenerating `just docs-knowledge` so the index of record stays truthful.
 - **No Unsolicited Docs Sprawl**: Do not edit or create documentation files when code behavior does not change. Never create scratch Markdown under `docs/`.
 - **No Custom ADRs / Reports**: Never create new ADRs for ordinary architecture updates or post-hoc Markdown implementation reports in the repository tree.
 - **No Manual Edit of Generated Artifacts**: Never manually edit rebuildable machine outputs under `.generated/knowledge/` or `.generated/diagrams/`.

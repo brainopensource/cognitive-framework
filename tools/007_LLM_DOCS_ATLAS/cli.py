@@ -116,7 +116,7 @@ def main(argv=None):
     ctx_p = sub.add_parser("context", help="Compile token-budgeted high-signal ContextPacket for an AI agent")
     ctx_p.add_argument("task", type=str)
     ctx_p.add_argument("--budget", type=int, default=8000)
-    ctx_p.add_argument("--strategy", type=str, default="ppr_submodular", choices=["ppr_submodular", "fts5_bm25"], help="Context compilation strategy")
+    ctx_p.add_argument("--strategy", type=str, default="ppr_submodular", choices=["ppr_submodular", "hybrid_rrf", "fts5_bm25"], help="Context compilation strategy")
     ctx_p.add_argument("--no-cache", action="store_true", help="Bypass packet cache")
     ctx_p.add_argument("--json", action="store_true")
     ctx_p.add_argument("--include-research", action="store_true")
@@ -139,6 +139,26 @@ def main(argv=None):
     i_p = sub.add_parser("inspect", help="Inspect a specific document or canonical ID")
     i_p.add_argument("target", type=str)
     i_p.add_argument("--json", action="store_true")
+
+    # 10. Brief (Phase B: human+agent readable briefing)
+    b_p = sub.add_parser("brief", help="Compile a structured task briefing (markdown + JSON)")
+    b_p.add_argument("task", type=str)
+    b_p.add_argument("--budget", type=int, default=8000)
+    b_p.add_argument("--strategy", type=str, default="ppr_submodular",
+                     choices=["ppr_submodular", "hybrid_rrf", "fts5_bm25"])
+    b_p.add_argument("--json", action="store_true")
+
+    # 11. Consolidation & drift diagnostics (Phase B)
+    con_p = sub.add_parser("consolidate", help="Detect duplicate documents and authority conflicts")
+    con_p.add_argument("--json", action="store_true")
+    dr_p = sub.add_parser("drift", help="Detect documentation drift (stale paths, undocumented symbols, orphan docs)")
+    dr_p.add_argument("--json", action="store_true")
+
+    # 12. Deterministic retrieval benchmark (Phase E)
+    bench_p = sub.add_parser("bench", help="Run the deterministic retrieval-quality benchmark (recall@k, MRR, latency)")
+    bench_p.add_argument("--budget", type=int, default=2000)
+    bench_p.add_argument("--k", type=int, default=5)
+    bench_p.add_argument("--json", action="store_true")
 
     args = parser.parse_args(argv)
     repo_root = args.root.resolve() if args.root else Path.cwd().resolve()
@@ -191,6 +211,31 @@ def main(argv=None):
         result = find_associated_tests(repo_root, touched_files=args.files)
     elif args.command == "inspect":
         result = next((r for r in _rows(ctx, "catalog.jsonl") if args.target in {r.get("path"), r.get("canonical_id")}), {"error": "not found", "target": args.target})
+    elif args.command == "brief":
+        from .core.briefing import compile_brief
+
+        brief = compile_brief(
+            repo_root,
+            args.task,
+            budget=args.budget,
+            strategy=args.strategy,
+        )
+        result = brief
+        if not args.json:
+            print(brief["brief_markdown"])
+            return 0
+    elif args.command == "consolidate":
+        from .core.consolidation import run_consolidation
+
+        result = run_consolidation(get_storage(repo_root))
+    elif args.command == "drift":
+        from .core.drift import detect_drift
+
+        result = detect_drift(get_storage(repo_root), repo_root)
+    elif args.command == "bench":
+        from .core.bench import run_bench
+
+        result = run_bench(budget=getattr(args, "budget", 2000), k=getattr(args, "k", 5))
     elif args.command == "doctor":
         storage = get_storage(repo_root)
         index_stats = storage.get_stats()

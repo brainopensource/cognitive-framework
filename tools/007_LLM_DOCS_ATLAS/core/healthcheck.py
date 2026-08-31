@@ -125,6 +125,40 @@ def run_healthcheck(
     _check(checks, "budget.symbol_ceiling", "ok" if ceiling > 0 else "error",
            f"max_global_symbols={ceiling}")
 
+    # 9. Knowledge health: consolidation + drift (warn-only; diagnostic value,
+    #    never blocks a healthy index on editorial signals).
+    try:
+        from .consolidation import run_consolidation
+
+        consolidation = run_consolidation(storage)
+        n_dup = len(consolidation["duplicate_documents"])
+        n_conf = len(consolidation["authority_conflicts"])
+        _check(checks, "knowledge.consolidation",
+               "ok" if n_dup == 0 and n_conf == 0 else "warn",
+               consolidation["summary"])
+        if n_dup:
+            recommendations.append(
+                "Duplicate document content detected: run `lda consolidate` and merge under one canonical owner.")
+        if n_conf:
+            recommendations.append(
+                "Conflicting authority claims for the same topic: run `lda consolidate` to resolve.")
+    except Exception as exc:  # pragma: no cover - diagnostics must not crash check
+        _check(checks, "knowledge.consolidation", "warn", f"consolidation diagnostics unavailable: {exc}")
+
+    try:
+        from .drift import detect_drift
+
+        drift = detect_drift(storage, ctx.root, sample_limit=min(sample_limit, 200))
+        _check(checks, "knowledge.drift",
+               "ok" if drift["status"] == "HEALTHY" else "warn",
+               drift["summary"])
+        if drift["status"] != "HEALTHY":
+            recommendations.append(
+                "Documentation drift detected: run `lda drift` for the stale-path / "
+                "undocumented-symbol / orphan-document breakdown.")
+    except Exception as exc:  # pragma: no cover
+        _check(checks, "knowledge.drift", "warn", f"drift diagnostics unavailable: {exc}")
+
     status = "HEALTHY" if not any(c["status"] == "error" for c in checks) else "DEGRADED"
     return {
         "status": status,

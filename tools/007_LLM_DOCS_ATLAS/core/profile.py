@@ -58,6 +58,9 @@ class RepositoryProfile:
     # Context packets must bind to the live workspace git HEAD and fail closed
     # (or recompile) on mismatch instead of serving stale facts.
     require_head_match: bool = True
+    # Optional intent -> [docs_frac, code_frac, tests_frac] override for the
+    # context packet budget mix (intents: bugfix/feature/research/test/explain).
+    budget_mix: dict[str, Any] = field(default_factory=dict)
     labels: dict[str, str] = field(default_factory=dict)
 
     def authority_score(self, value: str | None) -> int:

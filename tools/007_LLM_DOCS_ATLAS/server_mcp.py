@@ -43,6 +43,90 @@ class LDAMCPServer:
         stats = self._storage.get_stats()
         return stats.get("files", 0) > 0 and stats.get("documents", 0) > 0
 
+    # ------------------------------------------------------------------
+    # MCP resources & prompts
+    # ------------------------------------------------------------------
+
+    def _list_resources(self) -> list[dict[str, Any]]:
+        resources = [
+            {
+                "uri": "lda://map",
+                "name": "Repository topology map",
+                "description": "Language/entity/relation statistics for the indexed repository.",
+                "mimeType": "application/json",
+            }
+        ]
+        try:
+            con = self._storage.get_connection()
+            rows = con.execute(
+                "SELECT id, file_path, title, authority FROM documents ORDER BY file_path LIMIT 200"
+            ).fetchall()
+            for r in rows:
+                resources.append({
+                    "uri": f"lda://docs/{r['id']}",
+                    "name": r["title"],
+                    "description": f"{r['file_path']} (authority: {r['authority'] or 'none'})",
+                    "mimeType": "text/markdown",
+                })
+        except Exception:
+            pass
+        return resources
+
+    def _read_resource(self, uri: str) -> dict[str, Any] | None:
+        if uri == "lda://map":
+            return {
+                "uri": uri,
+                "mimeType": "application/json",
+                "text": json.dumps(self._storage.get_topology_map(), sort_keys=True),
+            }
+        if uri.startswith("lda://docs/"):
+            doc_id = uri[len("lda://docs/"):]
+            con = self._storage.get_connection()
+            row = con.execute(
+                "SELECT file_path, title, summary, authority FROM documents WHERE id = ?",
+                (doc_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            sections = con.execute(
+                "SELECT heading, content, start_line, end_line FROM doc_sections "
+                "WHERE doc_id = ? ORDER BY start_line",
+                (doc_id,),
+            ).fetchall()
+            parts = [f"# {row['title']}", "", row["summary"] or "", ""]
+            for s in sections:
+                parts.append(f"## {s['heading']} (L{s['start_line']}-L{s['end_line']})")
+                parts.append("")
+                parts.append(s["content"] or "")
+                parts.append("")
+            return {"uri": uri, "mimeType": "text/markdown", "text": "\n".join(parts)}
+        return None
+
+    def _get_prompt(self, name: str, args: Mapping[str, Any]) -> dict[str, Any]:
+        if name == "lda_task_briefing":
+            task = str(args.get("task", ""))
+            text = (
+                "Use the lda_brief tool to compile a structured briefing for this task, "
+                "then read only the cited documents/sections before implementing:\n\n"
+                f"Task: {task}"
+            )
+            return {"description": "LDA task briefing", "messages": [
+                {"role": "user", "content": {"type": "text", "text": text}},
+            ]}
+        if name == "lda_repo_orientation":
+            text = (
+                "Orient in this repository: call lda_doctor first; if the index is cold, "
+                "run 'lda index'. Then call lda_repomap for the structural map and lda_map "
+                "for topology. Work only from bounded context packets (lda_context) "
+                "afterwards; verify .generated/knowledge/report.json status=VALIDATED "
+                "before trusting catalog facts."
+            )
+            return {"description": "LDA repository orientation", "messages": [
+                {"role": "user", "content": {"type": "text", "text": text}},
+            ]}
+        raise ValueError(f"Unknown prompt: {name}")
+
+
     def _head_sha(self) -> str | None:
         from .core.gitinfo import current_head_sha
 
@@ -58,10 +142,66 @@ class LDAMCPServer:
                 "id": req_id,
                 "result": {
                     "protocolVersion": "2024-11-05",
-                    "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "lda-repository-intelligence", "version": "1.0.0"},
+                    "capabilities": {
+                        "tools": {},
+                        "resources": {"subscribe": False, "listChanged": False},
+                        "prompts": {"listChanged": False},
+                    },
+                    "serverInfo": {"name": "lda-repository-intelligence", "version": "1.2.0"},
                 },
             }
+
+        elif method == "resources/list":
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"resources": self._list_resources()},
+            }
+
+        elif method == "resources/read":
+            uri = (request.get("params") or {}).get("uri", "")
+            contents = self._read_resource(uri)
+            if contents is None:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32602, "message": f"Unknown resource: {uri}"},
+                }
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"contents": [contents]},
+            }
+
+        elif method == "prompts/list":
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"prompts": [
+                    {
+                        "name": "lda_task_briefing",
+                        "description": "Compile an LDA task briefing for a task string.",
+                        "arguments": [{"name": "task", "description": "Task keywords", "required": True}],
+                    },
+                    {
+                        "name": "lda_repo_orientation",
+                        "description": "Orient in an unfamiliar repository using the LDA structural map and topology.",
+                        "arguments": [],
+                    },
+                ]},
+            }
+
+        elif method == "prompts/get":
+            name = (request.get("params") or {}).get("name", "")
+            pargs = (request.get("params") or {}).get("arguments") or {}
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": self._get_prompt(name, pargs),
+            }
+
+        elif method == "notifications/initialized":
+            return None
 
         elif method == "tools/list":
             return {
@@ -77,10 +217,33 @@ class LDAMCPServer:
                                 "properties": {
                                     "query": {"type": "string", "description": "Task keywords or error message."},
                                     "budget": {"type": "integer", "description": "Token budget (default: 4000).", "default": 4000},
-                                    "strategy": {"type": "string", "description": "Strategy: 'ppr_submodular' (default) or 'fts5_bm25'.", "default": "ppr_submodular"},
+                                    "strategy": {"type": "string", "description": "Strategy: 'ppr_submodular' (default), 'hybrid_rrf' (dense+lexical fusion), or 'fts5_bm25'.", "default": "ppr_submodular", "enum": ["ppr_submodular", "hybrid_rrf", "fts5_bm25"]},
                                 },
                                 "required": ["query"],
                             },
+                        },
+                        {
+                            "name": "lda_brief",
+                            "description": "Compile a structured task briefing: task read-back, intent, authority map, key documents/code, documentation obligations, and test falsifiers (markdown + JSON).",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {"type": "string", "description": "Task keywords or error message."},
+                                    "budget": {"type": "integer", "description": "Token budget (default: 8000).", "default": 8000},
+                                    "strategy": {"type": "string", "description": "Ranking strategy.", "enum": ["ppr_submodular", "hybrid_rrf", "fts5_bm25"], "default": "ppr_submodular"},
+                                },
+                                "required": ["query"],
+                            },
+                        },
+                        {
+                            "name": "lda_consolidate",
+                            "description": "Detect duplicate/overlapping documents and conflicting authority claims (read-only consolidation diagnostics).",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
+                            "name": "lda_drift",
+                            "description": "Detect documentation drift: stale symbol paths, undocumented symbols, documents without code evidence.",
+                            "inputSchema": {"type": "object", "properties": {}},
                         },
                         {
                             "name": "lda_repomap",
@@ -246,15 +409,46 @@ class LDAMCPServer:
                     "symbols": [{"title": c.title, "locator": c.locator} for c in packet.symbols],
                 }
             else:
-                # Cold/degraded index: fail open to the canonical deterministic
-                # retrieval surface instead of serving empty packet facts.
-                from tools.docs_rag_v0 import retrieve
+                # Cold/degraded index: fail open to the deterministic catalog
+                # routing (authority-aware, read-only) instead of serving
+                # empty packet facts. LDA is standalone — no dependency on
+                # other repository tools.
+                from .core.ranking import catalog_fallback_candidates, load_catalog_metadata
 
-                payload = retrieve(query=query, budget=budget)
+                catalog = load_catalog_metadata(self._root, self._ctx.profile.generated_root)
+                payload = {
+                    "documents": [
+                        {"canonical_id": c.title, "path": c.locator, "authority": c.authority}
+                        for c in catalog_fallback_candidates(
+                            query, catalog, profile=self._ctx.profile
+                        )
+                    ],
+                    "degraded_mode": "catalog_routing",
+                }
             payload["index_healthy"] = healthy
             payload["source_head_sha"] = head
             payload["profile"] = self._ctx.profile.name
             return payload
+
+        elif name == "lda_brief":
+            from .core.briefing import compile_brief
+
+            return compile_brief(
+                self._root,
+                args.get("query", ""),
+                budget=args.get("budget", 8000),
+                strategy=args.get("strategy", "ppr_submodular"),
+            )
+
+        elif name == "lda_consolidate":
+            from .core.consolidation import run_consolidation
+
+            return run_consolidation(self._storage)
+
+        elif name == "lda_drift":
+            from .core.drift import detect_drift
+
+            return detect_drift(self._storage, self._root)
 
         elif name == "lda_repomap":
             from .atlas import generate_repository_map

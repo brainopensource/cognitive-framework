@@ -37,7 +37,41 @@ uv run lda serve
 
 The local dashboard binds only to `127.0.0.1:8765` by default. Its read-only API exposes `/api/status`, `/api/documents`, `/api/relations`, `/api/context`, and `/api/providers`. The Overview, Documents, Context, Graph, Quality, and Providers views all consume those same service results as the CLI.
 
+## MCP server (upgraded)
+
+`lda-mcp` (stdio JSON-RPC) exposes tools `lda_context`, `lda_brief`, `lda_consolidate`, `lda_drift`, `lda_repomap`, `lda_focused_tests`, `lda_symbol`, `lda_callers`, `lda_callees`, `lda_references`, `lda_tests_for_symbol`, `lda_docs_for_symbol`, `lda_fts_search`, `lda_map`, `lda_doctor`, `lda_check`, and `lda_coverage`; resources `lda://map` and `lda://docs/{id}`; prompts `lda_task_briefing` and `lda_repo_orientation`. On a cold index it degrades to authority-aware catalog routing (`degraded_mode: catalog_routing`) — LDA is standalone and imports no other repository tool. Agent-facing workflow recipes live in `SKILL.md`.
+
 The `knowledge` provider consumes `<generated_root>/knowledge/*.jsonl`; the `git` provider adds revision provenance. Context selection ranks keyword matches and authority via the active profile, prefers canonical/normative documents, and enforces the token budget. Research is opt-in. JSON is the stable agent-facing interface.
+
+## Retrieval strategies (Phase A)
+
+`lda context --strategy {ppr_submodular,hybrid_rrf,fts5_bm25}`:
+
+- **ppr_submodular** (default): BM25 seeds + Personalized-PageRank graph diffusion + submodular knapsack.
+- **hybrid_rrf**: deterministic feature-hashed dense embeddings (md5-bucketed, stable across processes) fused with lexical BM25 via Reciprocal Rank Fusion (k=60). Dense-only semantic hits enter the candidate pool.
+- **fts5_bm25**: lexical baseline.
+
+Additional Phase A guarantees:
+
+- **Section-level FTS**: document *sections* are indexed with full content; matching sections become zoomed `doc_section` candidates (`path#L1-L40`) and demote their whole-document parent, so packets carry the relevant passage.
+- **Query conditioning** (`core/query.py`): intent classification (bugfix/feature/research/test/explain), symbol-token extraction, and stack-trace `file:line` frame routing (frames become top-scored code candidates).
+- **Intent-conditioned budget mix**: docs/code/tests fractions follow the detected intent (e.g. bugfix → 20/55/25); override per intent via profile `budget_mix = { intent = [docs, code, tests] }`. Invalid overrides fail closed to the built-in mix.
+- **Content dedup**: the knapsack allocator collapses near-identical content (shingle Jaccard ≥ 0.9) so duplicate documents cannot consume budget.
+
+## Briefing, consolidation, drift (Phase B)
+
+- `lda brief "<task>"` — structured briefing (markdown + JSON): task read-back, intent, authority map, key documents/code, documentation obligations, test falsifiers, HEAD-bound provenance.
+- `lda consolidate` — duplicate/overlapping documents and conflicting authority claims (read-only diagnostics).
+- `lda drift` — stale symbol paths, undocumented symbols, documents without code evidence.
+- Both also run as warn-only checks inside `lda check` (`knowledge.consolidation`, `knowledge.drift`).
+
+## Benchmark (Phase E)
+
+`lda bench` runs the deterministic golden-query fixture (6-file repo, 4 queries) through every strategy and reports recall@5, MRR, and latency. Retrieval-quality regressions must keep `recall@5 >= 0.5` per strategy (`test/tools/test_lda_skill_bench.py`).
+
+## Adopted plugin: `repo_report`
+
+`plugins/repo_report/` (first adopted first-party plugin) provides deterministic repository snapshots — git state, freshness, incremental delta, inventory, contract inventory, graph stats — writing only `.lda/repo-report/`. Optional dependency-free Rust walk accelerator under `plugins/repo_report/rust/`. Registers through `PluginManager`; see its README.
 
 ## Portability contract
 

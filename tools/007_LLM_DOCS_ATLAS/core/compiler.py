@@ -13,16 +13,41 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .cache import PacketCache
+from .hybrid import DenseRetriever, reciprocal_rank_fusion
 from .models import Candidate, ContextPacket
 from .plugin_switches import AtlasStrategyConfig, StrategySwitcher
 from .ppr_engine import PPREngine
 from .profile import RepositoryProfile
+from .query import analyze_query
 from .ranking import allocate_budget, rank_entities
 from .skeletonizer import skeletonize
 from .storage import FactGraphStorage
 from .submodular_allocator import SubmodularContextAllocator
 
 logger = logging.getLogger(__name__)
+
+
+def _budget_mix_for(task: str, profile: RepositoryProfile) -> tuple[float, float, float]:
+    """Intent-conditioned (docs, code, tests) budget fractions.
+
+    Profile override: ``budget_mix = { intent = [docs, code, tests] }`` entries
+    replace the built-in defaults per intent; invalid rows fail closed to the
+    built-in mix rather than producing zero or negative budgets.
+    """
+    from .query import DEFAULT_BUDGET_MIX
+
+    intent = analyze_query(task).intent
+    override = getattr(profile, "budget_mix", None) or {}
+    row = override.get(intent)
+    if isinstance(row, (list, tuple)) and len(row) == 3:
+        try:
+            fracs = tuple(max(0.0, float(x)) for x in row)
+            total = sum(fracs)
+            if total > 0.0:
+                return fracs  # type: ignore[return-value]
+        except (TypeError, ValueError):
+            pass
+    return DEFAULT_BUDGET_MIX.get(intent, DEFAULT_BUDGET_MIX["explain"])
 
 
 class ContextCompiler:
@@ -71,20 +96,28 @@ class ContextCompiler:
         # 2. Candidate Harvesting & Initial Lexical Ranking
         all_candidates = rank_entities(task, self.storage, candidate_limit=80, profile=self.profile)
 
-        # 3. Strategy Routing: PPR Graph Diffusion vs FTS5 Lexical Baseline
+        # 3. Strategy Routing: PPR Graph Diffusion vs Hybrid RRF vs FTS5 Lexical Baseline
         active_strategy = strategy
         if strategy == "ppr_submodular":
             all_candidates, active_strategy = self._apply_ppr_diffusion(task, all_candidates)
+        elif strategy == "hybrid_rrf":
+            all_candidates, active_strategy = self._apply_hybrid_rrf(task, all_candidates)
 
-        # 4. Partition candidates by category
-        doc_candidates = [c for c in all_candidates if c.kind == "document"]
-        sym_candidates = [c for c in all_candidates if c.kind == "symbol"]
+        # 4. Partition candidates by category (sections zoom with documents;
+        #    code candidates include stack-trace frame hits)
+        doc_candidates = [
+            c for c in all_candidates if c.kind in ("document", "doc_section")
+        ]
+        sym_candidates = [
+            c for c in all_candidates if c.kind in ("symbol", "code")
+        ]
         test_candidates = [c for c in all_candidates if c.kind == "test" or "test" in c.locator.lower()]
 
-        # 5. Budget Allocation: 35% Docs, 45% Symbols & Code, 20% Tests/Callers
-        doc_budget = int(budget * 0.35)
-        sym_budget = int(budget * 0.45)
-        test_budget = int(budget * 0.20)
+        # 5. Budget Allocation: intent-conditioned mix (profile-overridable)
+        doc_frac, sym_frac, test_frac = _budget_mix_for(task, self.profile)
+        doc_budget = int(budget * doc_frac)
+        sym_budget = int(budget * sym_frac)
+        test_budget = int(budget * test_frac)
 
         if strategy == "ppr_submodular":
             selected_docs, doc_tokens = self.submodular_allocator.allocate(doc_candidates, doc_budget)
@@ -155,12 +188,20 @@ class ContextCompiler:
             warnings.append(f"Allocated tokens ({total_used}) exceeded budget ({budget}). Pruning occurred.")
 
         stats = self.storage.get_stats()
+        intent = analyze_query(task).intent
         provenance = {
             "indexer": "LDA Universal SOTA Engine",
-            "schema_version": "1.1.0",
+            "schema_version": "1.2.0",
             "profile": self.profile.name,
             "source_head_sha": self.head_sha,
             "strategy": active_strategy,
+            "task_intent": intent,
+            "ranking_channels": {
+                "lexical_bm25": True,
+                "dense_rrf": active_strategy == "hybrid_rrf",
+                "ppr_diffusion": active_strategy == "ppr_submodular",
+                "stack_trace_frames": True,
+            },
             "total_repo_files": stats.get("files", 0),
             "total_repo_symbols": stats.get("symbols", 0),
             "total_repo_relations": stats.get("relations", 0),
@@ -272,6 +313,80 @@ class ContextCompiler:
         except Exception as exc:
             logger.warning("PPR diffusion failed, falling back to FTS5: %s", exc)
             return candidates, "fts5_bm25"
+
+    def _apply_hybrid_rrf(
+        self,
+        task: str,
+        candidates: List[Candidate],
+    ) -> Tuple[List[Candidate], str]:
+        """Fuse lexical, dense, and intent-frame channels via Reciprocal Rank Fusion.
+
+        Dense-only hits (zero lexical overlap, e.g. paraphrased docstrings)
+        enter the pool as full candidates; fused ranks re-weight everyone.
+        Falls back to lexical ordering on any internal failure.
+        """
+        try:
+            retriever = DenseRetriever()
+            retriever.build_from_storage(self.storage)
+        except Exception as exc:
+            logger.warning("Dense index build failed, falling back to FTS5: %s", exc)
+            return candidates, "fts5_bm25"
+
+        dense_hits = retriever.ranked(task, limit=40)
+
+        # New candidates from dense-only hits (not already in the lexical pool).
+        known = {c.locator for c in candidates}
+        extra: List[Candidate] = []
+        for locator, score, meta in dense_hits:
+            if locator in known:
+                continue
+            kind = str(meta.get("kind", "symbol"))
+            title = str(meta.get("title", locator))
+            extra.append(
+                Candidate(
+                    locator=locator,
+                    kind=kind,
+                    title=title,
+                    score=20.0 + score * 50.0,
+                    tokens=int(meta.get("tokens", 100)),
+                    reason=f"Dense semantic match (cos={score:.3f})",
+                    authority=meta.get("authority"),
+                    representation="SKELETON",
+                    content=meta.get("content"),
+                )
+            )
+
+        fused = reciprocal_rank_fusion(
+            {
+                "lexical": [c.locator for c in candidates],
+                "dense": [loc for loc, _, _ in dense_hits],
+            },
+            weights={"lexical": 1.0, "dense": 1.0},
+            limit=max(len(candidates) + len(extra), 1),
+        )
+        rrf_rank = {loc: i for i, (loc, _) in enumerate(fused)}
+        pool = candidates + extra
+        max_rank = max(1, len(fused) - 1)
+        reweighted: List[Candidate] = []
+        for c in pool:
+            pos = rrf_rank.get(c.locator, max_rank)
+            rrf_score = 1.0 - (pos / max_rank)  # 1.0 best .. 0.0 worst
+            reweighted.append(
+                Candidate(
+                    locator=c.locator,
+                    kind=c.kind,
+                    title=c.title,
+                    score=c.score * 0.5 + rrf_score * 100.0,
+                    tokens=c.tokens,
+                    reason=f"{c.reason} [RRF rank {pos}]",
+                    authority=c.authority,
+                    representation=c.representation,
+                    content=c.content,
+                    provenance_ref=c.provenance_ref,
+                )
+            )
+        reweighted.sort(key=lambda x: (-x.score, x.locator))
+        return reweighted, "hybrid_rrf"
 
     def _serialize_packet(self, packet: ContextPacket) -> Dict[str, Any]:
         return {

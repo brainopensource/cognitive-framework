@@ -49,15 +49,23 @@ class SqliteVecPlugin:
         )
 
     def _simple_embedding(self, text: str, dim: int = 64) -> List[float]:
-        """Deterministic lightweight character-ngram hashed embedding (Zero-VRAM CPU)."""
+        """Deterministic lightweight character-ngram hashed embedding (Zero-VRAM CPU).
+
+        Uses hashlib-based bucketing — NOT Python's ``hash()``, which is salted
+        per process and would make vectors non-deterministic across runs,
+        breaking packet cache and provenance guarantees.
+        """
+        import hashlib
+
         vec = [0.0] * dim
         text = text.lower().strip()
         if not text:
             return vec
 
         for i in range(len(text) - 2):
-            trigram = text[i : i + 3]
-            h = hash(trigram) % dim
+            trigram = text[i: i + 3]
+            digest = hashlib.md5(trigram.encode("utf-8")).digest()
+            h = int.from_bytes(digest[:4], "little") % dim
             vec[h] += 1.0
 
         # L2 normalize

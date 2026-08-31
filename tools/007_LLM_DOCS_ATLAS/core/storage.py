@@ -242,6 +242,14 @@ class FactGraphStorage:
                 except Exception:
                     pass
 
+            # Section-level FTS rows carry the file path inside the locator
+            # (entity_id is the section id, which may no longer be resolvable
+            # above), so purge them by locator prefix.
+            try:
+                con.execute("DELETE FROM fts_search WHERE locator LIKE ?", (f"{path}%",))
+            except Exception:
+                pass
+
             con.execute("DELETE FROM relations WHERE source_path = ?", (path,))
 
     # --------------------------------------------------------------------------
@@ -391,6 +399,24 @@ class FactGraphStorage:
                     "INSERT INTO fts_search (entity_id, title, name, content, kind, locator) VALUES (?, ?, ?, ?, ?, ?)",
                     (doc.id, doc.title, doc.canonical_id or doc.title, doc.summary or "", "document", doc.file_path)
                 )
+                # Section-level FTS: agents zoom into matching sections, not
+                # whole documents. entity_id is the section id (joinable to
+                # doc_sections); locator carries the file path for incremental
+                # purge and provenance.
+                for sec in sections:
+                    if not sec.content:
+                        continue
+                    con.execute(
+                        "INSERT INTO fts_search (entity_id, title, name, content, kind, locator) VALUES (?, ?, ?, ?, ?, ?)",
+                        (
+                            sec.id,
+                            sec.heading,
+                            sec.heading,
+                            sec.content,
+                            "doc_section",
+                            f"{doc.file_path}#L{sec.start_line}-L{sec.end_line}",
+                        )
+                    )
             except Exception:
                 pass
 
@@ -546,6 +572,59 @@ class FactGraphStorage:
             WHERE r.target_id = ? AND r.kind IN ('documents', 'specified_by')
             """,
             (symbol_id,)
+        )
+        return [dict(r) for r in cur.fetchall()]
+
+    def search_sections(self, query: str, limit: int = 15) -> List[Dict[str, Any]]:
+        """BM25 search over document *section* content (not just metadata).
+
+        Returns section rows joined with their parent document's file path and
+        authority so rankers can build zoomed, provenance-bound candidates.
+        """
+        con = self.get_connection()
+        terms = [
+            cleaned
+            for cleaned in (
+                "".join(ch for ch in t if ch.isalnum() or ch == "_")
+                for t in query.replace('"', "").replace("'", "").split()
+            )
+            if len(cleaned) > 1
+        ]
+        if not terms:
+            return []
+        match_expr = " OR ".join(f'"{t}"*' for t in terms)
+        try:
+            cur = con.execute(
+                """
+                SELECT f.entity_id AS section_id, f.title AS heading, f.locator AS locator,
+                       f.rank AS rank,
+                       d.id AS doc_id, d.file_path AS file_path, d.title AS doc_title,
+                       d.authority AS authority, d.canonical_id AS canonical_id,
+                       s.content AS content, s.estimated_tokens AS estimated_tokens,
+                       s.start_line AS start_line, s.end_line AS end_line
+                FROM fts_search f
+                JOIN doc_sections s ON s.id = f.entity_id
+                JOIN documents d ON d.id = s.doc_id
+                WHERE f.kind = 'doc_section' AND fts_search MATCH ?
+                ORDER BY rank
+                LIMIT ?
+                """,
+                (match_expr, limit)
+            )
+            return [dict(r) for r in cur.fetchall()]
+        except Exception:
+            return []
+
+    def get_all_sections(self) -> List[Dict[str, Any]]:
+        """All document sections with parent file paths (dense indexing source)."""
+        con = self.get_connection()
+        cur = con.execute(
+            """
+            SELECT s.id, s.heading, s.content, s.estimated_tokens,
+                   s.start_line, s.end_line, d.file_path, d.authority
+            FROM doc_sections s
+            JOIN documents d ON d.id = s.doc_id
+            """
         )
         return [dict(r) for r in cur.fetchall()]
 

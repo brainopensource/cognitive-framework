@@ -156,10 +156,34 @@ def rank_entities(
     profile: Optional[RepositoryProfile] = None,
 ) -> List[Candidate]:
     """Rank repository entities using multi-signal scoring."""
+    from .query import analyze_query
+
     active = profile or RepositoryProfile()
-    terms = extract_search_terms(task)
+    plan = analyze_query(task)
+    terms = list(plan.keywords) or list(extract_search_terms(task))
     if not terms:
         terms = ["readme"]
+
+    # Stack-trace frames are the strongest routing signal: file paths named in
+    # a failing agent's task go straight to the top as code candidates.
+    frame_candidates: List[Candidate] = []
+    seen_locators: Set[str] = set()
+    for path, line in plan.frames:
+        locator = f"{path}#L{line}"
+        if locator in seen_locators or active.is_low_signal(locator):
+            continue
+        seen_locators.add(locator)
+        frame_candidates.append(
+            Candidate(
+                locator=locator,
+                kind="code",
+                title=Path(path).name,
+                score=90.0,
+                tokens=150,
+                reason=f"Stack-trace frame from task (line {line})",
+                representation="SKELETON",
+            )
+        )
 
     if repo_root is None:
         repo_root = storage.db_path.parent.parent
@@ -245,10 +269,66 @@ def rank_entities(
     # returning (fine-grained lookups remain available via zoom queries).
     candidates = apply_symbol_ceiling(candidates, active)
 
+    # Section-level zoom: matching sections rank above (or alongside) their
+    # whole parent document so packets carry the *relevant passage*, not the
+    # entire document. Sections whose file is not already a document candidate
+    # are appended; duplicates by locator are dropped.
+    try:
+        section_rows = storage.search_sections(" ".join(terms), limit=candidate_limit)
+    except Exception:
+        section_rows = []
+    existing_doc_paths: Set[str] = set()  # reserved: future path-level dedup
+    section_candidates: List[Candidate] = []
+    for row in section_rows:
+        file_path = row.get("file_path", "")
+        locator = row.get("locator") or f"{file_path}#L{row.get('start_line', 1)}"
+        if locator in seen_locators:
+            continue
+        if active.is_excluded_authority(row.get("authority")) or active.is_non_canonical_path(file_path):
+            continue
+        seen_locators.add(locator)
+        content = row.get("content") or ""
+        tokens = int(row.get("estimated_tokens") or max(30, len(content.split())))
+        score = 55.0 + abs(float(row.get("rank", 0.0)) or 0.0) * 5.0
+        authority = row.get("authority")
+        if authority in active.preferred_authority:
+            score += 25.0
+        section_candidates.append(
+            Candidate(
+                locator=locator,
+                kind="doc_section",
+                title=row.get("heading", ""),
+                score=score,
+                tokens=tokens,
+                reason=f"Matching section in {file_path}",
+                authority=authority,
+                representation="SKELETON",
+                content=content,
+            )
+        )
+    candidates.extend(section_candidates)
+    # Whole-document candidates that had a matching section still remain, but
+    # their content is summarized by the section hit; demote them slightly so
+    # sections win the knapsack without removing document context entirely.
+    if section_candidates:
+        section_files = {c.locator.split("#")[0] for c in section_candidates}
+        candidates = [
+            (c if c.kind != "document" or c.locator not in section_files
+             else Candidate(
+                 locator=c.locator, kind=c.kind, title=c.title, score=c.score * 0.8,
+                 tokens=c.tokens, reason=c.reason, authority=c.authority,
+                 representation=c.representation, content=c.content,
+                 provenance_ref=c.provenance_ref,
+             ))
+            for c in candidates
+        ]
+
+    candidates = frame_candidates + candidates
+
     # Fallback: route from the canonical catalog when the fact graph yields
     # nothing (an empty/cold .lda/index.db must not degrade agent routing).
-    if not candidates:
-        candidates = catalog_fallback_candidates(task, catalog_by_path, profile=active)
+    if not [c for c in candidates if c.kind != "code"]:
+        candidates.extend(catalog_fallback_candidates(task, catalog_by_path, profile=active))
 
     # Sort descending by score
     candidates.sort(key=lambda c: (-c.score, c.tokens, c.locator))

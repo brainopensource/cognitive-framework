@@ -17,8 +17,41 @@ logger = logging.getLogger(__name__)
 class SubmodularContextAllocator:
     """Selects optimal, non-redundant candidates under a token budget."""
 
-    def __init__(self, redundancy_penalty: float = 0.25) -> None:
+    def __init__(self, redundancy_penalty: float = 0.25, content_dedup_threshold: float = 0.9) -> None:
         self.lambda_penalty = redundancy_penalty
+        self.content_dedup_threshold = content_dedup_threshold
+
+    @staticmethod
+    def _content_shingles(candidate: Candidate) -> Set[str]:
+        """Word shingles of the candidate's real content (falls back to title)."""
+        text = (candidate.content or candidate.title or "").lower()
+        if not text:
+            return set()
+        return {w for w in text.split() if len(w) > 2}
+
+    def _deduplicate(self, candidates: Sequence[Candidate]) -> List[Candidate]:
+        """Drop near-duplicate content so redundant docs cannot consume budget.
+
+        Two candidates with word-shingle Jaccard above the threshold are
+        collapsed into the higher-scoring one (ties: first in order).
+        """
+        kept: List[Candidate] = []
+        kept_shingles: List[Set[str]] = []
+        for c in candidates:
+            shingles = self._content_shingles(c)
+            duplicate = False
+            for prev in kept_shingles:
+                if not shingles or not prev:
+                    continue
+                jaccard = len(shingles & prev) / len(shingles | prev)
+                if jaccard >= self.content_dedup_threshold:
+                    duplicate = True
+                    break
+            if duplicate:
+                continue
+            kept.append(c)
+            kept_shingles.append(shingles)
+        return kept
 
     def allocate(
         self,
@@ -28,6 +61,12 @@ class SubmodularContextAllocator:
     ) -> Tuple[List[Candidate], int]:
         """Pack candidates maximizing submodular coverage within budget."""
         if not candidates or budget <= 0:
+            return [], 0
+
+        # Content-level dedup pre-pass: identical documents must not each
+        # occupy a budget slot (Phase A consolidation guarantee).
+        candidates = self._deduplicate(candidates)
+        if not candidates:
             return [], 0
 
         scores = ppr_scores or {c.locator: c.score for c in candidates}

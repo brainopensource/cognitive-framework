@@ -74,19 +74,10 @@ def _find_env_key(key_name: str, environ: Any) -> str | None:
         val = environ.get(key_name)
         if val:
             return str(val)
-    from pathlib import Path
-    root = Path(__file__).resolve().parents[3]
-    env_p = root / ".env"
-    if env_p.is_file():
-        try:
-            for line in env_p.read_text(encoding="utf-8").splitlines():
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    k, v = line.split("=", 1)
-                    if k.strip() == key_name:
-                        return v.strip().strip("'\"")
-        except Exception:
-            pass
+    # Provider credentials are an explicit process/caller input.  Runtime
+    # selection must never discover a repository .env on its own: doing so
+    # turns otherwise hermetic tests into paid network runs.  Product entry
+    # points that support dotenv load it deliberately before selecting a port.
     return None
 
 

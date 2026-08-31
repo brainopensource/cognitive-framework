@@ -252,9 +252,11 @@ class GitEnvironment:
         )
         status_out = status_proc.stdout if status_proc.returncode == 0 else ""
 
-        snapshot_digest = digest_of(
-            {"head": head_commit, "status": status_out, "seq": self._snapshot_seq}
-        )
+        # Snapshot identity describes workspace material, not how often it was
+        # observed. Including `_snapshot_seq` made two consecutive reads of an
+        # unchanged tree produce different digests, so every verification
+        # receipt became stale the instant admission took a second snapshot.
+        snapshot_digest = digest_of({"head": head_commit, "status": status_out})
         return Result.success(
             EnvironmentSnapshot(
                 snapshot_id=f"git-snap-{head_commit[:8]}-{self._snapshot_seq:04d}",

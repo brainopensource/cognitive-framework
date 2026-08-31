@@ -155,6 +155,13 @@ The target `ContextPacket` records at minimum the task digest, repository snapsh
 
 The same composition path binds a generic completion-admission policy. `EpisodeEngine` asks whether completion is admissible; the code pack interprets coding verification, while runtime records the decision and its evidence reference. External evaluation remains a later, independent lifecycle stage.
 
+Workspace verification freshness is bound to a material snapshot digest. For a
+Git environment that digest covers the current HEAD and porcelain worktree
+state; observation counters belong only to the snapshot identifier and MUST NOT
+change the digest of an otherwise unchanged workspace. This permits a second
+read to validate a receipt while still invalidating it immediately after a
+material patch.
+
 The backend facade exposes `vg code run`, `status`, `resume`, `evidence`, and
 `cost`. These commands are thin clients of `ApplicationService`; preset names
 resolve to `vg-code-fast`, `vg-code-balanced`, or `vg-code-max` manifests and

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -207,8 +208,11 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
 
     def test_an_unavailable_backend_is_an_instrument_error_not_a_pass(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            result = lab_run.run_lab_task(
-                "vg-code-default", tmp, model_port="openrouter")
+            # This is an unavailable-provider falsifier even when a developer
+            # runs the suite from a shell that has live credentials exported.
+            with patch.dict(os.environ, {}, clear=True):
+                result = lab_run.run_lab_task(
+                    "vg-code-default", tmp, model_port="openrouter")
             # `S21-A-01`: the category is no longer the whole answer.
             self.assertTrue(result["outcome"].startswith(
                 StopReason.INSTRUMENT_ERROR))

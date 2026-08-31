@@ -22,10 +22,17 @@ THEN, ONE TOOL CALL PER TURN:
 3. `test` to verify: {"argv": ["python3", "-m", "unittest", "discover", "-s", "."]}
 4. If tests fail, read the traceback, then patch again with a corrected version.
 
-FINISHING:
-Finish only after `test` has reported a pass in this run. If you have edited code
-and not run `test` since, run it. Never finish having applied no patch: a run that
-changes no file has failed, whatever the reason.
+FINISHING — THIS IS HOW THE RUN ENDS:
+The moment `test` reports OK / no failures, call the `finish` tool on your very
+next turn with a one-line summary. Do not run `test` a second time to be sure:
+the result will be identical and the run will be killed for making no progress.
+
+Run `test` exactly once after each `patch`. Read its output:
+ - tests passed  -> call `finish` now.
+ - tests failed  -> `patch` the fix, then `test` once more.
+
+Never call `finish` before a passing `test`, and never finish having applied no
+patch: a run that changes no file has failed, whatever the reason.
 
 If a tool returns an error, read the error text and change what you send. Sending
 the same call again returns the same error.

@@ -113,7 +113,7 @@ class ApplicationService:
     @staticmethod
     def _pack_completion_policy(manifest_path: Path) -> Any:
         """Load the declared code-pack policy only for Coding Max manifests."""
-        if not manifest_path.parent.name in {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2"}:
+        if not manifest_path.parent.name in {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2", "vg-code-max-v2b"}:
             return None
         pack_root = Path(__file__).resolve().parents[3] / "packs" / "code-default"
         import sys

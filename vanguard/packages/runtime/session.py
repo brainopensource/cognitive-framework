@@ -106,7 +106,7 @@ from .wiring import (
 #: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
 ADMISSION_GATED_HARNESSES = frozenset(
     {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
-     "vg-code-max-v3"})
+     "vg-code-max-v2b", "vg-code-max-v3"})
 
 #: Presets deliberately exempt from capability-derived gating. Only shrinks.
 ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default"})
@@ -1006,7 +1006,7 @@ class HarnessSession:
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
                 completion_admitter=(self._admit_completion
-                                     if admission_required(harness)
+                                     if harness.harness in ADMISSION_GATED_HARNESSES
                                      else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
@@ -1039,6 +1039,11 @@ class HarnessSession:
                 request, requested_scope=self.scope,
                 reservation=_reservation_for(harness.budget,
                                              harness.effect_budget))
+            # The approved effect is the one that actually lands. It does not
+            # pass through the engine's turn callback, so without this the
+            # completion gate never saw the patch it had just applied and
+            # rejected every finish with MISSING_SOURCE_PATCH.
+            self._observe_completion_dispatch(request, approved_dispatch)
             observer = getattr(self.operator._model, "observe_dispatch", None)
             if callable(observer):
                 observer(approved_dispatch)
@@ -1226,7 +1231,7 @@ class HarnessSession:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
-        if request.action not in {"test", "exec"}:
+        if request.action not in {"test", "exec", "proc.exec"}:
             return
         argv = request.args.get("argv", request.args.get("command", ()))
         if isinstance(argv, str):
@@ -1338,6 +1343,18 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
     """
     for request, result in calls:
         if result.failure is not FailurePath.OK or result.outcome is None:
+            # An approved effect executes between engine segments. Its failed
+            # dispatch therefore has no engine callback to carry the failure
+            # into the next prompt. Dropping it here leaves the model blind and
+            # guarantees identical retries (observed live with proc.exec).
+            if admit_context:
+                failure = str(getattr(result.failure, "value", result.failure))
+                detail = str(result.detail or "dispatch produced no outcome")
+                operator.note(
+                    label=f"{request.action}-failure-{len(receipts)}",
+                    source="tool_result",
+                    text=f"{request.action} -> {failure}\n{detail}",
+                )
             continue
         outcome_detail = result.detail or getattr(result.outcome, "detail", "")
         receipts.append(Receipt(

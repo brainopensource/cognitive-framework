@@ -8,7 +8,8 @@
       "vg-code-max-v3/read-tool.json",
       "vg-code-max-v3/search-tool.json",
       "vg-code-max-v3/patch-tool.json",
-      "vg-code-max-v3/test-tool.json"
+      "vg-code-max-v3/test-tool.json",
+      "vg-code-max-v3/finish-tool.json"
     ],
     "context_policy": [
       "vg-code-default/context-policy.json"

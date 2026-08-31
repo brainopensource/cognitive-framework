@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
 import time
@@ -39,6 +40,10 @@ from benchmarks.run_20_eval_suite import (  # noqa: E402
     run_oracle_test,
     setup_workspace,
 )
+from benchmarks.sota_context import (  # noqa: E402
+    CHALLENGES as SOTA_CHALLENGES,
+    TIERS as SOTA_TIERS,
+)
 from vanguard.packages.runtime.root import (  # noqa: E402
     application_service,
     Cassette,
@@ -46,8 +51,59 @@ from vanguard.packages.runtime.root import (  # noqa: E402
     OpenRouterModel,
 )
 
-TIERS = {"easy": EASY_TIER_KEYS, "medium": MEDIUM_TIER_KEYS, "hard": HARD_TIER_KEYS}
+ALL_CHALLENGES = {**ALL_CHALLENGES, **SOTA_CHALLENGES}
+TIERS = {
+    "easy": EASY_TIER_KEYS,
+    "medium": MEDIUM_TIER_KEYS,
+    "hard": HARD_TIER_KEYS,
+    **SOTA_TIERS,
+}
 OUT = ROOT / "benchmarks/artifacts/ladder"
+
+
+class LiveBudgetExceeded(RuntimeError):
+    """Raised before a provider call once the live-run ceiling is closed."""
+
+
+class LiveBudget:
+    """One fail-closed budget shared by every challenge in a ladder run."""
+
+    def __init__(self, *, max_cost_usd: float, max_calls: int) -> None:
+        if max_cost_usd <= 0 or max_calls <= 0:
+            raise ValueError("live budget and call cap must be positive")
+        self.max_cost_usd = max_cost_usd
+        self.max_calls = max_calls
+        self.calls = 0
+        self.cost_usd = 0.0
+
+    def guard(self, delegate: object) -> object:
+        budget = self
+
+        class _BudgetedModel:
+            def propose(self, context, tools, sampling):
+                if budget.calls >= budget.max_calls:
+                    raise LiveBudgetExceeded(
+                        f"provider call cap reached ({budget.calls}/{budget.max_calls})")
+                if budget.cost_usd >= budget.max_cost_usd:
+                    raise LiveBudgetExceeded(
+                        f"provider cost cap reached (${budget.cost_usd:.6f}/"
+                        f"${budget.max_cost_usd:.6f})")
+                answer = delegate.propose(context, tools, sampling)
+                budget.calls += 1
+                value = getattr(answer, "value", None)
+                proposal = value if isinstance(value, dict) else answer
+                if isinstance(proposal, dict):
+                    budget.cost_usd += float(proposal.get("cost_usd") or 0.0)
+                return answer
+
+            def __getattr__(self, name):
+                return getattr(delegate, name)
+
+        return _BudgetedModel()
+
+    @property
+    def closed(self) -> bool:
+        return self.calls >= self.max_calls or self.cost_usd >= self.max_cost_usd
 
 
 def _trajectory(cassette: Cassette) -> list[dict]:
@@ -78,10 +134,13 @@ def _trajectory(cassette: Cassette) -> list[dict]:
 
 
 def run_one(key: str, tier: str, model_name: str, max_turns: int,
-            manifest: str) -> dict:
+            manifest: str, *, tag: str, live_budget: LiveBudget) -> dict:
     challenge = ALL_CHALLENGES[key]
     OUT.mkdir(parents=True, exist_ok=True)
-    tape_p = OUT / f"{key}__{model_name.replace('/', '_')}.cassette.json"
+    safe_tag = re.sub(r"[^A-Za-z0-9_.-]+", "_", tag).strip("._") or "run"
+    safe_model = re.sub(r"[^A-Za-z0-9_.-]+", "_", model_name)
+    artifact_stem = f"{safe_tag}__{key}__{safe_model}"
+    tape_p = OUT / f"{artifact_stem}.cassette.json"
 
     with tempfile.TemporaryDirectory(prefix=f"ladder_{key}_") as td:
         ws = Path(td)
@@ -94,10 +153,11 @@ def run_one(key: str, tier: str, model_name: str, max_turns: int,
                     "model": model_name}
 
         cassette = Cassette()
+        live_model = OpenRouterModel(model=model_name, stream=False,
+                                     reasoning_effort="none")
         recorder = CassetteRecorder(
             cassette,
-            delegate=OpenRouterModel(model=model_name, stream=False,
-                                     reasoning_effort="none"),
+            delegate=live_budget.guard(live_model),
             output_path=tape_p,
         )
 
@@ -148,7 +208,7 @@ def run_one(key: str, tier: str, model_name: str, max_turns: int,
             "cassette": str(tape_p.relative_to(ROOT)),
             "trajectory": _trajectory(cassette),
         }
-        (OUT / f"{key}__{model_name.replace('/', '_')}.run.json").write_text(
+        (OUT / f"{artifact_stem}.run.json").write_text(
             json.dumps(row, indent=2), encoding="utf-8")
         return row
 
@@ -162,6 +222,7 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", default="")
     ap.add_argument("--budget-usd", type=float, default=0.15)
+    ap.add_argument("--max-calls", type=int, default=300)
     ap.add_argument("--tag", default="run")
     args = ap.parse_args()
 
@@ -169,14 +230,21 @@ def main() -> int:
     if args.limit:
         keys = keys[: args.limit]
 
-    rows, spent = [], 0.0
+    rows = []
+    live_budget = LiveBudget(
+        max_cost_usd=args.budget_usd,
+        max_calls=args.max_calls,
+    )
     for key in keys:
-        if spent >= args.budget_usd:
-            print(f"[budget] stopping: ${spent:.5f} >= ${args.budget_usd}")
+        if live_budget.closed:
+            print(f"[budget] stopping: ${live_budget.cost_usd:.5f}/"
+                  f"${args.budget_usd:.5f}, {live_budget.calls}/{args.max_calls} calls")
             break
         print(f"\n=== {key} ({args.tier}) via {args.model} ===", flush=True)
-        row = run_one(key, args.tier, args.model, args.max_turns, args.manifest)
-        spent += float(row.get("cost_usd") or 0)
+        row = run_one(
+            key, args.tier, args.model, args.max_turns, args.manifest,
+            tag=args.tag, live_budget=live_budget,
+        )
         rows.append(row)
         print(f"  -> {row['status']} calls={row.get('llm_calls')} "
               f"turns={row.get('turns')} term={row.get('terminal_state')} "
@@ -189,13 +257,17 @@ def main() -> int:
         "max_turns": args.max_turns,
         "total": len(rows), "passed": passed,
         "pass_rate": f"{passed}/{len(rows)}" if rows else "0/0",
-        "spend_usd": round(spent, 6),
+        "spend_usd": round(live_budget.cost_usd, 6),
+        "llm_calls": live_budget.calls,
+        "budget_usd": args.budget_usd,
+        "max_calls": args.max_calls,
         "rows": [{k: v for k, v in r.items() if k != "trajectory"} for r in rows],
     }
     OUT.mkdir(parents=True, exist_ok=True)
     rp = OUT / f"report_{args.tag}_{args.tier}_{args.model.replace('/', '_')}.json"
     rp.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(f"\n=== {passed}/{len(rows)} PASS | spend ${spent:.5f} | {rp.relative_to(ROOT)}")
+    print(f"\n=== {passed}/{len(rows)} PASS | spend ${live_budget.cost_usd:.5f} | "
+          f"calls {live_budget.calls}/{args.max_calls} | {rp.relative_to(ROOT)}")
     return 0
 
 

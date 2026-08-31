@@ -1,0 +1,28 @@
+{
+  "name": "surgical_patch",
+  "verb": "patch.apply",
+  "description": "Apply a resilient atomic search/replace patch to a source file with 9-strategy fuzzy matching and automatic rollback on syntax error.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Relative path of the target file to modify."
+      },
+      "target": {
+        "type": "string",
+        "description": "Exact or approximate code snippet to be replaced."
+      },
+      "replacement": {
+        "type": "string",
+        "description": "New replacement code snippet to insert."
+      }
+    },
+    "required": [
+      "path",
+      "target",
+      "replacement"
+    ],
+    "additionalProperties": false
+  }
+}

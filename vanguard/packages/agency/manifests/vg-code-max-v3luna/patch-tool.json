@@ -1,0 +1,1 @@
+{"name":"patch","verb":"patch.apply","description":"Apply a validated atomic multi-file patch; include complete intended file content or a unified patch.","category":"fs_write","requires_approval":true,"schema":{"type":"object","required":["path","content"],"properties":{"path":{"type":"string"},"content":{"type":"string"}}}}

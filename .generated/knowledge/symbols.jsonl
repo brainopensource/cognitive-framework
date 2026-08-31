@@ -369,6 +369,7 @@
 {"symbol": "ParserOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PatchError", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchHunk", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "PatchOutcome", "kind": "class", "defined_in": "vanguard/packages/agency/forge/resilient_patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchReceipt", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/lex_surgical_editor.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PatchResult", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PermissionDeniedError", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
@@ -441,6 +442,7 @@
 {"symbol": "ReproducibilityVector", "kind": "class", "defined_in": "vanguard/packages/runtime/reproducibility.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Reservation", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Reservation", "kind": "class", "defined_in": "vanguard/packages/kernel/budget.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "ResilientPatcher", "kind": "class", "defined_in": "vanguard/packages/agency/forge/resilient_patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ResponseHandler", "kind": "class", "defined_in": "vanguard/packages/runtime/response_handler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ResponseWrangler", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Result", "kind": "class", "defined_in": "vanguard/packages/ports/event_store.py", "canonical_owner": "docs/backend/reference/ports.md"}

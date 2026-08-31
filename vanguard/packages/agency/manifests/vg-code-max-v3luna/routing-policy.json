@@ -1,0 +1,1 @@
+{"mode":"evidence-first","phases":["map","inspect","impact","plan","patch","focused_test","regression_test","adversarial_verify","finish"],"max_repeated_action_signatures":2,"branch_on_failure":true,"max_candidate_branches":2,"require_caller_analysis_for_public_changes":true}

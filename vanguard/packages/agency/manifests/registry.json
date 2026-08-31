@@ -43,6 +43,12 @@
       "role": "coding-max-preset"
     },
     {
+      "name": "vg-code-max-v3luna",
+      "path": "vg-code-max-v3luna/manifest.json",
+      "undeletable": false,
+      "role": "coding-max-frontier-experimental"
+    },
+    {
       "name": "vg-code-claude-shaped",
       "path": "vg-code-claude-shaped/manifest.json",
       "undeletable": false,
@@ -143,8 +149,29 @@
       "path": "vg-bugfix-v090-v2-reproduce-verify/manifest.json",
       "undeletable": false,
       "role": "benchmark-v090"
+    },
+    {
+      "name": "vg-herbs",
+      "path": "vg-herbs/manifest.json",
+      "undeletable": false,
+      "role": "hybrid-sota-solver"
+    },
+    {
+      "name": "vg-chimera-v1",
+      "path": "vg-chimera-v1/manifest.json",
+      "undeletable": false,
+      "role": "neurosymbolic-meta-harness"
+    },
+    {
+      "name": "vg-code-chimera",
+      "path": "vg-code-chimera/manifest.json",
+      "undeletable": false,
+      "role": "neurosymbolic-meta-harness"
     }
   ],
   "coding-max-v2b-preset": "vg-code-max-v2b/manifest.json",
-  "forge-v2-preset": "vg-1-forge-v2/manifest.json"
+  "forge-v2-preset": "vg-1-forge-v2/manifest.json",
+  "herbs-preset": "vg-herbs/manifest.json",
+  "chimera-v1-preset": "vg-chimera-v1/manifest.json",
+  "chimera-code-preset": "vg-code-chimera/manifest.json"
 }

@@ -1,0 +1,1 @@
+{"strategy":"symbol-and-graph-first","initial_context":"repository_map","rank_by":["task_path","symbol_match","caller_importer_distance","test_relevance","recent_evidence"],"max_files_per_slice":12,"max_slice_bytes":24000,"truncation_is_unresolved":true}

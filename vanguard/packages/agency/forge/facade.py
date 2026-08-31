@@ -18,6 +18,7 @@ from .engine import (
 from .patcher import ForgeAtomicPatcher
 
 FORGE_PRESET_NAME = "vg-1-forge"
+HERBS_PRESET_NAME = "vg-herbs"
 
 
 @dataclass(frozen=True, slots=True)

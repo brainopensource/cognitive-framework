@@ -1,0 +1,87 @@
+{
+  "runId": "baac-vg-herbs-live-1788176821",
+  "timestamp": "2026-08-31T11:47:01Z",
+  "preset": "vg-herbs",
+  "model": "openrouter/free",
+  "mode": "live",
+  "summary": {
+    "totalChallenges": 2,
+    "passedCount": 0,
+    "overallPassRatePct": 0.0,
+    "totalTokens": 27332,
+    "totalCostUsd": 0.0,
+    "totalDurationSeconds": 120.22,
+    "tierPromotion": {
+      "easyPromoted": false,
+      "easyPassRate": 0.0
+    },
+    "attribution": {
+      "PASS": 0,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 2,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "fib_cli",
+      "tier": "easy",
+      "preset": "vg-herbs",
+      "model": "openrouter/free",
+      "mode": "live",
+      "status": "FAIL",
+      "attribution": "HARNESS_ERROR",
+      "turns": 8,
+      "promptTokens": 13010,
+      "completionTokens": 313,
+      "totalTokens": 13323,
+      "costUsd": 0.0,
+      "durationSeconds": 36.75,
+      "oracle": {
+        "passed": false,
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... FAIL\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... FAIL\ntest_fib_values (__main__.TestFibOracle.test_fib_values) ... FAIL\n\n======================================================================\nFAIL: test_cli_execution (__main__.TestFibOracle.test_cli_execution)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/easy/fib_cli/oracle/verify.py\", line 62, in test_cli_execution\n    self.assertEqual(proc.stdout.strip(), \"55\")\nAssertionError: '' != '55'\n+ 55\n\n\n======================================================================\nFAIL: test_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/easy/fib_cli/oracle/verify.py\", line 43, in test_fib_exceptions\n    with self.assertRaises(ValueError):\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_fib_values (__main__.TestFibOracle.test_fib_values)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/easy/fib_cli/oracle/verify.py\", line 38, in test_fib_values\n    self.assertEqual(fib(n), val, f\"fib({n}) must be {val}\")\nAssertionError: 0 != 1 : fib(1) must be 1\n\n----------------------------------------------------------------------\nRan 3 tests in 0.022s\n\nFAILED (failures=3)\n",
+        "durationSeconds": 0.086,
+        "error": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... FAIL\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... FAIL\ntest_fib_values (__main__.TestFibOracle.test_fib_value",
+        "assertionCount": 3,
+        "failingAssertions": [
+          "test_cli_execution",
+          "test_fib_exceptions",
+          "test_fib_values",
+          "(failures=3)"
+        ]
+      },
+      "diagnosis": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... FAIL\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... FAIL\ntest_fib_values (__main__.TestFibOracle.test_fib_value"
+    },
+    {
+      "challengeId": "json_todo_store",
+      "tier": "easy",
+      "preset": "vg-herbs",
+      "model": "openrouter/free",
+      "mode": "live",
+      "status": "FAIL",
+      "attribution": "HARNESS_ERROR",
+      "turns": 8,
+      "promptTokens": 13455,
+      "completionTokens": 554,
+      "totalTokens": 14009,
+      "costUsd": 0.0,
+      "durationSeconds": 83.47,
+      "oracle": {
+        "passed": false,
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/easy/json_todo_store/oracle/verify.py\", line 37, in test_lifecycle_and_persistence\n    self.assertEqual(id1, 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nFAILED (failures=1)\n",
+        "durationSeconds": 0.06,
+        "error": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_p",
+        "assertionCount": 1,
+        "failingAssertions": [
+          "test_lifecycle_and_persistence",
+          "(failures=1)"
+        ]
+      },
+      "diagnosis": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_p"
+    }
+  ]
+}

@@ -27,7 +27,7 @@ from .engine import (
     compute_workspace_digest,
     parse_test_output,
 )
-from .facade import FORGE_PRESET_NAME, ForgeConfig, ForgeFacade
+from .facade import FORGE_PRESET_NAME, HERBS_PRESET_NAME, ForgeConfig, ForgeFacade
 from .patcher import (
     ASTPatcher,
     BlockPatcher,
@@ -38,10 +38,17 @@ from .patcher import (
     PatchResult,
     UnifiedDiffParser,
 )
+from .resilient_patcher import (
+    PatchOutcome,
+    ResilientPatcher,
+    collapse_whitespace,
+    normalize_unicode,
+)
 
 __all__ = [
     # Facade & Preset
     "FORGE_PRESET_NAME",
+    "HERBS_PRESET_NAME",
     "ForgeConfig",
     "ForgeFacade",
     # Engine & Admission
@@ -70,6 +77,10 @@ __all__ = [
     "ForgeAtomicPatcher",
     "PatchError",
     "PatchHunk",
+    "PatchOutcome",
     "PatchResult",
+    "ResilientPatcher",
     "UnifiedDiffParser",
+    "collapse_whitespace",
+    "normalize_unicode",
 ]

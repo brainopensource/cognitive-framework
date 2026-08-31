@@ -329,6 +329,7 @@ class ForgeOutcome:
     verification_receipt: VerificationReceipt | None
     diagnosis: str
     trajectory: list[dict[str, Any]] = field(default_factory=list)
+    admission_verdict: AdmissionVerdict | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -380,6 +381,7 @@ class ForgeEngine:
         changed_files: list[str],
         inspected_files: list[str],
         last_receipt: list[Optional[VerificationReceipt]],
+        last_verdict: list[Optional[AdmissionVerdict]] | None = None,
     ) -> Tuple[str, bool]:
         """Execute a single tool call from the model within the workspace."""
         try:
@@ -392,8 +394,6 @@ class ForgeEngine:
                     return f"Error: File not found: {path_str}", False
                 inspected_files.append(path_str)
                 content = p.read_text(encoding="utf-8")
-                if len(content) > 12000:
-                    content = content[:12000] + f"\n... [Truncated: {len(content)} total characters]"
                 return content, False
 
             elif tool_name == "edit_file":
@@ -409,6 +409,20 @@ class ForgeEngine:
                     return f"Successfully wrote {len(content)} chars to {path_str}", False
                 return f"Error applying edit to {path_str}: {res.error}", False
 
+            elif tool_name in ("surgical_patch", "patch_chunk", "resilient_patch"):
+                path_str = args.get("path", "")
+                target = args.get("target", "")
+                replacement = args.get("replacement", "")
+                res = self.patcher.apply_resilient_patch(path_str, target, replacement)
+                if res.success:
+                    for cf in res.changed_files:
+                        if cf not in changed_files:
+                            changed_files.append(cf)
+                    last_receipt[0] = None
+                    details_str = f" ({res.details[0]})" if res.details else ""
+                    return f"Successfully applied surgical patch to {path_str}{details_str}", False
+                return f"Error applying surgical patch to {path_str}: {res.error}", False
+
             elif tool_name == "patch_unified":
                 diff_text = args.get("diff", "")
                 res = self.patcher.apply_unified_diff(diff_text)
@@ -417,11 +431,13 @@ class ForgeEngine:
                         if cf not in changed_files:
                             changed_files.append(cf)
                     last_receipt[0] = None
-                    return f"Successfully applied diff across {len(res.changed_files)} files ({res.applied_hunks} hunks)", False
-                return f"Error applying diff: {res.error}", False
+                    return f"Successfully applied diff modifying {len(res.changed_files)} files: {res.changed_files}", False
+                return f"Error applying patch diff: {res.error}", False
 
             elif tool_name == "run_command":
                 cmd = args.get("command", "")
+                if not cmd:
+                    return "Error: Empty command", False
                 if self.command_runner is not None:
                     exit_code, output = self.command_runner(cmd, self.workspace_root)
                 elif self.sandbox_runner is not None:
@@ -435,10 +451,10 @@ class ForgeEngine:
                 else:
                     return "Error: No command runner or sandbox runner configured on ForgeEngine", False
 
+                ws_digest = compute_workspace_digest(self.workspace_root)
                 t_count, failing, exc_type, top_frame = parse_test_output(output, exit_code)
 
                 # Capture verification receipt if tests ran
-                ws_digest = compute_workspace_digest(self.workspace_root)
                 receipt = VerificationReceipt(
                     exit_code=exit_code,
                     executed_test_count=t_count,
@@ -446,12 +462,13 @@ class ForgeEngine:
                     task_digest=goal_contract.task_digest,
                     receipt_digest=digest_of({"cmd": cmd, "exit": exit_code, "ws": ws_digest}),
                     command=cmd,
-                    test_summary=output[:300],
+                    test_summary=output[:500],
                 )
                 last_receipt[0] = receipt
 
-                status_label = "PASS" if receipt.passed else "FAIL"
-                summary_prefix = f"Exit Code: {exit_code} [{status_label}] (Tests Executed: {t_count})"
+                summary_prefix = f"[Exit Code {exit_code}]"
+                if t_count > 0:
+                    summary_prefix += f" | {t_count} tests run"
                 if failing:
                     summary_prefix += f" | Failing: {list(failing)}"
                 if exc_type:
@@ -476,6 +493,8 @@ class ForgeEngine:
                     verification=last_receipt[0],
                     inspected_files=inspected_files,
                 )
+                if last_verdict is not None:
+                    last_verdict[0] = verdict
                 if not verdict.admissible:
                     return verdict.rejection_feedback or f"Admission Rejected: {verdict.reason}", False
 
@@ -503,6 +522,7 @@ class ForgeEngine:
         changed_files: list[str] = []
         inspected_files: list[str] = []
         last_receipt_box: list[Optional[VerificationReceipt]] = [None]
+        last_verdict_box: list[Optional[AdmissionVerdict]] = [None]
         fingerprints: list[FailureFingerprint] = []
 
         dialogue_blocks: list[Block] = []
@@ -627,6 +647,7 @@ class ForgeEngine:
                     changed_files,
                     inspected_files,
                     last_receipt_box,
+                    last_verdict_box,
                 )
 
                 turn_actions.append({"tool": fn_name, "args": args, "output_snippet": output[:120]})
@@ -687,4 +708,5 @@ class ForgeEngine:
             verification_receipt=last_receipt_box[0],
             diagnosis=diagnosis,
             trajectory=trajectory,
+            admission_verdict=last_verdict_box[0],
         )

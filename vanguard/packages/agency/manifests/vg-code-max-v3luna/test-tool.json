@@ -1,0 +1,1 @@
+{"name":"test","verb":"proc.exec","description":"Run an allowlisted focused, regression, or project test command and preserve complete output as verification evidence.","category":"process","requires_approval":true,"schema":{"type":"object","required":["argv"],"properties":{"argv":{"type":"array","items":{"type":"string"},"minItems":1},"cwd":{"type":"string"}}}}

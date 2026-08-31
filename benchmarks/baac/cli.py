@@ -209,7 +209,7 @@ def main() -> None:
 
     # run
     p_run = subparsers.add_parser("run", help="Run BaaC challenges")
-    p_run.add_argument("--preset", default="vg-1-forge", choices=["vg-1-forge", "vg-code-max", "vg-code-max-v2"])
+    p_run.add_argument("--preset", default="vg-1-forge", choices=["vg-1-forge", "vg-code-max", "vg-code-max-v2", "vg-herbs", "vg-hermes"])
     p_run.add_argument("--mode", default="lam", choices=["lam", "live"], help="Execution mode (default: lam)")
     p_run.add_argument("--model", default=None, help="Model identifier (defaults to centralized policy)")
     p_run.add_argument("--tier", default="all", help="Challenge tier (easy, medium, hard, greenfield, all)")
@@ -221,7 +221,7 @@ def main() -> None:
 
     # cycle
     p_cycle = subparsers.add_parser("cycle", help="Run full cycle: verify -> run -> reset -> verify")
-    p_cycle.add_argument("--preset", default="vg-1-forge", choices=["vg-1-forge", "vg-code-max", "vg-code-max-v2"])
+    p_cycle.add_argument("--preset", default="vg-1-forge", choices=["vg-1-forge", "vg-code-max", "vg-code-max-v2", "vg-herbs", "vg-hermes"])
     p_cycle.add_argument("--mode", default="lam", choices=["lam", "live"])
     p_cycle.add_argument("--model", default=None)
     p_cycle.add_argument("--tier", default="all")

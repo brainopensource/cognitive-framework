@@ -151,6 +151,198 @@ class OpenRouterLiveModelPort:
 class LamMockModelPort:
     """Hermetic $0.00 ModelPort using LLM API Mock engine or scripted cassettes."""
 
+    FIB_SOLUTION = '''"""Fibonacci Module."""
+
+from __future__ import annotations
+import sys
+import argparse
+
+
+def fib(n: int) -> int:
+    """Compute n-th Fibonacci number."""
+    if not isinstance(n, int) or isinstance(n, bool):
+        raise TypeError("n must be an integer")
+    if n < 0:
+        raise ValueError("n must be non-negative")
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n", type=int, required=True)
+    args = parser.parse_args()
+    if args.n < 0:
+        sys.stderr.write("Error: negative n\\n")
+        return 1
+    print(fib(args.n))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Exception:
+        sys.exit(1)
+'''
+
+    TODO_SOLUTION = '''"""JSON-Backed Todo Store."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any, List, Optional
+
+
+class TodoStore:
+    def __init__(self, filepath: str | Path) -> None:
+        self.filepath = Path(filepath)
+        self.items: list[dict[str, Any]] = []
+        if self.filepath.is_file():
+            try:
+                self.items = json.loads(self.filepath.read_text(encoding="utf-8"))
+            except Exception:
+                self.items = []
+        else:
+            self._save()
+
+    def _save(self) -> None:
+        self.filepath.parent.mkdir(parents=True, exist_ok=True)
+        self.filepath.write_text(json.dumps(self.items, indent=2), encoding="utf-8")
+
+    def add(self, title: str, tags: list[str] | None = None) -> int:
+        if not title or not title.strip():
+            raise ValueError("title cannot be empty")
+        next_id = max([item["id"] for item in self.items], default=0) + 1
+        item = {
+            "id": next_id,
+            "title": title.strip(),
+            "completed": False,
+            "tags": list(tags or []),
+        }
+        self.items.append(item)
+        self._save()
+        return next_id
+
+    def complete(self, item_id: int) -> bool:
+        for item in self.items:
+            if item["id"] == item_id:
+                item["completed"] = True
+                self._save()
+                return True
+        return False
+
+    def get(self, item_id: int) -> dict | None:
+        for item in self.items:
+            if item["id"] == item_id:
+                return dict(item)
+        return None
+
+    def list_pending(self) -> list[dict]:
+        pending = [dict(item) for item in self.items if not item["completed"]]
+        return sorted(pending, key=lambda x: x["id"])
+
+    def list_by_tag(self, tag: str) -> list[dict]:
+        matching = [dict(item) for item in self.items if tag in item.get("tags", [])]
+        return sorted(matching, key=lambda x: x["id"])
+'''
+
+    QUIZ_SOLUTION = '''"""Quiz Game Engine."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import json
+from pathlib import Path
+from typing import Any, List, Optional
+
+
+@dataclass
+class Question:
+    id: str
+    prompt: str
+    options: list[str]
+    correct_choice: str
+    points: int = 10
+
+
+class QuizEngine:
+    def __init__(self, questions: list[Question | dict]) -> None:
+        if not questions:
+            raise ValueError("questions list cannot be empty")
+        self.questions: list[Question] = []
+        for q in questions:
+            if isinstance(q, Question):
+                self.questions.append(q)
+            elif isinstance(q, dict):
+                self.questions.append(
+                    Question(
+                        id=str(q["id"]),
+                        prompt=str(q["prompt"]),
+                        options=list(q["options"]),
+                        correct_choice=str(q["correct_choice"]),
+                        points=int(q.get("points", 10)),
+                    )
+                )
+        self.index = 0
+        self.earned_points = 0
+        self.answered_count = 0
+
+    def current_question(self) -> Question | None:
+        if self.index < len(self.questions):
+            return self.questions[self.index]
+        return None
+
+    def submit_answer(self, choice: str) -> dict[str, Any]:
+        if self.is_finished():
+            raise RuntimeError("Quiz is already finished")
+        q = self.questions[self.index]
+        clean_choice = str(choice).strip().lower()
+        is_correct = clean_choice == str(q.correct_choice).strip().lower()
+        points = q.points if is_correct else 0
+        self.earned_points += points
+        self.answered_count += 1
+        self.index += 1
+        return {
+            "correct": is_correct,
+            "earned_points": points,
+            "correct_choice": q.correct_choice,
+            "question_id": q.id,
+        }
+
+    def get_score(self) -> dict[str, Any]:
+        total_pts = sum(q.points for q in self.questions)
+        pct = (self.earned_points / total_pts * 100.0) if total_pts > 0 else 0.0
+        return {
+            "total_points": total_pts,
+            "earned_points": self.earned_points,
+            "score_pct": pct,
+            "answered": self.answered_count,
+            "total_questions": len(self.questions),
+        }
+
+    def is_finished(self) -> bool:
+        return self.index >= len(self.questions)
+
+    def reset(self) -> None:
+        self.index = 0
+        self.earned_points = 0
+        self.answered_count = 0
+
+    @classmethod
+    def load_from_json(cls, json_path: str | Path) -> QuizEngine:
+        p = Path(json_path)
+        data = json.loads(p.read_text(encoding="utf-8"))
+        return cls(data)
+'''
+
     def __init__(self, challenge_id: str, budget_tracker: BudgetTracker) -> None:
         self.challenge_id = challenge_id
         self.budget_tracker = budget_tracker
@@ -160,8 +352,20 @@ class LamMockModelPort:
         self.turn_counter += 1
         self.budget_tracker.check_pre_call("lam-mock")
 
-        # In LAM mode, we simulate typical turn proposals or load from cassette if available
-        # Default mock simulation for fast offline smoke verification:
+        cid = self.challenge_id
+        if cid == "fib_cli":
+            target_path = "src/fib.py"
+            code = self.FIB_SOLUTION
+        elif cid == "json_todo_store":
+            target_path = "src/todo.py"
+            code = self.TODO_SOLUTION
+        elif cid == "quiz_game":
+            target_path = "src/quiz_engine.py"
+            code = self.QUIZ_SOLUTION
+        else:
+            target_path = "src/main.py"
+            code = "# Generated by LAM\\n"
+
         if self.turn_counter == 1:
             tool_calls = [
                 {
@@ -180,20 +384,31 @@ class LamMockModelPort:
                     "function": {
                         "name": "edit_file",
                         "arguments": {
-                            "path": "src/main.py",
-                            "content": "# Solution generated by LAM\n",
+                            "path": target_path,
+                            "content": code,
                         },
                     },
                 }
             ]
             content = "Applying implementation."
+        elif self.turn_counter == 3:
+            tool_calls = [
+                {
+                    "id": "call_3",
+                    "function": {
+                        "name": "run_command",
+                        "arguments": {"command": "python3 oracle/verify.py"},
+                    },
+                }
+            ]
+            content = "Running test oracle to verify implementation."
         else:
             tool_calls = [
                 {
                     "id": "call_fin",
                     "function": {
                         "name": "finish_task",
-                        "arguments": {"summary": "Completed in LAM mode."},
+                        "arguments": {"summary": f"Challenge {cid} completed and verified green."},
                     },
                 }
             ]
@@ -309,6 +524,7 @@ class BaaCRunner:
                 budget_limit_usd=self.budget_config.max_cost_usd,
                 require_patch_for_write=True,
                 model_name=self.model_name,
+                preset_name=self.preset,
             )
             goal = GoalContract(
                 task_digest=hashlib.sha256(cid.encode()).hexdigest(),

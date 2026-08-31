@@ -68,6 +68,7 @@ from ..agency.forge import (
     ForgeConfig,
     ForgeFacade,
     GoalContract,
+    HERBS_PRESET_NAME,
 )
 from .wiring import (
     BindingContext,
@@ -757,6 +758,7 @@ __all__ = [
     "get_workspace_root",
     "validate_workspace_path",
     "FORGE_PRESET_NAME",
+    "HERBS_PRESET_NAME",
     "ForgeConfig",
     "ForgeFacade",
     "GoalContract",

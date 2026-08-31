@@ -418,6 +418,45 @@ class ForgeAtomicPatcher:
             self.rollback(backup)
             return PatchResult(success=False, error=str(exc), backup=backup)
 
+    def apply_resilient_patch(
+        self,
+        rel_path: str,
+        target_chunk: str,
+        replacement_chunk: str,
+    ) -> PatchResult:
+        """Atomically apply a resilient patch with the 9-strategy fuzzy matching cascade."""
+        target = self._resolve_safe_path(rel_path)
+        if not target.is_file():
+            return PatchResult(success=False, error=f"File not found: {rel_path}")
+
+        original = target.read_text(encoding="utf-8")
+        backup = {rel_path: original}
+
+        from .resilient_patcher import ResilientPatcher
+
+        outcome = ResilientPatcher.apply_patch(
+            original_content=original,
+            target_chunk=target_chunk,
+            replacement_chunk=replacement_chunk,
+            file_path=target,
+        )
+
+        if not outcome.success:
+            return PatchResult(success=False, error=outcome.error_message or "Patch failed", backup=backup)
+
+        try:
+            target.write_text(outcome.modified_content, encoding="utf-8")
+            return PatchResult(
+                success=True,
+                changed_files=(rel_path,),
+                applied_hunks=1,
+                backup=backup,
+                details=(f"Strategy: {outcome.strategy_used}",),
+            )
+        except Exception as exc:
+            self.rollback(backup)
+            return PatchResult(success=False, error=str(exc), backup=backup)
+
     def apply_unified_diff(self, diff_text: str) -> PatchResult:
         """Atomically parse and apply a unified diff across one or more files."""
         try:

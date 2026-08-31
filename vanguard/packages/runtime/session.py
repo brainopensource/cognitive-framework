@@ -106,7 +106,7 @@ from .wiring import (
 #: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
 ADMISSION_GATED_HARNESSES = frozenset(
     {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
-     "vg-code-max-v2b", "vg-code-max-v3"})
+     "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"})
 
 #: Presets deliberately exempt from capability-derived gating. Only shrinks.
 ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default"})

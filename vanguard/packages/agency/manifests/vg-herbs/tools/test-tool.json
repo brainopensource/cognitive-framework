@@ -1,0 +1,25 @@
+{
+  "name": "test",
+  "verb": "proc.exec",
+  "description": "Run allowed test runners (pytest, unittest, python3, git, ruff) in isolated sandbox.",
+  "selector": {
+    "kind": "generic",
+    "uriPattern": "proc://exec/allow/git,pytest,ruff,python3,unittest"
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "argv": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Argument vector; argv[0] is the executable."
+      }
+    },
+    "required": [
+      "argv"
+    ],
+    "additionalProperties": false
+  }
+}

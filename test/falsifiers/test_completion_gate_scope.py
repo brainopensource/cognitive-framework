@@ -19,7 +19,7 @@ class TestCompletionGateScope(unittest.TestCase):
     def test_the_three_coding_max_presets_are_gated(self) -> None:
         self.assertEqual(
             ADMISSION_GATED_HARNESSES,
-            {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2", "vg-code-max-v2b", "vg-code-max-v3"},
+            {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2", "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"},
         )
 
     def test_default_harness_exemption_is_explicit_not_accidental(self) -> None:

@@ -1,0 +1,1 @@
+{"max_turns":64,"max_provider_calls":128,"max_context_tokens":120000,"max_cost_usd":1.0,"reservation_required":true,"shared_workspace_ledger":true}

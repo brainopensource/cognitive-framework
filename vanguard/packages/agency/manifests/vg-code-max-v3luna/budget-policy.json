@@ -1,1 +1,7 @@
-{"max_turns":64,"max_provider_calls":128,"max_context_tokens":120000,"max_cost_usd":1.0,"reservation_required":true,"shared_workspace_ledger":true}
+{
+  "tokens": "64000",
+  "wallClockMillis": "1800000",
+  "effects": "128",
+  "evaluations": "16",
+  "depth": "1"
+}

@@ -1,0 +1,225 @@
+{
+  "challenge": "sota_easy_config_precedence",
+  "tier": "sota-easy",
+  "title": "Typed Configuration Precedence",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3luna",
+  "status": "FAIL",
+  "llm_calls": 8,
+  "turns": 7,
+  "terminal_state": "instrument_error",
+  "cost_usd": 0.002004,
+  "latency_s": 55.54,
+  "files_modified": [],
+  "oracle_output": "\nF.\n======================================================================\nFAIL: test_false_spellings (_oracle_test.Hidden.test_false_spellings)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/ladder_sota_easy_config_precedence_b3t4pj0x/_oracle_test.py\", line 9, in test_false_spellings\n    self.assertIs(load_config({}, {'APP_DEBUG':value})['debug'], False)\nAssertionError: True is not False\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nFAILED (failures=1)\n",
+  "error": "",
+  "terminal_detail": "tool is not declared by manifest: patch",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/v3luna_deepseek_easy_policyfix_20260831__sota_easy_config_precedence__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "config/defaults.py"
+      },
+      "note": "",
+      "text": "\n\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 2328,
+        "completion_tokens": 120,
+        "cached_tokens": 0,
+        "total_tokens": 2448,
+        "cost_usd": 0.000359,
+        "usd_micros": 359,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000359,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "config/coerce.py"
+      },
+      "note": "",
+      "text": "\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 2703,
+        "completion_tokens": 79,
+        "cached_tokens": 0,
+        "total_tokens": 2782,
+        "cost_usd": 0.0004,
+        "usd_micros": 400,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.0004,
+      "prior_tool_result": "tool result turn=0 digest=sha256:3e58ee2448dcfd0b1b7a08a0d9242198e16394392514abf424c85f25189ab96e\nDEFAULTS = {'debug': False, 'workers': 2, 'region': 'local'}\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "config/loader.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 2855,
+        "completion_tokens": 46,
+        "cached_tokens": 2560,
+        "total_tokens": 2901,
+        "cost_usd": 9e-05,
+        "usd_micros": 90,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 9e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:7a60775b1c12b3f636fd77378d29c5389e843bd539b6b8121614d3aa8627769b\ndef coerce(key, value):\n    if key == 'workers':\n        return int(value)\n    if key == 'debug':\n        return bool(value)  # BUG: 'false' is true\n    return value\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "fs.search",
+      "args": {
+        "path": ".",
+        "pattern": "load_config"
+      },
+      "note": "",
+      "text": "Let me look at the tests to understand expected behavior.\n\n\n",
+      "usage": {
+        "prompt_tokens": 3065,
+        "completion_tokens": 69,
+        "cached_tokens": 2560,
+        "total_tokens": 3134,
+        "cost_usd": 0.000125,
+        "usd_micros": 125,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000125,
+      "prior_tool_result": "tool result turn=2 digest=sha256:69c8512a629d5b1ac74e253e3fa07dd66fb5e526727940e7e7e1d4cfa2699427\nfrom .defaults import DEFAULTS\nfrom .coerce import coerce\n\ndef load_config(file_values, environ):\n    result = file_values  # BUG: mutates caller\n    result.update(DEFAULTS)  # BUG: defaults overwrite file\n    for key in DEFAULTS:\n        env_key = 'APP_' + key.upper()\n        if env_key in environ:\n            result[key] = coerce(key, environ[env_key])\n    return result\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "test_config_public.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3296,
+        "completion_tokens": 47,
+        "cached_tokens": 2816,
+        "total_tokens": 3343,
+        "cost_usd": 0.000119,
+        "usd_micros": 119,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000119,
+      "prior_tool_result": "tool result turn=3 digest=sha256:0000000000000000000000000000000000000000000000000000000000000000\n[{\"file\": \"./config/loader.py\", \"line\": 4, \"content\": \"def load_config(file_values, environ):\"}, {\"file\": \"./config/__init__.py\", \"line\": 1, \"content\": \"from .loader import load_config\"}, {\"file\": \"./test_config_public.py\", \"line\": 2, \"content\": \"from config import load_config\"}, {\"file\": \"./test_config_public.py\", \"line\": 6, \"content\": \"  source={'workers': 4}; out=load_config(source, {'APP_DEBUG':'false','APP_WORKERS':'8'})\"}]",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "path": "config/coerce.py",
+        "content": "def coerce(key, value):\n    if key == 'workers':\n        return int(value)\n    if key == 'debug':\n        if isinstance(value, str):\n            return value.strip().lower() in ('1', 'true', 'yes', 'on')\n        return bool(value)\n    return value"
+      },
+      "note": "",
+      "text": "Now I understand the requirements. Let me fix all three files.\n\n**Bug 1** in `coerce.py`: `bool('false')` is `True`. Need to parse string booleans properly.\n\n**Bug 2** in `loader.py`: \n- `result = file_values` mutates caller\n- `result.update(DEFAULTS)` makes defaults overwrite file values (wrong precedence)\n- Need: defaults < file < environment\n\nLet me patch:\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 3501,
+        "completion_tokens": 374,
+        "cached_tokens": 3072,
+        "total_tokens": 3875,
+        "cost_usd": 0.000207,
+        "usd_micros": 207,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000207,
+      "prior_tool_result": "tool result turn=4 digest=sha256:d79a1c68b12f09f88b7ee2af67fd429b7c1c782029514b445a72811b854ad2a5\nimport unittest\nfrom config import load_config\n\nclass Public(unittest.TestCase):\n def test_precedence_and_types(self):\n  source={'workers': 4}; out=load_config(source, {'APP_DEBUG':'false','APP_WORKERS':'8'})\n  self.assertEqual(out, {'debug':False,'workers':8,'region':'local'})\n  self.assertEqual(source, {'workers':4})\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "content": "def coerce(key, value):\n    if key == 'workers':\n        return int(value)\n    if key == 'debug':\n        if isinstance(value, str):\n            return value.strip().lower() in ('1', 'true', 'yes', 'on')\n        return bool(value)\n    return value",
+        "path": "config/coerce.py"
+      },
+      "note": "",
+      "text": "The patch was denied due to a micros budget issue. Let me retry.\n\n\n",
+      "usage": {
+        "prompt_tokens": 3761,
+        "completion_tokens": 139,
+        "cached_tokens": 0,
+        "total_tokens": 3900,
+        "cost_usd": 0.000565,
+        "usd_micros": 565,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000565,
+      "prior_tool_result": "patch.apply -> F-12\ndenied: usd_micros requested 1000000, remaining 999995",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 7,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "content": "def coerce(key, value):\n    if key == 'workers':\n        return int(value)\n    if key == 'debug':\n        if isinstance(value, str):\n            return value.strip().lower() in ('1', 'true', 'yes', 'on')\n        return bool(value)\n    return value",
+        "path": "config/coerce.py"
+      },
+      "note": "",
+      "text": "The patch tool is being denied due to a budget issue. Let me try the other patch tool variant.\n\n\n",
+      "usage": {
+        "prompt_tokens": 3937,
+        "completion_tokens": 144,
+        "cached_tokens": 3584,
+        "total_tokens": 4081,
+        "cost_usd": 0.000139,
+        "usd_micros": 139,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000139,
+      "prior_tool_result": "patch.apply -> F-12\ndenied: usd_micros requested 1000000, remaining 999995",
+      "recovery_feedback": null
+    }
+  ]
+}

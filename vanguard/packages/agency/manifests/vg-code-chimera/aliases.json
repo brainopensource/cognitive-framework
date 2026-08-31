@@ -10,6 +10,5 @@
   "write_file": "patch.apply",
   "surgical_patch": "patch.apply",
   "test": "proc.exec",
-  "run_command": "proc.exec",
-  "finish": "proc.exec"
+  "run_command": "proc.exec"
 }

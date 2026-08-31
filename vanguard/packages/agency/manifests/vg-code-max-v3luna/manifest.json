@@ -1,26 +1,82 @@
 {
   "harness": "vg-code-max-v3luna",
   "components": {
-    "system_prompt": ["vg-code-max-v3luna/system-prompt.txt"],
+    "system_prompt": [
+      "vg-code-max-v3luna/system-prompt.txt"
+    ],
     "tools": [
       "vg-code-max-v3luna/read-tool.json",
       "vg-code-max-v3luna/search-tool.json",
       "vg-code-max-v3luna/patch-tool.json",
-      "vg-code-max-v3luna/finish-tool.json",
-      "vg-code-max-v3luna/test-tool.json"
+      "vg-code-max-v3luna/test-tool.json",
+      "vg-code-max-v3luna/finish-tool.json"
     ],
-    "context_policy": ["vg-code-max-v3luna/context-policy.json"],
-    "routing_policy": ["vg-code-max-v3luna/routing-policy.json"],
-    "approval_policy": ["vg-code-max-v3luna/approval-policy.json"],
-    "retrieval_policy": ["vg-code-max-v3luna/retrieval-policy.json"]
+    "context_policy": [
+      "vg-code-max-v3luna/context-policy.json"
+    ],
+    "routing_policy": [
+      "vg-code-max-v3luna/routing-policy.json"
+    ],
+    "approval_policy": [
+      "vg-code-max-v3luna/approval-policy.json"
+    ],
+    "retrieval_policy": [
+      "vg-code-max-v3luna/retrieval-policy.json"
+    ],
+    "skill": [
+      "vg-code-default/skills/pytest-green.json"
+    ]
   },
   "capabilities": [
-    {"verb":"fs.read","sink":"observation","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"low"},
-    {"verb":"fs.search","sink":"observation","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"low"},
-    {"verb":"patch.apply","sink":"privileged","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"medium"},
-    {"verb":"proc.exec","sink":"privileged","selector":{"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3,python,ls,find,cargo,npm,node,rustc"},"risk":"high"}
+    {
+      "verb": "fs.read",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "fs.search",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "patch.apply",
+      "sink": "privileged",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "medium"
+    },
+    {
+      "verb": "proc.exec",
+      "sink": "privileged",
+      "selector": {
+        "kind": "generic",
+        "uriPattern": "proc://exec/allow/git,pytest,ruff,python3,python,ls,find,cargo,npm,node,rustc"
+      },
+      "risk": "high"
+    }
   ],
-  "evaluators": ["coding-oracle@3"],
+  "evaluators": [
+    "coding-oracle@3"
+  ],
   "budgetPolicy": "vg-code-max-v3luna/budget-policy.json",
   "undeletable": false
 }

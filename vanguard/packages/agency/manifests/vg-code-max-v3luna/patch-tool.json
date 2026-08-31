@@ -1,1 +1,23 @@
-{"name":"patch.apply","verb":"patch.apply","description":"Apply a validated atomic multi-file patch; include complete intended file content or a unified patch.","category":"fs_write","requires_approval":true,"schema":{"type":"object","required":["path","content"],"properties":{"path":{"type":"string"},"content":{"type":"string"}}}}
+{
+  "name": "patch",
+  "verb": "patch.apply",
+  "description": "Apply a bugfix or create a file by writing the complete updated file content (e.g. {\"path\": \"lru/cache.py\", \"content\": \"...full code...\"}).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "File path to write"
+      },
+      "content": {
+        "type": "string",
+        "description": "Full file content to write"
+      }
+    },
+    "required": [
+      "path",
+      "content"
+    ],
+    "additionalProperties": false
+  }
+}

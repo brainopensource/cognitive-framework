@@ -1,1 +1,6 @@
-{"mode":"progressive-evidence","token_ceiling":120000,"summary_ceiling":12000,"preserve":["goal","constraints","changed_files","public_symbols","caller_graph","test_failures","verification_evidence","unresolved_hypotheses"],"compact_only_at_phase_boundary":true}
+{
+  "kind": "recency-window",
+  "maxItems": 64,
+  "brief_exempt": true,
+  "evict_old_tool_results": true
+}

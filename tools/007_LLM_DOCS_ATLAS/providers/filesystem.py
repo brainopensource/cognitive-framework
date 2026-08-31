@@ -31,11 +31,13 @@ LANG_EXT_MAP = {
     ".css": "css"
 }
 
+# Generic, project-agnostic ignore set. Project-specific workspace directories
+# (e.g. dev_context_logs, .vanguard) belong to the active RepositoryProfile,
+# never to this generic default.
 IGNORE_DIRS: Set[str] = {
     ".git", ".venv", "venv", "node_modules", "__pycache__",
-    ".generated", "dev_context_logs", ".pytest_cache", ".tox",
+    ".generated", ".pytest_cache", ".tox",
     "dist", "build", ".turbo", ".next", ".mypy_cache", ".ruff_cache",
-    ".vanguard", ".docs", ".draft"
 }
 
 
@@ -52,12 +54,14 @@ class FilesystemProvider(BaseProvider):
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> ProviderResult:
         root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
+        profile = getattr(repo_root, "profile", None)
+        ignored = IGNORE_DIRS | (set(profile.excluded_dirs) if profile else set())
         files_data: List[Dict[str, Any]] = []
         entities: List[Entity] = []
 
         for dirpath, dirnames, filenames in os.walk(root):
-            # Prune ignored directories in-place
-            dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS and not d.startswith(".")]
+            # Prune ignored directories in-place (generic + profile exclusions)
+            dirnames[:] = [d for d in dirnames if d not in ignored and not d.startswith(".")]
 
             for fname in filenames:
                 if fname.startswith("."):

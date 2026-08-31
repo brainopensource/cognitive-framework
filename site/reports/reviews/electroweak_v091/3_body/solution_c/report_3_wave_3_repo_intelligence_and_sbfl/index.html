@@ -4182,7 +4182,7 @@
 </code></pre></div>
 <h2 id="1-executive-summary-code-intelligence-architecture">1. Executive Summary &amp; Code Intelligence Architecture</h2>
 <p>In SWE-bench and large-scale repository engineering, <strong>lexical grep searches waste up to 60% of context tokens</strong> on false-positive matches (comments, test fixtures, string literals). Furthermore, when tests fail, LLMs frequently guess root causes across hundreds of source files.</p>
-<p>Solution C eliminates this inefficiency by implementing a <strong>dual-engine intelligence layer</strong> via the <a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/ports/index.py"><code>vanguard.packages.ports.index.IndexPort</code></a> interface:
+<p>Solution C eliminates this inefficiency by implementing a <strong>dual-engine intelligence layer</strong> via the <code>vanguard.packages.ports.index.IndexPort</code> interface:
 1. <strong>Tree-sitter AST Symbol Graph (<code>ASTSymbolIndexer</code>)</strong>: Parses classes, methods, signatures, docstrings, and call-graph dependencies with sub-10ms query times.
 2. <strong>Spectrum-Based Fault Localization (<code>SBFLFaultLocalizer</code>)</strong>: Analyzes test execution traces to compute statement suspiciousness using Ochiai, DStar ($* = 2$), and Tarantula formulas, presenting the LLM with the exact top-5 most suspicious lines of code.</p>
 <pre class="mermaid"><code>graph TD

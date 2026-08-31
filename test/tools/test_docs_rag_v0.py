@@ -194,19 +194,24 @@ class CanonicalOwnerResolutionTests(unittest.TestCase):
 
 
 class LdaFallbackRankingTests(unittest.TestCase):
+    def _aether_profile(self):
+        loader = import_module("tools.007_LLM_DOCS_ATLAS.core.profile_loader")
+        return loader.resolve_profile(Path.cwd(), {"profile": "aether"})
+
     def test_low_signal_locators_filtered(self) -> None:
+        profile = self._aether_profile()
         for locator in (
             "test/broken/fixtures/x.py",
             "benchmarks/frontier_v090/runs/a/b.py",
             "pkg/__init__.py",
             "vanguard/clients/studio/dist-browser/browser.js",
         ):
-            self.assertTrue(is_low_signal(locator), locator)
-        self.assertFalse(is_low_signal("vanguard/packages/kernel/dispatch.py"))
+            self.assertTrue(is_low_signal(locator, profile), locator)
+        self.assertFalse(is_low_signal("vanguard/packages/kernel/dispatch.py", profile))
 
     def test_catalog_fallback_is_canonical_and_authority_tagged(self) -> None:
         catalog = {row["path"]: row for row in FIXTURE_CATALOG}
-        candidates = catalog_fallback_candidates("kernel dispatch budget", catalog)
+        candidates = catalog_fallback_candidates("kernel dispatch budget", catalog, profile=self._aether_profile())
         self.assertTrue(candidates)
         for candidate in candidates:
             self.assertIsNotNone(candidate.authority)

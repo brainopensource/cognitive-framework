@@ -1176,6 +1176,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#5-product-applications-thin-app-thick-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Product applications: thin app, thick composition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#implementation-evidence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4297,6 +4308,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#5-product-applications-thin-app-thick-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Product applications: thin app, thick composition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#implementation-evidence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4393,6 +4415,63 @@ ightarrow   ext{adapters}$$</p>
 <li><strong>Runtime</strong>: Orchestration and lifecycle. Composes all layers into sessions.</li>
 <li><strong>Adapters</strong>: Concrete implementations. Must import only <code>domain</code> and <code>ports</code>. Adapters <strong>must never</strong> import <code>kernel</code> or <code>agency</code>.</li>
 </ul>
+<h2 id="5-product-applications-thin-app-thick-composition">5. Product applications: thin app, thick composition</h2>
+<p><code>apps/</code> is a client slot, not a home for another orchestration substrate. A
+first-party product application may validate a request, select a manifest and
+preset, invoke the shared runtime application service, and shape a result for a
+transport. It MUST NOT own a second turn loop, event writer, tool broker,
+provider client, checkpoint store, evaluator, or authorization path.</p>
+<p>Domain cognition belongs to the selected pack/composition:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Canonical owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request/result ergonomics and preset selection</td>
+<td><code>apps/&lt;product&gt;/</code></td>
+</tr>
+<tr>
+<td>Task planner, context policy, domain failure interpretation, completion policy</td>
+<td><code>packs/&lt;domain&gt;/</code> and manifest-selected components</td>
+</tr>
+<tr>
+<td>Generic model, index, sandbox, environment, memory and store contracts</td>
+<td><code>ports/</code></td>
+</tr>
+<tr>
+<td>Concrete infrastructure</td>
+<td><code>adapters/</code>; adapters never import <code>apps/</code> or pack policy</td>
+</tr>
+<tr>
+<td>Composition, lifecycle, ledger, checkpoints and child runtime</td>
+<td><code>runtime/</code></td>
+</tr>
+<tr>
+<td>Authorization, budgets and effect mediation</td>
+<td>domain-blind <code>kernel/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Repository-intelligence features such as symbol lookup, dependency edges, test
+mapping, history priors, or optional external indexes must enter through a
+generic port and normalized values. An adapter may implement the port; a code
+pack may decide how to rank the observations; an app may select the policy.
+Reversing that dependency—for example, an adapter importing
+<code>apps.coding_max</code>—is a boundary violation even when the prototype is stored
+outside the production tree.</p>
+<p>The same rule applies to verification. A code pack defines which checks are
+applicable and interprets their receipts. Execution occurs through the mediated
+environment/sandbox path, and independent evaluation remains exterior. Direct
+host <code>subprocess</code> or provider HTTP inside product or pack orchestration is not a
+shortcut around those contracts.</p>
+<p>Design reports and executable prototypes under <code>docs/reports/</code> are
+non-authorizing inputs. Their paths are never production owners, and their
+green demonstrations do not establish composition, boundary, or release
+acceptance against the current source subject.</p>
 <hr />
 <h2 id="implementation-evidence">Implementation Evidence</h2>
 <ul>

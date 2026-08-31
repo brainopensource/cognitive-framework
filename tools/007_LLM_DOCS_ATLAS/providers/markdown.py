@@ -33,6 +33,10 @@ class MarkdownDocProvider(BaseProvider):
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> ProviderResult:
         root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
+        profile = getattr(repo_root, "profile", None)
+        skip_dirs = {".git", "node_modules", ".venv"} | (
+            set(profile.excluded_dirs) if profile else set()
+        )
         documents: List[IRDocument] = []
         doc_sections: List[IRDocSection] = []
         relations: List[Relation] = []
@@ -40,7 +44,7 @@ class MarkdownDocProvider(BaseProvider):
 
         md_files = list(root.rglob("*.md")) + list(root.rglob("*.mdx"))
         for fpath in md_files:
-            if any(part in fpath.parts for part in [".git", "node_modules", ".venv", "dev_context_logs"]):
+            if any(part in fpath.parts for part in skip_dirs):
                 continue
             try:
                 rel_path = str(fpath.relative_to(root)).replace("\\", "/")

@@ -42,12 +42,14 @@ class Handler(BaseHTTPRequestHandler):
             if p.path=='/api/documents':
                 docs = cli._rows(self.ctx,'catalog.jsonl')
                 if not docs:
-                    docs = rescan_catalog(self.ctx)
+                    provider = fs_provider.FilesystemProvider()
+                    collected = provider.collect(self.ctx)
+                    docs = [e.metadata for e in collected.entities if e.metadata.get('path')]
                 valid_docs = [r for r in docs if (self.ctx.root / r.get('path','')).exists()]
                 return self.send_json(valid_docs)
             if p.path=='/api/rescan':
                 docs = rescan_catalog(self.ctx)
-                return self.send_json({'status':'ok', 'documents':len(docs)})
+                return self.send_json({'status':'ok', 'documents':len(docs), 'written':False})
             if p.path=='/api/relations': return self.send_json([{'source':r.get('source_id'),'target':r.get('target_id'),'kind':r.get('relationship_type','references'),'evidence':'links.jsonl'} for r in cli._rows(self.ctx,'links.jsonl')[:500]])
             if p.path=='/api/context':
                 q=parse_qs(p.query); import dataclasses

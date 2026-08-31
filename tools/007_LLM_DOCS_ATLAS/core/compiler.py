@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .models import Candidate, ContextPacket
+from .profile import RepositoryProfile
 from .ranking import allocate_budget, rank_entities
 from .skeletonizer import skeletonize
 from .storage import FactGraphStorage
@@ -18,9 +19,17 @@ from .storage import FactGraphStorage
 class ContextCompiler:
     """Deterministic token-budgeted context assembler."""
 
-    def __init__(self, repo_root: Path, storage: FactGraphStorage):
+    def __init__(
+        self,
+        repo_root: Path,
+        storage: FactGraphStorage,
+        profile: Optional[RepositoryProfile] = None,
+        head_sha: Optional[str] = None,
+    ):
         self.repo_root = Path(repo_root)
         self.storage = storage
+        self.profile = profile or RepositoryProfile()
+        self.head_sha = head_sha
 
     def compile(
         self,
@@ -29,7 +38,7 @@ class ContextCompiler:
         include_skeletons: bool = True,
     ) -> ContextPacket:
         """Compile a complete ContextPacket bounded to the requested budget."""
-        all_candidates = rank_entities(task, self.storage, candidate_limit=60)
+        all_candidates = rank_entities(task, self.storage, candidate_limit=60, profile=self.profile)
         
         # Partition candidates by category
         doc_candidates = [c for c in all_candidates if c.kind == "document"]
@@ -108,6 +117,8 @@ class ContextCompiler:
         provenance = {
             "indexer": "LDA Universal Engine",
             "schema_version": "1.0.0",
+            "profile": self.profile.name,
+            "source_head_sha": self.head_sha,
             "total_repo_files": stats.get("files", 0),
             "total_repo_symbols": stats.get("symbols", 0),
             "total_repo_relations": stats.get("relations", 0)
@@ -122,9 +133,12 @@ class ContextCompiler:
         }
 
         invariants = [
-            "TCB budget and hexagonal boundary flows must be preserved.",
-            "All privileged tool invocations must fail-closed on widest authority.",
-            "Modifications must remain scoped strictly to target modules."
+            "Packet facts are bound to provenance.source_head_sha; on workspace "
+            "HEAD mismatch, recompile the packet or fail closed — never serve "
+            "stale line numbers or symbols.",
+            "Never serve stale facts: recompile on any index/workspace mismatch.",
+            "All privileged tool invocations must fail closed on widest authority.",
+            "Modifications must remain scoped strictly to the target modules."
         ]
 
         return ContextPacket(

@@ -2688,6 +2688,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#post-m-10-10-qualification-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-M-10 1.0 qualification horizon
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#swe-p0swe-p5-parallel-program" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4175,6 +4186,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#post-m-10-10-qualification-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-M-10 1.0 qualification horizon
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#swe-p0swe-p5-parallel-program" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4343,6 +4365,45 @@ existing M-4–M-10 gates without silently closing them.</p>
 </table>
 <p>No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.</p>
+<h2 id="post-m-10-10-qualification-horizon">Post-M-10 1.0 qualification horizon</h2>
+<p>M-9 and M-10 keep their existing beta and <code>0.9.0</code> meanings. The following
+outcomes define a non-authorizing 1.0 horizon; they do not create new active
+milestones or permit work that M-8/M-9/M-10 currently block.</p>
+<table>
+<thead>
+<tr>
+<th>Horizon outcome</th>
+<th>Acceptance boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable agent framework</td>
+<td>Public manifest, port, application-service, event, artifact, resume, and compatibility contracts are documented and tested; a first-party app does not own a second runtime</td>
+</tr>
+<tr>
+<td>Useful Coding Max product</td>
+<td>Repository-scale bugfix, multi-file, migration, and greenfield tasks produce real patches and fresh verification through mediated effects with exact cost/latency/token evidence</td>
+</tr>
+<tr>
+<td>Reference-agent proof</td>
+<td>Coding Max and at least two non-coding supported agents install and run through the same composition contract with domain-specific policies outside the kernel</td>
+</tr>
+<tr>
+<td>Operational 1.0 candidate</td>
+<td>Upgrade/migration, backup/restore, restart/resume, offline-after-install, fault, security, performance, soak, and reproducible-build gates pass on the exact candidate</td>
+</tr>
+<tr>
+<td>Honest capability claim</td>
+<td>Any SOTA or SWE-bench claim names the official/reproducible protocol, exact model and subject, missingness, cost, evaluator, and harness-vs-model ablation</td>
+</tr>
+</tbody>
+</table>
+<p>Coding Max is delivered using the <strong>thin app, thick declarative composition</strong>
+boundary recorded in <a href="../active/">active.md</a> and <a href="../backlog/">backlog.md</a>. A new
+kernel primitive, runtime, store, tool broker, or evaluator is a failed horizon
+gate unless independently justified as a general framework contract through the
+normal decision and falsifier process.</p>
 <h2 id="swe-p0swe-p5-parallel-program">SWE-P0–SWE-P5 parallel program</h2>
 <p>The SWE program is evidence work, not a milestone shortcut. It does not authorize
 or close M-9 or M-10.</p>

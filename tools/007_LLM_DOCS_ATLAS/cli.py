@@ -32,6 +32,11 @@ def _rows(ctx: AtlasContext, name: str):
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+def _packet(ctx: AtlasContext, task: str, budget: int = 16000):
+    """Compile a token-budgeted ContextPacket (dashboard /api/context surface)."""
+    return compile_task_context(ctx.root, task, budget=budget)
+
+
 def _snapshot(ctx: AtlasContext):
     storage = get_storage(ctx.root)
     stats = storage.get_stats()

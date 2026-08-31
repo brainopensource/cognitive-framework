@@ -127,6 +127,8 @@ python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 
 The LDA dashboard (`uv run lda serve`, `127.0.0.1:8765`) visualizes the same knowledge base for humans. Its agent-facing `lda query` / `lda context` commands are **experimental** until `uv run lda doctor --json` reports `"index_healthy": true` (`just lda-index` populates the index); `docs_rag_v0.py` is the canonical agent retrieval surface.
 
+LDA is project-agnostic and profile-driven: this repository selects its AETHER profile (authority vocabulary, non-canonical tiers, workspace exclusions) explicitly via the root `lda.yaml` — never by artifact side-channel. Its architectural invariants, enforced by `test/tools/test_lda_portability.py`, are: (1) **Single Emitter** — LDA never writes `.generated/knowledge/`; (2) **Git-HEAD binding** — context packets record `provenance.source_head_sha` and must be recompiled (or refused) on workspace HEAD mismatch; (3) **Bounded growth** — global symbol rankings are capped at Top-K (`max_global_symbols`, default 500).
+
 ---
 
 ## 5. Worked Example: Developing a Feature With the Knowledge Base

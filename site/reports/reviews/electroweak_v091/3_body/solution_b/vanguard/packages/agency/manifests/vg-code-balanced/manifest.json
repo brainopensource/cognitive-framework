@@ -9,7 +9,10 @@
       "vg-code-default/search-tool.json",
       "vg-code-lex/surgical-patch-tool.json",
       "vg-code-default/patch-tool.json",
-      "vg-code-default/test-tool.json"
+      "vg-code-default/test-tool.json",
+      "vg-code-max/symbol-tool.json",
+      "vg-code-max/deps-tool.json",
+      "vg-code-max/tests-tool.json"
     ],
     "context_policy": [
       "vg-code-balanced/context-policy.json"
@@ -81,6 +84,42 @@
         "uriPattern": "proc://exec/allow/git,pytest,ruff,mypy,python3,node,npm"
       },
       "risk": "high"
+    },
+    {
+      "verb": "repo.symbol",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "repo.dependencies",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "repo.tests_for",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
     }
   ],
   "evaluators": [

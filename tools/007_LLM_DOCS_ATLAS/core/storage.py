@@ -250,6 +250,7 @@ class FactGraphStorage:
     def insert_entity(self, entity: IREntity):
         con = self.get_connection()
         with con:
+            kind_value = entity.kind.value if isinstance(entity.kind, EntityKind) else str(entity.kind)
             con.execute(
                 """
                 INSERT INTO entities (id, repo_id, kind, name, locator, authority, confidence_tier, metadata_json)
@@ -265,7 +266,7 @@ class FactGraphStorage:
                 (
                     entity.id,
                     "default",
-                    entity.kind.value if isinstance(entity.kind, EntityKind) else str(entity.kind),
+                    kind_value,
                     entity.name,
                     entity.locator,
                     entity.authority,
@@ -273,11 +274,12 @@ class FactGraphStorage:
                     json.dumps(entity.metadata or {})
                 )
             )
-            # Index into FTS5
+            # Index into FTS5 (same normalized kind value as the entities table:
+            # rankers branch on literal kinds like "symbol"/"document")
             try:
                 con.execute(
                     "INSERT INTO fts_search (entity_id, title, name, content, kind, locator) VALUES (?, ?, ?, ?, ?, ?)",
-                    (entity.id, entity.name, entity.name, json.dumps(entity.metadata or {}), str(entity.kind), entity.locator)
+                    (entity.id, entity.name, entity.name, json.dumps(entity.metadata or {}), kind_value, entity.locator)
                 )
             except Exception:
                 pass
@@ -423,10 +425,20 @@ class FactGraphStorage:
     # --------------------------------------------------------------------------
     def search_fts(self, query: str, limit: int = 30) -> List[Dict[str, Any]]:
         con = self.get_connection()
-        terms = [t for t in query.replace('"', '').replace("'", "").split() if len(t) > 1]
+        # Sanitize terms: hyphens, dots, and other punctuation are FTS5 MATCH
+        # syntax characters and would raise (silently degrading to a useless
+        # LIKE fallback). Strip them, then build an OR-of-prefixes expression.
+        terms = [
+            cleaned
+            for cleaned in (
+                "".join(ch for ch in t if ch.isalnum() or ch == "_")
+                for t in query.replace('"', "").replace("'", "").split()
+            )
+            if len(cleaned) > 1
+        ]
         if not terms:
             return []
-        match_expr = " OR ".join(f"{t}*" for t in terms)
+        match_expr = " OR ".join(f"\"{t}\"*" for t in terms)
         
         try:
             cur = con.execute(

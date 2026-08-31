@@ -2789,6 +2789,78 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#29-coding-max-convergence-epic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Coding Max Convergence Epic
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.9 Coding Max Convergence Epic">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preset-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preset contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-specific-completion-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task-specific completion policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explicitly-deferred-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explicitly deferred experiments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#definition-of-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition of Ready
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition of Done
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4324,6 +4396,78 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#29-coding-max-convergence-epic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Coding Max Convergence Epic
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.9 Coding Max Convergence Epic">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preset-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preset contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-specific-completion-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task-specific completion policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explicitly-deferred-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explicitly deferred experiments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#definition-of-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition of Ready
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Definition of Done
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4884,15 +5028,197 @@
 </tr>
 </tbody>
 </table>
+<h3 id="29-coding-max-convergence-epic">2.9 Coding Max Convergence Epic</h3>
+<p>This epic is the accepted planning disposition of the three Electroweak
+solutions. It does not authorize copying executable prototypes from the report
+tree. Production changes must be re-derived against current ports, boundaries,
+source, and tests.</p>
+<p>The architecture rule is <strong>thin app, thick declarative composition</strong>:
+<code>apps/coding_max</code> owns request/result ergonomics and preset selection;
+<code>packs/code-default</code> owns coding cognition and policy; runtime remains the only
+composition/lifecycle authority; infrastructure stays behind generic ports.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Capability package</th>
+<th>Primary owner</th>
+<th>Status</th>
+<th>Dependency</th>
+<th>Acceptance gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CMX-01</strong></td>
+<td>Current-mechanism delta and three presets</td>
+<td><code>packs/code-default</code>, manifests</td>
+<td><code>APPROVED</code></td>
+<td>EWK-Q disposition</td>
+<td><code>fast</code>, <code>balanced</code>, and <code>max</code> are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator</td>
+</tr>
+<tr>
+<td><strong>CMX-02</strong></td>
+<td>Port-backed repository intelligence</td>
+<td><code>ports/index.py</code>, <code>adapters</code>, code-pack bindings</td>
+<td><code>APPROVED</code></td>
+<td>CMX-01</td>
+<td>Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import <code>apps</code></td>
+</tr>
+<tr>
+<td><strong>CMX-03</strong></td>
+<td>Durable plan/context/recovery loop</td>
+<td>code-pack policies + existing projections</td>
+<td><code>APPROVED</code></td>
+<td>CMX-01, CMX-02</td>
+<td>A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects</td>
+</tr>
+<tr>
+<td><strong>CMX-04</strong></td>
+<td>Multi-file and greenfield correctness</td>
+<td>code-pack policies and fixtures</td>
+<td><code>APPROVED</code></td>
+<td>CMX-03</td>
+<td>Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission</td>
+</tr>
+<tr>
+<td><strong>CMX-05</strong></td>
+<td>Coding Max application facade</td>
+<td><code>apps/coding_max</code>, shared application service, <code>vg</code></td>
+<td><code>APPROVED</code></td>
+<td>CMX-03</td>
+<td>CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP</td>
+</tr>
+<tr>
+<td><strong>CMX-06</strong></td>
+<td>Conditional review and mediated specialist roles</td>
+<td>manifests/topology/child runtime</td>
+<td><code>PROPOSED</code></td>
+<td>CMX-05 and accepted M-7 evidence</td>
+<td>Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier</td>
+</tr>
+<tr>
+<td><strong>CMX-07</strong></td>
+<td>Repository-scale qualification</td>
+<td>benchmark program</td>
+<td><code>PROPOSED</code></td>
+<td>CMX-04, CMX-05</td>
+<td>Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts</td>
+</tr>
+<tr>
+<td><strong>CMX-08</strong></td>
+<td>First-party reference-agent portfolio</td>
+<td>apps + independent packs/manifests</td>
+<td><code>PROPOSED</code></td>
+<td>M-10 and stable public composition contract</td>
+<td>Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract</td>
+</tr>
+</tbody>
+</table>
+<h4 id="preset-contract">Preset contract</h4>
+<p>Presets change policy and ceilings, not runtime identity or authority. Numeric
+ceilings are calibrated later; their behavioral meanings are locked now.</p>
+<table>
+<thead>
+<tr>
+<th>Preset</th>
+<th>Required behavior</th>
+<th>Excluded by default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fast</code></td>
+<td>One primary worker; cheap deterministic discovery; direct inspect/edit/targeted-verify loop; escalate while preserving discoveries and failed attempts</td>
+<td>LLM planner, specialist children, branch search, full repository indexing</td>
+</tr>
+<tr>
+<td><code>balanced</code></td>
+<td>Explicit plan/TODO, progressive context, dependency/test mapping, targeted then affected verification, durable resume, conditional reviewer for declared risk</td>
+<td>Swarm/concurrency, mutation, branch search, self-modification</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>All empirically accepted balanced mechanisms with larger bounded context/turn/model ceilings, broad verification, and optional mediated specialist roles when their gate is accepted</td>
+<td>Unbounded compute, automatic authority expansion, mandatory swarm/SBFL/mutation</td>
+</tr>
+</tbody>
+</table>
+<p>Escalation is monotonic in compute but never in capability. The
+<code>fast -&gt; balanced -&gt; max</code> path may spend a larger pre-authorized budget and add policy components, but it
+cannot widen filesystem, network, command, evaluator, or child authority.</p>
+<h4 id="task-specific-completion-policy">Task-specific completion policy</h4>
+<table>
+<thead>
+<tr>
+<th>Task class</th>
+<th>Minimum completion evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Existing bug or failing test</td>
+<td>Reproducer fails on the baseline when feasible, passes on the postimage, and affected regression checks pass</td>
+</tr>
+<tr>
+<td>Multi-file feature/refactor/migration</td>
+<td>Every implicated interface is inspected; change-surface closure is recorded; targeted and affected checks pass; migration compatibility is tested when applicable</td>
+</tr>
+<tr>
+<td>Greenfield</td>
+<td>Scaffold baseline is recorded; build/syntax succeeds; at least one executable smoke or contract test created for the requested behavior passes on the postimage</td>
+</tr>
+<tr>
+<td>Repository without tests</td>
+<td>The pack declares an explicit acceptance command or creates the smallest executable harness; successful syntax/build alone is insufficient for behavioral completion</td>
+</tr>
+<tr>
+<td>Analysis/documentation/read-only</td>
+<td>A read-only preset applies an explicit requirements checklist; no fabricated patch or test count is required</td>
+</tr>
+</tbody>
+</table>
+<p>Manual review may supplement these policies but cannot replace an applicable
+automated check or an exterior evaluator verdict.</p>
+<h4 id="explicitly-deferred-experiments">Explicitly deferred experiments</h4>
+<p>The following are not Coding Max prerequisites: swarm concurrency, beam/branch
+search, ToolScript, SBFL, AST mutation testing, speculative auto-rollback,
+trajectory distillation, capsule promotion, and self-modification. Each requires
+a separate preregistered control/treatment experiment. It advances only when it
+improves task success or cost-adjusted success without exceeding the declared
+reliability regression budget.</p>
+<h4 id="definition-of-ready">Definition of Ready</h4>
+<p>A CMX package may enter <code>active.md</code> only when its exact source owner, public
+contract, negative falsifier, migration impact, measurement subject, and rollback
+path are named. A report-tree path or code snippet is never a production owner.</p>
+<h4 id="definition-of-done">Definition of Done</h4>
+<p>A CMX package is done only when current-source unit and integration tests pass,
+the boundary and TCB gates remain green, cold reconstruction is tested when
+state changes, canonical docs and generated knowledge are synchronized, and any
+capability or performance claim is supported by an exact-subject receipt.</p>
 <hr />
 <h2 id="3-prioritized-next-up-queue-staging-for-activemd">3. Prioritized Next-Up Queue (Staging for active.md)</h2>
-<p>When current <code>active.md</code> packages (<code>FIN-A1</code> / <code>FIN-B1</code>) complete, the next packages admitted to the active sprint are:</p>
+<p>The dependency-ordered queue is:</p>
 <ol>
-<li><strong><code>REL-01</code> (Wave H0 Tooling Cleanup)</strong> $\to$ Dev B removes urllib and synthetic dry-run data.</li>
-<li><strong><code>REL-02</code> (Wave H1 Canary Manifest)</strong> $\to$ Dev B freezes 10 content-addressed tasks with external evaluators.</li>
-<li><strong><code>TLS-04</code> (AST Syntax Pre-Flight Gate)</strong> $\to$ Dev A integrates &lt;0.2ms syntax check into patch tool.</li>
-<li><strong><code>DOC-04</code> (Griffe Python API Docs)</strong> $\to$ Dev A wires <code>mkdocstrings</code> into <code>mkdocs.yml</code>.</li>
+<li><strong><code>REL-01</code> (H0 evidence integrity)</strong> — remove direct provider HTTP and
+   synthetic result metrics from the admissible path; use runtime adapters and
+   an exterior oracle.</li>
+<li><strong><code>REL-02</code> (H1 frozen canary)</strong> — freeze executable, content-addressed,
+   single-attempt tasks and explicit missingness before any live run.</li>
+<li><strong><code>FIN-A1</code> / <code>W-092-5</code> disposition</strong> — independently accept a valid M-8
+   bundle or record a negative/undeterminable result without threshold changes.</li>
+<li><strong><code>CMX-01</code> through <code>CMX-05</code></strong> — deliver the Coding Max vertical slice in
+   dependency order.</li>
+<li><strong><code>CMX-07</code></strong> — qualify the vertical slice before enabling optional
+   orchestration.</li>
+<li><strong><code>CMX-06</code> and experimental features</strong> — admit one treatment at a time only
+   after a preregistered ablation.</li>
+<li><strong><code>CMX-08</code></strong> — qualify the supported first-party agent portfolio on the road
+   to 1.0 after M-10.</li>
 </ol>
+<p><code>TLS-04</code> may be absorbed into CMX-04 if its measured latency and defect-catch
+rate justify the seam. <code>DOC-04</code> remains approved but is not on the critical
+product path.</p>
 <hr />
 <h2 id="4-cross-references">4. Cross-References</h2>
 <ul>

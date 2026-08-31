@@ -52,8 +52,10 @@ do not override this board, source, tests, or receipts.
 
 ## Reconciled state on the exact subject
 
-The clean local and remote branch subject is
-`d639ec4bda5ea7d8836a182393498a31fc43ea1a`. The generated Tier-1 context names
+The production implementation subject reviewed for this plan is
+`d639ec4bda5ea7d8836a182393498a31fc43ea1a`; the documentation convergence was
+committed in descendant `9821a000ecb89d13047304c5e646caefea6bcf6c`, with no
+intervening production-lattice change. The generated Tier-1 context names
 `7d46c7f5528cf23a7b6cfcd6e02ece4d7f32e6a0`, while generated knowledge and
 several canonical architecture headers name still older subjects. Navigation
 artifacts are therefore usable only as routing hints until regenerated from

@@ -34,6 +34,10 @@ class CodeASTProvider(BaseProvider):
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> ProviderResult:
         root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
+        profile = getattr(repo_root, "profile", None)
+        skip_dirs = {".git", ".venv", "node_modules", "__pycache__"} | (
+            set(profile.excluded_dirs) if profile else set()
+        )
         symbols: List[IRSymbol] = []
         relations: List[IRRelation] = []
         legacy_entities: List[Entity] = []
@@ -42,7 +46,7 @@ class CodeASTProvider(BaseProvider):
         code_files = [
             p for p in root.rglob("*")
             if p.is_file() and p.suffix.lower() in {".py", ".ts", ".tsx", ".js", ".jsx", ".rs", ".go"}
-            and not any(x in p.parts for x in [".git", ".venv", "node_modules", "dev_context_logs", "__pycache__"])
+            and not any(x in p.parts for x in skip_dirs)
         ]
 
         for fpath in code_files:

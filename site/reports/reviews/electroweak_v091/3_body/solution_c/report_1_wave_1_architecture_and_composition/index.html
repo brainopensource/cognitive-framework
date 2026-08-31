@@ -4259,9 +4259,9 @@
     Apps -.-&gt;|Consults Policy via Port| Ports</code></pre>
 <h3 id="11-core-tenets-of-solution-c">1.1 Core Tenets of Solution C</h3>
 <ol>
-<li><strong>Zero Kernel Mutation</strong>: The Trusted Computing Base (<a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/kernel"><code>vanguard/packages/kernel/</code></a>) remains $\le 1438$ LOC, completely domain-blind, and mathematically immutable.</li>
-<li><strong>App-Layer Encapsulation</strong>: The entire end-to-end agent intelligence, task classification, multi-stage planning, and recovery loops reside within <a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/apps"><code>vanguard/packages/apps/coding_max/</code></a>.</li>
-<li><strong>Clean Pack Decoupling</strong>: The <a href="file:///home/rocha/Coding/Aether-D-System/packs/code-default"><code>packs/code-default/</code></a> package provides purely declarative tools and schemas without becoming an unmaintainable orchestration monolith.</li>
+<li><strong>Zero Kernel Mutation</strong>: The Trusted Computing Base (<code>vanguard/packages/kernel/</code>) remains $\le 1438$ LOC, completely domain-blind, and mathematically immutable.</li>
+<li><strong>App-Layer Encapsulation</strong>: The entire end-to-end agent intelligence, task classification, multi-stage planning, and recovery loops reside within <code>vanguard/packages/apps/coding_max/</code>.</li>
+<li><strong>Clean Pack Decoupling</strong>: The <code>packs/code-default/</code> package provides purely declarative tools and schemas without becoming an unmaintainable orchestration monolith.</li>
 <li><strong>Adaptive Effort (Min Orchestration / Max Intelligence)</strong>:</li>
 <li><strong>C0/C1 (Trivial/Localized)</strong>: Fast-path execution (<code>Search -&gt; Edit -&gt; Verify -&gt; Done</code>) in $\le 2$ turns.</li>
 <li><strong>C2/C3 (Medium/Complex SWE-bench)</strong>: Full cognitive harness (AST Index -&gt; Fault Localization -&gt; DAG Plan -&gt; Surgical Patch -&gt; Multi-Tier Verification).</li>
@@ -4717,7 +4717,7 @@ $$\text{domain} \leftarrow \text{ports} \leftarrow \text{kernel} \leftarrow \tex
 <h2 id="10-summary-of-wave-1-deliverables">10. Summary of Wave 1 Deliverables</h2>
 <ul>
 <li><strong>Architectural Blueprint</strong>: Strict separation of concern across all 7 layers.</li>
-<li><strong>Production Application Service</strong>: <a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/apps"><code>CodingMaxAppService</code></a> fully specified in Python 3.10+.</li>
+<li><strong>Production Application Service</strong>: <code>CodingMaxAppService</code> fully specified in Python 3.10+.</li>
 <li><strong>Preset Catalog</strong>: 4 specialized operating modes for Turbo, Deep SWE-bench, Swarm, and Repro.</li>
 <li><strong>Cryptographic &amp; Causal Integrity</strong>: Full binding to Event Sourcing, RFC 8785 JCS, and <code>aether.evidence/1</code> envelopes.</li>
 <li><strong>Tri-Substrate Synthesis</strong>: Unification of Vanguard state, LEX PTY execution, and LIM fault localization.</li>

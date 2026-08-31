@@ -4144,7 +4144,7 @@
 <h2 id="1-executive-summary-verification-philosophy">1. Executive Summary &amp; Verification Philosophy</h2>
 <p>In unconstrained agent systems, <strong>over 35% of failed SWE-bench episodes occur because the model declares "I have fixed the issue" without applying patches or verifying the test suite</strong>. Furthermore, trivial indentation or syntax errors consume full LLM turns when evaluated through slow subprocess test runners.</p>
 <p>Solution C enforces a <strong>closed-loop verification spine</strong>:
-1. <strong>Admission Gate (<a href="file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/admission_gate.py"><code>AdmissionGate</code></a>)</strong>: Intercepts final completion proposals fail-closed. If source files were not modified (<code>MISSING_SOURCE_PATCH</code>) or if verification tests were not executed on the exact tree (<code>VERIFICATION_STALE</code>), completion is rejected with an actionable prompt correction.
+1. <strong>Admission Gate (<code>AdmissionGate</code>)</strong>: Intercepts final completion proposals fail-closed. If source files were not modified (<code>MISSING_SOURCE_PATCH</code>) or if verification tests were not executed on the exact tree (<code>VERIFICATION_STALE</code>), completion is rejected with an actionable prompt correction.
 2. <strong>Multi-Tier Verification Pipeline (L0–L3)</strong>:
    * <strong>L0 Syntax Gate (&lt;0.2ms)</strong>: In-process AST parse returning syntax errors before touching the disk or invoking shell commands.
    * <strong>L1 Fast Linter (10–50ms)</strong>: Lightweight linter (e.g. <code>ruff</code>) catching undefined variables.

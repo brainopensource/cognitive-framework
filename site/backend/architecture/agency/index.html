@@ -1058,15 +1058,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-v092-target-coding-harness-control-loop" class="md-nav__link">
+  <a href="#6-coding-harness-control-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. v0.9.2 Target: Coding Harness Control Loop
+        6. Coding Harness Control Loop
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="6. v0.9.2 Target: Coding Harness Control Loop">
+    <nav class="md-nav" aria-label="6. Coding Harness Control Loop">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1103,10 +1103,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#64-planned-implementation-and-falsifiers" class="md-nav__link">
+  <a href="#64-current-ownership-remaining-integration-and-falsifiers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6.4 Planned implementation and falsifiers
+        6.4 Current ownership, remaining integration and falsifiers
       
     </span>
   </a>
@@ -4402,15 +4402,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-v092-target-coding-harness-control-loop" class="md-nav__link">
+  <a href="#6-coding-harness-control-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. v0.9.2 Target: Coding Harness Control Loop
+        6. Coding Harness Control Loop
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="6. v0.9.2 Target: Coding Harness Control Loop">
+    <nav class="md-nav" aria-label="6. Coding Harness Control Loop">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4447,10 +4447,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#64-planned-implementation-and-falsifiers" class="md-nav__link">
+  <a href="#64-current-ownership-remaining-integration-and-falsifiers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6.4 Planned implementation and falsifiers
+        6.4 Current ownership, remaining integration and falsifiers
       
     </span>
   </a>
@@ -4497,7 +4497,7 @@
 <ul>
 <li>Episode identity and lifecycle states.</li>
 <li>The step-by-step turn loop: Observe $ o$ Compile $    o$ Propose $    o$ Authorize $  o$ Dispatch $   o$ Ingest.</li>
-<li>Layered context compiler architecture (<code>ContextCompiler</code>) and compaction strategies.</li>
+<li>Layered L1-L5 context compiler architecture (<code>ContextCompiler</code>) and compaction strategies.</li>
 <li>Protocol recovery mechanisms for malformed model outputs (<code>protocol_recovery.py</code>).</li>
 <li>Hand-off interface between <code>agency</code> and <code>kernel.dispatch</code>.</li>
 </ul>
@@ -4509,8 +4509,8 @@
 </ul>
 <h2 id="as_built-status">AS_BUILT Status</h2>
 <ul>
-<li><code>IMPLEMENTED</code> — Fully functional bounded sequential episode engine implemented in <code>vanguard.packages.agency</code>.</li>
-<li><code>PARTIAL</code> — Protocol recovery and generic context compaction are implemented, but the coding-specific plan, verification-admission, classified recovery, and durable task-state loop described in Section 6 are <strong>v0.9.2 targets</strong>, not current behavior.</li>
+<li><code>IMPLEMENTED</code> — The bounded sequential episode engine, L1-L5 compiler, injected protocol-recovery pipeline, generic completion-admission callback, and runtime meta-controller consultation are integrated on the canonical run path.</li>
+<li><code>PARTIAL</code> — <code>CodingTaskState</code> and code-pack repository/context/verification middleware exist as mechanisms, but one end-to-end Coding Max composition does not yet integrate the complete durable plan, classified task recovery, multi-file/greenfield policy, and product qualification described in Section 6.</li>
 </ul>
 <hr />
 <h2 id="1-episode-identity-lifecycle">1. Episode Identity &amp; Lifecycle</h2>
@@ -4538,21 +4538,23 @@
 </ol>
 <hr />
 <h2 id="3-layered-context-architecture-contextcompiler">3. Layered Context Architecture (<code>ContextCompiler</code>)</h2>
-<p>The context compiler organizes prompt tokens into four distinct, prefix-stable layers:</p>
+<p>The context compiler organizes prompt tokens into five layers ordered by mutation rate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>+-------------------------------------------------------------+
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>| Layer 1 (L1): System Invariants &amp; Substrate Rules           | (Frozen at build)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>| Layer 1 (L1): System Role &amp; Output Contract                 | (Frozen at build)
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>+-------------------------------------------------------------+
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>| Layer 2 (L2): Agent Role Persona &amp; Pack Instructions        | (Frozen at composition)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>| Layer 2 (L2): Active Tool Specifications                    | (Frozen at composition)
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>+-------------------------------------------------------------+
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>| Layer 3 (L3): Active Tool Specifications &amp; Schema Prompts   | (Frozen at session start)
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>| Layer 3 (L3): Environment Conventions &amp; Retrieved Priors    | (Frozen within task)
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>+-------------------------------------------------------------+
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>| Layer 4 (L4): Dynamic Turn Observations &amp; Message History   | (Compacted dynamically)
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>| Layer 4 (L4): Task Brief &amp; Stable Task Notes                | (Stable within task)
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>+-------------------------------------------------------------+
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>| Layer 5 (L5): Turns, Results &amp; Dynamic Notes                | (Compacted dynamically)
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>+-------------------------------------------------------------+
 </code></pre></div>
 <h3 id="prefix-stability-kv-caching">Prefix Stability &amp; KV-Caching</h3>
-<p>Layers L1–L3 are deterministically hashed and remain byte-identical across turns, maximizing prompt cache hit rates on upstream LLM inference providers.</p>
+<p>Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone.</p>
 <h3 id="context-compaction">Context Compaction</h3>
-<p>When Layer 4 approaches the token budget ceiling, <code>CompactionEngine</code> applies structured compaction:
+<p>When the context approaches the token budget ceiling, <code>CompactionEngine</code> applies structured compaction to L5 while preserving higher layers:
 - Summarizes older observation blocks.
 - Preserves the initial user brief and the $N$ most recent turn receipts.
 - Emits a <code>ContextCompacted</code> event to ensure reproducibility.</p>
@@ -4602,9 +4604,12 @@
 <li><strong><code>RUNTIME_ERROR</code></strong>: Unrecoverable kernel or adapter fault.</li>
 </ul>
 <hr />
-<h2 id="6-v092-target-coding-harness-control-loop">6. v0.9.2 Target: Coding Harness Control Loop</h2>
+<h2 id="6-coding-harness-control-loop">6. Coding Harness Control Loop</h2>
 <blockquote>
-<p><strong>TARGET / PLANNED — not AS_BUILT.</strong> This section fixes the intended ownership and behavioral contract for v0.9.2 implementation. It does not assert that the current <code>EpisodeEngine</code> enforces these transitions.</p>
+<p><strong>PARTIAL AS_BUILT / PRODUCT TARGET.</strong> Generic completion admission,
+protocol recovery, context layering, meta-control, and mediated execution are
+integrated. The complete Coding Max product loop remains a staged code-pack
+and application composition, not a new agency engine.</p>
 </blockquote>
 <p>Vanguard owns the generic bounded turn, dispatch, event-observation, budget, and completion-admission seams. Coding semantics remain above the substrate in the code pack/harness: repository discovery, patch state, test selection, test-result interpretation, and the definition of an applicable coding verification. No coding vocabulary or repository-intelligence dependency belongs in the domain-blind kernel.</p>
 <p>The coding harness targets the following outcome-driven state machine:</p>
@@ -4663,12 +4668,25 @@ $$</p>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>NO_PROGRESS             PREMATURE_FINISH
 </code></pre></div>
 <p>Each class has a bounded retry limit and a recovery action. A retry is admissible only when the failure is retryable, budget remains, and the next action or information state differs materially. Repeating the same action with the same arguments against unchanged state is <code>NO_PROGRESS</code>, not recovery. Provider adapters may perform transport retries; the harness separately decides whether a failed turn or task action should be retried.</p>
-<h3 id="64-planned-implementation-and-falsifiers">6.4 Planned implementation and falsifiers</h3>
+<h3 id="64-current-ownership-remaining-integration-and-falsifiers">6.4 Current ownership, remaining integration and falsifiers</h3>
 <ul>
-<li><strong>Generic framework seam</strong>: completion-admission result and typed recovery decision in <code>vanguard/packages/agency/episode/</code>.</li>
-<li><strong>Coding ownership</strong>: state reducer, repository context selection, verification policy, and failure interpretation in the code pack/harness.</li>
-<li><strong>Runtime binding</strong>: manifest-selected context and admission policies in <code>vanguard/packages/runtime/session.py</code>.</li>
-<li><strong>Required falsifiers</strong>: premature finish, zero-test success, stale verification after edit, partial patch, repeated identical action, failed-test repair, and fresh-process reconstruction of the next action.</li>
+<li><strong>Generic framework seams (AS_BUILT)</strong>: completion-admission result and typed
+  protocol recovery in <code>vanguard/packages/agency/episode/</code>; L1-L5 compilation
+  in <code>vanguard/packages/agency/context/</code>; guarded meta-control and manifest
+  binding in <code>vanguard/packages/runtime/session.py</code>.</li>
+<li><strong>Coding mechanisms (AS_BUILT, not one accepted product loop)</strong>:
+  <code>CodingTaskState</code>, context ranking, symbol/import analysis, multi-file
+  completeness, test-output parsing, and verification gating.</li>
+<li><strong>Coding Max ownership (TARGET)</strong>: task classification, plan/TODO policy,
+  repository context selection, domain failure interpretation, verification
+  applicability, greenfield evidence policy, and fast/balanced/max presets in
+  the code pack; a thin <code>apps/coding_max</code> facade selects and invokes the
+  composition.</li>
+<li><strong>Required falsifiers</strong>: premature finish, zero-test success, stale
+  verification after edit, partial patch, repeated identical action, failed-test
+  repair, path escape, adapter-to-app import, host subprocess bypass,
+  multi-file omission, greenfield silent bypass, and fresh-process
+  reconstruction of the next action.</li>
 </ul>
 <hr />
 <h2 id="implementation-evidence">Implementation Evidence</h2>

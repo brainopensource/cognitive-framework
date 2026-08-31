@@ -1156,9 +1156,6 @@ class OpenRouterModel:
         proposal["pricing_source"] = route.pricing_source
         proposal["resolved_model"] = route.resolved_model
 
-        if self._recorder is not None:
-            self._recorder.record_interaction(context, tools, sampling, proposal)
-
         # In streaming/live mode, if a provider emits multiple parallel tool calls,
         # normalize to the primary atomic action to satisfy the single-action protocol.
         if proposal and isinstance(proposal.get("toolCalls"), list) and len(proposal["toolCalls"]) > 1:
@@ -1180,6 +1177,10 @@ class OpenRouterModel:
         if isinstance(proposal.get("model_fingerprint"), str):
             canonical["model_fingerprint"] = proposal["model_fingerprint"]
         canonical["text"] = proposal.get("text", "")
+
+        if self._recorder is not None:
+            self._recorder.record_interaction(context, tools, sampling, canonical)
+
         return Result.success(canonical)
 
 

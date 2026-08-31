@@ -207,7 +207,10 @@ def _basic_agent_case() -> dict[str, Any]:
             {"tool_messages": 2, "finish_reason": "tool_calls", "tool_calls": [_call("test", {"argv": ["python3", "-m", "unittest", "-q"]})]},
             {"tool_messages": 3, "finish_reason": "stop", "content": "verified", "tool_calls": []},
         ],
-        lambda root: _run_command(root, ["python3", "-m", "unittest", "-q"]),
+        lambda root: (
+            (root / "src/value.py").read_text(encoding="utf-8") == fixed
+            and _run_command(root, ["python3", "-m", "unittest", "-q"])
+        ),
     )
 
 

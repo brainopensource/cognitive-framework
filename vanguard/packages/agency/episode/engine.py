@@ -49,7 +49,7 @@ from .protocol_recovery import (
     recover_proposal,
 )
 from .admission_gate import AdmissionVerdict
-from .tool_policy import derive_phase, resolve_tool_policy
+from .tool_policy import ToolPolicy, derive_phase, resolve_tool_policy
 from .state import (
     TERMINAL_FOR_KIND,
     Episode,
@@ -274,6 +274,13 @@ class EpisodeEngine:
         recovery_state = ProtocolRecoveryState()
         recovery_feedback: dict[str, Any] | None = None
         sampling_override: dict[str, Any] | None = None
+        #: Repeated-action escalation (`CMX-03`). Tracked across turns because
+        #: a livelock is a property of the *sequence* of proposals, not of any
+        #: one of them.
+        last_effect_descriptor: str | None = None
+        last_dispatch_signal: str | None = None
+        repeat_count = 0
+        forced_tool_policy: ToolPolicy | None = None
         seen_verbs: set[str] = set()
         for span in accumulated:
             span_verb = getattr(span, "verb", None) or getattr(span, "action", None)
@@ -343,6 +350,10 @@ class EpisodeEngine:
                 policy = resolve_tool_policy(phase, preset_mode=self._preset_mode)
             else:
                 phase, policy = "inspect", None
+            # A tool set narrowed by the escalation ladder outranks the phase
+            # ladder: the phase policy is what the model was already ignoring.
+            if forced_tool_policy is not None:
+                policy = forced_tool_policy
             offered_tools = self._tools
             turn_sampling = dict(sampling_override or self._sampling)
             if policy is not None and policy.mode == "required" and policy.allowed:
@@ -399,6 +410,61 @@ class EpisodeEngine:
             # only the turn immediately after a retry carries feedback.
             recovery_feedback = None
             sampling_override = None
+
+            # -- repeated-action escalation (`CMX-03`) -------------------
+            # A model proposing the identical effect turn after turn is
+            # livelocked: the receipt it already holds is the one it would get
+            # again. Interrupt *before* dispatch, so the loop stops paying for
+            # the effect as well as the turn, and escalate rather than abandon
+            # on the first repeat — corrective feedback first, then a tool set
+            # that no longer offers the verb it cannot stop calling.
+            if proposal.kind == ProposalKind.EFFECT:
+                # Re-proposing an action whose last dispatch did *not* succeed
+                # is legitimate retry, not livelock: the receipt it holds is a
+                # failure, and the next attempt may well differ. Only an
+                # action that keeps succeeding identically is stuck.
+                if (proposal.descriptor == last_effect_descriptor
+                        and last_dispatch_signal == "ok"):
+                    repeat_count += 1
+                else:
+                    last_effect_descriptor = proposal.descriptor
+                    repeat_count = 1
+                    forced_tool_policy = None
+                if repeat_count >= self._no_progress_limit:
+                    if recovery_state.effect_retries >= recovery_state.max_effect_retries:
+                        detail = (f"repeated action {proposal.action} over "
+                                  f"{repeat_count} turns")
+                        episode = episode.terminated(RunTermination.ABANDONED, detail)
+                        self._emit_terminal(episode, "abandoned", detail)
+                        break
+                    recovery_state = recovery_state.with_effect_retry()
+                    # Guarded: never narrow to an empty set, which would strand
+                    # the episode with nothing left to propose.
+                    narrowed = tuple(sorted(declared_tool_names - {proposal.action}))
+                    if recovery_state.effect_retries > 1 and narrowed:
+                        forced_tool_policy = ToolPolicy(mode="required", allowed=narrowed)
+                    if not _apply_retry(
+                        RecoveryDecision(
+                            status="retry_model",
+                            retry_reason="REPEATED_ACTION",
+                            retry_feedback={
+                                "repeatedAction": proposal.action,
+                                "repeatCount": repeat_count,
+                                "lastReceiptDigest": (
+                                    episode.turns[-1].receipt_digest
+                                    if episode.turns else None),
+                                "message": (
+                                    f"You have proposed {proposal.action} with the "
+                                    f"same arguments {repeat_count} times. It already "
+                                    "returned a result — read that result and take "
+                                    "the next distinct step."
+                                ),
+                            },
+                        ),
+                        base_sampling=turn_sampling,
+                    ):
+                        break
+                    continue
 
             # -- state-dependent tool policy at the request boundary -----
             # (`ADR-0106 §4`). Only actions the harness itself declares are
@@ -608,6 +674,7 @@ class EpisodeEngine:
             )
             repeats = episode.repeats(turn, limit=self._no_progress_limit)
             episode = episode.with_turn(turn)
+            last_dispatch_signal = turn.progress_signal
 
             terminal = _TERMINAL_FOR_FAILURE.get(outcome.failure)
             if terminal is not None:

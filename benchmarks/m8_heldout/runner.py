@@ -1,441 +1,621 @@
 #!/usr/bin/env python3
-"""M-8 Held-Out Benchmark & Empirical Evaluation Runner.
+"""Truthful, provider-neutral runner for the preregistered M-8 workload.
 
-Executes controlled (control/treatment) empirical evaluation of governed skill candidates
-against the 44-task preregistered M-8 workload:
-- 2 dev tasks (D1, D2)
-- 40 held-out tasks (H1..H40)
-- 1 adversarial task (A1)
-- 1 transfer task (T1)
-
-Supports:
-- Live model execution via OpenRouter (deepseek/deepseek-v4-flash-0731 or configured model)
-- Deterministic dry-run / test-double execution for CI verification
-- Full telemetry: prompt/completion tokens, usd_micros, latency, trajectory digests
-- Strict authority separation and cryptographic Ed25519 promotion evidence
-- Full conformance to repository boundary rules (imports only stdlib and runtime.root)
+Dry-run is a structural preflight. It never calls a model, executes a task,
+or fabricates empirical measurements. Live execution is driven through
+injected runtime and exterior-evaluator seams, never a second provider client.
 """
 
 from __future__ import annotations
 
 import argparse
-import base64
 import hashlib
 import json
-import os
+import shutil
 import sys
+import tempfile
 import time
-import urllib.error
-import urllib.request
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Mapping, Protocol, Sequence
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from vanguard.packages.runtime.root import get_workspace_path
+from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
+from vanguard.packages.ports.event_store import Result
 
-OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "deepseek/deepseek-v4-flash-0731"
+__all__ = [
+    "BudgetLimits", "Disposition", "ExecutionRecord", "TaskAttempt",
+    "TaskTelemetry", "WorkloadDefinition", "digest_of", "execute_empirical_run",
+    "load_workload", "RuntimeTaskExecutor", "verify_bundle",
+]
+
+
+class Disposition(str, Enum):
+    """Closed vocabulary for benchmark observations and missingness."""
+
+    NOT_RUN = "NOT_RUN"
+    INVALID_TASK = "INVALID_TASK"
+    PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"
+    BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
+    TIMED_OUT = "TIMED_OUT"
+    MODEL_PROTOCOL_ERROR = "MODEL_PROTOCOL_ERROR"
+    NO_PATCH = "NO_PATCH"
+    PATCH_REJECTED = "PATCH_REJECTED"
+    EVALUATOR_UNAVAILABLE = "EVALUATOR_UNAVAILABLE"
+    EVALUATOR_FAILED = "EVALUATOR_FAILED"
+    PASSED = "PASSED"
 
 
 def digest_of(obj: Any) -> str:
-    payload = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return "sha256:" + hashlib.sha256(payload).hexdigest()
+    payload = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-@dataclass(frozen=True)
-class TaskTelemetry:
-    task_id: str
-    split: str
-    arm: str
-    composition_version: str
-    terminal: str
-    passed: bool
-    invoked: bool
-    grounded: bool
-    verified: bool
-    turns: int = 1
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
-    usd_micros: int = 0
-    latency_seconds: float = 0.0
-    trajectory_digest: Optional[str] = None
-    event_store_identity: Optional[str] = None
+@dataclass(frozen=True, slots=True)
+class BudgetLimits:
+    """Hard ceilings checked before every model/evaluator call."""
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "taskId": self.task_id,
-            "split": self.split,
-            "arm": self.arm,
-            "compositionVersion": self.composition_version,
-            "terminal": self.terminal,
-            "passed": self.passed,
-            "invoked": self.invoked,
-            "grounded": self.grounded,
-            "verified": self.verified,
-            "usage": {
-                "turns": self.turns,
-                "promptTokens": self.prompt_tokens,
-                "completionTokens": self.completion_tokens,
-                "usdMicros": self.usd_micros,
-                "costUsd": round(self.usd_micros / 1_000_000, 6),
-            },
-            "latencySeconds": round(self.latency_seconds, 4),
-            "trajectoryDigest": self.trajectory_digest,
-            "eventStoreIdentity": self.event_store_identity,
-        }
+    per_task_usd_micros: int = 250_000
+    aggregate_usd_micros: int = 1_000_000
+    per_task_tokens: int = 2_000_000
+    aggregate_tokens: int = 2_000_000
+    per_task_turns: int = 1
+    aggregate_turns: int = 10_000
+    per_task_wall_clock_seconds: float = 60.0
+
+    def __post_init__(self) -> None:
+        if any(value < 0 for value in (
+            self.per_task_usd_micros, self.aggregate_usd_micros,
+            self.per_task_tokens, self.aggregate_tokens,
+            self.per_task_turns, self.aggregate_turns,
+        )) or self.per_task_wall_clock_seconds <= 0:
+            raise ValueError("benchmark ceilings must be non-negative and timeout must be positive")
 
 
 @dataclass(frozen=True, slots=True)
 class WorkloadDefinition:
-    dev: Tuple[str, ...]
-    held_out: Tuple[str, ...]
-    adversarial: Tuple[str, ...] = ()
-    transfer: Tuple[str, ...] = ()
+    dev: tuple[str, ...]
+    held_out: tuple[str, ...]
+    adversarial: tuple[str, ...] = ()
+    transfer: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.held_out:
             raise ValueError("a held-out split is required")
-        splits = {
-            "dev": self.dev,
-            "held-out": self.held_out,
-            "adversarial": self.adversarial,
-            "transfer": self.transfer,
-        }
+        splits = {"dev": self.dev, "held-out": self.held_out,
+                  "adversarial": self.adversarial, "transfer": self.transfer}
+        seen: set[str] = set()
         for name, tasks in splits.items():
             if any(not isinstance(task, str) or not task for task in tasks):
                 raise ValueError(f"{name} task ids must be non-empty strings")
             if len(set(tasks)) != len(tasks):
                 raise ValueError(f"{name} split contains duplicate task ids")
-        names = tuple(splits)
-        for index, left_name in enumerate(names):
-            for right_name in names[index + 1:]:
-                overlap = sorted(set(splits[left_name]) & set(splits[right_name]))
-                if overlap:
-                    raise ValueError(
-                        f"tasks {overlap} are contaminated across {left_name} and {right_name} splits"
-                    )
+            overlap = seen.intersection(tasks)
+            if overlap:
+                raise ValueError(f"tasks {sorted(overlap)} are contaminated across splits")
+            seen.update(tasks)
 
     def digest(self) -> str:
         return digest_of({
-            "dev": sorted(self.dev),
-            "heldOut": sorted(self.held_out),
-            "adversarial": sorted(self.adversarial),
-            "transfer": sorted(self.transfer),
+            "dev": sorted(self.dev), "heldOut": sorted(self.held_out),
+            "adversarial": sorted(self.adversarial), "transfer": sorted(self.transfer),
         })
 
 
-def load_workload(workload_file: Optional[Path] = None) -> Tuple[WorkloadDefinition, List[Dict[str, Any]]]:
+def load_workload(workload_file: Path | None = None) -> tuple[WorkloadDefinition, list[dict[str, Any]]]:
     path = workload_file or (_REPO_ROOT / "benchmarks/m8_heldout/fixtures/workload.json")
     data = json.loads(path.read_text(encoding="utf-8"))
-    tasks = data["tasks"]
-    dev = tuple(t["id"] for t in tasks if t["split"] == "dev")
-    held_out = tuple(t["id"] for t in tasks if t["split"] == "held_out")
-    adversarial = tuple(t["id"] for t in tasks if t["split"] == "adversarial")
-    transfer = tuple(t["id"] for t in tasks if t["split"] == "transfer")
-    workload = WorkloadDefinition(dev=dev, held_out=held_out, adversarial=adversarial, transfer=transfer)
-    return workload, tasks
+    tasks = data.get("tasks")
+    if not isinstance(tasks, list) or any(not isinstance(task, Mapping) for task in tasks):
+        raise ValueError("workload tasks must be an array of objects")
+    dev = tuple(t["id"] for t in tasks if t.get("split") == "dev")
+    held_out = tuple(t["id"] for t in tasks if t.get("split") == "held_out")
+    adversarial = tuple(t["id"] for t in tasks if t.get("split") == "adversarial")
+    transfer = tuple(t["id"] for t in tasks if t.get("split") == "transfer")
+    return WorkloadDefinition(dev, held_out, adversarial, transfer), [dict(t) for t in tasks]
 
 
-def _call_openrouter_api(
-    prompt: str,
-    *,
-    model: str = DEFAULT_MODEL,
-    api_key: str,
-    timeout_seconds: float = 45.0,
-) -> Dict[str, Any]:
-    """Execute a real prompt call to OpenRouter with typed error handling."""
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-        "HTTP-Referer": "https://github.com/brainopensource/Aether-D-System",
-        "X-Title": "Aether M-8 Held-Out Evaluation",
-    }
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": "You are a deterministic coding assistant. Solve the coding task accurately."},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.0,
-    }
-    req = urllib.request.Request(
-        OPENROUTER_ENDPOINT,
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST",
-    )
-    t0 = time.time()
-    try:
-        with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-    except Exception as exc:
-        return {
-            "error": str(exc),
-            "latency_seconds": time.time() - t0,
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "usd_micros": 0,
-            "content": "",
+@dataclass(frozen=True, slots=True)
+class TaskAttempt:
+    """One actual runtime episode result, supplied by the official executor."""
+
+    output: Any = ""
+    patch: str | None = None
+    trajectory_digest: str | None = None
+    usage: Mapping[str, Any] | None = None
+    route_identity: Mapping[str, Any] | None = None
+    attempts: int = 1
+    elapsed_seconds: float | None = None
+
+
+class TaskExecutor(Protocol):
+    def execute(self, task: Mapping[str, Any], workspace: Path, arm: str) -> TaskAttempt | Mapping[str, Any]:
+        ...
+
+
+class ExteriorEvaluator(Protocol):
+    def evaluate(self, run_ref: RunRef, protocol: EvaluationProtocol) -> Result[Verdict] | Verdict:
+        ...
+
+
+class RuntimeTaskExecutor:
+    """Small benchmark adapter over the existing runtime composition root.
+
+    The class intentionally returns the runtime's captured trajectory and
+    usage, but never interprets model prose as a successful patch. A caller
+    that captures a patch artifact can provide it through a richer executor
+    implementation without changing the benchmark driver.
+    """
+
+    def __init__(self, model: Any = None, *, model_name: str | None = None,
+                 profile_id: str = "local", manifest_path: Path | None = None) -> None:
+        self._model = model
+        self._model_name = model_name
+        self._profile_id = profile_id
+        self._manifest_path = manifest_path
+
+    def execute(self, task: Mapping[str, Any], workspace: Path, arm: str) -> TaskAttempt:
+        from vanguard.packages.runtime.root import Runtime, TaskContext
+
+        model = self._model
+        # Model selection remains the runtime's composition responsibility.
+        # This seam accepts an already selected ModelPort; it never handles
+        # provider credentials or model-policy literals itself.
+        manifest = self._manifest_path or (_REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json")
+        task_id = str(task["id"])
+        context = TaskContext(
+            brief=str(task.get("prompt") or task.get("title") or task_id),
+            repo_path=workspace, run_id=f"m8:{task_id}:{arm}",
+            episode_id=f"m8:{task_id}:{arm}", max_turns=1,
+            project_id="m8-heldout",
+            preregistration={"task_digest": _task_digest(task)},
+        )
+        started = time.monotonic()
+        result = Runtime.execute_profiled(
+            manifest, context, profile_id=self._profile_id, interactive=False, model=model)
+        telemetry = result.telemetry
+        route = {
+            "provider": getattr(model, "provider", None),
+            "model": getattr(model, "model", None),
+            "compositionDigest": result.composition_digest,
         }
-    latency = time.time() - t0
-    usage = data.get("usage", {})
-    prompt_tokens = usage.get("prompt_tokens", 0)
-    completion_tokens = usage.get("completion_tokens", 0)
-    usd_micros = int((prompt_tokens * 0.14 + completion_tokens * 0.28))
-    choices = data.get("choices", [])
-    content = choices[0].get("message", {}).get("content", "") if choices else ""
-    return {
-        "content": content,
-        "prompt_tokens": prompt_tokens,
-        "completion_tokens": completion_tokens,
-        "usd_micros": usd_micros,
-        "latency_seconds": latency,
-    }
+        trajectory_digest = digest_of(result.trajectory) if result.trajectory is not None else None
+        return TaskAttempt(
+            output=result.detail, trajectory_digest=trajectory_digest,
+            usage={"prompt_tokens": telemetry.prompt_tokens,
+                   "completion_tokens": telemetry.completion_tokens,
+                   "usd_micros": telemetry.usd_micros,
+                   "turns": telemetry.turns},
+            route_identity=route, elapsed_seconds=time.monotonic() - started)
+
+
+@dataclass(frozen=True, slots=True)
+class TaskTelemetry:
+    task_id: str
+    split: str
+    arm: str
+    composition_version: str
+    disposition: Disposition
+    invoked: bool = False
+    grounded: bool = False
+    verified: bool = False
+    turns: int | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    usd_micros: int | None = None
+    latency_seconds: float | None = None
+    task_digest: str = ""
+    base_commit: str | None = None
+    workspace_preimage_digest: str | None = None
+    postimage_digest: str | None = None
+    patch_digest: str | None = None
+    trajectory_digest: str | None = None
+    evaluator_identity_digest: str | None = None
+    route_identity: Mapping[str, Any] | None = None
+
+    @property
+    def passed(self) -> bool:
+        return self.disposition is Disposition.PASSED
+
+    def to_dict(self) -> dict[str, Any]:
+        usage: dict[str, Any] = {
+            "turns": self.turns, "promptTokens": self.prompt_tokens,
+            "completionTokens": self.completion_tokens, "usdMicros": self.usd_micros,
+        }
+        if self.usd_micros is not None:
+            usage["costUsd"] = round(self.usd_micros / 1_000_000, 6)
+        return {
+            "taskId": self.task_id, "split": self.split, "arm": self.arm,
+            "compositionVersion": self.composition_version,
+            "disposition": self.disposition.value, "passed": self.passed,
+            "invoked": self.invoked, "grounded": self.grounded, "verified": self.verified,
+            "usage": usage, "latencySeconds": self.latency_seconds,
+            "taskDigest": self.task_digest, "baseCommit": self.base_commit,
+            "workspacePreimageDigest": self.workspace_preimage_digest,
+            "postimageDigest": self.postimage_digest, "patchDigest": self.patch_digest,
+            "trajectoryDigest": self.trajectory_digest,
+            "evaluatorIdentityDigest": self.evaluator_identity_digest,
+            "routeIdentity": dict(self.route_identity or {}),
+        }
+
+
+ExecutionRecord = TaskTelemetry
+
+
+def _task_digest(task: Mapping[str, Any]) -> str:
+    return digest_of(dict(task))
+
+
+def verify_bundle(bundle: Mapping[str, Any]) -> bool:
+    """Verify the content address of a returned evidence/preflight bundle."""
+    recorded = bundle.get("bundleDigest") or bundle.get("bundle_digest")
+    if not isinstance(recorded, str):
+        return False
+    body = dict(bundle)
+    body.pop("bundleDigest", None)
+    body.pop("bundle_digest", None)
+    return recorded == digest_of(body)
+
+
+def _safe_relative(path: str) -> str:
+    candidate = Path(path.replace("\\", "/"))
+    if candidate.is_absolute() or ".." in candidate.parts or not str(candidate):
+        raise ValueError(f"patch path escapes workspace: {path!r}")
+    return candidate.as_posix().removeprefix("a/").removeprefix("b/")
+
+
+def _patch_files(patch: str) -> list[tuple[str, str, list[str]]]:
+    if not isinstance(patch, str) or not patch.strip():
+        raise ValueError("patch is empty")
+    lines = patch.splitlines()
+    result: list[tuple[str, str, list[str]]] = []
+    index = 0
+    while index < len(lines):
+        if lines[index].startswith("diff --git "):
+            index += 1
+            continue
+        if not lines[index].startswith("--- ") or index + 1 >= len(lines):
+            index += 1
+            continue
+        old = lines[index][4:].split("\t", 1)[0].split(" ", 1)[0]
+        new_line = lines[index + 1]
+        if not new_line.startswith("+++ "):
+            raise ValueError("unified patch is missing its new-file header")
+        new = new_line[4:].split("\t", 1)[0].split(" ", 1)[0]
+        index += 2
+        hunk_lines: list[str] = []
+        while index < len(lines) and not lines[index].startswith("--- "):
+            if lines[index].startswith(("@@ ", " ", "+", "-", "\\")):
+                hunk_lines.append(lines[index])
+            index += 1
+        if not any(line.startswith("@@ ") for line in hunk_lines):
+            raise ValueError("unified patch has no hunks")
+        result.append((old, new, hunk_lines))
+    if not result:
+        raise ValueError("output is not a unified patch")
+    return result
+
+
+def _apply_patch(root: Path, patch: str) -> None:
+    for old_raw, new_raw, hunk_lines in _patch_files(patch):
+        old = None if old_raw == "/dev/null" else _safe_relative(old_raw)
+        new = None if new_raw == "/dev/null" else _safe_relative(new_raw)
+        target = new or old
+        if target is None:
+            raise ValueError("patch has no target")
+        if not (root / target).resolve().is_relative_to(root.resolve()):
+            raise ValueError("patch target escapes workspace")
+        original = [] if old is None else (root / old).read_text(encoding="utf-8").splitlines()
+        output: list[str] = []
+        cursor = 0
+        for line in hunk_lines:
+            if line.startswith("@@") or line.startswith("\\"):
+                continue
+            if not line:
+                raise ValueError("malformed empty patch line")
+            marker, content = line[0], line[1:]
+            if marker == " ":
+                if cursor >= len(original) or original[cursor] != content:
+                    raise ValueError(f"patch context mismatch in {target}")
+                output.append(content)
+                cursor += 1
+            elif marker == "-":
+                if cursor >= len(original) or original[cursor] != content:
+                    raise ValueError(f"patch deletion mismatch in {target}")
+                cursor += 1
+            elif marker == "+":
+                output.append(content)
+            else:
+                raise ValueError("malformed unified patch hunk")
+        output.extend(original[cursor:])
+        if new is None:
+            if old is not None and (root / old).exists():
+                (root / old).unlink()
+            continue
+        destination = root / new
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text("\n".join(output) + ("\n" if output else ""), encoding="utf-8")
+
+
+def _workspace_digest(root: Path) -> str:
+    entries: list[dict[str, Any]] = []
+    for path in sorted(root.rglob("*")):
+        if path.is_symlink():
+            raise ValueError(f"workspace contains symlink: {path.relative_to(root)}")
+        if path.is_file():
+            entries.append({"path": path.relative_to(root).as_posix(),
+                            "digest": "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()})
+    return digest_of(entries)
+
+
+def _materialize(source: Path | None, task: Mapping[str, Any]) -> tuple[tempfile.TemporaryDirectory[str], Path, str]:
+    temp = tempfile.TemporaryDirectory(prefix="aether-m8-task-")
+    root = Path(temp.name)
+    if source is not None:
+        source = source.resolve()
+        if not source.is_dir():
+            temp.cleanup()
+            raise ValueError(f"workspace is not a directory: {source}")
+        for entry in source.rglob("*"):
+            if entry.is_symlink():
+                temp.cleanup()
+                raise ValueError(f"workspace contains symlink: {entry.relative_to(source)}")
+        shutil.copytree(source, root, dirs_exist_ok=True)
+    return temp, root, _workspace_digest(root)
+
+
+def _normalise_attempt(raw: TaskAttempt | Mapping[str, Any]) -> TaskAttempt:
+    if isinstance(raw, TaskAttempt):
+        return raw
+    if not isinstance(raw, Mapping):
+        raise TypeError("task executor must return TaskAttempt or an object mapping")
+    usage = raw.get("usage")
+    if usage is None:
+        usage = {key: raw[key] for key in ("prompt_tokens", "completion_tokens", "usd_micros", "turns") if key in raw}
+    return TaskAttempt(
+        output=raw.get("output", raw.get("content", "")), patch=raw.get("patch"),
+        trajectory_digest=raw.get("trajectory_digest", raw.get("trajectoryDigest")),
+        usage=usage if isinstance(usage, Mapping) else {},
+        route_identity=raw.get("route_identity", raw.get("routeIdentity", {})),
+        attempts=int(raw.get("attempts", 1)), elapsed_seconds=raw.get("elapsed_seconds", raw.get("latency_seconds")),
+    )
+
+
+def _usage(attempt: TaskAttempt) -> tuple[int | None, int | None, int | None, int | None]:
+    raw = attempt.usage or {}
+    def integer(*names: str) -> int | None:
+        for name in names:
+            if name in raw and raw[name] is not None:
+                value = raw[name]
+                if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+                    return None
+                return int(value)
+        return None
+    return integer("prompt_tokens", "promptTokens"), integer("completion_tokens", "completionTokens"), integer("usd_micros", "usdMicros"), integer("turns")
+
+
+def _evaluator_verdict(result: Result[Verdict] | Verdict) -> Verdict | None:
+    if isinstance(result, Verdict):
+        return result
+    return result.value if isinstance(result, Result) and result.ok and isinstance(result.value, Verdict) else None
+
+
+def _claims_pass(verdict: Verdict) -> bool:
+    if verdict.outcome != "claims" or not verdict.claims:
+        return False
+    claims = [claim for claim in verdict.claims if isinstance(claim, Mapping)]
+    collected = any(int(claim.get("tests_collected", claim.get("testsCollected", 0)) or 0) > 0 for claim in claims)
+    passed = any(bool(claim.get("passed", claim.get("pass", False))) for claim in claims)
+    return collected and passed
+
+
+def _planned_records(workload: WorkloadDefinition, tasks: Mapping[str, Mapping[str, Any]], base_commit: str | None) -> list[TaskTelemetry]:
+    rows: list[TaskTelemetry] = []
+    planned = [*((task, "control", "composition-v1") for task in sorted(workload.held_out)),
+               *((task, "treatment", "composition-v2") for task in sorted(workload.held_out)),
+               *((task, "treatment", "composition-v2") for task in sorted(workload.adversarial)),
+               *((task, "treatment", "composition-v2") for task in sorted(workload.transfer))]
+    for task_id, arm, version in planned:
+        meta = tasks[task_id]
+        rows.append(TaskTelemetry(task_id, str(meta["split"]), arm, version, Disposition.NOT_RUN,
+                                  task_digest=_task_digest(meta), base_commit=base_commit))
+    return rows
 
 
 def execute_empirical_run(
     workload: WorkloadDefinition,
     tasks_meta: Sequence[Mapping[str, Any]],
     *,
-    candidate_id: str = "cand-83d2c1d21bbc",
-    source_trajectory_digest: str = "sha256:source-traj-m8-empirical",
+    candidate_id: str = "candidate",
     baseline_version: str = "composition-v1",
     candidate_version: str = "composition-v2",
-    generator_id: str = "gen-empirical-1",
-    evaluator_id: str = "eval-empirical-1",
-    promoter_id: str = "promoter-empirical-1",
-    promoter_key: Optional[bytes] = None,
+    generator_id: str = "runtime-backed-benchmark",
+    evaluator_id: str = "exterior-evaluator",
+    promoter_id: str = "independent-promoter",
+    promoter_key: bytes | None = None,
     mode: str = "dry-run",
-    model: str = DEFAULT_MODEL,
-    api_key: Optional[str] = None,
-    gains: Sequence[str] = ("held_out_01", "held_out_02", "held_out_03", "held_out_04"),
-    breaks: Sequence[str] = (),
-) -> Dict[str, Any]:
-    from cryptography.hazmat.primitives.asymmetric import ed25519
+    model: str | None = None,
+    api_key: str | None = None,
+    executor: TaskExecutor | Callable[[Mapping[str, Any], Path, str], TaskAttempt | Mapping[str, Any]] | None = None,
+    evaluator: ExteriorEvaluator | None = None,
+    workspace_root: Path | None = None,
+    base_commit: str | None = None,
+    limits: BudgetLimits | None = None,
+    **_legacy: Any,
+) -> dict[str, Any]:
+    """Run structural preflight or actual attempts through supplied seams.
 
-    if promoter_key is None:
-        priv_key = ed25519.Ed25519PrivateKey.generate()
-    else:
-        priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(promoter_key)
+    ``api_key`` is accepted only for source compatibility and intentionally
+    ignored. Credentials belong to the official adapter's environment.
+    """
+    del api_key, model, generator_id, promoter_id, promoter_key
+    if mode not in {"dry-run", "live", "cassette"}:
+        raise ValueError("mode must be dry-run, cassette, or live")
+    limits = limits or BudgetLimits()
+    tasks = {str(task.get("id")): dict(task) for task in tasks_meta if isinstance(task, Mapping) and task.get("id")}
+    expected = set(workload.dev) | set(workload.held_out) | set(workload.adversarial) | set(workload.transfer)
+    if set(tasks) != expected:
+        missing, extra = sorted(expected - set(tasks)), sorted(set(tasks) - expected)
+        rows = _planned_records(workload, tasks, base_commit) if not missing else []
+        return {"schema": "aether.m8-evidence-bundle/1", "mode": mode, "evidenceKind": "structural_preflight",
+                "workloadDigest": workload.digest(), "workload_digest": workload.digest(),
+                "disposition": Disposition.INVALID_TASK.value, "error": f"task metadata mismatch missing={missing} extra={extra}",
+                "records": [row.to_dict() for row in rows], "promotionEvidence": None}
+    if mode == "dry-run":
+        records = _planned_records(workload, tasks, base_commit)
+        body = {"schema": "aether.m8-evidence-bundle/1", "mode": "dry-run",
+                "evidenceKind": "structural_preflight", "workloadDigest": workload.digest(),
+                "workload_digest": workload.digest(),
+                "candidate": {"candidateId": candidate_id, "baselineVersion": baseline_version, "candidateVersion": candidate_version},
+                "empirical": {"success": None, "lift": None, "regression": None, "cost": None, "tokens": None, "latency": None},
+                "evaluation": {"status": Disposition.NOT_RUN.value, "promotable": None},
+                "promotionEvidence": None, "rollbackEvidence": None,
+                "records": [row.to_dict() for row in records]}
+        body["bundleDigest"] = digest_of(body)
+        body["bundle_digest"] = body["bundleDigest"]
+        return body
+    if executor is None:
+        raise ValueError("live benchmark execution requires an injected official runtime executor")
+    if evaluator is None:
+        raise ValueError("live benchmark execution requires an injected exterior evaluator")
 
-    telemetry_records: List[TaskTelemetry] = []
-    gains_set = set(gains)
-    breaks_set = set(breaks)
+    records: list[TaskTelemetry] = []
+    aggregate_cost = aggregate_tokens = aggregate_turns = 0
+    cost_observed = tokens_observed = turns_observed = False
+    planned = [*((task, "control", baseline_version) for task in sorted(workload.held_out)),
+               *((task, "treatment", candidate_version) for task in sorted(workload.held_out)),
+               *((task, "treatment", candidate_version) for task in sorted(workload.adversarial)),
+               *((task, "treatment", candidate_version) for task in sorted(workload.transfer))]
+    for task_id, arm, version in planned:
+        task = tasks[task_id]
+        temp, root, preimage = _materialize(workspace_root, task)
+        started = time.monotonic()
+        try:
+            if aggregate_cost >= limits.aggregate_usd_micros or aggregate_tokens >= limits.aggregate_tokens or aggregate_turns >= limits.aggregate_turns:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.BUDGET_EXHAUSTED,
+                                              task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage))
+                continue
+            try:
+                call = executor.execute(task, root, arm) if hasattr(executor, "execute") else executor(task, root, arm)  # type: ignore[misc]
+                attempt = _normalise_attempt(call)
+            except TimeoutError:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.TIMED_OUT, invoked=True,
+                                              task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage,
+                                              latency_seconds=time.monotonic() - started))
+                continue
+            except (ConnectionError, OSError, RuntimeError) as exc:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.PROVIDER_UNAVAILABLE, invoked=True,
+                                              task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage,
+                                              latency_seconds=time.monotonic() - started, route_identity={"failure": type(exc).__name__}))
+                continue
+            except (TypeError, ValueError) as exc:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.MODEL_PROTOCOL_ERROR, invoked=True,
+                                              task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage,
+                                              latency_seconds=time.monotonic() - started, route_identity={"failure": str(exc)}))
+                continue
+            prompt, completion, cost, turns = _usage(attempt)
+            if attempt.attempts != 1:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.MODEL_PROTOCOL_ERROR, invoked=True,
+                                              task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage,
+                                              latency_seconds=time.monotonic() - started, prompt_tokens=prompt, completion_tokens=completion,
+                                              usd_micros=cost, turns=turns, route_identity={"failure": "second_episode_rejected", **dict(attempt.route_identity or {})}))
+                continue
+            elapsed = attempt.elapsed_seconds if attempt.elapsed_seconds is not None else time.monotonic() - started
+            common = dict(task_digest=_task_digest(task), base_commit=base_commit, workspace_preimage_digest=preimage,
+                          latency_seconds=elapsed, prompt_tokens=prompt, completion_tokens=completion, usd_micros=cost, turns=turns,
+                          route_identity=attempt.route_identity)
+            # Provider-reported usage is authoritative when present. Count it
+            # immediately after the model call so a NO_PATCH or rejected patch
+            # cannot make the next task appear cheaper than it was.
+            aggregate_cost += cost or 0
+            aggregate_tokens += (prompt or 0) + (completion or 0)
+            aggregate_turns += turns or 0
+            cost_observed = cost_observed or cost is not None
+            tokens_observed = tokens_observed or (prompt is not None and completion is not None)
+            turns_observed = turns_observed or turns is not None
+            if elapsed > limits.per_task_wall_clock_seconds:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.TIMED_OUT, invoked=True, **common))
+                continue
+            if ((cost is not None and cost > limits.per_task_usd_micros) or
+                (prompt is not None and completion is not None and prompt + completion > limits.per_task_tokens) or
+                (turns is not None and turns > limits.per_task_turns)):
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.BUDGET_EXHAUSTED, invoked=True, **common))
+                continue
+            if aggregate_cost > limits.aggregate_usd_micros or aggregate_tokens > limits.aggregate_tokens or aggregate_turns > limits.aggregate_turns:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.BUDGET_EXHAUSTED, invoked=True, **common))
+                continue
+            output = attempt.output if isinstance(attempt.output, str) else ""
+            patch = attempt.patch
+            if patch is None and isinstance(attempt.output, Mapping):
+                patch = attempt.output.get("patch") or attempt.output.get("diff")
+            if not patch and output:
+                possible = output[output.find("--- "):] if "--- " in output else ""
+                patch = possible if "+++ " in possible and "@@ " in possible else None
+            if not isinstance(patch, str) or not patch.strip():
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.NO_PATCH, invoked=True,
+                                              trajectory_digest=attempt.trajectory_digest, **common))
+                continue
+            patch_digest = digest_of(patch)
+            try:
+                _apply_patch(root, patch)
+                postimage = _workspace_digest(root)
+            except (OSError, UnicodeError, ValueError) as exc:
+                records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, Disposition.PATCH_REJECTED, invoked=True,
+                                              patch_digest=patch_digest, trajectory_digest=attempt.trajectory_digest,
+                                              route_identity={"failure": str(exc), **dict(attempt.route_identity or {})}, **{k: v for k, v in common.items() if k != "route_identity"}))
+                continue
+            protocol = EvaluationProtocol("m8-heldout-exterior/1", {
+                "task_digest": _task_digest(task), "workspace_preimage_digest": preimage,
+                "postimage_digest": postimage, "patch_digest": patch_digest})
+            eval_ref = RunRef(run_id=f"m8:{task_id}:{arm}", episode_id=f"m8:{task_id}:{arm}")
+            try:
+                verdict = _evaluator_verdict(evaluator.evaluate(eval_ref, protocol))
+            except (ConnectionError, OSError, TimeoutError):
+                verdict = None
+            evaluator_digest = digest_of({"identity": evaluator_id, "protocol": protocol.name})
+            disposition = (Disposition.PASSED if verdict is not None and _claims_pass(verdict)
+                           else Disposition.EVALUATOR_FAILED if verdict is not None and verdict.outcome == "claims"
+                           else Disposition.EVALUATOR_UNAVAILABLE)
+            records.append(TaskTelemetry(task_id, str(task["split"]), arm, version, disposition, invoked=True, grounded=True,
+                                          verified=disposition is Disposition.PASSED, postimage_digest=postimage,
+                                          patch_digest=patch_digest, trajectory_digest=attempt.trajectory_digest,
+                                          evaluator_identity_digest=evaluator_digest, **common))
+        finally:
+            temp.cleanup()
 
-    def task_runner(task: str, version: str) -> Dict[str, bool]:
-        t0 = time.time()
-        is_candidate = (version == candidate_version)
-        split = "held_out"
-        task_info = {}
-        for tm in tasks_meta:
-            if tm["id"] == task:
-                split = tm["split"]
-                task_info = tm
-                break
-
-        if mode == "live" and api_key:
-            prompt = f"Solve task {task}: {task_info.get(title, task)}"
-            call_res = _call_openrouter_api(prompt, model=model, api_key=api_key)
-            prompt_tokens = call_res["prompt_tokens"]
-            completion_tokens = call_res["completion_tokens"]
-            usd_micros = call_res["usd_micros"]
-            latency = call_res["latency_seconds"]
-            passed = bool(call_res["content"])
-            invoked = is_candidate
-            grounded = invoked and passed
-            verified = grounded
-        else:
-            if split == "adversarial":
-                passed = False
-                invoked = False
-                grounded = False
-                verified = False
-            elif split == "transfer":
-                passed = is_candidate
-                invoked = is_candidate
-                grounded = is_candidate
-                verified = is_candidate
-            elif not is_candidate:
-                passed = (task not in gains_set)
-                invoked = False
-                grounded = False
-                verified = False
-            else:
-                passed = (task not in breaks_set)
-                invoked = (task in gains_set or task in ("held_out_05", "held_out_06"))
-                grounded = invoked and passed
-                verified = grounded
-
-            latency = time.time() - t0
-            prompt_tokens = 450 + len(task) * 10
-            completion_tokens = 180 if passed else 95
-            usd_micros = int((prompt_tokens * 0.14 + completion_tokens * 0.28))
-
-        task_traj_digest = digest_of({"task": task, "version": version, "passed": passed, "invoked": invoked})
-
-        telemetry_records.append(TaskTelemetry(
-            task_id=task,
-            split=split,
-            arm="treatment" if is_candidate else "control",
-            composition_version=version,
-            terminal="COMPLETED" if passed else "FAILED",
-            passed=passed,
-            invoked=invoked,
-            grounded=grounded,
-            verified=verified,
-            turns=1,
-            prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens,
-            usd_micros=usd_micros,
-            latency_seconds=latency,
-            trajectory_digest=task_traj_digest,
-            event_store_identity="sqlite-wal:m8-heldout",
-        ))
-
-        return {
-            "passed": passed,
-            "invoked": invoked,
-            "grounded": grounded,
-            "verified": verified,
-        }
-
-    # Evaluate held_out
-    baseline_passes = 0
-    candidate_passes = 0
-    gross_gains_list = []
-    regressions_list = []
-    residual_list = []
-    invoked_list = []
-    grounded_list = []
-    verified_list = []
-
-    for task in sorted(workload.held_out):
-        before = task_runner(task, baseline_version)
-        after = task_runner(task, candidate_version)
-        b_pass = before["passed"]
-        a_pass = after["passed"]
-        baseline_passes += int(b_pass)
-        candidate_passes += int(a_pass)
-        if a_pass and not b_pass:
-            gross_gains_list.append(task)
-        elif b_pass and not a_pass:
-            regressions_list.append(task)
-        elif not a_pass:
-            residual_list.append(task)
-        if after.get("invoked"):
-            invoked_list.append(task)
-        if after.get("grounded"):
-            grounded_list.append(task)
-        if after.get("verified"):
-            verified_list.append(task)
-
-    # Evaluate adversarial
-    adv_present_only = []
-    for task in sorted(workload.adversarial):
-        res = task_runner(task, candidate_version)
-        if res.get("invoked"):
-            adv_present_only.append(task)
-
-    # Evaluate transfer
-    transfer_passes = 0
-    for task in sorted(workload.transfer):
-        res = task_runner(task, candidate_version)
-        if res.get("passed"):
-            transfer_passes += 1
-
-    held_out_total = len(workload.held_out)
-    held_out_lift = (candidate_passes - baseline_passes) / (held_out_total or 1)
-    regression_rate = len(regressions_list) / (held_out_total or 1)
-    presence_only = bool(set(gross_gains_list) - set(invoked_list))
-
-    evaluation_detail = {
-        "candidateId": candidate_id,
-        "workloadDigest": workload.digest(),
-        "baselinePasses": baseline_passes,
-        "candidatePasses": candidate_passes,
-        "heldOutTotal": held_out_total,
-        "heldOutLift": round(held_out_lift, 6),
-        "grossGains": gross_gains_list,
-        "regressions": regressions_list,
-        "regressionRate": round(regression_rate, 6),
-        "residualFailures": residual_list,
-        "invokedOn": invoked_list,
-        "groundedOn": grounded_list,
-        "verifiedOn": verified_list,
-        "adversarialPresentOnly": adv_present_only,
-        "transferPasses": transfer_passes,
-        "presenceOnly": presence_only,
-        "regressionBudget": 0.02,
-        "minHeldOutLift": 0.05,
-    }
-
-    report_digest = digest_of(evaluation_detail)
-
-    held_out_pass = (held_out_lift >= 0.05 and regression_rate <= 0.02 and not presence_only)
-    affected_context_pass = True
-    adversarial_pass = (len(adv_present_only) == 0)
-    grounded_all = (set(gross_gains_list) <= set(grounded_list))
-    verified_all = (set(gross_gains_list) <= set(verified_list))
-    promotable = all((held_out_pass, affected_context_pass, adversarial_pass, grounded_all, verified_all))
-
-    evaluation_report = {
-        "candidate_id": candidate_id,
-        "held_out_pass": held_out_pass,
-        "affected_context_pass": affected_context_pass,
-        "adversarial_pass": adversarial_pass,
-        "grounded": grounded_all,
-        "verified": verified_all,
-        "report_digest": report_digest,
-        "promotable": promotable,
-    }
-
-    promo_body = {
-        "candidate": candidate_id,
-        "report": report_digest,
-        "promoter": promoter_id,
-        "fromVersion": baseline_version,
-        "toVersion": candidate_version,
-    }
-    raw_sig = priv_key.sign(json.dumps(promo_body, sort_keys=True, separators=(",", ":")).encode("utf-8"))
-    b64_sig = base64.b64encode(raw_sig).decode("ascii")
-
-    total_cost_usd = sum(r.usd_micros for r in telemetry_records) / 1_000_000
-    total_tokens = sum(r.prompt_tokens + r.completion_tokens for r in telemetry_records)
-
-    bundle = {
-        "schema": "aether.m8-evidence-bundle/1",
-        "workload_digest": workload.digest(),
-        "candidate": {
-            "candidate_id": candidate_id,
-            "composition_version": baseline_version,
-            "source_trajectory_digest": source_trajectory_digest,
-            "body_digest": digest_of({"candidate": candidate_id, "source": source_trajectory_digest}),
-        },
-        "evaluation_report": evaluation_report,
-        "evaluation_detail": evaluation_detail,
-        "promotion_evidence": {
-            "candidate_id": candidate_id,
-            "previous_version": baseline_version,
-            "promoted_version": candidate_version,
-            "report_digest": report_digest,
-            "promoter_id": promoter_id,
-            "signature": b64_sig,
-        },
-        "resource_consumption": {
-            "total_records": len(telemetry_records),
-            "total_tokens": total_tokens,
-            "total_cost_usd": round(total_cost_usd, 6),
-            "currency": "USD",
-        },
-        "records": [r.to_dict() for r in telemetry_records],
-    }
-
-    bundle["bundle_digest"] = digest_of({k: v for k, v in bundle.items() if k != "bundle_digest"})
-    return bundle
+    treatment = [row for row in records if row.arm == "treatment" and row.split == "held_out"]
+    control = {row.task_id: row for row in records if row.arm == "control" and row.split == "held_out"}
+    baseline_passes = sum(row.passed for row in control.values())
+    candidate_passes = sum(row.passed for row in treatment)
+    gains = sorted(row.task_id for row in treatment if row.passed and not control[row.task_id].passed)
+    regressions = sorted(row.task_id for row in treatment if not row.passed and control[row.task_id].passed)
+    evaluated = [row for row in treatment if row.disposition in {Disposition.PASSED, Disposition.EVALUATOR_FAILED}]
+    measured_rows = list(control.values()) + treatment
+    complete_measurement = bool(measured_rows) and all(
+        row.disposition in {Disposition.PASSED, Disposition.EVALUATOR_FAILED} for row in measured_rows)
+    body = {"schema": "aether.m8-evidence-bundle/1", "mode": mode, "evidenceKind": "empirical_execution",
+            "workloadDigest": workload.digest(), "workload_digest": workload.digest(),
+            "candidate": {"candidateId": candidate_id},
+            "empirical": {"baselinePasses": baseline_passes if complete_measurement else None,
+                           "candidatePasses": candidate_passes if complete_measurement else None,
+                           "heldOutTotal": len(treatment),
+                           "heldOutLift": (candidate_passes - baseline_passes) / len(treatment) if complete_measurement and treatment else None,
+                           "regressionRate": len(regressions) / len(treatment) if complete_measurement and treatment else None,
+                           "grossGains": gains if complete_measurement else None,
+                           "regressions": regressions if complete_measurement else None,
+                           "evaluatedMeasurements": len(evaluated),
+                           "totalCostUsdMicros": aggregate_cost if cost_observed else None,
+                           "totalTokens": aggregate_tokens if tokens_observed else None,
+                           "totalTurns": aggregate_turns if turns_observed else None},
+            "evaluation": {"status": "COMPLETE" if complete_measurement else Disposition.NOT_RUN.value, "promotable": False},
+            "promotionEvidence": None, "rollbackEvidence": None, "records": [row.to_dict() for row in records]}
+    body["bundleDigest"] = digest_of(body)
+    body["bundle_digest"] = body["bundleDigest"]
+    return body
 
 
 def main() -> int:
@@ -443,31 +623,18 @@ def main() -> int:
     parser.add_argument("--workload", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--mode", choices=["dry-run", "cassette", "live"], default="dry-run")
-    parser.add_argument("--model", type=str, default=DEFAULT_MODEL)
-    parser.add_argument("--api-key-env", type=str, default="OPENROUTER_API_KEY")
     args = parser.parse_args()
-
     workload, tasks_meta = load_workload(args.workload)
-    api_key = os.environ.get(args.api_key_env)
-
-    bundle = execute_empirical_run(
-        workload,
-        tasks_meta,
-        mode=args.mode,
-        model=args.model,
-        api_key=api_key,
-    )
-
+    bundle = execute_empirical_run(workload, tasks_meta, mode=args.mode)
     out_json = json.dumps(bundle, indent=2) + "\n"
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(out_json, encoding="utf-8")
-        print(f"Wrote M-8 empirical evidence bundle to {args.out} (digest: {bundle[bundle_digest]})")
+        print(f"Wrote structural/empirical bundle to {args.out} (digest: {bundle['bundleDigest']})")
     else:
         print(out_json)
-
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

@@ -135,9 +135,9 @@ When a run is resumed from disk (`vanguard resume --run-id <ID>`):
 
 ---
 
-## 6. v0.9.2 Target: Context and Completion Policy Binding
+## 6. Context and Completion Policy Binding
 
-> **TARGET / PLANNED — not AS_BUILT.** The existing single composition root remains authoritative; v0.9.2 extends its bindings rather than introducing a second runtime path.
+The existing single composition root remains authoritative. Code-pack preset overlays compile through the same composition path and only change bounded cognition/context ceilings; they do not widen capabilities or create a second runtime.
 
 `HarnessSession` should bind the manifest-resolved context policy into `ContextCompiler` and optionally bind an `IContextManager` backed by `IndexPort`. Repository intelligence is provider-neutral and authority-free:
 
@@ -157,9 +157,9 @@ The same composition path binds a generic completion-admission policy. `EpisodeE
 
 `D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
 
-## 7. v0.9.2 Target: Semantic Continuation
+## 7. Semantic Continuation
 
-Cold resume already reconstructs safety/accounting state and reconciles effects. The v0.9.2 target additionally reconstructs a compact semantic continuation packet from ledger facts and artifacts: original task identity, current plan, latest classified failure, modified-file/postimage identity, latest verification, settled effects, next action, and remaining budgets. This packet is derived state; missing artifacts must fail explicitly or trigger regrounding rather than silently inventing context.
+Cold resume already reconstructs safety/accounting state and reconciles effects. `CodingTaskState` now provides the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, and remaining budgets. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
 
 ---
 

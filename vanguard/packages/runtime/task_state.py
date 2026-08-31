@@ -2,12 +2,73 @@
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 from ..domain.canonicalisation.digest import digest_of
 
-__all__ = ["CodingTaskState"]
+__all__ = ["CodingTaskState", "DeadEnd", "Discovery", "RouteDecision", "TodoItem"]
+
+
+@dataclass(frozen=True, slots=True)
+class Discovery:
+    """A durable fact discovered during exploration, with its provenance."""
+
+    fact: str
+    source: str
+    confidence: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not self.fact.strip() or not self.source.strip() or not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("discovery requires source/fact and confidence in [0, 1]")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"fact": self.fact, "source": self.source, "confidence": self.confidence}
+
+
+@dataclass(frozen=True, slots=True)
+class DeadEnd:
+    """A failed approach retained so escalation does not repeat it blindly."""
+
+    attempt: str
+    reason: str
+    evidence: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.attempt.strip() or not self.reason.strip():
+            raise ValueError("dead end requires an attempt and reason")
+
+    def to_dict(self) -> dict[str, str]:
+        return {"attempt": self.attempt, "reason": self.reason, "evidence": self.evidence}
+
+
+@dataclass(frozen=True, slots=True)
+class RouteDecision:
+    """A model-route decision and its typed failure, if any."""
+
+    route: str
+    reason: str
+    failure: str | None = None
+
+    def to_dict(self) -> dict[str, str | None]:
+        return {"route": self.route, "reason": self.reason, "failure": self.failure}
+
+
+@dataclass(frozen=True, slots=True)
+class TodoItem:
+    """TODO state whose completion requires the right evidence."""
+
+    todo_id: str
+    description: str
+    status: str = "pending"
+    receipt_digest: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.todo_id.strip() or not self.description.strip():
+            raise ValueError("TODO requires an id and description")
+        if self.status not in {"pending", "in_progress", "complete"}:
+            raise ValueError(f"unknown TODO status: {self.status!r}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +88,14 @@ class CodingTaskState:
     next_action: str | None = None
     settled_effects: tuple[str, ...] = ()
     remaining_budgets: Mapping[str, int] = field(default_factory=dict)
+    task_class: str = "coding"
+    completion_requirements: tuple[str, ...] = ()
+    discoveries: tuple[Discovery, ...] = ()
+    dead_ends: tuple[DeadEnd, ...] = ()
+    implicated_files: tuple[str, ...] = ()
+    change_surface: tuple[str, ...] = ()
+    todo_items: tuple[TodoItem, ...] = ()
+    route_decisions: tuple[RouteDecision, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.objective.strip():
@@ -39,6 +108,18 @@ class CodingTaskState:
         if any(not isinstance(k, str) or not isinstance(v, int) or v < 0
                for k, v in self.remaining_budgets.items()):
             raise ValueError("remaining_budgets must contain non-negative integers")
+        if not isinstance(self.task_class, str) or not self.task_class.strip():
+            raise ValueError("task_class must be non-empty")
+        if not all(isinstance(v, str) and v for v in self.completion_requirements):
+            raise TypeError("completion_requirements must contain non-empty strings")
+        if not all(isinstance(v, Discovery) for v in self.discoveries):
+            raise TypeError("discoveries must contain Discovery values")
+        if not all(isinstance(v, DeadEnd) for v in self.dead_ends):
+            raise TypeError("dead_ends must contain DeadEnd values")
+        if not all(isinstance(v, TodoItem) for v in self.todo_items):
+            raise TypeError("todo_items must contain TodoItem values")
+        if not all(isinstance(v, RouteDecision) for v in self.route_decisions):
+            raise TypeError("route_decisions must contain RouteDecision values")
 
     def to_canonical_dict(self) -> dict[str, Any]:
         return {
@@ -55,6 +136,16 @@ class CodingTaskState:
             "nextAction": self.next_action,
             "settledEffects": list(self.settled_effects),
             "remainingBudgets": dict(self.remaining_budgets),
+            "taskClass": self.task_class,
+            "completionRequirements": list(self.completion_requirements),
+            "discoveries": [item.to_dict() for item in self.discoveries],
+            "deadEnds": [item.to_dict() for item in self.dead_ends],
+            "implicatedFiles": list(self.implicated_files),
+            "changeSurface": list(self.change_surface),
+            "todoItems": [{"todoId": item.todo_id, "description": item.description,
+                           "status": item.status, "receiptDigest": item.receipt_digest}
+                          for item in self.todo_items],
+            "routeDecisions": [item.to_dict() for item in self.route_decisions],
         }
 
     def digest(self) -> str:
@@ -72,6 +163,14 @@ class CodingTaskState:
         verification = raw.get("lastVerification", raw.get("last_verification", {}))
         if not isinstance(budgets, Mapping) or not isinstance(verification, Mapping):
             raise TypeError("state mappings must be objects")
+        discoveries = tuple(Discovery(str(item["fact"]), str(item["source"]), float(item.get("confidence", 1.0)))
+                           for item in raw.get("discoveries", ()) if isinstance(item, Mapping))
+        dead_ends = tuple(DeadEnd(str(item["attempt"]), str(item["reason"]), str(item.get("evidence", "")))
+                         for item in raw.get("deadEnds", ()) if isinstance(item, Mapping))
+        todos = tuple(TodoItem(str(item["todoId"]), str(item["description"]), str(item.get("status", "pending")), item.get("receiptDigest"))
+                      for item in raw.get("todoItems", ()) if isinstance(item, Mapping))
+        routes = tuple(RouteDecision(str(item["route"]), str(item["reason"]), item.get("failure"))
+                       for item in raw.get("routeDecisions", ()) if isinstance(item, Mapping))
         return cls(
             objective=str(raw.get("objective", "")),
             constraints=strings("constraints", "constraints"),
@@ -86,4 +185,31 @@ class CodingTaskState:
             next_action=raw.get("nextAction", raw.get("next_action")),
             settled_effects=strings("settled_effects", "settledEffects"),
             remaining_budgets={str(k): int(v) for k, v in budgets.items()},
+            task_class=str(raw.get("taskClass", raw.get("task_class", "coding"))),
+            completion_requirements=strings("completion_requirements", "completionRequirements"),
+            discoveries=discoveries,
+            dead_ends=dead_ends,
+            implicated_files=strings("implicated_files", "implicatedFiles"),
+            change_surface=strings("change_surface", "changeSurface"),
+            todo_items=todos,
+            route_decisions=routes,
         )
+
+    def transition_todo(self, todo_id: str, status: str, *, receipt_digest: str | None = None,
+                        verification_fresh: bool = False) -> "CodingTaskState":
+        """Advance a TODO only when its evidence requirement is satisfied."""
+        if status == "complete" and not receipt_digest:
+            raise ValueError("TODO completion requires a receipt digest")
+        if status == "complete" and ("verify" in self.completion_requirements or "verification" in self.completion_requirements) and not verification_fresh:
+            raise ValueError("verification TODO requires a fresh verification receipt")
+        updated = []
+        found = False
+        for item in self.todo_items:
+            if item.todo_id == todo_id:
+                updated.append(TodoItem(item.todo_id, item.description, status, receipt_digest or item.receipt_digest))
+                found = True
+            else:
+                updated.append(item)
+        if not found:
+            raise KeyError(todo_id)
+        return dataclasses.replace(self, todo_items=tuple(updated), next_action=None if status == "complete" else self.next_action)

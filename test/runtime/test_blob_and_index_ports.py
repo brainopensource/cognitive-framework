@@ -236,6 +236,33 @@ class BothIndexesSatisfyThePort(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertIn("pkg/ledger.py", index.files().value)
 
+    def test_dependency_and_test_observations_are_values_and_sorted(self) -> None:
+        contents = {
+            "src/main.py": "from src.util import value\n\ndef run():\n    return value\n",
+            "src/util.py": "value = 42\n",
+            "tests/test_main.py": "from src.main import run\n",
+        }
+        index = InMemoryRepoIndex(contents)
+        edges = index.dependencies().value
+        self.assertEqual(edges[0].source, "src/main.py")
+        self.assertEqual(edges[0].target, "src/util.py")
+        associations = index.tests().value
+        self.assertEqual(associations[0].test_path, "tests/test_main.py")
+        self.assertEqual(associations[0].source_path, "src/main.py")
+        summary = index.repo_map(token_budget=1).value
+        self.assertTrue(summary.truncated)
+        self.assertEqual(summary.adapter_id, "in-memory-repo-index/1")
+
+    def test_path_traversal_and_symlink_escape_are_rejected(self) -> None:
+        for index in self.indexes:
+            self.assertFalse(index.files(prefix="../").ok)
+        outside = self.root.parent / "outside.py"
+        outside.write_text("secret = True\n")
+        (self.root / "link.py").symlink_to(outside)
+        result = FileRepoIndex().index(str(self.root))
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "invalid_request")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -124,6 +124,7 @@
 {"symbol": "CostVector", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DSMLDecoderPlugin", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DaemonConfig", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/daemon.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "DeadEnd", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Decision", "kind": "class", "defined_in": "vanguard/packages/domain/selectors/resource_selector.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Decision", "kind": "class", "defined_in": "vanguard/packages/kernel/policy.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "DecoderPlugin", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -132,11 +133,13 @@
 {"symbol": "DelayedTerminalEmitter", "kind": "class", "defined_in": "vanguard/packages/runtime/trajectory.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DelegationContractError", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DelegationResult", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "DependencyEdge", "kind": "class", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "DeprecatedKindError", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
 {"symbol": "DescriptorBoundApprovalPolicy", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DiagnosticCheck", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DiagnosticsResult", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DiscoveredInstruction", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/discovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "Discovery", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DispatchResult", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "DogfoodReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DomainBindingRegistry", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/base.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -411,6 +414,7 @@
 {"symbol": "Reflection", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "RegisteredManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "RepairOutcome", "kind": "class", "defined_in": "vanguard/packages/runtime/repair.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "RepositoryMap", "kind": "class", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ReproducibilityVector", "kind": "class", "defined_in": "vanguard/packages/runtime/reproducibility.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Reservation", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Reservation", "kind": "class", "defined_in": "vanguard/packages/kernel/budget.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
@@ -424,6 +428,7 @@
 {"symbol": "RollbackEvidence", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
 {"symbol": "RollbackRefused", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RootlessSandboxRunner", "kind": "class", "defined_in": "vanguard/packages/adapters/sandbox/rootless.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "RouteDecision", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RouteDecision", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RpcResponse", "kind": "class", "defined_in": "vanguard/packages/runtime/registry/broker.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunMetrics", "kind": "class", "defined_in": "vanguard/packages/runtime/paired_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -530,6 +535,7 @@
 {"symbol": "TierAttempt", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TierEscalationRouter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TierLadder", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TodoItem", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ToolPolicy", "kind": "class", "defined_in": "vanguard/packages/agency/episode/tool_policy.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ToolSchema", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Topology", "kind": "class", "defined_in": "vanguard/packages/runtime/topology.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

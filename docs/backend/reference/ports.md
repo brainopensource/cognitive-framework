@@ -54,7 +54,7 @@ This document is the canonical reference owner for all hexagonal port protocols 
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure Python protocols enforce strict dependency inversion (`domain <- ports <- kernel <- agency <- runtime -> adapters`).
-- `PARTIAL` — `IContextManager` and `IndexPort` provide the existing extension seams; the provider-neutral repository `ContextPacket` usage described in Section 5 is a **v0.9.2 target**, not a new implemented port signature.
+- `IMPLEMENTED` — `IndexPort` exposes bounded, value-only file, symbol, dependency, test-association, and repository-map observations. It does not select policy or dispatch effects.
 
 ---
 
@@ -97,7 +97,7 @@ Hexagonal ports define the interfaces required by the runtime and kernel:
 | `EnvironmentPort` (`environment.py`) | `get(key) -> str`<br>`cwd() -> Path`<br>`qualify(tool) -> bool` | Host environment inspection and path resolution. |
 | `ClockPort` (`determinism.py`) | `now() -> datetime` | Pluggable time source for deterministic replay. |
 | `RandomPort` (`determinism.py`) | `token() -> str`, `randint(a, b) -> int` | Pluggable entropy source for deterministic replay. |
-| `IndexPort` (`index.py`) | `search(query) -> list[Hit]`, `index(doc) -> None` | Inverted index / search interface. |
+| `IndexPort` (`index.py`) | `index(root)`, `files(prefix)`, `symbols(name, path)`, `dependencies(path)`, `tests(path)`, `repo_map(token_budget)` | Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries. |
 | `MemoryPort` (`memory.py`) | `search(q) -> list[MemoryHit]`, `put(r) -> None` | Memory retrieval port interface. |
 | `ChildTurnPort` (`child_turn.py`) | `spawn(child_spec) -> ChildResult` | Mediated child agent execution delegation. |
 
@@ -128,9 +128,9 @@ SPI methods return the `Result[T]` Algebraic Data Type (`vanguard.packages.domai
 
 ---
 
-## 5. v0.9.2 Target: Repository-Intelligence Binding
+## 5. Repository-Intelligence Binding
 
-> **TARGET / PLANNED — not AS_BUILT.** Reuse the five frozen SPIs and existing `IndexPort`; do not add an LDA-specific substrate port.
+The existing `IndexPort` is the narrow repository-intelligence boundary; no LDA-specific substrate port is added. `FileRepoIndex` and `InMemoryRepoIndex` return value-only observations. The file adapter bounds files, symbols, dependency edges, and test associations, rejects traversal and symlink escape, and reports a deterministic source revision.
 
 The code-pack `IContextManager` may query `IndexPort` or a provider adapter and compile the results into a bounded, value-only context packet. The planned logical fields are:
 
@@ -146,7 +146,7 @@ packet_digest
 
 `omissions` makes truncation, unavailable sources, and failed provider lookups explicit. Hits are advisory references with provenance and confidence; consumers resolve and verify target files before use. An index health claim is usable only when its schema is valid, its source snapshot matches, required entity counts are non-zero, referenced paths resolve, and freshness checks pass. Otherwise composition degrades to a deterministic filesystem/source search implementation.
 
-The provider boundary is intentionally narrow: it retrieves and ranks information but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Exact value types and versioned schemas should be added here only when their source implementation lands.
+The provider boundary is intentionally narrow: it retrieves observations but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Empty observations are successful values; an unbuilt, unavailable, stale, or invalid source is a typed failure for deterministic fallback.
 
 ---
 

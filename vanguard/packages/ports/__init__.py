@@ -52,6 +52,7 @@ from .evidence_errors import (
     EvidenceCaptureRequiredError,
     EvidenceSink,
 )
+from .index import DependencyEdge, IndexPort, RepositoryMap, Symbol, TestAssociation
 
 __all__ = [
     "AffectedResource",
@@ -91,4 +92,9 @@ __all__ = [
     "EvidenceCaptureError",
     "EvidenceCaptureRequiredError",
     "EvidenceSink",
+    "DependencyEdge",
+    "IndexPort",
+    "RepositoryMap",
+    "Symbol",
+    "TestAssociation",
 ]

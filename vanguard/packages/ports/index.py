@@ -20,7 +20,7 @@ from typing import Protocol, Sequence, runtime_checkable
 
 from .event_store import Result
 
-__all__ = ["IndexPort", "Symbol"]
+__all__ = ["DependencyEdge", "IndexPort", "RepositoryMap", "Symbol", "TestAssociation"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,6 +38,38 @@ class Symbol:
     line: int
 
 
+@dataclass(frozen=True, slots=True)
+class DependencyEdge:
+    """A normalized, value-only import/dependency observation."""
+
+    source: str
+    target: str
+    kind: str = "import"
+
+
+@dataclass(frozen=True, slots=True)
+class TestAssociation:
+    """A value-only association between a test and an affected source file."""
+
+    test_path: str
+    source_path: str
+
+
+@dataclass(frozen=True, slots=True)
+class RepositoryMap:
+    """Bounded repository summary with explicit provenance and truncation."""
+
+    files: tuple[str, ...]
+    symbols: tuple[Symbol, ...]
+    dependencies: tuple[DependencyEdge, ...]
+    tests: tuple[TestAssociation, ...]
+    adapter_id: str
+    source_revision: str
+    generated_at_source: str = "deterministic-index"
+    truncated: bool = False
+    token_estimate: int = 0
+
+
 @runtime_checkable
 class IndexPort(Protocol):
     """What is in the workspace, as observations."""
@@ -50,3 +82,12 @@ class IndexPort(Protocol):
 
     def symbols(self, *, name: str = "", path: str = "") -> Result[Sequence[Symbol]]:
         """Definitions matching `name` and/or `path`. Empty is not a failure."""
+
+    def dependencies(self, *, path: str = "") -> Result[Sequence[DependencyEdge]]:
+        """Normalized import/dependency edges, optionally for one source path."""
+
+    def tests(self, *, path: str = "") -> Result[Sequence[TestAssociation]]:
+        """Test-to-source associations, optionally for one source path."""
+
+    def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
+        """Return a bounded, attributable repository summary."""

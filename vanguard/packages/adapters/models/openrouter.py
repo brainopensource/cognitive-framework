@@ -306,7 +306,19 @@ def _messages(context: ContextBundle) -> list[dict[str, Any]]:
         content_str = str(content or "")
         role = getattr(block, "role", None) or (block.get("role") if isinstance(block, Mapping) else None)
 
-        if layer == "L1" or label == "system-core":
+        # `VG-03 §10.1` (`agency/context/layers.py:ROLE_FOR_LAYER`) declares
+        # L1 (system), L2 (tool schemas), and L3 (environment/conventions) all
+        # route to role="system" -- this used to only implement L1, silently
+        # demoting the tool-schema and harness/AGENTS.md blocks (L2, L3) into
+        # role="user" instead. A live qualification traced a model repeatedly
+        # emitting a malformed tool call (`fs.read({"path": "."})`) back to
+        # this exact prompt shape: the tool contract and workspace
+        # instructions arrived as anonymous user turns ahead of the real
+        # task, rather than as the system framing the model was designed to
+        # weight differently. Honoring the block's own declared role (already
+        # correct in the compiled bundle) rather than re-deriving it from the
+        # layer tag is the fix, and it stays correct if a layer is ever added.
+        if role == "system" or layer == "L1" or label == "system-core":
             if not any(m.get("role") == "system" for m in messages):
                 messages.append({"role": "system", "content": content_str})
             else:

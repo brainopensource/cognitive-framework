@@ -5,96 +5,88 @@
     "real_model": "openrouter/free",
     "real_tools": [],
     "real_cost": 0.0,
-    "real_ms": 3792.4,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-0",
     "lam_scenario": "t0-dogfood-bug-001",
     "lam_tools": [
-      "read"
+      "view_file"
     ],
-    "lam_ms": 0.1,
+    "lam_ms": 0.15,
     "parity_score": 90
   },
   {
     "iq": 1,
     "tier_label": "SWE Easy",
-    "real_model": "poolside/laguna-s-2.1:free",
+    "real_model": "openrouter/free",
     "real_tools": [],
     "real_cost": 0.0,
-    "real_ms": 15977.0,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-1",
     "lam_scenario": "t1-calculator",
     "lam_tools": [
       "view_file"
     ],
-    "lam_ms": 0.09,
+    "lam_ms": 0.15,
     "parity_score": 90
   },
   {
     "iq": 2,
     "tier_label": "SWE Medium",
-    "real_model": "deepseek/deepseek-v4-flash-0731",
-    "real_tools": [
-      "list_dir"
-    ],
+    "real_model": "openrouter/free",
+    "real_tools": [],
     "real_cost": 0.0,
-    "real_ms": 1452.9,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-2",
     "lam_scenario": "t2-cache-lru",
     "lam_tools": [
       "view_file"
     ],
-    "lam_ms": 0.09,
-    "parity_score": 95
+    "lam_ms": 0.14,
+    "parity_score": 90
   },
   {
     "iq": 3,
     "tier_label": "SWE Advanced",
-    "real_model": "stealth/ox-alpha",
-    "real_tools": [
-      "list_dir"
-    ],
+    "real_model": "deepseek/deepseek-v4-flash-0731",
+    "real_tools": [],
     "real_cost": 0.0,
-    "real_ms": 3478.8,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-3",
-    "lam_scenario": "t3-caching-engine",
+    "lam_scenario": "t3-astropy-12907",
     "lam_tools": [
-      "list_dir"
+      "view_file"
     ],
-    "lam_ms": 0.07,
-    "parity_score": 95
+    "lam_ms": 0.14,
+    "parity_score": 90
   },
   {
     "iq": 4,
     "tier_label": "SWE Pro Entry",
-    "real_model": "deepseek/deepseek-v4-flash",
-    "real_tools": [
-      "list_dir"
-    ],
-    "real_cost": 5.8834384e-05,
-    "real_ms": 3386.3,
+    "real_model": "deepseek/deepseek-v4-flash-0731",
+    "real_tools": [],
+    "real_cost": 0.0,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-4",
     "lam_scenario": "t4-approval-todo",
     "lam_tools": [
       "view_file"
     ],
-    "lam_ms": 0.07,
-    "parity_score": 95
+    "lam_ms": 0.14,
+    "parity_score": 90
   },
   {
     "iq": 5,
     "tier_label": "SWE Pro Hard",
     "real_model": "openai/gpt-5.6-luna",
-    "real_tools": [
-      "list_dir"
-    ],
-    "real_cost": 6.84e-05,
-    "real_ms": 2362.8,
+    "real_tools": [],
+    "real_cost": 0.0,
+    "real_ms": 0.0,
     "lam_model": "lam/tier-5",
     "lam_scenario": "t5-async-event-loop",
     "lam_tools": [
       "view_file"
     ],
-    "lam_ms": 0.07,
-    "parity_score": 95
+    "lam_ms": 0.15,
+    "parity_score": 90
   }
 ]

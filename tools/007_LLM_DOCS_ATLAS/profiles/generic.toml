@@ -3,6 +3,10 @@
 # $LDA_PROFILE names an explicit profile.
 name = "generic"
 
+# Default code/document extension sets (profile-agnostic, from the standardizer).
+code_extensions = [".py", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".rs", ".go", ".java", ".kt", ".kts", ".cs", ".c", ".h", ".cpp", ".hpp", ".cc", ".rb", ".php", ".sh", ".bash", ".sql"]
+document_extensions = [".md", ".mdx", ".rst", ".txt"]
+
 # Bounded-growth invariant: cap globally ranked symbols at Top-K.
 max_global_symbols = 500
 

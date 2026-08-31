@@ -588,3 +588,68 @@ class FactGraphStorage:
             "documents": docs,
             "relations": relations
         }
+# --------------------------------------------------------------------------
+    # Hygiene & coverage diagnostics (used by `lda check` / healthcheck)
+    # --------------------------------------------------------------------------
+
+    def purge_all(self) -> None:
+        """Wipe every indexed fact. Used by `lda index --rebuild` so stale rows
+        (e.g. entities whose files were deleted) cannot leak into search."""
+        con = self.get_connection()
+        with con:
+            try:
+                con.execute("DELETE FROM fts_search")
+            except Exception:
+                pass
+            con.execute("DELETE FROM doc_sections")
+            con.execute("DELETE FROM documents")
+            con.execute("DELETE FROM symbols")
+            con.execute("DELETE FROM relations")
+            con.execute("DELETE FROM entities")
+            con.execute("DELETE FROM files")
+            con.execute("DELETE FROM index_runs")
+
+    def coverage_by_language(self) -> Dict[str, Any]:
+        """Per-language file, symbol, and relation counts for the fact graph."""
+        con = self.get_connection()
+        files: Dict[str, int] = {r["language"]: r["n"] for r in con.execute(
+            "SELECT language, COUNT(*) AS n FROM files GROUP BY language ORDER BY n DESC")}
+        symbols: Dict[str, int] = {r["language"]: r["n"] for r in con.execute(
+            "SELECT language, COUNT(*) AS n FROM symbols GROUP BY language ORDER BY n DESC")}
+        relations: Dict[str, int] = {r["kind"]: r["n"] for r in con.execute(
+            "SELECT kind, COUNT(*) AS n FROM relations GROUP BY kind ORDER BY n DESC")}
+        return {"files": files, "symbols": symbols, "relations": relations}
+
+    def count_orphan_fts(self) -> int:
+        """FTS rows whose entity no longer exists (set, not text, table)."""
+        con = self.get_connection()
+        try:
+            return int(con.execute(
+                "SELECT COUNT(*) FROM fts_search WHERE entity_id NOT IN (SELECT id FROM entities)"
+            ).fetchone()[0])
+        except Exception:
+            return -1
+
+    def sample_symbol_paths(self, limit: int = 300) -> tuple[str, ...]:
+        con = self.get_connection()
+        rows = con.execute(
+            "SELECT file_path FROM symbols GROUP BY file_path LIMIT ?", (limit,)).fetchall()
+        return tuple(str(r[0]) for r in rows)
+
+    def record_index_run(self, *, files: int, symbols: int, relations: int, incremental: bool) -> None:
+        import time as _time
+
+        con = self.get_connection()
+        id_ = f"idx-{_time.time_ns()}"
+        with con:
+            con.execute(
+                "INSERT INTO index_runs (id, repo_id, started_at, completed_at, files_indexed, symbols_found, relations_found, is_incremental, indexer_version) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (id_, "default", str(_time.time()), str(_time.time()), int(files), int(symbols), int(relations), int(incremental), "1.0.0"),
+            )
+
+    def latest_index_run(self) -> Optional[Dict[str, Any]]:
+        con = self.get_connection()
+        rows = con.execute(
+            "SELECT * FROM index_runs ORDER BY started_at DESC LIMIT 1").fetchall()
+        return dict(rows[0]) if rows else None

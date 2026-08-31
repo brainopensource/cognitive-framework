@@ -8,28 +8,9 @@ from typing import Any, Dict, List, Optional, Set
 
 from ..core.ir import ConfidenceTier, EntityKind, IREntity, Provenance, SourceLocation
 from ..core.models import Entity, ProviderResult
+from ..core.standardizer import detect_language, file_kind
 from .base import BaseProvider
 
-
-LANG_EXT_MAP = {
-    ".py": "python",
-    ".ts": "typescript",
-    ".tsx": "typescript",
-    ".js": "javascript",
-    ".jsx": "javascript",
-    ".rs": "rust",
-    ".go": "go",
-    ".md": "markdown",
-    ".mdx": "markdown",
-    ".json": "json",
-    ".yaml": "yaml",
-    ".yml": "yaml",
-    ".toml": "toml",
-    ".sh": "bash",
-    ".sql": "sql",
-    ".html": "html",
-    ".css": "css"
-}
 
 # Generic, project-agnostic ignore set. Project-specific workspace directories
 # (e.g. dev_context_logs, .vanguard) belong to the active RepositoryProfile,
@@ -42,7 +23,7 @@ IGNORE_DIRS: Set[str] = {
 
 
 class FilesystemProvider(BaseProvider):
-    """Discovers and hashes repository files."""
+    """Discovers and hashes repository files, classifying by profile extensions."""
 
     name = "filesystem"
     confidence_tier = ConfidenceTier.STRUCTURED_DOC
@@ -56,6 +37,8 @@ class FilesystemProvider(BaseProvider):
         root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
         profile = getattr(repo_root, "profile", None)
         ignored = IGNORE_DIRS | (set(profile.excluded_dirs) if profile else set())
+        code_exts = (profile.code_extensions if profile else ())
+        doc_exts = (profile.document_extensions if profile else ())
         files_data: List[Dict[str, Any]] = []
         entities: List[Entity] = []
 
@@ -69,8 +52,8 @@ class FilesystemProvider(BaseProvider):
                 fpath = Path(dirpath) / fname
                 try:
                     rel_path = str(fpath.relative_to(root)).replace("\\", "/")
-                    ext = fpath.suffix.lower()
-                    lang = LANG_EXT_MAP.get(ext, "unknown")
+                    lang = detect_language(rel_path)
+                    kind = file_kind(rel_path, code_exts=code_exts, doc_exts=doc_exts)
                     stat = fpath.stat()
                     mtime = stat.st_mtime
                     size = stat.st_size
@@ -97,7 +80,7 @@ class FilesystemProvider(BaseProvider):
                     entities.append(
                         Entity(
                             id=rel_path,
-                            kind="document" if lang == "markdown" else "file",
+                            kind=kind if kind in {"document", "code"} else "file",
                             locator=rel_path,
                             metadata={"language": lang, "size_bytes": size, "path": rel_path}
                         )

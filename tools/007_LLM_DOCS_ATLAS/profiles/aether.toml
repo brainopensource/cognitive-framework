@@ -25,6 +25,10 @@ low_signal_patterns = [
   "tools/lda/index.html",
 ]
 
+# Code/document extension sets for the AETHER monorepo (TS frontend + Python backend).
+code_extensions = [".py", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".rs", ".go", ".java", ".kt", ".cs", ".c", ".h", ".cpp", ".hpp", ".sh", ".rb", ".php", ".sql"]
+document_extensions = [".md", ".mdx", ".rst", ".txt"]
+
 # Workspace-local directories excluded from discovery (merged with generic
 # defaults by the providers).
 excluded_dirs = [

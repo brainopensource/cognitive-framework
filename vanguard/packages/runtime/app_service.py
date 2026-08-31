@@ -419,6 +419,28 @@ class ApplicationService:
             error=None,
         )
 
+    def evidence(self, run_id: str, *, state_dir: Path | str | None = None) -> Mapping[str, Any]:
+        """Return the run's durable evidence projection through one query path."""
+        events = self.events(run_id, state_dir=state_dir).events
+        trajectory = next((e.get("payload", {}).get("trajectory") for e in reversed(events)
+                           if isinstance(e.get("payload"), Mapping) and e.get("payload", {}).get("trajectory")), None)
+        return {"runId": run_id, "status": self.status(run_id, state_dir=state_dir).status,
+                "events": len(events), "trajectory": trajectory,
+                "eventDigests": [e.get("digest") for e in events if e.get("digest")]}
+
+    def cost(self, run_id: str, *, state_dir: Path | str | None = None) -> Mapping[str, Any]:
+        """Return observed budget settlement; absent dimensions remain absent."""
+        events = self.events(run_id, state_dir=state_dir).events
+        totals: dict[str, int] = {}
+        for event in events:
+            payload = event.get("payload", {})
+            settlement = payload.get("settlement") if isinstance(payload, Mapping) else None
+            if isinstance(settlement, Mapping):
+                for key, value in settlement.items():
+                    if isinstance(value, int) and not isinstance(value, bool):
+                        totals[str(key)] = totals.get(str(key), 0) + value
+        return {"runId": run_id, "observed": bool(totals), "settlement": totals}
+
     def doctor(
         self,
         *,
@@ -660,4 +682,3 @@ class ApplicationService:
                         pass
 
         return out_p
-

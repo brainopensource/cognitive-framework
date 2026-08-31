@@ -53,6 +53,8 @@ def _snapshot(ctx: AtlasContext):
             else "fact graph is empty; run 'uv run lda index' or use tools/docs_rag_v0.py"
         ),
         "root": str(ctx.root),
+        "profile": ctx.profile.name,
+        "head_sha": ctx.head_sha,
         "database_stats": stats,
         "topology": topo,
         "documents": stats.get("documents", len(docs)),
@@ -74,11 +76,19 @@ def main(argv=None):
     # 1. Index command
     idx_p = sub.add_parser("index", help="Index repository into SQLite + FTS5 fact graph")
     idx_p.add_argument("--incremental", action="store_true", help="Perform warm incremental re-index")
+    idx_p.add_argument("--rebuild", action="store_true", help="Purge all facts first, then re-index (kills stale/orphan rows)")
     idx_p.add_argument("--json", action="store_true")
 
     # 2. Status & Scan
-    for name in ("status", "scan", "check", "doctor", "build"):
+    for name in ("status", "scan", "doctor", "build"):
         sub.add_parser(name).add_argument("--json", action="store_true")
+
+    # 2b. SOTA health/ruler commands
+    ch_p = sub.add_parser("check", help="Run full health/coverage/hygiene diagnostics (profile, KB, graph, freshness)")
+    ch_p.add_argument("--json", action="store_true")
+    st_p = sub.add_parser("standardize", help="Inspect symbols in a file via the standardizer (language + canonical kinds)")
+    st_p.add_argument("path", type=str, help="Path to a source file")
+    st_p.add_argument("--json", action="store_true")
 
     # 3. Query
     q_p = sub.add_parser("query", help="Query repository symbols, docs, and AST entities")
@@ -123,7 +133,7 @@ def main(argv=None):
     result = None
 
     if args.command == "index":
-        result = index_repository(repo_root, incremental=args.incremental)
+        result = index_repository(repo_root, incremental=args.incremental, rebuild=getattr(args, "rebuild", False))
     elif args.command in {"status", "scan"}:
         result = _snapshot(ctx)
     elif args.command == "query":
@@ -160,12 +170,23 @@ def main(argv=None):
             index_stats.get("files", 0) > 0
             and index_stats.get("documents", 0) > 0
         )
+        from .core.healthcheck import run_healthcheck
+
+        health = run_healthcheck(ctx, storage)
         result = {
             "root": str(repo_root),
             "storage_db": str(storage.db_path),
             "db_exists": storage.db_path.exists(),
             "index_rows": index_stats,
             "index_healthy": index_healthy,
+            "profile": ctx.profile.name,
+            "head_sha": ctx.head_sha,
+            "coverage": storage.coverage_by_language(),
+            "health": {
+                "status": health["status"],
+                "checks": health["checks"],
+                "recommendations": health["recommendations"],
+            },
             "index_hint": (
                 "index is populated"
                 if index_healthy
@@ -182,7 +203,54 @@ def main(argv=None):
             }
         }
     elif args.command == "check":
-        result = {"delegation": "use just check or test runners", "status": "available"}
+        from .core.healthcheck import run_healthcheck
+
+        result = run_healthcheck(ctx, get_storage(repo_root))
+    elif args.command == "standardize":
+        from .providers.code_ast import CodeASTProvider
+        from .core.standardizer import detect_language, file_kind
+
+        target = Path(args.path)
+        if not target.is_file():
+            result = {"error": "not found", "path": str(args.path)}
+        else:
+            rel = str(target)
+            source = target.read_text(encoding="utf-8", errors="replace")
+            provider = CodeASTProvider()
+            ext = target.suffix.lower()
+            if ext == ".py":
+                syms, rels = provider._parse_python(rel, source)
+            elif ext in (".ts", ".tsx", ".js", ".jsx"):
+                syms, rels = provider._parse_tsjs(rel, source)
+            elif ext == ".rs":
+                syms, rels = provider._parse_rust(rel, source)
+            elif ext == ".go":
+                syms, rels = provider._parse_go(rel, source)
+            else:
+                syms, rels = provider._parse_generic(rel, source, detect_language(rel))
+            result = {
+                "path": rel,
+                "language": detect_language(rel),
+                "kind": file_kind(rel),
+                "symbols": [
+                    {
+                        "name": s.name,
+                        "kind": s.kind,
+                        "language": s.language,
+                        "line": s.location.start_line if s.location else 1,
+                        "signature": s.signature,
+                    }
+                    for s in syms
+                ],
+                "relations": [
+                    {
+                        "kind": getattr(r.kind, "value", str(r.kind)),
+                        "target": r.target_id,
+                        "evidence": r.evidence,
+                    }
+                    for r in rels[:20]
+                ],
+            }
     elif args.command == "build":
         from .dashboard import write_dashboard
         path = write_dashboard(ctx, repo_root / "tools" / "007_LLM_DOCS_ATLAS" / "dashboard.html")

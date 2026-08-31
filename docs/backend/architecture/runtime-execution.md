@@ -64,7 +64,7 @@ This document is the canonical architecture owner for the end-to-end runtime lif
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Single runtime authority (`HarnessSession`) orchestrates all composition, activation, execution, and teardown across the substrate (`RF-94`).
-- `PARTIAL` — Current composition exposes context/index seams, but manifest context-policy binding, optional repository-intelligence packets, coding completion admission, and semantic task-state continuation are **v0.9.2 targets** described below.
+- `PARTIAL` — Current composition exposes context/index seams, registered Coding Max presets, mediated completion admission for those presets, and semantic task-state continuation seams. Full task-state persistence and repository-scale qualification remain open gates.
 
 ---
 
@@ -154,6 +154,13 @@ LDA, SCIP-style indexes, and future providers are substitutable adapters/project
 The target `ContextPacket` records at minimum the task digest, repository snapshot digest, provider identity/version, query digest, selected documents/symbols/files/tests/dependency edges, estimated tokens, omissions, and an overall packet digest. It is bounded by the manifest context budget and captured as evidence sufficient to reproduce selection.
 
 The same composition path binds a generic completion-admission policy. `EpisodeEngine` asks whether completion is admissible; the code pack interprets coding verification, while runtime records the decision and its evidence reference. External evaluation remains a later, independent lifecycle stage.
+
+The backend facade exposes `vg code run`, `status`, `resume`, `evidence`, and
+`cost`. These commands are thin clients of `ApplicationService`; preset names
+resolve to `vg-code-fast`, `vg-code-balanced`, or `vg-code-max` manifests and
+do not create a second runtime or persistence path. Coding Max completion is
+admitted only after mediated patch and test facts have produced a fresh
+workspace-bound verification receipt.
 
 `D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
 

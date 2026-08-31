@@ -84,6 +84,8 @@ class AtlasContext:
             generated_root=paths.get("generated", profile.generated_root),
             cache_root=paths.get("cache", profile.cache_root),
             excluded_dirs=tuple(profile.excluded_dirs),
+            document_extensions=tuple(paths.get("document_extensions", profile.document_extensions)),
+            code_extensions=tuple(paths.get("code_extensions", profile.code_extensions)),
             preferred_authority=tuple(auth.get("preferred", profile.preferred_authority)),
             secondary_authority=tuple(auth.get("secondary", profile.secondary_authority)),
             excluded_authority=tuple(auth.get("excluded_by_default", profile.excluded_authority)),

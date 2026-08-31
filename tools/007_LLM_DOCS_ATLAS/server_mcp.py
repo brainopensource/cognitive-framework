@@ -154,7 +154,17 @@ class LDAMCPServer:
                         },
                         {
                             "name": "lda_doctor",
-                            "description": "Check repository intelligence health status, SQLite database stats, and entity counts.",
+                            "description": "Check repository intelligence health status, SQLite database stats, entity counts, per-language coverage, and HEAD binding.",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
+                            "name": "lda_check",
+                            "description": "Run the full SOTA health/ruler diagnostics: profile resolution, knowledge-base validity, fact-graph health, orphan/stale/low-signal hygiene, freshness, and recommendations.",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
+                            "name": "lda_coverage",
+                            "description": "Per-language coverage of the indexed fact graph (files, symbols, relations).",
                             "inputSchema": {"type": "object", "properties": {}},
                         },
                     ]
@@ -287,6 +297,7 @@ class LDAMCPServer:
                 "status": "HEALTHY" if healthy else "DEGRADED_EMPTY_INDEX",
                 "index_healthy": healthy,
                 "stats": stats,
+                "coverage": self._storage.coverage_by_language(),
                 "storage_db": str(self._storage.db_path),
                 "source_head_sha": self._head_sha(),
                 "profile": self._ctx.profile.name,
@@ -298,6 +309,14 @@ class LDAMCPServer:
                     "docs_rag_v0.py / rg when unhealthy"
                 ),
             }
+
+        elif name == "lda_check":
+            from .core.healthcheck import run_healthcheck
+
+            return run_healthcheck(self._ctx, self._storage)
+
+        elif name == "lda_coverage":
+            return self._storage.coverage_by_language()
 
         raise ValueError(f"Unknown tool: {name}")
 

@@ -23,25 +23,23 @@ from vanguard.packages.runtime.task_state import CodingTaskState
 class TestWave1AuditFalsifiers(unittest.TestCase):
     """Independent falsifiers for Wave 1 architecture, contracts, and seams."""
 
-    def test_falsify_session_lacks_completion_admitter_wiring(self) -> None:
-        """Falsifier: HarnessSession.__init__ or run loop does not wire completion_admitter into EpisodeEngine."""
+    def test_completion_admitter_is_wired_for_coding_max_presets(self) -> None:
+        """Falsifier: Coding Max can terminate without the pack admission gate."""
         session_source = inspect.getsource(HarnessSession)
-        self.assertNotIn(
+        self.assertIn(
             "completion_admitter=",
             session_source,
-            "Documented Finding: HarnessSession currently does NOT pass completion_admitter to EpisodeEngine",
         )
 
-    def test_falsify_presets_missing_in_manifests(self) -> None:
-        """Falsifier: Manifest registry lacks dedicated vg-code-fast, vg-code-balanced, vg-code-max."""
+    def test_coding_max_presets_are_registered_in_manifests(self) -> None:
+        """Falsifier: preset identities disappear from the production registry."""
         packs = ManifestLoader().list_available_packs()
         has_fast = "vg-code-fast" in packs
         has_balanced = "vg-code-balanced" in packs
         has_max = "vg-code-max" in packs
 
-        self.assertFalse(
+        self.assertTrue(
             has_fast and has_balanced and has_max,
-            "Documented Finding: CMX-01 presets (fast, balanced, max) are not yet registered in agency manifests",
         )
 
     def test_verify_index_port_and_adapter_contract(self) -> None:
@@ -54,15 +52,14 @@ class TestWave1AuditFalsifiers(unittest.TestCase):
         self.assertIn("tests", methods)
         self.assertIn("repo_map", methods)
 
-    def test_falsify_repo_map_toolkit_duplicates_indexer_logic(self) -> None:
-        """Falsifier: packs/code-default/toolkits/repo_map.py duplicates scanning & definition regexes rather than consuming IndexPort."""
+    def test_repo_map_toolkit_delegates_to_index_port(self) -> None:
+        """Falsifier: pack-local repository scanning becomes a second index authority."""
         repo_map_path = Path("packs/code-default/toolkits/repo_map.py")
         self.assertTrue(repo_map_path.is_file())
         content = repo_map_path.read_text(encoding="utf-8")
-        # Notice hardcoded regexes and crude slicing in packs/code-default/toolkits/repo_map.py
-        self.assertIn("_DEFINITIONS", content)
-        self.assertIn("token_budget * 4", content)
-        self.assertIn("text[:budget]", content)
+        self.assertIn("FileRepoIndex", content)
+        self.assertNotIn("_DEFINITIONS", content)
+        self.assertNotIn("text[:budget]", content)
 
     def test_falsify_app_service_resume_clobbers_brief(self) -> None:
         """Falsifier: ApplicationService.resume overwrites brief and does not restore CodingTaskState."""

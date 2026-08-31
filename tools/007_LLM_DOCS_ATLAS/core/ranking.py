@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 from .models import Candidate
 from .profile import RepositoryProfile
+from .standardizer import split_identifiers
 from .storage import FactGraphStorage
 
 
@@ -123,10 +124,28 @@ def catalog_fallback_candidates(
 
 
 def extract_search_terms(text: str) -> List[str]:
-    """Extract salient search terms and code identifiers from a task prompt."""
-    raw = re.findall(r"[a-zA-Z0-9_/-]{2,}", text)
-    stopwords = {"and", "for", "the", "with", "from", "that", "this", "into", "over", "what", "when", "where", "which", "make", "help", "need"}
-    return [t.lower() for t in raw if t.lower() not in stopwords]
+    """Extract salient search terms and code identifiers from a task prompt.
+
+    Uses the standardizer's identifier splitting so camelCase / snake_case /
+    PascalCase symbols match ("FrontendPersistencePort" fully OR-able). Terms
+    are deduplicated deterministically.
+    """
+    raw = re.findall(r"[A-Za-z0-9_/.-]{2,}", text)
+    stopwords = {"and", "for", "the", "with", "from", "that", "this", "into",
+                 "over", "what", "when", "where", "which", "make", "help",
+                 "need", "your", "you", "are", "not", "all", "any", "out",
+                 "use", "using", "via", "per", "each"}
+    terms: List[str] = []
+    for token in raw:
+        lower = token.lower()
+        if lower in stopwords:
+            continue
+        terms.append(lower)
+        # Expand camelCase/PascalCase sub-words as additional OR-terms.
+        for part in split_identifiers(token):
+            if part not in terms:
+                terms.append(part)
+    return terms
 
 
 def rank_entities(

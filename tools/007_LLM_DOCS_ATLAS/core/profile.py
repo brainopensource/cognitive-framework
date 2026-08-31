@@ -34,7 +34,8 @@ class RepositoryProfile:
     schema_roots: tuple[str, ...] = ("schemas", "schema")
     generated_root: str = ".generated"
     cache_root: str = ".generated/lda-cache"
-    document_extensions: tuple[str, ...] = (".md", ".mdx", ".rst")
+    document_extensions: tuple[str, ...] = (".md", ".mdx", ".rst", ".txt")
+    code_extensions: tuple[str, ...] = (".py", ".ts", ".tsx", ".js", ".jsx", ".rs", ".go", ".java", ".kt", ".cs", ".c", ".h", ".cpp", ".hpp", ".sh", ".rb", ".php", ".sql")
     excluded_dirs: tuple[str, ...] = (
         ".git", ".venv", "node_modules", "dist", "dist-browser", "build", "site", ".site", "out",
         "__pycache__", ".tox", ".coverage", "coverage", ".pytest_cache", ".ruff_cache"

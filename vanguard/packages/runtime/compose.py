@@ -425,6 +425,7 @@ class Runtime:
         than from a dialect's role vocabulary, so identical bytes carry an
         identical artifact digest whichever dialect named them.
         """
+        directory = directory.resolve()
         root = directory.parent
         wanted: list[tuple[str, str]] = []
         for component in canonical.components:

@@ -8,6 +8,7 @@ compose a harness and it does not write envelopes except through
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..agency import EpisodeEngine, RunTermination
+from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
 from ..agency.context import (
     CompetencePriorRecorder,
     CompiledContext,
@@ -429,6 +431,9 @@ class HarnessSession:
         self._on_terminal = on_terminal
         self.run_plan = run_plan
         self._episode_begun_here = False
+        self._completion_gate = AdmissionGate()
+        self._completion_changed_files: set[str] = set()
+        self._completion_verification: VerificationReceipt | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -601,6 +606,9 @@ class HarnessSession:
                 for capability in harness.frozen.capabilities
             ),
         )
+        # Read-only callback context for completion facts; it is populated
+        # exclusively by this session's mediated dispatch path.
+        self.operator._completion_calls = self.calls
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -926,13 +934,18 @@ class HarnessSession:
                 preset_mode=getattr(harness, "tool_policy_preset", None),
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
-                truncation_detector=truncation_detector)
+                truncation_detector=truncation_detector,
+                completion_admitter=(self._admit_completion
+                                     if harness.harness in {
+                                         "vg-code-fast", "vg-code-balanced", "vg-code-max"
+                                     } else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
                 spans=(_operator_span(),),
                 receipt_labeller=lambda turn, dispatch: _admit_turn_result(
-                    self.operator, turn, dispatch))
+                    self.operator, turn, dispatch,
+                    on_dispatch=self._observe_completion_dispatch))
             terminal, detail = outcome.terminal, outcome.episode.detail
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)
@@ -1119,8 +1132,56 @@ class HarnessSession:
                 episode_id=self.task.episode_id, verdict=verdict)
         return verdict
 
+    def _workspace_digest(self) -> str:
+        snapshot = self.ports.environment.snapshot()
+        if snapshot.ok and snapshot.value is not None:
+            return snapshot.value.digest
+        return ""
 
-def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Span | None:
+    def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
+        """Capture patch and verification facts at the mediated boundary."""
+        if result.failure is not FailurePath.OK or result.outcome is None:
+            return
+        outcome = result.outcome
+        if request.action in {"patch", "write", "delete"}:
+            path = request.args.get("path")
+            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
+                self._completion_changed_files.add(path.replace("\\", "/"))
+        if request.action not in {"test", "exec"}:
+            return
+        argv = request.args.get("argv", request.args.get("command", ()))
+        if isinstance(argv, str):
+            argv = ()
+        executable = str(argv[0]) if isinstance(argv, Sequence) and argv else ""
+        is_test = executable.rsplit("/", 1)[-1] in {"pytest", "unittest"} or any(
+            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else ()))
+        if not is_test:
+            return
+        detail = str(outcome.detail or "")
+        match = re.search(r"\[exit (-?\d+)\]", detail)
+        exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
+        self._completion_verification = VerificationReceipt(
+            exit_code=exit_code,
+            executed_test_count=1,
+            workspace_digest=self._workspace_digest(),
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            receipt_digest=outcome.result_digest or "",
+        )
+
+    def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
+        """Apply the coding completion contract before reducing ``finish``."""
+        return self._completion_gate.evaluate(
+            self.harness.harness,
+            tuple(sorted(self._completion_changed_files)),
+            {"kind": "finish"},
+            verification=self._completion_verification,
+            current_workspace_digest=self._workspace_digest(),
+            task_requirements_satisfied=True,
+        )
+
+
+def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,
+                       *, on_dispatch: Callable[[EffectRequest, Any], None] | None = None) -> Span | None:
     """Admit the just-produced tool result before the next model turn.
 
     EpisodeEngine invokes this callback immediately after every dispatch. The
@@ -1133,6 +1194,13 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
+    if on_dispatch is not None:
+        # The session's dispatch ledger is ordered; the latest call is the
+        # effect represented by this callback. Keeping this hook here means
+        # admission observes only mediated effects, never model output.
+        calls = getattr(operator, "_completion_calls", ())
+        if calls:
+            on_dispatch(calls[-1][0], result)
     # The callback is also used by small operator doubles in the composition
     # contract tests.  Access the wrapped model itself first; looking up
     # ``operator._model`` as an attribute of the model is an accidental

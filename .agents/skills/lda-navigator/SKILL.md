@@ -71,10 +71,31 @@ View the high-level hexagonal architecture boundaries, module paths, and logical
 {"method": "tools/call", "params": {"name": "lda_map", "arguments": {}}}
 ```
 
-### 10. Health & Index Stats (`lda_doctor`)
-Assert SQLite database health, entity counts, and schema freshness:
+### 10. Health & Index Stats (`lda_doctor` / `lda_check` / `lda_coverage`)
+Assert SQLite database health, entity counts, per-language coverage, HEAD binding, and hygiene:
 ```json
 {"method": "tools/call", "params": {"name": "lda_doctor", "arguments": {}}}
+{"method": "tools/call", "params": {"name": "lda_check", "arguments": {}}}
+{"method": "tools/call", "params": {"name": "lda_coverage", "arguments": {}}}
+```
+```bash
+# CLI equivalents
+uv run lda doctor --json      # health + coverage + HEAD + profile
+uv run lda check --json       # full SOTA diagnostics (profile/KB/graph/hygiene/freshness)
+```
+
+### 11. Standardizer / Ruler (`lda standardize`)
+Inspect a single file — detected language, canonical symbol kinds, and import edges — before editing code you must not guess at:
+```bash
+uv run lda standardize src/frontend/component.ts      # TS symbols/imports
+uv run lda standardize vanguard/packages/kernel/budget.py
+```
+
+### 12. Rebuild vs. Incremental (`lda index`)
+`lda index --rebuild` purges all facts first (kills stale/orphan FTS rows found by `lda_check`), then re-indexes every profile-declared code/doc extension:
+```bash
+uv run lda index --rebuild --json
+uv run lda index --incremental --json
 ```
 
 ---
@@ -83,7 +104,7 @@ Assert SQLite database health, entity counts, and schema freshness:
 
 When assigned any coding, debugging, or refactoring task:
 
-0. **Health Gate**: Run `lda_doctor` first. If `index_healthy` is `false`, fall back to `python3 tools/docs_rag_v0.py "<query>"` and `rg` — never trust packet facts from a cold index.
+0. **Health Gate**: Run `lda_doctor` / `lda_check` first. If `index_healthy` is `false` (or `lda_check` reports DEGRADED), fall back to `python3 tools/docs_rag_v0.py "<query>"` and `rg` — never trust packet facts from a cold/dirty index. If `lda_check` reports orphan/stale/low-signal hygiene warnings, run `lda index --rebuild` to purge them.
 1. **Acquire Context**: Run `lda_context` with your task prompt. Check `source_head_sha` against the workspace HEAD (`git rev-parse HEAD`); on mismatch, recompile — never serve stale line numbers or symbols.
 2. **Verify Dependencies**: Pin symbols with `lda_symbol` and trace callers with `lda_callers`.
 3. **Execute & Falsify**: Apply surgical diffs, run the tests identified in Step 1, and update all documentation debt obligations returned by `lda_context`.

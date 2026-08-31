@@ -59,14 +59,26 @@ def rescan_catalog(ctx: AtlasContext) -> Dict[str, Any]:
     return {"status": "ok", "documents": len(docs), "written": False}
 
 
-def index_repository(repo_root: Path, incremental: bool = False) -> Dict[str, Any]:
-    """Execute complete repository indexing into SQLite + FTS5 fact graph."""
+def index_repository(
+    repo_root: Path,
+    incremental: bool = False,
+    rebuild: bool = False,
+) -> Dict[str, Any]:
+    """Execute complete repository indexing into SQLite + FTS5 fact graph.
+
+    ``rebuild=True`` purges every existing fact first (fixes orphan/stale rows
+    without relying on incremental diffing); ``incremental=True`` reuses file
+    content hashes to touch only changed files. The knowledge base itself is
+    never written (Single Emitter invariant).
+    """
     start_time = time.time()
     ctx = AtlasContext.discover(Path(repo_root))
     repo_root = ctx.root
     storage = get_storage(repo_root)
+    if rebuild:
+        storage.purge_all()
 
-    file_states = storage.get_all_file_states() if incremental else {}
+    file_states = storage.get_all_file_states() if incremental and not rebuild else {}
     
     # 1. Discover filesystem files (profile-aware exclusions via the context)
     fs_provider = FilesystemProvider()
@@ -117,7 +129,7 @@ def index_repository(repo_root: Path, incremental: bool = False) -> Dict[str, An
     for e in fs_res.entities + md_res.entities + ast_res.entities:
         ir_ent = IREntity(
             id=e.id,
-            kind=EntityKind.DOCUMENT if e.kind == "document" else (EntityKind.SYMBOL if e.kind == "symbol" else EntityKind.FILE),
+            kind=EntityKind.DOCUMENT if e.kind == "document" else (EntityKind.FILE if e.kind == "file" else e.kind),
             name=e.metadata.get("name", e.id),
             locator=e.locator,
             provenance=Provenance("provider", "lda", e.locator),
@@ -147,7 +159,7 @@ def index_repository(repo_root: Path, incremental: bool = False) -> Dict[str, An
         if sym.symbol_id not in known_entity_ids:
             storage.insert_entity(IREntity(
                 id=sym.symbol_id,
-                kind=EntityKind.SYMBOL,
+                kind=sym.kind,
                 name=sym.name,
                 locator=sym.file_path,
                 provenance=Provenance("code_ast", "lda", sym.file_path),
@@ -169,9 +181,16 @@ def index_repository(repo_root: Path, incremental: bool = False) -> Dict[str, An
 
     elapsed = time.time() - start_time
     stats = storage.get_stats()
+    storage.record_index_run(
+        files=int(stats.get("files", 0)),
+        symbols=int(stats.get("symbols", 0)),
+        relations=int(stats.get("relations", 0)),
+        incremental=bool(incremental),
+    )
     return {
         "status": "SUCCESS",
         "incremental": incremental,
+        "rebuild": rebuild,
         "files_indexed": indexed_count,
         "total_files": stats.get("files", 0),
         "total_symbols": stats.get("symbols", 0),
